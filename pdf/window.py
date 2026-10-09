@@ -15,6 +15,7 @@ from pdf.exporter import export_drawings, find_drawings
 from dxf_dwg.exporter import export_parts, find_parts
 from pdf.settings import load_settings, save_settings, SETTINGS_PATH
 from gui.layout import WorkspaceLayout
+from k_factor.window import KFactorView
 from gui.icons import make_icon
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
@@ -29,7 +30,7 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
+class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
     _PAGE_ATTRIBUTES = (
         "source_folder", "output_folder", "include_subfolders", "overwrite_existing",
         "output_format", "bend_lines", "controls", "results", "row_ids", "stat_values",
@@ -39,6 +40,7 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         "search_query", "status_filter", "search_entry", "filter_menu", "files_toolbar",
         "visible_count", "results_footer", "row_statuses", "empty_title", "empty_hint",
         "_visible_rows",
+        "k_state", "k_widgets", "k_calculation_label",
     )
 
     def __init__(self, settings_path=SETTINGS_PATH):
@@ -75,6 +77,7 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         self.row_ids = {}
         self.stat_values = {}
         self._icons = {}
+        self.k_state = self.k_widgets = self.k_calculation_label = None
         self._create_filter_state()
         self._build_window()
         self._remember_page()
@@ -88,6 +91,8 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
 
     @property
     def _start_text(self):
+        if self.mode == "k_factor":
+            return "Montaja K/R uygula"
         return "PDF aktarımını başlat" if self._is_pdf else "Açınım aktarımını başlat"
 
     @property
@@ -99,7 +104,7 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         return "teknik resim" if self._is_pdf else "parça"
 
     def _switch_mode(self, mode):
-        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg"):
+        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor"):
             return
         self._save_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
@@ -138,6 +143,9 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         self.controls, self.results = [], []
         self.row_ids, self.stat_values = {}, {}
         self._create_filter_state()
+        self.k_state = self.k_widgets = self.k_calculation_label = None
+        if self.mode == "k_factor":
+            self._create_k_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -240,8 +248,10 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
             self.empty_state.place_forget()
         else:
             filtered = bool(self.row_ids)
-            self.empty_title.configure(text="Eşleşen dosya yok" if filtered else "Aktarım için hazır")
+            self.empty_title.configure(text="Eşleşen dosya yok" if filtered else
+                                       "Montaj için hazır" if self.mode == "k_factor" else "Aktarım için hazır")
             self.empty_hint.configure(text="Aramayı veya durum filtresini değiştirin." if filtered else
+                                      "Montajı tara ile aktif montajı inceleyin." if self.mode == "k_factor" else
                                       "Kaynak klasörü seçin ve Klasörü tara düğmesine basın.")
             self.empty_state.place(relx=.5, rely=.6, anchor="center")
 
@@ -358,6 +368,11 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
     def _save_preferences(self):
         try:
             saved = load_settings(self.settings_path)
+            if self.mode == "k_factor":
+                saved.update({f"kr_{key}": value.get() for key, value in self.k_state.items() if key != "save"})
+                saved["appearance"] = "dark" if self.theme_mode.get() == "Koyu" else "light"
+                save_settings(saved, self.settings_path)
+                return
             saved.update({f"{self.mode}_source": self.source_folder.get(),
                           f"{self.mode}_output": self.output_folder.get(),
                           f"{self.mode}_recursive": self.include_subfolders.get(),
@@ -373,8 +388,7 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
     def _set_busy(self, value):
         self.busy = value
         for key, button in self.nav_buttons.items():
-            if key != "k_factor":
-                button.configure(state="disabled" if value else "normal")
+            button.configure(state="disabled" if value else "normal")
         for control in self.controls:
             control.configure(state="disabled" if value else "normal")
         self.start_button.configure(state="disabled" if value else "normal",
@@ -403,6 +417,8 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         return source
 
     def _scan(self):
+        if self.mode == "k_factor":
+            return self._scan_k_assembly()
         if self.busy:
             return
         source = self._valid_source()
@@ -423,6 +439,8 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         threading.Thread(target=scan, daemon=False).start()
 
     def _start_export(self):
+        if self.mode == "k_factor":
+            return self._start_k_apply()
         if self.busy:
             return
         source = self._valid_source()
@@ -528,7 +546,7 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
             try:
                 with open(path, "w", newline="", encoding="utf-8-sig") as stream:
                     writer = csv.writer(stream, delimiter=";")
-                    writer.writerow(("Kaynak", "PDF" if self._is_pdf else "DXF / DWG", "Durum", "Açıklama"))
+                    writer.writerow(("Kaynak", "K/R parçası" if self.mode == "k_factor" else "PDF" if self._is_pdf else "DXF / DWG", "Durum", "Açıklama"))
                     for result in self.results:
                         writer.writerow((result["source"], result["output"], LABELS[result["status"]], result["detail"]))
                 self._append_log(f"Rapor kaydedildi: {path}")
@@ -546,10 +564,12 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
         elif state == "cancelled":
             text, color = f"Durduruldu · {summary['processed']} / {summary['total']} dosya işlendi.", AMBER
         elif state == "empty":
-            text, color = f"Bu klasörde {self._extension} dosyası bulunamadı.", AMBER
+            text, color = ("Aktif montajda parça bulunamadı." if self.mode == "k_factor" else
+                           f"Bu klasörde {self._extension} dosyası bulunamadı."), AMBER
         else:
             unit = "PDF" if self._is_pdf else "parça"
-            text = f"Tamamlandı · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
+            preview = self.mode == "k_factor" and self.results and all(item.get("preview") for item in self.results)
+            text = f"{'Önizleme tamamlandı' if preview else 'Tamamlandı'} · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
             color = AMBER if summary["failed"] else GREEN
         self.status_label.configure(text=text, text_color=color)
         self._append_log(text)
@@ -573,7 +593,7 @@ class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
                 elif event == "result":
                     self.results.append(value)
                     detail = value["detail"]
-                    if not self._is_pdf and value.get("thickness_mm") is not None and value.get("quantity") is not None:
+                    if self.mode == "dxf_dwg" and value.get("thickness_mm") is not None and value.get("quantity") is not None:
                         detail = f"{value['thickness_mm']:g} mm · {value['quantity']} adet · {detail}"
                     self._update_row(value["source"], value["status"], detail)
                     self._append_log(f"{LABELS[value['status']]} · {Path(value['source']).name} · {value['detail']}")

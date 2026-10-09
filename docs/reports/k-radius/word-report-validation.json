@@ -1,0 +1,12 @@
+{
+  "file": "GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx",
+  "bytes": 243555,
+  "sha256": "7994a011737c4a5c7dc2c188d5efda7827b17acc3d1d0535fce1dc08778b7212",
+  "embedded_images": 7,
+  "tests": 174,
+  "gui_tests": 39,
+  "kr_tests": 34,
+  "zip_crc_ok": true,
+  "python_docx_readback_ok": true,
+  "native_word_render_verified": false
+}

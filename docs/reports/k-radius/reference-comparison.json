@@ -1,0 +1,13 @@
+{
+  "source_commit": "a1cf212d8b86b3849e5cc12070226d5d4bded2a3",
+  "source": "https://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/tools/calc-unfold.py",
+  "inputs": {
+    "t": 2,
+    "r": 1.64,
+    "k": 0.38,
+    "angle": 90
+  },
+  "reference_ba": 3.7699111843077517,
+  "gokworks_ba": 3.7699111843077517,
+  "reference_stdout": "Inputs: r, T, Kf, ML, angle\n---------------------------------\nEffective inner radius: 1.64 mm\nEffective outer radius: 3.64 mm\nFlange length: 51.76 mm\n* Flange diff (FD = FL - ML): 1.76 mm\nBend allowance: 3.77 mm\nLeg length: 48.12 mm\n"
+}

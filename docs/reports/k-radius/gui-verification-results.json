@@ -1,0 +1,1969 @@
+{
+  "started_utc": "2026-10-09T07:38:17.652251+00:00",
+  "finished_utc": "2026-10-09T07:38:39.507937+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "tk": "9.0.4",
+  "packages": {
+    "customtkinter": "6.0.0",
+    "Pillow": "12.1.0",
+    "ezdxf": "1.4.3",
+    "python-docx": "1.2.0"
+  },
+  "git_head": "90bec3fc3ce197b2d7e338236cfc5ba541e4d923",
+  "working_tree_modified": true,
+  "tests_run": 174,
+  "successful": true,
+  "outcomes": {
+    "passed": 174
+  },
+  "modules": {
+    "test_dxf_dwg": 69,
+    "test_export_window": 22,
+    "test_gui_audit": 12,
+    "test_k_factor": 34,
+    "test_pdf_exporter": 29,
+    "test_settings_and_connection": 8
+  },
+  "tests": [
+    {
+      "id": "test_dxf_dwg.ExportTests.test_activation_failure_does_not_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001192
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_activation_returning_wrong_document_without_error_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000431
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_active_speedpak_configuration_rejects_incomplete_counts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000637
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_assembly_interface_cast",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000553
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_batch_continues_after_failed_part",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001146
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_batch_summary_and_com_cleanup",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.006625
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_both_formats_and_api_contract",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003879
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cached_com_application_converted_for_byref_outputs",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004214
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cancellation_between_parts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000975
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cancellation_during_count_ends_batch_without_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000629
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_com_cleanup_failure_is_reported_and_done_is_emitted",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003481
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_com_object_property_is_not_invoked",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000249
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_component_paths_normalize_windows_separators_and_case",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000212
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_configuration_mismatch_and_missing_thickness_never_guess",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.002067
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_connection_failure_still_uninitializes_com",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000668
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_count_is_physical_not_visibility_or_bom",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000456
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_count_requires_active_assembly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000662
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000607
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_default_excludes_bend_lines",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003719
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_destination_directory_is_error_before_opening_or_exporting",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000461
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_distinct_unicode_component_paths_and_configurations_do_not_merge",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000293
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_dwg_only_export_does_not_need_dxf_reader",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001028
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_empty_and_precancelled_batch_do_not_connect",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000498
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_empty_or_malformed_dxf_and_bad_dwg_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003058
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_existing_inactive_part_activated_then_restored_without_closing",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003208
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001265
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_failed_overwrite_preserves_original_and_cleans_temp",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000647
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_feature_seen_as_child_does_not_truncate_top_level_chain",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000305
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_hidden_existing_part_visible_during_export_then_hidden",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003206
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_hidden_part_visibility_restored_on_export_failure",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000421
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_invalid_destination",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00026
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_invalid_numeric_dxf_coordinates_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000623
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_long_valid_destination_does_not_make_temporary_name_too_long",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004423
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_malformed_dxf_during_overwrite_preserves_previous_output",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000754
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_dxf_reader_errors_before_connecting",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000868
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000795
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000566
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_output_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000241
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_source_and_invalid_formats",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000439
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_modeldoc_wrapper_casts_to_part_interface",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004455
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_multi_part_batch_keeps_each_models_thickness_and_quantity",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.008433
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_batch_uses_nested_total_for_both_formats",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004174
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_destination_directory_is_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001244
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000529
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_existing_output_skips_and_preserves_assembly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001169
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_partial_output_exports_only_missing_format",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001319
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_nested_assembly_occurrences_and_configuration_counts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000589
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000521
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_only_missing_format_exported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000623
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_open_document_with_wrong_path_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000302
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_open_failure_closes_owned_document",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000268
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_opened_document_closed_and_previous_restored",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003687
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_output_parent_file_is_an_error_not_a_skip",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000482
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_partial_success_reported_as_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003927
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_parts_outside_active_assembly_skip_without_opening",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001069
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_platform_requirement_is_explicit",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000739
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_preexisting_outputs_skip_without_opening_part",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000541
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_racing_target_is_not_overwritten",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003676
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.043421
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_same_named_documents_restored_by_full_path",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003793
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_scanning_filters_and_nested_paths",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000955
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_successful_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003254
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_thickness_nested_active_feature_and_meter_conversion",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000334
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_truncated_binary_fixture_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000414
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unavailable_assembly_interface_and_root_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00121
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unavailable_part_interface_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000472
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unloaded_or_speedpak_subassembly_rejects_incomplete_count",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000802
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unsaved_previous_document_restored_by_title",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004662
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_windows_publish_uses_rename_without_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000555
+    },
+    {
+      "id": "test_export_window.WindowTests.test_connection_failure_releases_controls_and_shows_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.381278
+    },
+    {
+      "id": "test_export_window.WindowTests.test_details_show_full_paths_and_copy_to_clipboard",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.318267
+    },
+    {
+      "id": "test_export_window.WindowTests.test_dxf_scan_and_navigation_locked_during_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.363
+    },
+    {
+      "id": "test_export_window.WindowTests.test_empty_dxf_worker_message",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.446791
+    },
+    {
+      "id": "test_export_window.WindowTests.test_empty_list_hint_follows_scan_reset_and_independent_tabs",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.466702
+    },
+    {
+      "id": "test_export_window.WindowTests.test_filters_are_independent_between_modules",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.350165
+    },
+    {
+      "id": "test_export_window.WindowTests.test_full_dxf_worker_and_csv_report",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.391193
+    },
+    {
+      "id": "test_export_window.WindowTests.test_full_pdf_worker_and_turkish_csv_report",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.348618
+    },
+    {
+      "id": "test_export_window.WindowTests.test_invalid_source_and_output_keep_worker_idle",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.271862
+    },
+    {
+      "id": "test_export_window.WindowTests.test_minimum_window_size_keeps_controls_and_results_visible",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.074557
+    },
+    {
+      "id": "test_export_window.WindowTests.test_navigation_retains_independent_preferences",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.378843
+    },
+    {
+      "id": "test_export_window.WindowTests.test_pdf_scan_regression",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.350178
+    },
+    {
+      "id": "test_export_window.WindowTests.test_real_entrypoint_runs_tk_loop_and_closes_cleanly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.451795
+    },
+    {
+      "id": "test_export_window.WindowTests.test_report_write_failure_is_displayed",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.252909
+    },
+    {
+      "id": "test_export_window.WindowTests.test_rescan_deletes_detached_rows_and_resets_filters",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.250353
+    },
+    {
+      "id": "test_export_window.WindowTests.test_restart_loads_both_modules_and_rejects_invalid_format",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.667731
+    },
+    {
+      "id": "test_export_window.WindowTests.test_scaled_interface_keeps_table_text_and_icons_usable",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.331217
+    },
+    {
+      "id": "test_export_window.WindowTests.test_search_status_filters_and_live_results_keep_full_counts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.266542
+    },
+    {
+      "id": "test_export_window.WindowTests.test_source_dialog_filters_parts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.322996
+    },
+    {
+      "id": "test_export_window.WindowTests.test_stop_then_close_waits_for_active_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.327113
+    },
+    {
+      "id": "test_export_window.WindowTests.test_theme_change_while_busy_preserves_worker_controls",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.41318
+    },
+    {
+      "id": "test_export_window.WindowTests.test_themes_preserve_both_pages_and_reload_preference",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.864197
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_browse_buttons_choose_and_cancel_in_both_modules",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.338274
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_ctrl_f_search_entry_and_clear_button_bindings",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.252608
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_declining_close_keeps_worker_and_window_alive",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.324308
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_dxf_option_widgets_and_start_button_reach_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.358903
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_filtered_csv_report_button_still_writes_all_results",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.255693
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "status": "passed",
+      "detail": "",
+      "seconds": 2.666558
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_mouse_double_click_and_escape_close_details",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.415559
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_output_folder_button_delegates_or_reports_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.23392
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_repeated_navigation_and_theme_buttons_keep_page_state",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.100979
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_scan_failure_releases_controls_and_reports_reason",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.332289
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_scan_stop_button_and_disabled_navigation",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.381012
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_theme_selector_buttons_apply_and_save_choice",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.27735
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_apply_writes_metres_and_k_type_without_saving",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000916
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_batch_deduplicates_instances_and_restores_assembly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000998
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_batch_nested_assembly_and_suppression",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000684
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_calibration_skips_wrong_thickness_and_continues_batch",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000916
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_cancel_after_current_part_keeps_next_part_unchanged",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001749
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_com_cleanup_error_still_sends_done",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000591
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_cross_configuration_propagation_rolls_back",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000676
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_explicit_save_and_existing_dirty_document_protection",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000583
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_failed_rollback_is_explicit_and_never_saved",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000416
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000664
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_missing_platform_cancel_and_invalid_assembly_always_finish",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000503
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_missing_sheet_feature_and_inaccessible_suppression_fail",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000224
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001669
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_multiple_configurations_restore_active_and_preserve_other",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000507
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_newly_opened_preview_closes_but_unsaved_apply_stays_open",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000563
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_non_sheet_and_multi_body_parts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000194
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_preview_does_not_modify_or_save",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000262
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_selection_access_failure_does_not_change_model",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000404
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_wrong_activation_and_unknown_configuration_do_not_write",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000162
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "status": "passed",
+      "detail": "",
+      "seconds": 9.9e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00042
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_custom_tools_material_and_punch_dominance",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000134
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000304
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_independent_hand_calculation_90_degrees",
+      "status": "passed",
+      "detail": "",
+      "seconds": 4.5e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000533
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_measured_ba_calibration_and_table_difference",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000249
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_measured_outside_dimensions_and_blank_recover_ba",
+      "status": "passed",
+      "detail": "",
+      "seconds": 4.6e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_published_freecad_manual_example",
+      "status": "passed",
+      "detail": "",
+      "seconds": 5.9e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_tool_angles_reject_incompatible_acute_bends",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000486
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_invalid_calculation_blocks_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.372817
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_measured_ba_and_outside_dimensions_calculator",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.373668
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_navigation_title_preferences_and_theme_persistence",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.53882
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_real_preview_and_apply_worker_result_events",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.596536
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.385964
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_activation_failure_prevents_export_and_restores_previous",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000683
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_all_sheets_and_pdf_api_contract",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000506
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_batch_continues_after_bad_drawing",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001197
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_batch_stop_between_drawings",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000928
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_batch_summary_com_and_output",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000857
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_cached_application_uses_late_binding_for_byref",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000398
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_cached_extension_uses_late_binding_for_saveas_byref",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000597
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_cleanup_failures_are_reported_without_losing_success",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000667
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_com_object_property_does_not_call_default_member",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000267
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_competing_target_is_preserved",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000399
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_connection_failure_cleans_up_com",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000603
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_destination_failure_is_reported_per_drawing",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000342
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_drawing_interface_cast_for_sheet_names",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000545
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_empty_and_precancelled_do_not_connect",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000646
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_existing_output_skips_without_opening",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00032
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_failed_overwrite_keeps_original_and_cleans_temp",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000534
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_inactive_open_drawing_is_activated_then_previous_restored",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000539
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00047
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000966
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_missing_pywin32_returns_error_and_done",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00054
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_newly_opened_drawing_is_closed_and_previous_restored",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00039
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_open_and_save_warnings_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000441
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_open_error_closes_owned_document_without_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000289
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_save_error_is_failure_even_if_api_returns_true",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000306
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_scan_and_destination_preserve_subfolders",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000539
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_single_sheet_string",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000472
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_successful_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000677
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_windows_publish_uses_rename_and_preserves_competing_target",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000637
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_wrong_document_and_missing_drawing_interface_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.0005
+    },
+    {
+      "id": "test_settings_and_connection.ConnectionTests.test_connects_to_existing_session_without_starting_solidworks",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000185
+    },
+    {
+      "id": "test_settings_and_connection.ConnectionTests.test_inactive_session_reports_actionable_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000849
+    },
+    {
+      "id": "test_settings_and_connection.ConnectionTests.test_missing_pywin32_reports_install_command",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000924
+    },
+    {
+      "id": "test_settings_and_connection.EntryPointTests.test_main_script_calls_application_entrypoint",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000624
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_failed_publish_preserves_previous_settings",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00064
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000482
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_preferences_roundtrip_turkish_paths_and_independent_modules",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000262
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_unreadable_settings_fall_back",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000267
+    }
+  ],
+  "subcases": [
+    {
+      "test": "test_dxf_dwg.ExportTests.test_count_requires_active_assembly",
+      "parameters": {
+        "active": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_count_requires_active_assembly",
+      "parameters": {
+        "active": "<test_dxf_dwg.FakePart object at 0x7f4f8bbe47a0>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "parameters": {
+        "path": "",
+        "config": "Default"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "parameters": {
+        "path": "/tmp/tmpha8dc1vo/source/part.SLDPRT",
+        "config": ""
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "parameters": {
+        "path": "/tmp/tmpha8dc1vo/other.step",
+        "config": "Default"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "resolve": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "resolve": 3
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "state": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "state": 4
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "state": 5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "parameters": {
+        "content": "b'0\\nSECTION\\n2\\nENTITIES\\n0\\nLINE\\n10\\n0\\n20\\n0\\n11\\n10\\n21\\n20\\n0\\nEOF\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "parameters": {
+        "content": "b'2\\nENTITIES\\n0\\nLINE\\n10\\n0\\n20\\n0\\n11\\n10\\n21\\n20\\n0\\nENDSEC\\n0\\nEOF\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "parameters": {
+        "content": "b'0\\nSECTION\\n2\\nENTITIES\\n0\\nLINE\\ninvalid\\n0\\n20\\n0\\n11\\n10\\n21\\n20\\n0\\nENDSEC\\n0\\nEOF\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f4f8b8dab40>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f4f8b8daa80>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f4f8b8d9220>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f4f8b8da480>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f4f8b8da750>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 0,
+        "quantity": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": Infinity,
+        "quantity": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 2,
+        "quantity": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 2,
+        "quantity": 1.5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 2,
+        "quantity": true
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "parameters": {
+        "model": "<test_dxf_dwg.FakePart object at 0x7f4f8bbefad0>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "parameters": {
+        "model": "<test_dxf_dwg.FakePart object at 0x7f4f8bbef980>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "parameters": {
+        "model": "<test_dxf_dwg.FakePart object at 0x7f4f8bbef830>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r12-asc.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r12-bin.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r2018-asc.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r2018-bin.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Açık",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Açık",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Koyu",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Koyu",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write",
+      "parameters": {
+        "flag": "gauge"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write",
+      "parameters": {
+        "flag": "material_link"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "modify_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "rebuild_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "readback_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "save_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "parameters": {
+        "angle": 30
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "parameters": {
+        "angle": 45
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "parameters": {
+        "angle": 120
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 1.5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 3
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 4
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 2.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 6.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 2.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 6.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 2.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 6.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": true
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": false
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": "nan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": "inf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": "x"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": -1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          2,
+          2,
+          0.4,
+          0
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          2,
+          2,
+          0.4,
+          180
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          2,
+          2,
+          1.1,
+          90
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          0,
+          2,
+          0.4,
+          90
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='unknown', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=4, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=40, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=8, die_opening_mm=None, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=0.2, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "ba": 0.1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "ba": 30
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_measured_ba_calibration_and_table_difference",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=2, measured_ba_mm=4.39822971502571, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_measured_ba_calibration_and_table_difference",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=2, angle_deg=90, calibration_thickness_mm=3, measured_ba_mm=4.39822971502571, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1400x900",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1400x900",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "parameters": {
+        "case": "data"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "parameters": {
+        "case": "sheets"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "parameters": {
+        "case": "selection"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b''"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b'invalid pdf'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b'%PDF-1.7'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b'%PDF-1.7\\n1 0 obj\\n<< /Type /Catalog >>\\nendobj\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "{bad json"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "null"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "[]"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "42"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "�invalid"
+      },
+      "status": "passed"
+    }
+  ],
+  "sha256": {
+    "main.py": "e9ec874479ae662d9003d5c960aa108b561507a0a778684f4fbb4cc74be427bd",
+    "gui/__init__.py": "ed3a5b1cebbbc1f2c8ea7d180a4313fa5dfe0ccfa4b922d8ba4247d2cebaa54a",
+    "gui/icons.py": "816a088301be926800fe4d6e0512b1d2ea40aff7fb91b36a9303b1ed4fb18a2a",
+    "gui/theme.py": "b3e09460136533ee0999e981be4967f2fd175f7c4fcaca55e76ea50c311f50f2",
+    "gui/layout.py": "6b0fbb40bfcd6ec28a4cc9ca50b8487f0c9bbd4828ac66bfac432f0c80d8d775",
+    "pdf/__init__.py": "57749b3a37e8d041288a279c13f0aa7d48d4dfd804eae33e975fefe4672693a4",
+    "pdf/settings.py": "9d44e6369baadf5e6371d8049920c069b2da9a772f9acd7ea40d545af3573bd2",
+    "pdf/exporter.py": "602dd70cb91020bf536bffc86eb935599f2d454ae7793fbddf69a3d824bdaee4",
+    "pdf/window.py": "f2c086a51c66d799add5a6c93dd8ae295ed9bf35223d2a9f047ba7c781809de3",
+    "dxf_dwg/__init__.py": "bb9d726644a16f909ac570b4a6529c10a4c5536757b75d3a3e8a0d98cdc3f62d",
+    "dxf_dwg/exporter.py": "a3e7641a558e97d80ab15c813163bc24b1df0b1f767b48681115e5203651f8a2",
+    "solidworks/connection.py": "3db902243fa87ddb47592556c3c07b1787e77cda10ac37f7a7a34b577915aa0e",
+    "solidworks/__init__.py": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+    "k_factor/__init__.py": "46fface833feb0cfde3ee5cd71589be667affb9978b87cf779dd656049d8ebcd",
+    "k_factor/window.py": "428dc6d3221d6a5a6f472c41bad4c22b022b3a33801d259665b759eb12b27932",
+    "k_factor/rules.py": "9c2a1520c141ca5ce938f1abc7343689bd1f84e8c4ddf3ebc87dff5a76fb63c9",
+    "k_factor/apply.py": "53c1ad2c9c93b4be257a87f4d9f01fd7c70f0c1061fcb14dba5b1f8099f47f63",
+    "tests/test_gui_audit.py": "614dc2f0a04118489bd38cc807cafb404b4a542c939fb248327e38f4a3b20e5f",
+    "tests/test_settings_and_connection.py": "3d86debc648cf593bed029b859dcc4b2132e2ca85b91cb78d350576fd04bc9fd",
+    "tests/test_dxf_dwg.py": "cea14654adb6d500d89e77eb71b7bbc78ddd075aa094dacc876ec856d716f793",
+    "tests/test_pdf_exporter.py": "b2d68d2ff5ac862dbef3cf83bae58a0de59de14770c7b579cf6f0b9915036960",
+    "tests/test_k_factor.py": "bd781767ad5eac6897d0531cf0a2db370fb1be8acc8bad7749e681e648e01be6",
+    "tests/test_export_window.py": "5e15dc78e8b4ef364f7b402bed41babeb7e7badff633c39caa942f70b8ab5f97"
+  },
+  "lines": {
+    "application": 2669,
+    "tests": 2525
+  }
+}

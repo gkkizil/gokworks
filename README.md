@@ -1,6 +1,6 @@
 # GOKWORKS
 
-SolidWorks teknik resimlerini PDF'e ve tek gövdeli sac metal parçaların açınımlarını DXF/DWG'ye topluca aktarır.
+SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular.
 
 ## Windows'ta çalıştırma
 
@@ -16,7 +16,7 @@ Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çal
 
 ## Arayüz ve temalar
 
-Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi her iki ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
+Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi üç ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
 
 - Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
 - **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** yalnızca liste filtrelerini kaldırır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
@@ -25,6 +25,14 @@ Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, du
 - Küçük pencerede ayar alanı kaydırılabilir; sonuç listesi görünür kalır. İkonlar ve tablo yazıları ekran ölçeklemesine uyum sağlar. %125 widget ölçeklemesi test edildi; tüm Windows monitör/DPI kombinasyonları bu bulut testinin kapsamında değildir.
 
 [Açık tema](docs/screenshots/gui-dxf-dwg-light.png), [koyu tema](docs/screenshots/gui-dxf-dwg-dark.png) ve [GUI tasarım/doğrulama notları](docs/gui-design.md).
+
+## K FAKTÖR - RADIUS
+
+Yeni sekme etkin: malzeme ailesi, üst bıçak uç R/açı ve alt kalıp V/açı seçilir. Katalogda nominal ölçüler ve özel giriş vardır. Otomatik V her parçanın kalınlığına göre seçilir. **Hesapla / kontrol et**, BA/BD formüllerini gösterir; bağımsız BA + ölçülmüş iç R veya dış A/B/düz boy ölçümüyle K kalibre edilebilir.
+
+**Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir. Seçilen malzeme bütün saclar için varsayılır; CAD malzemesi değişmez.
+
+Genel tablo ve yaklaşık R hesabı üretim kalibrasyonu değildir. Bu sürüm havada büküm içindir; gauge/malzeme tablosuna bağlı veya özel büküm override'ı olan parçalar açıklamalı hata alır. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
 
 ## Sac metal açınımı
 
@@ -88,7 +96,7 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son bulut doğrulamasında **140 test geçti**. Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son K/R sürümü doğrulamasında **174 test geçti**; 39 gerçek GUI testi dahildir. [Güncel test kanıtları](docs/reports/k-radius/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 
@@ -97,3 +105,5 @@ Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm program
 Son denetimde 140 testin tamamı geçti; 34'ü gerçek Tk GUI testidir. Ek kabul testleri gerçek düğme komutlarını, Ctrl+F/çift tıklama/Enter/Escape olaylarını, diyalog iptallerini, filtreli CSV raporunu ve 12 yerleşim alt senaryosunu kapsar. İlk yerleşim açıkça zamanlanarak açılışın Configure olayına bağımlılığı giderildi.
 
 [Word raporu](docs/reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx), [test kanıtları](docs/reports/README.md) ve [test bazlı JSON](docs/reports/gui-verification-results.json). Gerçek Windows/SolidWorks üretimi bu Linux denetiminin kapsamı dışındadır.
+
+K/R eklenmesi sonrası üç ekranın açık/koyu görüntüleri ve elle hesap kontrolünü içeren [güncel Word raporu](docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx). Önceki 140 testlik GUI raporu tarihsel kayıt olarak korunur.

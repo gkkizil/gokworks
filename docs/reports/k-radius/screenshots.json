@@ -1,0 +1,65 @@
+[
+  {
+    "file": "docs/screenshots/gui-current-pdf-light.png",
+    "mode": "pdf",
+    "theme": "Açık",
+    "width": 1240,
+    "height": 860,
+    "sha256": "6ee896127585f725f8f45a98a1cf787a1db0b9f36f180313a440cc4b03ceb9ce",
+    "captured_utc": "2026-10-09T07:39:26.363307+00:00"
+  },
+  {
+    "file": "docs/screenshots/gui-current-pdf-dark.png",
+    "mode": "pdf",
+    "theme": "Koyu",
+    "width": 1240,
+    "height": 860,
+    "sha256": "d1ccaec641feac825d7e0c0a594fc39b20b30c6edb220a0dc6211bd2e2a3b8f4",
+    "captured_utc": "2026-10-09T07:39:26.870200+00:00"
+  },
+  {
+    "file": "docs/screenshots/gui-current-dxf-dwg-light.png",
+    "mode": "dxf_dwg",
+    "theme": "Açık",
+    "width": 1240,
+    "height": 860,
+    "sha256": "d16cfca5338ae8caa73455644be64df5453949e236850e3abdef6d1d27ec4c37",
+    "captured_utc": "2026-10-09T07:39:27.458516+00:00"
+  },
+  {
+    "file": "docs/screenshots/gui-current-dxf-dwg-dark.png",
+    "mode": "dxf_dwg",
+    "theme": "Koyu",
+    "width": 1240,
+    "height": 860,
+    "sha256": "a437eec675ba96ed8dfc7f4408530544631a6a2423200285d683c513144f894f",
+    "captured_utc": "2026-10-09T07:39:27.971113+00:00"
+  },
+  {
+    "file": "docs/screenshots/gui-k-radius-light.png",
+    "mode": "k_factor",
+    "theme": "Açık",
+    "width": 1240,
+    "height": 860,
+    "sha256": "4a4419c3ed035271efbd8e830c6f70fa2e8f0704556ecd24fc07cc627630387d",
+    "captured_utc": "2026-10-09T07:39:28.614629+00:00"
+  },
+  {
+    "file": "docs/screenshots/gui-k-radius-dark.png",
+    "mode": "k_factor",
+    "theme": "Koyu",
+    "width": 1240,
+    "height": 860,
+    "sha256": "b2ae7838aca214bf6d03539db6913f719dca06f1494c63203b0d57f4f7577363",
+    "captured_utc": "2026-10-09T07:39:29.160047+00:00"
+  },
+  {
+    "file": "docs/screenshots/gui-k-radius-ba-light.png",
+    "mode": "k_factor",
+    "theme": "Açık",
+    "width": 1240,
+    "height": 860,
+    "sha256": "4ef59e14c0d1c0c3eb86b6f5d449a6b890827dab8492886f7da0d44d1d3b9686",
+    "captured_utc": "2026-10-09T07:39:29.703847+00:00"
+  }
+]

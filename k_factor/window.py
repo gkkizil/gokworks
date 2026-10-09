@@ -1,0 +1,194 @@
+"""K/R çalışma alanı: takım kataloğu, elle hesap ve montaj işçisi."""
+
+import threading
+import tkinter as tk
+
+import customtkinter as ctk
+
+from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT
+from k_factor.apply import update_assembly
+from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, calculate,
+                            number, ba_from_outside_dimensions)
+
+AUTO_DIE = "Otomatik (8 × t)"
+
+
+class KFactorView:
+    def _create_k_state(self, saved):
+        defaults = dict(material=MATERIALS[0].label, punch="1", die=AUTO_DIE,
+                        thickness="2", angle="90", radius="", method="Tablo",
+                        ba="", outside_a="", outside_b="", flat="")
+        defaults.update(punch_angle="85", die_angle="85")
+        self.k_state = {key: tk.StringVar(self, value=str(saved.get(f"kr_{key}", value)))
+                        for key, value in defaults.items()}
+        if self.k_state["material"].get() not in [m.label for m in MATERIALS]:
+            self.k_state["material"].set(MATERIALS[0].label)
+        if self.k_state["method"].get() not in ("Tablo", "BA ölçümü"):
+            self.k_state["method"].set("Tablo")
+        self.k_state["save"] = tk.BooleanVar(self, value=False)  # explicit each session
+        self.k_widgets = {}
+
+    def _build_k_settings(self):
+        self.settings_body = ctk.CTkScrollableFrame(
+            self.workspace, height=340, corner_radius=0, fg_color="transparent",
+            scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
+        self.settings_body.grid(row=1, column=0, sticky="ew", padx=24, pady=(0, 14))
+        self.settings_body.grid_columnconfigure(0, weight=1)
+        # The CTk scrollbar defaults to 200 px and otherwise prevents the
+        # settings viewport shrinking enough to leave room for the results.
+        self.settings_body._scrollbar.configure(height=24, width=10)
+        self._settings_height = 340
+        panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
+                             border_width=1, border_color=BORDER)
+        panel.grid(row=0, column=0, sticky="ew")
+        for column in range(3):
+            panel.grid_columnconfigure(column, weight=1, uniform="kr")
+        self._label(panel, "01   Malzeme ve takım · Havada büküm", 14, bold=True).grid(
+            row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(12, 4))
+        for column, (key, label, values) in enumerate((
+            ("material", "Malzeme varsayımı", [m.label for m in MATERIALS]),
+            ("punch", "Üst bıçak uç R (mm)", [f"{r:g}" for r in PUNCH_RADII]),
+            ("die", "Alt kalıp V açıklığı (mm)", [AUTO_DIE] + [str(v) for v in DIE_OPENINGS]),
+        )):
+            self._k_field(panel, key, label, 1, column, values=values,
+                          readonly=key == "material")
+        for column, (key, label) in enumerate((("punch_angle", "Üst bıçak açısı (°)"),
+                                                ("die_angle", "Alt kalıp açısı (°)"))):
+            self._k_field(panel, key, label, 2, column, values=[str(a) for a in TOOL_ANGLES])
+        self._label(panel, "Malzeme tüm saclar için kullanılır. Özel takım ölçüsü yazabilirsiniz; otomatik V parçanın kalınlığına göre seçilir.",
+                    11, MUTED, wraplength=225, justify="left").grid(
+            row=2, column=2, sticky="w", padx=16, pady=(0, 6))
+        self._label(panel, "02   Elle hesap ve numune kontrolü", 14, bold=True).grid(
+            row=3, column=0, columnspan=3, sticky="w", padx=16, pady=(6, 4))
+        for column, (key, label) in enumerate((
+            ("thickness", "Hesap / numune kalınlığı (mm)"),
+            ("angle", "Düz sacdan büküm açısı (°)"),
+            ("radius", "Ölçülmüş iç R (mm, isteğe bağlı)"),
+        )):
+            self._k_field(panel, key, label, 4, column)
+        self._k_field(panel, "method", "K kaynağı", 5, 0,
+                      values=["Tablo", "BA ölçümü"], readonly=True)
+        self._k_field(panel, "ba", "Ölçülmüş BA (mm)", 5, 1)
+        self._label(panel, "BA ölçümünde gerçek iç R zorunlu. Kalibrasyon yalnız aynı kalınlığa uygulanır.",
+                    11, MUTED, wraplength=225, justify="left").grid(
+            row=5, column=2, sticky="w", padx=16, pady=8)
+        for column, (key, label) in enumerate((
+            ("outside_a", "Alternatif: dış A (mm)"),
+            ("outside_b", "Dış B (mm)"), ("flat", "Ölçülen düz boy (mm)"),
+        )):
+            self._k_field(panel, key, label, 6, column)
+        self._label(panel, "Tek bükümlü numune: A/B dış sanal köşeye ölçülür. BA boşsa A, B ve düz boydan hesaplanır.",
+                    11, MUTED, wraplength=700, justify="left").grid(
+            row=7, column=0, columnspan=3, sticky="w", padx=16, pady=(0, 8))
+        self.k_calculation_label = self._label(panel, "", 12, TEXT, wraplength=730,
+                                              justify="left", anchor="w")
+        self.k_calculation_label.grid(row=8, column=0, columnspan=3, sticky="ew", padx=16, pady=6)
+        self._preview_k_calculation()
+        for key, variable in self.k_state.items():
+            if key != "save":
+                variable.trace_add("write", lambda *_: self._preview_k_calculation()
+                                   if self.mode == "k_factor" and not self.busy else None)
+
+    def _build_k_actions(self, parent):
+        # Keep montage scanning and save choice outside the scrollable form.
+        actions = ctk.CTkFrame(parent, fg_color="transparent")
+        actions.grid(row=0, column=0, columnspan=4, sticky="ew", pady=(0, 10))
+        self.scan_button = self._button(actions, "Montajı tara", self._scan_k_assembly,
+                                         icon="search", width=132)
+        self.scan_button.pack(side="left", padx=(0, 8))
+        self.open_button = self._button(actions, "Hesapla / kontrol et", self._preview_k_calculation,
+                                         width=164)
+        self.open_button.pack(side="left", padx=(0, 16))
+        save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
+        save.pack(side="left")
+        self.controls.extend((self.scan_button, self.open_button, save))
+
+    def _k_field(self, panel, key, label, row, column, *, values=None, readonly=False):
+        holder = ctk.CTkFrame(panel, fg_color="transparent")
+        holder.grid(row=row, column=column, sticky="ew", padx=16, pady=(3, 7))
+        holder.grid_columnconfigure(0, weight=1)
+        self._label(holder, label, 11, MUTED).grid(row=0, column=0, sticky="w", pady=(0, 4))
+        if values and readonly:
+            field = ctk.CTkOptionMenu(
+                holder, variable=self.k_state[key], values=values, height=34,
+                fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
+                dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
+                text_color=TEXT, dropdown_text_color=TEXT,
+                font=(UI_FONT, 11), dropdown_font=(UI_FONT, 11))
+        elif values:
+            field = ctk.CTkComboBox(
+                holder, variable=self.k_state[key], values=values, height=34,
+                fg_color=PANEL, border_color=BORDER, button_color=SECONDARY,
+                button_hover_color=HOVER, dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
+                text_color=TEXT, dropdown_text_color=TEXT, font=(UI_FONT, 12),
+                dropdown_font=(UI_FONT, 12))
+        else:
+            field = ctk.CTkEntry(holder, textvariable=self.k_state[key], height=34,
+                                fg_color=PANEL, border_color=BORDER, text_color=TEXT,
+                                font=(UI_FONT, 12))
+        field.grid(row=1, column=0, sticky="ew")
+        self.k_widgets[key] = field
+        self.controls.append(field)
+
+    def _k_recipe(self):
+        values = {key: variable.get() for key, variable in self.k_state.items()}
+        material = next((m.key for m in MATERIALS if m.label == values["material"]), None)
+        t = number(values["thickness"], "Hesap / numune kalınlığı")
+        radius = number(values["radius"], "Ölçülmüş iç R") if values["radius"].strip() else None
+        angle = number(values["angle"], "Büküm açısı")
+        measured_ba = None
+        if values["method"] == "BA ölçümü":
+            if radius is None:
+                raise ValueError("BA kalibrasyonu için ölçülmüş iç R girin.")
+            if values["ba"].strip():
+                measured_ba = number(values["ba"], "Ölçülmüş BA")
+            else:
+                measured_ba = ba_from_outside_dimensions(t, radius, values["outside_a"],
+                                                        values["outside_b"], values["flat"], angle)
+        recipe = Recipe(material=material, punch_radius_mm=number(values["punch"], "Üst bıçak uç R"),
+                        die_opening_mm=None if values["die"] == AUTO_DIE else number(values["die"], "Alt kalıp V"),
+                        measured_radius_mm=radius, angle_deg=angle,
+                        calibration_thickness_mm=t if measured_ba is not None else None,
+                        measured_ba_mm=measured_ba,
+                        punch_angle_deg=number(values["punch_angle"], "Üst bıçak açısı"),
+                        die_angle_deg=number(values["die_angle"], "Alt kalıp açısı"))
+        recipe.validate()
+        return t, recipe
+
+    def _preview_k_calculation(self):
+        try:
+            thickness, recipe = self._k_recipe()
+            result = calculate(thickness, recipe)
+            text = (f"K = {result.k_factor:.5f}   ·   İç R = {result.radius_mm:.3f} mm   ·   V = {result.die_opening_mm:g} mm\n"
+                    f"BA = ({result.angle_deg:g} × π / 180) × ({result.radius_mm:g} + {result.k_factor:g} × {thickness:g})"
+                    f" = {result.ba_mm:.5f} mm   ·   BD = {result.bd_mm:.5f} mm\n")
+            if result.calibrated:
+                text += f"Ölçümden K; tablo K = {result.table_k:.5f}, fark = {result.k_factor-result.table_k:+.5f}."
+            else:
+                text += "Tablo önerisi · Hesap tutarlılığı, üretim doğrulaması değildir."
+            self.k_calculation_label.configure(text=text, text_color=TEXT)
+            return result
+        except ValueError as error:
+            self.k_calculation_label.configure(text=str(error), text_color=RED)
+            return None
+
+    def _scan_k_assembly(self):
+        self._run_k_worker(preview=True)
+
+    def _start_k_apply(self):
+        self._run_k_worker(preview=False)
+
+    def _run_k_worker(self, *, preview):
+        if self.busy:
+            return
+        if self._preview_k_calculation() is None:
+            return
+        _, recipe = self._k_recipe()
+        save = self.k_state["save"].get() and not preview
+        self._save_preferences()
+        self._reset()
+        self._set_busy(True)
+        self.status_label.configure(text="Montaj K/R önizlemesi hazırlanıyor…" if preview else "K/R uygulanıyor…",
+                                    text_color=MUTED)
+        threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),
+                         kwargs=dict(preview=preview, save=save), daemon=False).start()

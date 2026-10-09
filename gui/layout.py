@@ -23,13 +23,14 @@ class WorkspaceLayout:
         self._build_settings()
         self._build_stats()
         self._build_results()
-        self.status_label = self._label(self.workspace, "Hazır · Kaynak ve çıktı klasörünü seçin.",
+        self.status_label = self._label(self.workspace, "Hazır · Ana montajı SolidWorks'te aktif yapın." if self.mode == "k_factor" else "Hazır · Kaynak ve çıktı klasörünü seçin.",
                                         12, MUTED, anchor="w")
         self.status_label.grid(row=4, column=0, sticky="ew", padx=24, pady=(10, 6))
         self.progress = ctk.CTkProgressBar(self.workspace, height=4, corner_radius=2,
                                           fg_color=BORDER, progress_color=ACCENT)
         self.progress.grid(row=5, column=0, sticky="ew", padx=24, pady=(0, 18))
         self.progress.set(0)
+        self._refresh_list_state()
         self.workspace.bind("<Configure>", self._resize_pdf_area)
         # Initial widget construction can emit Configure before the binding
         # exists. Schedule the first fit explicitly, without waiting for resize.
@@ -58,7 +59,7 @@ class WorkspaceLayout:
         self.nav_buttons = {}
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
-            ("k_factor", "K Faktörü", "tools"),
+            ("k_factor", "K FAKTÖR - RADIUS", "tools"),
         )):
             active = key == self.mode
             button = ctk.CTkButton(
@@ -69,11 +70,11 @@ class WorkspaceLayout:
                 text_color=ACCENT if active else MUTED, text_color_disabled=MUTED,
                 font=ctk.CTkFont(family=UI_FONT, size=13, weight="bold" if active else "normal"),
                 command=lambda selected=key: self._switch_mode(selected),
-                state="disabled" if key == "k_factor" else "normal",
+                state="normal",
             )
             button.grid(row=row, column=0, sticky="ew", pady=(0, 6))
             self.nav_buttons[key] = button
-        self._label(self.sidebar, "K Faktörü yakında", 10, MUTED).grid(
+        self._label(self.sidebar, "Belge ve sac metal araçları", 10, MUTED).grid(
             row=3, column=0, sticky="w", padx=24, pady=(4, 0))
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         footer.grid(row=5, column=0, sticky="ew", padx=20, pady=24)
@@ -99,9 +100,10 @@ class WorkspaceLayout:
         header.grid_columnconfigure(0, weight=1)
         self._label(header, "GOKWORKS  /  BELGE İŞLEMLERİ", 10, MUTED, True).grid(
             row=0, column=0, sticky="w", pady=(0, 4))
-        self._label(header, "PDF Aktarımı" if self._is_pdf else "DXF / DWG Açınımı",
+        self._label(header, "K FAKTÖR - RADIUS" if self.mode == "k_factor" else "PDF Aktarımı" if self._is_pdf else "DXF / DWG Açınımı",
                     28, bold=True).grid(row=1, column=0, sticky="w")
-        subtitle = ("Teknik resimlerin tüm sayfalarını tek PDF'e aktarın." if self._is_pdf else
+        subtitle = ("Malzeme, takım ve BA hesabıyla montajdaki sac parçaları düzenleyin." if self.mode == "k_factor" else
+                    "Teknik resimlerin tüm sayfalarını tek PDF'e aktarın." if self._is_pdf else
                     "Sac metal parçaları kalınlık ve toplam adetle kaydedin.")
         self._label(header, subtitle, 12, MUTED, wraplength=350, justify="left").grid(
             row=2, column=0, sticky="w", pady=(3, 0))
@@ -117,6 +119,8 @@ class WorkspaceLayout:
         self.stop_button.pack(side="left")
 
     def _build_settings(self):
+        if self.mode == "k_factor":
+            return self._build_k_settings()
         height = 210 if self._is_pdf else 260
         self.settings_body = ctk.CTkScrollableFrame(
             self.workspace, height=height, corner_radius=0, fg_color="transparent",
@@ -205,14 +209,16 @@ class WorkspaceLayout:
     def _build_stats(self):
         self.stats_frame = ctk.CTkFrame(self.workspace, fg_color="transparent")
         self.stats_frame.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 14))
+        if self.mode == "k_factor":
+            self._build_k_actions(self.stats_frame)
         for index, (key, caption, color, icon) in enumerate((
-            ("total", "Toplam dosya", TEXT, "file"), ("succeeded", "Başarılı", GREEN, "check"),
+            ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Başarılı", GREEN, "check"),
             ("skipped", "Atlanan", AMBER, "skip"), ("failed", "Hatalı", RED, "error"),
         )):
             self.stats_frame.grid_columnconfigure(index, weight=1, uniform="stats")
             card = ctk.CTkFrame(self.stats_frame, fg_color=INPUT, corner_radius=10,
                                  border_width=1, border_color=BORDER)
-            card.grid(row=0, column=index, sticky="ew",
+            card.grid(row=1 if self.mode == "k_factor" else 0, column=index, sticky="ew",
                        padx=(0 if index == 0 else 4, 0 if index == 3 else 4))
             card.grid_columnconfigure(0, weight=1)
             self._label(card, caption, 11, MUTED).grid(row=0, column=0, sticky="w", padx=14, pady=(8, 0))
@@ -230,7 +236,7 @@ class WorkspaceLayout:
         self.results_header = ctk.CTkFrame(card, fg_color="transparent")
         self.results_header.grid(row=0, column=0, sticky="ew", padx=16, pady=(10, 0))
         self.results_header.grid_columnconfigure(0, weight=1)
-        self._label(self.results_header, "Dosyalar ve sonuçlar", 16, bold=True).grid(row=0, column=0, sticky="w")
+        self._label(self.results_header, "Montaj parçaları ve K/R sonuçları" if self.mode == "k_factor" else "Dosyalar ve sonuçlar", 16, bold=True).grid(row=0, column=0, sticky="w")
         self.report_button = self._button(self.results_header, "Rapor kaydet", self._save_report,
                                           icon="download", width=136, state="disabled")
         self.report_button.configure(height=34)
@@ -277,7 +283,7 @@ class WorkspaceLayout:
                                   show="headings", style="Gok.Treeview", selectmode="browse")
         for name, caption, width in (
             ("file", "Teknik resim" if self._is_pdf else "Parça", 270),
-            ("status", "Durum", 108), ("detail", "Açıklama" if self._is_pdf else "Kalınlık, adet ve açıklama", 340),
+            ("status", "Durum", 108), ("detail", "K, R, takım ve BA" if self.mode == "k_factor" else "Açıklama" if self._is_pdf else "Kalınlık, adet ve açıklama", 340),
         ):
             self.table.heading(name, text=caption, anchor="w")
             self.table.column(name, width=width, minwidth=80, stretch=name != "status")

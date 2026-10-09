@@ -1,6 +1,6 @@
 # Tüm programın yeniden doğrulanması
 
-**140 test başarılı, 0 başarısız, 0 atlanan.** Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](test-results/latest-tests.log) kaydedildi.
+**174 test başarılı, 0 başarısız, 0 atlanan.** Son K/R sürümü için [güncel kanıtlar](reports/k-radius/README.md); önceki GUI denetimi ayrı tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/k-radius/test-run.log) kaydedildi.
 
 ## Kapsam
 
@@ -8,12 +8,13 @@
 | --- | ---: | --- |
 | DXF/DWG | 69 | Geometri/büküm seçenekleri, parça arayüzü, kalınlık, dosya adı, alt montajların toplam adedi, bastırma, konfigürasyon ve Unicode yol ayrımı, SpeedPak/yüklenmemiş bileşenler, dosya koruma, durdurma ve COM temizliği. Yanlış belge, uzun dosya adı ve bozuk ASCII/ikili DXF de sınandı. |
 | PDF | 29 | Tüm sayfalar, tek sayfa, teknik resim arayüzü, açık/kapalı belgeler, aktivasyon ve önceki belgeye dönüş, BYREF bağlama, kesilmiş çıktı, üzerine yazma, yarışan hedef ve hata sonrası devam. |
-| Gerçek Tk arayüzü | 34 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
+| Gerçek Tk arayüzü | 39 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
+| K/R hesaplama ve uygulama | 29 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
 | Ayarlar | 4 | JSON ve Türkçe karakterler, bozuk/okunamayan dosyadan güvenli dönüş, başarısız kayıt sırasında eski ayarların korunması. |
 | SolidWorks bağlantısı | 3 | Çalışan oturuma bağlanma, oturum bulunamaması ve pywin32 eksikliği. |
 | Giriş noktası | 1 | `main.py` uygulama giriş fonksiyonunu çağırıyor. |
 
-K faktörü ekranı mevcut programda kapalı; `k_factor/rules.py` şirket tablosunu bekleyen bir yer tutucu. Bu alanda üretim hesaplaması bulunmadığından hesaplama doğruluğu iddia edilmiyor; menünün devre dışı kaldığı arayüz testinde kontrol edildi. `backups/` uygulamanın çalıştırdığı kod değildir.
+K/R sekmesi **K FAKTÖR - RADIUS** adıyla etkin. Genel ANSI tablosu, yaklaşık havada büküm R hesabı ve bağımsız BA ölçümüyle kalibrasyon var. Üretim doğruluğu iddiası için gerçek numune gerekir. [Algoritma ve kaynak kıyaslaması](k-factor-radius.md). `backups/` uygulamanın çalıştırdığı kod değildir.
 
 ## Bulunan ve düzeltilen sorunlar
 
@@ -79,7 +80,7 @@ Bulut ortamı:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Ek test aracı `coverage==7.16.2` ile ölçülen sonuç: **1457 çalıştırılabilir satırın 1416'sı (%97,2)**; satır/dal birleşik kapsamı **%96**. Çalıştırılmamış istisna yolları ve Windows'a özgü davranışlar bulunduğundan %100 doğrulama iddia edilmiyor. Coverage yalnızca test ortamına kuruldu, uygulamanın bağımlılıklarına eklenmedi.
+K/R öncesi tarihsel GUI denetiminde ek test aracı `coverage==7.16.2` ile ölçülen sonuç: **1457 çalıştırılabilir satırın 1416'sı (%97,2)**; satır/dal birleşik kapsamı **%96**. Çalıştırılmamış istisna yolları ve Windows'a özgü davranışlar bulunduğundan %100 doğrulama iddia edilmiyor. Coverage yalnızca test ortamına kuruldu, uygulamanın bağımlılıklarına eklenmedi.
 
 ```bash
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user \
@@ -101,3 +102,7 @@ Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT
 ## GUI baştan sona yeniden kontrolü
 
 Önceki 128 test yeniden geçti. Gerçek düğme komutları ve Tk klavye/fare olaylarıyla 12 ek kabul testi çalıştırıldı. İlk boyutlandırma açıkça zamanlanarak ilk Configure olayına bağımlılık giderildi. Son tam çalıştırmada 140 test başarılı, 0 başarısız, 0 atlanan; GUI kapsamı 34 testtir. 12 boyut/tema/ekran alt senaryosu da geçti. [Word raporu](reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx), [kanıt dosyaları](reports/README.md).
+
+## K/R sürümü sonrası son kontrol
+
+174 test başarılı; 39 gerçek GUI testi. K/R kapsamında 34 yeni test (29 hesaplama/COM, 5 GUI) var. Kaydırma çubuğunun varsayılan 200 px minimumu yeni ayar alanını daraltmayı engelliyordu; 24 px olarak ayarlandı. Tarama/hesaplama/kayıt seçimi kaydırma alanı dışına alındı. İki tema, küçük/büyük pencere ve %125 ölçek sınandı. [Güncel kanıtlar](reports/k-radius/README.md) ve [Word raporu](reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx).

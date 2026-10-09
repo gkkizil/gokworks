@@ -1,6 +1,7 @@
 """Testleri çalıştır, Word raporu için makine tarafından okunabilir kanıt kaydet."""
 
 from collections import Counter
+import argparse
 from datetime import datetime, timezone
 import hashlib
 from importlib.metadata import version
@@ -64,8 +65,10 @@ class EvidenceResult(unittest.TextTestResult):
 
 
 def main():
-    folder = ROOT/'docs/reports'
-    folder.mkdir(exist_ok=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', type=Path, default=ROOT/'docs/reports')
+    folder = parser.parse_args().output_dir.resolve()
+    folder.mkdir(parents=True, exist_ok=True)
     started = datetime.now(timezone.utc)
     suite = unittest.defaultTestLoader.discover(str(ROOT/'tests'))
     result = unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult).run(suite)

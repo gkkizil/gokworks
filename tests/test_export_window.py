@@ -273,7 +273,7 @@ class WindowTests(unittest.TestCase):
         self.assertEqual(self.app.source_folder.get(), '/Parçalar')
         self.assertEqual(self.app.output_format.get(), 'DXF')
         self.assertTrue(self.app.bend_lines.get())
-        self.assertEqual(self.app.nav_buttons['k_factor'].cget('state'), 'disabled')
+        self.assertEqual(self.app.nav_buttons['k_factor'].cget('state'), 'normal')
 
     def test_stop_then_close_waits_for_active_worker(self):
         from threading import Event

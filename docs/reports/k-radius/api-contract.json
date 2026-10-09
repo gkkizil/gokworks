@@ -1,0 +1,414 @@
+{
+  "source_commit": "85a773aedc87b49afda3a65c8bb650f5ba771092",
+  "source": "https://github.com/angelsix/solidworks-api/tree/85a773aedc87b49afda3a65c8bb650f5ba771092/References/2023",
+  "runtime_verified": false,
+  "methods": {
+    "IFeature": [
+      {
+        "name": "ModifyDefinition",
+        "signature": "2003021c1c1c",
+        "parameters": [
+          "",
+          "Data",
+          "TopDoc",
+          "Component"
+        ]
+      },
+      {
+        "name": "GetErrorCode",
+        "signature": "200008",
+        "parameters": [
+          ""
+        ]
+      }
+    ],
+    "ISheetMetalFeatureData": [
+      {
+        "name": "AccessSelections",
+        "signature": "2002021c1c",
+        "parameters": [
+          "",
+          "TopDoc",
+          "Component"
+        ]
+      },
+      {
+        "name": "IAccessSelections",
+        "signature": "2002021280b0128294",
+        "parameters": [
+          "",
+          "TopDoc",
+          "Component"
+        ]
+      },
+      {
+        "name": "ReleaseSelectionAccess",
+        "signature": "200001",
+        "parameters": []
+      },
+      {
+        "name": "get_BendRadius",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendRadius",
+        "signature": "2001010d",
+        "parameters": [
+          "Radius"
+        ]
+      },
+      {
+        "name": "get_Thickness",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_Thickness",
+        "signature": "2001010d",
+        "parameters": [
+          "Thickness"
+        ]
+      },
+      {
+        "name": "get_FixedReference",
+        "signature": "20001c",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_FixedReference",
+        "signature": "2001011c",
+        "parameters": [
+          "FixedReference"
+        ]
+      },
+      {
+        "name": "get_BendAllowanceType",
+        "signature": "200008",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendAllowanceType",
+        "signature": "20010108",
+        "parameters": [
+          "BendAllowanceType"
+        ]
+      },
+      {
+        "name": "get_BendTableFile",
+        "signature": "20000e",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendTableFile",
+        "signature": "2001010e",
+        "parameters": [
+          "BendTableFile"
+        ]
+      },
+      {
+        "name": "get_KFactor",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_KFactor",
+        "signature": "2001010d",
+        "parameters": [
+          "KFactor"
+        ]
+      },
+      {
+        "name": "get_BendAllowance",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendAllowance",
+        "signature": "2001010d",
+        "parameters": [
+          "BendAllowance"
+        ]
+      },
+      {
+        "name": "get_UseAutoRelief",
+        "signature": "200002",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_UseAutoRelief",
+        "signature": "20010102",
+        "parameters": [
+          "AutoRelief"
+        ]
+      },
+      {
+        "name": "get_AutoReliefType",
+        "signature": "200008",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_AutoReliefType",
+        "signature": "20010108",
+        "parameters": [
+          "AutoReliefType"
+        ]
+      },
+      {
+        "name": "get_ReliefRatio",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_ReliefRatio",
+        "signature": "2001010d",
+        "parameters": [
+          "ReliefRatio"
+        ]
+      },
+      {
+        "name": "IAccessSelections2",
+        "signature": "200202128650128674",
+        "parameters": [
+          "",
+          "TopDoc",
+          "Component"
+        ]
+      },
+      {
+        "name": "GetCustomBendAllowance",
+        "signature": "2000128908",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "SetCustomBendAllowance",
+        "signature": "200101128908",
+        "parameters": [
+          "PBendData"
+        ]
+      },
+      {
+        "name": "GetOverrideDefaultParameter",
+        "signature": "2001081002",
+        "parameters": [
+          "",
+          "OverrideDefaultParameter"
+        ]
+      },
+      {
+        "name": "SetOverrideDefaultParameter",
+        "signature": "20010802",
+        "parameters": [
+          "",
+          "OverrideDefaultParameter"
+        ]
+      },
+      {
+        "name": "GetUseGaugeTable",
+        "signature": "2002081002100e",
+        "parameters": [
+          "",
+          "UseGaugeTable",
+          "GaugeTableFile"
+        ]
+      },
+      {
+        "name": "SetUseGaugeTable",
+        "signature": "200208020e",
+        "parameters": [
+          "",
+          "UseGaugeTable",
+          "GaugeTableFile"
+        ]
+      },
+      {
+        "name": "GetOverrideDefaultParameter2",
+        "signature": "200208081002",
+        "parameters": [
+          "",
+          "Parameter",
+          "OverrideDefaultParameter"
+        ]
+      },
+      {
+        "name": "SetOverrideDefaultParameter2",
+        "signature": "2002080802",
+        "parameters": [
+          "",
+          "Parameter",
+          "OverrideDefaultParameter"
+        ]
+      },
+      {
+        "name": "get_UseMaterialSheetMetalParameters",
+        "signature": "200002",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_UseMaterialSheetMetalParameters",
+        "signature": "20010102",
+        "parameters": [
+          "Retval"
+        ]
+      }
+    ],
+    "IModelDoc2": [
+      {
+        "name": "GetConfigurationNames",
+        "signature": "20001c",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "GetSaveFlag",
+        "signature": "200002",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "ShowConfiguration2",
+        "signature": "2001020e",
+        "parameters": [
+          "",
+          "ConfigurationName"
+        ]
+      },
+      {
+        "name": "EditRebuild3",
+        "signature": "200002",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "Save3",
+        "signature": "2003020810081008",
+        "parameters": [
+          "",
+          "Options",
+          "Errors",
+          "Warnings"
+        ]
+      }
+    ],
+    "ICustomBendAllowance": [
+      {
+        "name": "get_Type",
+        "signature": "200008",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_Type",
+        "signature": "20010108",
+        "parameters": [
+          "Type"
+        ]
+      },
+      {
+        "name": "get_BendTableFile",
+        "signature": "20000e",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendTableFile",
+        "signature": "2001010e",
+        "parameters": [
+          "BendTableFile"
+        ]
+      },
+      {
+        "name": "get_KFactor",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_KFactor",
+        "signature": "2001010d",
+        "parameters": [
+          "KFactor"
+        ]
+      },
+      {
+        "name": "get_BendAllowance",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendAllowance",
+        "signature": "2001010d",
+        "parameters": [
+          "BendAllowance"
+        ]
+      },
+      {
+        "name": "get_BendDeduction",
+        "signature": "20000d",
+        "parameters": [
+          ""
+        ]
+      },
+      {
+        "name": "set_BendDeduction",
+        "signature": "2001010d",
+        "parameters": [
+          "BendDeduction"
+        ]
+      }
+    ]
+  },
+  "enums": {
+    "swBendAllowanceTypes_e": {
+      "swBendAllowanceBendTable": 1,
+      "swBendAllowanceKFactor": 2,
+      "swBendAllowanceDirect": 3,
+      "swBendAllowanceDeduction": 4,
+      "swBendAllowanceBendCalculationTable": 5
+    },
+    "swSheetMetalModifierError_e": {
+      "swSheetMetalModifierError_NoError": 0,
+      "swSheetMetalModifierError_OldArchitecture": 1,
+      "swSheetMetalModifierError_NotEnabledOnTemplate": 2,
+      "swSheetMetalModifierError_InvalidProperty": 3,
+      "swSheetMetalModifierError_UnspecifiedError": 4,
+      "swSheetMetalModifierError_GaugeTablePathNotEmpty": 5
+    }
+  },
+  "sha256": {
+    "SolidWorks.Interop.sldworks.dll": "7a6bf74d2a9f60563959d738c3c85f825f257c9def2a3bec464511aaebfc88e4",
+    "SolidWorks.Interop.swconst.dll": "2272a99dd0dc1bd40b16a8dcc7849616fe7d90349a06342f9ac6999ec0587a3b"
+  }
+}
