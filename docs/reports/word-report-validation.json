@@ -1,0 +1,12 @@
+{
+  "file": "GOKWORKS_GUI_Test_Raporu_2026-10-09.docx",
+  "sha256": "7f41269506489cfb57e9630098ef4210af07195cbd53d920b2a126e5b5075a21",
+  "bytes": 155892,
+  "zip_crc": "passed",
+  "xml_files_parsed": 18,
+  "images_embedded": 4,
+  "all_34_gui_test_ids_present": true,
+  "python_docx_readback": "passed",
+  "pandoc_readback": "passed",
+  "microsoft_word_native_render": "not_run"
+}

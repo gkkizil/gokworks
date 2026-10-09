@@ -1,2 +1,4 @@
 customtkinter==6.0.0
+Pillow==12.1.0
 pywin32==312
+ezdxf==1.4.3

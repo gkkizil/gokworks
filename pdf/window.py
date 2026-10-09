@@ -1,4 +1,4 @@
-"""GOKWORKS'in PDF ekranı."""
+"""GOKWORKS'in PDF ve sac metal açınım ekranları."""
 
 import csv
 from datetime import datetime
@@ -7,42 +7,64 @@ from pathlib import Path
 import queue
 import threading
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 
 from pdf.exporter import export_drawings, find_drawings
+from dxf_dwg.exporter import export_parts, find_parts
 from pdf.settings import load_settings, save_settings, SETTINGS_PATH
-
-BG = "#101316"
-PANEL = "#191E23"
-INPUT = "#11161B"
-BORDER = "#2D353D"
-TEXT = "#EDF2F5"
-MUTED = "#95A3AE"
-ACCENT = "#4AD7B3"
-GREEN = "#66DBAB"
-AMBER = "#E9BE70"
-RED = "#F1848F"
+from gui.layout import WorkspaceLayout
+from gui.icons import make_icon
+from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
+                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
           "skipped": "Atlandı", "error": "Hata"}
+FILTERS = {"Tüm durumlar": None, "Bekleyen": "pending", "İşleniyor": "running",
+           "Başarılı": "success", "Atlanan": "skipped", "Hatalı": "error"}
 
 
-class GokworksPdfApp(ctk.CTk):
+def _search_text(value):
+    # Turkish İ casefolds to i + combining dot; searches should still match i.
+    return str(value).casefold().replace("\u0307", "")
+
+
+class GokworksPdfApp(WorkspaceLayout, ctk.CTk):
+    _PAGE_ATTRIBUTES = (
+        "source_folder", "output_folder", "include_subfolders", "overwrite_existing",
+        "output_format", "bend_lines", "controls", "results", "row_ids", "stat_values",
+        "workspace", "pdf_header", "start_button", "stop_button", "settings_body",
+        "_settings_height", "scan_button", "open_button", "stats_frame", "results_header",
+        "report_button", "result_tabs", "table", "empty_state", "log_box", "status_label", "progress",
+        "search_query", "status_filter", "search_entry", "filter_menu", "files_toolbar",
+        "visible_count", "results_footer", "row_statuses", "empty_title", "empty_hint",
+        "_visible_rows",
+    )
+
     def __init__(self, settings_path=SETTINGS_PATH):
-        ctk.set_appearance_mode("dark")
+        saved = load_settings(settings_path)
+        appearance = saved.get("appearance", "light")
+        ctk.set_appearance_mode(appearance if appearance in ("light", "dark") else "light")
         ctk.set_default_color_theme("dark-blue")
+        if os.name != "nt":
+            ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         super().__init__()
         self.title("GOKWORKS • SolidWorks Otomasyonu")
-        self.geometry("1140x780")
+        self.geometry("1240x860")
         self.minsize(1000, 690)
         self.configure(fg_color=BG)
         self.settings_path = settings_path
-        saved = load_settings(settings_path)
+        self.mode = "pdf"
+        self._pages = {}
+        self.theme_mode = tk.StringVar(self, value="Koyu" if ctk.get_appearance_mode() == "Dark" else "Açık")
         self.source_folder = tk.StringVar(self, value=str(saved.get("pdf_source", "")))
         self.output_folder = tk.StringVar(self, value=str(saved.get("pdf_output", "")))
         self.include_subfolders = tk.BooleanVar(self, value=saved.get("pdf_recursive", True) is True)
         self.overwrite_existing = tk.BooleanVar(self, value=saved.get("pdf_overwrite", False) is True)
+        self.output_format = tk.StringVar(self, value=saved.get("dxf_dwg_format", "DXF"))
+        if self.output_format.get() not in ("DXF", "DWG", "DXF + DWG"):
+            self.output_format.set("DXF")
+        self.bend_lines = tk.BooleanVar(self, value=saved.get("dxf_dwg_bend_lines", False) is True)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
         self.busy = False
@@ -52,190 +74,229 @@ class GokworksPdfApp(ctk.CTk):
         self.results = []
         self.row_ids = {}
         self.stat_values = {}
+        self._icons = {}
+        self._create_filter_state()
         self._build_window()
+        self._remember_page()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._poll_id = self.after(80, self._process_events)
+        self.bind("<Control-f>", self._focus_search)
+
+    @property
+    def _is_pdf(self):
+        return self.mode == "pdf"
+
+    @property
+    def _start_text(self):
+        return "PDF aktarımını başlat" if self._is_pdf else "Açınım aktarımını başlat"
+
+    @property
+    def _extension(self):
+        return ".SLDDRW" if self._is_pdf else ".SLDPRT"
+
+    @property
+    def _file_label(self):
+        return "teknik resim" if self._is_pdf else "parça"
+
+    def _switch_mode(self, mode):
+        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg"):
+            return
+        self._save_preferences()
+        layout_fit = getattr(self, "_layout_fit_id", None)
+        if layout_fit is not None:
+            self.after_cancel(layout_fit)
+            self._layout_fit_id = None
+        self.workspace.unbind("<Configure>")
+        self._remember_page()
+        self.workspace.grid_remove()
+        self.mode = mode
+        if mode in self._pages:
+            for name, value in self._pages[mode].items():
+                setattr(self, name, value)
+            self.workspace.grid()
+        else:
+            self._create_page_state()
+            self._build_window()
+            self._remember_page()
+        self.stop_event.clear()
+        self.workspace.bind("<Configure>", self._resize_pdf_area)
+        self._update_navigation()
+        self._resize_pdf_area()
+
+    def _remember_page(self):
+        self._pages[self.mode] = {name: getattr(self, name) for name in self._PAGE_ATTRIBUTES}
+
+    def _create_page_state(self):
+        saved = load_settings(self.settings_path)
+        self.source_folder = tk.StringVar(self, value=str(saved.get(f"{self.mode}_source", "")))
+        self.output_folder = tk.StringVar(self, value=str(saved.get(f"{self.mode}_output", "")))
+        self.include_subfolders = tk.BooleanVar(self, value=saved.get(f"{self.mode}_recursive", True) is True)
+        self.overwrite_existing = tk.BooleanVar(self, value=saved.get(f"{self.mode}_overwrite", False) is True)
+        output_format = saved.get("dxf_dwg_format", "DXF")
+        self.output_format = tk.StringVar(self, value=output_format if output_format in ("DXF", "DWG", "DXF + DWG") else "DXF")
+        self.bend_lines = tk.BooleanVar(self, value=saved.get("dxf_dwg_bend_lines", False) is True)
+        self.controls, self.results = [], []
+        self.row_ids, self.stat_values = {}, {}
+        self._create_filter_state()
+
+    def _create_filter_state(self):
+        self.search_query = tk.StringVar(self, value="")
+        self.status_filter = tk.StringVar(self, value="Tüm durumlar")
+        self.row_statuses = {}
+        self._visible_rows = set()
+        mode = self.mode
+        for variable in (self.search_query, self.status_filter):
+            variable.trace_add("write", lambda *_: self._apply_filters() if self.mode == mode else None)
+
+    def _icon(self, name, color=MUTED, size=20):
+        key = name, color, size
+        if key not in self._icons:
+            self._icons[key] = make_icon(*key)
+        return self._icons[key]
+
+    def _update_navigation(self):
+        for key, button in self.nav_buttons.items():
+            active = key == self.mode
+            button.configure(
+                fg_color=ACCENT_BG if active else "transparent",
+                hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
+                text_color=ACCENT if active else MUTED,
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools"}[key],
+                                 ACCENT if active else MUTED),
+                border_width=1 if active else 0,
+                font=ctk.CTkFont(family=UI_FONT, size=14, weight="bold" if active else "normal"),
+            )
+
+    def _cancel_widget_callbacks(self, widget):
+        """Silinen panelin CustomTkinter zamanlayıcılarını da iptal et."""
+        owners = {}
+
+        def collect(current):
+            for command in getattr(current, "_tclCommands", None) or ():
+                owners[command] = current
+            for child in current.winfo_children():
+                collect(child)
+
+        collect(widget)
+        for timer in self.tk.splitlist(self.tk.call("after", "info")):
+            script = self.tk.call("after", "info", timer)[0]
+            command = self.tk.splitlist(script)[0]
+            owner = owners.get(command)
+            if owner is not None:
+                owner.after_cancel(timer)
 
     def _label(self, parent, text, size=13, color=TEXT, bold=False, **kwargs):
+        kwargs.setdefault("height", size + 6)
         return ctk.CTkLabel(parent, text=text, text_color=color,
-                            font=ctk.CTkFont(family="Segoe UI", size=size,
+                            font=ctk.CTkFont(family=UI_FONT, size=size,
                                             weight="bold" if bold else "normal"), **kwargs)
 
-    def _button(self, parent, text, command, primary=False, **kwargs):
+    def _button(self, parent, text, command, primary=False, icon=None, **kwargs):
         return ctk.CTkButton(
             parent, text=text, command=command, corner_radius=8, height=38,
-            fg_color=ACCENT if primary else "#253039",
-            hover_color="#70E7C7" if primary else "#34434F",
-            text_color="#10231D" if primary else TEXT,
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"), **kwargs)
+            fg_color=ACCENT if primary else SECONDARY,
+            hover_color=("#12634F", "#70E7C7") if primary else HOVER,
+            text_color=("#FFFFFF", "#10231D") if primary else TEXT, text_color_disabled=MUTED,
+            image=self._icon(icon, ("#FFFFFF", "#10231D") if primary else MUTED, 18) if icon else None,
+            font=ctk.CTkFont(family=UI_FONT, size=12, weight="bold"), **kwargs)
 
-    def _build_window(self):
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+    def _change_theme(self, selection):
+        if selection not in ("Açık", "Koyu"):
+            return
+        self.theme_mode.set(selection)
+        ctk.set_appearance_mode("dark" if selection == "Koyu" else "light")
+        self._configure_table_style()
+        self._save_preferences()
 
-        self.sidebar = ctk.CTkFrame(self, width=230, corner_radius=0, fg_color="#151B20")
-        self.sidebar.grid(row=0, column=0, sticky="ns")
-        self.sidebar.grid_propagate(False)
-        self.sidebar.grid_columnconfigure(0, weight=1)
-        self.sidebar.grid_rowconfigure(4, weight=1)
-        brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        brand.grid(row=0, column=0, sticky="ew", padx=20, pady=(30, 32))
-        badge = ctk.CTkFrame(brand, width=38, height=38, fg_color="#203D35", corner_radius=9)
-        badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
-        badge.grid_propagate(False)
-        self._label(badge, "G", 23, ACCENT, True).place(relx=.5, rely=.5, anchor="center")
-        self._label(brand, "GOKWORKS", 16, bold=True).grid(row=0, column=1, sticky="w")
-        self._label(brand, "SolidWorks otomasyonu", 10, MUTED).grid(row=1, column=1, sticky="w")
-        self._label(self.sidebar, "ARAÇLAR", 10, MUTED, True).grid(row=1, column=0, sticky="w", padx=24, pady=(0, 10))
-        navigation = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        navigation.grid(row=2, column=0, sticky="ew", padx=14)
-        navigation.grid_columnconfigure(0, weight=1)
-        self.nav_buttons = {}
-        for row, (key, title) in enumerate((("pdf", "PDF"), ("dxf_dwg", "DXF / DWG"), ("k_factor", "K Faktörü"))):
-            active = key == "pdf"
-            nav = ctk.CTkButton(navigation, text=title, height=46, corner_radius=8, anchor="w",
-                               fg_color="#24483E" if active else "transparent",
-                               hover_color="#2E5D4F" if active else "#222B32",
-                               text_color=ACCENT if active else MUTED, text_color_disabled=MUTED,
-                               border_width=1 if active else 0, border_color="#346857",
-                               font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold" if active else "normal"),
-                               command=lambda: self.workspace.focus_set(), state="normal" if active else "disabled")
-            nav.grid(row=row, column=0, sticky="ew", pady=(0, 8))
-            self.nav_buttons[key] = nav
-        footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        footer.grid(row=5, column=0, sticky="ew", padx=24, pady=24)
-        self._label(footer, "SOLID AUTOMATION", 10, MUTED, True).pack(anchor="w")
-        self._label(footer, "Windows masaüstü", 10, "#6F7E89").pack(anchor="w", pady=(3, 0))
+    def _focus_search(self, event=None):
+        self.result_tabs.set("Dosyalar")
+        self.search_entry.focus_set()
+        return "break"
 
-        self.workspace = ctk.CTkFrame(self, fg_color=BG, corner_radius=0)
-        self.workspace.grid(row=0, column=1, sticky="nsew", padx=24, pady=24)
-        self.workspace.grid_columnconfigure(0, weight=1)
-        self.workspace.grid_rowconfigure(3, weight=1)
-        header = ctk.CTkFrame(self.workspace, fg_color="transparent")
-        self.pdf_header = header
-        header.grid(row=0, column=0, sticky="ew", pady=(0, 18))
-        header.grid_columnconfigure(0, weight=1)
-        self._label(header, "PDF Aktarımı", 25, bold=True).grid(row=0, column=0, sticky="w")
-        self._label(header, "Teknik resimlerin tüm sayfalarını PDF'e aktar.", 12, MUTED,
-                    wraplength=310, justify="left").grid(row=1, column=0, sticky="w", pady=(4, 0))
-        actions = ctk.CTkFrame(header, fg_color="transparent")
-        actions.grid(row=0, column=1, rowspan=2, sticky="e", padx=(12, 0))
-        self.start_button = self._button(actions, "PDF AKTARIMINI BAŞLAT", self._start_export, primary=True, width=220)
-        self.start_button.configure(height=44)
-        self.start_button.pack(side="left", padx=(0, 8))
-        self.stop_button = self._button(actions, "Durdur", self._request_stop, width=80, state="disabled")
-        self.stop_button.configure(height=44)
-        self.stop_button.pack(side="left")
+    def _clear_filters(self):
+        self.search_query.set("")
+        self.status_filter.set("Tüm durumlar")
 
-        self.settings_body = ctk.CTkScrollableFrame(self.workspace, height=220, fg_color="transparent",
-                                                   corner_radius=0)
-        self.settings_body.grid(row=1, column=0, sticky="ew", pady=(0, 12))
-        self.settings_body.grid_columnconfigure(0, weight=1)
-        # Scrollbar'ın varsayılan 200 birimlik isteği kısa paneli büyütmesin.
-        self.settings_body._scrollbar.configure(height=24)
-        self._settings_height = 220
-        folders = ctk.CTkFrame(self.settings_body, fg_color="transparent")
-        folders.grid(row=0, column=0, sticky="ew", pady=(0, 12))
-        for column in range(2):
-            folders.grid_columnconfigure(column, weight=1, uniform="folders")
-        for column, (title, hint, variable) in enumerate((
-            ("Kaynak klasör", "Bir çizim seç; bulunduğu klasör taranır.", self.source_folder),
-            ("PDF kayıt klasörü", "PDF dosyalarının kaydedileceği klasör.", self.output_folder),
-        )):
-            card = ctk.CTkFrame(folders, fg_color=PANEL, corner_radius=10, border_width=1, border_color=BORDER)
-            card.grid(row=0, column=column, sticky="nsew", padx=(0 if column == 0 else 6, 6 if column == 0 else 0))
-            card.grid_columnconfigure(0, weight=1)
-            self._folder_input(card, 0, title, hint, variable)
+    def _apply_filters(self):
+        query = _search_text(self.search_query.get().strip())
+        status = FILTERS.get(self.status_filter.get())
+        self._visible_rows.clear()
+        visible = 0
+        for path, row in self.row_ids.items():
+            values = self.table.item(row, "values")
+            row_status = self.row_statuses[path]
+            if (status is None or row_status == status) and query in _search_text(" ".join(values)):
+                self.table.move(row, "", visible)
+                self.table.item(row, tags=(row_status, "stripe") if visible % 2 else (row_status,))
+                visible += 1
+                self._visible_rows.add(row)
+            else:
+                self.table.detach(row)
+        self._refresh_list_state()
 
-        options = ctk.CTkFrame(self.settings_body, fg_color=PANEL, corner_radius=10)
-        options.grid(row=1, column=0, sticky="ew")
-        options.grid_columnconfigure(0, weight=1)
-        options.grid_columnconfigure(1, weight=1)
-        for column, (text, variable) in enumerate((("Alt klasörleri de tara", self.include_subfolders),
-                                                   ("Mevcut PDF'lerin üzerine yaz", self.overwrite_existing))):
-            control = ctk.CTkCheckBox(options, text=text, variable=variable, height=28,
-                                     checkbox_width=18, checkbox_height=18, corner_radius=4,
-                                     fg_color=ACCENT, hover_color="#70E7C7", checkmark_color=BG,
-                                     border_color="#55636F", text_color=TEXT, font=ctk.CTkFont(size=12))
-            control.grid(row=0, column=column, sticky="w", padx=16, pady=(12, 8))
-            self.controls.append(control)
-        tools = ctk.CTkFrame(options, fg_color="transparent")
-        tools.grid(row=1, column=0, columnspan=2, sticky="ew", padx=16, pady=(0, 12))
-        tools.grid_columnconfigure(2, weight=1)
-        self.scan_button = self._button(tools, "Klasörü tara", self._scan, width=110)
-        self.scan_button.grid(row=0, column=0, padx=(0, 8))
-        self.controls.append(self.scan_button)
-        self.open_button = self._button(tools, "PDF klasörünü aç", self._open_output, width=138)
-        self.open_button.grid(row=0, column=1)
-        self._label(tools, "SolidWorks açık olmalı.", 11, MUTED).grid(row=0, column=2, sticky="e", padx=(12, 0))
+    def _refresh_list_state(self):
+        self.visible_count.configure(text=f"{len(self._visible_rows)} / {len(self.row_ids)} dosya")
+        if self._visible_rows:
+            self.empty_state.place_forget()
+        else:
+            filtered = bool(self.row_ids)
+            self.empty_title.configure(text="Eşleşen dosya yok" if filtered else "Aktarım için hazır")
+            self.empty_hint.configure(text="Aramayı veya durum filtresini değiştirin." if filtered else
+                                      "Kaynak klasörü seçin ve Klasörü tara düğmesine basın.")
+            self.empty_state.place(relx=.5, rely=.6, anchor="center")
 
-        stats = ctk.CTkFrame(self.workspace, fg_color="transparent")
-        self.stats_frame = stats
-        stats.grid(row=2, column=0, sticky="ew", pady=(0, 12))
-        for index, (key, caption, color) in enumerate((("total", "Bulunan", TEXT), ("succeeded", "Başarılı", GREEN),
-                                                      ("skipped", "Atlanan", AMBER), ("failed", "Hatalı", RED))):
-            stats.grid_columnconfigure(index, weight=1, uniform="stats")
-            card = ctk.CTkFrame(stats, fg_color=PANEL, corner_radius=10)
-            card.grid(row=0, column=index, sticky="ew", padx=(0 if index == 0 else 4, 0 if index == 3 else 4))
-            self._label(card, caption, 11, MUTED).pack(anchor="w", padx=14, pady=(10, 0))
-            value = self._label(card, "0", 22, color, True)
-            value.pack(anchor="w", padx=14, pady=(0, 8))
-            self.stat_values[key] = value
+    def _show_detail(self, event=None):
+        if event is not None and getattr(event, "num", None) == 1:
+            row = self.table.identify_row(event.y)
+        else:
+            selection = self.table.selection()
+            row = selection[0] if selection else ""
+        path = next((path for path, identifier in self.row_ids.items() if identifier == row), None)
+        if path is None:
+            return "break"
+        result = next((item for item in reversed(self.results) if item["source"] == path), None)
+        output = result["output"] if result else "Henüz üretilmedi."
+        detail = self.table.item(row, "values")[2] or "Dosya aktarım için bekliyor."
+        status = LABELS[self.row_statuses[path]]
+        text = f"Kaynak\n{path}\n\nÇıktı\n{output}\n\nDurum\n{status}\n\nAçıklama\n{detail}"
+        existing = getattr(self, "detail_window", None)
+        if existing is not None and existing.winfo_exists():
+            self._close_detail()
+        window = ctk.CTkToplevel(self)
+        self.detail_window = window
+        window.title("GOKWORKS · Dosya ayrıntıları")
+        window.geometry("660x470")
+        window.minsize(520, 360)
+        window.configure(fg_color=PANEL)
+        window.transient(self)
+        window.protocol("WM_DELETE_WINDOW", self._close_detail)
+        window.grid_columnconfigure(0, weight=1)
+        window.grid_rowconfigure(1, weight=1)
+        self._label(window, Path(path).name, 20, bold=True, wraplength=600,
+                    justify="left").grid(row=0, column=0, sticky="w", padx=24, pady=(20, 12))
+        content = ctk.CTkTextbox(window, fg_color=INPUT, text_color=TEXT, wrap="word", font=(UI_FONT, 13))
+        content.grid(row=1, column=0, sticky="nsew", padx=24)
+        content.insert("1.0", text)
+        content.configure(state="disabled")
+        actions = ctk.CTkFrame(window, fg_color="transparent")
+        actions.grid(row=2, column=0, sticky="ew", padx=24, pady=18)
+        def copy_details():
+            self.clipboard_clear()
+            self.clipboard_append(text)
+        self._button(actions, "Ayrıntıları kopyala", copy_details, icon="copy", width=170).pack(side="left")
+        self._button(actions, "Kapat", self._close_detail, width=90).pack(side="right")
+        window.bind("<Escape>", lambda _: self._close_detail())
+        return "break"
 
-        results_card = ctk.CTkFrame(self.workspace, fg_color=PANEL, corner_radius=12, border_width=1, border_color=BORDER)
-        results_card.grid(row=3, column=0, sticky="nsew")
-        results_card.grid_columnconfigure(0, weight=1)
-        results_card.grid_rowconfigure(1, weight=1)
-        result_header = ctk.CTkFrame(results_card, fg_color="transparent")
-        self.results_header = result_header
-        result_header.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 2))
-        result_header.grid_columnconfigure(0, weight=1)
-        self._label(result_header, "Aktarım listesi", 15, bold=True).grid(row=0, column=0, sticky="w")
-        self.report_button = self._button(result_header, "Rapor kaydet", self._save_report, width=106, state="disabled")
-        self.report_button.grid(row=0, column=1)
-        self.result_tabs = ctk.CTkTabview(results_card, fg_color=PANEL, corner_radius=6, anchor="w",
-                                        segmented_button_fg_color=PANEL, segmented_button_selected_color="#293942",
-                                        segmented_button_selected_hover_color="#344A56", segmented_button_unselected_color=PANEL,
-                                        segmented_button_unselected_hover_color="#253039")
-        self.result_tabs.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 8))
-        files_tab = self.result_tabs.add("Dosyalar")
-        log_tab = self.result_tabs.add("Günlük")
-        files_tab.grid_rowconfigure(0, weight=1)
-        files_tab.grid_columnconfigure(0, weight=1)
-        style = ttk.Style(self)
-        style.theme_use("clam")
-        style.configure("Gok.Treeview", background=INPUT, fieldbackground=INPUT, foreground=TEXT,
-                        borderwidth=0, rowheight=32, font=("Segoe UI", 10))
-        style.configure("Gok.Treeview.Heading", background="#253039", foreground=MUTED,
-                        relief="flat", padding=(8, 9), font=("Segoe UI", 10, "bold"))
-        style.map("Gok.Treeview.Heading", background=[("active", "#30434D")])
-        style.map("Gok.Treeview", background=[("selected", "#284B40")], foreground=[("selected", "white")])
-        self.table = ttk.Treeview(files_tab, columns=("file", "status", "detail"), show="headings", style="Gok.Treeview")
-        for name, caption, width in (("file", "TEKNİK RESİM", 300), ("status", "DURUM", 105), ("detail", "AÇIKLAMA", 290)):
-            self.table.heading(name, text=caption)
-            self.table.column(name, width=width, minwidth=80, stretch=name != "status")
-        self.table.grid(row=0, column=0, sticky="nsew")
-        scroll = ctk.CTkScrollbar(files_tab, command=self.table.yview, fg_color=INPUT)
-        scroll.grid(row=0, column=1, sticky="ns")
-        horizontal = ctk.CTkScrollbar(files_tab, orientation="horizontal", command=self.table.xview, fg_color=INPUT)
-        horizontal.grid(row=1, column=0, sticky="ew")
-        self.table.configure(yscrollcommand=scroll.set, xscrollcommand=horizontal.set)
-        for status, color in (("pending", MUTED), ("running", ACCENT), ("success", GREEN), ("skipped", AMBER), ("error", RED)):
-            self.table.tag_configure(status, foreground=color)
-        log_tab.grid_rowconfigure(0, weight=1)
-        log_tab.grid_columnconfigure(0, weight=1)
-        self.log_box = ctk.CTkTextbox(log_tab, fg_color=INPUT, text_color=TEXT, wrap="word", font=("Consolas", 11))
-        self.log_box.grid(row=0, column=0, sticky="nsew")
-        self.log_box.configure(state="disabled")
-        self.status_label = self._label(self.workspace, "Hazır · Kaynak ve PDF kayıt klasörünü seç.", 12, MUTED, anchor="w")
-        self.status_label.grid(row=4, column=0, sticky="ew", pady=(10, 5))
-        self.workspace.bind("<Configure>", self._resize_pdf_area)
-        self.progress = ctk.CTkProgressBar(self.workspace, height=6, corner_radius=3, fg_color=BORDER, progress_color=ACCENT)
-        self.progress.grid(row=5, column=0, sticky="ew")
-        self.progress.set(0)
+    def _close_detail(self):
+        window = getattr(self, "detail_window", None)
+        if window is not None and window.winfo_exists():
+            self._cancel_widget_callbacks(window)
+            window.destroy()
+        self.detail_window = None
 
     def _resize_pdf_area(self, event=None):
-        self.status_label.configure(wraplength=max(240, self.workspace.winfo_width() - 12))
+        self.status_label.configure(wraplength=max(240, self.workspace.winfo_width() - 56))
         previous = getattr(self, "_layout_fit_id", None)
         if previous is not None:
             self.after_cancel(previous)
@@ -246,28 +307,32 @@ class GokworksPdfApp(ctk.CTk):
         if self._closed or self.workspace.winfo_height() < 100:
             return
         scale = self.settings_body._get_widget_scaling()
-        fixed = (self.pdf_header.winfo_reqheight() + self.stats_frame.winfo_reqheight()
-                 + self.status_label.winfo_reqheight() + self.progress.winfo_reqheight() + 57 * scale)
-        result_minimum = self.results_header.winfo_reqheight() + 150 * scale
-        available = (self.workspace.winfo_height() - fixed - result_minimum) / scale
-        height = max(120, min(220, int(available)))
+        if getattr(self, "_table_style_key", None) != (ctk.get_appearance_mode(), scale):
+            self._configure_table_style()
+        results_card = self.result_tabs.master
+        active_tab = self.result_tabs.tab(self.result_tabs.get())
+        # Measure the rendered frame/tab decorations instead of guessing their
+        # height. The scrollable settings content is taller than its viewport.
+        result_chrome = results_card.winfo_height() - active_tab.winfo_height()
+        horizontal_scroll = self.table.master.grid_slaves(row=2)[0]
+        result_minimum = (result_chrome + 128 * scale + horizontal_scroll.winfo_reqheight()
+                          + self.files_toolbar.winfo_reqheight() + self.results_footer.winfo_reqheight()
+                          + 12 * scale)
+        shared_space = (self.settings_body._parent_canvas.winfo_height()
+                        + results_card.winfo_height())
+        available = (shared_space - result_minimum) / scale
+        preferred = int(self.settings_body.winfo_reqheight() / scale) + 2
+        height = max(96, min(preferred, int(available)))
         if height != self._settings_height:
             self._settings_height = height
             self.settings_body.configure(height=height)
+        scrollbar = self.settings_body._scrollbar
+        needs_scroll = preferred > height
+        if needs_scroll and not scrollbar.winfo_manager():
+            scrollbar.grid()
+        elif not needs_scroll and scrollbar.winfo_manager():
+            scrollbar.grid_remove()
 
-
-    def _folder_input(self, parent, row, label, hint, variable):
-        frame = ctk.CTkFrame(parent, fg_color="transparent")
-        frame.grid(row=row, column=0, sticky="ew", padx=20, pady=(14, 14))
-        frame.grid_columnconfigure(0, weight=1)
-        self._label(frame, label, 13, bold=True).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 7))
-        entry = ctk.CTkEntry(frame, textvariable=variable, height=38, corner_radius=7,
-                            border_width=1, border_color=BORDER, fg_color=INPUT, font=("Segoe UI", 11))
-        entry.grid(row=1, column=0, sticky="ew", padx=(0, 6))
-        browse = self._button(frame, "Gözat", lambda: self._choose_folder(variable, label), width=68)
-        browse.grid(row=1, column=1)
-        self._label(frame, hint, 10, MUTED, wraplength=260, justify="left").grid(row=2, column=0, columnspan=2, sticky="w", pady=(5, 0))
-        self.controls.extend((entry, browse))
 
     def _choose_folder(self, variable, title):
         initial = variable.get().strip()
@@ -278,9 +343,9 @@ class GokworksPdfApp(ctk.CTk):
             # Seçilen dosya, topluca taranacak klasörü belirler.
             selected = filedialog.askopenfilename(
                 parent=self,
-                title="Kaynak klasördeki bir teknik resmi seç",
+                title=f"Kaynak klasördeki bir {self._file_label} seç",
                 initialdir=initial,
-                filetypes=[("SOLIDWORKS teknik resim (*.SLDDRW)", "*.slddrw"),
+                filetypes=[(f"SOLIDWORKS {self._file_label} (*{self._extension})", self._extension.lower().replace(".", "*.")),
                            ("Tüm dosyalar (*.*)", "*.*")],
             )
             folder = str(Path(selected).parent) if selected else ""
@@ -292,22 +357,33 @@ class GokworksPdfApp(ctk.CTk):
 
     def _save_preferences(self):
         try:
-            save_settings({"pdf_source": self.source_folder.get(), "pdf_output": self.output_folder.get(),
-                           "pdf_recursive": self.include_subfolders.get(), "pdf_overwrite": self.overwrite_existing.get()},
-                          self.settings_path)
+            saved = load_settings(self.settings_path)
+            saved.update({f"{self.mode}_source": self.source_folder.get(),
+                          f"{self.mode}_output": self.output_folder.get(),
+                          f"{self.mode}_recursive": self.include_subfolders.get(),
+                          f"{self.mode}_overwrite": self.overwrite_existing.get(),
+                          "appearance": "dark" if self.theme_mode.get() == "Koyu" else "light"})
+            if not self._is_pdf:
+                saved.update({"dxf_dwg_format": self.output_format.get(),
+                              "dxf_dwg_bend_lines": self.bend_lines.get()})
+            save_settings(saved, self.settings_path)
         except OSError as error:
             self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
 
     def _set_busy(self, value):
         self.busy = value
+        for key, button in self.nav_buttons.items():
+            if key != "k_factor":
+                button.configure(state="disabled" if value else "normal")
         for control in self.controls:
             control.configure(state="disabled" if value else "normal")
         self.start_button.configure(state="disabled" if value else "normal",
-                                     text="AKTARIM SÜRÜYOR…" if value else "PDF AKTARIMINI BAŞLAT")
+                                     text="Aktarım sürüyor…" if value else self._start_text)
         self.stop_button.configure(state="normal" if value else "disabled")
 
     def _reset(self):
         self.results.clear()
+        self._clear_filters()
         self._fill_files([])
         self.result_tabs.set("Dosyalar")
         self.progress.set(0)
@@ -335,11 +411,12 @@ class GokworksPdfApp(ctk.CTk):
         self._reset()
         self._set_busy(True)
         self.start_button.configure(text="Klasör taranıyor…")
-        self.status_label.configure(text="Teknik resimler taranıyor…", text_color=MUTED)
+        self.status_label.configure(text="Dosyalar taranıyor…", text_color=MUTED)
         recursive = self.include_subfolders.get()
+        scanner = find_drawings if self._is_pdf else find_parts
         def scan():
             try:
-                files = find_drawings(source, recursive, self.stop_event)
+                files = scanner(source, recursive, self.stop_event)
                 self.events.put(("preview", files))
             except Exception as error:
                 self.events.put(("preview_error", str(error)))
@@ -353,14 +430,20 @@ class GokworksPdfApp(ctk.CTk):
             return
         output = self.output_folder.get().strip()
         if not output or (Path(output).exists() and not Path(output).is_dir()):
-            self.status_label.configure(text="Geçerli bir PDF kayıt klasörü seç.", text_color=RED)
+            self.status_label.configure(text="Geçerli bir çıktı kayıt klasörü seç.", text_color=RED)
             return
         self._save_preferences()
         self._reset()
         self._set_busy(True)
         self.status_label.configure(text="Aktarım hazırlanıyor…", text_color=MUTED)
-        threading.Thread(target=export_drawings,
+        exporter = export_drawings if self._is_pdf else export_parts
+        export_options = {} if self._is_pdf else {
+            "formats": ("dxf", "dwg") if self.output_format.get() == "DXF + DWG" else (self.output_format.get().lower(),),
+            "bend_lines": self.bend_lines.get(),
+        }
+        threading.Thread(target=exporter,
                          args=(source, output, self.include_subfolders.get(), self.overwrite_existing.get(), self.events, self.stop_event),
+                         kwargs=export_options,
                          daemon=False).start()
 
     def _request_stop(self):
@@ -369,8 +452,13 @@ class GokworksPdfApp(ctk.CTk):
         self.status_label.configure(text="Geçerli dosya tamamlandıktan sonra duracak…", text_color=AMBER)
 
     def _fill_files(self, files):
-        self.table.delete(*self.table.get_children())
+        # Detached, filtered rows are not returned by get_children(). Delete
+        # them too, otherwise the next scan reuses an existing file_n id.
+        if self.row_ids:
+            self.table.delete(*self.row_ids.values())
         self.row_ids.clear()
+        self.row_statuses.clear()
+        self._visible_rows.clear()
         for index, path in enumerate(files):
             try:
                 name = str(Path(path).relative_to(Path(self.source_folder.get()).resolve()))
@@ -378,14 +466,41 @@ class GokworksPdfApp(ctk.CTk):
                 name = Path(path).name
             self.row_ids[path] = self.table.insert("", "end", iid=f"file_{index}",
                                                     values=(name, "Bekliyor", ""), tags=("pending",))
+            self.row_statuses[path] = "pending"
         self.stat_values["total"].configure(text=str(len(files)))
+        self._apply_filters()
 
     def _update_row(self, path, status, detail=""):
         row = self.row_ids.get(path)
         if row:
             name = self.table.item(row, "values")[0]
-            self.table.item(row, values=(name, LABELS[status], detail), tags=(status,))
-            self.table.see(row)
+            striped = "stripe" in self.table.item(row, "tags")
+            values = name, LABELS[status], detail
+            self.table.item(row, values=values, tags=(status, "stripe") if striped else (status,))
+            self.row_statuses[path] = status
+            wanted = FILTERS.get(self.status_filter.get())
+            query = _search_text(self.search_query.get().strip())
+            matches = (wanted is None or status == wanted) and query in _search_text(" ".join(values))
+            changed = False
+            if matches and row not in self._visible_rows:
+                # Restore the original scan order without redrawing unrelated
+                # rows on each worker event (large batches must stay responsive).
+                position = 0
+                for identifier in self.row_ids.values():
+                    if identifier == row:
+                        break
+                    position += identifier in self._visible_rows
+                self.table.move(row, "", position)
+                self._visible_rows.add(row)
+                changed = True
+            elif not matches and row in self._visible_rows:
+                self.table.detach(row)
+                self._visible_rows.remove(row)
+                changed = True
+            if changed:
+                self._refresh_list_state()
+            if matches:
+                self.table.see(row)
 
     def _append_log(self, message):
         self.log_box.configure(state="normal")
@@ -398,22 +513,22 @@ class GokworksPdfApp(ctk.CTk):
         if folder and Path(folder).is_dir():
             try:
                 os.startfile(folder)
-            except OSError as error:
+            except (OSError, AttributeError) as error:
                 self.status_label.configure(text=f"Klasör açılamadı: {error}", text_color=RED)
         else:
-            self.status_label.configure(text="PDF kayıt klasörü henüz oluşturulmadı.", text_color=AMBER)
+            self.status_label.configure(text="Çıktı kayıt klasörü henüz oluşturulmadı.", text_color=AMBER)
 
     def _save_report(self):
         if not self.results:
             return
         path = filedialog.asksaveasfilename(parent=self, title="Aktarım raporunu kaydet",
-                                           initialfile=f"GOKWORKS_PDF_{datetime.now():%Y%m%d_%H%M}.csv",
+                                           initialfile=f"GOKWORKS_{self.mode.upper()}_{datetime.now():%Y%m%d_%H%M}.csv",
                                            defaultextension=".csv", filetypes=[("CSV raporu", "*.csv")])
         if path:
             try:
                 with open(path, "w", newline="", encoding="utf-8-sig") as stream:
                     writer = csv.writer(stream, delimiter=";")
-                    writer.writerow(("Kaynak", "PDF", "Durum", "Açıklama"))
+                    writer.writerow(("Kaynak", "PDF" if self._is_pdf else "DXF / DWG", "Durum", "Açıklama"))
                     for result in self.results:
                         writer.writerow((result["source"], result["output"], LABELS[result["status"]], result["detail"]))
                 self._append_log(f"Rapor kaydedildi: {path}")
@@ -431,9 +546,10 @@ class GokworksPdfApp(ctk.CTk):
         elif state == "cancelled":
             text, color = f"Durduruldu · {summary['processed']} / {summary['total']} dosya işlendi.", AMBER
         elif state == "empty":
-            text, color = "Bu klasörde .SLDDRW dosyası bulunamadı.", AMBER
+            text, color = f"Bu klasörde {self._extension} dosyası bulunamadı.", AMBER
         else:
-            text = f"Tamamlandı · {summary['succeeded']} PDF, {summary['skipped']} atlanan, {summary['failed']} hatalı."
+            unit = "PDF" if self._is_pdf else "parça"
+            text = f"Tamamlandı · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
             color = AMBER if summary["failed"] else GREEN
         self.status_label.configure(text=text, text_color=color)
         self._append_log(text)
@@ -456,7 +572,10 @@ class GokworksPdfApp(ctk.CTk):
                     self.status_label.configure(text=f"Aktarılıyor · {Path(value).name}")
                 elif event == "result":
                     self.results.append(value)
-                    self._update_row(value["source"], value["status"], value["detail"])
+                    detail = value["detail"]
+                    if not self._is_pdf and value.get("thickness_mm") is not None and value.get("quantity") is not None:
+                        detail = f"{value['thickness_mm']:g} mm · {value['quantity']} adet · {detail}"
+                    self._update_row(value["source"], value["status"], detail)
                     self._append_log(f"{LABELS[value['status']]} · {Path(value['source']).name} · {value['detail']}")
                 elif event == "counts":
                     for key in ("succeeded", "skipped", "failed"):
@@ -470,7 +589,7 @@ class GokworksPdfApp(ctk.CTk):
                     self._set_busy(False)
                     if event == "preview":
                         self._fill_files(value)
-                        text = f"{len(value)} teknik resim bulundu. Aktarım için hazır."
+                        text = f"{len(value)} {self._file_label} bulundu. Aktarım için hazır."
                         if self.stop_event.is_set():
                             text = "Klasör taraması durduruldu."
                         self.status_label.configure(text=text, text_color=MUTED)
@@ -501,6 +620,7 @@ class GokworksPdfApp(ctk.CTk):
         if layout_fit is not None:
             self.after_cancel(layout_fit)
         self.after_cancel(self._poll_id)
+        self._cancel_widget_callbacks(self)
         self.destroy()
 
 
