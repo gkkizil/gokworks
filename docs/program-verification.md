@@ -1,6 +1,6 @@
 # Tüm programın yeniden doğrulanması
 
-**240 test başarılı, 0 başarısız, 0 atlanan.** [Güncel montaj uyumu kontrolü ve Word raporu](reports/fit-compatibility/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/fit-compatibility/test-run.log) kaydedildi.
+**261 test başarılı, 0 başarısız, 0 atlanan.** [Güncel geometrik tolerans kontrolü ve Word raporu](reports/geometric-tolerances/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/geometric-tolerances/test-run.log) kaydedildi.
 
 ## Kapsam
 
@@ -8,9 +8,10 @@
 | --- | ---: | --- |
 | DXF/DWG | 69 | Geometri/büküm seçenekleri, parça arayüzü, kalınlık, dosya adı, alt montajların toplam adedi, bastırma, konfigürasyon ve Unicode yol ayrımı, SpeedPak/yüklenmemiş bileşenler, dosya koruma, durdurma ve COM temizliği. Yanlış belge, uzun dosya adı ve bozuk ASCII/ikili DXF de sınandı. |
 | PDF | 34 | Tüm sayfalar, tek sayfa, teknik resim arayüzü, açık/kapalı belgeler, aktivasyon ve önceki belgeye dönüş, BYREF bağlama, kesilmiş çıktı, üzerine yazma, yarışan hedef ve hata sonrası devam. |
-| Gerçek Tk arayüzü | 68 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
+| Gerçek Tk arayüzü | 79 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
 | K/R hesaplama ve uygulama | 39 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
 | ISO delik/mil hesabı | 22 | Çap sınırları, 198 eşleşme, limitler, yarım mikrometre, işaret/sınıflama, geçersiz giriş ve bağımsız tablo örnekleri. 9 ISO ve 10 manuel ISO GUI testi üstteki GUI sayısına dahildir. Manuel tek/bilateral toleranslar, ölçülen noktalar, eşleşme farkları ve geçersiz limitler de sınandı. |
+| Geometrik tolerans belirtimi | 10 | Toplam genişlik/çap ayrımı, datum gerekliliği, 1 nm eşik, geçersiz girişler, sayı sınırları ve içerik ayrımları. 11 ek GUI testi üstteki GUI sayısına dahildir. |
 | Ayarlar | 4 | JSON ve Türkçe karakterler, bozuk/okunamayan dosyadan güvenli dönüş, başarısız kayıt sırasında eski ayarların korunması. |
 | SolidWorks bağlantısı | 3 | Çalışan oturuma bağlanma, oturum bulunamaması ve pywin32 eksikliği. |
 | Giriş noktası | 1 | `main.py` uygulama giriş fonksiyonunu çağırıyor. |
@@ -127,3 +128,7 @@ Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT
 ## Montaj uyumu kontrolü
 
 240 test geçti; 68 GUI testi. 6 hesap ve 4 arayüz testi daha eklendi. Montaj hedefleri tüm ölçü limitlerine göre değerlendirilir; referans çift/yaygın geçme, gerçek geçme türünün yerine kullanılmaz. Mil ±0,1, delik +0/−0,05 örneğinde −0,15…+0,10 mm ara geçme; tüm parçalarda serbest veya tüm parçalarda sıkı geçme garantisi yok. [Yeni kaynak hashleri, ekran ve Word raporu](reports/fit-compatibility/README.md).
+
+## Geometrik toleranslar / GD&T
+
+261 test geçti; 79 gerçek Tk GUI testi. ASME 2018 belgesine göre 12 güncel özellik ve iki engellenen eski kart, Rule #1/Rule #2, vektör şemaları, datum/çerçeve, ölçüm/üretim açıklamaları, açık tolerans ve toplam hata karşılaştırması, arama/CSV/pano/tercihler/rehber ve iki tema × beş boyut/ölçek sınandı. FreeCAD-GDT ile 14 özellik adı eşleştirildi; kaynak uygulama çalıştırılmadı. ASME belgesinin ilgili bölümleri incelendi; belge/figürleri GitHub’a yayımlanmadı. R2024 yalnızca dosya adında görüldü; kurallar kapakta doğrulanan 2018 baskısından alındı. [Yeni kanıtlar ve Word raporu](reports/geometric-tolerances/README.md), [belirtim sınırları](geometric-tolerances.md).

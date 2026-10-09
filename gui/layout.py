@@ -16,6 +16,8 @@ class WorkspaceLayout:
             self._build_sidebar()
         if self.mode == 'iso_fits':
             return self._build_iso_workspace()
+        if self.mode == 'geometric_tolerances':
+            return self._build_gdt_workspace()
         self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
                                       border_width=1, border_color=BORDER)
         self.workspace.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
@@ -63,6 +65,7 @@ class WorkspaceLayout:
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
             ("k_factor", "K FAKTÖR - RADIUS", "tools"),
             ("iso_fits", "ISO GEÇMELERİ", "ruler"),
+            ("geometric_tolerances", "GEOMETRİK TOL.", "ruler"),
         )):
             active = key == self.mode
             button = ctk.CTkButton(
@@ -340,7 +343,7 @@ class WorkspaceLayout:
         style.map("Gok.Treeview", background=[("selected", color(ACCENT_BG))],
                   foreground=[("selected", color(TEXT))])
         tables = {page['table'] for page in self._pages.values() if 'table' in page}
-        if self.mode != 'iso_fits':
+        if self.mode not in ('iso_fits', 'geometric_tolerances'):
             tables.add(self.table)
         for table in tables:
             table.column("status", width=round(108 * scale), minwidth=round(80 * scale))

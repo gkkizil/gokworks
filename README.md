@@ -1,6 +1,6 @@
 # GOKWORKS
 
-SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir.
+SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir; geometrik toleransları ASME GD&T rehberiyle açıklar.
 
 ## Windows'ta çalıştırma
 
@@ -16,7 +16,7 @@ Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çal
 
 ## Arayüz ve temalar
 
-Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi dört ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
+Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi beş ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
 
 - Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
 - **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** yalnızca liste filtrelerini kaldırır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
@@ -41,6 +41,14 @@ Yeni sekme etkin: malzeme ailesi, üst bıçak uç R/açı ve alt kalıp V/açı
 **Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir. Seçilen malzeme bütün saclar için varsayılır; CAD malzemesi değişmez.
 
 Genel tablo ve yaklaşık R hesabı üretim kalibrasyonu değildir. Bu sürüm havada büküm içindir; gauge/malzeme tablosuna bağlı veya özel büküm override'ı olan parçalar açıklamalı hata alır. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
+
+## Geometrik toleranslar / GD&T
+
+**GEOMETRİK TOL.** sekmesinde 12 güncel ASME özelliği ve iki kaldırılmış sembol için eğitim kartları; vektör semboller ve bölge şemaları, datum ilişkisi, ölçüm yöntemi ve üretim notları gösterilir. Türkçe/İngilizce arama, açık/koyu tema, örnek datum sırası, CSV/pano ve ASME Y14.5-2018 okuma rehberi vardır. Tasarımcı **toplam t** değerini girer; boyut veya f/m/c/v sınıfından geometrik değer üretilmez.
+
+Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal mesafedir; ±0,3 mm değildir. Konum **Ø0,3 mm** için radyal pay 0,15 mm'dir. İsteğe bağlı ölçülmüş toplam hata, hata ≤ t aritmetiğiyle karşılaştırılır; tek çap ölçüsü, CMM analizi veya belirsizlikli kalite kabulü veya tam ASME model/resim kontrolü değildir. Normal yüzey formunda ilgili boyut toleransı girilirse t < boyut toleransı koşulu kontrol edilir (8.4). CAD modeline tolerans yazılmaz.
+
+[Kullanım, ASME belge bölümleri ve FreeCAD-GDT karşılaştırması](docs/geometric-tolerances.md). Gerçek ekranlar: [koyu](docs/reports/geometric-tolerances/screenshots/gdt-dark.png), [açık](docs/reports/geometric-tolerances/screenshots/gdt-light.png), [konum / A-B-C](docs/reports/geometric-tolerances/screenshots/gdt-position-dark.png).
 
 ## Sac metal açınımı
 
@@ -104,7 +112,7 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son kapsamlı kontrolde **240 test geçti**; 68 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/fit-compatibility/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son kapsamlı kontrolde **261 test geçti**; 79 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/geometric-tolerances/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 
@@ -125,3 +133,5 @@ ISO eklemesinden sonra **216 test / 58 GUI testi** geçti; 3217 sayısal kaynak 
 Manuel ISO eklemesinden sonra **230 test / 64 GUI testi** geçti. Delik 50 +0,02/0 ve mil 50 0/−0,02 için 0–0,04 mm boşluk; kayar geçme adayı/sınırda temas sonucu verir. [Güncel manuel ISO raporu](docs/reports/manual-iso/README.md).
 
 Montaj uyumu eklemesinden sonra **240 test / 68 GUI testi** geçti. Mil 50 ±0,1; delik 50 +0/−0,05 mm örneği −0,15…+0,10 mm ara geçme verir. [Güncel uyumluluk ekranı](docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [Word/test raporu](docs/reports/fit-compatibility/README.md).
+
+Geometrik tolerans eklemesinden sonra **261 test / 79 GUI testi** geçti. [Son Word raporu ve yedi gerçek ekran](docs/reports/geometric-tolerances/README.md). Önceki raporlar tarihsel kayıt olarak korunur.

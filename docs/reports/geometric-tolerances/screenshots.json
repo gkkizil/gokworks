@@ -1,0 +1,148 @@
+[
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-dark.png",
+    "sha256": "a30d5614a33ca8bccebbe454b471c99a95f71a084a6316ebad790092326aef59",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "cylindricity",
+    "name": "Silindiriklik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-light.png",
+    "sha256": "bc35e351cfedae09396f11b6a529c4a9383fe20973f41e603ae1a5f6c9d9cf3e",
+    "theme": "Açık",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "cylindricity",
+    "name": "Silindiriklik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-position-dark.png",
+    "sha256": "636c01038e21fc03349bceb52984ecc920e85a7c84530333984d2f8b497f0cba",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "position",
+    "name": "Konum",
+    "tolerance_mm": "0,3",
+    "datum": [
+      "A",
+      "B",
+      "C"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-total-runout-dark.png",
+    "sha256": "63dd0f800e0d47df71d65415b988e6fd330d2040532130e81e8f2867b05f6a14",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "total_runout",
+    "name": "Toplam Salgı",
+    "tolerance_mm": "0,05",
+    "datum": [
+      "A"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-measurement-dark.png",
+    "sha256": "21eed0a81e12c6dd4d6df6f80ccfc266bda681757858509dddcd8def79414a93",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "flatness",
+    "name": "Düzlemsellik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "0,1",
+    "measured_error_mm": "0,050001",
+    "view": "Ölçüm karşılaştırması",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-small-dark.png",
+    "sha256": "640be4014189c57171508fd1136b19a9a2c38b785b5fcd38a430ec8c3e404cc0",
+    "theme": "Koyu",
+    "size": [
+      1000,
+      690
+    ],
+    "kind": "circularity",
+    "name": "Dairesellik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/geometric-tolerances/screenshots/gdt-legacy-dark.png",
+    "sha256": "0f6163bc302b216ca47196bf8856048989f7b79b1f6155d5055c95665ded5889",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "concentricity",
+    "name": "Eş Merkezlilik (eski)",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": false,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  }
+]

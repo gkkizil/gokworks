@@ -17,6 +17,7 @@ from pdf.settings import load_settings, save_settings, SETTINGS_PATH
 from gui.layout import WorkspaceLayout
 from k_factor.window import KFactorView
 from iso_fits.window import IsoFitsView
+from geometric_tolerances.window import GeometricTolerancesView
 from gui.icons import make_icon
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
@@ -31,7 +32,9 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _GDT_PAGE_ATTRIBUTES = ('workspace', 'gdt_state', 'gdt_widgets', 'gdt_result',
+                            'gdt_search', 'status_label')
     _ISO_PAGE_ATTRIBUTES = ('workspace', 'iso_state', 'iso_widgets', 'iso_result',
                             'iso_search', 'status_label')
     _PAGE_ATTRIBUTES = (
@@ -110,7 +113,7 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
         return "teknik resim" if self._is_pdf else "parça"
 
     def _switch_mode(self, mode):
-        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits"):
+        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances"):
             return
         self._save_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
@@ -135,9 +138,12 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
         self._resize_pdf_area()
         if self.mode == 'iso_fits':
             self._draw_iso_diagram()
+        elif self.mode == 'geometric_tolerances':
+            self._draw_gdt_diagram()
 
     def _remember_page(self):
-        attributes = self._ISO_PAGE_ATTRIBUTES if self.mode == 'iso_fits' else self._PAGE_ATTRIBUTES
+        attributes = (self._GDT_PAGE_ATTRIBUTES if self.mode == 'geometric_tolerances' else
+                      self._ISO_PAGE_ATTRIBUTES if self.mode == 'iso_fits' else self._PAGE_ATTRIBUTES)
         self._pages[self.mode] = {name: getattr(self, name) for name in attributes}
 
     def _create_page_state(self):
@@ -157,6 +163,8 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
             self._create_k_state(saved)
         elif self.mode == 'iso_fits':
             self._create_iso_state(saved)
+        elif self.mode == 'geometric_tolerances':
+            self._create_gdt_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -180,7 +188,7 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
                 fg_color=ACCENT_BG if active else "transparent",
                 hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
                 text_color=ACCENT if active else MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "ruler"}[key],
                                  ACCENT if active else MUTED),
                 border_width=1 if active else 0,
                 font=ctk.CTkFont(family=UI_FONT, size=14, weight="bold" if active else "normal"),
@@ -227,9 +235,14 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
         self._configure_table_style()
         if self.mode == 'iso_fits':
             self._draw_iso_diagram()
+        elif self.mode == 'geometric_tolerances':
+            self._draw_gdt_diagram()
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if self.mode == 'geometric_tolerances':
+            self.gdt_widgets['search'].focus_set()
+            return 'break'
         if self.mode == 'iso_fits':
             key = 'hole_upper' if self.iso_state['method'].get() == 'Manuel kontrol' else 'search'
             self.iso_widgets[key].focus_set()
@@ -323,11 +336,12 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
         self.detail_window = None
 
     def _resize_pdf_area(self, event=None):
-        if self.mode == 'iso_fits':
+        if self.mode in ('iso_fits', 'geometric_tolerances'):
             previous = getattr(self, '_layout_fit_id', None)
             if previous is not None:
                 self.after_cancel(previous)
-            self._layout_fit_id = self.after(150, self._resize_iso_workspace)
+            callback = self._resize_iso_workspace if self.mode == 'iso_fits' else self._resize_gdt_workspace
+            self._layout_fit_id = self.after(150, callback)
             return
         self.status_label.configure(wraplength=max(240, self.workspace.winfo_width() - 56))
         previous = getattr(self, "_layout_fit_id", None)
@@ -395,6 +409,11 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
     def _save_preferences(self):
         try:
             saved = load_settings(self.settings_path)
+            if self.mode == 'geometric_tolerances':
+                saved.update({f'gdt_{key}': value.get() for key, value in self.gdt_state.items() if key != 'measured'})
+                saved['appearance'] = 'dark' if self.theme_mode.get() == 'Koyu' else 'light'
+                save_settings(saved, self.settings_path)
+                return
             if self.mode == 'iso_fits':
                 saved.update({f'iso_{key}': value.get() for key, value in self.iso_state.items()})
                 saved['appearance'] = 'dark' if self.theme_mode.get() == 'Koyu' else 'light'
@@ -415,7 +434,7 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
                               "dxf_dwg_bend_lines": self.bend_lines.get()})
             save_settings(saved, self.settings_path)
         except OSError as error:
-            if self.mode == 'iso_fits':
+            if self.mode in ('iso_fits', 'geometric_tolerances'):
                 self.status_label.configure(text=f'Tercihler kaydedilemedi: {error}', text_color=RED)
             else:
                 self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")

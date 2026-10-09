@@ -1,0 +1,11 @@
+{
+  "file": "GOKWORKS_Geometrik_Tolerans_Raporu_2026-10-09.docx",
+  "sha256": "9ce1231d98fd2e0dd07c3db4860bb530ff3de0c6a9ad17d630994f15d8c88e30",
+  "bytes": 247635,
+  "tests": 261,
+  "gui_tests": 79,
+  "embedded_images": 7,
+  "zip_crc_ok": true,
+  "python_docx_readback_ok": true,
+  "native_word_render_verified": false
+}

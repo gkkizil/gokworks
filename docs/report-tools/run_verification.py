@@ -72,7 +72,7 @@ def main():
     started = datetime.now(timezone.utc)
     suite = unittest.defaultTestLoader.discover(str(ROOT/'tests'))
     result = unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult).run(suite)
-    files = [ROOT/'main.py'] + [file for name in ('gui', 'pdf', 'dxf_dwg', 'solidworks', 'k_factor', 'iso_fits')
+    files = [ROOT/'main.py'] + [file for name in ('gui', 'pdf', 'dxf_dwg', 'solidworks', 'k_factor', 'iso_fits', 'geometric_tolerances')
                               for file in (ROOT/name).rglob('*.py')]
     test_files = list((ROOT/'tests').rglob('*.py'))
     files.append(ROOT/'iso_fits/tables.json')
