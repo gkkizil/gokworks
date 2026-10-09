@@ -1,6 +1,6 @@
 # Tüm programın yeniden doğrulanması
 
-**199 test başarılı, 0 başarısız, 0 atlanan.** [Güncel GitHub karşılaştırması, GUI matrisi ve Word raporu](reports/final-audit/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/final-audit/test-run.log) kaydedildi.
+**216 test başarılı, 0 başarısız, 0 atlanan.** [Güncel ISO karşılaştırması, GUI kontrolü ve Word raporu](reports/iso-fits/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/iso-fits/test-run.log) kaydedildi.
 
 ## Kapsam
 
@@ -8,8 +8,9 @@
 | --- | ---: | --- |
 | DXF/DWG | 69 | Geometri/büküm seçenekleri, parça arayüzü, kalınlık, dosya adı, alt montajların toplam adedi, bastırma, konfigürasyon ve Unicode yol ayrımı, SpeedPak/yüklenmemiş bileşenler, dosya koruma, durdurma ve COM temizliği. Yanlış belge, uzun dosya adı ve bozuk ASCII/ikili DXF de sınandı. |
 | PDF | 34 | Tüm sayfalar, tek sayfa, teknik resim arayüzü, açık/kapalı belgeler, aktivasyon ve önceki belgeye dönüş, BYREF bağlama, kesilmiş çıktı, üzerine yazma, yarışan hedef ve hata sonrası devam. |
-| Gerçek Tk arayüzü | 49 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
+| Gerçek Tk arayüzü | 58 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
 | K/R hesaplama ve uygulama | 39 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
+| ISO delik/mil hesabı | 8 | Çap sınırları, 198 eşleşme, limitler, yarım mikrometre, işaret/sınıflama, geçersiz giriş ve bağımsız tablo örnekleri. 9 ISO GUI testi üstteki GUI sayısına dahildir. |
 | Ayarlar | 4 | JSON ve Türkçe karakterler, bozuk/okunamayan dosyadan güvenli dönüş, başarısız kayıt sırasında eski ayarların korunması. |
 | SolidWorks bağlantısı | 3 | Çalışan oturuma bağlanma, oturum bulunamaması ve pywin32 eksikliği. |
 | Giriş noktası | 1 | `main.py` uygulama giriş fonksiyonunu çağırıyor. |
@@ -114,3 +115,7 @@ Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT
 ## Son kaynak ve GUI denetimi
 
 199 test geçti. Beş PDF regresyon testi ve beş GUI testi eklendi. Yanlış kaynak/aktif çizim, uzun geçici ad, hedef klasörü ve COM kapanış hatası düzeltildi. Sonuç sekmesi değişimi yeniden ölçülüyor; ilk pencere desteklenen ekran ölçüsüne göre açılıyor. 112 yerleşim senaryosu, 144 menü seçimi ve 108 dış BA hesap karşılaştırması geçti. [Kaynaklar, görüntüler ve kapsam sınırları](reports/final-audit/README.md).
+
+## ISO geçmeleri eklemesi
+
+216 test geçti; 58 gerçek GUI testi. ISO GEÇMELERİ için 8 hesap ve 9 arayüz testi eklendi. 1–400 mm, 11 delik / 18 mil sınıfı; tam sayı nm sapmaları ve Decimal hesap. 3217 kaynak kontrolünde bilinen F8 ≤3 mm kaynak hatasından iki fark kaydedildi; 0 beklenmeyen fark. Resmî ISO metnine ağ erişimi engellendi; uygulama ISO sertifikası iddia etmez. [Hesap, kaynaklar ve kapsam](iso-fits.md), [güncel kanıtlar](reports/iso-fits/README.md).

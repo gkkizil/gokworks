@@ -16,6 +16,7 @@ from dxf_dwg.exporter import export_parts, find_parts
 from pdf.settings import load_settings, save_settings, SETTINGS_PATH
 from gui.layout import WorkspaceLayout
 from k_factor.window import KFactorView
+from iso_fits.window import IsoFitsView
 from gui.icons import make_icon
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
@@ -30,7 +31,9 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
+class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _ISO_PAGE_ATTRIBUTES = ('workspace', 'iso_state', 'iso_widgets', 'iso_result',
+                            'iso_search', 'status_label')
     _PAGE_ATTRIBUTES = (
         "source_folder", "output_folder", "include_subfolders", "overwrite_existing",
         "output_format", "bend_lines", "controls", "results", "row_ids", "stat_values",
@@ -107,7 +110,7 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
         return "teknik resim" if self._is_pdf else "parça"
 
     def _switch_mode(self, mode):
-        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor"):
+        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits"):
             return
         self._save_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
@@ -130,9 +133,12 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
         self.workspace.bind("<Configure>", self._resize_pdf_area)
         self._update_navigation()
         self._resize_pdf_area()
+        if self.mode == 'iso_fits':
+            self._draw_iso_diagram()
 
     def _remember_page(self):
-        self._pages[self.mode] = {name: getattr(self, name) for name in self._PAGE_ATTRIBUTES}
+        attributes = self._ISO_PAGE_ATTRIBUTES if self.mode == 'iso_fits' else self._PAGE_ATTRIBUTES
+        self._pages[self.mode] = {name: getattr(self, name) for name in attributes}
 
     def _create_page_state(self):
         saved = load_settings(self.settings_path)
@@ -149,6 +155,8 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
         self.k_state = self.k_widgets = self.k_calculation_label = None
         if self.mode == "k_factor":
             self._create_k_state(saved)
+        elif self.mode == 'iso_fits':
+            self._create_iso_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -172,7 +180,7 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
                 fg_color=ACCENT_BG if active else "transparent",
                 hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
                 text_color=ACCENT if active else MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler"}[key],
                                  ACCENT if active else MUTED),
                 border_width=1 if active else 0,
                 font=ctk.CTkFont(family=UI_FONT, size=14, weight="bold" if active else "normal"),
@@ -217,9 +225,14 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
         self.theme_mode.set(selection)
         ctk.set_appearance_mode("dark" if selection == "Koyu" else "light")
         self._configure_table_style()
+        if self.mode == 'iso_fits':
+            self._draw_iso_diagram()
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if self.mode == 'iso_fits':
+            self.iso_widgets['search'].focus_set()
+            return 'break'
         self.result_tabs.set("Dosyalar")
         self.search_entry.focus_set()
         return "break"
@@ -309,6 +322,12 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
         self.detail_window = None
 
     def _resize_pdf_area(self, event=None):
+        if self.mode == 'iso_fits':
+            previous = getattr(self, '_layout_fit_id', None)
+            if previous is not None:
+                self.after_cancel(previous)
+            self._layout_fit_id = self.after(150, self._resize_iso_workspace)
+            return
         self.status_label.configure(wraplength=max(240, self.workspace.winfo_width() - 56))
         previous = getattr(self, "_layout_fit_id", None)
         if previous is not None:
@@ -375,6 +394,11 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
     def _save_preferences(self):
         try:
             saved = load_settings(self.settings_path)
+            if self.mode == 'iso_fits':
+                saved.update({f'iso_{key}': value.get() for key, value in self.iso_state.items()})
+                saved['appearance'] = 'dark' if self.theme_mode.get() == 'Koyu' else 'light'
+                save_settings(saved, self.settings_path)
+                return
             if self.mode == "k_factor":
                 saved.update({f"kr_{key}": value.get() for key, value in self.k_state.items() if key != "save"})
                 saved["appearance"] = "dark" if self.theme_mode.get() == "Koyu" else "light"
@@ -390,7 +414,10 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
                               "dxf_dwg_bend_lines": self.bend_lines.get()})
             save_settings(saved, self.settings_path)
         except OSError as error:
-            self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
+            if self.mode == 'iso_fits':
+                self.status_label.configure(text=f'Tercihler kaydedilemedi: {error}', text_color=RED)
+            else:
+                self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
 
     def _set_busy(self, value):
         self.busy = value

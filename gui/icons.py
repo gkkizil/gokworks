@@ -42,6 +42,10 @@ def _draw_icon(name, color):
         line([(3, 8), (12, 3), (21, 8), (12, 13), (3, 8)])
         line([(3, 12), (12, 17), (21, 12)])
         line([(3, 16), (12, 21), (21, 16)])
+    elif name == 'ruler':
+        box((3, 7, 21, 17), radius=1)
+        for x in (7, 11, 15, 19):
+            line([(x, 7), (x, 11 if x % 8 == 7 else 13)])
     elif name == "tools":
         line([(4, 4), (20, 20)])
         line([(4, 20), (20, 4)])

@@ -72,9 +72,10 @@ def main():
     started = datetime.now(timezone.utc)
     suite = unittest.defaultTestLoader.discover(str(ROOT/'tests'))
     result = unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult).run(suite)
-    files = [ROOT/'main.py'] + [file for name in ('gui', 'pdf', 'dxf_dwg', 'solidworks', 'k_factor')
+    files = [ROOT/'main.py'] + [file for name in ('gui', 'pdf', 'dxf_dwg', 'solidworks', 'k_factor', 'iso_fits')
                               for file in (ROOT/name).rglob('*.py')]
     test_files = list((ROOT/'tests').rglob('*.py'))
+    files.append(ROOT/'iso_fits/tables.json')
     data = {
         'started_utc': started.isoformat(), 'finished_utc': datetime.now(timezone.utc).isoformat(),
         'platform': platform.platform(), 'python': platform.python_version(),
@@ -88,7 +89,7 @@ def main():
         'tests': result.records, 'subcases': result.subcases,
         'sha256': {str(file.relative_to(ROOT)): hashlib.sha256(file.read_bytes()).hexdigest()
                    for file in files + test_files},
-        'lines': {label: sum(len(file.read_text().splitlines()) for file in selected)
+        'lines': {label: sum(len(file.read_text().splitlines()) for file in selected if file.suffix == '.py')
                   for label, selected in [('application', files), ('tests', test_files)]},
     }
     (folder/'gui-verification-results.json').write_text(json.dumps(data, ensure_ascii=False, indent=2, default=str), encoding='utf-8')

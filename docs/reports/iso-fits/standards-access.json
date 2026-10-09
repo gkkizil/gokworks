@@ -1,0 +1,20 @@
+{
+  "checked_utc": "2026-10-09T10:38:46.718897+00:00",
+  "records": [
+    {
+      "standard": "ISO 286-1:2010",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:286:-1:ed-2:v1:en",
+      "http_status": 403,
+      "reason": "HTTP Error 403: Forbidden",
+      "full_standard_text_reviewed": false
+    },
+    {
+      "standard": "ISO 286-2:2010",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:286:-2:ed-2:v1:en",
+      "http_status": 403,
+      "reason": "HTTP Error 403: Forbidden",
+      "full_standard_text_reviewed": false
+    }
+  ],
+  "note": "Kaydedilen ağ taslağı çalışma ortamına uygulanmış/yayımlanmış sayılmaz. HTTP erişim sonucu normatif metin/güncellik incelemesi değildir."
+}

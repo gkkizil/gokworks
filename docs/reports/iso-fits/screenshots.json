@@ -1,0 +1,77 @@
+[
+  {
+    "file": "docs/reports/iso-fits/screenshots/iso-light.png",
+    "sha256": "b364e3804f6243c737d1239b6b2f12b48a115431a9d4f5eb2d612ff38eb4ecd2",
+    "theme": "Açık",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H8",
+    "shaft": "f7",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/iso-fits/screenshots/iso-dark.png",
+    "sha256": "5ce4278b89c5db231f9c1bc747ec314943adc2bae8ec6288e8a5af002d858e7f",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H8",
+    "shaft": "f7",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/iso-fits/screenshots/iso-zones-dark.png",
+    "sha256": "7cbfcd9e34acb08c7308153fad70d76eb6713367c81eb03f6274f3064250a1e6",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H8",
+    "shaft": "f7",
+    "view": "Tolerans bölgeleri",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/iso-fits/screenshots/iso-transition-dark.png",
+    "sha256": "d258e371250f8f36e62f77daed21062906a8f04a294db2a2c054ecfe7cc968fd",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H7",
+    "shaft": "k6",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/iso-fits/screenshots/iso-interference-dark.png",
+    "sha256": "734694de16d95ca6f058b48f9e23706dd84b1f405dfff8bf258cadb7a2faeb7c",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H7",
+    "shaft": "p6",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  }
+]

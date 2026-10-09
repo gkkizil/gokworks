@@ -1,0 +1,5759 @@
+{
+  "started_utc": "2026-10-09T10:33:54.494227+00:00",
+  "finished_utc": "2026-10-09T10:35:13.289082+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "tk": "9.0.4",
+  "packages": {
+    "customtkinter": "6.0.0",
+    "Pillow": "12.1.0",
+    "ezdxf": "1.4.3",
+    "python-docx": "1.2.0"
+  },
+  "git_head": "45541bc23186abf61e9ec708fb9bab9d8891056c",
+  "working_tree_modified": true,
+  "tests_run": 216,
+  "successful": true,
+  "outcomes": {
+    "passed": 216
+  },
+  "modules": {
+    "test_dxf_dwg": 69,
+    "test_export_window": 22,
+    "test_final_gui": 5,
+    "test_gui_audit": 12,
+    "test_iso_fits": 17,
+    "test_k_factor": 34,
+    "test_manual_k_radius": 15,
+    "test_pdf_exporter": 34,
+    "test_settings_and_connection": 8
+  },
+  "tests": [
+    {
+      "id": "test_dxf_dwg.ExportTests.test_activation_failure_does_not_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001241
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_activation_returning_wrong_document_without_error_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000432
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_active_speedpak_configuration_rejects_incomplete_counts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000793
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_assembly_interface_cast",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000572
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_batch_continues_after_failed_part",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001078
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_batch_summary_and_com_cleanup",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.006885
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_both_formats_and_api_contract",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004749
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cached_com_application_converted_for_byref_outputs",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003137
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cancellation_between_parts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000953
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cancellation_during_count_ends_batch_without_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000593
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_com_cleanup_failure_is_reported_and_done_is_emitted",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003539
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_com_object_property_is_not_invoked",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000253
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_component_paths_normalize_windows_separators_and_case",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00021
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_configuration_mismatch_and_missing_thickness_never_guess",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00167
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_connection_failure_still_uninitializes_com",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000603
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_count_is_physical_not_visibility_or_bom",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000241
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_count_requires_active_assembly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00067
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000601
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_default_excludes_bend_lines",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003118
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_destination_directory_is_error_before_opening_or_exporting",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000535
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_distinct_unicode_component_paths_and_configurations_do_not_merge",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000288
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_dwg_only_export_does_not_need_dxf_reader",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00131
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_empty_and_precancelled_batch_do_not_connect",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000507
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_empty_or_malformed_dxf_and_bad_dwg_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003306
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_existing_inactive_part_activated_then_restored_without_closing",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003403
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001234
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_failed_overwrite_preserves_original_and_cleans_temp",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000801
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_feature_seen_as_child_does_not_truncate_top_level_chain",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000363
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_hidden_existing_part_visible_during_export_then_hidden",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003345
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_hidden_part_visibility_restored_on_export_failure",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000405
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_invalid_destination",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000402
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_invalid_numeric_dxf_coordinates_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001248
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_long_valid_destination_does_not_make_temporary_name_too_long",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003262
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_malformed_dxf_during_overwrite_preserves_previous_output",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000858
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_dxf_reader_errors_before_connecting",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000647
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000797
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000636
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_output_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000237
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_missing_source_and_invalid_formats",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000429
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_modeldoc_wrapper_casts_to_part_interface",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003534
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_multi_part_batch_keeps_each_models_thickness_and_quantity",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.007167
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_batch_uses_nested_total_for_both_formats",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004182
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_destination_directory_is_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000871
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000508
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_existing_output_skips_and_preserves_assembly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000826
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_named_partial_output_exports_only_missing_format",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001263
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_nested_assembly_occurrences_and_configuration_counts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000388
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000402
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_only_missing_format_exported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000457
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_open_document_with_wrong_path_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000268
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_open_failure_closes_owned_document",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000412
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_opened_document_closed_and_previous_restored",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00343
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_output_parent_file_is_an_error_not_a_skip",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000411
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_partial_success_reported_as_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004036
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_parts_outside_active_assembly_skip_without_opening",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000699
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_platform_requirement_is_explicit",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000345
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_preexisting_outputs_skip_without_opening_part",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000411
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_racing_target_is_not_overwritten",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003068
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.036032
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_same_named_documents_restored_by_full_path",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003546
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_scanning_filters_and_nested_paths",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000678
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_successful_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.004174
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_thickness_nested_active_feature_and_meter_conversion",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000346
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_truncated_binary_fixture_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000357
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unavailable_assembly_interface_and_root_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001392
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unavailable_part_interface_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000432
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unloaded_or_speedpak_subassembly_rejects_incomplete_count",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000657
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_unsaved_previous_document_restored_by_title",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003507
+    },
+    {
+      "id": "test_dxf_dwg.ExportTests.test_windows_publish_uses_rename_without_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000492
+    },
+    {
+      "id": "test_export_window.WindowTests.test_connection_failure_releases_controls_and_shows_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.357932
+    },
+    {
+      "id": "test_export_window.WindowTests.test_details_show_full_paths_and_copy_to_clipboard",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.310767
+    },
+    {
+      "id": "test_export_window.WindowTests.test_dxf_scan_and_navigation_locked_during_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.444727
+    },
+    {
+      "id": "test_export_window.WindowTests.test_empty_dxf_worker_message",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.459423
+    },
+    {
+      "id": "test_export_window.WindowTests.test_empty_list_hint_follows_scan_reset_and_independent_tabs",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.531152
+    },
+    {
+      "id": "test_export_window.WindowTests.test_filters_are_independent_between_modules",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.376218
+    },
+    {
+      "id": "test_export_window.WindowTests.test_full_dxf_worker_and_csv_report",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.407414
+    },
+    {
+      "id": "test_export_window.WindowTests.test_full_pdf_worker_and_turkish_csv_report",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.346535
+    },
+    {
+      "id": "test_export_window.WindowTests.test_invalid_source_and_output_keep_worker_idle",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.260537
+    },
+    {
+      "id": "test_export_window.WindowTests.test_minimum_window_size_keeps_controls_and_results_visible",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.214615
+    },
+    {
+      "id": "test_export_window.WindowTests.test_navigation_retains_independent_preferences",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.376692
+    },
+    {
+      "id": "test_export_window.WindowTests.test_pdf_scan_regression",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.445195
+    },
+    {
+      "id": "test_export_window.WindowTests.test_real_entrypoint_runs_tk_loop_and_closes_cleanly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.493276
+    },
+    {
+      "id": "test_export_window.WindowTests.test_report_write_failure_is_displayed",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.250719
+    },
+    {
+      "id": "test_export_window.WindowTests.test_rescan_deletes_detached_rows_and_resets_filters",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.256104
+    },
+    {
+      "id": "test_export_window.WindowTests.test_restart_loads_both_modules_and_rejects_invalid_format",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.64351
+    },
+    {
+      "id": "test_export_window.WindowTests.test_scaled_interface_keeps_table_text_and_icons_usable",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.421015
+    },
+    {
+      "id": "test_export_window.WindowTests.test_search_status_filters_and_live_results_keep_full_counts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.267584
+    },
+    {
+      "id": "test_export_window.WindowTests.test_source_dialog_filters_parts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.34227
+    },
+    {
+      "id": "test_export_window.WindowTests.test_stop_then_close_waits_for_active_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.332631
+    },
+    {
+      "id": "test_export_window.WindowTests.test_theme_change_while_busy_preserves_worker_controls",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.413047
+    },
+    {
+      "id": "test_export_window.WindowTests.test_themes_preserve_both_pages_and_reload_preference",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.74445
+    },
+    {
+      "id": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.853472
+    },
+    {
+      "id": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "status": "passed",
+      "detail": "",
+      "seconds": 23.728225
+    },
+    {
+      "id": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.833644
+    },
+    {
+      "id": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.315057
+    },
+    {
+      "id": "test_final_gui.FinalGUIAuditTests.test_startup_fits_supported_monitor_sizes_and_window_dpi",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.681555
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_browse_buttons_choose_and_cancel_in_both_modules",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.364574
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_ctrl_f_search_entry_and_clear_button_bindings",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.268058
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_declining_close_keeps_worker_and_window_alive",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.330909
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_dxf_option_widgets_and_start_button_reach_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.381807
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_filtered_csv_report_button_still_writes_all_results",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.258822
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "status": "passed",
+      "detail": "",
+      "seconds": 2.82804
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_mouse_double_click_and_escape_close_details",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.517525
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_output_folder_button_delegates_or_reports_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.286433
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_repeated_navigation_and_theme_buttons_keep_page_state",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.3302
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_scan_failure_releases_controls_and_reports_reason",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.408742
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_scan_stop_button_and_disabled_navigation",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.414219
+    },
+    {
+      "id": "test_gui_audit.GUIAuditTests.test_theme_selector_buttons_apply_and_save_choice",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.306467
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_both_views_and_three_sample_sizes",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.689243
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_csv_clipboard_cancel_and_write_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.622548
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_default_and_every_preset",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.71896
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_every_dropdown_item",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.877223
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_interference_and_transition_metrics",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.663594
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_invalid_input_clears_values_and_disables_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.656713
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_navigation_theme_and_preferences_after_restart",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.617872
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "status": "passed",
+      "detail": "",
+      "seconds": 15.951433
+    },
+    {
+      "id": "test_iso_fits.IsoGuiTests.test_search_sources_dialog_and_catalog_link",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.94407
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_all_pairs_sample_endpoints_stay_inside_limits",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.078568
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_classification_including_touching_and_diameter_dependent_presets",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000356
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000163
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001796
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_formats_keep_precision_and_units",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000161
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_half_micron_and_independent_table_values",
+      "status": "passed",
+      "detail": "",
+      "seconds": 8.8e-05
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000402
+    },
+    {
+      "id": "test_iso_fits.IsoRulesTests.test_known_h8_f7_limits_and_clearances",
+      "status": "passed",
+      "detail": "",
+      "seconds": 6.4e-05
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_apply_writes_metres_and_k_type_without_saving",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001166
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_batch_deduplicates_instances_and_restores_assembly",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001571
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_batch_nested_assembly_and_suppression",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000961
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_calibration_skips_wrong_thickness_and_continues_batch",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000907
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_cancel_after_current_part_keeps_next_part_unchanged",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000817
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_com_cleanup_error_still_sends_done",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000564
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_cross_configuration_propagation_rolls_back",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000743
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_explicit_save_and_existing_dirty_document_protection",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000869
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_failed_rollback_is_explicit_and_never_saved",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000476
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000749
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_missing_platform_cancel_and_invalid_assembly_always_finish",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000676
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_missing_sheet_feature_and_inaccessible_suppression_fail",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000243
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.003064
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_multiple_configurations_restore_active_and_preserve_other",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000534
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_newly_opened_preview_closes_but_unsaved_apply_stays_open",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000547
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_non_sheet_and_multi_body_parts",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000191
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_preview_does_not_modify_or_save",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000644
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_selection_access_failure_does_not_change_model",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000552
+    },
+    {
+      "id": "test_k_factor.ApplyTests.test_wrong_activation_and_unknown_configuration_do_not_write",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000258
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000104
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000586
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_custom_tools_material_and_punch_dominance",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000157
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000341
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_independent_hand_calculation_90_degrees",
+      "status": "passed",
+      "detail": "",
+      "seconds": 5.4e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001916
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_measured_ba_calibration_and_table_difference",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000359
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_measured_outside_dimensions_and_blank_recover_ba",
+      "status": "passed",
+      "detail": "",
+      "seconds": 5.1e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_published_freecad_manual_example",
+      "status": "passed",
+      "detail": "",
+      "seconds": 3.4e-05
+    },
+    {
+      "id": "test_k_factor.CalculationTests.test_tool_angles_reject_incompatible_acute_bends",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000504
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_invalid_calculation_blocks_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.431058
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_measured_ba_and_outside_dimensions_calculator",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.430981
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_navigation_title_preferences_and_theme_persistence",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.600659
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_real_preview_and_apply_worker_result_events",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.569592
+    },
+    {
+      "id": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "status": "passed",
+      "detail": "",
+      "seconds": 2.175148
+    },
+    {
+      "id": "test_manual_k_radius.ManualApplyTests.test_exact_values_and_metres_written_without_changing_thickness",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000777
+    },
+    {
+      "id": "test_manual_k_radius.ManualApplyTests.test_manual_failure_uses_existing_verified_rollback",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000484
+    },
+    {
+      "id": "test_manual_k_radius.ManualApplyTests.test_mismatched_thickness_skips_even_gauge_override_without_save",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000356
+    },
+    {
+      "id": "test_manual_k_radius.ManualApplyTests.test_nested_batch_updates_and_saves_matching_parts_once",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001212
+    },
+    {
+      "id": "test_manual_k_radius.ManualApplyTests.test_only_matching_referenced_configuration_is_updated",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000562
+    },
+    {
+      "id": "test_manual_k_radius.ManualApplyTests.test_preview_does_not_modify",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000343
+    },
+    {
+      "id": "test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.587615
+    },
+    {
+      "id": "test_manual_k_radius.ManualGuiTests.test_manual_fields_scroll_into_view_and_actions_remain_visible",
+      "status": "passed",
+      "detail": "",
+      "seconds": 1.887647
+    },
+    {
+      "id": "test_manual_k_radius.ManualGuiTests.test_manual_preferences_reload_and_save_choice_starts_off",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.970096
+    },
+    {
+      "id": "test_manual_k_radius.ManualGuiTests.test_real_preview_apply_and_csv_report_from_gui",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.707785
+    },
+    {
+      "id": "test_manual_k_radius.ManualGuiTests.test_tabs_keep_independent_values_and_ignore_invalid_automatic_fields",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.484731
+    },
+    {
+      "id": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000314
+    },
+    {
+      "id": "test_manual_k_radius.ManualRulesTests.test_manual_assignment_is_independent_of_tool_catalogue",
+      "status": "passed",
+      "detail": "",
+      "seconds": 3.8e-05
+    },
+    {
+      "id": "test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00018
+    },
+    {
+      "id": "test_manual_k_radius.ManualRulesTests.test_user_values_and_decimal_comma_are_preserved",
+      "status": "passed",
+      "detail": "",
+      "seconds": 3.9e-05
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_activation_checks_returned_document_and_actual_active_document",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001053
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_activation_failure_prevents_export_and_restores_previous",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000436
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_all_sheets_and_pdf_api_contract",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000605
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_batch_continues_after_bad_drawing",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001438
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_batch_stop_between_drawings",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001641
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_batch_summary_com_and_output",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00116
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_cached_application_uses_late_binding_for_byref",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000448
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_cached_extension_uses_late_binding_for_saveas_byref",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000474
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_cleanup_failures_are_reported_without_losing_success",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000492
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_com_cleanup_failure_is_reported_and_worker_returns",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000844
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_com_object_property_does_not_call_default_member",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000331
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_competing_target_is_preserved",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000405
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_connection_failure_cleans_up_com",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000743
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_destination_failure_is_reported_per_drawing",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000655
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_drawing_interface_cast_for_sheet_names",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000659
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_empty_and_precancelled_do_not_connect",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001063
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_existing_output_skips_without_opening",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000307
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_failed_overwrite_keeps_original_and_cleans_temp",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000568
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_inactive_open_drawing_is_activated_then_previous_restored",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00043
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000448
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000892
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_missing_pywin32_returns_error_and_done",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000834
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_newly_opened_drawing_is_closed_and_previous_restored",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000452
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_open_and_save_warnings_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000651
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_open_error_closes_owned_document_without_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000358
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_pdf_target_directory_is_an_error_even_without_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000256
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_save_error_is_failure_even_if_api_returns_true",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000305
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_scan_and_destination_preserve_subfolders",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.00054
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_single_sheet_string",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000342
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_successful_overwrite",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000381
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_valid_long_pdf_name_uses_short_temporary_name",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000435
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_windows_publish_uses_rename_and_preserves_competing_target",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001071
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_wrong_document_and_missing_drawing_interface_are_reported",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000528
+    },
+    {
+      "id": "test_pdf_exporter.PdfTests.test_wrong_open_document_is_rejected_before_export",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000328
+    },
+    {
+      "id": "test_settings_and_connection.ConnectionTests.test_connects_to_existing_session_without_starting_solidworks",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000195
+    },
+    {
+      "id": "test_settings_and_connection.ConnectionTests.test_inactive_session_reports_actionable_error",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000753
+    },
+    {
+      "id": "test_settings_and_connection.ConnectionTests.test_missing_pywin32_reports_install_command",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.001068
+    },
+    {
+      "id": "test_settings_and_connection.EntryPointTests.test_main_script_calls_application_entrypoint",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000714
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_failed_publish_preserves_previous_settings",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000592
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000617
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_preferences_roundtrip_turkish_paths_and_independent_modules",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000254
+    },
+    {
+      "id": "test_settings_and_connection.SettingsTests.test_unreadable_settings_fall_back",
+      "status": "passed",
+      "detail": "",
+      "seconds": 0.000277
+    }
+  ],
+  "subcases": [
+    {
+      "test": "test_dxf_dwg.ExportTests.test_count_requires_active_assembly",
+      "parameters": {
+        "active": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_count_requires_active_assembly",
+      "parameters": {
+        "active": "<test_dxf_dwg.FakePart object at 0x7f26902f0c80>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "parameters": {
+        "path": "",
+        "config": "Default"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "parameters": {
+        "path": "/tmp/tmprrxgc6bm/source/part.SLDPRT",
+        "config": ""
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_cycle_and_missing_component_data_are_reported",
+      "parameters": {
+        "path": "/tmp/tmprrxgc6bm/other.step",
+        "config": "Default"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "resolve": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "resolve": 3
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "state": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "state": 4
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_failed_or_unresolved_components_reject_incomplete_count",
+      "parameters": {
+        "state": 5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "parameters": {
+        "content": "b'0\\nSECTION\\n2\\nENTITIES\\n0\\nLINE\\n10\\n0\\n20\\n0\\n11\\n10\\n21\\n20\\n0\\nEOF\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "parameters": {
+        "content": "b'2\\nENTITIES\\n0\\nLINE\\n10\\n0\\n20\\n0\\n11\\n10\\n21\\n20\\n0\\nENDSEC\\n0\\nEOF\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_dxf_section_end_and_invalid_group_codes_are_rejected",
+      "parameters": {
+        "content": "b'0\\nSECTION\\n2\\nENTITIES\\n0\\nLINE\\ninvalid\\n0\\n20\\n0\\n11\\n10\\n21\\n20\\n0\\nENDSEC\\n0\\nEOF\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f269030c8c0>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f269030da90>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f269030c7a0>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f269030c920>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_missing_invalid_or_ambiguous_thickness_is_rejected",
+      "parameters": {
+        "feature": "<test_dxf_dwg.FakeFeature object at 0x7f269030c5f0>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 0,
+        "quantity": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": Infinity,
+        "quantity": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 2,
+        "quantity": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 2,
+        "quantity": 1.5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_named_destinations_keep_decimals_and_subdirectories",
+      "parameters": {
+        "thickness": 2,
+        "quantity": true
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "parameters": {
+        "model": "<test_dxf_dwg.FakePart object at 0x7f269033c5c0>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "parameters": {
+        "model": "<test_dxf_dwg.FakePart object at 0x7f269033c710>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_non_sheet_metal_and_multi_body_rejected",
+      "parameters": {
+        "model": "<test_dxf_dwg.FakePart object at 0x7f269033c860>"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r12-asc.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r12-bin.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r2018-asc.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_dxf_dwg.ExportTests.test_real_r12_and_r2018_ascii_and_binary_fixtures_are_accepted",
+      "parameters": {
+        "path": "plate-r2018-bin.dxf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "material"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "punch"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "die"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "punch_angle"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "die_angle"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "thickness"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "angle"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "radius"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "method"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "ba"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "outside_a"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "outside_b"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Malzeme / Takım",
+        "field": "flat"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Manuel K / R",
+        "field": "manual_thickness"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Manuel K / R",
+        "field": "manual_k"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
+      "parameters": {
+        "assignment": "Manuel K / R",
+        "field": "manual_r"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1600x900",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "pdf",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "assignment": null,
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Malzeme / Takım",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Dosyalar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu",
+        "page": "k_factor",
+        "assignment": "Manuel K / R",
+        "result_tab": "Günlük"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "pdf",
+        "value": "Tüm durumlar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "pdf",
+        "value": "Bekleyen"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "pdf",
+        "value": "İşleniyor"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "pdf",
+        "value": "Başarılı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "pdf",
+        "value": "Atlanan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "pdf",
+        "value": "Hatalı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "value": "Tüm durumlar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "value": "Bekleyen"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "value": "İşleniyor"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "value": "Başarılı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "value": "Atlanan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "dxf_dwg",
+        "value": "Hatalı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Tüm durumlar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Bekleyen"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "İşleniyor"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Başarılı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Atlanan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Hatalı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Düşük karbonlu çelik — genel"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Paslanmaz çelik — genel"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Yumuşak alüminyum — genel"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "0.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "0.8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "1"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "1.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "3"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "4"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Otomatik (8 × t)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "10"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "12"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "16"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "20"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "24"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "32"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "40"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "50"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "63"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "80"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "100"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "30"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "60"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "85"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "88"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "90"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "30"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "60"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "85"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "88"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "90"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "Tablo"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "BA ölçümü"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "0.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "0.8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "1"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "1.2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "1.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "2.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "3"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "4"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "10"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "12"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "15"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Açık",
+        "page": "k_factor",
+        "value": "20"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "pdf",
+        "value": "Tüm durumlar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "pdf",
+        "value": "Bekleyen"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "pdf",
+        "value": "İşleniyor"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "pdf",
+        "value": "Başarılı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "pdf",
+        "value": "Atlanan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "pdf",
+        "value": "Hatalı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "value": "Tüm durumlar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "value": "Bekleyen"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "value": "İşleniyor"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "value": "Başarılı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "value": "Atlanan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "dxf_dwg",
+        "value": "Hatalı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Tüm durumlar"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Bekleyen"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "İşleniyor"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Başarılı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Atlanan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Hatalı"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Düşük karbonlu çelik — genel"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Paslanmaz çelik — genel"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Yumuşak alüminyum — genel"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "0.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "0.8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "1"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "1.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "3"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "4"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Otomatik (8 × t)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "10"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "12"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "16"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "20"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "24"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "32"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "40"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "50"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "63"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "80"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "100"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "30"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "60"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "85"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "88"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "90"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "30"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "60"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "85"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "88"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "90"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "Tablo"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "BA ölçümü"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "0.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "0.8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "1"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "1.2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "1.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "2.5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "3"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "4"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "10"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "12"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "15"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
+      "parameters": {
+        "theme": "Koyu",
+        "page": "k_factor",
+        "value": "20"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "parameters": {
+        "theme": "Açık",
+        "foreground": "#202937",
+        "background": "#FFFFFF"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "parameters": {
+        "theme": "Açık",
+        "foreground": "#687586",
+        "background": "#FFFFFF"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "parameters": {
+        "theme": "Açık",
+        "foreground": "#FFFFFF",
+        "background": "#177C65"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "parameters": {
+        "theme": "Koyu",
+        "foreground": "#ECF2F8",
+        "background": "#151F2A"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "parameters": {
+        "theme": "Koyu",
+        "foreground": "#A1B0C0",
+        "background": "#151F2A"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons",
+      "parameters": {
+        "theme": "Koyu",
+        "foreground": "#10231D",
+        "background": "#52DEBC"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_startup_fits_supported_monitor_sizes_and_window_dpi",
+      "parameters": {
+        "screen": [
+          1366,
+          768
+        ],
+        "scale": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_startup_fits_supported_monitor_sizes_and_window_dpi",
+      "parameters": {
+        "screen": [
+          1920,
+          1080
+        ],
+        "scale": 1.25
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_final_gui.FinalGUIAuditTests.test_startup_fits_supported_monitor_sizes_and_window_dpi",
+      "parameters": {
+        "screen": [
+          1920,
+          1080
+        ],
+        "scale": 1.5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Açık",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Açık",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Koyu",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1140x840",
+        "theme": "Koyu",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu",
+        "mode": "pdf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu",
+        "mode": "dxf_dwg"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1000x690",
+        "scale": 1,
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1240x860",
+        "scale": 1,
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1366x768",
+        "scale": 1,
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1400x900",
+        "scale": 1.25,
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
+      "parameters": {
+        "size": "1920x1080",
+        "scale": 1.5,
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_classification_including_touching_and_diameter_dependent_presets",
+      "parameters": {
+        "shaft": "h6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_classification_including_touching_and_diameter_dependent_presets",
+      "parameters": {
+        "shaft": "k6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_classification_including_touching_and_diameter_dependent_presets",
+      "parameters": {
+        "shaft": "p6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "parameters": {
+        "value": "1"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "parameters": {
+        "value": "3"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "parameters": {
+        "value": "3.000000001"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "parameters": {
+        "value": "50"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "parameters": {
+        "value": "50,000000001"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_comma_input_and_inclusive_upper_bound",
+      "parameters": {
+        "value": "400"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "H6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "H7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "H8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "H9"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "H11"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "F8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "G7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "JS7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "K7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "N7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "P7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "c11"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "d9"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "e8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "f7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "g6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "h5"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "h6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "h7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "h8"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "h9"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "h11"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "js6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "k6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "m6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "n6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "p6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "r6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_dataset_consistency_and_standard_it_widths",
+      "parameters": {
+        "code": "s6"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": true
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": ""
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "NaN"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "inf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "1e2"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "-1"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "0"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": ".9"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "400.000000001"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "500"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "50 mm"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "1,2.3"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "value": "50.0000000001"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "code": "h7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "code": "F7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "code": "Q7"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "code": "H18"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_iso_fits.IsoRulesTests.test_invalid_input_and_case_are_rejected",
+      "parameters": {
+        "code": "z9"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write",
+      "parameters": {
+        "flag": "gauge"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write",
+      "parameters": {
+        "flag": "material_link"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "modify_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "rebuild_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "readback_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values",
+      "parameters": {
+        "flag": "save_fail"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "parameters": {
+        "angle": 30
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "parameters": {
+        "angle": 45
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_angles_use_bend_rotation_not_inside_angle",
+      "parameters": {
+        "angle": 120
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 1.5
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 3
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 4
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_catalogue_selects_different_v_for_each_thickness",
+      "parameters": {
+        "t": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 2.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "aluminium",
+        "radius": 6.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 2.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "steel",
+        "radius": 6.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 2
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 2.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 6
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_generic_table_classes_and_boundaries",
+      "parameters": {
+        "material": "stainless",
+        "radius": 6.00001
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": true
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": false
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": "nan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": "inf"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": "x"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": 0
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "bad": -1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          2,
+          2,
+          0.4,
+          0
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          2,
+          2,
+          0.4,
+          180
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          2,
+          2,
+          1.1,
+          90
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "args": [
+          0,
+          2,
+          0.4,
+          90
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='unknown', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=4, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=40, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=8, die_opening_mm=None, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=0.2, angle_deg=90, calibration_thickness_mm=None, measured_ba_mm=None, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "ba": 0.1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_invalid_and_out_of_model_inputs_are_rejected",
+      "parameters": {
+        "ba": 30
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_measured_ba_calibration_and_table_difference",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=None, angle_deg=90, calibration_thickness_mm=2, measured_ba_mm=4.39822971502571, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.CalculationTests.test_measured_ba_calibration_and_table_difference",
+      "parameters": {
+        "recipe": "Recipe(material='steel', punch_radius_mm=1, die_opening_mm=None, measured_radius_mm=2, angle_deg=90, calibration_thickness_mm=3, measured_ba_mm=4.39822971502571, punch_angle_deg=85, die_angle_deg=85)"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1400x900",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
+      "parameters": {
+        "size": "1400x900",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply",
+      "parameters": {
+        "key": "manual_k",
+        "value": "1.01"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply",
+      "parameters": {
+        "key": "manual_k",
+        "value": ""
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply",
+      "parameters": {
+        "key": "manual_r",
+        "value": "0"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply",
+      "parameters": {
+        "key": "manual_thickness",
+        "value": "nan"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_manual_fields_scroll_into_view_and_actions_remain_visible",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_manual_fields_scroll_into_view_and_actions_remain_visible",
+      "parameters": {
+        "size": "1000x690",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_manual_fields_scroll_into_view_and_actions_remain_visible",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Açık"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualGuiTests.test_manual_fields_scroll_into_view_and_actions_remain_visible",
+      "parameters": {
+        "size": "1240x860",
+        "theme": "Koyu"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          0,
+          0.274,
+          2
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          2,
+          -0.1,
+          2
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          2,
+          1.001,
+          2
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          2,
+          0.274,
+          0
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          2,
+          "nan",
+          2
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          2,
+          0.274,
+          "inf"
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_invalid_values_are_rejected_before_any_worker",
+      "parameters": {
+        "values": [
+          true,
+          0.274,
+          2
+        ]
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not",
+      "parameters": {
+        "actual": 1
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not",
+      "parameters": {
+        "actual": 1.99
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not",
+      "parameters": {
+        "actual": 2.01
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not",
+      "parameters": {
+        "actual": 3
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not",
+      "parameters": {
+        "actual": 2.000002
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_activation_checks_returned_document_and_actual_active_document",
+      "parameters": {
+        "wrong_return": true
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_activation_checks_returned_document_and_actual_active_document",
+      "parameters": {
+        "wrong_return": false
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "parameters": {
+        "case": "data"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "parameters": {
+        "case": "sheets"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_export_data_sheets_or_failed_sheet_selection",
+      "parameters": {
+        "case": "selection"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": null
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b''"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b'invalid pdf'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b'%PDF-1.7'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_pdf_exporter.PdfTests.test_missing_invalid_or_truncated_pdf_is_rejected",
+      "parameters": {
+        "content": "b'%PDF-1.7\\n1 0 obj\\n<< /Type /Catalog >>\\nendobj\\n'"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "{bad json"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "null"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "[]"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "42"
+      },
+      "status": "passed"
+    },
+    {
+      "test": "test_settings_and_connection.SettingsTests.test_missing_corrupt_and_wrong_shape_settings_fall_back",
+      "parameters": {
+        "content": "�invalid"
+      },
+      "status": "passed"
+    }
+  ],
+  "sha256": {
+    "main.py": "e9ec874479ae662d9003d5c960aa108b561507a0a778684f4fbb4cc74be427bd",
+    "gui/__init__.py": "ed3a5b1cebbbc1f2c8ea7d180a4313fa5dfe0ccfa4b922d8ba4247d2cebaa54a",
+    "gui/icons.py": "994b1b5500c0e46255535cb4396fa289e0d748d005f9a492ad947e83f6845f83",
+    "gui/theme.py": "b3e09460136533ee0999e981be4967f2fd175f7c4fcaca55e76ea50c311f50f2",
+    "gui/layout.py": "5660dc3325ffc483f592e07ff5356a115e9193523b900f287e8904ca89a5af75",
+    "pdf/__init__.py": "57749b3a37e8d041288a279c13f0aa7d48d4dfd804eae33e975fefe4672693a4",
+    "pdf/settings.py": "9d44e6369baadf5e6371d8049920c069b2da9a772f9acd7ea40d545af3573bd2",
+    "pdf/exporter.py": "0810d794316f2ff722925ed6a44b36758403224ff9ddcb67d593724f083719f1",
+    "pdf/window.py": "3f080247291d2b53f8a41663f92facd0e30f565fd33378a22b9900fa64ef3038",
+    "dxf_dwg/__init__.py": "bb9d726644a16f909ac570b4a6529c10a4c5536757b75d3a3e8a0d98cdc3f62d",
+    "dxf_dwg/exporter.py": "a3e7641a558e97d80ab15c813163bc24b1df0b1f767b48681115e5203651f8a2",
+    "solidworks/connection.py": "3db902243fa87ddb47592556c3c07b1787e77cda10ac37f7a7a34b577915aa0e",
+    "solidworks/__init__.py": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+    "k_factor/__init__.py": "46fface833feb0cfde3ee5cd71589be667affb9978b87cf779dd656049d8ebcd",
+    "k_factor/window.py": "2e1881b7ad688643b9ec9f87b97463a332e016ccbec6db68155dbfe193974ffb",
+    "k_factor/rules.py": "36e6aba4df22e57b807512a9ea0f5f39a6a0d0c9c3471f0d6c18f711f01dc4db",
+    "k_factor/apply.py": "ecb4a2c67378f2821bb16addd9527a7f2ffbe0ed079713ef20e2465634cf3c28",
+    "iso_fits/__init__.py": "9ab306f4913f52ee79e73dc7835300dabe0f4d76c923c02f6929de4601e0a7ae",
+    "iso_fits/window.py": "bf1093a7193c8525d55bbd9e3b71b8aec37baa87ba8ab50c645070e405fc2c80",
+    "iso_fits/rules.py": "eb5f8e1c5b9c640cc1d97da67af0e5485686e5a3f8832dfaa1de5eab675a9200",
+    "iso_fits/diagram.py": "843b5da8d19d7b38e04af4bc502bd2aa92dc92c70e545557b8263ad36231da5f",
+    "iso_fits/tables.json": "6f0c9f5538bf2b9000cf7b710e8d0c12796222360671a8c78321be4a59bf7115",
+    "tests/test_gui_audit.py": "614dc2f0a04118489bd38cc807cafb404b4a542c939fb248327e38f4a3b20e5f",
+    "tests/test_settings_and_connection.py": "3d86debc648cf593bed029b859dcc4b2132e2ca85b91cb78d350576fd04bc9fd",
+    "tests/test_final_gui.py": "f6aa414ad8aeee45b46398c9952f3d059810ad8741e6fb1f7867b2d7448b6ea3",
+    "tests/test_dxf_dwg.py": "cea14654adb6d500d89e77eb71b7bbc78ddd075aa094dacc876ec856d716f793",
+    "tests/test_pdf_exporter.py": "a5fe9f4370ff5687aa1ac983ebdf244d2d3c9f3111af04be802cc58b96001d84",
+    "tests/test_iso_fits.py": "22fab4ddaab1273f76ef70ecce65b38df81fea498189d31e694c47c2e361f494",
+    "tests/test_k_factor.py": "bd781767ad5eac6897d0531cf0a2db370fb1be8acc8bad7749e681e648e01be6",
+    "tests/test_manual_k_radius.py": "c1b59a193b14beb976de25b7ae7936724125b1fc85e7ec0adff758bb5bbdbed8",
+    "tests/test_export_window.py": "5e15dc78e8b4ef364f7b402bed41babeb7e7badff633c39caa942f70b8ab5f97"
+  },
+  "lines": {
+    "application": 3459,
+    "tests": 3204
+  }
+}

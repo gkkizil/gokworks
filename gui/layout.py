@@ -14,6 +14,8 @@ class WorkspaceLayout:
         self.grid_rowconfigure(0, weight=1)
         if not hasattr(self, "sidebar"):
             self._build_sidebar()
+        if self.mode == 'iso_fits':
+            return self._build_iso_workspace()
         self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
                                       border_width=1, border_color=BORDER)
         self.workspace.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
@@ -60,6 +62,7 @@ class WorkspaceLayout:
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
             ("k_factor", "K FAKTÖR - RADIUS", "tools"),
+            ("iso_fits", "ISO GEÇMELERİ", "ruler"),
         )):
             active = key == self.mode
             button = ctk.CTkButton(
@@ -322,7 +325,7 @@ class WorkspaceLayout:
 
     def _configure_table_style(self):
         color = lambda value: value[1 if ctk.get_appearance_mode() == "Dark" else 0]
-        scale = self.settings_body._get_widget_scaling()
+        scale = self.workspace._get_widget_scaling()
         self._table_style_key = ctk.get_appearance_mode(), scale
         style = ttk.Style(self)
         style.theme_use("clam")
@@ -336,8 +339,9 @@ class WorkspaceLayout:
         style.map("Gok.Treeview.Heading", background=[("active", color(SECONDARY))])
         style.map("Gok.Treeview", background=[("selected", color(ACCENT_BG))],
                   foreground=[("selected", color(TEXT))])
-        tables = {page["table"] for page in self._pages.values()}
-        tables.add(self.table)
+        tables = {page['table'] for page in self._pages.values() if 'table' in page}
+        if self.mode != 'iso_fits':
+            tables.add(self.table)
         for table in tables:
             table.column("status", width=round(108 * scale), minwidth=round(80 * scale))
             for column in ("file", "detail"):

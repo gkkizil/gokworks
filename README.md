@@ -1,6 +1,6 @@
 # GOKWORKS
 
-SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular.
+SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir.
 
 ## Windows'ta çalıştırma
 
@@ -16,7 +16,7 @@ Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çal
 
 ## Arayüz ve temalar
 
-Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi üç ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
+Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi dört ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
 
 - Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
 - **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** yalnızca liste filtrelerini kaldırır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
@@ -25,6 +25,12 @@ Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, du
 - Küçük pencerede ayar alanı kaydırılabilir; sonuç listesi görünür kalır. İkonlar ve tablo yazıları ekran ölçeklemesine uyum sağlar. %125 widget ölçeklemesi test edildi; tüm Windows monitör/DPI kombinasyonları bu bulut testinin kapsamında değildir.
 
 [Açık tema](docs/screenshots/gui-dxf-dwg-light.png), [koyu tema](docs/screenshots/gui-dxf-dwg-dark.png) ve [GUI tasarım/doğrulama notları](docs/gui-design.md).
+
+## ISO GEÇMELERİ
+
+Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–400 mm**, 11 delik ve 18 mil sınıfı için ölçü/sapma limitleri, boşluk/sıkılık, şematik kesit ve doğrusal tolerans bölgeleri gösterilir. Üç örnek ölçü, mm/µm, arama, CSV ve pano desteklenir. SolidWorks bağlantısı gerektirmez.
+
+Ø50 H8/f7: **0,025–0,089 mm boşluk**. H7/h6 minimum sıfır boşlukla boşluklu; H7/k6 ara; H7/p6 sıkı geçmedir. Tür çapa göre hesaplanır. ISO 286-1/-2:2010 standart temeli, GitHub tablolarının karşılaştırması, resmî metne erişim sınırı ve elle kontrol [ISO kılavuzundadır](docs/iso-fits.md). [Açık](docs/reports/iso-fits/screenshots/iso-light.png) / [koyu](docs/reports/iso-fits/screenshots/iso-dark.png) gerçek ekranlar.
 
 ## K FAKTÖR - RADIUS
 
@@ -98,7 +104,7 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son kapsamlı kontrolde **199 test geçti**; 49 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/final-audit/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son kapsamlı kontrolde **216 test geçti**; 58 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/iso-fits/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 
@@ -112,4 +118,6 @@ K/R eklenmesi sonrası üç ekranın açık/koyu görüntüleri ve elle hesap ko
 
 Manuel K/R eklenmesi sonrası [manuel eklemedeki 189 testlik kontrol](docs/reports/manual-k-radius/README.md) ve [manuel sekmenin görüntüsü](docs/screenshots/gui-manual-k-radius-light.png).
 
-Son GitHub kaynak karşılaştırması, 112 yerleşim senaryosu, 144 menü seçimi ve güncel sekiz ekran görüntüsü: [199 testlik son kontrol](docs/reports/final-audit/README.md). [Güncel Word raporu](docs/reports/final-audit/GOKWORKS_Son_Kontrol_2026-10-09.docx).
+ISO eklemesi öncesindeki GitHub kaynak karşılaştırması, 112 yerleşim senaryosu, 144 menü seçimi ve güncel sekiz ekran görüntüsü: [199 testlik son kontrol](docs/reports/final-audit/README.md). [199 testlik Word raporu](docs/reports/final-audit/GOKWORKS_Son_Kontrol_2026-10-09.docx).
+
+ISO eklemesinden sonra **216 test / 58 GUI testi** geçti; 3217 sayısal kaynak karşılaştırması yapıldı. [ISO doğrulama raporu](docs/reports/iso-fits/README.md) ve [güncel Word raporu](docs/reports/iso-fits/GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx).
