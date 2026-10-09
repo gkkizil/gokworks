@@ -1,0 +1,174 @@
+[
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-light.png",
+    "sha256": "15e753d5baf13a85039664293c970064630006fad5e322efb7b67b201f695f8e",
+    "theme": "Açık",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H8",
+    "shaft": "f7",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-dark.png",
+    "sha256": "f698407b0a61b4b8038da9eae11bb1b4892c8b7fb59534a7336c2a3845359919",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H8",
+    "shaft": "f7",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-zones-dark.png",
+    "sha256": "a9aebd1f912754eec37e900614e1453038aabb56686fa1f95660c1e257dd0ee5",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H8",
+    "shaft": "f7",
+    "view": "Tolerans bölgeleri",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-transition-dark.png",
+    "sha256": "b746a2f2ad7eeaff0c276fedf613be67bf1eba081ea521350736436a581ea123",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H7",
+    "shaft": "k6",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-interference-dark.png",
+    "sha256": "50818eab9f299fc382007634c6ade75ebcbacee599e47d36a0cf6bb43bf715e0",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "H7",
+    "shaft": "p6",
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-manual-light.png",
+    "sha256": "7723da8707ee43f00c50bcf511ee2b432dbe2e90d5280e1e1b2cb4724e554123",
+    "theme": "Açık",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "Manuel",
+    "shaft": "Manuel",
+    "method": "Manuel kontrol",
+    "hole_deviations_mm": [
+      "0",
+      "0.02"
+    ],
+    "shaft_deviations_mm": [
+      "-0.02",
+      "0"
+    ],
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-manual-dark.png",
+    "sha256": "e3f0815b8e3825dfa627c4d4624547e322c34f0073e889bf04bd1afe5bb80727",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "Manuel",
+    "shaft": "Manuel",
+    "method": "Manuel kontrol",
+    "hole_deviations_mm": [
+      "0",
+      "0.02"
+    ],
+    "shaft_deviations_mm": [
+      "-0.02",
+      "0"
+    ],
+    "view": "Montaj kesiti",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-manual-comparison-dark.png",
+    "sha256": "79be40bc4c470a96cf7eecbe36da8be89e6084f4a13cdd8885c108cef01b08ca",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "Manuel",
+    "shaft": "Manuel",
+    "method": "Manuel kontrol",
+    "hole_deviations_mm": [
+      "0",
+      "0.02"
+    ],
+    "shaft_deviations_mm": [
+      "-0.02",
+      "0"
+    ],
+    "view": "ISO karşılaştırması",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png",
+    "sha256": "236a524c8936003d1430bef54399655cd40d24bb499473ae128481e84b5c908f",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "nominal_mm": "50",
+    "hole": "Manuel",
+    "shaft": "Manuel",
+    "method": "Manuel kontrol",
+    "hole_deviations_mm": [
+      "-0.05",
+      "0"
+    ],
+    "shaft_deviations_mm": [
+      "-0.1",
+      "0.1"
+    ],
+    "target": "Serbest / kayar",
+    "view": "Montaj uyumu",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  }
+]

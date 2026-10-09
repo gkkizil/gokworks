@@ -10,7 +10,8 @@ import customtkinter as ctk
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 from iso_fits.diagram import draw
-from iso_fits.manual import calculate_manual, compare_classes, usage_hint
+from iso_fits.manual import (calculate_manual, compare_classes, usage_hint,
+                             TARGETS, closest_pair, closest_preset, compatibility)
 from iso_fits.rules import (classes, calculate, PRESETS, CLASSIFICATION,
                             format_mm, format_deviation)
 
@@ -43,12 +44,12 @@ class IsoFitsView:
         defaults = {'diameter': '50', 'hole': 'H8', 'shaft': 'f7',
                     'unit': 'mm', 'sample': 'Orta değer', 'view': 'Montaj kesiti',
                     'method': 'ISO seçimi', 'hole_lower': '0', 'hole_upper': '+0,02',
-                    'shaft_lower': '-0,02', 'shaft_upper': '0'}
+                    'shaft_lower': '-0,02', 'shaft_upper': '0', 'target': 'Genel kontrol'}
         self.iso_state = {key: tk.StringVar(self, value=str(saved.get(f'iso_{key}', value)))
                           for key, value in defaults.items()}
         for key, choices in [('hole', classes('hole')), ('shaft', classes('shaft')),
                              ('unit', ('mm', 'µm')), ('sample', SAMPLES), ('view', VIEWS),
-                             ('method', METHODS)]:
+                             ('method', METHODS), ('target', TARGETS)]:
             if self.iso_state[key].get() not in choices:
                 self.iso_state[key].set(defaults[key])
         self.iso_result = None
@@ -189,8 +190,17 @@ class IsoFitsView:
             self.iso_widgets[key].grid(row=2, column=column, sticky='w', padx=14, pady=(2, 8))
         self.iso_widgets['explanation'] = self._label(result, '', 11, MUTED, justify='left', anchor='w', wraplength=430)
         self.iso_widgets['explanation'].grid(row=3, column=0, columnspan=2, sticky='ew', padx=14, pady=(0, 12))
+        assessment = self._iso_card(details)
+        assessment.grid(row=2, column=0, sticky='ew', pady=(0, 12))
+        assessment.grid_columnconfigure(0, weight=1)
+        self._label(assessment, 'MONTAJ UYUMU / EN YAKIN GEÇME', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
+        self.iso_widgets['assessment'] = assessment
+        self.iso_widgets['compatibility_title'] = self._label(assessment, '', 13, bold=True, justify='left', anchor='w', wraplength=430)
+        self.iso_widgets['compatibility_title'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 4))
+        self.iso_widgets['compatibility_text'] = self._label(assessment, '', 11, MUTED, justify='left', anchor='w', wraplength=430)
+        self.iso_widgets['compatibility_text'].grid(row=2, column=0, sticky='ew', padx=14, pady=(0, 12))
         limits_card = self._iso_card(details)
-        limits_card.grid(row=2, column=0, sticky='ew', pady=(0, 12))
+        limits_card.grid(row=3, column=0, sticky='ew', pady=(0, 12))
         limits_card.grid_columnconfigure((0, 1), weight=1)
         self._label(limits_card, 'ÖLÇÜ SINIRLARI', 10, MUTED, True).grid(row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 6))
         for row, (key, title) in enumerate([('hole_limits', 'Delik · Dmin / Dmax'), ('shaft_limits', 'Mil · dmin / dmax'),
@@ -201,7 +211,7 @@ class IsoFitsView:
         self.iso_widgets['copy'] = self._button(limits_card, 'Sonucu kopyala', self._copy_iso_result, icon='copy', width=156)
         self.iso_widgets['copy'].grid(row=5, column=0, columnspan=2, sticky='w', padx=14, pady=(8, 12))
         comparison = self._iso_card(details)
-        comparison.grid(row=3, column=0, sticky='ew', pady=(0, 12))
+        comparison.grid(row=4, column=0, sticky='ew', pady=(0, 12))
         comparison.grid_columnconfigure(0, weight=1)
         self._label(comparison, 'ISO TABLO KONTROLÜ', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
         self.iso_widgets['comparison'] = comparison
@@ -210,7 +220,7 @@ class IsoFitsView:
         self.iso_widgets['note'] = self._label(details,
             'Geçme türü boyut limitlerinden hesaplanır. Montaj kuvveti, yağlama veya sıcaklık kararı için malzeme, yüzey ve çalışma koşulları gerekir.',
             11, MUTED, wraplength=430, justify='left', anchor='w')
-        self.iso_widgets['note'].grid(row=4, column=0, sticky='ew', pady=(0, 8))
+        self.iso_widgets['note'].grid(row=5, column=0, sticky='ew', pady=(0, 8))
         self.status_label = self._label(self.workspace, '', 11, MUTED, anchor='w')
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(12, 16))
         for variable in self.iso_state.values():
@@ -242,19 +252,31 @@ class IsoFitsView:
         self._label(panel, 'SONUÇ BİRİMİ', 10, MUTED).grid(row=6, column=0, sticky='w', padx=6, pady=(14, 4))
         self.iso_widgets['manual_unit'] = self._iso_menu(panel, 'unit', ('mm', 'µm'), width=90)
         self.iso_widgets['manual_unit'].grid(row=6, column=1, sticky='ew', padx=6, pady=(14, 4))
+        self._label(panel, 'MONTAJ HEDEFİ', 10, MUTED, True).grid(row=7, column=0, columnspan=2, sticky='w', padx=6, pady=(12, 4))
+        self.iso_widgets['target'] = self._iso_menu(panel, 'target', TARGETS, width=200)
+        self.iso_widgets['target'].grid(row=8, column=0, columnspan=2, sticky='ew', padx=6)
         self.iso_widgets['manual_example'] = self._button(panel, 'Delik +0,02 / Mil -0,02', self._fill_manual_example, width=200)
         self.iso_widgets['manual_example'].grid(
-            row=7, column=0, columnspan=2, sticky='ew', padx=6, pady=(12, 10))
+            row=9, column=0, columnspan=2, sticky='ew', padx=6, pady=(12, 6))
+        self.iso_widgets['compatibility_example'] = self._button(panel, 'Mil ±0,1 / Delik -0,05', self._fill_compatibility_example, width=200)
+        self.iso_widgets['compatibility_example'].grid(row=10, column=0, columnspan=2, sticky='ew', padx=6, pady=(0, 10))
         self.iso_widgets['manual_help'] = self._label(panel,
             'Nominal çap delik ve mil için ortaktır.\n\n50 +0,02: alt 0, üst +0,02.\n50 -0,02: alt -0,02, üst 0.\n\n±0,02 için alt -0,02, üst +0,02 girin.\n\nGerçekleşen tek ölçü için alt ve üst sapmayı aynı girin.\n\nSapma girişleri her zaman mm; sonuçlar mm/µm seçilebilir.',
             11, MUTED, justify='left', anchor='w', wraplength=220)
-        self.iso_widgets['manual_help'].grid(row=8, column=0, columnspan=2, sticky='ew', padx=6, pady=(0, 8))
+        self.iso_widgets['manual_help'].grid(row=11, column=0, columnspan=2, sticky='ew', padx=6, pady=(0, 8))
 
     def _fill_manual_example(self):
+        self._set_manual_inputs([('diameter', '50'), ('hole_upper', '+0,02'), ('hole_lower', '0'),
+                                 ('shaft_upper', '0'), ('shaft_lower', '-0,02')])
+
+    def _fill_compatibility_example(self):
+        self._set_manual_inputs([('diameter', '50'), ('hole_upper', '0'), ('hole_lower', '-0,05'),
+                                 ('shaft_upper', '+0,1'), ('shaft_lower', '-0,1')])
+
+    def _set_manual_inputs(self, values):
         self._iso_loading = True
         try:
-            for key, value in [('diameter', '50'), ('hole_upper', '+0,02'), ('hole_lower', '0'),
-                               ('shaft_upper', '0'), ('shaft_lower', '-0,02')]:
+            for key, value in values:
                 self.iso_state[key].set(value)
         finally:
             self._iso_loading = False
@@ -314,6 +336,7 @@ class IsoFitsView:
             widget.grid_remove() if manual else widget.grid()
         self.iso_widgets['manual_inputs'].grid() if manual else self.iso_widgets['manual_inputs'].grid_remove()
         self.iso_widgets['comparison'].grid() if manual else self.iso_widgets['comparison'].grid_remove()
+        self.iso_widgets['assessment'].grid() if manual else self.iso_widgets['assessment'].grid_remove()
         try:
             if manual:
                 fit = calculate_manual(self.iso_state['diameter'].get(),
@@ -323,7 +346,7 @@ class IsoFitsView:
         except ValueError as error:
             self.iso_result = None
             self.status_label.configure(text=str(error), text_color=RED)
-            for key in ('minimum', 'maximum', 'kind', 'explanation', 'hole_limits', 'shaft_limits', 'hole_deviations', 'shaft_deviations', 'iso_comparison'):
+            for key in ('minimum', 'maximum', 'kind', 'explanation', 'hole_limits', 'shaft_limits', 'hole_deviations', 'shaft_deviations', 'iso_comparison', 'compatibility_title', 'compatibility_text'):
                 self.iso_widgets[key].configure(text='—')
             for key in ('copy', 'export'):
                 self.iso_widgets[key].configure(state='disabled')
@@ -363,6 +386,12 @@ class IsoFitsView:
                 best = compare_classes(band, feature)[0]
                 summary.append(f'{label} {best.code} ({"tam" if best.exact else "en yakın"})')
             explanation += '\nISO kontrolü: '+', '.join(summary)+'.'
+            nearest = closest_pair(fit)
+            explanation += f'\nEn yakın çift: {nearest.code} · {CLASSIFICATION[nearest.fit.kind]}.'
+            assessment = compatibility(fit, self.iso_state['target'].get())
+            self.iso_widgets['compatibility_title'].configure(text=assessment.title, text_color={
+                'compatible': GREEN, 'incompatible': RED, 'boundary': AMBER, 'conditional': AMBER, 'info': MUTED}[assessment.status])
+            self.iso_widgets['compatibility_text'].configure(text=self._compatibility_text(fit))
             self.iso_widgets['iso_comparison'].configure(text=(
                 'DELİK · '+self._iso_match_text(fit.hole, 'hole')+'\n\nMİL · '+self._iso_match_text(fit.shaft, 'shaft')+
                 '\n\nKarşılaştırma mevcut 11 delik / 18 mil sınıfı içindedir. Yakınlık, alt/üst sapma farklarının mutlak toplamıdır. Kullanım adları öneridir; yağlama kararı için yüzey, malzeme ve çalışma koşulları gerekir.'))
@@ -391,7 +420,7 @@ class IsoFitsView:
         self.iso_widgets['form'].configure(width=form_width)
         self.iso_widgets['canvas'].configure(height=round(220*scale))
         available = max(260, int(width-form_width-96))
-        for key in ('explanation', 'note', 'iso_comparison'):
+        for key in ('explanation', 'note', 'iso_comparison', 'compatibility_title', 'compatibility_text'):
             self.iso_widgets[key].configure(wraplength=available)
         self.iso_widgets['manual_help'].configure(wraplength=max(170, form_width-48))
         self.status_label.configure(wraplength=max(300, width-48))
@@ -422,7 +451,23 @@ class IsoFitsView:
                          ('Mil ISO kontrolü', self._iso_match_text(fit.shaft, 'shaft')),
                          ('Kullanım yorumu (öneri)', usage_hint(fit)),
                          ('Kullanım sınırı', 'Yağlama ve montaj kararı için yüzey/malzeme/çalışma koşulları gerekir.')])
+            assessment = compatibility(fit, self.iso_state['target'].get())
+            rows.extend([('Montaj hedefi', self.iso_state['target'].get()),
+                         ('Boyutsal uygunluk', assessment.title), ('Montaj değerlendirmesi', self._compatibility_text(fit))])
         return rows
+
+    def _compatibility_text(self, fit):
+        result = compatibility(fit, self.iso_state['target'].get())
+        pair, preset = closest_pair(fit), closest_preset(fit)
+        text = (result.explanation+f'\n\nTablo kapsamındaki en yakın ISO çift: {pair.code} · {CLASSIFICATION[pair.fit.kind]}. '
+                f'Toplam limit farkı: {format_deviation(pair.distance_nm)}.\n'
+                f'En yakın yaygın geçme: {preset.code} · {CLASSIFICATION[preset.fit.kind]}. '
+                f'Toplam limit farkı: {format_deviation(preset.distance_nm)}.')
+        if pair.fit.kind != fit.kind or preset.fit.kind != fit.kind:
+            text += '\nYakın referansın türü girilen ölçülerin türünden farklı olabilir; montaj hesabı girilen limitlere aittir.'
+        if pair.beyond_reference_width:
+            text += '\nISO çiftten en az bir limit farkı, o parçanın referans tolerans genişliğini aşıyor; en yakın etiketi ISO uyumu veya uygun üretim toleransı anlamına gelmez.'
+        return text+'\n\nBu kontrol boyutsaldır; gerçek montaj kuvveti, yüzey, şekil ve çalışma koşulları ayrıca değerlendirilir.'
 
     def _copy_iso_result(self):
         rows = self._iso_report_rows()

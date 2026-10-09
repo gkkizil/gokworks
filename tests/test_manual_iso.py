@@ -4,13 +4,79 @@ import os
 import unittest
 from unittest.mock import patch
 
-from iso_fits.manual import calculate_manual, compare_classes, deviation_nm, usage_hint
+from iso_fits.manual import (calculate_manual, compare_classes, deviation_nm, usage_hint,
+                             closest_pair, closest_preset, compatibility, TARGETS)
 from iso_fits.rules import calculate, format_deviation, mm
 import test_export_window as fixtures
 import test_iso_fits as iso_tests
 
 
 class ManualIsoRulesTests(unittest.TestCase):
+    def test_corrected_point_zero_five_example_and_targets(self):
+        fit = calculate_manual(50, '-0,05', '0', '-0,1', '+0,1')
+        self.assertEqual((fit.hole.minimum_mm, fit.hole.maximum_mm), (Decimal('49.95'), Decimal(50)))
+        self.assertEqual((fit.shaft.minimum_mm, fit.shaft.maximum_mm), (Decimal('49.9'), Decimal('50.1')))
+        self.assertEqual((fit.minimum_clearance_nm, fit.maximum_clearance_nm, fit.kind), (-150000, 100000, 'transition'))
+        self.assertEqual(compatibility(fit).status, 'conditional')
+        self.assertEqual(compatibility(fit, 'Serbest / kayar').status, 'incompatible')
+        self.assertEqual(compatibility(fit, 'Ara / konumlandırma').status, 'compatible')
+        self.assertEqual(compatibility(fit, 'Sıkı / pres').status, 'incompatible')
+        self.assertEqual(deviation_nm('-0,05'), -50000)
+        with self.assertRaises(ValueError):
+            deviation_nm('-5%')
+
+    def test_target_boundary_and_contact_cases_are_not_guarantees(self):
+        strict_clearance = calculate(50, 'H7', 'g6')
+        strict_interference = calculate(50, 'H7', 'p6')
+        touching_clearance = calculate(50, 'H7', 'h6')
+        touching_interference = calculate_manual(50, 0, '.025', '.025', '.041')
+        self.assertEqual(compatibility(strict_clearance, 'Serbest / kayar').status, 'compatible')
+        self.assertEqual(compatibility(touching_clearance, 'Serbest / kayar').status, 'boundary')
+        self.assertEqual(compatibility(strict_interference, 'Sıkı / pres').status, 'compatible')
+        self.assertEqual(compatibility(touching_interference, 'Sıkı / pres').status, 'boundary')
+        self.assertEqual(compatibility(calculate_manual(50, 0, 0, 0, 0), 'Sıkı / pres').status, 'incompatible')
+        self.assertEqual(compatibility(strict_clearance, 'Ara / konumlandırma').status, 'incompatible')
+        self.assertEqual(compatibility(strict_interference).status, 'conditional')
+        self.assertEqual(compatibility(strict_clearance).status, 'info')
+        with self.assertRaises(ValueError):
+            compatibility(strict_clearance, 'unrecognised target')
+
+    def test_joint_iso_pair_and_common_preset_are_distinct(self):
+        fit = calculate_manual(50, 0, '.02', '-.02', 0)
+        pair, preset = closest_pair(fit), closest_preset(fit)
+        self.assertEqual((pair.code, pair.distance_nm), ('H6/h6', 8000))
+        self.assertEqual((preset.code, preset.distance_nm), ('H7/h6', 9000))
+        self.assertFalse(pair.beyond_reference_width)
+        self.assertEqual(pair.worst_limit_difference_nm, 4000)
+
+    def test_reference_type_does_not_replace_actual_transition(self):
+        fit = calculate_manual(50, '-.05', 0, '-.1', '.1')
+        pair, preset = closest_pair(fit), closest_preset(fit)
+        self.assertEqual(pair.code, 'N7/h9')
+        self.assertEqual(pair.distance_nm, 163000)
+        self.assertEqual(pair.fit.kind, 'transition')
+        self.assertEqual(preset.code, 'H8/e8')
+        self.assertEqual(preset.distance_nm, 250000)
+        self.assertEqual(preset.fit.kind, 'clearance')
+        self.assertEqual(fit.kind, 'transition')
+
+    def test_large_distance_to_iso_is_explicitly_flagged(self):
+        pair = closest_pair(calculate_manual(50, '-.05', 0, '-.1', '.1'))
+        self.assertTrue(pair.beyond_reference_width)
+        exact = closest_pair(calculate(50, 'H7', 'k6'))
+        self.assertFalse(exact.beyond_reference_width)
+        self.assertEqual((exact.distance_nm, exact.worst_limit_difference_nm), (0, 0))
+
+    def test_all_common_fits_keep_exact_reference_at_four_sizes(self):
+        from iso_fits.rules import PRESETS
+        for size in (1, 3, 50, 400):
+            for preset in PRESETS:
+                fit = calculate(size, preset.hole, preset.shaft)
+                with self.subTest(size=size, preset=preset.code):
+                    self.assertEqual(closest_pair(fit).distance_nm, 0)
+                    self.assertEqual(closest_preset(fit).distance_nm, 0)
+                    self.assertEqual(closest_preset(fit).fit.kind, fit.kind)
+
     def test_user_unilateral_example_and_actual_dimensions(self):
         fit = calculate_manual('50', '0', '+0,02', '-0,02', '0')
         self.assertEqual((fit.hole.minimum_mm, fit.hole.maximum_mm), (Decimal(50), Decimal('50.02')))
@@ -95,6 +161,60 @@ class ManualIsoGuiTests(unittest.TestCase):
         self.app.nav_buttons['iso_fits'].invoke()
         self.app.iso_widgets['method']._buttons_dict['Manuel kontrol'].invoke()
         self.settle()
+
+    def test_actual_example_button_and_every_target_menu(self):
+        self.manual()
+        self.app.iso_widgets['compatibility_example'].invoke()
+        self.assertEqual(self.app.iso_result.kind, 'transition')
+        self.assertEqual(self.app.iso_result.minimum_clearance_nm, -150000)
+        self.assertIn('N7/h9', self.app.iso_widgets['explanation'].cget('text'))
+        self.assertIn('H8/e8', self.app.iso_widgets['compatibility_text'].cget('text'))
+        self.assertIn('farklı olabilir', self.app.iso_widgets['compatibility_text'].cget('text'))
+        self.assertIn('genişliğini aşıyor', self.app.iso_widgets['compatibility_text'].cget('text'))
+        for index, target in enumerate(TARGETS):
+            self.app.iso_widgets['target']._dropdown_menu.invoke(index)
+            self.assertEqual(self.app.iso_state['target'].get(), target)
+            self.assertEqual(self.app.iso_widgets['compatibility_title'].cget('text'), compatibility(self.app.iso_result, target).title)
+
+    def test_compatibility_clears_on_invalid_input_and_hides_in_iso_mode(self):
+        self.manual()
+        self.app.iso_state['hole_lower'].set('wrong')
+        for key in ('compatibility_title', 'compatibility_text'):
+            self.assertEqual(self.app.iso_widgets[key].cget('text'), '—')
+        self.app.iso_widgets['compatibility_example'].invoke()
+        self.assertNotEqual(self.app.iso_widgets['compatibility_title'].cget('text'), '—')
+        self.app.iso_widgets['method']._buttons_dict['ISO seçimi'].invoke()
+        self.settle()
+        self.assertFalse(self.app.iso_widgets['assessment'].winfo_viewable())
+
+    def test_joint_report_includes_target_reference_and_actual_values(self):
+        self.manual()
+        self.app.iso_widgets['compatibility_example'].invoke()
+        self.app.iso_state['target'].set('Serbest / kayar')
+        self.app.iso_widgets['copy'].invoke()
+        report = self.app.clipboard_get()
+        self.assertIn('Serbest / kayar', report)
+        self.assertIn('N7/h9', report)
+        self.assertIn('H8/e8', report)
+        self.assertIn('-0,150000', report)
+        self.assertIn('uygun değil', report)
+
+    def test_target_persistence_and_assessment_can_be_scrolled_into_view(self):
+        self.manual()
+        self.app.iso_state['target'].set('Sıkı / pres')
+        self.app._on_close()
+        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
+        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.app._switch_mode('iso_fits'); self.settle()
+        self.assertEqual(self.app.iso_state['target'].get(), 'Sıkı / pres')
+        self.app.geometry('1000x690'); self.settle(.3)
+        details = self.app.iso_widgets['details']
+        assessment = self.app.iso_widgets['assessment']
+        details._parent_canvas.yview_moveto(max(0, assessment.winfo_y()-10)/details.winfo_height())
+        self.app.update()
+        viewport = details._parent_canvas
+        self.assertGreaterEqual(assessment.winfo_rooty(), viewport.winfo_rooty())
+        self.assertLessEqual(assessment.winfo_rooty()+assessment.winfo_height(), viewport.winfo_rooty()+viewport.winfo_height())
 
     def test_real_method_button_and_example_results(self):
         self.manual()

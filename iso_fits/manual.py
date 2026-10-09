@@ -7,6 +7,9 @@ import re
 from iso_fits.rules import Fit, LimitBand, PRESETS, calculate, classes, diameter, limits
 
 
+TARGETS = ('Genel kontrol', 'Serbest / kayar', 'Ara / konumlandırma', 'Sıkı / pres')
+
+
 def deviation_nm(value):
     if isinstance(value, bool):
         raise ValueError('Sapma sayısal olmalı.')
@@ -61,6 +64,86 @@ def compare_classes(band, feature):
         matches.append(Match(code, band.lower_nm-standard.lower_nm,
                              band.upper_nm-standard.upper_nm))
     return tuple(sorted(matches, key=lambda item: (item.distance_nm, item.code)))
+
+
+@dataclass(frozen=True)
+class PairMatch:
+    fit: Fit
+    distance_nm: int
+    worst_limit_difference_nm: int
+    beyond_reference_width: bool
+
+    @property
+    def code(self):
+        return f'{self.fit.hole.code}/{self.fit.shaft.code}'
+
+
+def _pair_match(fit, reference):
+    differences = [abs(a-b) for band, ref in ((fit.hole, reference.hole), (fit.shaft, reference.shaft))
+                   for a, b in ((band.lower_nm, ref.lower_nm), (band.upper_nm, ref.upper_nm))]
+    beyond = any(abs(band.lower_nm-ref.lower_nm) > ref.tolerance_nm
+                 or abs(band.upper_nm-ref.upper_nm) > ref.tolerance_nm
+                 for band, ref in ((fit.hole, reference.hole), (fit.shaft, reference.shaft)))
+    return PairMatch(reference, sum(differences), max(differences), beyond)
+
+
+def closest_pair(fit):
+    hole = compare_classes(fit.hole, 'hole')[0].code
+    shaft = compare_classes(fit.shaft, 'shaft')[0].code
+    return _pair_match(fit, calculate(fit.hole.nominal_mm, hole, shaft))
+
+
+def closest_preset(fit):
+    return min((_pair_match(fit, calculate(fit.hole.nominal_mm, p.hole, p.shaft)) for p in PRESETS),
+               key=lambda item: (item.distance_nm, item.code))
+
+
+@dataclass(frozen=True)
+class Compatibility:
+    status: str
+    title: str
+    explanation: str
+
+
+def compatibility(fit, target='Genel kontrol'):
+    if target not in TARGETS:
+        raise ValueError('Geçersiz montaj hedefi.')
+    low, high = fit.minimum_clearance_nm, fit.maximum_clearance_nm
+    if target == 'Serbest / kayar':
+        if low > 0:
+            return Compatibility('compatible', 'Boşluklu hedefe boyutsal olarak uygun',
+                                 'Tüm izin verilen ölçü kombinasyonlarında pozitif boşluk var.')
+        if low == 0:
+            return Compatibility('boundary', 'Sınırda temas; serbest montaj garanti değil',
+                                 'Minimum boşluk sıfır. Yüzey ve şekil hataları montajı zorlaştırabilir.')
+        return Compatibility('incompatible', 'Serbest/kayar hedefe tüm limitlerde uygun değil',
+                             'Bazı veya tüm ölçü kombinasyonlarında mil delikten büyük; sıkılık oluşur.')
+    if target == 'Sıkı / pres':
+        if high < 0:
+            return Compatibility('compatible', 'Sıkı hedefe boyutsal olarak uygun',
+                                 'Tüm ölçü kombinasyonlarında sıkılık var. Pres kuvveti/ısıl montaj ayrıca hesaplanmalı.')
+        if high == 0 and low < 0:
+            return Compatibility('boundary', 'Sınırda temas; sıkılık garanti değil',
+                                 'En az sıkılık sıfır; tüm parçalar için sıkı montaj garanti edilemez.')
+        return Compatibility('incompatible', 'Sıkı/pres hedefe tüm limitlerde uygun değil',
+                             'Sıfır temas veya boşluk oluşabilir; her parçada sıkılık yok.')
+    if target == 'Ara / konumlandırma':
+        if low < 0 < high:
+            return Compatibility('compatible', 'Ara geçme hedefi oluşuyor',
+                                 'Gerçekleşen ölçüye göre boşluk veya sıkılık mümkündür; montaj yöntemi değişebilir.')
+        return Compatibility('incompatible', 'Ara geçme hedefi oluşmuyor',
+                             'Limitler hem pozitif boşluk hem negatif sıkılık bölgesini kapsamıyor.')
+    if low < 0 < high:
+        return Compatibility('conditional', 'Montaj ölçüye bağlı; tek tip geçiş garanti değil',
+                             'Bazı parçalar boşluklu, bazıları sıkı geçer. Her parçanın aynı şekilde takılması garanti değil.')
+    if high <= 0 and low < 0:
+        return Compatibility('conditional', 'Sıkılık veya sınırda temas; montaj değerlendirmesi gerekir',
+                             'Mil delikten büyük veya sınırda eşit. Pres/ısıl yöntem, malzeme ve yüzey değerlendirilmelidir.')
+    if low == 0:
+        return Compatibility('boundary', 'Sınırda temas; hedefi seçerek kontrol edin',
+                             'Boşluk sıfıra inebilir. Kayar/serbest montaj için yüzey ve şekil etkileri önemlidir.')
+    return Compatibility('info', 'Tüm limitlerde boşluklu eşleşme',
+                         'Hedefi seçerek kayar, ara veya sıkı geçmeye boyutsal uygunluğu kontrol edin.')
 
 
 def usage_hint(fit):

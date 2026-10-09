@@ -25,6 +25,28 @@ Sol panelde **Manuel kontrol** seçin. Nominal çap delik ve mil için ortaktır
 
 [Manuel menünün gerçek görüntüsü](reports/manual-iso/screenshots/iso-manual-dark.png), [ISO karşılaştırma alanı](reports/manual-iso/screenshots/iso-manual-comparison-dark.png) ve [güncel test/Word raporu](reports/manual-iso/README.md).
 
+## Montaj uyumu ve en yakın geçme
+
+**Montaj hedefi** menüsüyle Genel kontrol, Serbest/kayar, Ara/konumlandırma veya Sıkı/pres seçilir. Yeni **MONTAJ UYUMU / EN YAKIN GEÇME** kartı, girilen delik/mil limitlerinin bu hedefi bütün izin verilen ölçü kombinasyonlarında sağlayıp sağlamadığını açıklar.
+
+| Hedef | Boyutsal koşul | Sınır durumu |
+| --- | --- | --- |
+| Serbest / kayar | `Cmin > 0`: bütün limitlerde pozitif boşluk | `Cmin = 0`: sınırda temas; serbest montaj garanti değil. Negatif Cmin: sıkılık oluşabilir. |
+| Ara / konumlandırma | `Cmin < 0 < Cmax`: ölçüye bağlı boşluk veya sıkılık | Tek taraflı veya yalnız temas aralığı, ara geçme koşulunu sağlamaz. |
+| Sıkı / pres | `Cmax < 0`: bütün limitlerde pozitif sıkılık | `Cmax = 0, Cmin < 0`: sınırda temas; her parçada sıkılık garanti değil. |
+
+Uyumluluk boyutsal bir kontroldür. Pres kuvveti, malzeme, şekil hataları, yüzey, yük ve çalışma koşulları için üretim değerlendirmesi gerekir. Genel kontrolde “her ölçüde boşluk”, “sınırda temas” veya “bazı parçalar boşluklu, bazıları sıkı” açıklaması verilir; bilinmeyen üretim dağılımından geçme olasılığı üretilmez.
+
+**En yakın ISO çift**, mevcut delik/mil sınıflarından toplam dört limit farkı en küçük olan çifttir. Ayrı delik/mil en yakınlarının birleşimi bu toplamı en aza indirir. **En yakın yaygın geçme** 14 kayıtlı eşleşme arasında aynı ölçütle seçilir. Eşit farkta sınıf adı kullanılır. Toplam fark nm hassasiyetle hesaplanıp mm gösterilir; girilen toleranslar değiştirilmez.
+
+Referansın türü gerçek hesabın türünden farklıysa kartta açık not verilir. En az bir limit farkı ilgili parçanın referans tolerans genişliğinden büyükse uzaklık açıklanır. Bu genişlik karşılaştırması uygulamanın açıklayıcı kontrolüdür; ISO'nun ayrı bir kabul/ret kuralı değildir. “En yakın” etiketi, tam ISO eşleşmesi veya üretime uygunluk kararı yerine geçmez.
+
+**Kullanıcı örneği:** nominal 50 mm, mil alt −0,1/üst +0,1 mm; delik alt −0,05/üst 0 mm. Delik **49,950–50,000**, mil **49,900–50,100 mm**. En sıkı durum `49,950−50,100=−0,150 mm`, en boşluklu durum `50,000−49,900=+0,100 mm`: **ara geçme**. Serbest/kayar veya her parçada sıkı/pres hedefi garanti edilmez; ara geçme hedefi boyutsal olarak oluşur.
+
+Bu örnekte en yakın ISO çift **N7/h9**, toplam limit farkı **0,163 mm**; en yakın yaygın geçme **H8/e8**, toplam fark **0,250 mm**. H8/e8 referansı boşluklu olsa da girilen örneğin sonucu ara geçmedir. N7/h9 için alt/üst farkları delikte 17/8 µm, milde 38/100 µm; toplam 163 µm. H8/e8 için delikte 50/39 µm, milde 11/150 µm; toplam 250 µm. Farklar büyük olduğu için bunlar tam/yakın ISO uyumu gibi yorumlanmaz.
+
+[Yeni uyumluluk ekranı](reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [güncel test/Word raporu](reports/fit-compatibility/README.md).
+
 ## Standart temeli ve kapsam
 
 - **ISO 286-1:2010**: doğrusal boyut toleransları için ISO kod sistemi, tolerans/sapma/geçme kuralları. [ISO çevrimiçi katalog kaydı](https://www.iso.org/obp/ui/#iso:std:iso:286:-1:ed-2:v1:en).
@@ -88,4 +110,4 @@ Yeniden üretmek için dört kaynağı tablodaki commitlere checkout edip klasö
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-[ISO eklemesinin 216 testlik tarihsel raporu](reports/iso-fits/README.md); [manuel kontrol sonrası güncel rapor](reports/manual-iso/README.md).
+[ISO eklemesinin 216 testlik tarihsel raporu](reports/iso-fits/README.md); [manuel kontrolün 230 testlik raporu](reports/manual-iso/README.md); [montaj uyumu sonrası güncel rapor](reports/fit-compatibility/README.md).

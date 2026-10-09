@@ -28,9 +28,9 @@ Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, du
 
 ## ISO GEÇMELERİ
 
-Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–400 mm**, 11 delik ve 18 mil sınıfı için ölçü/sapma limitleri, boşluk/sıkılık, şematik kesit ve doğrusal tolerans bölgeleri gösterilir. Üç örnek ölçü, mm/µm, arama, CSV ve pano desteklenir. **Manuel kontrol** menüsünde kendi delik/mil alt ve üst sapmalarınızı girin: boşluk/sıkılık ve ISO tablosunda tam/en yakın eşleşme hesaplanır. SolidWorks bağlantısı gerektirmez.
+Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–400 mm**, 11 delik ve 18 mil sınıfı için ölçü/sapma limitleri, boşluk/sıkılık, şematik kesit ve doğrusal tolerans bölgeleri gösterilir. Üç örnek ölçü, mm/µm, arama, CSV ve pano desteklenir. **Manuel kontrol** menüsünde kendi delik/mil alt ve üst sapmalarınızı girin: boşluk/sıkılık ve ISO tablosunda tam/en yakın eşleşme hesaplanır. **Montaj hedefi** menüsü bütün limitlerde kayar, ara veya sıkı geçmeye uygunluğu açıklar; en yakın ISO çift ve yaygın geçme ayrıca gösterilir. SolidWorks bağlantısı gerektirmez.
 
-Ø50 H8/f7: **0,025–0,089 mm boşluk**. H7/h6 minimum sıfır boşlukla boşluklu; H7/k6 ara; H7/p6 sıkı geçmedir. Tür çapa göre hesaplanır. ISO 286-1/-2:2010 standart temeli, GitHub tablolarının karşılaştırması, resmî metne erişim sınırı ve elle kontrol [ISO kılavuzundadır](docs/iso-fits.md). [Açık](docs/reports/manual-iso/screenshots/iso-light.png) / [koyu](docs/reports/manual-iso/screenshots/iso-dark.png) gerçek ekranlar. [Manuel tolerans ekranı](docs/reports/manual-iso/screenshots/iso-manual-dark.png).
+Ø50 H8/f7: **0,025–0,089 mm boşluk**. H7/h6 minimum sıfır boşlukla boşluklu; H7/k6 ara; H7/p6 sıkı geçmedir. Tür çapa göre hesaplanır. ISO 286-1/-2:2010 standart temeli, GitHub tablolarının karşılaştırması, resmî metne erişim sınırı ve elle kontrol [ISO kılavuzundadır](docs/iso-fits.md). [Açık](docs/reports/fit-compatibility/screenshots/iso-light.png) / [koyu](docs/reports/fit-compatibility/screenshots/iso-dark.png) gerçek ekranlar. [Manuel tolerans ekranı](docs/reports/fit-compatibility/screenshots/iso-manual-dark.png).
 
 ## K FAKTÖR - RADIUS
 
@@ -104,7 +104,7 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son kapsamlı kontrolde **230 test geçti**; 64 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/manual-iso/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son kapsamlı kontrolde **240 test geçti**; 68 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/fit-compatibility/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 
@@ -123,3 +123,5 @@ ISO eklemesi öncesindeki GitHub kaynak karşılaştırması, 112 yerleşim sena
 ISO eklemesinden sonra **216 test / 58 GUI testi** geçti; 3217 sayısal kaynak karşılaştırması yapıldı. [ISO doğrulama raporu](docs/reports/iso-fits/README.md) ve [güncel Word raporu](docs/reports/iso-fits/GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx).
 
 Manuel ISO eklemesinden sonra **230 test / 64 GUI testi** geçti. Delik 50 +0,02/0 ve mil 50 0/−0,02 için 0–0,04 mm boşluk; kayar geçme adayı/sınırda temas sonucu verir. [Güncel manuel ISO raporu](docs/reports/manual-iso/README.md).
+
+Montaj uyumu eklemesinden sonra **240 test / 68 GUI testi** geçti. Mil 50 ±0,1; delik 50 +0/−0,05 mm örneği −0,15…+0,10 mm ara geçme verir. [Güncel uyumluluk ekranı](docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [Word/test raporu](docs/reports/fit-compatibility/README.md).

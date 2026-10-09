@@ -67,6 +67,23 @@ def main():
                                 'hole_deviations_mm': ['0', '0.02'], 'shaft_deviations_mm': ['-0.02', '0'],
                                 'view': 'ISO karşılaştırması' if scroll else 'Montaj kesiti',
                                 'native_tk_capture': True, 'solidworks_required': False})
+            app._fill_compatibility_example()
+            app.iso_state['target'].set('Serbest / kayar')
+            app.update()
+            details = app.iso_widgets['details']
+            details._parent_canvas.yview_moveto(max(0, app.iso_widgets['assessment'].winfo_y()-10)/details.winfo_height())
+            deadline = time.monotonic()+.6
+            while time.monotonic() < deadline:
+                app.update(); time.sleep(.01)
+            x, y = app.winfo_rootx(), app.winfo_rooty()
+            path = images/'iso-compatibility-dark.png'
+            ImageGrab.grab(bbox=(x, y, x+app.winfo_width(), y+app.winfo_height())).save(path)
+            records.append({'file': str(path.relative_to(ROOT)), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                            'theme': 'Koyu', 'size': [app.winfo_width(), app.winfo_height()], 'nominal_mm': '50',
+                            'hole': 'Manuel', 'shaft': 'Manuel', 'method': 'Manuel kontrol',
+                            'hole_deviations_mm': ['-0.05', '0'], 'shaft_deviations_mm': ['-0.1', '0.1'],
+                            'target': 'Serbest / kayar', 'view': 'Montaj uyumu',
+                            'native_tk_capture': True, 'solidworks_required': False})
         finally:
             app._on_close()
     if errors:

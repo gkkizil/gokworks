@@ -24,9 +24,9 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**230 test geçti; 64'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**240 test geçti; 68'i gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
-Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/manual-iso/test-run.log).
+Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/fit-compatibility/test-run.log).
 
 Çalışan uygulamadan 1240×860 boyutunda alınan gerçek ekran görüntüleri:
 
@@ -35,17 +35,17 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 | DXF/DWG | [Görüntü](reports/final-audit/screenshots/dxf-dwg-light.png) | [Görüntü](reports/final-audit/screenshots/dxf-dwg-dark.png) |
 | PDF | [Görüntü](reports/final-audit/screenshots/pdf-light.png) | [Görüntü](reports/final-audit/screenshots/pdf-dark.png) |
 | K FAKTÖR - RADIUS / Manuel | [Görüntü](reports/final-audit/screenshots/manual-k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/manual-k-radius-dark.png) |
-| ISO GEÇMELERİ | [Görüntü](reports/manual-iso/screenshots/iso-light.png) | [Görüntü](reports/manual-iso/screenshots/iso-dark.png) |
-| ISO / Manuel kontrol | [Görüntü](reports/manual-iso/screenshots/iso-manual-light.png) | [Görüntü](reports/manual-iso/screenshots/iso-manual-dark.png) |
+| ISO GEÇMELERİ | [Görüntü](reports/fit-compatibility/screenshots/iso-light.png) | [Görüntü](reports/fit-compatibility/screenshots/iso-dark.png) |
+| ISO / Manuel kontrol | [Görüntü](reports/fit-compatibility/screenshots/iso-manual-light.png) | [Görüntü](reports/fit-compatibility/screenshots/iso-manual-dark.png) |
 | K FAKTÖR - RADIUS / Takım | [Görüntü](reports/final-audit/screenshots/k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/k-radius-dark.png) |
 
 ## Kod satırı sayısı
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 22 | 3.645 | 3.309 |
-| Testler | 10 | 3.393 | 3.013 |
-| Toplam | 32 | 7.038 | 6.322 |
+| Uygulama | 22 | 3.773 | 3.419 |
+| Testler | 10 | 3.513 | 3.123 |
+| Toplam | 32 | 7.286 | 6.542 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -60,3 +60,5 @@ ISO öncesi denetim: 112 yerleşim kombinasyonu, 144 gerçek menü seçimi ve %1
 ISO eklemesinde 8 hesap ve 9 GUI testi eklendi. İki tema, 5 boyut/ölçek, 31 delik/mil/birim menü seçeneği, 14 eşleşme, iki grafik, üç örnek ölçü, CSV/pano, hatalı giriş ve yeniden açılış sınandı. Tolerans bölgeleri gerçek sapma ölçeğini, montaj kesiti sabit büyütmeyle şematik gösterimi kullanır. [Güncel ISO raporu ve kaynak sınırları](reports/iso-fits/README.md).
 
 ISO sol panelinde **ISO seçimi / Manuel kontrol** menüsü bulunur. Manuel girişte dört sapma alanı, canlı geçme sonucu, tam/en yakın ISO sınıfı ve farklar; mm/µm, örnek doldurma, CSV ve pano desteklenir. 14 ek test (8 hesap, 6 GUI) geçti. %100/%125/%150, iki tema, alanlara ve karşılaştırmaya kaydırarak erişim sınandı. [Güncel manuel rapor ve resimler](reports/manual-iso/README.md).
+
+Manuel kontrolde Montaj hedefi menüsü ve MONTAJ UYUMU / EN YAKIN GEÇME kartı eklendi. Yeni kart farklı referans/gerçek geçme türünü, sınırda teması ve büyük limit farklarını açıklar. 6 hesap + 4 GUI testi daha geçti; CSV/pano ve hedef tercihi desteklenir. [Güncel kart görüntüsü](reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [240 testlik güncel rapor](reports/fit-compatibility/README.md).
