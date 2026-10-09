@@ -1,0 +1,21 @@
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+Cannot create cache home directory: '/home/agent/.cache/ezdxf', cache files will not be saved.
+See also issue https://github.com/mozman/ezdxf/issues/923.
+test_readable_theme_contrast_and_green_primary_buttons (test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons) ... ok
+test_all_pages_results_tabs_and_resolution_scale_matrix (test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix) ... ok
+test_themes_preserve_both_pages_and_reload_preference (test_export_window.WindowTests.test_themes_preserve_both_pages_and_reload_preference) ... ok
+test_theme_change_while_busy_preserves_worker_controls (test_export_window.WindowTests.test_theme_change_while_busy_preserves_worker_controls) ... ok
+test_navigation_title_preferences_and_theme_persistence (test_k_factor.KGuiTests.test_navigation_title_preferences_and_theme_persistence) ... ok
+test_navigation_theme_and_preferences_after_restart (test_iso_fits.IsoGuiTests.test_navigation_theme_and_preferences_after_restart) ... ok
+test_all_fourteen_buttons_draw_zones_symbols_and_frames_in_both_themes (test_geometric_tolerances.GeometricGuiTests.test_all_fourteen_buttons_draw_zones_symbols_and_frames_in_both_themes) ... ok
+test_page_cache_preferences_theme_and_guide (test_geometric_tolerances.GeometricGuiTests.test_page_cache_preferences_theme_and_guide) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 31.502s
+
+OK

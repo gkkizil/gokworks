@@ -6,6 +6,8 @@ Kullanıcının paylaştığı sade CRM ekranı örneği temel alındı: açık 
 
 Yan menüden **Açık / Koyu** seçilir. Seçim beş ekranı, tabloyu, ikonları ve açık ayrıntı penceresini değiştirir; ayarlara kaydedilir. Tema değişikliği çalışan aktarımı durdurmaz, dosya listelerini/sonuçları sıfırlamaz.
 
+Koyu tema siyah zemin kullanır: ana arka plan `#000000`, yan menü `#080808`, panel `#0B0B0B`, giriş/şema `#050505`. İkincil düğmeler ve hover nötr siyah tonlarındadır; yeşil vurgular korunur. Sekiz mevcut GUI testiyle kontrast, tema tercihi, sekmeler, ölçekler, rehber ve işlem sırasındaki tema geçişi sınandı. [Siyah tema kontrolü ve güncel ekranlar](reports/black-theme/README.md). Önceki 270 testlik rapor, önceki paletin denetim kaydıdır.
+
 Sonuç alanına Türkçe dosya adı/açıklama araması, durum filtresi ve görünen/toplam dosya sayısı eklendi. Filtreler yalnızca görünümü etkiler. Yeni tarama/aktarım filtreleri sıfırlar; PDF ve DXF/DWG geçişleri filtreleri bağımsız korur. İş parçacığından gelen sonuç, aktif filtreye göre kendi satırını günceller; tüm tablo her sonuçta yeniden çizilmez.
 
 Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yollarını ve aktarım açıklamasını açar. Ayrıntıların panoya kopyalanması desteklenir. Pano sahipliği ana uygulamada tutulur; ayrıntı penceresini kapatmak kopyalanan bilgiyi kaybettirmez. Pencere kapanırken CustomTkinter zamanlayıcıları iptal edilir. İlk incelemedeki kapanış sonrası Tcl `invalid command name` hatası bu şekilde giderildi.
@@ -38,7 +40,7 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 | K FAKTÖR - RADIUS / Manuel | [Görüntü](reports/final-audit/screenshots/manual-k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/manual-k-radius-dark.png) |
 | ISO GEÇMELERİ | [Görüntü](reports/fit-compatibility/screenshots/iso-light.png) | [Görüntü](reports/fit-compatibility/screenshots/iso-dark.png) |
 | ISO / Manuel kontrol | [Görüntü](reports/fit-compatibility/screenshots/iso-manual-light.png) | [Görüntü](reports/fit-compatibility/screenshots/iso-manual-dark.png) |
-| GEOMETRİK TOL. | [Görüntü](reports/geometric-tolerances/screenshots/gdt-light.png) | [Görüntü](reports/geometric-tolerances/screenshots/gdt-dark.png) |
+| GEOMETRİK TOL. | [Görüntü](reports/geometric-tolerances/screenshots/gdt-light.png) | [Görüntü](reports/black-theme/screenshots/geometric_tolerances-black.png) |
 | K FAKTÖR - RADIUS / Takım | [Görüntü](reports/final-audit/screenshots/k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/k-radius-dark.png) |
 
 ## Kod satırı sayısı

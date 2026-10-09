@@ -1,0 +1,82 @@
+{
+  "baseline_commit": "6ccbca5b470f68cba7e69b9f349c981df1d1ad87",
+  "theme_sha256": "6182c81a73b02fdc04935c2e19c74c5dbdde4ceb3938c31bd87055981229907a",
+  "existing_gui_tests_passed": 8,
+  "failed": 0,
+  "skipped": 0,
+  "dark_palette": {
+    "BG": "#000000",
+    "SIDEBAR": "#080808",
+    "PANEL": "#0B0B0B",
+    "INPUT": "#050505",
+    "BORDER": "#262626",
+    "SECONDARY": "#191919",
+    "HOVER": "#242424"
+  },
+  "green_accent": "#52DEBC",
+  "screenshots": [
+    {
+      "file": "docs/reports/black-theme/screenshots/pdf-black.png",
+      "sha256": "be1fbf8c22611d21c4fa7c4d3c2534c32e642a8df81d79a1af79ae4dabcfd1b5",
+      "size": [
+        1240,
+        860
+      ],
+      "native_tk_capture": true
+    },
+    {
+      "file": "docs/reports/black-theme/screenshots/dxf_dwg-black.png",
+      "sha256": "772a2de1e61caa500ee565594210ee113e14052462cf772cf7bac3b7b8082440",
+      "size": [
+        1240,
+        860
+      ],
+      "native_tk_capture": true
+    },
+    {
+      "file": "docs/reports/black-theme/screenshots/k_factor-black.png",
+      "sha256": "6c97016cdd3d85ad2236b8bedaa622d2700b77902122375c2eb853b2c580470a",
+      "size": [
+        1240,
+        860
+      ],
+      "native_tk_capture": true
+    },
+    {
+      "file": "docs/reports/black-theme/screenshots/iso_fits-black.png",
+      "sha256": "1c8afc837b73a8488ce046e41fc59811ad21838a7f396c722b97ef501246a758",
+      "size": [
+        1240,
+        860
+      ],
+      "native_tk_capture": true
+    },
+    {
+      "file": "docs/reports/black-theme/screenshots/geometric_tolerances-black.png",
+      "sha256": "afb30419894b63a2b39e8d0c55496c948c31ba1885e0f2372f341194f7dc6ed5",
+      "size": [
+        1240,
+        860
+      ],
+      "native_tk_capture": true
+    },
+    {
+      "file": "docs/reports/black-theme/screenshots/gdt-guide-black.png",
+      "sha256": "3dfcd75b01791241ebb6cfa2606b45b55dbe4f1c14d982b721fd5598b6d5e377",
+      "size": [
+        760,
+        580
+      ],
+      "native_tk_capture": true
+    },
+    {
+      "file": "docs/reports/black-theme/screenshots/geometric-tolerances-light.png",
+      "sha256": "a6e10d551b1438edc437806933741a9fe5e9c3fdce422b1794f2debe72076ef1",
+      "size": [
+        1240,
+        860
+      ],
+      "native_tk_capture": true
+    }
+  ]
+}

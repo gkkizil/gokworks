@@ -48,7 +48,7 @@ Genel tablo ve yaklaşık R hesabı üretim kalibrasyonu değildir. Bu sürüm h
 
 Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal mesafedir; ±0,3 mm değildir. Konum **Ø0,3 mm** için radyal pay 0,15 mm'dir. İsteğe bağlı ölçülmüş toplam hata, hata ≤ t aritmetiğiyle karşılaştırılır; tek çap ölçüsü, CMM analizi veya belirsizlikli kalite kabulü veya tam ASME model/resim kontrolü değildir. Normal yüzey formunda ilgili boyut toleransı girilirse t < boyut toleransı koşulu kontrol edilir (8.4). CAD modeline tolerans yazılmaz.
 
-[Kullanım, ASME belge bölümleri ve FreeCAD-GDT karşılaştırması](docs/geometric-tolerances.md). Gerçek ekranlar: [koyu](docs/reports/geometric-tolerances/screenshots/gdt-dark.png), [açık](docs/reports/geometric-tolerances/screenshots/gdt-light.png), [konum / A-B-C](docs/reports/geometric-tolerances/screenshots/gdt-position-dark.png).
+[Kullanım, ASME belge bölümleri ve FreeCAD-GDT karşılaştırması](docs/geometric-tolerances.md). Gerçek ekranlar: [koyu](docs/reports/black-theme/screenshots/geometric_tolerances-black.png), [açık](docs/reports/geometric-tolerances/screenshots/gdt-light.png), [konum / A-B-C](docs/reports/geometric-tolerances/screenshots/gdt-position-dark.png).
 
 ## Sac metal açınımı
 
