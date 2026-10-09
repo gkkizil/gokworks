@@ -1,6 +1,6 @@
 # Tüm programın yeniden doğrulanması
 
-**174 test başarılı, 0 başarısız, 0 atlanan.** Son K/R sürümü için [güncel kanıtlar](reports/k-radius/README.md); önceki GUI denetimi ayrı tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/k-radius/test-run.log) kaydedildi.
+**189 test başarılı, 0 başarısız, 0 atlanan.** Manuel K/R sürümü için [güncel kanıtlar](reports/manual-k-radius/README.md); önceki GUI denetimi ayrı tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/manual-k-radius/test-run.log) kaydedildi.
 
 ## Kapsam
 
@@ -8,8 +8,8 @@
 | --- | ---: | --- |
 | DXF/DWG | 69 | Geometri/büküm seçenekleri, parça arayüzü, kalınlık, dosya adı, alt montajların toplam adedi, bastırma, konfigürasyon ve Unicode yol ayrımı, SpeedPak/yüklenmemiş bileşenler, dosya koruma, durdurma ve COM temizliği. Yanlış belge, uzun dosya adı ve bozuk ASCII/ikili DXF de sınandı. |
 | PDF | 29 | Tüm sayfalar, tek sayfa, teknik resim arayüzü, açık/kapalı belgeler, aktivasyon ve önceki belgeye dönüş, BYREF bağlama, kesilmiş çıktı, üzerine yazma, yarışan hedef ve hata sonrası devam. |
-| Gerçek Tk arayüzü | 39 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
-| K/R hesaplama ve uygulama | 29 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
+| Gerçek Tk arayüzü | 44 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
+| K/R hesaplama ve uygulama | 39 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
 | Ayarlar | 4 | JSON ve Türkçe karakterler, bozuk/okunamayan dosyadan güvenli dönüş, başarısız kayıt sırasında eski ayarların korunması. |
 | SolidWorks bağlantısı | 3 | Çalışan oturuma bağlanma, oturum bulunamaması ve pywin32 eksikliği. |
 | Giriş noktası | 1 | `main.py` uygulama giriş fonksiyonunu çağırıyor. |
@@ -106,3 +106,7 @@ Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT
 ## K/R sürümü sonrası son kontrol
 
 174 test başarılı; 39 gerçek GUI testi. K/R kapsamında 34 yeni test (29 hesaplama/COM, 5 GUI) var. Kaydırma çubuğunun varsayılan 200 px minimumu yeni ayar alanını daraltmayı engelliyordu; 24 px olarak ayarlandı. Tarama/hesaplama/kayıt seçimi kaydırma alanı dışına alındı. İki tema, küçük/büyük pencere ve %125 ölçek sınandı. [Güncel kanıtlar](reports/k-radius/README.md) ve [Word raporu](reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx).
+
+## Kalınlığa göre manuel K/R
+
+15 yeni test eklendi; son tam çalışmada 189 test geçti, 44 GUI testi. Kullanıcı girdiği K ve R doğrudan yazılır, hedef kalınlıkla eşleşmeyen saclar atlanır. K/R sekmesinde iki bağımsız alt sekme var. İçerik/sekmeler değişince yerleşim tekrar ölçülerek küçük pencerede tabloya alan ayrılır. [Son kanıtlar](reports/manual-k-radius/README.md) ve [kullanım](manual-k-radius.md).

@@ -1,5 +1,9 @@
 # K FAKTÖR - RADIUS
 
+Ekranın iki alt sekmesi vardır: **Malzeme / Takım** ve **Manuel K / R**.
+Bu belge malzeme/takım hesabını anlatır. Kalınlık eşleştirerek doğrudan kullanıcı
+K/R değerlerini yazmak için [manuel atama kılavuzuna](manual-k-radius.md) bakın.
+
 Bu ekran, SolidWorks'teki aktif montajın aktif konfigürasyonunu alt montajlar
 dahil dolaşır. Her dosya + referans konfigürasyonu bir kez işlenir; tekrar eden
 parçanın montaj adedi sonuçta gösterilir. Bastırılmış bileşenler işlenmez.

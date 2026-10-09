@@ -146,9 +146,44 @@ class Calculation:
     notes: tuple[str, ...]
 
 
+class ThicknessMismatch(ValueError):
+    """Manuel atamada farklı kalınlığı olan saclar hata değil, atlamadır."""
+
+
+@dataclass(frozen=True)
+class ManualAssignment:
+    thickness_mm: float
+    k_factor: float
+    radius_mm: float
+
+    def validate(self):
+        number(self.thickness_mm, "Hedef sac kalınlığı")
+        k = number(self.k_factor, "Manuel K faktörü", zero=True)
+        if k > 1:
+            raise ValueError("ANSI K faktörü 0–1 aralığında olmalı.")
+        number(self.radius_mm, "Manuel büküm yarıçapı")
+
+
+@dataclass(frozen=True)
+class ManualCalculation:
+    thickness_mm: float
+    k_factor: float
+    radius_mm: float
+    notes: tuple[str, ...] = ("K/R kullanıcı tarafından doğrudan girildi; tablo veya takım tahmini kullanılmadı.",)
+    ba_mm: None = None
+
+
 def calculate(thickness_mm, recipe=Recipe()):
     recipe.validate()
     t = number(thickness_mm, "Sac kalınlığı")
+    if isinstance(recipe, ManualAssignment):
+        target = number(recipe.thickness_mm, "Hedef sac kalınlığı")
+        # A fixed 1 nm tolerance only absorbs unit-conversion floating error;
+        # it must not grow with thickness or merge nominally different sheets.
+        if not math.isclose(t, target, rel_tol=0, abs_tol=1e-6):
+            raise ThicknessMismatch(f"Sac kalınlığı {t:.12g} mm; hedef {target:.12g} mm ile eşleşmedi, atlandı.")
+        return ManualCalculation(t, number(recipe.k_factor, "Manuel K faktörü", zero=True),
+                                 number(recipe.radius_mm, "Manuel büküm yarıçapı"))
     material = material_by_key(recipe.material)
     punch = number(recipe.punch_radius_mm, "Üst bıçak uç R")
     if recipe.die_opening_mm is None:

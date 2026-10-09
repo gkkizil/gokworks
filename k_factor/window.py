@@ -5,12 +5,13 @@ import tkinter as tk
 
 import customtkinter as ctk
 
-from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT
+from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG
 from k_factor.apply import update_assembly
-from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, calculate,
+from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, calculate,
                             number, ba_from_outside_dimensions)
 
 AUTO_DIE = "Otomatik (8 × t)"
+AUTOMATIC_TAB, MANUAL_TAB = "Malzeme / Takım", "Manuel K / R"
 
 
 class KFactorView:
@@ -19,12 +20,15 @@ class KFactorView:
                         thickness="2", angle="90", radius="", method="Tablo",
                         ba="", outside_a="", outside_b="", flat="")
         defaults.update(punch_angle="85", die_angle="85")
+        defaults.update(assignment_mode=AUTOMATIC_TAB, manual_thickness="2", manual_k="", manual_r="")
         self.k_state = {key: tk.StringVar(self, value=str(saved.get(f"kr_{key}", value)))
                         for key, value in defaults.items()}
         if self.k_state["material"].get() not in [m.label for m in MATERIALS]:
             self.k_state["material"].set(MATERIALS[0].label)
         if self.k_state["method"].get() not in ("Tablo", "BA ölçümü"):
             self.k_state["method"].set("Tablo")
+        if self.k_state["assignment_mode"].get() not in (AUTOMATIC_TAB, MANUAL_TAB):
+            self.k_state["assignment_mode"].set(AUTOMATIC_TAB)
         self.k_state["save"] = tk.BooleanVar(self, value=False)  # explicit each session
         self.k_widgets = {}
 
@@ -38,9 +42,19 @@ class KFactorView:
         # settings viewport shrinking enough to leave room for the results.
         self.settings_body._scrollbar.configure(height=24, width=10)
         self._settings_height = 340
+        selector = ctk.CTkSegmentedButton(
+            self.settings_body, variable=self.k_state["assignment_mode"],
+            values=[AUTOMATIC_TAB, MANUAL_TAB], command=self._select_k_assignment,
+            height=34, fg_color=SECONDARY, selected_color=ACCENT_BG,
+            selected_hover_color=HOVER, unselected_color=SECONDARY,
+            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12))
+        selector.grid(row=0, column=0, sticky="w", pady=(0, 10))
+        self.k_widgets["assignment_tabs"] = selector
+        self.controls.append(selector)
         panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
                              border_width=1, border_color=BORDER)
-        panel.grid(row=0, column=0, sticky="ew")
+        panel.grid(row=1, column=0, sticky="ew")
+        self.k_widgets["automatic_panel"] = panel
         for column in range(3):
             panel.grid_columnconfigure(column, weight=1, uniform="kr")
         self._label(panel, "01   Malzeme ve takım · Havada büküm", 14, bold=True).grid(
@@ -83,11 +97,51 @@ class KFactorView:
         self.k_calculation_label = self._label(panel, "", 12, TEXT, wraplength=730,
                                               justify="left", anchor="w")
         self.k_calculation_label.grid(row=8, column=0, columnspan=3, sticky="ew", padx=16, pady=6)
-        self._preview_k_calculation()
+        self.k_widgets["automatic_summary"] = self.k_calculation_label
+        self._build_manual_k_settings()
+        self._select_k_assignment(self.k_state["assignment_mode"].get())
         for key, variable in self.k_state.items():
-            if key != "save":
+            if key == "assignment_mode":
+                variable.trace_add("write", lambda *_: self._select_k_assignment(
+                    self.k_state["assignment_mode"].get()) if self.mode == "k_factor" and not self.busy else None)
+            elif key != "save":
                 variable.trace_add("write", lambda *_: self._preview_k_calculation()
                                    if self.mode == "k_factor" and not self.busy else None)
+
+    def _build_manual_k_settings(self):
+        panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
+                             border_width=1, border_color=BORDER)
+        panel.grid(row=1, column=0, sticky="ew")
+        self.k_widgets["manual_panel"] = panel
+        for column in range(3):
+            panel.grid_columnconfigure(column, weight=1, uniform="manual_kr")
+        self._label(panel, "Kalınlığa göre manuel K / R atama", 14, bold=True).grid(
+            row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(14, 8))
+        self._k_field(panel, "manual_thickness", "Hedef sac kalınlığı (mm)", 1, 0,
+                      values=["0.5", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "4", "5", "6", "8", "10", "12", "15", "20"])
+        self._k_field(panel, "manual_k", "K faktörü (0–1)", 1, 1)
+        self._k_field(panel, "manual_r", "İç büküm yarıçapı R (mm)", 1, 2)
+        self._label(panel, "Örnek: 2 mm sac → K: 0,274 · R: 2 mm. Virgül veya nokta kullanabilirsiniz.",
+                    11, MUTED, wraplength=700, justify="left").grid(
+            row=2, column=0, columnspan=3, sticky="w", padx=16, pady=(4, 8))
+        summary = self._label(panel, "", 12, TEXT, wraplength=700, justify="left", anchor="w")
+        summary.grid(row=3, column=0, columnspan=3, sticky="ew", padx=16, pady=(4, 14))
+        self.k_widgets["manual_summary"] = summary
+
+    def _select_k_assignment(self, selection):
+        if self.busy or selection not in (AUTOMATIC_TAB, MANUAL_TAB):
+            return
+        if self.k_state["assignment_mode"].get() != selection:
+            self.k_state["assignment_mode"].set(selection)
+        manual = selection == MANUAL_TAB
+        self.k_widgets["automatic_panel"].grid_remove()
+        self.k_widgets["manual_panel"].grid_remove()
+        self.k_widgets["manual_panel" if manual else "automatic_panel"].grid()
+        self.k_calculation_label = self.k_widgets["manual_summary" if manual else "automatic_summary"]
+        self.settings_body._parent_canvas.yview_moveto(0)
+        self._preview_k_calculation()
+        if hasattr(self, "status_label"):
+            self._resize_pdf_area()
 
     def _build_k_actions(self, parent):
         # Keep montage scanning and save choice outside the scrollable form.
@@ -132,6 +186,12 @@ class KFactorView:
 
     def _k_recipe(self):
         values = {key: variable.get() for key, variable in self.k_state.items()}
+        if values["assignment_mode"] == MANUAL_TAB:
+            t = number(values["manual_thickness"], "Hedef sac kalınlığı")
+            recipe = ManualAssignment(t, number(values["manual_k"], "Manuel K faktörü", zero=True),
+                                      number(values["manual_r"], "Manuel büküm yarıçapı"))
+            recipe.validate()
+            return t, recipe
         material = next((m.key for m in MATERIALS if m.label == values["material"]), None)
         t = number(values["thickness"], "Hesap / numune kalınlığı")
         radius = number(values["radius"], "Ölçülmüş iç R") if values["radius"].strip() else None
@@ -159,6 +219,13 @@ class KFactorView:
         try:
             thickness, recipe = self._k_recipe()
             result = calculate(thickness, recipe)
+            if isinstance(recipe, ManualAssignment):
+                self.k_calculation_label.configure(
+                    text=f"{thickness:.12g} mm sac → K = {result.k_factor:.12g} · R = {result.radius_mm:.12g} mm\n"
+                         "Aktif montaj ve alt montajlarda yalnız bu kalınlıktaki saclar güncellenir.\n"
+                         "Önce Montajı tara ile kontrol edin; ardından Montaja K/R uygula düğmesini kullanın.",
+                    text_color=TEXT)
+                return result
             text = (f"K = {result.k_factor:.5f}   ·   İç R = {result.radius_mm:.3f} mm   ·   V = {result.die_opening_mm:g} mm\n"
                     f"BA = ({result.angle_deg:g} × π / 180) × ({result.radius_mm:g} + {result.k_factor:g} × {thickness:g})"
                     f" = {result.ba_mm:.5f} mm   ·   BD = {result.bd_mm:.5f} mm\n")

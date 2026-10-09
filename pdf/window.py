@@ -332,10 +332,14 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
                         + results_card.winfo_height())
         available = (shared_space - result_minimum) / scale
         preferred = int(self.settings_body.winfo_reqheight() / scale) + 2
-        height = max(96, min(preferred, int(available)))
+        minimum = 64 if self.mode == "k_factor" else 96
+        height = max(minimum, min(preferred, int(available)))
         if height != self._settings_height:
             self._settings_height = height
             self.settings_body.configure(height=height)
+            # Tab/content switches change child geometry after this callback.
+            # Re-measure once Tk has applied the new height, until it settles.
+            self._layout_fit_id = self.after(40, self._fit_pdf_settings)
         scrollbar = self.settings_body._scrollbar
         needs_scroll = preferred > height
         if needs_scroll and not scrollbar.winfo_manager():

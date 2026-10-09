@@ -1,0 +1,16 @@
+[
+  {
+    "file": "docs/screenshots/gui-manual-k-radius-light.png",
+    "theme": "Açık",
+    "width": 1240,
+    "height": 860,
+    "sha256": "d7655285c9aa67e7adae830c9b318c3c9416badf8c50c452e797f9f353824942"
+  },
+  {
+    "file": "docs/screenshots/gui-manual-k-radius-dark.png",
+    "theme": "Koyu",
+    "width": 1240,
+    "height": 860,
+    "sha256": "f4501b3d6a49abc660c3ae2f5585500d1c9d8e8920f9b4d9896350888f6a480c"
+  }
+]

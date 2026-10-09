@@ -1,0 +1,228 @@
+"""Kalınlık eşleştirerek kullanıcı K/R değerlerini aynen atama."""
+
+from copy import deepcopy
+import csv
+import os
+from queue import Queue
+from types import SimpleNamespace
+import time
+import unittest
+from unittest.mock import Mock, patch
+
+from k_factor import apply as ap
+from k_factor.rules import ManualAssignment, ThicknessMismatch, calculate
+from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB
+from pdf.settings import load_settings
+from pdf.window import GokworksPdfApp
+import test_export_window as window_tests
+import test_k_factor as kr_tests
+from test_dxf_dwg import FakeComponent, FakeAssembly, FakeMultiPartApp, Variant
+
+
+class ManualRulesTests(unittest.TestCase):
+    def test_user_values_and_decimal_comma_are_preserved(self):
+        result=calculate('2,0',ManualAssignment('2','0,274','2'))
+        self.assertEqual((result.thickness_mm,result.k_factor,result.radius_mm),(2,.274,2))
+        self.assertIsNone(result.ba_mm)
+
+    def test_unit_roundoff_matches_but_other_thicknesses_do_not(self):
+        assignment=ManualAssignment(2,.274,2)
+        self.assertEqual(calculate(2+1e-10,assignment).k_factor,.274)
+        for actual in (1,1.99,2.01,3,2+2e-6):
+            with self.subTest(actual=actual),self.assertRaises(ThicknessMismatch):
+                calculate(actual,assignment)
+
+    def test_manual_assignment_is_independent_of_tool_catalogue(self):
+        # Large/custom radii are not passed through the air-bending V model.
+        result=calculate(25,ManualAssignment(25,.274123456,80))
+        self.assertEqual(result.k_factor,.274123456)
+        self.assertEqual(result.radius_mm,80)
+
+    def test_invalid_values_are_rejected_before_any_worker(self):
+        for values in ((0,.274,2),(2,-.1,2),(2,1.001,2),(2,.274,0),
+                       (2,'nan',2),(2,.274,'inf'),(True,.274,2)):
+            with self.subTest(values=values),self.assertRaises(ValueError):
+                ManualAssignment(*values).validate()
+        for k in (0,1):self.assertEqual(calculate(2,ManualAssignment(2,k,2)).k_factor,k)
+
+
+class ManualApplyTests(unittest.TestCase):
+    setUp=kr_tests.ApplyTests.setUp
+
+    def manual(self,**kwargs):
+        return ap.process_part(self.app,self.model.path,'default',ManualAssignment(2,.274,2),**kwargs)
+
+    def test_exact_values_and_metres_written_without_changing_thickness(self):
+        self.model.states['Default']['radius']=.001
+        status,detail,_=self.manual()
+        self.assertEqual(status,'success',detail)
+        state=self.model.states['Default']
+        self.assertEqual((state['k'],state['radius'],state['thickness'],state['type']),(.274,.002,.002,2))
+        self.assertEqual(self.model.save_count,0)
+        self.assertIn('Manuel atama',detail)
+
+    def test_mismatched_thickness_skips_even_gauge_override_without_save(self):
+        self.model.states['Default']['thickness']=.003
+        self.model.gauge=self.model.material_link=True
+        before=deepcopy(self.model.states)
+        status,detail,result=self.manual(save=True)
+        self.assertEqual(status,'skipped',detail)
+        self.assertIn('eşleşmedi',detail)
+        self.assertIsNone(result)
+        self.assertEqual(self.model.states,before)
+        self.assertEqual(self.model.feature.modify_count,0)
+        self.assertEqual(self.model.save_count,0)
+
+    def test_preview_does_not_modify(self):
+        before=deepcopy(self.model.states)
+        status,detail,result=self.manual(preview=True,save=True)
+        self.assertEqual(status,'success',detail)
+        self.assertEqual(result.k_factor,.274)
+        self.assertEqual(self.model.states,before)
+        self.assertEqual(self.model.feature.modify_count,0)
+        self.assertEqual(self.model.save_count,0)
+
+    def test_manual_failure_uses_existing_verified_rollback(self):
+        self.model.readback_fail=True
+        before=deepcopy(self.model.states)
+        status,detail,_=self.manual(save=True)
+        self.assertEqual(status,'error')
+        self.assertIn('geri yüklendi',detail)
+        self.assertEqual(self.model.states,before)
+        self.assertEqual(self.model.save_count,0)
+
+    def test_only_matching_referenced_configuration_is_updated(self):
+        self.model.states['Other']=deepcopy(self.model.states['Default'])
+        self.model.states['Other']['thickness']=.003
+        before=deepcopy(self.model.states['Other'])
+        self.model.ShowConfiguration2('Other')
+        status,detail,_=self.manual()
+        self.assertEqual(status,'success',detail)
+        self.assertEqual(self.model.states['Default']['k'],.274)
+        self.assertEqual(self.model.states['Other'],before)
+        self.assertEqual(self.model.config,'Other')
+
+    def test_nested_batch_updates_and_saves_matching_parts_once(self):
+        thick=kr_tests.SheetPart('/work/thick.sldprt')
+        thick.states['Default']['thickness']=.003
+        before=deepcopy(thick.states)
+        sub=FakeComponent('/work/sub.sldasm',children=(FakeComponent(self.model.path),)*2)
+        self.assembly.root.children=(sub,sub,FakeComponent(thick.path))
+        app=FakeMultiPartApp((self.model,thick),self.assembly)
+        events=Queue()
+        with patch.object(ap,'connect_to_solidworks',return_value=app):
+            ap.update_assembly(ManualAssignment(2,.274,2),events,save=True)
+        results=[v for k,v in events.queue if k=='result']
+        self.assertEqual([r['status'] for r in results],['success','skipped'])
+        self.assertEqual(results[0]['quantity'],4)
+        self.assertEqual(self.model.save_count,1)
+        self.assertEqual(thick.save_count,0)
+        self.assertEqual(thick.states,before)
+        self.assertEqual(list(events.queue)[-1][1]['skipped'],1)
+        self.assertIs(app.ActiveDoc,self.assembly)
+
+
+@unittest.skipUnless(os.name=='nt' or os.environ.get('DISPLAY'),'GUI requires display')
+class ManualGuiTests(unittest.TestCase):
+    setUp=window_tests.WindowTests.setUp
+    close_app=window_tests.WindowTests.close_app
+    wait_idle=window_tests.WindowTests.wait_idle
+
+    def select_manual(self):
+        self.app._switch_mode('k_factor')
+        self.app.k_widgets['assignment_tabs']._buttons_dict[MANUAL_TAB].invoke()
+        for key,value in (('manual_thickness','2'),('manual_k','0,274'),('manual_r','2')):
+            self.app.k_state[key].set(value)
+        self.app.update()
+
+    def test_tabs_keep_independent_values_and_ignore_invalid_automatic_fields(self):
+        self.select_manual()
+        self.app.k_state['punch'].set('nan')
+        result=self.app._preview_k_calculation()
+        self.assertEqual(result.k_factor,.274)
+        self.assertIn('yalnız bu kalınlıktaki',self.app.k_calculation_label.cget('text'))
+        self.app.k_widgets['assignment_tabs']._buttons_dict[AUTOMATIC_TAB].invoke()
+        self.assertIsNone(self.app._preview_k_calculation())
+        self.app.k_widgets['assignment_tabs']._buttons_dict[MANUAL_TAB].invoke()
+        self.assertEqual(self.app._preview_k_calculation().radius_mm,2)
+        self.app._switch_mode('pdf');self.app._switch_mode('k_factor')
+        self.assertEqual(self.app.k_state['assignment_mode'].get(),MANUAL_TAB)
+        self.assertEqual(self.app.k_state['manual_k'].get(),'0,274')
+
+    def test_invalid_manual_inputs_block_scan_and_apply(self):
+        self.select_manual()
+        for key,value in (('manual_k','1.01'),('manual_k',''),('manual_r','0'),('manual_thickness','nan')):
+            with self.subTest(key=key,value=value):
+                self.app.k_state['manual_k'].set('.274');self.app.k_state['manual_r'].set('2')
+                self.app.k_state['manual_thickness'].set('2');self.app.k_state[key].set(value)
+                with patch('k_factor.window.update_assembly') as worker:
+                    self.app.scan_button.invoke();self.app.start_button.invoke()
+                worker.assert_not_called();self.assertFalse(self.app.busy)
+
+    def test_real_preview_apply_and_csv_report_from_gui(self):
+        self.select_manual()
+        model=kr_tests.SheetPart()
+        thick=kr_tests.SheetPart('/work/thick.sldprt');thick.states['Default']['thickness']=.003
+        assembly=FakeAssembly('/work/main.sldasm',(FakeComponent(model.path),FakeComponent(thick.path)))
+        app=FakeMultiPartApp((model,thick),assembly)
+        com=SimpleNamespace(VT_BYREF=16,VT_I4=3,VT_BOOL=11,VT_BSTR=8,VT_EMPTY=0,
+                            CoInitialize=Mock(),CoUninitialize=Mock())
+        with patch.multiple(ap,pythoncom=com,win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant))),patch.object(ap,'connect_to_solidworks',return_value=app):
+            self.app.scan_button.invoke();self.wait_idle()
+            self.assertEqual(model.feature.modify_count,0)
+            self.assertTrue(self.app.results[0]['preview'])
+            self.app.start_button.invoke();self.wait_idle()
+        self.assertEqual([r['status'] for r in self.app.results],['success','skipped'])
+        self.assertEqual(model.states['Default']['k'],.274)
+        self.assertEqual(model.states['Default']['radius'],.002)
+        self.assertEqual(thick.states['Default']['k'],.4)
+        self.assertEqual(self.app.stat_values['skipped'].cget('text'),'1')
+        report=self.root/'manuel.csv'
+        with patch('pdf.window.filedialog.asksaveasfilename',return_value=str(report)):
+            self.app.report_button.invoke()
+        with report.open(encoding='utf-8-sig') as stream:rows=list(csv.reader(stream,delimiter=';'))
+        self.assertEqual(len(rows),3)
+        self.assertIn('K=0.274',rows[1][3])
+
+    def test_manual_preferences_reload_and_save_choice_starts_off(self):
+        self.select_manual();self.app.k_state['save'].set(True)
+        self.app._on_close()
+        self.app=GokworksPdfApp(settings_path=self.settings)
+        self.app.report_callback_exception=lambda *args:self.errors.append(args)
+        self.app._switch_mode('k_factor');self.app.update()
+        self.assertEqual(self.app.k_state['assignment_mode'].get(),MANUAL_TAB)
+        self.assertEqual(self.app.k_state['manual_k'].get(),'0,274')
+        self.assertFalse(self.app.k_state['save'].get())
+        self.assertEqual(load_settings(self.settings)['kr_manual_r'],'2')
+
+    def test_manual_fields_scroll_into_view_and_actions_remain_visible(self):
+        self.select_manual()
+        for size in ('1000x690','1240x860'):
+            self.app.geometry(size)
+            for theme in ('Açık','Koyu'):
+                with self.subTest(size=size,theme=theme):
+                    self.app._change_theme(theme)
+                    end=time.monotonic()+.3
+                    while time.monotonic()<end:self.app.update();time.sleep(.01)
+                    canvas=self.app.settings_body._parent_canvas
+                    field=self.app.k_widgets['manual_thickness']
+                    offset=field.master.winfo_rooty()-self.app.settings_body.winfo_rooty()
+                    canvas.yview_moveto(offset/self.app.settings_body.winfo_height())
+                    self.app.update()
+                    width,height=self.app.winfo_width(),self.app.winfo_height()
+                    for widget in (self.app.k_widgets['manual_thickness'],self.app.k_widgets['manual_k'],
+                                   self.app.k_widgets['manual_r'],self.app.start_button,self.app.scan_button):
+                        x=widget.winfo_rootx()-self.app.winfo_rootx()
+                        y=widget.winfo_rooty()-self.app.winfo_rooty()
+                        self.assertTrue(widget.winfo_ismapped())
+                        self.assertGreaterEqual(x,0);self.assertGreaterEqual(y,0)
+                        self.assertLessEqual(x+widget.winfo_width(),width+1)
+                        self.assertLessEqual(y+widget.winfo_height(),height+1)
+                        if widget in (self.app.k_widgets['manual_thickness'],self.app.k_widgets['manual_k'],self.app.k_widgets['manual_r']):
+                            self.assertGreaterEqual(widget.winfo_rooty(),canvas.winfo_rooty())
+                            self.assertLessEqual(widget.winfo_rooty()+widget.winfo_height(),
+                                                 canvas.winfo_rooty()+canvas.winfo_height())
+                    self.assertGreater(self.app.table.winfo_height(),80)
+
+
+if __name__=='__main__':unittest.main()

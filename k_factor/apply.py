@@ -8,7 +8,7 @@ from dataclasses import dataclass, replace
 import math
 
 from dxf_dwg import exporter as sw
-from k_factor.rules import Recipe, calculate, material_by_key
+from k_factor.rules import ManualAssignment, ThicknessMismatch, calculate, material_by_key, number
 from solidworks.connection import connect_to_solidworks
 
 pythoncom, win32com = sw.pythoncom, sw.win32com
@@ -230,6 +230,10 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if len(features) != 1:
             raise RuntimeError("Tek bir aktif SheetMetal unsuru gerekir.")
         feature = features[0]
+        if isinstance(recipe, ManualAssignment):
+            # Read thickness first: non-matching sheets must never go through
+            # K/R override checks or any parameter write/save.
+            calculation = calculate(float(feature.GetDefinition().Thickness) * 1000, recipe)
         before = _state(feature)
         if feature.GetErrorCode():
             raise RuntimeError("SheetMetal unsuru zaten hata içeriyor; önce parçayı düzeltin.")
@@ -263,10 +267,13 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                 notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
         else:
             notes.append(f"Önizleme; mevcut K={before.k_factor:.4f}, R={before.radius*1000:.3f} mm.")
-        notes.append(f"K={calculation.k_factor:.4f} · R={calculation.radius_mm:.3f} mm · t={calculation.thickness_mm:g} mm · V={calculation.die_opening_mm:g} mm · BA({calculation.angle_deg:g}°)={calculation.ba_mm:.5f} mm")
+        if isinstance(recipe, ManualAssignment):
+            notes.append(f"Manuel atama · K={calculation.k_factor:.12g} · R={calculation.radius_mm:.12g} mm · t={calculation.thickness_mm:.12g} mm")
+        else:
+            notes.append(f"K={calculation.k_factor:.4f} · R={calculation.radius_mm:.3f} mm · t={calculation.thickness_mm:g} mm · V={calculation.die_opening_mm:g} mm · BA({calculation.angle_deg:g}°)={calculation.ba_mm:.5f} mm")
         notes.extend(calculation.notes)
         status = "success"
-    except NotSheetMetal as error:
+    except (NotSheetMetal, ThicknessMismatch) as error:
         status = "skipped"
         notes.append(str(error))
     except Exception as error:
@@ -324,7 +331,13 @@ def update_assembly(recipe, events, stop_event=None, *, preview=False, save=Fals
         summary["total"] = len(records)
         events.put(("files", sources))
         events.put(("total", len(records)))
-        events.put(("log", f"Montaj: {assembly_name} [{assembly_configuration}] · Malzeme varsayımı: {material_by_key(recipe.material).label} · Havada büküm · {'Önizleme' if preview else 'K/R uygulama'}"))
+        if isinstance(recipe, ManualAssignment):
+            scope = (f"Manuel K/R · Hedef kalınlık: {number(recipe.thickness_mm, 'Kalınlık'):.12g} mm"
+                     f" · K={number(recipe.k_factor, 'K', zero=True):.12g}"
+                     f" · R={number(recipe.radius_mm, 'R'):.12g} mm")
+        else:
+            scope = f"Malzeme varsayımı: {material_by_key(recipe.material).label} · Havada büküm"
+        events.put(("log", f"Montaj: {assembly_name} [{assembly_configuration}] · {scope} · {'Önizleme' if preview else 'K/R uygulama'}"))
         if not records:
             summary["state"] = "empty"
         for index, (((path, configuration), quantity), source) in enumerate(zip(records, sources), 1):

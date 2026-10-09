@@ -28,6 +28,8 @@ Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, du
 
 ## K FAKTÖR - RADIUS
 
+**Manuel K / R** alt sekmesinde kalınlık, K ve iç R değerlerini doğrudan girebilirsiniz. Örneğin `2 mm → K=0,274, R=2 mm`: aktif montaj ve alt montajlarda yalnızca 2 mm saclar güncellenir, diğer kalınlıklar atlanır. [Manuel atama kılavuzu](docs/manual-k-radius.md).
+
 Yeni sekme etkin: malzeme ailesi, üst bıçak uç R/açı ve alt kalıp V/açı seçilir. Katalogda nominal ölçüler ve özel giriş vardır. Otomatik V her parçanın kalınlığına göre seçilir. **Hesapla / kontrol et**, BA/BD formüllerini gösterir; bağımsız BA + ölçülmüş iç R veya dış A/B/düz boy ölçümüyle K kalibre edilebilir.
 
 **Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir. Seçilen malzeme bütün saclar için varsayılır; CAD malzemesi değişmez.
@@ -96,14 +98,16 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son K/R sürümü doğrulamasında **174 test geçti**; 39 gerçek GUI testi dahildir. [Güncel test kanıtları](docs/reports/k-radius/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son manuel K/R sürümü doğrulamasında **189 test geçti**; 44 gerçek GUI testi dahildir. [Güncel test kanıtları](docs/reports/manual-k-radius/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 
 ## GUI yeniden kontrolü ve Word raporu
 
-Son denetimde 140 testin tamamı geçti; 34'ü gerçek Tk GUI testidir. Ek kabul testleri gerçek düğme komutlarını, Ctrl+F/çift tıklama/Enter/Escape olaylarını, diyalog iptallerini, filtreli CSV raporunu ve 12 yerleşim alt senaryosunu kapsar. İlk yerleşim açıkça zamanlanarak açılışın Configure olayına bağımlılığı giderildi.
+K/R öncesi GUI denetiminde 140 testin tamamı geçti; 34'ü gerçek Tk GUI testidir. Ek kabul testleri gerçek düğme komutlarını, Ctrl+F/çift tıklama/Enter/Escape olaylarını, diyalog iptallerini, filtreli CSV raporunu ve 12 yerleşim alt senaryosunu kapsar. İlk yerleşim açıkça zamanlanarak açılışın Configure olayına bağımlılığı giderildi.
 
 [Word raporu](docs/reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx), [test kanıtları](docs/reports/README.md) ve [test bazlı JSON](docs/reports/gui-verification-results.json). Gerçek Windows/SolidWorks üretimi bu Linux denetiminin kapsamı dışındadır.
 
-K/R eklenmesi sonrası üç ekranın açık/koyu görüntüleri ve elle hesap kontrolünü içeren [güncel Word raporu](docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx). Önceki 140 testlik GUI raporu tarihsel kayıt olarak korunur.
+K/R eklenmesi sonrası üç ekranın açık/koyu görüntüleri ve elle hesap kontrolünü içeren [174 testlik sürümün Word raporu](docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx). Önceki 140 testlik GUI raporu tarihsel kayıt olarak korunur.
+
+Manuel K/R eklenmesi sonrası [189 testlik son kontrol](docs/reports/manual-k-radius/README.md) ve [manuel sekmenin görüntüsü](docs/screenshots/gui-manual-k-radius-light.png).
