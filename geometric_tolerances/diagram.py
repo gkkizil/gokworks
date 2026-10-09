@@ -1,7 +1,9 @@
 """Yazı tipi sembollerine bağımlı olmayan Tk vektör şemaları."""
 
+from math import cos, radians, sin
+
 from gui.theme import INPUT, TEXT, MUTED, ACCENT, ACCENT_BG, UI_FONT
-from geometric_tolerances.rules import fmt
+from geometric_tolerances.rules import fmt, fmt_mm
 
 
 def symbol(canvas, key, x, y, size, color, width=2, tag='symbol'):
@@ -62,19 +64,27 @@ def draw(canvas, spec, appearance='Light', scale=1, *, frame=False):
                            font=(UI_FONT, -round(12*scale)), tags='invalid')
         return
     if frame:
-        sizes = [40, 88] + [38] * len(spec.datums)
+        value = ('Ø' if spec.characteristic.diametrical else '') + fmt_mm(spec.tolerance)
+        font = (UI_FONT, -round(14*scale), 'bold')
+        # Canvas bounds include glyph overhang/fallbacks that font.measure can
+        # miss. Measure the actual rendered item before sizing its cell.
+        probe = canvas.create_text(0, 0, text=value, font=font)
+        box = canvas.bbox(probe)
+        value_width = box[2]-box[0]
+        canvas.delete(probe)
+        sizes = [40, max(88, value_width/scale+20)] + [38] * len(spec.datums)
         start = max(10*scale, (w-sum(sizes)*scale)/2)
         top, bottom = 12*scale, 48*scale
         for index, width in enumerate(sizes):
             end = start + width*scale
-            canvas.create_rectangle(start, top, end, bottom, outline=color(ACCENT), tags='frame')
+            canvas.create_rectangle(start, top, end, bottom, outline=color(ACCENT), tags=('frame', 'frame-cell'))
             if index == 0:
                 symbol(canvas, spec.characteristic.key, (start+end)/2, (top+bottom)/2,
                        20*scale, color(TEXT), max(1, 2*scale))
             else:
-                text = (('Ø' if spec.characteristic.diametrical else '')+fmt(spec.tolerance)) if index == 1 else spec.datums[index-2]
+                text = value if index == 1 else spec.datums[index-2]
                 canvas.create_text((start+end)/2, (top+bottom)/2, text=text, fill=color(TEXT),
-                                   font=(UI_FONT, -round(14*scale), 'bold'), tags='frame')
+                                   font=font, tags=('frame', 'frame-number' if index == 1 else 'frame-datum'))
             start = end
         return
     # Logical 460 × 210 scene: horizontal shrink keeps diagrams accessible at minimum size.
@@ -82,8 +92,8 @@ def draw(canvas, spec, appearance='Light', scale=1, *, frame=False):
     offset = (w-460*sx)/2
     def coords(points):
         return [value*sx+offset if index % 2 == 0 else value*sy for index, value in enumerate(points)]
-    def line(*points, **kwargs):
-        canvas.create_line(*coords(points), fill=color(ACCENT), width=max(1, 2*scale), tags='zone', **kwargs)
+    def line(*points, tag='zone', **kwargs):
+        canvas.create_line(*coords(points), fill=color(ACCENT), width=max(1, 2*scale), tags=('zone', tag), **kwargs)
     def rect(*points):
         canvas.create_rectangle(*coords(points), fill=color(ACCENT_BG), outline=color(ACCENT), width=max(1, 2*scale), tags='zone')
     def oval(*points, dashed=False):
@@ -113,7 +123,7 @@ def draw(canvas, spec, appearance='Light', scale=1, *, frame=False):
     elif key in ('circularity', 'circular_runout', 'position', 'concentricity'):
         if key in ('position', 'concentricity'):
             oval(160, 30, 300, 170)
-            line(230, 40, 230, 160, arrow='both')
+            line(230, 30, 230, 170, arrow='both', tag='dimension')
             text(250, 98, 'Øt')
             text(230, 183, 'Silindirik bölgenin enine kesiti', True)
         else:
@@ -136,12 +146,18 @@ def draw(canvas, spec, appearance='Light', scale=1, *, frame=False):
         else:
             text(230, 183, 'Şekil kontrolü · datum gerekmez', True)
     elif key in ('line_profile', 'surface_profile'):
-        for y in (44, 86):
-            canvas.create_line(*coords([55, y+75, 135, y+20, 220, y, 305, y+25, 405, y+70]),
-                               smooth=True, fill=color(ACCENT), width=max(1, 2*scale), tags='zone')
-        line(220, 44, 220, 86, arrow='both')
-        text(243, 64, 't')
-        text(230, 166, 'Toplam profil bölgesi · simetrik örnek', True)
+        # Circular true profile: concentric offsets keep width uniform in the
+        # normal direction, unlike vertical translations of a curved spline.
+        for radius in (65, 85, 105):
+            points = [coordinate for angle in range(20, 161)
+                      for coordinate in (230+radius*cos(radians(angle)), 140-radius*sin(radians(angle)))]
+            if radius == 85:
+                canvas.create_line(*coords(points), fill=color(MUTED), dash=(4, 3), tags='true-profile')
+            else:
+                line(*points, tag='profile-boundary')
+        line(230, 35, 230, 75, arrow='both', tag='dimension')
+        text(251, 56, 't')
+        text(230, 166, 'Normal yönde t · teorik profil çevresinde ±t/2', True)
         if spec.datums:
             text(230, 191, 'Datum '+ ' | '.join(spec.datums), True)
     elif key == 'symmetry':
@@ -161,10 +177,10 @@ def draw(canvas, spec, appearance='Light', scale=1, *, frame=False):
             text(223, 68, 't')
             text(280, 140, '90°', True)
         elif key == 'angularity':
-            line(110, 142, 300, 35)
-            line(160, 158, 350, 51)
-            line(208, 87, 244, 108, arrow='both')
-            text(249, 82, 't')
+            line(130, 130, 235, 25, tag='angle-boundary')
+            line(170, 170, 275, 65, tag='angle-boundary')
+            line(175, 85, 215, 125, arrow='both', tag='dimension')
+            text(240, 100, 't')
             text(330, 143, '45° örnek', True)
         datum()
     text(230, 8, 'BOYUT '+fmt(spec.size)+' mm · ŞEMATİK BÖLGE', True)

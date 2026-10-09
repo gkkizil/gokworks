@@ -20,9 +20,14 @@ def number(value, label, *, zero=False, maximum=Decimal('10000')):
     return result
 
 
-def fmt(value):
+def fmt_mm(value):
+    """ASME 4.3.1/4.3.3 millimeter notation for technical frames."""
     text = format(value, 'f')
-    return (text.rstrip('0').rstrip('.') if '.' in text else text).replace('.', ',')
+    return text.rstrip('0').rstrip('.') if '.' in text else text
+
+
+def fmt(value):
+    return fmt_mm(value).replace('.', ',')
 
 
 @dataclass(frozen=True)
@@ -44,7 +49,7 @@ class Specification:
 
     @property
     def frame(self):
-        value = ('⌀' if self.characteristic.diametrical else '') + fmt(self.tolerance)
+        value = ('⌀' if self.characteristic.diametrical else '') + fmt_mm(self.tolerance)
         return ' | '.join((self.characteristic.name, value, *self.datums))
 
 

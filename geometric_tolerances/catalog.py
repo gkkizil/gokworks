@@ -126,6 +126,21 @@ CHARACTERISTICS = {item.key: item for item in CATALOG}
 ACTIVE = tuple(item for item in CATALOG if item.active)
 GROUPS = ('Şekil', 'Profil', 'Yön', 'Konum', 'Salgı', 'Eski işaretler')
 
+MEASUREMENT_INPUTS = {
+    'straightness': 'Yüzey çizgisini kapsayan en dar iki paralel doğru arasındaki mesafeyi girin; tek nokta sapmasını girmeyin.',
+    'flatness': 'Yüzeyi kapsayan en dar iki paralel düzlem arasındaki mesafeyi girin; datuma göre yükseklik veya tek nokta sapması değildir.',
+    'circularity': 'Kesit için değerlendirilmiş eş merkezli çemberlerin Rmax - Rmin radyal mesafesini girin; çap farkı değildir. Gerekli bütün kesitler değerlendirilir.',
+    'cylindricity': 'Bütün yüzeyi kapsayan eş eksenli silindirlerin değerlendirilmiş Rmax - Rmin radyal mesafesini girin; çap farkı veya tek kesit sonucu değildir.',
+    'line_profile': 'Bu merkezlenmiş profil örneğinde teorik profile göre 2 x en büyük |normal sapma| değerini girin. Her noktanın sınırı ±t/2; maksimum - minimum farkı yeterli değildir.',
+    'surface_profile': 'Bu merkezlenmiş profil örneğinde teorik yüzeye göre 2 x en büyük |normal sapma| değerini girin. Her noktanın sınırı ±t/2; maksimum - minimum farkı yeterli değildir.',
+    'parallelism': 'Datuma paralel yönü sabit iki düzlemin yüzeyi kapsayan normal mesafesini girin; datumdan uzaklık değildir.',
+    'perpendicularity': 'Datuma dik yönü sabit iki düzlemin yüzeyi kapsayan normal mesafesini girin; açı derecesi değildir.',
+    'angularity': 'Teorik açıda yönü sabit iki düzlemin yüzeyi kapsayan normal mesafesini girin; açı derecesi değildir.',
+    'position': 'Çap cinsinden değerlendirilmiş konum hatasını girin. Basit 2B kontrol: 2 x sqrt(dx² + dy²); radyal sapmayı doğrudan girmeyin. Bütün AME ekseni ayrıca değerlendirilir.',
+    'circular_runout': 'Aynı kesitte tam turdaki maksimum - minimum komparatör farkını (TIR) girin; ikiyle çarpmayın. Gerekli bütün kesitler değerlendirilir.',
+    'total_runout': 'Bütün yüzeyin tam dönüş ve boyuna taramasındaki ortak maksimum - minimum farkını (TIR) girin; kesitleri ayrı sıfırlamayın, ikiyle çarpmayın.',
+}
+
 GUIDE = """GEOMETRİK TOLERANSLAR · ASME Y14.5-2018
 
 Birincil kaynak kullanıcının yüklediği ASME-Y14.5-2018-R2024-Dimensioning-and-Tolerancing.pdf belgesidir. Kapak ve ana metin ASME Y14.5-2018 olarak doğrulandı. R2024 dosya adıdır; yeniden onay bilgisi kapakta/metinde görülmedi. Belge hash'i ve bölüm eşleştirmeleri raporda kayıtlıdır. PDF GitHub'a yüklenmez.
@@ -141,6 +156,10 @@ Datum sistemi — Bölüm 7: Datum, datum unsurunun true geometric counterpart'�
 Basic ölçüler — 5.1.1.2 ve 10.2.1.1: Teorik olarak tam ölçülerin dikdörtgen çerçevesi, gerçek konumu/profili belirler. Gösterim boyutu bir basic konum ölçüsü veya boyut toleransı değildir. Konum için eksen, RFS'de unrelated AME üzerinden değerlendirilir (10.3.2); MMC/LMC'de surface method varsayımı vardır (5.9.2). Türetilmiş medyan çizgiyle AME ekseni karıştırılmaz.
 
 Toplam bölge: t=0,3 mm, ±0,3 mm değildir. Konum Ø0,3 mm için radyal pay 0,15 mm’dir. Silindiriklikte t iki eş eksenli silindir arasındaki radyal mesafedir. Profilde normal yönde toplam genişlik t; aksi belirtilmezse uniform ve true profile çevresinde eşit dağılır (11.3). Yön toleransı mm cinsinden bölgedir; ± derece değildir.
+
+Ölçüm girişi: Konumda 2B radyal sapma 0,03 mm ise çap cinsinden hata 0,06 mm’dir; Ø0,05 sınırını aşar. Merkezlenmiş profil t=0,05 mm ise her normal sapma -0,025 ile +0,025 mm arasında kalmalıdır. +0,01 ve +0,04 mm sapmaların aralığı 0,03 mm olsa da profil uygun değildir: eşdeğer merkezlenmiş toplam hata 2 x 0,04 = 0,08 mm’dir. Datumlu profilde hizalama datum sistemini korumalıdır; datumsuz profilde izin verilen ilişkilendirme sonrası sapmalar kullanılır. Dairesellik/silindiriklik radyal bölge genişliğidir; salgı komparatörün maksimum - minimum farkıdır, tekrar ikiyle çarpılmaz. Alan, seçilen özellik için önceden değerlendirilmiş hata içindir; ham nokta/sapma hesaplayıcısı değildir.
+
+Çerçeve yazımı: Teknik çerçevede mm değerleri ondalık noktayla, 1 mm altı başında sıfırla yazılır (4.3.1, 4.3.3): 0.05. Türkçe giriş ve açıklamalarda ondalık virgül kullanılabilir. Şemanın 45° açısallık örneği gerçek 45° yönünde çizilir; profil sınırları teorik profile normal yönde eşit uzaklıktadır. Şema piksel boyutları fiziksel ölçüm değildir.
 
 Değeri tasarımcı belirler. Genel f/m/c/v boyut sınıflarından ASME geometrik değer türetilmez. İsteğe bağlı hata, ilgili özellik için doğru datum/bölgeyle değerlendirilmiş toplam geometrik hatadır; tek çap sapması veya nokta ölçümü değildir. Yalnızca hata <= t aritmetiği gösterilir. Tam resim/model uygunluğu, zarf/virtual condition, ölçüm belirsizliği ve kalite kabulü değerlendirilmez. Tür değişince eski ölçüm temizlenir; yeniden açılışta geri yüklenmez.
 

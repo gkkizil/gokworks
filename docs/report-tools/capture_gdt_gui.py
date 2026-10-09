@@ -1,5 +1,6 @@
 """Geometrik tolerans ekranının gerçek Tk görüntülerini kaydet."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -16,7 +17,11 @@ from geometric_tolerances.catalog import CHARACTERISTICS
 
 
 def main():
-    folder = ROOT/'docs/reports/geometric-tolerances'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', type=Path, default=ROOT/'docs/reports/geometric-tolerances')
+    parser.add_argument('--dimension-audit', action='store_true')
+    args = parser.parse_args()
+    folder = args.output_dir.resolve()
     images = folder/'screenshots'
     images.mkdir(parents=True, exist_ok=True)
     records, errors = [], []
@@ -27,6 +32,10 @@ def main():
              ('gdt-measurement-dark', 'Koyu', 'flatness', '0,05', 'A', '0,050001', '1240x860', 1),
              ('gdt-small-dark', 'Koyu', 'circularity', '0,05', 'A', '', '1000x690', 0),
              ('gdt-legacy-dark', 'Koyu', 'concentricity', '0,05', 'A', '', '1240x860', 0)]
+    if args.dimension_audit:
+        cases += [('gdt-angularity-dark', 'Koyu', 'angularity', '0,05', 'A', '', '1240x860', 0),
+                  ('gdt-profile-dark', 'Koyu', 'surface_profile', '0,05', 'A | B | C', '', '1240x860', 0),
+                  ('gdt-long-frame-dark', 'Koyu', 'position', '999,999999', 'A | B | C', '', '1000x690', 0)]
     with TemporaryDirectory() as temp:
         app = GokworksPdfApp(settings_path=Path(temp)/'settings.json')
         app.report_callback_exception = lambda *args: errors.append(str(args))

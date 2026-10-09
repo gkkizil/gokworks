@@ -1,5 +1,6 @@
 import csv
 from decimal import Decimal
+from math import atan2, cos, degrees, hypot, radians
 import os
 import time
 import unittest
@@ -8,13 +9,56 @@ from unittest.mock import patch
 import customtkinter as ctk
 
 import test_export_window as fixtures
-from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GUIDE, ACTIVE
-from geometric_tolerances.rules import DATUM_CHOICES, fmt, specify
+from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GUIDE, ACTIVE, MEASUREMENT_INPUTS
+from geometric_tolerances.rules import DATUM_CHOICES, fmt, fmt_mm, specify
 from gui.theme import INPUT
 from pdf.settings import load_settings, save_settings
 
 
 class GeometricRulesTests(unittest.TestCase):
+    def test_asme_mm_frame_keeps_leading_zero_and_exact_decimal_point(self):
+        for raw, expected in [('0,000001', '0.000001'), ('0.050000', '0.05'),
+                              ('1.000000', '1'), ('999.999999', '999.999999'), ('1000', '1000')]:
+            with self.subTest(value=raw):
+                spec = specify('position', '50', raw, 'A | B | C')
+                self.assertEqual(fmt_mm(spec.tolerance), expected)
+                self.assertEqual(spec.frame, f'Konum | ⌀{expected} | A | B | C')
+
+    def test_position_independent_pythagorean_examples_use_diametral_error(self):
+        # Exact 3-4-5 triangle; the GUI input is the evaluated diameter error.
+        for dx, dy, t, expected in [('0.015', '0.020', '0.05', True),
+                                    ('0.018', '0.024', '0.05', False),
+                                    ('-0.018', '0.024', '0.06', True)]:
+            with self.subTest(dx=dx, dy=dy, t=t):
+                radial = (Decimal(dx)**2+Decimal(dy)**2).sqrt()
+                spec = specify('position', '50', t, measured=str(2*radial))
+                self.assertEqual(spec.accepted, expected)
+                self.assertEqual(4*(Decimal(dx)**2+Decimal(dy)**2) <= Decimal(t)**2, expected)
+
+    def test_centered_profile_uses_absolute_normal_deviation_not_peak_to_peak(self):
+        for key in ('line_profile', 'surface_profile'):
+            for deviations, equivalent, accepted in [
+                (('0.01', '0.04'), '0.08', False),
+                (('-0.025', '0.025'), '0.05', True),
+                (('-0.025001', '0.001'), '0.050002', False)]:
+                with self.subTest(key=key, deviations=deviations):
+                    points = tuple(Decimal(point) for point in deviations)
+                    total = 2*max(map(abs, points))
+                    self.assertEqual(total, Decimal(equivalent))
+                    spec = specify(key, '50', '0.05', measured=str(total))
+                    self.assertEqual(spec.accepted, accepted)
+                    self.assertEqual(all(abs(point) <= Decimal('0.025') for point in points), accepted)
+        self.assertEqual(set(MEASUREMENT_INPUTS), {item.key for item in ACTIVE})
+
+    def test_radial_form_width_and_runout_tir_are_not_doubled(self):
+        for key in ('circularity', 'cylindricity', 'circular_runout', 'total_runout'):
+            with self.subTest(key=key):
+                # Evaluated bounding radii share an axis; radial width is 0.05.
+                width = Decimal('25.025')-Decimal('24.975')
+                self.assertEqual(width, Decimal('0.05'))
+                self.assertTrue(specify(key, '50', '0.05', measured=str(width)).accepted)
+                self.assertFalse(specify(key, '50', '0.05', measured='0.050001').accepted)
+
     def test_asme_2018_has_twelve_active_and_two_deleted_characteristics(self):
         self.assertEqual(len(ACTIVE), 12)
         self.assertEqual({item.key for item in CATALOG if not item.active}, {'concentricity', 'symmetry'})
@@ -38,7 +82,7 @@ class GeometricRulesTests(unittest.TestCase):
 
     def test_default_rfs_rmb_has_no_material_modifiers_and_position_example_requires_datum(self):
         spec = specify('position', '100', '0.05', 'A | B | C')
-        self.assertEqual(spec.frame, 'Konum | ⌀0,05 | A | B | C')
+        self.assertEqual(spec.frame, 'Konum | ⌀0.05 | A | B | C')
         self.assertIn('unrelated AME', spec.characteristic.zone)
         with self.assertRaisesRegex(ValueError, 'datum referansı'):
             specify('position', '100', '0.05', 'Yok')
@@ -49,7 +93,7 @@ class GeometricRulesTests(unittest.TestCase):
     def test_total_width_is_not_plus_minus_or_a_general_grade(self):
         spec = specify('cylindricity', '100', '0,3')
         self.assertEqual(spec.tolerance, Decimal('0.3'))
-        self.assertEqual(spec.frame, 'Silindiriklik | 0,3')
+        self.assertEqual(spec.frame, 'Silindiriklik | 0.3')
         self.assertNotIn('±', spec.frame)
         self.assertEqual(spec.datums, ())
         self.assertEqual(spec.tolerance, specify('cylindricity', '500', '0,3').tolerance)
@@ -58,7 +102,7 @@ class GeometricRulesTests(unittest.TestCase):
 
     def test_cylindrical_position_region_is_diameter_not_radius(self):
         spec = specify('position', '50', '0,3', 'A | B | C')
-        self.assertEqual(spec.frame, 'Konum | ⌀0,3 | A | B | C')
+        self.assertEqual(spec.frame, 'Konum | ⌀0.3 | A | B | C')
         self.assertEqual(spec.tolerance/2, Decimal('0.15'))
         self.assertEqual(spec.datums, ('A', 'B', 'C'))
         self.assertIn('t/2', spec.characteristic.zone)
@@ -153,6 +197,109 @@ class GeometricGuiTests(unittest.TestCase):
     def open_page(self):
         self.app.nav_buttons['geometric_tolerances'].invoke()
         self.settle()
+
+    def test_angularity_draws_45_degrees_with_perpendicular_width(self):
+        self.open_page()
+        self.app._select_gdt('angularity')
+        canvas = self.app.gdt_widgets['canvas']
+        boundaries = [canvas.coords(item) for item in canvas.find_withtag('angle-boundary')]
+        self.assertEqual(len(boundaries), 2)
+        x1, y1, x2, y2 = boundaries[0]
+        direction = (x2-x1, y2-y1)
+        self.assertAlmostEqual(abs(degrees(atan2(direction[1], direction[0]))), 45)
+        arrow = canvas.coords(canvas.find_withtag('dimension')[0])
+        normal = (arrow[2]-arrow[0], arrow[3]-arrow[1])
+        self.assertAlmostEqual(direction[0]*normal[0]+direction[1]*normal[1], 0)
+        # Both arrow endpoints actually belong to their boundary lines.
+        for point, edge in zip((arrow[:2], arrow[2:]), boundaries):
+            self.assertAlmostEqual((point[0]-edge[0])*direction[1]-(point[1]-edge[1])*direction[0], 0)
+
+    def test_position_diameter_arrow_reaches_both_cylinder_boundaries(self):
+        self.open_page()
+        self.app._select_gdt('position')
+        canvas = self.app.gdt_widgets['canvas']
+        circle = next(item for item in canvas.find_withtag('zone') if canvas.type(item) == 'oval')
+        left, top, right, bottom = canvas.coords(circle)
+        ax, ay, bx, by = canvas.coords(canvas.find_withtag('dimension')[0])
+        self.assertAlmostEqual(ax, (left+right)/2)
+        self.assertAlmostEqual(bx, ax)
+        self.assertAlmostEqual(ay, top)
+        self.assertAlmostEqual(by, bottom)
+        self.assertAlmostEqual(by-ay, right-left)
+
+    def test_profile_boundaries_are_centered_normal_offsets_and_arrow_meets_them(self):
+        self.open_page()
+        for kind in ('line_profile', 'surface_profile'):
+            with self.subTest(kind=kind):
+                self.app._select_gdt(kind)
+                canvas = self.app.gdt_widgets['canvas']
+                lines = [canvas.coords(item) for item in canvas.find_withtag('profile-boundary')]
+                true = canvas.coords(canvas.find_withtag('true-profile')[0])
+                arrow = canvas.coords(canvas.find_withtag('dimension')[0])
+                # Symmetry axis determined from the drawn curve, not a fixture coordinate.
+                center_x = (true[0]+true[-2])/2
+                # Arc endpoints are at 20 and 160 degrees; central vertex is at 90.
+                mid = len(true)//4*2
+                radius = (true[0]-center_x)/cos(radians(20))
+                center_y = true[mid+1]+radius
+                width = hypot(arrow[2]-arrow[0], arrow[3]-arrow[1])
+                for index in range(0, len(true), 2):
+                    radii = [hypot(points[index]-center_x, points[index+1]-center_y) for points in lines]
+                    actual = hypot(true[index]-center_x, true[index+1]-center_y)
+                    self.assertAlmostEqual(radii[1]-radii[0], width)
+                    self.assertAlmostEqual((radii[0]+radii[1])/2, actual)
+                boundary_tops = sorted(points[mid+1] for points in lines)
+                self.assertAlmostEqual(arrow[1], boundary_tops[0])
+                self.assertAlmostEqual(arrow[3], boundary_tops[1])
+                self.assertIn('Normal sınır: ±0,025 mm', self.app.gdt_widgets['value'].cget('text'))
+
+    def test_long_frame_numbers_fit_cells_and_canvas_at_three_scales(self):
+        self.addCleanup(lambda: ctk.set_widget_scaling(1))
+        self.open_page()
+        for scale in (1, 1.25, 1.5):
+            ctk.set_widget_scaling(scale)
+            self.settle(1.05)
+            self.app.geometry('1000x690+0+0' if scale == 1 else '1920x1080+0+0')
+            for theme in ('Açık', 'Koyu'):
+                self.app._change_theme(theme)
+                self.app._select_gdt('position')
+                self.app.gdt_state['datum'].set('A | B | C')
+                for value in ('0,000001', '999,999999', '1000'):
+                    with self.subTest(scale=scale, theme=theme, value=value):
+                        self.app.gdt_state['tolerance'].set(value)
+                        self.settle(.05)
+                        canvas = self.app.gdt_widgets['frame']
+                        cells = canvas.find_withtag('frame-cell')
+                        self.assertEqual(len(cells), 5)
+                        cell = canvas.coords(cells[1])
+                        box = canvas.bbox(canvas.find_withtag('frame-number')[0])
+                        self.assertGreaterEqual(box[0], cell[0]+5*scale)
+                        self.assertLessEqual(box[2], cell[2]-5*scale)
+                        self.assertGreaterEqual(box[1], cell[1])
+                        self.assertLessEqual(box[3], cell[3])
+                        whole = canvas.bbox('frame')
+                        self.assertGreaterEqual(whole[0], 0)
+                        self.assertLessEqual(whole[2], canvas.winfo_width())
+
+    def test_measurement_definition_and_half_width_export_follow_feature(self):
+        self.open_page()
+        for item in ACTIVE:
+            with self.subTest(kind=item.key):
+                self.app._select_gdt(item.key)
+                help_text = self.app.gdt_widgets['measured_help'].cget('text')
+                self.assertEqual(help_text, MEASUREMENT_INPUTS[item.key])
+                report = dict(self.app._gdt_report_rows())
+                self.assertEqual(report['Ölçüm girişinin anlamı'], help_text)
+                expected = '0,025' if item.diametrical or item.group == 'Profil' else ''
+                self.assertEqual(report['Merkezlenmiş bölge yarı payı (mm)'], expected)
+        self.app._select_gdt('position')
+        self.app.gdt_state['measured'].set('0,06')
+        self.assertIn('sınır dışında', self.app.gdt_widgets['assessment'].cget('text'))
+        self.assertIn('radyal sapmayı doğrudan girmeyin', self.app.gdt_widgets['measured_help'].cget('text'))
+        self.app._select_gdt('surface_profile')
+        self.app.gdt_state['measured'].set('0,08')
+        self.assertIn('sınır dışında', self.app.gdt_widgets['assessment'].cget('text'))
+        self.assertIn('maksimum - minimum farkı yeterli değildir', self.app.gdt_widgets['measured_help'].cget('text'))
 
     def test_deleted_symbols_are_educational_only_and_cannot_export_a_current_frame(self):
         self.open_page()
@@ -282,7 +429,7 @@ class GeometricGuiTests(unittest.TestCase):
         self.app.gdt_state['measured'].set('0.05')
         self.app._copy_gdt_report()
         clipboard = self.app.clipboard_get()
-        self.assertIn('Konum | ⌀0,3 | A | B | C', clipboard)
+        self.assertIn('Konum | ⌀0.3 | A | B | C', clipboard)
         self.assertIn('ASME Y14.5-2018', clipboard)
         self.assertIn('RFS / datum boyut özelliğinde RMB', clipboard)
         path = self.root/'gdt.csv'

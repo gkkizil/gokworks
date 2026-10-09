@@ -1,0 +1,218 @@
+[
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-dark.png",
+    "sha256": "375d5dcbc1a4127f8542bd7c650c0ec4c35d67743536eb96580568bfc5a71e0e",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "cylindricity",
+    "name": "Silindiriklik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-light.png",
+    "sha256": "ea38f84e37f9db829b7bcc877ca2c3a414206772236330da8d0c9489aaaf5508",
+    "theme": "Açık",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "cylindricity",
+    "name": "Silindiriklik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-position-dark.png",
+    "sha256": "83ff4e43c09c2588ac766e0665fb435fdbf661ae82d01ffd97c7984a0cfd3d79",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "position",
+    "name": "Konum",
+    "tolerance_mm": "0,3",
+    "datum": [
+      "A",
+      "B",
+      "C"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-total-runout-dark.png",
+    "sha256": "5b5f1ef83ddb7fe97a3e106f9f12019a32eac5f625d48f7d724769e6ebe14f8e",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "total_runout",
+    "name": "Toplam Salgı",
+    "tolerance_mm": "0,05",
+    "datum": [
+      "A"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-measurement-dark.png",
+    "sha256": "f1d2a8ca03eb122bde71dc150b58a0060308c1000841b01e9268c15a126d2191",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "flatness",
+    "name": "Düzlemsellik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "0,1",
+    "measured_error_mm": "0,050001",
+    "view": "Ölçüm karşılaştırması",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-small-dark.png",
+    "sha256": "bc882ba2876b3a13d352fffaff07454331b4237e51d0279be512b342c307d558",
+    "theme": "Koyu",
+    "size": [
+      1000,
+      690
+    ],
+    "kind": "circularity",
+    "name": "Dairesellik",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-legacy-dark.png",
+    "sha256": "3c60d68391d24c3b684210610bb4a0ff082f37e27092a6da88a96e0e10044c83",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "concentricity",
+    "name": "Eş Merkezlilik (eski)",
+    "tolerance_mm": "0,05",
+    "datum": [],
+    "asme_2018_active": false,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-angularity-dark.png",
+    "sha256": "8b8c98b2facc83f09b1210caa7107be47ac0f6bda7e4f51d81839d08854a1d76",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "angularity",
+    "name": "Açısallık",
+    "tolerance_mm": "0,05",
+    "datum": [
+      "A"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-profile-dark.png",
+    "sha256": "c66570019e5fd7d61cdb02e6fdb19d48699a14cc92612bbf6ba8774f633dee70",
+    "theme": "Koyu",
+    "size": [
+      1240,
+      860
+    ],
+    "kind": "surface_profile",
+    "name": "Yüzey Profili",
+    "tolerance_mm": "0,05",
+    "datum": [
+      "A",
+      "B",
+      "C"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  },
+  {
+    "file": "docs/reports/gdt-dimension-audit/screenshots/gdt-long-frame-dark.png",
+    "sha256": "1814bc8909d17c69bb74490eff8bb5f70a4aa09b4a8195ef84f60a3fa5be86ab",
+    "theme": "Koyu",
+    "size": [
+      1000,
+      690
+    ],
+    "kind": "position",
+    "name": "Konum",
+    "tolerance_mm": "999,999999",
+    "datum": [
+      "A",
+      "B",
+      "C"
+    ],
+    "asme_2018_active": true,
+    "standard": "ASME Y14.5-2018",
+    "size_tolerance_mm": "",
+    "measured_error_mm": "",
+    "view": "Tolerans çerçevesi ve bölge",
+    "native_tk_capture": true,
+    "solidworks_required": false
+  }
+]

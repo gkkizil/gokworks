@@ -25,9 +25,9 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**261 test geçti; 79'u gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**270 test geçti; 84'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
-Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/geometric-tolerances/test-run.log).
+Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/gdt-dimension-audit/test-run.log).
 
 Çalışan uygulamadan 1240×860 boyutunda alınan gerçek ekran görüntüleri:
 
@@ -45,9 +45,9 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 27 | 4.580 | 4.171 |
-| Testler | 11 | 3.903 | 3.482 |
-| Toplam | 38 | 8.483 | 7.653 |
+| Uygulama | 27 | 4.627 | 4.212 |
+| Testler | 11 | 4.050 | 3.620 |
+| Toplam | 38 | 8.677 | 7.832 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -66,3 +66,5 @@ ISO sol panelinde **ISO seçimi / Manuel kontrol** menüsü bulunur. Manuel giri
 Manuel kontrolde Montaj hedefi menüsü ve MONTAJ UYUMU / EN YAKIN GEÇME kartı eklendi. Yeni kart farklı referans/gerçek geçme türünü, sınırda teması ve büyük limit farklarını açıklar. 6 hesap + 4 GUI testi daha geçti; CSV/pano ve hedef tercihi desteklenir. [Güncel kart görüntüsü](reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [240 testlik güncel rapor](reports/fit-compatibility/README.md).
 
 GD&T eklemesinde 10 hesap/içerik ve 11 GUI testi geçti. 12 güncel türün iki temada çizimi, iki kaldırılmış kartın çıktı engeli ve Rule #1 boyut ilişkisi, datum menüleri, arama, CSV/pano, hatalı giriş, ölçüm temizliği, rehber ve %100/%125/%150 alan erişimi kontrol edildi. [261 testlik son rapor](reports/geometric-tolerances/README.md).
+
+GD&T ölçü denetiminde 9 regresyon testi eklendi: gerçek 45° ve normal ok, tam çap oku, normal yönde eşit profil sınırları, teknik çerçevede ASME ondalık noktası ve uzun sayıların iki tema/üç ölçekte hücreye sığması. Özelliğe göre ölçüm açıklamaları ve profil ±t/2 payı eklendi. [270 testlik güncel rapor](reports/gdt-dimension-audit/README.md).

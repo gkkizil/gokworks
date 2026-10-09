@@ -1,0 +1,11 @@
+{
+  "file": "GOKWORKS_GDT_Olcu_Denetimi_2026-10-09.docx",
+  "sha256": "6916788efbd5e9ebe5c776a7d8e64f799118cacf9152e2458c435dbe539ad5f6",
+  "bytes": 336845,
+  "tests": 270,
+  "gui_tests": 84,
+  "embedded_images": 10,
+  "zip_crc_ok": true,
+  "python_docx_readback_ok": true,
+  "native_word_render_verified": false
+}

@@ -60,7 +60,22 @@ Koaksiyellik için **10.6**, simetrik ilişkiler için **10.7**, position/profil
 
 ## Sayısal kapsam
 
+ASME 4.3.1/4.3.3 gereği teknik tolerans çerçevesinde ondalık nokta ve 1 mm altında başta sıfır kullanılır: `Ø0.05 | A | B | C`. Türkçe giriş/açıklamalar ondalık virgül kabul eder. Çerçeve hücresi gerçek Tk yazı sınırından boyutlandırılır; en uzun sayı ve çap işareti kırpılmaz.
+
 Virgül/nokta, en çok altı ondalık basamak ve `Decimal` kullanılır. `hata <= t`, `pay = t − hata`: t=0,05 için hata 0,050000 sınırda, 0,050001 sınır dışında; pay −0,000001 mm. 1 nm aşım yuvarlanmaz. Normal yüzeyde t=0,05 / boyut toleransı 0,05 reddedilir; 0,050001 boyut toleransı ilişkiyi sağlar.
+
+Ölçüm alanı ham nokta/sapma yerine seçilen özellik için önceden değerlendirilmiş toplam hata ister. Her güncel türün tanımı alanın altında ve CSV/panoda gösterilir:
+
+| Tür / örnek | Girilecek hata ve sonuç |
+| --- | --- |
+| RFS konum: dx=0,015, dy=0,020 mm | Basit 2B çap hatası `2 × √(dx²+dy²) = 0,05 mm`; Ø0,05 sınırında. Bütün AME ekseni ayrıca değerlendirilir. |
+| RFS konum: radyal sapma 0,03 mm | Çap hatası 0,06 mm; Ø0,05 sınırını aşar. |
+| Merkezlenmiş profil: sapmalar +0,01 / +0,04 mm | Her normal sapma ±t/2 içinde olmalı. t=0,05 için +0,04 uygun değildir; eşdeğer hata `2 × max(abs(sapma)) = 0,08 mm`. Max−min=0,03 kullanmak hatalıdır. |
+| Merkezlenmiş profil: sapmalar −0,025 / +0,025 mm | Eşdeğer hata 0,05 mm; t=0,05 sınırında. |
+| Dairesellik / silindiriklik | Değerlendirilmiş sınır çemberi/silindiri için radyal mesafe `Rmax−Rmin`; çap farkı değildir. |
+| Radyal dairesel / toplam salgı | Komparatörün maksimum−minimum farkı (TIR); tekrar ikiyle çarpılmaz. Toplam salgıda kesitler ayrı sıfırlanmaz. |
+
+Datumlu profilde hizalama datum sistemini korur; datumsuz profilde izin verilen ilişkilendirme sonrası normal sapmalar kullanılır. Her normal yön yerel teorik profil üzerinden değerlendirilir. Merkezlenmiş profil için sınır ±t/2 ve konum için radyal pay t/2 ayrıca gösterilir.
 
 Gösterim boyutu `0 < D ≤ 10000`, t/boyut toleransı `0 < değer ≤ 1000`, hata `0 ≤ e ≤ 1000` mm: arayüz sınırlarıdır, normatif ASME aralığı/üretim önerisi değildir. Sıfır MMC konum, bonus, datum mobility, kompozit/ortak bölge, tangent plane, projected zone, free state ve profil değiştiricileri üretilmez.
 
@@ -81,6 +96,8 @@ Eski kaynak kaldırılmış iki işareti içerir; uygulama bunları birincil ASM
 Checkout sabit commit'te olmalıdır. Belge yardımcısı `pdftotext`/`pdfinfo` ister; bunlar uygulama bağımlılığı değildir.
 
 ## Testler ve rapor
+
+Son ölçü denetiminde 9 regresyon testi eklendi. Gerçek Tk koordinatlarıyla 45° açı, t okunun sınırlara dikliği/teması, çap okunun çembere erişimi, profilin her örnek noktada eşit normal ofseti ve merkezlenmesi kontrol edilir. Uzun çerçeve sayıları iki tema × %100/%125/%150'de gerçek hücre/yazı sınırlarıyla sınanır. Elle hesaplanan konum/profil/radyal örnekleri ayrıca karşılaştırılır. [Güncel ölçü denetimi ve Word raporu](reports/gdt-dimension-audit/README.md).
 
 10 hesap/içerik ve 11 gerçek GUI testi eklendi. 12 güncel/2 eski tür iki temada seçildi. Datum/çerçeve, Rule #1 hata engeli, 1 nm eşik, geçersizlik, arama/Ctrl+F, CSV/pano/iptal/kayıt hatası, tercihler/rehber ve ölçüm temizliği sınandı.
 

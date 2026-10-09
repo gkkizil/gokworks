@@ -1,0 +1,40 @@
+{
+  "before": {
+    "angularity_degrees": 29.386379960350897,
+    "position_arrow_over_diameter": 0.8571428571428574,
+    "long_value_fits_with_5px_padding": false,
+    "number_bbox": [
+      121,
+      22,
+      210,
+      39
+    ],
+    "number_cell": [
+      120.5,
+      12.0,
+      208.5,
+      48.0
+    ]
+  },
+  "after": {
+    "angularity_degrees": 45.0,
+    "position_arrow_over_diameter": 1.0000000000000002,
+    "long_value_fits_with_5px_padding": true,
+    "number_bbox": [
+      121,
+      22,
+      210,
+      39
+    ],
+    "number_cell": [
+      110.0,
+      12.0,
+      219.0,
+      48.0
+    ]
+  },
+  "baseline_commit": "870f96c840caf72262d43e41cf51dd8bd67f3efc",
+  "baseline_diagram_sha256": "d345e1188ae8bc5f7b7ede9933b4d3d9887eef0bdd7b1749b027058756b486d7",
+  "current_diagram_sha256": "3154575966682c8d763052530399ceb0253c604b7f9a0313271b3e42330bc3ab",
+  "native_tk_measurement": true
+}

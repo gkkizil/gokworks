@@ -41,6 +41,7 @@ def main():
     pdf_text = subprocess.check_output(['pdftotext', str(standard), '-'], text=True)
     assert 'ASME Y14.5-2018' in pdf_text, 'Belge baskısı doğrulanamadı.'
     anchors = [('Önsöz: kaldırılanlar', 'two past practices, use of concentricity'),
+               ('4.3.3: ondalık nokta', '4.3.3 Decimal Points'),
                ('5.8.1: Rule #1', '5.8.1 Rule #1'),
                ('5.9.1: Rule #2', '5.9.1 Rule #2'),
                ('8.4.4: silindiriklik', '8.4.4 Cylindricity'),
@@ -63,7 +64,7 @@ def main():
                'r2024_in_filename': 'R2024' in standard.name, 'r2024_confirmed_in_content':
                'R2024' in pdf_text or 'Reaffirmed 2024' in pdf_text,
                'metadata_title': title, 'metadata_used_as_edition_evidence': False,
-               'reviewed_sections': ['Önsöz', '5.1.1.2', '5.8.1–5.8.3', '5.9.1–5.9.2', '7',
+               'reviewed_sections': ['Önsöz', '4.3.1–4.3.3', '5.1.1.2', '5.8.1–5.8.3', '5.9.1–5.9.2', '7',
                    '8.4.1–8.4.4', '9.3', '10.2–10.3.2', '10.6–10.7', '11.2–11.3', '12.4', 'D.2–D.4'],
                'section_anchor_checks': checks, 'pdf_published_to_repository': False,
                'full_standard_conformance_certified': False}

@@ -1,0 +1,243 @@
+{
+  "checked_utc": "2026-10-09T12:55:44.739166+00:00",
+  "repository": "https://github.com/juanvanyo/FreeCAD-GDT",
+  "commit": "841518cdd74f6a7dad3321d29937c49dc7dc4b1f",
+  "discovered_via": "https://github.com/FreeCAD/FreeCAD-addons/blob/master/.gitmodules",
+  "comparisons_total": 14,
+  "unexpected_differences": 0,
+  "characteristics": [
+    {
+      "key": "straightness",
+      "application": "Straightness",
+      "reference": "Straightness",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "8.4.1.1"
+    },
+    {
+      "key": "flatness",
+      "application": "Flatness",
+      "reference": "Flatness",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "8.4.2"
+    },
+    {
+      "key": "circularity",
+      "application": "Circularity",
+      "reference": "Circularity",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "8.4.3"
+    },
+    {
+      "key": "cylindricity",
+      "application": "Cylindricity",
+      "reference": "Cylindricity",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "8.4.4"
+    },
+    {
+      "key": "line_profile",
+      "application": "Profile of a Line",
+      "reference": "Profile of a line",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "11.2.1.2 / 11.3.1"
+    },
+    {
+      "key": "surface_profile",
+      "application": "Profile of a Surface",
+      "reference": "Profile of a surface",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "11.2.1.1 / 11.3.1"
+    },
+    {
+      "key": "parallelism",
+      "application": "Parallelism",
+      "reference": "Parallelism",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "9.3 / 9.3.2"
+    },
+    {
+      "key": "perpendicularity",
+      "application": "Perpendicularity",
+      "reference": "Perpendicularity",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "9.3 / 9.3.2"
+    },
+    {
+      "key": "angularity",
+      "application": "Angularity",
+      "reference": "Angularity",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "9.3 / 9.3.2"
+    },
+    {
+      "key": "position",
+      "application": "Position",
+      "reference": "Position",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "10.2 / 10.3.2"
+    },
+    {
+      "key": "concentricity",
+      "application": "Concentricity",
+      "reference": "Concentricity",
+      "match": true,
+      "asme_2018_active": false,
+      "asme_section": "Önsöz / Ek D.2–D.4 / 10.6"
+    },
+    {
+      "key": "symmetry",
+      "application": "Symmetry",
+      "reference": "Symmetry",
+      "match": true,
+      "asme_2018_active": false,
+      "asme_section": "Önsöz / Ek D.3–D.4 / 10.7"
+    },
+    {
+      "key": "circular_runout",
+      "application": "Circular Run-out",
+      "reference": "Circular run-out",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "12.4.1.1"
+    },
+    {
+      "key": "total_runout",
+      "application": "Total Run-out",
+      "reference": "Total run-out",
+      "match": true,
+      "asme_2018_active": true,
+      "asme_section": "12.4.2.1"
+    }
+  ],
+  "explicit_tolerance_and_separate_datum_system": true,
+  "freecad_application_executed": false,
+  "numeric_standard_validation": false,
+  "source_code_copied": false,
+  "primary_standard": {
+    "filename": "ASME-Y14.5-2018-R2024-Dimensioning-and-Tolerancing.pdf",
+    "sha256": "f10fe25d6b78453df203a5102eaeb5f9e13c70ced3404789a034e87104dc2ada",
+    "bytes": 22932636,
+    "pdf_pages": 347,
+    "cover_edition": "ASME Y14.5-2018",
+    "r2024_in_filename": true,
+    "r2024_confirmed_in_content": false,
+    "metadata_title": "ASTM A240&A240M",
+    "metadata_used_as_edition_evidence": false,
+    "reviewed_sections": [
+      "Önsöz",
+      "4.3.1–4.3.3",
+      "5.1.1.2",
+      "5.8.1–5.8.3",
+      "5.9.1–5.9.2",
+      "7",
+      "8.4.1–8.4.4",
+      "9.3",
+      "10.2–10.3.2",
+      "10.6–10.7",
+      "11.2–11.3",
+      "12.4",
+      "D.2–D.4"
+    ],
+    "section_anchor_checks": [
+      {
+        "section": "Önsöz: kaldırılanlar",
+        "pdf_pages": [
+          16
+        ],
+        "found": true
+      },
+      {
+        "section": "4.3.3: ondalık nokta",
+        "pdf_pages": [
+          31
+        ],
+        "found": true
+      },
+      {
+        "section": "5.8.1: Rule #1",
+        "pdf_pages": [
+          53
+        ],
+        "found": true
+      },
+      {
+        "section": "5.9.1: Rule #2",
+        "pdf_pages": [
+          54
+        ],
+        "found": true
+      },
+      {
+        "section": "8.4.4: silindiriklik",
+        "pdf_pages": [
+          167
+        ],
+        "found": true
+      },
+      {
+        "section": "10.3.2: RFS konum",
+        "pdf_pages": [
+          197
+        ],
+        "found": true
+      },
+      {
+        "section": "11.3.1: profil bölgesi",
+        "pdf_pages": [
+          258
+        ],
+        "found": true
+      },
+      {
+        "section": "12.4.2.1: toplam salgı",
+        "pdf_pages": [
+          306
+        ],
+        "found": true
+      },
+      {
+        "section": "D.4: kaldırılan semboller",
+        "pdf_pages": [
+          344
+        ],
+        "found": true
+      }
+    ],
+    "pdf_published_to_repository": false,
+    "full_standard_conformance_certified": false
+  },
+  "active_characteristics": 12,
+  "legacy_symbols_blocked": [
+    "concentricity",
+    "symmetry"
+  ],
+  "reference_sha256": {
+    "README.md": "8a041705985784983652e2acd2d2500d37ed9f00c1e249017931e3e8d63017a0",
+    "GDT.py": "cd3077a7178619722cb7c4314f7c3594c2192a51b8de017d3719249288496b85",
+    "geometricTolerance.py": "c92c09728a8b0b630be4b2df4b33ee998f6bf88827ea52f9edd78dcbc994ed92",
+    "Gui/Resources/icons/Characteristic/angularity.svg": "45025e239bce4a3a1c0efbe3cefb2bdefd35849b2a3b47f5e3969f7de9597674",
+    "Gui/Resources/icons/Characteristic/circularRunOut.svg": "b02f10a74f9bcd43bc2799521014a2d42f694bf3903e9993514a92eda67385bc",
+    "Gui/Resources/icons/Characteristic/circularity.svg": "35ee1329c83cc508855b37195ac974102256d70ca6cd51564cd9cd58dbff8b09",
+    "Gui/Resources/icons/Characteristic/concentricity.svg": "e8582b5e8d9d1de930d7a115eef6a7a2b31679695b95662a43fba4523cb68570",
+    "Gui/Resources/icons/Characteristic/cylindricity.svg": "8a97366c5f4ab49401a6912f39d2411ede2f6e5a50f5f5993ab2a6186d686b34",
+    "Gui/Resources/icons/Characteristic/flatness.svg": "12437a49f1d7ead7a9e43464c405429b4c73c664e05c72705c43db8cb9457fbf",
+    "Gui/Resources/icons/Characteristic/parallelism.svg": "85a267642d1e1688ee9e2e209b24ddfe77906ff436c9a22a4a58e83bf94a75c8",
+    "Gui/Resources/icons/Characteristic/perpendicularity.svg": "600b58d13be76f6c4e8fff6b4ec5595c30b155cd5d55cdab905241debf81e839",
+    "Gui/Resources/icons/Characteristic/position.svg": "ab6a79ef430c3cfa164cd1603cd65a8ec8d5054989884ffff44784cde940399d",
+    "Gui/Resources/icons/Characteristic/profileOfALine.svg": "037a883e56aab6633af0a71fd1154ea29c0096e8b359f94f1db60b2d67fbd6b0",
+    "Gui/Resources/icons/Characteristic/profileOfASurface.svg": "30614fd6a5379fd0b73f2066e0ef46d0afc050c3b09184d7da873607006ead66",
+    "Gui/Resources/icons/Characteristic/straightness.svg": "55b10e0f686f9abccbc533640471d4e6d0d9a967eca5275be2dfbcf57b1080f2",
+    "Gui/Resources/icons/Characteristic/symmetry.svg": "bfced8cdd5a43d638f32bf30d4b772a81a658f2f7edf895fbb7e3605b7d833b3",
+    "Gui/Resources/icons/Characteristic/totalRunOut.svg": "8b1d7c68b5b05134407040b7bc5b14521b1b23670447166f4d30bf4d800a22a8"
+  }
+}

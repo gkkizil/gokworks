@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 import customtkinter as ctk
 
-from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE
+from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
 from geometric_tolerances.diagram import draw, symbol
 from geometric_tolerances.rules import DATUM_CHOICES, fmt, specify
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
@@ -164,8 +164,10 @@ class GeometricTolerancesView:
                     fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
                 entry.grid(row=3, column=0, sticky='ew', padx=14, pady=(5, 10))
                 self.gdt_widgets['measured'] = entry
+                self.gdt_widgets['measured_help'] = self._label(card, '', 11, MUTED, wraplength=400, anchor='w', justify='left')
+                self.gdt_widgets['measured_help'].grid(row=4, column=0, sticky='ew', padx=14, pady=(0, 10))
             self.gdt_widgets[key] = self._label(card, '', 12, TEXT, justify='left', anchor='w', wraplength=400)
-            self.gdt_widgets[key].grid(row=4 if key == 'assessment' else 1, column=0, sticky='ew', padx=14, pady=(0, 14))
+            self.gdt_widgets[key].grid(row=5 if key == 'assessment' else 1, column=0, sticky='ew', padx=14, pady=(0, 14))
         self.gdt_widgets['example'] = self._label(details, '', 11, MUTED, justify='left', anchor='w', wraplength=400)
         self.gdt_widgets['example'].grid(row=6, column=0, sticky='ew', padx=4, pady=(0, 8))
         self.gdt_widgets['copy'] = self._button(details, 'Belirtimi kopyala', self._copy_gdt_report, icon='copy', width=165)
@@ -231,6 +233,7 @@ class GeometricTolerancesView:
                           ('measurement', item.measurement), ('note', item.note),
                           ('example', 'Kullanım örneği: '+item.example)]:
             self.gdt_widgets[key].configure(text=text)
+        self.gdt_widgets['measured_help'].configure(text=MEASUREMENT_INPUTS.get(item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.'))
         for key in ('size', 'tolerance', 'measured', 'size_tolerance'):
             self.gdt_widgets[key].configure(state='normal' if item.active else 'disabled')
         self.gdt_widgets['size_rule'].grid() if item.group == 'Şekil' else self.gdt_widgets['size_rule'].grid_remove()
@@ -257,6 +260,8 @@ class GeometricTolerancesView:
             value = ('Øt' if item.diametrical else 't') + ' = '+fmt(spec.tolerance)+' mm'
             if item.diametrical:
                 value += '\nRadyal pay: '+fmt(spec.tolerance/2)+' mm'
+            elif item.group == 'Profil':
+                value += '\nNormal sınır: ±'+fmt(spec.tolerance/2)+' mm'
             self.gdt_widgets['value'].configure(text=value, text_color=ACCENT)
             self.gdt_widgets['assessment'].configure(text=self._gdt_assessment(), text_color=
                 MUTED if spec.accepted is None else GREEN if spec.accepted else RED)
@@ -320,7 +325,7 @@ class GeometricTolerancesView:
         self.gdt_widgets['catalog'].configure(width=form_width)
         available = max(240, int(width-form_width-104))
         self.gdt_widgets['value'].configure(wraplength=max(140, (available-28)/2))
-        for key in ('zone', 'measurement', 'note', 'assessment', 'example', 'datum_note', 'size_rule_help'):
+        for key in ('zone', 'measurement', 'note', 'assessment', 'example', 'datum_note', 'size_rule_help', 'measured_help'):
             self.gdt_widgets[key].configure(wraplength=available)
         for key in ('title', 'english', 'description'):
             self.gdt_widgets[key].configure(wraplength=max(180, available-74))
@@ -343,6 +348,8 @@ class GeometricTolerancesView:
                 ('Datum sırası', ' | '.join(spec.datums) or 'Yok'), ('Örnek çerçeve', spec.frame),
                 ('Bölge', item.zone), ('Ölçüm yöntemi', item.measurement), ('Üretim notu', item.note),
                 ('Kullanım örneği', item.example),
+                ('Ölçüm girişinin anlamı', MEASUREMENT_INPUTS[item.key]),
+                ('Merkezlenmiş bölge yarı payı (mm)', fmt(spec.tolerance/2) if item.diametrical or item.group == 'Profil' else ''),
                 ('Ölçülmüş toplam geometrik hata (mm)', '' if spec.measured is None else fmt(spec.measured)),
                 ('Aritmetik karşılaştırma', self._gdt_assessment()),
                 ('Kapsam', 'Öğretici şema; tasarımcı belirtimi; CAD değişikliği veya belirsizlikle kalite kabulü değildir.')]
