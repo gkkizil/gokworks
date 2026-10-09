@@ -1,6 +1,6 @@
 # DXF/DWG aktarımı: GitHub kaynaklarıyla doğrulama
 
-Bu rapor DXF/DWG geliştirmesindeki geçmiş 55 testlik doğrulamayı kaydeder. Daha sonra PDF ve diğer modüller de sınandı: **140 testlik güncel sonuç ve son DXF/GUI incelemesi [tüm programın doğrulama raporundadır](program-verification.md).**
+Bu rapor DXF/DWG geliştirmesindeki geçmiş 55 testlik doğrulamayı kaydeder. Daha sonra PDF ve diğer modüller de sınandı: **199 testlik güncel sonuç ve son DXF/GUI incelemesi [tüm programın doğrulama raporundadır](program-verification.md).**
 
 Kıyaslama, aktarım çağrısının referanslarla uyumlu olduğunu gösterdi ve önceki kodda bir COM hatası ortaya çıkardı. Hata yeniden üretilip düzeltildi. **55 yerel test geçti; gerçek SolidWorks çıktısının geometrik doğruluğu henüz doğrulanmadı.**
 

@@ -98,7 +98,7 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son manuel K/R sürümü doğrulamasında **189 test geçti**; 44 gerçek GUI testi dahildir. [Güncel test kanıtları](docs/reports/manual-k-radius/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son kapsamlı kontrolde **199 test geçti**; 49 gerçek GUI testi dahildir. [Güncel test kanıtları ve Word raporu](docs/reports/final-audit/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 
@@ -110,4 +110,6 @@ K/R öncesi GUI denetiminde 140 testin tamamı geçti; 34'ü gerçek Tk GUI test
 
 K/R eklenmesi sonrası üç ekranın açık/koyu görüntüleri ve elle hesap kontrolünü içeren [174 testlik sürümün Word raporu](docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx). Önceki 140 testlik GUI raporu tarihsel kayıt olarak korunur.
 
-Manuel K/R eklenmesi sonrası [189 testlik son kontrol](docs/reports/manual-k-radius/README.md) ve [manuel sekmenin görüntüsü](docs/screenshots/gui-manual-k-radius-light.png).
+Manuel K/R eklenmesi sonrası [manuel eklemedeki 189 testlik kontrol](docs/reports/manual-k-radius/README.md) ve [manuel sekmenin görüntüsü](docs/screenshots/gui-manual-k-radius-light.png).
+
+Son GitHub kaynak karşılaştırması, 112 yerleşim senaryosu, 144 menü seçimi ve güncel sekiz ekran görüntüsü: [199 testlik son kontrol](docs/reports/final-audit/README.md). [Güncel Word raporu](docs/reports/final-audit/GOKWORKS_Son_Kontrol_2026-10-09.docx).

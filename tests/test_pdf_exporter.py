@@ -266,6 +266,47 @@ class PdfTests(unittest.TestCase):
         self.assertFalse(self.model.calls)
         self.assertEqual(self.app.activated[-1], previous.path)
 
+    def test_wrong_open_document_is_rejected_before_export(self):
+        other = FakeDrawing(self.root/'other.slddrw')
+        other.app = self.app
+        self.app.GetOpenDocumentByName = Mock(return_value=other)
+        self.app.ActiveDoc = other
+        self.assertEqual(self.run_one()[0], 'error')
+        self.assertFalse(other.calls)
+        self.assertFalse(self.target.exists())
+
+    def test_activation_checks_returned_document_and_actual_active_document(self):
+        for wrong_return in (True, False):
+            with self.subTest(wrong_return=wrong_return):
+                self.target.unlink(missing_ok=True)
+                self.model.calls.clear()
+                other = FakeDrawing(self.root/'other.slddrw')
+                self.app.ActiveDoc = other
+                def activate(name, preferences, rebuild, errors):
+                    self.app.ActiveDoc = self.model if wrong_return else other
+                    return other if wrong_return else self.model
+                self.app.ActivateDoc3 = activate
+                self.assertEqual(self.run_one()[0], 'error')
+                self.assertFalse(self.model.calls)
+                self.assertFalse(self.target.exists())
+
+    def test_valid_long_pdf_name_uses_short_temporary_name(self):
+        self.target = self.output/('p'*225+'.pdf')
+        self.assertEqual(self.run_one()[0], 'success')
+        self.assertEqual(self.target.read_bytes(), PDF)
+
+    def test_pdf_target_directory_is_an_error_even_without_overwrite(self):
+        self.target.mkdir(parents=True)
+        self.assertEqual(self.run_one()[0], 'error')
+        self.assertFalse(self.model.calls)
+
+    def test_com_cleanup_failure_is_reported_and_worker_returns(self):
+        self.com.CoUninitialize.side_effect = RuntimeError('cleanup failed')
+        messages = self.run_batch()
+        self.assertEqual(messages[-1][0], 'done')
+        self.assertEqual(messages[-1][1]['state'], 'error')
+        self.assertIn('cleanup failed', messages[-1][1]['error'])
+
     def test_single_sheet_string(self):
         self.model.sheets = 'Tek Sayfa'
         self.assertEqual(self.run_one()[0], 'success')

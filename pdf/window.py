@@ -52,7 +52,10 @@ class GokworksPdfApp(KFactorView, WorkspaceLayout, ctk.CTk):
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         super().__init__()
         self.title("GOKWORKS • SolidWorks Otomasyonu")
-        self.geometry("1240x860")
+        window_scale = self._get_window_scaling()
+        width = min(1240, max(1000, int(self.winfo_screenwidth()/window_scale)-24))
+        height = min(860, max(690, int(self.winfo_screenheight()/window_scale)-32))
+        self.geometry(f"{width}x{height}")
         self.minsize(1000, 690)
         self.configure(fg_color=BG)
         self.settings_path = settings_path

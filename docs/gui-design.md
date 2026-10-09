@@ -23,25 +23,26 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**189 test geçti; 44'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**199 test geçti; 49'u gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
-Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](test-results/latest-tests.log).
+Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/final-audit/test-run.log).
 
 Çalışan uygulamadan 1240×860 boyutunda alınan gerçek ekran görüntüleri:
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| DXF/DWG | [Görüntü](screenshots/gui-current-dxf-dwg-light.png) | [Görüntü](screenshots/gui-current-dxf-dwg-dark.png) |
-| PDF | [Görüntü](screenshots/gui-current-pdf-light.png) | [Görüntü](screenshots/gui-current-pdf-dark.png) |
-| K FAKTÖR - RADIUS / Manuel | [Görüntü](screenshots/gui-manual-k-radius-light.png) | [Görüntü](screenshots/gui-manual-k-radius-dark.png) |
+| DXF/DWG | [Görüntü](reports/final-audit/screenshots/dxf-dwg-light.png) | [Görüntü](reports/final-audit/screenshots/dxf-dwg-dark.png) |
+| PDF | [Görüntü](reports/final-audit/screenshots/pdf-light.png) | [Görüntü](reports/final-audit/screenshots/pdf-dark.png) |
+| K FAKTÖR - RADIUS / Manuel | [Görüntü](reports/final-audit/screenshots/manual-k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/manual-k-radius-dark.png) |
+| K FAKTÖR - RADIUS / Takım | [Görüntü](reports/final-audit/screenshots/k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/k-radius-dark.png) |
 
 ## Kod satırı sayısı
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 17 | 2.788 | 2.539 |
-| Testler | 7 | 2.753 | 2.434 |
-| Toplam | 24 | 5.541 | 4.973 |
+| Uygulama | 17 | 2.811 | 2.560 |
+| Testler | 8 | 2.951 | 2.613 |
+| Toplam | 25 | 5.762 | 5.173 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -50,3 +51,5 @@ Son yeniden denetimde 12 ek GUI kabul testi eklendi. İlk yerleşim zamanlaması
 K/R güncel ekranında Montajı tara, Hesapla ve dosya kayıt seçimi kaydırılan formun dışındadır. Seçilen malzeme tüm saclara varsayılır; parametreler değiştikçe numune hesabı yenilenir. [Yeni Word raporu](reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx); eski rapor K/R öncesi denetimin kaydıdır.
 
 Son manuel eklemede 15 test çalıştırıldı. Form alanları küçük pencerede kaydırılarak erişilebilir; tarama/uygulama ve sonuç listesi görünür kalır. [189 testlik kanıt](reports/manual-k-radius/README.md). Önceki Word raporları kendi sürümlerinin tarihsel kayıtlarıdır.
+
+Son denetim: 112 yerleşim kombinasyonu, 144 gerçek menü seçimi ve %150 ölçek dahil 49 GUI testi geçti. Yeşil vurgu korundu. Desteklenen ekranlarda ilk pencere mevcut ölçülere göre seçilir. [Güncel Word raporu, ekranlar ve kanıtlar](reports/final-audit/README.md).

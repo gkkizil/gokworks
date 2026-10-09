@@ -243,6 +243,7 @@ class WorkspaceLayout:
         self.report_button.grid(row=0, column=1)
         self.result_tabs = ctk.CTkTabview(
             card, fg_color=PANEL, corner_radius=6, anchor="w", text_color=TEXT,
+            command=self._resize_pdf_area,
             segmented_button_fg_color=PANEL, segmented_button_selected_color=ACCENT_BG,
             segmented_button_selected_hover_color=HOVER, segmented_button_unselected_color=PANEL,
             segmented_button_unselected_hover_color=SECONDARY,

@@ -38,6 +38,10 @@ def _document_name(model):
     return read_com_value(model, "GetPathName") or read_com_value(model, "GetTitle")
 
 
+def _path_key(path):
+    return os.path.abspath(str(path)).replace("\\", "/").lower() if path else ""
+
+
 def _drawing_api(model):
     if hasattr(model, "GetSheetNames"):
         return model
@@ -99,9 +103,12 @@ def _validate_pdf(path):
 def export_one_drawing(app, drawing, destination, overwrite):
     """Tüm sayfaları geçici PDF'e aktar; başarılı dosyayı hedefe taşı."""
     destination = Path(destination)
-    if destination.exists() and not overwrite:
-        return "skipped", "PDF zaten var."
-    temporary = destination.with_name(f".{destination.stem}.gokworks-{uuid4().hex}.pdf")
+    if destination.exists():
+        if not destination.is_file():
+            return "error", "PDF çıktı yolu bir dosya değil."
+        if not overwrite:
+            return "skipped", "PDF zaten var."
+    temporary = destination.with_name(f".gokworks-{uuid4().hex}.pdf")
     opened_here = False
     model = None
     previous_name = None
@@ -124,6 +131,8 @@ def export_one_drawing(app, drawing, destination, overwrite):
                 notes.append(f"Açma uyarısı: {warnings.value}")
         if read_com_value(model, "GetType") != DRAWING:
             raise RuntimeError("Dosya bir teknik resim değil.")
+        if _path_key(read_com_value(model, "GetPathName")) != _path_key(drawing):
+            raise RuntimeError("SolidWorks istenen teknik resim yerine farklı belge döndürdü; aktarım yapılmadı.")
 
         data = app.GetExportFileData(PDF_DATA)
         if data is None:
@@ -146,6 +155,11 @@ def export_one_drawing(app, drawing, destination, overwrite):
             activated_here = True
             if activated is None or errors.value:
                 raise RuntimeError(f"Teknik resim etkinleştirilemedi. SolidWorks hata kodu: {errors.value}")
+            if _path_key(read_com_value(activated, "GetPathName")) != _path_key(drawing):
+                raise RuntimeError("SolidWorks farklı bir belgeyi etkinleştirdi; aktarım yapılmadı.")
+        active = read_com_value(app, "ActiveDoc")
+        if active is None or _path_key(read_com_value(active, "GetPathName")) != _path_key(drawing):
+            raise RuntimeError("Aktif SolidWorks belgesi kaynak teknik resim değil; aktarım yapılmadı.")
         errors, warnings = _out_integer(), _out_integer()
         extension = _late_bound(read_com_value(model, "Extension"))
         saved = extension.SaveAs(str(temporary), 0, SILENT, data, errors, warnings)
@@ -246,5 +260,10 @@ def export_drawings(source_folder, output_folder, include_subfolders,
         try:
             if initialized:
                 pythoncom.CoUninitialize()
+        except Exception as error:
+            message = f"SolidWorks bağlantısı temizlenemedi: {error}"
+            summary["state"] = "error"
+            summary["error"] = "; ".join(filter(None, (summary["error"], message)))
+            events.put(("log", message))
         finally:
             events.put(("done", summary))

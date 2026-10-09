@@ -1,0 +1,90 @@
+[
+  {
+    "file": "docs/reports/final-audit/screenshots/pdf-light.png",
+    "sha256": "6ee896127585f725f8f45a98a1cf787a1db0b9f36f180313a440cc4b03ceb9ce",
+    "width": 1240,
+    "height": 860,
+    "theme": "Açık",
+    "page": "pdf",
+    "assignment": null,
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/dxf-dwg-light.png",
+    "sha256": "d16cfca5338ae8caa73455644be64df5453949e236850e3abdef6d1d27ec4c37",
+    "width": 1240,
+    "height": 860,
+    "theme": "Açık",
+    "page": "dxf_dwg",
+    "assignment": null,
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/k-radius-light.png",
+    "sha256": "9389f13b14c416937898e22c127329e0f67faf6ee9fcc90b53404442005dba35",
+    "width": 1240,
+    "height": 860,
+    "theme": "Açık",
+    "page": "k_factor",
+    "assignment": "Malzeme / Takım",
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/manual-k-radius-light.png",
+    "sha256": "d7655285c9aa67e7adae830c9b318c3c9416badf8c50c452e797f9f353824942",
+    "width": 1240,
+    "height": 860,
+    "theme": "Açık",
+    "page": "k_factor",
+    "assignment": "Manuel K / R",
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/pdf-dark.png",
+    "sha256": "d97e4a066a96cf3b6986db76ed4bc8a5d289fd4be1bc4d850317a79aa98d6bdc",
+    "width": 1240,
+    "height": 860,
+    "theme": "Koyu",
+    "page": "pdf",
+    "assignment": null,
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/dxf-dwg-dark.png",
+    "sha256": "a437eec675ba96ed8dfc7f4408530544631a6a2423200285d683c513144f894f",
+    "width": 1240,
+    "height": 860,
+    "theme": "Koyu",
+    "page": "dxf_dwg",
+    "assignment": null,
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/k-radius-dark.png",
+    "sha256": "7bf1ee6538f37f612ead16a1636a3c0800344ee91cc8d2e61d82a1a83cc9c564",
+    "width": 1240,
+    "height": 860,
+    "theme": "Koyu",
+    "page": "k_factor",
+    "assignment": "Malzeme / Takım",
+    "real_tk_capture": true,
+    "cad_results_present": false
+  },
+  {
+    "file": "docs/reports/final-audit/screenshots/manual-k-radius-dark.png",
+    "sha256": "f4501b3d6a49abc660c3ae2f5585500d1c9d8e8920f9b4d9896350888f6a480c",
+    "width": 1240,
+    "height": 860,
+    "theme": "Koyu",
+    "page": "k_factor",
+    "assignment": "Manuel K / R",
+    "real_tk_capture": true,
+    "cad_results_present": false
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "file": "GOKWORKS_Son_Kontrol_2026-10-09.docx",
+  "sha256": "1ebf2d951d3c3fe5fe9251898cf142100da89dfe4dff1b736de8eed4045b0f4e",
+  "bytes": 270497,
+  "tests": 199,
+  "gui_tests": 49,
+  "embedded_images": 8,
+  "zip_crc_ok": true,
+  "python_docx_readback_ok": true,
+  "native_word_render_verified": false
+}
