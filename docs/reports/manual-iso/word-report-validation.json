@@ -1,0 +1,11 @@
+{
+  "file": "GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx",
+  "sha256": "4abb786f275961e56b11cc2a09755bc9da08d35b8071ed25c3d785bdbc447668",
+  "bytes": 288674,
+  "tests": 230,
+  "gui_tests": 64,
+  "embedded_images": 8,
+  "zip_crc_ok": true,
+  "python_docx_readback_ok": true,
+  "native_word_render_verified": false
+}

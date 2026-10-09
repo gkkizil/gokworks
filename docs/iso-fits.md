@@ -6,6 +6,25 @@ Delik/mil alt ve üst ölçüleri, EI/ES ve ei/es sapmaları, boşluk veya sık�
 
 **Montaj kesiti** şematiktir; sapmalar görünürlük için büyütülür. Üç örnek ölçü arasında büyütme oranı sabittir. **Tolerans bölgeleri** gerçek sapma değerlerine göre doğrusal eksen kullanır. *Orta değer* yalnızca limitlerin ortasıdır; üretimin olasılık dağılımını temsil etmez. Arama ve Ctrl+F yaygın eşleşmeleri bulur. Küçük pencerede iki liste kaydırılabilir.
 
+## Manuel tolerans kontrolü
+
+Sol panelde **Manuel kontrol** seçin. Nominal çap delik ve mil için ortaktır. Delik/mil **üst ve alt sapmaları mm olarak** ayrı girilir; sonuç birimi mm/µm seçilebilir. Sapmalar canlı hesaplanır; ters limit, eksik sayı, geçersiz çap veya fiziksel olarak sıfır/negatif ölçü varsa eski sonuç temizlenir ve rapor/kopyalama kapanır. Girişler, ISO seçimi ve tema yeniden açılışta korunur.
+
+| Ø50 mm örneği | Delik alt / üst (mm) | Mil alt / üst (mm) | Sonuç |
+| --- | --- | --- | --- |
+| Delik 50 +0,02; mil 50 −0,02 | 0 / +0,02 | −0,02 / 0 | Boşluk 0–0,04 mm; boşluklu, kayar geçme adayı; sınırda temas |
+| İki parça da 50 ±0,02 | −0,02 / +0,02 | −0,02 / +0,02 | −0,04…+0,04 mm; ara geçme |
+| Gerçek ölçü 50,02 delik ve 49,98 mil | +0,02 / +0,02 | −0,02 / −0,02 | Sabit 0,04 mm boşluk; bu bir ölçüm örneği |
+| H7/p6 limitlerinin elle girişi | 0 / +0,025 | +0,026 / +0,042 | Sıkılık 0,001–0,042 mm; tam H7/p6 eşleşmesi |
+
+**Tam ISO eşleşmesi** için hem alt hem üst sapma tabloya tam eşit olmalıdır. Tam eşleşme yoksa mevcut 11 delik ve 18 mil sınıfı içindeki en yakın sınıflar ve farklar gösterilir. Yakınlık ölçütü `|girilen alt − ISO alt| + |girilen üst − ISO üst|`; eşit yakınlıkta sınıf adıyla sıralanır. Bu ölçüt ISO'nun yeni bir sınıf atama kuralı değildir. Girilen toleranslar otomatik ISO değerine yuvarlanmaz; geçme hesabı daima kullanıcı limitlerinden yapılır. Yakınlık, başka çap/sınıflara kapsam genişletmesi veya geometrik uygunluk kararı değildir.
+
+İlk örnekte delik 0…+20 µm: en yakın **H6 (0…+16)**, alt fark 0, üst fark +4 µm. Mil −20…0 µm: en yakın **h6 (−16…0)**, alt fark −4, üst fark 0 µm. Bunlar tam eşleşme değildir. Ölçü limitleri 50,000–50,020 ve 49,980–50,000 mm olarak korunur; hesap `50,000−50,000=0` ve `50,020−49,980=0,040 mm` verir.
+
+“Sıkı” ve “ara” sınıfları boyut limitlerinden hesaplanır. “Kayar”, “bol/serbest” ve “hareketli/yağlı çalışma adayı” pratik kullanım yorumlarıdır. Minimum boşluk sıfırsa kayar/sınırda temas adayı; pozitif boşlukta en yakın doğrulanmış boşluklu yaygın eşleşmenin kullanım ailesi gösterilir. H11/c11 ve H9/d9 bol/serbest; H8/e8, H8/f7 ve H7/g6 hareketli/yağlı çalışma adaylarıdır. **Yağlama ihtiyacı veya montaj kuvveti**, yalnız toleranslardan kesin belirlenmez; malzeme, yüzey, hız, yük ve sıcaklık gerekir.
+
+[Manuel menünün gerçek görüntüsü](reports/manual-iso/screenshots/iso-manual-dark.png), [ISO karşılaştırma alanı](reports/manual-iso/screenshots/iso-manual-comparison-dark.png) ve [güncel test/Word raporu](reports/manual-iso/README.md).
+
 ## Standart temeli ve kapsam
 
 - **ISO 286-1:2010**: doğrusal boyut toleransları için ISO kod sistemi, tolerans/sapma/geçme kuralları. [ISO çevrimiçi katalog kaydı](https://www.iso.org/obp/ui/#iso:std:iso:286:-1:ed-2:v1:en).
@@ -69,4 +88,4 @@ Yeniden üretmek için dört kaynağı tablodaki commitlere checkout edip klasö
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-[ISO eklemesinin test raporu ve gerçek ekran görüntüleri](reports/iso-fits/README.md).
+[ISO eklemesinin 216 testlik tarihsel raporu](reports/iso-fits/README.md); [manuel kontrol sonrası güncel rapor](reports/manual-iso/README.md).

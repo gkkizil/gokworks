@@ -1,5 +1,6 @@
 """ISO eklemesinin doğrulanmış kanıtlarından resimli Word raporu üret."""
 
+import argparse
 from datetime import datetime
 import hashlib
 import json
@@ -16,6 +17,10 @@ FOLDER = ROOT/'docs/reports/iso-fits'
 
 
 def main():
+    global FOLDER
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', type=Path, default=FOLDER)
+    FOLDER = parser.parse_args().output_dir.resolve()
     results = json.loads((FOLDER/'gui-verification-results.json').read_text())
     sources = json.loads((FOLDER/'source-comparison.json').read_text())
     screenshots = json.loads((FOLDER/'screenshots.json').read_text())
@@ -28,7 +33,7 @@ def main():
     assert sources['unexpected_differences'] == 0
     assert sources['table_sha256'] == results['sha256']['iso_fits/tables.json']
     gui = [r for r in results['tests'] if r['id'].startswith(('test_export_window.', 'test_gui_audit.', 'test_final_gui.'))
-           or any(f'.{name}.' in r['id'] for name in ('KGuiTests', 'ManualGuiTests', 'IsoGuiTests'))]
+           or any(f'.{name}.' in r['id'] for name in ('KGuiTests', 'ManualGuiTests', 'IsoGuiTests', 'ManualIsoGuiTests'))]
     when = datetime.fromisoformat(results['finished_utc']).astimezone(ZoneInfo('Europe/Istanbul'))
     doc = Document()
     section = doc.sections[0]
@@ -46,6 +51,8 @@ def main():
     paragraph(doc, when.strftime('%d.%m.%Y %H:%M:%S — Türkiye saati (UTC+3)'))
     paragraph(doc, f"{results['tests_run']} test geçti; 0 başarısız, 0 atlanan. {len(gui)} gerçek Tk GUI testi.", True)
     paragraph(doc, 'ISO GEÇMELERİ: nominal çap, 11 delik / 18 mil sınıfı, boşluk/sıkılık limitleri, şematik kesit, gerçek sapma bölgeleri, üç örnek ölçü, mm/µm, arama, CSV ve pano. Açık/koyu tema ile seçimlerin kalıcılığı sınandı.')
+    paragraph(doc, 'Manuel kontrol menüsünde delik ve mil üst/alt sapmaları ayrı girilir. 50 +0,02/0 delik, 50 0/−0,02 mil: D=50,000–50,020; d=49,980–50,000 mm; Cmin=0, Cmax=0,040 mm. Sonuç boşluklu, kayar geçme adayı; sınırda temas mümkündür. İki parçaya da ±0,02 girilirse C=−0,040…+0,040 mm ve sonuç ara geçmedir. Tek gerçekleşen ölçü için alt ve üst sapma aynı girilir.')
+    paragraph(doc, 'Tam ISO eşleşmesi iki sapmanın da tabloya eşit olmasıdır. En yakın sınıf, desteklenen 11 delik / 18 mil sınıfı içinde alt ve üst farkların mutlak toplamı ile sıralanır. Örnek delik için H6 en yakın: alt fark 0, üst fark +4 µm. Mil için h6 en yakın: alt fark −4, üst fark 0 µm. Bu eşleşmeler tam ISO sınıfı olarak atanmaz; sonuç kullanıcının ölçülerinden hesaplanır. Kayar/yağlı kullanım adları öneridir; yağlama koşulu yüzey, malzeme ve çalışma koşulları gerektirir.')
     paragraph(doc, 'Çap kapsamı 1–400 mm. ISO 286-1:2010 ve ISO 286-2:2010 temel alınan standart adlarıdır. Resmî ISO/üretici sitelerine bulut ağ politikası nedeniyle erişilemedi. Tam standart metni indirilmedi veya incelenmiş sayılmadı; güncel baskı/düzeltmeler ISO kataloğundan ayrıca kontrol edilmelidir. Açık kaynak karşılaştırması ISO sertifikası değildir.')
     table(doc, ('Ø50 mm', 'Cmin / Cmax (mm)', 'Tür'), [
         ('H8/f7', '+0,025 / +0,089', 'Boşluklu'), ('H7/h6', '0 / +0,041', 'Boşluklu; sınırda temas'),
@@ -59,6 +66,7 @@ def main():
     paragraph(doc, 'F8 ≤3 mm: Passungsrechner EI=+10, ES=+20 µm veriyor; IT8 genişliği 14 µm ve F temel sapması +6 µm olmalı. Uygulamada EI=+6, ES=+20 µm kullanılır. 1,5 ve 3 mm karşılaştırmalarındaki iki kaynak farkı kanıtta korunur. Kaynak commitleri ve dosya hashleri source-comparison.json içindedir.')
     doc.add_heading('Test kapsamı ve sınırlar', 1)
     paragraph(doc, 'ISO için 8 hesap testi ve 9 GUI testi eklendi. Bütün 198 delik/mil kombinasyonunun beş çaptaki örnek ölçüleri limitler içinde kontrol edildi. 3/50 mm sınırları, virgüllü giriş, yanlış sınıf, kapsam dışı çap, yarım mikrometre, sıfır boşluk, geçersiz girişte eski sonuçların temizlenmesi, CSV iptal/kayıt hatası ve tercihler sınandı.')
+    paragraph(doc, 'Manuel kontrol için ayrıca 8 hesap + 6 gerçek GUI testi: tek/bilateral toleranslar ve gerçekleşen ölçü, sıkı/ara/kayar/yağlı aday yorumları, 1 nm hassasiyet, ters veya geçersiz limitleri reddetme, bütün desteklenen sınıfların altı çapta tam eşleşmesi, en yakın sınıfı tam eşitlikten ayırma, canlı sonuç, CSV/pano, sekme/yeniden açılış ve iki temada küçük/büyük/%125/%150 alanlara erişim.')
     paragraph(doc, 'ISO GUI matrisi iki tema × beş boyut/ölçek: 1000×690, 1240×860, 1366×768 (%100), 1400×900 (%125), 1920×1080 (%150). Gerçek pencere boyutu ve kaydırılarak sonuç düğmesine erişim doğrulandı. Önceki PDF/DXF/K-R testleri de tekrar geçti. Bu Linux çalışması gerçek Windows DPI, SolidWorks COM üretimi veya yerel Word sayfa görünümü değildir.')
     paragraph(doc, f"Satır kapsamı %{coverage['percent_statements_covered']:.2f}; satır/dal birleşik kapsamı %{coverage['percent_covered']:.2f}. Uygulama {results['lines']['application']} fiziksel Python satırı; testler {results['lines']['tests']} satır. Veri JSON'u ve rapor araçları bu Python sayımında değildir.")
     paragraph(doc, 'Kesit şematiktir; sapmalar büyütülür. Bölge grafiği doğrusal sapma ölçeğidir. Orta ölçü üretim dağılımı varsayımı değildir. Montaj kuvveti, yağlama, malzeme, sıcaklık ve geometrik toleranslar ayrıca değerlendirilir. CSV ölçü/tolerans raporudur; CAD modeli değiştirilmez.')

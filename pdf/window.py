@@ -231,7 +231,8 @@ class GokworksPdfApp(IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
 
     def _focus_search(self, event=None):
         if self.mode == 'iso_fits':
-            self.iso_widgets['search'].focus_set()
+            key = 'hole_upper' if self.iso_state['method'].get() == 'Manuel kontrol' else 'search'
+            self.iso_widgets[key].focus_set()
             return 'break'
         self.result_tabs.set("Dosyalar")
         self.search_entry.focus_set()

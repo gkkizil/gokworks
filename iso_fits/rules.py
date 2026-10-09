@@ -65,7 +65,8 @@ def format_deviation(nanometres, unit='mm'):
     if unit != 'µm':
         raise ValueError('Birim mm veya µm olmalı.')
     value = Decimal(nanometres)/1000
-    return format(value, '+.1f').replace('.', ',')+' µm'
+    places = max(1, min(3, -value.as_tuple().exponent))
+    return format(value, f'+.{places}f').replace('.', ',')+' µm'
 
 
 @dataclass(frozen=True)

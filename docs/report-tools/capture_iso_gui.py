@@ -1,5 +1,6 @@
 """Gerçek Tk penceresinden ISO ekranlarını ve görüntü hashlerini kaydet."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -15,7 +16,9 @@ from pdf.window import GokworksPdfApp
 
 
 def main():
-    folder = ROOT/'docs/reports/iso-fits'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', type=Path, default=ROOT/'docs/reports/iso-fits')
+    folder = parser.parse_args().output_dir.resolve()
     images = folder/'screenshots'
     images.mkdir(parents=True, exist_ok=True)
     records, errors = [], []
@@ -44,6 +47,25 @@ def main():
                 records.append({'file': str(path.relative_to(ROOT)), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                                 'theme': theme, 'size': [app.winfo_width(), app.winfo_height()],
                                 'nominal_mm': '50', 'hole': hole, 'shaft': shaft, 'view': view,
+                                'native_tk_capture': True, 'solidworks_required': False})
+            app.iso_state['method'].set('Manuel kontrol')
+            app.iso_state['view'].set('Montaj kesiti')
+            app._fill_manual_example()
+            for name, theme, scroll in [('iso-manual-light', 'Açık', 0), ('iso-manual-dark', 'Koyu', 0),
+                                        ('iso-manual-comparison-dark', 'Koyu', 1)]:
+                app._change_theme(theme)
+                app.iso_widgets['details']._parent_canvas.yview_moveto(scroll)
+                deadline = time.monotonic()+.6
+                while time.monotonic() < deadline:
+                    app.update(); time.sleep(.01)
+                x, y = app.winfo_rootx(), app.winfo_rooty()
+                path = images/(name+'.png')
+                ImageGrab.grab(bbox=(x, y, x+app.winfo_width(), y+app.winfo_height())).save(path)
+                records.append({'file': str(path.relative_to(ROOT)), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
+                                'theme': theme, 'size': [app.winfo_width(), app.winfo_height()],
+                                'nominal_mm': '50', 'hole': 'Manuel', 'shaft': 'Manuel', 'method': 'Manuel kontrol',
+                                'hole_deviations_mm': ['0', '0.02'], 'shaft_deviations_mm': ['-0.02', '0'],
+                                'view': 'ISO karşılaştırması' if scroll else 'Montaj kesiti',
                                 'native_tk_capture': True, 'solidworks_required': False})
         finally:
             app._on_close()
