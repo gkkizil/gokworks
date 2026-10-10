@@ -27,7 +27,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**320 test geçti; 122'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**327 test geçti; 127'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -49,9 +49,9 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.119 | 4.669 |
-| Testler | 18 | 5.151 | 4.592 |
-| Toplam | 47 | 10.270 | 9.261 |
+| Uygulama | 29 | 5.134 | 4.684 |
+| Testler | 19 | 5.299 | 4.724 |
+| Toplam | 48 | 10.433 | 9.408 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -63,7 +63,7 @@ Son manuel eklemede 15 test çalıştırıldı. Form alanları küçük pencered
 
 ISO öncesi denetim: 112 yerleşim kombinasyonu, 144 gerçek menü seçimi ve %150 ölçek dahil 49 GUI testi geçti. Yeşil vurgu korundu. Desteklenen ekranlarda ilk pencere mevcut ölçülere göre seçilir. [ISO öncesi Word raporu, ekranlar ve kanıtlar](reports/final-audit/README.md).
 
-ISO eklemesinde 8 hesap ve 9 GUI testi eklendi. İki tema, 5 boyut/ölçek, 31 delik/mil/birim menü seçeneği, 14 eşleşme, iki grafik, üç örnek ölçü, CSV/pano, hatalı giriş ve yeniden açılış sınandı. Tolerans bölgeleri gerçek sapma ölçeğini, montaj kesiti sabit büyütmeyle şematik gösterimi kullanır. [Güncel ISO raporu ve kaynak sınırları](reports/iso-fits/README.md).
+ISO eklemesinde 8 hesap ve 9 GUI testi eklendi. İki tema, 5 boyut/ölçek, 31 delik/mil/birim menü seçeneği, 14 eşleşme, iki grafik, üç örnek ölçü, CSV/pano, hatalı giriş ve yeniden açılış sınandı. Bu ilk sürümde tolerans bölgeleri gerçek sapma ölçeğini, montaj kesiti sabit büyütmeyle şematik gösterimi kullanıyordu; güncel kesit aşağıda açıklanır. [Güncel ISO raporu ve kaynak sınırları](reports/iso-fits/README.md).
 
 ISO sol panelinde **ISO seçimi / Manuel kontrol** menüsü bulunur. Manuel girişte dört sapma alanı, canlı geçme sonucu, tam/en yakın ISO sınıfı ve farklar; mm/µm, örnek doldurma, CSV ve pano desteklenir. 14 ek test (8 hesap, 6 GUI) geçti. %100/%125/%150, iki tema, alanlara ve karşılaştırmaya kaydırarak erişim sınandı. [Güncel manuel rapor ve resimler](reports/manual-iso/README.md).
 
@@ -110,6 +110,8 @@ Aynı Linux/Xorg ortamında 66a8e45 ile karşılaştırma: 10.000 örnek dosyal�
 
 Bu ölçüm gerçek Tk listesi ve örnek dosya adlarıyla yapıldı; CAD aktarım süresi değildir. 10.000 satırda toplu filtreleme, seçim/veri korunması, sırasız canlı sonuçlar, yeni tarama ve üç modülün ayrı listeleri regresyon testleriyle kontrol edilir.
 
-ISO montaj kesitinde delik ve mil tam çap oklarıyla (D/d), tek taraflı boşluk veya çakışma g oku ile gösterilir. Çapsal ve radyal değerler ayrı yazılır; seçilen örneğin durumu ile tolerans çiftinin genel türü ayrılır. Sıfır fark temas olarak gösterilir. Üç örnek arasında büyütme sabittir; kırmızı alanlar deformasyon öncesi boyutsal çakışmayı gösterir. Kesit 310 px, tolerans bölgeleri 220 px çizim alanı kullanır; sağ çalışma alanı kaydırılabilir. Altı yeni gerçek GUI testi çap/radyal oklarını, ara geçme uçlarını, yarım mikrometreyi, sıfır temasını ve iki tema/üç ölçek görünümünü doğrular.
+ISO montaj kesitinde delik ve mil tam çap oklarıyla (D/d), tek taraflı boşluk veya çakışma g oku ile gösterilir. Çapsal ve radyal değerler ayrı yazılır; seçilen örneğin durumu ile tolerans çiftinin genel türü ayrılır. Sıfır fark temas olarak gösterilir. Kesit ölçeksizdir; küçük boşluklar çizgi kalınlığında kaybolmaz. Kırmızı alanlar deformasyon öncesi boyutsal çakışmayı gösterir. Kesit 310 px, tolerans bölgeleri 220 px çizim alanı kullanır; sağ çalışma alanı kaydırılabilir. Altı gerçek GUI testi çap/radyal oklarını, ara geçme uçlarını, yarım mikrometreyi, sıfır temasını ve iki tema/üç ölçek görünümünü doğrular.
 
 Yeni gerçek ekranlar: [boşluklu koyu](screenshots/iso-section-clearance-dark.png), [boşluklu açık](screenshots/iso-section-clearance-light.png), [ara geçmenin sıkı örneği](screenshots/iso-section-transition-dark.png), [sıkı geçme](screenshots/iso-section-interference-dark.png), [temas](screenshots/iso-section-contact-dark.png), [1000×690 pencere](screenshots/iso-section-small-dark.png). [Kesiti okuma ve hesap açıklaması](iso-fits.md).
+
+Tolerans yeniden denetiminde 9.108 ISO çiftinin ve 225 manuel aralığın işaretleri bağımsız kesir hesabıyla kontrol edildi. Sayısal sınıflandırmada ters işaret bulunmadı. Nominalden ortak sapma büyüdüğünde 0,02 mm boşluğu 0,016 piksele düşüren çizim düzeltildi: boşluk/sıkılık alanı yalnız D−d ilişkisinden türetilir ve sıfır olmayan alan çizgi kalınlığında kaybolmaz. Kesit ölçeksizdir; sayısal değerler değişmez. İşaretli D−d kesitte, Cmin/Cmax tolerans kartında, seçili örneğin değerleri de CSV/panoda görünür. Girilen limitlerin sonucu, en yakın ISO referansının türünden önce açıkça yazılır. Pozitif 0,02 mm, negatif 0,02 mm, temas, ara geçme örnekleri ve veri çıkışları beş gerçek GUI testiyle sınandı. [0,02 mm boşluk görüntüsü](screenshots/iso-positive-twenty-microns-dark.png).

@@ -2,7 +2,7 @@
 
 from gui.theme import (INPUT, PANEL, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, UI_FONT)
-from iso_fits.rules import CLASSIFICATION, format_mm, format_deviation
+from iso_fits.rules import CLASSIFICATION, format_mm, format_deviation, mm
 
 
 def draw(canvas, fit, view, sample, appearance, scale):
@@ -24,14 +24,16 @@ def draw(canvas, fit, view, sample, appearance, scale):
         low -= padding; high += padding
         top, bottom = 28*scale, height-45*scale
         y = lambda value: top+(high-value)/(high-low)*(bottom-top)
-        canvas.create_line(30*scale, y(0), width-22*scale, y(0), fill=color(MUTED), dash=(5, 4))
-        text(32*scale, y(0)-9*scale, '0 · nominal çap', fill=color(MUTED), anchor='w')
+        canvas.create_line(60*scale, y(0), width-22*scale, y(0), fill=color(MUTED), dash=(5, 4))
+        text(12*scale, y(0), '0 µm', fill=color(MUTED), anchor='w')
+        text(width/2, 10*scale, 'Sapmalar (µm) · 0 = nominal çap', fill=color(MUTED))
         for band, fraction, paint, role in [(fit.hole, .39, ACCENT, 'DELİK'), (fit.shaft, .74, MUTED, 'MİL')]:
             x = width*fraction; half = min(38*scale, width*.085)
             canvas.create_rectangle(x-half, y(band.upper_nm), x+half, y(band.lower_nm),
-                                    fill=color(paint), outline=color(paint))
+                                    fill=color(paint), outline=color(paint), tags='hole_band' if role == 'DELİK' else 'shaft_band')
             text(x, y(band.upper_nm)-10*scale, format_deviation(band.upper_nm, 'µm'))
-            text(x, y(band.lower_nm)+10*scale, format_deviation(band.lower_nm, 'µm'))
+            if band.lower_nm != band.upper_nm:
+                text(x, y(band.lower_nm)+10*scale, format_deviation(band.lower_nm, 'µm'))
             text(x, height-15*scale, f'{role} · {band.code}', font=bold)
         return
     _draw_section(canvas, fit, sample, appearance, scale, color)
@@ -48,15 +50,14 @@ def _draw_section(canvas, fit, sample, appearance, scale, color):
                            font=kw.pop('font', font), **kw)
     hole, shaft = fit.sample(sample)
     difference = hole-shaft
-    hole_dev = float(hole-fit.hole.nominal_mm)
-    shaft_dev = float(shaft-fit.shaft.nominal_mm)
-    # Keep the magnification fixed while switching between sample sizes.
-    maximum = max(*(abs(value)/1_000_000 for band in (fit.hole, fit.shaft)
-                    for value in (band.lower_nm, band.upper_nm)), .001)
+    # This is an explicitly unscaled illustration. A nonzero radial gap must
+    # exceed the strokes, even for tiny differences or a large common offset.
+    # Use the signed D-d relation, not deviations from the nominal diameter.
+    maximum = mm(max(abs(fit.minimum_clearance_nm), abs(fit.maximum_clearance_nm)))
+    radial_pixels = (6+10*float(abs(difference)/maximum))*scale if difference else 0
     nominal_height = 82*scale
-    exaggeration = nominal_height*.4/maximum
-    hole_height = nominal_height+hole_dev*exaggeration
-    shaft_height = nominal_height+shaft_dev*exaggeration
+    hole_height = nominal_height
+    shaft_height = nominal_height+2*radial_pixels*(-1 if difference > 0 else 1)
     center = 112*scale
     left, right = width*.18, width*.82
     bore_top, bore_bottom = center-hole_height/2, center+hole_height/2
@@ -82,7 +83,7 @@ def _draw_section(canvas, fit, sample, appearance, scale, color):
         # rather than a physically assembled, undeformed interference fit.
         for y0, y1 in [(shaft_top, bore_top), (bore_bottom, shaft_bottom)]:
             canvas.create_rectangle(shaft_left, y0, shaft_right, y1, fill=color(RED),
-                                    outline=color(RED), stipple='gray50', tags='overlap')
+                                    outline=color(RED), tags='overlap')
     canvas.create_line(left, bore_top, right, bore_top, fill=edge, width=2)
     canvas.create_line(left, bore_bottom, right, bore_bottom, fill=edge, width=2)
 
@@ -109,10 +110,10 @@ def _draw_section(canvas, fit, sample, appearance, scale, color):
     state = 'BOŞLUK VAR' if difference > 0 else 'SIKILIK VAR' if difference < 0 else 'SINIRDA TEMAS'
     text(width/2, 215*scale, f'Seçilen örnek: {state}', fill=edge, font=bold, tags='sample_state')
     if difference:
-        label, formula = ('Çapsal boşluk', 'D − d') if difference > 0 else ('Çapsal sıkılık', 'd − D')
-        text(width/2, 239*scale, f'{label}: {formula} = {format_mm(abs(difference))} mm',
+        relation = 'boşluk' if difference > 0 else 'sıkılık'
+        text(width/2, 239*scale, f'D − d = {format_mm(difference, signed=True)} mm · {relation}',
              font=bold, width=width-24*scale, tags='diametral_result')
-        text(width/2, 263*scale, f'Tek tarafta: g = ({formula}) / 2 = {format_mm(abs(difference)/2)} mm',
+        text(width/2, 263*scale, f'Tek tarafta: g = {format_mm(abs(difference)/2)} mm ({relation})',
              width=width-24*scale, tags='radial_result')
     else:
         text(width/2, 239*scale, f'D = d = {format_mm(hole)} mm', font=bold, tags='diametral_result')

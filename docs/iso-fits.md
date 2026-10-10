@@ -4,13 +4,17 @@ Yan menüde **ISO GEÇMELERİ** ekranı bulunur. Nominal çapı yazın, delik ve
 
 Delik/mil alt ve üst ölçüleri, EI/ES ve ei/es sapmaları, boşluk veya sıkılık sınırları gösterilir. **mm / µm** seçimi sapma ve geçme sonuçlarının birimini değiştirir; nominal çap ve parça ölçüleri mm olarak kalır. **CSV kaydet** UTF-8 BOM, noktalı virgül ve ondalık virgülle Excel'e uygun rapor oluşturur. **Sonucu kopyala** bütün sayısal sonuçları panoya verir. Tema ve seçimler yeniden açılışta korunur.
 
-**Montaj kesiti** şematiktir; sapmalar görünürlük için büyütülür. Üç örnek ölçü arasında büyütme oranı sabittir. **Tolerans bölgeleri** gerçek sapma değerlerine göre doğrusal eksen kullanır. *Orta değer* yalnızca limitlerin ortasıdır; üretimin olasılık dağılımını temsil etmez. Arama ve Ctrl+F yaygın eşleşmeleri bulur. Küçük pencerede iki liste kaydırılabilir.
+**Montaj kesiti** ölçeksizdir; sıfırdan farklı boşluk ve çakışmalar görünür çizilir. Küçük farkların çizgi kalınlığında kaybolmaması için çizimde görünürlük alt sınırı vardır; kesitteki piksel genişliğinden ölçü alınmaz. **Tolerans bölgeleri** gerçek sapma değerlerine göre doğrusal eksen kullanır. *Orta değer* yalnızca limitlerin ortasıdır; üretimin olasılık dağılımını temsil etmez. Arama ve Ctrl+F yaygın eşleşmeleri bulur. Küçük pencerede iki liste kaydırılabilir.
 
 Kesitte taralı gövde **deliği**, yeşil parça **mili** gösterir. **D** oku delik çapını, **d** oku mil çapını tam olarak boyutlandırır. Yeşil boşluk alanları `D > d`, kırmızı çakışma alanları `d > D` durumudur. Kırmızı alan, deformasyon öncesi boyutsal çakışmadır; montaj sonrası elastik şekli göstermez. `D = d` olduğunda **Sınırda temas** yazılır; boşluk veya çakışma alanı çizilmez.
 
 **Çapsal boşluk** `D − d`, **çapsal sıkılık** `d − D` olarak hesaplanır. **g** oku üstte tek tarafı gösterir: eş merkezli kesitte boşluğun veya çakışmanın radyal büyüklüğü `|D − d| / 2`'dir. Bu, montaj kuvveti hesabı değildir. Çapsal ve tek taraflı değerler ayrı yazılır; raporlanan sayılar çizim büyütmesinden etkilenmez. Örneğin Ø50 H8/f7 orta değerinde D=50,019500 mm ve d=49,962500 mm: çapsal boşluk **0,057000 mm**, tek tarafta **0,028500 mm**.
 
 **Seçilen örnek** ile **tolerans çiftinin türü** ayrı gösterilir. H7/k6 bir ara geçmedir: en az boşluk seçiminde sıkılık, en çok boşluk seçiminde boşluk gösterilebilir. Bu, çiftin ara geçme sınıfını değiştirmez. En az boşluk `Dmin/dmax`, en çok boşluk `Dmax/dmin`, orta değer ise her iki limit bandının ortasıdır. Kesit ve tolerans bölgeleri bağımsız yükseklik kullanır; küçük pencerede sağ alan kaydırılabilir.
+
+Kesit sonucu **işaretli D − d** ile yazılır: **+0,020000 mm boşluk**, **−0,020000 mm sıkılık**, **0 temas**. Tek taraftaki g değeri mutlak büyüklüktür. Ana sonuç kartı tolerans aralığının türünü ve işaretli Cmin/Cmax'ı; kesit yalnız seçilen örneğin ölçülerini gösterir. CSV/pano her ikisini ve örnek D/d ölçülerini ayrı kaydeder. En yakın ISO referansının türü, girilen limitlerin sonucu yerine kullanılmaz.
+
+Son yeniden kontrolde 9.108 ISO çiftinin sınır/sınır üstü çap hesabı ve 225 manuel aralık bağımsız `Fraction` hesabıyla uyuştu. Pinlenmiş GitHub kaynaklarına karşı 3.217 sayısal karşılaştırma tekrar çalıştırıldı; aşağıda belgelenen iki F8 kaynak farkı dışında beklenmeyen fark yoktur. 50,020/50,000 mm, 52,020/52,000 mm ve 70,020/70,000 mm çiftleri aynı +0,020 mm boşluğu verir; tümünde görünür boşluk ve +0,010 mm tek taraflı fark sınanır. Önceki nominal sapmaya bağlı çizim, son örnekte açıklığı 0,016 piksele düşürüyordu; bu yaklaşım kaldırıldı. Ters ölçü çifti −0,020 mm sıkılık verir. Bu yeniden kontrol, kullanıcının tam girişleri bildirilmediğinden kendi hata örneğinin birebir doğrulandığı anlamına gelmez.
 
 
 ## Delik esaslı / mil esaslı örnekler

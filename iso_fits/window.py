@@ -187,21 +187,23 @@ class IsoFitsView:
         self.iso_widgets['sample'] = samples
         self.iso_widgets['section_help'] = self._label(diagram,
             'D: delik çapı · d: mil çapı · g: tek taraftaki boşluk / çakışma.\n'
-            'Kesit eş merkezli ve ölçeksizdir; sapmalar büyütülür.\n'
+            'Kesit eş merkezli ve ölçeksizdir; küçük farklar görünür çizilir.\n'
             'Kırmızı alan: deformasyon öncesi boyutsal çakışma.', 10, MUTED, wraplength=400)
         self.iso_widgets['section_help'].grid(row=3, column=0, padx=14, pady=(2, 10))
         result = self._iso_card(details)
         result.grid(row=1, column=0, sticky='ew', pady=(0, 12))
         result.grid_columnconfigure((0, 1), weight=1)
+        self._label(result, 'TOLERANS ARALIĞININ SONUCU · DELİK − MİL', 10, MUTED, True).grid(
+            row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 0))
         self.iso_widgets['kind'] = self._label(result, '', 18, bold=True)
-        self.iso_widgets['kind'].grid(row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 8))
+        self.iso_widgets['kind'].grid(row=1, column=0, columnspan=2, sticky='w', padx=14, pady=(6, 8))
         for column, key in enumerate(('minimum', 'maximum')):
             self.iso_widgets[key+'_title'] = self._label(result, '', 10, MUTED)
-            self.iso_widgets[key+'_title'].grid(row=1, column=column, sticky='w', padx=14)
+            self.iso_widgets[key+'_title'].grid(row=2, column=column, sticky='w', padx=14)
             self.iso_widgets[key] = self._label(result, '', 18, bold=True)
-            self.iso_widgets[key].grid(row=2, column=column, sticky='w', padx=14, pady=(2, 8))
+            self.iso_widgets[key].grid(row=3, column=column, sticky='w', padx=14, pady=(2, 8))
         self.iso_widgets['explanation'] = self._label(result, '', 11, MUTED, justify='left', anchor='w', wraplength=430)
-        self.iso_widgets['explanation'].grid(row=3, column=0, columnspan=2, sticky='ew', padx=14, pady=(0, 12))
+        self.iso_widgets['explanation'].grid(row=4, column=0, columnspan=2, sticky='ew', padx=14, pady=(0, 12))
         assessment = self._iso_card(details)
         assessment.grid(row=2, column=0, sticky='ew', pady=(0, 12))
         assessment.grid_columnconfigure(0, weight=1)
@@ -442,7 +444,10 @@ class IsoFitsView:
             configure_changed(self.iso_widgets['iso_comparison'], text=(
                 'DELİK · '+self._iso_match_text(fit.hole, 'hole')+'\n\nMİL · '+self._iso_match_text(fit.shaft, 'shaft')+
                 '\n\nKarşılaştırma mevcut 11 delik / 18 mil sınıfı içindedir. Yakınlık, alt/üst sapma farklarının mutlak toplamıdır. Kullanım adları öneridir; yağlama kararı için yüzey, malzeme ve çalışma koşulları gerekir.'))
-        configure_changed(self.iso_widgets['explanation'], text=explanation)
+        signed_limits = (f'Cmin = {format_deviation(fit.minimum_clearance_nm, unit)} · '
+                         f'Cmax = {format_deviation(fit.maximum_clearance_nm, unit)}\n'
+                         'C = delik − mil: (+) boşluk, (−) sıkılık, 0 temas.\n')
+        configure_changed(self.iso_widgets['explanation'], text=signed_limits+explanation)
         for key, band in [('hole', fit.hole), ('shaft', fit.shaft)]:
             configure_changed(self.iso_widgets[key+'_limits'], text=f'{format_mm(band.minimum_mm)} / {format_mm(band.maximum_mm)} mm')
             configure_changed(self.iso_widgets[key+'_deviations'], text=f'{format_deviation(band.lower_nm, unit)} / {format_deviation(band.upper_nm, unit)}')
@@ -505,6 +510,14 @@ class IsoFitsView:
                 ('Minimum delik − mil (mm)', format_deviation(fit.minimum_clearance_nm).split(' ')[0]),
                 ('Maksimum delik − mil (mm)', format_deviation(fit.maximum_clearance_nm).split(' ')[0]),
                 ('Kapsam', '1–400 mm; seçili doğrulanmış sınıflar; şematik kesit; montaj kuvveti hesabı yok')]
+        sample = self.iso_state['sample'].get()
+        hole, shaft = fit.sample(sample)
+        difference = hole-shaft
+        rows.extend([('Kesit örneği', sample), ('Örnek delik çapı (mm)', format_mm(hole)),
+                     ('Örnek mil çapı (mm)', format_mm(shaft)),
+                     ('Örnek delik − mil (mm)', format_mm(difference, signed=True)),
+                     ('Örnek boyutların ilişkisi', 'Boşluk' if difference > 0 else 'Sıkılık' if difference < 0 else 'Temas'),
+                     ('Örnek tek taraflı fark (mm)', format_mm(abs(difference)/2))])
         if self.iso_state['method'].get() == 'Manuel kontrol':
             rows.extend([('Delik ISO kontrolü', self._iso_match_text(fit.hole, 'hole')),
                          ('Mil ISO kontrolü', self._iso_match_text(fit.shaft, 'shaft')),
@@ -519,7 +532,8 @@ class IsoFitsView:
         result = compatibility(fit, self.iso_state['target'].get())
         pair = closest_pair(fit)
         heading = 'Tam ISO çift eşleşmesi' if pair.distance_nm == 0 else 'En yakın ISO çift (yalnız referans)'
-        text = (result.explanation+f'\n\n{heading}: {pair.code} · {CLASSIFICATION[pair.fit.kind]}. '
+        text = (f'Girilen limitlerin sonucu: {CLASSIFICATION[fit.kind]}.\n'+result.explanation+
+                f'\n\n{heading}: {pair.code}. Referansın türü: {CLASSIFICATION[pair.fit.kind]}. '
                 f'Toplam limit farkı: {format_deviation(pair.distance_nm)}. '
                 f'En büyük tek limit farkı: {format_deviation(pair.worst_limit_difference_nm)}.')
         for band, feature, label in ((fit.hole, 'hole', 'Delik'), (fit.shaft, 'shaft', 'Mil')):

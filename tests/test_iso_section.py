@@ -54,7 +54,7 @@ class IsoSectionTests(unittest.TestCase):
 
     def test_transition_endpoints_show_different_samples_with_same_overall_kind(self):
         canvas = self.section('H7', 'k6')
-        ratios = []
+        gaps = []
         for sample, state, region in [(SAMPLES[0], 'SIKILIK VAR', 'overlap'),
                                       (SAMPLES[2], 'BOŞLUK VAR', 'clearance')]:
             self.app.iso_state['sample'].set(sample)
@@ -66,8 +66,9 @@ class IsoSectionTests(unittest.TestCase):
             hole, shaft = self.app.iso_result.sample(sample)
             self.assertIn(format_mm(abs(hole-shaft)), self.text('diametral_result'))
             radial = canvas.coords(canvas.find_withtag('radial_dimension')[0])
-            ratios.append((radial[3]-radial[1])/float(abs(hole-shaft)))
-        self.assertAlmostEqual(*ratios)  # Magnification stays fixed across samples.
+            gaps.append(radial[3]-radial[1])
+        self.assertLess(gaps[0], gaps[1])  # Larger difference has a larger visible region.
+        self.assertGreater(gaps[0], 6)
 
     def test_zero_difference_is_contact_without_gap_or_overlap_and_recovers(self):
         canvas = self.section('H7', 'h6')
@@ -94,7 +95,7 @@ class IsoSectionTests(unittest.TestCase):
         self.assertIn('0,0000005', self.text('radial_result'))
         self.app.iso_state['shaft_upper'].set('0,000002')
         self.app.iso_state['shaft_lower'].set('0,000002')
-        self.assertIn('d − D', self.text('diametral_result'))
+        self.assertIn('D − d = -0,000001', self.text('diametral_result'))
         self.assertIn('0,0000005', self.text('radial_result'))
         self.assertEqual(len(canvas.find_withtag('overlap')), 2)
         self.app.iso_state['diameter'].set('invalid')

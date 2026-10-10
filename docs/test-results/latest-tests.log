@@ -197,6 +197,13 @@ test_small_window_both_themes_and_dpi_keep_labels_inside_canvas (test_iso_sectio
 test_transition_endpoints_show_different_samples_with_same_overall_kind (test_iso_section.IsoSectionTests.test_transition_endpoints_show_different_samples_with_same_overall_kind) ... ok
 test_view_change_restores_height_and_hides_section_legend (test_iso_section.IsoSectionTests.test_view_change_restores_height_and_hides_section_legend) ... ok
 test_zero_difference_is_contact_without_gap_or_overlap_and_recovers (test_iso_section.IsoSectionTests.test_zero_difference_is_contact_without_gap_or_overlap_and_recovers) ... ok
+test_every_iso_pair_at_boundaries_and_just_above_with_fraction_oracle (test_iso_tolerance_audit.ToleranceArithmeticAuditTests.test_every_iso_pair_at_boundaries_and_just_above_with_fraction_oracle) ... ok
+test_manual_interval_grid_with_signed_raw_input_oracle (test_iso_tolerance_audit.ToleranceArithmeticAuditTests.test_manual_interval_grid_with_signed_raw_input_oracle) ... ok
+test_nearest_transition_reference_cannot_replace_positive_actual_clearance (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_nearest_transition_reference_cannot_replace_positive_actual_clearance) ... ok
+test_positive_twenty_micron_clearance_never_disappears_with_common_offset (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_positive_twenty_micron_clearance_never_disappears_with_common_offset) ... ok
+test_transition_positive_twenty_micron_sample_remains_a_positive_clearance (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_transition_positive_twenty_micron_sample_remains_a_positive_clearance) ... ok
+test_twenty_micron_interference_has_negative_signed_difference (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_twenty_micron_interference_has_negative_signed_difference) ... ok
+test_unilateral_example_section_card_csv_and_clipboard_agree (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_unilateral_example_section_card_csv_and_clipboard_agree) ... ok
 test_apply_writes_metres_and_k_type_without_saving (test_k_factor.ApplyTests.test_apply_writes_metres_and_k_type_without_saving) ... ok
 test_batch_deduplicates_instances_and_restores_assembly (test_k_factor.ApplyTests.test_batch_deduplicates_instances_and_restores_assembly) ... ok
 test_batch_nested_assembly_and_suppression (test_k_factor.ApplyTests.test_batch_nested_assembly_and_suppression) ... ok
@@ -332,6 +339,6 @@ test_independent_reference_pages_keep_their_work_areas_after_operation_pages (te
 test_operation_work_areas_stay_large_when_scrolling_and_switching_forms (test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms) ... ok
 
 ----------------------------------------------------------------------
-Ran 320 tests in 149.053s
+Ran 327 tests in 151.973s
 
 OK
