@@ -6,6 +6,12 @@ Delik/mil alt ve üst ölçüleri, EI/ES ve ei/es sapmaları, boşluk veya sık�
 
 **Montaj kesiti** şematiktir; sapmalar görünürlük için büyütülür. Üç örnek ölçü arasında büyütme oranı sabittir. **Tolerans bölgeleri** gerçek sapma değerlerine göre doğrusal eksen kullanır. *Orta değer* yalnızca limitlerin ortasıdır; üretimin olasılık dağılımını temsil etmez. Arama ve Ctrl+F yaygın eşleşmeleri bulur. Küçük pencerede iki liste kaydırılabilir.
 
+Kesitte taralı gövde **deliği**, yeşil parça **mili** gösterir. **D** oku delik çapını, **d** oku mil çapını tam olarak boyutlandırır. Yeşil boşluk alanları `D > d`, kırmızı çakışma alanları `d > D` durumudur. Kırmızı alan, deformasyon öncesi boyutsal çakışmadır; montaj sonrası elastik şekli göstermez. `D = d` olduğunda **Sınırda temas** yazılır; boşluk veya çakışma alanı çizilmez.
+
+**Çapsal boşluk** `D − d`, **çapsal sıkılık** `d − D` olarak hesaplanır. **g** oku üstte tek tarafı gösterir: eş merkezli kesitte boşluğun veya çakışmanın radyal büyüklüğü `|D − d| / 2`'dir. Bu, montaj kuvveti hesabı değildir. Çapsal ve tek taraflı değerler ayrı yazılır; raporlanan sayılar çizim büyütmesinden etkilenmez. Örneğin Ø50 H8/f7 orta değerinde D=50,019500 mm ve d=49,962500 mm: çapsal boşluk **0,057000 mm**, tek tarafta **0,028500 mm**.
+
+**Seçilen örnek** ile **tolerans çiftinin türü** ayrı gösterilir. H7/k6 bir ara geçmedir: en az boşluk seçiminde sıkılık, en çok boşluk seçiminde boşluk gösterilebilir. Bu, çiftin ara geçme sınıfını değiştirmez. En az boşluk `Dmin/dmax`, en çok boşluk `Dmax/dmin`, orta değer ise her iki limit bandının ortasıdır. Kesit ve tolerans bölgeleri bağımsız yükseklik kullanır; küçük pencerede sağ alan kaydırılabilir.
+
 
 ## Delik esaslı / mil esaslı örnekler
 

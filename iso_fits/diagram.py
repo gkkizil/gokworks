@@ -1,7 +1,8 @@
 """Tk üzerinde şematik montaj kesiti ve gerçek sapma ölçeğiyle bölge grafiği."""
 
-from gui.theme import INPUT, PANEL, TEXT, MUTED, BORDER, ACCENT, GREEN, RED, UI_FONT
-from iso_fits.rules import format_mm, format_deviation
+from gui.theme import (INPUT, PANEL, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
+                       GREEN, AMBER, RED, UI_FONT)
+from iso_fits.rules import CLASSIFICATION, format_mm, format_deviation
 
 
 def draw(canvas, fit, view, sample, appearance, scale):
@@ -33,6 +34,18 @@ def draw(canvas, fit, view, sample, appearance, scale):
             text(x, y(band.lower_nm)+10*scale, format_deviation(band.lower_nm, 'µm'))
             text(x, height-15*scale, f'{role} · {band.code}', font=bold)
         return
+    _draw_section(canvas, fit, sample, appearance, scale, color)
+
+
+def _draw_section(canvas, fit, sample, appearance, scale, color):
+    """Concentric longitudinal section; numeric values remain exact Decimal."""
+    width = canvas.winfo_width()
+    compact = width/scale < 440
+    font = (UI_FONT, -round((10 if compact else 12)*scale))
+    bold = (UI_FONT, -round((11 if compact else 13)*scale), 'bold')
+    def text(x, y, value, fill=None, **kw):
+        canvas.create_text(x, y, text=value, fill=fill or color(TEXT),
+                           font=kw.pop('font', font), **kw)
     hole, shaft = fit.sample(sample)
     difference = hole-shaft
     hole_dev = float(hole-fit.hole.nominal_mm)
@@ -40,31 +53,69 @@ def draw(canvas, fit, view, sample, appearance, scale):
     # Keep the magnification fixed while switching between sample sizes.
     maximum = max(*(abs(value)/1_000_000 for band in (fit.hole, fit.shaft)
                     for value in (band.lower_nm, band.upper_nm)), .001)
-    nominal_height = min(75*scale, height*.32)
+    nominal_height = 82*scale
     exaggeration = nominal_height*.4/maximum
     hole_height = nominal_height+hole_dev*exaggeration
     shaft_height = nominal_height+shaft_dev*exaggeration
-    center = height*.43; left, right = width*.22, width*.78
+    center = 112*scale
+    left, right = width*.18, width*.82
     bore_top, bore_bottom = center-hole_height/2, center+hole_height/2
-    outer_top, outer_bottom = bore_top-24*scale, bore_bottom+24*scale
+    outer_top, outer_bottom = bore_top-22*scale, bore_bottom+22*scale
     fill = color(PANEL)
     for y0, y1 in [(outer_top, bore_top), (bore_bottom, outer_bottom)]:
-        canvas.create_rectangle(left, y0, right, y1, fill=fill, outline=color(BORDER))
+        canvas.create_rectangle(left, y0, right, y1, fill=fill, outline=color(MUTED), tags='housing')
         for x in range(round(left+8*scale), round(right), max(1, round(24*scale))):
-            canvas.create_line(x, y1-2*scale, min(right-2*scale, x+min(20*scale, y1-y0-4)), y0+2*scale, fill=color(BORDER))
+            canvas.create_line(x, y1-2*scale, min(right-2*scale, x+min(20*scale, y1-y0-4)), y0+2*scale, fill=color(MUTED))
     shaft_top, shaft_bottom = center-shaft_height/2, center+shaft_height/2
-    edge = color(GREEN if difference >= 0 else RED)
-    canvas.create_line(width*.12, center, width*.88, center, fill=color(MUTED), dash=(5, 4))
-    canvas.create_rectangle(width*.31, shaft_top, width*.69, shaft_bottom,
-                            fill=color(ACCENT), outline=edge, width=2)
+    edge = color(GREEN if difference > 0 else RED if difference < 0 else AMBER)
+    canvas.create_line(12*scale, center, width-12*scale, center,
+                       fill=color(MUTED), dash=(8, 3, 2, 3), tags='axis')
+    shaft_left, shaft_right = width*.25, width*.75
+    canvas.create_rectangle(shaft_left, shaft_top, shaft_right, shaft_bottom,
+                            fill=color(ACCENT), outline=edge, width=2, tags='shaft')
+    if difference > 0:
+        for y0, y1 in [(bore_top, shaft_top), (shaft_bottom, bore_bottom)]:
+            canvas.create_rectangle(shaft_left, y0, shaft_right, y1,
+                                    fill=color(ACCENT_BG), outline=edge, tags='clearance')
+    elif difference < 0:
+        # Red regions show dimensional overlap before elastic deformation,
+        # rather than a physically assembled, undeformed interference fit.
+        for y0, y1 in [(shaft_top, bore_top), (bore_bottom, shaft_bottom)]:
+            canvas.create_rectangle(shaft_left, y0, shaft_right, y1, fill=color(RED),
+                                    outline=color(RED), stipple='gray50', tags='overlap')
     canvas.create_line(left, bore_top, right, bore_top, fill=edge, width=2)
     canvas.create_line(left, bore_bottom, right, bore_bottom, fill=edge, width=2)
-    if difference < 0:
-        for y0, y1 in [(shaft_top, bore_top), (bore_bottom, shaft_bottom)]:
-            canvas.create_rectangle(width*.31, y0, width*.69, y1, fill=color(RED), outline=color(RED), stipple='gray50')
-    text(width/2, 12*scale, f'DELİK · {fit.hole.code} · Ø{format_mm(hole)} mm', font=bold)
-    text(width/2, center, f'MİL · {fit.shaft.code}',
-         fill='#10231D' if appearance == 'Dark' else '#FFFFFF', font=bold)
-    text(width/2, height-40*scale, f'Mil çapı: {format_mm(shaft)} mm')
-    text(width/2, height-18*scale,
-         f"{'Boşluk' if difference >= 0 else 'Sıkılık'}: {format_mm(abs(difference))} mm", fill=edge, font=bold)
+
+    # Dimension arrows span the full diameter. g spans one radial side only.
+    for x, y0, y1, label, anchor in [(width*.09, bore_top, bore_bottom, 'D', 'e'),
+                                    (width*.91, shaft_top, shaft_bottom, 'd', 'w')]:
+        start = left if label == 'D' else shaft_right
+        for y in (y0, y1):
+            canvas.create_line(start, y, x, y, fill=color(MUTED), tags='extension')
+        canvas.create_line(x, y0, x, y1, arrow='both', arrowshape=(5*scale, 6*scale, 2*scale),
+                           fill=color(TEXT), tags=f'dimension_{label}')
+        text(x+(-4 if label == 'D' else 4)*scale, center-9*scale, label, font=bold, anchor=anchor)
+    if difference:
+        gx = shaft_right-12*scale
+        canvas.create_line(gx, min(bore_top, shaft_top), gx, max(bore_top, shaft_top),
+                           fill=edge, arrow='both', arrowshape=(3*scale, 4*scale, 1.5*scale), tags='radial_dimension')
+        text(right+4*scale, (bore_top+shaft_top)/2, 'g', fill=edge, font=bold, anchor='w')
+    text(width/2, 16*scale, f'DELİK {fit.hole.code} · D = Ø{format_mm(hole)} mm',
+         font=bold, width=width-24*scale, tags='hole_label')
+    text(width/2, center, f'MİL {fit.shaft.code}\nd = Ø{format_mm(shaft)} mm',
+         fill='#10231D' if appearance == 'Dark' else '#FFFFFF', font=bold,
+         width=shaft_right-shaft_left-12*scale, tags='shaft_label')
+    canvas.create_line(12*scale, 197*scale, width-12*scale, 197*scale, fill=color(BORDER))
+    state = 'BOŞLUK VAR' if difference > 0 else 'SIKILIK VAR' if difference < 0 else 'SINIRDA TEMAS'
+    text(width/2, 215*scale, f'Seçilen örnek: {state}', fill=edge, font=bold, tags='sample_state')
+    if difference:
+        label, formula = ('Çapsal boşluk', 'D − d') if difference > 0 else ('Çapsal sıkılık', 'd − D')
+        text(width/2, 239*scale, f'{label}: {formula} = {format_mm(abs(difference))} mm',
+             font=bold, width=width-24*scale, tags='diametral_result')
+        text(width/2, 263*scale, f'Tek tarafta: g = ({formula}) / 2 = {format_mm(abs(difference)/2)} mm',
+             width=width-24*scale, tags='radial_result')
+    else:
+        text(width/2, 239*scale, f'D = d = {format_mm(hole)} mm', font=bold, tags='diametral_result')
+        text(width/2, 263*scale, 'Çapsal fark = 0 mm · Tek tarafta g = 0 mm', tags='radial_result')
+    text(width/2, 290*scale, f'Tolerans çiftinin türü: {CLASSIFICATION[fit.kind]}',
+         fill=color(MUTED), width=width-24*scale, tags='fit_kind')

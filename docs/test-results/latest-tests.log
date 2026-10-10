@@ -191,6 +191,12 @@ test_shorter_filtered_list_stays_visible_after_manual_form (test_iso_matching.Ma
 test_equal_distance_is_not_a_unique_iso_identification (test_iso_matching.ManualMatchingRulesTests.test_equal_distance_is_not_a_unique_iso_identification) ... ok
 test_independent_hole_values_identify_their_own_class (test_iso_matching.ManualMatchingRulesTests.test_independent_hole_values_identify_their_own_class) ... ok
 test_manual_band_has_no_reference_class_and_rejects_wrong_feature (test_iso_matching.ManualMatchingRulesTests.test_manual_band_has_no_reference_class_and_rejects_wrong_feature) ... ok
+test_diameter_arrows_span_parts_and_radial_arrow_is_half_the_difference (test_iso_section.IsoSectionTests.test_diameter_arrows_span_parts_and_radial_arrow_is_half_the_difference) ... ok
+test_manual_half_micron_radial_value_and_negative_gap_are_exact (test_iso_section.IsoSectionTests.test_manual_half_micron_radial_value_and_negative_gap_are_exact) ... ok
+test_small_window_both_themes_and_dpi_keep_labels_inside_canvas (test_iso_section.IsoSectionTests.test_small_window_both_themes_and_dpi_keep_labels_inside_canvas) ... ok
+test_transition_endpoints_show_different_samples_with_same_overall_kind (test_iso_section.IsoSectionTests.test_transition_endpoints_show_different_samples_with_same_overall_kind) ... ok
+test_view_change_restores_height_and_hides_section_legend (test_iso_section.IsoSectionTests.test_view_change_restores_height_and_hides_section_legend) ... ok
+test_zero_difference_is_contact_without_gap_or_overlap_and_recovers (test_iso_section.IsoSectionTests.test_zero_difference_is_contact_without_gap_or_overlap_and_recovers) ... ok
 test_apply_writes_metres_and_k_type_without_saving (test_k_factor.ApplyTests.test_apply_writes_metres_and_k_type_without_saving) ... ok
 test_batch_deduplicates_instances_and_restores_assembly (test_k_factor.ApplyTests.test_batch_deduplicates_instances_and_restores_assembly) ... ok
 test_batch_nested_assembly_and_suppression (test_k_factor.ApplyTests.test_batch_nested_assembly_and_suppression) ... ok
@@ -326,6 +332,6 @@ test_independent_reference_pages_keep_their_work_areas_after_operation_pages (te
 test_operation_work_areas_stay_large_when_scrolling_and_switching_forms (test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms) ... ok
 
 ----------------------------------------------------------------------
-Ran 314 tests in 143.011s
+Ran 320 tests in 149.053s
 
 OK

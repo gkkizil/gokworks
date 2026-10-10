@@ -27,7 +27,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**314 test geçti; 116'sı gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**320 test geçti; 122'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -49,9 +49,9 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.058 | 4.611 |
-| Testler | 17 | 5.012 | 4.468 |
-| Toplam | 46 | 10.070 | 9.079 |
+| Uygulama | 29 | 5.119 | 4.669 |
+| Testler | 18 | 5.151 | 4.592 |
+| Toplam | 47 | 10.270 | 9.261 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -109,3 +109,7 @@ Aynı Linux/Xorg ortamında 66a8e45 ile karşılaştırma: 10.000 örnek dosyal�
 | Aramayı temizleyip tüm satırları gösterme | 389,49 | 4,39 |
 
 Bu ölçüm gerçek Tk listesi ve örnek dosya adlarıyla yapıldı; CAD aktarım süresi değildir. 10.000 satırda toplu filtreleme, seçim/veri korunması, sırasız canlı sonuçlar, yeni tarama ve üç modülün ayrı listeleri regresyon testleriyle kontrol edilir.
+
+ISO montaj kesitinde delik ve mil tam çap oklarıyla (D/d), tek taraflı boşluk veya çakışma g oku ile gösterilir. Çapsal ve radyal değerler ayrı yazılır; seçilen örneğin durumu ile tolerans çiftinin genel türü ayrılır. Sıfır fark temas olarak gösterilir. Üç örnek arasında büyütme sabittir; kırmızı alanlar deformasyon öncesi boyutsal çakışmayı gösterir. Kesit 310 px, tolerans bölgeleri 220 px çizim alanı kullanır; sağ çalışma alanı kaydırılabilir. Altı yeni gerçek GUI testi çap/radyal oklarını, ara geçme uçlarını, yarım mikrometreyi, sıfır temasını ve iki tema/üç ölçek görünümünü doğrular.
+
+Yeni gerçek ekranlar: [boşluklu koyu](screenshots/iso-section-clearance-dark.png), [boşluklu açık](screenshots/iso-section-clearance-light.png), [ara geçmenin sıkı örneği](screenshots/iso-section-transition-dark.png), [sıkı geçme](screenshots/iso-section-interference-dark.png), [temas](screenshots/iso-section-contact-dark.png), [1000×690 pencere](screenshots/iso-section-small-dark.png). [Kesiti okuma ve hesap açıklaması](iso-fits.md).

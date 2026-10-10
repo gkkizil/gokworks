@@ -185,8 +185,11 @@ class IsoFitsView:
                                          unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 10))
         samples.grid(row=2, column=0, sticky='ew', padx=14, pady=(8, 4))
         self.iso_widgets['sample'] = samples
-        self._label(diagram, 'Kesit şematik; sapmalar görünürlük için büyütülür.', 10, MUTED,
-                    wraplength=400).grid(row=3, column=0, padx=14, pady=(2, 10))
+        self.iso_widgets['section_help'] = self._label(diagram,
+            'D: delik çapı · d: mil çapı · g: tek taraftaki boşluk / çakışma.\n'
+            'Kesit eş merkezli ve ölçeksizdir; sapmalar büyütülür.\n'
+            'Kırmızı alan: deformasyon öncesi boyutsal çakışma.', 10, MUTED, wraplength=400)
+        self.iso_widgets['section_help'].grid(row=3, column=0, padx=14, pady=(2, 10))
         result = self._iso_card(details)
         result.grid(row=1, column=0, sticky='ew', pady=(0, 12))
         result.grid_columnconfigure((0, 1), weight=1)
@@ -452,6 +455,14 @@ class IsoFitsView:
 
     def _draw_iso_diagram(self):
         canvas = self.iso_widgets['canvas']
+        scale = self.workspace._get_widget_scaling()
+        section = self.iso_state['view'].get() == 'Montaj kesiti'
+        configure_changed(canvas, height=round((310 if section else 220)*scale))
+        help_label = self.iso_widgets['section_help']
+        if section and not help_label.winfo_manager():
+            help_label.grid()
+        elif not section and help_label.winfo_manager():
+            help_label.grid_remove()
         state = (self.iso_result, self.iso_state['view'].get(), self.iso_state['sample'].get(),
                  ctk.get_appearance_mode(), self.workspace._get_widget_scaling(),
                  canvas.winfo_width(), canvas.winfo_height())
@@ -467,9 +478,8 @@ class IsoFitsView:
         width = self.workspace.winfo_width()/scale
         form_width = max(250, min(308, (width-64)*.33))
         configure_changed(self.iso_widgets['form'], width=form_width)
-        configure_changed(self.iso_widgets['canvas'], height=round(220*scale))
         available = max(260, int(width-form_width-96))
-        for key in ('explanation', 'note', 'iso_comparison', 'compatibility_title', 'compatibility_text'):
+        for key in ('explanation', 'note', 'iso_comparison', 'compatibility_title', 'compatibility_text', 'section_help'):
             configure_changed(self.iso_widgets[key], wraplength=available)
         configure_changed(self.iso_widgets['manual_help'], wraplength=max(170, form_width-48))
         configure_changed(self.status_label, wraplength=max(300, width-48))
