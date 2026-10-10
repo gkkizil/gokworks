@@ -34,6 +34,8 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 ## K FAKTÖR - RADIUS
 
+K/R ekranında geniş **Malzeme / Takım**, **Manuel K / R** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
+
 **Manuel K / R** alt sekmesinde kalınlık, K ve iç R değerlerini doğrudan girebilirsiniz. Örneğin `2 mm → K=0,274, R=2 mm`: aktif montaj ve alt montajlarda yalnızca 2 mm saclar güncellenir, diğer kalınlıklar atlanır. [Manuel atama kılavuzu](docs/manual-k-radius.md).
 
 Yeni sekme etkin: malzeme ailesi, üst bıçak uç R/açı ve alt kalıp V/açı seçilir. Katalogda nominal ölçüler ve özel giriş vardır. Otomatik V her parçanın kalınlığına göre seçilir. **Hesapla / kontrol et**, BA/BD formüllerini gösterir; bağımsız BA + ölçülmüş iç R veya dış A/B/düz boy ölçümüyle K kalibre edilebilir.
@@ -56,7 +58,7 @@ Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal m
 2. Uygulamada **DXF / DWG** ekranına geçin.
 3. Kaynak klasörü yazın veya **Gözat** ile bu klasördeki bir `.SLDPRT` dosyasını seçin. Seçim, klasörü belirler; aktarım klasördeki tüm parçalara uygulanır.
 4. Çıktı klasörünü seçin. **Alt klasörleri de tara** açıksa çıktı klasöründe aynı alt klasör yapısı korunur.
-5. **DXF**, **DWG** veya **DXF + DWG** seçin. Varsayılan çıktı DXF'tir; büküm çizgileri varsayılan olarak kapalıdır. İstenirse **Büküm çizgilerini ekle** seçeneğini açın.
+5. **DXF** veya **DWG** seçin; yalnız seçtiğiniz biçim kaydedilir. Eski **DXF + DWG** tercihi DXF'e dönüştürülür. Varsayılan çıktı DXF'tir; büküm çizgileri varsayılan olarak kapalıdır. İstenirse **Büküm çizgilerini ekle** seçeneğini açın.
 6. **Klasörü tara** ile listeyi kontrol edin ve **Açınım aktarımını başlat** düğmesine basın.
 7. Dosya bazındaki sonuçları ve **Günlük** sekmesini inceleyin. **Rapor kaydet**, Türkçe karakterleri destekleyen CSV raporu üretir.
 
@@ -68,13 +70,13 @@ Adetler aktarım başlamadan önce **aktif montajın aktif konfigürasyonundan, 
 
 Hafif bileşenler adet hesabı öncesinde çözümlenir. Çözümlenmemiş/yüklenmemiş bileşen, SpeedPak ana montaj veya SpeedPak alt montaj varsa eksik adetle dosya oluşturulmaz; açık hata gösterilir. Kalınlık veya uygun konfigürasyon adedi okunamazsa tahmini değer kullanılmaz.
 
-Sayaçlar parçaları sayar. İki biçim seçildiğinde bir biçim başarısız olursa parça **Hata** olarak raporlanır; başarılı biçimin çıktısı korunur ve açıklamada belirtilir. Sonraki çalıştırma mevcut başarılı çıktıyı atlayıp eksik biçimi tekrar deneyebilir.
+Sayaçlar parçaları sayar. Sonuç ve CSV çıktı yolunda yalnız kaydedilmiş veya mevcut olduğu için atlanmış dosyalar gösterilir. Dosya doğrulanıp kaydedildikten sonraki geçici dosya/COM bağlantısı temizleme sorunları uyarı olarak gösterilir; başarılı aktarımı hata sonucuna dönüştürmez. SolidWorks aktarım hatası ve geçersiz çıktı dosyası hata olarak kalır.
 
 Mevcut çıktılar varsayılan olarak atlanır. **Mevcut çıktıların üzerine yaz** seçilirse yalnızca yeni çıktı doğrulandıktan sonra eski dosya değiştirilir. ASCII ve ikili DXF, `ezdxf==1.4.3` ile okunup denetlenir: dosya sonu eksik, okunamayan, yapısal hata/onarım gerektiren veya model alanı boş dosyalar reddedilir. DXF doğrulaması için `requirements.txt` bağımlılıklarının güncel kurulması gerekir. DWG'de boyut ve dosya başlığı kontrol edilir; tam DWG içeriği ayrıştırılmaz. Bu kontroller açınım ölçülerinin veya yönünün doğru olduğunu kanıtlamaz.
 
 DXF/DWG sonuç satırları, okunabilen sac kalınlığı ve montaj adedini açıklamanın başında gösterir. Boş liste, klasör seçme ve tarama adımlarını gösterir; tarama sonrasında bu yönlendirme gizlenir. Hedef dosya yolu bir klasörse aktarım hata olarak raporlanır.
 
-**Durdur**, işlenen parça ve seçili çıktı biçimleri tamamlandıktan sonra sonraki parçaya geçişi engeller. SolidWorks'ün devam eden COM çağrısı zorla kesilmez. Çalışma sırasında ekran ve seçenek değişiklikleri kilitlenir.
+**Durdur**, işlenen parça ve seçili çıktı biçimi tamamlandıktan sonra sonraki parçaya geçişi engeller. SolidWorks'ün devam eden COM çağrısı zorla kesilmez. Çalışma sırasında ekran ve seçenek değişiklikleri kilitlenir.
 
 ### Desteklenen parçalar ve sınırlar
 
@@ -88,7 +90,7 @@ DXF/DWG sonuç satırları, okunabilen sac kalınlığı ve montaj adedini açı
 
 Linux'taki otomatik testler gerçek SolidWorks üretimini doğrulayamaz. Windows'ta:
 
-1. Bilinen ölçülerde, tek gövdeli bir sac parçanın kopyasını montaja ekleyin ve ana montajı aktif yapın. DXF ve DWG'yi birlikte üretin; iki çıktıyı CAD/CAM programında açıp açınım ölçülerini ve yönünü SolidWorks açınımıyla karşılaştırın.
+1. Bilinen ölçülerde, tek gövdeli bir sac parçanın kopyasını montaja ekleyin ve ana montajı aktif yapın. Önce DXF, ardından DWG seçerek ayrı çalıştırmalarda üretin; her çalıştırmada yalnız seçilen uzantının oluştuğunu kontrol edin. Çıktıları CAD/CAM programında açıp açınım ölçülerini ve yönünü SolidWorks açınımıyla karşılaştırın.
 2. Büküm çizgileri kapalı ve açık iki ayrı klasöre aktarın. İkinci çıktıda çizgilerin eklendiğini doğrulayın.
 3. Aynı hedefe tekrar aktarın: mevcut dosyalar atlanmalı. Üzerine yaz seçeneğiyle yeniden aktarımı ayrıca kontrol edin.
 4. Alt klasörlerde aynı isimli iki parça kullanın; ayrı çıktı yolları oluşmalı.
@@ -112,7 +114,7 @@ Linux bulut ortamındaki sanal ekranla:
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son kapsamlı kontrolde **289 test geçti**; 93 gerçek GUI testi dahildir. [K/R, ISO ve çalışma alanı raporu](docs/reports/kr-workspace-fix/README.md). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son kapsamlı kontrolde **301 test geçti**; 103 gerçek GUI testi dahildir. [Son test çıktısı](docs/test-results/latest-tests.log), [güncel K/R ve tek biçim ekranları](docs/gui-design.md#güncel-kr-alanı-ve-menü-geçişleri). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. Tek biçim DXF/DWG üretimi, eski ayarın dönüşümü, hızlı menü geçişleri ve 4000 dosyalık liste hazırlanırken Durdur erişimi ayrıca sınandı. DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 

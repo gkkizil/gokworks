@@ -1,6 +1,6 @@
 # GUI tasarımı ve doğrulama
 
-Kullanıcının paylaştığı sade CRM ekranı örneği temel alındı: açık zemin, ince gri sınırlar, ikonlu yan menü, beyaz çalışma alanı ve belirgin başlıklar. Aynı düzenin koyu tema paleti de hazırlandı. PDF ve DXF/DWG aktarım seçenekleri korunuyor; **K FAKTÖR - RADIUS** etkin; Malzeme / Takım ve Manuel K / R alt sekmeleri vardır. **ISO GEÇMELERİ** bağımsız delik/mil hesap ekranıdır. **GEOMETRİK TOL.**, ASME 2018 rehberidir: 12 güncel özellik ve iki eski eğitim kartı.
+Kullanıcının paylaştığı sade CRM ekranı örneği temel alındı: açık zemin, ince gri sınırlar, ikonlu yan menü, beyaz çalışma alanı ve belirgin başlıklar. Aynı düzenin koyu tema paleti de hazırlandı. PDF ve DXF/DWG aktarım ekranları vardır; DXF veya DWG tek başına seçilir. **K FAKTÖR - RADIUS** ekranında geniş Malzeme / Takım, Manuel K / R ve Montaj sonuçları sekmeleri vardır. **ISO GEÇMELERİ** bağımsız delik/mil hesap ekranıdır. **GEOMETRİK TOL.**, ASME 2018 rehberidir: 12 güncel özellik ve iki eski eğitim kartı.
 
 ## Kullanım
 
@@ -27,9 +27,9 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**289 test geçti; 93'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**301 test geçti; 103'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını ve büyük listelerin olay sırasını kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
-Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/kr-workspace-fix/test-run.log).
+Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
 Çalışan uygulamadan 1240×860 boyutunda alınan gerçek ekran görüntüleri:
 
@@ -49,9 +49,9 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 27 | 4.749 | 4.323 |
-| Testler | 14 | 4.462 | 3.966 |
-| Toplam | 41 | 9.211 | 8.289 |
+| Uygulama | 28 | 4.940 | 4.499 |
+| Testler | 15 | 4.717 | 4.201 |
+| Toplam | 43 | 9.657 | 8.700 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -75,6 +75,14 @@ GD&T ölçü denetiminde 9 regresyon testi eklendi: gerçek 45° ve normal ok, t
 
 ## Tam yükseklikte çalışma alanları — 10.10.2026
 
-PDF/DXF/K ayarları soldaki bağımsız kaydırılan formda, tablo/günlük sağdaki tam yükseklikte sonuç alanındadır. Form kaydırılırken tablo yüksekliği değişmez. K/R tarama, hesap ve kayıt seçimi kaydırma dışında kalır. ISO ve GD&T kendi hesap/şema düzenlerini korur. Dar sonuç panelinde arama ve filtreler iki satıra geçer; başlık ve ipuçları alan genişliğine uyar.
+PDF/DXF ayarları soldaki bağımsız kaydırılan formda, tablo/günlük sağdaki tam yükseklikte sonuç alanındadır. Form kaydırılırken tablo yüksekliği değişmez. K/R ekranı aşağıdaki yeni sekmeli düzene geçti. ISO ve GD&T kendi hesap/şema düzenlerini korur. Dar sonuç panelinde arama ve filtreler iki satıra geçer; başlık ve ipuçları alan genişliğine uyar.
 
 CustomTkinter ölçeklemesinin eski grid konumlarını yeniden yüklediği sekme geçişi giderildi. ISO filtre değişiminde liste kaydırması başa alınır; kısa mil esaslı listede önceki uzun listenin boş alanı görünmez. Tümü görünümünde delik ve mil esaslı örnekler dönüşümlü gösterilir. [Son 19 gerçek ekran ve Word/test kanıtları](reports/kr-workspace-fix/README.md). Önceki raporlar tarihsel tasarımı gösterir.
+
+## Güncel K/R alanı ve menü geçişleri
+
+K/R için form ve tablo aynı anda dar sütunlara sıkıştırılmaz. 48 px sekme seçimi kaydırma dışında kalır; malzeme/takım ve manuel alanlar tüm genişliği kullanır. Girişler 42 px yüksekliğindedir. Montaj sonuçları sekmesi tam genişlikte dosya/günlük alanını açar. Montajı tara, Hesapla ve kayıt seçeneği üç görünümde de sabittir. İki tema, 1000×690 minimum pencere ve %125/%150 ölçekler test edilir.
+
+Yan menü vurgusu kısa renk geçişi kullanır; sayfa içeriği hemen açılır. Tercih yazımı 250 ms ertelenir; hızlı geçişte ayrılan sayfaların değerleri birleştirilir, işlem başlatılırken/kapanırken kaydedilir. Büyük dosya listeleri kısa gruplarla eklenir, işçi olayları sınırlı sürelerle tüketilir; Durdur ve diğer Tk olaylarına sıra verilir.
+
+Güncel gerçek ekranlar: [takım](screenshots/gui-current-kr-tools-dark.png), [manuel koyu](screenshots/gui-current-kr-manual-dark.png), [manuel açık](screenshots/gui-current-kr-manual-light.png), [küçük pencere](screenshots/gui-current-kr-manual-small.png), [montaj sonuçları](screenshots/gui-current-kr-results-dark.png), [tek biçim DXF/DWG](screenshots/gui-current-dxf-dwg-dark.png). Bu görüntüler çalışan Tk arayüzünden alındı; SolidWorks çıktısını kanıtlamaz. Önceki Word raporları kendi sürümlerinin kayıtlarıdır.

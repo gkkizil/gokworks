@@ -18,6 +18,8 @@ class WorkspaceLayout:
             return self._build_iso_workspace()
         if self.mode == 'geometric_tolerances':
             return self._build_gdt_workspace()
+        if self.mode == 'k_factor':
+            return self._build_k_workspace()
         self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
                                       border_width=1, border_color=BORDER)
         self.workspace.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
@@ -72,6 +74,9 @@ class WorkspaceLayout:
         navigation.grid(row=2, column=0, sticky="ew", padx=12)
         navigation.grid_columnconfigure(0, weight=1)
         self.nav_buttons = {}
+        self._nav_active = self.mode
+        self._nav_fonts = {active: ctk.CTkFont(family=UI_FONT, size=13, weight='bold' if active else 'normal')
+                           for active in (False, True)}
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
             ("k_factor", "K FAKTÖR - RADIUS", "tools"),
@@ -85,7 +90,7 @@ class WorkspaceLayout:
                 border_width=1 if active else 0,
                 fg_color=ACCENT_BG if active else "transparent", hover_color=SECONDARY,
                 text_color=ACCENT if active else MUTED, text_color_disabled=MUTED,
-                font=ctk.CTkFont(family=UI_FONT, size=13, weight="bold" if active else "normal"),
+                font=self._nav_fonts[active],
                 command=lambda selected=key: self._switch_mode(selected),
                 state="normal",
             )
@@ -183,7 +188,7 @@ class WorkspaceLayout:
             formats.grid(row=3, column=0, sticky="ew", padx=16, pady=(0, 12))
             self._label(formats, "Biçim", 12, MUTED).pack(anchor="w", pady=(0, 6))
             format_menu = ctk.CTkSegmentedButton(
-                formats, values=["DXF", "DWG", "DXF + DWG"], variable=self.output_format,
+                formats, values=["DXF", "DWG"], variable=self.output_format,
                 height=32, fg_color=SECONDARY, selected_color=ACCENT_BG,
                 selected_hover_color=HOVER, unselected_color=SECONDARY,
                 unselected_hover_color=HOVER, text_color=TEXT,
@@ -225,24 +230,28 @@ class WorkspaceLayout:
     def _build_stats(self):
         self.stats_frame = ctk.CTkFrame(self.workspace, fg_color="transparent")
         self.stats_frame.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 14))
-        for index, (key, caption, color, icon) in enumerate((
+        metrics = [
             ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Başarılı", GREEN, "check"),
             ("skipped", "Atlanan", AMBER, "skip"), ("failed", "Hatalı", RED, "error"),
-        )):
+        ]
+        for index, (key, caption, color, icon) in enumerate(metrics):
             self.stats_frame.grid_columnconfigure(index, weight=1, uniform="stats")
             card = ctk.CTkFrame(self.stats_frame, fg_color=INPUT, corner_radius=10,
                                  border_width=1, border_color=BORDER)
             card.grid(row=0, column=index, sticky="ew",
-                       padx=(0 if index == 0 else 4, 0 if index == 3 else 4))
+                       padx=(0 if index == 0 else 4, 0 if index == len(metrics)-1 else 4))
             card.grid_columnconfigure(0, weight=1)
-            self._label(card, caption, 11, MUTED).grid(row=0, column=0, sticky="w", padx=14, pady=(8, 0))
+            compact = self.mode == 'k_factor'
+            self._label(card, caption, 11, MUTED).grid(row=0, column=0, sticky="w", padx=14,
+                                                     pady=8 if compact else (8, 0))
             self.stat_values[key] = self._label(card, "0", 20, color, True)
-            self.stat_values[key].grid(row=1, column=0, sticky="w", padx=14, pady=(0, 8))
+            self.stat_values[key].grid(row=0 if compact else 1, column=1 if compact else 0,
+                                      sticky="w", padx=14, pady=8 if compact else (0, 8))
             ctk.CTkLabel(card, text="", image=self._icon(icon, color, 20)).grid(
-                row=0, column=1, rowspan=2, padx=(8, 14))
+                row=0, column=2 if compact else 1, rowspan=1 if compact else 2, padx=(8, 14))
 
-    def _build_results(self):
-        card = ctk.CTkFrame(self.workspace, fg_color=PANEL, corner_radius=12,
+    def _build_results(self, parent=None):
+        card = ctk.CTkFrame(self.workspace if parent is None else parent, fg_color=PANEL, corner_radius=12,
                             border_width=1, border_color=BORDER)
         card.grid(row=3, column=0, sticky="nsew", padx=24)
         card.grid_columnconfigure(0, weight=1)
@@ -356,10 +365,10 @@ class WorkspaceLayout:
         if self.mode not in ('iso_fits', 'geometric_tolerances'):
             tables.add(self.table)
         for table in tables:
-            table.column("status", width=round(108 * scale), minwidth=round(80 * scale))
+            table.column("status", width=round(152 * scale), minwidth=round(80 * scale))
             for column in ("file", "detail"):
                 table.column(column, minwidth=round(80 * scale))
             for status, value in (("pending", MUTED), ("running", ACCENT), ("success", GREEN),
-                                  ("skipped", AMBER), ("error", RED)):
+                                  ("partial", AMBER), ("skipped", AMBER), ("error", RED)):
                 table.tag_configure(status, foreground=color(value))
             table.tag_configure("stripe", background=color(INPUT))

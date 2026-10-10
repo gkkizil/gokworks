@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import queue
 import threading
+import time
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -19,12 +20,13 @@ from k_factor.window import KFactorView
 from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from gui.icons import make_icon
+from gui.motion import blend, pair
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
+                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
-          "skipped": "Atlandı", "error": "Hata"}
+          "partial": "Kısmen tamamlandı", "skipped": "Atlandı", "error": "Hata"}
 FILTERS = {"Tüm durumlar": None, "Bekleyen": "pending", "İşleniyor": "running",
-           "Başarılı": "success", "Atlanan": "skipped", "Hatalı": "error"}
+           "Başarılı": "success", "Kısmi": "partial", "Atlanan": "skipped", "Hatalı": "error"}
 
 
 def _search_text(value):
@@ -73,7 +75,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.include_subfolders = tk.BooleanVar(self, value=saved.get("pdf_recursive", True) is True)
         self.overwrite_existing = tk.BooleanVar(self, value=saved.get("pdf_overwrite", False) is True)
         self.output_format = tk.StringVar(self, value=saved.get("dxf_dwg_format", "DXF"))
-        if self.output_format.get() not in ("DXF", "DWG", "DXF + DWG"):
+        if self.output_format.get() not in ("DXF", "DWG"):
             self.output_format.set("DXF")
         self.bend_lines = tk.BooleanVar(self, value=saved.get("dxf_dwg_bend_lines", False) is True)
         self.events = queue.Queue()
@@ -81,6 +83,10 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.busy = False
         self.close_pending = False
         self._closed = False
+        self._pending_preferences = {}
+        self._preferences_save_id = None
+        self._pending_files = None
+        self._pending_preview = False
         self.controls = []
         self.results = []
         self.row_ids = {}
@@ -115,7 +121,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
     def _switch_mode(self, mode):
         if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances"):
             return
-        self._save_preferences()
+        self._schedule_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
         if layout_fit is not None:
             self.after_cancel(layout_fit)
@@ -153,7 +159,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.include_subfolders = tk.BooleanVar(self, value=saved.get(f"{self.mode}_recursive", True) is True)
         self.overwrite_existing = tk.BooleanVar(self, value=saved.get(f"{self.mode}_overwrite", False) is True)
         output_format = saved.get("dxf_dwg_format", "DXF")
-        self.output_format = tk.StringVar(self, value=output_format if output_format in ("DXF", "DWG", "DXF + DWG") else "DXF")
+        self.output_format = tk.StringVar(self, value=output_format if output_format in ("DXF", "DWG") else "DXF")
         self.bend_lines = tk.BooleanVar(self, value=saved.get("dxf_dwg_bend_lines", False) is True)
         self.controls, self.results = [], []
         self.row_ids, self.stat_values = {}, {}
@@ -182,17 +188,37 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         return self._icons[key]
 
     def _update_navigation(self):
-        for key, button in self.nav_buttons.items():
+        previous = self._nav_active
+        animation = getattr(self, '_nav_anim_id', None)
+        if animation is not None:
+            self.after_cancel(animation)
+            for key, button in self.nav_buttons.items():
+                if key not in (previous, self.mode):
+                    button.configure(fg_color='transparent')
+        self._nav_active = self.mode
+        transitions = []
+        for key in dict.fromkeys((previous, self.mode)):
+            button = self.nav_buttons[key]
             active = key == self.mode
+            target = ACCENT_BG if active else 'transparent'
+            transitions.append((button, pair(button.cget('fg_color'), SIDEBAR), pair(target, SIDEBAR), target))
             button.configure(
-                fg_color=ACCENT_BG if active else "transparent",
                 hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
                 text_color=ACCENT if active else MUTED,
                 image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "ruler"}[key],
                                  ACCENT if active else MUTED),
                 border_width=1 if active else 0,
-                font=ctk.CTkFont(family=UI_FONT, size=14, weight="bold" if active else "normal"),
+                font=self._nav_fonts[active],
             )
+        def frame(step=1):
+            if self._closed:
+                return
+            fraction = 1-(1-step/7)**3
+            for button, start, end, target in transitions:
+                button.configure(fg_color=target if step == 7 else tuple(
+                    blend(a, b, fraction) for a, b in zip(start, end)))
+            self._nav_anim_id = self.after(16, lambda: frame(step+1)) if step < 7 else None
+        self._nav_anim_id = self.after(0, frame)
 
     def _cancel_widget_callbacks(self, widget):
         """Silinen panelin CustomTkinter zamanlayıcılarını da iptal et."""
@@ -247,6 +273,9 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             key = 'hole_upper' if self.iso_state['method'].get() == 'Manuel kontrol' else 'search'
             self.iso_widgets[key].focus_set()
             return 'break'
+        if self.mode == 'k_factor':
+            from k_factor.window import RESULTS_TAB
+            self._select_k_view(RESULTS_TAB)
         self.result_tabs.set("Dosyalar")
         self.search_entry.focus_set()
         return "break"
@@ -341,13 +370,15 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             if previous is not None:
                 self.after_cancel(previous)
             callback = self._resize_iso_workspace if self.mode == 'iso_fits' else self._resize_gdt_workspace
-            self._layout_fit_id = self.after(150, callback)
+            self._layout_fit_id = self.after(35, callback)
             return
-        self.status_label.configure(wraplength=max(240, self.workspace.winfo_width() - 56))
+        wrap = max(240, self.workspace.winfo_width() - 56)
+        if self.status_label.cget('wraplength') != wrap:
+            self.status_label.configure(wraplength=wrap)
         previous = getattr(self, "_layout_fit_id", None)
         if previous is not None:
             self.after_cancel(previous)
-        self._layout_fit_id = self.after(150, self._fit_pdf_settings)
+        self._layout_fit_id = self.after(35, self._fit_pdf_settings)
 
     def _fit_pdf_settings(self):
         self._layout_fit_id = None
@@ -356,21 +387,15 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         scale = self.settings_body._get_widget_scaling()
         if getattr(self, "_table_style_key", None) != (ctk.get_appearance_mode(), scale):
             self._configure_table_style()
+        if self.mode == 'k_factor':
+            return self._resize_k_workspace()
         width = self.workspace.winfo_width()/scale
         form_width = max(288, min(350, (width-60)*.35))
         width_changed = abs(self.form_panel.cget("width")-form_width) > .5
-        self.form_panel.configure(width=form_width)
+        if width_changed:
+            self.form_panel.configure(width=form_width)
         result_width = max(260, width-form_width-60)
-        self.results_title.configure(wraplength=max(90, result_width-190))
-        self.results_hint.configure(wraplength=max(100, result_width-135))
-        # Search keeps the full width when the result panel is narrow; filters
-        # move to the next row instead of forcing controls beyond the viewport.
-        narrow = result_width < 560
-        search = self.search_entry.master
-        search.grid(row=0, column=0, columnspan=3 if narrow else 1, sticky="ew",
-                              padx=(0, 0 if narrow else 8), pady=(0, 6 if narrow else 0))
-        self.filter_menu.grid(row=1 if narrow else 0, column=0 if narrow else 1, sticky="w", padx=(0, 8))
-        self.clear_filter_button.grid(row=1 if narrow else 0, column=2, sticky="e")
+        self._fit_results_toolbar(result_width)
         self._settings_height = self.settings_body._parent_canvas.winfo_height()/scale
         preferred = self.settings_body.winfo_reqheight()/scale
         scrollbar = self.settings_body._scrollbar
@@ -381,6 +406,22 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             scrollbar.grid_remove()
         if width_changed:
             self._layout_fit_id = self.after(40, self._fit_pdf_settings)
+
+    def _fit_results_toolbar(self, result_width):
+        key = (round(result_width), self.workspace._get_widget_scaling())
+        if getattr(self.files_toolbar, '_layout_key', None) == key:
+            return
+        self.files_toolbar._layout_key = key
+        self.results_title.configure(wraplength=max(90, result_width-190))
+        self.results_hint.configure(wraplength=max(100, result_width-135))
+        # Search keeps the full width when the result panel is narrow; filters
+        # move to the next row instead of forcing controls beyond the viewport.
+        narrow = result_width < 560
+        search = self.search_entry.master
+        search.grid(row=0, column=0, columnspan=3 if narrow else 1, sticky="ew",
+                              padx=(0, 0 if narrow else 8), pady=(0, 6 if narrow else 0))
+        self.filter_menu.grid(row=1 if narrow else 0, column=0 if narrow else 1, sticky="w", padx=(0, 8))
+        self.clear_filter_button.grid(row=1 if narrow else 0, column=2, sticky="e")
 
 
     def _choose_folder(self, variable, title):
@@ -405,37 +446,42 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             variable.set(folder)
 
     def _save_preferences(self):
+        if self._preferences_save_id is not None:
+            self.after_cancel(self._preferences_save_id)
+            self._preferences_save_id = None
+        self._pending_preferences.update(self._preference_values())
         try:
             saved = load_settings(self.settings_path)
-            if self.mode == 'geometric_tolerances':
-                saved.update({f'gdt_{key}': value.get() for key, value in self.gdt_state.items() if key != 'measured'})
-                saved['appearance'] = 'dark' if self.theme_mode.get() == 'Koyu' else 'light'
-                save_settings(saved, self.settings_path)
-                return
-            if self.mode == 'iso_fits':
-                saved.update({f'iso_{key}': value.get() for key, value in self.iso_state.items()})
-                saved['appearance'] = 'dark' if self.theme_mode.get() == 'Koyu' else 'light'
-                save_settings(saved, self.settings_path)
-                return
-            if self.mode == "k_factor":
-                saved.update({f"kr_{key}": value.get() for key, value in self.k_state.items() if key != "save"})
-                saved["appearance"] = "dark" if self.theme_mode.get() == "Koyu" else "light"
-                save_settings(saved, self.settings_path)
-                return
-            saved.update({f"{self.mode}_source": self.source_folder.get(),
-                          f"{self.mode}_output": self.output_folder.get(),
-                          f"{self.mode}_recursive": self.include_subfolders.get(),
-                          f"{self.mode}_overwrite": self.overwrite_existing.get(),
-                          "appearance": "dark" if self.theme_mode.get() == "Koyu" else "light"})
-            if not self._is_pdf:
-                saved.update({"dxf_dwg_format": self.output_format.get(),
-                              "dxf_dwg_bend_lines": self.bend_lines.get()})
-            save_settings(saved, self.settings_path)
+            updated = {**saved, **self._pending_preferences}
+            if updated != saved:
+                save_settings(updated, self.settings_path)
+            self._pending_preferences.clear()
         except OSError as error:
             if self.mode in ('iso_fits', 'geometric_tolerances'):
                 self.status_label.configure(text=f'Tercihler kaydedilemedi: {error}', text_color=RED)
             else:
                 self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
+
+    def _preference_values(self):
+        saved = {'appearance': 'dark' if self.theme_mode.get() == 'Koyu' else 'light'}
+        if self.mode == 'geometric_tolerances':
+            saved.update({f'gdt_{key}': value.get() for key, value in self.gdt_state.items() if key != 'measured'})
+        elif self.mode == 'iso_fits':
+            saved.update({f'iso_{key}': value.get() for key, value in self.iso_state.items()})
+        elif self.mode == 'k_factor':
+            saved.update({f'kr_{key}': value.get() for key, value in self.k_state.items() if key != 'save'})
+        else:
+            saved.update({f'{self.mode}_source': self.source_folder.get(), f'{self.mode}_output': self.output_folder.get(),
+                          f'{self.mode}_recursive': self.include_subfolders.get(), f'{self.mode}_overwrite': self.overwrite_existing.get()})
+            if not self._is_pdf:
+                saved.update(dxf_dwg_format=self.output_format.get(), dxf_dwg_bend_lines=self.bend_lines.get())
+        return saved
+
+    def _schedule_preferences(self):
+        self._pending_preferences.update(self._preference_values())
+        if self._preferences_save_id is not None:
+            self.after_cancel(self._preferences_save_id)
+        self._preferences_save_id = self.after(250, self._save_preferences)
 
     def _set_busy(self, value):
         self.busy = value
@@ -502,13 +548,16 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         if not output or (Path(output).exists() and not Path(output).is_dir()):
             self.status_label.configure(text="Geçerli bir çıktı kayıt klasörü seç.", text_color=RED)
             return
+        if not self._is_pdf and self.output_format.get() not in ('DXF', 'DWG'):
+            self.status_label.configure(text='Çıktı türü olarak DXF veya DWG seçin.', text_color=RED)
+            return
         self._save_preferences()
         self._reset()
         self._set_busy(True)
         self.status_label.configure(text="Aktarım hazırlanıyor…", text_color=MUTED)
         exporter = export_drawings if self._is_pdf else export_parts
         export_options = {} if self._is_pdf else {
-            "formats": ("dxf", "dwg") if self.output_format.get() == "DXF + DWG" else (self.output_format.get().lower(),),
+            "formats": (self.output_format.get().lower(),),
             "bend_lines": self.bend_lines.get(),
         }
         threading.Thread(target=exporter,
@@ -522,6 +571,14 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.status_label.configure(text="Geçerli dosya tamamlandıktan sonra duracak…", text_color=AMBER)
 
     def _fill_files(self, files):
+        self._prepare_file_list()
+        source = Path(self.source_folder.get()).resolve()
+        for index, path in enumerate(files):
+            self._insert_file_row(index, path, source)
+        self.stat_values['total'].configure(text=str(len(files)))
+        self._apply_filters()
+
+    def _prepare_file_list(self):
         # Detached, filtered rows are not returned by get_children(). Delete
         # them too, otherwise the next scan reuses an existing file_n id.
         if self.row_ids:
@@ -529,16 +586,49 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.row_ids.clear()
         self.row_statuses.clear()
         self._visible_rows.clear()
-        for index, path in enumerate(files):
-            try:
-                name = str(Path(path).relative_to(Path(self.source_folder.get()).resolve()))
-            except ValueError:
-                name = Path(path).name
-            self.row_ids[path] = self.table.insert("", "end", iid=f"file_{index}",
-                                                    values=(name, "Bekliyor", ""), tags=("pending",))
-            self.row_statuses[path] = "pending"
-        self.stat_values["total"].configure(text=str(len(files)))
+
+    def _insert_file_row(self, index, path, source):
+        try:
+            name = str(Path(path).relative_to(source))
+        except ValueError:
+            name = Path(path).name
+        self.row_ids[path] = self.table.insert('', 'end', iid=f'file_{index}',
+                                              values=(name, 'Bekliyor', ''), tags=('pending',))
+        self.row_statuses[path] = 'pending'
+
+    def _queue_file_list(self, files):
+        if len(files) <= 300:
+            self._fill_files(files)
+            return False
+        self._prepare_file_list()
+        self._pending_files = dict(iterator=iter(files), index=0, total=len(files),
+                                   source=Path(self.source_folder.get()).resolve())
+        return True
+
+    def _fill_next_file_batch(self):
+        pending = self._pending_files
+        deadline = time.perf_counter()+.006
+        while pending['index'] < pending['total']:
+            self._insert_file_row(pending['index'], next(pending['iterator']), pending['source'])
+            pending['index'] += 1
+            if time.perf_counter() >= deadline:
+                self.status_label.configure(text=f"Liste hazırlanıyor · {pending['index']} / {pending['total']}")
+                return
+        self._pending_files = None
+        self.stat_values['total'].configure(text=str(pending['total']))
         self._apply_filters()
+        if self._pending_preview:
+            self._pending_preview = False
+            self._finish_preview()
+
+    def _finish_preview(self):
+        self._set_busy(False)
+        text = f'{len(self.row_ids)} {self._file_label} bulundu. Aktarım için hazır.'
+        if self.stop_event.is_set():
+            text = 'Klasör taraması durduruldu.'
+        self.status_label.configure(text=text, text_color=MUTED)
+        if self.close_pending:
+            self._destroy_app()
 
     def _update_row(self, path, status, detail=""):
         row = self.row_ids.get(path)
@@ -607,8 +697,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
 
     def _finish(self, summary):
         self._set_busy(False)
-        for key in ("total", "succeeded", "skipped", "failed"):
-            self.stat_values[key].configure(text=str(summary[key]))
+        for key, widget in self.stat_values.items():
+            widget.configure(text=str(summary.get(key, 0)))
         state = summary["state"]
         if state == "error":
             text, color = summary["error"], RED
@@ -622,7 +712,12 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             unit = "PDF" if self._is_pdf else "parça"
             preview = self.mode == "k_factor" and self.results and all(item.get("preview") for item in self.results)
             text = f"{'Önizleme tamamlandı' if preview else 'Tamamlandı'} · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
-            color = AMBER if summary["failed"] else GREEN
+            if summary.get('partial'):
+                text += f" {summary['partial']} parçada bazı biçimler hazır, bazıları tamamlanamadı."
+            color = AMBER if summary["failed"] or summary.get('partial') else GREEN
+        if summary.get('warnings'):
+            text += ' · Uyarı: '+ '; '.join(summary['warnings'])
+            color = AMBER
         self.status_label.configure(text=text, text_color=color)
         self._append_log(text)
         self.report_button.configure(state="normal" if self.results else "disabled")
@@ -630,11 +725,20 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             self._destroy_app()
 
     def _process_events(self):
+        if self._pending_files is not None:
+            self._fill_next_file_batch()
+            if self._closed:
+                return
+            if self._pending_files is not None:
+                self._poll_id = self.after(8, self._process_events)
+                return
+        deadline = time.perf_counter()+.008
+        handled = 0
         try:
             while True:
                 event, value = self.events.get_nowait()
                 if event == "files":
-                    self._fill_files(value)
+                    self._queue_file_list(value)
                 elif event == "phase":
                     self.status_label.configure(text=value, text_color=MUTED)
                 elif event == "total":
@@ -650,32 +754,33 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                     self._update_row(value["source"], value["status"], detail)
                     self._append_log(f"{LABELS[value['status']]} · {Path(value['source']).name} · {value['detail']}")
                 elif event == "counts":
-                    for key in ("succeeded", "skipped", "failed"):
-                        self.stat_values[key].configure(text=str(value[key]))
+                    for key, widget in self.stat_values.items():
+                        widget.configure(text=str(value.get(key, 0)))
                 elif event == "progress":
                     current, total = value
                     self.progress.set(current / total if total else 0)
                 elif event == "log":
                     self._append_log(value)
                 elif event in ("preview", "preview_error"):
-                    self._set_busy(False)
                     if event == "preview":
-                        self._fill_files(value)
-                        text = f"{len(value)} {self._file_label} bulundu. Aktarım için hazır."
-                        if self.stop_event.is_set():
-                            text = "Klasör taraması durduruldu."
-                        self.status_label.configure(text=text, text_color=MUTED)
+                        self._pending_preview = self._queue_file_list(value)
+                        if not self._pending_preview:
+                            self._finish_preview()
                     else:
+                        self._set_busy(False)
                         self.status_label.configure(text=value, text_color=RED)
-                    if self.close_pending:
-                        self._destroy_app()
+                        if self.close_pending:
+                            self._destroy_app()
                 elif event == "done":
                     self._finish(value)
                 if self._closed:
                     return
+                handled += 1
+                if self._pending_files is not None or handled >= 100 or time.perf_counter() >= deadline:
+                    break
         except queue.Empty:
             pass
-        self._poll_id = self.after(80, self._process_events)
+        self._poll_id = self.after(8 if self._pending_files is not None or not self.events.empty() else 80, self._process_events)
 
     def _on_close(self):
         if self.busy:

@@ -317,20 +317,49 @@ class ExportTests(unittest.TestCase):
         self.targets[0].write_bytes(b'original')
         self.model.invalid.add('.dxf')
         status, detail = self.run_one(overwrite=True)
-        self.assertEqual(status, 'error')
+        self.assertEqual(status, 'partial')
         self.assertIn('DXF:', detail)
         self.assertEqual(self.targets[0].read_bytes(), b'original')
         self.assertEqual(self.targets[1].read_bytes(), DWG)
         self.assertFalse(list(self.output.glob('.*')))
 
-    def test_partial_success_reported_as_error(self):
+    def test_partial_success_reports_the_saved_format_separately(self):
         self.model.fail.add('.dwg')
-        status, detail = self.run_one()
-        self.assertEqual(status, 'error')
+        outputs = []
+        status, detail = ex.export_one_part(self.app, self.part, self.targets, output_results=outputs)
+        self.assertEqual(status, 'partial')
         self.assertIn('DXF: açınım aktarıldı', detail)
         self.assertIn('DWG:', detail)
         self.assertTrue(self.targets[0].exists())
         self.assertFalse(self.targets[1].exists())
+        self.assertEqual([(item['format'], item['status']) for item in outputs],
+                         [('DXF', 'success'), ('DWG', 'error')])
+        self.assertEqual(outputs[0]['path'], str(self.targets[0]))
+
+    @unittest.skipIf(os.name == 'nt', 'Unix hard-link publication path')
+    def test_published_output_remains_success_when_temporary_cleanup_fails(self):
+        native_unlink = Path.unlink
+        def unlink(path, *args, **kwargs):
+            if path.name.startswith('.gokworks-'):
+                raise PermissionError('temporary cleanup denied')
+            return native_unlink(path, *args, **kwargs)
+        with patch.object(Path, 'unlink', unlink):
+            status, detail = ex.export_one_part(self.app, self.part, [self.targets[0]])
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.targets[0].read_bytes(), DXF)
+        self.assertIn('temporary cleanup denied', detail)
+
+    def test_batch_partial_result_lists_only_available_output_paths(self):
+        self.model.fail.add('.dwg')
+        messages = self.run_batch(formats=('dxf', 'dwg'))
+        result = next(value for kind, value in messages if kind == 'result')
+        summary = messages[-1][1]
+        self.assertEqual(result['status'], 'partial')
+        self.assertEqual(summary['partial'], 1)
+        self.assertEqual(summary['failed'], 0)
+        self.assertTrue(Path(result['output']).is_file())
+        self.assertTrue(result['output'].endswith('.dxf'))
+        self.assertEqual([item['status'] for item in result['outputs']], ['success', 'error'])
 
     def test_successful_overwrite(self):
         self.output.mkdir()
@@ -601,8 +630,9 @@ class ExportTests(unittest.TestCase):
         self.com.CoUninitialize.side_effect = RuntimeError('COM cleanup failed')
         messages = self.run_batch()
         self.assertEqual(messages[-1][0], 'done')
-        self.assertEqual(messages[-1][1]['state'], 'error')
-        self.assertIn('COM cleanup failed', messages[-1][1]['error'])
+        self.assertEqual(messages[-1][1]['state'], 'completed')
+        self.assertEqual(messages[-1][1]['succeeded'], 1)
+        self.assertIn('COM cleanup failed', messages[-1][1]['warnings'][0])
 
     def test_active_speedpak_configuration_rejects_incomplete_counts(self):
         self.activate_assembly()

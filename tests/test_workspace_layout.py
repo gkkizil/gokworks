@@ -7,7 +7,7 @@ import unittest
 import customtkinter as ctk
 
 import test_export_window as fixtures
-from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB
+from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 
 
 @unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
@@ -40,8 +40,26 @@ class WorkspaceLayoutTests(unittest.TestCase):
                             self.assertEqual(f'{self.app.winfo_width()}x{self.app.winfo_height()}', size)
                             result = self.app.result_tabs.master
                             form = self.app.form_panel
-                            self.assertGreaterEqual(result.winfo_rootx(), form.winfo_rootx()+form.winfo_width())
-                            self.assertAlmostEqual(result.winfo_rooty(), form.winfo_rooty(), delta=1)
+                            if mode == 'k_factor':
+                                self.assertTrue(form.winfo_viewable())
+                                self.assertFalse(result.winfo_viewable())
+                                self.assertGreater(form.winfo_width(), 600*scale)
+                                selector = self.app.k_widgets['assignment_tabs']
+                                self.assertTrue(selector.winfo_viewable())
+                                self.assertGreaterEqual(selector.winfo_height(), 48*scale)
+                                if assignment == MANUAL_TAB:
+                                    for key in ('manual_thickness', 'manual_k', 'manual_r'):
+                                        field = self.app.k_widgets[key]
+                                        self.assertTrue(field.winfo_viewable())
+                                        self.assertGreaterEqual(field.winfo_height(), round(42*scale))
+                                self.app._select_k_view(RESULTS_TAB)
+                                self.settle(.04)
+                                self.assertFalse(form.winfo_viewable())
+                                self.assertTrue(result.winfo_viewable())
+                                self.assertEqual(result.winfo_width(), form.winfo_width())
+                            else:
+                                self.assertGreaterEqual(result.winfo_rootx(), form.winfo_rootx()+form.winfo_width())
+                                self.assertAlmostEqual(result.winfo_rooty(), form.winfo_rooty(), delta=1)
                             self.assertGreaterEqual(self.app.table.winfo_height(), 180*scale)
                             self.assertGreaterEqual(result.winfo_width(), 300*scale)
                             height = self.app.table.winfo_height()
@@ -63,6 +81,9 @@ class WorkspaceLayoutTests(unittest.TestCase):
                 self.assertGreater(widgets['details']._parent_canvas.winfo_height(), 400)
                 self.assertGreater(widgets['canvas'].winfo_width(), 400)
             else:
+                if mode == 'k_factor':
+                    self.app._select_k_view(RESULTS_TAB)
+                    self.settle()
                 self.assertGreater(self.app.table.winfo_height(), 300)
 
 

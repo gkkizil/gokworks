@@ -5,16 +5,65 @@ import tkinter as tk
 
 import customtkinter as ctk
 
-from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG
+from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
 from k_factor.apply import update_assembly
 from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, calculate,
                             number, ba_from_outside_dimensions)
 
 AUTO_DIE = "Otomatik (8 × t)"
 AUTOMATIC_TAB, MANUAL_TAB = "Malzeme / Takım", "Manuel K / R"
+RESULTS_TAB = "Montaj sonuçları"
 
 
 class KFactorView:
+    def _build_k_workspace(self):
+        self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
+                                      border_width=1, border_color=BORDER)
+        self.workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=20)
+        self.workspace.grid_columnconfigure(0, weight=1)
+        self.workspace.grid_rowconfigure(3, weight=1)
+        self._build_header()
+        self.pdf_header.grid_configure(pady=(14, 12))
+        self._build_stats()
+        self.stats_frame.grid(row=1, column=0, sticky='ew', padx=24, pady=(0, 8))
+        view = tk.StringVar(self, self.k_state['assignment_mode'].get())
+        self.k_widgets['work_view'] = view
+        selector = ctk.CTkSegmentedButton(self.workspace, variable=view,
+            values=[AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB], command=self._select_k_view,
+            height=48, dynamic_resizing=False, fg_color=SECONDARY, selected_color=ACCENT_BG,
+            selected_hover_color=HOVER, unselected_color=SECONDARY,
+            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 14, 'bold'))
+        selector.grid(row=2, column=0, sticky='ew', padx=24, pady=(0, 8))
+        self.k_widgets['assignment_tabs'] = selector
+        self.controls.append(selector)
+        body = ctk.CTkFrame(self.workspace, fg_color='transparent')
+        body.grid(row=3, column=0, sticky='nsew', padx=24)
+        body.grid_columnconfigure(0, weight=1)
+        body.grid_rowconfigure(0, weight=1)
+        self.k_widgets['body'] = body
+        self.form_panel = ctk.CTkFrame(body, fg_color=PANEL, corner_radius=12,
+                                      border_width=1, border_color=BORDER)
+        self.form_panel.grid(row=0, column=0, sticky='nsew')
+        self.form_panel.grid_propagate(False)
+        self.form_panel.grid_columnconfigure(0, weight=1)
+        self.form_panel.grid_rowconfigure(0, weight=1)
+        self._build_k_settings()
+        self._build_results(parent=body)
+        self.result_tabs.master.grid(row=0, column=0, sticky='nsew', padx=0)
+        self.result_tabs.master.grid_propagate(False)
+        self._build_k_actions(self.workspace)
+        self.status_label = self._label(self.workspace, 'Hazır · Ana montajı SolidWorks’te aktif yapın.',
+                                        12, MUTED, anchor='w')
+        self.status_label.grid(row=5, column=0, sticky='ew', padx=24, pady=(4, 4))
+        self.progress = ctk.CTkProgressBar(self.workspace, height=4, corner_radius=2,
+                                         fg_color=BORDER, progress_color=ACCENT)
+        self.progress.grid(row=6, column=0, sticky='ew', padx=24, pady=(0, 8))
+        self.progress.set(0)
+        self._refresh_list_state()
+        self._select_k_view(view.get())
+        self.workspace.bind('<Configure>', self._resize_pdf_area)
+        self._resize_pdf_area()
+
     def _create_k_state(self, saved):
         defaults = dict(material=MATERIALS[0].label, punch="1", die=AUTO_DIE,
                         thickness="2", angle="90", radius="", method="Tablo",
@@ -42,15 +91,6 @@ class KFactorView:
         # settings viewport shrinking enough to leave room for the results.
         self.settings_body._scrollbar.configure(height=24, width=10)
         self._settings_height = 340
-        selector = ctk.CTkSegmentedButton(
-            self.settings_body, variable=self.k_state["assignment_mode"],
-            values=[AUTOMATIC_TAB, MANUAL_TAB], command=self._select_k_assignment,
-            height=34, fg_color=SECONDARY, selected_color=ACCENT_BG,
-            selected_hover_color=HOVER, unselected_color=SECONDARY,
-            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12))
-        selector.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        self.k_widgets["assignment_tabs"] = selector
-        self.controls.append(selector)
         panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
                              border_width=1, border_color=BORDER)
         panel.grid(row=1, column=0, sticky="ew")
@@ -99,19 +139,6 @@ class KFactorView:
         self.k_calculation_label.grid(row=8, column=0, columnspan=3, sticky="ew", padx=16, pady=6)
         self.k_widgets["automatic_summary"] = self.k_calculation_label
         self._build_manual_k_settings()
-        for form in (panel, self.k_widgets["manual_panel"]):
-            children = sorted(form.winfo_children(), key=lambda widget: (
-                int(widget.grid_info().get('row', 0)), int(widget.grid_info().get('column', 0))))
-            for column in (1, 2):
-                form.grid_columnconfigure(column, weight=0, uniform="")
-            form.grid_columnconfigure(0, weight=1, uniform="")
-            for row, widget in enumerate(children):
-                info = widget._last_geometry_manager_call['kwargs']
-                widget.grid(row=row, column=0, columnspan=1, sticky="ew",
-                            padx=info.get('padx', 0), pady=info.get('pady', 0))
-                if isinstance(widget, ctk.CTkLabel):
-                    widget.configure(wraplength=250, justify="left", anchor="w")
-        self._build_k_actions(self.form_panel)
         self._select_k_assignment(self.k_state["assignment_mode"].get())
         for key, variable in self.k_state.items():
             if key == "assignment_mode":
@@ -146,6 +173,11 @@ class KFactorView:
             return
         if self.k_state["assignment_mode"].get() != selection:
             self.k_state["assignment_mode"].set(selection)
+            return  # The variable trace applies the view once.
+        self.k_widgets['assignment_tabs'].set(selection)
+        self.form_panel.grid()
+        if hasattr(self, 'result_tabs') and self.result_tabs.master.master is self.k_widgets['body']:
+            self.result_tabs.master.grid_remove()
         manual = selection == MANUAL_TAB
         self.k_widgets["automatic_panel"].grid_remove()
         self.k_widgets["manual_panel"].grid_remove()
@@ -156,43 +188,56 @@ class KFactorView:
         if hasattr(self, "status_label"):
             self._resize_pdf_area()
 
+    def _select_k_view(self, selection):
+        if selection != RESULTS_TAB:
+            return self._select_k_assignment(selection)
+        self.k_widgets['assignment_tabs'].set(RESULTS_TAB)
+        self.form_panel.grid_remove()
+        self.result_tabs.master.grid()
+        self._resize_pdf_area()
+
+    def _resize_k_workspace(self):
+        width = self.k_widgets['body'].winfo_width()/self.workspace._get_widget_scaling()
+        for key in ('automatic_summary', 'manual_summary'):
+            self.k_widgets[key].configure(wraplength=max(240, width-80))
+        self._fit_results_toolbar(width)
+
     def _build_k_actions(self, parent):
         # Keep montage scanning and save choice outside the scrollable form.
         actions = ctk.CTkFrame(parent, fg_color="transparent")
-        actions.grid(row=1, column=0, sticky="ew", padx=14, pady=(8, 12))
-        actions.grid_columnconfigure((0, 1), weight=1)
+        actions.grid(row=4, column=0, sticky="ew", padx=24, pady=(8, 0))
         self.scan_button = self._button(actions, "Montajı tara", self._scan_k_assembly,
-                                         icon="search", width=130)
+                                         icon="search", width=166)
         self.scan_button.grid(row=0, column=0, sticky="ew", padx=(0, 6))
-        self.open_button = self._button(actions, "Hesapla", self._preview_k_calculation, width=100)
+        self.open_button = self._button(actions, "Hesapla / kontrol et", self._preview_k_calculation, width=172)
         self.open_button.grid(row=0, column=1, sticky="ew")
         save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
-        save.grid(row=1, column=0, columnspan=2, sticky="w", pady=(10, 0))
+        save.grid(row=0, column=2, sticky="w", padx=(20, 0))
         self.controls.extend((self.scan_button, self.open_button, save))
 
     def _k_field(self, panel, key, label, row, column, *, values=None, readonly=False):
         holder = ctk.CTkFrame(panel, fg_color="transparent")
         holder.grid(row=row, column=column, sticky="ew", padx=16, pady=(3, 7))
         holder.grid_columnconfigure(0, weight=1)
-        self._label(holder, label, 11, MUTED, wraplength=240, justify="left").grid(row=0, column=0, sticky="w", pady=(0, 4))
+        self._label(holder, label, 12, MUTED, wraplength=240, justify="left").grid(row=0, column=0, sticky="w", pady=(0, 6))
         if values and readonly:
             field = ctk.CTkOptionMenu(
-                holder, variable=self.k_state[key], values=values, height=34,
+                holder, variable=self.k_state[key], values=values, height=42,
                 fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
                 dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
                 text_color=TEXT, dropdown_text_color=TEXT,
-                font=(UI_FONT, 11), dropdown_font=(UI_FONT, 11))
+                font=(UI_FONT, 13), dropdown_font=(UI_FONT, 13))
         elif values:
             field = ctk.CTkComboBox(
-                holder, variable=self.k_state[key], values=values, height=34,
+                holder, variable=self.k_state[key], values=values, height=42,
                 fg_color=PANEL, border_color=BORDER, button_color=SECONDARY,
                 button_hover_color=HOVER, dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
-                text_color=TEXT, dropdown_text_color=TEXT, font=(UI_FONT, 12),
-                dropdown_font=(UI_FONT, 12))
+                text_color=TEXT, dropdown_text_color=TEXT, font=(UI_FONT, 14),
+                dropdown_font=(UI_FONT, 13))
         else:
-            field = ctk.CTkEntry(holder, textvariable=self.k_state[key], height=34,
+            field = ctk.CTkEntry(holder, textvariable=self.k_state[key], height=42,
                                 fg_color=PANEL, border_color=BORDER, text_color=TEXT,
-                                font=(UI_FONT, 12))
+                                font=(UI_FONT, 14))
         field.grid(row=1, column=0, sticky="ew")
         self.k_widgets[key] = field
         self.controls.append(field)
@@ -267,6 +312,7 @@ class KFactorView:
         save = self.k_state["save"].get() and not preview
         self._save_preferences()
         self._reset()
+        self._select_k_view(RESULTS_TAB)
         self._set_busy(True)
         self.status_label.configure(text="Montaj K/R önizlemesi hazırlanıyor…" if preview else "K/R uygulanıyor…",
                                     text_color=MUTED)

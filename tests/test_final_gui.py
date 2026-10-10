@@ -8,7 +8,7 @@ from unittest.mock import patch
 import customtkinter as ctk
 
 import test_export_window as fixtures
-from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB
+from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 from gui import theme
 
 
@@ -57,6 +57,7 @@ class FinalGUIAuditTests(unittest.TestCase):
                     self.app.nav_buttons[mode].invoke()
                     if assignment:
                         self.app.k_widgets['assignment_tabs']._buttons_dict[assignment].invoke()
+                        self.app.k_widgets['assignment_tabs']._buttons_dict[RESULTS_TAB].invoke()
                     for result_tab in ('Dosyalar', 'Günlük'):
                         with self.subTest(size=size, scale=scale, theme=appearance,
                                           page=mode, assignment=assignment, result_tab=result_tab):
@@ -94,7 +95,7 @@ class FinalGUIAuditTests(unittest.TestCase):
                             self.assertEqual(menu.get(), value)
                 if mode == 'dxf_dwg':
                     selector = next(w for w in self.app.controls if isinstance(w, ctk.CTkSegmentedButton))
-                    for value in ('DXF', 'DWG', 'DXF + DWG'):
+                    for value in ('DXF', 'DWG'):
                         selector._buttons_dict[value].invoke()
                         self.assertEqual(self.app.output_format.get(), value)
 

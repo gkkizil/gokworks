@@ -276,7 +276,9 @@ def _publish(temporary, destination, overwrite):
         os.rename(temporary, destination)
     else:
         os.link(temporary, destination)
-        temporary.unlink()
+        # Publishing is complete once the destination link exists. Temporary
+        # cleanup belongs to the caller and must not turn a saved file into a
+        # failed export if unlinking is refused.
 
 
 def _pending_targets(targets, overwrite):
@@ -294,18 +296,26 @@ def _pending_targets(targets, overwrite):
 
 
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
-                    target_builder=None, output_paths=None):
+                    target_builder=None, output_paths=None, output_results=None):
     """Kaynağı kaydetmeden açınımı aktar; yalnızca bu çağrının açtığı belgeyi kapat.
 
     Çok gövdeli parçalar eksik/üst üste geometri üretmek yerine hata döndürür.
-    İki biçim seçilirse birindeki hata parçanın tamamında hata olarak raporlanır.
+    Her biçimin sonucu ayrıdır. Hazır çıktı ile başarısız biçim birlikteyse
+    parça kısmen tamamlandı olarak raporlanır; başarısız biçim saklanmaz.
     """
     targets = [Path(target) for target in targets]
+    records = [] if output_results is None else output_results
+    records.clear()
+    def record(target, state, detail):
+        records.append(dict(format=target.suffix[1:].upper(), path=str(target),
+                            status=state, detail=detail))
     try:
         pending = _pending_targets(targets, overwrite) if target_builder is None else []
     except (OSError, ValueError) as error:
         return "error", str(error)
     if target_builder is None and not pending:
+        for target in targets:
+            record(target, "skipped", "Dosya zaten var; yeniden aktarılmadı.")
         return "skipped", "Seçilen çıktı dosyaları zaten var."
     opened_here = False
     model = None
@@ -379,6 +389,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             if target not in pending:
                 outcomes.append("skipped")
                 notes.append(f"{kind}: zaten var, atlandı")
+                record(target, "skipped", "Dosya zaten var; yeniden aktarılmadı.")
                 continue
             # Keep the temporary basename short: appending a UUID to a long
             # part name can exceed Windows/filesystem limits before publishing.
@@ -394,18 +405,22 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     _publish(temporary, target, overwrite)
                     outcomes.append("success")
                     notes.append(f"{kind}: açınım aktarıldı")
+                    record(target, "success", "Açınım doğrulandı ve kaydedildi.")
                 except FileExistsError:
                     outcomes.append("skipped")
                     notes.append(f"{kind}: aktarım sırasında hedef oluştu, atlandı")
+                    record(target, "skipped", "Aktarım sırasında hedef oluştu; üzerine yazılmadı.")
             except Exception as error:
                 outcomes.append("error")
                 notes.append(f"{kind}: {error}")
+                record(target, "error", str(error))
             finally:
                 try:
                     temporary.unlink(missing_ok=True)
                 except OSError as error:
                     notes.append(f"Geçici dosya temizlenemedi: {error}")
-        status = "error" if "error" in outcomes else "success" if "success" in outcomes else "skipped"
+        status = ("partial" if "error" in outcomes and any(item in outcomes for item in ("success", "skipped"))
+                  else "error" if "error" in outcomes else "success" if "success" in outcomes else "skipped")
     except Exception as error:
         status = "error"
         notes.append(str(error))
@@ -435,7 +450,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                  events, stop_event=None, formats=("dxf",), bend_lines=False):
     """Dosya bazında olaylar gönder; sayaçlar çıktı biçimlerini değil parçaları sayar."""
     summary = {"state": "completed", "total": 0, "processed": 0,
-               "succeeded": 0, "skipped": 0, "failed": 0, "error": ""}
+               "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": []}
     initialized = False
     try:
         formats = normalize_formats(formats)
@@ -472,7 +487,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             if stop_event is not None and stop_event.is_set():
                 summary["state"] = "cancelled"
                 break
-            targets, metadata = [], {}
+            targets, metadata, outputs = [], {}, []
             events.put(("current", part))
             def build_targets(model, configuration):
                 quantity = quantities.get(_part_key(part, configuration), 0)
@@ -486,10 +501,12 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                 status, detail = "skipped", "Parça aktif montajda kullanılmıyor; aktarılmadı."
             else:
                 status, detail = export_one_part(app, part, targets, overwrite_existing, bend_lines,
-                                                target_builder=build_targets, output_paths=targets)
-            summary[{"success": "succeeded", "skipped": "skipped", "error": "failed"}[status]] += 1
+                                                target_builder=build_targets, output_paths=targets,
+                                                output_results=outputs)
+            summary[{"success": "succeeded", "partial": "partial", "skipped": "skipped", "error": "failed"}[status]] += 1
             summary["processed"] = index
-            events.put(("result", {"source": part, "output": " | ".join(map(str, targets)),
+            available = [item['path'] for item in outputs if item['status'] in ('success', 'skipped')]
+            events.put(("result", {"source": part, "output": " | ".join(available), "outputs": outputs,
                                     "status": status, "detail": detail, **metadata}))
             events.put(("counts", dict(summary)))
             events.put(("progress", (index, len(parts))))
@@ -505,8 +522,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                 pythoncom.CoUninitialize()
         except Exception as error:
             message = f"SolidWorks bağlantısı temizlenemedi: {error}"
-            summary["state"] = "error"
-            summary["error"] = "; ".join(filter(None, (summary["error"], message)))
+            summary["warnings"].append(message)
             events.put(("log", message))
         finally:
             events.put(("done", summary))

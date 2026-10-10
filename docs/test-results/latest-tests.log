@@ -1,0 +1,17 @@
+Cannot create cache home directory: '/home/agent/.cache/ezdxf', cache files will not be saved.
+See also issue https://github.com/mozman/ezdxf/issues/923.
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+...../workspace/gokworks/.venv/lib/python3.12/site-packages/ezdxf/query.py:444: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+  query_args = EntityQueryParser.parseString(query, parseAll=True)
+/workspace/gokworks/.venv/lib/python3.12/site-packages/pyparsing/util.py:466: PyparsingDeprecationWarning: 'parseAll' argument is deprecated, use 'parse_all'
+  return fn(self, *args, **kwargs)
+........................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 301 tests in 132.096s
+
+OK

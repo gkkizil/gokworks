@@ -68,7 +68,8 @@ class GUIAuditTests(unittest.TestCase):
         self.app.source_folder.set(str(self.root))
         self.app.output_folder.set(str(self.root/'outputs'))
         formats = next(control for control in self.app.controls if isinstance(control, ctk.CTkSegmentedButton))
-        formats._buttons_dict['DXF + DWG'].invoke()
+        self.assertEqual(formats.cget('values'), ['DXF', 'DWG'])
+        formats._buttons_dict['DWG'].invoke()
         checkboxes = [control for control in self.app.controls if isinstance(control, ctk.CTkCheckBox)]
         for control in checkboxes:
             control.toggle()
@@ -81,7 +82,7 @@ class GUIAuditTests(unittest.TestCase):
         with patch('pdf.window.export_parts', side_effect=worker):
             self.app.start_button.invoke()
             self.wait_idle()
-        self.assertEqual(captured['formats'], ('dxf', 'dwg'))
+        self.assertEqual(captured['formats'], ('dwg',))
         self.assertTrue(captured['bend_lines'])
         self.assertFalse(captured['recursive'])
         self.assertTrue(captured['overwrite'])
