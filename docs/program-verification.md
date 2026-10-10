@@ -1,6 +1,6 @@
 # Tüm programın yeniden doğrulanması
 
-**270 test başarılı, 0 başarısız, 0 atlanan.** [Güncel GD&T ölçü denetimi ve Word raporu](reports/gdt-dimension-audit/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/gdt-dimension-audit/test-run.log) kaydedildi.
+**289 test başarılı, 0 başarısız, 0 atlanan.** [Güncel K/R, ISO ve çalışma alanı raporu](reports/kr-workspace-fix/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/kr-workspace-fix/test-run.log) kaydedildi.
 
 ## Kapsam
 
@@ -8,9 +8,9 @@
 | --- | ---: | --- |
 | DXF/DWG | 69 | Geometri/büküm seçenekleri, parça arayüzü, kalınlık, dosya adı, alt montajların toplam adedi, bastırma, konfigürasyon ve Unicode yol ayrımı, SpeedPak/yüklenmemiş bileşenler, dosya koruma, durdurma ve COM temizliği. Yanlış belge, uzun dosya adı ve bozuk ASCII/ikili DXF de sınandı. |
 | PDF | 34 | Tüm sayfalar, tek sayfa, teknik resim arayüzü, açık/kapalı belgeler, aktivasyon ve önceki belgeye dönüş, BYREF bağlama, kesilmiş çıktı, üzerine yazma, yarışan hedef ve hata sonrası devam. |
-| Gerçek Tk arayüzü | 84 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
-| K/R hesaplama ve uygulama | 39 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
-| ISO delik/mil hesabı | 22 | Çap sınırları, 198 eşleşme, limitler, yarım mikrometre, işaret/sınıflama, geçersiz giriş ve bağımsız tablo örnekleri. 9 ISO ve 10 manuel ISO GUI testi üstteki GUI sayısına dahildir. Manuel tek/bilateral toleranslar, ölçülen noktalar, eşleşme farkları ve geçersiz limitler de sınandı. |
+| Gerçek Tk arayüzü | 93 | PDF ve DXF/DWG iş parçacıklarının çıktı/CSV sonuçları, Türkçe yollar, sekmelerin durumunu koruma, tercihlerin yeniden yüklenmesi, hata sonrası düğmelerin açılması, işlem sırasında kapanış, boş liste yönlendirmesi, kalınlık/adet gösterimi ve küçük pencerede liste görünürlüğü. Gerçek uygulama giriş noktası Tk ana döngüsünden geçirilip kapatıldı. |
+| K/R hesaplama ve uygulama | 46 | ANSI sınıfları, sınırlar, elle BA/BD örnekleri, bağımsız ölçümden K, takım/açı uygunluğu, montaj, geri okuma, konfigürasyon yayılımında geri alma, başarısız geri alma, kayıt ve COM kapanışı. |
+| ISO delik/mil hesabı | 25 | Çap sınırları, 198 eşleşme, limitler, yarım mikrometre, işaret/sınıflama, geçersiz giriş ve bağımsız tablo örnekleri. 9 ISO ve 10 manuel ISO GUI testi üstteki GUI sayısına dahildir. Manuel tek/bilateral toleranslar, ölçülen noktalar, eşleşme farkları ve geçersiz limitler de sınandı. |
 | Geometrik tolerans belirtimi | 14 | Toplam genişlik/çap ayrımı, datum gerekliliği, 1 nm eşik, geçersiz girişler, sayı sınırları ve içerik ayrımları. 16 GUI testi üstteki GUI sayısına dahildir. |
 | Ayarlar | 4 | JSON ve Türkçe karakterler, bozuk/okunamayan dosyadan güvenli dönüş, başarısız kayıt sırasında eski ayarların korunması. |
 | SolidWorks bağlantısı | 3 | Çalışan oturuma bağlanma, oturum bulunamaması ve pywin32 eksikliği. |
@@ -136,3 +136,11 @@ Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT
 ## GD&T ölçü denetimi
 
 270 test / 84 gerçek GUI testi geçti. 9 yeni regresyon testiyle ASME mm çerçeve yazımı, bağımsız konum/profil/radyal örnekleri, gerçek 45° yönü ve normal t oku, tam çap oku, eşit normal profil sınırları ve uzun sayıların hücreye sığması kontrol edildi. 12 özellik için ölçüm girişinin anlamı açıklanır; merkezlenmiş profilde ±t/2 gösterilir. [Word raporu ve kanıtlar](reports/gdt-dimension-audit/README.md).
+
+## K/R COM, ISO eşleşmeleri ve çalışma alanları
+
+19 regresyon testi eklendi; son çalıştırmada 289 test / 93 gerçek GUI testi geçti. Çağrılabilir dönen COM nesnesinin yanlış varsayılan üye çağrısı aynı HRESULT ile yeniden üretildi; aktif büküm payı dışındaki alanlara erişim kaldırıldı. Başarısız yazma/rebuild sonrası eski aktif türün geri yüklenmesi ve kalınlık filtresi kontrol edildi.
+
+ISO hazır liste H7 ağırlıklıydı; 23 delik/mil esaslı örnek ve filtre eklendi. Manuel ekrandaki ayrı H7 ağırlıklı yaygın geçme önerisi kaldırıldı; gerçek sınıf karşılaştırması ve eşit uzaklıklar gösterilir. Ø50 için 11 delik sınıfının bağımsız kaynak değerleriyle canlı form/CSV/pano kontrolü ve 3.217 tablo karşılaştırması tekrar yapıldı.
+
+PDF/DXF/K formlarının kaydırması sonuç yüksekliğini değiştirmiyor. 1000×690, 1366×768, 1400×900 (%125) ve 1920×1080 (%150), iki tema, alt sekmeler ve sayfa geçişleri sınandı. [Kanıtlar ve Word raporu](reports/kr-workspace-fix/README.md). Gerçek SolidWorks 2025 çalıştırması bekleniyor: [yerel kabul adımları](local-solidworks-check.md).

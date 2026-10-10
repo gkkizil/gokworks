@@ -1,10 +1,19 @@
 # ISO geçme toleransları
 
-Yan menüde **ISO GEÇMELERİ** ekranı bulunur. Nominal çapı yazın, delik ve mil sınıfını seçin veya soldaki yaygın eşleşmelerden birine tıklayın. Virgül ve nokta kabul edilir. Hesap SolidWorks bağlantısı olmadan çalışır; CAD parametrelerini değiştirmez.
+Yan menüde **ISO GEÇMELERİ** ekranı bulunur. Nominal çapı yazın, delik ve mil sınıfını seçin veya soldaki delik/mil esaslı eşleşme örneklerinden birine tıklayın. Virgül ve nokta kabul edilir. Hesap SolidWorks bağlantısı olmadan çalışır; CAD parametrelerini değiştirmez.
 
 Delik/mil alt ve üst ölçüleri, EI/ES ve ei/es sapmaları, boşluk veya sıkılık sınırları gösterilir. **mm / µm** seçimi sapma ve geçme sonuçlarının birimini değiştirir; nominal çap ve parça ölçüleri mm olarak kalır. **CSV kaydet** UTF-8 BOM, noktalı virgül ve ondalık virgülle Excel'e uygun rapor oluşturur. **Sonucu kopyala** bütün sayısal sonuçları panoya verir. Tema ve seçimler yeniden açılışta korunur.
 
 **Montaj kesiti** şematiktir; sapmalar görünürlük için büyütülür. Üç örnek ölçü arasında büyütme oranı sabittir. **Tolerans bölgeleri** gerçek sapma değerlerine göre doğrusal eksen kullanır. *Orta değer* yalnızca limitlerin ortasıdır; üretimin olasılık dağılımını temsil etmez. Arama ve Ctrl+F yaygın eşleşmeleri bulur. Küçük pencerede iki liste kaydırılabilir.
+
+
+## Delik esaslı / mil esaslı örnekler
+
+Hazır liste artık **Tümü / Delik esaslı / Mil esaslı** filtresiyle 23 örnek sunar. Delik esasında H sınıfının alt sapması EI=0; mil esasında h sınıfının üst sapması es=0'dır. H7/js6, H7/k6, H7/m6 ve H7/n6 aynı deliği farklı mil bölgeleriyle eşleştirir; H7 tek başına bir geçme türü değildir. Örnekler bütün ISO kod sisteminin tamamını içermez; 11 delik × 18 mil menülerinden 198 çift seçilebilir.
+
+H6/k6 ve H8/k6 farklı delik toleranslı örneklerdir. Ø50'de mil esaslı JS7/h6: −0,0125…+0,0285 mm; K7/h6: −0,018…+0,023 mm; N7/h6: −0,033…+0,008 mm ara geçme verir. P7/h6: −0,042…−0,001 mm sıkı geçmedir. Bu gruplar metin etiketinden değil, seçilen çapın EI/ES/ei/es değerlerinden hesaplanır. P7/h6 Ø3'te −0,016…0 mm sıkılık/sınırda temastır; pozitif boşluk bulunmadığı için ara geçme değildir.
+
+[Mil esaslı gerçek ekran](reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-dark.png) · [Son test/Word raporu](reports/kr-workspace-fix/README.md).
 
 ## Manuel tolerans kontrolü
 
@@ -17,7 +26,7 @@ Sol panelde **Manuel kontrol** seçin. Nominal çap delik ve mil için ortaktır
 | Gerçek ölçü 50,02 delik ve 49,98 mil | +0,02 / +0,02 | −0,02 / −0,02 | Sabit 0,04 mm boşluk; bu bir ölçüm örneği |
 | H7/p6 limitlerinin elle girişi | 0 / +0,025 | +0,026 / +0,042 | Sıkılık 0,001–0,042 mm; tam H7/p6 eşleşmesi |
 
-**Tam ISO eşleşmesi** için hem alt hem üst sapma tabloya tam eşit olmalıdır. Tam eşleşme yoksa mevcut 11 delik ve 18 mil sınıfı içindeki en yakın sınıflar ve farklar gösterilir. Yakınlık ölçütü `|girilen alt − ISO alt| + |girilen üst − ISO üst|`; eşit yakınlıkta sınıf adıyla sıralanır. Bu ölçüt ISO'nun yeni bir sınıf atama kuralı değildir. Girilen toleranslar otomatik ISO değerine yuvarlanmaz; geçme hesabı daima kullanıcı limitlerinden yapılır. Yakınlık, başka çap/sınıflara kapsam genişletmesi veya geometrik uygunluk kararı değildir.
+**Tam ISO eşleşmesi** için hem alt hem üst sapma tabloya tam eşit olmalıdır. Tam eşleşme yoksa mevcut 11 delik ve 18 mil sınıfı içindeki en yakın sınıflar ve farklar gösterilir. Yakınlık ölçütü `|girilen alt − ISO alt| + |girilen üst − ISO üst|`; eşit yakınlıkta bütün en yakın sınıflar gösterilir; sınıf adı sırası bir tercih veya tekil eşleşme değildir. Bu ölçüt ISO'nun yeni bir sınıf atama kuralı değildir. Girilen toleranslar otomatik ISO değerine yuvarlanmaz; geçme hesabı daima kullanıcı limitlerinden yapılır. Yakınlık, başka çap/sınıflara kapsam genişletmesi veya geometrik uygunluk kararı değildir.
 
 İlk örnekte delik 0…+20 µm: en yakın **H6 (0…+16)**, alt fark 0, üst fark +4 µm. Mil −20…0 µm: en yakın **h6 (−16…0)**, alt fark −4, üst fark 0 µm. Bunlar tam eşleşme değildir. Ölçü limitleri 50,000–50,020 ve 49,980–50,000 mm olarak korunur; hesap `50,000−50,000=0` ve `50,020−49,980=0,040 mm` verir.
 
@@ -37,13 +46,13 @@ Sol panelde **Manuel kontrol** seçin. Nominal çap delik ve mil için ortaktır
 
 Uyumluluk boyutsal bir kontroldür. Pres kuvveti, malzeme, şekil hataları, yüzey, yük ve çalışma koşulları için üretim değerlendirmesi gerekir. Genel kontrolde “her ölçüde boşluk”, “sınırda temas” veya “bazı parçalar boşluklu, bazıları sıkı” açıklaması verilir; bilinmeyen üretim dağılımından geçme olasılığı üretilmez.
 
-**En yakın ISO çift**, mevcut delik/mil sınıflarından toplam dört limit farkı en küçük olan çifttir. Ayrı delik/mil en yakınlarının birleşimi bu toplamı en aza indirir. **En yakın yaygın geçme** 14 kayıtlı eşleşme arasında aynı ölçütle seçilir. Eşit farkta sınıf adı kullanılır. Toplam fark nm hassasiyetle hesaplanıp mm gösterilir; girilen toleranslar değiştirilmez.
+**En yakın ISO çift**, mevcut delik/mil sınıflarından toplam dört limit farkı en küçük olan çifttir. Ayrı delik/mil en yakınlarının birleşimi bu toplamı en aza indirir. Manuel sonuçta H7 ağırlıklı ayrı hazır örnek önerisi gösterilmez. Eşit farkta bütün en yakın delik/mil sınıfları açıkça verilir; gösterilen referans çift bunlardan bir temsilcidir. Toplam fark nm hassasiyetle hesaplanıp mm gösterilir; girilen toleranslar değiştirilmez.
 
 Referansın türü gerçek hesabın türünden farklıysa kartta açık not verilir. En az bir limit farkı ilgili parçanın referans tolerans genişliğinden büyükse uzaklık açıklanır. Bu genişlik karşılaştırması uygulamanın açıklayıcı kontrolüdür; ISO'nun ayrı bir kabul/ret kuralı değildir. “En yakın” etiketi, tam ISO eşleşmesi veya üretime uygunluk kararı yerine geçmez.
 
 **Kullanıcı örneği:** nominal 50 mm, mil alt −0,1/üst +0,1 mm; delik alt −0,05/üst 0 mm. Delik **49,950–50,000**, mil **49,900–50,100 mm**. En sıkı durum `49,950−50,100=−0,150 mm`, en boşluklu durum `50,000−49,900=+0,100 mm`: **ara geçme**. Serbest/kayar veya her parçada sıkı/pres hedefi garanti edilmez; ara geçme hedefi boyutsal olarak oluşur.
 
-Bu örnekte en yakın ISO çift **N7/h9**, toplam limit farkı **0,163 mm**; en yakın yaygın geçme **H8/e8**, toplam fark **0,250 mm**. H8/e8 referansı boşluklu olsa da girilen örneğin sonucu ara geçmedir. N7/h9 için alt/üst farkları delikte 17/8 µm, milde 38/100 µm; toplam 163 µm. H8/e8 için delikte 50/39 µm, milde 11/150 µm; toplam 250 µm. Farklar büyük olduğu için bunlar tam/yakın ISO uyumu gibi yorumlanmaz.
+Bu örnekte en küçük toplam fark 0,163 mm'dir: delikte N7 ve P7 eşit uzaklıktadır; milde h9 en yakındır. N7/h9 gösterilen referanslardan biridir; tek bir ISO sınıfına atama yapılmaz. N7/h9 için alt/üst farkları delikte −17/+8 µm, milde −38/+100 µm; mutlak toplam 163 µm. Girilen ölçüler bu referanslara dönüştürülmez ve sonuç ara geçme olarak kalır.
 
 [Yeni uyumluluk ekranı](reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [güncel test/Word raporu](reports/fit-compatibility/README.md).
 

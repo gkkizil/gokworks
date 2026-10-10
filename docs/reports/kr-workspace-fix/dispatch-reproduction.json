@@ -1,0 +1,16 @@
+{
+  "baseline_commit": "d111a46c9114f40ace9455adb7b948b49e240d65",
+  "baseline_source_sha256": "ecb4a2c67378f2821bb16addd9527a7f2ffbe0ed079713ef20e2465634cf3c28",
+  "before": {
+    "status": "error",
+    "hresult": -2147352573,
+    "detail": "(-2147352573, 'Üye bulunamadı.', None, None)"
+  },
+  "after": {
+    "status": "success",
+    "k_factor": 0.4,
+    "radius_metres": 0.002
+  },
+  "uses_com_behavior_test_double": true,
+  "real_solidworks_2025_executed": false
+}

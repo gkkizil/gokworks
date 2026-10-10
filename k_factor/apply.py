@@ -15,6 +15,28 @@ pythoncom, win32com = sw.pythoncom, sw.win32com
 _value, _key = sw._value, sw._part_key
 
 
+def _read(obj, member):
+    """Read a zero-argument COM member without invoking returned dispatch objects."""
+    try:
+        return _value(obj, member)
+    except Exception as error:
+        raise RuntimeError(f"SolidWorks API · {member}: {error}") from error
+
+
+def _write(obj, member, value):
+    try:
+        setattr(obj, member, value)
+    except Exception as error:
+        raise RuntimeError(f"SolidWorks API · {member} yazımı: {error}") from error
+
+
+def _call(obj, member, *args):
+    try:
+        return getattr(obj, member)(*args)
+    except Exception as error:
+        raise RuntimeError(f"SolidWorks API · {member}: {error}") from error
+
+
 def _out(kind):
     return win32com.client.VARIANT(pythoncom.VT_BYREF | kind, 0 if kind == pythoncom.VT_I4 else False if kind == pythoncom.VT_BOOL else "")
 
@@ -61,16 +83,21 @@ class FeatureState:
 
 
 def _state(feature):
-    definition = _value(feature, "GetDefinition")
+    definition = _read(feature, "GetDefinition")
     if definition is None:
         raise RuntimeError("SheetMetal unsur tanımı okunamadı.")
-    allowance = definition.GetCustomBendAllowance()
+    allowance = _read(definition, "GetCustomBendAllowance")
     if allowance is None:
         raise RuntimeError("Özel büküm payı API'si okunamadı.")
-    return FeatureState(_value(feature, "Name"), float(definition.Thickness),
-                        float(definition.BendRadius), int(allowance.Type),
-                        float(allowance.KFactor), float(allowance.BendAllowance),
-                        float(allowance.BendDeduction), str(allowance.BendTableFile or ""))
+    allowance_type = int(_read(allowance, "Type"))
+    # Inactive allowance modes are not needed for state/rollback and some
+    # dispatch implementations do not expose their getters in the current mode.
+    k = float(_read(allowance, "KFactor")) if allowance_type == 2 else 0.0
+    ba = float(_read(allowance, "BendAllowance")) if allowance_type == 3 else 0.0
+    bd = float(_read(allowance, "BendDeduction")) if allowance_type == 4 else 0.0
+    table = str(_read(allowance, "BendTableFile") or "") if allowance_type in (1, 5) else ""
+    return FeatureState(_read(feature, "Name"), float(_read(definition, "Thickness")),
+                        float(_read(definition, "BendRadius")), allowance_type, k, ba, bd, table)
 
 
 def _states(model):
@@ -119,27 +146,29 @@ def _capture(model):
 
 
 def _modify(model, feature, state):
-    definition = _value(feature, "GetDefinition")
-    if not definition.AccessSelections(model, None):
+    definition = _read(feature, "GetDefinition")
+    if not _call(definition, "AccessSelections", model, None):
         raise RuntimeError("SheetMetal seçim erişimi alınamadı.")
     accessed = True
     try:
-        allowance = definition.GetCustomBendAllowance()
-        allowance.Type, allowance.KFactor = state.allowance_type, state.k_factor
-        allowance.BendAllowance, allowance.BendDeduction = state.bend_allowance, state.bend_deduction
-        allowance.BendTableFile = state.bend_table
-        definition.SetCustomBendAllowance(allowance)
-        definition.BendRadius = state.radius
-        if not feature.ModifyDefinition(definition, model, None):
+        allowance = _read(definition, "GetCustomBendAllowance")
+        _write(allowance, "Type", state.allowance_type)
+        member, value = {1: ("BendTableFile", state.bend_table), 2: ("KFactor", state.k_factor),
+                         3: ("BendAllowance", state.bend_allowance), 4: ("BendDeduction", state.bend_deduction),
+                         5: ("BendTableFile", state.bend_table)}[state.allowance_type]
+        _write(allowance, member, value)
+        _call(definition, "SetCustomBendAllowance", allowance)
+        _write(definition, "BendRadius", state.radius)
+        if not _call(feature, "ModifyDefinition", definition, model, None):
             raise RuntimeError("SolidWorks K/R değişikliğini kabul etmedi.")
         accessed = False  # ModifyDefinition ends selection access itself.
-        if not model.EditRebuild3():
+        if not _read(model, "EditRebuild3"):
             raise RuntimeError("K/R sonrasında parça yeniden oluşturulamadı.")
-        if feature.GetErrorCode():
+        if _read(feature, "GetErrorCode"):
             raise RuntimeError("SheetMetal unsuru değişiklik sonrası hata içeriyor.")
     finally:
         if accessed:
-            definition.ReleaseSelectionAccess()
+            _read(definition, "ReleaseSelectionAccess")
 
 
 def _rollback(model, snapshots):
@@ -164,10 +193,10 @@ def _rollback(model, snapshots):
 
 
 def _check_defaults(model, definition):
-    if bool(definition.UseMaterialSheetMetalParameters):
+    if bool(_read(definition, "UseMaterialSheetMetalParameters")):
         raise RuntimeError("Sac parametreleri malzemeye bağlı; önce SolidWorks'te bu bağı kaldırın.")
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
-    error = definition.GetUseGaugeTable(used, filename)
+    error = _call(definition, "GetUseGaugeTable", used, filename)
     if error != 0:
         raise RuntimeError(f"Gauge tablosu durumu okunamadı; API hata kodu: {error}")
     if used.value:
@@ -195,6 +224,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
     visibility_changed = False
     snapshots = None
     notes, status, calculation = [], "error", None
+    stage = "Parça açma"
     try:
         model = app.GetOpenDocumentByName(path)
         if model is None:
@@ -205,6 +235,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                 raise RuntimeError(f"Parça açılamadı; hata kodu: {errors.value}")
             if warnings.value:
                 notes.append(f"Açma uyarısı: {warnings.value}")
+        stage = "Parça belgesi ve etkinleştirme"
         if _value(model, "GetType") != 1 or _key(_value(model, "GetPathName"), "") != _key(path, ""):
             raise RuntimeError("SolidWorks istenen parça yerine farklı belge döndürdü.")
         original_config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
@@ -218,6 +249,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                 or _key(_value(activated, "GetPathName"), "") != _key(path, "")
                 or _key(_value(active, "GetPathName"), "") != _key(path, "")):
             raise RuntimeError("SolidWorks kaynak parçayı etkinleştiremedi.")
+        stage = "Konfigürasyon ve sac gövdeleri"
         _show_configuration(model, configuration)
         configuration = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
         part = sw._part_api(model)
@@ -226,6 +258,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
             raise NotSheetMetal("Sac metal değil.")
         if len(bodies) != 1:
             raise RuntimeError("Çok gövdeli parça desteklenmiyor; ayrı sac parçalar kullanın.")
+        stage = "Sac unsuru ve kalınlığı"
         features = [f for f, kind in _features(model) if kind == "SheetMetal"]
         if len(features) != 1:
             raise RuntimeError("Tek bir aktif SheetMetal unsuru gerekir.")
@@ -233,20 +266,25 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if isinstance(recipe, ManualAssignment):
             # Read thickness first: non-matching sheets must never go through
             # K/R override checks or any parameter write/save.
-            calculation = calculate(float(feature.GetDefinition().Thickness) * 1000, recipe)
+            calculation = calculate(float(_read(_read(feature, "GetDefinition"), "Thickness")) * 1000, recipe)
+        stage = "Mevcut K/R ve büküm payı okuma"
         before = _state(feature)
-        if feature.GetErrorCode():
+        if _read(feature, "GetErrorCode"):
             raise RuntimeError("SheetMetal unsuru zaten hata içeriyor; önce parçayı düzeltin.")
         calculation = calculate(before.thickness * 1000, recipe)
-        _check_defaults(model, feature.GetDefinition())
+        stage = "Malzeme, gauge ve özel büküm kontrolleri"
+        _check_defaults(model, _read(feature, "GetDefinition"))
         if not preview:
-            if save and model.GetSaveFlag():
+            if save and _read(model, "GetSaveFlag"):
                 raise RuntimeError("Parçada önceden kaydedilmemiş değişiklik var; önce SolidWorks'te kaydedin veya dosyaları kaydet seçeneğini kapatın.")
+            stage = "Konfigürasyonların yedeğini alma"
             snapshots = _capture(model)
             target = replace(before, radius=calculation.radius_mm / 1000,
                              allowance_type=2, k_factor=calculation.k_factor)
             changed = True  # COM setters can mutate even if ModifyDefinition fails.
+            stage = "K/R yazma ve yeniden oluşturma"
             _modify(model, feature, target)
+            stage = "K/R geri okuma ve konfigürasyon doğrulaması"
             after = _state(feature)
             if not _same([target], [after]):
                 raise RuntimeError("K/R yazma sonrası değerler geri okumada eşleşmedi.")
@@ -257,6 +295,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                         raise RuntimeError(f"Değişiklik başka konfigürasyona yayıldı ({name}); işlem geri alınıyor. Parametreleri konfigürasyona özel tanımlayın.")
             _show_configuration(model, configuration)
             if save:
+                stage = "Parça dosyasını kaydetme"
                 errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
                 if not model.Save3(1, errors, warnings) or errors.value:
                     raise RuntimeError(f"Parça kaydedilemedi; hata kodu: {errors.value}. Dosyanın durumunu SolidWorks'te kontrol edin.")
@@ -266,7 +305,8 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
             else:
                 notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
         else:
-            notes.append(f"Önizleme; mevcut K={before.k_factor:.4f}, R={before.radius*1000:.3f} mm.")
+            current = f"K={before.k_factor:.4f}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
+            notes.append(f"Önizleme; mevcut {current}, R={before.radius*1000:.3f} mm.")
         if isinstance(recipe, ManualAssignment):
             notes.append(f"Manuel atama · K={calculation.k_factor:.12g} · R={calculation.radius_mm:.12g} mm · t={calculation.thickness_mm:.12g} mm")
         else:
@@ -277,7 +317,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         status = "skipped"
         notes.append(str(error))
     except Exception as error:
-        notes.append(str(error))
+        notes.append(f"{stage}: {error}")
         if changed and snapshots is not None:
             try:
                 _rollback(model, snapshots)

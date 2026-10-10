@@ -101,6 +101,14 @@ def limits(nominal, code, feature):
     return LimitBand(code, nominal, upper, lower, bracket)
 
 
+def diameter_bracket(nominal):
+    """Validated table interval without choosing a hole or shaft class."""
+    nominal = diameter(nominal)
+    bounds = _tables()['bounds_mm']
+    index = next(i for i, upper in enumerate(bounds) if nominal <= upper)
+    return (0 if index == 0 else bounds[index-1], bounds[index])
+
+
 @dataclass(frozen=True)
 class Fit:
     hole: LimitBand
@@ -155,6 +163,10 @@ class Preset:
     def code(self):
         return f'{self.hole} / {self.shaft}'
 
+    @property
+    def basis(self):
+        return 'Delik esaslı' if self.hole.startswith('H') else 'Mil esaslı'
+
 
 PRESETS = (
     Preset('H11', 'c11', 'Geniş boşluk'),
@@ -171,4 +183,13 @@ PRESETS = (
     Preset('H7', 'p6', 'Sıkılık için değerlendirme'),
     Preset('H7', 'r6', 'Daha büyük sıkılık'),
     Preset('H7', 's6', 'Yüksek sıkılık'),
+    Preset('H6', 'h5', 'Dar toleranslı sınırda temas'),
+    Preset('H6', 'k6', 'Dar delik toleranslı konumlandırma'),
+    Preset('H8', 'k6', 'Geniş delik toleranslı konumlandırma'),
+    Preset('G7', 'h6', 'Mil esaslı pozitif boşluk'),
+    Preset('F8', 'h6', 'Mil esaslı hareketli eşleşme'),
+    Preset('JS7', 'h6', 'Mil esaslı simetrik delik bölgesi'),
+    Preset('K7', 'h6', 'Mil esaslı konumlandırma'),
+    Preset('N7', 'h6', 'Mil esaslı dar ara eşleşme'),
+    Preset('P7', 'h6', 'Mil esaslı sıkılık değerlendirmesi'),
 )

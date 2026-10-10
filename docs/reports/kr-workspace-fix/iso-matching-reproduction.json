@@ -1,0 +1,19 @@
+{
+  "baseline_commit": "d111a46c9114f40ace9455adb7b948b49e240d65",
+  "baseline_sha256": "506920dcea253ec3f30951575088c96681fb86c712da13f1e67f9e6bef588d26",
+  "input": {
+    "nominal_mm": 50,
+    "hole_lower_mm": 0,
+    "hole_upper_mm": ".02",
+    "shaft_lower_mm": "-.02",
+    "shaft_upper_mm": 0
+  },
+  "actual_closest_pair": "H6/h6",
+  "before": "Boşluk sıfıra inebilir. Kayar/serbest montaj için yüzey ve şekil etkileri önemlidir.\n\nTablo kapsamındaki en yakın ISO çift: H6/h6 · Boşluklu geçme. Toplam limit farkı: +0,008000 mm.\nEn yakın yaygın geçme: H7/h6 · Boşluklu geçme. Toplam limit farkı: +0,009000 mm.\n\nBu kontrol boyutsaldır; gerçek montaj kuvveti, yüzey, şekil ve çalışma koşulları ayrıca değerlendirilir.",
+  "after": "Boşluk sıfıra inebilir. Kayar/serbest montaj için yüzey ve şekil etkileri önemlidir.\n\nEn yakın ISO çift (yalnız referans): H6/h6 · Boşluklu geçme. Toplam limit farkı: +0,008000 mm. En büyük tek limit farkı: +0,004000 mm.\n\nBu kontrol boyutsaldır; gerçek montaj kuvveti, yüzey, şekil ve çalışma koşulları ayrıca değerlendirilir.",
+  "before_tie": "Tam ISO eşleşmesi yok. En yakın: N7.\nGirilen - ISO: alt -17,0 µm; üst +8,0 µm.\nYakın sınıflar: N7, P7, K7",
+  "after_tie": "Tam ISO eşleşmesi yok. En yakın: N7 (referans).\nGirilen - ISO: alt -17,0 µm; üst +8,0 µm.\nEşit uzaklıktaki sınıflar: N7, P7; tek bir sınıf seçilemez.\nYakın sınıflar: N7, P7, K7",
+  "numerical_calculation_was_not_hardcoded_to_h7": true,
+  "common_preset_suggestion_removed": true,
+  "real_solidworks_executed": false
+}

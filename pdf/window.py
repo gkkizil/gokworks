@@ -40,13 +40,13 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
     _PAGE_ATTRIBUTES = (
         "source_folder", "output_folder", "include_subfolders", "overwrite_existing",
         "output_format", "bend_lines", "controls", "results", "row_ids", "stat_values",
-        "workspace", "pdf_header", "start_button", "stop_button", "settings_body",
+        "workspace", "pdf_header", "start_button", "stop_button", "settings_body", "form_panel",
         "_settings_height", "scan_button", "open_button", "stats_frame", "results_header",
         "report_button", "result_tabs", "table", "empty_state", "log_box", "status_label", "progress",
         "search_query", "status_filter", "search_entry", "filter_menu", "files_toolbar",
         "visible_count", "results_footer", "row_statuses", "empty_title", "empty_hint",
         "_visible_rows",
-        "k_state", "k_widgets", "k_calculation_label",
+        "k_state", "k_widgets", "k_calculation_label", "results_title", "results_hint", "clear_filter_button",
     )
 
     def __init__(self, settings_path=SETTINGS_PATH):
@@ -356,33 +356,31 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         scale = self.settings_body._get_widget_scaling()
         if getattr(self, "_table_style_key", None) != (ctk.get_appearance_mode(), scale):
             self._configure_table_style()
-        results_card = self.result_tabs.master
-        active_tab = self.result_tabs.tab(self.result_tabs.get())
-        # Measure the rendered frame/tab decorations instead of guessing their
-        # height. The scrollable settings content is taller than its viewport.
-        result_chrome = results_card.winfo_height() - active_tab.winfo_height()
-        horizontal_scroll = self.table.master.grid_slaves(row=2)[0]
-        result_minimum = (result_chrome + 128 * scale + horizontal_scroll.winfo_reqheight()
-                          + self.files_toolbar.winfo_reqheight() + self.results_footer.winfo_reqheight()
-                          + 12 * scale)
-        shared_space = (self.settings_body._parent_canvas.winfo_height()
-                        + results_card.winfo_height())
-        available = (shared_space - result_minimum) / scale
-        preferred = int(self.settings_body.winfo_reqheight() / scale) + 2
-        minimum = 64 if self.mode == "k_factor" else 96
-        height = max(minimum, min(preferred, int(available)))
-        if height != self._settings_height:
-            self._settings_height = height
-            self.settings_body.configure(height=height)
-            # Tab/content switches change child geometry after this callback.
-            # Re-measure once Tk has applied the new height, until it settles.
-            self._layout_fit_id = self.after(40, self._fit_pdf_settings)
+        width = self.workspace.winfo_width()/scale
+        form_width = max(288, min(350, (width-60)*.35))
+        width_changed = abs(self.form_panel.cget("width")-form_width) > .5
+        self.form_panel.configure(width=form_width)
+        result_width = max(260, width-form_width-60)
+        self.results_title.configure(wraplength=max(90, result_width-190))
+        self.results_hint.configure(wraplength=max(100, result_width-135))
+        # Search keeps the full width when the result panel is narrow; filters
+        # move to the next row instead of forcing controls beyond the viewport.
+        narrow = result_width < 560
+        search = self.search_entry.master
+        search.grid(row=0, column=0, columnspan=3 if narrow else 1, sticky="ew",
+                              padx=(0, 0 if narrow else 8), pady=(0, 6 if narrow else 0))
+        self.filter_menu.grid(row=1 if narrow else 0, column=0 if narrow else 1, sticky="w", padx=(0, 8))
+        self.clear_filter_button.grid(row=1 if narrow else 0, column=2, sticky="e")
+        self._settings_height = self.settings_body._parent_canvas.winfo_height()/scale
+        preferred = self.settings_body.winfo_reqheight()/scale
         scrollbar = self.settings_body._scrollbar
-        needs_scroll = preferred > height
+        needs_scroll = preferred > self._settings_height
         if needs_scroll and not scrollbar.winfo_manager():
             scrollbar.grid()
         elif not needs_scroll and scrollbar.winfo_manager():
             scrollbar.grid_remove()
+        if width_changed:
+            self._layout_fit_id = self.after(40, self._fit_pdf_settings)
 
 
     def _choose_folder(self, variable, title):

@@ -34,9 +34,9 @@ class KFactorView:
 
     def _build_k_settings(self):
         self.settings_body = ctk.CTkScrollableFrame(
-            self.workspace, height=340, corner_radius=0, fg_color="transparent",
+            self.form_panel, height=340, corner_radius=0, fg_color="transparent",
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
-        self.settings_body.grid(row=1, column=0, sticky="ew", padx=24, pady=(0, 14))
+        self.settings_body.grid(row=0, column=0, sticky="nsew", padx=6, pady=(8, 0))
         self.settings_body.grid_columnconfigure(0, weight=1)
         # The CTk scrollbar defaults to 200 px and otherwise prevents the
         # settings viewport shrinking enough to leave room for the results.
@@ -48,7 +48,7 @@ class KFactorView:
             height=34, fg_color=SECONDARY, selected_color=ACCENT_BG,
             selected_hover_color=HOVER, unselected_color=SECONDARY,
             unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12))
-        selector.grid(row=0, column=0, sticky="w", pady=(0, 10))
+        selector.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         self.k_widgets["assignment_tabs"] = selector
         self.controls.append(selector)
         panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
@@ -99,6 +99,19 @@ class KFactorView:
         self.k_calculation_label.grid(row=8, column=0, columnspan=3, sticky="ew", padx=16, pady=6)
         self.k_widgets["automatic_summary"] = self.k_calculation_label
         self._build_manual_k_settings()
+        for form in (panel, self.k_widgets["manual_panel"]):
+            children = sorted(form.winfo_children(), key=lambda widget: (
+                int(widget.grid_info().get('row', 0)), int(widget.grid_info().get('column', 0))))
+            for column in (1, 2):
+                form.grid_columnconfigure(column, weight=0, uniform="")
+            form.grid_columnconfigure(0, weight=1, uniform="")
+            for row, widget in enumerate(children):
+                info = widget._last_geometry_manager_call['kwargs']
+                widget.grid(row=row, column=0, columnspan=1, sticky="ew",
+                            padx=info.get('padx', 0), pady=info.get('pady', 0))
+                if isinstance(widget, ctk.CTkLabel):
+                    widget.configure(wraplength=250, justify="left", anchor="w")
+        self._build_k_actions(self.form_panel)
         self._select_k_assignment(self.k_state["assignment_mode"].get())
         for key, variable in self.k_state.items():
             if key == "assignment_mode":
@@ -146,22 +159,22 @@ class KFactorView:
     def _build_k_actions(self, parent):
         # Keep montage scanning and save choice outside the scrollable form.
         actions = ctk.CTkFrame(parent, fg_color="transparent")
-        actions.grid(row=0, column=0, columnspan=4, sticky="ew", pady=(0, 10))
+        actions.grid(row=1, column=0, sticky="ew", padx=14, pady=(8, 12))
+        actions.grid_columnconfigure((0, 1), weight=1)
         self.scan_button = self._button(actions, "Montajı tara", self._scan_k_assembly,
-                                         icon="search", width=132)
-        self.scan_button.pack(side="left", padx=(0, 8))
-        self.open_button = self._button(actions, "Hesapla / kontrol et", self._preview_k_calculation,
-                                         width=164)
-        self.open_button.pack(side="left", padx=(0, 16))
+                                         icon="search", width=130)
+        self.scan_button.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+        self.open_button = self._button(actions, "Hesapla", self._preview_k_calculation, width=100)
+        self.open_button.grid(row=0, column=1, sticky="ew")
         save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
-        save.pack(side="left")
+        save.grid(row=1, column=0, columnspan=2, sticky="w", pady=(10, 0))
         self.controls.extend((self.scan_button, self.open_button, save))
 
     def _k_field(self, panel, key, label, row, column, *, values=None, readonly=False):
         holder = ctk.CTkFrame(panel, fg_color="transparent")
         holder.grid(row=row, column=column, sticky="ew", padx=16, pady=(3, 7))
         holder.grid_columnconfigure(0, weight=1)
-        self._label(holder, label, 11, MUTED).grid(row=0, column=0, sticky="w", pady=(0, 4))
+        self._label(holder, label, 11, MUTED, wraplength=240, justify="left").grid(row=0, column=0, sticky="w", pady=(0, 4))
         if values and readonly:
             field = ctk.CTkOptionMenu(
                 holder, variable=self.k_state[key], values=values, height=34,

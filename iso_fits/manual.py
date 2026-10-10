@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 import re
 
-from iso_fits.rules import Fit, LimitBand, PRESETS, calculate, classes, diameter, limits
+from iso_fits.rules import (Fit, LimitBand, PRESETS, calculate, classes, diameter,
+                            diameter_bracket, limits)
 
 
 TARGETS = ('Genel kontrol', 'Serbest / kayar', 'Ara / konumlandırma', 'Sıkı / pres')
@@ -23,13 +24,13 @@ def deviation_nm(value):
 
 
 def manual_band(nominal, lower, upper, feature):
-    # Reuse the verified diameter range and table interval definition.
-    reference = limits(nominal, 'H7' if feature == 'hole' else 'h6', feature)
+    classes(feature)  # Validate the feature independently of any ISO class.
+    nominal = diameter(nominal)
     lower, upper = deviation_nm(lower), deviation_nm(upper)
     title = 'Delik' if feature == 'hole' else 'Mil'
     if lower > upper:
         raise ValueError(f'{title}: alt sapma üst sapmadan büyük olamaz.')
-    band = LimitBand('Manuel', reference.nominal_mm, upper, lower, reference.bracket_mm)
+    band = LimitBand('Manuel', nominal, upper, lower, diameter_bracket(nominal))
     if band.minimum_mm <= 0:
         raise ValueError(f'{title}: minimum ölçü sıfırdan büyük olmalı.')
     return band
@@ -64,6 +65,12 @@ def compare_classes(band, feature):
         matches.append(Match(code, band.lower_nm-standard.lower_nm,
                              band.upper_nm-standard.upper_nm))
     return tuple(sorted(matches, key=lambda item: (item.distance_nm, item.code)))
+
+
+def closest_classes(band, feature):
+    """Return every equally near class; alphabetic order is not a preference."""
+    matches = compare_classes(band, feature)
+    return tuple(item for item in matches if item.distance_nm == matches[0].distance_nm)
 
 
 @dataclass(frozen=True)
@@ -163,6 +170,6 @@ def usage_hint(fit):
     closest = min(candidates, key=distance)
     if closest.shaft in ('c11', 'd9'):
         return 'Bol / serbest geçme adayı'
-    if closest.shaft in ('e8', 'f7', 'g6'):
+    if closest.shaft in ('e8', 'f7', 'g6') or (closest.hole in ('F8', 'G7') and closest.shaft == 'h6'):
         return 'Hareketli / yağlı çalışma adayı'
     return 'Boşluklu / kayar geçme adayı'

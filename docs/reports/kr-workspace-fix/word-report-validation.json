@@ -1,0 +1,10 @@
+{
+  "file": "GOKWORKS_KR_ISO_GUI_Kontrol_2026-10-10.docx",
+  "sha256": "7d33a101353e4ee9b7bfef90b836c1c42c4bf85080a3b7d515981b0a8feb050a",
+  "bytes": 295943,
+  "tests": 289,
+  "embedded_images": 8,
+  "zip_crc_ok": true,
+  "python_docx_readback_ok": true,
+  "native_word_render_verified": false
+}

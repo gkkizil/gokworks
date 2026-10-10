@@ -164,3 +164,7 @@ ve üretim numunesi Windows/atölye ortamında ayrıca kontrol edilmelidir.
 [Son test sonuçları](reports/k-radius/README.md) ·
 [Açık GUI](screenshots/gui-k-radius-light.png) ·
 [Koyu GUI](screenshots/gui-k-radius-dark.png)
+
+## COM okuma/yazma denetimi — 10.10.2026
+
+Sıfır argümanlı üyeler dönen COM nesnesini tekrar çağırmadan okunur. Büküm payı tipi 2 için yalnız K, tip 3 için BA, tip 4 için BD, tip 1/5 için tablo alanı kullanılır. Etkin olmayan alanlar okunmaz/yazılmaz; geri okuma ve geri alma etkin türe göre yapılır. Hata mesajı API üyesini ve işlem aşamasını içerir. [Tekrarlanan HRESULT, testler ve ekranlar](reports/kr-workspace-fix/README.md). Interop kaynak kıyaslaması gerçek SolidWorks 2025 çalıştırmasının yerini tutmaz; [yerel kontrol](local-solidworks-check.md) gereklidir.

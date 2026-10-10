@@ -21,18 +21,29 @@ class WorkspaceLayout:
         self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
                                       border_width=1, border_color=BORDER)
         self.workspace.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
-        self.workspace.grid_columnconfigure(0, weight=1)
-        self.workspace.grid_rowconfigure(3, weight=1)
+        self.workspace.grid_columnconfigure(0, weight=0)
+        self.workspace.grid_columnconfigure(1, weight=1)
+        self.workspace.grid_rowconfigure(2, weight=1)
         self._build_header()
+        self.pdf_header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=24, pady=(20, 18))
+        self.form_panel = ctk.CTkFrame(self.workspace, width=320, fg_color=INPUT,
+                                     corner_radius=12, border_width=1, border_color=BORDER)
+        self.form_panel.grid(row=2, column=0, sticky="nsew", padx=(24, 0))
+        self.form_panel.grid_propagate(False)
+        self.form_panel.grid_columnconfigure(0, weight=1)
+        self.form_panel.grid_rowconfigure(0, weight=1)
         self._build_settings()
         self._build_stats()
+        self.stats_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=24, pady=(0, 14))
         self._build_results()
+        self.result_tabs.master.grid(row=2, column=1, sticky="nsew", padx=(12, 24))
+        self.result_tabs.master.grid_propagate(False)
         self.status_label = self._label(self.workspace, "Hazır · Ana montajı SolidWorks'te aktif yapın." if self.mode == "k_factor" else "Hazır · Kaynak ve çıktı klasörünü seçin.",
                                         12, MUTED, anchor="w")
-        self.status_label.grid(row=4, column=0, sticky="ew", padx=24, pady=(10, 6))
+        self.status_label.grid(row=3, column=0, columnspan=2, sticky="ew", padx=24, pady=(10, 6))
         self.progress = ctk.CTkProgressBar(self.workspace, height=4, corner_radius=2,
                                           fg_color=BORDER, progress_color=ACCENT)
-        self.progress.grid(row=5, column=0, sticky="ew", padx=24, pady=(0, 18))
+        self.progress.grid(row=4, column=0, columnspan=2, sticky="ew", padx=24, pady=(0, 18))
         self.progress.set(0)
         self._refresh_list_state()
         self.workspace.bind("<Configure>", self._resize_pdf_area)
@@ -104,10 +115,10 @@ class WorkspaceLayout:
         self.pdf_header = header
         header.grid(row=0, column=0, sticky="ew", padx=24, pady=(20, 18))
         header.grid_columnconfigure(0, weight=1)
-        self._label(header, "GOKWORKS  /  BELGE İŞLEMLERİ", 10, MUTED, True).grid(
+        self._label(header, "GOKWORKS  /  SAC PARAMETRELERİ" if self.mode == "k_factor" else "GOKWORKS  /  BELGE İŞLEMLERİ", 10, MUTED, True).grid(
             row=0, column=0, sticky="w", pady=(0, 4))
         self._label(header, "K FAKTÖR - RADIUS" if self.mode == "k_factor" else "PDF Aktarımı" if self._is_pdf else "DXF / DWG Açınımı",
-                    28, bold=True).grid(row=1, column=0, sticky="w")
+                    24, bold=True).grid(row=1, column=0, sticky="w")
         subtitle = ("Malzeme, takım ve BA hesabıyla montajdaki sac parçaları düzenleyin." if self.mode == "k_factor" else
                     "Teknik resimlerin tüm sayfalarını tek PDF'e aktarın." if self._is_pdf else
                     "Sac metal parçaları kalınlık ve toplam adetle kaydedin.")
@@ -127,12 +138,12 @@ class WorkspaceLayout:
     def _build_settings(self):
         if self.mode == "k_factor":
             return self._build_k_settings()
-        height = 210 if self._is_pdf else 260
+        height = 340
         self.settings_body = ctk.CTkScrollableFrame(
-            self.workspace, height=height, corner_radius=0, fg_color="transparent",
+            self.form_panel, height=height, corner_radius=0, fg_color="transparent",
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED,
         )
-        self.settings_body.grid(row=1, column=0, sticky="ew", padx=24, pady=(0, 14))
+        self.settings_body.grid(row=0, column=0, sticky="nsew", padx=6, pady=8)
         self.settings_body.grid_columnconfigure(0, weight=1)
         self.settings_body._scrollbar.configure(height=24, width=10)
         self._settings_height = height
@@ -142,36 +153,35 @@ class WorkspaceLayout:
         panel.grid_columnconfigure(0, weight=1)
         folders = ctk.CTkFrame(panel, fg_color="transparent")
         folders.grid(row=0, column=0, sticky="ew")
-        for column in range(2):
-            folders.grid_columnconfigure(column, weight=1, uniform="folders")
+        folders.grid_columnconfigure(0, weight=1)
         for column, (title, hint, variable) in enumerate((
             ("Kaynak klasör", f"Klasördeki {self._extension} dosyaları aktarılır.", self.source_folder),
             ("Çıktı klasörü", "Her teknik resim için tek PDF dosyası." if self._is_pdf else
              "PARÇAADI - 2 mm - 12 adet.dxf", self.output_folder),
         )):
             card = ctk.CTkFrame(folders, fg_color="transparent")
-            card.grid(row=0, column=column, sticky="nsew")
+            card.grid(row=column, column=0, sticky="nsew")
             card.grid_columnconfigure(0, weight=1)
             self._folder_input(card, column, title, hint, variable)
         ctk.CTkFrame(panel, height=1, fg_color=BORDER).grid(row=1, column=0, sticky="ew", padx=16)
         options = ctk.CTkFrame(panel, fg_color="transparent")
         options.grid(row=2, column=0, sticky="ew", padx=16, pady=12)
         tools = ctk.CTkFrame(options, fg_color="transparent")
-        tools.pack(side="right", padx=(12, 0))
+        tools.pack(side="bottom", fill="x", pady=(12, 0))
         self.scan_button = self._button(tools, "Klasörü tara", self._scan, icon="search", width=116)
-        self.scan_button.pack(side="left", padx=(0, 6))
+        self.scan_button.pack(fill="x", pady=(0, 6))
         self.open_button = self._button(tools, "Çıktı klasörü", self._open_output, icon="folder", width=126)
-        self.open_button.pack(side="left")
+        self.open_button.pack(fill="x")
         self.controls.append(self.scan_button)
         for text, variable in (("Alt klasörleri tara", self.include_subfolders),
                                ("Üzerine yaz", self.overwrite_existing)):
             control = self._checkbox(options, text, variable)
-            control.pack(side="left", padx=(0, 16))
+            control.pack(anchor="w", pady=4)
             self.controls.append(control)
         if not self._is_pdf:
             formats = ctk.CTkFrame(panel, fg_color="transparent")
             formats.grid(row=3, column=0, sticky="ew", padx=16, pady=(0, 12))
-            self._label(formats, "Biçim", 12, MUTED).pack(side="left", padx=(0, 10))
+            self._label(formats, "Biçim", 12, MUTED).pack(anchor="w", pady=(0, 6))
             format_menu = ctk.CTkSegmentedButton(
                 formats, values=["DXF", "DWG", "DXF + DWG"], variable=self.output_format,
                 height=32, fg_color=SECONDARY, selected_color=ACCENT_BG,
@@ -179,11 +189,11 @@ class WorkspaceLayout:
                 unselected_hover_color=HOVER, text_color=TEXT,
                 font=ctk.CTkFont(family=UI_FONT, size=12),
             )
-            format_menu.pack(side="left", padx=(0, 18))
+            format_menu.pack(fill="x", pady=(0, 8))
             bends = self._checkbox(formats, "Büküm çizgileri", self.bend_lines)
-            bends.pack(side="left")
+            bends.pack(anchor="w")
             self._label(formats, "Adet kaynağı: aktif montaj\nAlt montajlar dahil", 10, MUTED,
-                        justify="right").pack(side="right", padx=(10, 0))
+                        justify="left").pack(anchor="w", pady=(8, 0))
             self.controls.extend((format_menu, bends))
 
     def _checkbox(self, parent, text, variable):
@@ -215,8 +225,6 @@ class WorkspaceLayout:
     def _build_stats(self):
         self.stats_frame = ctk.CTkFrame(self.workspace, fg_color="transparent")
         self.stats_frame.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 14))
-        if self.mode == "k_factor":
-            self._build_k_actions(self.stats_frame)
         for index, (key, caption, color, icon) in enumerate((
             ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Başarılı", GREEN, "check"),
             ("skipped", "Atlanan", AMBER, "skip"), ("failed", "Hatalı", RED, "error"),
@@ -224,11 +232,11 @@ class WorkspaceLayout:
             self.stats_frame.grid_columnconfigure(index, weight=1, uniform="stats")
             card = ctk.CTkFrame(self.stats_frame, fg_color=INPUT, corner_radius=10,
                                  border_width=1, border_color=BORDER)
-            card.grid(row=1 if self.mode == "k_factor" else 0, column=index, sticky="ew",
+            card.grid(row=0, column=index, sticky="ew",
                        padx=(0 if index == 0 else 4, 0 if index == 3 else 4))
             card.grid_columnconfigure(0, weight=1)
             self._label(card, caption, 11, MUTED).grid(row=0, column=0, sticky="w", padx=14, pady=(8, 0))
-            self.stat_values[key] = self._label(card, "0", 25, color, True)
+            self.stat_values[key] = self._label(card, "0", 20, color, True)
             self.stat_values[key].grid(row=1, column=0, sticky="w", padx=14, pady=(0, 8))
             ctk.CTkLabel(card, text="", image=self._icon(icon, color, 20)).grid(
                 row=0, column=1, rowspan=2, padx=(8, 14))
@@ -242,7 +250,8 @@ class WorkspaceLayout:
         self.results_header = ctk.CTkFrame(card, fg_color="transparent")
         self.results_header.grid(row=0, column=0, sticky="ew", padx=16, pady=(10, 0))
         self.results_header.grid_columnconfigure(0, weight=1)
-        self._label(self.results_header, "Montaj parçaları ve K/R sonuçları" if self.mode == "k_factor" else "Dosyalar ve sonuçlar", 16, bold=True).grid(row=0, column=0, sticky="w")
+        self.results_title = self._label(self.results_header, "Montaj sonuçları" if self.mode == "k_factor" else "Dosyalar ve sonuçlar", 15, bold=True, wraplength=220, justify="left")
+        self.results_title.grid(row=0, column=0, sticky="w")
         self.report_button = self._button(self.results_header, "Rapor kaydet", self._save_report,
                                           icon="download", width=136, state="disabled")
         self.report_button.configure(height=34)
@@ -284,6 +293,7 @@ class WorkspaceLayout:
         )
         self.filter_menu.grid(row=0, column=1, padx=(0, 8))
         clear = self._button(self.files_toolbar, "Temizle", self._clear_filters, icon="close", width=88)
+        self.clear_filter_button = clear
         clear.configure(height=32)
         clear.grid(row=0, column=2)
         self.table = ttk.Treeview(files_tab, columns=("file", "status", "detail"),
@@ -314,8 +324,8 @@ class WorkspaceLayout:
         self.results_footer = ctk.CTkFrame(files_tab, fg_color="transparent")
         self.results_footer.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(4, 0))
         self.results_footer.grid_columnconfigure(0, weight=1)
-        self._label(self.results_footer, "Ayrıntılar için dosyaya çift tıklayın.  ·  Ctrl+F: ara",
-                    10, MUTED).grid(row=0, column=0, sticky="w")
+        self.results_hint = self._label(self.results_footer, "Ayrıntılar: çift tık  ·  Ctrl+F: ara", 10, MUTED, wraplength=220, justify="left")
+        self.results_hint.grid(row=0, column=0, sticky="w")
         self.visible_count = self._label(self.results_footer, "0 / 0 dosya", 10, MUTED)
         self.visible_count.grid(row=0, column=1, sticky="e")
         log_tab.grid_rowconfigure(0, weight=1)

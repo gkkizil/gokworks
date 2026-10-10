@@ -27,29 +27,31 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**270 test geçti; 84'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**289 test geçti; 93'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, gerçek önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. %125 widget ölçeklemesinde tablo yazısının büyümesi, iki tema ve iki ekranın çalışması da sınandı. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
-Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/gdt-dimension-audit/test-run.log).
+Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Tam program raporu](program-verification.md) ve [son test çıktısı](reports/kr-workspace-fix/test-run.log).
 
 Çalışan uygulamadan 1240×860 boyutunda alınan gerçek ekran görüntüleri:
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| DXF/DWG | [Görüntü](reports/final-audit/screenshots/dxf-dwg-light.png) | [Görüntü](reports/final-audit/screenshots/dxf-dwg-dark.png) |
-| PDF | [Görüntü](reports/final-audit/screenshots/pdf-light.png) | [Görüntü](reports/final-audit/screenshots/pdf-dark.png) |
-| K FAKTÖR - RADIUS / Manuel | [Görüntü](reports/final-audit/screenshots/manual-k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/manual-k-radius-dark.png) |
-| ISO GEÇMELERİ | [Görüntü](reports/fit-compatibility/screenshots/iso-light.png) | [Görüntü](reports/fit-compatibility/screenshots/iso-dark.png) |
-| ISO / Manuel kontrol | [Görüntü](reports/fit-compatibility/screenshots/iso-manual-light.png) | [Görüntü](reports/fit-compatibility/screenshots/iso-manual-dark.png) |
-| GEOMETRİK TOL. | [Görüntü](reports/geometric-tolerances/screenshots/gdt-light.png) | [Görüntü](reports/black-theme/screenshots/geometric_tolerances-black.png) |
-| K FAKTÖR - RADIUS / Takım | [Görüntü](reports/final-audit/screenshots/k-radius-light.png) | [Görüntü](reports/final-audit/screenshots/k-radius-dark.png) |
+| DXF/DWG | [Görüntü](reports/kr-workspace-fix/screenshots/dxf-dwg-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/dxf-dwg-dark.png) |
+| PDF | [Görüntü](reports/kr-workspace-fix/screenshots/pdf-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/pdf-dark.png) |
+| K/R Manuel | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-manual-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-manual-dark.png) |
+| K/R Takım | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-dark.png) |
+| ISO | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-dark.png) |
+| ISO Mil esaslı | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-dark.png) |
+| GD&T | [Görüntü](reports/kr-workspace-fix/screenshots/geometric-tolerances-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/geometric-tolerances-dark.png) |
+
+[Manuel ISO H6 referansı](reports/kr-workspace-fix/screenshots/iso-fits-manual-h6-dark.png), [tam H8 eşleşmesi](reports/kr-workspace-fix/screenshots/iso-fits-manual-h8-dark.png) ve [tablo kontrolü](reports/kr-workspace-fix/screenshots/iso-fits-manual-comparison-dark.png).
 
 ## Kod satırı sayısı
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 27 | 4.627 | 4.212 |
-| Testler | 11 | 4.050 | 3.620 |
-| Toplam | 38 | 8.677 | 7.832 |
+| Uygulama | 27 | 4.749 | 4.323 |
+| Testler | 14 | 4.462 | 3.966 |
+| Toplam | 41 | 9.211 | 8.289 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -70,3 +72,9 @@ Manuel kontrolde Montaj hedefi menüsü ve MONTAJ UYUMU / EN YAKIN GEÇME kartı
 GD&T eklemesinde 10 hesap/içerik ve 11 GUI testi geçti. 12 güncel türün iki temada çizimi, iki kaldırılmış kartın çıktı engeli ve Rule #1 boyut ilişkisi, datum menüleri, arama, CSV/pano, hatalı giriş, ölçüm temizliği, rehber ve %100/%125/%150 alan erişimi kontrol edildi. [261 testlik son rapor](reports/geometric-tolerances/README.md).
 
 GD&T ölçü denetiminde 9 regresyon testi eklendi: gerçek 45° ve normal ok, tam çap oku, normal yönde eşit profil sınırları, teknik çerçevede ASME ondalık noktası ve uzun sayıların iki tema/üç ölçekte hücreye sığması. Özelliğe göre ölçüm açıklamaları ve profil ±t/2 payı eklendi. [270 testlik güncel rapor](reports/gdt-dimension-audit/README.md).
+
+## Tam yükseklikte çalışma alanları — 10.10.2026
+
+PDF/DXF/K ayarları soldaki bağımsız kaydırılan formda, tablo/günlük sağdaki tam yükseklikte sonuç alanındadır. Form kaydırılırken tablo yüksekliği değişmez. K/R tarama, hesap ve kayıt seçimi kaydırma dışında kalır. ISO ve GD&T kendi hesap/şema düzenlerini korur. Dar sonuç panelinde arama ve filtreler iki satıra geçer; başlık ve ipuçları alan genişliğine uyar.
+
+CustomTkinter ölçeklemesinin eski grid konumlarını yeniden yüklediği sekme geçişi giderildi. ISO filtre değişiminde liste kaydırması başa alınır; kısa mil esaslı listede önceki uzun listenin boş alanı görünmez. Tümü görünümünde delik ve mil esaslı örnekler dönüşümlü gösterilir. [Son 19 gerçek ekran ve Word/test kanıtları](reports/kr-workspace-fix/README.md). Önceki raporlar tarihsel tasarımı gösterir.

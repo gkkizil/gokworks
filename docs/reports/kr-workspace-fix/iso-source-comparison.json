@@ -1,0 +1,68 @@
+{
+  "sources": {
+    "isofits": {
+      "repository": "parkergreene/isofits",
+      "commit": "d3083a941e8071bb12114a28a25274bf99c30ac0",
+      "file": "src/data.py",
+      "sha256": "3a2a9e302f08fdbef60c63f9ac65951804c5386ceb0e50d9ffa880971aa953bc"
+    },
+    "passungsrechner": {
+      "repository": "lachr/Passungsrechner",
+      "commit": "0289439b1883db363d92e38f1ab352817b4d5a47",
+      "file": "src/data/tolerances.json",
+      "sha256": "e76d3c4beb71f2e47a66cc51bf0d7ec7bbcd7e4e5e3e523a83c37565f304cdfb"
+    },
+    "iso-286-rust": {
+      "repository": "bell-jamie/iso-286",
+      "commit": "6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "file": "src/tables.rs",
+      "sha256": "3d93a356ac304fabc55a9f7249c2a96b2c7458470719d1dea2f3172ab59bcc90"
+    },
+    "ISO286": {
+      "repository": "saucecode/ISO286",
+      "commit": "f455cecdfc6659f35002bc112e3667f4316eb086",
+      "file": "iso286.py",
+      "sha256": "5449a57923c56601ff1f2d89195a3dca416de0513441d9c06510d9b867d2a621"
+    }
+  },
+  "table_sha256": "6f0c9f5538bf2b9000cf7b710e8d0c12796222360671a8c78321be4a59bf7115",
+  "comparisons": {
+    "passungsrechner_table": 1288,
+    "isofits_runtime": 1100,
+    "independent_it_width": 667,
+    "independent_fundamental_deviation": 161,
+    "independent_f8_fundamental_deviation": 1
+  },
+  "comparisons_total": 3217,
+  "known_source_errors": [
+    {
+      "source": "passungsrechner_table",
+      "class": "F8",
+      "diameter_mm": "3",
+      "application_nm": [
+        20000,
+        6000
+      ],
+      "source_nm": [
+        20000,
+        10000
+      ]
+    },
+    {
+      "source": "passungsrechner_table",
+      "class": "F8",
+      "diameter_mm": "1.5",
+      "application_nm": [
+        20000,
+        6000
+      ],
+      "source_nm": [
+        20000,
+        10000
+      ]
+    }
+  ],
+  "unexpected_differences": 0,
+  "f8_resolution": "F8 ≤3: EI=+6 µm; IT8=14 µm; ES=+20 µm. Kaynaktaki EI=+10 µm reddedildi.",
+  "limits": "Resmî ISO metni erişilemedi. Rust kodu yürütülmedi; sayısal tablo kaynağıdır. Dış Python isotol gerçekten yürütüldü; 3 mm sınır hatası nedeniyle yalnız D>3 için kullanıldı."
+}

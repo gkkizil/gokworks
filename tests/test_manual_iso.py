@@ -55,9 +55,9 @@ class ManualIsoRulesTests(unittest.TestCase):
         self.assertEqual(pair.code, 'N7/h9')
         self.assertEqual(pair.distance_nm, 163000)
         self.assertEqual(pair.fit.kind, 'transition')
-        self.assertEqual(preset.code, 'H8/e8')
-        self.assertEqual(preset.distance_nm, 250000)
-        self.assertEqual(preset.fit.kind, 'clearance')
+        self.assertEqual(preset.code, 'N7/h6')
+        self.assertEqual(preset.distance_nm, 209000)
+        self.assertEqual(preset.fit.kind, 'transition')
         self.assertEqual(fit.kind, 'transition')
 
     def test_large_distance_to_iso_is_explicitly_flagged(self):
@@ -101,6 +101,8 @@ class ManualIsoRulesTests(unittest.TestCase):
                 self.assertEqual(fit.kind, kind)
                 self.assertIn(term, usage_hint(fit))
         self.assertIn('Bol', usage_hint(calculate(50, 'H11', 'c11')))
+        for hole in ('F8', 'G7'):
+            self.assertIn('yağlı', usage_hint(calculate(50, hole, 'h6')))
         self.assertIn('temas', usage_hint(calculate_manual(50, 0, 0, 0, 0)))
 
     def test_signed_input_and_nanometre_precision(self):
@@ -168,8 +170,8 @@ class ManualIsoGuiTests(unittest.TestCase):
         self.assertEqual(self.app.iso_result.kind, 'transition')
         self.assertEqual(self.app.iso_result.minimum_clearance_nm, -150000)
         self.assertIn('N7/h9', self.app.iso_widgets['explanation'].cget('text'))
-        self.assertIn('H8/e8', self.app.iso_widgets['compatibility_text'].cget('text'))
-        self.assertIn('farklı olabilir', self.app.iso_widgets['compatibility_text'].cget('text'))
+        self.assertNotIn('H8/e8', self.app.iso_widgets['compatibility_text'].cget('text'))
+        self.assertIn('eşit uzaklıktaki sınıflar', self.app.iso_widgets['compatibility_text'].cget('text'))
         self.assertIn('genişliğini aşıyor', self.app.iso_widgets['compatibility_text'].cget('text'))
         for index, target in enumerate(TARGETS):
             self.app.iso_widgets['target']._dropdown_menu.invoke(index)
@@ -195,7 +197,7 @@ class ManualIsoGuiTests(unittest.TestCase):
         report = self.app.clipboard_get()
         self.assertIn('Serbest / kayar', report)
         self.assertIn('N7/h9', report)
-        self.assertIn('H8/e8', report)
+        self.assertNotIn('H8/e8', report)
         self.assertIn('-0,150000', report)
         self.assertIn('uygun değil', report)
 

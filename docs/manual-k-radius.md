@@ -50,3 +50,9 @@ listesi erişilebilir kalır.
 Linux testlerinde gerçek Tk arayüzü çalıştırıldı; SolidWorks COM sınırı test
 nesneleriyle temsil edilir. Gerçek Windows/SolidWorks montajında uygulama
 bu bulut ortamında çalıştırılamaz.
+
+## SolidWorks 2025 hata incelemesi
+
+Dönen COM nesnesi çağrılabilir olsa da varsayılan üyesi çağrılmaz. Büküm payının yalnız etkin türünün alanı okunur; K atamasında tür 2, K ve R yazılır. Başka türden dönüşte geri alma o türün aktif alanını geri yükler. Kalınlık filtresi eşleşmeyen saclar için K/R API erişiminden önce uygulanır. Hatalar aşama ve üye adını gösterir. Aynı `Üye bulunamadı` HRESULT davranışı test nesnesiyle yeniden üretildi; gerçek SolidWorks 2025 bu bulutta çalıştırılmadı.
+
+[Yeni yerleşim ve kanıtlar](reports/kr-workspace-fix/README.md) · [Yerel kabul kontrolü](local-solidworks-check.md).

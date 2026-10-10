@@ -1,6 +1,7 @@
 """ISO geçmeleri için bağımsız, açık/koyu temalı hesap ve gösterim ekranı."""
 
 import csv
+from itertools import zip_longest
 import tkinter as tk
 from tkinter import filedialog
 import webbrowser
@@ -11,13 +12,14 @@ from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 from iso_fits.diagram import draw
 from iso_fits.manual import (calculate_manual, compare_classes, usage_hint,
-                             TARGETS, closest_pair, closest_preset, compatibility)
+                             TARGETS, closest_pair, closest_classes, compatibility)
 from iso_fits.rules import (classes, calculate, PRESETS, CLASSIFICATION,
                             format_mm, format_deviation)
 
 SAMPLES = ('En az boşluk', 'Orta değer', 'En çok boşluk')
 VIEWS = ('Montaj kesiti', 'Tolerans bölgeleri')
 METHODS = ('ISO seçimi', 'Manuel kontrol')
+BASES = ('Tümü', 'Delik esaslı', 'Mil esaslı')
 COLORS = {'clearance': GREEN, 'transition': AMBER, 'interference': RED}
 SOURCE_TEXT = '''ISO 286-1:2010 — Tolerans, sapma ve geçmelerin temel kuralları.
 ISO 286-2:2010 — Delik ve mil tolerans sınıflarının sınır sapmaları.
@@ -37,6 +39,7 @@ Montaj kuvveti, çalışma sıcaklığı, malzeme, yüzey ve şekil/konum tolera
 
 
 SOURCE_TEXT += '\n\nManuel kontrol: delik ve mil için ortak nominal çap ile ayrı alt/üst sapmalar girilir. Geçme girilen ölçü limitlerinden hesaplanır. Tam ISO eşleşmesi iki sapmanın da aynı olmasıdır; en yakın sınıf mevcut sınıflar içindeki alt/üst farkların mutlak toplamına göre seçilir. Yakın sınıf girilen toleransları değiştirmez. Kayar/yağlı kullanım adları öneridir; yağlama veya montaj kuvveti sonucu değildir.'
+SOURCE_TEXT += '\n\nEşleşme örnekleri delik esaslı (H: EI=0) ve mil esaslı (h: es=0) olarak filtrelenir. Aynı H7 deliği farklı millerle farklı geçmeler oluşturabilir; H7 tek başına geçme türü değildir. Liste bütün ISO çiftlerini değil, doğrulanan tablolardan 23 örneği gösterir. Delik/mil menülerinden 198 çift serbestçe seçilebilir. Her örneğin grubu seçilen çaptaki gerçek limitlere göre hesaplanır. Manuel kontrolde eşit uzaklıktaki sınıflar birlikte verilir; hazır örneklerden birine zorla eşleştirme yapılmaz.'
 
 
 class IsoFitsView:
@@ -44,12 +47,12 @@ class IsoFitsView:
         defaults = {'diameter': '50', 'hole': 'H8', 'shaft': 'f7',
                     'unit': 'mm', 'sample': 'Orta değer', 'view': 'Montaj kesiti',
                     'method': 'ISO seçimi', 'hole_lower': '0', 'hole_upper': '+0,02',
-                    'shaft_lower': '-0,02', 'shaft_upper': '0', 'target': 'Genel kontrol'}
+                    'shaft_lower': '-0,02', 'shaft_upper': '0', 'target': 'Genel kontrol', 'basis': 'Tümü'}
         self.iso_state = {key: tk.StringVar(self, value=str(saved.get(f'iso_{key}', value)))
                           for key, value in defaults.items()}
         for key, choices in [('hole', classes('hole')), ('shaft', classes('shaft')),
                              ('unit', ('mm', 'µm')), ('sample', SAMPLES), ('view', VIEWS),
-                             ('method', METHODS), ('target', TARGETS)]:
+                             ('method', METHODS), ('target', TARGETS), ('basis', BASES)]:
             if self.iso_state[key].get() not in choices:
                 self.iso_state[key].set(defaults[key])
         self.iso_result = None
@@ -124,9 +127,14 @@ class IsoFitsView:
             self.iso_widgets[key] = menu
         toolbar = ctk.CTkFrame(form, fg_color='transparent')
         toolbar.grid(row=3, column=0, sticky='ew', padx=16)
-        self._label(toolbar, 'YAYGIN EŞLEŞMELER', 10, MUTED, True).pack(side='left')
+        toolbar.grid_columnconfigure(0, weight=1)
+        self._label(toolbar, 'EŞLEŞME ÖRNEKLERİ', 10, MUTED, True).grid(row=0, column=0, sticky='w')
         self.iso_widgets['unit'] = self._iso_menu(toolbar, 'unit', ('mm', 'µm'), width=72)
-        self.iso_widgets['unit'].pack(side='right')
+        self.iso_widgets['unit'].grid(row=0, column=1, sticky='e')
+        self.iso_widgets['basis'] = self._iso_menu(toolbar, 'basis', BASES, width=200)
+        self.iso_widgets['basis'].grid(row=1, column=0, columnspan=2, sticky='ew', pady=(8, 4))
+        self._label(toolbar, 'Delik esası: H… / mil esası: …/h\nGeçme türü seçilen çapa göre hesaplanır.',
+                    10, MUTED, justify='left').grid(row=2, column=0, columnspan=2, sticky='w', pady=(2, 0))
         self.iso_search = tk.StringVar(self, value='')
         search_frame = ctk.CTkFrame(form, fg_color='transparent')
         search_frame.grid(row=4, column=0, sticky='ew', padx=16, pady=(8, 8))
@@ -288,9 +296,12 @@ class IsoFitsView:
         if exact:
             return 'Tam eşleşme: '+', '.join(exact)
         best = matches[0]
-        return (f'Tam ISO eşleşmesi yok. En yakın: {best.code}.\n'
+        tied = closest_classes(band, feature)
+        tie_note = ('\nEşit uzaklıktaki sınıflar: '+', '.join(item.code for item in tied)+
+                    '; tek bir sınıf seçilemez.') if len(tied) > 1 else ''
+        return (f'Tam ISO eşleşmesi yok. En yakın: {best.code} (referans).\n'
                 f'Girilen - ISO: alt {format_deviation(best.lower_difference_nm, "µm")}; '
-                f'üst {format_deviation(best.upper_difference_nm, "µm")}.\n'
+                f'üst {format_deviation(best.upper_difference_nm, "µm")}.{tie_note}\n'
                 'Yakın sınıflar: '+', '.join(item.code for item in matches[:3]))
 
     def _select_iso_preset(self, preset):
@@ -304,12 +315,20 @@ class IsoFitsView:
 
     def _filter_iso_presets(self):
         query = self.iso_search.get().casefold().replace(' ', '')
+        filter_key = (query, self.iso_state['basis'].get(), self.iso_state['method'].get(),
+                      self.iso_state['diameter'].get())
+        if getattr(self, '_iso_preset_filter', None) != filter_key:
+            # A shorter list must not retain an offset beyond its new items.
+            self.iso_widgets['presets']._parent_canvas.yview_moveto(0)
+            self._iso_preset_filter = filter_key
         for widget in [*self.iso_widgets['groups'].values(), *self.iso_widgets['preset_buttons'].values()]:
             widget.grid_remove()
         row = 0
         for kind in CLASSIFICATION:
             matches = []
             for preset in PRESETS:
+                if self.iso_state['basis'].get() not in ('Tümü', preset.basis):
+                    continue
                 if query not in (preset.code+' '+preset.label).casefold().replace(' ', ''):
                     continue
                 try:
@@ -320,6 +339,10 @@ class IsoFitsView:
                     matches.append(preset)
             if not matches:
                 continue
+            if self.iso_state['basis'].get() == 'Tümü':
+                holes = [p for p in matches if p.basis == 'Delik esaslı']
+                shafts = [p for p in matches if p.basis == 'Mil esaslı']
+                matches = [p for pair in zip_longest(holes, shafts) for p in pair if p is not None]
             self.iso_widgets['groups'][kind].configure(text=CLASSIFICATION[kind].upper()
                 if self.iso_result else 'ÇAPI GİRİN · EŞLEŞMELER')
             self.iso_widgets['groups'][kind].grid(row=row, column=0, sticky='w', padx=8, pady=(12, 6)); row += 1
@@ -383,11 +406,17 @@ class IsoFitsView:
             explanation += '\n'+usage_hint(fit)+'.'
             summary = []
             for band, feature, label in ((fit.hole, 'hole', 'Delik'), (fit.shaft, 'shaft', 'mil')):
-                best = compare_classes(band, feature)[0]
-                summary.append(f'{label} {best.code} ({"tam" if best.exact else "en yakın"})')
+                candidates = closest_classes(band, feature)
+                codes = '/'.join(item.code for item in candidates)
+                summary.append(f'{label} {codes} ({"tam" if candidates[0].exact else "tam eşleşme yok; referans"})')
             explanation += '\nISO kontrolü: '+', '.join(summary)+'.'
             nearest = closest_pair(fit)
-            explanation += f'\nEn yakın çift: {nearest.code} · {CLASSIFICATION[nearest.fit.kind]}.'
+            if nearest.distance_nm == 0:
+                explanation += f'\nTam ISO çift eşleşmesi: {nearest.code}.'
+            else:
+                explanation += (f'\nEn yakın çift: {nearest.code} (referans). '
+                                f'Toplam limit farkı: {format_deviation(nearest.distance_nm, unit)}. '
+                                'Girilen ölçüler ISO sınıfına dönüştürülmez.')
             assessment = compatibility(fit, self.iso_state['target'].get())
             self.iso_widgets['compatibility_title'].configure(text=assessment.title, text_color={
                 'compatible': GREEN, 'incompatible': RED, 'boundary': AMBER, 'conditional': AMBER, 'info': MUTED}[assessment.status])
@@ -458,12 +487,16 @@ class IsoFitsView:
 
     def _compatibility_text(self, fit):
         result = compatibility(fit, self.iso_state['target'].get())
-        pair, preset = closest_pair(fit), closest_preset(fit)
-        text = (result.explanation+f'\n\nTablo kapsamındaki en yakın ISO çift: {pair.code} · {CLASSIFICATION[pair.fit.kind]}. '
-                f'Toplam limit farkı: {format_deviation(pair.distance_nm)}.\n'
-                f'En yakın yaygın geçme: {preset.code} · {CLASSIFICATION[preset.fit.kind]}. '
-                f'Toplam limit farkı: {format_deviation(preset.distance_nm)}.')
-        if pair.fit.kind != fit.kind or preset.fit.kind != fit.kind:
+        pair = closest_pair(fit)
+        heading = 'Tam ISO çift eşleşmesi' if pair.distance_nm == 0 else 'En yakın ISO çift (yalnız referans)'
+        text = (result.explanation+f'\n\n{heading}: {pair.code} · {CLASSIFICATION[pair.fit.kind]}. '
+                f'Toplam limit farkı: {format_deviation(pair.distance_nm)}. '
+                f'En büyük tek limit farkı: {format_deviation(pair.worst_limit_difference_nm)}.')
+        for band, feature, label in ((fit.hole, 'hole', 'Delik'), (fit.shaft, 'shaft', 'Mil')):
+            tied = closest_classes(band, feature)
+            if len(tied) > 1:
+                text += f'\n{label}: eşit uzaklıktaki sınıflar '+', '.join(item.code for item in tied)+'.'
+        if pair.fit.kind != fit.kind:
             text += '\nYakın referansın türü girilen ölçülerin türünden farklı olabilir; montaj hesabı girilen limitlere aittir.'
         if pair.beyond_reference_width:
             text += '\nISO çiftten en az bir limit farkı, o parçanın referans tolerans genişliğini aşıyor; en yakın etiketi ISO uyumu veya uygun üretim toleransı anlamına gelmez.'
