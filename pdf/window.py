@@ -22,7 +22,7 @@ from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from gui.icons import make_icon
 from gui.motion import blend, pair
-from gui.rendering import hide_grid
+from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
@@ -89,6 +89,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self._preferences_save_id = None
         self._pending_files = None
         self._pending_preview = False
+        self._worker_updates = None
         self._last_ui_activity = time.monotonic()
         self._preload_id = None
         self.controls = []
@@ -355,7 +356,10 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self._refresh_list_state()
 
     def _refresh_list_state(self):
-        self.visible_count.configure(text=f"{len(self._visible_rows)} / {len(self.row_ids)} dosya")
+        if self._worker_updates is not None:
+            self._worker_updates['list_changed'] = True
+            return
+        configure_changed(self.visible_count, text=f"{len(self._visible_rows)} / {len(self.row_ids)} dosya")
         if self._visible_rows:
             self.empty_state.place_forget()
         else:
@@ -720,13 +724,47 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             if changed:
                 self._refresh_list_state()
             if matches:
-                self.table.see(row)
+                if self._worker_updates is not None:
+                    self._worker_updates['row'] = row
+                else:
+                    self.table.see(row)
 
     def _append_log(self, message):
+        text = f"{datetime.now():%H:%M:%S}  {message}\n"
+        if self._worker_updates is not None:
+            self._worker_updates['logs'].append(text)
+        else:
+            self._write_log(text)
+
+    def _write_log(self, text):
+        # Keep the reader's position when they scroll up during an export.
+        follow = self.log_box.yview()[1] >= .999
         self.log_box.configure(state="normal")
-        self.log_box.insert("end", f"{datetime.now():%H:%M:%S}  {message}\n")
-        self.log_box.see("end")
+        self.log_box.insert("end", text)
+        if follow:
+            self.log_box.see("end")
         self.log_box.configure(state="disabled")
+
+    def _flush_worker_updates(self):
+        updates, self._worker_updates = self._worker_updates, None
+        if updates is None:
+            return
+        if updates['counts'] is not None:
+            for key, widget in self.stat_values.items():
+                configure_changed(widget, text=str(updates['counts'].get(key, 0)))
+        if updates['total'] is not None:
+            configure_changed(self.stat_values['total'], text=str(updates['total']))
+        if updates['progress'] is not None:
+            current, total = updates['progress']
+            self.progress.set(current / total if total else 0)
+        if updates['status']:
+            configure_changed(self.status_label, **updates['status'])
+        if updates['list_changed']:
+            self._refresh_list_state()
+        if updates['row'] in self._visible_rows:
+            self.table.see(updates['row'])
+        if updates['logs']:
+            self._write_log(''.join(updates['logs']))
 
     def _open_output(self):
         folder = self.output_folder.get().strip()
@@ -792,7 +830,11 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             if self._pending_files is not None:
                 self._poll_id = self.after(8, self._process_events)
                 return
-        deadline = time.perf_counter()+.008
+        # Retain every result/log, but paint counters and scrolling once per
+        # bounded Tk turn. Leave time for the paint after consuming events.
+        self._worker_updates = dict(counts=None, total=None, progress=None, status={},
+                                    logs=[], row=None, list_changed=False)
+        deadline = time.perf_counter()+.006
         handled = 0
         try:
             while True:
@@ -800,12 +842,12 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                 if event == "files":
                     self._queue_file_list(value)
                 elif event == "phase":
-                    self.status_label.configure(text=value, text_color=MUTED)
+                    self._worker_updates['status'].update(text=value, text_color=MUTED)
                 elif event == "total":
-                    self.stat_values["total"].configure(text=str(value))
+                    self._worker_updates['total'] = value
                 elif event == "current":
                     self._update_row(value, "running")
-                    self.status_label.configure(text=f"Aktarılıyor · {Path(value).name}")
+                    self._worker_updates['status']['text'] = f"Aktarılıyor · {Path(value).name}"
                 elif event == "result":
                     self.results.append(value)
                     detail = value["detail"]
@@ -814,25 +856,32 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                     self._update_row(value["source"], value["status"], detail)
                     self._append_log(f"{LABELS[value['status']]} · {Path(value['source']).name} · {value['detail']}")
                 elif event == "counts":
-                    for key, widget in self.stat_values.items():
-                        widget.configure(text=str(value.get(key, 0)))
+                    self._worker_updates['counts'] = value
+                    self._worker_updates['total'] = None
                 elif event == "progress":
-                    current, total = value
-                    self.progress.set(current / total if total else 0)
+                    self._worker_updates['progress'] = value
                 elif event == "log":
                     self._append_log(value)
                 elif event in ("preview", "preview_error"):
                     if event == "preview":
                         self._pending_preview = self._queue_file_list(value)
                         if not self._pending_preview:
+                            self._flush_worker_updates()
                             self._finish_preview()
+                            break
                     else:
+                        self._flush_worker_updates()
                         self._set_busy(False)
                         self.status_label.configure(text=value, text_color=RED)
                         if self.close_pending:
                             self._destroy_app()
+                        break
                 elif event == "done":
+                    # Final summaries must not be overwritten by an earlier
+                    # queued count/phase after the worker releases the GUI.
+                    self._flush_worker_updates()
                     self._finish(value)
+                    break
                 if self._closed:
                     return
                 handled += 1
@@ -840,6 +889,13 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                     break
         except queue.Empty:
             pass
+        finally:
+            if not self._closed:
+                self._flush_worker_updates()
+            else:
+                self._worker_updates = None
+        if self._closed:
+            return
         self._poll_id = self.after(8 if self._pending_files is not None or not self.events.empty() else 80, self._process_events)
 
     def _on_close(self):

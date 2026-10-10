@@ -160,10 +160,14 @@ test_k_scan_automatically_opens_full_result_view (test_gui_flow.GUIFlowTests.tes
 test_large_preview_yields_to_stop_before_completing_list (test_gui_flow.GUIFlowTests.test_large_preview_yields_to_stop_before_completing_list) ... ok
 test_large_worker_list_precedes_results_and_done (test_gui_flow.GUIFlowTests.test_large_worker_list_precedes_results_and_done) ... ok
 test_legacy_combined_format_migrates_and_stays_single_on_restart (test_gui_flow.GUIFlowTests.test_legacy_combined_format_migrates_and_stays_single_on_restart) ... ok
+test_log_scrolling_stays_with_reader_and_follows_again_at_bottom (test_gui_flow.GUIFlowTests.test_log_scrolling_stays_with_reader_and_follows_again_at_bottom) ... ok
 test_preference_retry_keeps_departed_page_snapshot (test_gui_flow.GUIFlowTests.test_preference_retry_keeps_departed_page_snapshot) ... ok
 test_rapid_menu_clicks_leave_only_final_page_highlighted (test_gui_flow.GUIFlowTests.test_rapid_menu_clicks_leave_only_final_page_highlighted) ... ok
 test_rapid_navigation_defers_io_and_close_flushes_every_page (test_gui_flow.GUIFlowTests.test_rapid_navigation_defers_io_and_close_flushes_every_page) ... ok
 test_selected_dwg_exports_only_dwg_even_when_dxf_would_fail (test_gui_flow.GUIFlowTests.test_selected_dwg_exports_only_dwg_even_when_dxf_would_fail) ... ok
+test_worker_batch_keeps_total_event_order_and_final_summary_in_each_module (test_gui_flow.GUIFlowTests.test_worker_batch_keeps_total_event_order_and_final_summary_in_each_module) ... ok
+test_worker_batch_retains_every_result_and_log_with_one_visible_update (test_gui_flow.GUIFlowTests.test_worker_batch_retains_every_result_and_log_with_one_visible_update) ... ok
+test_worker_log_burst_yields_between_batches_without_losing_messages (test_gui_flow.GUIFlowTests.test_worker_log_burst_yields_between_batches_without_losing_messages) ... ok
 test_both_views_and_three_sample_sizes (test_iso_fits.IsoGuiTests.test_both_views_and_three_sample_sizes) ... ok
 test_csv_clipboard_cancel_and_write_error (test_iso_fits.IsoGuiTests.test_csv_clipboard_cancel_and_write_error) ... ok
 test_default_and_every_preset (test_iso_fits.IsoGuiTests.test_default_and_every_preset) ... ok
@@ -339,6 +343,6 @@ test_independent_reference_pages_keep_their_work_areas_after_operation_pages (te
 test_operation_work_areas_stay_large_when_scrolling_and_switching_forms (test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms) ... ok
 
 ----------------------------------------------------------------------
-Ran 327 tests in 151.501s
+Ran 331 tests in 152.310s
 
 OK

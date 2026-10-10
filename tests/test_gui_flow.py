@@ -181,6 +181,93 @@ class GUIFlowTests(GuiTestCase):
         self.assertEqual(self.app.table.item(self.app.row_ids[paths[-1]], 'values')[1], 'Başarılı')
         self.assertEqual(self.app.stat_values['succeeded'].cget('text'), '1')
 
+    def test_worker_batch_retains_every_result_and_log_with_one_visible_update(self):
+        paths = [str(self.root/f'part-{i}.slddrw') for i in range(8)]
+        self.app._fill_files(paths)
+        self.app.after_cancel(self.app._poll_id)
+        expected = []
+        self.app.events.put(('phase', 'Aktarım hazırlanıyor'))
+        self.app.events.put(('log', 'Başlangıç'))
+        for index, path in enumerate(paths, 1):
+            result = dict(source=path, output=path+'.pdf', status='success', detail=f'Sonuç {index}')
+            expected.append(result)
+            for event in (('current', path), ('result', result),
+                          ('counts', dict(total=8, succeeded=index)), ('progress', (index, 8))):
+                self.app.events.put(event)
+        self.app.events.put(('log', 'Bitiş'))
+        with patch('pdf.window.time.perf_counter', return_value=0), \
+                patch.object(self.app.log_box, 'insert', wraps=self.app.log_box.insert) as logs, \
+                patch.object(self.app.progress, 'set', wraps=self.app.progress.set) as progress, \
+                patch.object(self.app.table, 'see', wraps=self.app.table.see) as scroll:
+            self.app._process_events()
+        self.assertEqual(self.app.results, expected)
+        self.assertEqual((logs.call_count, progress.call_count, scroll.call_count), (1, 1, 1))
+        self.assertEqual(self.app.progress.get(), 1)
+        self.assertEqual(self.app.stat_values['succeeded'].cget('text'), '8')
+        for index, path in enumerate(paths, 1):
+            self.assertEqual(self.app.table.item(self.app.row_ids[path], 'values')[1:],
+                             ('Başarılı', f'Sonuç {index}'))
+        text = self.app.log_box.get('1.0', 'end')
+        messages = ['Başlangıç', *[f'Sonuç {i}' for i in range(1, 9)], 'Bitiş']
+        self.assertEqual([text.index(message) for message in messages],
+                         sorted(text.index(message) for message in messages))
+        self.assertIsNone(self.app._worker_updates)
+
+    def test_worker_batch_keeps_total_event_order_and_final_summary_in_each_module(self):
+        for mode in ('pdf', 'dxf_dwg', 'k_factor'):
+            self.app._switch_mode(mode)
+            for events, total in [([('counts', dict(total=9)), ('total', 21)], '21'),
+                                  ([('total', 21), ('counts', dict(total=9))], '9')]:
+                with self.subTest(mode=mode, total=total):
+                    self.app.after_cancel(self.app._poll_id)
+                    for event in events:
+                        self.app.events.put(event)
+                    self.app._process_events()
+                    self.assertEqual(self.app.stat_values['total'].cget('text'), total)
+            self.app._set_busy(True)
+            self.app.events.put(('counts', dict(total=99, failed=99)))
+            self.app.events.put(('phase', 'Eski durum'))
+            self.app.events.put(('done', dict(state='completed', total=3, processed=3,
+                                              succeeded=3, skipped=0, failed=0)))
+            self.app.after_cancel(self.app._poll_id)
+            self.app._process_events()
+            self.assertFalse(self.app.busy)
+            self.assertEqual(self.app.stat_values['succeeded'].cget('text'), '3')
+            self.assertEqual(self.app.stat_values['failed'].cget('text'), '0')
+            self.assertIn('Tamamlandı', self.app.status_label.cget('text'))
+
+    def test_worker_log_burst_yields_between_batches_without_losing_messages(self):
+        self.app.after_cancel(self.app._poll_id)
+        for index in range(120):
+            self.app.events.put(('log', f'Mesaj {index:03}'))
+        with patch('pdf.window.time.perf_counter', return_value=0):
+            self.app._process_events()
+            self.assertEqual(self.app.events.qsize(), 20)
+            self.app.after_cancel(self.app._poll_id)
+            self.app._process_events()
+        text = self.app.log_box.get('1.0', 'end')
+        self.assertEqual(text.count('Mesaj '), 120)
+        self.assertLess(text.index('Mesaj 099'), text.index('Mesaj 100'))
+        self.assertTrue(self.app.events.empty())
+
+    def test_log_scrolling_stays_with_reader_and_follows_again_at_bottom(self):
+        self.app.result_tabs.set('Günlük')
+        self.settle(.15)
+        self.app._write_log(''.join(f'Eski satır {index}\n' for index in range(200)))
+        self.app.update_idletasks()
+        self.assertGreater(self.app.log_box.yview()[1], .99)
+        self.app.log_box.yview_moveto(0)
+        self.app.update_idletasks()
+        with patch.object(self.app.log_box, 'see', wraps=self.app.log_box.see) as scroll:
+            self.app._append_log('Yeni satır')
+            self.app.update_idletasks()
+        scroll.assert_not_called()
+        self.assertLess(self.app.log_box.yview()[0], .01)
+        self.app.log_box.yview_moveto(1)
+        self.app._append_log('Takip yeniden açık')
+        self.app.update_idletasks()
+        self.assertGreater(self.app.log_box.yview()[1], .99)
+
 
 if __name__ == '__main__':
     unittest.main()

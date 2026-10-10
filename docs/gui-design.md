@@ -27,7 +27,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**327 test geçti; 127'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**331 test geçti; 131'i gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -49,13 +49,13 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.134 | 4.684 |
-| Testler ve ortak yardımcıları | 23 | 5.210 | 4.628 |
-| Toplam | 52 | 10.344 | 9.312 |
+| Uygulama | 29 | 5.190 | 4.738 |
+| Testler ve ortak yardımcıları | 23 | 5.297 | 4.711 |
+| Toplam | 52 | 10.487 | 9.449 |
 
-Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler test yardımcılarının ortaklaştırılması sonrası sayımdır.
+Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler olay çizimlerinin toplulaştırılması ve dört yeni akış kontrolü sonrası sayımdır.
 
-GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz. Ekransız keşifte aynı 127 GUI testi ekran gereksinimiyle işaretlenir.
+Önceki sadeleştirmede GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. O aşamadaki 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz.
 
 Son yeniden denetimde 12 ek GUI kabul testi eklendi. İlk yerleşim zamanlaması açıkça başlatıldı. Sonuçlar ve kapsam sınırları [Word raporunda](reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx); test bazlı kanıtlar [rapor dizininde](reports/README.md). Satır sayıları bu yeniden denetim sonrası güncellenmiştir; rapor üretim araçları uygulama/test sayımına dahil değildir.
 
@@ -111,6 +111,19 @@ Aynı Linux/Xorg ortamında 66a8e45 ile karşılaştırma: 10.000 örnek dosyal�
 | Aramayı temizleyip tüm satırları gösterme | 389,49 | 4,39 |
 
 Bu ölçüm gerçek Tk listesi ve örnek dosya adlarıyla yapıldı; CAD aktarım süresi değildir. 10.000 satırda toplu filtreleme, seçim/veri korunması, sırasız canlı sonuçlar, yeni tarama ve üç modülün ayrı listeleri regresyon testleriyle kontrol edilir.
+
+İşçi olayları tüketilirken tüm sonuçlar ve günlük kayıtları korunur; aynı turdaki sayaç, ilerleme, durum yazısı ve tablo kaydırması bir kez uygulanır. Her tur en fazla 100 olay veya 6 ms tüketimle sınırlıdır; ardından çizim ve diğer Tk olaylarına sıra verilir. Son özet önceki sayaçlarla ezilmez. Günlükte yukarı kaydıran okuyucunun konumu korunur; aşağıya dönünce yeni kayıt takibi devam eder.
+
+9bfcac4 ile aynı Linux/Xorg ortamında, 2.000 satırlık tabloda 500 örnek dosya sonucu ve üç tekrar için:
+
+| Ölçüm | Önce | Sonra |
+| --- | ---: | ---: |
+| Olay tüketimi + Tk çizimi medyanı | 305,83 ms | 47,47 ms |
+| Bir olay turunun en uzun süresi | 8,19 ms | 2,23 ms |
+| Günlüğe ekleme çağrısı | 501 | 21 |
+| İlerleme çubuğu çizimi | 500 | 20 |
+
+Sayaç ölçümleri zaman ölçümünden ayrı çalıştırıldı. Poll beklemeleri ve SolidWorks süresi bu ölçüme dahil değildir; Windows kare hızı ölçülmedi. Hazır sayfalar arasında geçiş medyanı 3,08 ms'dir. [Ham ölçümler](test-results/gui-responsiveness.json) ve [tekrar çalıştırma aracı](report-tools/benchmark_gui_events.py): `python docs/report-tools/benchmark_gui_events.py . sonuc.json`. Dört yeni gerçek GUI testi toplu çizimde veri/sıra korunmasını, PDF/DXF/K-R son özetlerini, olay turunun sınırını ve günlük kaydırmasını sınar.
 
 ISO montaj kesitinde delik ve mil tam çap oklarıyla (D/d), tek taraflı boşluk veya çakışma g oku ile gösterilir. Çapsal ve radyal değerler ayrı yazılır; seçilen örneğin durumu ile tolerans çiftinin genel türü ayrılır. Sıfır fark temas olarak gösterilir. Kesit ölçeksizdir; küçük boşluklar çizgi kalınlığında kaybolmaz. Kırmızı alanlar deformasyon öncesi boyutsal çakışmayı gösterir. Kesit 310 px, tolerans bölgeleri 220 px çizim alanı kullanır; sağ çalışma alanı kaydırılabilir. Altı gerçek GUI testi çap/radyal oklarını, ara geçme uçlarını, yarım mikrometreyi, sıfır temasını ve iki tema/üç ölçek görünümünü doğrular.
 

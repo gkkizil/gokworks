@@ -1,0 +1,49 @@
+{
+  "baseline_commit": "9bfcac4e03a91eadba51cbf44fa3d3acd92b6fea",
+  "candidate_window_sha256": "aa894a2af2a584c8ab2ab4da3ac46a574c37c9e6c9ab304b420d8435ece575ba",
+  "environment": {
+    "system": "Linux",
+    "python": "3.12.14",
+    "tk": 9.0,
+    "customtkinter": "6.0.0",
+    "display": "Xorg :99"
+  },
+  "workload": {
+    "rows": 2000,
+    "results": 500,
+    "events_per_result": 4,
+    "terminal_events": 1,
+    "timing_runs": 3
+  },
+  "method": "Manual Tk event drains followed by update_idletasks; excludes poll delays and SolidWorks. Mock paint counters run separately from timings.",
+  "before": {
+    "warm_switch_median_ms": 3.9961609872989357,
+    "burst_median_ms": 305.83176901564,
+    "burst_runs_ms": [
+      314.56354502006434,
+      305.337278987281,
+      305.83176901564
+    ],
+    "callback_median_ms": 8.090055503998883,
+    "callback_max_ms": 8.194520021788776,
+    "redraw_calls": {
+      "log_inserts": 501,
+      "progress_updates": 500
+    }
+  },
+  "after": {
+    "warm_switch_median_ms": 3.0755285115446895,
+    "burst_median_ms": 47.46926898951642,
+    "burst_runs_ms": [
+      48.64582000300288,
+      47.46926898951642,
+      46.11770101473667
+    ],
+    "callback_median_ms": 1.0848840174730867,
+    "callback_max_ms": 2.230228972621262,
+    "redraw_calls": {
+      "log_inserts": 21,
+      "progress_updates": 20
+    }
+  }
+}
