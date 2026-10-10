@@ -4,9 +4,9 @@ import threading
 import tkinter as tk
 
 import customtkinter as ctk
-from gui.rendering import configure_changed
+from gui.rendering import configure_changed, hide_grid
 
-from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
+from gui.theme import PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
 from k_factor.apply import update_assembly
 from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, calculate,
                             number, ba_from_outside_dimensions)
@@ -24,7 +24,7 @@ class KFactorView:
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(3, weight=1)
         self._build_header()
-        self.pdf_header.grid_configure(pady=(14, 12))
+        self.pdf_header.grid_configure(pady=(12, 8))
         self._build_stats()
         self.stats_frame.grid(row=1, column=0, sticky='ew', padx=24, pady=(0, 8))
         view = tk.StringVar(self, self.k_state['assignment_mode'].get())
@@ -92,13 +92,12 @@ class KFactorView:
         # settings viewport shrinking enough to leave room for the results.
         self.settings_body._scrollbar.configure(height=24, width=10)
         self._settings_height = 340
-        panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
-                             border_width=1, border_color=BORDER)
+        panel = ctk.CTkFrame(self.settings_body, fg_color="transparent", corner_radius=0)
         panel.grid(row=1, column=0, sticky="ew")
         self.k_widgets["automatic_panel"] = panel
         for column in range(3):
             panel.grid_columnconfigure(column, weight=1, uniform="kr")
-        self._label(panel, "01   Malzeme ve takım · Havada büküm", 14, bold=True).grid(
+        self._label(panel, "Malzeme ve takım · Havada büküm", 14, bold=True).grid(
             row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(12, 4))
         for column, (key, label, values) in enumerate((
             ("material", "Malzeme varsayımı", [m.label for m in MATERIALS]),
@@ -113,7 +112,7 @@ class KFactorView:
         self._label(panel, "Malzeme tüm saclar için kullanılır. Özel takım ölçüsü yazabilirsiniz; otomatik V parçanın kalınlığına göre seçilir.",
                     11, MUTED, wraplength=225, justify="left").grid(
             row=2, column=2, sticky="w", padx=16, pady=(0, 6))
-        self._label(panel, "02   Elle hesap ve numune kontrolü", 14, bold=True).grid(
+        self._label(panel, "Elle hesap ve numune kontrolü", 14, bold=True).grid(
             row=3, column=0, columnspan=3, sticky="w", padx=16, pady=(6, 4))
         for column, (key, label) in enumerate((
             ("thickness", "Hesap / numune kalınlığı (mm)"),
@@ -150,8 +149,7 @@ class KFactorView:
                                    if self.mode == "k_factor" and not self.busy else None)
 
     def _build_manual_k_settings(self):
-        panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
-                             border_width=1, border_color=BORDER)
+        panel = ctk.CTkFrame(self.settings_body, fg_color="transparent", corner_radius=0)
         panel.grid(row=1, column=0, sticky="ew")
         self.k_widgets["manual_panel"] = panel
         for column in range(3):
@@ -165,8 +163,11 @@ class KFactorView:
         self._label(panel, "Örnek: 2 mm sac → K: 0,274 · R: 2 mm. Virgül veya nokta kullanabilirsiniz.",
                     11, MUTED, wraplength=700, justify="left").grid(
             row=2, column=0, columnspan=3, sticky="w", padx=16, pady=(4, 8))
-        summary = self._label(panel, "", 12, TEXT, wraplength=700, justify="left", anchor="w")
-        summary.grid(row=3, column=0, columnspan=3, sticky="ew", padx=16, pady=(4, 14))
+        summary_band = ctk.CTkFrame(panel, fg_color=ACCENT_BG, corner_radius=10)
+        summary_band.grid(row=3, column=0, columnspan=3, sticky="ew", padx=16, pady=(8, 16))
+        summary_band.grid_columnconfigure(0, weight=1)
+        summary = self._label(summary_band, "", 13, TEXT, wraplength=670, justify="left", anchor="w")
+        summary.grid(row=0, column=0, sticky="ew", padx=16, pady=16)
         self.k_widgets["manual_summary"] = summary
 
     def _select_k_assignment(self, selection):
@@ -178,10 +179,10 @@ class KFactorView:
         self.k_widgets['assignment_tabs'].set(selection)
         self.form_panel.grid()
         if hasattr(self, 'result_tabs') and self.result_tabs.master.master is self.k_widgets['body']:
-            self.result_tabs.master.grid_remove()
+            hide_grid(self.result_tabs.master)
         manual = selection == MANUAL_TAB
-        self.k_widgets["automatic_panel"].grid_remove()
-        self.k_widgets["manual_panel"].grid_remove()
+        hide_grid(self.k_widgets["automatic_panel"])
+        hide_grid(self.k_widgets["manual_panel"])
         self.k_widgets["manual_panel" if manual else "automatic_panel"].grid()
         self.k_calculation_label = self.k_widgets["manual_summary" if manual else "automatic_summary"]
         self.settings_body._parent_canvas.yview_moveto(0)
@@ -193,14 +194,14 @@ class KFactorView:
         if selection != RESULTS_TAB:
             return self._select_k_assignment(selection)
         self.k_widgets['assignment_tabs'].set(RESULTS_TAB)
-        self.form_panel.grid_remove()
+        hide_grid(self.form_panel)
         self.result_tabs.master.grid()
         self._resize_pdf_area()
 
     def _resize_k_workspace(self):
         width = self.k_widgets['body'].winfo_width()/self.workspace._get_widget_scaling()
         for key in ('automatic_summary', 'manual_summary'):
-            configure_changed(self.k_widgets[key], wraplength=max(240, width-80))
+            configure_changed(self.k_widgets[key], wraplength=max(240, width-(112 if key == 'manual_summary' else 80)))
         self._fit_results_toolbar(width)
 
     def _build_k_actions(self, parent):

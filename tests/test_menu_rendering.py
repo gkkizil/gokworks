@@ -10,6 +10,7 @@ from support.gui import GuiTestCase
 from gui.theme import ACCENT_BG
 from iso_fits import window as iso_view
 from iso_fits.rules import PRESETS
+from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 
 
 class MenuRenderingTests(GuiTestCase):
@@ -100,6 +101,50 @@ class MenuRenderingTests(GuiTestCase):
         self.assertEqual(self.app.iso_result, fit)
         self.assertEqual(self.app.iso_state['hole_lower'].get(), '-0,05')
         self.assertEqual(canvas.find_all(), original)
+
+    def test_conditional_forms_and_filtered_choices_stay_hidden_after_dpi_changes(self):
+        self.addCleanup(lambda: ctk.set_widget_scaling(1))
+        self.app._switch_mode('iso_fits')
+        self.app.iso_search.set('H7/g6')
+        for method, scale in [('ISO seçimi', 1.25), ('Manuel kontrol', 1.5), ('ISO seçimi', 1)]:
+            with self.subTest(method=method, scale=scale):
+                self.app.iso_state['method'].set(method)
+                self.app.iso_state['view'].set('Tolerans bölgeleri')
+                expected_fit = self.app.iso_result
+                ctk.set_widget_scaling(scale)
+                self.settle()
+                manual = method == 'Manuel kontrol'
+                widgets = self.app.iso_widgets
+                for key in ('manual_inputs', 'assessment', 'comparison'):
+                    self.assertEqual(bool(widgets[key].grid_info()), manual)
+                for widget in widgets['iso_inputs']:
+                    self.assertEqual(bool(widget.grid_info()), not manual)
+                self.assertFalse(widgets['section_help'].grid_info())
+                visible = [key for key, widget in widgets['preset_buttons'].items() if widget.grid_info()]
+                self.assertEqual(visible, ['H7 / g6'])
+                self.assertEqual(self.app.iso_result, expected_fit)
+
+        self.app._switch_mode('geometric_tolerances')
+        self.app._select_gdt('position')
+        self.app.gdt_search.set('SİLİNDİR')
+        ctk.set_widget_scaling(1.25)
+        self.settle()
+        self.assertFalse(self.app.gdt_widgets['size_rule'].grid_info())
+        visible = [key for key, widget in self.app.gdt_widgets['choices'].items() if widget.grid_info()]
+        self.assertEqual(visible, ['cylindricity'])
+
+        self.app._switch_mode('k_factor')
+        for view, scale in [(MANUAL_TAB, 1.5), (RESULTS_TAB, 1), (AUTOMATIC_TAB, 1.25)]:
+            with self.subTest(view=view, scale=scale):
+                self.app._select_k_view(view)
+                ctk.set_widget_scaling(scale)
+                self.settle()
+                results = view == RESULTS_TAB
+                self.assertEqual(bool(self.app.form_panel.grid_info()), not results)
+                self.assertEqual(bool(self.app.result_tabs.master.grid_info()), results)
+                if not results:
+                    self.assertEqual(bool(self.app.k_widgets['manual_panel'].grid_info()), view == MANUAL_TAB)
+                    self.assertEqual(bool(self.app.k_widgets['automatic_panel'].grid_info()), view == AUTOMATIC_TAB)
 
     def test_iso_sample_and_view_changes_only_redraw_diagram(self):
         self.app._switch_mode('iso_fits')

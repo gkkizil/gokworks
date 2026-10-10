@@ -22,6 +22,7 @@ from support.solidworks import (
 )
 
 from k_factor import apply as ap
+from k_factor.window import RESULTS_TAB
 from k_factor.rules import (
     Recipe,
     ba_from_outside_dimensions,
@@ -382,6 +383,7 @@ class KGuiTests(GuiTestCase):
 
     def test_small_large_and_scaled_layout_in_both_themes(self):
         self.app._switch_mode('k_factor')
+        self.app._select_k_view(RESULTS_TAB)
         try:
             for size,scale in (('1000x690',1),('1240x860',1),('1400x900',1.25)):
                 ctk.set_widget_scaling(scale)

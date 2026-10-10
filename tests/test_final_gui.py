@@ -106,6 +106,7 @@ class FinalGUIAuditTests(LayoutGuiTestCase):
             self.app._change_theme(appearance)
             for foreground, background in [(theme.TEXT[index], theme.PANEL[index]),
                                            (theme.MUTED[index], theme.PANEL[index]),
+                                           (theme.RED[index], theme.ACCENT_BG[index]),
                                            (self.app.start_button.cget('text_color')[index], theme.ACCENT[index])]:
                 with self.subTest(theme=appearance, foreground=foreground, background=background):
                     low, high = sorted((luminance(foreground), luminance(background)))

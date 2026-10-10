@@ -1,5 +1,6 @@
 """Real Tk fixture and event pumping shared by all GUI test modules."""
 
+import gc
 import os
 import time
 import unittest
@@ -16,6 +17,9 @@ class GuiTestCase(unittest.TestCase):
     settle_seconds = .25
 
     def setUp(self):
+        # Retired Tk fonts must be collected on the GUI thread, before a new
+        # export worker can trigger cyclic GC (notably on Python 3.13/Tk 8.6).
+        gc.collect()
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)

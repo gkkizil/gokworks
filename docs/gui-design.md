@@ -1,12 +1,20 @@
 # GUI tasarımı ve doğrulama
 
-Kullanıcının paylaştığı sade CRM ekranı örneği temel alındı: açık zemin, ince gri sınırlar, ikonlu yan menü, beyaz çalışma alanı ve belirgin başlıklar. Aynı düzenin koyu tema paleti de hazırlandı. PDF ve DXF/DWG aktarım ekranları vardır; DXF veya DWG tek başına seçilir. **K FAKTÖR - RADIUS** ekranında geniş Malzeme / Takım, Manuel K / R ve Montaj sonuçları sekmeleri vardır. **ISO GEÇMELERİ** bağımsız delik/mil hesap ekranıdır. **GEOMETRİK TOL.**, ASME 2018 rehberidir: 12 güncel özellik ve iki eski eğitim kartı.
+Kullanıcının paylaştığı sade CRM ekranı örneği temel alındı: açık zemin, ince gri sınırlar, ikonlu yan menü, beyaz çalışma alanı ve belirgin başlıklar. Aynı düzenin koyu tema paleti de hazırlandı. PDF ve DXF/DWG aktarım ekranları vardır; DXF veya DWG tek başına seçilir. **K FAKTÖR - RADIUS** ekranında geniş Malzeme / Takım, Manuel K / R ve Montaj sonuçları sekmeleri vardır. **ISO GEÇMELERİ** bağımsız delik/mil hesap ekranıdır. **Geometrik tolerans**, ASME 2018 rehberidir: 12 güncel özellik ve iki eski eğitim kartı.
+
+## Son görsel düzenleme
+
+Yan menü dışa aktarım ve mühendislik olarak ayrıldı; GD&T için ayrı hedef ikonu kullanıldı. İç içe ayar çerçeveleri kaldırıldı, sonuç sekmelerinin tıklama alanı büyütüldü, boş listelere ikonlu yönlendirme ve manuel K/R formuna özet bandı eklendi. ISO geçme sınıfı ve minimum/maksimum değerler artık kesitin üstündedir. Açık temada nötr yeşil-gri, koyu temada siyah zemin korunur.
+
+Ekran ölçeği değiştiğinde gizli ISO manuel formu, filtrelenmiş seçenekler ve K/R panelleri yeniden görünmüyor. CustomTkinter kaydırma çerçevelerinde gerçek geometri sahibi de temizlenir; seçim, sayfa önbelleği ve hesap sonuçları korunur. Bu davranış tek bir yeni regresyon testinde sınanır. K/R sonuç yerleşimi testi ilgili sekmeyi açıkça seçer. Python 3.13/Tk 8.6 toplu testlerinde eski pencere yazı tiplerinin bir sonraki aktarım işçisinde temizlenmesini önlemek için testler arasında ana iş parçacığında çöp toplama yapılır.
+
+[Gerçek ekran galerisi](ui-preview/README.md). Bulutta düzgün yazı görüntülemesi için Python 3.13 / Tk 8.6 kullanıldı; Windows Segoe UI değişmedi. [Aynı ortamda önce/sonra akıcılık ölçümü](test-results/ui-polish-responsiveness.json): sıcak menü geçişi medyanı 4,26 → 3,96 ms; 500 sentetik sonucun çizimi 84,00 → 83,50 ms. Bu küçük fark hızlanma garantisi değildir; görsel değişiklikler önceki toplu çizim davranışını korur. SolidWorks işlem süresi ölçülmedi.
 
 ## Kullanım
 
 Yan menüden **Açık / Koyu** seçilir. Seçim beş ekranı, tabloyu, ikonları ve açık ayrıntı penceresini değiştirir; ayarlara kaydedilir. Tema değişikliği çalışan aktarımı durdurmaz, dosya listelerini/sonuçları sıfırlamaz.
 
-Koyu tema siyah zemin kullanır: ana arka plan `#000000`, yan menü `#080808`, panel `#0B0B0B`, giriş/şema `#050505`. İkincil düğmeler ve hover nötr siyah tonlarındadır; yeşil vurgular korunur. Sekiz mevcut GUI testiyle kontrast, tema tercihi, sekmeler, ölçekler, rehber ve işlem sırasındaki tema geçişi sınandı. [Siyah tema kontrolü ve güncel ekranlar](reports/black-theme/README.md). Önceki 270 testlik rapor, önceki paletin denetim kaydıdır.
+Koyu tema siyah zemin kullanır: ana arka plan `#000000`, yan menü `#080808`, panel `#0B0B0B`, giriş/şema `#101010`. İkincil düğmeler ve hover nötr siyah tonlarındadır; yeşil vurgular korunur. Sekiz mevcut GUI testiyle kontrast, tema tercihi, sekmeler, ölçekler, rehber ve işlem sırasındaki tema geçişi sınandı. [Siyah tema kontrolü ve güncel ekranlar](reports/black-theme/README.md). Önceki 270 testlik rapor, önceki paletin denetim kaydıdır.
 
 Sonuç alanına Türkçe dosya adı/açıklama araması, durum filtresi ve görünen/toplam dosya sayısı eklendi. Filtreler yalnızca görünümü etkiler. Yeni tarama/aktarım filtreleri sıfırlar; PDF ve DXF/DWG geçişleri filtreleri bağımsız korur. İş parçacığından gelen sonuç, aktif filtreye göre kendi satırını günceller; tüm tablo her sonuçta yeniden çizilmez.
 
@@ -27,7 +35,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**331 test geçti; 131'i gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**332 test geçti; 132'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -35,25 +43,25 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| DXF/DWG | [Görüntü](reports/kr-workspace-fix/screenshots/dxf-dwg-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/dxf-dwg-dark.png) |
-| PDF | [Görüntü](reports/kr-workspace-fix/screenshots/pdf-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/pdf-dark.png) |
-| K/R Manuel | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-manual-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-manual-dark.png) |
-| K/R Takım | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/k-factor-dark.png) |
-| ISO | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-dark.png) |
-| ISO Mil esaslı | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-dark.png) |
-| GD&T | [Görüntü](reports/kr-workspace-fix/screenshots/geometric-tolerances-light.png) | [Görüntü](reports/kr-workspace-fix/screenshots/geometric-tolerances-dark.png) |
+| DXF/DWG | [Görüntü](ui-preview/screenshots/dxf-dwg-light.png) | [Görüntü](ui-preview/screenshots/dxf-dwg-dark.png) |
+| PDF | [Görüntü](ui-preview/screenshots/pdf-light.png) | [Görüntü](ui-preview/screenshots/pdf-dark.png) |
+| K/R Manuel | [Görüntü](ui-preview/screenshots/k-factor-manual-light.png) | [Görüntü](ui-preview/screenshots/k-factor-manual-dark.png) |
+| K/R Takım | [Görüntü](ui-preview/screenshots/k-factor-light.png) | [Görüntü](ui-preview/screenshots/k-factor-dark.png) |
+| ISO | [Görüntü](ui-preview/screenshots/iso-fits-light.png) | [Görüntü](ui-preview/screenshots/iso-fits-dark.png) |
+| ISO Mil esaslı | [Görüntü](ui-preview/screenshots/iso-fits-shaft-basis-light.png) | [Görüntü](ui-preview/screenshots/iso-fits-shaft-basis-dark.png) |
+| GD&T | [Görüntü](ui-preview/screenshots/geometric-tolerances-light.png) | [Görüntü](ui-preview/screenshots/geometric-tolerances-dark.png) |
 
-[Manuel ISO H6 referansı](reports/kr-workspace-fix/screenshots/iso-fits-manual-h6-dark.png), [tam H8 eşleşmesi](reports/kr-workspace-fix/screenshots/iso-fits-manual-h8-dark.png) ve [tablo kontrolü](reports/kr-workspace-fix/screenshots/iso-fits-manual-comparison-dark.png).
+[Manuel ISO H6 referansı](ui-preview/screenshots/iso-fits-manual-h6-dark.png), [tam H8 eşleşmesi](ui-preview/screenshots/iso-fits-manual-h8-dark.png) ve [tablo kontrolü](ui-preview/screenshots/iso-fits-manual-comparison-dark.png).
 
 ## Kod satırı sayısı
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.190 | 4.738 |
-| Testler ve ortak yardımcıları | 23 | 5.297 | 4.711 |
-| Toplam | 52 | 10.487 | 9.449 |
+| Uygulama | 29 | 5.210 | 4.756 |
+| Testler ve ortak yardımcıları | 23 | 5.349 | 4.760 |
+| Toplam | 52 | 10.559 | 9.516 |
 
-Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler olay çizimlerinin toplulaştırılması ve dört yeni akış kontrolü sonrası sayımdır.
+Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler 10 Ekim arayüz sadeleştirmesi ve DPI görünürlük düzeltmesi sonrası sayımdır.
 
 Önceki sadeleştirmede GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. O aşamadaki 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz.
 
@@ -79,7 +87,7 @@ GD&T ölçü denetiminde 9 regresyon testi eklendi: gerçek 45° ve normal ok, t
 
 PDF/DXF ayarları soldaki bağımsız kaydırılan formda, tablo/günlük sağdaki tam yükseklikte sonuç alanındadır. Form kaydırılırken tablo yüksekliği değişmez. K/R ekranı aşağıdaki yeni sekmeli düzene geçti. ISO ve GD&T kendi hesap/şema düzenlerini korur. Dar sonuç panelinde arama ve filtreler iki satıra geçer; başlık ve ipuçları alan genişliğine uyar.
 
-CustomTkinter ölçeklemesinin eski grid konumlarını yeniden yüklediği sekme geçişi giderildi. ISO filtre değişiminde liste kaydırması başa alınır; kısa mil esaslı listede önceki uzun listenin boş alanı görünmez. Tümü görünümünde delik ve mil esaslı örnekler dönüşümlü gösterilir. [Son 19 gerçek ekran ve Word/test kanıtları](reports/kr-workspace-fix/README.md). Önceki raporlar tarihsel tasarımı gösterir.
+CustomTkinter ölçeklemesinin eski grid konumlarını yeniden yüklediği sekme geçişi giderildi. ISO filtre değişiminde liste kaydırması başa alınır; kısa mil esaslı listede önceki uzun listenin boş alanı görünmez. Tümü görünümünde delik ve mil esaslı örnekler dönüşümlü gösterilir. [Son 19 gerçek ekran ve Word/test kanıtları](ui-preview/README.md). Önceki raporlar tarihsel tasarımı gösterir.
 
 ## Güncel K/R alanı ve menü geçişleri
 

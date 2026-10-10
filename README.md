@@ -16,7 +16,7 @@ Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çal
 
 ## Arayüz ve temalar
 
-Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, durum kartları ve sonuç alanı kullanılır. Yan menüdeki **Açık / Koyu** seçimi beş ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
+Yan menü Dışa Aktarım ve Mühendislik olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi beş ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
 
 - Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
 - **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** yalnızca liste filtrelerini kaldırır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
@@ -24,7 +24,7 @@ Paylaşılan tasarım örneğine uygun sade yan menü, birleşik ayar paneli, du
 - Dosyaya çift tıklayarak veya seçili dosyada **Enter** ile tam kaynak/çıktı yollarını ve açıklamayı açın. **Ayrıntıları kopyala** bilgileri panoya kopyalar. **Escape** ayrıntı penceresini kapatır.
 - Küçük pencerede ayar alanı kaydırılabilir; sonuç listesi görünür kalır. İkonlar ve tablo yazıları ekran ölçeklemesine uyum sağlar. %125 widget ölçeklemesi test edildi; tüm Windows monitör/DPI kombinasyonları bu bulut testinin kapsamında değildir.
 
-[Açık tema](docs/screenshots/gui-dxf-dwg-light.png), [koyu tema](docs/screenshots/gui-dxf-dwg-dark.png) ve [GUI tasarım/doğrulama notları](docs/gui-design.md).
+[Güncel ekran galerisi](docs/ui-preview/README.md), [açık tema](docs/ui-preview/screenshots/iso-fits-light.png), [siyah tema](docs/ui-preview/screenshots/dxf-dwg-dark.png) ve [GUI tasarım/doğrulama notları](docs/gui-design.md).
 
 ## ISO GEÇMELERİ
 
@@ -111,10 +111,11 @@ Harici test bağımlılığı gerekmez:
 Linux bulut ortamındaki sanal ekranla:
 
 ```bash
-DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user .venv/bin/python -m unittest discover -s tests -v
+DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cache \
+  /workspace/.cloud-setup/gui-venv/bin/python -m unittest discover -s tests -v
 ```
 
-Son kapsamlı kontrolde **331 test geçti**; 131 gerçek GUI testi dahildir. [Son test çıktısı](docs/test-results/latest-tests.log), [güncel K/R, tek biçim ve menü akıcılığı](docs/gui-design.md#güncel-kr-alanı-ve-menü-geçişleri). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. Tek biçim DXF/DWG üretimi, eski ayarın dönüşümü, hızlı menü geçişleri, çizim önbelleği, boşta sayfa ön yükleme ve 4000 dosyalık liste hazırlanırken Durdur erişimi ayrıca sınandı. 10.000 satırlık sonuç listesinde toplu filtreleme, seçim/veri korunması ve canlı sonuçların sırası kontrol edildi. ISO kesitinde çap okları, çapsal/tek taraflı fark, sıfır temas ve ara geçmenin farklı örnekleri doğrulandı. [Yeni kesit görünümü](docs/screenshots/iso-section-clearance-dark.png). DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. İşçi olaylarının toplu çiziminde sonuç/günlük sırası, son özetin korunması, her turdaki olay sınırı ve günlük kaydırma konumu da kontrol edildi. [GUI akıcılık ölçümleri](docs/test-results/gui-responsiveness.json). Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Son kapsamlı kontrolde **332 test geçti**; 132 gerçek GUI testi dahildir. [Son test çıktısı](docs/test-results/latest-tests.log), [güncel K/R, tek biçim ve menü akıcılığı](docs/gui-design.md#güncel-kr-alanı-ve-menü-geçişleri). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. Tek biçim DXF/DWG üretimi, eski ayarın dönüşümü, hızlı menü geçişleri, çizim önbelleği, boşta sayfa ön yükleme ve 4000 dosyalık liste hazırlanırken Durdur erişimi ayrıca sınandı. 10.000 satırlık sonuç listesinde toplu filtreleme, seçim/veri korunması ve canlı sonuçların sırası kontrol edildi. ISO kesitinde çap okları, çapsal/tek taraflı fark, sıfır temas ve ara geçmenin farklı örnekleri doğrulandı. [Yeni kesit görünümü](docs/screenshots/iso-section-clearance-dark.png). DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. İşçi olaylarının toplu çiziminde sonuç/günlük sırası, son özetin korunması, her turdaki olay sınırı ve günlük kaydırma konumu da kontrol edildi. [GUI akıcılık ölçümleri](docs/test-results/gui-responsiveness.json). Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
 
 Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
 

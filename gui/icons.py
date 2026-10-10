@@ -46,6 +46,13 @@ def _draw_icon(name, color):
         box((3, 7, 21, 17), radius=1)
         for x in (7, 11, 15, 19):
             line([(x, 7), (x, 11 if x % 8 == 7 else 13)])
+    elif name == 'target':
+        circle((5, 5, 19, 19))
+        circle((9, 9, 15, 15))
+        line([(12, 2), (12, 7)])
+        line([(12, 17), (12, 22)])
+        line([(2, 12), (7, 12)])
+        line([(17, 12), (22, 12)])
     elif name == "tools":
         line([(4, 4), (20, 20)])
         line([(4, 20), (20, 4)])

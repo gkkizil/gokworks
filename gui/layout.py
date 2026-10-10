@@ -8,6 +8,11 @@ from gui.theme import (SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
                        ACCENT_BG, GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT)
 
 
+class ResultsTabview(ctk.CTkTabview):
+    # CTk uses this value for both the selector and its reserved grid space.
+    _button_height = 34
+
+
 class WorkspaceLayout:
     def _build_window(self):
         self.grid_columnconfigure(1, weight=1)
@@ -60,7 +65,7 @@ class WorkspaceLayout:
         self.sidebar.grid_columnconfigure(0, weight=1)
         self.sidebar.grid_rowconfigure(4, weight=1)
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        brand.grid(row=0, column=0, sticky="ew", padx=20, pady=(30, 32))
+        brand.grid(row=0, column=0, sticky="ew", padx=20, pady=(28, 28))
         badge = ctk.CTkFrame(brand, width=36, height=36, corner_radius=10, fg_color=ACCENT_BG)
         badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
         badge.grid_propagate(False)
@@ -68,7 +73,7 @@ class WorkspaceLayout:
             relx=.5, rely=.5, anchor="center")
         self._label(brand, "GOKWORKS", 16, bold=True).grid(row=0, column=1, sticky="w")
         self._label(brand, "SolidWorks araçları", 11, MUTED).grid(row=1, column=1, sticky="w")
-        self._label(self.sidebar, "ÇALIŞMA ALANLARI", 10, MUTED, True).grid(
+        self._label(self.sidebar, "DIŞA AKTARIM", 10, MUTED, True).grid(
             row=1, column=0, sticky="w", padx=22, pady=(0, 10))
         navigation = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         navigation.grid(row=2, column=0, sticky="ew", padx=12)
@@ -80,24 +85,25 @@ class WorkspaceLayout:
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
             ("k_factor", "K FAKTÖR - RADIUS", "tools"),
-            ("iso_fits", "ISO GEÇMELERİ", "ruler"),
-            ("geometric_tolerances", "GEOMETRİK TOL.", "ruler"),
+            ("iso_fits", "ISO geçmeleri", "ruler"),
+            ("geometric_tolerances", "Geometrik tolerans", "target"),
         )):
+            if row == 2:
+                self._label(navigation, "MÜHENDİSLİK", 10, MUTED, True).grid(
+                    row=row, column=0, sticky="w", padx=10, pady=(22, 10))
             active = key == self.mode
             button = ctk.CTkButton(
                 navigation, text=title, image=self._icon(icon, ACCENT if active else MUTED),
-                height=44, corner_radius=8, anchor="w", border_color=BORDER,
-                border_width=1 if active else 0,
+                height=44, corner_radius=8, anchor="w", border_color=ACCENT_BG,
+                border_width=0,
                 fg_color=ACCENT_BG if active else "transparent", hover_color=SECONDARY,
                 text_color=ACCENT if active else MUTED, text_color_disabled=MUTED,
                 font=self._nav_fonts[active],
                 command=lambda selected=key: self._switch_mode(selected),
                 state="normal",
             )
-            button.grid(row=row, column=0, sticky="ew", pady=(0, 6))
+            button.grid(row=row if row < 2 else row+1, column=0, sticky="ew", pady=(0, 6))
             self.nav_buttons[key] = button
-        self._label(self.sidebar, "Belge ve sac metal araçları", 10, MUTED).grid(
-            row=3, column=0, sticky="w", padx=24, pady=(4, 0))
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         footer.grid(row=5, column=0, sticky="ew", padx=20, pady=24)
         footer.grid_columnconfigure(0, weight=1)
@@ -111,7 +117,7 @@ class WorkspaceLayout:
         )
         self.theme_selector.grid(row=1, column=0, sticky="ew")
         ctk.CTkFrame(footer, height=1, fg_color=BORDER).grid(row=2, column=0, sticky="ew", pady=18)
-        self._label(footer, "MASAÜSTÜ OTOMASYONU", 10, MUTED, True).grid(row=3, column=0, sticky="w")
+        self._label(footer, "SolidWorks araçları", 11, TEXT, True).grid(row=3, column=0, sticky="w")
         self._label(footer, "Aktarım için SolidWorks\noturumu açık olmalı.", 11, MUTED,
                     justify="left").grid(row=4, column=0, sticky="w", pady=(4, 0))
 
@@ -152,8 +158,7 @@ class WorkspaceLayout:
         self.settings_body.grid_columnconfigure(0, weight=1)
         self.settings_body._scrollbar.configure(height=24, width=10)
         self._settings_height = height
-        panel = ctk.CTkFrame(self.settings_body, fg_color=INPUT, corner_radius=12,
-                             border_width=1, border_color=BORDER)
+        panel = ctk.CTkFrame(self.settings_body, fg_color="transparent", corner_radius=0)
         panel.grid(row=0, column=0, sticky="ew")
         panel.grid_columnconfigure(0, weight=1)
         folders = ctk.CTkFrame(panel, fg_color="transparent")
@@ -214,7 +219,7 @@ class WorkspaceLayout:
         frame = ctk.CTkFrame(parent, fg_color="transparent")
         frame.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 10))
         frame.grid_columnconfigure(0, weight=1)
-        self._label(frame, f"0{column + 1}   {label}", 13, bold=True).grid(
+        self._label(frame, label, 13, bold=True).grid(
             row=0, column=0, columnspan=2, sticky="w", pady=(0, 6))
         entry = ctk.CTkEntry(frame, textvariable=variable, height=38, corner_radius=7,
                              border_width=1, border_color=BORDER, fg_color=PANEL,
@@ -265,7 +270,7 @@ class WorkspaceLayout:
                                           icon="download", width=136, state="disabled")
         self.report_button.configure(height=34)
         self.report_button.grid(row=0, column=1)
-        self.result_tabs = ctk.CTkTabview(
+        self.result_tabs = ResultsTabview(
             card, fg_color=PANEL, corner_radius=6, anchor="w", text_color=TEXT,
             command=self._resize_pdf_area,
             segmented_button_fg_color=PANEL, segmented_button_selected_color=ACCENT_BG,
@@ -273,7 +278,7 @@ class WorkspaceLayout:
             segmented_button_unselected_hover_color=SECONDARY,
         )
         self.result_tabs.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 6))
-        self.result_tabs._segmented_button.configure(font=ctk.CTkFont(family=UI_FONT, size=12))
+        self.result_tabs._segmented_button.configure(font=ctk.CTkFont(family=UI_FONT, size=12, weight="bold"))
         files_tab = self.result_tabs.add("Dosyalar")
         log_tab = self.result_tabs.add("Günlük")
         files_tab.grid_columnconfigure(0, weight=1)
@@ -324,12 +329,15 @@ class WorkspaceLayout:
         self.table.bind("<Double-1>", self._show_detail)
         self.table.bind("<Return>", self._show_detail)
         self.empty_state = ctk.CTkFrame(self.table, fg_color=PANEL, bg_color=PANEL, corner_radius=0)
-        self.empty_title = self._label(self.empty_state, "Aktarım için hazır", 14, bold=True)
+        ctk.CTkLabel(self.empty_state, text="", width=52, height=52,
+                     fg_color=ACCENT_BG, corner_radius=14,
+                     image=self._icon("file" if self._is_pdf else "layers", ACCENT, 28)).pack(pady=(0, 14))
+        self.empty_title = self._label(self.empty_state, "Aktarım için hazır", 16, bold=True)
         self.empty_title.pack(padx=12)
         self.empty_hint = self._label(self.empty_state, "Kaynak klasörü seçin ve Klasörü tara düğmesine basın.",
                                       11, MUTED, wraplength=400, justify="center")
         self.empty_hint.pack(padx=12, pady=(2, 0))
-        self.empty_state.place(relx=.5, rely=.6, anchor="center")
+        self.empty_state.place(relx=.5, rely=.52, anchor="center")
         self.results_footer = ctk.CTkFrame(files_tab, fg_color="transparent")
         self.results_footer.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(4, 0))
         self.results_footer.grid_columnconfigure(0, weight=1)

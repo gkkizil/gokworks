@@ -1,0 +1,66 @@
+{
+  "baseline_commit": "e4d505ce58c3c4cbaf8b626222683feaea60213c",
+  "candidate_source_sha256": {
+    "dxf_dwg/__init__.py": "bb9d726644a16f909ac570b4a6529c10a4c5536757b75d3a3e8a0d98cdc3f62d",
+    "dxf_dwg/exporter.py": "7e87d3a0dc28e0cb3c272aff1d25e9d0fc313f54628f08e5238de102ed4a68b2",
+    "geometric_tolerances/__init__.py": "49be4421dc5d66f58582332b890254496e794c6332ecd97ca821f6e819d4c97a",
+    "geometric_tolerances/catalog.py": "c9103df43dfd50c548bdd33ce71945384909070b5a78619bad6fb989a4263075",
+    "geometric_tolerances/diagram.py": "3154575966682c8d763052530399ceb0253c604b7f9a0313271b3e42330bc3ab",
+    "geometric_tolerances/rules.py": "13c3760871b30c449f439c004a4e6bc381685adcb280414160149e7044a7cdcd",
+    "geometric_tolerances/window.py": "b81b269afcca9602fc2cfea8cc053091ff6c05b52b99572b871b54f83653e4b9",
+    "gui/__init__.py": "ed3a5b1cebbbc1f2c8ea7d180a4313fa5dfe0ccfa4b922d8ba4247d2cebaa54a",
+    "gui/icons.py": "a634a00af4f2ed5e35fe81df098a175d0326b5ea10689d81b6d7387b5be8d054",
+    "gui/layout.py": "f4eaed1349c76b55aa8d0f981d9fb3e052231e9349ca2a12b7fc132e90ae1773",
+    "gui/motion.py": "5c7fb4d5cc095386be80e4f36a3835952139a7efdb61396ee9f8f6d935cb981e",
+    "gui/rendering.py": "a9874d28b594c03ec7d6babccaab8e6815c6865bb3a109a02cbf26de663b1e92",
+    "gui/theme.py": "7c5b2473d41e37d7c4f4452d1c442dcd7bf76c58dd2a2b530fdacfd3226c61aa",
+    "iso_fits/__init__.py": "9ab306f4913f52ee79e73dc7835300dabe0f4d76c923c02f6929de4601e0a7ae",
+    "iso_fits/diagram.py": "90c20ac75c677d5f59f093557179ebb92d5f22215075a9e1d20257a7c57c243c",
+    "iso_fits/manual.py": "87a1ecfa51f6750f8b38c94494336cca75597f52536dd7aa44ca3758973a4970",
+    "iso_fits/rules.py": "4faf15be2221fd448294c39080bc6c602fa0d459daad327ebb8f4916ca266982",
+    "iso_fits/window.py": "94f19dc9d2be53baa6ddaca80f6289873d2f04590ae086903e37b1e0282d16ea",
+    "k_factor/__init__.py": "46fface833feb0cfde3ee5cd71589be667affb9978b87cf779dd656049d8ebcd",
+    "k_factor/apply.py": "4f8d667ea88e310fa71c7b4d135591f0123ff9a4b3b6c477c3dbe24cefc12c8f",
+    "k_factor/rules.py": "36e6aba4df22e57b807512a9ea0f5f39a6a0d0c9c3471f0d6c18f711f01dc4db",
+    "k_factor/window.py": "f42ee6a99fb79a843300be5e1d2ff887f6c37855c0f8367d2dd9e77247a716d8",
+    "main.py": "e9ec874479ae662d9003d5c960aa108b561507a0a778684f4fbb4cc74be427bd",
+    "pdf/__init__.py": "57749b3a37e8d041288a279c13f0aa7d48d4dfd804eae33e975fefe4672693a4",
+    "pdf/exporter.py": "0810d794316f2ff722925ed6a44b36758403224ff9ddcb67d593724f083719f1",
+    "pdf/settings.py": "9d44e6369baadf5e6371d8049920c069b2da9a772f9acd7ea40d545af3573bd2",
+    "pdf/window.py": "7b84c593e462d3a6f40de7c049b0fb9fc631fb5b7363af0c16c086e46193eff6",
+    "solidworks/__init__.py": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+    "solidworks/connection.py": "3db902243fa87ddb47592556c3c07b1787e77cda10ac37f7a7a34b577915aa0e"
+  },
+  "environment": "Linux / Xorg 2560x1600 / Python 3.13.5 / Tk 8.6 / CustomTkinter 6.0.0",
+  "scope": "Synthetic worker rendering: 2000 rows, 500 results, three runs; excludes SolidWorks and timer polling waits. Warm page switching measured over 50 switches. Small timing differences are not a speedup guarantee.",
+  "baseline": {
+    "warm_switch_median_ms": 4.262365499016596,
+    "burst_median_ms": 83.99536700017052,
+    "burst_runs_ms": [
+      86.53770599994459,
+      83.81534200088936,
+      83.99536700017052
+    ],
+    "callback_median_ms": 1.7699389973131474,
+    "callback_max_ms": 3.2153930005733855,
+    "redraw_calls": {
+      "log_inserts": 21,
+      "progress_updates": 20
+    }
+  },
+  "candidate": {
+    "warm_switch_median_ms": 3.9601514999958454,
+    "burst_median_ms": 83.50096499998472,
+    "burst_runs_ms": [
+      84.43617900047684,
+      83.50096499998472,
+      82.48623400140787
+    ],
+    "callback_median_ms": 1.7983719990297686,
+    "callback_max_ms": 3.284120997705031,
+    "redraw_calls": {
+      "log_inserts": 21,
+      "progress_updates": 20
+    }
+  }
+}

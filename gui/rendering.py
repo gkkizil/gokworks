@@ -9,6 +9,8 @@ def configure_changed(widget, **options):
 
 def hide_grid(widget):
     # CTk 6 replays this call on DPI changes even after Tk's grid_remove().
-    # Retain Tk's grid geometry, but prevent hidden pages from being remapped.
+    # Scrollable frames delegate geometry to their outer CTkFrame.
+    # Retain Tk's grid geometry, but prevent hidden widgets from being remapped.
     widget.grid_remove()
-    widget._last_geometry_manager_call = None
+    owner = getattr(widget, '_parent_frame', widget)
+    owner._last_geometry_manager_call = None

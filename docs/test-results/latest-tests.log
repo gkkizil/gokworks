@@ -1,5 +1,3 @@
-Cannot create cache home directory: '/home/agent/.cache/ezdxf', cache files will not be saved.
-See also issue https://github.com/mozman/ezdxf/issues/923.
 FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
 FontManager error: Directory does not exist: /home/agent/.fonts/
 FontManager error: Directory does not exist: /home/agent/.fonts/
@@ -11,9 +9,9 @@ test_activation_returning_wrong_document_without_error_is_rejected (test_dxf_dwg
 test_active_speedpak_configuration_rejects_incomplete_counts (test_dxf_dwg.ExportTests.test_active_speedpak_configuration_rejects_incomplete_counts) ... ok
 test_assembly_interface_cast (test_dxf_dwg.ExportTests.test_assembly_interface_cast) ... ok
 test_batch_continues_after_failed_part (test_dxf_dwg.ExportTests.test_batch_continues_after_failed_part) ... ok
-test_batch_partial_result_lists_only_available_output_paths (test_dxf_dwg.ExportTests.test_batch_partial_result_lists_only_available_output_paths) ... /workspace/gokworks/.venv/lib/python3.12/site-packages/ezdxf/query.py:444: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+test_batch_partial_result_lists_only_available_output_paths (test_dxf_dwg.ExportTests.test_batch_partial_result_lists_only_available_output_paths) ... /workspace/.cloud-setup/gui-venv/lib/python3.13/site-packages/ezdxf/query.py:444: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
   query_args = EntityQueryParser.parseString(query, parseAll=True)
-/workspace/gokworks/.venv/lib/python3.12/site-packages/pyparsing/util.py:466: PyparsingDeprecationWarning: 'parseAll' argument is deprecated, use 'parse_all'
+/workspace/.cloud-setup/gui-venv/lib/python3.13/site-packages/pyparsing/util.py:466: PyparsingDeprecationWarning: 'parseAll' argument is deprecated, use 'parse_all'
   return fn(self, *args, **kwargs)
 ok
 test_batch_summary_and_com_cleanup (test_dxf_dwg.ExportTests.test_batch_summary_and_com_cleanup) ... ok
@@ -288,6 +286,7 @@ test_invalid_values_are_rejected_before_any_worker (test_manual_k_radius.ManualR
 test_manual_assignment_is_independent_of_tool_catalogue (test_manual_k_radius.ManualRulesTests.test_manual_assignment_is_independent_of_tool_catalogue) ... ok
 test_unit_roundoff_matches_but_other_thicknesses_do_not (test_manual_k_radius.ManualRulesTests.test_unit_roundoff_matches_but_other_thicknesses_do_not) ... ok
 test_user_values_and_decimal_comma_are_preserved (test_manual_k_radius.ManualRulesTests.test_user_values_and_decimal_comma_are_preserved) ... ok
+test_conditional_forms_and_filtered_choices_stay_hidden_after_dpi_changes (test_menu_rendering.MenuRenderingTests.test_conditional_forms_and_filtered_choices_stay_hidden_after_dpi_changes) ... ok
 test_diagram_cache_invalidates_on_data_theme_size_and_invalid_input (test_menu_rendering.MenuRenderingTests.test_diagram_cache_invalidates_on_data_theme_size_and_invalid_input) ... ok
 test_failed_preload_removes_partial_page_and_restores_active_workspace (test_menu_rendering.MenuRenderingTests.test_failed_preload_removes_partial_page_and_restores_active_workspace) ... ok
 test_gdt_numeric_change_does_not_rebuild_catalog_or_static_heading (test_menu_rendering.MenuRenderingTests.test_gdt_numeric_change_does_not_rebuild_catalog_or_static_heading) ... ok
@@ -343,6 +342,6 @@ test_independent_reference_pages_keep_their_work_areas_after_operation_pages (te
 test_operation_work_areas_stay_large_when_scrolling_and_switching_forms (test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms) ... ok
 
 ----------------------------------------------------------------------
-Ran 331 tests in 152.310s
+Ran 332 tests in 183.756s
 
 OK

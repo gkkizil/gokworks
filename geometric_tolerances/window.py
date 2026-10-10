@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 import customtkinter as ctk
-from gui.rendering import configure_changed
+from gui.rendering import configure_changed, hide_grid
 
 from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
 from geometric_tolerances.diagram import draw, symbol
@@ -63,12 +63,12 @@ class GeometricTolerancesView:
         catalog.grid_columnconfigure(0, weight=1)
         catalog.grid_rowconfigure(2, weight=1)
         self.gdt_widgets['catalog'] = catalog
-        self._label(catalog, 'GEOMETRİK ÖZELLİKLER', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=16, pady=(16, 8))
+        self._label(catalog, 'Geometrik özellikler', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=16, pady=(16, 8))
         search_row = ctk.CTkFrame(catalog, fg_color='transparent')
         search_row.grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 10))
         search_row.grid_columnconfigure(1, weight=1)
         self._label(search_row, 'Ara', 11, MUTED).grid(row=0, column=0, padx=(0, 6))
-        search = ctk.CTkEntry(search_row, textvariable=self.gdt_search, height=34,
+        search = ctk.CTkEntry(search_row, textvariable=self.gdt_search, height=36,
                               fg_color=PANEL, text_color=TEXT, border_color=BORDER,
                               placeholder_text='Tür veya kullanım ara', font=(UI_FONT, 12))
         search.grid(row=0, column=1, sticky='ew')
@@ -83,7 +83,7 @@ class GeometricTolerancesView:
         self.gdt_widgets['choices'] = {}
         for item in CATALOG:
             button = ctk.CTkButton(listing, text=item.name,
-                height=38, anchor='w', corner_radius=7, border_width=1, border_color=BORDER,
+                height=38, anchor='w', corner_radius=7, border_width=0, border_color=BORDER,
                 fg_color='transparent', hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12),
                 command=lambda key=item.key: self._select_gdt(key))
             self.gdt_widgets['choices'][item.key] = button
@@ -108,18 +108,18 @@ class GeometricTolerancesView:
         inputs = self._gdt_card(details)
         inputs.grid(row=1, column=0, sticky='ew', pady=(0, 12))
         inputs.grid_columnconfigure((0, 1), weight=1, uniform='gdt_inputs')
-        for key, label, row, column in [('size', 'GÖSTERİM BOYUTU (mm)', 0, 0),
-                                       ('tolerance', 'TOPLAM TOLERANS t (mm)', 0, 1)]:
+        for key, label, row, column in [('size', 'Gösterim boyutu (mm)', 0, 0),
+                                       ('tolerance', 'Toplam tolerans t (mm)', 0, 1)]:
             self._label(inputs, label, 10, MUTED, True, wraplength=170, justify='left', anchor='w').grid(row=row, column=column, sticky='ew', padx=14, pady=(12, 5))
-            entry = ctk.CTkEntry(inputs, textvariable=self.gdt_state[key], height=34,
+            entry = ctk.CTkEntry(inputs, textvariable=self.gdt_state[key], height=36,
                                  fg_color=PANEL, text_color=TEXT, border_color=BORDER,
                                  font=(UI_FONT, 14), placeholder_text='İsteğe bağlı' if key == 'measured' else '')
             entry.grid(row=row+1, column=column, sticky='ew', padx=14, pady=(0, 4))
             self.gdt_widgets[key] = entry
-        self._label(inputs, 'DATUM SİSTEMİ / ÖNCELİK', 10, MUTED, True, wraplength=170,
+        self._label(inputs, 'Datum sistemi / öncelik', 10, MUTED, True, wraplength=170,
                     justify='left', anchor='w').grid(row=2, column=0, sticky='ew', padx=14, pady=(12, 5))
         menu = ctk.CTkOptionMenu(inputs, variable=self.gdt_state['datum'], values=list(DATUM_CHOICES),
-            width=140, height=34, fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
+            width=140, height=36, fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
             dropdown_fg_color=PANEL, dropdown_hover_color=HOVER, dropdown_text_color=TEXT, text_color=TEXT,
             text_color_disabled=MUTED, font=(UI_FONT, 12), dropdown_font=(UI_FONT, 12))
         menu.grid(row=3, column=0, sticky='ew', padx=14, pady=(0, 4))
@@ -132,7 +132,7 @@ class GeometricTolerancesView:
         diagram = self._gdt_card(details)
         diagram.grid(row=2, column=0, sticky='ew', pady=(0, 12))
         diagram.grid_columnconfigure(0, weight=1)
-        self._label(diagram, 'TOLERANS ÇERÇEVESİ / BÖLGE', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 0))
+        self._label(diagram, 'Tolerans çerçevesi / bölge', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 0))
         for row, key, height in [(1, 'frame', 62), (2, 'canvas', 214)]:
             canvas = tk.Canvas(diagram, height=height, borderwidth=0, highlightthickness=0)
             canvas.grid(row=row, column=0, sticky='ew', padx=12)
@@ -140,8 +140,8 @@ class GeometricTolerancesView:
             self.gdt_widgets[key] = canvas
         self.gdt_widgets['zone'] = self._label(diagram, '', 12, TEXT, justify='left', anchor='w', wraplength=400)
         self.gdt_widgets['zone'].grid(row=3, column=0, sticky='ew', padx=14, pady=(6, 14))
-        for row, key, caption in [(3, 'measurement', 'NASIL ÖLÇÜLÜR?'), (4, 'note', 'ÜRETİM / TASARIM NOTU'),
-                                  (5, 'assessment', 'ÖLÇÜM KARŞILAŞTIRMASI')]:
+        for row, key, caption in [(3, 'measurement', 'Nasıl ölçülür?'), (4, 'note', 'Üretim / tasarım notu'),
+                                  (5, 'assessment', 'Ölçüm karşılaştırması')]:
             card = self._gdt_card(details)
             card.grid(row=row, column=0, sticky='ew', pady=(0, 12))
             card.grid_columnconfigure(0, weight=1)
@@ -152,7 +152,7 @@ class GeometricTolerancesView:
                 rule.grid_columnconfigure(0, weight=1)
                 self.gdt_widgets['size_rule'] = rule
                 self._label(rule, 'İlgili boyut toleransı (mm, isteğe bağlı)', 11, MUTED, wraplength=240, justify='left').grid(row=0, column=0, sticky='w')
-                size_entry = ctk.CTkEntry(rule, textvariable=self.gdt_state['size_tolerance'], height=34,
+                size_entry = ctk.CTkEntry(rule, textvariable=self.gdt_state['size_tolerance'], height=36,
                     fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
                 size_entry.grid(row=1, column=0, sticky='ew', pady=(5, 6))
                 self.gdt_widgets['size_tolerance'] = size_entry
@@ -161,7 +161,7 @@ class GeometricTolerancesView:
                     11, MUTED, wraplength=400, anchor='w', justify='left')
                 self.gdt_widgets['size_rule_help'].grid(row=2, column=0, sticky='ew')
                 self._label(card, 'Ölçülmüş toplam geometrik hata (mm)', 11, MUTED).grid(row=2, column=0, sticky='w', padx=14)
-                entry = ctk.CTkEntry(card, textvariable=self.gdt_state['measured'], height=34,
+                entry = ctk.CTkEntry(card, textvariable=self.gdt_state['measured'], height=36,
                     fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
                 entry.grid(row=3, column=0, sticky='ew', padx=14, pady=(5, 10))
                 self.gdt_widgets['measured'] = entry
@@ -217,7 +217,7 @@ class GeometricTolerancesView:
                 listing._parent_canvas.yview_moveto(0)
             return
         for widget in (*self.gdt_widgets['groups'].values(), *self.gdt_widgets['choices'].values()):
-            widget.grid_remove()
+            hide_grid(widget)
         row, count = 0, 0
         for group in GROUPS:
             items = [item for item in CATALOG if item.group == group and query in normalize(
@@ -252,7 +252,7 @@ class GeometricTolerancesView:
         configure_changed(self.gdt_widgets['measured_help'], text=MEASUREMENT_INPUTS.get(item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.'))
         for key in ('size', 'tolerance', 'measured', 'size_tolerance'):
             configure_changed(self.gdt_widgets[key], state='normal' if item.active else 'disabled')
-        self.gdt_widgets['size_rule'].grid() if item.group == 'Şekil' else self.gdt_widgets['size_rule'].grid_remove()
+        self.gdt_widgets['size_rule'].grid() if item.group == 'Şekil' else hide_grid(self.gdt_widgets['size_rule'])
         configure_changed(self.gdt_widgets['datum'], state='disabled' if item.datum == 'none' or not item.active else 'normal',
             variable=self.gdt_widgets['datum_display'] if item.datum == 'none' else self.gdt_state['datum'])
         configure_changed(self.gdt_widgets['datum_note'], text={

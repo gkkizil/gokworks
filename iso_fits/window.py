@@ -7,7 +7,7 @@ from tkinter import filedialog
 import webbrowser
 
 import customtkinter as ctk
-from gui.rendering import configure_changed
+from gui.rendering import configure_changed, hide_grid
 
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
@@ -66,7 +66,7 @@ class IsoFitsView:
 
     def _iso_menu(self, parent, key, values, width=130):
         return ctk.CTkOptionMenu(parent, variable=self.iso_state[key], values=list(values),
-                                width=width, height=34, fg_color=SECONDARY,
+                                width=width, height=36, fg_color=SECONDARY,
                                 button_color=SECONDARY, button_hover_color=HOVER,
                                 dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
                                 dropdown_text_color=TEXT, text_color=TEXT,
@@ -104,14 +104,14 @@ class IsoFitsView:
         form.grid_rowconfigure(5, weight=1)
         self.iso_widgets['form'] = form
         method = ctk.CTkSegmentedButton(form, variable=self.iso_state['method'], values=list(METHODS),
-            height=32, fg_color=SECONDARY, selected_color=ACCENT_BG, selected_hover_color=HOVER,
+            height=36, fg_color=SECONDARY, selected_color=ACCENT_BG, selected_hover_color=HOVER,
             unselected_color=SECONDARY, unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
         method.grid(row=0, column=0, sticky='ew', padx=16, pady=(14, 0))
         self.iso_widgets['method'] = method
         nominal = ctk.CTkFrame(form, fg_color='transparent')
         nominal.grid(row=1, column=0, sticky='ew', padx=16, pady=(14, 10))
         nominal.grid_columnconfigure(0, weight=1)
-        self._label(nominal, 'NOMİNAL ÇAP (mm)', 11, MUTED, True).grid(row=0, column=0, sticky='w', pady=(0, 6))
+        self._label(nominal, 'Nominal çap (mm)', 11, MUTED, True).grid(row=0, column=0, sticky='w', pady=(0, 6))
         entry = ctk.CTkEntry(nominal, textvariable=self.iso_state['diameter'], height=40,
                              fg_color=PANEL, text_color=TEXT, border_color=BORDER,
                              font=(UI_FONT, 20, 'bold'), justify='center')
@@ -120,7 +120,7 @@ class IsoFitsView:
         self._label(nominal, 'Doğrulanan aralık: 1–400 mm', 10, MUTED).grid(row=2, column=0, sticky='w', pady=(4, 0))
         selectors = ctk.CTkFrame(form, fg_color='transparent')
         selectors.grid(row=2, column=0, sticky='ew', padx=16, pady=(0, 10))
-        for column, (key, caption, feature) in enumerate([('hole', 'DELİK', 'hole'), ('shaft', 'MİL', 'shaft')]):
+        for column, (key, caption, feature) in enumerate([('hole', 'Delik', 'hole'), ('shaft', 'Mil', 'shaft')]):
             selectors.grid_columnconfigure(column, weight=1, uniform='iso_selectors')
             self._label(selectors, caption, 10, MUTED, True).grid(row=0, column=column, sticky='w', pady=(0, 4))
             menu = self._iso_menu(selectors, key, classes(feature), width=112)
@@ -129,7 +129,7 @@ class IsoFitsView:
         toolbar = ctk.CTkFrame(form, fg_color='transparent')
         toolbar.grid(row=3, column=0, sticky='ew', padx=16)
         toolbar.grid_columnconfigure(0, weight=1)
-        self._label(toolbar, 'EŞLEŞME ÖRNEKLERİ', 10, MUTED, True).grid(row=0, column=0, sticky='w')
+        self._label(toolbar, 'Eşleşme örnekleri', 11, MUTED, True).grid(row=0, column=0, sticky='w')
         self.iso_widgets['unit'] = self._iso_menu(toolbar, 'unit', ('mm', 'µm'), width=72)
         self.iso_widgets['unit'].grid(row=0, column=1, sticky='e')
         self.iso_widgets['basis'] = self._iso_menu(toolbar, 'basis', BASES, width=200)
@@ -141,7 +141,7 @@ class IsoFitsView:
         search_frame.grid(row=4, column=0, sticky='ew', padx=16, pady=(8, 8))
         search_frame.grid_columnconfigure(1, weight=1)
         self._label(search_frame, 'Ara', 11, MUTED).grid(row=0, column=0, padx=(0, 6))
-        self.iso_widgets['search'] = ctk.CTkEntry(search_frame, textvariable=self.iso_search, height=32, fg_color=PANEL,
+        self.iso_widgets['search'] = ctk.CTkEntry(search_frame, textvariable=self.iso_search, height=36, fg_color=PANEL,
                                                 text_color=TEXT, border_color=BORDER, font=(UI_FONT, 11))
         self.iso_widgets['search'].grid(row=0, column=1, sticky='ew')
         presets = ctk.CTkScrollableFrame(form, fg_color='transparent', corner_radius=0,
@@ -162,16 +162,17 @@ class IsoFitsView:
             self.iso_widgets['preset_buttons'][preset.code] = button
         self.iso_widgets['iso_inputs'] = (selectors, toolbar, search_frame, presets)
         self._build_manual_inputs(form)
-        details = ctk.CTkScrollableFrame(body, fg_color='transparent', corner_radius=0)
+        details = ctk.CTkScrollableFrame(body, fg_color='transparent', corner_radius=0,
+            scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         details.grid(row=0, column=1, sticky='nsew')
         details.grid_columnconfigure(0, weight=1)
         details._scrollbar.configure(width=8, height=24)
         self.iso_widgets['details'] = details
         diagram = self._iso_card(details)
-        diagram.grid(row=0, column=0, sticky='ew', pady=(0, 12))
+        diagram.grid(row=1, column=0, sticky='ew', pady=(0, 12))
         diagram.grid_columnconfigure(0, weight=1)
         views = ctk.CTkSegmentedButton(diagram, variable=self.iso_state['view'], values=list(VIEWS),
-                                       height=32, fg_color=SECONDARY, selected_color=ACCENT_BG,
+                                       height=36, fg_color=SECONDARY, selected_color=ACCENT_BG,
                                        selected_hover_color=HOVER, unselected_color=SECONDARY,
                                        unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
         views.grid(row=0, column=0, sticky='ew', padx=14, pady=(12, 8))
@@ -180,7 +181,7 @@ class IsoFitsView:
         canvas.grid(row=1, column=0, sticky='ew', padx=12)
         self.iso_widgets['canvas'] = canvas
         samples = ctk.CTkSegmentedButton(diagram, variable=self.iso_state['sample'], values=list(SAMPLES),
-                                         height=30, fg_color=SECONDARY, selected_color=ACCENT_BG,
+                                         height=36, fg_color=SECONDARY, selected_color=ACCENT_BG,
                                          selected_hover_color=HOVER, unselected_color=SECONDARY,
                                          unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 10))
         samples.grid(row=2, column=0, sticky='ew', padx=14, pady=(8, 4))
@@ -191,9 +192,9 @@ class IsoFitsView:
             'Kırmızı alan: deformasyon öncesi boyutsal çakışma.', 10, MUTED, wraplength=400)
         self.iso_widgets['section_help'].grid(row=3, column=0, padx=14, pady=(2, 10))
         result = self._iso_card(details)
-        result.grid(row=1, column=0, sticky='ew', pady=(0, 12))
+        result.grid(row=0, column=0, sticky='ew', pady=(0, 12))
         result.grid_columnconfigure((0, 1), weight=1)
-        self._label(result, 'TOLERANS ARALIĞININ SONUCU · DELİK − MİL', 10, MUTED, True).grid(
+        self._label(result, 'Geçme sonucu · delik − mil', 11, MUTED, True).grid(
             row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 0))
         self.iso_widgets['kind'] = self._label(result, '', 18, bold=True)
         self.iso_widgets['kind'].grid(row=1, column=0, columnspan=2, sticky='w', padx=14, pady=(6, 8))
@@ -201,22 +202,22 @@ class IsoFitsView:
             self.iso_widgets[key+'_title'] = self._label(result, '', 10, MUTED)
             self.iso_widgets[key+'_title'].grid(row=2, column=column, sticky='w', padx=14)
             self.iso_widgets[key] = self._label(result, '', 18, bold=True)
-            self.iso_widgets[key].grid(row=3, column=column, sticky='w', padx=14, pady=(2, 8))
-        self.iso_widgets['explanation'] = self._label(result, '', 11, MUTED, justify='left', anchor='w', wraplength=430)
-        self.iso_widgets['explanation'].grid(row=4, column=0, columnspan=2, sticky='ew', padx=14, pady=(0, 12))
+            self.iso_widgets[key].grid(row=3, column=column, sticky='w', padx=14, pady=(2, 14))
+        self.iso_widgets['explanation'] = self._label(details, '', 11, MUTED, justify='left', anchor='w', wraplength=430)
+        self.iso_widgets['explanation'].grid(row=2, column=0, sticky='ew', padx=4, pady=(0, 16))
         assessment = self._iso_card(details)
-        assessment.grid(row=2, column=0, sticky='ew', pady=(0, 12))
+        assessment.grid(row=3, column=0, sticky='ew', pady=(0, 12))
         assessment.grid_columnconfigure(0, weight=1)
-        self._label(assessment, 'MONTAJ UYUMU / EN YAKIN GEÇME', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
+        self._label(assessment, 'Montaj uyumu / en yakın geçme', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
         self.iso_widgets['assessment'] = assessment
         self.iso_widgets['compatibility_title'] = self._label(assessment, '', 13, bold=True, justify='left', anchor='w', wraplength=430)
         self.iso_widgets['compatibility_title'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 4))
         self.iso_widgets['compatibility_text'] = self._label(assessment, '', 11, MUTED, justify='left', anchor='w', wraplength=430)
         self.iso_widgets['compatibility_text'].grid(row=2, column=0, sticky='ew', padx=14, pady=(0, 12))
         limits_card = self._iso_card(details)
-        limits_card.grid(row=3, column=0, sticky='ew', pady=(0, 12))
+        limits_card.grid(row=4, column=0, sticky='ew', pady=(0, 12))
         limits_card.grid_columnconfigure((0, 1), weight=1)
-        self._label(limits_card, 'ÖLÇÜ SINIRLARI', 10, MUTED, True).grid(row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 6))
+        self._label(limits_card, 'Ölçü sınırları', 11, MUTED, True).grid(row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 6))
         for row, (key, title) in enumerate([('hole_limits', 'Delik · Dmin / Dmax'), ('shaft_limits', 'Mil · dmin / dmax'),
                                            ('hole_deviations', 'Delik · EI / ES'), ('shaft_deviations', 'Mil · ei / es')], 1):
             self._label(limits_card, title, 11, MUTED).grid(row=row, column=0, sticky='w', padx=14, pady=3)
@@ -225,16 +226,16 @@ class IsoFitsView:
         self.iso_widgets['copy'] = self._button(limits_card, 'Sonucu kopyala', self._copy_iso_result, icon='copy', width=156)
         self.iso_widgets['copy'].grid(row=5, column=0, columnspan=2, sticky='w', padx=14, pady=(8, 12))
         comparison = self._iso_card(details)
-        comparison.grid(row=4, column=0, sticky='ew', pady=(0, 12))
+        comparison.grid(row=5, column=0, sticky='ew', pady=(0, 12))
         comparison.grid_columnconfigure(0, weight=1)
-        self._label(comparison, 'ISO TABLO KONTROLÜ', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
+        self._label(comparison, 'ISO tablo kontrolü', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
         self.iso_widgets['comparison'] = comparison
         self.iso_widgets['iso_comparison'] = self._label(comparison, '', 11, TEXT, justify='left', anchor='w', wraplength=430)
         self.iso_widgets['iso_comparison'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 12))
         self.iso_widgets['note'] = self._label(details,
             'Geçme türü boyut limitlerinden hesaplanır. Montaj kuvveti, yağlama veya sıcaklık kararı için malzeme, yüzey ve çalışma koşulları gerekir.',
             11, MUTED, wraplength=430, justify='left', anchor='w')
-        self.iso_widgets['note'].grid(row=5, column=0, sticky='ew', pady=(0, 8))
+        self.iso_widgets['note'].grid(row=6, column=0, sticky='ew', pady=(0, 8))
         self.status_label = self._label(self.workspace, '', 11, MUTED, anchor='w')
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(12, 16))
         for key, variable in self.iso_state.items():
@@ -254,8 +255,8 @@ class IsoFitsView:
         panel.grid_columnconfigure((0, 1), weight=1, uniform='manual_columns')
         panel._scrollbar.configure(width=8, height=24)
         self.iso_widgets['manual_inputs'] = panel
-        self._label(panel, 'SAPMALAR (mm)', 11, MUTED, True).grid(row=0, column=0, columnspan=2, sticky='w', padx=6, pady=(4, 10))
-        for column, (role, label) in enumerate((('hole', 'DELİK'), ('shaft', 'MİL'))):
+        self._label(panel, 'Sapmalar (mm)', 11, MUTED, True).grid(row=0, column=0, columnspan=2, sticky='w', padx=6, pady=(4, 10))
+        for column, (role, label) in enumerate((('hole', 'Delik'), ('shaft', 'Mil'))):
             self._label(panel, label, 12, ACCENT, True).grid(row=1, column=column, sticky='w', padx=6)
             for row, (side, caption) in enumerate((('upper', 'Üst sapma (+/-)'), ('lower', 'Alt sapma (+/-)'))):
                 key = role+'_'+side
@@ -264,10 +265,10 @@ class IsoFitsView:
                     fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14), justify='center')
                 entry.grid(row=3+row*2, column=column, sticky='ew', padx=6)
                 self.iso_widgets[key] = entry
-        self._label(panel, 'SONUÇ BİRİMİ', 10, MUTED).grid(row=6, column=0, sticky='w', padx=6, pady=(14, 4))
+        self._label(panel, 'Sonuç birimi', 11, MUTED).grid(row=6, column=0, sticky='w', padx=6, pady=(14, 4))
         self.iso_widgets['manual_unit'] = self._iso_menu(panel, 'unit', ('mm', 'µm'), width=90)
         self.iso_widgets['manual_unit'].grid(row=6, column=1, sticky='ew', padx=6, pady=(14, 4))
-        self._label(panel, 'MONTAJ HEDEFİ', 10, MUTED, True).grid(row=7, column=0, columnspan=2, sticky='w', padx=6, pady=(12, 4))
+        self._label(panel, 'Montaj hedefi', 11, MUTED, True).grid(row=7, column=0, columnspan=2, sticky='w', padx=6, pady=(12, 4))
         self.iso_widgets['target'] = self._iso_menu(panel, 'target', TARGETS, width=200)
         self.iso_widgets['target'].grid(row=8, column=0, columnspan=2, sticky='ew', padx=6)
         self.iso_widgets['manual_example'] = self._button(panel, 'Delik +0,02 / Mil -0,02', self._fill_manual_example, width=200)
@@ -342,7 +343,7 @@ class IsoFitsView:
             # A shorter list must not retain an offset beyond its new items.
             listing._parent_canvas.yview_moveto(0)
         for widget in [*self.iso_widgets['groups'].values(), *self.iso_widgets['preset_buttons'].values()]:
-            widget.grid_remove()
+            hide_grid(widget)
         grouped = {kind: [] for kind in CLASSIFICATION}
         for preset in PRESETS:
             if self.iso_state['basis'].get() not in ('Tümü', preset.basis):
@@ -376,10 +377,10 @@ class IsoFitsView:
     def _update_iso_result(self):
         manual = self.iso_state['method'].get() == 'Manuel kontrol'
         for widget in self.iso_widgets['iso_inputs']:
-            widget.grid_remove() if manual else widget.grid()
-        self.iso_widgets['manual_inputs'].grid() if manual else self.iso_widgets['manual_inputs'].grid_remove()
-        self.iso_widgets['comparison'].grid() if manual else self.iso_widgets['comparison'].grid_remove()
-        self.iso_widgets['assessment'].grid() if manual else self.iso_widgets['assessment'].grid_remove()
+            hide_grid(widget) if manual else widget.grid()
+        self.iso_widgets['manual_inputs'].grid() if manual else hide_grid(self.iso_widgets['manual_inputs'])
+        self.iso_widgets['comparison'].grid() if manual else hide_grid(self.iso_widgets['comparison'])
+        self.iso_widgets['assessment'].grid() if manual else hide_grid(self.iso_widgets['assessment'])
         try:
             if manual:
                 fit = calculate_manual(self.iso_state['diameter'].get(),
@@ -467,7 +468,7 @@ class IsoFitsView:
         if section and not help_label.winfo_manager():
             help_label.grid()
         elif not section and help_label.winfo_manager():
-            help_label.grid_remove()
+            hide_grid(help_label)
         state = (self.iso_result, self.iso_state['view'].get(), self.iso_state['sample'].get(),
                  ctk.get_appearance_mode(), self.workspace._get_widget_scaling(),
                  canvas.winfo_width(), canvas.winfo_height())

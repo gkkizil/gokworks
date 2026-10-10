@@ -255,9 +255,9 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             button.configure(
                 hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
                 text_color=ACCENT if active else MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "ruler"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target"}[key],
                                  ACCENT if active else MUTED),
-                border_width=1 if active else 0,
+                border_width=0,
                 font=self._nav_fonts[active],
             )
         def frame(step=1):
@@ -369,7 +369,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             self.empty_hint.configure(text="Aramayı veya durum filtresini değiştirin." if filtered else
                                       "Montajı tara ile aktif montajı inceleyin." if self.mode == "k_factor" else
                                       "Kaynak klasörü seçin ve Klasörü tara düğmesine basın.")
-            self.empty_state.place(relx=.5, rely=.6, anchor="center")
+            self.empty_state.place(relx=.5, rely=.52, anchor="center")
 
     def _show_detail(self, event=None):
         if event is not None and getattr(event, "num", None) == 1:
@@ -460,7 +460,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         if needs_scroll and not scrollbar.winfo_manager():
             scrollbar.grid()
         elif not needs_scroll and scrollbar.winfo_manager():
-            scrollbar.grid_remove()
+            hide_grid(scrollbar)
         if width_changed:
             self._layout_fit_id = self.after(40, self._fit_pdf_settings)
 
@@ -471,6 +471,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.files_toolbar._layout_key = key
         self.results_title.configure(wraplength=max(90, result_width-190))
         self.results_hint.configure(wraplength=max(100, result_width-135))
+        self.empty_hint.configure(wraplength=max(150, min(360, result_width-80)))
         # Search keeps the full width when the result panel is narrow; filters
         # move to the next row instead of forcing controls beyond the viewport.
         narrow = result_width < 560
