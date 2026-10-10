@@ -27,7 +27,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**310 test geçti; 112'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**314 test geçti; 116'sı gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -49,9 +49,9 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.044 | 4.597 |
-| Testler | 16 | 4.917 | 4.384 |
-| Toplam | 45 | 9.961 | 8.981 |
+| Uygulama | 29 | 5.058 | 4.611 |
+| Testler | 17 | 5.012 | 4.468 |
+| Toplam | 46 | 10.070 | 9.079 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -98,3 +98,14 @@ Linux/Xorg üzerinde aynı 8ece3f4 sürümüyle karşılaştırılan ölçümde 
 | GD&T tolerans girişi | 4,78 | 0,49 |
 
 Hazır sayfalar arasında 50 geçişin medyanı yaklaşık 3 ms'dir. Bunlar Tk güncelleme süreleridir; Windows cihazının kare hızı veya monitör gecikmesi ölçülmedi. Ön yükleme sırasında aktif sonuçlar, manuel ölçüler, hata sonrası geri dönüş ve DPI değişiminde gizli sayfalar ayrıca test edilir.
+
+PDF, DXF/DWG ve K/R sonuç listeleri arama metnini bellekte tutar; her tuşta satırları Tk'dan yeniden okumaz. Filtrelenmiş satırlar tek `Treeview.set_children` çağrısıyla tarama sırasına yerleştirilir. Durum veya açıklama değişince arama metni yenilenir; gizli satırlar silinmez. Yeniden tarama önbelleği temizler, sekmeler kendi listelerini korur. Canlı sonuçlarla geri gelen satırın konumu sıralı indekslerden bulunur.
+
+Aynı Linux/Xorg ortamında 66a8e45 ile karşılaştırma: 10.000 örnek dosyalık listede Türkçe `imalat-000` araması ve ardından aramayı temizleme, değişken güncellemesi + `update_idletasks()` medyanı (3 tekrar):
+
+| İşlem | Önce (ms) | Sonra (ms) |
+| --- | ---: | ---: |
+| Arama | 32,50 | 2,27 |
+| Aramayı temizleyip tüm satırları gösterme | 389,49 | 4,39 |
+
+Bu ölçüm gerçek Tk listesi ve örnek dosya adlarıyla yapıldı; CAD aktarım süresi değildir. 10.000 satırda toplu filtreleme, seçim/veri korunması, sırasız canlı sonuçlar, yeni tarama ve üç modülün ayrı listeleri regresyon testleriyle kontrol edilir.

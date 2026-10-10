@@ -1,5 +1,6 @@
 """GOKWORKS'in PDF ve sac metal açınım ekranları."""
 
+from bisect import bisect_left
 import csv
 from datetime import datetime
 import os
@@ -48,7 +49,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         "report_button", "result_tabs", "table", "empty_state", "log_box", "status_label", "progress",
         "search_query", "status_filter", "search_entry", "filter_menu", "files_toolbar",
         "visible_count", "results_footer", "row_statuses", "empty_title", "empty_hint",
-        "_visible_rows",
+        "_visible_rows", "_visible_order", "_row_data",
         "k_state", "k_widgets", "k_calculation_label", "results_title", "results_hint", "clear_filter_button",
     )
 
@@ -223,6 +224,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.status_filter = tk.StringVar(self, value="Tüm durumlar")
         self.row_statuses = {}
         self._visible_rows = set()
+        self._visible_order = []
+        self._row_data = {}
         mode = self.mode
         for variable in (self.search_query, self.status_filter):
             variable.trace_add("write", lambda *_: self._apply_filters() if self.mode == mode else None)
@@ -333,18 +336,22 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
     def _apply_filters(self):
         query = _search_text(self.search_query.get().strip())
         status = FILTERS.get(self.status_filter.get())
-        self._visible_rows.clear()
-        visible = 0
+        rows, order = [], []
         for path, row in self.row_ids.items():
-            values = self.table.item(row, "values")
+            data = self._row_data[path]
             row_status = self.row_statuses[path]
-            if (status is None or row_status == status) and query in _search_text(" ".join(values)):
-                self.table.move(row, "", visible)
-                self.table.item(row, tags=(row_status, "stripe") if visible % 2 else (row_status,))
-                visible += 1
-                self._visible_rows.add(row)
-            else:
-                self.table.detach(row)
+            if (status is None or row_status == status) and query in data['search']:
+                tags = (row_status, "stripe") if len(rows) % 2 else (row_status,)
+                if tags != data['tags']:
+                    self.table.item(row, tags=tags)
+                    data['tags'] = tags
+                rows.append(row)
+                order.append(data['order'])
+        # One Tk call attaches matching items in scan order and detaches the
+        # rest. Moving every row individually is quadratic for long lists.
+        self.table.set_children('', *rows)
+        self._visible_order = order
+        self._visible_rows = set(rows)
         self._refresh_list_state()
 
     def _refresh_list_state(self):
@@ -632,15 +639,21 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.row_ids.clear()
         self.row_statuses.clear()
         self._visible_rows.clear()
+        self._visible_order.clear()
+        self._row_data.clear()
 
     def _insert_file_row(self, index, path, source):
         try:
             name = str(Path(path).relative_to(source))
         except ValueError:
             name = Path(path).name
+        values = name, 'Bekliyor', ''
+        tags = ('pending', 'stripe') if index % 2 else ('pending',)
         self.row_ids[path] = self.table.insert('', 'end', iid=f'file_{index}',
-                                              values=(name, 'Bekliyor', ''), tags=('pending',))
+                                              values=values, tags=tags)
         self.row_statuses[path] = 'pending'
+        self._row_data[path] = dict(values=values, search=_search_text(' '.join(values)),
+                                   order=index, tags=tags)
 
     def _queue_file_list(self, files):
         if len(files) <= 300:
@@ -679,28 +692,29 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
     def _update_row(self, path, status, detail=""):
         row = self.row_ids.get(path)
         if row:
-            name = self.table.item(row, "values")[0]
-            striped = "stripe" in self.table.item(row, "tags")
+            data = self._row_data[path]
+            name = data['values'][0]
+            striped = "stripe" in data['tags']
             values = name, LABELS[status], detail
-            self.table.item(row, values=values, tags=(status, "stripe") if striped else (status,))
+            tags = (status, "stripe") if striped else (status,)
+            self.table.item(row, values=values, tags=tags)
+            data.update(values=values, search=_search_text(' '.join(values)), tags=tags)
             self.row_statuses[path] = status
             wanted = FILTERS.get(self.status_filter.get())
             query = _search_text(self.search_query.get().strip())
-            matches = (wanted is None or status == wanted) and query in _search_text(" ".join(values))
+            matches = (wanted is None or status == wanted) and query in data['search']
             changed = False
+            position = bisect_left(self._visible_order, data['order'])
             if matches and row not in self._visible_rows:
                 # Restore the original scan order without redrawing unrelated
                 # rows on each worker event (large batches must stay responsive).
-                position = 0
-                for identifier in self.row_ids.values():
-                    if identifier == row:
-                        break
-                    position += identifier in self._visible_rows
                 self.table.move(row, "", position)
+                self._visible_order.insert(position, data['order'])
                 self._visible_rows.add(row)
                 changed = True
             elif not matches and row in self._visible_rows:
                 self.table.detach(row)
+                self._visible_order.pop(position)
                 self._visible_rows.remove(row)
                 changed = True
             if changed:
