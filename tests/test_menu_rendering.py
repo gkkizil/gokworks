@@ -1,27 +1,19 @@
 """Menus preserve data while skipping unchanged Tk layouts and drawings."""
 
-import os
 import time
 import unittest
 from unittest.mock import patch
+
 import customtkinter as ctk
+from support.gui import GuiTestCase
 
-import test_export_window as fixtures
 from gui.theme import ACCENT_BG
-from iso_fits.rules import PRESETS
 from iso_fits import window as iso_view
+from iso_fits.rules import PRESETS
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class MenuRenderingTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
-    def settle(self):
-        end = time.monotonic()+.15
-        while time.monotonic() < end:
-            self.app.update()
-            time.sleep(.003)
+class MenuRenderingTests(GuiTestCase):
+    settle_seconds = .15
 
     def preload(self):
         if self.app._preload_id is not None:

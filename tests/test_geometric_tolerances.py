@@ -1,15 +1,19 @@
 import csv
+import unittest
 from decimal import Decimal
 from math import atan2, cos, degrees, hypot, radians
-import os
-import time
-import unittest
 from unittest.mock import patch
 
 import customtkinter as ctk
+from support.gui import GuiTestCase
 
-import test_export_window as fixtures
-from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GUIDE, ACTIVE, MEASUREMENT_INPUTS
+from geometric_tolerances.catalog import (
+    ACTIVE,
+    CATALOG,
+    CHARACTERISTICS,
+    GUIDE,
+    MEASUREMENT_INPUTS,
+)
 from geometric_tolerances.rules import DATUM_CHOICES, fmt, fmt_mm, specify
 from gui.theme import INPUT
 from pdf.settings import load_settings, save_settings
@@ -183,16 +187,8 @@ class GeometricRulesTests(unittest.TestCase):
                 self.assertTrue(all((item.description, item.zone, item.measurement, item.note, item.example)))
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class GeometricGuiTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
-    def settle(self, seconds=.23):
-        deadline = time.monotonic()+seconds
-        while time.monotonic() < deadline:
-            self.app.update()
-            time.sleep(.005)
+class GeometricGuiTests(GuiTestCase):
+    settle_seconds = .23
 
     def open_page(self):
         self.app.nav_buttons['geometric_tolerances'].invoke()
@@ -330,13 +326,6 @@ class GeometricGuiTests(unittest.TestCase):
         self.assertEqual(self.app.gdt_state['size_tolerance'].get(), '')
         self.assertIn('Rule #1', self.app.gdt_widgets['assessment'].cget('text'))
 
-    def assert_inside(self, child, parent):
-        self.assertTrue(child.winfo_ismapped())
-        self.assertGreaterEqual(child.winfo_rootx(), parent.winfo_rootx()-1)
-        self.assertGreaterEqual(child.winfo_rooty(), parent.winfo_rooty()-1)
-        self.assertLessEqual(child.winfo_rootx()+child.winfo_width(), parent.winfo_rootx()+parent.winfo_width()+1)
-        self.assertLessEqual(child.winfo_rooty()+child.winfo_height(), parent.winfo_rooty()+parent.winfo_height()+1)
-
     def test_all_fourteen_buttons_draw_zones_symbols_and_frames_in_both_themes(self):
         self.open_page()
         for appearance in ('Açık', 'Koyu'):
@@ -363,7 +352,7 @@ class GeometricGuiTests(unittest.TestCase):
                     self.assertEqual(self.app.gdt_widgets['datum'].get(), 'Gerekmez' if item.datum == 'none' else 'A')
                     self.assertEqual(self.app.gdt_widgets['export'].cget('state'), 'normal')
                     self.assert_inside(self.app.gdt_widgets['choices'][item.key],
-                                       self.app.gdt_widgets['listing']._parent_canvas)
+                                       self.app.gdt_widgets['listing']._parent_canvas, left=1, mapped=True)
 
     def test_no_stale_result_on_invalid_tolerance_or_measured_error(self):
         self.open_page()
@@ -477,8 +466,7 @@ class GeometricGuiTests(unittest.TestCase):
         self.assertEqual(saved['pdf_source'], '/pdf/source')
         self.assertEqual(saved['unrelated_setting'], 'keep')
         self.app._on_close()
-        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.open_page()
         self.assertEqual(self.app.gdt_result.tolerance, Decimal('0.03'))
         self.assertIsNone(self.app.gdt_result.measured)
@@ -486,8 +474,7 @@ class GeometricGuiTests(unittest.TestCase):
     def test_corrupt_saved_choices_fall_back_but_invalid_numeric_values_are_visible(self):
         self.app._on_close()
         save_settings({'gdt_kind': 'unknown', 'gdt_datum': 'A | A', 'gdt_tolerance': 'NaN'}, self.settings)
-        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.open_page()
         self.assertEqual(self.app.gdt_state['kind'].get(), 'cylindricity')
         self.assertEqual(self.app.gdt_state['datum'].get(), 'A')
@@ -512,7 +499,7 @@ class GeometricGuiTests(unittest.TestCase):
                     self.assertEqual(f'{self.app.winfo_width()}x{self.app.winfo_height()}', size)
                     for widget in [self.app.theme_selector, *self.app.nav_buttons.values(),
                                    self.app.gdt_widgets['export'], self.app.gdt_widgets['guide']]:
-                        self.assert_inside(widget, self.app)
+                        self.assert_inside(widget, self.app, left=1, mapped=True)
                     canvas = self.app.gdt_widgets['canvas']
                     for item in canvas.find_withtag('zone'):
                         if canvas.type(item) == 'oval':
@@ -527,10 +514,10 @@ class GeometricGuiTests(unittest.TestCase):
                         distance = field.winfo_rooty()-details.winfo_rooty()
                         viewport.yview_moveto(max(0, distance-(viewport.winfo_height()-field.winfo_height())/2)/details.winfo_height())
                         self.app.update()
-                        self.assert_inside(field, viewport)
+                        self.assert_inside(field, viewport, left=1, mapped=True)
                     self.app.gdt_widgets['listing']._parent_canvas.yview_moveto(1)
                     self.app.update()
-                    self.assert_inside(self.app.gdt_widgets['choices']['total_runout'], self.app.gdt_widgets['listing']._parent_canvas)
+                    self.assert_inside(self.app.gdt_widgets['choices']['total_runout'], self.app.gdt_widgets['listing']._parent_canvas, left=1, mapped=True)
 
 
 if __name__ == '__main__':

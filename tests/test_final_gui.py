@@ -1,38 +1,17 @@
 """Son GUI denetimi: tüm sayfalar, gerçek menü komutları ve DPI ölçeği."""
 
-import os
-import time
 import unittest
 from unittest.mock import patch
 
 import customtkinter as ctk
+from support.gui import GuiTestCase, LayoutGuiTestCase
 
-import test_export_window as fixtures
-from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 from gui import theme
+from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class FinalGUIAuditTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
-    def settle(self):
-        self.app.update()
-        deadline = time.monotonic() + 3
-        while self.app._layout_fit_id is not None and time.monotonic() < deadline:
-            self.app.update()
-            time.sleep(.005)
-        self.assertIsNone(self.app._layout_fit_id, 'Layout did not converge')
-
-    def assert_inside(self, child, parent):
-        self.assertTrue(child.winfo_viewable())
-        self.assertGreaterEqual(child.winfo_rootx(), parent.winfo_rootx())
-        self.assertGreaterEqual(child.winfo_rooty(), parent.winfo_rooty())
-        self.assertLessEqual(child.winfo_rootx()+child.winfo_width(),
-                             parent.winfo_rootx()+parent.winfo_width()+1)
-        self.assertLessEqual(child.winfo_rooty()+child.winfo_height(),
-                             parent.winfo_rooty()+parent.winfo_height()+1)
+class FinalGUIAuditTests(LayoutGuiTestCase):
+    layout_timeout = 3
 
     def test_all_pages_results_tabs_and_resolution_scale_matrix(self):
         self.addCleanup(lambda: ctk.set_widget_scaling(1))
@@ -45,10 +24,7 @@ class FinalGUIAuditTests(unittest.TestCase):
                 # CTk 6.0 locks the window size for 1000 ms during a DPI
                 # transition. Wait for that documented source behavior before
                 # requesting the next resolution, then verify the actual size.
-                deadline = time.monotonic() + 1.05
-                while time.monotonic() < deadline:
-                    self.app.update()
-                    time.sleep(.005)
+                GuiTestCase.settle(self, 1.05)
             self.app.geometry(size+'+0+0')
             for appearance in ('Açık', 'Koyu'):
                 self.app.theme_selector._buttons_dict[appearance].invoke()
@@ -145,8 +121,7 @@ class FinalGUIAuditTests(unittest.TestCase):
                 ctk.set_window_scaling(scale)
                 with patch.object(ctk.CTk, 'winfo_screenwidth', return_value=screen[0]), \
                      patch.object(ctk.CTk, 'winfo_screenheight', return_value=screen[1]):
-                    self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-                self.app.report_callback_exception = lambda *args: self.errors.append(args)
+                    self.open_app()
                 self.settle()
                 self.assertLessEqual(self.app.winfo_width(), screen[0])
                 self.assertLessEqual(self.app.winfo_height()+32, screen[1])

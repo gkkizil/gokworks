@@ -1,14 +1,21 @@
 import csv
-from decimal import Decimal
-import os
 import unittest
+from decimal import Decimal
 from unittest.mock import patch
 
-from iso_fits.manual import (calculate_manual, compare_classes, deviation_nm, usage_hint,
-                             closest_pair, closest_preset, compatibility, TARGETS)
+from support.gui import GuiTestCase
+
+from iso_fits.manual import (
+    TARGETS,
+    calculate_manual,
+    closest_pair,
+    closest_preset,
+    compare_classes,
+    compatibility,
+    deviation_nm,
+    usage_hint,
+)
 from iso_fits.rules import calculate, format_deviation, mm
-import test_export_window as fixtures
-import test_iso_fits as iso_tests
 
 
 class ManualIsoRulesTests(unittest.TestCase):
@@ -153,12 +160,7 @@ class ManualIsoRulesTests(unittest.TestCase):
             self.assertEqual(hole-shaft, Decimal(difference))
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class ManualIsoGuiTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-    settle = iso_tests.IsoGuiTests.settle
-
+class ManualIsoGuiTests(GuiTestCase):
     def manual(self):
         self.app.nav_buttons['iso_fits'].invoke()
         self.app.iso_widgets['method']._buttons_dict['Manuel kontrol'].invoke()
@@ -205,8 +207,7 @@ class ManualIsoGuiTests(unittest.TestCase):
         self.manual()
         self.app.iso_state['target'].set('Sıkı / pres')
         self.app._on_close()
-        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.app._switch_mode('iso_fits'); self.settle()
         self.assertEqual(self.app.iso_state['target'].get(), 'Sıkı / pres')
         self.app.geometry('1000x690'); self.settle(.3)
@@ -254,8 +255,7 @@ class ManualIsoGuiTests(unittest.TestCase):
         self.app._switch_mode('iso_fits')
         self.assertEqual(self.app.iso_state['method'].get(), 'Manuel kontrol')
         self.app._on_close()
-        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.app._switch_mode('iso_fits')
         self.settle()
         self.assertEqual(self.app.iso_state['hole_upper'].get(), '.03')

@@ -339,6 +339,6 @@ test_independent_reference_pages_keep_their_work_areas_after_operation_pages (te
 test_operation_work_areas_stay_large_when_scrolling_and_switching_forms (test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms) ... ok
 
 ----------------------------------------------------------------------
-Ran 327 tests in 151.973s
+Ran 327 tests in 151.501s
 
 OK

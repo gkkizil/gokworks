@@ -1,40 +1,30 @@
 """Selected-format exports, view state and cooperative GUI scheduling."""
 
-import os
-from pathlib import Path
-import time
-from types import SimpleNamespace
 import unittest
-from unittest.mock import Mock, patch
+from pathlib import Path
+from unittest.mock import patch
 
 import customtkinter as ctk
+from support.gui import GuiTestCase
+from support.solidworks import (
+    FakeApp,
+    FakeAssembly,
+    FakeComponent,
+    FakePart,
+    solidworks_session,
+)
 
-import test_export_window as fixtures
 from dxf_dwg import exporter as ex
 from gui.theme import ACCENT_BG
 from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 from pdf.settings import load_settings, save_settings
-from pdf.window import GokworksPdfApp
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class GUIFlowTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-    wait_idle = fixtures.WindowTests.wait_idle
-
-    def pump_until(self, predicate, timeout=5):
-        deadline = time.monotonic()+timeout
-        while not predicate() and time.monotonic() < deadline:
-            self.app.update()
-            time.sleep(.002)
-        self.assertTrue(predicate())
-
+class GUIFlowTests(GuiTestCase):
     def test_legacy_combined_format_migrates_and_stays_single_on_restart(self):
         self.app._on_close()
         save_settings({'dxf_dwg_format': 'DXF + DWG'}, self.settings)
-        self.app = GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.app._switch_mode('dxf_dwg')
         self.app.update()
         selector = next(control for control in self.app.controls
@@ -47,19 +37,14 @@ class GUIFlowTests(unittest.TestCase):
     def test_selected_dwg_exports_only_dwg_even_when_dxf_would_fail(self):
         part = self.root/'sheet.sldprt'
         part.touch()
-        model = fixtures.FakePart(part)
+        model = FakePart(part)
         model.fail.add('.dxf')
-        assembly = fixtures.FakeAssembly(self.root/'main.sldasm', [fixtures.FakeComponent(part)])
-        com = SimpleNamespace(VT_BYREF=1, VT_I4=2, VT_EMPTY=0,
-                              CoInitialize=Mock(), CoUninitialize=Mock())
+        assembly = FakeAssembly(self.root/'main.sldasm', [FakeComponent(part)])
         self.app._switch_mode('dxf_dwg')
         self.app.source_folder.set(str(self.root))
         self.app.output_folder.set(str(self.root/'output'))
         self.app.output_format.set('DWG')
-        with patch.multiple(ex, pythoncom=com,
-                            win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=fixtures.Variant))), \
-                patch.object(ex, 'connect_to_solidworks',
-                             return_value=fixtures.FakeApp(model, previous=assembly)):
+        with solidworks_session(ex, FakeApp(model, previous=assembly), 'dxf'):
             self.app.start_button.invoke()
             self.wait_idle()
         self.assertEqual(len(model.calls), 1)

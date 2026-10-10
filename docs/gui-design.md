@@ -50,10 +50,12 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
 | Uygulama | 29 | 5.134 | 4.684 |
-| Testler | 19 | 5.299 | 4.724 |
-| Toplam | 48 | 10.433 | 9.408 |
+| Testler ve ortak yardımcıları | 23 | 5.210 | 4.628 |
+| Toplam | 52 | 10.344 | 9.312 |
 
-Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
+Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler test yardımcılarının ortaklaştırılması sonrası sayımdır.
+
+GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz. Ekransız keşifte aynı 127 GUI testi ekran gereksinimiyle işaretlenir.
 
 Son yeniden denetimde 12 ek GUI kabul testi eklendi. İlk yerleşim zamanlaması açıkça başlatıldı. Sonuçlar ve kapsam sınırları [Word raporunda](reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx); test bazlı kanıtlar [rapor dizininde](reports/README.md). Satır sayıları bu yeniden denetim sonrası güncellenmiştir; rapor üretim araçları uygulama/test sayımına dahil değildir.
 

@@ -1,34 +1,19 @@
 """GUI'nin kullanıcı kontrolleri üzerinden tamamlayıcı kabul testleri."""
 
 import csv
-import os
+import unittest
 from pathlib import Path
 from threading import Event
-import time
-import unittest
+from tkinter import ttk
 from unittest.mock import patch
 
 import customtkinter as ctk
-from tkinter import ttk
+from support.gui import LayoutGuiTestCase
 
-import test_export_window as window_tests
 from pdf.settings import load_settings
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class GUIAuditTests(unittest.TestCase):
-    setUp = window_tests.WindowTests.setUp
-    close_app = window_tests.WindowTests.close_app
-    wait_idle = window_tests.WindowTests.wait_idle
-
-    def settle(self):
-        self.app.update()
-        deadline = time.monotonic() + 2
-        while self.app._layout_fit_id is not None and time.monotonic() < deadline:
-            self.app.update()
-            time.sleep(.01)
-        self.app.update()
-
+class GUIAuditTests(LayoutGuiTestCase):
     def test_browse_buttons_choose_and_cancel_in_both_modules(self):
         for mode in ('pdf', 'dxf_dwg'):
             self.app.nav_buttons[mode].invoke()

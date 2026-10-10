@@ -4,16 +4,14 @@ Hole numbers: lachr/Passungsrechner 0289439b1883db363d92e38f1ab352817b4d5a47,
 src/data/tolerances.json (EI, ES in µm). No H7 default or preset is a match.
 """
 
-from decimal import Decimal
-import os
 import unittest
+from decimal import Decimal
 
-from iso_fits.manual import manual_band, closest_classes
+from support.gui import GuiTestCase
+
+from iso_fits.manual import closest_classes, manual_band
 from iso_fits.rules import PRESETS
 from iso_fits.window import BASES
-import test_export_window as fixtures
-import test_iso_fits as iso_tests
-
 
 HOLES_50 = {'H6': (0, 16), 'H7': (0, 25), 'H8': (0, 39), 'H9': (0, 62),
             'H11': (0, 160), 'F8': (25, 64), 'G7': (9, 34),
@@ -48,12 +46,7 @@ class ManualMatchingRulesTests(unittest.TestCase):
             manual_band(50, 0, '.02', 'bad feature')
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class ManualMatchingGuiTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-    settle = iso_tests.IsoGuiTests.settle
-
+class ManualMatchingGuiTests(GuiTestCase):
     def manual(self):
         self.app._switch_mode('iso_fits')
         self.app.iso_widgets['method']._buttons_dict['Manuel kontrol'].invoke()
@@ -155,8 +148,7 @@ class ManualMatchingGuiTests(unittest.TestCase):
         self.app.iso_state['basis'].set('Mil esaslı')
         self.app.iso_widgets['preset_buttons']['P7 / h6'].invoke()
         self.app._on_close()
-        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.app._switch_mode('iso_fits'); self.settle()
         self.assertEqual(self.app.iso_state['basis'].get(), 'Mil esaslı')
         self.assertEqual(self.app.iso_result.hole.code, 'P7')

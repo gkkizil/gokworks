@@ -1,17 +1,12 @@
 """Large result lists filter in bulk and retain live, independent row data."""
 
-import os
 import unittest
 from unittest.mock import patch
 
-import test_export_window as fixtures
+from support.gui import GuiTestCase
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class FileListRenderingTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
+class FileListRenderingTests(GuiTestCase):
     def paths(self, count, extension='slddrw'):
         return [str(self.root/f'İmalat-{i:05}.{extension}') for i in range(count)]
 

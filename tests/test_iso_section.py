@@ -1,19 +1,16 @@
 """Section dimensions, radial differences and selected/overall fit states."""
 
-import os
-import time
 import unittest
 
 import customtkinter as ctk
-import test_export_window as fixtures
+from support.gui import GuiTestCase
+
 from iso_fits.rules import format_mm
 from iso_fits.window import SAMPLES
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class IsoSectionTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
+class IsoSectionTests(GuiTestCase):
+    settle_seconds = .12
 
     def section(self, hole='H8', shaft='f7'):
         self.app._switch_mode('iso_fits')
@@ -21,12 +18,6 @@ class IsoSectionTests(unittest.TestCase):
         self.app.iso_state['shaft'].set(shaft)
         self.settle()
         return self.app.iso_widgets['canvas']
-
-    def settle(self):
-        end = time.monotonic()+.12
-        while time.monotonic() < end:
-            self.app.update()
-            time.sleep(.003)
 
     def text(self, tag):
         canvas = self.app.iso_widgets['canvas']

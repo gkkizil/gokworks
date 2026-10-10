@@ -1,17 +1,16 @@
 import csv
-from decimal import Decimal
 import json
-import os
-from pathlib import Path
-import time
 import unittest
+from decimal import Decimal
+from pathlib import Path
 from unittest.mock import patch
 
 import customtkinter as ctk
+from support.gui import GuiTestCase
+
+from gui.theme import INPUT
 from iso_fits import rules
 from iso_fits.window import SAMPLES, VIEWS
-from gui.theme import INPUT
-import test_export_window as fixtures
 
 
 class IsoRulesTests(unittest.TestCase):
@@ -101,18 +100,7 @@ class IsoRulesTests(unittest.TestCase):
             rules.format_deviation(1, 'inch')
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class IsoGuiTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
-    def settle(self, seconds=.25):
-        deadline = time.monotonic()+seconds
-        while time.monotonic() < deadline:
-            self.app.update()
-            time.sleep(.01)
-        self.app.update()
-
+class IsoGuiTests(GuiTestCase):
     def iso(self):
         self.app.nav_buttons['iso_fits'].invoke()
         self.settle()
@@ -200,8 +188,7 @@ class IsoGuiTests(unittest.TestCase):
         self.assertEqual(self.app.iso_widgets['canvas'].cget('background'), INPUT[1])
         self.assertEqual(self.app.iso_state['diameter'].get(), '24,5')
         self.app._on_close()
-        self.app = fixtures.GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
+        self.open_app()
         self.iso()
         self.assertEqual(self.app.iso_state['diameter'].get(), '24,5')
         self.assertEqual(self.app.iso_state['shaft'].get(), 'k6')

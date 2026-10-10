@@ -1,26 +1,14 @@
 """Native geometry checks for usable work areas independent of form scrolling."""
 
-import os
-import time
 import unittest
 
 import customtkinter as ctk
+from support.gui import GuiTestCase
 
-import test_export_window as fixtures
 from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class WorkspaceLayoutTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
-    def settle(self, seconds=.25):
-        end = time.monotonic()+seconds
-        while time.monotonic() < end:
-            self.app.update()
-            time.sleep(.005)
-
+class WorkspaceLayoutTests(GuiTestCase):
     def test_operation_work_areas_stay_large_when_scrolling_and_switching_forms(self):
         self.addCleanup(lambda: ctk.set_widget_scaling(1))
         for size, scale in [('1000x690', 1), ('1366x768', 1), ('1400x900', 1.25), ('1920x1080', 1.5)]:

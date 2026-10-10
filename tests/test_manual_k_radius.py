@@ -1,22 +1,25 @@
 """Kalınlık eşleştirerek kullanıcı K/R değerlerini aynen atama."""
 
-from copy import deepcopy
 import csv
-import os
-from queue import Queue
-from types import SimpleNamespace
-import time
 import unittest
-from unittest.mock import Mock, patch
+from copy import deepcopy
+from queue import Queue
+from unittest.mock import patch
+
+from support.fixtures import KApplyTestCase
+from support.gui import GuiTestCase
+from support.solidworks import (
+    FakeAssembly,
+    FakeComponent,
+    FakeMultiPartApp,
+    SheetPart,
+    solidworks_session,
+)
 
 from k_factor import apply as ap
 from k_factor.rules import ManualAssignment, ThicknessMismatch, calculate
 from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB
 from pdf.settings import load_settings
-from pdf.window import GokworksPdfApp
-import test_export_window as window_tests
-import test_k_factor as kr_tests
-from test_dxf_dwg import FakeComponent, FakeAssembly, FakeMultiPartApp, Variant
 
 
 class ManualRulesTests(unittest.TestCase):
@@ -46,9 +49,7 @@ class ManualRulesTests(unittest.TestCase):
         for k in (0,1):self.assertEqual(calculate(2,ManualAssignment(2,k,2)).k_factor,k)
 
 
-class ManualApplyTests(unittest.TestCase):
-    setUp=kr_tests.ApplyTests.setUp
-
+class ManualApplyTests(KApplyTestCase):
     def manual(self,**kwargs):
         return ap.process_part(self.app,self.model.path,'default',ManualAssignment(2,.274,2),**kwargs)
 
@@ -103,7 +104,7 @@ class ManualApplyTests(unittest.TestCase):
         self.assertEqual(self.model.config,'Other')
 
     def test_nested_batch_updates_and_saves_matching_parts_once(self):
-        thick=kr_tests.SheetPart('/work/thick.sldprt')
+        thick=SheetPart('/work/thick.sldprt')
         thick.states['Default']['thickness']=.003
         before=deepcopy(thick.states)
         sub=FakeComponent('/work/sub.sldasm',children=(FakeComponent(self.model.path),)*2)
@@ -122,12 +123,7 @@ class ManualApplyTests(unittest.TestCase):
         self.assertIs(app.ActiveDoc,self.assembly)
 
 
-@unittest.skipUnless(os.name=='nt' or os.environ.get('DISPLAY'),'GUI requires display')
-class ManualGuiTests(unittest.TestCase):
-    setUp=window_tests.WindowTests.setUp
-    close_app=window_tests.WindowTests.close_app
-    wait_idle=window_tests.WindowTests.wait_idle
-
+class ManualGuiTests(GuiTestCase):
     def select_manual(self):
         self.app._switch_mode('k_factor')
         self.app.k_widgets['assignment_tabs']._buttons_dict[MANUAL_TAB].invoke()
@@ -161,13 +157,11 @@ class ManualGuiTests(unittest.TestCase):
 
     def test_real_preview_apply_and_csv_report_from_gui(self):
         self.select_manual()
-        model=kr_tests.SheetPart()
-        thick=kr_tests.SheetPart('/work/thick.sldprt');thick.states['Default']['thickness']=.003
+        model=SheetPart()
+        thick=SheetPart('/work/thick.sldprt');thick.states['Default']['thickness']=.003
         assembly=FakeAssembly('/work/main.sldasm',(FakeComponent(model.path),FakeComponent(thick.path)))
         app=FakeMultiPartApp((model,thick),assembly)
-        com=SimpleNamespace(VT_BYREF=16,VT_I4=3,VT_BOOL=11,VT_BSTR=8,VT_EMPTY=0,
-                            CoInitialize=Mock(),CoUninitialize=Mock())
-        with patch.multiple(ap,pythoncom=com,win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant))),patch.object(ap,'connect_to_solidworks',return_value=app):
+        with solidworks_session(ap, app, 'kr'):
             self.app.scan_button.invoke();self.wait_idle()
             self.assertEqual(model.feature.modify_count,0)
             self.assertTrue(self.app.results[0]['preview'])
@@ -187,8 +181,7 @@ class ManualGuiTests(unittest.TestCase):
     def test_manual_preferences_reload_and_save_choice_starts_off(self):
         self.select_manual();self.app.k_state['save'].set(True)
         self.app._on_close()
-        self.app=GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception=lambda *args:self.errors.append(args)
+        self.open_app()
         self.app._switch_mode('k_factor');self.app.update()
         self.assertEqual(self.app.k_state['assignment_mode'].get(),MANUAL_TAB)
         self.assertEqual(self.app.k_state['manual_k'].get(),'0,274')
@@ -202,22 +195,15 @@ class ManualGuiTests(unittest.TestCase):
             for theme in ('Açık','Koyu'):
                 with self.subTest(size=size,theme=theme):
                     self.app._change_theme(theme)
-                    end=time.monotonic()+.3
-                    while time.monotonic()<end:self.app.update();time.sleep(.01)
+                    self.settle(.3)
                     canvas=self.app.settings_body._parent_canvas
                     field=self.app.k_widgets['manual_thickness']
                     offset=field.master.winfo_rooty()-self.app.settings_body.winfo_rooty()
                     canvas.yview_moveto(offset/self.app.settings_body.winfo_height())
                     self.app.update()
-                    width,height=self.app.winfo_width(),self.app.winfo_height()
                     for widget in (self.app.k_widgets['manual_thickness'],self.app.k_widgets['manual_k'],
                                    self.app.k_widgets['manual_r'],self.app.start_button,self.app.scan_button):
-                        x=widget.winfo_rootx()-self.app.winfo_rootx()
-                        y=widget.winfo_rooty()-self.app.winfo_rooty()
-                        self.assertTrue(widget.winfo_ismapped())
-                        self.assertGreaterEqual(x,0);self.assertGreaterEqual(y,0)
-                        self.assertLessEqual(x+widget.winfo_width(),width+1)
-                        self.assertLessEqual(y+widget.winfo_height(),height+1)
+                        self.assert_inside(widget, mapped=True)
                         if widget in (self.app.k_widgets['manual_thickness'],self.app.k_widgets['manual_k'],self.app.k_widgets['manual_r']):
                             self.assertGreaterEqual(widget.winfo_rooty(),canvas.winfo_rooty())
                             self.assertLessEqual(widget.winfo_rooty()+widget.winfo_height(),

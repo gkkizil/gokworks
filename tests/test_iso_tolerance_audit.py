@@ -1,15 +1,15 @@
 """Independent interval arithmetic and positive/negative clearance GUI audit."""
 
 import csv
+import json
+import unittest
 from fractions import Fraction
 from itertools import product
-import json
-import os
 from pathlib import Path
-import unittest
 from unittest.mock import patch
 
-import test_export_window as fixtures
+from support.gui import GuiTestCase
+
 from iso_fits import rules
 from iso_fits.manual import calculate_manual
 from iso_fits.window import SAMPLES
@@ -52,11 +52,7 @@ class ToleranceArithmeticAuditTests(unittest.TestCase):
             calculate_manual('50', '0', '0.02%', '0', '0')
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display')
-class ToleranceGuiAuditTests(unittest.TestCase):
-    setUp = fixtures.WindowTests.setUp
-    close_app = fixtures.WindowTests.close_app
-
+class ToleranceGuiAuditTests(GuiTestCase):
     def manual(self, lower_hole, upper_hole, lower_shaft, upper_shaft):
         self.app._switch_mode('iso_fits')
         self.app.iso_state['method'].set('Manuel kontrol')

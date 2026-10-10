@@ -1,105 +1,14 @@
+import unittest
 from pathlib import Path
 from queue import Queue
 from tempfile import TemporaryDirectory
 from threading import Event
 from types import SimpleNamespace
-import unittest
 from unittest.mock import Mock, patch
 
+from support.solidworks import PDF, FakeDrawing, FakePdfApp, FakePdfData, install_com
+
 from pdf import exporter as ex
-from test_dxf_dwg import Variant
-
-PDF = b'%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF\n'
-
-
-class FakePdfData:
-    def __init__(self):
-        self.sheets, self.ok = None, True
-        self.ViewPdfAfterSaving = True
-        self.ExportAs3D = True
-
-    def SetSheets(self, scope, sheets):
-        assert scope == 3 and sheets.kind == 12
-        self.sheets = sheets.value
-        return self.ok
-
-
-class FakeDrawing:
-    _oleobj_ = object()
-
-    def __init__(self, path, sheets=('Sheet1', 'Sayfa 2')):
-        self.path, self.sheets = str(path), sheets
-        self.Extension = SimpleNamespace(SaveAs=self.save_as)
-        self.calls = []
-        self.content = PDF
-        self.save_error, self.save_warning = 0, 0
-        self.save_ok = True
-        self.on_save = None
-        self.app = None
-
-    def __call__(self):
-        raise AssertionError('Do not invoke a COM document default member')
-
-    def GetType(self):
-        return 3
-
-    def GetTitle(self):
-        return Path(self.path).name
-
-    def GetPathName(self):
-        return self.path
-
-    def GetSheetNames(self):
-        return self.sheets
-
-    def save_as(self, path, version, options, data, errors, warnings):
-        assert self.app.ActiveDoc is self, 'SaveAs requires the drawing to be active'
-        assert (version, options) == (0, 1)
-        self.calls.append((path, data))
-        errors.value, warnings.value = self.save_error, self.save_warning
-        if self.on_save:
-            self.on_save(Path(path))
-        if self.content is not None:
-            Path(path).write_bytes(self.content)
-        return self.save_ok
-
-
-class FakePdfApp:
-    def __init__(self, models, opened=None, previous=None):
-        self.models = {model.path: model for model in models}
-        for model in models:
-            model.app = self
-        self.opened = set(self.models if opened is None else opened)
-        self.previous = previous
-        self.ActiveDoc = previous or models[0]
-        self.data = FakePdfData()
-        self.closed, self.activated = [], []
-        self.open_calls = []
-        self.open_error, self.open_warning, self.activate_error = 0, 0, 0
-
-    def GetOpenDocumentByName(self, path):
-        return self.models[path] if path in self.opened else None
-
-    def OpenDoc6(self, path, kind, options, configuration, errors, warnings):
-        assert (kind, options, configuration) == (3, 1, '')
-        self.open_calls.append(path)
-        errors.value, warnings.value = self.open_error, self.open_warning
-        self.ActiveDoc = self.models[path]
-        return self.ActiveDoc
-
-    def CloseDoc(self, title):
-        self.closed.append(title)
-
-    def GetExportFileData(self, kind):
-        assert kind == 1
-        return self.data
-
-    def ActivateDoc3(self, name, preferences, rebuild, errors):
-        assert (preferences, rebuild) == (False, 1)
-        self.activated.append(name)
-        errors.value = self.activate_error
-        self.ActiveDoc = self.models.get(name, self.previous)
-        return self.ActiveDoc
 
 
 class PdfTests(unittest.TestCase):
@@ -115,13 +24,7 @@ class PdfTests(unittest.TestCase):
         self.target = self.output/'drawing.pdf'
         self.model = FakeDrawing(self.drawing)
         self.app = FakePdfApp([self.model])
-        self.com = SimpleNamespace(VT_BYREF=1, VT_I4=2, VT_ARRAY=4, VT_BSTR=8,
-                                   CoInitialize=Mock(), CoUninitialize=Mock())
-        self.client = SimpleNamespace(VARIANT=Variant,
-                                      dynamic=SimpleNamespace(DumbDispatch=Mock(side_effect=lambda app: app)))
-        stub = patch.multiple(ex, pythoncom=self.com, win32com=SimpleNamespace(client=self.client))
-        stub.start()
-        self.addCleanup(stub.stop)
+        self.com, self.client = install_com(self, ex, 'pdf', dynamic=True)
 
     def run_one(self, overwrite=False):
         return ex.export_one_drawing(self.app, str(self.drawing), self.target, overwrite)

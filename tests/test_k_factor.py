@@ -1,24 +1,38 @@
 """K/R: bağımsız sayısal örnekler, COM hata/geri alma ve gerçek Tk akışları."""
 
+import unittest
 from copy import deepcopy
 from dataclasses import replace
-import os
 from queue import Queue
 from threading import Event
 from types import SimpleNamespace
-import unittest
-import time
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+
+import customtkinter as ctk
+from support.fixtures import KApplyTestCase
+from support.gui import GuiTestCase
+from support.solidworks import (
+    FakeApp,
+    FakeAssembly,
+    FakeComponent,
+    FakeFeature,
+    FakeMultiPartApp,
+    SheetPart,
+    solidworks_session,
+)
 
 from k_factor import apply as ap
-from k_factor.rules import (Recipe, calculate, recommended_k, bend_allowance,
-                            bend_deduction, k_from_bend_allowance,
-                            ba_from_outside_dimensions, number)
+from k_factor.rules import (
+    Recipe,
+    ba_from_outside_dimensions,
+    bend_allowance,
+    bend_deduction,
+    calculate,
+    k_from_bend_allowance,
+    number,
+    recommended_k,
+)
 from pdf.settings import load_settings
-import customtkinter as ctk
-from test_dxf_dwg import (FakePart, FakeFeature, FakeComponent, FakeAssembly,
-                          FakeApp, FakeMultiPartApp, Variant)
-import test_export_window as window_tests
 
 
 class CalculationTests(unittest.TestCase):
@@ -101,93 +115,7 @@ class CalculationTests(unittest.TestCase):
         with self.assertRaises(ValueError): ba_from_outside_dimensions(2,2,1,40,40)
 
 
-class Definition:
-    def __init__(self, feature):
-        self.feature=feature
-        self.data=deepcopy(feature.model.states[feature.model.config])
-        self.Thickness, self.BendRadius=self.data['thickness'],self.data['radius']
-        self.UseMaterialSheetMetalParameters=feature.model.material_link
-        self.allowance=SimpleNamespace(Type=self.data['type'], KFactor=self.data['k'],
-                                      BendAllowance=self.data['ba'], BendDeduction=self.data['bd'],
-                                      BendTableFile='')
-
-    def GetCustomBendAllowance(self): return self.allowance
-    def SetCustomBendAllowance(self, value): self.allowance=value
-    def AccessSelections(self, model, component):
-        assert model is self.feature.model and component is None
-        self.feature.access_count+=1
-        return not model.access_fail
-    def ReleaseSelectionAccess(self): self.feature.release_count+=1
-    def GetUseGaugeTable(self, used, filename):
-        used.value=self.feature.model.gauge
-        return 0
-
-
-class SheetFeature(FakeFeature):
-    def __init__(self, model):
-        super().__init__()
-        self.model=model
-        self.access_count=self.release_count=self.modify_count=0
-    def GetDefinition(self): return Definition(self)
-    def GetErrorCode(self): return 0
-    def ModifyDefinition(self, definition, model, component):
-        assert model is self.model and component is None
-        self.modify_count+=1
-        if model.modify_fail:
-            model.modify_fail=False
-            return False
-        data=dict(thickness=definition.Thickness, radius=definition.BendRadius,
-                  type=definition.allowance.Type,k=definition.allowance.KFactor,
-                  ba=definition.allowance.BendAllowance,bd=definition.allowance.BendDeduction)
-        if model.readback_fail:
-            data['radius']+=.001
-            model.readback_fail=False
-        model.states[model.config]=data
-        if model.propagate:
-            for key in model.states: model.states[key]=deepcopy(data)
-        return True
-
-
-class SheetPart(FakePart):
-    def __init__(self,path='/work/sheet.sldprt', configurations=('Default',)):
-        super().__init__(path)
-        initial=dict(thickness=.002,radius=.002,type=2,k=.4,ba=.004,bd=.003)
-        self.states={c:deepcopy(initial) for c in configurations}
-        self.config=configurations[0]
-        self.ConfigurationManager.ActiveConfiguration.Name=self.config
-        self.feature=SheetFeature(self)
-        self.gauge=self.material_link=self.access_fail=self.modify_fail=False
-        self.rebuild_fail=self.readback_fail=self.propagate=self.dirty=self.save_fail=False
-        self.save_count=0
-    def GetConfigurationNames(self): return tuple(self.states)
-    def ShowConfiguration2(self,config):
-        if config not in self.states: return False
-        self.config=config
-        self.ConfigurationManager.ActiveConfiguration.Name=config
-        return True
-    def EditRebuild3(self):
-        failed=self.rebuild_fail
-        self.rebuild_fail=False
-        return not failed
-    def GetSaveFlag(self): return self.dirty
-    def Save3(self,options,errors,warnings):
-        assert options==1
-        self.save_count+=1
-        errors.value=1 if self.save_fail else 0
-        return not self.save_fail
-
-
-class ApplyTests(unittest.TestCase):
-    def setUp(self):
-        self.model=SheetPart()
-        self.assembly=FakeAssembly('/work/main.sldasm',[FakeComponent(self.model.path) for _ in range(3)])
-        self.app=FakeApp(self.model,previous=self.assembly)
-        self.com=SimpleNamespace(VT_BYREF=16, VT_I4=3, VT_BOOL=11, VT_BSTR=8,VT_EMPTY=0,
-                                 CoInitialize=Mock(),CoUninitialize=Mock())
-        patcher=patch.multiple(ap,pythoncom=self.com,
-                             win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant)))
-        patcher.start();self.addCleanup(patcher.stop)
-
+class ApplyTests(KApplyTestCase):
     def process(self,**kwargs):
         return ap.process_part(self.app,self.model.path,'default',Recipe(),**kwargs)
 
@@ -401,12 +329,7 @@ class ApplyTests(unittest.TestCase):
         self.com.CoUninitialize.assert_called_once()
 
 
-@unittest.skipUnless(os.name=='nt' or os.environ.get('DISPLAY'),'GUI requires display')
-class KGuiTests(unittest.TestCase):
-    setUp=window_tests.WindowTests.setUp
-    close_app=window_tests.WindowTests.close_app
-    wait_idle=window_tests.WindowTests.wait_idle
-
+class KGuiTests(GuiTestCase):
     def test_navigation_title_preferences_and_theme_persistence(self):
         self.app.nav_buttons['k_factor'].invoke();self.app.update()
         self.assertEqual(self.app.mode,'k_factor')
@@ -443,10 +366,8 @@ class KGuiTests(unittest.TestCase):
         model=SheetPart()
         assembly=FakeAssembly('/work/main.sldasm',[FakeComponent(model.path)])
         app=FakeApp(model,previous=assembly)
-        com=SimpleNamespace(VT_BYREF=16,VT_I4=3,VT_BOOL=11,VT_BSTR=8,VT_EMPTY=0,
-                            CoInitialize=Mock(),CoUninitialize=Mock())
         self.app._switch_mode('k_factor')
-        with patch.multiple(ap,pythoncom=com,win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant))), patch.object(ap,'connect_to_solidworks',return_value=app):
+        with solidworks_session(ap, app, 'kr'):
             self.app.scan_button.invoke();self.wait_idle()
             self.assertTrue(self.app.results[0]['preview'])
             self.assertIn('Önizleme tamamlandı',self.app.status_label.cget('text'))
@@ -468,21 +389,11 @@ class KGuiTests(unittest.TestCase):
                 for theme in ('Açık','Koyu'):
                     with self.subTest(size=size,theme=theme):
                         self.app._change_theme(theme)
-                        deadline=time.monotonic()+2
-                        self.app.update()
-                        while self.app._layout_fit_id is not None and time.monotonic()<deadline:
-                            self.app.update();time.sleep(.01)
-                        self.app.update()
-                        width,height=self.app.winfo_width(),self.app.winfo_height()
+                        self.wait_layout()
                         for widget in (self.app.start_button,self.app.stop_button,self.app.scan_button,
                                        self.app.open_button,self.app.table,
                                        self.app.status_label,self.app.nav_buttons['k_factor']):
-                            x=widget.winfo_rootx()-self.app.winfo_rootx()
-                            y=widget.winfo_rooty()-self.app.winfo_rooty()
-                            self.assertGreaterEqual(x,0)
-                            self.assertGreaterEqual(y,0)
-                            self.assertLessEqual(x+widget.winfo_width(),width+1)
-                            self.assertLessEqual(y+widget.winfo_height(),height+1)
+                            self.assert_inside(widget)
                         self.assertGreater(self.app.table.winfo_height(),80)
         finally:
             ctk.set_widget_scaling(1)

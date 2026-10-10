@@ -1,179 +1,25 @@
 import os
+import unittest
 from pathlib import Path
 from queue import Queue
 from tempfile import TemporaryDirectory
 from threading import Event
 from types import SimpleNamespace
-import unittest
 from unittest.mock import Mock, patch
 
+from support.solidworks import (
+    DWG,
+    DXF,
+    FakeApp,
+    FakeAssembly,
+    FakeComponent,
+    FakeFeature,
+    FakeMultiPartApp,
+    FakePart,
+    install_com,
+)
+
 from dxf_dwg import exporter as ex
-
-DXF = b'0\nSECTION\n2\nENTITIES\n0\nLINE\n10\n0\n20\n0\n11\n10\n21\n20\n0\nENDSEC\n0\nEOF\n'
-DWG = b'AC1032' + b'\x00' * 40
-
-
-class Variant:
-    def __init__(self, kind, value):
-        self.kind, self.value = kind, value
-
-
-class FakeFeature:
-    def __init__(self, name='Sheet-Metal1', kind='SheetMetal', thickness=.002,
-                 suppressed=False, child=None, next_feature=None):
-        self.Name, self.kind = name, kind
-        self.thickness, self.suppressed = thickness, suppressed
-        self.child, self.next = child, next_feature
-
-    def GetTypeName2(self):
-        return self.kind
-
-    def GetNextFeature(self):
-        return self.next
-
-    GetNextSubFeature = GetNextFeature
-
-    def GetFirstSubFeature(self):
-        return self.child
-
-    def IsSuppressed2(self, scope, configurations):
-        assert scope == 1 and configurations.kind == 0
-        return (self.suppressed,)
-
-    def GetDefinition(self):
-        return SimpleNamespace(Thickness=self.thickness)
-
-
-class FakeComponent:
-    def __init__(self, path, configuration='Default', children=(), state=2):
-        self.path, self.ReferencedConfiguration = str(path), configuration
-        self.children, self.state = children, state
-        self.model, self.IsSpeedPak = object(), False
-
-    def GetSuppression(self):
-        return self.state
-
-    def GetPathName(self):
-        return self.path
-
-    def GetChildren(self):
-        return self.children
-
-    def GetModelDoc2(self):
-        return self.model
-
-
-class FakePart:
-    # Like pywin32 CDispatch: the wrapper is callable, but calling it invokes
-    # a COM default member rather than reading the object property.
-    _oleobj_ = object()
-
-    def __init__(self, path, sheet=True, bodies=1):
-        self.path = str(path)
-        self.ConfigurationManager = SimpleNamespace(ActiveConfiguration=SimpleNamespace(Name='Default'))
-        self.bodies = [SimpleNamespace(IsSheetMetal=lambda: sheet) for _ in range(bodies)]
-        self.calls = []
-        self.fail = set()
-        self.invalid = set()
-        self.on_export = None
-        self.Visible = True
-        self.feature = FakeFeature()
-
-    def __call__(self):
-        raise AssertionError('COM document default member must not be invoked')
-
-    def GetType(self):
-        return 1
-
-    def GetTitle(self):
-        return Path(self.path).name
-
-    def GetPathName(self):
-        return self.path
-
-    def GetBodies2(self, kind, visible_only):
-        assert (kind, visible_only) == (0, False)
-        return self.bodies
-
-    def FirstFeature(self):
-        return self.feature
-
-    def ExportToDWG2(self, path, model_path, action, single, alignment, flip_x, flip_y, options, views):
-        self.calls.append((path, model_path, action, single, alignment, flip_x, flip_y, options, views))
-        kind = Path(path).suffix
-        if self.on_export:
-            self.on_export(Path(path))
-        if kind in self.fail:
-            return False
-        Path(path).write_bytes(b'invalid output content' if kind in self.invalid else DXF if kind == '.dxf' else DWG)
-        return True
-
-
-class FakeAssembly(FakePart):
-    def __init__(self, path, children=()):
-        super().__init__(path)
-        self.root = FakeComponent(path, children=children)
-        self.resolve_status = 0
-        self.ConfigurationManager = SimpleNamespace(ActiveConfiguration=SimpleNamespace(
-            Name='Assembly-Default', GetRootComponent3=self.get_root))
-
-    def GetType(self):
-        return 2
-
-    def get_root(self, resolve):
-        assert resolve is True
-        return self.root
-
-    def ResolveAllLightWeightComponents(self, warn):
-        assert warn is True
-        return self.resolve_status
-
-
-class FakeApp:
-    def __init__(self, model, existing=True, previous=None):
-        self.model, self.existing = model, existing
-        self.ActiveDoc = previous if previous is not None else model if existing else None
-        self.closed, self.activated = [], []
-        self.open_count = 0
-        self.previous = previous
-        self.open_error = 0
-        self.activate_error = 0
-
-    def GetOpenDocumentByName(self, path):
-        return self.model if self.existing else None
-
-    def OpenDoc6(self, path, kind, options, configuration, errors, warnings):
-        assert (kind, options, configuration) == (1, 1, '')
-        self.open_count += 1
-        errors.value = self.open_error
-        self.ActiveDoc = self.model
-        return self.model
-
-    def CloseDoc(self, title):
-        self.closed.append(title)
-
-    def ActivateDoc3(self, title, use_preferences, rebuild, errors):
-        assert (use_preferences, rebuild) == (False, 1)
-        self.activated.append(title)
-        errors.value = self.activate_error
-        self.ActiveDoc = self.model if title in (self.model.GetTitle(), self.model.GetPathName()) else self.previous
-        return self.ActiveDoc
-
-
-class FakeMultiPartApp(FakeApp):
-    def __init__(self, models, assembly):
-        super().__init__(models[0], previous=assembly)
-        self.models = {model.path: model for model in models}
-
-    def GetOpenDocumentByName(self, path):
-        return self.models.get(str(path))
-
-    def ActivateDoc3(self, name, use_preferences, rebuild, errors):
-        assert (use_preferences, rebuild) == (False, 1)
-        self.activated.append(name)
-        errors.value = self.activate_error
-        self.ActiveDoc = self.models.get(name, self.previous)
-        return self.ActiveDoc
 
 
 class ExportTests(unittest.TestCase):
@@ -190,12 +36,7 @@ class ExportTests(unittest.TestCase):
         self.model = FakePart(self.part)
         self.app = FakeApp(self.model)
         self.assembly = FakeAssembly(self.root/'main.SLDASM', [FakeComponent(self.part)])
-        self.com = SimpleNamespace(VT_BYREF=1, VT_I4=2, VT_EMPTY=0,
-                                   CoInitialize=Mock(), CoUninitialize=Mock())
-        self.enter_patch = patch.multiple(ex, pythoncom=self.com,
-                                         win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant)))
-        self.enter_patch.start()
-        self.addCleanup(self.enter_patch.stop)
+        self.com, _ = install_com(self, ex, 'dxf')
 
     def run_one(self, **kwargs):
         return ex.export_one_part(self.app, str(self.part), self.targets, **kwargs)

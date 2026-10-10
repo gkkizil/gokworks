@@ -1,13 +1,14 @@
 """Regressions for callable COM return objects and inactive allowance members."""
 
+import unittest
 from copy import deepcopy
 from types import SimpleNamespace
-import unittest
+
+from support.fixtures import KApplyTestCase
+from support.solidworks import Definition, SheetFeature
 
 from k_factor import apply as ap
 from k_factor.rules import ManualAssignment
-import test_k_factor as fixtures
-from test_k_factor import Definition, SheetFeature
 
 
 class MemberNotFound(Exception):
@@ -68,9 +69,7 @@ class ModeDefinition(Definition):
         self.allowance = value.base
 
 
-class NativeDispatchApplyTests(unittest.TestCase):
-    setUp = fixtures.ApplyTests.setUp
-
+class NativeDispatchApplyTests(KApplyTestCase):
     def manual(self, **kwargs):
         return ap.process_part(self.app, self.model.path, 'Default',
                                ManualAssignment(2, .274, 2), **kwargs)

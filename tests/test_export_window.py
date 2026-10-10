@@ -1,53 +1,30 @@
 import csv
-import os
-from pathlib import Path
 import runpy
-from tempfile import TemporaryDirectory
-import time
 import unittest
-from unittest.mock import patch
-
-import customtkinter as ctk
+from pathlib import Path
 from tkinter import ttk
 from tkinter.font import Font
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
-from pdf.settings import load_settings, save_settings
-from pdf.window import GokworksPdfApp
+import customtkinter as ctk
+from support.gui import GuiTestCase
+from support.solidworks import (
+    FakeApp,
+    FakeAssembly,
+    FakeComponent,
+    FakeDrawing,
+    FakePart,
+    FakePdfApp,
+    solidworks_session,
+)
+
 from dxf_dwg import exporter as ex
 from pdf import exporter as pdf_ex
-from test_dxf_dwg import FakeApp, FakePart, FakeAssembly, FakeComponent, Variant
-from test_pdf_exporter import FakePdfApp, FakeDrawing
-from types import SimpleNamespace
-from unittest.mock import Mock
+from pdf.settings import load_settings, save_settings
 
 
-@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'GUI requires a display (use DISPLAY=:99 on cloud)')
-class WindowTests(unittest.TestCase):
-    def setUp(self):
-        self.temp = TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
-        self.settings = self.root/'settings.json'
-        save_settings({'unrelated_setting': 'keep'}, self.settings)
-        self.app = GokworksPdfApp(settings_path=self.settings)
-        self.errors = []
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
-        self.app.update()
-        self.addCleanup(self.close_app)
-
-    def close_app(self):
-        if not self.app._closed:
-            self.app._on_close()
-        self.assertFalse(self.errors)
-
-    def wait_idle(self):
-        deadline = time.monotonic() + 5
-        while self.app.busy and time.monotonic() < deadline:
-            self.app.update()
-            time.sleep(.01)
-        self.app.update()
-        self.assertFalse(self.app.busy, 'worker did not complete')
-
+class WindowTests(GuiTestCase):
     def test_navigation_retains_independent_preferences(self):
         sidebar = self.app.sidebar
         pdf_page = self.app.workspace
@@ -123,14 +100,12 @@ class WindowTests(unittest.TestCase):
         part.touch()
         model = FakePart(part)
         assembly = FakeAssembly(self.root/'main.sldasm', [FakeComponent(part) for _ in range(3)])
-        com = SimpleNamespace(VT_BYREF=1, VT_I4=2, VT_EMPTY=0,
-                              CoInitialize=Mock(), CoUninitialize=Mock())
         self.app._switch_mode('dxf_dwg')
         self.app.source_folder.set(str(source))
         self.app.output_folder.set(str(self.root/'outputs'))
         self.app.output_format.set('DXF')
         self.app.bend_lines.set(True)
-        with patch.multiple(ex, pythoncom=com, win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant))), patch.object(ex, 'connect_to_solidworks', return_value=FakeApp(model, previous=assembly)):
+        with solidworks_session(ex, FakeApp(model, previous=assembly), 'dxf'):
             self.app._start_export()
             self.wait_idle()
         self.assertEqual(len(self.app.results), 1)
@@ -211,11 +186,9 @@ class WindowTests(unittest.TestCase):
         drawing = source/'Çizim.slddrw'
         drawing.touch()
         model = FakeDrawing(drawing)
-        com = SimpleNamespace(VT_BYREF=1, VT_I4=2, VT_ARRAY=4, VT_BSTR=8,
-                              CoInitialize=Mock(), CoUninitialize=Mock())
         self.app.source_folder.set(str(source))
         self.app.output_folder.set(str(self.root/'PDF'))
-        with patch.multiple(pdf_ex, pythoncom=com, win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant))), patch.object(pdf_ex, 'connect_to_solidworks', return_value=FakePdfApp([model])):
+        with solidworks_session(pdf_ex, FakePdfApp([model]), 'pdf'):
             self.app._start_export()
             self.wait_idle()
         self.assertEqual(self.app.results[0]['status'], 'success')
@@ -264,9 +237,7 @@ class WindowTests(unittest.TestCase):
                        'pdf_recursive': False, 'pdf_overwrite': True,
                        'dxf_dwg_source': '/Parçalar', 'dxf_dwg_output': '/CAD',
                        'dxf_dwg_format': 'INVALID', 'dxf_dwg_bend_lines': True}, self.settings)
-        self.app = GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
-        self.app.update()
+        self.open_app()
         self.assertEqual(self.app.source_folder.get(), '/Çizimler')
         self.assertFalse(self.app.include_subfolders.get())
         self.assertTrue(self.app.overwrite_existing.get())
@@ -297,11 +268,7 @@ class WindowTests(unittest.TestCase):
             self.assertTrue(self.app.close_pending)
             self.assertFalse(self.app._closed)
             proceed.set()
-            deadline = time.monotonic() + 5
-            while not self.app._closed and time.monotonic() < deadline:
-                self.app.update()
-                time.sleep(.01)
-            self.assertTrue(self.app._closed)
+            self.pump_until(lambda: self.app._closed)
 
     def test_report_write_failure_is_displayed(self):
         self.app.results.append({'source': 'test.slddrw', 'output': 'test.pdf',
@@ -340,9 +307,7 @@ class WindowTests(unittest.TestCase):
         self.assertIn('Sonuçlar korundu', self.app.log_box.get('1.0', 'end'))
         self.app._change_theme('Koyu')
         self.app._on_close()
-        self.app = GokworksPdfApp(settings_path=self.settings)
-        self.app.report_callback_exception = lambda *args: self.errors.append(args)
-        self.app.update()
+        self.open_app()
         self.assertEqual(self.app.theme_mode.get(), 'Koyu')
         self.assertEqual(ctk.get_appearance_mode(), 'Dark')
 
@@ -446,11 +411,7 @@ class WindowTests(unittest.TestCase):
             self.app._change_theme(selection)
             for mode in ('pdf', 'dxf_dwg'):
                 self.app._switch_mode(mode)
-                deadline = time.monotonic() + 2
-                self.app.update()
-                while self.app._layout_fit_id is not None and time.monotonic() < deadline:
-                    self.app.update()
-                    time.sleep(.01)
+                self.wait_layout()
                 self.assertGreater(self.app.table.winfo_height(), 80)
                 self.assertTrue(self.app.start_button.winfo_viewable())
                 self.assertEqual(self.app.theme_mode.get(), selection)
@@ -469,12 +430,7 @@ class WindowTests(unittest.TestCase):
         self.app.geometry('1000x690')
         for mode in ('pdf', 'dxf_dwg'):
             self.app._switch_mode(mode)
-            deadline = time.monotonic() + 2
-            self.app.update()
-            while self.app._layout_fit_id is not None and time.monotonic() < deadline:
-                self.app.update()
-                time.sleep(.01)
-            self.app.update()
+            self.wait_layout()
             self.assertIsNone(self.app._layout_fit_id)
             self.assertTrue(self.app.start_button.winfo_viewable())
             self.assertTrue(self.app.table.winfo_viewable())
@@ -485,11 +441,7 @@ class WindowTests(unittest.TestCase):
         for mode in ('pdf', 'dxf_dwg'):
             self.app._switch_mode(mode)
             self.app.update()
-            deadline = time.monotonic() + 2
-            while self.app._layout_fit_id is not None and time.monotonic() < deadline:
-                self.app.update()
-                time.sleep(.01)
-            self.app.update()
+            self.wait_layout()
             viewport = self.app.settings_body._parent_canvas
             self.assertLessEqual(self.app.scan_button.winfo_rooty() + self.app.scan_button.winfo_height(),
                                  viewport.winfo_rooty() + viewport.winfo_height())
