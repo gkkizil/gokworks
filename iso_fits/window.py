@@ -7,6 +7,7 @@ from tkinter import filedialog
 import webbrowser
 
 import customtkinter as ctk
+from gui.rendering import configure_changed
 
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
@@ -231,11 +232,12 @@ class IsoFitsView:
         self.iso_widgets['note'].grid(row=5, column=0, sticky='ew', pady=(0, 8))
         self.status_label = self._label(self.workspace, '', 11, MUTED, anchor='w')
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(12, 16))
-        for variable in self.iso_state.values():
-            variable.trace_add('write', lambda *_: self._update_iso_result()
+        for key, variable in self.iso_state.items():
+            callback = self._draw_iso_diagram if key in ('view', 'sample') else self._update_iso_result
+            variable.trace_add('write', lambda *_, callback=callback: callback()
                                if self.mode == 'iso_fits' and not self._iso_loading else None)
         self.iso_search.trace_add('write', lambda *_: self._filter_iso_presets() if self.mode == 'iso_fits' else None)
-        canvas.bind('<Configure>', lambda _: self._draw_iso_diagram())
+        canvas.bind('<Configure>', lambda _: self._draw_iso_diagram() if self.mode == 'iso_fits' else None)
         self.workspace.bind('<Configure>', self._resize_pdf_area)
         self._update_iso_result()
         self._resize_pdf_area()
@@ -316,42 +318,55 @@ class IsoFitsView:
     def _filter_iso_presets(self):
         query = self.iso_search.get().casefold().replace(' ', '')
         filter_key = (query, self.iso_state['basis'].get(), self.iso_state['method'].get(),
-                      self.iso_state['diameter'].get())
-        if getattr(self, '_iso_preset_filter', None) != filter_key:
+                      self.iso_state['diameter'].get(), self.iso_result is not None)
+        listing = self.iso_widgets['presets']
+        selected_pair = self.iso_state['hole'].get(), self.iso_state['shaft'].get()
+        if getattr(listing, '_filter_key', None) == filter_key:
+            previous = getattr(listing, '_selected_pair', None)
+            if previous != selected_pair:
+                for preset in PRESETS:
+                    pair = preset.hole, preset.shaft
+                    if pair in (previous, selected_pair):
+                        selected = pair == selected_pair
+                        configure_changed(self.iso_widgets['preset_buttons'][preset.code],
+                                          fg_color=ACCENT_BG if selected else 'transparent',
+                                          text_color=ACCENT if selected else TEXT)
+            listing._selected_pair = selected_pair
+            return
+        if getattr(listing, '_filter_key', None) != filter_key:
             # A shorter list must not retain an offset beyond its new items.
-            self.iso_widgets['presets']._parent_canvas.yview_moveto(0)
-            self._iso_preset_filter = filter_key
+            listing._parent_canvas.yview_moveto(0)
         for widget in [*self.iso_widgets['groups'].values(), *self.iso_widgets['preset_buttons'].values()]:
             widget.grid_remove()
+        grouped = {kind: [] for kind in CLASSIFICATION}
+        for preset in PRESETS:
+            if self.iso_state['basis'].get() not in ('Tümü', preset.basis):
+                continue
+            if query not in (preset.code+' '+preset.label).casefold().replace(' ', ''):
+                continue
+            try:
+                actual_kind = calculate(self.iso_state['diameter'].get(), preset.hole, preset.shaft).kind
+            except ValueError:
+                actual_kind = 'clearance'
+            grouped[actual_kind].append(preset)
         row = 0
-        for kind in CLASSIFICATION:
-            matches = []
-            for preset in PRESETS:
-                if self.iso_state['basis'].get() not in ('Tümü', preset.basis):
-                    continue
-                if query not in (preset.code+' '+preset.label).casefold().replace(' ', ''):
-                    continue
-                try:
-                    actual_kind = calculate(self.iso_state['diameter'].get(), preset.hole, preset.shaft).kind
-                except ValueError:
-                    actual_kind = 'clearance'
-                if actual_kind == kind:
-                    matches.append(preset)
+        for kind, matches in grouped.items():
             if not matches:
                 continue
             if self.iso_state['basis'].get() == 'Tümü':
                 holes = [p for p in matches if p.basis == 'Delik esaslı']
                 shafts = [p for p in matches if p.basis == 'Mil esaslı']
                 matches = [p for pair in zip_longest(holes, shafts) for p in pair if p is not None]
-            self.iso_widgets['groups'][kind].configure(text=CLASSIFICATION[kind].upper()
+            configure_changed(self.iso_widgets['groups'][kind], text=CLASSIFICATION[kind].upper()
                 if self.iso_result else 'ÇAPI GİRİN · EŞLEŞMELER')
             self.iso_widgets['groups'][kind].grid(row=row, column=0, sticky='w', padx=8, pady=(12, 6)); row += 1
             for preset in matches:
                 button = self.iso_widgets['preset_buttons'][preset.code]
                 selected = (preset.hole, preset.shaft) == (self.iso_state['hole'].get(), self.iso_state['shaft'].get())
-                button.configure(fg_color=ACCENT_BG if selected else 'transparent',
+                configure_changed(button, fg_color=ACCENT_BG if selected else 'transparent',
                                  text_color=ACCENT if selected else TEXT)
                 button.grid(row=row, column=0, sticky='ew', padx=4, pady=(0, 6)); row += 1
+        listing._filter_key, listing._selected_pair = filter_key, selected_pair
 
     def _update_iso_result(self):
         manual = self.iso_state['method'].get() == 'Manuel kontrol'
@@ -368,18 +383,18 @@ class IsoFitsView:
                 fit = calculate(self.iso_state['diameter'].get(), self.iso_state['hole'].get(), self.iso_state['shaft'].get())
         except ValueError as error:
             self.iso_result = None
-            self.status_label.configure(text=str(error), text_color=RED)
+            configure_changed(self.status_label, text=str(error), text_color=RED)
             for key in ('minimum', 'maximum', 'kind', 'explanation', 'hole_limits', 'shaft_limits', 'hole_deviations', 'shaft_deviations', 'iso_comparison', 'compatibility_title', 'compatibility_text'):
-                self.iso_widgets[key].configure(text='—')
+                configure_changed(self.iso_widgets[key], text='—')
             for key in ('copy', 'export'):
-                self.iso_widgets[key].configure(state='disabled')
+                configure_changed(self.iso_widgets[key], state='disabled')
             self._filter_iso_presets()
             self._draw_iso_diagram()
             return
         self.iso_result = fit
         unit = self.iso_state['unit'].get()
         paint = COLORS[fit.kind]
-        self.iso_widgets['kind'].configure(text=CLASSIFICATION[fit.kind], text_color=paint)
+        configure_changed(self.iso_widgets['kind'], text=CLASSIFICATION[fit.kind], text_color=paint)
         if fit.kind == 'clearance':
             metrics = (('minimum', 'MİNİMUM BOŞLUK', fit.minimum_clearance_nm),
                        ('maximum', 'MAKSİMUM BOŞLUK', fit.maximum_clearance_nm))
@@ -390,8 +405,8 @@ class IsoFitsView:
             metrics = (('minimum', 'MAKSİMUM SIKILIK', fit.maximum_interference_nm),
                        ('maximum', 'MAKSİMUM BOŞLUK', fit.maximum_clearance_nm))
         for key, title, value in metrics:
-            self.iso_widgets[key+'_title'].configure(text=title)
-            self.iso_widgets[key].configure(text=format_deviation(value, unit), text_color=paint)
+            configure_changed(self.iso_widgets[key+'_title'], text=title)
+            configure_changed(self.iso_widgets[key], text=format_deviation(value, unit), text_color=paint)
         if fit.kind == 'clearance':
             explanation = 'Tüm limitlerde boşluk veya sınırda temas var.'
             if fit.minimum_clearance_nm == 0:
@@ -418,41 +433,46 @@ class IsoFitsView:
                                 f'Toplam limit farkı: {format_deviation(nearest.distance_nm, unit)}. '
                                 'Girilen ölçüler ISO sınıfına dönüştürülmez.')
             assessment = compatibility(fit, self.iso_state['target'].get())
-            self.iso_widgets['compatibility_title'].configure(text=assessment.title, text_color={
+            configure_changed(self.iso_widgets['compatibility_title'], text=assessment.title, text_color={
                 'compatible': GREEN, 'incompatible': RED, 'boundary': AMBER, 'conditional': AMBER, 'info': MUTED}[assessment.status])
-            self.iso_widgets['compatibility_text'].configure(text=self._compatibility_text(fit))
-            self.iso_widgets['iso_comparison'].configure(text=(
+            configure_changed(self.iso_widgets['compatibility_text'], text=self._compatibility_text(fit))
+            configure_changed(self.iso_widgets['iso_comparison'], text=(
                 'DELİK · '+self._iso_match_text(fit.hole, 'hole')+'\n\nMİL · '+self._iso_match_text(fit.shaft, 'shaft')+
                 '\n\nKarşılaştırma mevcut 11 delik / 18 mil sınıfı içindedir. Yakınlık, alt/üst sapma farklarının mutlak toplamıdır. Kullanım adları öneridir; yağlama kararı için yüzey, malzeme ve çalışma koşulları gerekir.'))
-        self.iso_widgets['explanation'].configure(text=explanation)
+        configure_changed(self.iso_widgets['explanation'], text=explanation)
         for key, band in [('hole', fit.hole), ('shaft', fit.shaft)]:
-            self.iso_widgets[key+'_limits'].configure(text=f'{format_mm(band.minimum_mm)} / {format_mm(band.maximum_mm)} mm')
-            self.iso_widgets[key+'_deviations'].configure(text=f'{format_deviation(band.lower_nm, unit)} / {format_deviation(band.upper_nm, unit)}')
+            configure_changed(self.iso_widgets[key+'_limits'], text=f'{format_mm(band.minimum_mm)} / {format_mm(band.maximum_mm)} mm')
+            configure_changed(self.iso_widgets[key+'_deviations'], text=f'{format_deviation(band.lower_nm, unit)} / {format_deviation(band.upper_nm, unit)}')
         for key in ('copy', 'export'):
-            self.iso_widgets[key].configure(state='normal')
+            configure_changed(self.iso_widgets[key], state='normal')
         pair = 'Manuel tolerans kontrolü' if manual else f'{fit.hole.code}/{fit.shaft.code}'
-        self.status_label.configure(text=f'Ø{format_mm(fit.hole.nominal_mm)} · {pair} · Tablo aralığı: {fit.hole.bracket_mm[0]} < D ≤ {fit.hole.bracket_mm[1]} mm', text_color=MUTED)
+        configure_changed(self.status_label, text=f'Ø{format_mm(fit.hole.nominal_mm)} · {pair} · Tablo aralığı: {fit.hole.bracket_mm[0]} < D ≤ {fit.hole.bracket_mm[1]} mm', text_color=MUTED)
         self._filter_iso_presets()
         self._draw_iso_diagram()
 
     def _draw_iso_diagram(self):
-        draw(self.iso_widgets['canvas'], self.iso_result, self.iso_state['view'].get(),
-             self.iso_state['sample'].get(), ctk.get_appearance_mode(), self.workspace._get_widget_scaling())
+        canvas = self.iso_widgets['canvas']
+        state = (self.iso_result, self.iso_state['view'].get(), self.iso_state['sample'].get(),
+                 ctk.get_appearance_mode(), self.workspace._get_widget_scaling(),
+                 canvas.winfo_width(), canvas.winfo_height())
+        if getattr(canvas, '_drawing_state', None) != state:
+            draw(canvas, *state[:5])
+            canvas._drawing_state = state
 
     def _resize_iso_workspace(self):
         self._layout_fit_id = None
-        if self._closed:
+        if self._closed or self.mode != 'iso_fits':
             return
         scale = self.workspace._get_widget_scaling()
         width = self.workspace.winfo_width()/scale
         form_width = max(250, min(308, (width-64)*.33))
-        self.iso_widgets['form'].configure(width=form_width)
-        self.iso_widgets['canvas'].configure(height=round(220*scale))
+        configure_changed(self.iso_widgets['form'], width=form_width)
+        configure_changed(self.iso_widgets['canvas'], height=round(220*scale))
         available = max(260, int(width-form_width-96))
         for key in ('explanation', 'note', 'iso_comparison', 'compatibility_title', 'compatibility_text'):
-            self.iso_widgets[key].configure(wraplength=available)
-        self.iso_widgets['manual_help'].configure(wraplength=max(170, form_width-48))
-        self.status_label.configure(wraplength=max(300, width-48))
+            configure_changed(self.iso_widgets[key], wraplength=available)
+        configure_changed(self.iso_widgets['manual_help'], wraplength=max(170, form_width-48))
+        configure_changed(self.status_label, wraplength=max(300, width-48))
         self._draw_iso_diagram()
 
     def _iso_report_rows(self):

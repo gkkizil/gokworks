@@ -4,6 +4,7 @@ import threading
 import tkinter as tk
 
 import customtkinter as ctk
+from gui.rendering import configure_changed
 
 from gui.theme import INPUT, PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
 from k_factor.apply import update_assembly
@@ -199,7 +200,7 @@ class KFactorView:
     def _resize_k_workspace(self):
         width = self.k_widgets['body'].winfo_width()/self.workspace._get_widget_scaling()
         for key in ('automatic_summary', 'manual_summary'):
-            self.k_widgets[key].configure(wraplength=max(240, width-80))
+            configure_changed(self.k_widgets[key], wraplength=max(240, width-80))
         self._fit_results_toolbar(width)
 
     def _build_k_actions(self, parent):

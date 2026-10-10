@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 import customtkinter as ctk
+from gui.rendering import configure_changed
 
 from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
 from geometric_tolerances.diagram import draw, symbol
@@ -201,6 +202,20 @@ class GeometricTolerancesView:
     def _filter_gdt_catalog(self, reset=False):
         normalize = lambda value: value.casefold().replace('\u0307', '')
         query = normalize(self.gdt_search.get().strip())
+        listing = self.gdt_widgets['listing']
+        selected = self.gdt_state['kind'].get()
+        if getattr(listing, '_filter_query', None) == query:
+            previous = getattr(listing, '_selected_kind', None)
+            if previous != selected:
+                for key in (previous, selected):
+                    if key in self.gdt_widgets['choices']:
+                        active = key == selected
+                        configure_changed(self.gdt_widgets['choices'][key],
+                            fg_color=ACCENT_BG if active else 'transparent', text_color=ACCENT if active else TEXT)
+            listing._selected_kind = selected
+            if reset:
+                listing._parent_canvas.yview_moveto(0)
+            return
         for widget in (*self.gdt_widgets['groups'].values(), *self.gdt_widgets['choices'].values()):
             widget.grid_remove()
         row, count = 0, 0
@@ -214,13 +229,14 @@ class GeometricTolerancesView:
             for item in items:
                 active = item.key == self.gdt_state['kind'].get()
                 button = self.gdt_widgets['choices'][item.key]
-                button.configure(fg_color=ACCENT_BG if active else 'transparent', text_color=ACCENT if active else TEXT)
+                configure_changed(button, fg_color=ACCENT_BG if active else 'transparent', text_color=ACCENT if active else TEXT)
                 button.grid(row=row, column=0, sticky='ew', padx=4, pady=(0, 5))
                 row += 1
                 count += 1
         if reset:
             self.gdt_widgets['listing']._parent_canvas.yview_moveto(0)
-        self.gdt_widgets['count'].configure(text=f'{count} / {len(CATALOG)} · 12 güncel + 2 eski' if count else 'Eşleşen özellik bulunamadı.')
+        configure_changed(self.gdt_widgets['count'], text=f'{count} / {len(CATALOG)} · 12 güncel + 2 eski' if count else 'Eşleşen özellik bulunamadı.')
+        listing._filter_query, listing._selected_kind = query, selected
 
     def _update_gdt_result(self):
         item = CHARACTERISTICS.get(self.gdt_state['kind'].get())
@@ -232,22 +248,22 @@ class GeometricTolerancesView:
                           ('description', item.description), ('zone', item.zone),
                           ('measurement', item.measurement), ('note', item.note),
                           ('example', 'Kullanım örneği: '+item.example)]:
-            self.gdt_widgets[key].configure(text=text)
-        self.gdt_widgets['measured_help'].configure(text=MEASUREMENT_INPUTS.get(item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.'))
+            configure_changed(self.gdt_widgets[key], text=text)
+        configure_changed(self.gdt_widgets['measured_help'], text=MEASUREMENT_INPUTS.get(item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.'))
         for key in ('size', 'tolerance', 'measured', 'size_tolerance'):
-            self.gdt_widgets[key].configure(state='normal' if item.active else 'disabled')
+            configure_changed(self.gdt_widgets[key], state='normal' if item.active else 'disabled')
         self.gdt_widgets['size_rule'].grid() if item.group == 'Şekil' else self.gdt_widgets['size_rule'].grid_remove()
-        self.gdt_widgets['datum'].configure(state='disabled' if item.datum == 'none' or not item.active else 'normal',
+        configure_changed(self.gdt_widgets['datum'], state='disabled' if item.datum == 'none' or not item.active else 'normal',
             variable=self.gdt_widgets['datum_display'] if item.datum == 'none' else self.gdt_state['datum'])
-        self.gdt_widgets['datum_note'].configure(text={
+        configure_changed(self.gdt_widgets['datum_note'], text={
             'none': 'Şekil toleransı: datum çerçeveye eklenmez.',
             'optional': 'Datum seçime bağlıdır; teorik ölçü/profil tanımı ayrıca gerekir.',
             'required': 'Bu örnek referanslıdır; datum sırası ölçüm önceliğini belirler.'}[item.datum])
         if not item.active:
             self.gdt_result = None
             self._show_gdt_error('ASME 2018: eski sembol; position/profile/runout ile işlevine göre yeniden belirtin.')
-            self.gdt_widgets['value'].configure(text='2018’de kaldırıldı', text_color=AMBER)
-            self.gdt_widgets['datum_note'].configure(text='Eski çizim okuma bilgisi · güncel belirtim oluşturulmaz.')
+            configure_changed(self.gdt_widgets['value'], text='2018’de kaldırıldı', text_color=AMBER)
+            configure_changed(self.gdt_widgets['datum_note'], text='Eski çizim okuma bilgisi · güncel belirtim oluşturulmaz.')
             self._filter_gdt_catalog()
             return
         try:
@@ -262,21 +278,21 @@ class GeometricTolerancesView:
                 value += '\nRadyal pay: '+fmt(spec.tolerance/2)+' mm'
             elif item.group == 'Profil':
                 value += '\nNormal sınır: ±'+fmt(spec.tolerance/2)+' mm'
-            self.gdt_widgets['value'].configure(text=value, text_color=ACCENT)
-            self.gdt_widgets['assessment'].configure(text=self._gdt_assessment(), text_color=
+            configure_changed(self.gdt_widgets['value'], text=value, text_color=ACCENT)
+            configure_changed(self.gdt_widgets['assessment'], text=self._gdt_assessment(), text_color=
                 MUTED if spec.accepted is None else GREEN if spec.accepted else RED)
-            self.status_label.configure(text=f'ASME Y14.5-2018 · § {item.reference} · Kullanıcı belirtimi; basic ölçüler/boyut limitleri ayrıca gerekir.', text_color=MUTED)
+            configure_changed(self.status_label, text=f'ASME Y14.5-2018 · § {item.reference} · Kullanıcı belirtimi; basic ölçüler/boyut limitleri ayrıca gerekir.', text_color=MUTED)
             for key in ('copy', 'export'):
-                self.gdt_widgets[key].configure(state='normal')
+                configure_changed(self.gdt_widgets[key], state='normal')
             self._draw_gdt_diagram()
         self._filter_gdt_catalog()
 
     def _show_gdt_error(self, message):
-        self.gdt_widgets['value'].configure(text='Değerleri kontrol edin.', text_color=RED)
-        self.gdt_widgets['assessment'].configure(text='Geçerli belirtim olmadan karşılaştırma yapılmaz.', text_color=MUTED)
-        self.status_label.configure(text=message, text_color=RED)
+        configure_changed(self.gdt_widgets['value'], text='Değerleri kontrol edin.', text_color=RED)
+        configure_changed(self.gdt_widgets['assessment'], text='Geçerli belirtim olmadan karşılaştırma yapılmaz.', text_color=MUTED)
+        configure_changed(self.status_label, text=message, text_color=RED)
         for key in ('copy', 'export'):
-            self.gdt_widgets[key].configure(state='disabled')
+            configure_changed(self.gdt_widgets[key], state='disabled')
         self._draw_gdt_diagram()
 
     def _gdt_assessment(self):
@@ -296,6 +312,12 @@ class GeometricTolerancesView:
     def _draw_gdt_diagram(self):
         scale = self.workspace._get_widget_scaling()
         theme = ctk.get_appearance_mode()
+        owner = self.gdt_widgets['canvas']
+        state = (self.gdt_result, self.gdt_state['kind'].get(), theme, scale,
+                 tuple((self.gdt_widgets[key].winfo_width(), self.gdt_widgets[key].winfo_height())
+                       for key in ('canvas', 'frame', 'symbol')))
+        if getattr(owner, '_drawing_state', None) == state:
+            return
         for key in ('canvas', 'frame'):
             draw(self.gdt_widgets[key], self.gdt_result, theme, scale, frame=key == 'frame')
         item = CHARACTERISTICS.get(self.gdt_state['kind'].get())
@@ -309,11 +331,12 @@ class GeometricTolerancesView:
                     width=max(100, area.winfo_width()-24*scale), tags='legacy')
         canvas = self.gdt_widgets['symbol']
         color = lambda pair: pair[1 if theme == 'Dark' else 0]
-        canvas.configure(background=color(INPUT), width=round(50*scale), height=round(54*scale))
+        configure_changed(canvas, background=color(INPUT), width=round(50*scale), height=round(54*scale))
         canvas.delete('all')
         kind = self.gdt_state['kind'].get()
         if kind in CHARACTERISTICS:
             symbol(canvas, kind, 25*scale, 27*scale, 26*scale, color(ACCENT if item.active else AMBER), 2*scale)
+        owner._drawing_state = state
 
     def _resize_gdt_workspace(self):
         self._layout_fit_id = None
@@ -322,16 +345,16 @@ class GeometricTolerancesView:
         scale = self.workspace._get_widget_scaling()
         width = self.workspace.winfo_width()/scale
         form_width = max(224, min(270, (width-64)*.29))
-        self.gdt_widgets['catalog'].configure(width=form_width)
+        configure_changed(self.gdt_widgets['catalog'], width=form_width)
         available = max(240, int(width-form_width-104))
-        self.gdt_widgets['value'].configure(wraplength=max(140, (available-28)/2))
+        configure_changed(self.gdt_widgets['value'], wraplength=max(140, (available-28)/2))
         for key in ('zone', 'measurement', 'note', 'assessment', 'example', 'datum_note', 'size_rule_help', 'measured_help'):
-            self.gdt_widgets[key].configure(wraplength=available)
+            configure_changed(self.gdt_widgets[key], wraplength=available)
         for key in ('title', 'english', 'description'):
-            self.gdt_widgets[key].configure(wraplength=max(180, available-74))
-        self.gdt_widgets['canvas'].configure(height=round(214*scale))
-        self.gdt_widgets['frame'].configure(height=round(62*scale))
-        self.status_label.configure(wraplength=max(300, width-48))
+            configure_changed(self.gdt_widgets[key], wraplength=max(180, available-74))
+        configure_changed(self.gdt_widgets['canvas'], height=round(214*scale))
+        configure_changed(self.gdt_widgets['frame'], height=round(62*scale))
+        configure_changed(self.status_label, wraplength=max(300, width-48))
         self._draw_gdt_diagram()
 
     def _gdt_report_rows(self):

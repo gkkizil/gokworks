@@ -21,6 +21,7 @@ from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from gui.icons import make_icon
 from gui.motion import blend, pair
+from gui.rendering import hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
@@ -87,6 +88,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self._preferences_save_id = None
         self._pending_files = None
         self._pending_preview = False
+        self._last_ui_activity = time.monotonic()
+        self._preload_id = None
         self.controls = []
         self.results = []
         self.row_ids = {}
@@ -99,6 +102,48 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._poll_id = self.after(80, self._process_events)
         self.bind("<Control-f>", self._focus_search)
+        for sequence in ('<ButtonPress>', '<KeyPress>', '<MouseWheel>'):
+            self.bind(sequence, self._note_ui_activity, add='+')
+        self._preload_id = self.after(700, self._preload_page)
+
+    def _note_ui_activity(self, event=None):
+        self._last_ui_activity = time.monotonic()
+
+    def _preload_page(self):
+        """Prepare one hidden page between interactions, on the Tk thread."""
+        self._preload_id = None
+        if self._closed:
+            return
+        missing = next((mode for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances')
+                        if mode not in self._pages), None)
+        if missing is None:
+            return
+        if self.busy or time.monotonic()-self._last_ui_activity < .6:
+            self._preload_id = self.after(700, self._preload_page)
+            return
+        self._remember_page()
+        active_mode, active = self.mode, self._pages[self.mode]
+        try:
+            self.mode = missing
+            self._create_page_state()
+            self._build_window()
+            self._remember_page()
+            self.workspace.unbind('<Configure>')
+            hide_grid(self.workspace)
+        except Exception:
+            if self.workspace is not active['workspace']:
+                self._cancel_widget_callbacks(self.workspace)
+                self.workspace.destroy()
+            raise
+        finally:
+            if self._layout_fit_id is not None:
+                self.after_cancel(self._layout_fit_id)
+                self._layout_fit_id = None
+            self.mode = active_mode
+            for name, value in active.items():
+                setattr(self, name, value)
+            self._resize_pdf_area()
+        self._preload_id = self.after(700, self._preload_page)
 
     @property
     def _is_pdf(self):
@@ -119,6 +164,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         return "teknik resim" if self._is_pdf else "parça"
 
     def _switch_mode(self, mode):
+        self._note_ui_activity()
         if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances"):
             return
         self._schedule_preferences()
@@ -128,7 +174,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             self._layout_fit_id = None
         self.workspace.unbind("<Configure>")
         self._remember_page()
-        self.workspace.grid_remove()
+        hide_grid(self.workspace)
         self.mode = mode
         if mode in self._pages:
             for name, value in self._pages[mode].items():

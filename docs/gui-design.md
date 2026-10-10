@@ -27,7 +27,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**301 test geçti; 103'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını ve büyük listelerin olay sırasını kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**310 test geçti; 112'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -49,9 +49,9 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 28 | 4.940 | 4.499 |
-| Testler | 15 | 4.717 | 4.201 |
-| Toplam | 43 | 9.657 | 8.700 |
+| Uygulama | 29 | 5.044 | 4.597 |
+| Testler | 16 | 4.917 | 4.384 |
+| Toplam | 45 | 9.961 | 8.981 |
 
 Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı `tests/` altındaki Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler GUI çalışması tamamlandığı andaki sayımdır.
 
@@ -86,3 +86,15 @@ K/R için form ve tablo aynı anda dar sütunlara sıkıştırılmaz. 48 px sekm
 Yan menü vurgusu kısa renk geçişi kullanır; sayfa içeriği hemen açılır. Tercih yazımı 250 ms ertelenir; hızlı geçişte ayrılan sayfaların değerleri birleştirilir, işlem başlatılırken/kapanırken kaydedilir. Büyük dosya listeleri kısa gruplarla eklenir, işçi olayları sınırlı sürelerle tüketilir; Durdur ve diğer Tk olaylarına sıra verilir.
 
 Güncel gerçek ekranlar: [takım](screenshots/gui-current-kr-tools-dark.png), [manuel koyu](screenshots/gui-current-kr-manual-dark.png), [manuel açık](screenshots/gui-current-kr-manual-light.png), [küçük pencere](screenshots/gui-current-kr-manual-small.png), [montaj sonuçları](screenshots/gui-current-kr-results-dark.png), [tek biçim DXF/DWG](screenshots/gui-current-dxf-dwg-dark.png). Bu görüntüler çalışan Tk arayüzünden alındı; SolidWorks çıktısını kanıtlamaz. Önceki Word raporları kendi sürümlerinin kayıtlarıdır.
+
+Menü akıcılığı için ISO/GD&T listeleri yalnız arama, filtre veya seçim değiştiğinde düzenlenir. Sayı ve örnek ölçü değişince sabit menü düğmeleri yeniden çizilmez. Grafik önbelleği veri, görünüm, tema, ölçek ve gerçek tuval boyutunu izler; hatalı girişte eski geçerli grafiği korumaz. Kullanılmamış sayfalar, son girişten en az 600 ms sonra ve işçi çalışmıyorken, 700 ms aralıklarla Tk iş parçacığında hazırlanır. Aktif sayfa ve tercihler korunur. Gizli sayfaların CTk 6 DPI değişiminde tekrar görünmesi engellendi.
+
+Linux/Xorg üzerinde aynı 8ece3f4 sürümüyle karşılaştırılan ölçümde değişken güncellemesi ve `update_idletasks()` süresinin medyanı (her satır 30 örnek):
+
+| İşlem | Önce (ms) | Sonra (ms) |
+| --- | ---: | ---: |
+| ISO örnek ölçü seçimi | 6,67 | 0,74 |
+| ISO mil sınıfı seçimi | 6,44 | 0,98 |
+| GD&T tolerans girişi | 4,78 | 0,49 |
+
+Hazır sayfalar arasında 50 geçişin medyanı yaklaşık 3 ms'dir. Bunlar Tk güncelleme süreleridir; Windows cihazının kare hızı veya monitör gecikmesi ölçülmedi. Ön yükleme sırasında aktif sonuçlar, manuel ölçüler, hata sonrası geri dönüş ve DPI değişiminde gizli sayfalar ayrıca test edilir.
