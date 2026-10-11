@@ -234,7 +234,8 @@ class GUIFlowTests(GuiTestCase):
             self.assertFalse(self.app.busy)
             self.assertEqual(self.app.stat_values['succeeded'].cget('text'), '3')
             self.assertEqual(self.app.stat_values['failed'].cget('text'), '0')
-            self.assertIn('Tamamlandı', self.app.status_label.cget('text'))
+            completion = 'K/R uygulaması tamamlandı' if mode == 'k_factor' else 'Tamamlandı'
+            self.assertIn(completion, self.app.status_label.cget('text'))
 
     def test_worker_log_burst_yields_between_batches_without_losing_messages(self):
         self.app.after_cancel(self.app._poll_id)

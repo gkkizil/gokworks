@@ -6,7 +6,7 @@ import tkinter as tk
 import customtkinter as ctk
 from gui.rendering import configure_changed, hide_grid
 
-from gui.theme import PANEL, BORDER, TEXT, MUTED, RED, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
+from gui.theme import PANEL, BORDER, TEXT, MUTED, RED, AMBER, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
 from k_factor.apply import update_assembly
 from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, calculate,
                             number, ba_from_outside_dimensions)
@@ -303,20 +303,51 @@ class KFactorView:
         self._run_k_worker(preview=True)
 
     def _start_k_apply(self):
+        if self.busy:
+            if self.k_widgets.get('operation_preview') and not self.stop_event.is_set():
+                _, recipe = self._k_recipe()
+                self.k_widgets['pending_apply'] = (recipe, self.k_state['save'].get())
+                self.start_button.configure(state='disabled', text='Uygulama sırada…')
+                text = 'K/R uygulama isteği alındı. Montaj kontrolü bitince atama başlayacak.'
+                self.status_label.configure(text=text, text_color=MUTED)
+                self._append_log(text)
+            return
         self._run_k_worker(preview=False)
 
-    def _run_k_worker(self, *, preview):
+    def _continue_k_apply(self, summary):
+        request = self.k_widgets.pop('pending_apply', None)
+        if request is None:
+            return
+        if (summary['state'] == 'completed' and summary['succeeded']
+                and not summary['failed'] and not self.stop_event.is_set()):
+            self._run_k_worker(preview=False, request=request)
+        else:
+            text = 'Bekleyen K/R ataması başlatılmadı: kontrolde hata oluştu, işlem durduruldu veya uygun parça bulunamadı. K/R uygulanmadı.'
+            self.status_label.configure(text=text, text_color=AMBER)
+            self._append_log(text)
+
+    def _run_k_worker(self, *, preview, request=None):
         if self.busy:
             return
-        if self._preview_k_calculation() is None:
-            return
-        _, recipe = self._k_recipe()
-        save = self.k_state["save"].get() and not preview
+        if request is None:
+            if self._preview_k_calculation() is None:
+                return
+            _, recipe = self._k_recipe()
+            save = self.k_state['save'].get() and not preview
+        else:
+            recipe, save = request
         self._save_preferences()
+        self.k_widgets['operation_preview'] = preview
         self._reset()
+        self.k_widgets['success_caption'].configure(text='Hazır' if preview else 'Uygulanan')
+        self.filter_menu.configure(values=['Tüm durumlar', 'Bekleyen', 'İşleniyor',
+                                          'Uygulamaya hazır' if preview else 'Uygulandı',
+                                          'Atlanan', 'Hatalı'])
         self._select_k_view(RESULTS_TAB)
         self._set_busy(True)
-        self.status_label.configure(text="Montaj K/R önizlemesi hazırlanıyor…" if preview else "K/R uygulanıyor…",
-                                    text_color=MUTED)
+        operation = ('Montaj kontrolü başladı. Bu işlem K/R değerlerini değiştirmez.'
+                     if preview else 'K/R ataması başladı. Değerler parçalara yazılacak ve geri okunarak kontrol edilecek.')
+        self.status_label.configure(text=operation, text_color=MUTED)
+        self._append_log(operation)
         threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),
                          kwargs=dict(preview=preview, save=save), daemon=False).start()

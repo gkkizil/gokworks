@@ -53,7 +53,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-light.png",
-    "sha256": "d0feba7b74d645c66b0197377f8ba8399030057866417aaf29cfbe9b5cadff6c",
+    "sha256": "b840328db77139485e8bb9c8e6349eb15c3adc5081a3b907d728988d92054370",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -66,7 +66,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-dark.png",
-    "sha256": "aafd5aca9545658c38009c27b8fe1e2bf82065275f2306becee792b8376c3b89",
+    "sha256": "0675633907ac72513a67c20eece9b69cd33363583b2db692a327946f61b84fb3",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -119,7 +119,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-light.png",
-    "sha256": "d2f33ad6dded836ba0d671a5aee9b074d314cd2dfd42c17ccd543d6a713e5ff6",
+    "sha256": "51b3a674a14cd1ec457cbe75fb0da6eb35e83154b99a4f3ecd806692ce86eb42",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -132,7 +132,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark.png",
-    "sha256": "ffc7d70a272ee4d50557040ecd09e4d08cc8175a0a8fc5a5799c187ec89a149f",
+    "sha256": "4a467bad7f475153d508f59fde727a1fbe4d3f00e8941a69dc50ee377be709ec",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -195,7 +195,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark-small.png",
-    "sha256": "974f318dbf1f1a47286f9273edabe5a231ab995eb64bd6af1ed524d5365ed467",
+    "sha256": "32dcd0539f0e0968dc15729ecea20333d78d091cd00fded4a1b15705712c7013",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1000x690",

@@ -10,6 +10,12 @@ geçip **Git → Pull** kullanın. ZIP ile açtıysanız aynı dalın güncel ZI
 yeniden indirin; eski klasörü saklayıp yeni klasörü ayrı proje olarak açın.
 ZIP klasöründe `git pull` kullanılamaz.
 
+Güncellemeden önce çalışan GOKWORKS penceresini/PyCharm çalışmasını durdurun.
+Pull sonrasında `main.py` dosyasını yeniden çalıştırın. Açık eski Python
+işlemi, diskte güncellenen kodu kendiliğinden yüklemez. PyCharm Run
+Configuration içindeki script yolunun güncel proje klasörüne ait olduğuna
+bakın; eski masaüstü ZIP klasörünü çalıştırmayın.
+
 PyCharm'ın projenin kendi `.venv` yorumlayıcısını kullandığını kontrol edin.
 Aynı yorumlayıcıya bağımlılıkları kurun:
 
@@ -26,6 +32,7 @@ Python aynı Windows kullanıcı oturumunda çalışmalıdır.
 1. SolidWorks'te aktif ana montajı ve kontrol edeceğiniz parçaları kaydedin.
 2. **K FAKTÖR - RADIUS → Manuel K / R**: kalınlık `2`, K `0,274`, R `2` girin.
 3. **Montajı tara** ile eşleşen 2 mm sacları ve atlama nedenlerini okuyun.
+   Tarama sonuçlarında **Uygulamaya hazır** görünür; bu aşamada K/R yazılmaz.
 4. İlk kontrolü **Parça dosyalarını kaydet** işaretlenmeden yapın; **Montaja
    K/R uygula** kullanın. Değişiklik SolidWorks belleğinde uygulanır.
 5. Başarılı parçanın doğru konfigürasyonunda SheetMetal unsurunu açın:
@@ -33,12 +40,28 @@ Python aynı Windows kullanıcı oturumunda çalışmalıdır.
 6. Farklı kalınlıklı saclarda değişiklik olmamalı. Alt montajlar dahil sayılar
    raporda görünmeli. Malzeme/gauge tablosuna bağlı, çok gövdeli veya özel
    büküm override'ı olan parçalar için destek sınırlarını rapordan kontrol edin.
+   Süpürme flanşında özel yarıçap açıksa işlem yazmadan durmalıdır; varsayılan
+   R ve büküm payına bağlıysa uygulanabilir. Türkçe karakterli/büyük harfli
+   dosya yolları ve konfigürasyon adları ayrıntılarda özgün haliyle görünmeli.
 7. Başarılı sonucu gözle kontrol ettikten sonra SolidWorks'te kaydedin.
 
 Hata durumunda **Günlük**, satıra çift tıklama veya **Rapor kaydet** ile tam
 metni alın. Yeni hata metni işlem aşamasını ve ilgili API üyesini içerir;
 örneğin `Mevcut K/R ve büküm payı okuma: SolidWorks API · KFactor: ...`.
-`Açma uyarısı: 128` tek başına yazma hatasının hangi üyeden geldiğini göstermez.
+`128`, `swFileLoadWarning_AlreadyOpen` demektir: belge zaten açık/yüklüdür.
+Bu bilgi tek başına atamayı engellemez. Mevcut belge yeniden kullanılmalı ve
+işlem sonunda uygulama tarafından yeni açılmış gibi kapatılmamalıdır.
+[Enum kaydı](reports/k-radius/api-contract.json) SolidWorks interop
+metadata'sından doğrulanmıştır.
+
+**Durum Uygulandı** ve **K/R uygulandı ve geri okumayla doğrulandı** metni,
+yazılan K/R'nin SolidWorks'ten tekrar okunup kontrol edildiğini belirtir.
+**Önizleme; K/R uygulanmadı** metni, değerlerin yalnız okunduğunu belirtir.
+“Montaja K/R uygula” sonrası hâlâ yalnız önizleme görüyorsanız önce çalışan
+proje yolunu ve güncel dalı kontrol edin; Günlük ve tam satır ayrıntısını alın.
+Tarama sürerken **Tarama bitince K/R uygula** düğmesine basılırsa uygulama
+isteği bekletilir; uygun parça bulunan başarılı taramadan sonra başlar.
+Durdur/iptal/hata durumunda bekleyen istek uygulanmaz.
 
 ## ISO ve GUI kabul kontrolü
 

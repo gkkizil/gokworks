@@ -76,12 +76,14 @@ def _part_key(path, configuration):
     return normalized.lower(), str(configuration).lower()
 
 
-def assembly_quantities(app, stop_event=None):
+def assembly_quantities(app, stop_event=None, *, references=None):
     """Aktif montajın fiziksel parça örneklerini dosya+konfigürasyonla say.
 
     BOM satırları/kullanıcı adet özellikleri kullanılmaz. Gizli ve BOM dışı
     bileşenler sayılır; bastırılmış bileşenler ve onların alt dalları sayılmaz.
     Aynı alt montajın her örneği ayrı dolaşılır, dosya bazında tekilleştirilmez.
+    references verilirse karşılaştırma anahtarlarının özgün dosya yolu ve
+    konfigürasyon adları bu sözlüğe yazılır; COM'a bu özgün adlar gönderilir.
     """
     assembly = _value(app, "ActiveDoc")
     if assembly is None or _value(assembly, "GetType") != ASSEMBLY:
@@ -127,6 +129,8 @@ def assembly_quantities(app, stop_event=None):
         extension = str(path).lower()
         if extension.endswith(".sldprt"):
             counts[key] += 1
+            if references is not None:
+                references.setdefault(key, (str(path), str(config)))
         elif extension.endswith(".sldasm"):
             if key in ancestors:
                 raise RuntimeError("Montaj ağacında döngü bulundu; adet hesabı tamamlanamadı.")

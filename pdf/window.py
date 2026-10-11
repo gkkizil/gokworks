@@ -28,7 +28,8 @@ from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
           "partial": "Kısmen tamamlandı", "skipped": "Atlandı", "error": "Hata"}
 FILTERS = {"Tüm durumlar": None, "Bekleyen": "pending", "İşleniyor": "running",
-           "Başarılı": "success", "Kısmi": "partial", "Atlanan": "skipped", "Hatalı": "error"}
+           "Başarılı": "success", "Uygulamaya hazır": "success", "Uygulandı": "success",
+           "Kısmi": "partial", "Atlanan": "skipped", "Hatalı": "error"}
 
 
 def _search_text(value):
@@ -384,7 +385,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         result = next((item for item in reversed(self.results) if item["source"] == path), None)
         output = result["output"] if result else "Henüz üretilmedi."
         detail = self.table.item(row, "values")[2] or "Dosya aktarım için bekliyor."
-        status = LABELS[self.row_statuses[path]]
+        status = self._result_status_label(self.row_statuses[path],
+                                          preview=result.get('preview') if result else None)
         text = f"Kaynak\n{path}\n\nÇıktı\n{output}\n\nDurum\n{status}\n\nAçıklama\n{detail}"
         existing = getattr(self, "detail_window", None)
         if existing is not None and existing.winfo_exists():
@@ -551,6 +553,13 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             control.configure(state="disabled" if value else "normal")
         self.start_button.configure(state="disabled" if value else "normal",
                                      text="Aktarım sürüyor…" if value else self._start_text)
+        if value and self.mode == 'k_factor':
+            preview = self.k_widgets.get('operation_preview', False)
+            queued = bool(self.k_widgets.get('pending_apply'))
+            self.start_button.configure(
+                state='normal' if preview and not queued and not self.stop_event.is_set() else 'disabled',
+                text=('Uygulama sırada…' if queued else 'Tarama bitince K/R uygula')
+                     if preview else 'K/R uygulanıyor…')
         self.stop_button.configure(state="normal" if value else "disabled")
 
     def _reset(self):
@@ -627,6 +636,9 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
 
     def _request_stop(self):
         self.stop_event.set()
+        if self.mode == 'k_factor':
+            self.k_widgets.pop('pending_apply', None)
+            self.start_button.configure(state='disabled')
         self.stop_button.configure(state="disabled")
         self.status_label.configure(text="Geçerli dosya tamamlandıktan sonra duracak…", text_color=AMBER)
 
@@ -696,13 +708,20 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         if self.close_pending:
             self._destroy_app()
 
-    def _update_row(self, path, status, detail=""):
+    def _result_status_label(self, status, *, preview=None):
+        if self.mode == 'k_factor' and status == 'success':
+            if preview is None:
+                preview = self.k_widgets.get('operation_preview', False)
+            return 'Uygulamaya hazır' if preview else 'Uygulandı'
+        return LABELS[status]
+
+    def _update_row(self, path, status, detail="", *, preview=None):
         row = self.row_ids.get(path)
         if row:
             data = self._row_data[path]
             name = data['values'][0]
             striped = "stripe" in data['tags']
-            values = name, LABELS[status], detail
+            values = name, self._result_status_label(status, preview=preview), detail
             tags = (status, "stripe") if striped else (status,)
             self.table.item(row, values=values, tags=tags)
             data.update(values=values, search=_search_text(' '.join(values)), tags=tags)
@@ -791,12 +810,23 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                     writer = csv.writer(stream, delimiter=";")
                     writer.writerow(("Kaynak", "K/R parçası" if self.mode == "k_factor" else "PDF" if self._is_pdf else "DXF / DWG", "Durum", "Açıklama"))
                     for result in self.results:
-                        writer.writerow((result["source"], result["output"], LABELS[result["status"]], result["detail"]))
+                        writer.writerow((result["source"], result["output"],
+                                         self._result_status_label(result["status"], preview=result.get('preview')),
+                                         result["detail"]))
                 self._append_log(f"Rapor kaydedildi: {path}")
             except OSError as error:
                 self.status_label.configure(text=f"Rapor kaydedilemedi: {error}", text_color=RED)
 
     def _finish(self, summary):
+        if self.mode == 'k_factor':
+            expected_preview = self.k_widgets.get('operation_preview', False)
+            actual_preview = summary.get('preview', expected_preview)
+            self.k_widgets['operation_preview'] = actual_preview
+            self.k_widgets['success_caption'].configure(text='Hazır' if actual_preview else 'Uygulanan')
+            if not expected_preview and actual_preview:
+                summary = dict(summary, state='error', error=(
+                    'K/R uygulanmadı: uygulama isteğine yalnız kontrol sonucu geldi. '
+                    'Montaja K/R uygula düğmesiyle yeniden deneyin.'))
         self._set_busy(False)
         for key, widget in self.stat_values.items():
             widget.configure(text=str(summary.get(key, 0)))
@@ -811,8 +841,15 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                            f"Bu klasörde {self._extension} dosyası bulunamadı."), AMBER
         else:
             unit = "PDF" if self._is_pdf else "parça"
-            preview = self.mode == "k_factor" and self.results and all(item.get("preview") for item in self.results)
-            text = f"{'Önizleme tamamlandı' if preview else 'Tamamlandı'} · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
+            preview = self.mode == 'k_factor' and summary.get('preview', self.k_widgets.get('operation_preview', False))
+            if self.mode == 'k_factor':
+                text = (f"{'Montaj kontrolü tamamlandı' if preview else 'K/R uygulaması tamamlandı'}"
+                        f" · {summary['succeeded']} {'hazır' if preview else 'uygulanan'} parça, "
+                        f"{summary['skipped']} atlanan, {summary['failed']} hatalı.")
+                if preview:
+                    text += ' K/R uygulanmadı. Montaja K/R uygula düğmesini kullanın.'
+            else:
+                text = f"Tamamlandı · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
             if summary.get('partial'):
                 text += f" {summary['partial']} parçada bazı biçimler hazır, bazıları tamamlanamadı."
             color = AMBER if summary["failed"] or summary.get('partial') else GREEN
@@ -824,6 +861,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.report_button.configure(state="normal" if self.results else "disabled")
         if self.close_pending:
             self._destroy_app()
+        elif self.mode == 'k_factor':
+            self._continue_k_apply(summary)
 
     def _process_events(self):
         if self._pending_files is not None:
@@ -850,14 +889,16 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                     self._worker_updates['total'] = value
                 elif event == "current":
                     self._update_row(value, "running")
-                    self._worker_updates['status']['text'] = f"Aktarılıyor · {Path(value).name}"
+                    action = ('Kontrol ediliyor' if self.k_widgets.get('operation_preview') else 'K/R uygulanıyor') if self.mode == 'k_factor' else 'Aktarılıyor'
+                    self._worker_updates['status']['text'] = f"{action} · {Path(value).name}"
                 elif event == "result":
                     self.results.append(value)
                     detail = value["detail"]
                     if self.mode == "dxf_dwg" and value.get("thickness_mm") is not None and value.get("quantity") is not None:
                         detail = f"{value['thickness_mm']:g} mm · {value['quantity']} adet · {detail}"
-                    self._update_row(value["source"], value["status"], detail)
-                    self._append_log(f"{LABELS[value['status']]} · {Path(value['source']).name} · {value['detail']}")
+                    self._update_row(value["source"], value["status"], detail, preview=value.get('preview'))
+                    label = self._result_status_label(value['status'], preview=value.get('preview'))
+                    self._append_log(f"{label} · {Path(value['source']).name} · {value['detail']}")
                 elif event == "counts":
                     self._worker_updates['counts'] = value
                     self._worker_updates['total'] = None

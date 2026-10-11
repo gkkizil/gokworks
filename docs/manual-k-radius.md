@@ -15,11 +15,19 @@ doldurulur; başlangıçta bu alanlara üretim değeri atanmaz.
 1. Ana montajı SolidWorks'te aktif yapın; **Manuel K / R** sekmesini açın.
 2. Kalınlık, K ve R değerlerini girin.
 3. **Montajı tara** ile yazma yapmadan eşleşmeleri ve önerilen değerleri görün.
+   Uygun parçalar **Uygulamaya hazır** gösterilir; “Önizleme; K/R uygulanmadı”
+   açıklaması mevcut ve hedef değerleri ayırır.
 4. **Montaja K/R uygula** ile eşleşen sac parçalarının sac metal parametrelerini
    güncelleyin. `2 mm → K=0.274, R=2 mm` örneğinde 1, 1.99, 2.01 ve 3 mm
    saclar atlanır; bu parçalar için K/R yazımı veya dosya kaydı yapılmaz.
 5. Varsayılan değişiklik SolidWorks belleğindedir. Dosyalara da kaydetmek
    isterseniz **Parça dosyalarını kaydet** seçeneğini işaretleyin.
+
+Gerçek uygulama sonucu **Uygulandı** gösterilir. Başarı, istenen K ve R'nin
+yazılması, yeniden oluşturma ve değerlerin SolidWorks'ten geri okunmasıyla
+doğrulanır. Bellekte uygulama ile dosyaya kaydetme ayrı işlemlerdir.
+`128` açma bilgisi, parçanın zaten yüklü olduğunu belirtir; hata anlamına
+gelmez. [Güncelleme ve yerel kontrol adımları](local-solidworks-check.md).
 
 Aktif montajın aktif konfigürasyonu, alt montajlar dahil dolaşılır. Aynı
 dosya/referans konfigürasyonu bir kez işlenir, montaj adedi raporda gösterilir.

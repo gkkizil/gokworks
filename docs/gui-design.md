@@ -14,7 +14,38 @@ Ekran ölçeği değiştiğinde gizli ISO manuel formu, filtrelenmiş seçenekle
 
 Kullanıcının verdiği G monogramı `gui/assets/gokworks-logo.jpg` olarak aynen saklanır. Yan menü bu görseli ölçeklenebilir CTkImage ile gösterir. Ana pencere, dosya ayrıntıları, ISO kaynakları ve GD&T rehberi aynı pencere simgesini kullanır. Windows `.ico` dosyası yedi boyut içerir; CustomTkinter'ın gecikmeli varsayılan simgesini de devre dışı bırakır. Varlık yolları çalışma dizininden bağımsız çözülür.
 
-Logo değişikliği için mevcut 5 tema/ölçek/menü testi ve 3 ayrıntı/rehber penceresi testi geçti. [Hedefli test çıktısı](test-results/logo-gui-tests.log). Aşağıdaki 332 testlik tam tarama ve performans karşılaştırması 10 Ekim sürümünün kaydıdır; logo değişikliğinde hesaplama ve dışa aktarma kodu değiştirilmedi.
+Logo değişikliği için mevcut 5 tema/ölçek/menü testi ve 3 ayrıntı/rehber penceresi testi geçti. [Hedefli test çıktısı](test-results/logo-gui-tests.log). 332 testlik önceki tam tarama ve performans karşılaştırması 10 Ekim sürümünün kaydıdır; logo değişikliğinde hesaplama ve dışa aktarma kodu değiştirilmedi.
+
+## K/R tarama ve atama ayrımı
+
+Tarama sonuçları **Uygulamaya hazır**, gerçek yazma sonuçları **Uygulandı**
+gösterilir. Sayaç, filtre, satır ayrıntısı, günlük ve CSV aynı ayrımı kullanır.
+Tarama, K/R'yi değiştirmediğini açıkça belirtir; gerçek uygulama istenen
+değerlerin SolidWorks'ten geri okunarak doğrulandığını gösterir.
+
+Tarama sürerken verilen **Tarama bitince K/R uygula** isteği saklanır.
+Kontrol başarılıysa ve uygun parça varsa yeni uygulama işlemi başlar;
+durdurma, hata veya uygun parça bulunamaması bekleyen isteği iptal eder.
+Uygulama isteğine yalnız önizleme sonucu gelmesi açık hata olarak gösterilir.
+`128` bilgisi, zaten yüklü parçanın yeniden kullanılmasıyla ele alınır;
+mevcut belge uygulamanın yeni açtığı belge gibi kapatılmaz.
+[API karşılaştırması ve yerel kontrol](local-solidworks-check.md).
+
+Astra ile K/R dosyaları ve bağlı arayüz/COM akışı ayrıca incelendi. Süpürme
+flanşının özel yarıçapını belirleyen `UseDefaultRadius` kontrolü eklendi;
+tanım, kaynağı ve DLL hash'i [API kaydında](reports/k-radius/api-contract.json)
+ayrı tutulur. Adetlerin karşılaştırma anahtarları özgün dosya yolu olarak
+kullanılmıyor; `İ` gibi karakterler ve referans konfigürasyonu COM çağrılarında
+korunuyor. İki durum mevcut regresyon testlerine eklenerek sınandı.
+
+11 Ekim tam çalıştırma: **335 test, 0 başarısız, 0 atlanan**, 189,489 saniye;
+133 gerçek Tk GUI testi dahildir. Yüklü belgeyi yeniden kullanma, 128/karma
+uyarı maskesinde belgeyi kapatmama, taramada sıfır yazma, gerçek atama ve
+bekleyen isteğin durdurma/hata ile iptali kontrol edildi. Uygulama isteğine
+yalnız önizleme sonucu gelen bildirilen durum da yeniden üretildi; arayüz
+bunu uygulanmış saymıyor. [Tam çıktı](test-results/latest-tests.log).
+SolidWorks COM sınırı test nesneleriyle temsil edildi; gerçek SolidWorks
+2025 kabulü yerelde yapılmalıdır.
 
 ## Kullanım
 
@@ -41,7 +72,7 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 ## Doğrulama
 
-**332 test geçti; 132'si gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
+**335 test geçti; 133'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
 Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
@@ -63,11 +94,11 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.238 | 4.778 |
-| Testler ve ortak yardımcıları | 23 | 5.349 | 4.760 |
-| Toplam | 52 | 10.587 | 9.538 |
+| Uygulama | 29 | 5.336 | 4.874 |
+| Testler ve ortak yardımcıları | 23 | 5.483 | 4.888 |
+| Toplam | 52 | 10.819 | 9.762 |
 
-Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler 11 Ekim logo eklemesi sonrası sayımdır.
+Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler 11 Ekim K/R atama düzeltmesi sonrası sayımdır.
 
 Önceki sadeleştirmede GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. O aşamadaki 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz.
 

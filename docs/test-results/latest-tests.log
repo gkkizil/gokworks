@@ -206,6 +206,7 @@ test_positive_twenty_micron_clearance_never_disappears_with_common_offset (test_
 test_transition_positive_twenty_micron_sample_remains_a_positive_clearance (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_transition_positive_twenty_micron_sample_remains_a_positive_clearance) ... ok
 test_twenty_micron_interference_has_negative_signed_difference (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_twenty_micron_interference_has_negative_signed_difference) ... ok
 test_unilateral_example_section_card_csv_and_clipboard_agree (test_iso_tolerance_audit.ToleranceGuiAuditTests.test_unilateral_example_section_card_csv_and_clipboard_agree) ... ok
+test_already_open_warning_does_not_block_assignment_or_close_borrowed_part (test_k_factor.ApplyTests.test_already_open_warning_does_not_block_assignment_or_close_borrowed_part) ... ok
 test_apply_writes_metres_and_k_type_without_saving (test_k_factor.ApplyTests.test_apply_writes_metres_and_k_type_without_saving) ... ok
 test_batch_deduplicates_instances_and_restores_assembly (test_k_factor.ApplyTests.test_batch_deduplicates_instances_and_restores_assembly) ... ok
 test_batch_nested_assembly_and_suppression (test_k_factor.ApplyTests.test_batch_nested_assembly_and_suppression) ... ok
@@ -216,6 +217,7 @@ test_cross_configuration_propagation_rolls_back (test_k_factor.ApplyTests.test_c
 test_explicit_save_and_existing_dirty_document_protection (test_k_factor.ApplyTests.test_explicit_save_and_existing_dirty_document_protection) ... ok
 test_failed_rollback_is_explicit_and_never_saved (test_k_factor.ApplyTests.test_failed_rollback_is_explicit_and_never_saved) ... ok
 test_gauge_material_and_individual_bend_overrides_reject_before_write (test_k_factor.ApplyTests.test_gauge_material_and_individual_bend_overrides_reject_before_write) ... ok
+test_loaded_assembly_part_is_reused_without_reopening_or_closing (test_k_factor.ApplyTests.test_loaded_assembly_part_is_reused_without_reopening_or_closing) ... ok
 test_missing_platform_cancel_and_invalid_assembly_always_finish (test_k_factor.ApplyTests.test_missing_platform_cancel_and_invalid_assembly_always_finish) ... ok
 test_missing_sheet_feature_and_inaccessible_suppression_fail (test_k_factor.ApplyTests.test_missing_sheet_feature_and_inaccessible_suppression_fail) ... ok
 test_modify_rebuild_readback_and_save_errors_restore_values (test_k_factor.ApplyTests.test_modify_rebuild_readback_and_save_errors_restore_values) ... ok
@@ -235,6 +237,7 @@ test_measured_ba_calibration_and_table_difference (test_k_factor.CalculationTest
 test_measured_outside_dimensions_and_blank_recover_ba (test_k_factor.CalculationTests.test_measured_outside_dimensions_and_blank_recover_ba) ... ok
 test_published_freecad_manual_example (test_k_factor.CalculationTests.test_published_freecad_manual_example) ... ok
 test_tool_angles_reject_incompatible_acute_bends (test_k_factor.CalculationTests.test_tool_angles_reject_incompatible_acute_bends) ... ok
+test_apply_requested_during_scan_is_preserved_and_stop_cancels_it (test_k_factor.KGuiTests.test_apply_requested_during_scan_is_preserved_and_stop_cancels_it) ... ok
 test_invalid_calculation_blocks_worker (test_k_factor.KGuiTests.test_invalid_calculation_blocks_worker) ... ok
 test_measured_ba_and_outside_dimensions_calculator (test_k_factor.KGuiTests.test_measured_ba_and_outside_dimensions_calculator) ... ok
 test_navigation_title_preferences_and_theme_persistence (test_k_factor.KGuiTests.test_navigation_title_preferences_and_theme_persistence) ... ok
@@ -342,6 +345,6 @@ test_independent_reference_pages_keep_their_work_areas_after_operation_pages (te
 test_operation_work_areas_stay_large_when_scrolling_and_switching_forms (test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms) ... ok
 
 ----------------------------------------------------------------------
-Ran 332 tests in 183.756s
+Ran 335 tests in 189.489s
 
 OK

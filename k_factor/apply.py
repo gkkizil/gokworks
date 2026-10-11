@@ -13,6 +13,7 @@ from solidworks.connection import connect_to_solidworks
 
 pythoncom, win32com = sw.pythoncom, sw.win32com
 _value, _key = sw._value, sw._part_key
+ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
 
 
 def _read(obj, member):
@@ -207,7 +208,9 @@ def _check_defaults(model, definition):
         data = _value(feature, "GetDefinition")
         if data is None:
             continue
-        for attribute in ("UseDefaultBendRadius", "UseDefaultBendAllowance"):
+        # Swept flanges use UseDefaultRadius; other bend features expose
+        # UseDefaultBendRadius. Both must inherit the sheet-metal radius.
+        for attribute in ("UseDefaultBendRadius", "UseDefaultRadius", "UseDefaultBendAllowance"):
             if hasattr(data, attribute) and not bool(_value(data, attribute)):
                 raise RuntimeError(f"{_value(feature, 'Name')} özel büküm parametresi kullanıyor; genel K/R tüm bükümlere geçmez. Önce varsayılan büküm parametrelerini etkinleştirin.")
 
@@ -226,15 +229,25 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
     notes, status, calculation = [], "error", None
     stage = "Parça açma"
     try:
-        model = app.GetOpenDocumentByName(path)
+        # Assembly dependencies can be loaded without a document window.
+        # Prefer the same lookup used by xCAD before trying the name lookup.
+        get_open = getattr(app, "GetOpenDocument", None)
+        model = get_open(path) if get_open is not None else None
+        if model is None:
+            model = app.GetOpenDocumentByName(path)
         if model is None:
             errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
             model = app.OpenDoc6(path, 1, 1, configuration, errors, warnings)
-            opened = model is not None
+            # AlreadyOpen means this is a borrowed document. Closing it here
+            # could close a part loaded by the user's assembly/session.
+            opened = model is not None and not (warnings.value & ALREADY_OPEN)
             if model is None or errors.value:
                 raise RuntimeError(f"Parça açılamadı; hata kodu: {errors.value}")
-            if warnings.value:
-                notes.append(f"Açma uyarısı: {warnings.value}")
+            if warnings.value & ALREADY_OPEN:
+                notes.append("Açma bilgisi: belge zaten açık/yüklü (128); mevcut belge kullanıldı.")
+            other_warnings = warnings.value & ~ALREADY_OPEN
+            if other_warnings:
+                notes.append(f"Açma uyarısı: {other_warnings} (toplam kod: {warnings.value})")
         stage = "Parça belgesi ve etkinleştirme"
         if _value(model, "GetType") != 1 or _key(_value(model, "GetPathName"), "") != _key(path, ""):
             raise RuntimeError("SolidWorks istenen parça yerine farklı belge döndürdü.")
@@ -304,11 +317,13 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                     notes.append(f"Kaydetme uyarısı: {warnings.value}")
             else:
                 notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
+            notes.insert(0, f"K/R uygulandı ve geri okumayla doğrulandı: K={after.k_factor:.12g}, "
+                         f"R={after.radius*1000:.12g} mm, t={after.thickness*1000:.12g} mm.")
         else:
             current = f"K={before.k_factor:.4f}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
-            notes.append(f"Önizleme; mevcut {current}, R={before.radius*1000:.3f} mm.")
+            notes.insert(0, f"Önizleme; K/R uygulanmadı. Mevcut {current}, R={before.radius*1000:.3f} mm.")
         if isinstance(recipe, ManualAssignment):
-            notes.append(f"Manuel atama · K={calculation.k_factor:.12g} · R={calculation.radius_mm:.12g} mm · t={calculation.thickness_mm:.12g} mm")
+            notes.append(f"{'Manuel atama hedefi' if preview else 'Manuel atama'} · K={calculation.k_factor:.12g} · R={calculation.radius_mm:.12g} mm · t={calculation.thickness_mm:.12g} mm")
         else:
             notes.append(f"K={calculation.k_factor:.4f} · R={calculation.radius_mm:.3f} mm · t={calculation.thickness_mm:g} mm · V={calculation.die_opening_mm:g} mm · BA({calculation.angle_deg:g}°)={calculation.ba_mm:.5f} mm")
         notes.extend(calculation.notes)
@@ -350,7 +365,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
 def update_assembly(recipe, events, stop_event=None, *, preview=False, save=False):
     """Alt montajlar dahil, her dosya+konfigürasyona bir kez uygula."""
     summary = dict(state="completed", total=0, processed=0, succeeded=0,
-                   skipped=0, failed=0, error="")
+                   skipped=0, failed=0, error="", preview=bool(preview))
     initialized, app, assembly_name = False, None, None
     try:
         recipe.validate()
@@ -365,8 +380,12 @@ def update_assembly(recipe, events, stop_event=None, *, preview=False, save=Fals
         if hasattr(app, "_oleobj_"):
             app = win32com.client.dynamic.DumbDispatch(app)
         events.put(("phase", "Aktif montaj ve alt montajlar okunuyor…"))
-        counts, assembly_name, assembly_configuration = sw.assembly_quantities(app, stop_event)
-        records = sorted(counts.items())
+        references = {}
+        counts, assembly_name, assembly_configuration = sw.assembly_quantities(
+            app, stop_event, references=references)
+        # Comparison keys may change Unicode characters (İ -> i + dot).
+        # They are suitable for counting, never for opening a physical file.
+        records = [(references[key], quantity) for key, quantity in sorted(counts.items())]
         sources = [f"{path} [{configuration}]" for (path, configuration), _ in records]
         summary["total"] = len(records)
         events.put(("files", sources))

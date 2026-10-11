@@ -197,11 +197,15 @@ class ApplyTests(KApplyTestCase):
                 self.assertEqual(self.process()[0],'error')
                 self.assertEqual(self.model.feature.modify_count,0)
                 setattr(self.model,flag,False)
-        child=FakeFeature('Bend','OneBend')
-        child.GetDefinition=lambda:SimpleNamespace(UseDefaultBendRadius=False)
-        self.model.feature.child=child
-        self.assertEqual(self.process()[0],'error')
-        self.assertEqual(self.model.feature.modify_count,0)
+        for kind, attribute in (('OneBend', 'UseDefaultBendRadius'),
+                                ('SweepFlange', 'UseDefaultRadius'),
+                                ('EdgeFlange', 'UseDefaultBendAllowance')):
+            with self.subTest(kind=kind, attribute=attribute):
+                child=FakeFeature('Bend',kind)
+                child.GetDefinition=lambda:SimpleNamespace(**{attribute:False})
+                self.model.feature.child=child
+                self.assertEqual(self.process()[0],'error')
+                self.assertEqual(self.model.feature.modify_count,0)
 
     def test_non_sheet_and_multi_body_parts(self):
         self.model.bodies[0].IsSheetMetal=lambda:False
@@ -210,10 +214,17 @@ class ApplyTests(KApplyTestCase):
         self.assertEqual(self.process()[0],'error')
 
     def test_batch_deduplicates_instances_and_restores_assembly(self):
+        self.model.path='/work/İmalat/UZVCR-P008.SLDPRT'
+        self.assembly.root.children=(FakeComponent(self.model.path,configuration='Default'),)*3
+        def loaded_document(path):
+            self.assertEqual(path,self.model.path)
+            return self.model
+        self.app.GetOpenDocument=loaded_document
         events=self.batch()
         results=[value for kind,value in events if kind=='result']
         self.assertEqual(len(results),1)
         self.assertEqual(results[0]['quantity'],3)
+        self.assertEqual(results[0]['source'],f'{self.model.path} [Default]')
         self.assertEqual(results[0]['status'],'success',results[0]['detail'])
         self.assertEqual(events[-1][1]['succeeded'],1)
         self.assertIs(self.app.ActiveDoc,self.assembly)
@@ -242,6 +253,47 @@ class ApplyTests(KApplyTestCase):
         self.app.closed.clear()
         self.assertEqual(self.process()[0],'success')
         self.assertFalse(self.app.closed)
+
+    def test_loaded_assembly_part_is_reused_without_reopening_or_closing(self):
+        self.app.GetOpenDocument=lambda path:self.model if path==self.model.path else None
+        with patch.object(self.app,'GetOpenDocumentByName') as by_name, \
+                patch.object(self.app,'OpenDoc6') as open_doc:
+            status,detail,_=self.process(preview=True)
+            self.assertEqual(status,'success',detail)
+            by_name.assert_not_called()
+            open_doc.assert_not_called()
+        self.assertEqual(self.model.feature.modify_count,0)
+        self.assertFalse(self.app.closed)
+        status,detail,_=self.process()
+        self.assertEqual(status,'success',detail)
+        self.assertIn('geri okumayla doğrulandı',detail)
+        self.assertEqual(self.model.states['Default']['k'],.43)
+        self.assertFalse(self.app.closed)
+
+    def test_already_open_warning_does_not_block_assignment_or_close_borrowed_part(self):
+        self.app.existing=False
+        for warning_code in (128,128|2):
+            with self.subTest(warning_code=warning_code):
+                def open_part(path,kind,options,configuration,errors,warnings):
+                    warnings.value=warning_code
+                    return self.model
+                self.app.OpenDoc6=open_part
+                self.model.states['Default']['k']=.5
+                self.model.states['Default']['radius']=.0005
+                status,detail,_=self.process(preview=True)
+                self.assertEqual(status,'success',detail)
+                self.assertIn('K/R uygulanmadı',detail)
+                self.assertIn('zaten açık/yüklü (128)',detail)
+                self.assertEqual(self.model.states['Default']['k'],.5)
+                status,detail,_=self.process(save=True)
+                self.assertEqual(status,'success',detail)
+                self.assertIn('geri okumayla doğrulandı',detail)
+                self.assertNotIn('Önizleme',detail)
+                self.assertEqual(self.model.states['Default']['k'],.43)
+                self.assertAlmostEqual(self.model.states['Default']['radius'],.00256)
+                self.assertFalse(self.app.closed)
+                if warning_code!=128:
+                    self.assertIn('Açma uyarısı: 2 (toplam kod: 130)',detail)
 
     def test_cancel_after_current_part_keeps_next_part_unchanged(self):
         other=SheetPart('/work/z-next.sldprt')
@@ -368,18 +420,85 @@ class KGuiTests(GuiTestCase):
         assembly=FakeAssembly('/work/main.sldasm',[FakeComponent(model.path)])
         app=FakeApp(model,previous=assembly)
         self.app._switch_mode('k_factor')
-        with solidworks_session(ap, app, 'kr'):
+        with solidworks_session(ap, app, 'kr'), patch('k_factor.window.update_assembly',wraps=ap.update_assembly) as worker:
             self.app.scan_button.invoke();self.wait_idle()
             self.assertTrue(self.app.results[0]['preview'])
-            self.assertIn('Önizleme tamamlandı',self.app.status_label.cget('text'))
+            self.assertIn('K/R uygulanmadı',self.app.status_label.cget('text'))
+            self.assertIn('Montaja K/R uygula',self.app.status_label.cget('text'))
+            self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulamaya hazır')
+            self.assertEqual(self.app.k_widgets['success_caption'].cget('text'),'Hazır')
+            self.app.status_filter.set('Uygulamaya hazır');self.app.update()
+            self.assertEqual(len(self.app.table.get_children()),1)
             self.assertEqual(model.feature.modify_count,0)
             self.app.start_button.invoke();self.wait_idle()
+        self.assertEqual([call.kwargs['preview'] for call in worker.call_args_list],[True,False])
         self.assertFalse(self.app.results[0]['preview'])
+        self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulandı')
+        self.assertEqual(self.app.k_widgets['success_caption'].cget('text'),'Uygulanan')
+        self.assertNotIn('K/R uygulanmadı',self.app.status_label.cget('text'))
         self.assertEqual(self.app.results[0]['status'],'success',self.app.results[0]['detail'])
         self.assertEqual(model.states['Default']['k'],.43)
         self.assertEqual(model.save_count,0)
         self.assertEqual(self.app.progress.get(),1)
         self.assertEqual(self.app.nav_buttons['k_factor'].cget('state'),'normal')
+
+        # Reproduce the reported symptom: Apply receives preview-only results.
+        model.states['Default']['k']=.5
+        before=deepcopy(model.states)
+        def preview_instead(*args,**kwargs):
+            kwargs['preview']=True
+            ap.update_assembly(*args,**kwargs)
+        with solidworks_session(ap,app,'kr'), patch('k_factor.window.update_assembly',side_effect=preview_instead):
+            self.app.start_button.invoke();self.wait_idle()
+        self.assertEqual(model.states,before)
+        self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulamaya hazır')
+        self.assertIn('uygulama isteğine yalnız kontrol sonucu geldi',self.app.status_label.cget('text'))
+        self.assertEqual(self.app.result_tabs.get(),'Günlük')
+
+    def test_apply_requested_during_scan_is_preserved_and_stop_cancels_it(self):
+        self.app._switch_mode('k_factor')
+        real_worker = ap.update_assembly
+        for outcome in ('apply', 'stop', 'scan_error'):
+            with self.subTest(outcome=outcome):
+                release = Event()
+                calls = []
+                model = SheetPart()
+                model.material_link = outcome == 'scan_error'
+                assembly = FakeAssembly('/work/main.sldasm',[FakeComponent(model.path)])
+                app = FakeApp(model,previous=assembly)
+
+                def gated_worker(*args, **kwargs):
+                    calls.append(kwargs['preview'])
+                    if kwargs['preview']:
+                        release.wait(3)
+                    real_worker(*args, **kwargs)
+
+                with solidworks_session(ap, app, 'kr'), patch('k_factor.window.update_assembly',side_effect=gated_worker):
+                    self.app.scan_button.invoke()
+                    self.assertEqual(self.app.start_button.cget('state'),'normal')
+                    self.app.start_button.invoke()
+                    self.assertIn('pending_apply',self.app.k_widgets)
+                    self.assertEqual(self.app.start_button.cget('state'),'disabled')
+                    if outcome == 'stop':
+                        self.app.stop_button.invoke()
+                    release.set()
+                    self.wait_idle()
+                self.assertNotIn('pending_apply',self.app.k_widgets)
+                if outcome == 'stop':
+                    self.assertEqual(calls,[True])
+                    self.assertEqual(model.feature.modify_count,0)
+                    self.assertIn('Durduruldu',self.app.status_label.cget('text'))
+                elif outcome == 'scan_error':
+                    self.assertEqual(calls,[True])
+                    self.assertEqual(model.feature.modify_count,0)
+                    self.assertIn('K/R uygulanmadı',self.app.status_label.cget('text'))
+                else:
+                    self.assertEqual(calls,[True,False])
+                    self.assertEqual(len(self.app.results),1)
+                    self.assertFalse(self.app.results[0]['preview'])
+                    self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulandı')
+                    self.assertEqual(model.states['Default']['k'],.43)
+                    self.assertNotIn('Montaj kontrolü başladı',self.app.log_box.get('1.0','end'))
 
     def test_small_large_and_scaled_layout_in_both_themes(self):
         self.app._switch_mode('k_factor')

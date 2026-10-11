@@ -391,6 +391,9 @@
     ]
   },
   "enums": {
+    "swFileLoadWarning_e": {
+      "swFileLoadWarning_AlreadyOpen": 128
+    },
     "swBendAllowanceTypes_e": {
       "swBendAllowanceBendTable": 1,
       "swBendAllowanceKFactor": 2,
@@ -410,5 +413,44 @@
   "sha256": {
     "SolidWorks.Interop.sldworks.dll": "7a6bf74d2a9f60563959d738c3c85f825f257c9def2a3bec464511aaebfc88e4",
     "SolidWorks.Interop.swconst.dll": "2272a99dd0dc1bd40b16a8dcc7849616fe7d90349a06342f9ac6999ec0587a3b"
-  }
+  },
+  "supplemental_sources": [
+    {
+      "source": "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/thirdpty/SolidWorks.Interop.sldworks.dll",
+      "sha256": "cc2920cd4d412b9b52d033f6ac1add04ec126994915ced764b6d1d7688b39179",
+      "runtime_verified": false,
+      "methods": {
+        "ISweptFlangeFeatureData": [
+          {
+            "name": "get_UseDefaultRadius",
+            "signature": "200002",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "set_UseDefaultRadius",
+            "signature": "20010102",
+            "parameters": [
+              "Retval"
+            ]
+          },
+          {
+            "name": "get_UseDefaultBendAllowance",
+            "signature": "200002",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "set_UseDefaultBendAllowance",
+            "signature": "20010102",
+            "parameters": [
+              "Retval"
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

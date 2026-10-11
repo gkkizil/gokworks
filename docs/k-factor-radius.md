@@ -21,9 +21,10 @@ parçanın montaj adedi sonuçta gösterilir. Bastırılmış bileşenler işlen
 5. **Montajı tara** ile değişiklik yapmadan K/R önerilerini inceleyin. Sonuç
    satırına çift tıklayarak mevcut ve önerilen değerleri, BA hesabını ve uygunluk
    notlarını görün. Sac olmayan parçalar atlanır; desteklenmeyen parçalar açık
-   hata alır.
+   hata alır. **Uygulamaya hazır**, yalnız tarama sonucudur; K/R yazılmaz.
 6. **Montaja K/R uygula**, K ve iç R'yi sac metal unsuruna yazar. Varsayılan
-   davranış bellekte değiştirmektir; parçalar otomatik kaydedilmez.
+   davranış bellekte değiştirmektir; parçalar otomatik kaydedilmez. Sonuç
+   **Uygulandı** olduğunda değerler geri okunarak doğrulanmış olur.
 7. **Parça dosyalarını kaydet** işaretlenirse SolidWorks `Save3` kullanılır.
    Önceden kaydedilmemiş değişikliği olan parçanın otomatik kaydı reddedilir.
    İlk gerçek uygulamayı montaj/parça kopyalarıyla kontrol edin.
@@ -132,6 +133,10 @@ R ve kalınlık ayrı bir gerçek numuneden gelmelidir.
   özel bükümler otomatik değiştirilmez; ilgili bağın/override'ın SolidWorks'te
   düzenlenmesi gerektiği raporlanır. Eski sac mimarisinde gauge API hata
   veriyorsa uygunluk doğrulanmış sayılmaz.
+  Süpürme flanşının yarıçap mirası `UseDefaultRadius` ile kontrol edilir;
+  diğer bükümlerdeki `UseDefaultBendRadius` ile aynı alan değildir.
+  Süpürme flanşı özel R kullanıyorsa genel R'nin bütün bükümlere aktarıldığı
+  söylenmez; işlem yazmadan önce açık açıklamayla durdurulur.
 - İşlem öncesi parçanın bütün konfigürasyonlarındaki sac parametreleri alınır.
   Başka konfigürasyona yayılan değişiklik, yanlış geri okuma veya rebuild
   hatasında eski K/R geri yazılır ve tekrar kontrol edilir. Geri alma da
@@ -139,6 +144,16 @@ R ve kalınlık ayrı bir gerçek numuneden gelmelidir.
   Değerler geri alınsa bile SolidWorks'ün değiştirilmiş belge işareti kalabilir.
 - Önceki parça konfigürasyonu ve işlem sonunda ana montaj geri etkinleştirilir.
   Bellekte değiştirilmiş yeni açılan parça kaybolmaması için açık bırakılır.
+  Yüklü montaj parçaları önce `GetOpenDocument`, ardından
+  `GetOpenDocumentByName` ile aranır. `OpenDoc6` uyarı maskesinde 128
+  (`AlreadyOpen`) varsa belge mevcut oturuma aittir; yeni açılmış kabul edilip
+  kapatılmaz. Diğer uyarı bitleri ayrıca görünür kalır. Belge arama sırası
+  [xCAD kaynak koduyla](https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwDocumentCollection.cs#L340),
+  128 değeri [interop metadata kaydıyla](reports/k-radius/api-contract.json)
+  karşılaştırıldı; bu karşılaştırma gerçek SolidWorks 2025 çalıştırması değildir.
+  Montaj adetleri karşılaştırma anahtarlarıyla sayılır; COM'a dosya yolu ve
+  referans konfigürasyonu SolidWorks'ün verdiği özgün haliyle gönderilir.
+  Özellikle `İ` harfi küçük harfe çevrilip fiziksel dosya yolu değiştirilmez.
 - `Save3` hatası dosya bazında raporlanır. SolidWorks'ün yerel kaydı, eski
   DXF/PDF çıktılarındaki atomik dosya yayımlama garantisiyle eşdeğer değildir.
 

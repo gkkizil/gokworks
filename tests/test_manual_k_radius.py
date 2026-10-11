@@ -165,6 +165,19 @@ class ManualGuiTests(GuiTestCase):
             self.app.scan_button.invoke();self.wait_idle()
             self.assertEqual(model.feature.modify_count,0)
             self.assertTrue(self.app.results[0]['preview'])
+            preview_report=self.root/'manuel-kontrol.csv'
+            with patch('pdf.window.filedialog.asksaveasfilename',return_value=str(preview_report)):
+                self.app.report_button.invoke()
+            with preview_report.open(encoding='utf-8-sig') as stream:
+                preview_rows=list(csv.reader(stream,delimiter=';'))
+            self.assertEqual(preview_rows[1][2],'Uygulamaya hazır')
+            self.assertIn('Uygulamaya hazır',self.app.log_box.get('1.0','end'))
+            self.app.table.selection_set('file_0')
+            self.app._show_detail()
+            detail=next(widget for widget in self.app.detail_window.winfo_children()
+                        if hasattr(widget,'get') and widget.__class__.__name__=='CTkTextbox')
+            self.assertIn('Uygulamaya hazır',detail.get('1.0','end'))
+            self.app._close_detail()
             self.app.start_button.invoke();self.wait_idle()
         self.assertEqual([r['status'] for r in self.app.results],['success','skipped'])
         self.assertEqual(model.states['Default']['k'],.274)
@@ -176,6 +189,7 @@ class ManualGuiTests(GuiTestCase):
             self.app.report_button.invoke()
         with report.open(encoding='utf-8-sig') as stream:rows=list(csv.reader(stream,delimiter=';'))
         self.assertEqual(len(rows),3)
+        self.assertEqual(rows[1][2],'Uygulandı')
         self.assertIn('K=0.274',rows[1][3])
 
     def test_manual_preferences_reload_and_save_choice_starts_off(self):

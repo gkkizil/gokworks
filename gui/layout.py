@@ -236,7 +236,7 @@ class WorkspaceLayout:
         self.stats_frame = ctk.CTkFrame(self.workspace, fg_color="transparent")
         self.stats_frame.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 14))
         metrics = [
-            ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Başarılı", GREEN, "check"),
+            ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Uygulanan" if self.mode == "k_factor" else "Başarılı", GREEN, "check"),
             ("skipped", "Atlanan", AMBER, "skip"), ("failed", "Hatalı", RED, "error"),
         ]
         for index, (key, caption, color, icon) in enumerate(metrics):
@@ -247,8 +247,11 @@ class WorkspaceLayout:
                        padx=(0 if index == 0 else 4, 0 if index == len(metrics)-1 else 4))
             card.grid_columnconfigure(0, weight=1)
             compact = self.mode == 'k_factor'
-            self._label(card, caption, 11, MUTED).grid(row=0, column=0, sticky="w", padx=14,
-                                                     pady=8 if compact else (8, 0))
+            caption_label = self._label(card, caption, 11, MUTED)
+            caption_label.grid(row=0, column=0, sticky="w", padx=14,
+                               pady=8 if compact else (8, 0))
+            if compact and key == 'succeeded':
+                self.k_widgets['success_caption'] = caption_label
             self.stat_values[key] = self._label(card, "0", 20, color, True)
             self.stat_values[key].grid(row=0 if compact else 1, column=1 if compact else 0,
                                       sticky="w", padx=14, pady=8 if compact else (0, 8))
