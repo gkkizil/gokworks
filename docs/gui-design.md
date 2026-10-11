@@ -10,6 +10,12 @@ Ekran ölçeği değiştiğinde gizli ISO manuel formu, filtrelenmiş seçenekle
 
 [Gerçek ekran galerisi](ui-preview/README.md). Bulutta düzgün yazı görüntülemesi için Python 3.13 / Tk 8.6 kullanıldı; Windows Segoe UI değişmedi. [Aynı ortamda önce/sonra akıcılık ölçümü](test-results/ui-polish-responsiveness.json): sıcak menü geçişi medyanı 4,26 → 3,96 ms; 500 sentetik sonucun çizimi 84,00 → 83,50 ms. Bu küçük fark hızlanma garantisi değildir; görsel değişiklikler önceki toplu çizim davranışını korur. SolidWorks işlem süresi ölçülmedi.
 
+## Uygulama logosu
+
+Kullanıcının verdiği G monogramı `gui/assets/gokworks-logo.jpg` olarak aynen saklanır. Yan menü bu görseli ölçeklenebilir CTkImage ile gösterir. Ana pencere, dosya ayrıntıları, ISO kaynakları ve GD&T rehberi aynı pencere simgesini kullanır. Windows `.ico` dosyası yedi boyut içerir; CustomTkinter'ın gecikmeli varsayılan simgesini de devre dışı bırakır. Varlık yolları çalışma dizininden bağımsız çözülür.
+
+Logo değişikliği için mevcut 5 tema/ölçek/menü testi ve 3 ayrıntı/rehber penceresi testi geçti. [Hedefli test çıktısı](test-results/logo-gui-tests.log). Aşağıdaki 332 testlik tam tarama ve performans karşılaştırması 10 Ekim sürümünün kaydıdır; logo değişikliğinde hesaplama ve dışa aktarma kodu değiştirilmedi.
+
 ## Kullanım
 
 Yan menüden **Açık / Koyu** seçilir. Seçim beş ekranı, tabloyu, ikonları ve açık ayrıntı penceresini değiştirir; ayarlara kaydedilir. Tema değişikliği çalışan aktarımı durdurmaz, dosya listelerini/sonuçları sıfırlamaz.
@@ -57,11 +63,11 @@ Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrıl�
 
 | Kapsam | Python dosyası | Toplam satır | Boş olmayan satır |
 | --- | ---: | ---: | ---: |
-| Uygulama | 29 | 5.210 | 4.756 |
+| Uygulama | 29 | 5.238 | 4.778 |
 | Testler ve ortak yardımcıları | 23 | 5.349 | 4.760 |
-| Toplam | 52 | 10.559 | 9.516 |
+| Toplam | 52 | 10.587 | 9.538 |
 
-Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler 10 Ekim arayüz sadeleştirmesi ve DPI görünürlük düzeltmesi sonrası sayımdır.
+Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir. Uygulama kapsamı `main.py`, `pdf/`, `dxf_dwg/`, `solidworks/`, `k_factor/`, `gui/`, `iso_fits/`, `geometric_tolerances/` altındaki Python dosyalarıdır. Test kapsamı, `tests/support/` dahil `tests/` altındaki bütün Python dosyalarıdır. `.venv`, üçüncü taraf kütüphaneler, `backups/`, belgeler, ISO veri JSON'u ve DXF örnekleri sayılmadı. Bu değerler 11 Ekim logo eklemesi sonrası sayımdır.
 
 Önceki sadeleştirmede GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. O aşamadaki 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz.
 

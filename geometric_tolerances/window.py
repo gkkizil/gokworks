@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 import customtkinter as ctk
+from gui.icons import set_window_icon
 from gui.rendering import configure_changed, hide_grid
 
 from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
@@ -405,6 +406,7 @@ class GeometricTolerancesView:
     def _show_gdt_guide(self):
         self._close_detail()
         window = ctk.CTkToplevel(self)
+        set_window_icon(window)
         self.detail_window = window
         window.title('GOKWORKS · Geometrik tolerans rehberi')
         window.geometry('760x580')

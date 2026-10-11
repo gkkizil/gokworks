@@ -1,6 +1,6 @@
 # Güncel arayüz
 
-10 Ekim 2026. Görseller çalışan Tk uygulamasından, Linux sanal ekranında 1240 × 860 boyutunda alındı. Açık ve siyah tema, yeşil vurgu, dışa aktarım / mühendislik menü grupları ve bağımsız çalışma alanları gösteriliyor. K/R alanlarına örnek değerler girildi; bu görüntüler SolidWorks'e uygulama veya gerçek CAD çıktısı kanıtı değildir.
+11 Ekim 2026. Kullanıcının gönderdiği uygulama logosu yan menüye ve pencere simgelerine eklendi. Görseller çalışan Tk uygulamasından, Linux sanal ekranında 1240 × 860 boyutunda alındı. Açık ve siyah tema, yeşil vurgu, dışa aktarım / mühendislik menü grupları ve bağımsız çalışma alanları gösteriliyor. K/R alanlarına örnek değerler girildi; bu görüntüler SolidWorks'e uygulama veya gerçek CAD çıktısı kanıtı değildir.
 
 | Çalışma alanı | Açık tema | Koyu tema |
 | --- | --- | --- |

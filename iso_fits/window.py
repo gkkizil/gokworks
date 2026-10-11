@@ -7,6 +7,7 @@ from tkinter import filedialog
 import webbrowser
 
 import customtkinter as ctk
+from gui.icons import set_window_icon
 from gui.rendering import configure_changed, hide_grid
 
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
@@ -571,6 +572,7 @@ class IsoFitsView:
     def _show_iso_sources(self):
         self._close_detail()
         window = ctk.CTkToplevel(self)
+        set_window_icon(window)
         self.detail_window = window
         window.title('ISO geçmeleri · Kaynaklar ve hesap kapsamı')
         window.geometry('700x540'); window.minsize(520, 360)

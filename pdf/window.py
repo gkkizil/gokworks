@@ -20,7 +20,7 @@ from gui.layout import WorkspaceLayout
 from k_factor.window import KFactorView
 from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
-from gui.icons import make_icon
+from gui.icons import make_icon, set_window_icon
 from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
@@ -61,6 +61,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         if os.name != "nt":
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         super().__init__()
+        set_window_icon(self)
         self.title("GOKWORKS • SolidWorks Otomasyonu")
         window_scale = self._get_window_scaling()
         width = min(1240, max(1000, int(self.winfo_screenwidth()/window_scale)-24))
@@ -389,6 +390,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         if existing is not None and existing.winfo_exists():
             self._close_detail()
         window = ctk.CTkToplevel(self)
+        set_window_icon(window)
         self.detail_window = window
         window.title("GOKWORKS · Dosya ayrıntıları")
         window.geometry("660x470")

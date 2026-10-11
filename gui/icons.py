@@ -1,11 +1,33 @@
-"""Pillow ile çizilen özgün, ölçeklenebilir arayüz ikonları.
+"""Uygulama logosu ve Pillow ile çizilen ölçeklenebilir arayüz ikonları.
 
 Font veya çevrimiçi ikon servisi gerekmez. CTkImage nesneleri her uygulama
 penceresinde ayrı tutulur; farklı Tk kökleri PhotoImage paylaşmaz.
 """
 
+import os
+from pathlib import Path
+
 import customtkinter as ctk
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageTk
+
+LOGO_PATH = Path(__file__).resolve().parent / "assets" / "gokworks-logo.jpg"
+
+
+def make_logo(size=40):
+    with Image.open(LOGO_PATH) as source:
+        logo = source.copy()
+    return ctk.CTkImage(light_image=logo, dark_image=logo, size=(size, size))
+
+
+def set_window_icon(window):
+    icon_path = LOGO_PATH.with_suffix(".ico")
+    if os.name == "nt":
+        # Calling CTk's method also prevents its delayed blue default icon.
+        window.iconbitmap(str(icon_path))
+    else:
+        with Image.open(icon_path) as source:
+            window._window_icon = ImageTk.PhotoImage(source.copy(), master=window)
+        window.iconphoto(True, window._window_icon)
 
 
 def make_icon(name, color, size=20):

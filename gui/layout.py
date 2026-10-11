@@ -4,6 +4,7 @@ from tkinter import ttk
 
 import customtkinter as ctk
 
+from gui.icons import make_logo
 from gui.theme import (SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
                        ACCENT_BG, GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT)
 
@@ -66,11 +67,10 @@ class WorkspaceLayout:
         self.sidebar.grid_rowconfigure(4, weight=1)
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         brand.grid(row=0, column=0, sticky="ew", padx=20, pady=(28, 28))
-        badge = ctk.CTkFrame(brand, width=36, height=36, corner_radius=10, fg_color=ACCENT_BG)
-        badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
-        badge.grid_propagate(False)
-        ctk.CTkLabel(badge, text="", image=self._icon("layers", ACCENT, 24)).place(
-            relx=.5, rely=.5, anchor="center")
+        self.brand_logo = make_logo()
+        self.brand_badge = ctk.CTkLabel(brand, text="", image=self.brand_logo,
+                                       width=40, height=40, fg_color="#FFFFFF")
+        self.brand_badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
         self._label(brand, "GOKWORKS", 16, bold=True).grid(row=0, column=1, sticky="w")
         self._label(brand, "SolidWorks araçları", 11, MUTED).grid(row=1, column=1, sticky="w")
         self._label(self.sidebar, "DIŞA AKTARIM", 10, MUTED, True).grid(

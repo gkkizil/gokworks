@@ -1,7 +1,7 @@
 [
   {
     "file": "docs/ui-preview/screenshots/pdf-light.png",
-    "sha256": "c1f9965e79f44faa6990a2442b9770d414bef19d426cc105c07623df59c6fc1d",
+    "sha256": "6dd46762c934b5eeb7b305f1e57bdee1f340fc8a0a699ce760236d1896edc915",
     "mode": "pdf",
     "theme": "Açık",
     "size": "1240x860",
@@ -14,7 +14,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/pdf-dark.png",
-    "sha256": "ec6f5754cea1fb9e2ccf1922ed7d49c498ac861ee730798c850866086a0dc3dd",
+    "sha256": "2cbeaf0a6ccfdbc3ef0a30e3a15d94db6a8cd8f0cf8a070162f75fc55fc66c64",
     "mode": "pdf",
     "theme": "Koyu",
     "size": "1240x860",
@@ -27,7 +27,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-light.png",
-    "sha256": "90d8f8270c53a1bed39f6c89e7834d48c9cc5182b4e8a85dc0d5cea9336e6107",
+    "sha256": "d6aa96495b67d740d25322b7448a803feced61d6d0126e3cbe4b540ca2dad4f2",
     "mode": "dxf_dwg",
     "theme": "Açık",
     "size": "1240x860",
@@ -40,7 +40,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark.png",
-    "sha256": "28ead9762d9252e7b17e3c633c443e7dd8568aa84426685d2b96a614d6795eba",
+    "sha256": "cc82c16d5459ce5d657817c95ec850563b4dbf42411d30739d9e8a889e032cce",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1240x860",
@@ -53,7 +53,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-light.png",
-    "sha256": "e3932eca5690fc2a9972dba4318917f3df1ca8568d988a3e05bebf376547e782",
+    "sha256": "d0feba7b74d645c66b0197377f8ba8399030057866417aaf29cfbe9b5cadff6c",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -66,7 +66,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-dark.png",
-    "sha256": "f2865fcf98caba0279cf4fde1e632fcc95ee0d9df1f4f3888f257e16fc5dc1f0",
+    "sha256": "aafd5aca9545658c38009c27b8fe1e2bf82065275f2306becee792b8376c3b89",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -79,7 +79,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-light.png",
-    "sha256": "b43223480d06f76de96e3203910dcd5528ae27e0f704479e0aa69f3364a5e631",
+    "sha256": "e0b4115ae4f1474d27139005c518d214d984e807fa818693e7232da71110d4bb",
     "mode": "iso_fits",
     "theme": "Açık",
     "size": "1240x860",
@@ -89,7 +89,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-dark.png",
-    "sha256": "3305b1236f4a4833efda3ebc89defbfbb6ce0f59071572d244f8cb2d6fe7a384",
+    "sha256": "4bb85a5404408f8bb0f1309381a8eef8ae9e9d8dad5f34bac5810a846f8361b7",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -99,7 +99,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-light.png",
-    "sha256": "0aa1c7fed9e180a2c79339a56c0a509f932654d0dd1c2c561a3735aa67aac3a2",
+    "sha256": "6cc816d34e188a8567f7708c937b0e145dfac8cb91930329da1fb7f740c7dab6",
     "mode": "geometric_tolerances",
     "theme": "Açık",
     "size": "1240x860",
@@ -109,7 +109,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-dark.png",
-    "sha256": "0b998559d5bfdebffdf8adbfd975f710fb65fbbf90e670d0e18fee6f64cdf075",
+    "sha256": "575e6364de11d3bb4dad7566fde2074344b431b618e30eb357c0b85523ce492e",
     "mode": "geometric_tolerances",
     "theme": "Koyu",
     "size": "1240x860",
@@ -119,7 +119,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-light.png",
-    "sha256": "41dc7ac0057eafa2ee10e8bd0677fa21b36605a4ee37a0c7cf97075fb5da3171",
+    "sha256": "d2f33ad6dded836ba0d671a5aee9b074d314cd2dfd42c17ccd543d6a713e5ff6",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -132,7 +132,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark.png",
-    "sha256": "3362dd491ca54a7a7f0a4203b65c19eefd9f75617ec52ae1ba43f01f3155517a",
+    "sha256": "ffc7d70a272ee4d50557040ecd09e4d08cc8175a0a8fc5a5799c187ec89a149f",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -145,7 +145,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h6-dark.png",
-    "sha256": "6af6048607ff21d4b35f71f77a1f0332f78639a6657d357e3f26ab9b3c46214e",
+    "sha256": "75e1df6e77decc7860dbd54d15809b54eb98b20985b21b2b527895981d54db24",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -155,7 +155,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h8-dark.png",
-    "sha256": "6dbe0f0397ef8b6bcc1c9028e056a83673d6a243891a1019b8857208fa6568ba",
+    "sha256": "30947e3a3ce04f08f24b543aa0edb76c48e804e1478298559483bd9debe3a9b3",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -165,7 +165,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-comparison-dark.png",
-    "sha256": "9d0c0ca9bc1b12fba4f43ccf8af67e9fc3448be58fd753297192b0e04f45fcb4",
+    "sha256": "778ea816b711b781ad56c3ec37747077947b6e5c256f6ce70b69501fdd625f31",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -175,7 +175,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-light.png",
-    "sha256": "09fa8f1dd7f238d484112fe72cc94df08b94033df94e3026f9d66f94f04ea173",
+    "sha256": "e33c4ca7783aa23967d020366f22b808dd342c6dfa1b564a49df4c71c356d1af",
     "mode": "iso_fits",
     "theme": "Açık",
     "size": "1240x860",
@@ -185,7 +185,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-dark.png",
-    "sha256": "a8f91e20c0a9dce48a6022d1cd17879c4860ac98d40b2da13299f60037f1a54d",
+    "sha256": "02e8f59dd1fba8ffd2ea637130d425f1a917f2a7b005d9c7a4cf1d0759563f10",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -195,7 +195,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark-small.png",
-    "sha256": "ffe70c81987bc1a6057691fe8fc99886e4fd309cbfbbbae2ed9e71ed32c60e4a",
+    "sha256": "974f318dbf1f1a47286f9273edabe5a231ab995eb64bd6af1ed524d5365ed467",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1000x690",
@@ -208,7 +208,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark-small.png",
-    "sha256": "b141a7c1d4db478f13d897ef2d306c25670dbcf80eea86abd81c99cbf1f02e96",
+    "sha256": "078416f671601ec6b0363e4972a7d84f8dd54eb2296763dc3852f993bba4f350",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1000x690",
