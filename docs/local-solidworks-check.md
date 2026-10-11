@@ -63,6 +63,26 @@ Tarama sürerken **Tarama bitince K/R uygula** düğmesine basılırsa uygulama
 isteği bekletilir; uygun parça bulunan başarılı taramadan sonra başlar.
 Durdur/iptal/hata durumunda bekleyen istek uygulanmaz.
 
+## Katıyı Saca Dönüştür ile oluşturulan parçalar
+
+1. Tek gövdeli bir dönüşüm parçasının kopyasını montaja ekleyin. **Gövdeyi
+   koru** seçeneğiyle ikinci katı gövde kalan parça bu sürümde desteklenmez.
+2. Dönüşüm unsurunda kalınlık/yarıçap ve büküm payı için varsayılan sac
+   parametrelerini kullanın. Özel değerler açıksa uygulama ilgili ayarı
+   bildirip K/R yazmadan durmalıdır.
+3. Gerçek kalınlığa karşılık gelen manuel atamayı yapın; örneğin
+   `1,5 mm → K=0,274, R=1,5 mm`. Tarama sırasında değerler değişmemeli.
+4. **Montaja K/R uygula** sonrasında hem ana SheetMetal unsurunu hem de
+   **Katıyı Saca Dönüştür** unsurunu düzenleyerek K, R ve kalınlığı kontrol
+   edin. Sonuç ayrıntısında dönüşümün de geri okumayla doğrulandığı yazmalıdır.
+5. Modeli yeniden oluşturup açınımını kontrol edin. Ardından özel K veya R
+   kullanan bir dönüşüm kopyasında tekrar deneyin: işlem açık açıklamayla
+   durmalı, dosya kaydedilmemelidir. Başka konfigürasyon değişmemelidir.
+
+Buluttaki [dönüşüm ve K/R testleri](test-results/convert-solid-kr-tests.log),
+API sözleşmesini ve hata/geri alma davranışını test nesneleriyle sınar;
+yukarıdaki gerçek SolidWorks geometri kontrolünün yerine geçmez.
+
 ## ISO ve GUI kabul kontrolü
 
 - **ISO seçimi → Mil esaslı**: JS7/h6, K7/h6 ve N7/h6 ara geçme örneklerini

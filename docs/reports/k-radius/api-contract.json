@@ -449,7 +449,69 @@
               "Retval"
             ]
           }
+        ],
+        "IConvertSolidFeatureData": [
+          {
+            "name": "get_SheetThickness",
+            "signature": "20000d",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "get_BendRadius",
+            "signature": "20000d",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "get_OverrideDefaultSheetMetalParameters",
+            "signature": "200002",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "GetCustomBendAllowance",
+            "signature": "20001c",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "get_OverrideDefaultBendAllowanceParameters",
+            "signature": "200002",
+            "parameters": [
+              ""
+            ]
+          },
+          {
+            "name": "get_OverrideBendRadius",
+            "signature": "200002",
+            "parameters": [
+              ""
+            ]
+          }
         ]
+      }
+    }
+  ],
+  "documentation_sources": [
+    {
+      "source": "https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/tag/v3.12.1",
+      "asset": "SolidWorks.Interop.xmldoc.v3.12.1.zip",
+      "sha256": "6cbddbcd2e173b664dd920cd6928d013f6b445f885c1478a6a5acb7fd6f0605b",
+      "api_documentation_version": "2026",
+      "runtime_verified": false,
+      "access_note": "Official help.solidworks.com requests returned HTTP 403; documentation read through this unofficial mirror and member signatures checked against the separately attributed xCAD interop DLL.",
+      "findings": {
+        "IFeature.GetTypeName2": "SolidToSheetMetal maps to IConvertSolidFeatureData.",
+        "IConvertSolidFeatureData.OverrideDefaultSheetMetalParameters": "Overrides parent thickness and default bend radius; BendRadius and SheetThickness setters require true.",
+        "IConvertSolidFeatureData.OverrideDefaultBendAllowanceParameters": "Overrides custom bend allowance inherited from the parent sheet metal feature.",
+        "IConvertSolidFeatureData.OverrideBendRadius": "Gauge-only creation setting; valid only before CreateFeature. It is not the override check for an existing conversion.",
+        "IConvertSolidFeatureData.GetCustomBendAllowance": "Returns an ICustomBendAllowance object.",
+        "IConvertSolidFeatureData.SheetThickness": "The thickness member is SheetThickness, not ISheetMetalFeatureData.Thickness."
       }
     }
   ]

@@ -137,11 +137,26 @@ R ve kalınlık ayrı bir gerçek numuneden gelmelidir.
   diğer bükümlerdeki `UseDefaultBendRadius` ile aynı alan değildir.
   Süpürme flanşı özel R kullanıyorsa genel R'nin bütün bükümlere aktarıldığı
   söylenmez; işlem yazmadan önce açık açıklamayla durdurulur.
+- **Katıyı Saca Dönüştür** unsurları `GetTypeName2 = SolidToSheetMetal`
+  ile tanınır. Varsayılan sac parametrelerine bağlı, tek gövdeli dönüşümlerde
+  ana `SheetMetal` güncellenir; dönüşümün kendi `SheetThickness`, `BendRadius`,
+  büküm payı türü, K değeri ve unsur hata durumu da geri okunur. Dönüşüm
+  değerleri hedefle eşleşmeden **Uygulandı** sonucu verilmez.
+  `OverrideDefaultSheetMetalParameters` veya
+  `OverrideDefaultBendAllowanceParameters` açıksa yazmadan önce ilgili unsur
+  ve ayar adı bildirilir. Özel ayarlar kendiliğinden kaldırılmaz.
+  `OverrideBendRadius`, yalnız unsur oluşturulurken kullanılan gauge ayarıdır;
+  mevcut dönüşümün parametre mirasını denetlemek için kullanılmaz.
+  **Gövdeyi koru** nedeniyle birden fazla katı gövde kalan parçalar mevcut
+  tek gövde sınırına tabidir.
 - İşlem öncesi parçanın bütün konfigürasyonlarındaki sac parametreleri alınır.
   Başka konfigürasyona yayılan değişiklik, yanlış geri okuma veya rebuild
   hatasında eski K/R geri yazılır ve tekrar kontrol edilir. Geri alma da
   başarısızsa açık **GERİ ALMA HATASI** gösterilir; otomatik kayıt yapılmaz.
   Değerler geri alınsa bile SolidWorks'ün değiştirilmiş belge işareti kalabilir.
+  Dönüşüm unsurları da bu karşılaştırmaya dahildir. Yeniden oluşturma sonrası
+  dönüşüm tanımı okunamasa bile ana sacın önceki değerleri geri yüklenmeye
+  çalışılır; ardından ana sac ve dönüşüm birlikte tekrar denetlenir.
 - Önceki parça konfigürasyonu ve işlem sonunda ana montaj geri etkinleştirilir.
   Bellekte değiştirilmiş yeni açılan parça kaybolmaması için açık bırakılır.
   Yüklü montaj parçaları önce `GetOpenDocument`, ardından
@@ -170,9 +185,16 @@ R ve kalınlık ayrı bir gerçek numuneden gelmelidir.
   çalıştırılmadan metadata olarak okundu. Kullanılan arayüz üyeleri, BYREF
   parametreler, gauge hata kodu `0` ve K tipi `2` doğrulandı.
   [API sözleşmesi ve SHA-256 kayıtları](reports/k-radius/api-contract.json).
+- Dönüşümün unsur türü ve override davranışı, 2026 API yardımının
+  [GitHub'daki bağımsız belge kopyası v3.12.1](https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/tag/v3.12.1)
+  üzerinden incelendi. `IConvertSolidFeatureData` üye imzaları ayrıca xCAD
+  deposundaki interop dosyasıyla karşılaştırıldı. Kaynak sürümü, dosya özeti
+  ve tespitler aynı API sözleşmesi kaydındadır. Bu belge sürümü karşılaştırması,
+  SolidWorks 2025 üzerinde gerçek model çalıştırması değildir.
 
 SolidWorks yardım sitesi bu bulut ortamındaki ağ erişiminde 403 verdi;
-resmi yardım sayfaları okunmuş gibi gösterilmez. Interop metadata kıyaslaması
+resmi siteden doğrudan yardım sayfaları okunmuş gibi gösterilmez. Dönüşüm
+belgeleri yukarıda belirtilen bağımsız kopyadan okunmuştur. Interop metadata kıyaslaması
 gerçek COM çalıştırması değildir. Gerçek SolidWorks geometrisi, hedef sürüm
 ve üretim numunesi Windows/atölye ortamında ayrıca kontrol edilmelidir.
 

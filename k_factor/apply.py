@@ -14,6 +14,7 @@ from solidworks.connection import connect_to_solidworks
 pythoncom, win32com = sw.pythoncom, sw.win32com
 _value, _key = sw._value, sw._part_key
 ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
+CONVERT_SOLID = "SolidToSheetMetal"  # IFeature.GetTypeName2; not the display name.
 
 
 def _read(obj, member):
@@ -81,12 +82,14 @@ class FeatureState:
     bend_allowance: float
     bend_deduction: float
     bend_table: str
+    kind: str = "SheetMetal"
+    error_code: int = 0
 
 
-def _state(feature):
+def _state(feature, kind="SheetMetal"):
     definition = _read(feature, "GetDefinition")
     if definition is None:
-        raise RuntimeError("SheetMetal unsur tanımı okunamadı.")
+        raise RuntimeError(f"{_read(feature, 'Name')} ({kind}) unsur tanımı okunamadı.")
     allowance = _read(definition, "GetCustomBendAllowance")
     if allowance is None:
         raise RuntimeError("Özel büküm payı API'si okunamadı.")
@@ -97,20 +100,22 @@ def _state(feature):
     ba = float(_read(allowance, "BendAllowance")) if allowance_type == 3 else 0.0
     bd = float(_read(allowance, "BendDeduction")) if allowance_type == 4 else 0.0
     table = str(_read(allowance, "BendTableFile") or "") if allowance_type in (1, 5) else ""
-    return FeatureState(_read(feature, "Name"), float(_read(definition, "Thickness")),
-                        float(_read(definition, "BendRadius")), allowance_type, k, ba, bd, table)
+    thickness_member = "SheetThickness" if kind == CONVERT_SOLID else "Thickness"
+    return FeatureState(_read(feature, "Name"), float(_read(definition, thickness_member)),
+                        float(_read(definition, "BendRadius")), allowance_type, k, ba, bd, table,
+                        kind, int(_read(feature, "GetErrorCode")))
 
 
 def _states(model):
-    return [_state(feature) for feature, kind in _features(model, include_suppressed=True)
-            if kind == "SheetMetal"]
+    return [_state(feature, kind) for feature, kind in _features(model, include_suppressed=True)
+            if kind in ("SheetMetal", CONVERT_SOLID)]
 
 
 def _same(left, right):
     if len(left) != len(right):
         return False
     for a, b in zip(left, right):
-        if (a.name, a.allowance_type) != (b.name, b.allowance_type):
+        if (a.name, a.kind, a.allowance_type, a.error_code) != (b.name, b.kind, b.allowance_type, b.error_code):
             return False
         if a.allowance_type in (1, 5) and a.bend_table != b.bend_table:
             return False
@@ -179,12 +184,21 @@ def _rollback(model, snapshots):
         # including propagated changes caused by unconfigured dimensions.
         for name, before in snapshots.items():
             _show_configuration(model, name)
-            if _same(before, _states(model)):
+            try:
+                unchanged = _same(before, _states(model))
+            except Exception:
+                # A failed rebuild can make a downstream definition unreadable.
+                # Still attempt restoring the known parent values, then verify.
+                unchanged = False
+            if unchanged:
                 continue
             features = {_value(f, "Name"): f for f, kind in _features(model, include_suppressed=True)
                         if kind == "SheetMetal"}
             for state in before:
-                _modify(model, features[state.name], state)
+                # ConvertSolid inherits these values. Do not initialize it or
+                # alter its thickness/relief/override settings during rollback.
+                if state.kind == "SheetMetal":
+                    _modify(model, features[state.name], state)
         for name, before in snapshots.items():
             _show_configuration(model, name)
             if not _same(before, _states(model)):
@@ -206,6 +220,21 @@ def _check_defaults(model, definition):
         if kind == "SheetMetal":
             continue
         data = _value(feature, "GetDefinition")
+        if kind == CONVERT_SOLID:
+            name = _read(feature, "Name")
+            if data is None:
+                raise RuntimeError(f"{name}: Katıyı Saca Dönüştür unsur tanımı okunamadı.")
+            # OverrideBendRadius concerns gauge settings during creation only.
+            # Existing conversions override their parent through these flags.
+            for attribute, label in (("OverrideDefaultSheetMetalParameters", "kalınlık/yarıçap"),
+                                     ("OverrideDefaultBendAllowanceParameters", "büküm payı/K")):
+                override = _read(data, attribute)
+                if override is None:
+                    raise RuntimeError(f"{name}: {attribute} durumu okunamadı; K/R uygulanmadı.")
+                if bool(override):
+                    raise RuntimeError(f"{name}: Katıyı Saca Dönüştür özel {label} parametresi kullanıyor "
+                                       f"({attribute}). K/R uygulanmadı; SolidWorks'te dönüşüm unsurunu "
+                                       "düzenleyip ilgili varsayılan parametreleri kullanın.")
         if data is None:
             continue
         # Swept flanges use UseDefaultRadius; other bend features expose
@@ -213,6 +242,22 @@ def _check_defaults(model, definition):
         for attribute in ("UseDefaultBendRadius", "UseDefaultRadius", "UseDefaultBendAllowance"):
             if hasattr(data, attribute) and not bool(_value(data, attribute)):
                 raise RuntimeError(f"{_value(feature, 'Name')} özel büküm parametresi kullanıyor; genel K/R tüm bükümlere geçmez. Önce varsayılan büküm parametrelerini etkinleştirin.")
+
+
+def _check_converted_values(model, expected, *, expected_names=None):
+    names = []
+    for feature, kind in _features(model):
+        if kind != CONVERT_SOLID:
+            continue
+        actual = _state(feature, kind)
+        target = replace(expected, name=actual.name, kind=kind, error_code=0)
+        if not _same([actual], [target]):
+            raise RuntimeError(f"{actual.name}: Katıyı Saca Dönüştür K/R, kalınlık veya unsur durumu "
+                               "ana sac parametreleriyle eşleşmedi; dönüşüm doğrulanamadı.")
+        names.append(actual.name)
+    if expected_names is not None and tuple(names) != expected_names:
+        raise RuntimeError("Katıyı Saca Dönüştür unsur listesi değişti; dönüşüm doğrulanamadı.")
+    return tuple(names)
 
 
 class NotSheetMetal(Exception):
@@ -282,11 +327,13 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
             calculation = calculate(float(_read(_read(feature, "GetDefinition"), "Thickness")) * 1000, recipe)
         stage = "Mevcut K/R ve büküm payı okuma"
         before = _state(feature)
-        if _read(feature, "GetErrorCode"):
+        if before.error_code:
             raise RuntimeError("SheetMetal unsuru zaten hata içeriyor; önce parçayı düzeltin.")
         calculation = calculate(before.thickness * 1000, recipe)
         stage = "Malzeme, gauge ve özel büküm kontrolleri"
         _check_defaults(model, _read(feature, "GetDefinition"))
+        stage = "Katıyı Saca Dönüştür parametre kontrolü"
+        converted_names = _check_converted_values(model, before)
         if not preview:
             if save and _read(model, "GetSaveFlag"):
                 raise RuntimeError("Parçada önceden kaydedilmemiş değişiklik var; önce SolidWorks'te kaydedin veya dosyaları kaydet seçeneğini kapatın.")
@@ -307,6 +354,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                     if not _same(untouched, _states(model)):
                         raise RuntimeError(f"Değişiklik başka konfigürasyona yayıldı ({name}); işlem geri alınıyor. Parametreleri konfigürasyona özel tanımlayın.")
             _show_configuration(model, configuration)
+            _check_converted_values(model, target, expected_names=converted_names)
+            if converted_names:
+                notes.append(f"Katıyı Saca Dönüştür: {len(converted_names)} unsurda K/R ve kalınlık geri okumayla doğrulandı.")
             if save:
                 stage = "Parça dosyasını kaydetme"
                 errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
