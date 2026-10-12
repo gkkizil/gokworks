@@ -133,7 +133,7 @@ def compatibility(fit, target='Genel kontrol'):
             return Compatibility('boundary', 'Sınırda temas; sıkılık garanti değil',
                                  'En az sıkılık sıfır; tüm parçalar için sıkı montaj garanti edilemez.')
         return Compatibility('incompatible', 'Sıkı/pres hedefe tüm limitlerde uygun değil',
-                             'Sıfır temas veya boşluk oluşabilir; her parçada sıkılık yok.')
+                             'Sınırda temas veya boşluk oluşabilir; her parçada sıkılık yok.')
     if target == 'Ara / konumlandırma':
         if low < 0 < high:
             return Compatibility('compatible', 'Ara geçme hedefi oluşuyor',
@@ -141,7 +141,7 @@ def compatibility(fit, target='Genel kontrol'):
         return Compatibility('incompatible', 'Ara geçme hedefi oluşmuyor',
                              'Limitler hem pozitif boşluk hem negatif sıkılık bölgesini kapsamıyor.')
     if low < 0 < high:
-        return Compatibility('conditional', 'Montaj ölçüye bağlı; tek tip geçiş garanti değil',
+        return Compatibility('conditional', 'Montaj ölçüye bağlı; aynı montaj sonucu garanti değil',
                              'Bazı parçalar boşluklu, bazıları sıkı geçer. Her parçanın aynı şekilde takılması garanti değil.')
     if high <= 0 and low < 0:
         return Compatibility('conditional', 'Sıkılık veya sınırda temas; montaj değerlendirmesi gerekir',

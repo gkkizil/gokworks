@@ -1,4 +1,4 @@
-# BOM-ÜRÜN AĞACI
+# BOM - Ürün ağacı
 
 [Örnek Excel ve arayüz görselleri](reports/bom/README.md) sentetik montaj
 verileriyle hazırlanmıştır; kullanıcının gerçek CAD dosyalarını içermez.

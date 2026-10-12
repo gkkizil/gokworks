@@ -92,7 +92,7 @@ class GeometricRulesTests(unittest.TestCase):
             specify('position', '100', '0.05', 'Yok')
         self.assertIn('5.9.1', GUIDE)
         self.assertIn('5.9.2', GUIDE)
-        self.assertIn('RFS/RMB aynı kavram değildir', GUIDE)
+        self.assertIn('RFS ve RMB aynı kavram değildir', GUIDE)
 
     def test_total_width_is_not_plus_minus_or_a_general_grade(self):
         spec = specify('cylindricity', '100', '0,3')
@@ -102,7 +102,7 @@ class GeometricRulesTests(unittest.TestCase):
         self.assertEqual(spec.datums, ())
         self.assertEqual(spec.tolerance, specify('cylindricity', '500', '0,3').tolerance)
         self.assertIn('f/m/c/v', GUIDE)
-        self.assertIn('geometrik değer türetilmez', GUIDE)
+        self.assertIn('geometrik tolerans üretilmez', GUIDE)
 
     def test_cylindrical_position_region_is_diameter_not_radius(self):
         spec = specify('position', '50', '0,3', 'A | B | C')
@@ -290,11 +290,11 @@ class GeometricGuiTests(GuiTestCase):
                 self.assertEqual(report['Merkezlenmiş bölge yarı payı (mm)'], expected)
         self.app._select_gdt('position')
         self.app.gdt_state['measured'].set('0,06')
-        self.assertIn('sınır dışında', self.app.gdt_widgets['assessment'].cget('text'))
+        self.assertIn('tolerans dışında', self.app.gdt_widgets['assessment'].cget('text'))
         self.assertIn('radyal sapmayı doğrudan girmeyin', self.app.gdt_widgets['measured_help'].cget('text'))
         self.app._select_gdt('surface_profile')
         self.app.gdt_state['measured'].set('0,08')
-        self.assertIn('sınır dışında', self.app.gdt_widgets['assessment'].cget('text'))
+        self.assertIn('tolerans dışında', self.app.gdt_widgets['assessment'].cget('text'))
         self.assertIn('maksimum - minimum farkı yeterli değildir', self.app.gdt_widgets['measured_help'].cget('text'))
 
     def test_deleted_symbols_are_educational_only_and_cannot_export_a_current_frame(self):
@@ -324,7 +324,7 @@ class GeometricGuiTests(GuiTestCase):
         self.assertEqual(dict(self.app._gdt_report_rows())['İlgili boyut toleransı (mm)'], '0,1')
         self.app._select_gdt('flatness')
         self.assertEqual(self.app.gdt_state['size_tolerance'].get(), '')
-        self.assertIn('Rule #1', self.app.gdt_widgets['assessment'].cget('text'))
+        self.assertIn('ASME Kural 1', self.app.gdt_widgets['assessment'].cget('text'))
 
     def test_all_fourteen_buttons_draw_zones_symbols_and_frames_in_both_themes(self):
         self.open_page()
@@ -391,7 +391,7 @@ class GeometricGuiTests(GuiTestCase):
         self.app.gdt_state['measured'].set('0,05')
         self.assertIn('tam sınırda', self.app.gdt_widgets['assessment'].cget('text'))
         self.app.gdt_state['measured'].set('0,050001')
-        self.assertIn('sınır dışında', self.app.gdt_widgets['assessment'].cget('text'))
+        self.assertIn('tolerans dışında', self.app.gdt_widgets['assessment'].cget('text'))
         self.assertIn('-0,000001', self.app.gdt_widgets['assessment'].cget('text'))
         self.app.gdt_widgets['choices']['flatness'].invoke()
         self.assertEqual(self.app.gdt_state['measured'].get(), '')

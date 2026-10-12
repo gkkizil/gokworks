@@ -1,6 +1,6 @@
 """ANSI K faktörü, havada büküm takımları ve bağımsız BA ölçüm hesabı.
 
-Tablolar genel başlangıç önerileridir. Uzunluklar mm, açı düz sacdan dönülen
+Tablolar genel başlangıç önerileridir. Uzunluklar mm, açı düz sactan dönülen
 büküm açısıdır. Tablo hesabı, bağımsız üretim ölçümü yerine geçmez.
 """
 
@@ -37,9 +37,9 @@ def number(value, label, *, zero=False):
     try:
         value = float(str(value).strip().replace(",", "."))
     except (ValueError, TypeError):
-        raise ValueError(f"{label} sayısal olmalı.") from None
+        raise ValueError(f"{label} için geçerli bir sayı girin.") from None
     if not math.isfinite(value) or value < 0 or (not zero and value == 0):
-        raise ValueError(f"{label} {'sıfır veya pozitif' if zero else 'pozitif'} ve sonlu olmalı.")
+        raise ValueError(f"{label} için {'sıfır veya daha büyük' if zero else 'sıfırdan büyük'} bir sayı girin.")
     return value
 
 
@@ -47,7 +47,7 @@ def _geometry(thickness, radius, angle):
     t, r = number(thickness, "Sac kalınlığı"), number(radius, "İç yarıçap", zero=True)
     a = number(angle, "Büküm açısı")
     if a >= 180:
-        raise ValueError("Büküm açısı 0 ile 180 derece arasında olmalı; 180° hem desteklenmiyor.")
+        raise ValueError("Büküm açısı 0°'den büyük, 180°'den küçük olmalıdır. Tam katlama (180°) desteklenmez.")
     return t, r, math.radians(a)
 
 
@@ -64,7 +64,7 @@ def k_from_bend_allowance(thickness, radius, measured_ba, angle=90):
     t, r, a = _geometry(thickness, radius, angle)
     k = (number(measured_ba, "Ölçülmüş BA") / a - r) / t
     if not math.isfinite(k) or not 0 <= k <= 1:
-        raise ValueError("BA ölçümünden çıkan K, 0–1 dışında. Açı, iç R, kalınlık ve BA ölçümünü kontrol edin.")
+        raise ValueError("Ölçümden hesaplanan K faktörü 0–1 aralığının dışında. Açıyı, iç yarıçapı, sac kalınlığını ve büküm payını kontrol edin.")
     return k
 
 
@@ -114,7 +114,7 @@ class Recipe:
 
     def validate(self):
         material_by_key(self.material)
-        number(self.punch_radius_mm, "Üst bıçak uç R")
+        number(self.punch_radius_mm, "Üst bıçak yarıçapı R")
         _geometry(1, 1, self.angle_deg)
         for label, angle in (("Üst bıçak açısı", self.punch_angle_deg),
                              ("Alt kalıp açısı", self.die_angle_deg)):
@@ -185,7 +185,7 @@ def calculate(thickness_mm, recipe=Recipe()):
         return ManualCalculation(t, number(recipe.k_factor, "Manuel K faktörü", zero=True),
                                  number(recipe.radius_mm, "Manuel büküm yarıçapı"))
     material = material_by_key(recipe.material)
-    punch = number(recipe.punch_radius_mm, "Üst bıçak uç R")
+    punch = number(recipe.punch_radius_mm, "Üst bıçak yarıçapı R")
     if recipe.die_opening_mm is None:
         candidates = [v for v in DIE_OPENINGS if 6 <= v / t <= 12]
         if not candidates:
@@ -196,7 +196,7 @@ def calculate(thickness_mm, recipe=Recipe()):
     if not 6 <= v / t <= 12:
         raise ValueError(f"V/t={v/t:g}: genel havada büküm modeli 6–12 × t aralığını destekler. Uygun V seçin.")
     if punch >= v / 2:
-        raise ValueError("Üst bıçak uç R, V açıklığının yarısından küçük olmalı.")
+        raise ValueError("Üst bıçak yarıçapı R, V açıklığının yarısından küçük olmalı.")
     notes = ["Genel havada büküm önerisi; takım kapasitesi ve malzeme uygunluğunu üretimde kontrol edin."]
     natural_radius = material.air_radius_ratio * v
     r = (number(recipe.measured_radius_mm, "Ölçülmüş iç R")
@@ -208,7 +208,7 @@ def calculate(thickness_mm, recipe=Recipe()):
     if recipe.measured_radius_mm is None:
         notes.append(f"R ≈ max(bıçak R, {material.air_radius_ratio:g} × V); ölçülmüş R daha güvenilirdir.")
     if punch > natural_radius:
-        notes.append("Bıçak R baskın; R tahmini yaklaşık modeldir.")
+        notes.append("Yarıçap tahmininde bıçak yarıçapı baskındır; üretim ölçümüyle kontrol edin.")
     table_k = recommended_k(recipe.material, t, r)
     calibrated = recipe.measured_ba_mm is not None
     if calibrated:
@@ -221,7 +221,7 @@ def calculate(thickness_mm, recipe=Recipe()):
         notes.append("K, bağımsız BA ölçümünden hesaplandı; aynı malzeme/takım/açı koşulları gerekir.")
     else:
         k = table_k
-        notes.append("BA hesabı formülü kontrol eder; tablo K değerini deneysel olarak doğrulamaz.")
+        notes.append("Büküm payı hesabı tabloya dayalıdır; K faktörünü doğrulamak için üretim ölçümü gerekir.")
     if k > .5:
         notes.append("K > 0.5: ölçüm ve büküm koşulları ayrıca kontrol edilmeli.")
     return Calculation(t, v, r, table_k, k, bend_allowance(t, r, k, recipe.angle_deg),

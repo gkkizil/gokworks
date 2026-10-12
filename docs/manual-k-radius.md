@@ -1,6 +1,6 @@
 # Kalınlığa göre manuel K / R atama
 
-**K FAKTÖR - RADIUS → Manuel K / R** sekmesinde üç değer girilir:
+**K faktörü / yarıçap → Manuel K / R** sekmesinde üç değer girilir:
 
 | Alan | Örnek |
 | --- | --- |

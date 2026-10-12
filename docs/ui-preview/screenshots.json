@@ -1,7 +1,7 @@
 [
   {
     "file": "docs/ui-preview/screenshots/pdf-light.png",
-    "sha256": "6dd46762c934b5eeb7b305f1e57bdee1f340fc8a0a699ce760236d1896edc915",
+    "sha256": "fe4c58af6e24a98b1864994a28ead054e57a31e092c56db03ab8273201b65af2",
     "mode": "pdf",
     "theme": "Açık",
     "size": "1240x860",
@@ -10,11 +10,14 @@
     "real_solidworks_executed": false,
     "table_height_px": 406,
     "results_width_px": 608,
-    "form_width_px": 328
+    "form_width_px": 328,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/pdf-dark.png",
-    "sha256": "2cbeaf0a6ccfdbc3ef0a30e3a15d94db6a8cd8f0cf8a070162f75fc55fc66c64",
+    "sha256": "61e895b4ffaa70010c513601b72bff66b47e968a2cd733e6ca3283a456a6b9d7",
     "mode": "pdf",
     "theme": "Koyu",
     "size": "1240x860",
@@ -23,11 +26,14 @@
     "real_solidworks_executed": false,
     "table_height_px": 406,
     "results_width_px": 608,
-    "form_width_px": 328
+    "form_width_px": 328,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-light.png",
-    "sha256": "d6aa96495b67d740d25322b7448a803feced61d6d0126e3cbe4b540ca2dad4f2",
+    "sha256": "804e078e5875a0be8b928dee3a7ff8b498e82d33619b1746a56ab59deedd0c2e",
     "mode": "dxf_dwg",
     "theme": "Açık",
     "size": "1240x860",
@@ -36,11 +42,14 @@
     "real_solidworks_executed": false,
     "table_height_px": 406,
     "results_width_px": 608,
-    "form_width_px": 328
+    "form_width_px": 328,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark.png",
-    "sha256": "cc82c16d5459ce5d657817c95ec850563b4dbf42411d30739d9e8a889e032cce",
+    "sha256": "6d155387f968a99f0c5a7e882e1cf5df730151aec5ef56e90fe994f1c2d3b8ff",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1240x860",
@@ -49,166 +58,211 @@
     "real_solidworks_executed": false,
     "table_height_px": 406,
     "results_width_px": 608,
-    "form_width_px": 328
+    "form_width_px": 328,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-light.png",
-    "sha256": "b840328db77139485e8bb9c8e6349eb15c3adc5081a3b907d728988d92054370",
+    "sha256": "4bd0e0d04aa65ebcff7eaa424c0d80a8493aaa51e3d0dcb1b5270b1f21bf385e",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
     "variant": "",
     "native_tk_capture": true,
     "real_solidworks_executed": false,
-    "table_height_px": 397,
+    "table_height_px": 398,
     "results_width_px": 900,
-    "form_width_px": 948
+    "form_width_px": 948,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-dark.png",
-    "sha256": "0675633907ac72513a67c20eece9b69cd33363583b2db692a327946f61b84fb3",
+    "sha256": "0578e9d538435ab5be061024e691b0c0cc11976453d84752397e9e06ab2e2b32",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "",
     "native_tk_capture": true,
     "real_solidworks_executed": false,
-    "table_height_px": 397,
+    "table_height_px": 398,
     "results_width_px": 900,
-    "form_width_px": 948
+    "form_width_px": 948,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-light.png",
-    "sha256": "e0b4115ae4f1474d27139005c518d214d984e807fa818693e7232da71110d4bb",
+    "sha256": "836e15b2f3b0528162b284827527a3fecf2462bdac186ffe2c9e9394cb441d24",
     "mode": "iso_fits",
     "theme": "Açık",
     "size": "1240x860",
     "variant": "",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-dark.png",
-    "sha256": "4bb85a5404408f8bb0f1309381a8eef8ae9e9d8dad5f34bac5810a846f8361b7",
+    "sha256": "db02ca0815cca825b72cd0699fa495f69ceb4c309ad3a819ea111a206f642985",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-light.png",
-    "sha256": "6cc816d34e188a8567f7708c937b0e145dfac8cb91930329da1fb7f740c7dab6",
+    "sha256": "20fbb3102084980d006c235b2395010d05a37cc61166ab90740753e2cefe0273",
     "mode": "geometric_tolerances",
     "theme": "Açık",
     "size": "1240x860",
     "variant": "",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-dark.png",
-    "sha256": "575e6364de11d3bb4dad7566fde2074344b431b618e30eb357c0b85523ce492e",
+    "sha256": "a816e6efb0dc6b01b1dfcbfa220ff63c08378f5c47172f283ffb15970e5ac072",
     "mode": "geometric_tolerances",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-light.png",
-    "sha256": "51b3a674a14cd1ec457cbe75fb0da6eb35e83154b99a4f3ecd806692ce86eb42",
+    "sha256": "f69b23b24e372ac134eb0ec86d91d532820e82996c81c01f446559dd063331d3",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
     "variant": "manual",
     "native_tk_capture": true,
     "real_solidworks_executed": false,
-    "table_height_px": 397,
+    "table_height_px": 398,
     "results_width_px": 900,
-    "form_width_px": 948
+    "form_width_px": 948,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark.png",
-    "sha256": "4a467bad7f475153d508f59fde727a1fbe4d3f00e8941a69dc50ee377be709ec",
+    "sha256": "41cc5dc9f41746cb88981dcff8bd7a07deb823e306566b02f2ffdd36c04f8ffb",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "manual",
     "native_tk_capture": true,
     "real_solidworks_executed": false,
-    "table_height_px": 397,
+    "table_height_px": 398,
     "results_width_px": 900,
-    "form_width_px": 948
+    "form_width_px": 948,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h6-dark.png",
-    "sha256": "75e1df6e77decc7860dbd54d15809b54eb98b20985b21b2b527895981d54db24",
+    "sha256": "a190f9dd8e400076bfaaea30dd8c0ebeea4f19e03f8cf7de927c66dad927c886",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "manual-h6",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h8-dark.png",
-    "sha256": "30947e3a3ce04f08f24b543aa0edb76c48e804e1478298559483bd9debe3a9b3",
+    "sha256": "ebeede924b57b5d3ba9c97f00b9cd1314ea5c0b6c1c076bb7495ab904d220435",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "manual-h8",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-comparison-dark.png",
-    "sha256": "778ea816b711b781ad56c3ec37747077947b6e5c256f6ce70b69501fdd625f31",
+    "sha256": "a98db07880831681a32a9ca81f4ca51c90250ebd129538afba376de868c2563c",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "manual-comparison",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-light.png",
-    "sha256": "e33c4ca7783aa23967d020366f22b808dd342c6dfa1b564a49df4c71c356d1af",
+    "sha256": "07d53acabb6232e4cc704d0947ee5eeac9ae4f007ee42479908344f25b2f855c",
     "mode": "iso_fits",
     "theme": "Açık",
     "size": "1240x860",
     "variant": "shaft-basis",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-dark.png",
-    "sha256": "02e8f59dd1fba8ffd2ea637130d425f1a917f2a7b005d9c7a4cf1d0759563f10",
+    "sha256": "1800449bb4158e658caadafdb479faa898b75f19751a200c311509cf96bb98cc",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
     "variant": "shaft-basis",
     "native_tk_capture": true,
-    "real_solidworks_executed": false
+    "real_solidworks_executed": false,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark-small.png",
-    "sha256": "32dcd0539f0e0968dc15729ecea20333d78d091cd00fded4a1b15705712c7013",
+    "sha256": "aaf24fd63d5e0979260824eda4b1a765dc8672c67fbf8565863b09201de69636",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1000x690",
     "variant": "manual",
     "native_tk_capture": true,
     "real_solidworks_executed": false,
-    "table_height_px": 397,
+    "table_height_px": 398,
     "results_width_px": 900,
-    "form_width_px": 708
+    "form_width_px": 708,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark-small.png",
-    "sha256": "078416f671601ec6b0363e4972a7d84f8dd54eb2296763dc3852f993bba4f350",
+    "sha256": "d5d71f3ea8756ff472bbd62976519f4a30361a6d55dd09c2531156d4ed48e2b9",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1000x690",
@@ -217,6 +271,9 @@
     "real_solidworks_executed": false,
     "table_height_px": 198,
     "results_width_px": 408,
-    "form_width_px": 288
+    "form_width_px": 288,
+    "python": "3.13.5",
+    "tk": "8.6",
+    "turkish_glyphs_verified": true
   }
 ]

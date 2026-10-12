@@ -1,4 +1,4 @@
-# K FAKTÖR - RADIUS
+# K faktörü / yarıçap
 
 Ekranın iki alt sekmesi vardır: **Malzeme / Takım** ve **Manuel K / R**.
 Bu belge malzeme/takım hesabını anlatır. Kalınlık eşleştirerek doğrudan kullanıcı
@@ -10,7 +10,7 @@ parçanın montaj adedi sonuçta gösterilir. Bastırılmış bileşenler işlen
 
 ## Kullanım
 
-1. Ana montajı SolidWorks'te aktif yapın. **K FAKTÖR - RADIUS** ekranını açın.
+1. Ana montajı SolidWorks'te aktif yapın. **K faktörü / yarıçap** ekranını açın.
 2. Malzeme ailesini seçin: genel düşük karbonlu çelik, paslanmaz veya yumuşak
    alüminyum. Seçim tüm işlenecek saclar için bir hesap varsayımıdır; CAD'deki
    malzeme ataması değişmez. Farklı malzemeli sacları aynı varsayımla işlemeyin.
@@ -43,7 +43,7 @@ Bunlar markalı takım model numaraları veya onaylı üretici kapasite kataloğ
 değildir; yaygın nominal ölçü seçimleridir. Özel ölçü girilebilir. Program
 takım dayanımını, tonajı, minimum flanş boyunu, çarpışmayı veya geri esnemeyi
 hesaplamaz. Bu sürüm yalnız **havada büküm** içindir; dip büküm, ezme/coining,
-hem ve özel büyük yarıçaplı takımlar bu modelle değerlendirilmez.
+tam katlama ve özel büyük yarıçaplı takımlar bu modelle değerlendirilmez.
 
 Genel uygunluk sınırı `6 ≤ V/t ≤ 12`; otomatik seçim hedefi `8t`'dir. Katalogda
 bu sınır içinde seçenek bulunmuyorsa değer uydurulmaz. Bıçak R ve iç R,
@@ -80,7 +80,7 @@ belirtilir. Üretimde ölçülmüş iç R girildiğinde tahminin yerine o değer
 
 ## Elle bend allowance kontrolü
 
-Açı `θ`, **düz sacdan dönülen büküm açısıdır**; parça iç açısı değildir.
+Açı `θ`, **düz sactan dönülen büküm açısıdır**; parça iç açısı değildir.
 Örneğin iç açı 60° ise formüle 120° girilir. `θ_rad = θ_deg × π / 180`.
 
 ```text

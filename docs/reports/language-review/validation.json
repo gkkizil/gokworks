@@ -1,0 +1,89 @@
+{
+  "python": "3.13.5",
+  "tk": 8.6,
+  "full_suite": {
+    "tests": 377,
+    "seconds": 198.266,
+    "exit_code": 0,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "log_sha256": "a0fb6ba78d6b02a3a197b1f199912c31e621a0a892a6f5d57cba1bf2c4ff8876",
+    "command": "DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cloud-setup/cache /workspace/.cloud-setup/gui-venv/bin/python -m unittest discover -s tests -v"
+  },
+  "fonts": {
+    "Helvetica": {
+      "normal": {
+        "actual_family": "Nimbus Sans",
+        "glyph_widths_px": {
+          "Ç": 14,
+          "ç": 10,
+          "Ğ": 15,
+          "ğ": 11,
+          "İ": 5,
+          "ı": 5,
+          "Ö": 15,
+          "ö": 11,
+          "Ş": 13,
+          "ş": 10,
+          "Ü": 14,
+          "ü": 11
+        }
+      },
+      "bold": {
+        "actual_family": "Nimbus Sans",
+        "glyph_widths_px": {
+          "Ç": 14,
+          "ç": 11,
+          "Ğ": 15,
+          "ğ": 12,
+          "İ": 5,
+          "ı": 5,
+          "Ö": 15,
+          "ö": 12,
+          "Ş": 13,
+          "ş": 11,
+          "Ü": 14,
+          "ü": 12
+        }
+      }
+    },
+    "Courier": {
+      "normal": {
+        "actual_family": "Courier",
+        "glyph_widths_px": {
+          "Ç": 12,
+          "ç": 12,
+          "Ğ": 12,
+          "ğ": 12,
+          "İ": 12,
+          "ı": 12,
+          "Ö": 12,
+          "ö": 12,
+          "Ş": 12,
+          "ş": 12,
+          "Ü": 12,
+          "ü": 12
+        }
+      },
+      "bold": {
+        "actual_family": "Courier",
+        "glyph_widths_px": {
+          "Ç": 12,
+          "ç": 12,
+          "Ğ": 12,
+          "ğ": 12,
+          "İ": 12,
+          "ı": 12,
+          "Ö": 12,
+          "ö": 12,
+          "Ş": 12,
+          "ş": 12,
+          "Ü": 12,
+          "ü": 12
+        }
+      }
+    }
+  },
+  "native_solidworks_2025_verified": false
+}

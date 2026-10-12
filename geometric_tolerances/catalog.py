@@ -26,7 +26,7 @@ class Characteristic:
 
 CATALOG = (
     Characteristic('straightness', 'Doğrusallık', 'Straightness', 'Şekil',
-        'Seçilen yüzey çizgisinin ideal bir doğrudan ne kadar ayrılabileceğini sınırlar.',
+        'Yüzey üzerindeki bir çizginin düz bir çizgiden sapmasını sınırlar.',
         'Bu örnekte, aynı düzlemde iki paralel doğru arasındaki toplam mesafe t. Türetilmiş eksen için silindirik bölge ayrı bir belirtimdir.',
         'none', 'Belirtilen yönde çizgi taraması; CMM veya uygun doğrusal ölçüm düzeni. Tek noktadan ölçüm yeterli değildir.',
         'Uzun yüzeylerde işleme, fikstür ve gerilme kaynaklı eğilmeyi kontrol eder. Yüzey çizgisi ile eksen doğrusallığını ayırın.',
@@ -41,7 +41,7 @@ CATALOG = (
         'Bir dairesel kesitin ideal çember biçiminden sapmasını kontrol eder.',
         'Bir kesitte iki eş merkezli çember arasındaki radyal mesafe t. Kesitler ayrı değerlendirilir.',
         'none', 'Dairesellik cihazında kesit taraması; birden fazla kesit ve uygun filtreleme. İki noktalı çap ölçümü tam daireselliği kanıtlamaz.',
-        'Rule #1 boyut limitleriyle şekli de sınırlar. Normal durumda ayrı yüzey dairesellik toleransı boyut toleransından küçük olmalıdır. Loblu kesit iki noktalı mikrometrede gözden kaçabilir.',
+        'ASME Kural 1, boyut sınırlarıyla şekli de sınırlar. Normal durumda ayrı yüzey dairesellik toleransı boyut toleransından küçük olmalıdır. Loblu kesit iki noktalı mikrometrede gözden kaçabilir.',
         'Rulman yuvasının bir kesiti.'),
     Characteristic('cylindricity', 'Silindiriklik', 'Cylindricity', 'Şekil',
         'Silindirik yüzeyin tamamının ideal silindir biçimine uygunluğunu kontrol eder.',
@@ -50,13 +50,13 @@ CATALOG = (
         'Dairesellik, koniklik ve boyuna şekil hatalarını birlikte sınırlar; bu hataların basit toplamı değildir. Datum yoktur. Normal durumda t ilgili boyut toleransından küçük olmalıdır (8.4.4).',
         'Hidrolik pistonun çalışan silindirik yüzeyi.'),
     Characteristic('line_profile', 'Çizgi Profili', 'Profile of a Line', 'Profil',
-        'Belirtilen kesitteki gerçek çizginin teorik doğru profile uygunluğunu kontrol eder.',
+        'Tanımlanan kesitteki çizginin teorik profile göre sapmasını sınırlar.',
         'Bu örnekte teorik profil çevresinde simetrik, toplam genişliği t olan iki sınır çizgisi. Tek taraflı veya kaydırılmış bölgeler ayrıca belirtilir.',
         'optional', 'CMM, optik profil ölçümü veya uygun kesit taraması; teorik profil ve kesit yönü bilinmelidir.',
         'Datum verilirse profilin referansa göre yönü/konumu da sınırlandırılır. Teorik profil tanımı olmadan çerçeve tek başına yeterli değildir.',
         'Kam profilinin tanımlanan kesiti.'),
     Characteristic('surface_profile', 'Yüzey Profili', 'Profile of a Surface', 'Profil',
-        'Üç boyutlu gerçek yüzeyin teorik doğru yüzeye uygunluğunu kontrol eder.',
+        'Üç boyutlu yüzeyin teorik yüzeye göre sapmasını sınırlar.',
         'Bu örnekte teorik yüzey çevresinde simetrik, toplam genişliği t olan iki sınır yüzeyi. Çizimdeki kesit, 3B bölgenin bir temsilidir.',
         'optional', 'CMM veya doğrulanmış 3B tarama ile teorik CAD yüzeyine göre değerlendirme; datum ve ilişkilendirme yöntemi korunur.',
         'Serbest biçimli yüzeylerde kullanılır. Veri hizalaması hatayı yapay olarak küçültmemelidir; profilin yön/konum bağı çizimden okunur.',
@@ -80,22 +80,22 @@ CATALOG = (
         'Çerçevedeki tolerans mm’dir; açısal ± toleransla aynı şey değildir. Gerçek teorik açı teknik resimde ayrıca belirtilmelidir.',
         '45° işlenmiş oturma yüzeyi.'),
     Characteristic('position', 'Konum', 'Position', 'Konum',
-        'Bir boyut özelliğinin basic ölçülerle tanımlanan gerçek konumundan izin verilen sapmasını sınırlar. Bu örnek RFS delik eksenidir.',
-        'Bu delik ekseni örneğinde true position çevresinde çapı t olan silindir; radyal pay t/2. Basic ölçüler ve datum sistemi birlikte okunur; eksen unrelated AME’den değerlendirilir.',
+        'Bir deliğin veya milin, teorik ölçülerle tanımlanan konumundan sapmasını sınırlar. Bu örnek, boyuttan bağımsız (RFS) delik ekseni kontrolüdür.',
+        'Bu örnekte tolerans bölgesi, teorik eksen çevresinde çapı t olan silindirdir; radyal pay t/2’dir. Teorik ölçüler ve referans sistemi birlikte değerlendirilir. Eksen, datumlarla kısıtlanmadan oluşturulan ideal eşleşme zarfından (unrelated AME) elde edilir.',
         'required', 'CMM ile datum sistemine göre unrelated AME ekseninin RFS değerlendirmesi. Basit 2B merkez kontrolünde çap cinsinden hata: 2 × √(dx² + dy²).',
         '2B merkez hesabı tek başına eksen eğimini ve bütün boyu doğrulamaz. İşaretsiz boyut özelliğinde RFS, datum boyut özelliğinde RMB varsayılır. MMC/LMC yüzey sınırı veya bonus hesabı yapılmaz.',
         'Bağlantı deliği ekseninin teorik konumu.', True),
     Characteristic('concentricity', 'Eş Merkezlilik (eski)', 'Concentricity', 'Eski işaretler',
         'ASME 2018’de kaldırılmış eski eş merkezlilik sembolüdür. Güncel çerçeve oluşturulmaz.',
-        'Eski merkez/medyan nokta kontrolü, güncel position veya runout kontrolüyle doğrudan eşdeğer değildir. İşlev ve kontrol edilen özellik belirlenerek yeniden belirtilir.',
+        'Eski merkez/medyan nokta kontrolü, güncel konum veya salgı kontrolüyle doğrudan eşdeğer değildir. İşlev ve kontrol edilen özellik belirlenerek yeniden belirtilir.',
         'required', 'CMM ile karşılıklı yüzey noktalarından türetilmiş merkez/eksen değerlendirmesi; datum ekseni ayrı kurulur.',
-        'Eksen/koaksiyellik için position; yüzeyin datum eksenine ilişkisi için uygun profile veya runout kontrolü düşünülebilir (10.6). Otomatik dönüşüm yapılmaz.',
+        'Eksenlerin ortaklığı için konum; yüzeyin referans eksenine ilişkisi için profil veya salgı kontrolü düşünülebilir (10.6). Otomatik dönüşüm yapılmaz.',
         'İki mil kademesinin türetilmiş eksenleri.', True),
     Characteristic('symmetry', 'Simetri (eski)', 'Symmetry', 'Eski işaretler',
         'ASME 2018’de kaldırılmış eski simetri sembolüdür. Güncel çerçeve oluşturulmaz.',
-        'Simetrik ilişkiler güncel position veya profile belirtimleriyle kontrol edilebilir. Bu kontrollerin gerektirdiği geometri eski symmetry ile aynı kabul edilmez (10.7).',
+        'Simetrik ilişkiler güncel konum veya profil toleranslarıyle kontrol edilebilir. Bu kontrollerin gerektirdiği geometri eski simetri kontrolü ile aynı kabul edilmez (10.7).',
         'required', 'CMM ile karşılıklı yüzeylerden orta noktaların oluşturulması ve datum orta düzlemine göre değerlendirme.',
-        'Boyut özelliğinin merkez düzlemi ve yüzey profili farklı gerekliliklerdir. İstenen işlev için position veya profile seçin; eski sembolü doğrudan değiştirmeyin.',
+        'Boyut özelliğinin merkez düzlemi ve yüzey profili farklı gerekliliklerdir. İstenen işlev için konum veya profil toleransı seçin; eski sembolü doğrudan değiştirmeyin.',
         'Mil üzerindeki kanalın orta düzlemi.'),
     Characteristic('circular_runout', 'Dairesel Salgı', 'Circular Run-out', 'Salgı',
         'Datum ekseni çevresinde dönüş sırasında her ölçüm kesitindeki yüzey değişimini sınırlar.',
@@ -141,29 +141,27 @@ MEASUREMENT_INPUTS = {
     'total_runout': 'Bütün yüzeyin tam dönüş ve boyuna taramasındaki ortak maksimum - minimum farkını (TIR) girin; kesitleri ayrı sıfırlamayın, ikiyle çarpmayın.',
 }
 
-GUIDE = """GEOMETRİK TOLERANSLAR · ASME Y14.5-2018
+GUIDE = """ASME Y14.5-2018 · Geometrik tolerans rehberi
 
-Birincil kaynak kullanıcının yüklediği ASME-Y14.5-2018-R2024-Dimensioning-and-Tolerancing.pdf belgesidir. Kapak ve ana metin ASME Y14.5-2018 olarak doğrulandı. R2024 dosya adıdır; yeniden onay bilgisi kapakta/metinde görülmedi. Belge hash'i ve bölüm eşleştirmeleri raporda kayıtlıdır. PDF GitHub'a yüklenmez.
+Bu ekran 12 güncel özelliği açıklar: dört şekil, üç yön, bir konum, iki profil ve iki salgı toleransı. Eş merkezlilik ve simetri sembolleri ASME 2018’de kaldırılmıştır (Ek D). Eski çizimleri okumak için gösterilir; bu sembollerle güncel tolerans çerçevesi oluşturulmaz. İşlevine göre konum, profil veya salgı toleransı seçilmelidir (10.6–10.7).
 
-12 güncel özellik vardır: dört şekil, üç yön, konum, iki profil ve iki salgı. Concentricity / Symmetry sembolleri 2018’de kaldırılmıştır (Önsöz, Ek D). Eski işaretler eğitim için ayrı gösterilir; geçerli çerçeve oluşturulmaz. Koaksiyellik ve simetrik ilişki position/profile/runout ile işlevine göre yeniden belirtilir (10.6–10.7); otomatik veya eşdeğer dönüşüm yapılmaz.
+Referans (datum), ölçümde esas alınan teorik düzlem, eksen veya noktadır. Parçadaki ilgili referans yüzeyiyle aynı şey değildir. A | B | C sırası referansların önceliğini gösterir. Şekil toleransları referans kullanmaz. Bu ekrandaki yön ve konum örnekleri referans gerektirir; profil kontrolünde referans isteğe bağlıdır (Bölüm 7).
 
-Rule #1 — 5.8.1: Düzenli boyut özelliğinin yüzeyi MMC’deki kusursuz şekil zarfını aşamaz. Boyut limitleri ile şekil bağımsız varsayılmaz. İstisnalar 5.8.2, türetilmiş medyan çizgi/düzlem ve özel belirtimlere bağlıdır. Bu ekrandaki şekil örnekleri normal durumdaki yüzey/çizgi kontrolüdür. İlgili boyut toleransı girilirse t < boyut toleransı kontrol edilir (8.4); bu, MMC zarfını ölçerek kontrol etmek değildir.
+Teorik olarak tam ölçüler (basic dimensions), tolerans çerçevesiyle birlikte konumu veya profili tanımlar. Teknik resimde dikdörtgen çerçeve içinde gösterilir. Bu uygulamadaki “Gösterim boyutu” yalnız şemanın örnek boyutudur; konum ölçüsünün veya boyut toleransının yerine geçmez (5.1.1.2, 10.2.1.1).
 
-Rule #2 — 5.9.1: Boyut özelliğindeki geometrik tolerans için değiştirici yoksa RFS; datum boyut özelliği referansında değiştirici yoksa RMB varsayılır. RFS/RMB aynı kavram değildir. MMC/LMC ile MMB/LMB birbirinin yerine kullanılamaz. Bu rehber M/L değiştiricisi, bonus veya datum mobility üretmez. Dairesellik, silindiriklik, yüzeye uygulanan yön/profil ve salgı toleranslarına MMC/LMC eklenmez.
+ASME Kural 1 (Rule #1) — 5.8.1: Düzenli boyut özelliğinde, boyut sınırları şekli de sınırlar. Maksimum malzeme durumundaki (MMC) kusursuz şekil zarfı aşılmamalıdır. İstisnalar 5.8.2’de açıklanır. Bu ekran normal yüzey şekli örneklerinde geometrik toleransın ilgili boyut toleransından küçük olmasını kontrol eder (8.4); MMC zarfını ölçmez.
 
-Datum sistemi — Bölüm 7: Datum, datum unsurunun true geometric counterpart'ından oluşturulan teorik referanstır. A | B | C sırası önceliği gösterir. Ortogonal düzlem-düzlem-düzlem örneğinde 3-2-1 bağlama altı serbestliği kısıtlar; her datum geometrisi için otomatik 3-2-1 varsayılmaz. Şekil toleransları datum kullanmaz. Yön ve bu RFS konum örneği referans ister. Profil datumla veya datumsuz kullanılabilir. Datumsuz koaksiyellik gibi özel konum uygulamaları 10.6.2.3’te ayrıca açıklanır; bu çerçeve örneği onları üretmez.
+ASME Kural 2 (Rule #2) — 5.9.1: Boyut özelliğinde ek değiştirici yoksa geometrik tolerans boyuttan bağımsızdır (RFS). Referans boyut özelliğinde ise malzeme sınırından bağımsızlık (RMB) varsayılır. RFS ve RMB aynı kavram değildir. MMC/LMC belirtilmişse malzeme durumuna bağlı yüzey sınırları ayrıca değerlendirilir (5.9.2). Bu ekranda MMC/LMC, bonus tolerans veya referansın hareket payı hesaplanmaz. Dairesellik ve silindiriklik gibi yüzey şekli kontrollerine malzeme durumu değiştiricisi eklenmez.
 
-Basic ölçüler — 5.1.1.2 ve 10.2.1.1: Teorik olarak tam ölçülerin dikdörtgen çerçevesi, gerçek konumu/profili belirler. Gösterim boyutu bir basic konum ölçüsü veya boyut toleransı değildir. Konum için eksen, RFS'de unrelated AME üzerinden değerlendirilir (10.3.2); MMC/LMC'de surface method varsayımı vardır (5.9.2). Türetilmiş medyan çizgiyle AME ekseni karıştırılmaz.
+Toplam toleransın anlamı: t=0,3 mm, ±0,3 mm demek değildir. Konum için Ø0,3 mm tolerans bölgesinin radyal payı 0,15 mm’dir. Silindiriklikte t, iki eş eksenli silindir arasındaki radyal mesafedir. Merkezlenmiş profilde toplam bölge genişliği t’dir; her normal sapma ±t/2 içinde kalmalıdır. Yön toleransı da mm cinsindendir; açıya verilen ± derece toleransı değildir.
 
-Toplam bölge: t=0,3 mm, ±0,3 mm değildir. Konum Ø0,3 mm için radyal pay 0,15 mm’dir. Silindiriklikte t iki eş eksenli silindir arasındaki radyal mesafedir. Profilde normal yönde toplam genişlik t; aksi belirtilmezse uniform ve true profile çevresinde eşit dağılır (11.3). Yön toleransı mm cinsinden bölgedir; ± derece değildir.
+Ölçülen hata: Bu alana seçilen özellik için değerlendirilmiş toplam geometrik hatayı girin. Tek çap ölçüsü veya tek noktanın sapması çoğu özellik için yeterli değildir. Konum örneğinde 2B radyal sapma 0,03 mm ise çap cinsinden hata 0,06 mm’dir. Bu, bütün eksenin eğimini ve boyunu doğrulamaz. CMM, koordinat ölçüm cihazıdır; eksen kontrolünde datumlarla kısıtlanmadan oluşturulan ideal eşleşme zarfı (unrelated AME) ayrıca değerlendirilir.
 
-Ölçüm girişi: Konumda 2B radyal sapma 0,03 mm ise çap cinsinden hata 0,06 mm’dir; Ø0,05 sınırını aşar. Merkezlenmiş profil t=0,05 mm ise her normal sapma -0,025 ile +0,025 mm arasında kalmalıdır. +0,01 ve +0,04 mm sapmaların aralığı 0,03 mm olsa da profil uygun değildir: eşdeğer merkezlenmiş toplam hata 2 x 0,04 = 0,08 mm’dir. Datumlu profilde hizalama datum sistemini korumalıdır; datumsuz profilde izin verilen ilişkilendirme sonrası sapmalar kullanılır. Dairesellik/silindiriklik radyal bölge genişliğidir; salgı komparatörün maksimum - minimum farkıdır, tekrar ikiyle çarpılmaz. Alan, seçilen özellik için önceden değerlendirilmiş hata içindir; ham nokta/sapma hesaplayıcısı değildir.
+Merkezlenmiş profil örneği: t=0,05 mm için her normal sapma -0,025 ile +0,025 mm arasında olmalıdır. +0,01 ve +0,04 mm sapmalar arasındaki fark 0,03 mm olsa da yüzey uygun değildir; bu örnekte toplam hata 2 × 0,04 = 0,08 mm’dir. Dairesellik ve silindiriklikte radyal bölge genişliği kullanılır. Salgıda komparatörün en büyük ve en küçük okumalarının farkı kullanılır; sonuç ikiyle çarpılmaz.
 
-Çerçeve yazımı: Teknik çerçevede mm değerleri ondalık noktayla, 1 mm altı başında sıfırla yazılır (4.3.1, 4.3.3): 0.05. Türkçe giriş ve açıklamalarda ondalık virgül kullanılabilir. Şemanın 45° açısallık örneği gerçek 45° yönünde çizilir; profil sınırları teorik profile normal yönde eşit uzaklıktadır. Şema piksel boyutları fiziksel ölçüm değildir.
+Teknik çerçevede mm değerleri ondalık noktayla ve 1 mm altındaki değerler başında sıfırla yazılır: 0.05 (4.3.1, 4.3.3). Giriş alanları ve Türkçe açıklamalar ondalık virgülü destekler. Toleransı tasarımcı belirler; genel f/m/c/v boyut sınıflarından geometrik tolerans üretilmez.
 
-Değeri tasarımcı belirler. Genel f/m/c/v boyut sınıflarından ASME geometrik değer türetilmez. İsteğe bağlı hata, ilgili özellik için doğru datum/bölgeyle değerlendirilmiş toplam geometrik hatadır; tek çap sapması veya nokta ölçümü değildir. Yalnızca hata <= t aritmetiği gösterilir. Tam resim/model uygunluğu, zarf/virtual condition, ölçüm belirsizliği ve kalite kabulü değerlendirilmez. Tür değişince eski ölçüm temizlenir; yeniden açılışta geri yüklenmez.
+Şemalar açıklama amaçlıdır; piksel boyutları fiziksel ölçü değildir. Sonuç yalnız girilen hata ile toleransı karşılaştırır. Tam teknik resim veya model uygunluğu, ölçüm belirsizliği ve kalite kabulü değerlendirilmez. Tür değiştiğinde eski ölçüm temizlenir. Çerçeve CAD'e yazılmaz.
 
-Şemalar öğreticidir; bölgeler büyütülür. 3B bölgeler kesit/izdüşümle gösterilir. Kompozit/ortak bölge, izdüşümlü bölge, free state, tangent plane, unequally disposed/dynamic profile ve malzeme/boundary değiştiricileri burada oluşturulmaz. Tam GD&T çerçeve editörü veya CMM simülatörü değildir. Çerçeve CAD'e yazılmaz.
-
-GitHub yardımcı kaynağı: juanvanyo/FreeCAD-GDT’deki adlar ve çerçeve yapısı karşılaştırıldı. Bu eski kaynak 14 işaret içerir; 2018’e uymayan iki işaret uygulamada devre dışıdır. FreeCAD çalıştırılmadı ve kodu kopyalanmadı. Standart kuralları GitHub'dan değil yüklenen ASME belgesinden kontrol edildi; ISO kuralları bu sekmenin ASME kurallarıyla birleştirilmez.
+Bu rehber ASME Y14.5-2018 kapsamındadır; ISO geometrik tolerans kurallarıyla birleştirilmez. Kaynak belgeler ve bölüm karşılaştırmaları docs/geometric-tolerances.md içinde kayıtlıdır.
 """

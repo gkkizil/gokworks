@@ -209,7 +209,7 @@ def named_destinations(part, source, output, formats, thickness_mm, quantity):
 def find_parts(source_folder, include_subfolders, stop_event=None):
     source = Path(source_folder)
     if not source.is_dir():
-        raise ValueError("Kaynak klasör bulunamadı.")
+        raise ValueError("Kaynak klasörü bulunamadı.")
     parts = []
 
     def scan_error(error):

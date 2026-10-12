@@ -200,7 +200,7 @@ class GUIAuditTests(LayoutGuiTestCase):
         self.assertIn('Klasör açılamadı', self.app.status_label.cget('text'))
         self.app.output_folder.set(str(self.root/'missing'))
         self.app.open_button.invoke()
-        self.assertIn('henüz oluşturulmadı', self.app.status_label.cget('text'))
+        self.assertIn('Çıktı klasörü bulunamadı', self.app.status_label.cget('text'))
 
     def test_scan_failure_releases_controls_and_reports_reason(self):
         self.app.nav_buttons['dxf_dwg'].invoke()

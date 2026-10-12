@@ -8,7 +8,7 @@ def connect_to_solidworks():
     except ImportError as error:
         raise RuntimeError(
             "SolidWorks bağlantısı için pywin32 paketi gerekli. "
-            "PyCharm Terminal'inde .venv\\Scripts\\python.exe -m pip install pywin32 komutunu çalıştırın."
+            "PyCharm terminalinde .venv\\Scripts\\python.exe -m pip install pywin32 komutunu çalıştırın."
         ) from error
 
     try:

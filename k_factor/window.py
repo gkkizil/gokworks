@@ -53,7 +53,7 @@ class KFactorView:
         self.result_tabs.master.grid(row=0, column=0, sticky='nsew', padx=0)
         self.result_tabs.master.grid_propagate(False)
         self._build_k_actions(self.workspace)
-        self.status_label = self._label(self.workspace, 'Hazır · Ana montajı SolidWorks’te aktif yapın.',
+        self.status_label = self._label(self.workspace, 'Hazır · SolidWorks’te ana montajı etkinleştirin.',
                                         12, MUTED, anchor='w')
         self.status_label.grid(row=5, column=0, sticky='ew', padx=24, pady=(4, 4))
         self.progress = ctk.CTkProgressBar(self.workspace, height=4, corner_radius=2,
@@ -100,8 +100,8 @@ class KFactorView:
         self._label(panel, "Malzeme ve takım · Havada büküm", 14, bold=True).grid(
             row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(12, 4))
         for column, (key, label, values) in enumerate((
-            ("material", "Malzeme varsayımı", [m.label for m in MATERIALS]),
-            ("punch", "Üst bıçak uç R (mm)", [f"{r:g}" for r in PUNCH_RADII]),
+            ("material", "Hesapta kullanılacak malzeme", [m.label for m in MATERIALS]),
+            ("punch", "Üst bıçak yarıçapı R (mm)", [f"{r:g}" for r in PUNCH_RADII]),
             ("die", "Alt kalıp V açıklığı (mm)", [AUTO_DIE] + [str(v) for v in DIE_OPENINGS]),
         )):
             self._k_field(panel, key, label, 1, column, values=values,
@@ -112,26 +112,26 @@ class KFactorView:
         self._label(panel, "Malzeme tüm saclar için kullanılır. Özel takım ölçüsü yazabilirsiniz; otomatik V parçanın kalınlığına göre seçilir.",
                     11, MUTED, wraplength=225, justify="left").grid(
             row=2, column=2, sticky="w", padx=16, pady=(0, 6))
-        self._label(panel, "Elle hesap ve numune kontrolü", 14, bold=True).grid(
+        self._label(panel, "Numune hesabı ve kontrolü", 14, bold=True).grid(
             row=3, column=0, columnspan=3, sticky="w", padx=16, pady=(6, 4))
         for column, (key, label) in enumerate((
             ("thickness", "Hesap / numune kalınlığı (mm)"),
-            ("angle", "Düz sacdan büküm açısı (°)"),
-            ("radius", "Ölçülmüş iç R (mm, isteğe bağlı)"),
+            ("angle", "Düz sactan büküm açısı (°)"),
+            ("radius", "Ölçülen iç yarıçap R (mm, isteğe bağlı)"),
         )):
             self._k_field(panel, key, label, 4, column)
-        self._k_field(panel, "method", "K kaynağı", 5, 0,
+        self._k_field(panel, "method", "K hesaplama yöntemi", 5, 0,
                       values=["Tablo", "BA ölçümü"], readonly=True)
-        self._k_field(panel, "ba", "Ölçülmüş BA (mm)", 5, 1)
-        self._label(panel, "BA ölçümünde gerçek iç R zorunlu. Kalibrasyon yalnız aynı kalınlığa uygulanır.",
+        self._k_field(panel, "ba", "Ölçülen büküm payı BA (mm)", 5, 1)
+        self._label(panel, "Ölçümden K hesabı için iç yarıçap da girilmelidir. Sonuç yalnız aynı kalınlığa uygulanır.",
                     11, MUTED, wraplength=225, justify="left").grid(
             row=5, column=2, sticky="w", padx=16, pady=8)
         for column, (key, label) in enumerate((
-            ("outside_a", "Alternatif: dış A (mm)"),
-            ("outside_b", "Dış B (mm)"), ("flat", "Ölçülen düz boy (mm)"),
+            ("outside_a", "Dış ölçü A (mm, alternatif)"),
+            ("outside_b", "Dış ölçü B (mm)"), ("flat", "Ölçülen açınım boyu (mm)"),
         )):
             self._k_field(panel, key, label, 6, column)
-        self._label(panel, "Tek bükümlü numune: A/B dış sanal köşeye ölçülür. BA boşsa A, B ve düz boydan hesaplanır.",
+        self._label(panel, "Tek bükümlü numunede A ve B, dış yüzeylerin sanal kesişimine kadar ölçülür. Büküm payı boşsa bu ölçülerden ve açınım boyundan hesaplanır.",
                     11, MUTED, wraplength=700, justify="left").grid(
             row=7, column=0, columnspan=3, sticky="w", padx=16, pady=(0, 8))
         self.k_calculation_label = self._label(panel, "", 12, TEXT, wraplength=730,
@@ -154,12 +154,12 @@ class KFactorView:
         self.k_widgets["manual_panel"] = panel
         for column in range(3):
             panel.grid_columnconfigure(column, weight=1, uniform="manual_kr")
-        self._label(panel, "Kalınlığa göre manuel K / R atama", 14, bold=True).grid(
+        self._label(panel, "Belirli kalınlıktaki saclara K ve yarıçap atama", 14, bold=True).grid(
             row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(14, 8))
         self._k_field(panel, "manual_thickness", "Hedef sac kalınlığı (mm)", 1, 0,
                       values=["0.5", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "4", "5", "6", "8", "10", "12", "15", "20"])
         self._k_field(panel, "manual_k", "K faktörü (0–1)", 1, 1)
-        self._k_field(panel, "manual_r", "İç büküm yarıçapı R (mm)", 1, 2)
+        self._k_field(panel, "manual_r", "İç yarıçap R (mm)", 1, 2)
         self._label(panel, "Örnek: 2 mm sac → K: 0,274 · R: 2 mm. Virgül veya nokta kullanabilirsiniz.",
                     11, MUTED, wraplength=700, justify="left").grid(
             row=2, column=0, columnspan=3, sticky="w", padx=16, pady=(4, 8))
@@ -211,7 +211,7 @@ class KFactorView:
         self.scan_button = self._button(actions, "Montajı tara", self._scan_k_assembly,
                                          icon="search", width=166)
         self.scan_button.grid(row=0, column=0, sticky="ew", padx=(0, 6))
-        self.open_button = self._button(actions, "Hesapla / kontrol et", self._preview_k_calculation, width=172)
+        self.open_button = self._button(actions, "Hesapla ve kontrol et", self._preview_k_calculation, width=172)
         self.open_button.grid(row=0, column=1, sticky="ew")
         save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
         save.grid(row=0, column=2, sticky="w", padx=(20, 0))
@@ -292,7 +292,7 @@ class KFactorView:
             if result.calibrated:
                 text += f"Ölçümden K; tablo K = {result.table_k:.5f}, fark = {result.k_factor-result.table_k:+.5f}."
             else:
-                text += "Tablo önerisi · Hesap tutarlılığı, üretim doğrulaması değildir."
+                text += "Tabloya göre öneri · Üretim ölçümüyle kontrol edin."
             self.k_calculation_label.configure(text=text, text_color=TEXT)
             return result
         except ValueError as error:

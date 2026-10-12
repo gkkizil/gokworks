@@ -11,6 +11,7 @@ from tkinter import filedialog, ttk
 import customtkinter as ctk
 
 from bom.exporter import Cancelled, export_excel, scan_worker
+from gui.text import BOM_TITLE
 from gui.theme import PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT, GREEN, RED, AMBER, UI_FONT
 
 
@@ -31,7 +32,7 @@ class BomView:
         header.grid(row=0, column=0, sticky='ew', padx=24, pady=(20, 12))
         header.grid_columnconfigure(0, weight=1)
         self._label(header, 'GOKWORKS  /  MONTAJ LİSTESİ', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'BOM-ÜRÜN AĞACI', 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 6))
+        self._label(header, BOM_TITLE, 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 6))
         self._label(header, 'Aktif montajdaki parçalar, adetler ve alt montaj ilişkileri.', 12, MUTED,
                     wraplength=440, justify='left').grid(row=2, column=0, sticky='w')
         actions = ctk.CTkFrame(self.workspace, fg_color='transparent')
@@ -46,20 +47,20 @@ class BomView:
             self.bom_widgets[key] = button
         self.bom_widgets['export'].configure(state='disabled')
         self.bom_widgets['stop'].configure(state='disabled')
-        stats = self._label(actions, '0 farklı parça · 0 toplam adet', 12, MUTED)
+        stats = self._label(actions, '0 kalem · 0 toplam adet', 12, MUTED)
         stats.pack(side='right')
         self.bom_widgets['counts'] = stats
         options = ctk.CTkFrame(self.workspace, fg_color=INPUT, corner_radius=10)
         options.grid(row=2, column=0, sticky='ew', padx=24, pady=(0, 12))
         options.grid_columnconfigure(0, weight=1)
-        self.bom_widgets['assembly'] = self._label(options, 'Ana montajı SolidWorks’te aktif yapın.', 12,
+        self.bom_widgets['assembly'] = self._label(options, 'SolidWorks’te ana montajı etkinleştirin.', 12,
                                                  anchor='w', wraplength=650, justify='left')
         self.bom_widgets['assembly'].grid(row=0, column=0, sticky='ew', padx=14, pady=(10, 6))
-        self.bom_widgets['excluded'] = ctk.CTkCheckBox(options, text='BOM dışı bileşenleri de dahil et',
+        self.bom_widgets['excluded'] = ctk.CTkCheckBox(options, text='BOM dışında bırakılanları da ekle',
             variable=self.bom_state['include_excluded'], text_color=TEXT, fg_color=ACCENT,
             font=(UI_FONT, 12), checkbox_width=18, checkbox_height=18)
         self.bom_widgets['excluded'].grid(row=1, column=0, sticky='w', padx=14, pady=(0, 8))
-        self._label(options, 'Bastırılmış dallar alınmaz. Gizli parçalar sayılır. Sıralama: parça adı (A–Z, 2 → 10).',
+        self._label(options, 'Parçalar adlarına göre sıralanır: Parça 2, Parça 10. Bastırılmış bileşenler alınmaz; gizli parçalar sayılır.',
                     11, MUTED, wraplength=700, justify='left').grid(row=2, column=0, sticky='w', padx=14, pady=(0, 10))
         tabs = ctk.CTkTabview(self.workspace, fg_color=PANEL, text_color=TEXT,
                             segmented_button_selected_color=('#E7F4EE', '#173A33'))
@@ -70,7 +71,7 @@ class BomView:
             tab.grid_columnconfigure(0, weight=1)
             tab.grid_rowconfigure(1, weight=1)
             if key == 'parts':
-                entry = ctk.CTkEntry(tab, textvariable=self.bom_query, placeholder_text='Parça adı / konfigürasyon ara',
+                entry = ctk.CTkEntry(tab, textvariable=self.bom_query, placeholder_text='Parça adı veya konfigürasyon ara',
                                     fg_color=INPUT, text_color=TEXT, border_color=BORDER, height=34)
                 entry.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 8))
                 self.bom_widgets['search'] = entry
@@ -147,13 +148,13 @@ class BomView:
             if rows:
                 table.delete(*rows)
         self.bom_widgets['part_ids'] = []
-        self.bom_widgets['counts'].configure(text='0 farklı parça · 0 toplam adet')
+        self.bom_widgets['counts'].configure(text='0 kalem · 0 toplam adet')
 
     def _start_bom_render(self, result):
         self._clear_bom()
         self.bom_result = result
         self.bom_widgets['assembly'].configure(text=f'{PureWindowsPath(result.assembly).name} · Konfigürasyon: {result.configuration}')
-        self.bom_widgets['counts'].configure(text=f'{len(result.parts)} farklı parça · {result.total_parts} toplam adet')
+        self.bom_widgets['counts'].configure(text=f'{len(result.parts)} kalem · {result.total_parts} toplam adet')
         self.bom_widgets['render'] = chain((('part', i, part) for i, part in enumerate(result.parts)),
                                          (('tree', i, node) for i, node in enumerate(result.tree)))
         self.status_label.configure(text='Ürün ağacı hazırlanıyor…', text_color=MUTED)
@@ -192,7 +193,7 @@ class BomView:
         if self.busy or self.bom_result is None:
             return
         result = self.bom_result
-        path = filedialog.asksaveasfilename(parent=self, title='BOM-ÜRÜN AĞACI Excel dosyasını kaydet',
+        path = filedialog.asksaveasfilename(parent=self, title='Ürün ağacını Excel dosyasına kaydet',
             initialfile=f'{PureWindowsPath(result.assembly).stem}_BOM.xlsx', defaultextension='.xlsx',
             filetypes=[('Excel çalışma kitabı', '*.xlsx')])
         if not path:
@@ -223,7 +224,7 @@ class BomView:
         else:
             result = self.bom_result
             text, color = (f'Tarama tamamlandı · {result.total_parts} parça adedi · '
-                           f'{result.suppressed} bastırılmış, {result.excluded} BOM dışı dal atlandı.'), GREEN
+                           f'Atlanan dal: {result.suppressed} bastırılmış, {result.excluded} BOM dışı.'), GREEN
         self.status_label.configure(text=text, text_color=color)
         if self.close_pending:
             self._destroy_app()

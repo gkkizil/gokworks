@@ -386,7 +386,7 @@ class KGuiTests(GuiTestCase):
     def test_navigation_title_preferences_and_theme_persistence(self):
         self.app.nav_buttons['k_factor'].invoke();self.app.update()
         self.assertEqual(self.app.mode,'k_factor')
-        self.assertEqual(self.app.nav_buttons['k_factor'].cget('text'),'K FAKTÖR - RADIUS')
+        self.assertEqual(self.app.nav_buttons['k_factor'].cget('text'),'K faktörü / yarıçap')
         self.app.k_state['punch'].set('1,5')
         self.app.k_state['die'].set('17')
         workspace=self.app.workspace

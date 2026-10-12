@@ -6,6 +6,7 @@ from tkinter import filedialog
 
 import customtkinter as ctk
 from gui.icons import set_window_icon
+from gui.text import turkish_upper
 from gui.rendering import configure_changed, hide_grid
 
 from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
@@ -43,7 +44,7 @@ class GeometricTolerancesView:
         header.grid(row=0, column=0, sticky='ew', padx=24, pady=(20, 16))
         header.grid_columnconfigure(0, weight=1)
         self._label(header, 'GOKWORKS  /  ASME Y14.5-2018', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'Geometrik Toleranslar', 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
+        self._label(header, 'Geometrik toleranslar', 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
         self._label(header, 'GD&T · 12 güncel özellik ve eski işaretler', 12, MUTED,
                     wraplength=340, justify='left').grid(row=2, column=0, sticky='w')
         actions = ctk.CTkFrame(header, fg_color='transparent')
@@ -80,7 +81,7 @@ class GeometricTolerancesView:
         listing.grid_columnconfigure(0, weight=1)
         listing._scrollbar.configure(width=8, height=24)
         self.gdt_widgets['listing'] = listing
-        self.gdt_widgets['groups'] = {group: self._label(listing, group.upper(), 10, MUTED, True) for group in GROUPS}
+        self.gdt_widgets['groups'] = {group: self._label(listing, turkish_upper(group), 10, MUTED, True) for group in GROUPS}
         self.gdt_widgets['choices'] = {}
         for item in CATALOG:
             button = ctk.CTkButton(listing, text=item.name,
@@ -117,7 +118,7 @@ class GeometricTolerancesView:
                                  font=(UI_FONT, 14), placeholder_text='İsteğe bağlı' if key == 'measured' else '')
             entry.grid(row=row+1, column=column, sticky='ew', padx=14, pady=(0, 4))
             self.gdt_widgets[key] = entry
-        self._label(inputs, 'Datum sistemi / öncelik', 10, MUTED, True, wraplength=170,
+        self._label(inputs, 'Referans sırası (datum)', 10, MUTED, True, wraplength=170,
                     justify='left', anchor='w').grid(row=2, column=0, sticky='ew', padx=14, pady=(12, 5))
         menu = ctk.CTkOptionMenu(inputs, variable=self.gdt_state['datum'], values=list(DATUM_CHOICES),
             width=140, height=36, fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
@@ -158,7 +159,7 @@ class GeometricTolerancesView:
                 size_entry.grid(row=1, column=0, sticky='ew', pady=(5, 6))
                 self.gdt_widgets['size_tolerance'] = size_entry
                 self.gdt_widgets['size_rule_help'] = self._label(rule,
-                    'Normal, boyutla ilişkili yüzey için toplam boyut toleransı: üst limit - alt limit. ASME 8.4: t < boyut toleransı. MMC zarfı ölçümü değildir.',
+                    'Toplam boyut toleransı, üst ve alt ölçü sınırlarının farkıdır. ASME 8.4: bu yüzey örneğinde geometrik tolerans bu değerden küçük olmalıdır. MMC zarfı burada ölçülmez.',
                     11, MUTED, wraplength=400, anchor='w', justify='left')
                 self.gdt_widgets['size_rule_help'].grid(row=2, column=0, sticky='ew')
                 self._label(card, 'Ölçülmüş toplam geometrik hata (mm)', 11, MUTED).grid(row=2, column=0, sticky='w', padx=14)
@@ -172,7 +173,7 @@ class GeometricTolerancesView:
             self.gdt_widgets[key].grid(row=5 if key == 'assessment' else 1, column=0, sticky='ew', padx=14, pady=(0, 14))
         self.gdt_widgets['example'] = self._label(details, '', 11, MUTED, justify='left', anchor='w', wraplength=400)
         self.gdt_widgets['example'].grid(row=6, column=0, sticky='ew', padx=4, pady=(0, 8))
-        self.gdt_widgets['copy'] = self._button(details, 'Belirtimi kopyala', self._copy_gdt_report, icon='copy', width=165)
+        self.gdt_widgets['copy'] = self._button(details, 'Sonucu kopyala', self._copy_gdt_report, icon='copy', width=165)
         self.gdt_widgets['copy'].grid(row=7, column=0, sticky='w', padx=4, pady=(0, 14))
         self.status_label = self._label(self.workspace, '', 11, MUTED, anchor='w', justify='left', wraplength=700)
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(10, 16))
@@ -257,12 +258,12 @@ class GeometricTolerancesView:
         configure_changed(self.gdt_widgets['datum'], state='disabled' if item.datum == 'none' or not item.active else 'normal',
             variable=self.gdt_widgets['datum_display'] if item.datum == 'none' else self.gdt_state['datum'])
         configure_changed(self.gdt_widgets['datum_note'], text={
-            'none': 'Şekil toleransı: datum çerçeveye eklenmez.',
-            'optional': 'Datum seçime bağlıdır; teorik ölçü/profil tanımı ayrıca gerekir.',
-            'required': 'Bu örnek referanslıdır; datum sırası ölçüm önceliğini belirler.'}[item.datum])
+            'none': 'Şekil toleransında referans (datum) kullanılmaz.',
+            'optional': 'Referans seçimi isteğe bağlıdır. Teorik ölçüler ve profil ayrıca tanımlanmalıdır.',
+            'required': 'Bu örnek referans gerektirir. A, B, C sırası referans önceliğini belirler.'}[item.datum])
         if not item.active:
             self.gdt_result = None
-            self._show_gdt_error('ASME 2018: eski sembol; position/profile/runout ile işlevine göre yeniden belirtin.')
+            self._show_gdt_error('ASME 2018’de kaldırılmış sembol. İşlevine göre konum, profil veya salgı toleransı seçin.')
             configure_changed(self.gdt_widgets['value'], text='2018’de kaldırıldı', text_color=AMBER)
             configure_changed(self.gdt_widgets['datum_note'], text='Eski çizim okuma bilgisi · güncel belirtim oluşturulmaz.')
             self._filter_gdt_catalog()
@@ -282,7 +283,7 @@ class GeometricTolerancesView:
             configure_changed(self.gdt_widgets['value'], text=value, text_color=ACCENT)
             configure_changed(self.gdt_widgets['assessment'], text=self._gdt_assessment(), text_color=
                 MUTED if spec.accepted is None else GREEN if spec.accepted else RED)
-            configure_changed(self.status_label, text=f'ASME Y14.5-2018 · § {item.reference} · Kullanıcı belirtimi; basic ölçüler/boyut limitleri ayrıca gerekir.', text_color=MUTED)
+            configure_changed(self.status_label, text=f'ASME Y14.5-2018 · § {item.reference} · Girilen tolerans; teorik ölçüler ve boyut sınırları ayrıca tanımlanmalıdır.', text_color=MUTED)
             for key in ('copy', 'export'):
                 configure_changed(self.gdt_widgets[key], state='normal')
             self._draw_gdt_diagram()
@@ -300,10 +301,10 @@ class GeometricTolerancesView:
         spec = self.gdt_result
         relation = (('Boyut ilişkisi: t < '+fmt(spec.size_tolerance)+' mm kontrol edildi; MMC zarfı ölçülmedi.\n')
                     if spec.size_tolerance is not None else
-                    'Boyut toleransı girilmedi; Rule #1 boyut/şekil ilişkisi ayrıca kontrol edilir.\n' if spec.characteristic.group == 'Şekil' else '')
+                    'Boyut toleransı girilmedi. ASME Kural 1 kapsamındaki boyut ve şekil ilişkisini ayrıca kontrol edin.\n' if spec.characteristic.group == 'Şekil' else '')
         if spec.measured is None:
             return relation+'Ölçüm girilmedi. İlgili özellik için değerlendirilmiş toplam geometrik hatayı girin; tek çap veya nokta ölçüsü yeterli değildir.'
-        verdict = 'Matematiksel sınır içinde' if spec.accepted else 'Matematiksel sınır dışında'
+        verdict = 'Girilen hata tolerans içinde' if spec.accepted else 'Girilen hata tolerans dışında'
         if spec.margin == 0:
             verdict += ' · tam sınırda'
         return (relation+f'{verdict}\nHata {fmt(spec.measured)} mm; sınır {fmt(spec.tolerance)} mm.\n'
@@ -383,13 +384,13 @@ class GeometricTolerancesView:
         if rows:
             self.clipboard_clear()
             self.clipboard_append('\n'.join(f'{key}: {value}' for key, value in rows))
-            self.status_label.configure(text='Geometrik tolerans belirtimi panoya kopyalandı.', text_color=GREEN)
+            self.status_label.configure(text='Geometrik tolerans sonucu panoya kopyalandı.', text_color=GREEN)
 
     def _save_gdt_report(self):
         rows = self._gdt_report_rows()
         if not rows:
             return
-        path = filedialog.asksaveasfilename(parent=self, title='Geometrik tolerans belirtimini kaydet',
+        path = filedialog.asksaveasfilename(parent=self, title='Geometrik tolerans sonucunu kaydet',
             initialfile='GOKWORKS_Geometrik_Tolerans.csv', defaultextension='.csv', filetypes=[('CSV raporu', '*.csv')])
         if not path:
             return

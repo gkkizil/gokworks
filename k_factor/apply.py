@@ -148,7 +148,7 @@ def _sheet_overrides(definition):
         overridden = _out(pythoncom.VT_BOOL)
         error = _call(definition, "GetOverrideDefaultParameter2", parameter, overridden)
         if error != 0:
-            raise RuntimeError(f"{label} override durumu okunamadı; API hata kodu: {error}")
+            raise RuntimeError(f"{label} özel ayar durumu okunamadı; API hata kodu: {error}")
         values.append(bool(overridden.value))
     return tuple(values)
 
@@ -300,9 +300,9 @@ def _check_sheet_defaults(definition):
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
     error = _call(definition, "GetUseGaugeTable", used, filename)
     if error != 0:
-        raise RuntimeError(f"Gauge tablosu durumu okunamadı; API hata kodu: {error}")
+        raise RuntimeError(f"Sac kalınlık tablosu durumu okunamadı; API hata kodu: {error}")
     if used.value:
-        raise RuntimeError("Gauge tablosuna bağlı sac; önce SolidWorks'te tablo bağını kaldırın.")
+        raise RuntimeError("Sac kalınlık tablosuna bağlı parça; önce SolidWorks'te tablo bağını kaldırın.")
 
 
 def _check_defaults(model, parent):
@@ -439,8 +439,8 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         stage = "Mevcut K/R ve büküm payı okuma"
         before = _state(feature, parent_kind)
         if before.error_code or before.suppressed:
-            raise RuntimeError("SAC LEVHA unsuru baskılanmış veya zaten hata içeriyor; önce parçayı düzeltin.")
-        stage = "Malzeme, gauge ve özel büküm kontrolleri"
+            raise RuntimeError("SAC LEVHA unsuru bastırılmış veya zaten hata içeriyor; önce parçayı düzeltin.")
+        stage = "Malzeme, sac kalınlık tablosu ve özel büküm kontrolleri"
         _check_defaults(model, feature)
         inherited_names = _check_inherited_sheet(model, before)
         stage = "Katıyı Saca Dönüştür parametre kontrolü"

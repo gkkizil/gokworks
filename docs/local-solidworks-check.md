@@ -32,7 +32,7 @@ Python aynı Windows kullanıcı oturumunda çalışmalıdır.
 1. Montajın ve parçaların bir kopyasıyla çalışın. Aktif ana montajı ve kontrol
    edeceğiniz parçaları kaydedin; parçanın montajda referans verilen
    konfigürasyonunu ve mevcut ana SAC LEVHA K/R değerlerini kaydedin.
-2. **K FAKTÖR - RADIUS → Manuel K / R**: 1,5 mm örneğinde kalınlık `1,5`,
+2. **K faktörü / yarıçap → Manuel K / R**: 1,5 mm örneğinde kalınlık `1,5`,
    K `0,274`, R `1,5` girin. Ardından 2 mm örneğini `2 / 0,274 / 2` ile sınayın.
 3. **Montajı tara** ile eşleşen sacları ve atlama nedenlerini okuyun.
    Tarama sonuçlarında **Uygulamaya hazır** görünür; bu aşamada K/R yazılmaz.

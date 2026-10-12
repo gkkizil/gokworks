@@ -22,6 +22,7 @@ from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from bom.window import BomView
 from gui.icons import make_icon, set_window_icon
+from gui.typography import check_turkish_fonts
 from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
@@ -65,6 +66,11 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
         if os.name != "nt":
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         super().__init__()
+        try:
+            check_turkish_fonts(self)
+        except RuntimeError:
+            self.destroy()
+            raise
         set_window_icon(self)
         self.title("GOKWORKS • SolidWorks Otomasyonu")
         window_scale = self._get_window_scaling()
@@ -520,7 +526,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             # Seçilen dosya, topluca taranacak klasörü belirler.
             selected = filedialog.askopenfilename(
                 parent=self,
-                title=f"Kaynak klasördeki bir {self._file_label} seç",
+                title=f"Kaynak klasördeki bir {self._file_label} seçin",
                 initialdir=initial,
                 filetypes=[(f"SOLIDWORKS {self._file_label} (*{self._extension})", self._extension.lower().replace(".", "*.")),
                            ("Tüm dosyalar (*.*)", "*.*")],
@@ -607,7 +613,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
     def _valid_source(self):
         source = self.source_folder.get().strip()
         if not source or not Path(source).is_dir():
-            self.status_label.configure(text="Kaynak klasör bulunamadı. Bir klasör seç.", text_color=RED)
+            self.status_label.configure(text="Kaynak klasörü bulunamadı. Bir klasör seçin.", text_color=RED)
             return None
         return source
 
@@ -643,7 +649,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             return
         output = self.output_folder.get().strip()
         if not output or (Path(output).exists() and not Path(output).is_dir()):
-            self.status_label.configure(text="Geçerli bir çıktı kayıt klasörü seç.", text_color=RED)
+            self.status_label.configure(text="Geçerli bir çıktı klasörü seçin.", text_color=RED)
             return
         if not self._is_pdf and self.output_format.get() not in ('DXF', 'DWG'):
             self.status_label.configure(text='Çıktı türü olarak DXF veya DWG seçin.', text_color=RED)
@@ -670,7 +676,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             self.k_widgets.pop('pending_apply', None)
             self.start_button.configure(state='disabled')
         self.stop_button.configure(state="disabled")
-        self.status_label.configure(text="Geçerli dosya tamamlandıktan sonra duracak…", text_color=AMBER)
+        self.status_label.configure(text="İşlenen dosya tamamlanınca işlem duracak…", text_color=AMBER)
 
     def _fill_files(self, files):
         self._prepare_file_list()
@@ -826,7 +832,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             except (OSError, AttributeError) as error:
                 self.status_label.configure(text=f"Klasör açılamadı: {error}", text_color=RED)
         else:
-            self.status_label.configure(text="Çıktı kayıt klasörü henüz oluşturulmadı.", text_color=AMBER)
+            self.status_label.configure(text="Çıktı klasörü bulunamadı. Geçerli bir klasör seçin.", text_color=AMBER)
 
     def _save_report(self):
         if not self.results:
@@ -976,7 +982,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
 
     def _on_close(self):
         if self.busy:
-            if messagebox.askyesno("İşlem sürüyor", "İşlemi durdurup uygulamayı kapatmak istiyor musun?", parent=self):
+            if messagebox.askyesno("İşlem sürüyor", "İşlemi durdurup uygulamayı kapatmak istiyor musunuz?", parent=self):
                 self.close_pending = True
                 self._request_stop()
             return

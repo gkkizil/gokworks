@@ -209,7 +209,7 @@ class WindowTests(GuiTestCase):
         self.app.source_folder.set(str(self.root/'missing'))
         self.app._start_export()
         self.assertFalse(self.app.busy)
-        self.assertIn('Kaynak klasör bulunamadı', self.app.status_label.cget('text'))
+        self.assertIn('Kaynak klasörü bulunamadı', self.app.status_label.cget('text'))
         self.app.source_folder.set(str(self.root))
         (self.root/'output-file').touch()
         self.app.output_folder.set(str(self.root/'output-file'))

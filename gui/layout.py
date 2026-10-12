@@ -5,6 +5,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 from gui.icons import make_logo
+from gui.text import BOM_TITLE, KR_TITLE, KR_NAV_TITLE
 from gui.theme import (SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
                        ACCENT_BG, GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT)
 
@@ -48,7 +49,7 @@ class WorkspaceLayout:
         self._build_results()
         self.result_tabs.master.grid(row=2, column=1, sticky="nsew", padx=(12, 24))
         self.result_tabs.master.grid_propagate(False)
-        self.status_label = self._label(self.workspace, "Hazır · Ana montajı SolidWorks'te aktif yapın." if self.mode == "k_factor" else "Hazır · Kaynak ve çıktı klasörünü seçin.",
+        self.status_label = self._label(self.workspace, "Hazır · SolidWorks'te ana montajı etkinleştirin." if self.mode == "k_factor" else "Hazır · Kaynak ve çıktı klasörünü seçin.",
                                         12, MUTED, anchor="w")
         self.status_label.grid(row=3, column=0, columnspan=2, sticky="ew", padx=24, pady=(10, 6))
         self.progress = ctk.CTkProgressBar(self.workspace, height=4, corner_radius=2,
@@ -86,10 +87,10 @@ class WorkspaceLayout:
                            for active in (False, True)}
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
-            ("bom", "BOM-ÜRÜN AĞACI", "layers"),
-            ("k_factor", "K FAKTÖR - RADIUS", "tools"),
+            ("bom", BOM_TITLE, "layers"),
+            ("k_factor", KR_NAV_TITLE, "tools"),
             ("iso_fits", "ISO geçmeleri", "ruler"),
-            ("geometric_tolerances", "Geometrik tolerans", "target"),
+            ("geometric_tolerances", "Geometrik toleranslar", "target"),
         )):
             if row == 3:
                 self._label(navigation, "MÜHENDİSLİK", 10, MUTED, True).grid(
@@ -131,11 +132,11 @@ class WorkspaceLayout:
         header.grid_columnconfigure(0, weight=1)
         self._label(header, "GOKWORKS  /  SAC PARAMETRELERİ" if self.mode == "k_factor" else "GOKWORKS  /  BELGE İŞLEMLERİ", 10, MUTED, True).grid(
             row=0, column=0, sticky="w", pady=(0, 4))
-        self._label(header, "K FAKTÖR - RADIUS" if self.mode == "k_factor" else "PDF Aktarımı" if self._is_pdf else "DXF / DWG Açınımı",
+        self._label(header, KR_TITLE if self.mode == "k_factor" else "PDF aktarımı" if self._is_pdf else "DXF / DWG açınımı",
                     24, bold=True).grid(row=1, column=0, sticky="w")
-        subtitle = ("Malzeme, takım ve BA hesabıyla montajdaki sac parçaları düzenleyin." if self.mode == "k_factor" else
+        subtitle = ("Sac parçalarının K faktörünü ve iç büküm yarıçapını ayarlayın." if self.mode == "k_factor" else
                     "Teknik resimlerin tüm sayfalarını tek PDF'e aktarın." if self._is_pdf else
-                    "Sac metal parçaları kalınlık ve toplam adetle kaydedin.")
+                    "Sac açınımlarını kalınlık ve montaj adediyle adlandırıp kaydedin.")
         self._label(header, subtitle, 12, MUTED, wraplength=350, justify="left").grid(
             row=2, column=0, sticky="w", pady=(3, 0))
         actions = ctk.CTkFrame(header, fg_color="transparent")
@@ -168,9 +169,9 @@ class WorkspaceLayout:
         folders.grid(row=0, column=0, sticky="ew")
         folders.grid_columnconfigure(0, weight=1)
         for column, (title, hint, variable) in enumerate((
-            ("Kaynak klasör", f"Klasördeki {self._extension} dosyaları aktarılır.", self.source_folder),
+            ("Kaynak klasörü", f"Klasördeki {self._extension} dosyaları aktarılır.", self.source_folder),
             ("Çıktı klasörü", "Her teknik resim için tek PDF dosyası." if self._is_pdf else
-             "PARÇAADI - 2 mm - 12 adet.dxf", self.output_folder),
+             "PARÇA ADI - 2 mm - 12 adet.dxf", self.output_folder),
         )):
             card = ctk.CTkFrame(folders, fg_color="transparent")
             card.grid(row=column, column=0, sticky="nsew")
@@ -183,11 +184,11 @@ class WorkspaceLayout:
         tools.pack(side="bottom", fill="x", pady=(12, 0))
         self.scan_button = self._button(tools, "Klasörü tara", self._scan, icon="search", width=116)
         self.scan_button.pack(fill="x", pady=(0, 6))
-        self.open_button = self._button(tools, "Çıktı klasörü", self._open_output, icon="folder", width=126)
+        self.open_button = self._button(tools, "Klasörü aç", self._open_output, icon="folder", width=126)
         self.open_button.pack(fill="x")
         self.controls.append(self.scan_button)
         for text, variable in (("Alt klasörleri tara", self.include_subfolders),
-                               ("Üzerine yaz", self.overwrite_existing)):
+                               ("Mevcut dosyaların üzerine yaz", self.overwrite_existing)):
             control = self._checkbox(options, text, variable)
             control.pack(anchor="w", pady=4)
             self.controls.append(control)
@@ -203,7 +204,7 @@ class WorkspaceLayout:
                 font=ctk.CTkFont(family=UI_FONT, size=12),
             )
             format_menu.pack(fill="x", pady=(0, 8))
-            bends = self._checkbox(formats, "Büküm çizgileri", self.bend_lines)
+            bends = self._checkbox(formats, "Büküm çizgilerini ekle", self.bend_lines)
             bends.pack(anchor="w")
             self._label(formats, "Adet kaynağı: aktif montaj\nAlt montajlar dahil", 10, MUTED,
                         justify="left").pack(anchor="w", pady=(8, 0))
@@ -347,7 +348,7 @@ class WorkspaceLayout:
         self.results_footer = ctk.CTkFrame(files_tab, fg_color="transparent")
         self.results_footer.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(4, 0))
         self.results_footer.grid_columnconfigure(0, weight=1)
-        self.results_hint = self._label(self.results_footer, "Ayrıntılar: çift tık  ·  Ctrl+F: ara", 10, MUTED, wraplength=220, justify="left")
+        self.results_hint = self._label(self.results_footer, "Ayrıntı: çift tıklayın · Ctrl+F: ara", 10, MUTED, wraplength=220, justify="left")
         self.results_hint.grid(row=0, column=0, sticky="w")
         self.visible_count = self._label(self.results_footer, "0 / 0 dosya", 10, MUTED)
         self.visible_count.grid(row=0, column=1, sticky="e")

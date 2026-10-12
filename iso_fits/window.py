@@ -8,6 +8,7 @@ import webbrowser
 
 import customtkinter as ctk
 from gui.icons import set_window_icon
+from gui.text import turkish_upper
 from gui.rendering import configure_changed, hide_grid
 
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
@@ -23,21 +24,21 @@ VIEWS = ('Montaj kesiti', 'Tolerans bölgeleri')
 METHODS = ('ISO seçimi', 'Manuel kontrol')
 BASES = ('Tümü', 'Delik esaslı', 'Mil esaslı')
 COLORS = {'clearance': GREEN, 'transition': AMBER, 'interference': RED}
-SOURCE_TEXT = '''ISO 286-1:2010 — Tolerans, sapma ve geçmelerin temel kuralları.
-ISO 286-2:2010 — Delik ve mil tolerans sınıflarının sınır sapmaları.
+SOURCE_TEXT = '''ISO 286 · Delik ve mil geçmeleri
 
-Bu ekran 1–400 mm aralığında doğrulanan 11 delik ve 18 mil sınıfını sunar. Delikler büyük, miller küçük harfle gösterilir. Değerler tablodan alınır; yaklaşık IT formülü kullanılmaz. Çap aralıklarında alt sınır hariç, üst sınır dahildir.
+Nominal çap, delik ve mil için ortak ana ölçüdür. Bu ekran 1–400 mm aralığında, tablolarla doğrulanan 11 delik ve 18 mil sınıfını sunar. Delik sınıfı büyük harfle, mil sınıfı küçük harfle gösterilir. Örneğin H7/h6, H7 deliği ile h6 milinin eşleşmesidir.
 
-Cmin = EI − es; Cmax = ES − ei.
-Pozitif C boşluk, negatif C sıkılıktır. H7/h6 gibi Cmin=0 eşleşmeler boşluklu geçme sınıfındadır; minimum boşluk sıfırdır.
+Alt ve üst sapmalar ölçü sınırlarını belirler. EI ve ES delik sapmalarıdır; ei ve es mil sapmalarıdır. Çap aralıklarında alt sınır hariç, üst sınır dahildir.
 
-Tablolar: parkergreene/isofits, lachr/Passungsrechner, bell-jamie/iso-286. Kaynak commitleri, çap sınırları ve bağımsız karşılaştırma docs/iso-fits.md içinde kayıtlıdır. F8 ≤3 mm için bir kaynakta saptanan satır hatası, IT8 genişliği ve diğer tabloyla kontrol edilmiştir.
+En az delik − mil farkı: Cmin = EI − es.
+En çok delik − mil farkı: Cmax = ES − ei.
+Pozitif fark boşluk, negatif fark sıkılık, sıfır fark sınırda temas demektir. Boşluklu geçmede en küçük fark sıfır veya pozitiftir. Sıkı geçmede en büyük fark sıfır veya negatiftir; en küçük fark negatiftir. Ara geçmede fark hem pozitif hem negatif olabilir. H7/h6 gibi en az boşluğu sıfır olan eşleşmeler ara geçme değildir.
 
-Bu uygulama ISO belgesinin tam metnini içermez. Resmî metin ve güncellik ISO kataloğundan kontrol edilmelidir. Resmî ISO/üretici sitelerine bu bulut oturumunun ağ politikası nedeniyle erişilemedi; kaynaklar ISO tarafından sertifikalandırılmış sayılmaz.
+Montaj kesiti açıklama amaçlıdır; küçük farklar görünürlük için büyütülür. Tolerans bölgeleri sayısal sapma ölçeğini gösterir. “Orta değer” yalnız ölçü sınırlarının ortasıdır; üretimde en sık oluşacak ölçü anlamına gelmez.
 
-Montaj kesiti şematiktir; sapmalar görünürlük için büyütülür. Tolerans bölgeleri gerçek sayısal sapma ölçeğini gösterir. Orta değer bir olasılık/üretim dağılımı varsayımı değildir. Yalnızca limitlerin ortasıdır.
+Geçme türü, ölçü sınırlarından hesaplanır. Montaj veya pres kuvveti, yağlama ve sıcaklık seçimi için malzeme, yüzey ve çalışma koşulları ayrıca değerlendirilmelidir. Bu sekme geometrik tolerans hesabı yapmaz.
 
-Montaj kuvveti, çalışma sıcaklığı, malzeme, yüzey ve şekil/konum toleransları bu çaptan hesaplanmaz. Pres kuvveti veya yağlı/elle montaj kararı için bu bilgiler ayrıca gerekir. Geometrik toleranslar ISO 1101 kapsamındadır; bu sekme çap geçmelerini hesaplar.'''
+Standart temeli ISO 286-1:2010 ve ISO 286-2:2010’dur. Karşılaştırılan açık kaynak tablolar: parkergreene/isofits, lachr/Passungsrechner ve bell-jamie/iso-286. Kaynak kayıtları ve tablo karşılaştırmaları docs/iso-fits.md içindedir. Uygulama standardın tam metnini içermez; resmî kapsam ve güncellik ISO kataloğundan kontrol edilmelidir.'''
 
 
 SOURCE_TEXT += '\n\nManuel kontrol: delik ve mil için ortak nominal çap ile ayrı alt/üst sapmalar girilir. Geçme girilen ölçü limitlerinden hesaplanır. Tam ISO eşleşmesi iki sapmanın da aynı olmasıdır; en yakın sınıf mevcut sınıflar içindeki alt/üst farkların mutlak toplamına göre seçilir. Yakın sınıf girilen toleransları değiştirmez. Kayar/yağlı kullanım adları öneridir; yağlama veya montaj kuvveti sonucu değildir.'
@@ -83,8 +84,8 @@ class IsoFitsView:
         header.grid(row=0, column=0, sticky='ew', padx=24, pady=(20, 16))
         header.grid_columnconfigure(0, weight=1)
         self._label(header, 'GOKWORKS  /  MÜHENDİSLİK HESAPLARI', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'ISO Geçme Toleransları', 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
-        self._label(header, 'ISO 286 · Delik / mil limitleri ve kesit gösterimi', 12, MUTED,
+        self._label(header, 'ISO geçme toleransları', 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
+        self._label(header, 'ISO 286 · Delik ve mil ölçü sınırları ile kesit gösterimi', 12, MUTED,
                     wraplength=350, justify='left').grid(row=2, column=0, sticky='w')
         actions = ctk.CTkFrame(header, fg_color='transparent')
         actions.grid(row=1, column=1, rowspan=2, sticky='e', padx=(12, 0))
@@ -153,7 +154,7 @@ class IsoFitsView:
         self.iso_widgets['presets'] = presets
         self.iso_widgets['groups'] = {}
         for kind in CLASSIFICATION:
-            self.iso_widgets['groups'][kind] = self._label(presets, CLASSIFICATION[kind].upper(),
+            self.iso_widgets['groups'][kind] = self._label(presets, turkish_upper(CLASSIFICATION[kind]),
                                                            10, COLORS[kind], True)
         self.iso_widgets['preset_buttons'] = {}
         for preset in PRESETS:
@@ -229,7 +230,7 @@ class IsoFitsView:
         comparison = self._iso_card(details)
         comparison.grid(row=5, column=0, sticky='ew', pady=(0, 12))
         comparison.grid_columnconfigure(0, weight=1)
-        self._label(comparison, 'ISO tablo kontrolü', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
+        self._label(comparison, 'ISO tablosuyla karşılaştırma', 11, MUTED, True).grid(row=0, column=0, sticky='w', padx=14, pady=(12, 6))
         self.iso_widgets['comparison'] = comparison
         self.iso_widgets['iso_comparison'] = self._label(comparison, '', 11, TEXT, justify='left', anchor='w', wraplength=430)
         self.iso_widgets['iso_comparison'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 12))
@@ -259,7 +260,7 @@ class IsoFitsView:
         self._label(panel, 'Sapmalar (mm)', 11, MUTED, True).grid(row=0, column=0, columnspan=2, sticky='w', padx=6, pady=(4, 10))
         for column, (role, label) in enumerate((('hole', 'Delik'), ('shaft', 'Mil'))):
             self._label(panel, label, 12, ACCENT, True).grid(row=1, column=column, sticky='w', padx=6)
-            for row, (side, caption) in enumerate((('upper', 'Üst sapma (+/-)'), ('lower', 'Alt sapma (+/-)'))):
+            for row, (side, caption) in enumerate((('upper', 'Üst sapma (±)'), ('lower', 'Alt sapma (±)'))):
                 key = role+'_'+side
                 self._label(panel, caption, 10, MUTED).grid(row=2+row*2, column=column, sticky='w', padx=6, pady=(10, 3))
                 entry = ctk.CTkEntry(panel, textvariable=self.iso_state[key], width=90, height=36,
@@ -278,7 +279,7 @@ class IsoFitsView:
         self.iso_widgets['compatibility_example'] = self._button(panel, 'Mil ±0,1 / Delik -0,05', self._fill_compatibility_example, width=200)
         self.iso_widgets['compatibility_example'].grid(row=10, column=0, columnspan=2, sticky='ew', padx=6, pady=(0, 10))
         self.iso_widgets['manual_help'] = self._label(panel,
-            'Nominal çap delik ve mil için ortaktır.\n\n50 +0,02: alt 0, üst +0,02.\n50 -0,02: alt -0,02, üst 0.\n\n±0,02 için alt -0,02, üst +0,02 girin.\n\nGerçekleşen tek ölçü için alt ve üst sapmayı aynı girin.\n\nSapma girişleri her zaman mm; sonuçlar mm/µm seçilebilir.',
+            'Nominal çap delik ve mil için ortaktır.\n\n50 +0,02: alt 0, üst +0,02.\n50 -0,02: alt -0,02, üst 0.\n\n±0,02 için alt -0,02, üst +0,02 girin.\n\nGerçekleşen tek ölçü için alt ve üst sapmayı aynı girin.\n\nSapmaları mm olarak girin. Sonuçları mm veya µm olarak görebilirsiniz.',
             11, MUTED, justify='left', anchor='w', wraplength=220)
         self.iso_widgets['manual_help'].grid(row=11, column=0, columnspan=2, sticky='ew', padx=6, pady=(0, 8))
 
@@ -364,7 +365,7 @@ class IsoFitsView:
                 holes = [p for p in matches if p.basis == 'Delik esaslı']
                 shafts = [p for p in matches if p.basis == 'Mil esaslı']
                 matches = [p for pair in zip_longest(holes, shafts) for p in pair if p is not None]
-            configure_changed(self.iso_widgets['groups'][kind], text=CLASSIFICATION[kind].upper()
+            configure_changed(self.iso_widgets['groups'][kind], text=turkish_upper(CLASSIFICATION[kind])
                 if self.iso_result else 'ÇAPI GİRİN · EŞLEŞMELER')
             self.iso_widgets['groups'][kind].grid(row=row, column=0, sticky='w', padx=8, pady=(12, 6)); row += 1
             for preset in matches:
@@ -545,7 +546,7 @@ class IsoFitsView:
         if pair.fit.kind != fit.kind:
             text += '\nYakın referansın türü girilen ölçülerin türünden farklı olabilir; montaj hesabı girilen limitlere aittir.'
         if pair.beyond_reference_width:
-            text += '\nISO çiftten en az bir limit farkı, o parçanın referans tolerans genişliğini aşıyor; en yakın etiketi ISO uyumu veya uygun üretim toleransı anlamına gelmez.'
+            text += '\nISO çiftinden en az bir sınır farkı, o parçanın referans tolerans genişliğini aşıyor; en yakın etiketi ISO uyumu veya uygun üretim toleransı anlamına gelmez.'
         return text+'\n\nBu kontrol boyutsaldır; gerçek montaj kuvveti, yüzey, şekil ve çalışma koşulları ayrıca değerlendirilir.'
 
     def _copy_iso_result(self):

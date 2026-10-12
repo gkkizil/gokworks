@@ -193,7 +193,7 @@ def export_excel(result, destination, stop_event=None):
         ws.append([title])
         ws.append([result.assembly, result.configuration, created.isoformat(timespec='seconds')])
         ws.append([f'Bastırılmış dal: {result.suppressed}', f'BOM dışı dal: {result.excluded}',
-                   'BOM dışı dahil' if result.include_excluded else 'BOM dışı hariç'])
+                   'BOM dışında bırakılanlar dahil' if result.include_excluded else 'BOM dışında bırakılanlar hariç'])
         ws.append(headers)
         for values in rows:
             _check_cancel(stop_event)

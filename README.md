@@ -14,9 +14,9 @@ py -3.12 -m venv .venv
 
 Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz için `customtkinter==6.0.0` ve ölçeklenebilir ikonlar için `Pillow==12.1.0` kullanılır.
 
-## BOM-ÜRÜN AĞACI
+## BOM - Ürün ağacı
 
-**BOM-ÜRÜN AĞACI → Montajı tara**, SolidWorks'teki aktif ana montajın aktif
+**BOM - Ürün ağacı → Montajı tara**, SolidWorks'teki aktif ana montajın aktif
 konfigürasyonunu ve alt montajlarını okur. CAD dosyalarını kaydetmez veya
 parametrelerini değiştirmez. **Excel’e aktar**, Excel kurulu olmadan `.xlsx`
 oluşturur; bağımlılıklar için `pip install -r requirements.txt` çalıştırın.
@@ -60,7 +60,7 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 Ø50 H8/f7: **0,025–0,089 mm boşluk**. H7/h6 minimum sıfır boşlukla boşluklu; H7/k6 ara; H7/p6 sıkı geçmedir. Tür çapa göre hesaplanır. ISO 286-1/-2:2010 standart temeli, GitHub tablolarının karşılaştırması, resmî metne erişim sınırı ve elle kontrol [ISO kılavuzundadır](docs/iso-fits.md). [Açık](docs/reports/fit-compatibility/screenshots/iso-light.png) / [koyu](docs/reports/fit-compatibility/screenshots/iso-dark.png) gerçek ekranlar. [Manuel tolerans ekranı](docs/reports/fit-compatibility/screenshots/iso-manual-dark.png).
 
-## K FAKTÖR - RADIUS
+## K faktörü / yarıçap
 
 K/R ekranında geniş **Malzeme / Takım**, **Manuel K / R** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
 
@@ -174,3 +174,20 @@ GD&T ölçü denetiminden sonra **270 test / 84 GUI testi** geçti. Açısallık
 PDF, DXF/DWG ve K/R formları solda; sonuçlar sağda tam yüksekliği kullanır. ISO ve GD&T bağımsız hesap/şema alanlarını korur. ISO örneklerinde **Tümü / Delik esaslı / Mil esaslı** filtresi vardır; H6/k6, H8/k6 ve JS7/h6, K7/h6, N7/h6, P7/h6 gibi farklı delik örnekleri seçilebilir. Geçme türü seçilen çaptaki limitlerden hesaplanır. Manuel girişte tam sınıf, yakın referans ve eşit uzaklıklar ayrılır.
 
 K/R COM nesnesi okuma ve aktif büküm payı alanına yazma düzeltildi; hata metinleri artık aşama ve API üyesini içerir. [Güncel ekranlar, Word raporu ve test kanıtları](docs/reports/kr-workspace-fix/README.md). Gerçek SolidWorks 2025 kabul kontrolü [yerel kılavuzdadır](docs/local-solidworks-check.md); bu Linux ortamında gerçek CAD ataması çalıştırılmadı.
+
+## Bulutta Türkçe karakterleri doğru görüntüleme
+
+Linux arayüzü için Python 3.13 / Tk 8.6 ortamı hazırlanmıştır. Bazı Tk
+kurulumları Türkçe harfleri çizmeyebilir; uygulama böyle bir durumda eksik
+yazılar göstermek yerine açıklayıcı bir hata verir.
+
+```bash
+bash /workspace/.cloud-setup/start.sh
+cd /workspace/gokworks
+DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user \
+XDG_CACHE_HOME=/workspace/.cloud-setup/cache \
+/workspace/.cloud-setup/gui-venv/bin/python main.py
+```
+
+Testleri de aynı yorumlayıcıyla `-m unittest discover -s tests -v` kullanarak
+çalıştırın. Windows'ta yukarıdaki Python 3.12 kurulum adımları geçerlidir.

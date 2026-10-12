@@ -58,7 +58,7 @@ def _drawing_api(model):
 def find_drawings(source_folder, include_subfolders, stop_event=None):
     source = Path(source_folder)
     if not source.is_dir():
-        raise ValueError("Kaynak klasör bulunamadı.")
+        raise ValueError("Kaynak klasörü bulunamadı.")
     drawings = []
 
     def scan_error(error):
