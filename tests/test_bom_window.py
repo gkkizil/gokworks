@@ -65,13 +65,23 @@ class BomWindowTests(GuiTestCase):
             for size, scale in (('1000x690', 1), ('1240x860', 1.25)):
                 self.app._change_theme(theme)
                 ctk.set_widget_scaling(scale)
+                # CTk locks min/max to the old size for 1 s during DPI changes.
+                # Restore its normal bounds before checking the target size.
+                self.app._set_scaled_min_max()
                 self.app.geometry(size)
                 self.settle()
+                self.assertEqual(f'{self.app.winfo_width()}x{self.app.winfo_height()}', size)
                 for key in ('scan', 'export', 'stop', 'parts', 'search'):
                     self.assert_inside(self.app.bom_widgets[key], self.app)
                 for button in self.app.nav_buttons.values():
                     self.assert_inside(button, self.app.sidebar)
-                self.assertGreater(self.app.bom_widgets['parts'].winfo_height(), 80)
+                self.assertGreater(self.app.bom_widgets['parts'].winfo_height(), 130)
+                self.assertFalse(self.app.bom_widgets['inspector'].winfo_viewable())
+                self.app.bom_widgets['tabs'].set('Ürün ağacı')
+                self.settle()
+                for key in ('tree', 'expand', 'collapse', 'details'):
+                    self.assert_inside(self.app.bom_widgets[key], self.app)
+                self.app.bom_widgets['tabs'].set('Parça listesi')
 
     def test_failed_rescan_discards_stale_results_and_disables_export(self):
         self.scan()
@@ -83,6 +93,52 @@ class BomWindowTests(GuiTestCase):
         self.assertEqual(self.app.bom_widgets['export'].cget('state'), 'disabled')
         self.assertIn('SolidWorks yok', self.app.status_label.cget('text'))
         self.assertEqual(self.app.nav_buttons['pdf'].cget('state'), 'normal')
+
+    def test_metrics_tree_controls_and_selected_component_details(self):
+        self.scan()
+        widgets = self.app.bom_widgets
+        self.assertEqual([widgets['metric_'+key].cget('text') for key in
+                          ('unique', 'quantity', 'assemblies')], ['2', '3', '1'])
+        widgets['tabs'].set('Ürün ağacı')
+        assembly = next(node for node in self.result.tree if node.kind == 'Montaj')
+        children = widgets['tree'].get_children(assembly.number)
+        widgets['collapse'].invoke()
+        self.pump_until(lambda: 'tree_toggle' not in widgets)
+        self.assertFalse(widgets['tree'].item(assembly.number, 'open'))
+        self.assertEqual(widgets['tree'].get_children(assembly.number), children)
+        widgets['expand'].invoke()
+        self.pump_until(lambda: 'tree_toggle' not in widgets)
+        self.assertTrue(widgets['tree'].item(assembly.number, 'open'))
+        widgets['tree'].selection_set(assembly.number)
+        self.settle()
+        self.assertEqual(widgets['detail_name'].cget('text'), 'ÖRNEK-M001')
+        self.assertIn(assembly.instance, widgets['detail_info'].cget('text'))
+        widgets['copy_path'].invoke()
+        self.assertEqual(self.app.clipboard_get(), assembly.path)
+        widgets['details'].invoke()
+        self.settle()
+        self.assertTrue(self.app.detail_window.winfo_viewable())
+        self.app._close_detail()
+        widgets['tabs'].set('Parça listesi')
+        self.assertEqual(widgets['detail_name'].cget('text'), 'Bir satır seçin')
+
+    def test_empty_search_can_be_cleared_without_changing_export_or_metrics(self):
+        self.scan()
+        widgets = self.app.bom_widgets
+        widgets['parts'].selection_set('part_0')
+        self.settle()
+        self.app.bom_query.set('olmayan parça')
+        self.settle()
+        self.assertFalse(widgets['parts'].get_children())
+        self.assertTrue(widgets['parts_empty'].winfo_viewable())
+        self.assertEqual(widgets['parts_empty_heading'].cget('text'), 'Eşleşen parça yok')
+        self.assertEqual(widgets['export'].cget('state'), 'normal')
+        self.assertEqual(widgets['metric_quantity'].cget('text'), '3')
+        self.assertEqual(widgets['details'].cget('state'), 'disabled')
+        widgets['clear_search'].invoke()
+        self.settle()
+        self.assertEqual(len(widgets['parts'].get_children()), 2)
+        self.assertFalse(widgets['parts_empty'].winfo_viewable())
 
     def test_cancelling_large_preview_clears_partial_rows_and_prevents_export(self):
         parts = tuple(bom.Part(f'Parça {i}', f'/p{i}.sldprt', 'Default', 1) for i in range(10000))

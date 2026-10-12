@@ -3,6 +3,17 @@
 [Örnek Excel ve arayüz görselleri](reports/bom/README.md) sentetik montaj
 verileriyle hazırlanmıştır; kullanıcının gerçek CAD dosyalarını içermez.
 
+Montaj kartı etkin dosyayı ve konfigürasyonu gösterir. Üç sayı kartı farklı
+parça sayısını, toplam fiziksel adedi ve alt montajların kullanım adedini
+özetler. Alt montaj satırları ürün ağacında yeşille ayrılır; **Tümünü aç** ve
+**Tümünü kapat** düğmeleri bütün montaj dallarını yönetir.
+
+Arama parça adını, konfigürasyonu ve dosya yolunu filtreler. Excel dosyası
+her zaman bütün tarama sonucunu içerir. Dosya yolu ana tablodan çıkarılmıştır;
+seçili satırın ayrıntı panelinden görülebilir ve kopyalanabilir. Küçük pencerede
+panel gizlenir; **Ayrıntılar** düğmesi veya Enter aynı bilgileri açar.
+**BOM dışındakileri ekle** seçeneği sonraki taramada uygulanır.
+
 Aktif montajın aktif konfigürasyonu `GetRootComponent3(True)` ile alınır.
 `GetChildren` her bileşen örneği için ayrı dolaşılır; alt montajın referans
 konfigürasyonuna ait çocuklar kullanılır. Başka konfigürasyona geçilmez ve

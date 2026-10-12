@@ -387,3 +387,8 @@ class WorkspaceLayout:
                                   ("partial", AMBER), ("skipped", AMBER), ("error", RED)):
                 table.tag_configure(status, foreground=color(value))
             table.tag_configure("stripe", background=color(INPUT))
+        bom_pages = [page['bom_widgets'] for page in self._pages.values() if 'bom_widgets' in page]
+        if self.mode == 'bom' and self.bom_widgets not in bom_pages:
+            bom_pages.append(self.bom_widgets)
+        for widgets in bom_pages:
+            self._style_bom_tables(widgets)

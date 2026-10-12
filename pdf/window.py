@@ -450,12 +450,10 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
 
     def _resize_pdf_area(self, event=None):
         if self.mode == 'bom':
-            self._layout_fit_id = None
-            wrap = max(240, self.workspace.winfo_width()-56)
-            self.status_label.configure(wraplength=wrap)
-            self.bom_widgets['assembly'].configure(wraplength=wrap)
-            if getattr(self, '_table_style_key', None) != (ctk.get_appearance_mode(), self.workspace._get_widget_scaling()):
-                self._configure_table_style()
+            previous = getattr(self, '_layout_fit_id', None)
+            if previous is not None:
+                self.after_cancel(previous)
+            self._layout_fit_id = self.after(35, self._resize_bom_workspace)
             return
         if self.mode in ('iso_fits', 'geometric_tolerances'):
             previous = getattr(self, '_layout_fit_id', None)
