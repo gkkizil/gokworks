@@ -20,6 +20,7 @@ from gui.layout import WorkspaceLayout
 from k_factor.window import KFactorView
 from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
+from bom.window import BomView
 from gui.icons import make_icon, set_window_icon
 from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
@@ -37,7 +38,9 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _BOM_PAGE_ATTRIBUTES = ('workspace', 'bom_state', 'bom_query', 'bom_result',
+                            'bom_widgets', 'status_label', 'progress')
     _GDT_PAGE_ATTRIBUTES = ('workspace', 'gdt_state', 'gdt_widgets', 'gdt_result',
                             'gdt_search', 'status_label')
     _ISO_PAGE_ATTRIBUTES = ('workspace', 'iso_state', 'iso_widgets', 'iso_result',
@@ -118,7 +121,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self._preload_id = None
         if self._closed:
             return
-        missing = next((mode for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances')
+        missing = next((mode for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom')
                         if mode not in self._pages), None)
         if missing is None:
             return
@@ -169,7 +172,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
 
     def _switch_mode(self, mode):
         self._note_ui_activity()
-        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances"):
+        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances", "bom"):
             return
         self._schedule_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
@@ -198,7 +201,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             self._draw_gdt_diagram()
 
     def _remember_page(self):
-        attributes = (self._GDT_PAGE_ATTRIBUTES if self.mode == 'geometric_tolerances' else
+        attributes = (self._BOM_PAGE_ATTRIBUTES if self.mode == 'bom' else
+                      self._GDT_PAGE_ATTRIBUTES if self.mode == 'geometric_tolerances' else
                       self._ISO_PAGE_ATTRIBUTES if self.mode == 'iso_fits' else self._PAGE_ATTRIBUTES)
         self._pages[self.mode] = {name: getattr(self, name) for name in attributes}
 
@@ -221,6 +225,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             self._create_iso_state(saved)
         elif self.mode == 'geometric_tolerances':
             self._create_gdt_state(saved)
+        elif self.mode == 'bom':
+            self._create_bom_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -257,7 +263,7 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             button.configure(
                 hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
                 text_color=ACCENT if active else MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "layers"}[key],
                                  ACCENT if active else MUTED),
                 border_width=0,
                 font=self._nav_fonts[active],
@@ -318,6 +324,10 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if self.mode == 'bom':
+            self.bom_widgets['tabs'].set('Parça listesi')
+            self.bom_widgets['search'].focus_set()
+            return 'break'
         if self.mode == 'geometric_tolerances':
             self.gdt_widgets['search'].focus_set()
             return 'break'
@@ -433,6 +443,14 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         self.detail_window = None
 
     def _resize_pdf_area(self, event=None):
+        if self.mode == 'bom':
+            self._layout_fit_id = None
+            wrap = max(240, self.workspace.winfo_width()-56)
+            self.status_label.configure(wraplength=wrap)
+            self.bom_widgets['assembly'].configure(wraplength=wrap)
+            if getattr(self, '_table_style_key', None) != (ctk.get_appearance_mode(), self.workspace._get_widget_scaling()):
+                self._configure_table_style()
+            return
         if self.mode in ('iso_fits', 'geometric_tolerances'):
             previous = getattr(self, '_layout_fit_id', None)
             if previous is not None:
@@ -533,7 +551,9 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
 
     def _preference_values(self):
         saved = {'appearance': 'dark' if self.theme_mode.get() == 'Koyu' else 'light'}
-        if self.mode == 'geometric_tolerances':
+        if self.mode == 'bom':
+            saved['bom_include_excluded'] = self.bom_state['include_excluded'].get()
+        elif self.mode == 'geometric_tolerances':
             saved.update({f'gdt_{key}': value.get() for key, value in self.gdt_state.items() if key != 'measured'})
         elif self.mode == 'iso_fits':
             saved.update({f'iso_{key}': value.get() for key, value in self.iso_state.items()})
@@ -643,6 +663,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
                          daemon=False).start()
 
     def _request_stop(self):
+        if self.mode == 'bom':
+            return self._stop_bom()
         self.stop_event.set()
         if self.mode == 'k_factor':
             self.k_widgets.pop('pending_apply', None)
@@ -873,6 +895,8 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
             self._continue_k_apply(summary)
 
     def _process_events(self):
+        if self.mode == 'bom':
+            return self._process_bom_events()
         if self._pending_files is not None:
             self._fill_next_file_batch()
             if self._closed:

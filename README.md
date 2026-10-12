@@ -14,6 +14,34 @@ py -3.12 -m venv .venv
 
 Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz için `customtkinter==6.0.0` ve ölçeklenebilir ikonlar için `Pillow==12.1.0` kullanılır.
 
+## BOM-ÜRÜN AĞACI
+
+**BOM-ÜRÜN AĞACI → Montajı tara**, SolidWorks'teki aktif ana montajın aktif
+konfigürasyonunu ve alt montajlarını okur. CAD dosyalarını kaydetmez veya
+parametrelerini değiştirmez. **Excel’e aktar**, Excel kurulu olmadan `.xlsx`
+oluşturur; bağımlılıklar için `pip install -r requirements.txt` çalıştırın.
+
+- **Parça listesi**: Parça adı, fiziksel toplam adet, konfigürasyon ve dosya
+  yolu. Adlar Türkçe harflerle ve doğal sayı sırasıyla sıralanır (Parça 2,
+  Parça 10). Aynı dosyanın farklı konfigürasyonları ve aynı adlı farklı
+  dosyalar ayrı satırlardır.
+- **Ürün ağacı**: Her alt montajın altında kendi parçaları bulunur.
+  `ÖRNEK-M001 → Parça A / Parça B` ilişkisi korunur; iç içe montajlar Excel'de
+  girintili ve açılır/kapanır satır gruplarıyla gösterilir. Bu sayfa fiziksel
+  örnekleri ayrı satırlarda listeler; her örneğin adedi 1'dir. Aynı alt montaj
+  iki kez kullanılmışsa iki dal da alınır, toplam parça adetleri birleşir.
+- Bastırılmış dallar hariçtir; gizli bileşenler sayılır. BOM dışı işaretli
+  dallar varsayılan olarak atlanır; **BOM dışı bileşenleri de dahil et**
+  seçeneğiyle alınabilir. Tarama yeniden yapıldığında yeni seçim uygulanır.
+- Arama yalnız ekrandaki toplu parça listesini süzer; Excel tam tarama
+  sonucunu içerir. Eksik/çözümlenmemiş bileşen, SpeedPak veya API hatasında
+  kısmi sonuç dışa aktarılmaz. Durdurma mevcut Excel dosyasını korur.
+
+Bu çıktı uygulamanın bileşen ağacıdır; SolidWorks'te eklenmiş bir BOM
+tablosunu kopyalamaz. Özel BOM miktar/birim özellikleri, satın alınmış montaj
+kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
+Örnek Excel, kaynaklar ve Windows kabul adımları [BOM kılavuzunda](docs/bom.md).
+
 ## Arayüz ve temalar
 
 Yan menü Dışa Aktarım ve Mühendislik olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi beş ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.

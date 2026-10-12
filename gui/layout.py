@@ -20,6 +20,8 @@ class WorkspaceLayout:
         self.grid_rowconfigure(0, weight=1)
         if not hasattr(self, "sidebar"):
             self._build_sidebar()
+        if self.mode == 'bom':
+            return self._build_bom_workspace()
         if self.mode == 'iso_fits':
             return self._build_iso_workspace()
         if self.mode == 'geometric_tolerances':
@@ -84,11 +86,12 @@ class WorkspaceLayout:
                            for active in (False, True)}
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
+            ("bom", "BOM-ÜRÜN AĞACI", "layers"),
             ("k_factor", "K FAKTÖR - RADIUS", "tools"),
             ("iso_fits", "ISO geçmeleri", "ruler"),
             ("geometric_tolerances", "Geometrik tolerans", "target"),
         )):
-            if row == 2:
+            if row == 3:
                 self._label(navigation, "MÜHENDİSLİK", 10, MUTED, True).grid(
                     row=row, column=0, sticky="w", padx=10, pady=(22, 10))
             active = key == self.mode
@@ -102,7 +105,7 @@ class WorkspaceLayout:
                 command=lambda selected=key: self._switch_mode(selected),
                 state="normal",
             )
-            button.grid(row=row if row < 2 else row+1, column=0, sticky="ew", pady=(0, 6))
+            button.grid(row=row if row < 3 else row+1, column=0, sticky="ew", pady=(0, 6))
             self.nav_buttons[key] = button
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         footer.grid(row=5, column=0, sticky="ew", padx=20, pady=24)
@@ -373,7 +376,7 @@ class WorkspaceLayout:
         style.map("Gok.Treeview", background=[("selected", color(ACCENT_BG))],
                   foreground=[("selected", color(TEXT))])
         tables = {page['table'] for page in self._pages.values() if 'table' in page}
-        if self.mode not in ('iso_fits', 'geometric_tolerances'):
+        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom'):
             tables.add(self.table)
         for table in tables:
             table.column("status", width=round(152 * scale), minwidth=round(80 * scale))

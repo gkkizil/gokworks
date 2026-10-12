@@ -1,0 +1,49 @@
+{
+  "review_date": "2026-10-12",
+  "github_sources": [
+    {
+      "repository": "xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "path": "solidworks-api/document/assembly/components/traversing-tree/Macro.vba",
+      "url": "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/traversing-tree/Macro.vba",
+      "sha256": "373ff9e01a51cb43111d16b4a0552254a740e420dc0889678ee77f9b13ccc1ed",
+      "executed": false
+    },
+    {
+      "repository": "xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "path": "solidworks-api/document/assembly/compose-flat-bom/Macro.vba",
+      "url": "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/compose-flat-bom/Macro.vba",
+      "sha256": "6094d57e3fd87b24c0ffc32a022172236a6fce2fd4eb9fb714f3344008c0ca18",
+      "executed": false
+    },
+    {
+      "repository": "xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "path": "solidworks-api/document/assembly/components/write-quantities/Macro.vba",
+      "url": "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/write-quantities/Macro.vba",
+      "sha256": "deefa4fbfedba5eac46b9cc5eb06089b2da2f5d6e5007ad019f689a76f620fca",
+      "executed": false
+    },
+    {
+      "repository": "xarial/xcad",
+      "commit": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+      "path": "src/SolidWorks/Documents/SwAssembly.cs",
+      "url": "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwAssembly.cs",
+      "sha256": "901f2d1894070262f3b4e25e21f0accb9a05511c4441b53f5d432aad9e6f0b87",
+      "executed": false
+    },
+    {
+      "repository": "xarial/xcad",
+      "commit": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+      "path": "src/SolidWorks/Documents/SwComponent.cs",
+      "url": "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwComponent.cs",
+      "sha256": "0538f37c120301185f9f06234dff7fb3ca9dfb81ed3e46c2af6dccb936b1a782",
+      "executed": false
+    }
+  ],
+  "api_mirror_archive_sha256": "6cbddbcd2e173b664dd920cd6928d013f6b445f885c1478a6a5acb7fd6f0605b",
+  "implementation_copies_external_code": false,
+  "example_excel_uses_synthetic_data": true,
+  "native_solidworks_2025_verified": false
+}

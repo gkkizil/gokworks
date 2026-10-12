@@ -1,0 +1,30 @@
+[
+  {
+    "file": "docs/reports/bom/screenshots/bom-parts-light.png",
+    "sha256": "f8a80fb55d2468c931afbb93c6a1036c7418df4103ace1345df232e68007627e",
+    "synthetic_data": true,
+    "real_tk_capture": true,
+    "native_solidworks_executed": false
+  },
+  {
+    "file": "docs/reports/bom/screenshots/bom-tree-light.png",
+    "sha256": "bf5480864e0c538b5cc8d641a39c121e7d7f4bfc9c1cac7cdb4ecae1266c4dc3",
+    "synthetic_data": true,
+    "real_tk_capture": true,
+    "native_solidworks_executed": false
+  },
+  {
+    "file": "docs/reports/bom/screenshots/bom-parts-dark.png",
+    "sha256": "bf5176cbfcb77530dfa22d2d7d24d70e773a356bd9158653f566d6f81c998db4",
+    "synthetic_data": true,
+    "real_tk_capture": true,
+    "native_solidworks_executed": false
+  },
+  {
+    "file": "docs/reports/bom/screenshots/bom-tree-dark.png",
+    "sha256": "a30a9bd5698ef599dcf4d1949ea1f8aacb7fe088cb8cfa6b68412806e85131b4",
+    "synthetic_data": true,
+    "real_tk_capture": true,
+    "native_solidworks_executed": false
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "full_suite": {
+    "tests": 374,
+    "seconds": 175.079,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "log_sha256": "61ce6f6a0734a6649082b79e38b8a8cda52bace4962f11d6269aa4038e0c2d9f",
+    "command": "DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cloud-setup/cache .venv/bin/python -m unittest discover -s tests -v"
+  },
+  "targeted_bom_and_navigation": {
+    "tests": 28,
+    "exit_code": 0
+  },
+  "native_solidworks_2025_verified": false
+}
