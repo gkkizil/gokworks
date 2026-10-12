@@ -1,0 +1,23 @@
+{
+  "baseline_commit": "70bf2c9484e4e3eb5bfb6796ae98c0c4d0a5f8d6",
+  "full_suite": {
+    "command": "DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cloud-setup/cache .venv/bin/python -m unittest discover -s tests -v",
+    "tests": 356,
+    "seconds": 164.167,
+    "exit_code": 0,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "log_sha256": "c0a08b05beee7e57f291f70f35b35ead542fc8c2cd59aa3afa7c23178de6845b"
+  },
+  "targeted_kr": {
+    "tests": 55,
+    "exit_code": 0
+  },
+  "targeted_gui": {
+    "tests": 14,
+    "exit_code": 0
+  },
+  "native_solidworks_2025_verified": false,
+  "five_hour_recurrence_configured": false
+}

@@ -43,7 +43,7 @@ class NativeDefinition(Definition):
 
 class ActiveAllowance:
     _oleobj_ = object()
-    fields = {'KFactor': 2, 'BendAllowance': 3, 'BendDeduction': 4, 'BendTableFile': (1, 5)}
+    fields = {'KFactor': 2, 'BendAllowance': 3, 'BendDeduction': 4, 'BendTableFile': 1, 'BendCalculationTableFile': 5}
 
     def __init__(self, base):
         object.__setattr__(self, 'base', base)
@@ -152,6 +152,77 @@ class NativeDispatchApplyTests(KApplyTestCase):
         status, detail, _ = self.manual()
         self.assertEqual(status, 'skipped', detail)
         self.assertEqual(self.model.feature.modify_count, 0)
+
+
+class CalculationTableAllowance(ActiveAllowance):
+    fields = dict(ActiveAllowance.fields, BendTableFile=1, BendCalculationTableFile=5)
+
+    def __init__(self, base):
+        super().__init__(base)
+        object.__setattr__(self, 'last_set', None)
+
+    def __setattr__(self, key, value):
+        super().__setattr__(key, value)
+        object.__setattr__(self, 'last_set', key)
+        if key in self.fields:
+            # Real active setters also select their own mode.
+            self.base.Type = self.fields[key]
+
+
+class CalculationTableDefinition(Definition):
+    def __init__(self, feature):
+        super().__init__(feature)
+        self.allowance.BendCalculationTableFile = self.data['calculation_table']
+
+    def GetCustomBendAllowance(self):
+        return CalculationTableAllowance(self.allowance)
+
+    def SetCustomBendAllowance(self, value):
+        assert value.last_set == 'Type', 'Finalize Type after the active value setter'
+        self.allowance = value.base
+
+
+class CalculationTableFeature(SheetFeature):
+    def GetDefinition(self):
+        return CalculationTableDefinition(self)
+
+    def ModifyDefinition(self, definition, model, component):
+        self.modify_count += 1
+        state = model.states[model.config]
+        state.update(radius=definition.BendRadius, type=definition.allowance.Type)
+        if state['type'] == 2:
+            state['k'] = definition.allowance.KFactor
+        elif state['type'] == 5:
+            state['calculation_table'] = definition.allowance.BendCalculationTableFile
+        return True
+
+
+class CalculationTableTests(KApplyTestCase):
+    def setUp(self):
+        super().setUp()
+        self.model.feature = CalculationTableFeature(self.model)
+        self.model.states['Default'].update(type=5, calculation_table=r'C:\Tablolar\Özel hesap.xls')
+
+    def test_type_five_snapshot_reads_calculation_table_not_bend_table(self):
+        before = ap._state(self.model.feature)
+        self.assertEqual(before.allowance_type, 5)
+        self.assertEqual(before.bend_table, r'C:\Tablolar\Özel hesap.xls')
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+                                          ManualAssignment(2, .274, 2))
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+        self.assertEqual(self.model.states['Default']['type'], 2)
+
+    def test_failed_write_restores_type_five_file_and_finalizes_type_last(self):
+        before = ap._state(self.model.feature)
+        self.model.rebuild_fail = True
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+                                          ManualAssignment(2, .274, 3), save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('geri yüklendi', detail)
+        self.assertTrue(ap._same([before], [ap._state(self.model.feature)]))
+        self.assertEqual(self.model.states['Default']['calculation_table'], r'C:\Tablolar\Özel hesap.xls')
+        self.assertEqual(self.model.save_count, 0)
 
 
 if __name__ == '__main__':

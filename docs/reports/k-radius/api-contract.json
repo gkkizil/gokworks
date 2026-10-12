@@ -511,8 +511,28 @@
         "IConvertSolidFeatureData.OverrideDefaultBendAllowanceParameters": "Overrides custom bend allowance inherited from the parent sheet metal feature.",
         "IConvertSolidFeatureData.OverrideBendRadius": "Gauge-only creation setting; valid only before CreateFeature. It is not the override check for an existing conversion.",
         "IConvertSolidFeatureData.GetCustomBendAllowance": "Returns an ICustomBendAllowance object.",
-        "IConvertSolidFeatureData.SheetThickness": "The thickness member is SheetThickness, not ISheetMetalFeatureData.Thickness."
-      }
+        "IConvertSolidFeatureData.SheetThickness": "The thickness member is SheetThickness, not ISheetMetalFeatureData.Thickness.",
+        "IModelDocExtension.GetTemplateSheetMetal": "Returns the sheet metal folder IFeature for models created in SolidWorks 2013 or later; null for 2012 or earlier. Official mirrored example gets ISheetMetalFeatureData from this feature.GetDefinition and calls AccessSelections.",
+        "IFeature.GetTypeName2 (parent)": "TemplateSheetMetal maps to ISheetMetalFolder; the body-level SheetMetal maps to ISheetMetalFeatureData. Names displayed in the tree are not API types.",
+        "ISheetMetalFolder.GetFeature": "Returns the IFeature for the sheet metal folder; used only after an explicitly null GetTemplateSheetMetal result, never to hide an API exception.",
+        "ISheetMetalFeatureData.GetOverrideDefaultParameter2": "Returns swSheetMetalModifierError_e and an out bool. The mirror documents modern multibody architecture. Modern child checks fail closed on any nonzero result; legacy child-only parts do not use this method.",
+        "swSheetMetalOverrideDefaultParameters_e": "BendParameters = 0, BendAllowance = 1, AutoRelief = 2. Only the first two are read; none are written.",
+        "ICustomBendAllowance.BendCalculationTableFile": "Active file member for bend allowance Type=5; BendTableFile belongs to Type=1.",
+        "ICustomBendAllowance.Type": "Documentation says to set Type last because active value/file setters also change the allowance type. The implementation selects the target mode, writes only its active member, then finalizes Type."
+      },
+      "rechecked_date": "2026-10-12",
+      "rechecked_asset_sha256": "6cbddbcd2e173b664dd920cd6928d013f6b445f885c1478a6a5acb7fd6f0605b"
+    }
+  ],
+  "public_code_references": [
+    {
+      "source": "https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L1058",
+      "commit": "6c835fb712c18df8969500ec247a0768d3af0d37",
+      "file_sha256": "414942eaa8ebdc429fdbe189976701105cd98658c72581a11c429897a6670155",
+      "retrieved_date": "2026-10-12",
+      "runtime_verified": false,
+      "finding": "ChangeBendZone gets FeatureManager.GetSheetMetalFolder().GetFeature(), changes its CustomBendAllowance, calls SetCustomBendAllowance and ModifyDefinition on the folder feature.",
+      "scope": "Corroborates parent-target selection; does not prove behavior on the user model or establish the full failure/rollback contract."
     }
   ]
 }

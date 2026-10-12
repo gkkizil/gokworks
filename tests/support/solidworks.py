@@ -299,6 +299,9 @@ class SheetPart(FakePart):
         self.config=configurations[0]
         self.ConfigurationManager.ActiveConfiguration.Name=self.config
         self.feature=SheetFeature(self)
+        # Documented null template/folder denotes a legacy sheet-metal part.
+        self.Extension=SimpleNamespace(GetTemplateSheetMetal=lambda: None)
+        self.FeatureManager=SimpleNamespace(GetSheetMetalFolder=lambda: None)
         self.gauge=self.material_link=self.access_fail=self.modify_fail=False
         self.rebuild_fail=self.readback_fail=self.propagate=self.dirty=self.save_fail=False
         self.save_count=0

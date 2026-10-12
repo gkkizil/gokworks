@@ -14,6 +14,7 @@ from solidworks.connection import connect_to_solidworks
 pythoncom, win32com = sw.pythoncom, sw.win32com
 _value, _key = sw._value, sw._part_key
 ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
+TEMPLATE_SHEET = "TemplateSheetMetal"
 CONVERT_SOLID = "SolidToSheetMetal"  # IFeature.GetTypeName2; not the display name.
 
 
@@ -72,6 +73,59 @@ def _features(model, *, include_suppressed=False):
             yield feature, kind
 
 
+def _identity(feature):
+    return _read(feature, "Name"), _read(feature, "GetTypeName2")
+
+
+def _parent(model):
+    """Resolve SAC LEVHA through the documented API, never a display name.
+
+    A null template is documented for pre-2013 parts. API failures are not
+    evidence of legacy architecture and must not select an arbitrary child.
+    """
+    feature = _read(_read(model, "Extension"), "GetTemplateSheetMetal")
+    if feature is None:
+        folder = _read(_read(model, "FeatureManager"), "GetSheetMetalFolder")
+        if folder is not None:
+            feature = _read(folder, "GetFeature")
+            if feature is None:
+                raise RuntimeError("SAC LEVHA klasörünün GetFeature sonucu boş.")
+    if feature is not None:
+        name, kind = _identity(feature)
+        if kind != TEMPLATE_SHEET:
+            raise RuntimeError(f"SAC LEVHA API'si beklenmeyen unsur döndürdü: {name} ({kind}).")
+        return feature, kind
+    # A modern template in the tree contradicts a null lookup; fail closed.
+    candidates = list(_features(model, include_suppressed=True))
+    if any(kind == TEMPLATE_SHEET for _, kind in candidates):
+        raise RuntimeError("SAC LEVHA şablonu ağaçta bulundu ancak API'den alınamadı.")
+    active = [f for f, kind in _features(model) if kind == "SheetMetal"]
+    if len(active) != 1:
+        raise RuntimeError("Eski sac yapısında tek bir aktif SheetMetal unsuru gerekir.")
+    return active[0], "SheetMetal"
+
+
+def _tracked_features(model):
+    # The API-selected template may not occur in FirstFeature traversal.
+    parent, kind = _parent(model)
+    result = [(parent, kind)]
+    seen = {_identity(parent)}
+    for feature, kind in _features(model, include_suppressed=True):
+        if kind in (TEMPLATE_SHEET, "SheetMetal", CONVERT_SOLID) and _identity(feature) not in seen:
+            result.append((feature, kind))
+            seen.add(_identity(feature))
+    return result
+
+
+def _body_feature(model, parent, kind):
+    if kind == "SheetMetal":
+        return parent
+    children = [f for f, kind in _features(model) if kind == "SheetMetal"]
+    if len(children) != 1:
+        raise RuntimeError("Tek sac gövdesi için bir aktif SheetMetal alt unsuru gerekir.")
+    return children[0]
+
+
 @dataclass(frozen=True)
 class FeatureState:
     name: str
@@ -84,9 +138,22 @@ class FeatureState:
     bend_table: str
     kind: str = "SheetMetal"
     error_code: int = 0
+    suppressed: bool = False
+    overrides: tuple = ()
 
 
-def _state(feature, kind="SheetMetal"):
+def _sheet_overrides(definition):
+    values = []
+    for parameter, label in ((0, "kalınlık/yarıçap"), (1, "büküm payı/K")):
+        overridden = _out(pythoncom.VT_BOOL)
+        error = _call(definition, "GetOverrideDefaultParameter2", parameter, overridden)
+        if error != 0:
+            raise RuntimeError(f"{label} override durumu okunamadı; API hata kodu: {error}")
+        values.append(bool(overridden.value))
+    return tuple(values)
+
+
+def _state(feature, kind="SheetMetal", *, inherited=False):
     definition = _read(feature, "GetDefinition")
     if definition is None:
         raise RuntimeError(f"{_read(feature, 'Name')} ({kind}) unsur tanımı okunamadı.")
@@ -99,23 +166,33 @@ def _state(feature, kind="SheetMetal"):
     k = float(_read(allowance, "KFactor")) if allowance_type == 2 else 0.0
     ba = float(_read(allowance, "BendAllowance")) if allowance_type == 3 else 0.0
     bd = float(_read(allowance, "BendDeduction")) if allowance_type == 4 else 0.0
-    table = str(_read(allowance, "BendTableFile") or "") if allowance_type in (1, 5) else ""
+    if allowance_type not in (1, 2, 3, 4, 5):
+        raise RuntimeError(f"Desteklenmeyen büküm payı türü: {allowance_type}")
+    table_member = "BendCalculationTableFile" if allowance_type == 5 else "BendTableFile"
+    table = str(_read(allowance, table_member) or "") if allowance_type in (1, 5) else ""
     thickness_member = "SheetThickness" if kind == CONVERT_SOLID else "Thickness"
+    empty = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
+    suppressed = _call(feature, "IsSuppressed2", 1, empty)
+    if suppressed is None:
+        raise RuntimeError(f"Unsurun konfigürasyon durumu okunamadı: {_read(feature, 'Name')}")
     return FeatureState(_read(feature, "Name"), float(_read(definition, thickness_member)),
                         float(_read(definition, "BendRadius")), allowance_type, k, ba, bd, table,
-                        kind, int(_read(feature, "GetErrorCode")))
+                        kind, int(_read(feature, "GetErrorCode")), sw._success(suppressed),
+                        _sheet_overrides(definition) if inherited else ())
 
 
 def _states(model):
-    return [_state(feature, kind) for feature, kind in _features(model, include_suppressed=True)
-            if kind in ("SheetMetal", CONVERT_SOLID)]
+    features = _tracked_features(model)
+    modern = features[0][1] == TEMPLATE_SHEET
+    return [_state(feature, kind, inherited=modern and kind == "SheetMetal")
+            for feature, kind in features]
 
 
 def _same(left, right):
     if len(left) != len(right):
         return False
     for a, b in zip(left, right):
-        if (a.name, a.kind, a.allowance_type, a.error_code) != (b.name, b.kind, b.allowance_type, b.error_code):
+        if (a.name, a.kind, a.allowance_type, a.error_code, a.suppressed, a.overrides) != (b.name, b.kind, b.allowance_type, b.error_code, b.suppressed, b.overrides):
             return False
         if a.allowance_type in (1, 5) and a.bend_table != b.bend_table:
             return False
@@ -161,8 +238,10 @@ def _modify(model, feature, state):
         _write(allowance, "Type", state.allowance_type)
         member, value = {1: ("BendTableFile", state.bend_table), 2: ("KFactor", state.k_factor),
                          3: ("BendAllowance", state.bend_allowance), 4: ("BendDeduction", state.bend_deduction),
-                         5: ("BendTableFile", state.bend_table)}[state.allowance_type]
+                         5: ("BendCalculationTableFile", state.bend_table)}[state.allowance_type]
         _write(allowance, member, value)
+        # Active value/file setters can reset Type themselves. Finalize last.
+        _write(allowance, "Type", state.allowance_type)
         _call(definition, "SetCustomBendAllowance", allowance)
         _write(definition, "BendRadius", state.radius)
         if not _call(feature, "ModifyDefinition", definition, model, None):
@@ -192,13 +271,21 @@ def _rollback(model, snapshots):
                 unchanged = False
             if unchanged:
                 continue
-            features = {_value(f, "Name"): f for f, kind in _features(model, include_suppressed=True)
-                        if kind == "SheetMetal"}
             for state in before:
                 # ConvertSolid inherits these values. Do not initialize it or
                 # alter its thickness/relief/override settings during rollback.
-                if state.kind == "SheetMetal":
-                    _modify(model, features[state.name], state)
+                if state.kind in (TEMPLATE_SHEET, "SheetMetal"):
+                    # Reacquire after each parent modification/rebuild.
+                    features = {_identity(f): f for f, kind in _tracked_features(model)}
+                    feature = features[(state.name, state.kind)]
+                    # Restoring the parent often restores its inherited child.
+                    # Do not write that child unless it still differs.
+                    try:
+                        restored = _same([state], [_state(feature, state.kind, inherited=bool(state.overrides))])
+                    except Exception:
+                        restored = False
+                    if not restored:
+                        _modify(model, feature, state)
         for name, before in snapshots.items():
             _show_configuration(model, name)
             if not _same(before, _states(model)):
@@ -207,7 +294,7 @@ def _rollback(model, snapshots):
         _show_configuration(model, original)
 
 
-def _check_defaults(model, definition):
+def _check_sheet_defaults(definition):
     if bool(_read(definition, "UseMaterialSheetMetalParameters")):
         raise RuntimeError("Sac parametreleri malzemeye bağlı; önce SolidWorks'te bu bağı kaldırın.")
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
@@ -216,8 +303,19 @@ def _check_defaults(model, definition):
         raise RuntimeError(f"Gauge tablosu durumu okunamadı; API hata kodu: {error}")
     if used.value:
         raise RuntimeError("Gauge tablosuna bağlı sac; önce SolidWorks'te tablo bağını kaldırın.")
+
+
+def _check_defaults(model, parent):
+    _check_sheet_defaults(_read(parent, "GetDefinition"))
     for feature, kind in _features(model):
+        if kind == TEMPLATE_SHEET:
+            continue
         if kind == "SheetMetal":
+            if _identity(feature) != _identity(parent):
+                definition = _read(feature, "GetDefinition")
+                _check_sheet_defaults(definition)
+                if any(_sheet_overrides(definition)):
+                    raise RuntimeError(f"{_read(feature, 'Name')}: özel kalınlık/yarıçap veya büküm payı/K parametresi kullanıyor; K/R uygulanmadı.")
             continue
         data = _value(feature, "GetDefinition")
         if kind == CONVERT_SOLID:
@@ -242,6 +340,21 @@ def _check_defaults(model, definition):
         for attribute in ("UseDefaultBendRadius", "UseDefaultRadius", "UseDefaultBendAllowance"):
             if hasattr(data, attribute) and not bool(_value(data, attribute)):
                 raise RuntimeError(f"{_value(feature, 'Name')} özel büküm parametresi kullanıyor; genel K/R tüm bükümlere geçmez. Önce varsayılan büküm parametrelerini etkinleştirin.")
+
+
+def _check_inherited_sheet(model, expected, *, expected_names=None):
+    names = []
+    for feature, kind in _features(model):
+        if kind != "SheetMetal" or _identity(feature) == (expected.name, expected.kind):
+            continue
+        actual = _state(feature, kind, inherited=True)
+        target = replace(expected, name=actual.name, kind=kind, error_code=0, overrides=(False, False))
+        if not _same([actual], [target]):
+            raise RuntimeError(f"{actual.name}: SheetMetal alt unsuru ana SAC LEVHA K/R ve kalınlığıyla eşleşmedi.")
+        names.append(actual.name)
+    if expected_names is not None and tuple(names) != expected_names:
+        raise RuntimeError("SheetMetal alt unsur listesi değişti; SAC LEVHA doğrulanamadı.")
+    return tuple(names)
 
 
 def _check_converted_values(model, expected, *, expected_names=None):
@@ -317,21 +430,19 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if len(bodies) != 1:
             raise RuntimeError("Çok gövdeli parça desteklenmiyor; ayrı sac parçalar kullanın.")
         stage = "Sac unsuru ve kalınlığı"
-        features = [f for f, kind in _features(model) if kind == "SheetMetal"]
-        if len(features) != 1:
-            raise RuntimeError("Tek bir aktif SheetMetal unsuru gerekir.")
-        feature = features[0]
-        if isinstance(recipe, ManualAssignment):
-            # Read thickness first: non-matching sheets must never go through
-            # K/R override checks or any parameter write/save.
-            calculation = calculate(float(_read(_read(feature, "GetDefinition"), "Thickness")) * 1000, recipe)
+        feature, parent_kind = _parent(model)
+        body_feature = _body_feature(model, feature, parent_kind)
+        # Single-body support makes this the unique body-level SheetMetal
+        # definition, not the template's potentially different default thickness.
+        # Nonmatching manual sheets stop before allowance/override API calls.
+        calculation = calculate(float(_read(_read(body_feature, "GetDefinition"), "Thickness")) * 1000, recipe)
         stage = "Mevcut K/R ve büküm payı okuma"
-        before = _state(feature)
-        if before.error_code:
-            raise RuntimeError("SheetMetal unsuru zaten hata içeriyor; önce parçayı düzeltin.")
-        calculation = calculate(before.thickness * 1000, recipe)
+        before = _state(feature, parent_kind)
+        if before.error_code or before.suppressed:
+            raise RuntimeError("SAC LEVHA unsuru baskılanmış veya zaten hata içeriyor; önce parçayı düzeltin.")
         stage = "Malzeme, gauge ve özel büküm kontrolleri"
-        _check_defaults(model, _read(feature, "GetDefinition"))
+        _check_defaults(model, feature)
+        inherited_names = _check_inherited_sheet(model, before)
         stage = "Katıyı Saca Dönüştür parametre kontrolü"
         converted_names = _check_converted_values(model, before)
         if not preview:
@@ -343,9 +454,15 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                              allowance_type=2, k_factor=calculation.k_factor)
             changed = True  # COM setters can mutate even if ModifyDefinition fails.
             stage = "K/R yazma ve yeniden oluşturma"
+            # Configuration capture invalidates previous COM definitions and
+            # can invalidate feature wrappers. Resolve again before mutation.
+            feature, kind = _parent(model)
+            if _identity(feature) != (before.name, before.kind):
+                raise RuntimeError("SAC LEVHA hedefi konfigürasyon yedeğinden sonra değişti.")
             _modify(model, feature, target)
             stage = "K/R geri okuma ve konfigürasyon doğrulaması"
-            after = _state(feature)
+            feature, kind = _parent(model)
+            after = _state(feature, kind)
             if not _same([target], [after]):
                 raise RuntimeError("K/R yazma sonrası değerler geri okumada eşleşmedi.")
             for name, untouched in snapshots.items():
@@ -354,6 +471,13 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                     if not _same(untouched, _states(model)):
                         raise RuntimeError(f"Değişiklik başka konfigürasyona yayıldı ({name}); işlem geri alınıyor. Parametreleri konfigürasyona özel tanımlayın.")
             _show_configuration(model, configuration)
+            # Fresh reads after the configuration round-trip, including parent.
+            feature, kind = _parent(model)
+            after = _state(feature, kind)
+            if not _same([target], [after]):
+                raise RuntimeError("SAC LEVHA K/R konfigürasyon dönüşünde eşleşmedi.")
+            _check_defaults(model, feature)
+            _check_inherited_sheet(model, target, expected_names=inherited_names)
             _check_converted_values(model, target, expected_names=converted_names)
             if converted_names:
                 notes.append(f"Katıyı Saca Dönüştür: {len(converted_names)} unsurda K/R ve kalınlık geri okumayla doğrulandı.")
@@ -367,6 +491,11 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
                     notes.append(f"Kaydetme uyarısı: {warnings.value}")
             else:
                 notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
+            previous = f"K={before.k_factor:.12g}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
+            notes.append(f"SAC LEVHA: {after.name} ({after.kind}) · Konfigürasyon: {configuration} · "
+                         f"Önceki {previous}, R={before.radius*1000:.12g} mm → "
+                         f"Doğrulanan K={after.k_factor:.12g}, R={after.radius*1000:.12g} mm · "
+                         f"{len(inherited_names)} SheetMetal alt unsuru doğrulandı.")
             notes.insert(0, f"K/R uygulandı ve geri okumayla doğrulandı: K={after.k_factor:.12g}, "
                          f"R={after.radius*1000:.12g} mm, t={after.thickness*1000:.12g} mm.")
         else:

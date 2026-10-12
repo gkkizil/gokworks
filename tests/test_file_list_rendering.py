@@ -31,6 +31,27 @@ class FileListRenderingTests(GuiTestCase):
         self.assertEqual(table.selection(), ('file_5',))
         self.assertEqual(table.item('file_9999', 'values'), ('İmalat-09999.slddrw', 'Bekliyor', ''))
         self.assertEqual(self.app.stat_values['total'].cget('text'), '10000')
+        self.app._update_row(paths[5], 'error', 'İşleme sorunu')
+        self.app.search_query.set('imalat-000')
+        self.app.status_filter.set('Hatalı')
+        with patch.object(table, 'set_children', wraps=table.set_children) as bulk:
+            self.app._clear_filters()
+        self.assertEqual(bulk.call_count, 1)
+        self.assertEqual(table.get_children(), tuple(f'file_{i}' for i in range(10000)))
+        self.assertEqual(table.selection(), ('file_5',))
+        self.assertEqual(table.item('file_5', 'tags'), ('error', 'stripe'))
+        self.app.search_query.set('imalat-000')
+        self.app.status_filter.set('Hatalı')
+        with patch.object(table, 'item', wraps=table.item) as items, \
+                patch.object(table, 'set_children', wraps=table.set_children) as bulk:
+            self.app._reset()
+        items.assert_not_called()
+        self.assertEqual(bulk.call_count, 1)
+        self.assertFalse(table.get_children())
+        self.assertFalse(table.exists('file_9999'))
+        self.assertFalse(self.app._row_data)
+        self.assertEqual(self.app.search_query.get(), '')
+        self.assertEqual(self.app.status_filter.get(), 'Tüm durumlar')
 
     def test_out_of_order_results_restore_scan_order_and_refresh_searchable_details(self):
         paths = self.paths(120)

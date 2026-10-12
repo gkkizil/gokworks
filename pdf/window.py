@@ -333,10 +333,17 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
         return "break"
 
     def _clear_filters(self):
-        self.search_query.set("")
-        self.status_filter.set("Tüm durumlar")
+        self._suspend_filters = True
+        try:
+            self.search_query.set("")
+            self.status_filter.set("Tüm durumlar")
+        finally:
+            self._suspend_filters = False
+        self._apply_filters()
 
     def _apply_filters(self):
+        if getattr(self, '_suspend_filters', False):
+            return
         query = _search_text(self.search_query.get().strip())
         status = FILTERS.get(self.status_filter.get())
         rows, order = [], []
@@ -564,8 +571,9 @@ class GokworksPdfApp(GeometricTolerancesView, IsoFitsView, KFactorView, Workspac
 
     def _reset(self):
         self.results.clear()
+        self._prepare_file_list()
         self._clear_filters()
-        self._fill_files([])
+        self.stat_values['total'].configure(text='0')
         self.result_tabs.set("Dosyalar")
         self.progress.set(0)
         self.report_button.configure(state="disabled")

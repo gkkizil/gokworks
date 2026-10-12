@@ -29,15 +29,25 @@ Python aynı Windows kullanıcı oturumunda çalışmalıdır.
 
 ## K/R atama
 
-1. SolidWorks'te aktif ana montajı ve kontrol edeceğiniz parçaları kaydedin.
-2. **K FAKTÖR - RADIUS → Manuel K / R**: kalınlık `2`, K `0,274`, R `2` girin.
-3. **Montajı tara** ile eşleşen 2 mm sacları ve atlama nedenlerini okuyun.
+1. Montajın ve parçaların bir kopyasıyla çalışın. Aktif ana montajı ve kontrol
+   edeceğiniz parçaları kaydedin; parçanın montajda referans verilen
+   konfigürasyonunu ve mevcut ana SAC LEVHA K/R değerlerini kaydedin.
+2. **K FAKTÖR - RADIUS → Manuel K / R**: 1,5 mm örneğinde kalınlık `1,5`,
+   K `0,274`, R `1,5` girin. Ardından 2 mm örneğini `2 / 0,274 / 2` ile sınayın.
+3. **Montajı tara** ile eşleşen sacları ve atlama nedenlerini okuyun.
    Tarama sonuçlarında **Uygulamaya hazır** görünür; bu aşamada K/R yazılmaz.
 4. İlk kontrolü **Parça dosyalarını kaydet** işaretlenmeden yapın; **Montaja
    K/R uygula** kullanın. Değişiklik SolidWorks belleğinde uygulanır.
-5. Başarılı parçanın doğru konfigürasyonunda SheetMetal unsurunu açın:
-   kalınlık 2 mm, K faktörü 0,274, iç R 2 mm, büküm payı türü K faktörü olmalı.
-6. Farklı kalınlıklı saclarda değişiklik olmamalı. Alt montajlar dahil sayılar
+5. Başarılı parçanın doğru referans konfigürasyonunda **ana SAC LEVHA**
+   parametrelerini açın. Modern parçada API türü `TemplateSheetMetal` olan
+   bu unsurun K değeri 0,274, iç R değeri 1,5 mm (ikinci örnekte 2 mm), büküm
+   payı türü K faktörü olmalı. Alt `SheetMetal` unsurunu ve varsa **Katıyı
+   Saca Dönüştür** unsurunu da açın; aynı K/R ve değişmeyen gerçek kalınlığı
+   doğrulayın. Modeli yeniden oluşturup açınım geometrisini kontrol edin.
+   Sonuç ayrıntısındaki unsur adı/türü, konfigürasyon, önceki ve doğrulanan
+   yeni K/R ile kaydetme bilgisini ekrandaki değerlerle karşılaştırın.
+6. Farklı kalınlıklı saclarda ve parçanın diğer konfigürasyonlarında değişiklik
+   olmamalı; CAD malzemesi ve sac kalınlığı korunmalı. Alt montajlar dahil sayılar
    raporda görünmeli. Malzeme/gauge tablosuna bağlı, çok gövdeli veya özel
    büküm override'ı olan parçalar için destek sınırlarını rapordan kontrol edin.
    Süpürme flanşında özel yarıçap açıksa işlem yazmadan durmalıdır; varsayılan
@@ -62,6 +72,37 @@ proje yolunu ve güncel dalı kontrol edin; Günlük ve tam satır ayrıntısın
 Tarama sürerken **Tarama bitince K/R uygula** düğmesine basılırsa uygulama
 isteği bekletilir; uygun parça bulunan başarılı taramadan sonra başlar.
 Durdur/iptal/hata durumunda bekleyen istek uygulanmaz.
+
+## Ana SAC LEVHA hedefi ve geri okuma
+
+Modern parçada `Extension.GetTemplateSheetMetal()` ana sac klasörünün
+unsurunu verir. Açık bir null sonucu için `FeatureManager.GetSheetMetalFolder`
+ve `GetFeature` yolu kontrol edilir. Her iki API açıkça null döner ve ağaçta
+modern şablon yoksa eski yapıdaki tek `SheetMetal` unsuru kullanılabilir.
+API erişim hatası, farklı unsur türü veya okunamayan parametre başarıya
+çevrilmez. Lokalize unsur adına veya ağaç sırasına göre seçim yapılmaz.
+
+Kalınlık, tek sac gövdesinin aktif `SheetMetal` tanımından okunur. Yazma öncesi
+ana unsur, alt sac ve dönüşüm tanımları bütün konfigürasyonlarda yedeklenir;
+ağaç dolaşımında görünmeyen, API'den ayrı alınan ana unsur da yedeğe dahildir.
+Yazma ve rebuild sonrasında ana unsur yeniden alınır. Konfigürasyonlar arası
+kontrolün ardından ana unsur, alt sac ve dönüşüm değerleri yeniden okunur.
+Yalnız alt unsurun değişmesi başarı sayılmaz. Hata halinde önce ana değerler
+geri yüklenir; geri alma ayrıca doğrulanır. `GERİ ALMA HATASI` görülürse
+dosyayı kaydetmeyin; ayrıntıyla birlikte modelin durumunu inceleyin.
+
+Malzeme/gauge bağı ve alt sacın kalınlık/yarıçap veya K override'ı açıkken
+yazma yapılmaz. Bu ayarlar otomatik kapatılmaz. Büküm payı türü 5 için
+`BendCalculationTableFile` dosyası yedeklenir/geri yüklenir; tür 1'in
+`BendTableFile` alanıyla karıştırılmaz.
+
+[API kaynak kaydı](reports/k-radius/api-contract.json), yeniden indirilen
+2026 belge aynasını ve sabit GitHub commitindeki ana klasör örneğini ayrı
+kaynaklar olarak belirtir. [Ana unsur testleri](../tests/test_parent_k_radius.py)
+ve [dispatch testleri](../tests/test_kr_dispatch.py) API sözleşmesini test
+nesneleriyle doğrular. Bu kanıtlar Windows/SolidWorks 2025'te kullanıcının
+modelinin veya açınımının çalıştırıldığı anlamına gelmez; yukarıdaki yerel
+kabul kontrolü hâlâ gereklidir.
 
 ## Katıyı Saca Dönüştür ile oluşturulan parçalar
 
