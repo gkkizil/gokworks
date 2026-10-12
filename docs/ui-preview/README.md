@@ -2,6 +2,10 @@
 
 12 Ekim 2026. Yazım ve açıklamalar sadeleştirildi; Türkçe harfleri kaybeden bulut yazı tipi sorunu giderildi. Kullanıcının gönderdiği logo korunur. Görseller çalışan Tk uygulamasından, Linux sanal ekranında 1240 × 860 boyutunda alındı. Açık ve siyah tema, yeşil vurgu, dışa aktarım / mühendislik menü grupları ve bağımsız çalışma alanları gösteriliyor. K/R alanlarına örnek değerler girildi; bu görüntüler SolidWorks'e uygulama veya gerçek CAD çıktısı kanıtı değildir.
 
+Menü, başlık ve sekmedeki ad **ürün ağacı** olarak birleştirildi. Klasör
+düğmelerinde **Göz at** yazımı düzeltildi. PDF açıklamaları ve başlıklardaki
+büyük/küçük harf kullanımı gözden geçirildi; galeri son metinlerle yenilendi.
+
 | Çalışma alanı | Açık tema | Koyu tema |
 | --- | --- | --- |
 | PDF | [Görüntü](screenshots/pdf-light.png) | [Görüntü](screenshots/pdf-dark.png) |
@@ -11,7 +15,7 @@
 | ISO geçmeleri | [Görüntü](screenshots/iso-fits-light.png) | [Görüntü](screenshots/iso-fits-dark.png) |
 | Geometrik toleranslar | [Görüntü](screenshots/geometric-tolerances-light.png) | [Görüntü](screenshots/geometric-tolerances-dark.png) |
 | BOM · Parça listesi | [Görüntü](../reports/bom/screenshots/bom-parts-light.png) | [Görüntü](../reports/bom/screenshots/bom-parts-dark.png) |
-| BOM · Ürün ağacı | [Görüntü](../reports/bom/screenshots/bom-tree-light.png) | [Görüntü](../reports/bom/screenshots/bom-tree-dark.png) |
+| BOM · ürün ağacı | [Görüntü](../reports/bom/screenshots/bom-tree-light.png) | [Görüntü](../reports/bom/screenshots/bom-tree-dark.png) |
 
 ## Açık tema · ISO geçmeleri
 
@@ -33,4 +37,4 @@
 
 Görüntülerin dosya özetleri ve çekim bilgileri [screenshots.json](screenshots.json) içindedir. Yeniden üretmek için çalışan sanal ekranda `docs/report-tools/capture_workspaces.py --output-dir docs/ui-preview` kullanılır. Bulutun Python 3.13 / Tk 8.6 ortamı düzgün kenarlı yazı görüntülemesi sağlar; Windows uygulaması Segoe UI kullanır.
 
-[Türkçe metin denetimi ve 377 testlik doğrulama](../reports/language-review/README.md).
+[Türkçe metin denetimi ve doğrulama kayıtları](../reports/language-review/README.md).

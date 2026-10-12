@@ -72,7 +72,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             self.destroy()
             raise
         set_window_icon(self)
-        self.title("GOKWORKS • SolidWorks Otomasyonu")
+        self.title("GOKWORKS • SolidWorks otomasyonu")
         window_scale = self._get_window_scaling()
         width = min(1240, max(1000, int(self.winfo_screenwidth()/window_scale)-24))
         height = min(860, max(690, int(self.winfo_screenheight()/window_scale)-32))
@@ -589,7 +589,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             queued = bool(self.k_widgets.get('pending_apply'))
             self.start_button.configure(
                 state='normal' if preview and not queued and not self.stop_event.is_set() else 'disabled',
-                text=('Uygulama sırada…' if queued else 'Tarama bitince K/R uygula')
+                text=('Uygulama sıraya alındı…' if queued else 'Tarama bitince K/R uygula')
                      if preview else 'K/R uygulanıyor…')
         self.stop_button.configure(state="normal" if value else "disabled")
 

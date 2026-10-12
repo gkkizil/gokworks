@@ -1,5 +1,19 @@
 # Türkçe metin ve yazı tipi kontrolü
 
+Son düzeltme, 12 Ekim 2026: BOM menüsü, başlığı ve sekmesi **ürün ağacı**
+yazımını ortak bir metinden alır. **Gözat → Göz at** düzeltildi. **PDF'e aktar**
+yerine **PDF dosyasına aktar**, **aktif yapın** yerine **etkinleştirin**
+kullanıldı. Malzeme/takım sekmesi, ISO örnek düğmeleri ve pencere başlığındaki
+büyük/küçük harf tutarsızlıkları giderildi. PDF açıklaması, her teknik resmin
+kendi PDF dosyasına aktarıldığını açıkça belirtir.
+
+Bu metin düzeltmesinde **5 hedefli kontrol geçti**: Türkçe yazı tipi ve
+harf dönüşümü (3), klasör seçme düğmeleri (1), BOM sekmesi ve satır ayrıntıları
+(1). Genel test paketi yeniden çalıştırılmadı. Altı çalışma alanının güncel
+galerisi ve BOM görselleri yenilendi.
+
+## Önceki inceleme
+
 12 Ekim 2026. PDF, DXF/DWG, BOM, K/yarıçap, ISO geçmeleri ve geometrik
 toleranslar ekranlarının başlıkları, düğmeleri, yardım metinleri ve hata
 mesajları gözden geçirildi. Geometrik tolerans ve ISO rehberleri sadeleştirildi;

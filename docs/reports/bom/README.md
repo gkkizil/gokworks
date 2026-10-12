@@ -1,4 +1,4 @@
-# BOM - Ürün ağacı: güncel arayüz ve Excel örneği
+# BOM - ürün ağacı: güncel arayüz ve Excel örneği
 
 [Örnek Excel’i indir](ORNEK_BOM_URUN_AGACI.xlsx). Bu dosya sentetik bir
 ANA-MONTAJ içerir: iki ÖRNEK-M001 örneğinin her birinde P-002 ve bir iç

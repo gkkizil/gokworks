@@ -24,7 +24,7 @@ class GUIAuditTests(LayoutGuiTestCase):
             output = self.root/'Çıktılar'
             output.mkdir(exist_ok=True)
             browse = [control for control in self.app.controls if isinstance(control, ctk.CTkButton)
-                      and control.cget('text') == 'Gözat']
+                      and control.cget('text') == 'Göz at']
             with patch('pdf.window.filedialog.askopenfilename', return_value=str(selected)) as picker:
                 browse[0].invoke()
             self.assertEqual(self.app.source_folder.get(), str(selected.parent))

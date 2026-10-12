@@ -1,4 +1,4 @@
-"""Çizim dosyalarını, dosya bazında sonuç bildirerek PDF'e aktarır."""
+"""Çizim dosyalarını, dosya bazında sonuç bildirerek PDF dosyalarına aktarır."""
 
 import os
 from pathlib import Path
@@ -101,7 +101,7 @@ def _validate_pdf(path):
 
 
 def export_one_drawing(app, drawing, destination, overwrite):
-    """Tüm sayfaları geçici PDF'e aktar; başarılı dosyayı hedefe taşı."""
+    """Tüm sayfaları geçici PDF dosyasına aktar; başarılı dosyayı hedefe taşı."""
     destination = Path(destination)
     if destination.exists():
         if not destination.is_file():
@@ -141,7 +141,7 @@ def export_one_drawing(app, drawing, destination, overwrite):
         if isinstance(names, str):
             names = (names,)
         if not names:
-            raise RuntimeError("Çizimde PDF'e aktarılacak sayfa bulunamadı.")
+            raise RuntimeError("Çizimde PDF dosyasına aktarılacak sayfa bulunamadı.")
         sheets = win32com.client.VARIANT(pythoncom.VT_ARRAY | pythoncom.VT_BSTR, tuple(names))
         if not _com_success(data.SetSheets(SPECIFIED_SHEETS, sheets)):
             raise RuntimeError("Teknik resmin tüm sayfaları seçilemedi.")
@@ -236,7 +236,7 @@ def export_drawings(source_folder, output_folder, include_subfolders,
         initialized = True
         events.put(("phase", "SolidWorks'e bağlanılıyor…"))
         app = connect_to_solidworks()
-        events.put(("log", f"{len(drawings)} teknik resim bulundu. Tüm sayfalar PDF'e aktarılacak."))
+        events.put(("log", f"{len(drawings)} teknik resim bulundu. Her teknik resmin tüm sayfaları tek PDF dosyasına aktarılacak."))
 
         for index, drawing in enumerate(drawings, 1):
             if stop_event is not None and stop_event.is_set():

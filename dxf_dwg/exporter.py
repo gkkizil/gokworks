@@ -87,7 +87,7 @@ def assembly_quantities(app, stop_event=None, *, references=None):
     """
     assembly = _value(app, "ActiveDoc")
     if assembly is None or _value(assembly, "GetType") != ASSEMBLY:
-        raise RuntimeError("Montajdaki toplam adet için SolidWorks'te ana montajı aktif yapın.")
+        raise RuntimeError("Montajdaki toplam adet için SolidWorks'te ana montajı etkinleştirin.")
     assembly_api = assembly
     if not hasattr(assembly_api, "ResolveAllLightWeightComponents"):
         for interface in ("IAssemblyDoc", "AssemblyDoc"):
@@ -106,7 +106,7 @@ def assembly_quantities(app, stop_event=None, *, references=None):
         raise RuntimeError(f"Montaj bileşenleri çözümlenemedi. SolidWorks hata kodu: {resolved}")
     configuration = assembly.ConfigurationManager.ActiveConfiguration
     if hasattr(configuration, "IsSpeedPak") and _value(configuration, "IsSpeedPak"):
-        raise RuntimeError("Aktif montaj SpeedPak konfigürasyonunda. Toplam adet için tam montaj konfigürasyonunu aktif yapın.")
+        raise RuntimeError("Aktif montaj SpeedPak konfigürasyonunda. Toplam adet için tam montaj konfigürasyonunu etkinleştirin.")
     root = configuration.GetRootComponent3(True)
     if root is None:
         raise RuntimeError("Montaj bileşen ağacı okunamadı.")
@@ -496,7 +496,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             def build_targets(model, configuration):
                 quantity = quantities.get(_part_key(part, configuration), 0)
                 if not quantity:
-                    raise ValueError(f"Parçanın '{configuration}' konfigürasyonu aktif montajda bulunamadı. Montajdaki konfigürasyonu parçada aktif yapın.")
+                    raise ValueError(f"Parçanın '{configuration}' konfigürasyonu aktif montajda bulunamadı. Montajdaki konfigürasyonu parçada etkinleştirin.")
                 thickness = sheet_thickness_mm(model)
                 metadata.update(thickness_mm=thickness, quantity=quantity)
                 return named_destinations(part, source, output, formats, thickness, quantity)

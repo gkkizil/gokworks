@@ -273,10 +273,10 @@ class IsoFitsView:
         self._label(panel, 'Montaj hedefi', 11, MUTED, True).grid(row=7, column=0, columnspan=2, sticky='w', padx=6, pady=(12, 4))
         self.iso_widgets['target'] = self._iso_menu(panel, 'target', TARGETS, width=200)
         self.iso_widgets['target'].grid(row=8, column=0, columnspan=2, sticky='ew', padx=6)
-        self.iso_widgets['manual_example'] = self._button(panel, 'Delik +0,02 / Mil -0,02', self._fill_manual_example, width=200)
+        self.iso_widgets['manual_example'] = self._button(panel, 'Delik +0,02 / mil -0,02', self._fill_manual_example, width=200)
         self.iso_widgets['manual_example'].grid(
             row=9, column=0, columnspan=2, sticky='ew', padx=6, pady=(12, 6))
-        self.iso_widgets['compatibility_example'] = self._button(panel, 'Mil ±0,1 / Delik -0,05', self._fill_compatibility_example, width=200)
+        self.iso_widgets['compatibility_example'] = self._button(panel, 'Mil ±0,1 / delik -0,05', self._fill_compatibility_example, width=200)
         self.iso_widgets['compatibility_example'].grid(row=10, column=0, columnspan=2, sticky='ew', padx=6, pady=(0, 10))
         self.iso_widgets['manual_help'] = self._label(panel,
             'Nominal çap delik ve mil için ortaktır.\n\n50 +0,02: alt 0, üst +0,02.\n50 -0,02: alt -0,02, üst 0.\n\n±0,02 için alt -0,02, üst +0,02 girin.\n\nGerçekleşen tek ölçü için alt ve üst sapmayı aynı girin.\n\nSapmaları mm olarak girin. Sonuçları mm veya µm olarak görebilirsiniz.',

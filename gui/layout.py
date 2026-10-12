@@ -135,7 +135,7 @@ class WorkspaceLayout:
         self._label(header, KR_TITLE if self.mode == "k_factor" else "PDF aktarımı" if self._is_pdf else "DXF / DWG açınımı",
                     24, bold=True).grid(row=1, column=0, sticky="w")
         subtitle = ("Sac parçalarının K faktörünü ve iç büküm yarıçapını ayarlayın." if self.mode == "k_factor" else
-                    "Teknik resimlerin tüm sayfalarını tek PDF'e aktarın." if self._is_pdf else
+                    "Her teknik resmin tüm sayfalarını tek PDF dosyasına aktarın." if self._is_pdf else
                     "Sac açınımlarını kalınlık ve montaj adediyle adlandırıp kaydedin.")
         self._label(header, subtitle, 12, MUTED, wraplength=350, justify="left").grid(
             row=2, column=0, sticky="w", pady=(3, 0))
@@ -229,7 +229,7 @@ class WorkspaceLayout:
                              border_width=1, border_color=BORDER, fg_color=PANEL,
                              text_color=TEXT, font=(UI_FONT, 12))
         entry.grid(row=1, column=0, sticky="ew", padx=(0, 6))
-        browse = self._button(frame, "Gözat", lambda: self._choose_folder(variable, label),
+        browse = self._button(frame, "Göz at", lambda: self._choose_folder(variable, label),
                                icon="folder", width=88)
         browse.grid(row=1, column=1)
         self._label(frame, hint, 11, MUTED, wraplength=260, justify="left").grid(

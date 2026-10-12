@@ -13,7 +13,7 @@ import customtkinter as ctk
 from bom.exporter import Cancelled, export_excel, scan_worker
 from gui.icons import set_window_icon
 from gui.rendering import hide_grid
-from gui.text import BOM_TITLE
+from gui.text import BOM_TITLE, BOM_TREE_TAB
 from gui.theme import (PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT, ACCENT_BG,
                        SECONDARY, HOVER, GREEN, RED, AMBER, UI_FONT)
 
@@ -138,7 +138,7 @@ class BomView:
         tabs._segmented_button.configure(font=(UI_FONT, 13, 'bold'), corner_radius=8,
                                          width=300, dynamic_resizing=False)
         self.bom_widgets['tabs'] = tabs
-        for label, key in (('Parça listesi', 'parts'), ('Ürün ağacı', 'tree')):
+        for label, key in (('Parça listesi', 'parts'), (BOM_TREE_TAB, 'tree')):
             tab = tabs.add(label)
             tab.grid_columnconfigure(0, weight=1)
             tab.grid_rowconfigure(1, weight=1)
@@ -342,7 +342,7 @@ class BomView:
     def _update_bom_counts(self):
         if self.bom_result is None:
             return
-        if self.bom_widgets['tabs'].get() == 'Ürün ağacı':
+        if self.bom_widgets['tabs'].get() == BOM_TREE_TAB:
             text = f'{len(self.bom_result.tree)} bileşen'
         else:
             text = f'{len(self.bom_widgets["parts"].get_children())} / {len(self.bom_result.parts)} parça'

@@ -85,5 +85,14 @@
       }
     }
   },
-  "native_solidworks_2025_verified": false
+  "native_solidworks_2025_verified": false,
+  "latest_copy_review": {
+    "date": "2026-10-12",
+    "tests": 5,
+    "failed": 0,
+    "errors": 0,
+    "full_suite_rerun": false,
+    "command": "python -m unittest test_ui_language test_gui_audit.GUIAuditTests.test_browse_buttons_choose_and_cancel_in_both_modules test_bom_window.BomWindowTests.test_metrics_tree_controls_and_selected_component_details -v",
+    "log_sha256": "ec4907d9ed5cffce06a0567da5e42fb15bfc4f703d3e5aded579b27cc04513a3"
+  }
 }

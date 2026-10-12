@@ -12,7 +12,7 @@ from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, R
                             number, ba_from_outside_dimensions)
 
 AUTO_DIE = "Otomatik (8 × t)"
-AUTOMATIC_TAB, MANUAL_TAB = "Malzeme / Takım", "Manuel K / R"
+AUTOMATIC_TAB, MANUAL_TAB = "Malzeme / takım", "Manuel K / R"
 RESULTS_TAB = "Montaj sonuçları"
 
 
@@ -97,7 +97,7 @@ class KFactorView:
         self.k_widgets["automatic_panel"] = panel
         for column in range(3):
             panel.grid_columnconfigure(column, weight=1, uniform="kr")
-        self._label(panel, "Malzeme ve takım · Havada büküm", 14, bold=True).grid(
+        self._label(panel, "Malzeme ve takım · havada büküm", 14, bold=True).grid(
             row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(12, 4))
         for column, (key, label, values) in enumerate((
             ("material", "Hesapta kullanılacak malzeme", [m.label for m in MATERIALS]),
@@ -307,7 +307,7 @@ class KFactorView:
             if self.k_widgets.get('operation_preview') and not self.stop_event.is_set():
                 _, recipe = self._k_recipe()
                 self.k_widgets['pending_apply'] = (recipe, self.k_state['save'].get())
-                self.start_button.configure(state='disabled', text='Uygulama sırada…')
+                self.start_button.configure(state='disabled', text='Uygulama sıraya alındı…')
                 text = 'K/R uygulama isteği alındı. Montaj kontrolü bitince atama başlayacak.'
                 self.status_label.configure(text=text, text_color=MUTED)
                 self._append_log(text)

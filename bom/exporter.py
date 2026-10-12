@@ -70,7 +70,7 @@ class Result:
 def _assembly(app):
     model = sw._value(app, 'ActiveDoc')
     if model is None or sw._value(model, 'GetType') != sw.ASSEMBLY:
-        raise RuntimeError("BOM için SolidWorks'te ana montajı aktif yapın.")
+        raise RuntimeError("BOM için SolidWorks'te ana montajı etkinleştirin.")
     api = model
     if not hasattr(api, 'ResolveAllLightWeightComponents'):
         for interface in ('IAssemblyDoc', 'AssemblyDoc'):
@@ -109,7 +109,7 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
         raise RuntimeError(f'Montaj bileşenleri çözümlenemedi. API hata kodu: {resolved}')
     config = assembly.ConfigurationManager.ActiveConfiguration
     if hasattr(config, 'IsSpeedPak') and sw._value(config, 'IsSpeedPak'):
-        raise RuntimeError('SpeedPak yerine tam montaj konfigürasyonunu aktif yapın.')
+        raise RuntimeError('SpeedPak yerine tam montaj konfigürasyonunu etkinleştirin.')
     root = config.GetRootComponent3(True)
     if root is None:
         raise RuntimeError('Montaj bileşen ağacı okunamadı.')

@@ -13,6 +13,7 @@ from PIL import ImageGrab
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
 from bom.exporter import collect
+from gui.text import BOM_TREE_TAB
 from pdf.window import GokworksPdfApp
 from support.solidworks import FakeAssembly, FakeApp
 from test_bom import Component
@@ -57,7 +58,7 @@ def main():
                 ctk.set_widget_scaling(scale)
                 app._set_scaled_min_max()  # Release CTk's temporary DPI resize lock.
                 app.geometry(size+'+40+40')
-                app.bom_widgets['tabs'].set('Parça listesi' if view == 'parts' else 'Ürün ağacı')
+                app.bom_widgets['tabs'].set('Parça listesi' if view == 'parts' else BOM_TREE_TAB)
                 if suffix == '-empty':
                     app._clear_bom()
                     app._bom_busy(False)

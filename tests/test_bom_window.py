@@ -7,6 +7,7 @@ from unittest.mock import patch
 import customtkinter as ctk
 from openpyxl import load_workbook
 from bom import exporter as bom
+from gui.text import BOM_TREE_TAB
 from support.gui import GuiTestCase
 from support.solidworks import FakeAssembly, FakeApp, install_com
 from test_bom import Component
@@ -77,7 +78,7 @@ class BomWindowTests(GuiTestCase):
                     self.assert_inside(button, self.app.sidebar)
                 self.assertGreater(self.app.bom_widgets['parts'].winfo_height()/scale, 180)
                 self.assertFalse(self.app.bom_widgets['inspector'].winfo_viewable())
-                self.app.bom_widgets['tabs'].set('Ürün ağacı')
+                self.app.bom_widgets['tabs'].set(BOM_TREE_TAB)
                 self.settle()
                 for key in ('tree', 'expand', 'collapse', 'details'):
                     self.assert_inside(self.app.bom_widgets[key], self.app)
@@ -108,7 +109,7 @@ class BomWindowTests(GuiTestCase):
         dialog.copy_path_button.invoke()
         self.assertEqual(self.app.clipboard_get(), self.result.parts[0].path)
         self.app._close_detail()
-        widgets['tabs'].set('Ürün ağacı')
+        widgets['tabs'].set(BOM_TREE_TAB)
         assembly = next(node for node in self.result.tree if node.kind == 'Montaj')
         widgets['tree'].selection_set(assembly.number)
         self.settle()
@@ -127,7 +128,7 @@ class BomWindowTests(GuiTestCase):
         widgets = self.app.bom_widgets
         self.assertEqual([widgets['metric_'+key].cget('text') for key in
                           ('unique', 'quantity', 'assemblies')], ['2', '3', '1'])
-        widgets['tabs'].set('Ürün ağacı')
+        widgets['tabs'].set(BOM_TREE_TAB)
         assembly = next(node for node in self.result.tree if node.kind == 'Montaj')
         children = widgets['tree'].get_children(assembly.number)
         widgets['collapse'].invoke()
