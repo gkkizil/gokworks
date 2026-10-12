@@ -75,7 +75,7 @@ class BomWindowTests(GuiTestCase):
                     self.assert_inside(self.app.bom_widgets[key], self.app)
                 for button in self.app.nav_buttons.values():
                     self.assert_inside(button, self.app.sidebar)
-                self.assertGreater(self.app.bom_widgets['parts'].winfo_height(), 130)
+                self.assertGreater(self.app.bom_widgets['parts'].winfo_height()/scale, 180)
                 self.assertFalse(self.app.bom_widgets['inspector'].winfo_viewable())
                 self.app.bom_widgets['tabs'].set('Ürün ağacı')
                 self.settle()
@@ -92,7 +92,35 @@ class BomWindowTests(GuiTestCase):
         self.assertFalse(self.app.bom_widgets['parts'].get_children())
         self.assertEqual(self.app.bom_widgets['export'].cget('state'), 'disabled')
         self.assertIn('SolidWorks yok', self.app.status_label.cget('text'))
+        self.assertEqual(self.app.bom_widgets['assembly'].cget('text'), 'Tarama tamamlanamadı')
         self.assertEqual(self.app.nav_buttons['pdf'].cget('state'), 'normal')
+
+    def test_detail_dialog_copies_its_row_and_hidden_or_cleared_selection_stays_consistent(self):
+        self.scan()
+        widgets = self.app.bom_widgets
+        widgets['parts'].selection_set('part_0')
+        self.settle()
+        widgets['details'].invoke()
+        dialog = self.app.detail_window
+        widgets['parts'].selection_set('part_1')
+        self.settle()
+        self.assertEqual(widgets['detail_name'].cget('text'), self.result.parts[1].name)
+        dialog.copy_path_button.invoke()
+        self.assertEqual(self.app.clipboard_get(), self.result.parts[0].path)
+        self.app._close_detail()
+        widgets['tabs'].set('Ürün ağacı')
+        assembly = next(node for node in self.result.tree if node.kind == 'Montaj')
+        widgets['tree'].selection_set(assembly.number)
+        self.settle()
+        widgets['parts'].selection_set('part_0')  # A queued event from the hidden tab.
+        self.settle()
+        self.assertEqual(widgets['detail_name'].cget('text'), assembly.name)
+        widgets['tree'].selection_remove(assembly.number)
+        self.settle()
+        self.assertEqual(widgets['details'].cget('state'), 'disabled')
+        self.assertEqual(widgets['copy_path'].cget('state'), 'disabled')
+        self.app._show_bom_details('tree')
+        self.assertIsNone(self.app.detail_window)
 
     def test_metrics_tree_controls_and_selected_component_details(self):
         self.scan()
@@ -151,6 +179,7 @@ class BomWindowTests(GuiTestCase):
         self.assertIsNone(self.app.bom_result)
         self.assertFalse(self.app.bom_widgets['parts'].get_children())
         self.assertEqual(self.app.bom_widgets['export'].cget('state'), 'disabled')
+        self.assertEqual(self.app.bom_widgets['assembly'].cget('text'), 'Tarama durduruldu')
 
     def test_export_cancel_and_failure_preserve_preview_and_existing_file(self):
         self.scan()

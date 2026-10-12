@@ -18,6 +18,10 @@ Yeni arayüz montaj/konfigürasyon kartı, üç adet özeti, belirgin sekmeler,
 arama çubuğu, yeşil alt montaj satırları ve tüm dalları açma/kapatma kontrolleri
 içerir. Dosya yolu seçili satır paneline taşındı. Küçük pencerede **Ayrıntılar**
 düğmesi aynı bilgilere erişim sağlar. Açık ve koyu temalar desteklenir.
+Kısa pencerelerde başlık ve adet kartları sıkıştırılarak tabloya daha fazla
+alan ayrılır. Ayrıntı penceresindeki kopyalama düğmesi, arka plandaki seçim
+değişse bile pencerede gösterilen parçanın yolunu kopyalar. Seçim kaldırılınca
+eski ayrıntılar temizlenir; tarama hatası ve iptal üst kartta da belirtilir.
 
 Görseller gerçek Tk penceresinden, sentetik montaj verileriyle alındı.
 Kaynak ve checksum bilgileri `references.json` ve `screenshots.json` içindedir.
@@ -25,10 +29,12 @@ Kaynak ve checksum bilgileri `references.json` ve `screenshots.json` içindedir.
 2026-10-12 arayüz değişikliği için yalnız BOM'a özel kontroller çalıştırıldı;
 genel test paketi yeniden çalıştırılmadı.
 
-- `test_bom_window`: **8 geçti**. Gerçek Tk penceresinde tarama/Excel akışı,
+- `test_bom_window`: **9 geçti**. Gerçek Tk penceresinde tarama/Excel akışı,
   önizleme aramasının Excel'i filtrelememesi, seçim/ayrıntılar/yol kopyalama,
   alt montaj dallarını açma/kapatma, boş arama sonucu, sayılar, sayfa önbelleği,
   temalar, küçük pencere, %125 ölçek, iptal ve hatada önceki dosyanın korunması.
+  Açık ayrıntı penceresinde seçim değişimi ve gizli sekmeden gelen seçim
+  olayları da kontrol edildi.
 - Görselleri yeniden üretmek için: `PYTHONPATH=.:tests python docs/report-tools/capture_bom_gui.py`
   (Tk ekranı gerekir; bulutta `DISPLAY=:99`).
 - `git diff --check` geçti.

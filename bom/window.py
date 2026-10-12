@@ -45,10 +45,12 @@ class BomView:
         header = ctk.CTkFrame(self.workspace, fg_color='transparent')
         header.grid(row=0, column=0, sticky='ew', padx=24, pady=(18, 14))
         header.grid_columnconfigure(0, weight=1)
-        self._label(header, 'MONTAJ YÖNETİMİ', 10, MUTED, True).grid(row=0, column=0, sticky='w')
+        self.bom_widgets['eyebrow'] = self._label(header, 'MONTAJ YÖNETİMİ', 10, MUTED, True)
+        self.bom_widgets['eyebrow'].grid(row=0, column=0, sticky='w')
         self._label(header, BOM_TITLE, 25, bold=True).grid(row=1, column=0, sticky='w', pady=(5, 4))
-        self._label(header, 'Parça listesi ve alt montaj hiyerarşisi.', 12, MUTED,
-                    width=1, wraplength=300, justify='left', anchor='w').grid(row=2, column=0, sticky='ew')
+        self.bom_widgets['subtitle'] = self._label(header, 'Parça listesi ve alt montaj hiyerarşisi.', 12, MUTED,
+                    width=1, wraplength=300, justify='left', anchor='w')
+        self.bom_widgets['subtitle'].grid(row=2, column=0, sticky='ew')
         actions = ctk.CTkFrame(header, fg_color='transparent')
         actions.grid(row=1, column=1, rowspan=2, sticky='e', padx=(12, 0))
         for key, label, command, width, primary, icon in (
@@ -91,11 +93,15 @@ class BomView:
             card = ctk.CTkFrame(metrics, fg_color=INPUT, border_width=1, border_color=BORDER, corner_radius=10)
             card.grid(row=0, column=column, sticky='ew', padx=(0 if column == 0 else 5, 0 if column == 2 else 5))
             card.grid_columnconfigure(0, weight=1)
-            self._label(card, label, 11, MUTED).grid(row=0, column=0, sticky='w', padx=14, pady=(8, 0))
+            caption = self._label(card, label, 11, MUTED)
+            caption.grid(row=0, column=0, sticky='w', padx=14, pady=(8, 0))
             value = self._label(card, '0', 22, ACCENT if key == 'quantity' else TEXT, True)
             value.grid(row=1, column=0, sticky='w', padx=14, pady=(0, 8))
-            ctk.CTkLabel(card, text='', image=self._icon(icon, MUTED, 22)).grid(row=0, column=1, rowspan=2, padx=14)
+            symbol = ctk.CTkLabel(card, text='', image=self._icon(icon, MUTED, 22))
+            symbol.grid(row=0, column=1, rowspan=2, padx=14)
             self.bom_widgets['metric_'+key] = value
+            self.bom_widgets['metric_caption_'+key] = caption
+            self.bom_widgets['metric_icon_'+key] = symbol
 
         content = ctk.CTkFrame(self.workspace, fg_color='transparent')
         content.grid(row=3, column=0, sticky='nsew', padx=24)
@@ -178,6 +184,7 @@ class BomView:
                 table.heading(column, text=title, anchor='center' if column == 'qty' else 'w')
                 table.column(column, width=width, minwidth=60, stretch=column not in ('qty', 'kind'),
                              anchor='center' if column == 'qty' else 'w')
+            table.configure(selectmode='browse')
             table.grid(row=1, column=0, sticky='nsew')
             vertical = ctk.CTkScrollbar(tab, command=table.yview, width=10, fg_color=PANEL, button_color=BORDER)
             vertical.grid(row=1, column=1, sticky='ns')
@@ -268,6 +275,25 @@ class BomView:
         widgets = self.bom_widgets
         scale = self.workspace._get_widget_scaling()
         width = self.workspace.winfo_width()/scale
+        compact = self.workspace.winfo_height()/scale < 740
+        if widgets.get('compact') != compact:
+            widgets['compact'] = compact
+            for key, row in (('eyebrow', 0), ('subtitle', 2)):
+                if compact:
+                    hide_grid(widgets[key])
+                else:
+                    widgets[key].grid(row=row, column=0, sticky='ew' if row == 2 else 'w')
+            for key in ('unique', 'quantity', 'assemblies'):
+                caption, value, icon = (widgets[prefix+key] for prefix in
+                                        ('metric_caption_', 'metric_', 'metric_icon_'))
+                caption.grid(row=0, column=0, sticky='w', padx=14, pady=10 if compact else (8, 0))
+                value.grid(row=0 if compact else 1, column=1 if compact else 0,
+                           sticky='e' if compact else 'w', padx=(0, 14) if compact else 14,
+                           pady=8 if compact else (0, 8))
+                if compact:
+                    hide_grid(icon)
+                else:
+                    icon.grid(row=0, column=1, rowspan=2, padx=14)
         if getattr(self, '_table_style_key', None) != (ctk.get_appearance_mode(), scale):
             self._configure_table_style()
         show_inspector = width >= 950
@@ -354,12 +380,16 @@ class BomView:
             widgets[key].configure(state='disabled')
 
     def _select_bom_row(self, view):
+        # Selection events from a hidden tab must not replace the visible details.
+        active = 'parts' if self.bom_widgets['tabs'].get() == 'Parça listesi' else 'tree'
+        if view != active:
+            return
         result = self.bom_result
         if result is None or 'render' in self.bom_widgets:
             return
         rows = self.bom_widgets[view].selection()
         if not rows:
-            return
+            return self._reset_bom_details()
         if view == 'parts':
             part = result.parts[int(rows[0].removeprefix('part_'))]
             name, path = part.name, part.path
@@ -376,12 +406,15 @@ class BomView:
         self.bom_widgets['details'].configure(state='normal' if not self.busy else 'disabled')
         self.bom_widgets['copy_path'].configure(state='normal' if path and not self.busy else 'disabled')
 
-    def _copy_bom_path(self):
-        selection = self.bom_widgets.get('selection')
-        if selection and selection[2]:
+    def _copy_bom_path(self, path=None):
+        if path is None:
+            selection = self.bom_widgets.get('selection')
+            path = selection[2] if selection else ''
+        if path:
             self.clipboard_clear()
-            self.clipboard_append(selection[2])
-            self.status_label.configure(text='Dosya yolu kopyalandı.', text_color=MUTED)
+            self.clipboard_append(path)
+            if self.mode == 'bom' and not self.busy:
+                self.status_label.configure(text='Dosya yolu kopyalandı.', text_color=MUTED)
 
     def _show_bom_details(self, view=None):
         if self.busy:
@@ -412,7 +445,10 @@ class BomView:
         content.configure(state='disabled')
         actions = ctk.CTkFrame(window, fg_color='transparent')
         actions.grid(row=2, column=0, sticky='ew', padx=24, pady=18)
-        self._button(actions, 'Yolu kopyala', self._copy_bom_path, icon='copy', width=150).pack(side='left')
+        # Keep the dialog tied to its own row even if the table selection changes.
+        window.copy_path_button = self._button(actions, 'Yolu kopyala', lambda: self._copy_bom_path(path),
+                                               icon='copy', width=150, state='normal' if path else 'disabled')
+        window.copy_path_button.pack(side='left')
         self._button(actions, 'Kapat', self._close_detail, width=90).pack(side='right')
         window.bind('<Escape>', lambda event: self._close_detail())
         return 'break'
@@ -582,6 +618,9 @@ class BomView:
             result = self.bom_result
             text, color = (f'Tarama tamamlandı · {result.total_parts} parça adedi · '
                            f'Atlanan bileşen: {result.suppressed} bastırılmış, {result.excluded} BOM dışı.'), GREEN
+        if self.bom_result is None and state in ('error', 'cancelled'):
+            self.bom_widgets['assembly'].configure(text='Tarama tamamlanamadı' if state == 'error' else 'Tarama durduruldu')
+            self.bom_widgets['configuration'].configure(text='Montajı tara düğmesiyle yeniden deneyin.')
         self.status_label.configure(text=text, text_color=color)
         if self.close_pending:
             self._destroy_app()

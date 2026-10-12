@@ -53,7 +53,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-small.png",
-    "sha256": "d7c9307362785d813ba7cbcb3cd7e7b307960d57bb8dbb50d13733d63fcaa00c",
+    "sha256": "b0845fdee8ecf3d020b91172714d9259f43f88d9d9ac03c40814c0b012a060bf",
     "size": "1000x690",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -61,12 +61,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 148,
+    "table_height_px": 197,
     "inspector_visible": false
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-125pct.png",
-    "sha256": "6ca4a22c1c659abad0c794aa825d2e8f31a7e7316ea6d331d0500a115d2012da",
+    "sha256": "cca789c6d9ab4a6b5c892e467a3d202e0e594ee281f7e5844c72b24b4c76537b",
     "size": "1240x860",
     "widget_scale": 1.25,
     "synthetic_data": true,
@@ -74,7 +74,7 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 189,
+    "table_height_px": 249,
     "inspector_visible": false
   },
   {
