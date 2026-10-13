@@ -40,17 +40,9 @@ class BomView:
         self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(3, weight=1)
-        header = ctk.CTkFrame(self.workspace, fg_color='transparent')
-        header.grid(row=0, column=0, sticky='ew', padx=24, pady=(18, 14))
-        header.grid_columnconfigure(0, weight=1)
-        self.bom_widgets['eyebrow'] = self._label(header, 'MONTAJ YÖNETİMİ', 10, MUTED, True)
-        self.bom_widgets['eyebrow'].grid(row=0, column=0, sticky='w')
-        self._label(header, BOM_TITLE, 28, bold=True).grid(row=1, column=0, sticky='w', pady=(5, 4))
-        self.bom_widgets['subtitle'] = self._label(header, 'Parça listesi ve alt montaj hiyerarşisi.', 12, MUTED,
-                    width=1, wraplength=300, justify='left', anchor='w')
-        self.bom_widgets['subtitle'].grid(row=2, column=0, sticky='ew')
-        actions = ctk.CTkFrame(header, fg_color='transparent')
-        actions.grid(row=1, column=1, rowspan=2, sticky='e', padx=(12, 0))
+        header, actions, labels = self._page_header(BOM_TITLE,
+            'Parça listesi ve alt montaj hiyerarşisi.', 'MONTAJ / ÜRÜN AĞACI', 'tree')
+        self.bom_widgets.update(eyebrow=labels['eyebrow'], subtitle=labels['subtitle'])
         for key, label, command, width, primary, icon in (
                 ('scan', 'Montajı tara', self._scan_bom, 128, False, 'search'),
                 ('export', 'Excel’e aktar', self._save_bom, 144, True, 'download'),
@@ -62,7 +54,7 @@ class BomView:
         self.bom_widgets['export'].configure(state='disabled')
         self.bom_widgets['stop'].configure(state='disabled')
 
-        source = ctk.CTkFrame(self.workspace, fg_color=PANEL, corner_radius=12,
+        source = ctk.CTkFrame(self.workspace, fg_color=PANEL, corner_radius=16,
                               border_width=1, border_color=BORDER)
         source.grid(row=1, column=0, sticky='ew', padx=24, pady=(0, 12))
         source.grid_columnconfigure(1, weight=1)
@@ -89,7 +81,7 @@ class BomView:
                     ('quantity', 'Toplam adet', 'layers'), ('assemblies', 'Alt montaj adedi', 'folder'))):
             metrics.grid_columnconfigure(column, weight=1, uniform='bom_metrics')
             card = ctk.CTkFrame(metrics, fg_color=ACCENT_BG if key == 'quantity' else PANEL,
-                               border_width=1, border_color=BORDER, corner_radius=12)
+                               border_width=1, border_color=BORDER, corner_radius=16)
             card.grid(row=0, column=column, sticky='ew', padx=(0 if column == 0 else 5, 0 if column == 2 else 5))
             card.grid_columnconfigure(0, weight=1)
             caption = self._label(card, label, 11, MUTED)
@@ -109,7 +101,7 @@ class BomView:
         content.grid_columnconfigure(0, weight=1)
         content.grid_rowconfigure(0, weight=1)
         self.bom_widgets['content'] = content
-        card = ctk.CTkFrame(content, fg_color=PANEL, corner_radius=12, border_width=1, border_color=BORDER)
+        card = ctk.CTkFrame(content, fg_color=PANEL, corner_radius=16, border_width=1, border_color=BORDER)
         card.grid(row=0, column=0, sticky='nsew')
         card.grid_columnconfigure(0, weight=1)
         card.grid_rowconfigure(1, weight=1)
@@ -211,7 +203,7 @@ class BomView:
             self.bom_widgets[key+'_empty_heading'] = heading
             self.bom_widgets[key+'_empty_hint'] = hint
 
-        inspector = ctk.CTkFrame(content, width=220, fg_color=PANEL, corner_radius=12,
+        inspector = ctk.CTkFrame(content, width=220, fg_color=PANEL, corner_radius=16,
                                   border_width=1, border_color=BORDER)
         inspector.grid(row=0, column=1, sticky='ns', padx=(12, 0))
         inspector.grid_propagate(False)
@@ -292,7 +284,7 @@ class BomView:
                 if compact:
                     hide_grid(widgets[key])
                 else:
-                    widgets[key].grid(row=row, column=0, sticky='ew' if row == 2 else 'w')
+                    widgets[key].grid(row=row, column=1, sticky='ew' if row == 2 else 'w')
             for key in ('unique', 'quantity', 'assemblies'):
                 caption, value, icon = (widgets[prefix+key] for prefix in
                                         ('metric_caption_', 'metric_', 'metric_icon_'))

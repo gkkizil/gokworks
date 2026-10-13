@@ -5,6 +5,9 @@ CustomTkinter, pywin32 ve hesap/aktarım bağımlılıkları paket içindedir.
 Kullanıcının Python kurması gerekmez. SolidWorks gereken CAD işlemleri için
 SolidWorks ayrıca kurulu ve açık olmalıdır.
 
+EXE yalnız kullanıcı istediğinde, **Run workflow** ile seçilen dal için
+oluşturulur. Kod güncellemeleri otomatik EXE derlemesi başlatmaz.
+
 [Windows derlemeleri](https://github.com/gkkizil/gokworks/actions/workflows/windows-exe.yml)
 sayfasında başarılı çalışmanın **Artifacts → GOKWORKS-Windows-x64-…** paketini
 indirin. ZIP içindeki `GOKWORKS.exe` dosyasını çıkartıp açın.

@@ -40,7 +40,7 @@ class KFactorView:
         body.grid_columnconfigure(0, weight=1)
         body.grid_rowconfigure(0, weight=1)
         self.k_widgets['body'] = body
-        self.form_panel = ctk.CTkFrame(body, fg_color=PANEL, corner_radius=12,
+        self.form_panel = ctk.CTkFrame(body, fg_color=PANEL, corner_radius=16,
                                       border_width=1, border_color=BORDER)
         self.form_panel.grid(row=0, column=0, sticky='nsew')
         self.form_panel.grid_propagate(False)
@@ -124,21 +124,33 @@ class KFactorView:
             self._k_field(panel, key, label, 4, column)
         self._k_field(panel, "method", "K hesaplama yöntemi", 5, 0,
                       values=["Tablo", "BA ölçümü"], readonly=True)
-        self._k_field(panel, "ba", "Ölçülen büküm payı BA (mm)", 5, 1)
-        self._label(panel, "Ölçümden K hesabı için iç yarıçap da girilmelidir. Sonuç yalnız aynı kalınlığa uygulanır.",
-                    11, MUTED, wraplength=225, justify="left").grid(
-            row=5, column=2, sticky="w", padx=16, pady=8)
+        self._label(panel, "Tablo ile başlangıç değeri alın; üretim numunesiyle kontrol etmek için BA ölçümünü seçin.",
+                    11, MUTED, wraplength=490, justify="left").grid(
+            row=5, column=1, columnspan=2, sticky="w", padx=16, pady=8)
+        calibration = ctk.CTkFrame(panel, fg_color=INPUT, corner_radius=14)
+        calibration.grid(row=6, column=0, columnspan=3, sticky='ew', padx=16, pady=(8, 4))
+        for column in range(3):
+            calibration.grid_columnconfigure(column, weight=1, uniform='kr_calibration')
+        self.k_widgets['calibration_panel'] = calibration
+        self._label(calibration, 'Üretim numunesi · BA kalibrasyonu', 14, bold=True).grid(
+            row=0, column=0, columnspan=3, sticky='w', padx=16, pady=(14, 6))
+        self._k_field(calibration, "ba", "Ölçülen büküm payı BA (mm)", 1, 0)
         for column, (key, label) in enumerate((
             ("outside_a", "Dış ölçü A (mm, alternatif)"),
-            ("outside_b", "Dış ölçü B (mm)"), ("flat", "Ölçülen açınım boyu (mm)"),
+            ("outside_b", "Dış ölçü B (mm)"),
         )):
-            self._k_field(panel, key, label, 6, column)
-        self._label(panel, "Tek bükümlü numunede A ve B, dış yüzeylerin sanal kesişimine kadar ölçülür. Büküm payı boşsa bu ölçülerden ve açınım boyundan hesaplanır.",
-                    11, MUTED, wraplength=700, justify="left").grid(
-            row=7, column=0, columnspan=3, sticky="w", padx=16, pady=(0, 8))
-        self.k_calculation_label = self._label(panel, "", 12, TEXT, wraplength=730,
+            self._k_field(calibration, key, label, 1, column+1)
+        self._k_field(calibration, "flat", "Ölçülen açınım boyu (mm)", 2, 0)
+        self._label(calibration, "İç yarıçapı girin. BA boşsa dış A, dış B ve açınım boyuyla hesaplanır. A ve B, dış yüzeylerin sanal kesişimine kadar ölçülür.",
+                    11, MUTED, wraplength=470, justify="left").grid(
+            row=2, column=1, columnspan=2, sticky="w", padx=16, pady=(0, 12))
+        summary = ctk.CTkFrame(panel, fg_color=ACCENT_BG, corner_radius=14)
+        summary.grid(row=7, column=0, columnspan=3, sticky='ew', padx=16, pady=(14, 16))
+        summary.grid_columnconfigure(0, weight=1)
+        self._label(summary, 'Hesap özeti', 11, ACCENT, True).grid(row=0, column=0, sticky='w', padx=16, pady=(12, 4))
+        self.k_calculation_label = self._label(summary, "", 12, TEXT, wraplength=730,
                                               justify="left", anchor="w")
-        self.k_calculation_label.grid(row=8, column=0, columnspan=3, sticky="ew", padx=16, pady=6)
+        self.k_calculation_label.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 14))
         self.k_widgets["automatic_summary"] = self.k_calculation_label
         self._build_manual_k_settings()
         self._select_k_assignment(self.k_state["assignment_mode"].get())
@@ -171,6 +183,29 @@ class KFactorView:
         summary = self._label(summary_band, "", 13, TEXT, wraplength=670, justify="left", anchor="w")
         summary.grid(row=0, column=0, sticky="ew", padx=16, pady=16)
         self.k_widgets["manual_summary"] = summary
+        steps = ctk.CTkFrame(panel, fg_color='transparent')
+        steps.grid(row=4, column=0, columnspan=3, sticky='ew', padx=16, pady=(0, 16))
+        for column, (icon, title, hint) in enumerate((
+            ('search', '01  Montajı kontrol et', 'Montajı tara ile eşleşen sacları görün.'),
+            ('arrow', '02  Değerleri uygula', 'Montaja K/R uygula ile atamayı başlatın.'))):
+            steps.grid_columnconfigure(column, weight=1, uniform='kr_steps')
+            card = ctk.CTkFrame(steps, fg_color=INPUT, corner_radius=12)
+            card.grid(row=0, column=column, sticky='nsew', padx=(0, 6) if column == 0 else (6, 0))
+            card.grid_columnconfigure(0, weight=1)
+            self._label(card, title, 12, TEXT, True, image=self._icon(icon, MUTED, 18), compound='left').grid(
+                row=0, column=0, sticky='w', padx=14, pady=(12, 4))
+            self._label(card, hint, 11, MUTED, wraplength=240, justify='left').grid(
+                row=1, column=0, sticky='w', padx=14, pady=(0, 12))
+
+    def _sync_k_calibration(self):
+        panel = self.k_widgets.get('calibration_panel')
+        if panel is None:
+            return
+        show = self.k_state['method'].get() == 'BA ölçümü'
+        if show and not panel.winfo_manager():
+            panel.grid()
+        elif not show and panel.winfo_manager():
+            hide_grid(panel)
 
     def _select_k_assignment(self, selection):
         if self.busy or selection not in (AUTOMATIC_TAB, MANUAL_TAB):
@@ -298,6 +333,7 @@ class KFactorView:
         return t, recipe
 
     def _preview_k_calculation(self):
+        self._sync_k_calibration()
         try:
             thickness, recipe = self._k_recipe()
             result = calculate(thickness, recipe)

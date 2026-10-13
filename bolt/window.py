@@ -48,13 +48,9 @@ class BoltView:
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(1, weight=1)
         w = self.bolt_widgets
-        header = ctk.CTkFrame(self.workspace, fg_color='transparent')
-        header.grid(row=0, column=0, sticky='ew', padx=24, pady=(18, 16))
-        header.grid_columnconfigure(0, weight=1)
-        self._label(header, 'MÜHENDİSLİK HESAPLARI  /  BAĞLANTI ELEMANLARI', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'Cıvata hesabı', 28, bold=True).grid(row=1, column=0, sticky='w', pady=(5, 3))
-        self._label(header, 'Ölçüyü seçin, yükü girin, dayanımı görün.', 12, MUTED).grid(row=2, column=0, sticky='w')
-        self._button(header, 'Hesap yöntemi', self._show_bolt_method, width=124).grid(row=1, column=1, rowspan=2, sticky='e')
+        header, actions, _ = self._page_header('Cıvata hesabı',
+            'Ölçüyü seçin, yükü girin, dayanımı görün.', 'MÜHENDİSLİK / BAĞLANTI ELEMANLARI', 'bolt')
+        self._button(actions, 'Hesap yöntemi', self._show_bolt_method, width=124).pack()
         body = ctk.CTkFrame(self.workspace, fg_color='transparent')
         body.grid(row=1, column=0, sticky='nsew', padx=24)
         body.grid_columnconfigure(1, weight=1)

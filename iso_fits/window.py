@@ -63,7 +63,7 @@ class IsoFitsView:
         self._iso_loading = False
 
     def _iso_card(self, parent):
-        return ctk.CTkFrame(parent, fg_color=PANEL, corner_radius=12,
+        return ctk.CTkFrame(parent, fg_color=PANEL, corner_radius=16,
                             border_width=1, border_color=BORDER)
 
     def _iso_menu(self, parent, key, values, width=130):
@@ -78,15 +78,9 @@ class IsoFitsView:
         self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(1, weight=1)
-        header = ctk.CTkFrame(self.workspace, fg_color='transparent')
-        header.grid(row=0, column=0, sticky='ew', padx=24, pady=(20, 16))
-        header.grid_columnconfigure(0, weight=1)
-        self._label(header, 'GOKWORKS  /  MÜHENDİSLİK HESAPLARI', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'ISO geçme toleransları', 28, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
-        self._label(header, 'ISO 286 · Delik ve mil ölçü sınırları ile kesit gösterimi', 12, MUTED,
-                    wraplength=350, justify='left').grid(row=2, column=0, sticky='w')
-        actions = ctk.CTkFrame(header, fg_color='transparent')
-        actions.grid(row=1, column=1, rowspan=2, sticky='e', padx=(12, 0))
+        header, actions, _ = self._page_header('ISO geçme toleransları',
+            'ISO 286 · Delik ve mil ölçü sınırları ile kesit gösterimi',
+            'MÜHENDİSLİK / ÖLÇÜ KONTROLÜ', 'ruler')
         self.iso_widgets['sources'] = self._button(actions, 'Kaynaklar', self._show_iso_sources, width=104)
         self.iso_widgets['sources'].pack(side='left', padx=(0, 8))
         self.iso_widgets['export'] = self._button(actions, 'CSV kaydet', self._save_iso_report,

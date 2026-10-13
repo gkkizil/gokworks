@@ -124,6 +124,31 @@ class ManualApplyTests(KApplyTestCase):
 
 
 class ManualGuiTests(GuiTestCase):
+    def test_calibration_fields_follow_method_without_losing_measurements(self):
+        self.app._switch_mode('k_factor')
+        panel = self.app.k_widgets['calibration_panel']
+        self.app.update()
+        self.assertFalse(panel.winfo_viewable())
+        self.app.k_state['method'].set('BA ölçümü')
+        self.app.k_state['radius'].set('2')
+        self.app.k_state['ba'].set('4,08407044966673')
+        self.app.update()
+        self.assertTrue(panel.winfo_viewable())
+        self.assertAlmostEqual(self.app._preview_k_calculation().k_factor, .3)
+        self.app.k_state['method'].set('Tablo')
+        self.app.update()
+        self.assertFalse(panel.winfo_viewable())
+        self.assertAlmostEqual(self.app._preview_k_calculation().k_factor, .38)
+        self.app._switch_mode('pdf')
+        self.app._switch_mode('k_factor')
+        self.app.update()
+        self.assertFalse(panel.winfo_viewable())
+        self.app.k_state['method'].set('BA ölçümü')
+        self.app.update()
+        self.assertTrue(panel.winfo_viewable())
+        self.assertEqual(self.app.k_state['ba'].get(), '4,08407044966673')
+        self.assertAlmostEqual(self.app._preview_k_calculation().k_factor, .3)
+
     def select_manual(self):
         self.app._switch_mode('k_factor')
         self.app.k_widgets['assignment_tabs']._buttons_dict[MANUAL_TAB].invoke()

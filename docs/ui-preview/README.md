@@ -2,13 +2,15 @@
 
 **Mühendislik hesapları → Cıvata hesabı**. [Hesap ve kapsam](../bolt-calculator.md) · [Açık tema](../reports/bolt/screenshots/tension-light.png) · [Koyu tema](../reports/bolt/screenshots/combined-dark.png).
 
-13 Ekim 2026. Yedi çalışma alanında daha yumuşak bir görünüm: sakin yeşil
-vurgular, açık gri form alanları, mat koyu yüzeyler ve yuvarlak düğmeler.
-Menü seçimi 140 ms içinde yumuşakça değişir; içerik hemen kullanılabilir.
-Görseller çalışan Tk uygulamasından
-alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
+13 Ekim 2026. Product Design ile mevcut masaüstü arayüzü revize edildi.
+Yedi çalışma alanı ortak başlık, simge, işlem alanı ve daha yumuşak kartlar
+kullanır. Açık temada beyaz menü ve sakin yeşil vurgular, koyu temada mat
+yeşil yüzeyler vardır. Menü seçimi 140 ms içinde yumuşakça değişir; içerik
+hemen kullanılabilir. Görseller çalışan Tk uygulamasından alındı;
+SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 
-- Çalışma alanını çevreleyen ikinci çerçeve kaldırıldı; içerik kartları ayrıldı.
+- Temayla uyumlu sol menü, pencere kenarlarından ayrılmış yuvarlak bir paneldir.
+- Her sayfanın başlığı simgesiyle gösterilir; işlem düğmeleri aynı bölgede durur.
 - PDF/DXF klasör seçimleri numaralandırıldı; seçenekler ayrı başlıkta toplandı.
 - Sayaçlar, başlıklar ve tablo satırları daha okunaklı hale getirildi.
 - BOM'da toplam adet vurgulandı; seçili satır diğer alt montajlardan ayrıldı.
@@ -17,6 +19,10 @@ alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 - Ortak düğmelerin sert kenarlıkları kaldırıldı; giriş ve seçim alanları birleştirildi.
 - K/R sekmeleri sadeleştirildi. Geçersiz giriş ilgili formda gösterilir;
   işlem hatasında günlük açılır ve **Günlüğü kopyala** düğmesi kullanılabilir.
+- K/R'de BA ve numune ölçü alanları yalnız **BA ölçümü** seçildiğinde açılır.
+  Yöntemler arasında geçişte ölçüler korunur. Hesap özeti ayrı bir karttadır.
+- Manuel K/R ekranında tarama ve atama adımları iki kısa bilgi kartıyla anlatılır.
+- EXE yalnız kullanıcı isteğiyle oluşturulur; otomatik derleme kapatıldı.
 
 | Çalışma alanı | Açık tema | Koyu tema |
 | --- | --- | --- |
@@ -24,6 +30,7 @@ alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 | DXF / DWG | [Görüntü](screenshots/dxf-dwg-light.png) | [Görüntü](screenshots/dxf-dwg-dark.png) |
 | K/R · Takım | [Görüntü](screenshots/k-factor-light.png) | [Görüntü](screenshots/k-factor-dark.png) |
 | K/R · Manuel | [Görüntü](screenshots/k-factor-manual-light.png) | [Görüntü](screenshots/k-factor-manual-dark.png) |
+| K/R · BA ölçümü | [Görüntü](screenshots/k-factor-calibration-light.png) | [Görüntü](screenshots/k-factor-calibration-dark.png) |
 | ISO geçmeleri | [Görüntü](screenshots/iso-fits-light.png) | [Görüntü](screenshots/iso-fits-dark.png) |
 | Geometrik toleranslar | [Görüntü](screenshots/geometric-tolerances-light.png) | [Görüntü](screenshots/geometric-tolerances-dark.png) |
 | BOM · Parça listesi | [Görüntü](../reports/bom/screenshots/bom-parts-light.png) | [Görüntü](../reports/bom/screenshots/bom-parts-dark.png) |
@@ -53,11 +60,11 @@ alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 
 Görüntülerin dosya özetleri ve çekim bilgileri [screenshots.json](screenshots.json) içindedir. Yeniden üretmek için çalışan sanal ekranda `docs/report-tools/capture_workspaces.py --output-dir docs/ui-preview` kullanılır. Bulutun Python 3.13 / Tk 8.6 ortamı düzgün kenarlı yazı görüntülemesi sağlar; Windows uygulaması Segoe UI kullanır.
 
-Bu güncellemede **21 hedefli kontrol geçti**: K/R çağrıları, kayıt koruması,
-hata görünürlüğü, tarama–uygulama akışı, hızlı menü seçimi, metin/zemin
-kontrastı, farklı pencere/DPI yerleşimleri, BOM ve cıvata ekranı.
-19 genel ekran, 7 BOM ve 3 cıvata ekranı yenilendi. Genel test paketi
-çalıştırılmadı. [Kontrol çıktısı](soft-ui-checks.log).
+Bu revizyonda **8 hedefli kontrol geçti**: farklı pencere/DPI yerleşimleri,
+metin/zemin kontrastı, hızlı menü seçimi, BOM ve cıvata ekranı, K/R alanlarının
+erişilebilirliği, ölçüm değerlerinin korunması ve tarama–uygulama akışı.
+21 genel ekran, 7 BOM ve 3 cıvata ekranı yenilendi. Genel test paketi
+çalıştırılmadı. [Kontrol çıktısı](product-design-checks.log).
 
 K/R kontrollerinde alt COM nesnelerinin çıkış parametreleri düzeltildi;
 programın kendi konfigürasyon değişikliği önceden kaydedilmemiş düzenleme

@@ -32,21 +32,14 @@ class GeometricTolerancesView:
 
     def _gdt_card(self, parent):
         return ctk.CTkFrame(parent, fg_color=PANEL, border_color=BORDER,
-                            border_width=1, corner_radius=12)
+                            border_width=1, corner_radius=16)
 
     def _build_gdt_workspace(self):
         self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(1, weight=1)
-        header = ctk.CTkFrame(self.workspace, fg_color='transparent')
-        header.grid(row=0, column=0, sticky='ew', padx=24, pady=(20, 16))
-        header.grid_columnconfigure(0, weight=1)
-        self._label(header, 'GOKWORKS  /  ASME Y14.5-2018', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'Geometrik toleranslar', 28, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
-        self._label(header, 'GD&T · 12 güncel özellik ve eski işaretler', 12, MUTED,
-                    wraplength=340, justify='left').grid(row=2, column=0, sticky='w')
-        actions = ctk.CTkFrame(header, fg_color='transparent')
-        actions.grid(row=1, column=1, rowspan=2, sticky='e', padx=(12, 0))
+        header, actions, _ = self._page_header('Geometrik toleranslar',
+            'GD&T · 12 güncel özellik ve eski işaretler', 'MÜHENDİSLİK / ASME Y14.5-2018', 'target')
         self.gdt_widgets['guide'] = self._button(actions, 'Rehber', self._show_gdt_guide, width=90)
         self.gdt_widgets['guide'].pack(side='left', padx=(0, 8))
         self.gdt_widgets['export'] = self._button(actions, 'CSV kaydet', self._save_gdt_report,

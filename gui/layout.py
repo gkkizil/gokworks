@@ -44,7 +44,7 @@ class WorkspaceLayout:
         self._build_header()
         self.pdf_header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=24, pady=(20, 18))
         self.form_panel = ctk.CTkFrame(self.workspace, width=320, fg_color=PANEL,
-                                     corner_radius=12, border_width=1, border_color=BORDER)
+                                     corner_radius=16, border_width=1, border_color=BORDER)
         self.form_panel.grid(row=2, column=0, sticky="nsew", padx=(24, 0))
         self.form_panel.grid_propagate(False)
         self.form_panel.grid_columnconfigure(0, weight=1)
@@ -69,13 +69,13 @@ class WorkspaceLayout:
         self._resize_pdf_area()
 
     def _build_sidebar(self):
-        self.sidebar = ctk.CTkFrame(self, width=212, corner_radius=0, fg_color=SIDEBAR)
-        self.sidebar.grid(row=0, column=0, sticky="ns", padx=(0, 12))
+        self.sidebar = ctk.CTkFrame(self, width=208, corner_radius=18, fg_color=SIDEBAR)
+        self.sidebar.grid(row=0, column=0, sticky="ns", padx=(12, 0), pady=12)
         self.sidebar.grid_propagate(False)
         self.sidebar.grid_columnconfigure(0, weight=1)
         self.sidebar.grid_rowconfigure(4, weight=1)
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        brand.grid(row=0, column=0, sticky="ew", padx=18, pady=(26, 24))
+        brand.grid(row=0, column=0, sticky="ew", padx=16, pady=(18, 18))
         self.brand_logo = make_logo(32)
         self.brand_badge = ctk.CTkLabel(brand, text="", image=self.brand_logo,
                                        width=42, height=42, fg_color="#FFFFFF", corner_radius=10)
@@ -116,7 +116,7 @@ class WorkspaceLayout:
             button.grid(row=row if row < 3 else row+1, column=0, sticky="ew", pady=(0, 4))
             self.nav_buttons[key] = button
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        footer.grid(row=5, column=0, sticky="ew", padx=20, pady=24)
+        footer.grid(row=5, column=0, sticky="ew", padx=18, pady=16)
         footer.grid_columnconfigure(0, weight=1)
         self._label(footer, "GÖRÜNÜM", 10, NAV_MUTED, True).grid(row=0, column=0, sticky="w", pady=(0, 8))
         self.theme_selector = ctk.CTkSegmentedButton(
@@ -132,22 +132,36 @@ class WorkspaceLayout:
         self._label(footer, "CAD işlemleri için SolidWorks\noturumu açık olmalı.", 10, NAV_MUTED,
                     justify="left").grid(row=4, column=0, sticky="w", pady=(4, 0))
 
-    def _build_header(self):
+    def _page_header(self, title, subtitle, section, icon):
+        """Shared page identity and a consistent action area."""
         header = ctk.CTkFrame(self.workspace, fg_color="transparent")
-        self.pdf_header = header
-        header.grid(row=0, column=0, sticky="ew", padx=24, pady=(20, 18))
+        header.grid(row=0, column=0, sticky="ew", padx=24, pady=(16, 16))
         header.grid_columnconfigure(0, weight=1)
-        self._label(header, "GOKWORKS  /  SAC PARAMETRELERİ" if self.mode == "k_factor" else "GOKWORKS  /  BELGE İŞLEMLERİ", 10, MUTED, True).grid(
-            row=0, column=0, sticky="w", pady=(0, 4))
-        self._label(header, KR_TITLE if self.mode == "k_factor" else "PDF aktarımı" if self._is_pdf else "DXF / DWG açınımı",
-                    28, bold=True).grid(row=1, column=0, sticky="w")
+        identity = ctk.CTkFrame(header, fg_color="transparent")
+        identity.grid(row=0, column=0, sticky="w")
+        identity.grid_columnconfigure(1, weight=1)
+        ctk.CTkLabel(identity, text="", image=self._icon(icon, ACCENT, 25),
+                    width=48, height=48, fg_color=ACCENT_BG, corner_radius=14).grid(
+            row=0, column=0, rowspan=3, padx=(0, 12), sticky="w")
+        labels = {
+            'eyebrow': self._label(identity, section, 10, MUTED, True),
+            'title': self._label(identity, title, 26, bold=True),
+            'subtitle': self._label(identity, subtitle, 12, MUTED, wraplength=300, justify="left"),
+        }
+        for row, label in enumerate(labels.values()):
+            label.grid(row=row, column=1, sticky="w", pady=(0, 3 if row < 2 else 0))
+        actions = ctk.CTkFrame(header, fg_color="transparent")
+        actions.grid(row=0, column=1, sticky="e", padx=(12, 0))
+        return header, actions, labels
+
+    def _build_header(self):
         subtitle = ("Sac parçalarının K faktörünü ve iç büküm yarıçapını ayarlayın." if self.mode == "k_factor" else
                     "Her teknik resmin tüm sayfalarını tek PDF dosyasına aktarın." if self._is_pdf else
                     "Sac açınımlarını kalınlık ve montaj adediyle adlandırıp kaydedin.")
-        self._label(header, subtitle, 12, MUTED, wraplength=350, justify="left").grid(
-            row=2, column=0, sticky="w", pady=(3, 0))
-        actions = ctk.CTkFrame(header, fg_color="transparent")
-        actions.grid(row=1, column=1, rowspan=2, sticky="e", padx=(12, 0))
+        self.pdf_header, actions, _ = self._page_header(
+            KR_TITLE if self.mode == "k_factor" else "PDF aktarımı" if self._is_pdf else "DXF / DWG açınımı",
+            subtitle, "MÜHENDİSLİK / SAC METAL" if self.mode == "k_factor" else "AKTARIM / BELGELER",
+            "tools" if self.mode == "k_factor" else "file" if self._is_pdf else "layers")
         self.start_button = self._button(actions, self._start_text, self._start_export,
                                          primary=True, icon="arrow", width=224)
         self.start_button.configure(height=42)
@@ -256,7 +270,7 @@ class WorkspaceLayout:
         ]
         for index, (key, caption, color, icon) in enumerate(metrics):
             self.stats_frame.grid_columnconfigure(index, weight=1, uniform="stats")
-            card = ctk.CTkFrame(self.stats_frame, fg_color=PANEL, corner_radius=12,
+            card = ctk.CTkFrame(self.stats_frame, fg_color=PANEL, corner_radius=16,
                                  border_width=1, border_color=BORDER)
             card.grid(row=0, column=index, sticky="ew",
                        padx=(0 if index == 0 else 4, 0 if index == len(metrics)-1 else 4))
@@ -276,7 +290,7 @@ class WorkspaceLayout:
                     row=0, column=1, rowspan=2, padx=(8, 14))
 
     def _build_results(self, parent=None):
-        card = ctk.CTkFrame(self.workspace if parent is None else parent, fg_color=PANEL, corner_radius=12,
+        card = ctk.CTkFrame(self.workspace if parent is None else parent, fg_color=PANEL, corner_radius=16,
                             border_width=1, border_color=BORDER)
         card.grid(row=3, column=0, sticky="nsew", padx=24)
         card.grid_columnconfigure(0, weight=1)

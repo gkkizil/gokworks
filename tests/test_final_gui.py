@@ -80,6 +80,8 @@ class FinalGUIAuditTests(LayoutGuiTestCase):
         self.app.nav_buttons['k_factor'].invoke()
         for assignment in (AUTOMATIC_TAB, MANUAL_TAB):
             self.app.k_widgets['assignment_tabs']._buttons_dict[assignment].invoke()
+            if assignment == AUTOMATIC_TAB:
+                self.app.k_state['method'].set('BA ölçümü')
             self.settle()
             canvas = self.app.settings_body._parent_canvas
             for key, field in self.app.k_widgets.items():

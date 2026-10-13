@@ -1,7 +1,7 @@
 [
   {
     "file": "docs/reports/bom/screenshots/bom-parts-light.png",
-    "sha256": "697d4f846c0c4939f53eb4d03fc2adf2e8ccea389d50f25f5cba633852534ef0",
+    "sha256": "6ee3fc2cef7d7874898bdd35480790eec4639b760d561591153f496a01a2cb9e",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -9,12 +9,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 313,
+    "table_height_px": 318,
     "inspector_visible": true
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-light.png",
-    "sha256": "8b2ddca6ed133a7f4599e2089fe331ca8c230e142b6a5e86b0fa30e3f01e2e32",
+    "sha256": "f822e1df29fd5c0c37dc63168f3f49442c5f2fd759bb7c4595d0365c6ec330bc",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -22,12 +22,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 317,
+    "table_height_px": 322,
     "inspector_visible": true
   },
   {
     "file": "docs/reports/bom/screenshots/bom-parts-dark.png",
-    "sha256": "2815c67437d056a2e2dc4ac9cb97ead8f3ef2e5c7f818fcf1a4c463619957808",
+    "sha256": "c1fe9a48612648ddca8c953874f448116d5d8e42b4b206fa001ecd4fa1b59ccb",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -35,12 +35,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 313,
+    "table_height_px": 318,
     "inspector_visible": true
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark.png",
-    "sha256": "78ad3e686a7d59050089f63e1c8767d67f2e1bf8eac6569f3ed255f42011c0c9",
+    "sha256": "7bf3a0777fcaea151385dd35950246661d44684c888f5c1f81edd5d20269e83b",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -48,12 +48,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 317,
+    "table_height_px": 322,
     "inspector_visible": true
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-small.png",
-    "sha256": "986e2d0f3e0d7270e0364fba2e228026d79f4bcc4ab7c876fef90a9cc443d034",
+    "sha256": "78db68981063f3789e5ccb7e365501302de94fa458149e186c572f06f2ed2f21",
     "size": "1000x690",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -61,12 +61,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 198,
+    "table_height_px": 193,
     "inspector_visible": false
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-125pct.png",
-    "sha256": "dc1fdca5d4d35e09d59acb91436150c29aadd418fd7e70b9120493c776339cb7",
+    "sha256": "31ed4c02fbc128ebcfb1132dbc4e1bfdb592decf275e56b3ca73074a1c827ab6",
     "size": "1240x860",
     "widget_scale": 1.25,
     "synthetic_data": true,
@@ -74,12 +74,12 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 251,
+    "table_height_px": 243,
     "inspector_visible": false
   },
   {
     "file": "docs/reports/bom/screenshots/bom-parts-light-empty.png",
-    "sha256": "ca96ff13f2e05a0557ac26955ea8db5f64bf708b93095c038c04ed49e9b11cbb",
+    "sha256": "a521707f5e69b3a03f52caec82e9de93f6e6b6a8261c5e27780d991d9bfa19ec",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -87,7 +87,7 @@
     "native_solidworks_executed": false,
     "python": "3.13.5",
     "tk": "8.6.16",
-    "table_height_px": 313,
+    "table_height_px": 318,
     "inspector_visible": true
   }
 ]

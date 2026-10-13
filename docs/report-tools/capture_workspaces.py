@@ -31,6 +31,7 @@ def main():
                      for mode in ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances')
                      for theme in ('Açık', 'Koyu')]
             cases += [('k_factor', theme, '1240x860', 'manual') for theme in ('Açık', 'Koyu')]
+            cases += [('k_factor', theme, '1240x860', 'calibration') for theme in ('Açık', 'Koyu')]
             cases += [('iso_fits', 'Koyu', '1240x860', variant) for variant in ('manual-h6', 'manual-h8', 'manual-comparison')]
             cases += [('iso_fits', theme, '1240x860', 'shaft-basis') for theme in ('Açık', 'Koyu')]
             cases += [('k_factor', 'Koyu', '1000x690', 'manual'), ('dxf_dwg', 'Koyu', '1000x690', '')]
@@ -39,6 +40,9 @@ def main():
                 app._change_theme(theme)
                 app.geometry(size+'+40+40')
                 if mode == 'k_factor':
+                    app.k_state['method'].set('BA ölçümü' if variant == 'calibration' else 'Tablo')
+                    app.k_state['radius'].set('2' if variant == 'calibration' else '')
+                    app.k_state['ba'].set('4,08407044966673' if variant == 'calibration' else '')
                     app._select_k_assignment(MANUAL_TAB if variant == 'manual' else AUTOMATIC_TAB)
                     for key, value in [('manual_thickness', '2'), ('manual_k', '0,274'), ('manual_r', '2')]:
                         app.k_state[key].set(value)
