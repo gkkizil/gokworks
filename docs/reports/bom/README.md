@@ -15,13 +15,20 @@ ağaçta iki ayrı ÖRNEK-M001 dalı görünür. Gerçek kullanıcı montajı ok
 [Tarama öncesi](screenshots/bom-parts-light-empty.png)
 
 Yeni arayüz montaj/konfigürasyon kartı, üç adet özeti, belirgin sekmeler,
-arama çubuğu, yeşil alt montaj satırları ve tüm dalları açma/kapatma kontrolleri
+arama çubuğu, yeşil alt montaj adları ve tüm dalları açma/kapatma kontrolleri
 içerir. Dosya yolu seçili satır paneline taşındı. Küçük pencerede **Ayrıntılar**
 düğmesi aynı bilgilere erişim sağlar. Açık ve koyu temalar desteklenir.
 Kısa pencerelerde başlık ve adet kartları sıkıştırılarak tabloya daha fazla
 alan ayrılır. Ayrıntı penceresindeki kopyalama düğmesi, arka plandaki seçim
 değişse bile pencerede gösterilen parçanın yolunu kopyalar. Seçim kaldırılınca
 eski ayrıntılar temizlenir; tarama hatası ve iptal üst kartta da belirtilir.
+
+13 Ekim tasarımında lacivert sol menü, ayrı içerik kartları, vurgulu toplam
+adet kartı ve bileşen simgeli ayrıntı paneli eklendi. Seçim rengi yalnız
+seçili satıra uygulanır; diğer alt montajlar yazı rengiyle ayrılır.
+Bu değişiklikte BOM'un yerleşim/ölçek, seçim/dal ve tarama–Excel akışına
+yönelik üç arayüz kontrolü geçti. Ortak tasarımın dört arayüz kontrolüyle
+birlikte toplam yedi kontrol çalıştırıldı.
 
 Görseller gerçek Tk penceresinden, sentetik montaj verileriyle alındı.
 Kaynak ve checksum bilgileri `references.json` ve `screenshots.json` içindedir.

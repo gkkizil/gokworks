@@ -26,7 +26,8 @@ from gui.typography import check_turkish_fonts
 from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR)
+                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
+                       NAV_ACTIVE, NAV_ACCENT, NAV_MUTED, NAV_HOVER)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
           "partial": "Kısmen tamamlandı", "skipped": "Atlandı", "error": "Hata"}
 FILTERS = {"Tüm durumlar": None, "Bekleyen": "pending", "İşleniyor": "running",
@@ -264,13 +265,13 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
         for key in dict.fromkeys((previous, self.mode)):
             button = self.nav_buttons[key]
             active = key == self.mode
-            target = ACCENT_BG if active else 'transparent'
+            target = NAV_ACTIVE if active else 'transparent'
             transitions.append((button, pair(button.cget('fg_color'), SIDEBAR), pair(target, SIDEBAR), target))
             button.configure(
-                hover_color=("#D9EDE3", "#214A3F") if active else SECONDARY,
-                text_color=ACCENT if active else MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "layers"}[key],
-                                 ACCENT if active else MUTED),
+                hover_color=NAV_HOVER,
+                text_color=NAV_ACCENT if active else NAV_MUTED,
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree"}[key],
+                                 NAV_ACCENT if active else NAV_MUTED),
                 border_width=0,
                 font=self._nav_fonts[active],
             )
@@ -310,8 +311,9 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
 
     def _button(self, parent, text, command, primary=False, icon=None, **kwargs):
         return ctk.CTkButton(
-            parent, text=text, command=command, corner_radius=8, height=38,
-            fg_color=ACCENT if primary else SECONDARY,
+            parent, text=text, command=command, corner_radius=10, height=38,
+            border_width=0 if primary else 1, border_color=BORDER,
+            fg_color=ACCENT if primary else PANEL,
             hover_color=("#12634F", "#70E7C7") if primary else HOVER,
             text_color=("#FFFFFF", "#10231D") if primary else TEXT, text_color_disabled=MUTED,
             image=self._icon(icon, ("#FFFFFF", "#10231D") if primary else MUTED, 18) if icon else None,

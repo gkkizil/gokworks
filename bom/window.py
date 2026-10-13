@@ -37,9 +37,7 @@ class BomView:
         self.bom_widgets = {}
 
     def _build_bom_workspace(self):
-        self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
-                                      border_width=1, border_color=BORDER)
-        self.workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=20)
+        self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(3, weight=1)
         header = ctk.CTkFrame(self.workspace, fg_color='transparent')
@@ -47,7 +45,7 @@ class BomView:
         header.grid_columnconfigure(0, weight=1)
         self.bom_widgets['eyebrow'] = self._label(header, 'MONTAJ YÖNETİMİ', 10, MUTED, True)
         self.bom_widgets['eyebrow'].grid(row=0, column=0, sticky='w')
-        self._label(header, BOM_TITLE, 25, bold=True).grid(row=1, column=0, sticky='w', pady=(5, 4))
+        self._label(header, BOM_TITLE, 28, bold=True).grid(row=1, column=0, sticky='w', pady=(5, 4))
         self.bom_widgets['subtitle'] = self._label(header, 'Parça listesi ve alt montaj hiyerarşisi.', 12, MUTED,
                     width=1, wraplength=300, justify='left', anchor='w')
         self.bom_widgets['subtitle'].grid(row=2, column=0, sticky='ew')
@@ -64,11 +62,11 @@ class BomView:
         self.bom_widgets['export'].configure(state='disabled')
         self.bom_widgets['stop'].configure(state='disabled')
 
-        source = ctk.CTkFrame(self.workspace, fg_color=INPUT, corner_radius=12,
+        source = ctk.CTkFrame(self.workspace, fg_color=PANEL, corner_radius=12,
                               border_width=1, border_color=BORDER)
         source.grid(row=1, column=0, sticky='ew', padx=24, pady=(0, 12))
         source.grid_columnconfigure(1, weight=1)
-        badge = ctk.CTkLabel(source, text='', image=self._icon('layers', ACCENT, 24),
+        badge = ctk.CTkLabel(source, text='', image=self._icon('tree', ACCENT, 24),
                             width=44, height=44, fg_color=ACCENT_BG, corner_radius=10)
         badge.grid(row=0, column=0, rowspan=2, padx=(14, 12), pady=12)
         self.bom_widgets['assembly'] = self._label(source, 'Montaj seçilmedi', 14, bold=True,
@@ -90,14 +88,17 @@ class BomView:
         for column, (key, label, icon) in enumerate((('unique', 'Farklı parça', 'file'),
                     ('quantity', 'Toplam adet', 'layers'), ('assemblies', 'Alt montaj adedi', 'folder'))):
             metrics.grid_columnconfigure(column, weight=1, uniform='bom_metrics')
-            card = ctk.CTkFrame(metrics, fg_color=INPUT, border_width=1, border_color=BORDER, corner_radius=10)
+            card = ctk.CTkFrame(metrics, fg_color=ACCENT_BG if key == 'quantity' else PANEL,
+                               border_width=1, border_color=BORDER, corner_radius=12)
             card.grid(row=0, column=column, sticky='ew', padx=(0 if column == 0 else 5, 0 if column == 2 else 5))
             card.grid_columnconfigure(0, weight=1)
             caption = self._label(card, label, 11, MUTED)
             caption.grid(row=0, column=0, sticky='w', padx=14, pady=(8, 0))
-            value = self._label(card, '0', 22, ACCENT if key == 'quantity' else TEXT, True)
+            value = self._label(card, '0', 28, ACCENT if key == 'quantity' else TEXT, True)
             value.grid(row=1, column=0, sticky='w', padx=14, pady=(0, 8))
-            symbol = ctk.CTkLabel(card, text='', image=self._icon(icon, MUTED, 22))
+            symbol = ctk.CTkLabel(card, text='', image=self._icon(icon, ACCENT if key == 'quantity' else MUTED, 22),
+                                 width=38, height=38, fg_color=ACCENT_BG if key == 'quantity' else INPUT,
+                                 corner_radius=10)
             symbol.grid(row=0, column=1, rowspan=2, padx=14)
             self.bom_widgets['metric_'+key] = value
             self.bom_widgets['metric_caption_'+key] = caption
@@ -210,12 +211,17 @@ class BomView:
             self.bom_widgets[key+'_empty_heading'] = heading
             self.bom_widgets[key+'_empty_hint'] = hint
 
-        inspector = ctk.CTkFrame(content, width=220, fg_color=INPUT, corner_radius=12,
+        inspector = ctk.CTkFrame(content, width=220, fg_color=PANEL, corner_radius=12,
                                   border_width=1, border_color=BORDER)
         inspector.grid(row=0, column=1, sticky='ns', padx=(12, 0))
         inspector.grid_propagate(False)
         inspector.grid_columnconfigure(0, weight=1)
-        self._label(inspector, 'SATIR AYRINTISI', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=16, pady=(18, 14))
+        detail_header = ctk.CTkFrame(inspector, fg_color='transparent')
+        detail_header.grid(row=0, column=0, sticky='ew', padx=16, pady=(18, 18))
+        self.bom_widgets['detail_icon'] = ctk.CTkLabel(detail_header, text='', width=40, height=40,
+            image=self._icon('file', ACCENT, 22), fg_color=ACCENT_BG, corner_radius=10)
+        self.bom_widgets['detail_icon'].pack(side='left', padx=(0, 10))
+        self._label(detail_header, 'SEÇİLİ BİLEŞEN', 10, MUTED, True).pack(side='left')
         self.bom_widgets['detail_name'] = self._label(inspector, 'Bir satır seçin', 16, bold=True,
                                                      anchor='w', justify='left', wraplength=185)
         self.bom_widgets['detail_name'].grid(row=1, column=0, sticky='ew', padx=16, pady=(0, 6))
@@ -254,7 +260,7 @@ class BomView:
         style = ttk.Style(self)
         style.configure('Bom.Treeview', background=color(PANEL), fieldbackground=color(PANEL),
                         foreground=color(TEXT), borderwidth=0, bordercolor=color(PANEL),
-                        lightcolor=color(PANEL), darkcolor=color(PANEL), rowheight=round(38*scale),
+                        lightcolor=color(PANEL), darkcolor=color(PANEL), rowheight=round(42*scale),
                         font=(UI_FONT, -round(12*scale)))
         style.configure('Bom.Treeview.Heading', background=color(INPUT), foreground=color(MUTED),
                         relief='flat', padding=(round(10*scale), round(10*scale)),
@@ -265,7 +271,7 @@ class BomView:
         for key in ('parts', 'tree'):
             table = widgets[key]
             table.tag_configure('stripe', background=color(INPUT))
-            table.tag_configure('assembly', foreground=color(ACCENT), background=color(ACCENT_BG),
+            table.tag_configure('assembly', foreground=color(ACCENT), background=color(PANEL),
                                 font=(UI_FONT, -round(12*scale), 'bold'))
 
     def _resize_bom_workspace(self):
@@ -373,6 +379,7 @@ class BomView:
         widgets = self.bom_widgets
         widgets.pop('selection', None)
         widgets['detail_name'].configure(text='Bir satır seçin')
+        widgets['detail_icon'].configure(image=self._icon('file', ACCENT, 22))
         widgets['detail_info'].configure(text='Parça veya alt montaj bilgileri burada görünür.')
         widgets['detail_path'].configure(text='Seçim yapılmadı')
         widgets['selection_summary'].configure(text='Excel dosyasına tüm montaj aktarılır.')
@@ -400,6 +407,8 @@ class BomView:
             info = f'{node.kind}\nKonfigürasyon: {node.configuration}\nBileşen: {node.instance}'
         self.bom_widgets['selection'] = name, info, path
         self.bom_widgets['detail_name'].configure(text=name)
+        self.bom_widgets['detail_icon'].configure(image=self._icon(
+            'tree' if view == 'tree' and node.kind == 'Montaj' else 'file', ACCENT, 22))
         self.bom_widgets['detail_info'].configure(text=info)
         self.bom_widgets['detail_path'].configure(text=path or 'Dosya yolu bulunamadı')
         self.bom_widgets['selection_summary'].configure(text=f'{name} · Excel’e tüm montaj aktarılır.')

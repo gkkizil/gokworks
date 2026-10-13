@@ -15,7 +15,7 @@ from support.solidworks import (
 )
 
 from dxf_dwg import exporter as ex
-from gui.theme import ACCENT_BG
+from gui.theme import NAV_ACTIVE
 from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 from pdf.settings import load_settings, save_settings
 
@@ -114,7 +114,7 @@ class GUIFlowTests(GuiTestCase):
         self.assertEqual(self.app.mode, 'geometric_tolerances')
         for mode, button in self.app.nav_buttons.items():
             self.assertEqual(button.cget('fg_color'),
-                             ACCENT_BG if mode == self.app.mode else 'transparent')
+                             NAV_ACTIVE if mode == self.app.mode else 'transparent')
 
     def test_k_result_view_preserves_manual_recipe_and_fixed_actions(self):
         self.app._switch_mode('k_factor')

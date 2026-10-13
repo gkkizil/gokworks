@@ -6,8 +6,9 @@ import customtkinter as ctk
 
 from gui.icons import make_logo
 from gui.text import BOM_TITLE, KR_TITLE, KR_NAV_TITLE
-from gui.theme import (SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
-                       ACCENT_BG, GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT)
+from gui.theme import (BG, SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
+                       ACCENT_BG, GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT,
+                       NAV_TEXT, NAV_MUTED, NAV_ACTIVE, NAV_ACCENT, NAV_HOVER)
 
 
 class ResultsTabview(ctk.CTkTabview):
@@ -16,6 +17,11 @@ class ResultsTabview(ctk.CTkTabview):
 
 
 class WorkspaceLayout:
+    def _workspace_shell(self):
+        workspace = ctk.CTkFrame(self, fg_color=BG, corner_radius=0, border_width=0)
+        workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=16)
+        return workspace
+
     def _build_window(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -29,15 +35,13 @@ class WorkspaceLayout:
             return self._build_gdt_workspace()
         if self.mode == 'k_factor':
             return self._build_k_workspace()
-        self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
-                                      border_width=1, border_color=BORDER)
-        self.workspace.grid(row=0, column=1, sticky="nsew", padx=(0, 20), pady=20)
+        self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=0)
         self.workspace.grid_columnconfigure(1, weight=1)
         self.workspace.grid_rowconfigure(2, weight=1)
         self._build_header()
         self.pdf_header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=24, pady=(20, 18))
-        self.form_panel = ctk.CTkFrame(self.workspace, width=320, fg_color=INPUT,
+        self.form_panel = ctk.CTkFrame(self.workspace, width=320, fg_color=PANEL,
                                      corner_radius=12, border_width=1, border_color=BORDER)
         self.form_panel.grid(row=2, column=0, sticky="nsew", padx=(24, 0))
         self.form_panel.grid_propagate(False)
@@ -69,14 +73,14 @@ class WorkspaceLayout:
         self.sidebar.grid_columnconfigure(0, weight=1)
         self.sidebar.grid_rowconfigure(4, weight=1)
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        brand.grid(row=0, column=0, sticky="ew", padx=20, pady=(28, 28))
-        self.brand_logo = make_logo()
+        brand.grid(row=0, column=0, sticky="ew", padx=18, pady=(26, 30))
+        self.brand_logo = make_logo(32)
         self.brand_badge = ctk.CTkLabel(brand, text="", image=self.brand_logo,
-                                       width=40, height=40, fg_color="#FFFFFF")
+                                       width=42, height=42, fg_color="#FFFFFF", corner_radius=10)
         self.brand_badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
-        self._label(brand, "GOKWORKS", 16, bold=True).grid(row=0, column=1, sticky="w")
-        self._label(brand, "SolidWorks araçları", 11, MUTED).grid(row=1, column=1, sticky="w")
-        self._label(self.sidebar, "DIŞA AKTARIM", 10, MUTED, True).grid(
+        self._label(brand, "GOKWORKS", 16, NAV_TEXT, bold=True).grid(row=0, column=1, sticky="w")
+        self._label(brand, "Mühendislik araçları", 10, NAV_MUTED).grid(row=1, column=1, sticky="w")
+        self._label(self.sidebar, "AKTARIM VE MONTAJ", 10, NAV_MUTED, True).grid(
             row=1, column=0, sticky="w", padx=22, pady=(0, 10))
         navigation = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         navigation.grid(row=2, column=0, sticky="ew", padx=12)
@@ -87,21 +91,21 @@ class WorkspaceLayout:
                            for active in (False, True)}
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
-            ("bom", BOM_TITLE, "layers"),
+            ("bom", BOM_TITLE, "tree"),
             ("k_factor", KR_NAV_TITLE, "tools"),
             ("iso_fits", "ISO geçmeleri", "ruler"),
             ("geometric_tolerances", "Geometrik toleranslar", "target"),
         )):
             if row == 3:
-                self._label(navigation, "MÜHENDİSLİK", 10, MUTED, True).grid(
+                self._label(navigation, "HESAP VE REFERANS", 10, NAV_MUTED, True).grid(
                     row=row, column=0, sticky="w", padx=10, pady=(22, 10))
             active = key == self.mode
             button = ctk.CTkButton(
-                navigation, text=title, image=self._icon(icon, ACCENT if active else MUTED),
-                height=44, corner_radius=8, anchor="w", border_color=ACCENT_BG,
+                navigation, text=title, image=self._icon(icon, NAV_ACCENT if active else NAV_MUTED),
+                height=46, corner_radius=10, anchor="w", border_color=NAV_ACTIVE,
                 border_width=0,
-                fg_color=ACCENT_BG if active else "transparent", hover_color=SECONDARY,
-                text_color=ACCENT if active else MUTED, text_color_disabled=MUTED,
+                fg_color=NAV_ACTIVE if active else "transparent", hover_color=NAV_HOVER,
+                text_color=NAV_ACCENT if active else NAV_MUTED, text_color_disabled=NAV_MUTED,
                 font=self._nav_fonts[active],
                 command=lambda selected=key: self._switch_mode(selected),
                 state="normal",
@@ -111,18 +115,18 @@ class WorkspaceLayout:
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         footer.grid(row=5, column=0, sticky="ew", padx=20, pady=24)
         footer.grid_columnconfigure(0, weight=1)
-        self._label(footer, "GÖRÜNÜM", 10, MUTED, True).grid(row=0, column=0, sticky="w", pady=(0, 8))
+        self._label(footer, "GÖRÜNÜM", 10, NAV_MUTED, True).grid(row=0, column=0, sticky="w", pady=(0, 8))
         self.theme_selector = ctk.CTkSegmentedButton(
             footer, values=["Açık", "Koyu"], variable=self.theme_mode, command=self._change_theme,
-            height=34, fg_color=SECONDARY, selected_color=ACCENT_BG,
-            selected_hover_color=HOVER, unselected_color=SECONDARY,
-            unselected_hover_color=HOVER, text_color=TEXT,
+            height=36, fg_color=SIDEBAR, selected_color=NAV_ACTIVE,
+            selected_hover_color=NAV_HOVER, unselected_color=SIDEBAR,
+            unselected_hover_color=NAV_HOVER, text_color=NAV_TEXT,
             font=ctk.CTkFont(family=UI_FONT, size=12),
         )
         self.theme_selector.grid(row=1, column=0, sticky="ew")
-        ctk.CTkFrame(footer, height=1, fg_color=BORDER).grid(row=2, column=0, sticky="ew", pady=18)
-        self._label(footer, "SolidWorks araçları", 11, TEXT, True).grid(row=3, column=0, sticky="w")
-        self._label(footer, "Aktarım için SolidWorks\noturumu açık olmalı.", 11, MUTED,
+        ctk.CTkFrame(footer, height=1, fg_color=NAV_HOVER).grid(row=2, column=0, sticky="ew", pady=18)
+        self._label(footer, "SolidWorks masaüstü", 11, NAV_TEXT, True).grid(row=3, column=0, sticky="w")
+        self._label(footer, "CAD işlemleri için SolidWorks\noturumu açık olmalı.", 10, NAV_MUTED,
                     justify="left").grid(row=4, column=0, sticky="w", pady=(4, 0))
 
     def _build_header(self):
@@ -133,7 +137,7 @@ class WorkspaceLayout:
         self._label(header, "GOKWORKS  /  SAC PARAMETRELERİ" if self.mode == "k_factor" else "GOKWORKS  /  BELGE İŞLEMLERİ", 10, MUTED, True).grid(
             row=0, column=0, sticky="w", pady=(0, 4))
         self._label(header, KR_TITLE if self.mode == "k_factor" else "PDF aktarımı" if self._is_pdf else "DXF / DWG açınımı",
-                    24, bold=True).grid(row=1, column=0, sticky="w")
+                    28, bold=True).grid(row=1, column=0, sticky="w")
         subtitle = ("Sac parçalarının K faktörünü ve iç büküm yarıçapını ayarlayın." if self.mode == "k_factor" else
                     "Her teknik resmin tüm sayfalarını tek PDF dosyasına aktarın." if self._is_pdf else
                     "Sac açınımlarını kalınlık ve montaj adediyle adlandırıp kaydedin.")
@@ -180,6 +184,7 @@ class WorkspaceLayout:
         ctk.CTkFrame(panel, height=1, fg_color=BORDER).grid(row=1, column=0, sticky="ew", padx=16)
         options = ctk.CTkFrame(panel, fg_color="transparent")
         options.grid(row=2, column=0, sticky="ew", padx=16, pady=12)
+        self._label(options, 'SEÇENEKLER', 10, MUTED, True).pack(anchor='w', pady=(0, 8))
         tools = ctk.CTkFrame(options, fg_color="transparent")
         tools.pack(side="bottom", fill="x", pady=(12, 0))
         self.scan_button = self._button(tools, "Klasörü tara", self._scan, icon="search", width=116)
@@ -223,8 +228,11 @@ class WorkspaceLayout:
         frame = ctk.CTkFrame(parent, fg_color="transparent")
         frame.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 10))
         frame.grid_columnconfigure(0, weight=1)
-        self._label(frame, label, 13, bold=True).grid(
-            row=0, column=0, columnspan=2, sticky="w", pady=(0, 6))
+        heading = ctk.CTkFrame(frame, fg_color='transparent')
+        heading.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 10))
+        self._label(heading, f'0{column+1}', 11, ACCENT, True, width=28, height=28,
+                    fg_color=ACCENT_BG, corner_radius=8).pack(side='left', padx=(0, 9))
+        self._label(heading, label, 13, bold=True).pack(side='left')
         entry = ctk.CTkEntry(frame, textvariable=variable, height=38, corner_radius=7,
                              border_width=1, border_color=BORDER, fg_color=PANEL,
                              text_color=TEXT, font=(UI_FONT, 12))
@@ -245,7 +253,7 @@ class WorkspaceLayout:
         ]
         for index, (key, caption, color, icon) in enumerate(metrics):
             self.stats_frame.grid_columnconfigure(index, weight=1, uniform="stats")
-            card = ctk.CTkFrame(self.stats_frame, fg_color=INPUT, corner_radius=10,
+            card = ctk.CTkFrame(self.stats_frame, fg_color=PANEL, corner_radius=12,
                                  border_width=1, border_color=BORDER)
             card.grid(row=0, column=index, sticky="ew",
                        padx=(0 if index == 0 else 4, 0 if index == len(metrics)-1 else 4))
@@ -256,11 +264,13 @@ class WorkspaceLayout:
                                pady=8 if compact else (8, 0))
             if compact and key == 'succeeded':
                 self.k_widgets['success_caption'] = caption_label
-            self.stat_values[key] = self._label(card, "0", 20, color, True)
+            self.stat_values[key] = self._label(card, "0", 20 if compact else 26, color, True)
             self.stat_values[key].grid(row=0 if compact else 1, column=1 if compact else 0,
                                       sticky="w", padx=14, pady=8 if compact else (0, 8))
-            ctk.CTkLabel(card, text="", image=self._icon(icon, color, 20)).grid(
-                row=0, column=2 if compact else 1, rowspan=1 if compact else 2, padx=(8, 14))
+            if not compact:
+                ctk.CTkLabel(card, text="", image=self._icon(icon, color, 20),
+                            width=34, height=34, fg_color=INPUT, corner_radius=10).grid(
+                    row=0, column=1, rowspan=2, padx=(8, 14))
 
     def _build_results(self, parent=None):
         card = ctk.CTkFrame(self.workspace if parent is None else parent, fg_color=PANEL, corner_radius=12,
@@ -368,7 +378,7 @@ class WorkspaceLayout:
         style.theme_use("clam")
         style.configure("Gok.Treeview", background=color(PANEL), fieldbackground=color(PANEL),
                         foreground=color(TEXT), borderwidth=0, bordercolor=color(PANEL),
-                        lightcolor=color(PANEL), darkcolor=color(PANEL), rowheight=round(36 * scale),
+                        lightcolor=color(PANEL), darkcolor=color(PANEL), rowheight=round(40 * scale),
                         font=(UI_FONT, -round(13 * scale)))
         style.configure("Gok.Treeview.Heading", background=color(INPUT), foreground=color(MUTED),
                         relief="flat", padding=(round(8 * scale), round(9 * scale)),

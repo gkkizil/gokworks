@@ -18,9 +18,7 @@ RESULTS_TAB = "Montaj sonuçları"
 
 class KFactorView:
     def _build_k_workspace(self):
-        self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
-                                      border_width=1, border_color=BORDER)
-        self.workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=20)
+        self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(3, weight=1)
         self._build_header()

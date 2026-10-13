@@ -31,20 +31,18 @@ class GeometricTolerancesView:
         self._gdt_loading = False
 
     def _gdt_card(self, parent):
-        return ctk.CTkFrame(parent, fg_color=INPUT, border_color=BORDER,
+        return ctk.CTkFrame(parent, fg_color=PANEL, border_color=BORDER,
                             border_width=1, corner_radius=12)
 
     def _build_gdt_workspace(self):
-        self.workspace = ctk.CTkFrame(self, fg_color=PANEL, corner_radius=16,
-                                      border_width=1, border_color=BORDER)
-        self.workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=20)
+        self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(1, weight=1)
         header = ctk.CTkFrame(self.workspace, fg_color='transparent')
         header.grid(row=0, column=0, sticky='ew', padx=24, pady=(20, 16))
         header.grid_columnconfigure(0, weight=1)
         self._label(header, 'GOKWORKS  /  ASME Y14.5-2018', 10, MUTED, True).grid(row=0, column=0, sticky='w')
-        self._label(header, 'Geometrik toleranslar', 24, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
+        self._label(header, 'Geometrik toleranslar', 28, bold=True).grid(row=1, column=0, sticky='w', pady=(4, 2))
         self._label(header, 'GD&T · 12 güncel özellik ve eski işaretler', 12, MUTED,
                     wraplength=340, justify='left').grid(row=2, column=0, sticky='w')
         actions = ctk.CTkFrame(header, fg_color='transparent')

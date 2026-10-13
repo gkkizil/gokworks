@@ -68,6 +68,12 @@ def _draw_icon(name, color):
         box((3, 7, 21, 17), radius=1)
         for x in (7, 11, 15, 19):
             line([(x, 7), (x, 11 if x % 8 == 7 else 13)])
+    elif name == 'tree':
+        box((3, 2, 11, 8), radius=1)
+        line([(7, 9), (7, 19), (13, 19)])
+        line([(7, 12), (13, 12)])
+        box((14, 9, 22, 15), radius=1)
+        box((14, 17, 22, 23), radius=1)
     elif name == 'target':
         circle((5, 5, 19, 19))
         circle((9, 9, 15, 15))

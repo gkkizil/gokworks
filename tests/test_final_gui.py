@@ -106,6 +106,9 @@ class FinalGUIAuditTests(LayoutGuiTestCase):
             self.app._change_theme(appearance)
             for foreground, background in [(theme.TEXT[index], theme.PANEL[index]),
                                            (theme.MUTED[index], theme.PANEL[index]),
+                                           (theme.NAV_TEXT[index], theme.SIDEBAR[index]),
+                                           (theme.NAV_MUTED[index], theme.SIDEBAR[index]),
+                                           (theme.NAV_ACCENT[index], theme.NAV_ACTIVE[index]),
                                            (theme.RED[index], theme.ACCENT_BG[index]),
                                            (self.app.start_button.cget('text_color')[index], theme.ACCENT[index])]:
                 with self.subTest(theme=appearance, foreground=foreground, background=background):
