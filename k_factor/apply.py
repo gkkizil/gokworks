@@ -14,6 +14,7 @@ from solidworks.connection import connect_to_solidworks
 pythoncom, win32com = sw.pythoncom, sw.win32com
 _value, _key = sw._value, sw._part_key
 ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
+NEEDS_REBUILD = 2  # swActivateDocError_e.swDocNeedsRebuildWarning
 TEMPLATE_SHEET = "TemplateSheetMetal"
 CONVERT_SOLID = "SolidToSheetMetal"  # IFeature.GetTypeName2; not the display name.
 
@@ -51,6 +52,20 @@ def _call_byref(obj, member, *args):
 
 def _out(kind):
     return win32com.client.VARIANT(pythoncom.VT_BYREF | kind, 0 if kind == pythoncom.VT_I4 else False if kind == pythoncom.VT_BOOL else "")
+
+
+def _activate_document(app, name):
+    """Use the document pointer returned by activation, not a loaded proxy."""
+    errors = _out(pythoncom.VT_I4)
+    activated = _call_byref(app, "ActivateDoc3", name, False, 1, errors)
+    active = _read(app, "ActiveDoc")
+    if (activated is None or active is None or errors.value not in (0, NEEDS_REBUILD)
+            or _key(sw._document_name(activated), "") != _key(name, "")
+            or _key(sw._document_name(active), "") != _key(name, "")):
+        raise RuntimeError(f"SolidWorks belgeyi etkinleştiremedi: {name}; hata kodu: {errors.value}")
+    if errors.value == NEEDS_REBUILD and not _read(activated, "EditRebuild3"):
+        raise RuntimeError(f"Etkinleştirilen belge yeniden oluşturulamadı: {name}")
+    return activated
 
 
 def _features(model, *, include_suppressed=False):
@@ -396,8 +411,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
     notes, status, calculation = [], "error", None
     stage = "Parça açma"
     try:
-        # Assembly dependencies can be loaded without a document window.
-        # Prefer the same lookup used by xCAD before trying the name lookup.
+        # These lookups may return an assembly-loaded document without its
+        # own window. Use it for ownership/previous-state bookkeeping only;
+        # parameter access uses the fresh pointer returned by ActivateDoc3.
         get_open = getattr(app, "GetOpenDocument", None)
         model = get_open(path) if get_open is not None else None
         if model is None:
@@ -425,13 +441,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if not _value(model, "Visible"):
             model.Visible = True
             visibility_changed = True
-        errors = _out(pythoncom.VT_I4)
-        activated = app.ActivateDoc3(_value(model, "GetPathName"), False, 1, errors)
-        active = _value(app, "ActiveDoc")
-        if (activated is None or errors.value or active is None
-                or _key(_value(activated, "GetPathName"), "") != _key(path, "")
-                or _key(_value(active, "GetPathName"), "") != _key(path, "")):
-            raise RuntimeError("SolidWorks kaynak parçayı etkinleştiremedi.")
+        model = _activate_document(app, path)
+        if _read(model, "GetType") != 1:
+            raise RuntimeError("Etkinleştirilen belge bir parça değil; K/R uygulanmadı.")
         stage = "Konfigürasyon ve sac gövdeleri"
         _show_configuration(model, configuration)
         configuration = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
@@ -626,12 +638,7 @@ def update_assembly(recipe, events, stop_event=None, *, preview=False, save=Fals
     finally:
         if app is not None and assembly_name:
             try:
-                errors = _out(pythoncom.VT_I4)
-                restored = app.ActivateDoc3(assembly_name, False, 1, errors)
-                active = _value(app, "ActiveDoc")
-                if (restored is None or errors.value or sw._document_name(restored) != assembly_name
-                        or active is None or sw._document_name(active) != assembly_name):
-                    raise RuntimeError("Önceki montaj etkinleştirilemedi.")
+                _activate_document(app, assembly_name)
             except Exception as error:
                 summary.update(state="error", error=str(error))
         if initialized:

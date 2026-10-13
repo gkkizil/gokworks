@@ -74,6 +74,65 @@ class NativeDispatchApplyTests(KApplyTestCase):
         return ap.process_part(self.app, self.model.path, 'Default',
                                ManualAssignment(2, .274, 2), **kwargs)
 
+    def test_assembly_loaded_proxy_is_replaced_before_reading_sheet_parameters(self):
+        model = self.model
+        class LoadedProxy:
+            ConfigurationManager = model.ConfigurationManager
+            GetType = model.GetType
+            GetPathName = model.GetPathName
+            GetSaveFlag = model.GetSaveFlag
+
+            @property
+            def Visible(self):
+                return model.Visible
+
+            @Visible.setter
+            def Visible(self, value):
+                model.Visible = value
+
+            def GetBodies2(self, *args):
+                raise AssertionError('Read bodies from the activated document.')
+
+            def ExportToDWG2(self, *args):
+                raise AssertionError('K/R must not export anything.')
+
+        self.app.GetOpenDocument = lambda path: LoadedProxy()
+        self.model.Visible = False
+        for preview in (True, False):
+            with self.subTest(preview=preview):
+                status, detail, _ = self.manual(preview=preview)
+                self.assertEqual(status, 'success', detail)
+                self.assertEqual(model.states['Default']['k'], .4 if preview else .274)
+                self.assertFalse(model.Visible)
+                self.assertFalse(self.app.closed)
+
+    def test_rebuild_warning_does_not_block_manual_sheet_parameter_reading(self):
+        self.app.activate_error = 2
+        for preview in (True, False):
+            with self.subTest(preview=preview):
+                status, detail, _ = self.manual(preview=preview)
+                self.assertEqual(status, 'success', detail)
+                self.assertEqual(self.model.states['Default']['k'], .4 if preview else .274)
+
+    def test_activation_rebuild_failure_stops_before_any_kr_write(self):
+        self.app.activate_error = 2
+        self.model.rebuild_fail = True
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.manual(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('Etkinleştirilen belge yeniden oluşturulamadı', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.feature.modify_count, 0)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_real_activation_error_still_stops_before_any_kr_write(self):
+        self.app.activate_error = 1
+        status, detail, _ = self.manual(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('hata kodu: 1', detail)
+        self.assertEqual(self.model.feature.modify_count, 0)
+        self.assertEqual(self.model.save_count, 0)
+
     def test_type_aware_nested_definition_does_not_break_gauge_outputs(self):
         class TypedDefinition(NativeDefinition):
             def GetUseGaugeTable(self, *args):

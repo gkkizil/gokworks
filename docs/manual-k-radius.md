@@ -90,3 +90,24 @@ ekranından girişlere ve hesap özetine geri döner.
 Bu düzeltmelerin kullanıcının montajındaki hatayı giderdiği henüz gerçek
 SolidWorks oturumunda doğrulanmadı. Devam eden hatanın tam metni günlükten
 alınabilir. Güncel ekranlar ve hedefli kontrol kayıtları [burada](ui-preview/README.md).
+
+## Montaj içinde yüklü parçaların okunması
+
+K/R işçisi artık sac parametrelerini `ActivateDoc3` tarafından döndürülen
+güncel parça belgesinden okur. Önceden montaj bağımlılığı için alınan eski
+`GetOpenDocument` nesnesi kullanılmaya devam ediyordu. SolidWorks belgesi,
+kendi penceresinde açılmamış bir parçanın bu nesnesinde yöntemlerin düzgün
+çalışmayabileceğini belirtir. İlk nesne yalnız önceki konfigürasyon, kayıt
+durumu ve belge sahipliğini korumak için kullanılır.
+
+`swDocNeedsRebuildWarning = 2` belgeyi etkinleştirme hatası değildir. Bu
+uyarıda belge yeniden oluşturulup ardından sac değerleri okunur. Yeniden
+oluşturma başarısızsa veya gerçek etkinleştirme hatası gelirse K/R yazılmaz.
+Aynı kontrol işlem sonunda ana montaja dönülürken de kullanılır.
+
+Montajdan gelen eski nesnede gövde okuması başarısız olduğunda ve
+etkinleştirme uyarısı 2 döndüğünde, eski kodun hatası iki regresyonla yeniden
+üretildi. Düzeltmeden sonra **9 hedefli kontrol geçti**; bunlar parça
+sahipliği, mevcut düzenlemeleri koruma, ana montaja dönüş ve gerçek Tk
+tarama–uygulama akışını da içerir. SolidWorks COM davranışı test nesneleriyle
+temsil edildi; kullanıcının montajı bu bulutta çalıştırılmadı.
