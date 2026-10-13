@@ -4,8 +4,8 @@ import tkinter as tk
 import customtkinter as ctk
 
 from bolt.diagram import draw
-from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, SECTIONS, PLANES,
-                        SCOPE, calculate, fmt, number)
+from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, UNIT_LABELS, SECTIONS, PLANES,
+                        SCOPE, calculate, fmt, force_text, number)
 from gui.icons import set_window_icon
 from gui.rendering import configure_changed
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
@@ -18,6 +18,8 @@ class BoltView:
                         unit='kN', count='1', safety_factor='2', section='Dişli kesit', planes='Tek kesme')
         self.bolt_state = {key: tk.StringVar(self, value=str(saved.get('bolt_'+key, value)))
                            for key, value in defaults.items()}
+        if self.bolt_state['unit'].get() == 'kgf':
+            self.bolt_state['unit'].set('kg')
         for key, choices in (('metric', THREADS), ('grade', PROOF_STRESS), ('mode', MODES),
                              ('unit', UNITS), ('section', SECTIONS), ('planes', PLANES)):
             if self.bolt_state[key].get() not in choices:
@@ -72,18 +74,23 @@ class BoltView:
             height=36, fg_color=INPUT, selected_color=ACCENT_BG, selected_hover_color=HOVER,
             unselected_color=INPUT, unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
         modes.grid(row=5, column=0, columnspan=2, sticky='ew', padx=8)
-        self._bolt_field(form, 'unit', 'Kuvvet birimi', 6, 0, UNITS)
-        self._bolt_field(form, 'count', 'Cıvata adedi', 6, 1)
+        self._label(form, 'Yük birimi', 11, MUTED).grid(row=6, column=0, columnspan=2, sticky='w', padx=8, pady=(12, 5))
+        w['unit_input'] = ctk.CTkSegmentedButton(form, values=list(UNIT_LABELS.values()),
+            command=self._select_bolt_unit, height=36, fg_color=INPUT,
+            selected_color=ACCENT_BG, selected_hover_color=HOVER, unselected_color=INPUT,
+            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12))
+        w['unit_input'].grid(row=7, column=0, columnspan=2, sticky='ew', padx=8)
         self._bolt_field(form, 'tension', 'Toplam çekme · Ft', 8, 0)
         self._bolt_field(form, 'shear', 'Toplam kesme · Fv', 8, 1)
         self._bolt_field(form, 'section', 'Kesme kesiti', 10, 0, SECTIONS)
         self._bolt_field(form, 'planes', 'Kesme düzlemi', 10, 1, PLANES)
         self._label(form, '03   Güvenlik hedefi', 14, bold=True).grid(row=12, column=0, columnspan=2, sticky='w', padx=8, pady=(20, 0))
         self._bolt_field(form, 'safety_factor', 'Emniyet katsayısı', 13, 0)
-        self._label(form, 'Varsayılan: 2\nYük, eşit paylaşılır.', 10, MUTED, justify='left').grid(
-            row=14, column=1, sticky='w', padx=8)
-        self._label(form, 'kgf kuvvet birimidir; kg kütle birimidir.\nKaba diş · karbon / alaşımlı çelik', 10, MUTED,
-                    justify='left').grid(row=15, column=0, columnspan=2, sticky='w', padx=8, pady=(18, 14))
+        self._bolt_field(form, 'count', 'Cıvata adedi', 13, 1)
+        w['unit_hint'] = self._label(form, '', 10, MUTED, justify='left', wraplength=245)
+        w['unit_hint'].grid(row=15, column=0, columnspan=2, sticky='w', padx=8, pady=(12, 6))
+        self._label(form, 'Emniyet varsayılanı: 2 · Eşit yük paylaşımı\nKaba diş · karbon / alaşımlı çelik', 10, MUTED,
+                    justify='left').grid(row=16, column=0, columnspan=2, sticky='w', padx=8, pady=(0, 14))
         details = ctk.CTkScrollableFrame(body, fg_color='transparent', corner_radius=0,
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         details.grid(row=0, column=1, sticky='nsew')
@@ -134,6 +141,10 @@ class BoltView:
         self._update_bolt_result()
         self._resize_pdf_area()
 
+    def _select_bolt_unit(self, label):
+        unit = next(key for key, value in UNIT_LABELS.items() if value == label)
+        self.bolt_state['unit'].set(unit)
+
     def _bolt_changed(self, key):
         w = self.bolt_widgets
         if w['loading']:
@@ -157,6 +168,11 @@ class BoltView:
 
     def _update_bolt_result(self):
         w, state = self.bolt_widgets, self.bolt_state
+        unit = state['unit'].get()
+        w['unit_input'].set(UNIT_LABELS.get(unit, 'kg yük'))
+        configure_changed(w['unit_hint'], text=(
+            'kg yük: girilen kütlenin ağırlığı hesaplanır.\n1 kg yük = 9,80665 N (standart yerçekimi).'
+            if unit in ('kg', 'kgf') else 'Birim değişince girilen yük dönüştürülür.\n1 kN = 1.000 N'))
         for key in ('shear', 'section', 'planes'):
             configure_changed(w[key+'_input'], state='disabled' if state['mode'].get() == 'Çekme' else 'normal')
         configure_changed(w['tension_input'], state='disabled' if state['mode'].get() == 'Kesme' else 'normal')
@@ -184,7 +200,8 @@ class BoltView:
                 configure_changed(w[key], text=value)
             configure_changed(w['capacity'], text=(
                 f'{r.count} cıvata için tek başına yük sınırları:\n'
-                f'Çekme {fmt(r.tension_capacity_n/1000)} kN  ·  Kesme {fmt(r.shear_capacity_n/1000)} kN\n'
+                f'Çekme: {force_text(r.tension_capacity_n, r.unit)}\n'
+                f'Kesme: {force_text(r.shear_capacity_n, r.unit)}\n'
                 'Birleşik yükte bu iki sınır aynı anda kullanılamaz.'))
         configure_changed(w['verdict'], text=verdict, text_color=color)
         configure_changed(w['result_card'], border_color=color)
@@ -224,12 +241,15 @@ class BoltView:
             return
         text = (f'Cıvata hesabı · {r.metric} × {fmt(r.pitch)} · {r.grade}\n'
                 f'{r.mode} · {r.count} cıvata · {r.section} · {r.planes} kesme düzlemi\n'
+                f'Seçili birim: {UNIT_LABELS[r.unit]}\n'
+                f'Çekme: {force_text(r.tension_n, r.unit)} · Kesme: {force_text(r.shear_n, r.unit)}\n'
                 f'Toplam Ft = {fmt(r.tension_n)} N · Toplam Fv = {fmt(r.shear_n)} N\n'
                 f'As = {fmt(r.tensile_area)} mm² · Akesme = {fmt(r.shear_area)} mm²\n'
                 f'σ = {fmt(r.tensile_stress)} MPa · τ = {fmt(r.shear_stress)} MPa\n'
                 f'σeş = {fmt(r.equivalent_stress)} MPa · Sp = {fmt(r.proof_stress)} MPa\n'
                 f'Emniyet hedefi = {fmt(r.safety_factor)} · İzin verilen = {fmt(r.allowable_stress)} MPa\n'
-                f'Sonuç: {self.bolt_widgets["verdict"].cget("text")} · Kullanım %{fmt(r.utilization*100, 1)}\n\n{SCOPE}')
+                f'Sonuç: {self.bolt_widgets["verdict"].cget("text")} · Kullanım %{fmt(r.utilization*100, 1)}\n'
+                f'kg yük dönüşümü: standart yerçekimi g = 9,80665 m/s².\n\n{SCOPE}')
         self.clipboard_clear()
         self.clipboard_append(text)
         self.status_label.configure(text='Hesap ve varsayımlar panoya kopyalandı.', text_color=GREEN)
@@ -259,6 +279,8 @@ class BoltView:
             'Bu sınırla von Mises karşılaştırması, uygulamanın ihtiyatlı ön kontrol yöntemidir; '
             'ISO 898-1 bir bağlantı tasarım standardı değildir.\n\n'
             'Varsayılan emniyet katsayısı 2’dir; uygulamanızın gerektirdiği katsayıyı seçin. '
+            'kg yük seçiminde girilen kütle standart yerçekimiyle kuvvete çevrilir: F = m × 9,80665. '
+            'Newton (N) seçiminde değer doğrudan kuvvettir; 1 kN = 1.000 N. '
             'Çift kesmede iki kesme düzleminin eşit yük taşıdığı kabul edilir. '
             'Kapasiteler yalnız çekme veya yalnız kesme için ayrı ayrı verilir.\n\n'+SCOPE)
         box.configure(state='disabled')

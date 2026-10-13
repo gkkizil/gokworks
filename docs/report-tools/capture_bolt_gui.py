@@ -22,12 +22,13 @@ def main():
         app.report_callback_exception = lambda *args: errors.append(str(args))
         try:
             app._switch_mode('bolt')
-            for name, theme, mode, tension, shear, size in (
-                ('tension-light', 'Açık', 'Çekme', '10', '4', '1240x860'),
-                ('combined-dark', 'Koyu', 'Birleşik yük', '10', '4', '1240x860'),
-                ('unsafe-dark-small', 'Koyu', 'Birleşik yük', '12', '8', '1000x690')):
+            for name, theme, mode, tension, shear, unit, size in (
+                ('tension-light', 'Açık', 'Çekme', '1000', '400', 'kg', '1240x860'),
+                ('combined-dark', 'Koyu', 'Birleşik yük', '10000', '4000', 'N', '1240x860'),
+                ('unsafe-dark-small', 'Koyu', 'Birleşik yük', '12', '8', 'kN', '1000x690')):
                 app._change_theme(theme)
                 app.geometry(size+'+20+20')
+                app.bolt_state['unit'].set(unit)
                 for key, value in dict(mode=mode, tension=tension, shear=shear).items():
                     app.bolt_state[key].set(value)
                 deadline = time.monotonic()+.4

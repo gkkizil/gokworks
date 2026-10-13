@@ -11,7 +11,8 @@ THREADS = {f'M{d}': (d, p) for d, p in (
 # ISO 898-1 proof stress Sp, MPa. 8.8 has a separate value above M16.
 PROOF_STRESS = {'4.6': 225., '5.6': 280., '8.8': 580., '10.9': 830., '12.9': 970.}
 MODES = ('Çekme', 'Kesme', 'Birleşik yük')
-UNITS = {'kN': 1000., 'N': 1., 'kgf': 9.80665}
+UNITS = {'kg': 9.80665, 'N': 1., 'kN': 1000., 'kgf': 9.80665}
+UNIT_LABELS = {'kg': 'kg yük', 'N': 'Newton (N)', 'kN': 'kN'}
 SECTIONS = ('Dişli kesit', 'Dişsiz gövde')
 PLANES = ('Tek kesme', 'Çift kesme')
 
@@ -51,6 +52,7 @@ class Result:
     available_factor: float | None
     tension_capacity_n: float
     shear_capacity_n: float
+    unit: str
 
     @property
     def safe(self):
@@ -85,11 +87,17 @@ def calculate(*, metric='M10', grade='8.8', mode='Çekme', tension='10', shear='
     return Result(metric, grade, mode, pitch, bolts, shear_planes, section, factor, proof,
                   tensile_area, shear_area, ft, fv, sigma, tau, equivalent, allowable,
                   equivalent/allowable, proof/equivalent if equivalent else None,
-                  allowable*tensile_area*bolts, allowable/sqrt(3)*shear_area*bolts*shear_planes)
+                  allowable*tensile_area*bolts, allowable/sqrt(3)*shear_area*bolts*shear_planes,
+                  'kg' if unit == 'kgf' else unit)
 
 
 def fmt(value, digits=2):
     return f'{value:,.{digits}f}'.replace(',', '_').replace('.', ',').replace('_', '.')
+
+
+def force_text(force_n, unit):
+    suffix = 'kg yük' if unit in ('kg', 'kgf') else unit
+    return f'{fmt(force_n/UNITS[unit])} {suffix}'
 
 
 SCOPE = ('Statik yük ve eşit yük paylaşımı kabul edilir. Girilen çekme yükü cıvatalarda taşınan toplam kuvvettir. '

@@ -3,9 +3,10 @@
 **Mühendislik hesapları → Cıvata hesabı**. SolidWorks bağlantısı gerektirmez. Metrik ölçü, kalite sınıfı, yük türü ve kuvvet girildiğinde sonuç canlı güncellenir. Yeşil **Güvenli**, kırmızı **Güvensiz** ve yük girilmediğinde **Yük yok** gösterilir. Hatalı girişte önceki sonuç kaldırılır.
 
 - M3–M39 arasındaki 18 kaba diş ölçüsü; 4.6, 5.6, 8.8, 10.9 ve 12.9 çelik cıvata sınıfları.
-- Çekme, kesme veya eşzamanlı birleşik yük. N, kN ve kgf arasında geçiş girilmiş kuvveti dönüştürür; kgf kütle değildir.
+- Çekme, kesme veya eşzamanlı birleşik yük. **kg yük / Newton (N) / kN** seçimi görünür düğmelerle yapılır. Birim değişikliği girilmiş yükü dönüştürür; kapasite, yük okları ve pano aynı birimi kullanır. kg yük seçiminde kütle standart yerçekimi ile kuvvete çevrilir: **1 kg yük = 9,80665 N**. Önceki kgf tercihleri aynı kuvvet korunarak kg yük seçimine taşınır.
 - Cıvata adedi, tek/çift kesme düzlemi, dişli/dişsiz kesit ve 1–10 arasında emniyet katsayısı. Varsayılan katsayı 2; tüm cıvatalar ve çift kesmedeki düzlemler eşit yük taşır.
 - Yük okları, kapasite kullanımı, eşdeğer/izin verilen gerilme, mevcut emniyet ve çekme alanı. Hesap varsayımlarıyla panoya kopyalanabilir. Seçimler kaydedilir.
+- Somun altıgen yüzeyler, pah ve iç dişlerle çizilir. Büyütülmüş somun detayı açık deliği gösterir; montaj görünümünde dişli cıvata ucu somundan dışarı uzanır. Görsel ölçeksizdir, bir somun ölçü standardını doğrulamaz.
 
 ## Hesap yöntemi
 

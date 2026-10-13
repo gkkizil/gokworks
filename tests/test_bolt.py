@@ -58,6 +58,11 @@ class BoltCalculationTests(unittest.TestCase):
         self.assertAlmostEqual(calculate(tension='1,25').tension_n, 1250)
         self.assertEqual(calculate(tension='1250', unit='N').tension_n, 1250)
         self.assertAlmostEqual(calculate(tension='100', unit='kgf').tension_n, 980.665)
+        kg = calculate(mode='Birleşik yük', tension='100', shear='50', unit='kg')
+        newton = calculate(mode='Birleşik yük', tension='980,665', shear='490,3325', unit='N')
+        self.assertAlmostEqual(kg.tension_n, newton.tension_n)
+        self.assertAlmostEqual(kg.shear_n, newton.shear_n)
+        self.assertAlmostEqual(kg.utilization, newton.utilization)
 
     def test_boundary_and_unloaded_state(self):
         r = calculate()
@@ -71,7 +76,7 @@ class BoltCalculationTests(unittest.TestCase):
     def test_invalid_active_inputs_rejected_and_inactive_load_ignored(self):
         for key, value in (('tension', ''), ('tension', 'nan'), ('tension', 'inf'), ('shear', '-1'),
                            ('count', '0'), ('count', '1.5'), ('safety_factor', '.5'),
-                           ('metric', 'M11'), ('grade', 'A2-70'), ('unit', 'kg')):
+                           ('metric', 'M11'), ('grade', 'A2-70'), ('unit', 'lb')):
             with self.subTest(key=key, value=value), self.assertRaises(ValueError):
                 calculate(**{**dict(mode='Birleşik yük'), key: value})
         self.assertEqual(calculate(mode='Kesme', tension='invalid', shear='2').tension_n, 0)

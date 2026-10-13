@@ -51,9 +51,15 @@ class BoltWindowTests(GuiTestCase):
     def test_units_page_cache_preferences_and_copy_preserve_physical_load(self):
         state, w = self.app.bolt_state, self.app.bolt_widgets
         before = self.app.bolt_result
-        for unit in ('N', 'kgf', 'kN'):
+        for unit in ('N', 'kg', 'kN'):
             state['unit'].set(unit)
             self.assertAlmostEqual(self.app.bolt_result.tension_n, before.tension_n, places=6)
+        self.app._select_bolt_unit('kg yük')
+        self.assertEqual(state['unit'].get(), 'kg')
+        self.assertIn('kg yük', w['capacity'].cget('text'))
+        self.assertIn('9,80665', w['unit_hint'].cget('text'))
+        self.assertTrue(any('kg yük' in w['canvas'].itemcget(item, 'text')
+                            for item in w['canvas'].find_all() if w['canvas'].type(item) == 'text'))
         state['metric'].set('M12')
         self.app._copy_bolt_result()
         self.assertIn('M12', self.app.clipboard_get())
@@ -67,11 +73,13 @@ class BoltWindowTests(GuiTestCase):
         self.app._save_preferences()
         saved = load_settings(self.settings)
         self.assertEqual(saved['bolt_metric'], 'M12')
+        self.assertEqual(saved['bolt_unit'], 'kg')
         self.assertEqual(saved['unrelated_setting'], 'keep')
         self.close_app()
         self.open_app()
         self.app._switch_mode('bolt')
         self.assertEqual(self.app.bolt_result.metric, 'M12')
+        self.assertEqual(self.app.bolt_state['unit'].get(), 'kg')
 
     def test_small_window_dpi_and_unchanged_diagram(self):
         self.addCleanup(lambda: ctk.set_widget_scaling(1))
@@ -80,6 +88,7 @@ class BoltWindowTests(GuiTestCase):
             ctk.set_widget_scaling(scale)
             self.app._set_scaled_min_max()
             self.app.geometry(size)
+            self.app.bolt_widgets['details']._parent_canvas.yview_moveto(0)
             self.settle()
             for key in ('result_card', 'canvas'):
                 self.assert_inside(self.app.bolt_widgets[key])

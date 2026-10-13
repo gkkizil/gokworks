@@ -1,0 +1,66 @@
+name: Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/dxf-dwg-gui-report]
+    paths:
+      - '**/*.py'
+      - 'gui/assets/**'
+      - 'iso_fits/tables.json'
+      - 'requirements.txt'
+      - 'packaging/**'
+      - '.github/workflows/windows-exe.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-exe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            packaging/windows-requirements.txt
+      - name: Install build dependencies
+        run: python -m pip install -r packaging/windows-requirements.txt
+      - name: Build and open the packaged EXE
+        run: python packaging/build_windows.py *> windows-build.log
+      - name: Upload Windows package
+        id: artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GOKWORKS-Windows-x64-${{ github.sha }}
+          path: |
+            dist/GOKWORKS.exe
+            dist/SHA256.txt
+            dist/OKU.txt
+            dist/windows-smoke.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-build-log-${{ github.sha }}
+          path: |
+            windows-build.log
+            dist/windows-smoke.json
+          if-no-files-found: ignore
+      - name: Record downloadable build status
+        if: always()
+        env:
+          BUILD_STATUS: ${{ job.status }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        run: python packaging/publish_status.py
