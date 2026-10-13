@@ -64,3 +64,29 @@ bu bulut ortamında çalıştırılamaz.
 Dönen COM nesnesi çağrılabilir olsa da varsayılan üyesi çağrılmaz. Büküm payının yalnız etkin türünün alanı okunur; K atamasında tür 2, K ve R yazılır. Başka türden dönüşte geri alma o türün aktif alanını geri yükler. Kalınlık filtresi eşleşmeyen saclar için K/R API erişiminden önce uygulanır. Hatalar aşama ve üye adını gösterir. Aynı `Üye bulunamadı` HRESULT davranışı test nesnesiyle yeniden üretildi; gerçek SolidWorks 2025 bu bulutta çalıştırılmadı.
 
 [Yeni yerleşim ve kanıtlar](reports/kr-workspace-fix/README.md) · [Yerel kabul kontrolü](local-solidworks-check.md).
+
+## 13 Ekim 2026 çağrı ve hata görünürlüğü düzeltmesi
+
+`GetUseGaugeTable`, `GetOverrideDefaultParameter2` ve `Save3` çağrıları,
+kendi COM nesnelerinde `DumbDispatch` üzerinden yapılıyor. Yalnız ana
+SolidWorks nesnesini dönüştürmek yeterli değildi: alt nesneler yeniden tür
+bilgisiyle oluşturulabiliyor; çıkış değerleri tuple olarak dönüyor veya
+açık VARIANT çıkışlarıyla çakışıyordu. Bu durum başarılı bir sac kontrolünü
+hatalı gösterebiliyor, kayıt hatasının okunmasını da etkileyebiliyordu.
+[pywin32 b312 çağrı sarmalayıcısı](https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py#L361)
+incelendi; regresyonlar test nesneleriyle doğrulandı.
+
+Kaydedilmemiş değişiklik kontrolü artık belge etkinleştirilmeden ve
+konfigürasyon değiştirilmeden önce alınır. Programın kendi geçişinin
+oluşturduğu kayıt işareti atamayı engellemez; önceden bulunan kullanıcı
+düzenlemeleri için kayıt koruması sürer.
+
+Geçersiz girişle uygulama istendiğinde form görünür hale gelir ve neden
+başlatılmadığı durum satırında yazılır. Parça bazında hata oluştuğunda
+**Günlük** açılır. **Günlüğü kopyala**, girilen manuel değerleri, dosya adını
+ve tam hata metnini birlikte kopyalar. **Hesapla ve kontrol et** sonuç
+ekranından girişlere ve hesap özetine geri döner.
+
+Bu düzeltmelerin kullanıcının montajındaki hatayı giderdiği henüz gerçek
+SolidWorks oturumunda doğrulanmadı. Devam eden hatanın tam metni günlükten
+alınabilir. Güncel ekranlar ve hedefli kontrol kayıtları [burada](ui-preview/README.md).

@@ -1,10 +1,11 @@
 # Güncel arayüz
 
-Yeni: **Mühendislik hesapları → Cıvata hesabı**. [Hesap ve kapsam](../bolt-calculator.md) · [Açık tema](../reports/bolt/screenshots/tension-light.png) · [Koyu tema](../reports/bolt/screenshots/combined-dark.png). Aşağıdaki eski ekranlar cıvata menüsü eklenmeden önce çekilmiştir.
+**Mühendislik hesapları → Cıvata hesabı**. [Hesap ve kapsam](../bolt-calculator.md) · [Açık tema](../reports/bolt/screenshots/tension-light.png) · [Koyu tema](../reports/bolt/screenshots/combined-dark.png).
 
-13 Ekim 2026. Altı çalışma alanı ortak bir tasarımla yenilendi: koyu lacivert
-menü, açık temada beyaz kartlar, koyu temada katmanlı lacivert yüzeyler ve
-yeşil ana işlem düğmeleri. Logo korunur. Görseller çalışan Tk uygulamasından
+13 Ekim 2026. Yedi çalışma alanında daha yumuşak bir görünüm: sakin yeşil
+vurgular, açık gri form alanları, mat koyu yüzeyler ve yuvarlak düğmeler.
+Menü seçimi 140 ms içinde yumuşakça değişir; içerik hemen kullanılabilir.
+Görseller çalışan Tk uygulamasından
 alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 
 - Çalışma alanını çevreleyen ikinci çerçeve kaldırıldı; içerik kartları ayrıldı.
@@ -13,6 +14,9 @@ alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 - BOM'da toplam adet vurgulandı; seçili satır diğer alt montajlardan ayrıldı.
 - Seçili BOM bileşeninin türü ayrıntı panelinde simgeyle gösterilir.
 - Dar K/R alanında sayaç simgeleri kaldırılarak başlıklara yer açıldı.
+- Ortak düğmelerin sert kenarlıkları kaldırıldı; giriş ve seçim alanları birleştirildi.
+- K/R sekmeleri sadeleştirildi. Geçersiz giriş ilgili formda gösterilir;
+  işlem hatasında günlük açılır ve **Günlüğü kopyala** düğmesi kullanılabilir.
 
 | Çalışma alanı | Açık tema | Koyu tema |
 | --- | --- | --- |
@@ -49,11 +53,15 @@ alındı; SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
 
 Görüntülerin dosya özetleri ve çekim bilgileri [screenshots.json](screenshots.json) içindedir. Yeniden üretmek için çalışan sanal ekranda `docs/report-tools/capture_workspaces.py --output-dir docs/ui-preview` kullanılır. Bulutun Python 3.13 / Tk 8.6 ortamı düzgün kenarlı yazı görüntülemesi sağlar; Windows uygulaması Segoe UI kullanır.
 
-Bu tasarım için **7 hedefli arayüz kontrolü geçti**: çalışma alanlarının farklı
-pencere ve %100/%125/%150 ölçeklerde yerleşimi, referans sayfaları arasında
-geçiş, hızlı menü seçimi, metin/zemin kontrastı, BOM küçük pencere ve tema
-geçişleri, BOM seçim/dal kontrolleri ve tarama–Excel akışı. Kontrast kontrolü
-yeni sol menüyü de kapsar. 19 genel ekran ve 7 BOM ekranı yeniden çekildi.
-Genel hesaplama/aktarım test paketi bu görsel değişiklik için çalıştırılmadı.
+Bu güncellemede **21 hedefli kontrol geçti**: K/R çağrıları, kayıt koruması,
+hata görünürlüğü, tarama–uygulama akışı, hızlı menü seçimi, metin/zemin
+kontrastı, farklı pencere/DPI yerleşimleri, BOM ve cıvata ekranı.
+19 genel ekran, 7 BOM ve 3 cıvata ekranı yenilendi. Genel test paketi
+çalıştırılmadı. [Kontrol çıktısı](soft-ui-checks.log).
+
+K/R kontrollerinde alt COM nesnelerinin çıkış parametreleri düzeltildi;
+programın kendi konfigürasyon değişikliği önceden kaydedilmemiş düzenleme
+sayılmıyor. Windows/SolidWorks üzerinde kullanıcının montajı henüz
+doğrulanmadı. [K/R düzeltmesinin kapsamı](../manual-k-radius.md#13-ekim-2026-çağrı-ve-hata-görünürlüğü-düzeltmesi).
 
 [Türkçe metin denetimi ve doğrulama kayıtları](../reports/language-review/README.md).

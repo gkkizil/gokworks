@@ -24,17 +24,17 @@
   "screenshots": [
     {
       "file": "docs/reports/bolt/screenshots/combined-dark.png",
-      "sha256": "28a28e99518407d935d22379d4e70df3798be1051c90ac0f5adaec0269dcaaf3",
+      "sha256": "d7f98668b8f98a68d8c618e17d9e1d4479e8589c54e82278ba18c47873eeaae5",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/tension-light.png",
-      "sha256": "1bf1ecefa5b22ef79489cd8c449d664891da41fef544d762418a529165a170a0",
+      "sha256": "03b62b72d24d3ecf8e155af4c91864a3178be7b96c13c1b6586ad1452935a227",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/unsafe-dark-small.png",
-      "sha256": "2897a0c8c1e1d1334130352b5a1114e70529029aa47c2273a42f5c60052c8a27",
+      "sha256": "63cebdc1ef815b3784d17656de9d6a2b763e8511e5fdbe15e78d20ff02f272b2",
       "real_tk_capture": true
     }
   ],
@@ -58,5 +58,12 @@
     "change": "Explicit kg load / Newton / kN selection; unit-aware capacities, arrows and clipboard; hex nut detail.",
     "initial_failure": "Viewport assertion reused a scrolled panel; reset scroll before checking the next window size.",
     "full_suite_run": false
+  },
+  "soft_ui_revision": {
+    "date": "2026-10-13",
+    "change": "Shared muted palette, filled controls and rounded inputs.",
+    "native_captures_refreshed": 3,
+    "calculation_tests_rerun": false,
+    "layout_check": "test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram: ok"
   }
 }

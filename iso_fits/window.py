@@ -113,7 +113,7 @@ class IsoFitsView:
         nominal.grid_columnconfigure(0, weight=1)
         self._label(nominal, 'Nominal çap (mm)', 11, MUTED, True).grid(row=0, column=0, sticky='w', pady=(0, 6))
         entry = ctk.CTkEntry(nominal, textvariable=self.iso_state['diameter'], height=40,
-                             fg_color=PANEL, text_color=TEXT, border_color=BORDER,
+                             fg_color=INPUT, text_color=TEXT, border_color=BORDER,
                              font=(UI_FONT, 20, 'bold'), justify='center')
         entry.grid(row=1, column=0, sticky='ew')
         self.iso_widgets['diameter'] = entry
@@ -141,7 +141,7 @@ class IsoFitsView:
         search_frame.grid(row=4, column=0, sticky='ew', padx=16, pady=(8, 8))
         search_frame.grid_columnconfigure(1, weight=1)
         self._label(search_frame, 'Ara', 11, MUTED).grid(row=0, column=0, padx=(0, 6))
-        self.iso_widgets['search'] = ctk.CTkEntry(search_frame, textvariable=self.iso_search, height=36, fg_color=PANEL,
+        self.iso_widgets['search'] = ctk.CTkEntry(search_frame, textvariable=self.iso_search, height=36, fg_color=INPUT,
                                                 text_color=TEXT, border_color=BORDER, font=(UI_FONT, 11))
         self.iso_widgets['search'].grid(row=0, column=1, sticky='ew')
         presets = ctk.CTkScrollableFrame(form, fg_color='transparent', corner_radius=0,
@@ -262,7 +262,7 @@ class IsoFitsView:
                 key = role+'_'+side
                 self._label(panel, caption, 10, MUTED).grid(row=2+row*2, column=column, sticky='w', padx=6, pady=(10, 3))
                 entry = ctk.CTkEntry(panel, textvariable=self.iso_state[key], width=90, height=36,
-                    fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14), justify='center')
+                    fg_color=INPUT, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14), justify='center')
                 entry.grid(row=3+row*2, column=column, sticky='ew', padx=6)
                 self.iso_widgets[key] = entry
         self._label(panel, 'Sonuç birimi', 11, MUTED).grid(row=6, column=0, sticky='w', padx=6, pady=(14, 4))

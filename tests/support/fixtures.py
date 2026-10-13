@@ -17,4 +17,4 @@ class KApplyTestCase(unittest.TestCase):
         self.model=SheetPart()
         self.assembly=FakeAssembly('/work/main.sldasm',[FakeComponent(self.model.path) for _ in range(3)])
         self.app=FakeApp(self.model,previous=self.assembly)
-        self.com, _ = install_com(self, ap, 'kr')
+        self.com, self.client = install_com(self, ap, 'kr', dynamic=True)

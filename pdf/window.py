@@ -28,7 +28,8 @@ from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
-                       NAV_ACTIVE, NAV_ACCENT, NAV_MUTED, NAV_HOVER)
+                       NAV_ACTIVE, NAV_ACCENT, NAV_MUTED, NAV_HOVER,
+                       ACCENT_HOVER, configure_widget_theme)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
           "partial": "Kısmen tamamlandı", "skipped": "Atlandı", "error": "Hata"}
 FILTERS = {"Tüm durumlar": None, "Bekleyen": "pending", "İşleniyor": "running",
@@ -66,6 +67,7 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         appearance = saved.get("appearance", "light")
         ctk.set_appearance_mode(appearance if appearance in ("light", "dark") else "light")
         ctk.set_default_color_theme("dark-blue")
+        configure_widget_theme(ctk.ThemeManager.theme)
         if os.name != "nt":
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         super().__init__()
@@ -282,14 +284,16 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
                 border_width=0,
                 font=self._nav_fonts[active],
             )
-        def frame(step=1):
+        started = time.monotonic()
+        def frame():
             if self._closed:
                 return
-            fraction = 1-(1-step/7)**3
+            elapsed = min(1, (time.monotonic()-started)/.14)
+            fraction = 1-(1-elapsed)**3
             for button, start, end, target in transitions:
-                button.configure(fg_color=target if step == 7 else tuple(
+                button.configure(fg_color=target if elapsed == 1 else tuple(
                     blend(a, b, fraction) for a, b in zip(start, end)))
-            self._nav_anim_id = self.after(16, lambda: frame(step+1)) if step < 7 else None
+            self._nav_anim_id = self.after(16, frame) if elapsed < 1 else None
         self._nav_anim_id = self.after(0, frame)
 
     def _cancel_widget_callbacks(self, widget):
@@ -318,10 +322,10 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
 
     def _button(self, parent, text, command, primary=False, icon=None, **kwargs):
         return ctk.CTkButton(
-            parent, text=text, command=command, corner_radius=10, height=38,
-            border_width=0 if primary else 1, border_color=BORDER,
-            fg_color=ACCENT if primary else PANEL,
-            hover_color=("#12634F", "#70E7C7") if primary else HOVER,
+            parent, text=text, command=command, corner_radius=12, height=38,
+            border_width=0, border_color=BORDER,
+            fg_color=ACCENT if primary else SECONDARY,
+            hover_color=ACCENT_HOVER if primary else HOVER,
             text_color=("#FFFFFF", "#10231D") if primary else TEXT, text_color_disabled=MUTED,
             image=self._icon(icon, ("#FFFFFF", "#10231D") if primary else MUTED, 18) if icon else None,
             font=ctk.CTkFont(family=UI_FONT, size=12, weight="bold"), **kwargs)
@@ -916,6 +920,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         self.status_label.configure(text=text, text_color=color)
         self._append_log(text)
         self.report_button.configure(state="normal" if self.results else "disabled")
+        if self.mode == 'k_factor':
+            self._finish_k_feedback(summary)
         if self.close_pending:
             self._destroy_app()
         elif self.mode == 'k_factor':

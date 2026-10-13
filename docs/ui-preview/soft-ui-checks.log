@@ -1,0 +1,72 @@
+2026-10-13 — targeted checks; native Tk, simulated SolidWorks COM.
+The second invocation included a misspelled test class (BomGuiTests);
+that check was rerun with BomWindowTests in the third invocation.
+21 unique tests passed; no full-suite run.
+
+soft-ui-checks.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_callable_custom_allowance_return_is_not_invoked_as_default_member (test_kr_dispatch.NativeDispatchApplyTests.test_callable_custom_allowance_return_is_not_invoked_as_default_member) ... ok
+test_callable_feature_definition_return_is_not_invoked_as_default_member (test_kr_dispatch.NativeDispatchApplyTests.test_callable_feature_definition_return_is_not_invoked_as_default_member) ... ok
+test_inactive_allowance_getters_and_setters_are_not_used (test_kr_dispatch.NativeDispatchApplyTests.test_inactive_allowance_getters_and_setters_are_not_used) ... ok
+test_manual_assignment_can_replace_bend_allowance_mode (test_kr_dispatch.NativeDispatchApplyTests.test_manual_assignment_can_replace_bend_allowance_mode) ... ok
+test_nested_document_save_uses_explicit_error_and_warning_outputs (test_kr_dispatch.NativeDispatchApplyTests.test_nested_document_save_uses_explicit_error_and_warning_outputs) ... ok
+test_our_configuration_switch_is_not_mistaken_for_preexisting_edits (test_kr_dispatch.NativeDispatchApplyTests.test_our_configuration_switch_is_not_mistaken_for_preexisting_edits) ... ok
+test_required_getter_failure_names_member_and_stage_without_writing (test_kr_dispatch.NativeDispatchApplyTests.test_required_getter_failure_names_member_and_stage_without_writing) ... ok
+test_rollback_restores_original_active_allowance_mode (test_kr_dispatch.NativeDispatchApplyTests.test_rollback_restores_original_active_allowance_mode) ... ok
+test_type_aware_child_override_outputs_keep_true_and_false_distinct (test_kr_dispatch.NativeDispatchApplyTests.test_type_aware_child_override_outputs_keep_true_and_false_distinct) ... ok
+test_type_aware_nested_definition_does_not_break_gauge_outputs (test_kr_dispatch.NativeDispatchApplyTests.test_type_aware_nested_definition_does_not_break_gauge_outputs) ... ok
+test_wrong_thickness_never_reads_allowance_api (test_kr_dispatch.NativeDispatchApplyTests.test_wrong_thickness_never_reads_allowance_api) ... ok
+test_separate_parent_and_inherited_child_conversion_are_verified (test_parent_k_radius.ParentApplyTests.test_separate_parent_and_inherited_child_conversion_are_verified) ... ok
+test_explicit_save_and_existing_dirty_document_protection (test_k_factor.ApplyTests.test_explicit_save_and_existing_dirty_document_protection) ... ok
+test_readable_theme_contrast_and_green_primary_buttons (test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_green_primary_buttons) ... ok
+test_rapid_menu_clicks_leave_only_final_page_highlighted (test_gui_flow.GUIFlowTests.test_rapid_menu_clicks_leave_only_final_page_highlighted) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 1.721s
+
+OK
+
+
+soft-ui-layout.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_invalid_manual_inputs_block_scan_and_apply (test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply) ... ok
+test_failed_assignment_exposes_complete_reason_and_copies_log (test_manual_k_radius.ManualGuiTests.test_failed_assignment_exposes_complete_reason_and_copies_log) ... ok
+test_real_preview_apply_and_csv_report_from_gui (test_manual_k_radius.ManualGuiTests.test_real_preview_apply_and_csv_report_from_gui) ... ok
+test_all_pages_results_tabs_and_resolution_scale_matrix (test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix) ... ok
+BomGuiTests (unittest.loader._FailedTest.BomGuiTests) ... ERROR
+
+======================================================================
+ERROR: BomGuiTests (unittest.loader._FailedTest.BomGuiTests)
+----------------------------------------------------------------------
+AttributeError: module 'test_bom_window' has no attribute 'BomGuiTests'
+
+----------------------------------------------------------------------
+Ran 5 tests in 12.090s
+
+FAILED (errors=1)
+
+
+soft-ui-extra-layout.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_page_cache_themes_small_window_and_scaling_keep_controls_visible (test_bom_window.BomWindowTests.test_page_cache_themes_small_window_and_scaling_keep_controls_visible) ... ok
+test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 4.943s
+
+OK

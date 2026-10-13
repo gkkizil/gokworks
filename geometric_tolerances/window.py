@@ -69,7 +69,7 @@ class GeometricTolerancesView:
         search_row.grid_columnconfigure(1, weight=1)
         self._label(search_row, 'Ara', 11, MUTED).grid(row=0, column=0, padx=(0, 6))
         search = ctk.CTkEntry(search_row, textvariable=self.gdt_search, height=36,
-                              fg_color=PANEL, text_color=TEXT, border_color=BORDER,
+                              fg_color=INPUT, text_color=TEXT, border_color=BORDER,
                               placeholder_text='Tür veya kullanım ara', font=(UI_FONT, 12))
         search.grid(row=0, column=1, sticky='ew')
         self.gdt_widgets['search'] = search
@@ -112,7 +112,7 @@ class GeometricTolerancesView:
                                        ('tolerance', 'Toplam tolerans t (mm)', 0, 1)]:
             self._label(inputs, label, 10, MUTED, True, wraplength=170, justify='left', anchor='w').grid(row=row, column=column, sticky='ew', padx=14, pady=(12, 5))
             entry = ctk.CTkEntry(inputs, textvariable=self.gdt_state[key], height=36,
-                                 fg_color=PANEL, text_color=TEXT, border_color=BORDER,
+                                 fg_color=INPUT, text_color=TEXT, border_color=BORDER,
                                  font=(UI_FONT, 14), placeholder_text='İsteğe bağlı' if key == 'measured' else '')
             entry.grid(row=row+1, column=column, sticky='ew', padx=14, pady=(0, 4))
             self.gdt_widgets[key] = entry
@@ -153,7 +153,7 @@ class GeometricTolerancesView:
                 self.gdt_widgets['size_rule'] = rule
                 self._label(rule, 'İlgili boyut toleransı (mm, isteğe bağlı)', 11, MUTED, wraplength=240, justify='left').grid(row=0, column=0, sticky='w')
                 size_entry = ctk.CTkEntry(rule, textvariable=self.gdt_state['size_tolerance'], height=36,
-                    fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
+                    fg_color=INPUT, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
                 size_entry.grid(row=1, column=0, sticky='ew', pady=(5, 6))
                 self.gdt_widgets['size_tolerance'] = size_entry
                 self.gdt_widgets['size_rule_help'] = self._label(rule,
@@ -162,7 +162,7 @@ class GeometricTolerancesView:
                 self.gdt_widgets['size_rule_help'].grid(row=2, column=0, sticky='ew')
                 self._label(card, 'Ölçülmüş toplam geometrik hata (mm)', 11, MUTED).grid(row=2, column=0, sticky='w', padx=14)
                 entry = ctk.CTkEntry(card, textvariable=self.gdt_state['measured'], height=36,
-                    fg_color=PANEL, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
+                    fg_color=INPUT, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
                 entry.grid(row=3, column=0, sticky='ew', padx=14, pady=(5, 10))
                 self.gdt_widgets['measured'] = entry
                 self.gdt_widgets['measured_help'] = self._label(card, '', 11, MUTED, wraplength=400, anchor='w', justify='left')

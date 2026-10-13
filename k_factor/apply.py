@@ -40,6 +40,15 @@ def _call(obj, member, *args):
         raise RuntimeError(f"SolidWorks API · {member}: {error}") from error
 
 
+def _call_byref(obj, member, *args):
+    # DumbDispatch on SldWorks does not propagate to returned definitions or
+    # documents. Type-aware child wrappers infer their own output arguments
+    # and return tuples instead of updating our explicit VARIANTs.
+    if hasattr(obj, "_oleobj_"):
+        obj = win32com.client.dynamic.DumbDispatch(obj)
+    return _call(obj, member, *args)
+
+
 def _out(kind):
     return win32com.client.VARIANT(pythoncom.VT_BYREF | kind, 0 if kind == pythoncom.VT_I4 else False if kind == pythoncom.VT_BOOL else "")
 
@@ -146,7 +155,7 @@ def _sheet_overrides(definition):
     values = []
     for parameter, label in ((0, "kalınlık/yarıçap"), (1, "büküm payı/K")):
         overridden = _out(pythoncom.VT_BOOL)
-        error = _call(definition, "GetOverrideDefaultParameter2", parameter, overridden)
+        error = _call_byref(definition, "GetOverrideDefaultParameter2", parameter, overridden)
         if error != 0:
             raise RuntimeError(f"{label} özel ayar durumu okunamadı; API hata kodu: {error}")
         values.append(bool(overridden.value))
@@ -298,7 +307,7 @@ def _check_sheet_defaults(definition):
     if bool(_read(definition, "UseMaterialSheetMetalParameters")):
         raise RuntimeError("Sac parametreleri malzemeye bağlı; önce SolidWorks'te bu bağı kaldırın.")
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
-    error = _call(definition, "GetUseGaugeTable", used, filename)
+    error = _call_byref(definition, "GetUseGaugeTable", used, filename)
     if error != 0:
         raise RuntimeError(f"Sac kalınlık tablosu durumu okunamadı; API hata kodu: {error}")
     if used.value:
@@ -409,6 +418,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         stage = "Parça belgesi ve etkinleştirme"
         if _value(model, "GetType") != 1 or _key(_value(model, "GetPathName"), "") != _key(path, ""):
             raise RuntimeError("SolidWorks istenen parça yerine farklı belge döndürdü.")
+        # Activation/configuration changes can themselves set the save flag.
+        # Protect edits that existed before this operation, not our own switch.
+        preexisting_changes = bool(_read(model, "GetSaveFlag")) if save and not preview else False
         original_config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
         if not _value(model, "Visible"):
             model.Visible = True
@@ -446,7 +458,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         stage = "Katıyı Saca Dönüştür parametre kontrolü"
         converted_names = _check_converted_values(model, before)
         if not preview:
-            if save and _read(model, "GetSaveFlag"):
+            if preexisting_changes:
                 raise RuntimeError("Parçada önceden kaydedilmemiş değişiklik var; önce SolidWorks'te kaydedin veya dosyaları kaydet seçeneğini kapatın.")
             stage = "Konfigürasyonların yedeğini alma"
             snapshots = _capture(model)
@@ -484,7 +496,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
             if save:
                 stage = "Parça dosyasını kaydetme"
                 errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
-                if not model.Save3(1, errors, warnings) or errors.value:
+                if not _call_byref(model, "Save3", 1, errors, warnings) or errors.value:
                     raise RuntimeError(f"Parça kaydedilemedi; hata kodu: {errors.value}. Dosyanın durumunu SolidWorks'te kontrol edin.")
                 notes.append("Parça dosyası kaydedildi.")
                 if warnings.value:

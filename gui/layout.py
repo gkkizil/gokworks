@@ -105,7 +105,7 @@ class WorkspaceLayout:
             active = key == self.mode
             button = ctk.CTkButton(
                 navigation, text=title, image=self._icon(icon, NAV_ACCENT if active else NAV_MUTED),
-                height=44, corner_radius=10, anchor="w", border_color=NAV_ACTIVE,
+                height=44, corner_radius=12, anchor="w", border_color=NAV_ACTIVE,
                 border_width=0,
                 fg_color=NAV_ACTIVE if active else "transparent", hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED, text_color_disabled=NAV_MUTED,
@@ -236,8 +236,8 @@ class WorkspaceLayout:
         self._label(heading, f'0{column+1}', 11, ACCENT, True, width=28, height=28,
                     fg_color=ACCENT_BG, corner_radius=8).pack(side='left', padx=(0, 9))
         self._label(heading, label, 13, bold=True).pack(side='left')
-        entry = ctk.CTkEntry(frame, textvariable=variable, height=38, corner_radius=7,
-                             border_width=1, border_color=BORDER, fg_color=PANEL,
+        entry = ctk.CTkEntry(frame, textvariable=variable, height=38, corner_radius=10,
+                             border_width=1, border_color=BORDER, fg_color=INPUT,
                              text_color=TEXT, font=(UI_FONT, 12))
         entry.grid(row=1, column=0, sticky="ew", padx=(0, 6))
         browse = self._button(frame, "Göz at", lambda: self._choose_folder(variable, label),

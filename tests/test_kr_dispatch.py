@@ -74,6 +74,64 @@ class NativeDispatchApplyTests(KApplyTestCase):
         return ap.process_part(self.app, self.model.path, 'Default',
                                ManualAssignment(2, .274, 2), **kwargs)
 
+    def test_type_aware_nested_definition_does_not_break_gauge_outputs(self):
+        class TypedDefinition(NativeDefinition):
+            def GetUseGaugeTable(self, *args):
+                # InvokeTypes returns the retval together with output values.
+                return (0, self.feature.model.gauge, '')
+        self.model.feature.GetDefinition = lambda: TypedDefinition(self.model.feature)
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: Definition(obj.feature)
+        status, detail, _ = self.manual()
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+        self.model.gauge = True
+        writes = self.model.feature.modify_count
+        status, detail, _ = self.manual()
+        self.assertEqual(status, 'error')
+        self.assertIn('tablo bağını kaldırın', detail)
+        self.assertEqual(self.model.feature.modify_count, writes)
+
+    def test_type_aware_child_override_outputs_keep_true_and_false_distinct(self):
+        typed = SimpleNamespace(_oleobj_=object(),
+                                GetOverrideDefaultParameter2=lambda *args: (0, False))
+        def read_override(parameter, output):
+            output.value = parameter == 1
+            return 0
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: SimpleNamespace(
+            GetOverrideDefaultParameter2=read_override)
+        self.assertEqual(ap._sheet_overrides(typed), (False, True))
+
+    def test_nested_document_save_uses_explicit_error_and_warning_outputs(self):
+        self.model._oleobj_ = object()
+        save = self.model.Save3
+        self.model.Save3 = lambda *args: (True, 0, 0)
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: SimpleNamespace(Save3=save)
+        status, detail, _ = self.manual(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.save_count, 1)
+        self.model.save_fail = True
+        status, detail, _ = self.manual(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('kaydedilemedi', detail)
+
+    def test_our_configuration_switch_is_not_mistaken_for_preexisting_edits(self):
+        self.model.states['Other'] = deepcopy(self.model.states['Default'])
+        self.model.ShowConfiguration2('Other')
+        original_switch = self.model.ShowConfiguration2
+        def switch(name):
+            self.model.dirty = True
+            return original_switch(name)
+        self.model.ShowConfiguration2 = switch
+        status, detail, _ = self.manual(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.save_count, 1)
+        self.assertEqual(self.model.config, 'Other')
+        # A subsequent call must still protect edits already present at entry.
+        status, detail, _ = self.manual(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('önceden kaydedilmemiş', detail)
+        self.assertEqual(self.model.save_count, 1)
+
     def test_callable_custom_allowance_return_is_not_invoked_as_default_member(self):
         self.model.feature.GetDefinition = lambda: NativeDefinition(self.model.feature)
         status, detail, _ = self.manual()

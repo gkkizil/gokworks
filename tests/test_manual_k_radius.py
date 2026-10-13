@@ -151,9 +151,35 @@ class ManualGuiTests(GuiTestCase):
             with self.subTest(key=key,value=value):
                 self.app.k_state['manual_k'].set('.274');self.app.k_state['manual_r'].set('2')
                 self.app.k_state['manual_thickness'].set('2');self.app.k_state[key].set(value)
+                self.app._select_k_view('Montaj sonuçları')
                 with patch('k_factor.window.update_assembly') as worker:
                     self.app.scan_button.invoke();self.app.start_button.invoke()
                 worker.assert_not_called();self.assertFalse(self.app.busy)
+                self.app.update()
+                self.assertTrue(self.app.form_panel.winfo_viewable())
+                self.assertIn('K/R başlatılmadı', self.app.status_label.cget('text'))
+
+    def test_failed_assignment_exposes_complete_reason_and_copies_log(self):
+        self.select_manual()
+        model = SheetPart()
+        model.gauge = True
+        assembly = FakeAssembly('/work/main.sldasm', [FakeComponent(model.path)])
+        with solidworks_session(ap, FakeMultiPartApp((model,), assembly), 'kr'):
+            self.app.start_button.invoke()
+            self.wait_idle()
+        self.assertEqual(self.app.results[0]['status'], 'error')
+        self.assertEqual(model.feature.modify_count, 0)
+        self.assertEqual(self.app.result_tabs.get(), 'Günlük')
+        self.assertTrue(self.app.k_widgets['copy_log'].winfo_viewable())
+        self.app.k_widgets['copy_log'].invoke()
+        log = self.app.clipboard_get()
+        self.assertIn('tablo bağını kaldırın', log)
+        self.assertIn('sheet.sldprt', log)
+        self.assertIn('K=0.274', log)
+        # Return to the entered values directly from the results view.
+        self.app.open_button.invoke()
+        self.app.update()
+        self.assertTrue(self.app.form_panel.winfo_viewable())
 
     def test_real_preview_apply_and_csv_report_from_gui(self):
         self.select_manual()

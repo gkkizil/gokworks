@@ -6,7 +6,7 @@ import tkinter as tk
 import customtkinter as ctk
 from gui.rendering import configure_changed, hide_grid
 
-from gui.theme import PANEL, BORDER, TEXT, MUTED, RED, AMBER, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
+from gui.theme import PANEL, INPUT, BORDER, TEXT, MUTED, RED, AMBER, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
 from k_factor.apply import update_assembly
 from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, calculate,
                             number, ba_from_outside_dimensions)
@@ -29,9 +29,9 @@ class KFactorView:
         self.k_widgets['work_view'] = view
         selector = ctk.CTkSegmentedButton(self.workspace, variable=view,
             values=[AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB], command=self._select_k_view,
-            height=48, dynamic_resizing=False, fg_color=SECONDARY, selected_color=ACCENT_BG,
+            height=42, dynamic_resizing=False, fg_color=SECONDARY, selected_color=PANEL,
             selected_hover_color=HOVER, unselected_color=SECONDARY,
-            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 14, 'bold'))
+            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 13, 'bold'))
         selector.grid(row=2, column=0, sticky='ew', padx=24, pady=(0, 8))
         self.k_widgets['assignment_tabs'] = selector
         self.controls.append(selector)
@@ -50,6 +50,10 @@ class KFactorView:
         self._build_results(parent=body)
         self.result_tabs.master.grid(row=0, column=0, sticky='nsew', padx=0)
         self.result_tabs.master.grid_propagate(False)
+        copy = self._button(self.results_header, 'Günlüğü kopyala', self._copy_k_log,
+                            icon='copy', width=140, state='disabled')
+        copy.grid(row=0, column=2, padx=(8, 0))
+        self.k_widgets['copy_log'] = copy
         self._build_k_actions(self.workspace)
         self.status_label = self._label(self.workspace, 'Hazır · SolidWorks’te ana montajı etkinleştirin.',
                                         12, MUTED, anchor='w')
@@ -200,7 +204,27 @@ class KFactorView:
         width = self.k_widgets['body'].winfo_width()/self.workspace._get_widget_scaling()
         for key in ('automatic_summary', 'manual_summary'):
             configure_changed(self.k_widgets[key], wraplength=max(240, width-(112 if key == 'manual_summary' else 80)))
+        configure_changed(self.status_label, wraplength=max(240, width), justify='left')
         self._fit_results_toolbar(width)
+
+    def _copy_k_log(self):
+        text = self.log_box.get('1.0', 'end').strip()
+        if text:
+            self.clipboard_clear()
+            self.clipboard_append('GOKWORKS · K/R işlem günlüğü\n'+text)
+            self.k_widgets['copy_log'].configure(text='Kopyalandı')
+
+    def _finish_k_feedback(self, summary):
+        self.k_widgets['copy_log'].configure(state='normal', text='Günlüğü kopyala')
+        if summary['state'] == 'error' or summary.get('failed'):
+            # Per-part failures finish the batch normally. Still expose their
+            # full reasons instead of leaving them clipped in the table.
+            self.result_tabs.set('Günlük')
+        self._resize_pdf_area()
+
+    def _show_k_calculation(self):
+        self._select_k_view(self.k_state['assignment_mode'].get())
+        self.settings_body._parent_canvas.yview_moveto(1)
 
     def _build_k_actions(self, parent):
         # Keep montage scanning and save choice outside the scrollable form.
@@ -209,7 +233,7 @@ class KFactorView:
         self.scan_button = self._button(actions, "Montajı tara", self._scan_k_assembly,
                                          icon="search", width=166)
         self.scan_button.grid(row=0, column=0, sticky="ew", padx=(0, 6))
-        self.open_button = self._button(actions, "Hesapla ve kontrol et", self._preview_k_calculation, width=172)
+        self.open_button = self._button(actions, "Hesapla ve kontrol et", self._show_k_calculation, width=172)
         self.open_button.grid(row=0, column=1, sticky="ew")
         save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
         save.grid(row=0, column=2, sticky="w", padx=(20, 0))
@@ -230,13 +254,13 @@ class KFactorView:
         elif values:
             field = ctk.CTkComboBox(
                 holder, variable=self.k_state[key], values=values, height=42,
-                fg_color=PANEL, border_color=BORDER, button_color=SECONDARY,
+                fg_color=INPUT, border_color=BORDER, button_color=SECONDARY,
                 button_hover_color=HOVER, dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
                 text_color=TEXT, dropdown_text_color=TEXT, font=(UI_FONT, 14),
                 dropdown_font=(UI_FONT, 13))
         else:
             field = ctk.CTkEntry(holder, textvariable=self.k_state[key], height=42,
-                                fg_color=PANEL, border_color=BORDER, text_color=TEXT,
+                                fg_color=INPUT, border_color=BORDER, text_color=TEXT,
                                 font=(UI_FONT, 14))
         field.grid(row=1, column=0, sticky="ew")
         self.k_widgets[key] = field
@@ -331,6 +355,9 @@ class KFactorView:
         expected_scope = None
         if request is None:
             if self._preview_k_calculation() is None:
+                message = self.k_calculation_label.cget('text')
+                self._select_k_view(self.k_state['assignment_mode'].get())
+                self.status_label.configure(text=f'K/R başlatılmadı · {message}', text_color=RED)
                 return
             _, recipe = self._k_recipe()
             save = self.k_state['save'].get() and not preview
@@ -339,6 +366,7 @@ class KFactorView:
         self._save_preferences()
         self.k_widgets['operation_preview'] = preview
         self._reset()
+        self.k_widgets['copy_log'].configure(state='disabled', text='Günlüğü kopyala')
         self.k_widgets['success_caption'].configure(text='Hazır' if preview else 'Uygulanan')
         self.filter_menu.configure(values=['Tüm durumlar', 'Bekleyen', 'İşleniyor',
                                           'Uygulamaya hazır' if preview else 'Uygulandı',
@@ -349,6 +377,12 @@ class KFactorView:
                      if preview else 'K/R ataması başladı. Değerler parçalara yazılacak ve geri okunarak kontrol edilecek.')
         self.status_label.configure(text=operation, text_color=MUTED)
         self._append_log(operation)
+        if isinstance(recipe, ManualAssignment):
+            description = (f'Manuel · t={number(recipe.thickness_mm, "Kalınlık"):g} mm · '
+                           f'K={number(recipe.k_factor, "K", zero=True):g} · R={number(recipe.radius_mm, "R"):g} mm')
+        else:
+            description = f'Malzeme / takım · {self.k_state["material"].get()}'
+        self._append_log(description + (' · Dosyalar kaydedilecek.' if save else ' · Dosyalar kaydedilmeyecek.'))
         threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),
                          kwargs=dict(preview=preview, save=save, expected_scope=expected_scope),
                          daemon=False).start()
