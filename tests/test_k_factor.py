@@ -241,6 +241,46 @@ class ApplyTests(KApplyTestCase):
         self.assertEqual(len(results),1)
         self.assertEqual(results[0]['quantity'],4)
 
+    def test_queued_scope_rejects_changed_assembly_configuration_and_references(self):
+        scope = self.batch(preview=True)[-1][1]['scope']
+        original_path = self.assembly.path
+        original_config = self.assembly.ConfigurationManager.ActiveConfiguration.Name
+        original_children = self.assembly.root.children
+        for change in ('assembly', 'configuration', 'quantity', 'part_configuration', 'part_file'):
+            with self.subTest(change=change):
+                self.assembly.path = original_path
+                self.assembly.ConfigurationManager.ActiveConfiguration.Name = original_config
+                self.assembly.root.children = original_children
+                if change == 'assembly':
+                    self.assembly.path = '/work/other.sldasm'
+                elif change == 'configuration':
+                    self.assembly.ConfigurationManager.ActiveConfiguration.Name = 'Other'
+                elif change == 'quantity':
+                    self.assembly.root.children = original_children[:1]
+                elif change == 'part_configuration':
+                    self.assembly.root.children = [FakeComponent(self.model.path, 'Other')]
+                else:
+                    self.assembly.root.children = [FakeComponent('/work/other.sldprt')] * 3
+                messages = self.batch(expected_scope=scope, save=True)
+                self.assertEqual(messages[-1][1]['state'], 'error')
+                self.assertIn('K/R uygulanmadı', messages[-1][1]['error'])
+                self.assertEqual(messages[-1][1]['processed'], 0)
+                self.assertEqual(self.model.feature.modify_count, 0)
+                self.assertEqual(self.model.save_count, 0)
+
+    def test_queued_scope_accepts_same_references_in_different_tree_order(self):
+        self.model.states['Other'] = deepcopy(self.model.states['Default'])
+        self.assembly.root.children = [FakeComponent(self.model.path),
+                                     FakeComponent(self.model.path, 'Other')]
+        preview = self.batch(preview=True)[-1][1]
+        self.assertEqual(preview['succeeded'], 2)
+        self.assembly.root.children.reverse()
+        messages = self.batch(expected_scope=preview['scope'])
+        self.assertEqual(messages[-1][1]['state'], 'completed')
+        self.assertEqual(messages[-1][1]['succeeded'], 2)
+        self.assertEqual(self.model.feature.modify_count, 2)
+        self.assertEqual(self.model.config, 'Default')
+
     def test_newly_opened_preview_closes_but_unsaved_apply_stays_open(self):
         self.app.existing=False
         def open_part(path, kind, options, configuration, errors, warnings):
@@ -458,7 +498,7 @@ class KGuiTests(GuiTestCase):
     def test_apply_requested_during_scan_is_preserved_and_stop_cancels_it(self):
         self.app._switch_mode('k_factor')
         real_worker = ap.update_assembly
-        for outcome in ('apply', 'stop', 'scan_error'):
+        for outcome in ('apply', 'stop', 'scan_error', 'changed_assembly'):
             with self.subTest(outcome=outcome):
                 release = Event()
                 calls = []
@@ -471,6 +511,9 @@ class KGuiTests(GuiTestCase):
                     calls.append(kwargs['preview'])
                     if kwargs['preview']:
                         release.wait(3)
+                    if not kwargs['preview'] and outcome == 'changed_assembly':
+                        app.ActiveDoc = app.previous = FakeAssembly('/work/other.sldasm',
+                                                                   [FakeComponent(model.path)])
                     real_worker(*args, **kwargs)
 
                 with solidworks_session(ap, app, 'kr'), patch('k_factor.window.update_assembly',side_effect=gated_worker):
@@ -492,6 +535,11 @@ class KGuiTests(GuiTestCase):
                     self.assertEqual(calls,[True])
                     self.assertEqual(model.feature.modify_count,0)
                     self.assertIn('K/R uygulanmadı',self.app.status_label.cget('text'))
+                elif outcome == 'changed_assembly':
+                    self.assertEqual(calls, [True, False])
+                    self.assertEqual(model.feature.modify_count, 0)
+                    self.assertIn('Kontrolden sonra montaj', self.app.status_label.cget('text'))
+                    self.assertEqual(self.app.results, [])
                 else:
                     self.assertEqual(calls,[True,False])
                     self.assertEqual(len(self.app.results),1)

@@ -647,6 +647,21 @@ class ExportTests(unittest.TestCase):
         for kind in ('dxf', 'dwg'):
             self.assertTrue((self.output/f'part - 1.25 mm - 3 adet.{kind}').is_file())
 
+    def test_other_assembly_configurations_are_reported_in_results_and_summary(self):
+        self.assembly.root.children = ([FakeComponent(self.part)] * 3
+                                      + [FakeComponent(self.part, 'İnce')] * 2)
+        messages = self.run_batch()
+        result = next(value for kind, value in messages if kind == 'result')
+        self.assertEqual(result['status'], 'success', result['detail'])
+        self.assertEqual(result['quantity'], 3)
+        self.assertEqual(result['configuration'], 'Default')
+        self.assertEqual(result['unexported_configurations'], [('İnce', 2)])
+        self.assertIn('İnce (2 adet)', result['detail'])
+        self.assertEqual(messages[-1][1]['unexported_configurations'], 1)
+        self.assertTrue(messages[-1][1]['warnings'])
+        self.assertTrue((self.output/'part - 2 mm - 3 adet.dxf').is_file())
+        self.assertEqual(len(self.model.calls), 1)
+
     def test_parts_outside_active_assembly_skip_without_opening(self):
         self.assembly.root.children = []
         self.app.existing = False

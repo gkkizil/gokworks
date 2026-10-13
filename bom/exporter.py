@@ -200,6 +200,7 @@ def export_excel(result, destination, stop_event=None):
             ws.append(values)
         # Names and paths are user-controlled strings, never Excel formulas.
         for row in ws:
+            _check_cancel(stop_event)
             for cell in row:
                 if isinstance(cell.value, str):
                     cell.data_type = 's'
@@ -246,6 +247,7 @@ def export_excel(result, destination, stop_event=None):
 def scan_worker(events, stop_event, *, include_excluded=False):
     initialized = False
     try:
+        _check_cancel(stop_event)
         if pythoncom is None or win32com is None:
             raise RuntimeError('Montaj taraması Windows, pywin32 ve açık SolidWorks oturumu gerektirir.')
         pythoncom.CoInitialize()

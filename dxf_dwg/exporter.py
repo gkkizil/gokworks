@@ -454,7 +454,8 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                  events, stop_event=None, formats=("dxf",), bend_lines=False):
     """Dosya bazında olaylar gönder; sayaçlar çıktı biçimlerini değil parçaları sayar."""
     summary = {"state": "completed", "total": 0, "processed": 0,
-               "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": []}
+               "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": [],
+               "unexported_configurations": 0}
     initialized = False
     try:
         formats = normalize_formats(formats)
@@ -483,8 +484,12 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
         if hasattr(app, "_oleobj_"):
             app = win32com.client.dynamic.DumbDispatch(app)
         events.put(("phase", "Aktif montajdaki toplam adetler hesaplanıyor…"))
-        quantities, assembly_name, assembly_config = assembly_quantities(app, stop_event)
+        references = {}
+        quantities, assembly_name, assembly_config = assembly_quantities(app, stop_event, references=references)
         assembly_paths = {path for path, config in quantities}
+        configurations = {}
+        for key in sorted(quantities):
+            configurations.setdefault(key[0], []).append((key, references[key][1]))
         events.put(("log", f"Adet kaynağı: {assembly_name} · Konfigürasyon: {assembly_config} · Alt montajlar dahil."))
         events.put(("log", "Dosya adı: PARÇAADI - kalınlık mm - toplam adet. Aynı parça/konfigürasyon sayılır; bastırılmış bileşenler sayılmaz."))
         for index, part in enumerate(parts, 1):
@@ -498,7 +503,10 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                 if not quantity:
                     raise ValueError(f"Parçanın '{configuration}' konfigürasyonu aktif montajda bulunamadı. Montajdaki konfigürasyonu parçada etkinleştirin.")
                 thickness = sheet_thickness_mm(model)
-                metadata.update(thickness_mm=thickness, quantity=quantity)
+                others = [(name, quantities[key]) for key, name in configurations[_part_key(part, "")[0]]
+                          if key != _part_key(part, configuration)]
+                metadata.update(thickness_mm=thickness, quantity=quantity, configuration=configuration,
+                                unexported_configurations=others)
                 return named_destinations(part, source, output, formats, thickness, quantity)
 
             if _part_key(part, "")[0] not in assembly_paths:
@@ -507,6 +515,12 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                 status, detail = export_one_part(app, part, targets, overwrite_existing, bend_lines,
                                                 target_builder=build_targets, output_paths=targets,
                                                 output_results=outputs)
+            others = metadata.get('unexported_configurations', ())
+            if others:
+                summary['unexported_configurations'] += len(others)
+                detail += ('; Aktarılmayan montaj konfigürasyonları: '
+                           + ', '.join(f'{name} ({quantity} adet)' for name, quantity in others)
+                           + '. Bu işlem yalnız parçanın etkin konfigürasyonunu aktarır.')
             summary[{"success": "succeeded", "partial": "partial", "skipped": "skipped", "error": "failed"}[status]] += 1
             summary["processed"] = index
             available = [item['path'] for item in outputs if item['status'] in ('success', 'skipped')]
@@ -514,6 +528,10 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                                     "status": status, "detail": detail, **metadata}))
             events.put(("counts", dict(summary)))
             events.put(("progress", (index, len(parts))))
+        if summary['unexported_configurations']:
+            summary['warnings'].append(
+                f"Montajdaki {summary['unexported_configurations']} parça konfigürasyonu bu aktarımda "
+                "dışarıda kaldı; ayrıntılar sonuç listesinde.")
     except CountCancelled:
         summary["state"] = "cancelled"
     except Exception as error:

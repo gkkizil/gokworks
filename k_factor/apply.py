@@ -541,7 +541,8 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
     return status, "; ".join(notes), calculation
 
 
-def update_assembly(recipe, events, stop_event=None, *, preview=False, save=False):
+def update_assembly(recipe, events, stop_event=None, *, preview=False, save=False,
+                    expected_scope=None):
     """Alt montajlar dahil, her dosya+konfigürasyona bir kez uygula."""
     summary = dict(state="completed", total=0, processed=0, succeeded=0,
                    skipped=0, failed=0, error="", preview=bool(preview))
@@ -562,6 +563,15 @@ def update_assembly(recipe, events, stop_event=None, *, preview=False, save=Fals
         references = {}
         counts, assembly_name, assembly_configuration = sw.assembly_quantities(
             app, stop_event, references=references)
+        # A queued apply must still target the assembly/configuration and
+        # physical part references that were checked by its preview worker.
+        # Keep only immutable values; COM objects cannot cross worker threads.
+        scope = (_key(assembly_name, assembly_configuration), tuple(sorted(counts.items())))
+        if expected_scope is not None and scope != expected_scope:
+            raise RuntimeError(
+                "Kontrolden sonra montaj, konfigürasyon veya parça listesi değişti. "
+                "K/R uygulanmadı. Doğru montajı etkinleştirip yeniden tarayın.")
+        summary['scope'] = scope
         # Comparison keys may change Unicode characters (İ -> i + dot).
         # They are suitable for counting, never for opening a physical file.
         records = [(references[key], quantity) for key, quantity in sorted(counts.items())]

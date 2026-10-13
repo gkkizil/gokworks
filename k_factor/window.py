@@ -318,9 +318,10 @@ class KFactorView:
         request = self.k_widgets.pop('pending_apply', None)
         if request is None:
             return
-        if (summary['state'] == 'completed' and summary['succeeded']
+        if (summary['state'] == 'completed' and summary.get('preview') is True
+                and summary.get('scope') is not None and summary['succeeded']
                 and not summary['failed'] and not self.stop_event.is_set()):
-            self._run_k_worker(preview=False, request=request)
+            self._run_k_worker(preview=False, request=(*request, summary['scope']))
         else:
             text = 'Bekleyen K/R ataması başlatılmadı: kontrolde hata oluştu, işlem durduruldu veya uygun parça bulunamadı. K/R uygulanmadı.'
             self.status_label.configure(text=text, text_color=AMBER)
@@ -329,13 +330,14 @@ class KFactorView:
     def _run_k_worker(self, *, preview, request=None):
         if self.busy:
             return
+        expected_scope = None
         if request is None:
             if self._preview_k_calculation() is None:
                 return
             _, recipe = self._k_recipe()
             save = self.k_state['save'].get() and not preview
         else:
-            recipe, save = request
+            recipe, save, expected_scope = request
         self._save_preferences()
         self.k_widgets['operation_preview'] = preview
         self._reset()
@@ -350,4 +352,5 @@ class KFactorView:
         self.status_label.configure(text=operation, text_color=MUTED)
         self._append_log(operation)
         threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),
-                         kwargs=dict(preview=preview, save=save), daemon=False).start()
+                         kwargs=dict(preview=preview, save=save, expected_scope=expected_scope),
+                         daemon=False).start()

@@ -70,6 +70,8 @@ Yeni sekme etkin: malzeme ailesi, üst bıçak uç R/açı ve alt kalıp V/açı
 
 **Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir. Seçilen malzeme bütün saclar için varsayılır; CAD malzemesi değişmez.
 
+Tarama sürerken sıraya alınan K/R uygulaması, kontroldeki montajı, ana konfigürasyonu ve dosya/konfigürasyon adetlerini yeniden karşılaştırır. Bunlar değişmişse hiçbir parçaya yazmadan durur ve yeniden tarama ister.
+
 Genel tablo ve yaklaşık R hesabı üretim kalibrasyonu değildir. Bu sürüm havada büküm içindir; gauge/malzeme tablosuna bağlı veya özel büküm override'ı olan parçalar açıklamalı hata alır. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
 
 ## Geometrik toleranslar / GD&T
@@ -103,6 +105,8 @@ Sayaçlar parçaları sayar. Sonuç ve CSV çıktı yolunda yalnız kaydedilmiş
 Mevcut çıktılar varsayılan olarak atlanır. **Mevcut çıktıların üzerine yaz** seçilirse yalnızca yeni çıktı doğrulandıktan sonra eski dosya değiştirilir. ASCII ve ikili DXF, `ezdxf==1.4.3` ile okunup denetlenir: dosya sonu eksik, okunamayan, yapısal hata/onarım gerektiren veya model alanı boş dosyalar reddedilir. DXF doğrulaması için `requirements.txt` bağımlılıklarının güncel kurulması gerekir. DWG'de boyut ve dosya başlığı kontrol edilir; tam DWG içeriği ayrıştırılmaz. Bu kontroller açınım ölçülerinin veya yönünün doğru olduğunu kanıtlamaz.
 
 DXF/DWG sonuç satırları, okunabilen sac kalınlığı ve montaj adedini açıklamanın başında gösterir. Boş liste, klasör seçme ve tarama adımlarını gösterir; tarama sonrasında bu yönlendirme gizlenir. Hedef dosya yolu bir klasörse aktarım hata olarak raporlanır.
+
+Bir parça montajda birden fazla konfigürasyonla kullanılıyorsa, etkin konfigürasyon dışındakiler adları ve adetleriyle sonuç açıklamasında ve CSV raporunda belirtilir. Bitiş özetinde de uyarı gösterilir. Bu uyarı diğer konfigürasyonların otomatik aktarıldığı anlamına gelmez. Farklı konfigürasyonları ayrı çıktı klasörlerine aktarın; aynı kalınlık ve adette dosya adları aynı olabilir.
 
 **Durdur**, işlenen parça ve seçili çıktı biçimi tamamlandıktan sonra sonraki parçaya geçişi engeller. SolidWorks'ün devam eden COM çağrısı zorla kesilmez. Çalışma sırasında ekran ve seçenek değişiklikleri kilitlenir.
 

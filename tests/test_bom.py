@@ -187,6 +187,34 @@ class BomTests(unittest.TestCase):
                 bom.scan_worker(events, stop)
         self.assertEqual(events.get_nowait()[1]['state'], 'error')
 
+    def test_cancel_during_excel_styling_stops_before_next_row(self):
+        from openpyxl.styles import Alignment
+        stop = threading.Event()
+        destination = self.folder/'existing.xlsx'
+        destination.write_bytes(b'original')
+        result = bom.collect(self.app)
+        def cancel_on_alignment(*args, **kwargs):
+            stop.set()
+            return Alignment(*args, **kwargs)
+        with patch('openpyxl.styles.Alignment', side_effect=cancel_on_alignment) as alignment, \
+                patch('openpyxl.workbook.workbook.Workbook.save') as save:
+            with self.assertRaises(bom.Cancelled):
+                bom.export_excel(result, destination, stop)
+            self.assertLessEqual(alignment.call_count, 6)
+            save.assert_not_called()
+        self.assertEqual(destination.read_bytes(), b'original')
+        self.assertEqual(list(self.folder.glob('.gokworks*')), [])
+
+    def test_cancel_before_scan_does_not_connect_to_solidworks(self):
+        com, _ = install_com(self, bom, 'kr')
+        events, stop = queue.Queue(), threading.Event()
+        stop.set()
+        with patch('bom.exporter.connect_to_solidworks') as connect:
+            bom.scan_worker(events, stop)
+            connect.assert_not_called()
+        com.CoInitialize.assert_not_called()
+        self.assertEqual(list(events.queue), [('bom_done', {'state': 'cancelled'})])
+
 
 if __name__ == '__main__':
     unittest.main()
