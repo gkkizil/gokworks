@@ -24,17 +24,17 @@
   "screenshots": [
     {
       "file": "docs/reports/bolt/screenshots/combined-dark.png",
-      "sha256": "73b35c183249a90a8168bc7b4f4ad5d9e8b35c005c4f9781ee7715c432262107",
+      "sha256": "28a28e99518407d935d22379d4e70df3798be1051c90ac0f5adaec0269dcaaf3",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/tension-light.png",
-      "sha256": "eb9cb6e5592a25da00d1fefa77c20020475f35a5322e508491020b49b27605b6",
+      "sha256": "1bf1ecefa5b22ef79489cd8c449d664891da41fef544d762418a529165a170a0",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/unsafe-dark-small.png",
-      "sha256": "500dea100d56c387685314a5243db76ff8fe10eb93f2ca55595ca2a74f45ec9c",
+      "sha256": "2897a0c8c1e1d1334130352b5a1114e70529029aa47c2273a42f5c60052c8a27",
       "real_tk_capture": true
     }
   ],
@@ -44,5 +44,19 @@
     "native_captures_refreshed": 3,
     "small_window_visually_reviewed": true,
     "calculation_tests_rerun": false
+  },
+  "unit_revision": {
+    "date": "2026-10-13",
+    "checks": {
+      "test_bolt.BoltCalculationTests.test_force_units_and_decimal_comma": "ok",
+      "test_bolt.BoltCalculationTests.test_invalid_active_inputs_rejected_and_inactive_load_ignored": "ok",
+      "test_bolt_window.BoltWindowTests.test_live_load_modes_and_invalid_input_clear_previous_verdict": "ok",
+      "test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram": "ok",
+      "test_bolt_window.BoltWindowTests.test_units_page_cache_preferences_and_copy_preserve_physical_load": "ok"
+    },
+    "unique_checks_passed": 5,
+    "change": "Explicit kg load / Newton / kN selection; unit-aware capacities, arrows and clipboard; hex nut detail.",
+    "initial_failure": "Viewport assertion reused a scrolled panel; reset scroll before checking the next window size.",
+    "full_suite_run": false
   }
 }

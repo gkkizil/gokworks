@@ -1,0 +1,44 @@
+bolt-unit-checks.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_force_units_and_decimal_comma (test_bolt.BoltCalculationTests.test_force_units_and_decimal_comma) ... ok
+test_invalid_active_inputs_rejected_and_inactive_load_ignored (test_bolt.BoltCalculationTests.test_invalid_active_inputs_rejected_and_inactive_load_ignored) ... ok
+test_live_load_modes_and_invalid_input_clear_previous_verdict (test_bolt_window.BoltWindowTests.test_live_load_modes_and_invalid_input_clear_previous_verdict) ... ok
+test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram) ... FAIL
+test_units_page_cache_preferences_and_copy_preserve_physical_load (test_bolt_window.BoltWindowTests.test_units_page_cache_preferences_and_copy_preserve_physical_load) ... ok
+
+======================================================================
+FAIL: test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/gokworks/tests/test_bolt_window.py", line 93, in test_small_window_dpi_and_unchanged_diagram
+    self.assert_inside(self.app.bolt_widgets[key])
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/gokworks/tests/support/gui.py", line 70, in assert_inside
+    self.assertGreaterEqual(start, bound-left)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: -25 not greater than or equal to 0
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.440s
+
+FAILED (failures=1)
+
+
+bolt-unit-layout.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.781s
+
+OK
