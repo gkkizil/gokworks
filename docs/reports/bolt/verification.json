@@ -24,18 +24,25 @@
   "screenshots": [
     {
       "file": "docs/reports/bolt/screenshots/combined-dark.png",
-      "sha256": "599df1ff2b4134c1106413300cc47eab4966fa67dd969fb2e94f71f96ad239c7",
+      "sha256": "73b35c183249a90a8168bc7b4f4ad5d9e8b35c005c4f9781ee7715c432262107",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/tension-light.png",
-      "sha256": "ba92a9681e9f71ca5f1f1f18ae37af4abe36f6659706364d9adfba2adb40b9d0",
+      "sha256": "eb9cb6e5592a25da00d1fefa77c20020475f35a5322e508491020b49b27605b6",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/unsafe-dark-small.png",
-      "sha256": "94c0647f17e94f14fd20607edb87ad6cd87b925e47df33be3f4191c185161645",
+      "sha256": "500dea100d56c387685314a5243db76ff8fe10eb93f2ca55595ca2a74f45ec9c",
       "real_tk_capture": true
     }
-  ]
+  ],
+  "visual_revision": {
+    "date": "2026-10-13",
+    "change": "Show threaded tip beyond the nut and label both parts.",
+    "native_captures_refreshed": 3,
+    "small_window_visually_reviewed": true,
+    "calculation_tests_rerun": false
+  }
 }

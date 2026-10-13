@@ -36,11 +36,13 @@ def draw(canvas, result, appearance, scale):
         for x in range(106, 331, 20):
             line((x, y1-3, x+12, y0+3), fill=color(BORDER))
     # Metallic shank, turned highlights and visible thread flanks.
-    rect((199, 78, 241, 204), fill='#9BADBF', outline='#657B92', tags='bolt_body')
-    rect((205, 80, 214, 201), fill='#D5E1EC', outline='')
-    rect((232, 80, 240, 201), fill='#7B91A8', outline='')
+    # The threaded end projects beyond the nut, so it cannot read as a second head.
+    poly((199, 78, 241, 78, 241, 224, 236, 230, 204, 230, 199, 224),
+         fill='#9BADBF', outline='#657B92', tags='bolt_body')
+    rect((205, 80, 214, 227), fill='#D5E1EC', outline='')
+    rect((232, 80, 240, 223), fill='#7B91A8', outline='')
     thread_start = 88 if result.section == 'Dişli kesit' else 174
-    for y in range(thread_start, 201, 7):
+    for y in range(thread_start, 222, 7):
         line((200, y+5, 240, y-2), fill='#60768D', width=1.2*scale)
     rect((184, 83, 256, 91), fill='#ABBAC9', outline='#657B92')
     poly((184, 57, 196, 48, 244, 48, 256, 57, 256, 79, 184, 79),
@@ -48,15 +50,19 @@ def draw(canvas, result, appearance, scale):
     line((185, 58, 255, 58), fill='#EAF1F7', width=2*scale)
     text(220, 68, result.grade, paint=('#243348', '#243348'), size=11)
     rect((184, 179, 256, 185), fill='#ABBAC9', outline='#657B92')
-    poly((187, 185, 253, 185, 253, 203, 244, 211, 196, 211, 187, 203),
+    poly((195, 185, 245, 185, 253, 189, 253, 202, 245, 206, 195, 206, 187, 202, 187, 189),
          fill='#A8B9CA', outline='#657B92', width=1.5)
-    line((199, 186, 199, 207), fill='#D9E4EE', width=2*scale)
-    line((242, 186, 242, 207), fill='#70879D', width=2*scale)
+    line((199, 186, 199, 205), fill='#D9E4EE', width=2*scale)
+    line((242, 186, 242, 205), fill='#70879D', width=2*scale)
+    text(150, 196, 'Somun', MUTED, 10, anchor='e')
+    line((157, 196, 183, 196), fill=color(MUTED))
+    text(150, 224, 'Dişli uç', MUTED, 10, anchor='e')
+    line((157, 224, 195, 224), fill=color(MUTED))
     arrow = dict(arrow='last', arrowshape=(8*scale, 10*scale, 4*scale), width=3*scale)
     if result.tension_n:
         line((220, 45, 220, 12), fill=color(ACCENT), tags='tension_arrow', **arrow)
-        line((220, 213, 220, 251), fill=color(ACCENT), tags='tension_arrow', **arrow)
-        text(237, 238, f'Ft = {fmt(result.tension_n/result.count/1000)} kN', ACCENT, 10, anchor='w')
+        line((220, 234, 220, 255), fill=color(ACCENT), tags='tension_arrow', **arrow)
+        text(237, 245, f'Ft = {fmt(result.tension_n/result.count/1000)} kN', ACCENT, 10, anchor='w')
     if result.shear_n:
         # Double shear: centre plate carries V; each outer plate carries V/2.
         loads = [(132, 1), (102, -1), (164, -1)] if result.planes == 2 else [(115, 1), (152, -1)]
