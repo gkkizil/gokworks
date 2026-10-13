@@ -82,6 +82,7 @@ class KFactorView:
         if self.k_state["assignment_mode"].get() not in (AUTOMATIC_TAB, MANUAL_TAB):
             self.k_state["assignment_mode"].set(AUTOMATIC_TAB)
         self.k_state["save"] = tk.BooleanVar(self, value=False)  # explicit each session
+        self.k_state["all_bends"] = tk.BooleanVar(self, value=saved.get("kr_all_bends", True) is True)
         self.k_widgets = {}
 
     def _build_k_settings(self):
@@ -272,7 +273,13 @@ class KFactorView:
         self.open_button.grid(row=0, column=1, sticky="ew")
         save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
         save.grid(row=0, column=2, sticky="w", padx=(20, 0))
-        self.controls.extend((self.scan_button, self.open_button, save))
+        scope = self._checkbox(actions, "Tüm bükümlere uygula", self.k_state["all_bends"])
+        scope.grid(row=1, column=0, columnspan=2, sticky="w", pady=(10, 0))
+        self._label(actions, "Özel K/R değerleri ana sac ayarlarını kullanır. Kalınlık korunur.",
+                    11, MUTED, anchor="w", wraplength=280).grid(
+                        row=1, column=2, sticky="w", padx=(20, 0), pady=(10, 0))
+        self.k_widgets["all_bends"] = scope
+        self.controls.extend((self.scan_button, self.open_button, save, scope))
 
     def _k_field(self, panel, key, label, row, column, *, values=None, readonly=False):
         holder = ctk.CTkFrame(panel, fg_color="transparent")
@@ -306,7 +313,8 @@ class KFactorView:
         if values["assignment_mode"] == MANUAL_TAB:
             t = number(values["manual_thickness"], "Hedef sac kalınlığı")
             recipe = ManualAssignment(t, number(values["manual_k"], "Manuel K faktörü", zero=True),
-                                      number(values["manual_r"], "Manuel büküm yarıçapı"))
+                                      number(values["manual_r"], "Manuel büküm yarıçapı"),
+                                      all_bends=values["all_bends"])
             recipe.validate()
             return t, recipe
         material = next((m.key for m in MATERIALS if m.label == values["material"]), None)
@@ -328,7 +336,8 @@ class KFactorView:
                         calibration_thickness_mm=t if measured_ba is not None else None,
                         measured_ba_mm=measured_ba,
                         punch_angle_deg=number(values["punch_angle"], "Üst bıçak açısı"),
-                        die_angle_deg=number(values["die_angle"], "Alt kalıp açısı"))
+                        die_angle_deg=number(values["die_angle"], "Alt kalıp açısı"),
+                        all_bends=values["all_bends"])
         recipe.validate()
         return t, recipe
 
@@ -418,6 +427,7 @@ class KFactorView:
                            f'K={number(recipe.k_factor, "K", zero=True):g} · R={number(recipe.radius_mm, "R"):g} mm')
         else:
             description = f'Malzeme / takım · {self.k_state["material"].get()}'
+        description += ' · Tüm bükümler' if recipe.all_bends else ' · Mevcut özel büküm ayarları korunacak'
         self._append_log(description + (' · Dosyalar kaydedilecek.' if save else ' · Dosyalar kaydedilmeyecek.'))
         threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),
                          kwargs=dict(preview=preview, save=save, expected_scope=expected_scope),

@@ -245,13 +245,40 @@ class ManualGuiTests(GuiTestCase):
 
     def test_manual_preferences_reload_and_save_choice_starts_off(self):
         self.select_manual();self.app.k_state['save'].set(True)
+        self.assertTrue(self.app.k_state['all_bends'].get())
+        self.app.k_widgets['all_bends'].toggle()
+        self.assertFalse(self.app._k_recipe()[1].all_bends)
         self.app._on_close()
         self.open_app()
         self.app._switch_mode('k_factor');self.app.update()
         self.assertEqual(self.app.k_state['assignment_mode'].get(),MANUAL_TAB)
         self.assertEqual(self.app.k_state['manual_k'].get(),'0,274')
         self.assertFalse(self.app.k_state['save'].get())
+        self.assertFalse(self.app.k_state['all_bends'].get())
+        self.assertFalse(self.app._k_recipe()[1].all_bends)
         self.assertEqual(load_settings(self.settings)['kr_manual_r'],'2')
+
+    def test_manual_gui_applies_custom_bends_after_preview_without_saving(self):
+        from test_power_sm_k_radius import BendFeature
+        self.select_manual()
+        model = SheetPart()
+        bend = BendFeature(model)
+        model.feature.child = bend
+        assembly = FakeAssembly('/work/main.sldasm', (FakeComponent(model.path),))
+        app = FakeMultiPartApp((model,), assembly)
+        before = deepcopy(bend.states)
+        with solidworks_session(ap, app, 'kr'):
+            self.app.scan_button.invoke(); self.wait_idle()
+            self.assertEqual(self.app.results[0]['status'], 'success', self.app.results[0]['detail'])
+            self.assertEqual(bend.states, before)
+            self.assertEqual(model.feature.modify_count, 0)
+            self.app.start_button.invoke(); self.wait_idle()
+        self.assertEqual(self.app.results[0]['status'], 'success', self.app.results[0]['detail'])
+        self.assertTrue(all(bend.states['Default']['flags'].values()))
+        self.assertEqual(model.states['Default']['k'], .274)
+        self.assertEqual(model.save_count, 0)
+        self.assertIs(app.ActiveDoc, assembly)
+        self.assertIn('Ana K/R ayarlarına bağlanan unsurlar', self.app.results[0]['detail'])
 
     def test_manual_fields_scroll_into_view_and_actions_remain_visible(self):
         self.select_manual()
@@ -267,7 +294,8 @@ class ManualGuiTests(GuiTestCase):
                     canvas.yview_moveto(offset/self.app.settings_body.winfo_height())
                     self.app.update()
                     for widget in (self.app.k_widgets['manual_thickness'],self.app.k_widgets['manual_k'],
-                                   self.app.k_widgets['manual_r'],self.app.start_button,self.app.scan_button):
+                                   self.app.k_widgets['manual_r'],self.app.start_button,self.app.scan_button,
+                                   self.app.k_widgets['all_bends']):
                         self.assert_inside(widget, mapped=True)
                         if widget in (self.app.k_widgets['manual_thickness'],self.app.k_widgets['manual_k'],self.app.k_widgets['manual_r']):
                             self.assertGreaterEqual(widget.winfo_rooty(),canvas.winfo_rooty())

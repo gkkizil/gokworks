@@ -36,6 +36,8 @@ Python aynı Windows kullanıcı oturumunda çalışmalıdır.
    K `0,274`, R `1,5` girin. Ardından 2 mm örneğini `2 / 0,274 / 2` ile sınayın.
 3. **Montajı tara** ile eşleşen sacları ve atlama nedenlerini okuyun.
    Tarama sonuçlarında **Uygulamaya hazır** görünür; bu aşamada K/R yazılmaz.
+   **Tüm bükümlere uygula** açıkken, özel K/R kullanan bir kenar flanşı veya
+   çizilmiş bükümü de kontrol kapsamına ekleyin. Tarama bu özel değerleri değiştirmemeli.
 4. İlk kontrolü **Parça dosyalarını kaydet** işaretlenmeden yapın; **Montaja
    K/R uygula** kullanın. Değişiklik SolidWorks belleğinde uygulanır.
 5. Başarılı parçanın doğru referans konfigürasyonunda **ana SAC LEVHA**
@@ -49,9 +51,11 @@ Python aynı Windows kullanıcı oturumunda çalışmalıdır.
 6. Farklı kalınlıklı saclarda ve parçanın diğer konfigürasyonlarında değişiklik
    olmamalı; CAD malzemesi ve sac kalınlığı korunmalı. Alt montajlar dahil sayılar
    raporda görünmeli. Malzeme/gauge tablosuna bağlı, çok gövdeli veya özel
-   büküm override'ı olan parçalar için destek sınırlarını rapordan kontrol edin.
-   Süpürme flanşında özel yarıçap açıksa işlem yazmadan durmalıdır; varsayılan
-   R ve büküm payına bağlıysa uygulanabilir. Türkçe karakterli/büyük harfli
+   büküm türleri olan parçalar için destek sınırlarını rapordan kontrol edin.
+   **Tüm bükümlere uygula** açıksa desteklenen bükümlerin R/büküm payı ana
+   sacı kullanmalı; kapalıysa özel bükümler yazmadan durdurulmalıdır.
+   Günlükte R atama yolunu ve ana K/R'ye bağlanan unsur adlarını kontrol edin.
+   Türkçe karakterli/büyük harfli
    dosya yolları ve konfigürasyon adları ayrıntılarda özgün haliyle görünmeli.
 7. Başarılı sonucu gözle kontrol ettikten sonra SolidWorks'te kaydedin.
 

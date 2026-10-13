@@ -127,16 +127,22 @@ R ve kalınlık ayrı bir gerçek numuneden gelmelidir.
   SolidWorks'ten metre olarak okunur; hesap mm'de, iç R yazımı metre olarak
   yapılır. Kalınlık ve CAD malzemesi değiştirilmez.
 - `GetCustomBendAllowance`, `Type=2` (`swBendAllowanceKFactor`), `KFactor`,
-  `SetCustomBendAllowance` ve `BendRadius` kullanılır. `AccessSelections`,
+  `SetCustomBendAllowance` kullanılır. R, ana unsura ait tek yarıçap ölçüsü
+  bulunursa `SetSystemValue3(..., swSetValue_InThisConfiguration, ...)` ile,
+  ölçü bulunmazsa `BendRadius` tanımıyla yazılır. Alt unsura ait ölçüler ve
+  çap ölçüleri R hedefi olarak seçilmez. `AccessSelections`,
   `ModifyDefinition`, yeniden oluşturma ve geri okuma kontrol edilir.
-- Malzeme veya gauge tablosuna bağlı saclar ve varsayılan K/R'yi kullanmayan
-  özel bükümler otomatik değiştirilmez; ilgili bağın/override'ın SolidWorks'te
-  düzenlenmesi gerektiği raporlanır. Eski sac mimarisinde gauge API hata
+- Malzeme veya gauge tablosuna bağlı saclar otomatik değiştirilmez;
+  ilgili bağın SolidWorks'te düzenlenmesi gerektiği raporlanır.
+  **Tüm bükümlere uygula** açıksa desteklenen özel K/R ayarları ana sac
+  değerlerine bağlanır; kapalıysa bu parçalar yazmadan durdurulur.
+  Kalınlığı farklı bir alt sacın override'ı kaldırılmaz. Eski sac mimarisinde gauge API hata
   veriyorsa uygunluk doğrulanmış sayılmaz.
   Süpürme flanşının yarıçap mirası `UseDefaultRadius` ile kontrol edilir;
   diğer bükümlerdeki `UseDefaultBendRadius` ile aynı alan değildir.
-  Süpürme flanşı özel R kullanıyorsa genel R'nin bütün bükümlere aktarıldığı
-  söylenmez; işlem yazmadan önce açık açıklamayla durdurulur.
+  Her değiştirilen bükümün varsayılan ayarları geri okumayla doğrulanır.
+  Tabloya bağlı özel bükümler ve tanınmayan özel unsur türleri yazmadan
+  durdurulur. Büküm boşaltma, açı, uzunluk ve malzeme ayarları değiştirilmez.
 - **Katıyı Saca Dönüştür** unsurları `GetTypeName2 = SolidToSheetMetal`
   ile tanınır. Varsayılan sac parametrelerine bağlı, tek gövdeli dönüşümlerde
   ana `SheetMetal` güncellenir; dönüşümün kendi `SheetThickness`, `BendRadius`,
@@ -149,9 +155,10 @@ R ve kalınlık ayrı bir gerçek numuneden gelmelidir.
   mevcut dönüşümün parametre mirasını denetlemek için kullanılmaz.
   **Gövdeyi koru** nedeniyle birden fazla katı gövde kalan parçalar mevcut
   tek gövde sınırına tabidir.
-- İşlem öncesi parçanın bütün konfigürasyonlarındaki sac parametreleri alınır.
+- İşlem öncesi parçanın bütün konfigürasyonlarındaki sac parametreleri,
+  desteklenen bükümlerin varsayılan ayarları ve etkin özel K/R değerleri alınır.
   Başka konfigürasyona yayılan değişiklik, yanlış geri okuma veya rebuild
-  hatasında eski K/R geri yazılır ve tekrar kontrol edilir. Geri alma da
+  hatasında eski K/R ve özel büküm ayarları geri yazılır ve tekrar kontrol edilir. Geri alma da
   başarısızsa açık **GERİ ALMA HATASI** gösterilir; otomatik kayıt yapılmaz.
   Değerler geri alınsa bile SolidWorks'ün değiştirilmiş belge işareti kalabilir.
   Dönüşüm unsurları da bu karşılaştırmaya dahildir. Yeniden oluşturma sonrası

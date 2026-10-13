@@ -111,6 +111,7 @@ class Recipe:
     measured_ba_mm: float | None = None
     punch_angle_deg: float = 85
     die_angle_deg: float = 85
+    all_bends: bool = False
 
     def validate(self):
         material_by_key(self.material)
@@ -155,6 +156,7 @@ class ManualAssignment:
     thickness_mm: float
     k_factor: float
     radius_mm: float
+    all_bends: bool = False
 
     def validate(self):
         number(self.thickness_mm, "Hedef sac kalınlığı")

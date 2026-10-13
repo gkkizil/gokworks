@@ -42,11 +42,27 @@ K `0–1` aralığında; kalınlık ve R pozitif ve sonlu olmalıdır. Boş/geç
 alanlarla tarama ve uygulama başlatılmaz.
 
 SolidWorks'e `KFactor=0.274`, büküm payı türü `K factor (2)` ve
-`BendRadius=0.002 metre` yazılır. Mevcut sac kalınlığı değiştirilmez. Önceki
+`R=0.002 metre` yazılır. Ana sacın kendisine ait tek yarıçap ölçüsü varsa
+`SetSystemValue3` ile yalnız hedef konfigürasyona yazılır; ölçü yoksa
+`BendRadius` unsur tanımı kullanılır. Mevcut sac kalınlığı değiştirilmez. Önceki
 K/R sürümündeki geri okuma, rebuild, konfigürasyonların korunması, hata
 halinde geri alma ve önceki montaja dönüş kontrolleri kullanılır. Çok gövdeli,
-gauge/malzeme tablosuna bağlı veya özel büküm override'ı olan parçalar için
-aynı destek sınırları geçerlidir; [ayrıntılar](k-factor-radius.md).
+gauge/malzeme tablosuna bağlı parçalar için destek sınırları sürer;
+[ayrıntılar](k-factor-radius.md).
+
+**Tüm bükümlere uygula** başlangıçta açıktır. Özel K/R kullanan destekli
+bükümler ana sacın yarıçapını ve büküm payını kullanacak şekilde güncellenir.
+Modern `SheetMetal` alt unsurundaki K/R override'ları da kaldırılır; bunun
+kalınlığı değiştireceği bir parça işleme alınmaz. Seçenek kapalıysa özel
+büküm ayarı bulunan parça, açıklamasıyla birlikte durdurulur. Tercih iki
+atama sekmesinde ortaktır ve sonraki açılışta korunur.
+
+Tarama yalnız uygulanacak kapsamı kontrol eder. Gerçek uygulamada ana K/R,
+alt sac değerleri ve bükümlerin varsayılan ayarları geri okunur. Hata halinde
+önceki K/R ile özel yarıçap, büküm payı türü/değeri ve override durumları
+birlikte geri yüklenip doğrulanır.
+
+[Power-SM uyarlamasının kaynakları ve kapsamı](reports/power-sm-adaptation/README.md).
 
 CSV raporunda başarılı, farklı kalınlık nedeniyle atlanan ve hatalı parçalar
 ayrı görünür. Küçük pencerede form kaydırılabilir; tarama, uygulama ve sonuç
