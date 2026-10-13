@@ -12,7 +12,7 @@ import customtkinter as ctk
 
 from bom.exporter import Cancelled, export_excel, scan_worker
 from gui.icons import set_window_icon
-from gui.rendering import hide_grid
+from gui.rendering import configure_changed, hide_grid
 from gui.text import BOM_TITLE, BOM_TREE_TAB
 from gui.theme import (PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT, ACCENT_BG,
                        SECONDARY, HOVER, GREEN, RED, AMBER, UI_FONT)
@@ -197,7 +197,7 @@ class BomView:
             table.bind('<Return>', lambda event, view=key: self._show_bom_details(view))
             self.bom_widgets[key] = table
             empty = ctk.CTkFrame(table, fg_color=PANEL, corner_radius=0)
-            empty.place(relx=.5, rely=.5, anchor='center')
+            empty.place(relx=.5, rely=.55, anchor='center')
             empty_icon = ctk.CTkLabel(empty, text='', image=self._icon('layers' if key == 'tree' else 'file', ACCENT, 32),
                                     fg_color=ACCENT_BG, width=64, height=64, corner_radius=16)
             empty_icon.pack(pady=(0, 12))
@@ -256,6 +256,9 @@ class BomView:
     def _style_bom_tables(self, widgets=None):
         widgets = self.bom_widgets if widgets is None else widgets
         scale = widgets['content']._get_widget_scaling()
+        style_key = ctk.get_appearance_mode(), scale
+        if widgets.get('style_key') == style_key:
+            return
         color = lambda value: value[1 if ctk.get_appearance_mode() == 'Dark' else 0]
         style = ttk.Style(self)
         style.configure('Bom.Treeview', background=color(PANEL), fieldbackground=color(PANEL),
@@ -273,6 +276,7 @@ class BomView:
             table.tag_configure('stripe', background=color(INPUT))
             table.tag_configure('assembly', foreground=color(ACCENT), background=color(PANEL),
                                 font=(UI_FONT, -round(12*scale), 'bold'))
+        widgets['style_key'] = style_key
 
     def _resize_bom_workspace(self):
         self._layout_fit_id = None
@@ -313,30 +317,37 @@ class BomView:
         for key in ('assembly', 'configuration'):
             if widgets[key].cget('wraplength') != wrap:
                 widgets[key].configure(wraplength=wrap)
-        self.status_label.configure(wraplength=max(240, width-48))
+        configure_changed(self.status_label, wraplength=max(240, width-48))
         # Keep the useful columns in view; paths belong in the detail panel.
         table_width = max(340, width-98-(232 if show_inspector else 0))
+        columns_key = table_width, scale
+        resize_columns = widgets.get('columns_key') != columns_key
         for key, name_column, fixed_column in (('parts', 'name', 'qty'), ('tree', '#0', 'kind')):
             table = widgets[key]
             fixed = 70 if key == 'parts' else 85
             config = min(175, table_width*.30)
-            table.column(name_column, width=round((table_width-fixed-config)*scale), minwidth=round(140*scale))
-            table.column(fixed_column, width=round(fixed*scale), minwidth=round(60*scale), stretch=False)
-            table.column('config', width=round(config*scale), minwidth=round(100*scale))
+            if resize_columns:
+                table.column(name_column, width=round((table_width-fixed-config)*scale), minwidth=round(140*scale))
+                table.column(fixed_column, width=round(fixed*scale), minwidth=round(60*scale), stretch=False)
+                table.column('config', width=round(config*scale), minwidth=round(100*scale))
             icon = widgets[key+'_empty_icon']
             if table.winfo_height()/scale < 210:
-                icon.pack_forget()
+                if icon.winfo_manager():
+                    icon.pack_forget()
             elif not icon.winfo_manager():
                 icon.pack(before=widgets[key+'_empty_heading'], pady=(0, 12))
-            widgets[key+'_empty_hint'].configure(wraplength=min(310, table_width-28))
+            configure_changed(widgets[key+'_empty_hint'], wraplength=min(310, table_width-28))
+        widgets['columns_key'] = columns_key
 
     def _update_bom_search_hint(self):
         if 'search_hint' not in self.bom_widgets:
             return
+        hint = self.bom_widgets['search_hint']
         if self.bom_query.get() or self.focus_get() == self.bom_widgets['search']._entry:
-            hide_grid(self.bom_widgets['search_hint'])
-        else:
-            self.bom_widgets['search_hint'].grid(row=0, column=1, sticky='ew', padx=5)
+            if hint.winfo_manager():
+                hide_grid(hint)
+        elif not hint.winfo_manager():
+            hint.grid(row=0, column=1, sticky='ew', padx=5)
 
     def _update_bom_metrics(self):
         result = self.bom_result
@@ -351,40 +362,46 @@ class BomView:
         if self.bom_widgets['tabs'].get() == BOM_TREE_TAB:
             text = f'{len(self.bom_result.tree)} bileşen'
         else:
-            text = f'{len(self.bom_widgets["parts"].get_children())} / {len(self.bom_result.parts)} parça'
-        self.bom_widgets['counts'].configure(text=text)
+            text = f'{len(self.bom_widgets.get("visible_part_ids", ()))} / {len(self.bom_result.parts)} parça'
+        configure_changed(self.bom_widgets['counts'], text=text)
 
     def _bom_tab_changed(self):
         self._update_bom_counts()
         view = 'parts' if self.bom_widgets['tabs'].get() == 'Parça listesi' else 'tree'
-        self._reset_bom_details()
-        self._select_bom_row(view)
+        if self.bom_result is None or 'render' in self.bom_widgets:
+            self._reset_bom_details()
+        else:
+            self._select_bom_row(view)
 
     def _bom_empty_state(self, key, *, filtered=False):
         widgets = self.bom_widgets
-        table = widgets[key]
-        if table.get_children():
-            widgets[key+'_empty'].place_forget()
+        rows = (widgets.get('visible_part_ids', ()) if key == 'parts' else
+                self.bom_result.tree if self.bom_result is not None else ())
+        empty = widgets[key+'_empty']
+        if rows:
+            if empty.winfo_manager():
+                empty.place_forget()
             return
         has_result = self.bom_result is not None
         heading = 'Eşleşen parça yok' if filtered else 'Montajda parça bulunamadı' if has_result else 'Montajınız burada görünecek'
         hint = ('Aramayı değiştirin veya × düğmesiyle temizleyin.' if filtered else
                 'Bastırılmış ve BOM dışı bileşenleri kontrol edin.' if has_result else
                 'SolidWorks’te bir montaj açıp Montajı tara’ya basın.')
-        widgets[key+'_empty_heading'].configure(text=heading)
-        widgets[key+'_empty_hint'].configure(text=hint)
-        widgets[key+'_empty'].place(relx=.5, rely=.55, anchor='center')
+        configure_changed(widgets[key+'_empty_heading'], text=heading)
+        configure_changed(widgets[key+'_empty_hint'], text=hint)
+        if not empty.winfo_manager():
+            empty.place(relx=.5, rely=.55, anchor='center')
 
     def _reset_bom_details(self):
         widgets = self.bom_widgets
         widgets.pop('selection', None)
-        widgets['detail_name'].configure(text='Bir satır seçin')
-        widgets['detail_icon'].configure(image=self._icon('file', ACCENT, 22))
-        widgets['detail_info'].configure(text='Parça veya alt montaj bilgileri burada görünür.')
-        widgets['detail_path'].configure(text='Seçim yapılmadı')
-        widgets['selection_summary'].configure(text='Excel dosyasına tüm montaj aktarılır.')
+        configure_changed(widgets['detail_name'], text='Bir satır seçin')
+        configure_changed(widgets['detail_icon'], image=self._icon('file', ACCENT, 22))
+        configure_changed(widgets['detail_info'], text='Parça veya alt montaj bilgileri burada görünür.')
+        configure_changed(widgets['detail_path'], text='Seçim yapılmadı')
+        configure_changed(widgets['selection_summary'], text='Excel dosyasına tüm montaj aktarılır.')
         for key in ('copy_path', 'details'):
-            widgets[key].configure(state='disabled')
+            configure_changed(widgets[key], state='disabled')
 
     def _select_bom_row(self, view):
         # Selection events from a hidden tab must not replace the visible details.
@@ -406,14 +423,14 @@ class BomView:
             name, path = node.name, node.path
             info = f'{node.kind}\nKonfigürasyon: {node.configuration}\nBileşen: {node.instance}'
         self.bom_widgets['selection'] = name, info, path
-        self.bom_widgets['detail_name'].configure(text=name)
-        self.bom_widgets['detail_icon'].configure(image=self._icon(
+        configure_changed(self.bom_widgets['detail_name'], text=name)
+        configure_changed(self.bom_widgets['detail_icon'], image=self._icon(
             'tree' if view == 'tree' and node.kind == 'Montaj' else 'file', ACCENT, 22))
-        self.bom_widgets['detail_info'].configure(text=info)
-        self.bom_widgets['detail_path'].configure(text=path or 'Dosya yolu bulunamadı')
-        self.bom_widgets['selection_summary'].configure(text=f'{name} · Excel’e tüm montaj aktarılır.')
-        self.bom_widgets['details'].configure(state='normal' if not self.busy else 'disabled')
-        self.bom_widgets['copy_path'].configure(state='normal' if path and not self.busy else 'disabled')
+        configure_changed(self.bom_widgets['detail_info'], text=info)
+        configure_changed(self.bom_widgets['detail_path'], text=path or 'Dosya yolu bulunamadı')
+        configure_changed(self.bom_widgets['selection_summary'], text=f'{name} · Excel’e tüm montaj aktarılır.')
+        configure_changed(self.bom_widgets['details'], state='normal' if not self.busy else 'disabled')
+        configure_changed(self.bom_widgets['copy_path'], state='normal' if path and not self.busy else 'disabled')
 
     def _copy_bom_path(self, path=None):
         if path is None:
@@ -529,6 +546,9 @@ class BomView:
             if rows:
                 table.delete(*rows)
         self.bom_widgets['part_ids'] = []
+        self.bom_widgets['part_search'] = []
+        self.bom_widgets['visible_part_ids'] = ()
+        self.bom_widgets.pop('filter_key', None)
         self.bom_widgets['nodes'] = {}
         self.bom_widgets['counts'].configure(text='Henüz tarama yapılmadı')
         self.bom_widgets['assembly'].configure(text='Montaj seçilmedi')
@@ -564,6 +584,8 @@ class BomView:
                     values=(value.name, value.quantity, value.configuration, value.path),
                     tags=('stripe',) if index % 2 else ())
                 self.bom_widgets['part_ids'].append(iid)
+                self.bom_widgets['part_search'].append(
+                    f'{value.name} {value.configuration} {value.path}'.casefold().replace('\u0307', ''))
             else:
                 self.bom_widgets['tree'].insert(value.parent, 'end', iid=value.number,
                     text=value.name, values=(value.kind, value.configuration, value.path), open=True,
@@ -581,10 +603,15 @@ class BomView:
         if result is None or 'render' in self.bom_widgets:
             return
         query = self.bom_query.get().casefold().replace('\u0307', '')
-        ids = [iid for iid, part in zip(self.bom_widgets['part_ids'], result.parts)
-               if query in f'{part.name} {part.configuration} {part.path}'.casefold().replace('\u0307', '')]
+        if self.bom_widgets.get('filter_key') == query:
+            return
+        ids = tuple(iid for iid, text in zip(self.bom_widgets['part_ids'], self.bom_widgets['part_search'])
+                    if query in text)
         selected = self.bom_widgets['parts'].selection()
-        self.bom_widgets['parts'].set_children('', *ids)
+        if 'filter_key' not in self.bom_widgets or ids != self.bom_widgets['visible_part_ids']:
+            self.bom_widgets['parts'].set_children('', *ids)
+        self.bom_widgets['visible_part_ids'] = ids
+        self.bom_widgets['filter_key'] = query
         self._update_bom_counts()
         self._bom_empty_state('parts', filtered=bool(query))
         if selected and selected[0] not in ids:

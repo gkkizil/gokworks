@@ -373,23 +373,28 @@ class WorkspaceLayout:
     def _configure_table_style(self):
         color = lambda value: value[1 if ctk.get_appearance_mode() == "Dark" else 0]
         scale = self.workspace._get_widget_scaling()
-        self._table_style_key = ctk.get_appearance_mode(), scale
+        style_key = ctk.get_appearance_mode(), scale
         style = ttk.Style(self)
-        style.theme_use("clam")
-        style.configure("Gok.Treeview", background=color(PANEL), fieldbackground=color(PANEL),
-                        foreground=color(TEXT), borderwidth=0, bordercolor=color(PANEL),
-                        lightcolor=color(PANEL), darkcolor=color(PANEL), rowheight=round(40 * scale),
-                        font=(UI_FONT, -round(13 * scale)))
-        style.configure("Gok.Treeview.Heading", background=color(INPUT), foreground=color(MUTED),
-                        relief="flat", padding=(round(8 * scale), round(9 * scale)),
-                        font=(UI_FONT, -round(11 * scale), "bold"))
-        style.map("Gok.Treeview.Heading", background=[("active", color(SECONDARY))])
-        style.map("Gok.Treeview", background=[("selected", color(ACCENT_BG))],
-                  foreground=[("selected", color(TEXT))])
+        if style.theme_use() != 'clam':
+            style.theme_use('clam')
+        if getattr(self, '_table_style_key', None) != style_key:
+            style.configure("Gok.Treeview", background=color(PANEL), fieldbackground=color(PANEL),
+                            foreground=color(TEXT), borderwidth=0, bordercolor=color(PANEL),
+                            lightcolor=color(PANEL), darkcolor=color(PANEL), rowheight=round(40 * scale),
+                            font=(UI_FONT, -round(13 * scale)))
+            style.configure("Gok.Treeview.Heading", background=color(INPUT), foreground=color(MUTED),
+                            relief="flat", padding=(round(8 * scale), round(9 * scale)),
+                            font=(UI_FONT, -round(11 * scale), "bold"))
+            style.map("Gok.Treeview.Heading", background=[("active", color(SECONDARY))])
+            style.map("Gok.Treeview", background=[("selected", color(ACCENT_BG))],
+                      foreground=[("selected", color(TEXT))])
+            self._table_style_key = style_key
         tables = {page['table'] for page in self._pages.values() if 'table' in page}
         if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom'):
             tables.add(self.table)
         for table in tables:
+            if getattr(table, '_gok_style_key', None) == style_key:
+                continue
             table.column("status", width=round(152 * scale), minwidth=round(80 * scale))
             for column in ("file", "detail"):
                 table.column(column, minwidth=round(80 * scale))
@@ -397,6 +402,7 @@ class WorkspaceLayout:
                                   ("partial", AMBER), ("skipped", AMBER), ("error", RED)):
                 table.tag_configure(status, foreground=color(value))
             table.tag_configure("stripe", background=color(INPUT))
+            table._gok_style_key = style_key
         bom_pages = [page['bom_widgets'] for page in self._pages.values() if 'bom_widgets' in page]
         if self.mode == 'bom' and self.bom_widgets not in bom_pages:
             bom_pages.append(self.bom_widgets)

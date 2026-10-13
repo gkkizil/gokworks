@@ -2,12 +2,13 @@
 
 import time
 import unittest
+from tkinter import ttk
 from unittest.mock import patch
 
 import customtkinter as ctk
 from support.gui import GuiTestCase
 
-from gui.theme import ACCENT_BG
+from gui.theme import ACCENT, ACCENT_BG, GREEN
 from iso_fits import window as iso_view
 from iso_fits.rules import PRESETS
 from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
@@ -76,6 +77,27 @@ class MenuRenderingTests(GuiTestCase):
         self.app._preload_page()
         self.assertEqual(set(self.app._pages), {'pdf'})
         self.assertIsNotNone(self.app._preload_id)
+
+    def test_new_pages_reuse_table_styles_and_theme_and_scale_still_refresh_them(self):
+        self.addCleanup(lambda: ctk.set_widget_scaling(1))
+        original = self.app.table
+        real_theme = ttk.Style.theme_use
+        with patch.object(original, 'tag_configure', wraps=original.tag_configure) as tags, \
+                patch.object(ttk.Style, 'theme_use', autospec=True, side_effect=real_theme) as theme:
+            for _ in range(5):
+                self.preload()
+            tags.assert_not_called()
+            self.assertTrue(all(len(call.args) == 1 for call in theme.call_args_list))
+        self.app._switch_mode('bom')
+        self.app._change_theme('Koyu')
+        self.settle()
+        self.assertEqual(str(original.tag_configure('success', 'foreground')), GREEN[1])
+        self.assertEqual(str(self.app.bom_widgets['tree'].tag_configure('assembly', 'foreground')), ACCENT[1])
+        ctk.set_widget_scaling(1.25)
+        self.settle()
+        style = ttk.Style(self.app)
+        self.assertEqual(int(style.lookup('Gok.Treeview', 'rowheight')), 50)
+        self.assertEqual(int(style.lookup('Bom.Treeview', 'rowheight')), round(42*1.25))
 
     def test_preloaded_pages_stay_hidden_after_dpi_changes(self):
         self.addCleanup(lambda: ctk.set_widget_scaling(1))

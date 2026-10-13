@@ -182,6 +182,51 @@ class BomWindowTests(GuiTestCase):
         self.assertEqual(self.app.bom_widgets['export'].cget('state'), 'disabled')
         self.assertEqual(self.app.bom_widgets['assembly'].cget('text'), 'Tarama durduruldu')
 
+    def test_large_search_cache_preserves_unicode_selection_and_rescan_results(self):
+        parts = tuple(bom.Part(f'İmalat-{i:05}', f'/Üretim/İmalat-{i:05}.sldprt', 'İnce', 1)
+                      for i in range(10000))
+        self.app._bom_busy(True)
+        self.app._start_bom_render(replace(self.result, parts=parts))
+        self.wait_idle()
+        table = self.app.bom_widgets['parts']
+        table.selection_set('part_5')
+        self.app.bom_query.set('imalat-000')
+        self.assertEqual(table.get_children(), tuple(f'part_{i}' for i in range(100)))
+        with patch.object(table, 'set_children', wraps=table.set_children) as bulk:
+            self.app.bom_query.set('İMALAT-000')
+            bulk.assert_not_called()
+        self.assertEqual(table.selection(), ('part_5',))
+        self.assertEqual(self.app.bom_widgets['counts'].cget('text'), '100 / 10000 parça')
+        self.app._switch_mode('pdf')
+        self.app._switch_mode('bom')
+        self.app.bom_query.set('İmalat-00005')
+        self.assertEqual(table.get_children(), ('part_5',))
+        # A new result with the same query must not reuse the previous matches.
+        self.app._bom_busy(True)
+        self.app._start_bom_render(replace(self.result, parts=(parts[-1],)))
+        self.wait_idle()
+        self.assertEqual(table.get_children(), ())
+        self.assertEqual(table.selection(), ())
+        self.app.bom_query.set('imalat-09999')
+        self.assertEqual(table.get_children(), ('part_0',))
+        self.assertEqual(table.item('part_0', 'values')[0], 'İmalat-09999')
+
+    def test_unchanged_bom_layout_and_selection_do_not_redraw_widgets(self):
+        self.scan()
+        self.settle()
+        widgets = self.app.bom_widgets
+        widgets['parts'].selection_set('part_0')
+        self.settle()
+        with patch.object(widgets['parts'], 'column', wraps=widgets['parts'].column) as columns, \
+                patch.object(self.app.status_label, 'configure', wraps=self.app.status_label.configure) as status, \
+                patch.object(widgets['detail_name'], 'configure', wraps=widgets['detail_name'].configure) as name:
+            for _ in range(10):
+                self.app._resize_bom_workspace()
+                self.app._select_bom_row('parts')
+            columns.assert_not_called()
+            status.assert_not_called()
+            name.assert_not_called()
+
     def test_export_cancel_and_failure_preserve_preview_and_existing_file(self):
         self.scan()
         result = self.app.bom_result

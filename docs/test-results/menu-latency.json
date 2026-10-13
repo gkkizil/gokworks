@@ -1,0 +1,247 @@
+{
+  "date": "2026-10-13",
+  "baseline_commit": "7b965da014920ffd96fa8d1e5940ba7b410339af",
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.5",
+    "tk": "8.6.16",
+    "display": "Xvfb :99",
+    "synthetic_data": true,
+    "native_solidworks_executed": false,
+    "native_windows_executed": false
+  },
+  "bom_navigation": {
+    "before": {
+      "rows": 10000,
+      "synthetic_data": true,
+      "native_solidworks_executed": false,
+      "filter_median_ms": 6.557927990797907,
+      "filter_max_ms": 13.173252998967655,
+      "tab_median_ms": 4.268686498107854,
+      "warm_switch_median_ms": 5.998984495818149,
+      "equivalent_query_table_writes": 1,
+      "repeated_layout_writes": {
+        "status": 20,
+        "columns": 60
+      }
+    },
+    "after": {
+      "rows": 10000,
+      "synthetic_data": true,
+      "native_solidworks_executed": false,
+      "filter_median_ms": 0.5854729970451444,
+      "filter_max_ms": 2.4331589957000688,
+      "tab_median_ms": 1.7549365002196282,
+      "warm_switch_median_ms": 4.377846002171282,
+      "equivalent_query_table_writes": 0,
+      "repeated_layout_writes": {
+        "status": 0,
+        "columns": 0
+      }
+    }
+  },
+  "general_navigation": {
+    "before": {
+      "warm_switch_median_ms": 3.157937004289124,
+      "burst_median_ms": 56.34558599558659,
+      "burst_runs_ms": [
+        57.99281000508927,
+        56.34558599558659,
+        55.755556997610256
+      ],
+      "callback_median_ms": 1.0962230007862672,
+      "callback_max_ms": 2.9247600032249466,
+      "redraw_calls": {
+        "log_inserts": 21,
+        "progress_updates": 20
+      },
+      "startup_ms": 303.9899630093714,
+      "first_switch_ms": {
+        "dxf_dwg": 119.2991779971635,
+        "k_factor": 150.93141800025478,
+        "iso_fits": 144.71912900626194,
+        "geometric_tolerances": 82.35096099087968,
+        "pdf": 5.089865007903427
+      },
+      "large_list": {
+        "rows": 10000,
+        "clear_runs_ms": [
+          [
+            6.240329996217042,
+            6.314272002782673
+          ],
+          [
+            4.956033997586928,
+            5.0425340014044195
+          ],
+          [
+            6.015841994667426,
+            6.105957989348099
+          ]
+        ],
+        "reset_runs_ms": [
+          [
+            12.509894993854687,
+            12.619229994015768
+          ],
+          [
+            13.131581989000551,
+            13.679727999260649
+          ],
+          [
+            14.208025007974356,
+            14.624673000071198
+          ]
+        ],
+        "alternating_filter_runs_ms": [
+          [
+            6.558350010891445,
+            378.5189780028304
+          ],
+          [
+            6.521543997223489,
+            7.797077996656299
+          ],
+          [
+            9.432233011466451,
+            10.69624900992494
+          ]
+        ],
+        "clear_median_ms": 6.015841994667426,
+        "reset_median_ms": 13.131581989000551,
+        "counters": {
+          "clear": {
+            "bulk_filters": 1,
+            "row_calls": 5
+          },
+          "reset": {
+            "bulk_filters": 1,
+            "row_calls": 0
+          }
+        }
+      }
+    },
+    "after": {
+      "warm_switch_median_ms": 3.780867496971041,
+      "burst_median_ms": 59.534223008085974,
+      "burst_runs_ms": [
+        72.53528099681716,
+        59.534223008085974,
+        57.84085100458469
+      ],
+      "callback_median_ms": 1.2406460009515285,
+      "callback_max_ms": 3.223103005439043,
+      "redraw_calls": {
+        "log_inserts": 21,
+        "progress_updates": 20
+      },
+      "startup_ms": 328.10261599661317,
+      "first_switch_ms": {
+        "dxf_dwg": 133.5659969918197,
+        "k_factor": 162.36016599577852,
+        "iso_fits": 150.58898700226564,
+        "geometric_tolerances": 89.14353500586003,
+        "pdf": 4.833458995562978
+      },
+      "large_list": {
+        "rows": 10000,
+        "clear_runs_ms": [
+          [
+            7.100677001290023,
+            7.156200997997075
+          ],
+          [
+            6.005431001540273,
+            6.037669998477213
+          ],
+          [
+            5.71333899279125,
+            5.781001003924757
+          ]
+        ],
+        "reset_runs_ms": [
+          [
+            13.56340899656061,
+            14.177438002661802
+          ],
+          [
+            13.10803099477198,
+            13.596139004221186
+          ],
+          [
+            13.860498002031818,
+            14.241174008930102
+          ]
+        ],
+        "alternating_filter_runs_ms": [
+          [
+            8.015510000404902,
+            393.6910829943372
+          ],
+          [
+            8.230244988226332,
+            9.530701994663104
+          ],
+          [
+            9.125348005909473,
+            10.395709003205411
+          ]
+        ],
+        "clear_median_ms": 6.005431001540273,
+        "reset_median_ms": 13.56340899656061,
+        "counters": {
+          "clear": {
+            "bulk_filters": 1,
+            "row_calls": 5
+          },
+          "reset": {
+            "bulk_filters": 1,
+            "row_calls": 0
+          }
+        }
+      }
+    }
+  },
+  "validation": {
+    "unique_checks_passed": 15,
+    "full_suite_run": false,
+    "checks": {
+      "test_bom_window.BomWindowTests.test_cancelling_large_preview_clears_partial_rows_and_prevents_export": "ok",
+      "test_bom_window.BomWindowTests.test_close_during_scan_requests_stop_and_waits_for_worker": "ok",
+      "test_bom_window.BomWindowTests.test_detail_dialog_copies_its_row_and_hidden_or_cleared_selection_stays_consistent": "ok",
+      "test_bom_window.BomWindowTests.test_empty_search_can_be_cleared_without_changing_export_or_metrics": "ok",
+      "test_bom_window.BomWindowTests.test_export_cancel_and_failure_preserve_preview_and_existing_file": "ok",
+      "test_bom_window.BomWindowTests.test_failed_rescan_discards_stale_results_and_disables_export": "ok",
+      "test_bom_window.BomWindowTests.test_large_search_cache_preserves_unicode_selection_and_rescan_results": "ok",
+      "test_bom_window.BomWindowTests.test_metrics_tree_controls_and_selected_component_details": "ok",
+      "test_bom_window.BomWindowTests.test_page_cache_themes_small_window_and_scaling_keep_controls_visible": "ok",
+      "test_bom_window.BomWindowTests.test_real_scan_nested_tree_filter_and_excel_export_preserve_full_bom": "ok",
+      "test_bom_window.BomWindowTests.test_unchanged_bom_layout_and_selection_do_not_redraw_widgets": "ok",
+      "test_menu_rendering.MenuRenderingTests.test_new_pages_reuse_table_styles_and_theme_and_scale_still_refresh_them": "ok",
+      "test_menu_rendering.MenuRenderingTests.test_preloading_keeps_active_page_data_and_settings_unchanged": "ok",
+      "test_menu_rendering.MenuRenderingTests.test_preloaded_pages_stay_hidden_after_dpi_changes": "ok",
+      "test_gui_flow.GUIFlowTests.test_rapid_menu_clicks_leave_only_final_page_highlighted": "ok"
+    },
+    "runs": [
+      {
+        "count": 15,
+        "passed": 13,
+        "failed": 2
+      },
+      {
+        "count": 3,
+        "passed": 3,
+        "failed": 0
+      }
+    ],
+    "note": "Two test-only assertion errors corrected; affected checks rerun successfully."
+  },
+  "after_sha256": {
+    "bom/window.py": "390fd7cc36bfe7753e174ebe11ad3e8cb17c965ddf46cf55fc97955005d1961e",
+    "gui/layout.py": "d3885b03d5c259ce5176c60850c3dbd0c2f9e4afdd6380c4157d5470cb8571b4",
+    "tests/test_bom_window.py": "f953d303e90c02e004bb56a71da1d61f53cb88731cdfe9af40608d6890eed59d",
+    "tests/test_menu_rendering.py": "0f5f7d1cc1bb0745c0bbd8fd2ada30bec21e62630a6d4fad2c02dbae8ad988b3",
+    "docs/report-tools/benchmark_bom_navigation.py": "de9f1796cd30df4ee9f761462fcfed9dec32d8b754ed29c72ba62405a419ed1c",
+    "docs/report-tools/benchmark_gui_events.py": "1a3e68196ab84decf31b6245ef6c8aea22ec0bd36e27fe133384c8dea1fe9220"
+  }
+}

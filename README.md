@@ -52,7 +52,7 @@ Yan menü Dışa Aktarım ve Mühendislik olarak gruplandı. Sade ayar kartları
 - Dosyaya çift tıklayarak veya seçili dosyada **Enter** ile tam kaynak/çıktı yollarını ve açıklamayı açın. **Ayrıntıları kopyala** bilgileri panoya kopyalar. **Escape** ayrıntı penceresini kapatır.
 - Küçük pencerede ayar alanı kaydırılabilir; sonuç listesi görünür kalır. İkonlar ve tablo yazıları ekran ölçeklemesine uyum sağlar. %125 widget ölçeklemesi test edildi; tüm Windows monitör/DPI kombinasyonları bu bulut testinin kapsamında değildir.
 
-[Güncel ekran galerisi](docs/ui-preview/README.md), [açık tema](docs/ui-preview/screenshots/iso-fits-light.png), [siyah tema](docs/ui-preview/screenshots/dxf-dwg-dark.png) ve [GUI tasarım/doğrulama notları](docs/gui-design.md).
+[Güncel ekran galerisi](docs/ui-preview/README.md), [açık tema](docs/ui-preview/screenshots/iso-fits-light.png), [siyah tema](docs/ui-preview/screenshots/dxf-dwg-dark.png), [GUI tasarım/doğrulama notları](docs/gui-design.md) ve [menü akıcılığı ölçümleri](docs/menu-responsiveness.md).
 
 ## ISO GEÇMELERİ
 
