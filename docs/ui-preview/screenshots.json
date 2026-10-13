@@ -1,7 +1,7 @@
 [
   {
     "file": "docs/ui-preview/screenshots/pdf-light.png",
-    "sha256": "cb1d032f596a5eeecacf4cd6b6ae03cd246672678f2850496e5472d73d5936ae",
+    "sha256": "5979006f7b14f0006db6cb08fa7871e267c084e306c2c17868270ad809f7b2fd",
     "mode": "pdf",
     "theme": "Açık",
     "size": "1240x860",
@@ -14,7 +14,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/pdf-dark.png",
-    "sha256": "82b854aafbfa0bb6be27a7cc71d004e25840a83df0fa7f8641e6dc6867888df4",
+    "sha256": "b5c4ac868daeecb97b5235146524553cd35fdaca2a605613f6bdab50590fc063",
     "mode": "pdf",
     "theme": "Koyu",
     "size": "1240x860",
@@ -27,7 +27,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-light.png",
-    "sha256": "ed5e8d27a1ccbf77b1b83b2693dcb05cb8a15b6601ebce552502ee02898781cb",
+    "sha256": "43c52e4e8c61845d4986b14ec4cc330ef04e5aa04e0ee0577f0b1ebb10f73b84",
     "mode": "dxf_dwg",
     "theme": "Açık",
     "size": "1240x860",
@@ -40,7 +40,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark.png",
-    "sha256": "1256b4aae680f14ff9bbfa3de2ac8199c173eeed6772736783d753e168318fc0",
+    "sha256": "fe016c759b66ecdb75fc2a7f4f592339bd2b39aacbc5c4c9aeba54a168c17324",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1240x860",
@@ -53,7 +53,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-light.png",
-    "sha256": "95639ae7bf8e686562db427b2a5a0a4c80c1d7cf669ca862f846e3c3a85a2bbd",
+    "sha256": "c2976c6faa295a4572fd3255fb282f709a2c453f54b784cb075f11e6226ff75b",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -66,7 +66,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-dark.png",
-    "sha256": "96d78dba9e4f31d00acaaab97ca15b656ceb40e0337299882f7ae4deb861d5e3",
+    "sha256": "d4312710041333a8d736207f0d5dfe877208035f278d5116111d62d15345f196",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -79,7 +79,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-light.png",
-    "sha256": "ba28ee647d3431198e3b8052451784e30f9da61f536b37b3fd214d323ae607c1",
+    "sha256": "551a405e2e2505d174a0f3a0599fd9b2a6b913ebc2e7ef169cf31901b902051f",
     "mode": "iso_fits",
     "theme": "Açık",
     "size": "1240x860",
@@ -89,7 +89,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-dark.png",
-    "sha256": "446c7ef646e3f0634fb3e43d172c34ac0152d120e759fa6d479e032bf1055498",
+    "sha256": "3c1d2d1ff1e10b80e29fb04a6d6a1d5e53f088ba55804479f65e5a228bacda88",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -99,7 +99,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-light.png",
-    "sha256": "89ed529478ebe0f6cd097e843acb8ec0f0c7a1f13fea47c9c228ee184efa453a",
+    "sha256": "7f8ecff16379d20066a351431f6e181294d175597de32a28ab467019f24c1c6e",
     "mode": "geometric_tolerances",
     "theme": "Açık",
     "size": "1240x860",
@@ -109,7 +109,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-dark.png",
-    "sha256": "7f4cccf13a0413201a76bf095dd3f377a22a535e5e4e7d8adf1bdf0916cf7ff5",
+    "sha256": "c1d628bcf971f9b45b9313582449dc23e76c38ed888741f903c27e1ab6383b25",
     "mode": "geometric_tolerances",
     "theme": "Koyu",
     "size": "1240x860",
@@ -119,7 +119,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-light.png",
-    "sha256": "d817a8224c14028a0190b7f098b26aa9db10f4cdb0e0d822bb305b6eb8b8eea7",
+    "sha256": "6f8fca041f396806d12b6eeeeceb26b557f8bd915a404d852932be567ff7cffb",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -132,7 +132,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark.png",
-    "sha256": "835e7ac5ec628b9206f4c9533c230a9bf225f5376ebfc4765c1af595831765a1",
+    "sha256": "aef05fb4ae194f686bc29042a8d7530efb955636f1df283378906961c9314c12",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -145,7 +145,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-calibration-light.png",
-    "sha256": "65a5c3a2ed9464c64a2802adbe34a14383e3160e3325e5fa7eb808160c6292fa",
+    "sha256": "0dffeb3f9db550365716f6a3ca7232703ae9a8f2fbfb26011ac365d03446dcb1",
     "mode": "k_factor",
     "theme": "Açık",
     "size": "1240x860",
@@ -158,7 +158,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-calibration-dark.png",
-    "sha256": "e71c1394ae6f18975883e3cb246e125f06ace6ef50c0408c58e52605fc51528d",
+    "sha256": "8507783b3a73749700d99692fa57e74b83865f5ed59e26af7b23c95ca73040a9",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -171,7 +171,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h6-dark.png",
-    "sha256": "419d39fbc4b4e70321e267d1738a4e179d75e366ec31551110ae0c607303a3c7",
+    "sha256": "12435fbffa00fbd8832a19ba5d58026302946a3ae4b60d3023b2d6e2586b0dda",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -181,7 +181,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h8-dark.png",
-    "sha256": "4e15d818efb13ec01a65d677ac8f6d7d5c3e942b20e675fd4b206002fff217d3",
+    "sha256": "54fa4b80d25fb556ce7a1d953f6e32685af5e3f3ebd7eb0a991c44e7903e0d71",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -191,7 +191,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-comparison-dark.png",
-    "sha256": "92475879b304a66030fc356d2e1214144d1824dda5e9f9c7ef82379b7722b158",
+    "sha256": "13222d4847bc665e58fcb53561b5227047748183427b89bef04097262e30bdaf",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -201,7 +201,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-light.png",
-    "sha256": "b342ec9302079f293c678940128969d3589c4960b4a54d44767792f392a9a230",
+    "sha256": "6f0e3a8b7675b297fd8c72620e7b724e4c1fb9bc8214b39314db2ee7286e28bc",
     "mode": "iso_fits",
     "theme": "Açık",
     "size": "1240x860",
@@ -211,7 +211,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-dark.png",
-    "sha256": "1ef8bc4197c19d764155d0eb41158c3be65913a945f1c73edf23ba000150481c",
+    "sha256": "d7af9b0052eebf272b12a72052b5adc57ee14e88f9b3eb4d9ba1c334af679332",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -221,7 +221,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark-small.png",
-    "sha256": "310f549961c10ab0d01eb16522cfc4c93173a54a277da41008b52ffebc8283b6",
+    "sha256": "b2a67f089851e5481e44e96869dd3d338086775a3cdfdf9b55c7fcd03c3cd243",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1000x690",
@@ -234,7 +234,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark-small.png",
-    "sha256": "445698daaee0cd1ee8d2c9624463d7ba5578146e53365a62fdfafce0c17a2e79",
+    "sha256": "d4e68f8313ebb5b3712201aafdd648b2b3a808d23451a7283452ccd5b8ec6a8b",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1000x690",

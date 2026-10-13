@@ -9,7 +9,7 @@ from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, UNIT_LABELS, SECTIO
 from gui.icons import set_window_icon
 from gui.rendering import configure_changed
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
+                       SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 
 
 class BoltView:
@@ -186,7 +186,7 @@ class BoltView:
             configure_changed(w['capacity'], text='Geçerli değerler girildiğinde kapasite burada görünür.')
         else:
             verdict = 'Yük yok' if not r.loaded else 'Güvenli' if r.safe else 'Güvensiz'
-            color = AMBER if not r.loaded else GREEN if r.safe else RED
+            color = AMBER if not r.loaded else SUCCESS if r.safe else RED
             summary = ('Bir yük girerek dayanımı kontrol edin.' if not r.loaded else
                        f'Seçilen {fmt(r.safety_factor)} emniyet hedefi ' + ('sağlanıyor.' if r.safe else 'sağlanmıyor.'))
             usage = f'Kapasite kullanımı: %{fmt(r.utilization*100, 1)}'
@@ -248,7 +248,7 @@ class BoltView:
                 f'kg yük dönüşümü: standart yerçekimi g = 9,80665 m/s².\n\n{SCOPE}')
         self.clipboard_clear()
         self.clipboard_append(text)
-        self.status_label.configure(text='Hesap ve varsayımlar panoya kopyalandı.', text_color=GREEN)
+        self.status_label.configure(text='Hesap ve varsayımlar panoya kopyalandı.', text_color=SUCCESS)
 
     def _show_bolt_method(self):
         self._close_detail()

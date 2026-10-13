@@ -99,7 +99,7 @@ class FinalGUIAuditTests(LayoutGuiTestCase):
                     self.app.update()
                     self.assert_inside(field, canvas)
 
-    def test_readable_theme_contrast_and_green_primary_buttons(self):
+    def test_readable_theme_contrast_and_primary_buttons(self):
         def luminance(color):
             rgb = [int(color[i:i+2], 16)/255 for i in (1, 3, 5)]
             linear = [c/12.92 if c <= .04045 else ((c+.055)/1.055)**2.4 for c in rgb]

@@ -8,7 +8,7 @@ from unittest.mock import patch
 import customtkinter as ctk
 from support.gui import GuiTestCase
 
-from gui.theme import ACCENT, ACCENT_BG, GREEN
+from gui.theme import ACCENT, ACCENT_BG, SUCCESS
 from iso_fits import window as iso_view
 from iso_fits.rules import PRESETS
 from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
@@ -91,7 +91,7 @@ class MenuRenderingTests(GuiTestCase):
         self.app._switch_mode('bom')
         self.app._change_theme('Koyu')
         self.settle()
-        self.assertEqual(str(original.tag_configure('success', 'foreground')), GREEN[1])
+        self.assertEqual(str(original.tag_configure('success', 'foreground')), SUCCESS[1])
         self.assertEqual(str(self.app.bom_widgets['tree'].tag_configure('assembly', 'foreground')), ACCENT[1])
         ctk.set_widget_scaling(1.25)
         self.settle()

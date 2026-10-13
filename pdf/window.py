@@ -27,9 +27,9 @@ from gui.typography import check_turkish_fonts
 from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
+                       SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
                        NAV_ACTIVE, NAV_ACCENT, NAV_MUTED, NAV_HOVER,
-                       ACCENT_HOVER, configure_widget_theme)
+                       ACCENT_HOVER, PRIMARY_TEXT, configure_widget_theme)
 LABELS = {"pending": "Bekliyor", "running": "İşleniyor", "success": "Başarılı",
           "partial": "Kısmen tamamlandı", "skipped": "Atlandı", "error": "Hata"}
 FILTERS = {"Tüm durumlar": None, "Bekleyen": "pending", "İşleniyor": "running",
@@ -326,8 +326,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
             border_width=0, border_color=BORDER,
             fg_color=ACCENT if primary else SECONDARY,
             hover_color=ACCENT_HOVER if primary else HOVER,
-            text_color=("#FFFFFF", "#10231D") if primary else TEXT, text_color_disabled=MUTED,
-            image=self._icon(icon, ("#FFFFFF", "#10231D") if primary else MUTED, 18) if icon else None,
+            text_color=PRIMARY_TEXT if primary else TEXT, text_color_disabled=MUTED,
+            image=self._icon(icon, PRIMARY_TEXT if primary else MUTED, 18) if icon else None,
             font=ctk.CTkFont(family=UI_FONT, size=12, weight="bold"), **kwargs)
 
     def _change_theme(self, selection):
@@ -913,7 +913,7 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
                 text = f"Tamamlandı · {summary['succeeded']} {unit}, {summary['skipped']} atlanan, {summary['failed']} hatalı."
             if summary.get('partial'):
                 text += f" {summary['partial']} parçada bazı biçimler hazır, bazıları tamamlanamadı."
-            color = AMBER if summary["failed"] or summary.get('partial') else GREEN
+            color = AMBER if summary["failed"] or summary.get('partial') else SUCCESS
         if summary.get('warnings'):
             text += ' · Uyarı: '+ '; '.join(summary['warnings'])
             color = AMBER

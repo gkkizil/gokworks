@@ -12,7 +12,7 @@ from gui.text import turkish_upper
 from gui.rendering import configure_changed, hide_grid
 
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
+                       SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 from iso_fits.diagram import draw
 from iso_fits.manual import (calculate_manual, compare_classes, usage_hint,
                              TARGETS, closest_pair, closest_classes, compatibility)
@@ -23,7 +23,7 @@ SAMPLES = ('En az boşluk', 'Orta değer', 'En çok boşluk')
 VIEWS = ('Montaj kesiti', 'Tolerans bölgeleri')
 METHODS = ('ISO seçimi', 'Manuel kontrol')
 BASES = ('Tümü', 'Delik esaslı', 'Mil esaslı')
-COLORS = {'clearance': GREEN, 'transition': AMBER, 'interference': RED}
+COLORS = {'clearance': SUCCESS, 'transition': AMBER, 'interference': RED}
 SOURCE_TEXT = '''ISO 286 · Delik ve mil geçmeleri
 
 Nominal çap, delik ve mil için ortak ana ölçüdür. Bu ekran 1–400 mm aralığında, tablolarla doğrulanan 11 delik ve 18 mil sınıfını sunar. Delik sınıfı büyük harfle, mil sınıfı küçük harfle gösterilir. Örneğin H7/h6, H7 deliği ile h6 milinin eşleşmesidir.
@@ -434,7 +434,7 @@ class IsoFitsView:
                                 'Girilen ölçüler ISO sınıfına dönüştürülmez.')
             assessment = compatibility(fit, self.iso_state['target'].get())
             configure_changed(self.iso_widgets['compatibility_title'], text=assessment.title, text_color={
-                'compatible': GREEN, 'incompatible': RED, 'boundary': AMBER, 'conditional': AMBER, 'info': MUTED}[assessment.status])
+                'compatible': SUCCESS, 'incompatible': RED, 'boundary': AMBER, 'conditional': AMBER, 'info': MUTED}[assessment.status])
             configure_changed(self.iso_widgets['compatibility_text'], text=self._compatibility_text(fit))
             configure_changed(self.iso_widgets['iso_comparison'], text=(
                 'DELİK · '+self._iso_match_text(fit.hole, 'hole')+'\n\nMİL · '+self._iso_match_text(fit.shaft, 'shaft')+
@@ -558,7 +558,7 @@ class IsoFitsView:
             with open(path, 'w', newline='', encoding='utf-8-sig') as stream:
                 writer = csv.writer(stream, delimiter=';')
                 writer.writerow(('Parametre', 'Değer')); writer.writerows(self._iso_report_rows())
-            self.status_label.configure(text=f'CSV raporu kaydedildi: {path}', text_color=GREEN)
+            self.status_label.configure(text=f'CSV raporu kaydedildi: {path}', text_color=SUCCESS)
         except OSError as error:
             self.status_label.configure(text=f'CSV kaydedilemedi: {error}', text_color=RED)
 

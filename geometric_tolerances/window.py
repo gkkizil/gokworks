@@ -13,7 +13,7 @@ from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE
 from geometric_tolerances.diagram import draw, symbol
 from geometric_tolerances.rules import DATUM_CHOICES, fmt, specify
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT)
+                       SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 
 
 class GeometricTolerancesView:
@@ -273,7 +273,7 @@ class GeometricTolerancesView:
                 value += '\nNormal sınır: ±'+fmt(spec.tolerance/2)+' mm'
             configure_changed(self.gdt_widgets['value'], text=value, text_color=ACCENT)
             configure_changed(self.gdt_widgets['assessment'], text=self._gdt_assessment(), text_color=
-                MUTED if spec.accepted is None else GREEN if spec.accepted else RED)
+                MUTED if spec.accepted is None else SUCCESS if spec.accepted else RED)
             configure_changed(self.status_label, text=f'ASME Y14.5-2018 · § {item.reference} · Girilen tolerans; teorik ölçüler ve boyut sınırları ayrıca tanımlanmalıdır.', text_color=MUTED)
             for key in ('copy', 'export'):
                 configure_changed(self.gdt_widgets[key], state='normal')
@@ -375,7 +375,7 @@ class GeometricTolerancesView:
         if rows:
             self.clipboard_clear()
             self.clipboard_append('\n'.join(f'{key}: {value}' for key, value in rows))
-            self.status_label.configure(text='Geometrik tolerans sonucu panoya kopyalandı.', text_color=GREEN)
+            self.status_label.configure(text='Geometrik tolerans sonucu panoya kopyalandı.', text_color=SUCCESS)
 
     def _save_gdt_report(self):
         rows = self._gdt_report_rows()
@@ -393,7 +393,7 @@ class GeometricTolerancesView:
         except OSError as error:
             self.status_label.configure(text=f'CSV kaydedilemedi: {error}', text_color=RED)
         else:
-            self.status_label.configure(text='Geometrik tolerans CSV raporu kaydedildi.', text_color=GREEN)
+            self.status_label.configure(text='Geometrik tolerans CSV raporu kaydedildi.', text_color=SUCCESS)
 
     def _show_gdt_guide(self):
         self._close_detail()

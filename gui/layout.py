@@ -7,8 +7,8 @@ import customtkinter as ctk
 from gui.icons import make_logo
 from gui.text import BOM_TITLE, KR_TITLE, KR_NAV_TITLE
 from gui.theme import (BG, SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
-                       ACCENT_BG, GREEN, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT,
-                       NAV_TEXT, NAV_MUTED, NAV_ACTIVE, NAV_ACCENT, NAV_HOVER)
+                       ACCENT_BG, SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT,
+                       NAV_TEXT, NAV_MUTED, NAV_ACTIVE, NAV_ACCENT, NAV_HOVER, PRIMARY_TEXT)
 
 
 class ResultsTabview(ctk.CTkTabview):
@@ -236,7 +236,7 @@ class WorkspaceLayout:
         return ctk.CTkCheckBox(
             parent, text=text, variable=variable, height=28, checkbox_width=18,
             checkbox_height=18, corner_radius=4, border_width=2, fg_color=ACCENT,
-            hover_color=HOVER, checkmark_color=("#FFFFFF", "#10231D"),
+            hover_color=HOVER, checkmark_color=PRIMARY_TEXT,
             border_color=MUTED, text_color=TEXT,
             font=ctk.CTkFont(family=UI_FONT, size=12),
         )
@@ -265,7 +265,7 @@ class WorkspaceLayout:
         self.stats_frame = ctk.CTkFrame(self.workspace, fg_color="transparent")
         self.stats_frame.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 14))
         metrics = [
-            ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Uygulanan" if self.mode == "k_factor" else "Başarılı", GREEN, "check"),
+            ("total", "Toplam parça" if self.mode == "k_factor" else "Toplam dosya", TEXT, "file"), ("succeeded", "Uygulanan" if self.mode == "k_factor" else "Başarılı", SUCCESS, "check"),
             ("skipped", "Atlanan", AMBER, "skip"), ("failed", "Hatalı", RED, "error"),
         ]
         for index, (key, caption, color, icon) in enumerate(metrics):
@@ -415,7 +415,7 @@ class WorkspaceLayout:
             table.column("status", width=round(152 * scale), minwidth=round(80 * scale))
             for column in ("file", "detail"):
                 table.column(column, minwidth=round(80 * scale))
-            for status, value in (("pending", MUTED), ("running", ACCENT), ("success", GREEN),
+            for status, value in (("pending", MUTED), ("running", ACCENT), ("success", SUCCESS),
                                   ("partial", AMBER), ("skipped", AMBER), ("error", RED)):
                 table.tag_configure(status, foreground=color(value))
             table.tag_configure("stripe", background=color(INPUT))

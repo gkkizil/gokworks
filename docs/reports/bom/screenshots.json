@@ -1,7 +1,7 @@
 [
   {
     "file": "docs/reports/bom/screenshots/bom-parts-light.png",
-    "sha256": "6ee3fc2cef7d7874898bdd35480790eec4639b760d561591153f496a01a2cb9e",
+    "sha256": "44947f28693b1120f787f81fff9fd9752f64e935b671d7603fbf7ba94780ba1b",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -14,7 +14,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-light.png",
-    "sha256": "f822e1df29fd5c0c37dc63168f3f49442c5f2fd759bb7c4595d0365c6ec330bc",
+    "sha256": "c54e1bdba18e465c58b63fbde849f0af6ce1766a39aeec65bbe7e3cc547f10e7",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -27,7 +27,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-parts-dark.png",
-    "sha256": "c1fe9a48612648ddca8c953874f448116d5d8e42b4b206fa001ecd4fa1b59ccb",
+    "sha256": "848e2540bbeb110f67381aa15b18b2e6767da43e60e5786a78bb11df9fa8f0d7",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -40,7 +40,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark.png",
-    "sha256": "7bf3a0777fcaea151385dd35950246661d44684c888f5c1f81edd5d20269e83b",
+    "sha256": "3656da2419ab0d3bc96982bb13a78186434173e98f7c5470ceee8a6ab6fb8a6f",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -53,7 +53,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-small.png",
-    "sha256": "78db68981063f3789e5ccb7e365501302de94fa458149e186c572f06f2ed2f21",
+    "sha256": "3c9c444aea0867f5a74737ab8af2dd57673537155e0ccd5790add2d088ff63a6",
     "size": "1000x690",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -66,7 +66,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-125pct.png",
-    "sha256": "31ed4c02fbc128ebcfb1132dbc4e1bfdb592decf275e56b3ca73074a1c827ab6",
+    "sha256": "4d56fb0cfea5926e2b8ad90caa816f188d4b1ea6ebdb8894f79f0fa3b6dcade6",
     "size": "1240x860",
     "widget_scale": 1.25,
     "synthetic_data": true,
@@ -79,7 +79,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-parts-light-empty.png",
-    "sha256": "a521707f5e69b3a03f52caec82e9de93f6e6b6a8261c5e27780d991d9bfa19ec",
+    "sha256": "499d610735e8c40d585bd5ffd072bd32651ecec35a380979a91435dce602a973",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,

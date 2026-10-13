@@ -24,17 +24,17 @@
   "screenshots": [
     {
       "file": "docs/reports/bolt/screenshots/combined-dark.png",
-      "sha256": "7de94313c926938426dc145d3154e892586a3c45dea711b825ceda26b19e8ba1",
+      "sha256": "b65843c50a199522543a1358b89ecb890f6c79c577b4320ccc5eb910538b9f35",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/tension-light.png",
-      "sha256": "f61c3088056b800f2e32e38e459268070ebae24df232b2bf5c3b64ed47f607b5",
+      "sha256": "c1ffaf830f551af4ce332a19f584c88c022dd66712bb45dbd3d7cf6cd7a38cec",
       "real_tk_capture": true
     },
     {
       "file": "docs/reports/bolt/screenshots/unsafe-dark-small.png",
-      "sha256": "1585bd524d8015b9ed3e654fd638842cea2ad883134cc3c2697fa4181a32659f",
+      "sha256": "28af9cb6b0c1a44e7c97c504fbf58029deb379e5e642ea20ed67fe9416503b87",
       "real_tk_capture": true
     }
   ],
@@ -73,5 +73,13 @@
     "calculation_tests_rerun": false,
     "exe_built": false,
     "layout_check": "test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram: ok"
+  },
+  "blue_theme_revision": {
+    "date": "2026-10-13",
+    "change": "Light blue and layered navy surfaces; blue accents and success states.",
+    "native_captures_refreshed": 3,
+    "calculation_tests_rerun": false,
+    "exe_built": false,
+    "targeted_theme_checks_passed": 2
   }
 }

@@ -15,7 +15,7 @@ from gui.icons import set_window_icon
 from gui.rendering import configure_changed, hide_grid
 from gui.text import BOM_TITLE, BOM_TREE_TAB
 from gui.theme import (PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT, ACCENT_BG,
-                       SECONDARY, HOVER, GREEN, RED, AMBER, UI_FONT)
+                       SECONDARY, HOVER, SUCCESS, RED, AMBER, UI_FONT)
 
 
 class BomTabs(ctk.CTkTabview):
@@ -641,11 +641,11 @@ class BomView:
         elif state == 'cancelled':
             text, color = 'Durduruldu · Yeni bir Excel dosyası oluşturulmadı.', AMBER
         elif state == 'exported':
-            text, color = f'Excel kaydedildi: {outcome["path"]}', GREEN
+            text, color = f'Excel kaydedildi: {outcome["path"]}', SUCCESS
         else:
             result = self.bom_result
             text, color = (f'Tarama tamamlandı · {result.total_parts} parça adedi · '
-                           f'Atlanan bileşen: {result.suppressed} bastırılmış, {result.excluded} BOM dışı.'), GREEN
+                           f'Atlanan bileşen: {result.suppressed} bastırılmış, {result.excluded} BOM dışı.'), SUCCESS
         if self.bom_result is None and state in ('error', 'cancelled'):
             self.bom_widgets['assembly'].configure(text='Tarama tamamlanamadı' if state == 'error' else 'Tarama durduruldu')
             self.bom_widgets['configuration'].configure(text='Montajı tara düğmesiyle yeniden deneyin.')

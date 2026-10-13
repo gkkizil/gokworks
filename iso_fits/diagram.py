@@ -1,7 +1,7 @@
 """Tk üzerinde şematik montaj kesiti ve gerçek sapma ölçeğiyle bölge grafiği."""
 
 from gui.theme import (INPUT, PANEL, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
-                       GREEN, AMBER, RED, UI_FONT)
+                       SUCCESS, AMBER, RED, UI_FONT, PRIMARY_TEXT)
 from iso_fits.rules import CLASSIFICATION, format_mm, format_deviation, mm
 
 
@@ -68,7 +68,7 @@ def _draw_section(canvas, fit, sample, appearance, scale, color):
         for x in range(round(left+8*scale), round(right), max(1, round(24*scale))):
             canvas.create_line(x, y1-2*scale, min(right-2*scale, x+min(20*scale, y1-y0-4)), y0+2*scale, fill=color(MUTED))
     shaft_top, shaft_bottom = center-shaft_height/2, center+shaft_height/2
-    edge = color(GREEN if difference > 0 else RED if difference < 0 else AMBER)
+    edge = color(SUCCESS if difference > 0 else RED if difference < 0 else AMBER)
     canvas.create_line(12*scale, center, width-12*scale, center,
                        fill=color(MUTED), dash=(8, 3, 2, 3), tags='axis')
     shaft_left, shaft_right = width*.25, width*.75
@@ -104,7 +104,7 @@ def _draw_section(canvas, fit, sample, appearance, scale, color):
     text(width/2, 16*scale, f'DELİK {fit.hole.code} · D = Ø{format_mm(hole)} mm',
          font=bold, width=width-24*scale, tags='hole_label')
     text(width/2, center, f'MİL {fit.shaft.code}\nd = Ø{format_mm(shaft)} mm',
-         fill='#10231D' if appearance == 'Dark' else '#FFFFFF', font=bold,
+         fill=color(PRIMARY_TEXT), font=bold,
          width=shaft_right-shaft_left-12*scale, tags='shaft_label')
     canvas.create_line(12*scale, 197*scale, width-12*scale, 197*scale, fill=color(BORDER))
     state = 'BOŞLUK VAR' if difference > 0 else 'SIKILIK VAR' if difference < 0 else 'SINIRDA TEMAS'
