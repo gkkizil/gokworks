@@ -1,0 +1,15 @@
+2026-10-13 — neutral dark theme with blue accents.
+Light palette values remain unchanged. Contrast check passed. No EXE build.
+
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_readable_theme_contrast_and_primary_buttons (test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_primary_buttons) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.449s
+
+OK

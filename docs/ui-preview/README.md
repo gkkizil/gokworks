@@ -4,8 +4,8 @@
 
 13 Ekim 2026. Product Design ile mevcut masaüstü arayüzü revize edildi.
 Yedi çalışma alanı ortak başlık, simge, işlem alanı ve daha yumuşak kartlar
-kullanır. Açık temada beyaz ve açık mavi yüzeyler, koyu temada katmanlı
-lacivert yüzeyler vardır. Ana düğmeler, seçimler ve başarılı sonuçlar mavi
+kullanır. Açık temada beyaz ve açık mavi yüzeyler, koyu temada siyah ve
+koyu gri yüzeyler vardır. Ana düğmeler, seçimler ve başarılı sonuçlar mavi
 tonlarındadır. Menü seçimi 140 ms içinde yumuşakça değişir; içerik
 hemen kullanılabilir. Görseller çalışan Tk uygulamasından alındı;
 SolidWorks bağlantısı veya gerçek CAD çıktısı içermez.
@@ -72,6 +72,10 @@ sayfaların tema/tablo renklerinin yenilenmesi için **2 hedefli kontrol
 geçti**. Menü metninin açık temadaki kontrastı artırıldı. 31 ekran güncel
 paletle yeniden çekildi; hesaplama testleri ve EXE derlemesi çalıştırılmadı.
 [Tema kontrol çıktısı](blue-theme-checks.log).
+
+Koyu tema daha sonra nötr siyah/koyu gri yüzeylere çevrildi; mavi vurgular
+ve açık mavi tema korundu. 19 koyu ekran yenilendi ve metin kontrastı
+kontrolü geçti. [Koyu tema kontrol çıktısı](dark-theme-check.log).
 
 K/R kontrollerinde alt COM nesnelerinin çıkış parametreleri düzeltildi;
 programın kendi konfigürasyon değişikliği önceden kaydedilmemiş düzenleme

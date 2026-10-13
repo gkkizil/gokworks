@@ -14,7 +14,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/pdf-dark.png",
-    "sha256": "b5c4ac868daeecb97b5235146524553cd35fdaca2a605613f6bdab50590fc063",
+    "sha256": "5513505601ac39ef4afe448ddf6816f2cd032637905c05b9378c84fef6f8267f",
     "mode": "pdf",
     "theme": "Koyu",
     "size": "1240x860",
@@ -40,7 +40,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark.png",
-    "sha256": "fe016c759b66ecdb75fc2a7f4f592339bd2b39aacbc5c4c9aeba54a168c17324",
+    "sha256": "b574595b1de98997cbc1a3b76cf6f3ddfb99299da89542a34dcb9f5161912459",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1240x860",
@@ -66,7 +66,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-dark.png",
-    "sha256": "d4312710041333a8d736207f0d5dfe877208035f278d5116111d62d15345f196",
+    "sha256": "f72312ed1cf834566afca0f83ec6cfeea22e6377dee4ed3a41cff93e72466e8a",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -89,7 +89,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-dark.png",
-    "sha256": "3c1d2d1ff1e10b80e29fb04a6d6a1d5e53f088ba55804479f65e5a228bacda88",
+    "sha256": "6d54ab514ff9a6448668b42fa210ba367eadbef3af8d4727db0485d944f76ce0",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -109,7 +109,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/geometric-tolerances-dark.png",
-    "sha256": "c1d628bcf971f9b45b9313582449dc23e76c38ed888741f903c27e1ab6383b25",
+    "sha256": "8ee177525bce3248f5be5c3520eac7bde59eed548f6e950ed7b37ae4fd57db72",
     "mode": "geometric_tolerances",
     "theme": "Koyu",
     "size": "1240x860",
@@ -132,7 +132,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark.png",
-    "sha256": "aef05fb4ae194f686bc29042a8d7530efb955636f1df283378906961c9314c12",
+    "sha256": "452a2bb7dd629938c2286da575aa6e5354b9b4b59033dcc5319a093da476f254",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -158,7 +158,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-calibration-dark.png",
-    "sha256": "8507783b3a73749700d99692fa57e74b83865f5ed59e26af7b23c95ca73040a9",
+    "sha256": "60f02ada434dff26817c675c31a52b6f7b35af3bf82e4ecf6e42e52aafeafd94",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1240x860",
@@ -171,7 +171,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h6-dark.png",
-    "sha256": "12435fbffa00fbd8832a19ba5d58026302946a3ae4b60d3023b2d6e2586b0dda",
+    "sha256": "89d8c7acb6efb5668d8946a39adf4d97e02a5bee6c5f1ce3b23242ed60d1fd71",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -181,7 +181,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-h8-dark.png",
-    "sha256": "54fa4b80d25fb556ce7a1d953f6e32685af5e3f3ebd7eb0a991c44e7903e0d71",
+    "sha256": "fcc0d462acc8dd9193898a6c8add0c345e22581a0b9f894ab8dca067c35fa0d6",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -191,7 +191,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-manual-comparison-dark.png",
-    "sha256": "13222d4847bc665e58fcb53561b5227047748183427b89bef04097262e30bdaf",
+    "sha256": "07e2e80d4998a1641dfe0912e8f8004b496524d5f0041c5c888adb5e85a32f34",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -211,7 +211,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/iso-fits-shaft-basis-dark.png",
-    "sha256": "d7af9b0052eebf272b12a72052b5adc57ee14e88f9b3eb4d9ba1c334af679332",
+    "sha256": "41b6c68f5ebf60f02fcdbc2e63357a875169b48b4f87d9bffc2af3b742e35381",
     "mode": "iso_fits",
     "theme": "Koyu",
     "size": "1240x860",
@@ -221,7 +221,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/k-factor-manual-dark-small.png",
-    "sha256": "b2a67f089851e5481e44e96869dd3d338086775a3cdfdf9b55c7fcd03c3cd243",
+    "sha256": "f2dc14e8eebb431f4cd25639da8ac9ba0e1391c97e1c3dff94b6cf7ece4534b2",
     "mode": "k_factor",
     "theme": "Koyu",
     "size": "1000x690",
@@ -234,7 +234,7 @@
   },
   {
     "file": "docs/ui-preview/screenshots/dxf-dwg-dark-small.png",
-    "sha256": "d4e68f8313ebb5b3712201aafdd648b2b3a808d23451a7283452ccd5b8ec6a8b",
+    "sha256": "cf3b41a2db148bcb0298f11e4d4aaec905b652e711b30f3383ccf2f8ad09a2dc",
     "mode": "dxf_dwg",
     "theme": "Koyu",
     "size": "1000x690",

@@ -27,7 +27,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-parts-dark.png",
-    "sha256": "848e2540bbeb110f67381aa15b18b2e6767da43e60e5786a78bb11df9fa8f0d7",
+    "sha256": "6eeb59cdb0e71055e9627f3235922d8ea93c5c7921fedea852c656b97950abdf",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -40,7 +40,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark.png",
-    "sha256": "3656da2419ab0d3bc96982bb13a78186434173e98f7c5470ceee8a6ab6fb8a6f",
+    "sha256": "801a6e03f09cb85220576d9f92f645e5aeb4787269b5a5b5f964819018ce56e9",
     "size": "1240x860",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -53,7 +53,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-small.png",
-    "sha256": "3c9c444aea0867f5a74737ab8af2dd57673537155e0ccd5790add2d088ff63a6",
+    "sha256": "afa7acaba28ccee6c4d273dfb7a4f3f54599c409a45b81a59472e86c4db385cf",
     "size": "1000x690",
     "widget_scale": 1,
     "synthetic_data": true,
@@ -66,7 +66,7 @@
   },
   {
     "file": "docs/reports/bom/screenshots/bom-tree-dark-125pct.png",
-    "sha256": "4d56fb0cfea5926e2b8ad90caa816f188d4b1ea6ebdb8894f79f0fa3b6dcade6",
+    "sha256": "cab05957111eee25e4addf20f27b50edce53714bda113964a0bfe94dde61042c",
     "size": "1240x860",
     "widget_scale": 1.25,
     "synthetic_data": true,
