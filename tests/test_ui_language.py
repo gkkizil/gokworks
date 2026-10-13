@@ -18,9 +18,9 @@ class TurkishRenderingTests(GuiTestCase):
                     with self.subTest(family=family, weight=weight, char=char):
                         self.assertGreater(face.measure(char), 0)
         self.app._switch_mode('bom')
-        self.assertEqual(self.app.nav_buttons['bom'].cget('text'), 'BOM - ürün ağacı')
-        self.app.bom_widgets['tabs'].set('ürün ağacı')
-        self.assertEqual(self.app.bom_widgets['tabs'].get(), 'ürün ağacı')
+        self.assertEqual(self.app.nav_buttons['bom'].cget('text'), 'BOM - Ürün ağacı')
+        self.app.bom_widgets['tabs'].set('Ürün ağacı')
+        self.assertEqual(self.app.bom_widgets['tabs'].get(), 'Ürün ağacı')
 
     def test_uppercase_headings_use_turkish_dotted_i(self):
         self.assertEqual(turkish_upper('ürün ağacı'), 'ÜRÜN AĞACI')
