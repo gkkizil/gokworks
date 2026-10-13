@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-13",
+  "sources": [
+    {
+      "repository": "https://github.com/AmenJlili/power-sm",
+      "commit": "6c835fb712c18df8969500ec247a0768d3af0d37",
+      "file": "PowerSM/PowerSM/PowerGeometry_Form.cs",
+      "sha256": "414942eaa8ebdc429fdbe189976701105cd98658c72581a11c429897a6670155",
+      "finding": "GetSheetMetalFolder/GetFeature for parent; GetSheetMetals for child sheets."
+    },
+    {
+      "repository": "https://github.com/xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "file": "solidworks-api/document/sheet-metal/export-all-flat-patterns/Macro.vba",
+      "sha256": "e8bd7ffb6fb9f82207565b34a42821a94e510b229211d58e52ffd09653d71bb1",
+      "finding": "Type-based recursive feature/subfeature traversal."
+    },
+    {
+      "source": "https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/tag/v3.12.1",
+      "file": "SolidWorks.Interop.sldworks.xml",
+      "sha256": "f7ff9549f87c8abeaefdcf450ac0e435adfcefdfb68b66a9db9725ebdf404c61",
+      "members": [
+        "ISheetMetalFolder.GetSheetMetals",
+        "IFeature.GetTypeName2",
+        "ISheetMetalFeatureData.UseMaterialSheetMetalParameters"
+      ]
+    }
+  ],
+  "native_solidworks_executed": false,
+  "exe_built": false,
+  "targeted_checks_passed": 31,
+  "full_suite_run": false,
+  "tested_files": {
+    "k_factor/apply.py": "9766fd0571a9f67fde32c3dfbd91ccc6f4294e5a895aafc093b511b99e9e939b",
+    "tests/test_parent_k_radius.py": "4257c60fbbdffa34d5cf06314f0d0b364d8b8f1033d6cb520d9bc24aac808820"
+  }
+}

@@ -76,11 +76,14 @@ Durdur/iptal/hata durumunda bekleyen istek uygulanmaz.
 ## Ana SAC LEVHA hedefi ve geri okuma
 
 Modern parçada `Extension.GetTemplateSheetMetal()` ana sac klasörünün
-unsurunu verir. Açık bir null sonucu için `FeatureManager.GetSheetMetalFolder`
-ve `GetFeature` yolu kontrol edilir. Her iki API açıkça null döner ve ağaçta
-modern şablon yoksa eski yapıdaki tek `SheetMetal` unsuru kullanılabilir.
-API erişim hatası, farklı unsur türü veya okunamayan parametre başarıya
-çevrilmez. Lokalize unsur adına veya ağaç sırasına göre seçim yapılmaz.
+unsurunu verir. Null veya eksik API üyesi için `FeatureManager.GetSheetMetalFolder`
+ve `GetFeature` yolu kontrol edilir. Bu yollar sonuç vermezse ağaçtaki tek
+`TemplateSheetMetal` unsuru kullanılabilir. Modern şablon yoksa eski yapıdaki
+tek aktif `SheetMetal` unsuru kullanılır. Gövdeye ait sac unsurları ayrıca
+klasörün `GetSheetMetals()` listesinden alınır; yalnız görünür ağaca bağlı kalınmaz.
+Gerçek API çalışma hatası, çelişen tür, birden fazla aday veya okunamayan
+parametre başarıya çevrilmez. Lokalize ad veya ağaç sırası hedef belirlemez.
+Günlükte ana unsur, gövde unsuru ve ana unsurun bulunduğu yol gösterilir.
 
 Kalınlık, tek sac gövdesinin aktif `SheetMetal` tanımından okunur. Yazma öncesi
 ana unsur, alt sac ve dönüşüm tanımları bütün konfigürasyonlarda yedeklenir;
@@ -103,6 +106,8 @@ ve [dispatch testleri](../tests/test_kr_dispatch.py) API sözleşmesini test
 nesneleriyle doğrular. Bu kanıtlar Windows/SolidWorks 2025'te kullanıcının
 modelinin veya açınımının çalıştırıldığı anlamına gelmez; yukarıdaki yerel
 kabul kontrolü hâlâ gereklidir.
+
+[Sac unsurunu bulma araştırması ve yeni kontroller](reports/sheetmetal-discovery/README.md).
 
 ## Katıyı Saca Dönüştür ile oluşturulan parçalar
 

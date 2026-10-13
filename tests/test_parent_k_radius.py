@@ -12,7 +12,7 @@ from unittest.mock import patch
 from k_factor import apply as ap
 from k_factor.rules import ManualAssignment
 from support.fixtures import KApplyTestCase
-from support.solidworks import Definition, SheetFeature
+from support.solidworks import Definition, SheetFeature, FakeFeature
 from test_converted_k_radius import ConvertedFeature
 
 
@@ -125,6 +125,98 @@ class ParentApplyTests(KApplyTestCase):
         self.assertEqual(self.model.save_count, 1)
         self.assertIn('Parça dosyası kaydedildi', detail)
 
+    def test_missing_template_member_uses_the_documented_folder_feature(self):
+        class MissingTemplate:
+            @property
+            def GetTemplateSheetMetal(self):
+                error = RuntimeError('member not found')
+                error.hresult = -2147352573
+                raise error
+        self.model.Extension = MissingTemplate()
+        self.model.FeatureManager.GetSheetMetalFolder = lambda: SimpleNamespace(GetFeature=self.parent)
+        status, detail, _ = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('GetSheetMetalFolder.GetFeature', detail)
+        self.assertEqual(self.model.parent_states['Default']['k'], .274)
+        self.assertEqual(self.model.feature.modify_count, 0)
+
+    def test_unique_tree_template_is_used_when_discovery_apis_return_null(self):
+        self.model.Extension.GetTemplateSheetMetal = lambda: None
+        self.model.feature.next = self.parent()
+        for preview in (True, False):
+            with self.subTest(preview=preview):
+                status, detail, _ = self.process(preview=preview)
+                self.assertEqual(status, 'success', detail)
+                self.assertIn('Kaynak: unsur ağacı', detail)
+                self.assertEqual(self.model.parent_states['Default']['k'], .5 if preview else .274)
+                self.assertEqual(self.model.feature.modify_count, 0)
+
+    def test_folder_sheet_list_covers_children_absent_from_feature_tree(self):
+        self.model.FirstFeature = lambda: None
+        self.model.FeatureManager.GetSheetMetalFolder = lambda: SimpleNamespace(
+            GetFeature=self.parent, GetSheetMetals=lambda: (self.model.feature,))
+        for preview in (True, False):
+            with self.subTest(preview=preview):
+                status, detail, _ = self.process(preview=preview)
+                self.assertEqual(status, 'success', detail)
+                self.assertIn('1 SheetMetal alt unsuru doğrulandı' if not preview else 'Önizleme', detail)
+                self.assertEqual(self.model.states['Default']['k'], .5 if preview else .274)
+                self.assertEqual(self.model.feature.modify_count, 0)
+
+    def test_folder_list_and_tree_do_not_duplicate_the_same_sheet(self):
+        self.model.FeatureManager.GetSheetMetalFolder = lambda: SimpleNamespace(
+            GetFeature=self.parent, GetSheetMetals=lambda: (self.model.feature,self.model.feature))
+        status, detail, _ = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('1 SheetMetal alt unsuru doğrulandı', detail)
+        self.assertEqual(self.model.parent_writes, 1)
+
+    def test_unrelated_history_folder_does_not_block_sheet_discovery(self):
+        folder = FakeFeature('Geçmiş', 'HistoryFolder', next_feature=self.model.feature)
+        folder.IsSuppressed2 = lambda *args: None
+        folder.GetDefinition = lambda: (_ for _ in ()).throw(AssertionError('History has no K/R.'))
+        self.model.FirstFeature = lambda: folder
+        status, detail, _ = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.parent_states['Default']['k'], .274)
+
+    def test_instant3d_wrapper_uses_its_underlying_sheet_feature_type(self):
+        self.model.feature.GetTypeName2 = lambda: 'ICE'
+        self.model.feature.GetTypeName = lambda: 'SheetMetal'
+        status, detail, _ = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+
+    def test_multiple_tree_templates_are_rejected_without_writing(self):
+        self.model.Extension.GetTemplateSheetMetal = lambda: None
+        first, second = self.parent(), self.parent()
+        second.Name = 'SAC LEVHA – İkinci'
+        first.next = second
+        self.model.feature.next = first
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('Birden fazla ana SAC LEVHA', detail)
+        self.assertEqual(self.model.parent_writes, 0)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_gauge_table_is_checked_before_reading_the_material_property(self):
+        class GaugeDefinition(ParentDefinition):
+            @property
+            def UseMaterialSheetMetalParameters(self):
+                raise AssertionError('This property is invalid when a gauge table is used.')
+
+            @UseMaterialSheetMetalParameters.setter
+            def UseMaterialSheetMetalParameters(self, value):
+                pass
+        self.model.parent_gauge = True
+        with patch.object(ParentFeature, 'GetDefinition', lambda feature: GaugeDefinition(feature)):
+            status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('Sac kalınlık tablosuna bağlı parça', detail)
+        self.assertNotIn('This property is invalid', detail)
+        self.assertEqual(self.model.parent_writes, 0)
+        self.assertEqual(self.model.save_count, 0)
+
     def test_tree_order_and_localized_display_name_do_not_select_a_child(self):
         parent = self.parent()
         self.model.feature.next = parent
@@ -225,9 +317,6 @@ class ParentApplyTests(KApplyTestCase):
         self.model.FeatureManager.GetSheetMetalFolder = broken
         self.assertEqual(self.process()[0], 'error')
         self.model.FeatureManager.GetSheetMetalFolder = lambda: SimpleNamespace(GetFeature=lambda: None)
-        self.assertEqual(self.process()[0], 'error')
-        self.model.FeatureManager.GetSheetMetalFolder = lambda: None
-        self.model.feature.next = self.parent()
         self.assertEqual(self.process()[0], 'error')
         self.assertEqual(self.model.parent_writes, 0)
         self.assertEqual(self.model.feature.modify_count, 0)

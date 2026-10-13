@@ -17,6 +17,7 @@ ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
 NEEDS_REBUILD = 2  # swActivateDocError_e.swDocNeedsRebuildWarning
 TEMPLATE_SHEET = "TemplateSheetMetal"
 CONVERT_SOLID = "SolidToSheetMetal"  # IFeature.GetTypeName2; not the display name.
+MISSING_MEMBER = {-2147352573, -2147352570}  # DISP_E_MEMBERNOTFOUND / UNKNOWNNAME
 
 
 def _read(obj, member):
@@ -25,6 +26,32 @@ def _read(obj, member):
         return _value(obj, member)
     except Exception as error:
         raise RuntimeError(f"SolidWorks API · {member}: {error}") from error
+
+
+def _optional_read(obj, member):
+    """Missing discovery APIs allow an alternate path; execution errors do not."""
+    try:
+        return _value(obj, member)
+    except AttributeError:
+        return None
+    except Exception as error:
+        if getattr(error, "hresult", None) in MISSING_MEMBER:
+            return None
+        raise RuntimeError(f"SolidWorks API · {member}: {error}") from error
+
+
+def _feature_kind(feature):
+    kind = _read(feature, "GetTypeName2")
+    # The documented exception for an Instant3D feature wrapper.
+    return _read(feature, "GetTypeName") if kind == "ICE" else kind
+
+
+def _suppressed(feature):
+    empty = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
+    value = _call(feature, "IsSuppressed2", 1, empty)
+    if value is None:
+        raise RuntimeError(f"Unsurun konfigürasyon durumu okunamadı: {_read(feature, 'Name')}")
+    return sw._success(value)
 
 
 def _write(obj, member, value):
@@ -68,14 +95,20 @@ def _activate_document(app, name):
     return activated
 
 
-def _features(model, *, include_suppressed=False):
+def _features(model, *, include_suppressed=False, kinds=None):
     first = _value(model, "FirstFeature")
     stack = [(first, False)] if first is not None else []
+    # SheetMetal children can be exposed by the folder API even when normal
+    # FirstFeature/subfeature traversal does not contain them (PowerSM).
+    folder = _optional_read(_read(model, "FeatureManager"), "GetSheetMetalFolder")
+    if folder is not None:
+        sheets = _optional_read(folder, "GetSheetMetals")
+        if sheets is not None:
+            stack.extend((feature, False) for feature in sheets if feature is not None)
     visited, yielded = set(), set()
-    empty = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
     while stack:
         feature, sub = stack.pop()
-        name, kind = _value(feature, "Name"), _value(feature, "GetTypeName2")
+        name, kind = _read(feature, "Name"), _feature_kind(feature)
         context = name, kind, sub
         if context in visited:
             continue
@@ -87,29 +120,30 @@ def _features(model, *, include_suppressed=False):
         if child is not None:
             stack.append((child, True))
         identity = name, kind
-        if identity in yielded:
+        if identity in yielded or kinds is not None and kind not in kinds:
             continue
-        suppressed = feature.IsSuppressed2(1, empty)
-        if suppressed is None:
-            raise RuntimeError(f"Unsurun konfigürasyon durumu okunamadı: {name}")
-        if include_suppressed or not sw._success(suppressed):
+        # UI/history/body folders do not control K/R and need not support
+        # configuration suppression. Their children are still traversed.
+        if include_suppressed or kind.endswith("Folder") or not _suppressed(feature):
             yielded.add(identity)
             yield feature, kind
 
 
 def _identity(feature):
-    return _read(feature, "Name"), _read(feature, "GetTypeName2")
+    return _read(feature, "Name"), _feature_kind(feature)
 
 
-def _parent(model):
-    """Resolve SAC LEVHA through the documented API, never a display name.
+def _parent(model, *, notes=None):
+    """Resolve the unique SAC LEVHA parent by API/type, never a display name.
 
-    A null template is documented for pre-2013 parts. API failures are not
-    evidence of legacy architecture and must not select an arbitrary child.
+    A missing/null discovery API can use the folder or typed tree. A COM
+    execution failure or conflicting result must not select an arbitrary child.
     """
-    feature = _read(_read(model, "Extension"), "GetTemplateSheetMetal")
+    source = "GetTemplateSheetMetal"
+    feature = _optional_read(_read(model, "Extension"), "GetTemplateSheetMetal")
     if feature is None:
-        folder = _read(_read(model, "FeatureManager"), "GetSheetMetalFolder")
+        source = "GetSheetMetalFolder.GetFeature"
+        folder = _optional_read(_read(model, "FeatureManager"), "GetSheetMetalFolder")
         if folder is not None:
             feature = _read(folder, "GetFeature")
             if feature is None:
@@ -118,14 +152,22 @@ def _parent(model):
         name, kind = _identity(feature)
         if kind != TEMPLATE_SHEET:
             raise RuntimeError(f"SAC LEVHA API'si beklenmeyen unsur döndürdü: {name} ({kind}).")
+        if notes is not None:
+            notes.append(f"Ana sac unsuru: {name} ({kind}) · Kaynak: {source}.")
         return feature, kind
-    # A modern template in the tree contradicts a null lookup; fail closed.
-    candidates = list(_features(model, include_suppressed=True))
-    if any(kind == TEMPLATE_SHEET for _, kind in candidates):
-        raise RuntimeError("SAC LEVHA şablonu ağaçta bulundu ancak API'den alınamadı.")
-    active = [f for f, kind in _features(model) if kind == "SheetMetal"]
+    templates = list(_features(model, include_suppressed=True, kinds={TEMPLATE_SHEET}))
+    if len(templates) > 1:
+        raise RuntimeError("Birden fazla ana SAC LEVHA unsuru bulundu; hedef belirlenemedi.")
+    if templates:
+        feature, kind = templates[0]
+        if notes is not None:
+            notes.append(f"Ana sac unsuru: {_read(feature, 'Name')} ({kind}) · Kaynak: unsur ağacı.")
+        return feature, kind
+    active = [f for f, kind in _features(model, kinds={"SheetMetal"})]
     if len(active) != 1:
         raise RuntimeError("Eski sac yapısında tek bir aktif SheetMetal unsuru gerekir.")
+    if notes is not None:
+        notes.append(f"Sac unsuru: {_read(active[0], 'Name')} (SheetMetal) · Kaynak: eski sac yapısı.")
     return active[0], "SheetMetal"
 
 
@@ -134,7 +176,8 @@ def _tracked_features(model):
     parent, kind = _parent(model)
     result = [(parent, kind)]
     seen = {_identity(parent)}
-    for feature, kind in _features(model, include_suppressed=True):
+    for feature, kind in _features(model, include_suppressed=True,
+                                    kinds={TEMPLATE_SHEET, "SheetMetal", CONVERT_SOLID}):
         if kind in (TEMPLATE_SHEET, "SheetMetal", CONVERT_SOLID) and _identity(feature) not in seen:
             result.append((feature, kind))
             seen.add(_identity(feature))
@@ -144,7 +187,7 @@ def _tracked_features(model):
 def _body_feature(model, parent, kind):
     if kind == "SheetMetal":
         return parent
-    children = [f for f, kind in _features(model) if kind == "SheetMetal"]
+    children = [f for f, kind in _features(model, kinds={"SheetMetal"})]
     if len(children) != 1:
         raise RuntimeError("Tek sac gövdesi için bir aktif SheetMetal alt unsuru gerekir.")
     return children[0]
@@ -319,20 +362,21 @@ def _rollback(model, snapshots):
 
 
 def _check_sheet_defaults(definition):
-    if bool(_read(definition, "UseMaterialSheetMetalParameters")):
-        raise RuntimeError("Sac parametreleri malzemeye bağlı; önce SolidWorks'te bu bağı kaldırın.")
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
     error = _call_byref(definition, "GetUseGaugeTable", used, filename)
     if error != 0:
         raise RuntimeError(f"Sac kalınlık tablosu durumu okunamadı; API hata kodu: {error}")
     if used.value:
         raise RuntimeError("Sac kalınlık tablosuna bağlı parça; önce SolidWorks'te tablo bağını kaldırın.")
+    # This property is documented as valid only when GetUseGaugeTable is false.
+    if bool(_read(definition, "UseMaterialSheetMetalParameters")):
+        raise RuntimeError("Sac parametreleri malzemeye bağlı; önce SolidWorks'te bu bağı kaldırın.")
 
 
 def _check_defaults(model, parent):
     _check_sheet_defaults(_read(parent, "GetDefinition"))
     for feature, kind in _features(model):
-        if kind == TEMPLATE_SHEET:
+        if kind == TEMPLATE_SHEET or kind.endswith("Folder"):
             continue
         if kind == "SheetMetal":
             if _identity(feature) != _identity(parent):
@@ -368,7 +412,7 @@ def _check_defaults(model, parent):
 
 def _check_inherited_sheet(model, expected, *, expected_names=None):
     names = []
-    for feature, kind in _features(model):
+    for feature, kind in _features(model, kinds={"SheetMetal"}):
         if kind != "SheetMetal" or _identity(feature) == (expected.name, expected.kind):
             continue
         actual = _state(feature, kind, inherited=True)
@@ -383,7 +427,7 @@ def _check_inherited_sheet(model, expected, *, expected_names=None):
 
 def _check_converted_values(model, expected, *, expected_names=None):
     names = []
-    for feature, kind in _features(model):
+    for feature, kind in _features(model, kinds={CONVERT_SOLID}):
         if kind != CONVERT_SOLID:
             continue
         actual = _state(feature, kind)
@@ -454,8 +498,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if len(bodies) != 1:
             raise RuntimeError("Çok gövdeli parça desteklenmiyor; ayrı sac parçalar kullanın.")
         stage = "Sac unsuru ve kalınlığı"
-        feature, parent_kind = _parent(model)
+        feature, parent_kind = _parent(model, notes=notes)
         body_feature = _body_feature(model, feature, parent_kind)
+        notes.append(f"Gövde sac unsuru: {_read(body_feature, 'Name')} (SheetMetal).")
         # Single-body support makes this the unique body-level SheetMetal
         # definition, not the template's potentially different default thickness.
         # Nonmatching manual sheets stop before allowance/override API calls.

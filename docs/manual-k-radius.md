@@ -111,3 +111,15 @@ etkinleştirme uyarısı 2 döndüğünde, eski kodun hatası iki regresyonla ye
 sahipliği, mevcut düzenlemeleri koruma, ana montaja dönüş ve gerçek Tk
 tarama–uygulama akışını da içerir. SolidWorks COM davranışı test nesneleriyle
 temsil edildi; kullanıcının montajı bu bulutta çalıştırılmadı.
+
+## Ana sac ve gövde sac unsurunu bulma
+
+Ana parametre hedefi `TemplateSheetMetal`, gövdenin kalınlık kaynağı ise
+`SheetMetal` unsurudur. Bunlar ağaçta aynı adla görünmek zorunda değildir.
+Keşif API'si boş veya eksikse klasör API'si, ardından ağaçtaki tek ana sac
+unsuru kontrol edilir. Gövde unsuru klasörün `GetSheetMetals()` listesinden
+de alınır; listede ve ağaçta görünen aynı unsur bir kez işlenir.
+
+Günlük artık seçilen ana/gövde unsurunu ve keşif yolunu gösterir. PowerSM
+ve CodeStack karşılaştırması, desteklenen koşullar ve kontrol sonuçları
+[araştırma kaydında](reports/sheetmetal-discovery/README.md) bulunur.
