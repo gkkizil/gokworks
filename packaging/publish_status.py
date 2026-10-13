@@ -8,7 +8,9 @@ import subprocess
 
 
 def git(*args, data=None):
-    return subprocess.check_output(['git', *args], input=data, text=True).strip()
+    # Binary stdin keeps Windows newline translation out of mktree filenames.
+    output = subprocess.check_output(['git', *args], input=data.encode('utf-8') if data is not None else None)
+    return output.decode('utf-8').strip()
 
 
 def main():
