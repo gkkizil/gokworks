@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-13",
+  "environment": "Linux / Python 3.13.5 / Tk 8.6.16 / Xvfb",
+  "native_windows_executed": false,
+  "native_solidworks_executed": false,
+  "unique_checks_passed": 14,
+  "full_suite_run": false,
+  "checks": {
+    "test_bolt.BoltCalculationTests.test_boundary_and_unloaded_state": "ok",
+    "test_bolt.BoltCalculationTests.test_combined_load_can_fail_when_each_load_passes_alone": "ok",
+    "test_bolt.BoltCalculationTests.test_counts_and_safety_factor_change_capacity_without_changing_material": "ok",
+    "test_bolt.BoltCalculationTests.test_force_units_and_decimal_comma": "ok",
+    "test_bolt.BoltCalculationTests.test_grade_and_diameter_boundary": "ok",
+    "test_bolt.BoltCalculationTests.test_invalid_active_inputs_rejected_and_inactive_load_ignored": "ok",
+    "test_bolt.BoltCalculationTests.test_m10_88_tension_matches_tabulated_area_and_hand_calculation": "ok",
+    "test_bolt.BoltCalculationTests.test_shear_uses_thread_root_and_double_shear_shares_load": "ok",
+    "test_bolt_window.BoltWindowTests.test_live_load_modes_and_invalid_input_clear_previous_verdict": "ok",
+    "test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram": "ok",
+    "test_bolt_window.BoltWindowTests.test_units_page_cache_preferences_and_copy_preserve_physical_load": "ok",
+    "test_menu_rendering.MenuRenderingTests.test_preloading_keeps_active_page_data_and_settings_unchanged": "ok",
+    "test_menu_rendering.MenuRenderingTests.test_preloaded_pages_stay_hidden_after_dpi_changes": "ok",
+    "test_menu_rendering.MenuRenderingTests.test_new_pages_reuse_table_styles_and_theme_and_scale_still_refresh_them": "ok"
+  },
+  "screenshots": [
+    {
+      "file": "docs/reports/bolt/screenshots/combined-dark.png",
+      "sha256": "599df1ff2b4134c1106413300cc47eab4966fa67dd969fb2e94f71f96ad239c7",
+      "real_tk_capture": true
+    },
+    {
+      "file": "docs/reports/bolt/screenshots/tension-light.png",
+      "sha256": "ba92a9681e9f71ca5f1f1f18ae37af4abe36f6659706364d9adfba2adb40b9d0",
+      "real_tk_capture": true
+    },
+    {
+      "file": "docs/reports/bolt/screenshots/unsafe-dark-small.png",
+      "sha256": "94c0647f17e94f14fd20607edb87ad6cd87b925e47df33be3f4191c185161645",
+      "real_tk_capture": true
+    }
+  ]
+}

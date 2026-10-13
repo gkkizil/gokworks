@@ -21,6 +21,7 @@ from k_factor.window import KFactorView
 from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from bom.window import BomView
+from bolt.window import BoltView
 from gui.icons import make_icon, set_window_icon
 from gui.typography import check_turkish_fonts
 from gui.motion import blend, pair
@@ -40,7 +41,8 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _BOLT_PAGE_ATTRIBUTES = ('workspace', 'bolt_state', 'bolt_widgets', 'bolt_result', 'status_label')
     _BOM_PAGE_ATTRIBUTES = ('workspace', 'bom_state', 'bom_query', 'bom_result',
                             'bom_widgets', 'status_label', 'progress')
     _GDT_PAGE_ATTRIBUTES = ('workspace', 'gdt_state', 'gdt_widgets', 'gdt_result',
@@ -128,7 +130,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
         self._preload_id = None
         if self._closed:
             return
-        missing = next((mode for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom')
+        missing = next((mode for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt')
                         if mode not in self._pages), None)
         if missing is None:
             return
@@ -179,7 +181,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
 
     def _switch_mode(self, mode):
         self._note_ui_activity()
-        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances", "bom"):
+        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances", "bom", "bolt"):
             return
         self._schedule_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
@@ -206,9 +208,12 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             self._draw_iso_diagram()
         elif self.mode == 'geometric_tolerances':
             self._draw_gdt_diagram()
+        elif self.mode == 'bolt':
+            self._draw_bolt_diagram()
 
     def _remember_page(self):
-        attributes = (self._BOM_PAGE_ATTRIBUTES if self.mode == 'bom' else
+        attributes = (self._BOLT_PAGE_ATTRIBUTES if self.mode == 'bolt' else
+                      self._BOM_PAGE_ATTRIBUTES if self.mode == 'bom' else
                       self._GDT_PAGE_ATTRIBUTES if self.mode == 'geometric_tolerances' else
                       self._ISO_PAGE_ATTRIBUTES if self.mode == 'iso_fits' else self._PAGE_ATTRIBUTES)
         self._pages[self.mode] = {name: getattr(self, name) for name in attributes}
@@ -234,6 +239,8 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             self._create_gdt_state(saved)
         elif self.mode == 'bom':
             self._create_bom_state(saved)
+        elif self.mode == 'bolt':
+            self._create_bolt_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -270,7 +277,7 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             button.configure(
                 hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree", "bolt": "bolt"}[key],
                                  NAV_ACCENT if active else NAV_MUTED),
                 border_width=0,
                 font=self._nav_fonts[active],
@@ -329,9 +336,15 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
             self._draw_iso_diagram()
         elif self.mode == 'geometric_tolerances':
             self._draw_gdt_diagram()
+        elif self.mode == 'bolt':
+            self._draw_bolt_diagram()
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if self.mode == 'bolt':
+            key = 'shear' if self.bolt_state['mode'].get() == 'Kesme' else 'tension'
+            self.bolt_widgets[key+'_input'].focus_set()
+            return 'break'
         if self.mode == 'bom':
             self.bom_widgets['tabs'].set('Parça listesi')
             self.bom_widgets['search'].focus_set()
@@ -451,6 +464,12 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
         self.detail_window = None
 
     def _resize_pdf_area(self, event=None):
+        if self.mode == 'bolt':
+            previous = getattr(self, '_layout_fit_id', None)
+            if previous is not None:
+                self.after_cancel(previous)
+            self._layout_fit_id = self.after(35, self._resize_bolt_workspace)
+            return
         if self.mode == 'bom':
             previous = getattr(self, '_layout_fit_id', None)
             if previous is not None:
@@ -550,14 +569,16 @@ class GokworksPdfApp(BomView, GeometricTolerancesView, IsoFitsView, KFactorView,
                 save_settings(updated, self.settings_path)
             self._pending_preferences.clear()
         except OSError as error:
-            if self.mode in ('iso_fits', 'geometric_tolerances'):
+            if self.mode in ('iso_fits', 'geometric_tolerances', 'bolt'):
                 self.status_label.configure(text=f'Tercihler kaydedilemedi: {error}', text_color=RED)
             else:
                 self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
 
     def _preference_values(self):
         saved = {'appearance': 'dark' if self.theme_mode.get() == 'Koyu' else 'light'}
-        if self.mode == 'bom':
+        if self.mode == 'bolt':
+            saved.update({f'bolt_{key}': value.get() for key, value in self.bolt_state.items()})
+        elif self.mode == 'bom':
             saved['bom_include_excluded'] = self.bom_state['include_excluded'].get()
         elif self.mode == 'geometric_tolerances':
             saved.update({f'gdt_{key}': value.get() for key, value in self.gdt_state.items() if key != 'measured'})

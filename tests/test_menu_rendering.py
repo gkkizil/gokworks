@@ -30,7 +30,7 @@ class MenuRenderingTests(GuiTestCase):
         self.app._fill_files([source])
         self.app._update_row(source, 'success', 'ready')
         with patch('pdf.window.save_settings') as writer:
-            for _ in range(5):
+            for _ in range(6):
                 self.preload()
                 self.app.update()
                 self.assertEqual(self.app.mode, 'pdf')
@@ -38,13 +38,13 @@ class MenuRenderingTests(GuiTestCase):
                 self.assertTrue(workspace.winfo_viewable())
             writer.assert_not_called()
         self.assertEqual(set(self.app._pages),
-                         {'pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom'})
+                         {'pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt'})
         self.assertEqual(self.app.source_folder.get(), str(self.root))
         self.assertEqual(self.app.table.item('file_0', 'values')[1], 'Başarılı')
         for mode, page in self.app._pages.items():
             self.assertEqual(bool(page['workspace'].winfo_viewable()), mode == 'pdf')
         with patch.object(self.app, '_build_window') as build:
-            for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'pdf'):
+            for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'pdf'):
                 self.app._switch_mode(mode)
                 self.app.update()
         build.assert_not_called()
@@ -84,7 +84,7 @@ class MenuRenderingTests(GuiTestCase):
         real_theme = ttk.Style.theme_use
         with patch.object(original, 'tag_configure', wraps=original.tag_configure) as tags, \
                 patch.object(ttk.Style, 'theme_use', autospec=True, side_effect=real_theme) as theme:
-            for _ in range(5):
+            for _ in range(6):
                 self.preload()
             tags.assert_not_called()
             self.assertTrue(all(len(call.args) == 1 for call in theme.call_args_list))
@@ -101,7 +101,7 @@ class MenuRenderingTests(GuiTestCase):
 
     def test_preloaded_pages_stay_hidden_after_dpi_changes(self):
         self.addCleanup(lambda: ctk.set_widget_scaling(1))
-        for _ in range(5):
+        for _ in range(6):
             self.preload()
         for active, scale in (('pdf', 1.25), ('iso_fits', 1.5)):
             self.app._switch_mode(active)

@@ -1,0 +1,71 @@
+bolt-checks.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_boundary_and_unloaded_state (test_bolt.BoltCalculationTests.test_boundary_and_unloaded_state) ... ok
+test_combined_load_can_fail_when_each_load_passes_alone (test_bolt.BoltCalculationTests.test_combined_load_can_fail_when_each_load_passes_alone) ... ok
+test_counts_and_safety_factor_change_capacity_without_changing_material (test_bolt.BoltCalculationTests.test_counts_and_safety_factor_change_capacity_without_changing_material) ... ok
+test_force_units_and_decimal_comma (test_bolt.BoltCalculationTests.test_force_units_and_decimal_comma) ... ok
+test_grade_and_diameter_boundary (test_bolt.BoltCalculationTests.test_grade_and_diameter_boundary) ... ok
+test_invalid_active_inputs_rejected_and_inactive_load_ignored (test_bolt.BoltCalculationTests.test_invalid_active_inputs_rejected_and_inactive_load_ignored) ... ok
+test_m10_88_tension_matches_tabulated_area_and_hand_calculation (test_bolt.BoltCalculationTests.test_m10_88_tension_matches_tabulated_area_and_hand_calculation) ... ok
+test_shear_uses_thread_root_and_double_shear_shares_load (test_bolt.BoltCalculationTests.test_shear_uses_thread_root_and_double_shear_shares_load) ... ok
+test_live_load_modes_and_invalid_input_clear_previous_verdict (test_bolt_window.BoltWindowTests.test_live_load_modes_and_invalid_input_clear_previous_verdict) ... ok
+test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram) ... ok
+test_units_page_cache_preferences_and_copy_preserve_physical_load (test_bolt_window.BoltWindowTests.test_units_page_cache_preferences_and_copy_preserve_physical_load) ... ok
+test_preloading_keeps_active_page_data_and_settings_unchanged (test_menu_rendering.MenuRenderingTests.test_preloading_keeps_active_page_data_and_settings_unchanged) ... ok
+test_preloaded_pages_stay_hidden_after_dpi_changes (test_menu_rendering.MenuRenderingTests.test_preloaded_pages_stay_hidden_after_dpi_changes) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 6.851s
+
+OK
+
+
+bolt-layout-checks.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram) ... ok
+test_new_pages_reuse_table_styles_and_theme_and_scale_still_refresh_them (test_menu_rendering.MenuRenderingTests.test_new_pages_reuse_table_styles_and_theme_and_scale_still_refresh_them) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 3.801s
+
+OK
+
+
+bolt-final-checks.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_small_window_dpi_and_unchanged_diagram (test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.533s
+
+OK
+
+
+bolt-grade-check.log
+FontManager error: [Errno 30] Read-only file system: '/home/agent/.fonts/'
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+FontManager error: Directory does not exist: /home/agent/.fonts/
+customtkinter.windows.widgets.font warning: Preferred drawing method 'font_shapes' can not be used because the font file could not be loaded.
+Using 'circle_shapes' instead. The rendering quality will be bad!
+test_live_load_modes_and_invalid_input_clear_previous_verdict (test_bolt_window.BoltWindowTests.test_live_load_modes_and_invalid_input_clear_previous_verdict) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.757s
+
+OK

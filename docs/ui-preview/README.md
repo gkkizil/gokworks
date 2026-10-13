@@ -1,5 +1,7 @@
 # Güncel arayüz
 
+Yeni: **Mühendislik hesapları → Cıvata hesabı**. [Hesap ve kapsam](../bolt-calculator.md) · [Açık tema](../reports/bolt/screenshots/tension-light.png) · [Koyu tema](../reports/bolt/screenshots/combined-dark.png). Aşağıdaki eski ekranlar cıvata menüsü eklenmeden önce çekilmiştir.
+
 13 Ekim 2026. Altı çalışma alanı ortak bir tasarımla yenilendi: koyu lacivert
 menü, açık temada beyaz kartlar, koyu temada katmanlı lacivert yüzeyler ve
 yeşil ana işlem düğmeleri. Logo korunur. Görseller çalışan Tk uygulamasından

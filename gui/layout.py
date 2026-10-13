@@ -27,6 +27,8 @@ class WorkspaceLayout:
         self.grid_rowconfigure(0, weight=1)
         if not hasattr(self, "sidebar"):
             self._build_sidebar()
+        if self.mode == 'bolt':
+            return self._build_bolt_workspace()
         if self.mode == 'bom':
             return self._build_bom_workspace()
         if self.mode == 'iso_fits':
@@ -73,7 +75,7 @@ class WorkspaceLayout:
         self.sidebar.grid_columnconfigure(0, weight=1)
         self.sidebar.grid_rowconfigure(4, weight=1)
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        brand.grid(row=0, column=0, sticky="ew", padx=18, pady=(26, 30))
+        brand.grid(row=0, column=0, sticky="ew", padx=18, pady=(26, 24))
         self.brand_logo = make_logo(32)
         self.brand_badge = ctk.CTkLabel(brand, text="", image=self.brand_logo,
                                        width=42, height=42, fg_color="#FFFFFF", corner_radius=10)
@@ -93,16 +95,17 @@ class WorkspaceLayout:
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
             ("bom", BOM_TITLE, "tree"),
             ("k_factor", KR_NAV_TITLE, "tools"),
+            ("bolt", "Cıvata hesabı", "bolt"),
             ("iso_fits", "ISO geçmeleri", "ruler"),
             ("geometric_tolerances", "Geometrik toleranslar", "target"),
         )):
             if row == 3:
-                self._label(navigation, "HESAP VE REFERANS", 10, NAV_MUTED, True).grid(
+                self._label(navigation, "MÜHENDİSLİK HESAPLARI", 10, NAV_MUTED, True).grid(
                     row=row, column=0, sticky="w", padx=10, pady=(22, 10))
             active = key == self.mode
             button = ctk.CTkButton(
                 navigation, text=title, image=self._icon(icon, NAV_ACCENT if active else NAV_MUTED),
-                height=46, corner_radius=10, anchor="w", border_color=NAV_ACTIVE,
+                height=44, corner_radius=10, anchor="w", border_color=NAV_ACTIVE,
                 border_width=0,
                 fg_color=NAV_ACTIVE if active else "transparent", hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED, text_color_disabled=NAV_MUTED,
@@ -110,7 +113,7 @@ class WorkspaceLayout:
                 command=lambda selected=key: self._switch_mode(selected),
                 state="normal",
             )
-            button.grid(row=row if row < 3 else row+1, column=0, sticky="ew", pady=(0, 6))
+            button.grid(row=row if row < 3 else row+1, column=0, sticky="ew", pady=(0, 4))
             self.nav_buttons[key] = button
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         footer.grid(row=5, column=0, sticky="ew", padx=20, pady=24)
@@ -390,7 +393,7 @@ class WorkspaceLayout:
                       foreground=[("selected", color(TEXT))])
             self._table_style_key = style_key
         tables = {page['table'] for page in self._pages.values() if 'table' in page}
-        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom'):
+        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom', 'bolt'):
             tables.add(self.table)
         for table in tables:
             if getattr(table, '_gok_style_key', None) == style_key:

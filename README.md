@@ -42,9 +42,15 @@ tablosunu kopyalamaz. Özel BOM miktar/birim özellikleri, satın alınmış mon
 kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
 Örnek Excel, kaynaklar ve Windows kabul adımları [BOM kılavuzunda](docs/bom.md).
 
+## Cıvata hesabı
+
+**Mühendislik hesapları → Cıvata hesabı** altında metrik ölçü, kalite sınıfı ve yükü seçin. Çekme, kesme ve birleşik yük için cıvatanın statik dayanımı, emniyet katsayısı ve güvenli/güvensiz sonucu gösterilir. Yük yönleri canlı cıvata görselinde izlenir. N/kN/kgf, cıvata adedi, tek/çift kesme ve dişli/dişsiz kesit desteklenir. SolidWorks bağlantısı gerekmez.
+
+Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md).
+
 ## Arayüz ve temalar
 
-Yan menü Dışa Aktarım ve Mühendislik olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi beş ekranı ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
+Yan menü Aktarım ve montaj ile Mühendislik hesapları olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi tüm ekranları ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
 
 - Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
 - **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** yalnızca liste filtrelerini kaldırır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
