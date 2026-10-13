@@ -1,10 +1,10 @@
 {
-  "commit": "631bd31121a9278116c6915d0b47e4506eb1280d",
+  "commit": "f0bb94a2b2efb1714b6646b5e0891ddebf834391",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38356408737",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38356408737/artifacts/11792699402",
-  "bytes": 41661502,
-  "sha256": "ec10b1719e7a70b59c92913c801728d92e498196d42fd6880b8b2f6c562f8d31",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38356800813",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38356800813/artifacts/11793235734",
+  "bytes": 41662949,
+  "sha256": "d5835abb6e5cfe6daf017c8ba17ebea43c0809586cb3310c432821ceefba7ea8",
   "smoke": {
     "status": "passed",
     "platform": "win32",
