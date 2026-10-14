@@ -1,9 +1,9 @@
 """Read-only, instance-aware assembly traversal and atomic XLSX export."""
 
-from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 import os
+import math
 from pathlib import Path, PureWindowsPath
 import re
 from tempfile import NamedTemporaryFile
@@ -38,6 +38,9 @@ class Part:
     path: str
     configuration: str
     quantity: int
+    mass_kg: float | None = None
+    total_mass_kg: float | None = None
+    mass_note: str = ''
 
 
 @dataclass(frozen=True)
@@ -50,6 +53,8 @@ class Node:
     kind: str
     path: str
     configuration: str
+    mass_kg: float | None = None
+    mass_note: str = ''
 
 
 @dataclass(frozen=True)
@@ -65,6 +70,99 @@ class Result:
     @property
     def total_parts(self):
         return sum(part.quantity for part in self.parts)
+
+    @property
+    def total_mass_kg(self):
+        # An incomplete sum must not look like the weight of the whole BOM.
+        if any(part.total_mass_kg is None for part in self.parts):
+            return None
+        return math.fsum(part.total_mass_kg for part in self.parts)
+
+    @property
+    def missing_mass_parts(self):
+        return sum(node.kind == 'Parça' and node.mass_kg is None for node in self.tree)
+
+
+class _MassReader:
+    """Read live occurrence mass without selecting or switching documents.
+
+    GetModelDoc2 can point at a different active part configuration. Use the
+    assembly's IMassProperty2 with exactly one component instead. Reuse the
+    calculator, but never cache by file/config: assembly cuts can make two
+    occurrences of the same part weigh differently.
+    """
+    def __init__(self, assembly):
+        self.properties = None
+        self.error = ''
+        try:
+            extension = sw._value(assembly, 'Extension')
+            properties = sw._value(extension, 'CreateMassProperty2')
+            if properties is None:
+                raise RuntimeError('SolidWorks ağırlık hesaplayıcısını oluşturamadı.')
+            properties.UseSystemUnits = True  # meters, radians, kilograms
+            properties.IncludeHiddenBodiesOrComponents = True
+            self.properties = properties
+        except Exception as error:
+            self.error = f'SolidWorks ağırlık API’sine erişilemiyor: {error}'
+
+    def read(self, component, stop_event=None):
+        _check_cancel(stop_event)
+        if self.properties is None:
+            return None, self.error
+        try:
+            properties = self.properties
+            items = (component,)
+            if hasattr(component, '_oleobj_'):
+                # Preserve IDispatch entries in the SAFEARRAY on pywin32;
+                # plain Python doubles use the same logical one-item list.
+                items = win32com.client.VARIANT(pythoncom.VT_ARRAY | pythoncom.VT_DISPATCH, items)
+            properties.SelectedItems = items
+            selected = sw._value(properties, 'SelectedItems')
+            if not isinstance(selected, (tuple, list)) or len(selected) != 1:
+                raise RuntimeError('Ağırlık hesabı tek bileşenle sınırlandırılamadı.')
+            for member in ('Name2', 'GetPathName', 'ReferencedConfiguration'):
+                if sw._value(selected[0], member) != sw._value(component, member):
+                    raise RuntimeError('Ağırlık hesabında farklı bir bileşen seçildi.')
+            if not sw._value(properties, 'UseSystemUnits'):
+                raise RuntimeError('Ağırlık birimi kilogram olarak ayarlanamadı.')
+            if not sw._value(properties, 'Recalculate'):
+                raise RuntimeError('SolidWorks ağırlığı hesaplayamadı.')
+            value = sw._value(properties, 'Mass')
+            if isinstance(value, bool) or value is None:
+                raise ValueError('Geçerli bir ağırlık değeri alınamadı.')
+            mass = float(value)
+            if not math.isfinite(mass) or mass < 0:
+                raise ValueError('Geçerli bir ağırlık değeri alınamadı.')
+        except Exception as error:
+            return None, f'Ağırlık okunamadı: {error}'
+        _check_cancel(stop_event)
+        return mass, ''
+
+
+def _weighted_part(original, occurrences):
+    masses = [mass for mass, _ in occurrences]
+    if any(mass is None for mass in masses):
+        note = next(note for mass, note in occurrences if mass is None)
+        return Part(*original, len(masses), mass_note=note)
+    unit = masses[0] if all(math.isclose(mass, masses[0], rel_tol=1e-9, abs_tol=1e-12)
+                            for mass in masses) else None
+    note = '' if unit is not None else 'Bileşen örneklerinin ağırlıkları farklı.'
+    return Part(*original, len(masses), unit, math.fsum(masses), note)
+
+
+def _roll_up_mass(tree):
+    """Assembly rows sum included leaf occurrences; never add them twice."""
+    totals = {}
+    weighted = []
+    for node in reversed(tree):
+        if node.kind == 'Montaj':
+            children = totals.get(node.number, [])
+            mass = None if any(value is None for value in children) else math.fsum(children)
+            node = replace(node, mass_kg=mass,
+                           mass_note='Alt parçalardan bazılarının ağırlığı okunamadı.' if mass is None else '')
+        weighted.append(node)
+        totals.setdefault(node.parent, []).append(node.mass_kg)
+    return tuple(reversed(weighted))
 
 
 def _assembly(app):
@@ -115,7 +213,8 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
         raise RuntimeError('Montaj bileşen ağacı okunamadı.')
     configuration = str(sw._value(config, 'Name'))
     assembly_name = str(sw._document_name(assembly))
-    counts, originals, tree = Counter(), {}, []
+    masses, originals, tree = {}, {}, []
+    reader = _MassReader(assembly)
     suppressed = excluded = visited = 0
     root_key = sw._part_key(assembly_name, configuration)
     # Sibling records are read once and sorted before entering the traversal.
@@ -151,11 +250,13 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
         _check_cancel(stop_event)
         (component, path, ref, name, instance, kind), number, parent, level, ancestors = stack.pop()
         key = sw._part_key(path, ref)
-        tree.append(Node(number, parent, level, name, instance, kind, path, ref))
         if kind == 'Parça':
-            counts[key] += 1
+            mass, note = reader.read(component, stop_event)
+            tree.append(Node(number, parent, level, name, instance, kind, path, ref, mass, note))
+            masses.setdefault(key, []).append((mass, note))
             originals.setdefault(key, (name, path, ref))
         else:
+            tree.append(Node(number, parent, level, name, instance, kind, path, ref))
             if key in ancestors:
                 raise RuntimeError(f'Montaj ağacında döngü bulundu: {path}')
             if sw._value(component, 'GetModelDoc2') is None:
@@ -166,11 +267,11 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
                          for index, record in reversed(list(enumerate(children(component), 1))))
         visited += 1
         if progress and visited % 100 == 0:
-            progress(f'Montaj taranıyor · {visited} bileşen okundu')
+            progress(f'Montaj taranıyor · {visited} bileşenin parça ve ağırlık bilgileri okundu')
     _check_cancel(stop_event)
-    parts = tuple(sorted((Part(*originals[key], count) for key, count in counts.items()),
+    parts = tuple(sorted((_weighted_part(originals[key], values) for key, values in masses.items()),
                          key=lambda p: (name_key(p.name), name_key(p.configuration), p.path)))
-    return Result(assembly_name, configuration, parts, tuple(tree), suppressed, excluded, include_excluded)
+    return Result(assembly_name, configuration, parts, _roll_up_mass(tree), suppressed, excluded, include_excluded)
 
 
 def export_excel(result, destination, stop_event=None):
@@ -202,6 +303,7 @@ def export_excel(result, destination, stop_event=None):
         for row in ws:
             _check_cancel(stop_event)
             for cell in row:
+                _check_cancel(stop_event)
                 if isinstance(cell.value, str):
                     cell.data_type = 's'
                 cell.alignment = Alignment(vertical='top')
@@ -216,13 +318,33 @@ def export_excel(result, destination, stop_event=None):
         return ws
     temporary = None
     try:
-        sheet('Parça listesi', ['Sıra', 'Parça adı', 'Adet', 'Konfigürasyon', 'Dosya adı', 'Dosya yolu'],
-              ([i, p.name, p.quantity, p.configuration, PureWindowsPath(p.path).name, p.path]
-               for i, p in enumerate(result.parts, 1)), (8, 34, 10, 28, 40, 80))
+        part_sheet = sheet('Parça listesi', ['Sıra', 'Parça adı', 'Adet', 'Konfigürasyon', 'Dosya adı', 'Dosya yolu',
+                          'Birim ağırlık (kg)', 'Toplam ağırlık (kg)', 'Ağırlık durumu'],
+              ([i, p.name, p.quantity, p.configuration, PureWindowsPath(p.path).name, p.path,
+                p.mass_kg if p.mass_kg is not None else 'Değişken' if p.total_mass_kg is not None else 'Okunamadı',
+                p.total_mass_kg if p.total_mass_kg is not None else 'Okunamadı',
+                p.mass_note or ('Okunamadı' if p.total_mass_kg is None else 'Okundu')]
+               for i, p in enumerate(result.parts, 1)), (8, 34, 10, 28, 40, 80, 22, 22, 65))
         tree_sheet = sheet('Ürün ağacı', ['Pozisyon', 'Üst pozisyon', 'Seviye', 'Parça / montaj adı',
-                            'Bileşen örneği', 'Tür', 'Adet', 'Konfigürasyon', 'Dosya yolu'],
-              ([n.number, n.parent, n.level, n.name, n.instance, n.kind, 1, n.configuration, n.path]
-               for n in result.tree), (16, 16, 10, 34, 40, 12, 10, 28, 80))
+                            'Bileşen örneği', 'Tür', 'Adet', 'Konfigürasyon', 'Dosya yolu',
+                            'Ağırlık (kg)', 'Ağırlık durumu'],
+              ([n.number, n.parent, n.level, n.name, n.instance, n.kind, 1, n.configuration, n.path,
+                n.mass_kg if n.mass_kg is not None else 'Okunamadı',
+                n.mass_note or ('Okunamadı' if n.mass_kg is None else
+                               'Listelenen alt parçaların toplamı' if n.kind == 'Montaj' else 'Okundu')]
+               for n in result.tree), (16, 16, 10, 34, 40, 12, 10, 28, 80, 22, 65))
+        for ws, columns in ((part_sheet, (7, 8)), (tree_sheet, (10,))):
+            for row in ws.iter_rows(min_row=5):
+                _check_cancel(stop_event)
+                for column in columns:
+                    row[column-1].number_format = '0.000000'
+            # Metadata stays outside the filterable rows. Use the flat list to
+            # avoid summing both subassemblies and their children.
+            ws.cell(1, 4, 'BOM toplam ağırlığı (kg)')
+            total_cell = ws.cell(1, 5, result.total_mass_kg if result.total_mass_kg is not None else 'Eksik ağırlık bilgisi')
+            total_cell.number_format = '0.000000'
+            ws.cell(2, 4, 'Alt montaj ağırlıkları, listelenen alt parçaların toplamıdır.')
+            ws.cell(3, 4, f'Ağırlığı okunamayan parça adedi: {result.missing_mass_parts}')
         tree_sheet.sheet_properties.outlinePr.summaryBelow = False
         for row, node in enumerate(result.tree, 5):
             _check_cancel(stop_event)

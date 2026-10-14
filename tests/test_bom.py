@@ -2,6 +2,7 @@
 
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 import queue
 import tempfile
 import threading
@@ -14,10 +15,43 @@ from support.solidworks import FakeAssembly, FakeApp, FakeComponent, install_com
 
 
 class Component(FakeComponent):
-    def __init__(self, path, *args, name=None, excluded=False, **kwargs):
+    def __init__(self, path, *args, name=None, excluded=False, mass_kg=1.0, **kwargs):
         super().__init__(path, *args, **kwargs)
         self.Name2 = name or Path(path).stem+'-1'
         self.ExcludeFromBOM = excluded
+        self.mass_kg = mass_kg
+
+
+class MassProperties:
+    """A live assembly-context calculator; never reads the part's active doc."""
+    def __init__(self):
+        self.UseSystemUnits = False
+        self.IncludeHiddenBodiesOrComponents = False
+        self.SelectedItems = ()
+        self.calls = []
+        self.on_recalculate = None
+
+    def Recalculate(self):
+        assert self.UseSystemUnits is True
+        assert self.IncludeHiddenBodiesOrComponents is True
+        assert len(self.SelectedItems) == 1
+        component = self.SelectedItems[0]
+        self.calls.append(component)
+        if self.on_recalculate:
+            self.on_recalculate(component)
+        return not getattr(component, 'mass_failed', False)
+
+    @property
+    def Mass(self):
+        component = self.SelectedItems[0]
+        masses = component.mass_kg
+        return masses[component.ReferencedConfiguration] if isinstance(masses, dict) else masses
+
+
+def attach_mass_properties(assembly):
+    properties = MassProperties()
+    assembly.Extension = SimpleNamespace(CreateMassProperty2=lambda: properties)
+    return properties
 
 
 class BomTests(unittest.TestCase):
@@ -32,6 +66,154 @@ class BomTests(unittest.TestCase):
         hidden.IsHidden = True
         self.assembly = FakeAssembly(r'C:\İmalat\Ana.SLDASM', [branch, branch, hidden])
         self.app = FakeApp(self.assembly)
+        self.mass_properties = attach_mass_properties(self.assembly)
+
+    def test_mass_uses_referenced_occurrence_in_kg_and_preserves_document_state(self):
+        thin = Component('/plate.sldprt', 'İnce', mass_kg={'İnce': .25, 'Kalın': 1.5})
+        thick = Component('/plate.sldprt', 'Kalın', mass_kg={'İnce': .25, 'Kalın': 1.5})
+        thin.model = SimpleNamespace(ConfigurationManager=SimpleNamespace(
+            ActiveConfiguration=SimpleNamespace(Name='Kalın')))
+        self.assembly.root.children = [thin, thick, thin]
+        self.mass_properties.SelectedItems = (Component('/unrelated.sldprt', mass_kg=99),)
+        selection = self.assembly.selection = ['Existing user selection']
+        result = bom.collect(self.app)
+        by_config = {part.configuration: part for part in result.parts}
+        self.assertEqual((by_config['İnce'].quantity, by_config['İnce'].mass_kg,
+                          by_config['İnce'].total_mass_kg), (2, .25, .5))
+        self.assertEqual(by_config['Kalın'].mass_kg, 1.5)
+        self.assertEqual(result.total_mass_kg, 2.0)
+        self.assertEqual(result.missing_mass_parts, 0)
+        self.assertEqual(len(self.mass_properties.calls), 3)
+        self.assertIs(self.assembly.selection, selection)
+        self.assertEqual(thin.model.ConfigurationManager.ActiveConfiguration.Name, 'Kalın')
+        self.assertEqual(self.assembly.ConfigurationManager.ActiveConfiguration.Name, 'Assembly-Default')
+        self.assertEqual((self.app.open_count, self.app.closed), (0, []))
+
+    def test_instance_weights_are_summed_instead_of_reusing_file_weight(self):
+        self.assembly.root.children = [Component('/same.sldprt', mass_kg=1.0),
+                                       Component('/same.sldprt', mass_kg=1.5)]
+        result = bom.collect(self.app)
+        part, = result.parts
+        self.assertEqual(part.quantity, 2)
+        self.assertIsNone(part.mass_kg)
+        self.assertEqual(part.total_mass_kg, 2.5)
+        self.assertIn('farklı', part.mass_note)
+        self.assertEqual([node.mass_kg for node in result.tree], [1.0, 1.5])
+        self.assertEqual(result.total_mass_kg, 2.5)
+
+    def test_com_component_selection_uses_dispatch_array(self):
+        wrapped = []
+        def variant(kind, value):
+            wrapped.append(kind)
+            return SimpleNamespace(value=value)
+        class Calculator(MassProperties):
+            @property
+            def SelectedItems(self):
+                return self.items
+            @SelectedItems.setter
+            def SelectedItems(self, value):
+                self.items = value.value if hasattr(value, 'value') else value
+        self.assembly.Extension.CreateMassProperty2 = Calculator
+        part = Component('/native.sldprt', mass_kg=.025)
+        part._oleobj_ = object()
+        self.assembly.root.children = [part]
+        with patch.multiple(bom, pythoncom=SimpleNamespace(VT_ARRAY=8192, VT_DISPATCH=9),
+                            win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=variant))):
+            result = bom.collect(self.app)
+        self.assertEqual(wrapped, [8192 | 9])
+        self.assertEqual(result.parts[0].mass_kg, .025)
+
+    def test_nested_mass_respects_bom_exclusions_and_does_not_double_count(self):
+        inner = Component('/inner.sldasm', children=[Component('/a.sldprt', mass_kg=.5),
+            Component('/excluded.sldprt', mass_kg=7, excluded=True)])
+        outer = Component('/outer.sldasm', children=[inner, Component('/b.sldprt', mass_kg=.25)])
+        self.assembly.root.children = [outer, outer, Component('/suppressed.sldprt', state=0, mass_kg=10)]
+        result = bom.collect(self.app)
+        self.assertEqual(result.total_mass_kg, 1.5)
+        self.assertEqual([node.mass_kg for node in result.tree if node.name == 'outer'], [.75, .75])
+        self.assertEqual([node.mass_kg for node in result.tree if node.name == 'inner'], [.5, .5])
+        included = bom.collect(self.app, include_excluded=True)
+        self.assertEqual(included.total_mass_kg, 15.5)
+
+    def test_invalid_or_unavailable_mass_is_explicit_and_never_a_partial_total(self):
+        for value in (None, float('nan'), float('inf'), -.1, True, 'bad'):
+            with self.subTest(value=value):
+                self.assembly.root.children = [Component('/sub.sldasm', children=[
+                    Component('/unknown.sldprt', mass_kg=value), Component('/known.sldprt', mass_kg=2)])]
+                result = bom.collect(self.app)
+                self.assertEqual(result.total_parts, 2)
+                self.assertIsNone(result.total_mass_kg)
+                self.assertEqual(result.missing_mass_parts, 1)
+                self.assertIsNone(result.tree[0].mass_kg)
+                self.assertIn('okunamadı', next(p.mass_note for p in result.parts if p.name == 'unknown'))
+        self.assembly.root.children = [Component('/a.sldprt')]
+        self.assembly.Extension = SimpleNamespace(CreateMassProperty2=lambda: None)
+        result = bom.collect(self.app)
+        self.assertIsNone(result.parts[0].total_mass_kg)
+        self.assertIn('API', result.parts[0].mass_note)
+
+    def test_recalculation_failure_or_wrong_scope_does_not_export_assembly_mass_as_part_mass(self):
+        part = Component('/failed.sldprt', mass_kg=10)
+        part.mass_failed = True
+        self.assembly.root.children = [part]
+        self.assertIsNone(bom.collect(self.app).parts[0].mass_kg)
+        class IgnoredSelection(MassProperties):
+            @property
+            def SelectedItems(self):
+                return ()
+            @SelectedItems.setter
+            def SelectedItems(self, value):
+                pass
+        self.assembly.Extension.CreateMassProperty2 = IgnoredSelection
+        result = bom.collect(self.app)
+        self.assertIsNone(result.total_mass_kg)
+        self.assertIn('tek bileşen', result.parts[0].mass_note)
+
+    def test_zero_mass_is_valid_and_cancellation_during_mass_read_returns_no_result(self):
+        self.assembly.root.children = [Component('/zero.sldprt', mass_kg=0)]
+        result = bom.collect(self.app)
+        self.assertEqual(result.parts[0].mass_kg, 0)
+        self.assertEqual(result.total_mass_kg, 0)
+        stop = threading.Event()
+        self.mass_properties.on_recalculate = lambda _: stop.set()
+        with self.assertRaises(bom.Cancelled):
+            bom.collect(self.app, stop_event=stop)
+
+    def test_excel_weights_are_numeric_and_unknowns_and_variable_instances_are_explicit(self):
+        self.assembly.root.children = [Component('/sub.sldasm', children=[
+            Component('/a.sldprt', mass_kg=.123456789), Component('/a.sldprt', mass_kg=.123456789),
+            Component('/b.sldprt', mass_kg=1), Component('/b.sldprt', mass_kg=2),
+            Component('/c.sldprt', mass_kg=None)])]
+        destination = self.folder/'weighted.xlsx'
+        bom.export_excel(bom.collect(self.app), destination)
+        book = load_workbook(destination)
+        self.addCleanup(book.close)
+        parts, tree = book.worksheets
+        self.assertEqual(parts['G4'].value, 'Birim ağırlık (kg)')
+        self.assertEqual(parts['H4'].value, 'Toplam ağırlık (kg)')
+        self.assertAlmostEqual(parts['G5'].value, .123456789)
+        self.assertAlmostEqual(parts['H5'].value, .246913578)
+        self.assertEqual(parts['G5'].data_type, 'n')
+        self.assertEqual(parts['G5'].number_format, '0.000000')
+        self.assertEqual(parts['G6'].value, 'Değişken')
+        self.assertEqual(parts['H6'].value, 3)
+        self.assertEqual(parts['G7'].value, 'Okunamadı')
+        self.assertEqual(parts['H7'].value, 'Okunamadı')
+        self.assertEqual(parts['E1'].value, 'Eksik ağırlık bilgisi')
+        self.assertEqual(tree['J5'].value, 'Okunamadı')
+        self.assertEqual(tree['J6'].value, .123456789)
+        self.assertEqual(tree['J6'].data_type, 'n')
+        self.assertIn('okunamadı', parts['I7'].value)
+
+    def test_excel_bom_total_matches_leaf_parts_with_repeated_subassemblies(self):
+        result = bom.collect(self.app)
+        destination = self.folder/'total.xlsx'
+        bom.export_excel(result, destination)
+        book = load_workbook(destination, data_only=True)
+        self.addCleanup(book.close)
+        for sheet in book:
+            self.assertEqual(sheet['E1'].value, 5)
+            self.assertEqual(sheet['E1'].data_type, 'n')
 
     def test_repeated_subassemblies_keep_occurrences_hierarchy_and_natural_name_order(self):
         result = bom.collect(self.app)

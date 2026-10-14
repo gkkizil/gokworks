@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-14",
+  "source": "https://github.com/pedropaulovc/offline-solidworks-api-docs/blob/b586c9f0c993ae7791e1b8aea79dab2a341a0147/50_extract_type_member_details/metadata/api_member_details.xml",
+  "access_note": "Official help requests returned HTTP 403, also outside the sandbox. Signatures read from the unofficial documentation mirror; live SolidWorks not tested.",
+  "runtime_verified": false,
+  "members": [
+    {
+      "type": "IMassProperty2",
+      "member": "IncludeHiddenBodiesOrComponents",
+      "signature": "IncludeHiddenBodiesOrComponents {get; set;}",
+      "return_type": "System.bool",
+      "official_url": "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~IncludeHiddenBodiesOrComponents.html"
+    },
+    {
+      "type": "IMassProperty2",
+      "member": "Mass",
+      "signature": "Mass {get;}",
+      "return_type": "System.double",
+      "official_url": "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~Mass.html"
+    },
+    {
+      "type": "IMassProperty2",
+      "member": "Recalculate",
+      "signature": "Recalculate()",
+      "return_type": "System.bool",
+      "official_url": "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~Recalculate.html"
+    },
+    {
+      "type": "IMassProperty2",
+      "member": "SelectedItems",
+      "signature": "SelectedItems {get; set;}",
+      "return_type": "System.object",
+      "official_url": "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~SelectedItems.html"
+    },
+    {
+      "type": "IMassProperty2",
+      "member": "UseSystemUnits",
+      "signature": "UseSystemUnits {get; set;}",
+      "return_type": "System.bool",
+      "official_url": "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~UseSystemUnits.html"
+    },
+    {
+      "type": "IModelDocExtension",
+      "member": "CreateMassProperty2",
+      "signature": "CreateMassProperty2()",
+      "return_type": "System.object",
+      "official_url": "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~CreateMassProperty2.html"
+    }
+  ]
+}

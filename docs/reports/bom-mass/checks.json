@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-14",
+  "passed": 27,
+  "scope": "Targeted BOM/Excel and Tk GUI checks only. Incremental runs after fixes, not the entire suite.",
+  "solidworks_runtime_verified": false,
+  "tests": [
+    {
+      "name": "test_bom.BomTests.test_cancel_before_scan_does_not_connect_to_solidworks",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_cancel_during_excel_styling_stops_before_next_row",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_com_component_selection_uses_dispatch_array",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_cycles_speedpak_and_unresolved_assembly_fail",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_excel_bom_total_matches_leaf_parts_with_repeated_subassemblies",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_excel_failure_and_cancellation_preserve_existing_file_and_remove_staging",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_excel_formula_like_names_stay_literal",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_excel_has_sorted_numeric_totals_and_grouped_tree_under_assembly",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_excel_weights_are_numeric_and_unknowns_and_variable_instances_are_explicit",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_instance_weights_are_summed_instead_of_reusing_file_weight",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_invalid_or_unavailable_mass_is_explicit_and_never_a_partial_total",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_mass_uses_referenced_occurrence_in_kg_and_preserves_document_state",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_modern_bom_exclusion_uses_active_configuration_and_rejects_unreadable_value",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_nested_assemblies_preserve_parent_and_level",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_nested_mass_respects_bom_exclusions_and_does_not_double_count",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_non_assembly_and_cancelled_scan_do_not_return_partial_bom",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_recalculation_failure_or_wrong_scope_does_not_export_assembly_mass_as_part_mass",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_repeated_subassemblies_keep_occurrences_hierarchy_and_natural_name_order",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_required_api_errors_prevent_partial_result",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_same_names_different_files_and_configurations_do_not_merge",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_suppressed_and_excluded_branches_are_omitted_hidden_are_counted",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_worker_initializes_com_and_emits_only_complete_result",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom.BomTests.test_zero_mass_is_valid_and_cancellation_during_mass_read_returns_no_result",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom_window.BomWindowTests.test_missing_mass_warns_and_export_keeps_part_with_unknown_weight",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom_window.BomWindowTests.test_page_cache_themes_small_window_and_scaling_keep_controls_visible",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom_window.BomWindowTests.test_real_scan_nested_tree_filter_and_excel_export_preserve_full_bom",
+      "result": "ok"
+    },
+    {
+      "name": "test_bom_window.BomWindowTests.test_weights_show_in_preview_details_and_excel_in_both_views",
+      "result": "ok"
+    }
+  ]
+}

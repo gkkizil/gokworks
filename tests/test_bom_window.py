@@ -10,7 +10,7 @@ from bom import exporter as bom
 from gui.text import BOM_TREE_TAB
 from support.gui import GuiTestCase
 from support.solidworks import FakeAssembly, FakeApp, install_com
-from test_bom import Component
+from test_bom import Component, attach_mass_properties
 
 
 class BomWindowTests(GuiTestCase):
@@ -20,6 +20,7 @@ class BomWindowTests(GuiTestCase):
         assembly = FakeAssembly('/Ana.sldasm', [Component('/ÖRNEK-M001.sldasm', children=[child, child]),
                                                Component('/Parça 10.sldprt')])
         self.swapp = FakeApp(assembly)
+        attach_mass_properties(assembly)
         self.result = bom.collect(self.swapp)
         self.app.nav_buttons['bom'].invoke()
         self.app.update()
@@ -51,6 +52,42 @@ class BomWindowTests(GuiTestCase):
         self.assertEqual(book['Parça listesi']['C5'].value, 2)
         self.assertEqual(book['Ürün ağacı'].max_row, 8)
         self.assertIn('Excel kaydedildi', self.app.status_label.cget('text'))
+
+    def test_weights_show_in_preview_details_and_excel_in_both_views(self):
+        self.scan()
+        widgets = self.app.bom_widgets
+        self.assertEqual(widgets['parts'].set('part_0', 'mass'), '1')
+        self.assertEqual(widgets['parts'].set('part_0', 'total_mass'), '2')
+        self.assertIn('BOM ağırlığı (kg): 3', widgets['configuration'].cget('text'))
+        widgets['parts'].selection_set('part_0')
+        self.settle()
+        self.assertIn('Birim ağırlık (kg): 1', widgets['detail_info'].cget('text'))
+        self.assertIn('Toplam ağırlık (kg): 2', widgets['detail_info'].cget('text'))
+        widgets['tabs'].set(BOM_TREE_TAB)
+        assembly = next(n for n in self.result.tree if n.kind == 'Montaj')
+        self.assertEqual(widgets['tree'].set(assembly.number, 'mass'), '2')
+        widgets['tree'].selection_set(assembly.number)
+        self.settle()
+        self.assertIn('Ağırlık (kg): 2', widgets['detail_info'].cget('text'))
+
+    def test_missing_mass_warns_and_export_keeps_part_with_unknown_weight(self):
+        child = self.swapp.ActiveDoc.root.children[0].children[0]
+        child.mass_kg = None
+        self.scan()
+        widgets = self.app.bom_widgets
+        self.assertEqual(widgets['parts'].set('part_0', 'mass'), 'Okunamadı')
+        self.assertEqual(widgets['parts'].set('part_0', 'total_mass'), 'Okunamadı')
+        self.assertIn('Ağırlığı okunamayan: 2 parça', self.app.status_label.cget('text'))
+        self.assertEqual(widgets['export'].cget('state'), 'normal')
+        destination = self.root/'unknown-weight.xlsx'
+        with patch('bom.window.filedialog.asksaveasfilename', return_value=str(destination)):
+            widgets['export'].invoke()
+            self.wait_idle()
+        book = load_workbook(destination)
+        self.addCleanup(book.close)
+        self.assertEqual(book['Parça listesi']['G5'].value, 'Okunamadı')
+        self.assertEqual(book['Parça listesi']['C5'].value, 2)
+        self.assertEqual(book['Parça listesi']['E1'].value, 'Eksik ağırlık bilgisi')
 
     def test_page_cache_themes_small_window_and_scaling_keep_controls_visible(self):
         self.scan()

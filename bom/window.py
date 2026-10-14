@@ -28,6 +28,10 @@ class BomTabs(ctk.CTkTabview):
             self._command()
 
 
+def _mass_text(value):
+    return 'Okunamadı' if value is None else f'{value:.6f}'.rstrip('0').rstrip('.').replace('.', ',')
+
+
 class BomView:
     def _create_bom_state(self, saved):
         self.bom_state = {'include_excluded': tk.BooleanVar(self, value=saved.get('bom_include_excluded', False) is True)}
@@ -41,7 +45,7 @@ class BomView:
         self.workspace.grid_columnconfigure(0, weight=1)
         self.workspace.grid_rowconfigure(3, weight=1)
         header, actions, labels = self._page_header(BOM_TITLE,
-            'Parça listesi ve alt montaj hiyerarşisi.', 'MONTAJ / ÜRÜN AĞACI', 'tree')
+            'Parça ağırlıkları ve alt montaj hiyerarşisi.', 'MONTAJ / ÜRÜN AĞACI', 'tree')
         self.bom_widgets.update(eyebrow=labels['eyebrow'], subtitle=labels['subtitle'])
         for key, label, command, width, primary, icon in (
                 ('scan', 'Montajı tara', self._scan_bom, 128, False, 'search'),
@@ -158,9 +162,11 @@ class BomView:
                 self.bom_widgets['search'] = entry
                 self.bom_widgets['clear_search'] = clear
                 self._label(toolbar, 'Ada göre sıralı', 11, MUTED).grid(row=0, column=1, sticky='e')
-                table = ttk.Treeview(tab, columns=('name', 'qty', 'config', 'path'),
-                                     displaycolumns=('name', 'qty', 'config'), show='headings', style='Bom.Treeview')
-                columns = [('name', 'Parça adı ↑', 260), ('qty', 'Adet', 75), ('config', 'Konfigürasyon', 180), ('path', 'Dosya yolu', 300)]
+                table = ttk.Treeview(tab, columns=('name', 'qty', 'config', 'path', 'mass', 'total_mass'),
+                                     displaycolumns=('name', 'qty', 'mass', 'total_mass', 'config'),
+                                     show='headings', style='Bom.Treeview')
+                columns = [('name', 'Parça adı ↑', 260), ('qty', 'Adet', 65), ('config', 'Konfigürasyon', 150),
+                           ('path', 'Dosya yolu', 300), ('mass', 'Birim (kg)', 100), ('total_mass', 'Toplam (kg)', 110)]
             else:
                 self._label(toolbar, 'Montaj hiyerarşisi', 11, MUTED).grid(row=0, column=0, sticky='w')
                 for column, (key_button, text, expanded) in enumerate((('expand', 'Tümünü aç', True), ('collapse', 'Tümünü kapat', False)), 1):
@@ -168,15 +174,17 @@ class BomView:
                     button.configure(height=32)
                     button.grid(row=0, column=column, sticky='e', padx=(6, 0))
                     self.bom_widgets[key_button] = button
-                table = ttk.Treeview(tab, columns=('kind', 'config', 'path'),
-                    displaycolumns=('kind', 'config'), show='tree headings', style='Bom.Treeview')
+                table = ttk.Treeview(tab, columns=('kind', 'config', 'path', 'mass'),
+                    displaycolumns=('kind', 'mass', 'config'), show='tree headings', style='Bom.Treeview')
                 table.heading('#0', text='Montaj / parça', anchor='w')
                 table.column('#0', width=330, minwidth=200)
-                columns = [('kind', 'Tür', 90), ('config', 'Konfigürasyon', 180), ('path', 'Dosya yolu', 300)]
+                columns = [('kind', 'Tür', 90), ('config', 'Konfigürasyon', 180), ('path', 'Dosya yolu', 300),
+                           ('mass', 'Ağırlık (kg)', 110)]
             for column, title, width in columns:
-                table.heading(column, text=title, anchor='center' if column == 'qty' else 'w')
-                table.column(column, width=width, minwidth=60, stretch=column not in ('qty', 'kind'),
-                             anchor='center' if column == 'qty' else 'w')
+                anchor = 'center' if column == 'qty' else 'e' if column in ('mass', 'total_mass') else 'w'
+                table.heading(column, text=title, anchor=anchor)
+                table.column(column, width=width, minwidth=60,
+                             stretch=column not in ('qty', 'kind', 'mass', 'total_mass'), anchor=anchor)
             table.configure(selectmode='browse')
             table.grid(row=1, column=0, sticky='nsew')
             vertical = ctk.CTkScrollbar(tab, command=table.yview, width=10, fg_color=PANEL, button_color=BORDER)
@@ -195,7 +203,7 @@ class BomView:
             empty_icon.pack(pady=(0, 12))
             heading = self._label(empty, 'Montajınız burada görünecek', 16, bold=True)
             heading.pack()
-            hint = self._label(empty, 'Montajı tarayın; parçalar ve adetler otomatik listelensin.', 11, MUTED,
+            hint = self._label(empty, 'Montajı tarayın; parçalar, adetler ve ağırlıklar listelensin.', 11, MUTED,
                                wraplength=310, justify='center')
             hint.pack(pady=(5, 0))
             self.bom_widgets[key+'_empty'] = empty
@@ -316,12 +324,17 @@ class BomView:
         resize_columns = widgets.get('columns_key') != columns_key
         for key, name_column, fixed_column in (('parts', 'name', 'qty'), ('tree', '#0', 'kind')):
             table = widgets[key]
-            fixed = 70 if key == 'parts' else 85
-            config = min(175, table_width*.30)
+            fixed = 65 if key == 'parts' else 85
+            mass_width = 210 if key == 'parts' else 110
+            config = min(150, table_width*.22)
             if resize_columns:
-                table.column(name_column, width=round((table_width-fixed-config)*scale), minwidth=round(140*scale))
+                table.column(name_column, width=round((table_width-fixed-config-mass_width)*scale), minwidth=round(140*scale))
                 table.column(fixed_column, width=round(fixed*scale), minwidth=round(60*scale), stretch=False)
                 table.column('config', width=round(config*scale), minwidth=round(100*scale))
+                table.column('mass', width=round((100 if key == 'parts' else 110)*scale),
+                             minwidth=round(100*scale), stretch=False)
+                if key == 'parts':
+                    table.column('total_mass', width=round(110*scale), minwidth=round(110*scale), stretch=False)
             icon = widgets[key+'_empty_icon']
             if table.winfo_height()/scale < 210:
                 if icon.winfo_manager():
@@ -410,10 +423,15 @@ class BomView:
             part = result.parts[int(rows[0].removeprefix('part_'))]
             name, path = part.name, part.path
             info = f'Parça · {part.quantity} adet\nKonfigürasyon: {part.configuration}'
+            unit = 'Değişken' if part.mass_kg is None and part.total_mass_kg is not None else _mass_text(part.mass_kg)
+            info += f'\nBirim ağırlık (kg): {unit}\nToplam ağırlık (kg): {_mass_text(part.total_mass_kg)}'
         else:
             node = self.bom_widgets['nodes'][rows[0]]
             name, path = node.name, node.path
             info = f'{node.kind}\nKonfigürasyon: {node.configuration}\nBileşen: {node.instance}'
+            info += f'\nAğırlık (kg): {_mass_text(node.mass_kg)}'
+            if node.kind == 'Montaj':
+                info += '\nListelenen alt parçaların toplamı.'
         self.bom_widgets['selection'] = name, info, path
         configure_changed(self.bom_widgets['detail_name'], text=name)
         configure_changed(self.bom_widgets['detail_icon'], image=self._icon(
@@ -517,7 +535,7 @@ class BomView:
         self._bom_busy(True)
         self.status_label.configure(text='Aktif montaj taranıyor…', text_color=MUTED)
         self.bom_widgets['assembly'].configure(text='Aktif montaj taranıyor…')
-        self.bom_widgets['configuration'].configure(text='Montaj ve parça bilgileri okunuyor.')
+        self.bom_widgets['configuration'].configure(text='Montaj, parça ve ağırlık bilgileri okunuyor.')
         include = self.bom_state['include_excluded'].get()
         threading.Thread(target=scan_worker, args=(self.events, self.stop_event),
                          kwargs={'include_excluded': include}, daemon=False).start()
@@ -554,7 +572,8 @@ class BomView:
         self._clear_bom()
         self.bom_result = result
         self.bom_widgets['assembly'].configure(text=PureWindowsPath(result.assembly).name)
-        self.bom_widgets['configuration'].configure(text=f'Konfigürasyon: {result.configuration}')
+        self.bom_widgets['configuration'].configure(
+            text=f'Konfigürasyon: {result.configuration} · BOM ağırlığı (kg): {_mass_text(result.total_mass_kg)}')
         self.bom_widgets['nodes'] = {node.number: node for node in result.tree}
         self._update_bom_metrics()
         for key in ('parts', 'tree'):
@@ -573,14 +592,16 @@ class BomView:
             if kind == 'part':
                 iid = f'part_{index}'
                 self.bom_widgets['parts'].insert('', 'end', iid=iid,
-                    values=(value.name, value.quantity, value.configuration, value.path),
+                    values=(value.name, value.quantity, value.configuration, value.path,
+                            'Değişken' if value.mass_kg is None and value.total_mass_kg is not None else _mass_text(value.mass_kg),
+                            _mass_text(value.total_mass_kg)),
                     tags=('stripe',) if index % 2 else ())
                 self.bom_widgets['part_ids'].append(iid)
                 self.bom_widgets['part_search'].append(
                     f'{value.name} {value.configuration} {value.path}'.casefold().replace('\u0307', ''))
             else:
                 self.bom_widgets['tree'].insert(value.parent, 'end', iid=value.number,
-                    text=value.name, values=(value.kind, value.configuration, value.path), open=True,
+                    text=value.name, values=(value.kind, value.configuration, value.path, _mass_text(value.mass_kg)), open=True,
                     tags=('assembly',) if value.kind == 'Montaj' else ('stripe',) if index % 2 else ())
             if time.perf_counter() >= deadline:
                 return
@@ -646,6 +667,9 @@ class BomView:
             result = self.bom_result
             text, color = (f'Tarama tamamlandı · {result.total_parts} parça adedi · '
                            f'Atlanan bileşen: {result.suppressed} bastırılmış, {result.excluded} BOM dışı.'), SUCCESS
+            if result.missing_mass_parts:
+                text += f' Ağırlığı okunamayan: {result.missing_mass_parts} parça. Excel’de belirtilir.'
+                color = AMBER
         if self.bom_result is None and state in ('error', 'cancelled'):
             self.bom_widgets['assembly'].configure(text='Tarama tamamlanamadı' if state == 'error' else 'Tarama durduruldu')
             self.bom_widgets['configuration'].configure(text='Montajı tara düğmesiyle yeniden deneyin.')
