@@ -1,7 +1,7 @@
 """Conservative bolt-body screening; see docs/bolt-calculator.md for scope."""
 
 from dataclasses import dataclass
-from math import hypot, isfinite, pi, sqrt
+from math import ceil, hypot, isfinite, pi, sqrt
 
 # ISO metric coarse threads, diameter and pitch in mm.
 THREADS = {f'M{d}': (d, p) for d, p in (
@@ -61,6 +61,52 @@ class Result:
     @property
     def loaded(self):
         return self.tension_n > 0 or self.shear_n > 0
+
+    @property
+    def tension_utilization(self):
+        return self.tensile_stress/self.allowable_stress
+
+    @property
+    def shear_utilization(self):
+        return sqrt(3)*self.shear_stress/self.allowable_stress
+
+    @property
+    def safety_margin(self):
+        """Proportional load increase to the selected limit; not a yield margin."""
+        return 1/self.utilization-1 if self.utilization > 0 else None
+
+    @property
+    def minimum_count(self):
+        """Required equal-sharing count, including counts beyond the input limit."""
+        if not self.loaded:
+            return None
+
+        def stress(count):
+            return hypot(self.tension_n/(count*self.tensile_area),
+                         sqrt(3)*(self.shear_n/(count*self.planes*self.shear_area)))
+
+        count = max(1, ceil(stress(1)/self.allowable_stress))
+        # Check integer boundaries with the same arithmetic as calculate().
+        # A tolerance here could recommend a count that still fails the check.
+        if stress(count)/self.allowable_stress > 1:
+            count += 1
+        if count > 1 and stress(count-1)/self.allowable_stress <= 1:
+            count -= 1
+        return count
+
+    @property
+    def tension_limit_with_shear_n(self):
+        """Total admissible tension with the current shear held fixed."""
+        if self.shear_utilization > 1:
+            return None
+        return self.tension_capacity_n*sqrt(max(0., 1-self.shear_utilization**2))
+
+    @property
+    def shear_limit_with_tension_n(self):
+        """Total admissible shear with the current tension held fixed."""
+        if self.tension_utilization > 1:
+            return None
+        return self.shear_capacity_n*sqrt(max(0., 1-self.tension_utilization**2))
 
 
 def calculate(*, metric='M10', grade='8.8', mode='Çekme', tension='10', shear='0',

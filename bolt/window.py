@@ -95,7 +95,8 @@ class BoltView:
             'As = π/4 × (d − 0,938194P)²\n'
             'İzin verilen gerilme = Sp / emniyet katsayısı\n'
             'Birleşik yük: σeş = √(σ² + 3τ²)\n\n'
-            'Statik ön kontrol · Eşit yük paylaşımı\n'
+            'Cıvata gövdesi · Statik ön kontrol\n'
+            'Eşit yük paylaşımı kabul edilir.\n'
             'Ön sıkma ve bağlantı plakaları ayrıca kontrol edilir.',
             11, MUTED, justify='left', anchor='w', wraplength=360)
         w['bank'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 14))
@@ -123,7 +124,7 @@ class BoltView:
         w['summary'].grid(row=2, column=0, sticky='ew', padx=18, pady=(0, 6))
         w['progress'] = ctk.CTkProgressBar(result, height=7, fg_color=INPUT, progress_color=ACCENT)
         w['progress'].grid(row=3, column=0, sticky='ew', padx=18)
-        w['usage'] = self._label(result, '', 11, MUTED, anchor='w')
+        w['usage'] = self._label(result, '', 11, MUTED, anchor='w', justify='left', wraplength=390)
         w['usage'].grid(row=4, column=0, sticky='ew', padx=18, pady=(4, 8))
         visual = self._bolt_card(details)
         visual.grid(row=3, column=0, sticky='ew', pady=(0, 12))
@@ -214,18 +215,15 @@ class BoltView:
         else:
             verdict = 'Yük yok' if not r.loaded else 'Güvenli' if r.safe else 'Güvensiz'
             color = AMBER if not r.loaded else SUCCESS if r.safe else RED
-            summary = ('Bir yük girerek dayanımı kontrol edin.' if not r.loaded else
-                       f'Seçilen {fmt(r.safety_factor)} emniyet hedefi ' + ('sağlanıyor.' if r.safe else 'sağlanmıyor.'))
-            usage = f'Kapasite kullanımı: %{fmt(r.utilization*100, 1)}'
+            summary = ('Cıvata gövdesini kontrol etmek için yük girin.' if not r.loaded else
+                       f'Cıvata gövdesi: {fmt(r.safety_factor)} emniyet hedefi ' + ('sağlanıyor.' if r.safe else 'sağlanmıyor.'))
+            usage = (f'Kullanım: %{fmt(r.utilization*100, 1)} · '
+                     f'Yük marjı: {self._bolt_margin_text(r)}\n{self._bolt_minimum_text(r)}')
             for key, value in dict(stress=fmt(r.equivalent_stress)+' MPa', allowable=fmt(r.allowable_stress)+' MPa',
                                     factor=fmt(r.available_factor) if r.available_factor is not None else '—',
                                     area=fmt(r.tensile_area)+' mm²').items():
                 configure_changed(w[key], text=value)
-            configure_changed(w['capacity'], text=(
-                f'{r.count} cıvata için tek başına yük sınırları:\n'
-                f'Çekme: {force_text(r.tension_capacity_n, r.unit)}\n'
-                f'Kesme: {force_text(r.shear_capacity_n, r.unit)}\n'
-                'Birleşik yükte bu iki sınır aynı anda kullanılamaz.'))
+            configure_changed(w['capacity'], text=self._bolt_capacity_text(r))
             if r.mode == 'Birleşik yük':
                 configure_changed(w['capacity_title'], text='BİRLEŞİK YÜK · KAPASİTE KULLANIMI')
                 configure_changed(w['capacity_value'], text=f'%{fmt(r.utilization*100, 1)}')
@@ -242,6 +240,42 @@ class BoltView:
         w['progress'].set(min(1., self.bolt_result.utilization) if self.bolt_result else 0.)
         configure_changed(w['copy'], state='normal' if self.bolt_result else 'disabled')
         self._draw_bolt_diagram()
+
+    @staticmethod
+    def _bolt_margin_text(result):
+        margin = result.safety_margin
+        if margin is None:
+            return 'yük yok'
+        sign = '+' if margin > 0 else '-' if margin < 0 else ''
+        return sign+'%'+fmt(abs(margin)*100, 1)
+
+    @staticmethod
+    def _bolt_minimum_text(result):
+        minimum = result.minimum_count
+        if minimum is None:
+            return 'Minimum adet: yük girildiğinde hesaplanır.'
+        if minimum > 1000:
+            return 'Gerekli adet, 1000 adet sınırını aşıyor.'
+        return f'Eşit yük paylaşımıyla gerekli en az: {minimum} cıvata.'
+
+    @staticmethod
+    def _bolt_capacity_text(result):
+        r = result
+        text = (f'{r.count} cıvata için tek başına yük sınırları:\n'
+                f'Çekme: {force_text(r.tension_capacity_n, r.unit)}\n'
+                f'Kesme: {force_text(r.shear_capacity_n, r.unit)}\n'
+                'Birleşik yükte bu iki sınır aynı anda kullanılamaz.')
+        if r.mode == 'Birleşik yük':
+            tension = r.tension_limit_with_shear_n
+            shear = r.shear_limit_with_tension_n
+            text += (f'\n\nMevcut kesme ({force_text(r.shear_n, r.unit)}) sabitken çekme sınırı: '
+                     + (force_text(tension, r.unit) if tension is not None else
+                        'yok; kesme tek başına sınırı aşıyor.')
+                     + f'\nMevcut çekme ({force_text(r.tension_n, r.unit)}) sabitken kesme sınırı: '
+                     + (force_text(shear, r.unit) if shear is not None else
+                        'yok; çekme tek başına sınırı aşıyor.')
+                     + '\nBunlar toplam yük sınırıdır; eklenebilecek yük değildir.')
+        return text
 
     def _draw_bolt_diagram(self):
         canvas = self.bolt_widgets['canvas']
@@ -264,7 +298,7 @@ class BoltView:
         w = self.bolt_widgets
         scale = self.workspace._get_widget_scaling()
         width = max(220, w['details'].winfo_width()/scale-38)
-        for key in ('summary', 'capacity', 'scope', 'capacity_context'):
+        for key in ('summary', 'usage', 'capacity', 'scope', 'capacity_context'):
             configure_changed(w[key], wraplength=width)
         configure_changed(w['bank'], wraplength=max(190, w['form'].winfo_width()/scale-38))
         height = round(260*scale)
@@ -287,6 +321,11 @@ class BoltView:
                 f'σeş = {fmt(r.equivalent_stress)} MPa · Sp = {fmt(r.proof_stress)} MPa\n'
                 f'Emniyet hedefi = {fmt(r.safety_factor)} · İzin verilen = {fmt(r.allowable_stress)} MPa\n'
                 f'Sonuç: {self.bolt_widgets["verdict"].cget("text")} · Kullanım %{fmt(r.utilization*100, 1)}\n'
+                f'Seçili emniyet hedefine göre yük marjı = {self._bolt_margin_text(r)}\n'
+                f'{self._bolt_minimum_text(r)}\n'
+                'Minimum adet cıvata gövdesi, seçili emniyet ve eşit yük paylaşımı içindir; '
+                'adet otomatik değiştirilmez.\n'
+                f'{self._bolt_capacity_text(r)}\n'
                 f'kg yük dönüşümü: standart yerçekimi g = 9,80665 m/s².\n\n{SCOPE}')
         self.clipboard_clear()
         self.clipboard_append(text)
@@ -312,6 +351,14 @@ class BoltView:
             'von Mises eşdeğer gerilmesi: σeş = √(σ² + 3τ²)\n'
             'İzin verilen gerilme = Sp / emniyet katsayısı\n'
             'Güvenli koşulu: σeş ≤ izin verilen gerilme.\n\n'
+            'Yük marjı = 1 / kullanım − 1. Pozitif marj, kuvvetlerin aynı oranda '
+            'artırılmasıyla seçili sınırın ne kadar uzakta olduğunu gösterir. '
+            'Yük yoksa marj verilmez.\n'
+            'Gerekli en az cıvata adedi eşit yük paylaşımına göre hesaplanır; '
+            'girişteki adet otomatik değiştirilmez.\n'
+            'Birleşik yük sınırlarında diğer kuvvet sabit tutulur. Gösterilen değer '
+            'toplam kuvvet sınırıdır; eklenebilecek yük değildir. Diğer kuvvet tek başına '
+            'sınırı aşıyorsa geçerli sınır yoktur.\n\n'
             'Deney yükü gerilmesi Sp (MPa): 4.6: 225; 5.6: 280; 8.8: 580 (M16 ve altı), '
             '600 (M16 üstü); 10.9: 830; 12.9: 970. Sp kopma dayanımı değildir. '
             'Bu sınırla von Mises karşılaştırması, uygulamanın ihtiyatlı ön kontrol yöntemidir; '

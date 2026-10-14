@@ -50,9 +50,9 @@ kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
 
 ## Cıvata hesabı
 
-**Mühendislik hesapları → Cıvata hesabı** altında metrik ölçü, kalite sınıfı ve yükü seçin. Çekme, kesme ve birleşik yük için cıvatanın statik dayanımı, emniyet katsayısı ve güvenli/güvensiz sonucu gösterilir. Yük yönleri canlı cıvata görselinde izlenir. N/kN/kgf, cıvata adedi, tek/çift kesme ve dişli/dişsiz kesit desteklenir. SolidWorks bağlantısı gerekmez.
+**Mühendislik hesapları → Cıvata hesabı** altında metrik ölçü, kalite sınıfı ve yükü seçin. Çekme, kesme ve birleşik yük için cıvatanın statik dayanımı, emniyet katsayısı ve güvenli/güvensiz sonucu gösterilir. Eşit yük paylaşımına göre gerekli en az cıvata adedi ve seçili emniyet hedefine göre yük marjı hesaplanır. Birleşik yükte diğer kuvvet sabitken toplam yük sınırları da verilir. Cıvata adedi, tek/çift kesme ve dişli/dişsiz kesit desteklenir. SolidWorks bağlantısı gerekmez.
 
-Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. **kg yük / Newton (N) / kN** düğmeleri hem girdiyi hem gösterilen kapasiteyi dönüştürür. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md). [Windows EXE indirme ve derleme](packaging/README.md).
+Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. **kg yük / Newton (N) / kN** seçimi hem girdiyi hem gösterilen kapasiteyi dönüştürür. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md). [İncelenen GitHub projeleri](bolt/README.md). [Windows EXE indirme ve derleme](packaging/README.md).
 
 ## Arayüz ve temalar
 

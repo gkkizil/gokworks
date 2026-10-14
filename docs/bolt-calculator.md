@@ -6,11 +6,12 @@
 - Çekme, kesme veya eşzamanlı birleşik yük. **kg yük / Newton (N) / kN** seçimi açılır listeden yapılır. Birim değişikliği girilmiş yükü dönüştürür; kapasite, yük okları ve pano aynı birimi kullanır. kg yük seçiminde kütle standart yerçekimi ile kuvvete çevrilir: **1 kg yük = 9,80665 N**. Önceki kgf tercihleri aynı kuvvet korunarak kg yük seçimine taşınır.
 - Cıvata adedi, tek/çift kesme düzlemi, dişli/dişsiz kesit ve 1–10 arasında emniyet katsayısı. Varsayılan katsayı 2; tüm cıvatalar ve çift kesmedeki düzlemler eşit yük taşır.
 - Yük okları, kapasite kullanımı, eşdeğer/izin verilen gerilme, mevcut emniyet ve çekme alanı. Hesap varsayımlarıyla panoya kopyalanabilir. Seçimler kaydedilir.
+- Seçili emniyet hedefine göre yük marjı ve eşit yük paylaşımıyla gerekli en az cıvata adedi. Birleşik yükte mevcut diğer kuvvet sabitken toplam çekme/kesme sınırları. Adet otomatik değiştirilmez; gereksinim 1000'i aşıyorsa giriş sınırı belirtilir. Yük yoksa marj/adet önerisi verilmez.
 - Somun altıgen yüzeyler, pah ve iç dişlerle çizilir. Büyütülmüş somun detayı açık deliği gösterir; montaj görünümünde dişli cıvata ucu somundan dışarı uzanır. Görsel ölçeksizdir, bir somun ölçü standardını doğrulamaz.
 
 Sol sütunda parametreler ve kısa teknik bilgi, sağda mavi yük sınırı kartı, sonuç ve dinamik cıvata çizimi bulunur. Kart seçilen adet, emniyet katsayısı ve yük birimini kullanır. Birleşik yükte kart kapasite kullanımını gösterir; bağımsız çekme/kesme sınırları birlikte kullanılabilecek değerler değildir.
 
-**Ölçüler** görünümü metrik seçimine göre `d` (nominal çap), `k` (nominal baş yüksekliği), `s` (anahtar ağzı) ve yaklaşık kılavuz deliğini günceller. Baş tablosu ISO 4017 nominal ölçüleridir; DIN 933 ölçüleriyle karıştırılmaz (örneğin ISO M10 anahtar ağzı 16 mm'dir). Cıvata boyu temsili, toleranslar kapsam dışıdır. Yaklaşık `d − P` bir kılavuz deliği ön bilgisidir; bağlantı boşluk deliği ya da kesin matkap seçimi değildir. Bu revizyonda dış tablo erişimi engellendiği için canlı kaynak karşılaştırması yapılamadı; referans standardı [ISO 4017](https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en).
+**Ölçüler** görünümü metrik seçimine göre `d` (nominal çap), `k` (nominal baş yüksekliği), `s` (anahtar ağzı) ve yaklaşık kılavuz deliğini günceller. Baş tablosu ISO 4017 nominal ölçülerini esas alır; DIN 933 ölçüleriyle karıştırılmaz (örneğin ISO M10 anahtar ağzı 16 mm'dir). Cıvata boyu temsili, toleranslar kapsam dışıdır. Yaklaşık `d − P` bir kılavuz deliği ön bilgisidir; bağlantı boşluk deliği ya da kesin matkap seçimi değildir. GitHub geometri tablolarıyla yapılan karşılaştırma ve sürüm farkları [cıvata referans notunda](../bolt/README.md) açıklanır; referans standardı [ISO 4017](https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en).
 
 **Yük gösterimi** seçeneği önceki tek başlı cıvata, somun ve çekme/kesme oklarını korur. Güncel gerçek Tk ekranları: [Koyu](../bolt/examples/bolt-dimensions-dark.png) · [Açık](../bolt/examples/bolt-dimensions-light.png).
 
@@ -19,6 +20,13 @@ ve 2 ölçü verisi kontrolü. Açık/koyu temada 1240×860 ekran görüntüleri
 düzenle karşılaştırıldı; ölçü çizimi bu boyutta ilk görünümde tamamen açıktır.
 Küçük pencerede çizime ve girişlere sütun kaydırmalarıyla ulaşılır. Kapasite,
 birim dönüşümü, birleşik yük, geçersiz giriş ve sayfa önbelleği de kontrol edildi.
+
+GitHub referanslarıyla yapılan hesap iyileştirmesinde **20 ilgili kontrol geçti**:
+12 hesap, 6 gerçek Tk ve 2 ölçü verisi kontrolü. Minimum adedin güvenli sonucu
+sağlaması ve bir eksik adedin sınırı aşması, tam sayı sınırları, 1000 üzeri
+gereksinim, yük marjı, eşzamanlı kapasite, kg/N/kN dönüşümü ve geçersiz girişte
+önceki önerinin temizlenmesi doğrulandı. Açık/koyu gerçek ekran görüntüleri
+güncellendi; tüm uygulama testleri veya EXE derlemesi çalıştırılmadı.
 
 ## Hesap yöntemi
 
@@ -35,7 +43,13 @@ Dişsiz kesmede Ak = πd²/4
 Kullanım = σeş / (Sp / s)
 Mevcut emniyet = Sp / σeş
 Güvenli koşulu: kullanım ≤ 1
+Yük marjı = 1/kullanım − 1 (yük varsa)
+Gerekli adet = yukarı yuvarla(√[(Ft/As)² + 3(Fv/(m Ak))²] / (Sp/s))
+Mevcut Fv sabitken toplam Ft sınırı = n As √[(Sp/s)² − 3τ²]
+Mevcut Ft sabitken toplam Fv sınırı = n m Ak/√3 × √[(Sp/s)² − σ²]
 ```
+
+Gerekli adet en az 1'dir ve sınırdaki tam sayılar mevcut güvenli/güvensiz hesabıyla karşılaştırılır. Diğer kuvvet tek başına sınırı aşmışsa birleşik yük için geçerli sınır yoktur. Bu sınırlar eklenebilecek yük değildir ve aynı anda kullanılabilecek yeni bir yük çifti oluşturmaz. Marj, seçili deney yükü gerilmesi/emniyet sınırına göredir; akma veya kopma marjı değildir.
 
 Deney yükü gerilmesi `Sp`:
 
@@ -50,7 +64,7 @@ Deney yükü gerilmesi `Sp`:
 
 Malzeme değerlerinin dayanağı ISO 898-1:2013 deney yükü gerilmesi tablosu; kaba diş adımları ISO 261, temel diş geometrisi ISO 68-1 / ISO 724'tür. Sp kopma dayanımı değildir. Von Mises gerilmesinin Sp/s ile karşılaştırılması bu uygulamanın ihtiyatlı statik ön kontrol yöntemidir; ISO 898-1 bir bağlantı tasarım standardı değildir. Dişli kesmede çekme alanından daha küçük olan temel diş kök alanı kullanılır; imalat toleransları ayrıca modellenmez.
 
-Referans erişimleri: [ISO 898-1](https://www.iso.org/obp/ui/#iso:std:iso:898:-1:ed-5:v1:en), [ISO 261](https://www.iso.org/obp/ui/#iso:std:iso:261:ed-2:v1:en), [ISO 724](https://www.iso.org/obp/ui/#iso:std:iso:724:ed-2:v1:en). Standartların tam metni depoya dahil değildir. Bu oturumda dış teknik tablo sitelerine erişim ağ tarafından reddedildi; canlı kaynak karşılaştırması yapıldığı iddia edilmez.
+Referans erişimleri: [ISO 898-1](https://www.iso.org/obp/ui/#iso:std:iso:898:-1:ed-5:v1:en), [ISO 261](https://www.iso.org/obp/ui/#iso:std:iso:261:ed-2:v1:en), [ISO 724](https://www.iso.org/obp/ui/#iso:std:iso:724:ed-2:v1:en). Standartların tam metni depoya dahil değildir. Önceki revizyonda dış teknik tablo erişimi reddedilmişti. 14 Ekim GitHub incelemesinde BAT, ranf_thread_fast ve bolt-analysis kaynakları okunarak hesap varsayımları karşılaştırıldı; bu karşılaştırma tam bir VDI/ECSS/NASA bağlantı analizi veya standart doğrulaması değildir. [İncelenen sürümler ve uygulanan iyileştirmeler](../bolt/README.md).
 
 ## Kapsam
 

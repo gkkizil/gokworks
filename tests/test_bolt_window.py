@@ -5,6 +5,7 @@ from unittest.mock import patch
 import customtkinter as ctk
 from support.gui import GuiTestCase
 from pdf.settings import load_settings
+from bolt.rules import force_text
 
 
 class BoltWindowTests(GuiTestCase):
@@ -140,3 +141,55 @@ class BoltWindowTests(GuiTestCase):
         state['tension'].set('invalid')
         self.assertEqual(w['capacity_value'].cget('text'), '—')
         self.assertTrue(w['canvas'].find_withtag('dimension_head'))
+
+    def test_minimum_count_and_target_margin_are_advisory_and_cleared_when_invalid(self):
+        state, w = self.app.bolt_state, self.app.bolt_widgets
+        state['tension'].set('20')
+        self.assertEqual(self.app.bolt_result.minimum_count, 2)
+        self.assertEqual(state['count'].get(), '1')
+        self.assertIn('gerekli en az: 2 cıvata', w['usage'].cget('text'))
+        self.assertIn('Yük marjı: -%', w['usage'].cget('text'))
+        state['count'].set('2')
+        self.assertEqual(self.app.bolt_result.minimum_count, 2)
+        self.assertIn('Yük marjı: +%', w['usage'].cget('text'))
+        self.app._copy_bolt_result()
+        report = self.app.clipboard_get()
+        self.assertIn('gerekli en az: 2 cıvata', report)
+        self.assertIn('Seçili emniyet hedefine göre yük marjı', report)
+        self.assertIn('adet otomatik değiştirilmez', report)
+        state['tension'].set('1000000000')
+        self.assertGreater(self.app.bolt_result.minimum_count, 1000)
+        self.assertEqual(state['count'].get(), '2')
+        self.assertIn('1000 adet sınırını aşıyor', w['usage'].cget('text'))
+        self.assertNotIn('gerekli en az:', w['usage'].cget('text'))
+        state['tension'].set('0')
+        self.assertIsNone(self.app.bolt_result.minimum_count)
+        self.assertIn('yük girildiğinde hesaplanır', w['usage'].cget('text'))
+        state['tension'].set('invalid')
+        self.assertEqual(w['usage'].cget('text'), 'Hesaplanamadı')
+        self.assertEqual(w['copy'].cget('state'), 'disabled')
+
+    def test_combined_limits_hold_other_load_fixed_and_copy_the_same_units(self):
+        state, w = self.app.bolt_state, self.app.bolt_widgets
+        for key, value in dict(mode='Birleşik yük', tension='12', shear='8').items():
+            state[key].set(value)
+        self.assertEqual(self.app.bolt_result.minimum_count, 2)
+        self.assertEqual(state['count'].get(), '1')
+        for unit in ('kN', 'N', 'kg'):
+            state['unit'].set(unit)
+            result = self.app.bolt_result
+            text = w['capacity'].cget('text')
+            self.assertIn(f'çekme sınırı: {force_text(result.tension_limit_with_shear_n, unit)}', text)
+            self.assertIn(f'kesme sınırı: {force_text(result.shear_limit_with_tension_n, unit)}', text)
+            self.assertIn('iki sınır aynı anda kullanılamaz', text)
+            self.assertIn('eklenebilecek yük değildir', text)
+            self.app._copy_bolt_result()
+            self.assertIn(text, self.app.clipboard_get())
+        state['unit'].set('kN')
+        state['shear'].set('100')
+        self.assertIsNone(self.app.bolt_result.tension_limit_with_shear_n)
+        self.assertIn('çekme sınırı: yok; kesme tek başına sınırı aşıyor', w['capacity'].cget('text'))
+        state['shear'].set('8')
+        state['tension'].set('100')
+        self.assertIsNone(self.app.bolt_result.shear_limit_with_tension_n)
+        self.assertIn('kesme sınırı: yok; çekme tek başına sınırı aşıyor', w['capacity'].cget('text'))
