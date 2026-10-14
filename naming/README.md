@@ -4,8 +4,8 @@ SolidWorks dosyalarını yeni adlarla **ayrı bir Pack and Go paketine** aktarı
 
 ## Kullanım
 
-1. SolidWorks’te ana montajı, parçayı veya teknik resmi açıp değişikliklerini kaydedin.
-2. **Aktarım ve montaj → İsimlendirme aracı → Dosyaları oku** seçin.
+1. **Aktarım ve montaj → İsimlendirme aracı** ekranında kaynak seçin: **Kaynak klasör → Klasör seç** ile klasörü ve açılan dosya penceresinde ana montajı belirleyin; **Dosya seç** ile de doğrudan montaj, parça veya teknik resim seçebilirsiniz. SolidWorks'teki açık montaj için **Aktif montajı kullan** düğmesi montajı hemen okur.
+2. Dosyadan kaynak seçtiyseniz **Dosyaları oku** düğmesine basın. Kaynak dosya önceden açık olmak zorunda değildir; SolidWorks oturumu açık olmalıdır. Bir klasördeki bağımsız dosyaların tümü aynı proje sayılmaz: seçilen ana dosyanın Pack and Go referansları alınır. Kaynağı değiştirmek eski önizlemeyi temizler.
 3. Çıktı için mevcut bir üst klasör ve henüz oluşturulmamış bir **Yeni paket klasörü** adı girin.
 4. Ön/son ek, bul–değiştir veya numaralı isimlendirme seçin. Numaralı modda başlangıç ve basamak sayısı ayarlanır. Dosya uzantıları korunur.
 5. Eski–yeni adları kontrol edin. Tek bir dosya için satırı seçip **Seçili adı düzenle** kullanın. Aynı klasördeki aynı adlı model/teknik resim çifti, modelin yeni adını paylaşır; bağlantılar ayrıca dosya yolu üzerinden eşlenir.
@@ -23,7 +23,8 @@ Küçük ekranda ayarlar ayrı kaydırılır; önizleme tablosu ve paket düğme
 
 - Windows ad kuralları, dosya yolu uzunluğu, uzantılar ve büyük/küçük harften bağımsız ad çakışmaları doğrulanır.
 - Kaydedilmemiş değişiklik, eksik kaynak, paket dışında kalan referans veya sanal/bilinmeyen Pack and Go belgesi aktarımı engeller. Sanal parçaların adları bu API ile değiştirilemediğinden önce dış dosyaya kaydedilmesi gerekir.
-- Önizlemeden sonra aktif belge, kaynak boyutu/tarihi veya referans listesi değişirse yeniden okuma gerekir.
+- Aktif montaj modunda önizlemeden sonra aktif belge değişirse yeniden okuma gerekir. Dosyadan kaynak modunda paketleme, sonradan aktif olan belge yerine seçilmiş kaynak dosyayı kullanır. Her iki modda kaynak boyutu/tarihi veya referans listesi değişirse yeniden okuma gerekir.
+- Araç, kendisinin açtığı temiz kaynak belgeyi işlem sonunda kapatır; önceden açık belgeler açık tutulur. Önceki aktif belge, geçici görünürlük ve kaynak konfigürasyonu geri yüklenir. Kaynakta kaydedilmemiş değişiklik oluşmuşsa belge veri kaybını önlemek için açık bırakılır ve açıklama gösterilir.
 - `SetDocumentSaveToNames` dizisi, Pack and Go'nun **kendi belge sırasıyla** verilir. Önizlemedeki numaralandırma sırası bu API sırasını değiştirmez. Adlar geri okunup planla karşılaştırılır. `SetSaveToName` için `Override=False` kullanılır; `True` özel dosya eşleştirmesini geçersiz kılabilir.
 - Kaydetme her dosya için başarı kodu dönmelidir. Dosyaların varlığı/boyutu ve `GetDocumentDependencies2` ile diskte kayıtlı referansları denetlenir. Montaj ve resim referanslarının beklenen yeni dosyalara tam olarak eşleşmesi gerekir. Arama klasörleri veya kullanıcı konfigürasyonları değiştirilmez.
 - Çıktı en baştan **nihai klasörüne** yazılır. Bir geçici klasörü sonradan taşımak, dosyalara yazılmış mutlak referansları bozabileceğinden böyle bir taşıma yapılmaz.
@@ -42,3 +43,17 @@ Bu kontrol kayıtlı **dosya yolu referanslarını** doğrular. Canlı SolidWork
 **20 ilgili kontrol geçti:** referans grafiği, türetilmiş parça ve resim yolları, ad kuralları, model/resim eşleştirmesi, çıktı çakışmaları, kaynak değişimi, kayıt/iptal/hata temizliği, pywin32 dizi ve byref dönüşleri, COM yaşam döngüsü, gerçek Tk tarama/önizleme/elle düzeltme/kaydetme, tema/DPI/küçük ekran, ön yükleme ve hızlı menü geçişleri. İlk kontrollerde bulunan Linux mutlak yol ayrımı ve küçük ekrandaki yerleşim sorunları giderildi; ilgili kontroller tekrar geçti. Tüm test paketi çalıştırılmadı. [Kontrol kaydı](examples/checks.json).
 
 [Açık tema](examples/naming-light.png) · [Koyu tema](examples/naming-dark.png). Ekranlar örnek dosya bilgileriyle çalışan Tk uygulamasından alındı. Testlerde SolidWorks sınırı test nesneleriyle temsil edildi; gerçek `.sldasm/.sldprt/.slddrw` dosyaları üzerinde native Windows kabul testi henüz yapılmadı.
+
+## Kaynak seçimi ve dosya okuma düzeltmesi — 14 Ekim 2026
+
+Kaynak klasör/dosya seçimi ve **Aktif montajı kullan** kontrolleri eklendi.
+`GetDocumentNames` ve `GetDocumentSaveToNames` çıkış parametreleri, tür bilgili
+COM sarmalayıcısı `-2147352561` (zorunlu parametre eksik) döndürürse gerçek
+Pack and Go alt nesnesi üzerinde late-bound/BYREF olarak yeniden çağrılır.
+İlk getter erişiminde oluşan hata da bu yola alınır. Başarısız çağrılar artık
+ilgili API üyesini gösterir; kullanıcının canlı oturumundaki hata bu ortamda
+yeniden çalıştırılmadı.
+
+Bu güncellemede **29 ilgili kontrol geçti**: 19 arka plan/COM/referans kontrolü
+ve 10 gerçek Tk kaynak seçimi, iptal, montaj ağacı, önizleme, kayıt ve
+tema/ölçek kontrolü. Açık/koyu tema örnekleri yeni kaynak alanlarını gösterir.

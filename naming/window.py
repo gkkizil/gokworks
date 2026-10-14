@@ -18,22 +18,29 @@ from naming.hierarchy import document_rows
 class NamingView:
     def _create_naming_state(self, saved):
         defaults = dict(parent='', package='Yeni-paket', mode='Ön / son ek', prefix='', suffix='',
-                        find='', replacement='', start='1', digits='3')
+                        find='', replacement='', start='1', digits='3',
+                        source_mode='Aktif montaj', source_folder='', source_file='')
         self.naming_state = {key: tk.StringVar(self, value=str(saved.get('naming_'+key, value)))
                              for key, value in defaults.items()}
         if self.naming_state['mode'].get() not in ('Ön / son ek', 'Numaralı'):
             self.naming_state['mode'].set('Ön / son ek')
+        if self.naming_state['source_mode'].get() not in ('Aktif montaj', 'Dosyadan'):
+            self.naming_state['source_mode'].set('Aktif montaj')
         self.naming_snapshot = None
         self.naming_plan = ()
         self.naming_overrides = {}
         self.naming_widgets = {}
-        for value in self.naming_state.values():
-            value.trace_add('write', lambda *_: self._schedule_naming_preview() if self.mode == 'naming' else None)
+        for key, value in self.naming_state.items():
+            if key.startswith('source_'):
+                value.trace_add('write', lambda *_, key=key: self._naming_source_changed(key)
+                                if self.mode == 'naming' else None)
+            else:
+                value.trace_add('write', lambda *_: self._schedule_naming_preview() if self.mode == 'naming' else None)
 
     def _build_naming_workspace(self):
         self.workspace = self._workspace_shell()
         self.workspace.grid_columnconfigure(0, weight=1)
-        self.workspace.grid_rowconfigure(2, weight=1)
+        self.workspace.grid_rowconfigure(3, weight=1)
         _, actions, labels = self._page_header('İsimlendirme aracı',
             'Montaj ve teknik resim bağlantılarını koruyarak yeni bir paket oluşturun.',
             'AKTARIM / İSİMLENDİRME', 'copy')
@@ -43,17 +50,40 @@ class NamingView:
         widgets['scan'].pack(side='left', padx=(0, 6))
         widgets['stop'] = self._button(actions, 'Durdur', self._stop_naming, width=78, state='disabled')
         widgets['stop'].pack(side='left')
+        source = ctk.CTkFrame(self.workspace, fg_color=PANEL, border_width=1,
+                            border_color=BORDER, corner_radius=16)
+        source.grid(row=1, column=0, sticky='ew', padx=24, pady=(0, 8))
+        source.grid_columnconfigure((0, 1), weight=1, uniform='naming_source')
+        widgets['source'] = self._label(source, 'Kaynak: '+self.naming_state['source_mode'].get(),
+                                        12, MUTED, anchor='w', width=1, wraplength=600)
+        widgets['source'].grid(row=0, column=0, sticky='ew', padx=(14, 4), pady=(8, 4))
+        widgets['active_source'] = self._button(source, 'Aktif montajı kullan', self._use_active_naming_assembly,
+                                                width=158, icon='layers')
+        widgets['active_source'].configure(height=30)
+        widgets['active_source'].grid(row=0, column=1, sticky='e', padx=(4, 14), pady=(8, 4))
+        for column, key, title, button_key, button_text, command in (
+            (0, 'source_folder', 'Kaynak klasör', 'source_browse', 'Klasör seç', self._pick_naming_source_folder),
+            (1, 'source_file', 'Kaynak montaj / dosya', 'source_pick', 'Dosya seç', self._pick_naming_source_file),
+        ):
+            holder = ctk.CTkFrame(source, fg_color='transparent')
+            holder.grid(row=1, column=column, sticky='ew', padx=(14 if column == 0 else 4, 14 if column == 1 else 4), pady=(0, 10))
+            holder.grid_columnconfigure(0, weight=1)
+            self._label(holder, title, 11, MUTED).grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 4))
+            widgets[key] = ctk.CTkEntry(holder, textvariable=self.naming_state[key], height=32,
+                                        width=1, font=(UI_FONT, 12))
+            widgets[key].grid(row=1, column=0, sticky='ew', padx=(0, 5))
+            widgets[button_key] = self._button(holder, button_text, command, width=86,
+                                               icon='folder' if column == 0 else 'file')
+            widgets[button_key].configure(height=32)
+            widgets[button_key].grid(row=1, column=1)
         form = ctk.CTkScrollableFrame(self.workspace, fg_color=PANEL, border_width=1,
                                       border_color=BORDER, corner_radius=16, height=245)
         widgets['form'] = form
         # CTk's scrollbar otherwise requests a 200 px minimum viewport.
         form._scrollbar.configure(height=0)
-        form.grid(row=1, column=0, sticky='ew', padx=24, pady=(0, 12))
+        form.grid(row=2, column=0, sticky='ew', padx=24, pady=(0, 12))
         for col in range(4):
             form.grid_columnconfigure(col, weight=1, uniform='naming_form')
-        widgets['source'] = self._label(form, 'SolidWorks’te kayıtlı montajı veya dosyayı açın.', 12, MUTED,
-                                         anchor='w', width=1, wraplength=650)
-        widgets['source'].grid(row=0, column=0, columnspan=4, sticky='ew', padx=14, pady=(12, 8))
         output = ctk.CTkFrame(form, fg_color='transparent')
         output.grid(row=1, column=0, columnspan=3, sticky='ew', padx=(14, 8), pady=(0, 8))
         output.grid_columnconfigure(0, weight=1)
@@ -91,7 +121,7 @@ class NamingView:
         widgets['hint'].grid(row=3, column=2, columnspan=2, sticky='ew', padx=(8, 14), pady=(0, 10))
 
         card = ctk.CTkFrame(self.workspace, fg_color=PANEL, border_width=1, border_color=BORDER, corner_radius=16)
-        card.grid(row=2, column=0, sticky='nsew', padx=24)
+        card.grid(row=3, column=0, sticky='nsew', padx=24)
         card.grid_columnconfigure(0, weight=1)
         card.grid_rowconfigure(1, weight=1)
         toolbar = ctk.CTkFrame(card, fg_color='transparent')
@@ -119,7 +149,7 @@ class NamingView:
         table.bind('<<TreeviewSelect>>', lambda event: self._naming_buttons())
         widgets['table'] = table
         footer = ctk.CTkFrame(self.workspace, fg_color='transparent')
-        footer.grid(row=3, column=0, sticky='ew', padx=24, pady=(10, 6))
+        footer.grid(row=4, column=0, sticky='ew', padx=24, pady=(10, 6))
         footer.grid_columnconfigure(0, weight=1)
         self.status_label = self._label(footer, 'Hazır · Dosyaları oku ile başlayın.', 11, MUTED,
                                         anchor='w', width=1, wraplength=460, justify='left')
@@ -128,7 +158,7 @@ class NamingView:
         widgets['save'] = self._button(footer, 'Paketi oluştur', self._save_naming, primary=True, icon='copy', width=158, state='disabled')
         widgets['save'].grid(row=0, column=1)
         self.progress = ctk.CTkProgressBar(self.workspace, height=3)
-        self.progress.grid(row=4, column=0, sticky='ew', padx=24, pady=(0, 12))
+        self.progress.grid(row=5, column=0, sticky='ew', padx=24, pady=(0, 12))
         self.progress.set(0)
         self._configure_table_style()
         self.workspace.bind('<Configure>', self._resize_pdf_area)
@@ -143,14 +173,17 @@ class NamingView:
         width = self.workspace.winfo_width()/scale
         compact = self.workspace.winfo_height()/scale < 740
         if widgets.get('compact') != compact:
-            widgets['form'].configure(height=150 if compact else 245)
+            widgets['form'].configure(height=80 if compact else 200)
+            for key in ('edit', 'reset'):
+                widgets[key].configure(height=30 if compact else 38)
+            widgets['save'].configure(height=32 if compact else 38)
             for key, row in (('eyebrow', 0), ('subtitle', 2)):
                 if compact:
                     hide_grid(widgets[key])
                 else:
                     widgets[key].grid(row=row, column=1, sticky='ew' if row == 2 else 'w')
             widgets['compact'] = compact
-        for widget, wrap in ((widgets['source'], max(300, width-76)), (widgets['status'], max(240, width-235)),
+        for widget, wrap in ((widgets['source'], max(150, (width-76)/2)), (widgets['status'], max(240, width-235)),
                              (widgets['summary'], max(150, width-390)), (widgets['hint'], max(180, (width-76)/2))):
             configure_changed(widget, wraplength=wrap)
         style_key = ctk.get_appearance_mode(), scale
@@ -161,6 +194,73 @@ class NamingView:
         selected = filedialog.askdirectory(parent=self, title='Yeni paketin oluşturulacağı üst klasör')
         if selected:
             self.naming_state['parent'].set(selected)
+
+    def _clear_naming_preview(self):
+        widgets = self.naming_widgets
+        for key in ('preview_id', 'render_id'):
+            timer = widgets.pop(key, None)
+            if timer is not None:
+                self.after_cancel(timer)
+        widgets.pop('render', None)
+        widgets.pop('drawn_plan', None)
+        self.naming_snapshot = None
+        self.naming_plan = ()
+        self.naming_overrides.clear()
+        widgets['valid'] = False
+        if 'table' in widgets:
+            widgets['table'].delete(*widgets['table'].get_children())
+            widgets['summary'].configure(text='Kaynağı seçip Dosyaları oku ile montaj ağacını yükleyin.')
+            self._naming_buttons()
+
+    def _naming_source_changed(self, key):
+        widgets = self.naming_widgets
+        if widgets.get('changing_source'):
+            return
+        if key != 'source_mode':
+            widgets['changing_source'] = True
+            self.naming_state['source_mode'].set('Dosyadan')
+            if key == 'source_folder':
+                self.naming_state['source_file'].set('')
+            widgets['changing_source'] = False
+        self._clear_naming_preview()
+        if 'source' in widgets:
+            widgets['source'].configure(text='Kaynak: '+self.naming_state['source_mode'].get())
+        if 'status' in widgets:
+            widgets['status'].configure(text='Kaynak değişti · Ana montajı/dosyayı seçip Dosyaları oku kullanın.', text_color=MUTED)
+
+    def _pick_naming_source_folder(self):
+        if self.busy:
+            return
+        selected = filedialog.askdirectory(parent=self, title='İsimlendirilecek projenin kaynak klasörü',
+                                           initialdir=self.naming_state['source_folder'].get() or None)
+        if selected:
+            self.naming_state['source_folder'].set(selected)
+            # Let the native file picker choose the root explicitly; every
+            # assembly in this folder may belong to a different project.
+            self._pick_naming_source_file()
+
+    def _pick_naming_source_file(self):
+        if self.busy:
+            return
+        selected = filedialog.askopenfilename(parent=self, title='Kaynak ana montajı veya SolidWorks dosyasını seçin',
+            initialdir=self.naming_state['source_folder'].get() or None,
+            filetypes=[('SolidWorks dosyaları', '*.sldasm *.SLDASM *.sldprt *.SLDPRT *.slddrw *.SLDDRW'),
+                       ('Montaj', '*.sldasm *.SLDASM'), ('Parça', '*.sldprt *.SLDPRT'),
+                       ('Teknik resim', '*.slddrw *.SLDDRW')])
+        if selected:
+            self.naming_state['source_folder'].set(str(Path(selected).parent))
+            self.naming_state['source_file'].set(selected)
+
+    def _use_active_naming_assembly(self):
+        if self.busy:
+            return
+        widgets = self.naming_widgets
+        widgets['changing_source'] = True
+        self.naming_state['source_mode'].set('Aktif montaj')
+        self.naming_state['source_folder'].set('')
+        self.naming_state['source_file'].set('')
+        widgets['changing_source'] = False
+        self._scan_naming()
 
     def _schedule_naming_preview(self):
         widgets = self.naming_widgets
@@ -302,7 +402,7 @@ class NamingView:
         self.busy = value
         for button in self.nav_buttons.values():
             button.configure(state='disabled' if value else 'normal')
-        for key in ('scan', 'browse', 'reset', *self.naming_state):
+        for key in ('scan', 'browse', 'reset', 'active_source', 'source_browse', 'source_pick', *self.naming_state):
             if key in self.naming_widgets:
                 self.naming_widgets[key].configure(state='disabled' if value else 'normal')
         self.naming_widgets['stop'].configure(state='normal' if value else 'disabled')
@@ -318,21 +418,18 @@ class NamingView:
     def _scan_naming(self):
         if self.busy:
             return
-        for key in ('preview_id', 'render_id'):
-            timer = self.naming_widgets.pop(key, None)
-            if timer is not None:
-                self.after_cancel(timer)
-        self.naming_widgets.pop('render', None)
-        self.naming_snapshot = None
-        self.naming_plan = ()
-        self.naming_overrides.clear()
-        self.naming_widgets['table'].delete(*self.naming_widgets['table'].get_children())
-        self.naming_widgets['valid'] = False
-        self.naming_widgets.pop('drawn_plan', None)
+        self._clear_naming_preview()
+        explicit = self.naming_state['source_mode'].get() == 'Dosyadan'
+        source_path = self.naming_state['source_file'].get().strip() if explicit else None
+        if explicit and not source_path:
+            self.naming_widgets['status'].configure(text='Kaynak klasördeki ana montajı veya dosyayı seçin.', text_color=RED)
+            return
         self.naming_widgets['source'].configure(text='SolidWorks dosyaları ve teknik resimler okunuyor…')
+        self._save_preferences()
         self.stop_event.clear()
         self._naming_busy(True)
-        threading.Thread(target=worker, args=(self.events, self.stop_event), daemon=False).start()
+        threading.Thread(target=worker, args=(self.events, self.stop_event),
+                         kwargs=dict(source_path=source_path, require_assembly=not explicit), daemon=False).start()
 
     def _save_naming(self):
         if self.busy:
@@ -363,7 +460,13 @@ class NamingView:
                     self._naming_busy(False)
                     if value['state'] == 'scanned' and not self.stop_event.is_set():
                         self.naming_snapshot = value['snapshot']
-                        self.naming_widgets['source'].configure(text=f'Kaynak: {self.naming_snapshot.root}')
+                        self.naming_widgets['source'].configure(text=f'{self.naming_state["source_mode"].get()}: {PureWindowsPath(self.naming_snapshot.root).name}')
+                        self.naming_widgets['changing_source'] = True
+                        root = self.naming_snapshot.root
+                        self.naming_state['source_folder'].set(str(Path(root).parent) if Path(root).is_absolute()
+                                                              else str(PureWindowsPath(root).parent))
+                        self.naming_state['source_file'].set(self.naming_snapshot.root)
+                        self.naming_widgets['changing_source'] = False
                         self._update_naming_preview()
                     elif value['state'] == 'saved':
                         self.naming_widgets['valid'] = False

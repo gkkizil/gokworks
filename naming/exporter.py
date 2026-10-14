@@ -1,6 +1,7 @@
 """Plan names and copy a complete, verified Pack and Go package."""
 
 from dataclasses import dataclass
+from contextlib import contextmanager
 import json
 import ntpath
 from pathlib import Path, PureWindowsPath
@@ -55,6 +56,8 @@ class Document:
 class Snapshot:
     root: str
     documents: tuple
+    source_path: str | None = None
+    require_assembly: bool = False
 
 
 @dataclass(frozen=True)
@@ -92,20 +95,30 @@ def _com_array(values):
 
 def _arrays(obj, method_name, count):
     """Support both makepy return tuples and late-bound byref VARIANTs."""
-    method = getattr(obj, method_name)
     try:
+        # Type-aware dispatch can invoke an output-bearing getter during the
+        # attribute lookup itself, before Python ever calls the method.
+        method = getattr(obj, method_name)
         result = method()
     except Exception as error:
         code = getattr(error, 'hresult', None)
         if not isinstance(error, TypeError) and code not in (-2147352561, -2147352562, -2147352571):
-            raise
+            raise RuntimeError(f'SolidWorks {method_name} çağrısı başarısız: {error}') from error
         result = True  # Retry a late-bound method with explicit out arguments.
     if isinstance(result, tuple) and len(result) == count+1 and result[0] is True:
         return result[1:]
     if result is True:
-        outputs = [win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, None)
-                   for _ in range(count)]
-        result = method(*outputs)
+        # Cached makepy methods have Python output parameters rather than
+        # accepting explicit BYREF VARIANTs. Retry through late-bound dispatch.
+        try:
+            if hasattr(obj, '_oleobj_'):
+                obj = win32com.client.dynamic.DumbDispatch(obj)
+            method = getattr(obj, method_name)
+            outputs = [win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, None)
+                       for _ in range(count)]
+            result = method(*outputs)
+        except Exception as error:
+            raise RuntimeError(f'SolidWorks {method_name} çıkış parametreleri okunamadı: {error}') from error
         if result is True:
             return tuple(out.value for out in outputs)
         if isinstance(result, tuple) and len(result) == count+1 and result[0] is True:
@@ -115,7 +128,10 @@ def _arrays(obj, method_name, count):
 
 def _dependencies(app, path):
     # Search=False reads stored references and never changes SW search folders.
-    values = app.GetDocumentDependencies2(str(path), False, False, False)
+    try:
+        values = app.GetDocumentDependencies2(str(path), False, False, False)
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks GetDocumentDependencies2 referansları okuyamadı ({path}): {error}') from error
     if values is None:
         values = ()
     if not isinstance(values, (tuple, list)) or len(values) % 2:
@@ -126,26 +142,171 @@ def _dependencies(app, path):
     return paths
 
 
-def _session(app, stop=None, progress=None):
+def _open_document(app, path):
+    """Find a loaded document for ownership and state bookkeeping."""
+    try:
+        getter = getattr(app, 'GetOpenDocument', None)
+        model = getter(str(path)) if getter is not None else None
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks GetOpenDocument kaynak oturumunu okuyamadı ({path}): {error}') from error
+    if model is not None:
+        return model
+    try:
+        return app.GetOpenDocumentByName(str(path))
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks GetOpenDocumentByName kaynak oturumunu okuyamadı ({path}): {error}') from error
+
+
+def _out_integer():
+    return win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
+
+
+def _late_bound(app):
+    return win32com.client.dynamic.DumbDispatch(app) if hasattr(app, '_oleobj_') else app
+
+
+def _configuration(model):
+    manager = getattr(model, 'ConfigurationManager', None)
+    return sw._value(sw._value(manager, 'ActiveConfiguration'), 'Name') if manager is not None else None
+
+
+def _activate(app, name):
+    errors = _out_integer()
+    try:
+        model = app.ActivateDoc3(name, False, sw.DONT_REBUILD, errors)
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks ActivateDoc3 belgeyi etkinleştiremedi ({name}): {error}') from error
+    # swDocNeedsRebuildWarning=2 is successful activation without rebuilding.
+    if model is None or errors.value not in (0, 2) or path_key(sw._document_name(model)) != path_key(name):
+        raise RuntimeError(f'SolidWorks ActivateDoc3 hata kodu: {errors.value}; hedef: {name}')
+    return model
+
+
+@contextmanager
+def _source_document(app, source_path, stop=None):
+    """Borrow a selected source, or open and close only our own clean root.
+
+    Pack and Go belongs to ModelDocExtension. Visible existing sources need
+    no activation. Hidden assembly-loaded pointers need a temporary own window
+    and fresh activation pointer before querying their document APIs.
+    """
     _check(stop)
-    model = sw._value(app, 'ActiveDoc')
+    if source_path is None:
+        yield None
+        return
+    source_path = str(Path(source_path).absolute())
+    kind = {'.sldprt': 1, '.sldasm': 2, '.slddrw': 3}.get(PureWindowsPath(source_path).suffix.lower())
+    if kind is None:
+        raise ValueError('Kaynak olarak bir SolidWorks montaj, parça veya teknik resim dosyası seçin.')
+    _stamp(source_path)
+    app = _late_bound(app)
+    previous = sw._value(app, 'ActiveDoc')
+    previous_name = sw._document_name(previous) if previous is not None else None
+    model = None
+    opened = attempted_open = activated = visibility_changed = False
+    original_config = None
+    failure = None
+    cleanup_errors = []
+    try:
+        model = _open_document(app, source_path)
+        if model is None:
+            attempted_open = True
+            errors, warnings = _out_integer(), _out_integer()
+            try:
+                model = app.OpenDoc6(source_path, kind, sw.SILENT, '', errors, warnings)
+            except Exception as error:
+                raise RuntimeError(f'SolidWorks OpenDoc6 kaynak dosyayı açamadı: {error}') from error
+            matches = model is not None and path_key(sw._value(model, 'GetPathName')) == path_key(source_path)
+            opened = matches and not (int(warnings.value or 0) & sw.ALREADY_OPEN)
+            if model is None or errors.value:
+                raise RuntimeError(f'Kaynak dosya açılamadı; SolidWorks OpenDoc6 hata kodu: {errors.value}')
+        if (sw._value(model, 'GetType') != kind
+                or path_key(sw._value(model, 'GetPathName')) != path_key(source_path)):
+            raise RuntimeError('SolidWorks seçilen kaynak yerine farklı bir belge döndürdü.')
+        if sw._value(model, 'GetSaveFlag'):
+            raise RuntimeError(f'Kaynak dosyada kaydedilmemiş değişiklikler var; önce kaydedin: {source_path}')
+        original_config = _configuration(model)
+        visible = sw._value(model, 'Visible') if hasattr(model, 'Visible') else True
+        if not visible:
+            visibility_changed = True
+            model.Visible = True
+            activated = True  # Activation can change ActiveDoc even on failure.
+            model = _activate(app, source_path)
+            if sw._value(model, 'GetType') != kind:
+                raise RuntimeError('Etkinleştirilen kaynak belgenin türü beklenen SolidWorks türü değil.')
+        _check(stop)
+        yield model
+    except BaseException as error:
+        failure = error
+    finally:
+        if model is not None and original_config is not None:
+            try:
+                if _configuration(model) != original_config:
+                    if not model.ShowConfiguration2(original_config) or _configuration(model) != original_config:
+                        raise RuntimeError('Önceki kaynak konfigürasyonu doğrulanamadı.')
+            except Exception as error:
+                cleanup_errors.append(f'Kaynak konfigürasyonu geri alınamadı: {error}')
+        if visibility_changed and not opened and model is not None:
+            try:
+                model.Visible = False
+            except Exception as error:
+                cleanup_errors.append(f'Kaynak belge görünürlüğü geri alınamadı: {error}')
+        if opened and model is not None:
+            try:
+                if sw._value(model, 'GetSaveFlag'):
+                    raise RuntimeError('Açılan kaynakta kaydedilmemiş değişiklik oluştu; veri kaybını önlemek için belge açık bırakıldı.')
+                app.CloseDoc(sw._value(model, 'GetTitle'))
+            except Exception as error:
+                cleanup_errors.append(f'Kaynak belge kapatılamadı: {error}')
+        if (attempted_open or activated) and previous_name:
+            try:
+                active = sw._value(app, 'ActiveDoc')
+                active_name = sw._document_name(active) if active is not None else None
+                if active_name is None or path_key(active_name) != path_key(previous_name):
+                    _activate(app, previous_name)
+            except Exception as error:
+                cleanup_errors.append(f'Önceki aktif belge geri açılamadı: {error}')
+    if cleanup_errors:
+        message = '; '.join(([str(failure)] if failure is not None and str(failure) else []) + cleanup_errors)
+        raise RuntimeError(message) from failure
+    if failure is not None:
+        raise failure
+
+
+def _session(app, stop=None, progress=None, *, model=None, source_path=None, require_assembly=False):
+    _check(stop)
+    model = sw._value(app, 'ActiveDoc') if model is None else model
     if model is None or sw._value(model, 'GetType') not in (1, 2, 3):
         raise RuntimeError('SolidWorks’te kayıtlı bir montaj, parça veya teknik resim açın.')
+    if require_assembly and sw._value(model, 'GetType') != 2:
+        raise RuntimeError('Aktif montaj seçeneği için SolidWorks’te bir montajı etkinleştirin.')
     root = str(sw._value(model, 'GetPathName') or '')
     if not root:
         raise RuntimeError('Önce açık SolidWorks belgesini kaydedin.')
-    extension = sw._value(model, 'Extension')
-    pg = sw._value(extension, 'GetPackAndGo')
+    try:
+        extension = sw._value(model, 'Extension')
+        pg = sw._value(extension, 'GetPackAndGo')
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks GetPackAndGo başlatılamadı: {error}') from error
     if pg is None:
         raise RuntimeError('SolidWorks Pack and Go başlatılamadı.')
     for member in ('IncludeDrawings', 'IncludeSuppressed', 'IncludeToolboxComponents'):
-        setattr(pg, member, True)
-        if not sw._value(pg, member):
-            raise RuntimeError(f'Pack and Go ayarı uygulanamadı: {member}')
-    pg.IncludeSimulationResults = False
-    pg.AddPrefix = pg.AddSuffix = ''
+        try:
+            setattr(pg, member, True)
+            if not sw._value(pg, member):
+                raise RuntimeError('Ayar değeri geri okumada eşleşmedi.')
+        except Exception as error:
+            raise RuntimeError(f'Pack and Go ayarı uygulanamadı ({member}): {error}') from error
+    try:
+        pg.IncludeSimulationResults = False
+        pg.AddPrefix = pg.AddSuffix = ''
+    except Exception as error:
+        raise RuntimeError(f'Pack and Go IncludeSimulationResults/AddPrefix/AddSuffix ayarları uygulanamadı: {error}') from error
     names, = _arrays(pg, 'GetDocumentNames', 1)
-    count = sw._value(pg, 'GetDocumentNamesCount')
+    try:
+        count = sw._value(pg, 'GetDocumentNamesCount')
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks GetDocumentNamesCount dosya sayısını okuyamadı: {error}') from error
     if type(count) is not int or not isinstance(names, (tuple, list)) or not names or len(names) != count:
         raise RuntimeError('Pack and Go dosya listesi eksik veya okunamıyor.')
     _, states = _arrays(pg, 'GetDocumentSaveToNames', 2)
@@ -158,7 +319,7 @@ def _session(app, stop=None, progress=None):
     for index, path in enumerate(names, 1):
         _check(stop)
         path = str(path)
-        opened = app.GetOpenDocumentByName(path)
+        opened = _open_document(app, path)
         if opened is not None and sw._value(opened, 'GetSaveFlag'):
             raise RuntimeError(f'Kaydedilmemiş değişiklikler var; önce kaydedin: {path}')
         stamp = _stamp(path)
@@ -170,11 +331,14 @@ def _session(app, stop=None, progress=None):
         if progress and (index == 1 or index == count or index % 25 == 0):
             progress(f'Dosyalar ve bağlantılar okunuyor · {index}/{count}')
     _check(stop)
-    return Snapshot(root, tuple(documents)), extension, pg
+    return Snapshot(root, tuple(documents), source_path, require_assembly), extension, pg
 
 
-def scan(app, stop=None, progress=None):
-    snapshot, _, _ = _session(app, stop, progress)
+def scan(app, stop=None, progress=None, *, source_path=None, require_assembly=False):
+    source_path = str(Path(source_path).absolute()) if source_path is not None else None
+    with _source_document(app, source_path, stop) as model:
+        snapshot, _, _ = _session(app, stop, progress, model=model,
+                                  source_path=source_path, require_assembly=require_assembly)
     return snapshot
 
 
@@ -225,12 +389,19 @@ def plan_names(snapshot, destination, rules=Rules(), overrides=None, *, allow_co
 
 
 def execute(app, snapshot, entries, destination, stop=None, progress=None):
+    """Reopen an explicitly selected root rather than using a later ActiveDoc."""
+    with _source_document(app, snapshot.source_path, stop) as model:
+        return _execute(app, snapshot, entries, destination, stop, progress, model=model)
+
+
+def _execute(app, snapshot, entries, destination, stop=None, progress=None, *, model=None):
     """Save directly to final paths so moving a staging folder cannot break refs."""
     _check(stop)
     destination = Path(destination).absolute()
     if destination.exists() or not destination.parent.is_dir():
         raise ValueError('Paket klasörü yeni olmalı; üst klasör mevcut olmalı. Var olan dosyaların üzerine yazılmaz.')
-    fresh, extension, pg = _session(app, stop, progress)
+    fresh, extension, pg = _session(app, stop, progress, model=model,
+                                   source_path=snapshot.source_path, require_assembly=snapshot.require_assembly)
     old = {path_key(doc.path): doc for doc in snapshot.documents}
     current = {path_key(doc.path): doc for doc in fresh.documents}
     if path_key(fresh.root) != path_key(snapshot.root) or old != current:
@@ -307,7 +478,8 @@ def execute(app, snapshot, entries, destination, stop=None, progress=None):
                 pass
 
 
-def worker(events, stop, *, operation='scan', snapshot=None, entries=(), destination=None):
+def worker(events, stop, *, operation='scan', snapshot=None, entries=(), destination=None,
+           source_path=None, require_assembly=False):
     initialized = False
     try:
         _check(stop)
@@ -315,10 +487,11 @@ def worker(events, stop, *, operation='scan', snapshot=None, entries=(), destina
             raise RuntimeError('İsimlendirme Windows, pywin32 ve açık SolidWorks oturumu gerektirir.')
         pythoncom.CoInitialize()
         initialized = True
-        app = connect_to_solidworks()
+        app = _late_bound(connect_to_solidworks())
         phase = lambda text: events.put(('naming_phase', text))
         if operation == 'scan':
-            outcome = dict(state='scanned', snapshot=scan(app, stop, phase))
+            outcome = dict(state='scanned', snapshot=scan(app, stop, phase,
+                           source_path=source_path, require_assembly=require_assembly))
         elif operation == 'save':
             outcome = dict(state='saved', report=execute(app, snapshot, entries, destination, stop, phase))
         else:

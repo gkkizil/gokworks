@@ -148,6 +148,8 @@ class NamingWindowTests(GuiTestCase):
                 self.settle()
                 for key in ('scan', 'save', 'stop', 'table', 'parent', 'prefix', 'mode', 'package', 'suffix', 'start', 'digits'):
                     self.assert_inside(self.app.naming_widgets[key])
+                for key in ('active_source', 'source_browse', 'source_pick', 'source_folder', 'source_file'):
+                    self.assert_inside(self.app.naming_widgets[key])
                 for button in self.app.nav_buttons.values():
                     self.assert_inside(button, self.app.sidebar)
                 self.assertGreater(self.app.naming_widgets['table'].winfo_height(), 100)
@@ -179,6 +181,62 @@ class NamingWindowTests(GuiTestCase):
             self.app._edit_naming_row()
         self.assertEqual(dialog.call_args.kwargs['initialvalue'], 'YENİ-Levha')
         self.assertNotIn('preview_id', self.app.naming_widgets)
+
+    def test_folder_and_file_picker_invalidate_old_preview_and_save_selected_source(self):
+        self.scan()
+        widgets = self.app.naming_widgets
+        source = str(self.root/'Ana.sldasm')
+        with patch('naming.window.filedialog.askdirectory', return_value=str(self.root)), \
+                patch('naming.window.filedialog.askopenfilename', return_value=source) as picker:
+            widgets['source_browse'].invoke()
+        self.assertEqual(picker.call_args.kwargs['initialdir'], str(self.root))
+        self.assertEqual(self.app.naming_state['source_mode'].get(), 'Dosyadan')
+        self.assertEqual(self.app.naming_state['source_folder'].get(), str(self.root))
+        self.assertEqual(self.app.naming_state['source_file'].get(), source)
+        self.assertIsNone(self.app.naming_snapshot)
+        self.assertFalse(widgets['table'].get_children())
+        self.assertEqual(widgets['save'].cget('state'), 'disabled')
+        self.scan()
+        self.assertEqual(self.app.naming_snapshot.source_path, source)
+        self.assertEqual(widgets['save'].cget('state'), 'normal')
+        with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
+            widgets['save'].invoke()
+            self.wait_idle()
+        self.assertEqual(self.sw.saves, 1)
+
+    def test_cancelled_source_selection_and_empty_folder_cannot_use_stale_plan(self):
+        self.scan()
+        snapshot = self.app.naming_snapshot
+        with patch('naming.window.filedialog.askdirectory', return_value=''):
+            self.app.naming_widgets['source_browse'].invoke()
+        self.assertIs(self.app.naming_snapshot, snapshot)
+        with patch('naming.window.filedialog.askdirectory', return_value=str(self.root)), \
+                patch('naming.window.filedialog.askopenfilename', return_value=''):
+            self.app.naming_widgets['source_browse'].invoke()
+        with patch('naming.window.worker') as worker:
+            self.app.naming_widgets['scan'].invoke()
+        worker.assert_not_called()
+        self.assertFalse(self.app.busy)
+        self.assertIsNone(self.app.naming_snapshot)
+        self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
+        self.assertIn('dosyayı seçin', self.app.naming_widgets['status'].cget('text'))
+
+    def test_active_assembly_button_reads_source_and_rejects_active_part(self):
+        self.app.naming_state['source_file'].set(str(self.root/'Levha.sldprt'))
+        with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
+            self.app.naming_widgets['active_source'].invoke()
+            self.wait_idle()
+        self.assertEqual(self.app.naming_state['source_mode'].get(), 'Aktif montaj')
+        self.assertIsNone(self.app.naming_snapshot.source_path)
+        self.assertTrue(self.app.naming_snapshot.require_assembly)
+        self.assertEqual(self.app.naming_state['source_file'].get(), self.sw.paths[0])
+        self.sw.ActiveDoc.GetType = lambda: 1
+        with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
+            self.app.naming_widgets['active_source'].invoke()
+            self.wait_idle()
+        self.assertIsNone(self.app.naming_snapshot)
+        self.assertIn('montaj', self.app.naming_widgets['status'].cget('text').lower())
+        self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
 
     def test_rules_are_saved_and_close_cancels_pending_worker(self):
         self.app.naming_state['suffix'].set('-R2')
