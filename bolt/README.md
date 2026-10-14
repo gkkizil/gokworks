@@ -25,6 +25,19 @@ BAT’ın sıkma sırasında kullandığı burulma gerilmesi, ekranımızdaki d�
 
 ## Ölçü çizimi için ek karşılaştırma
 
+### İnce diş
+
+`Diş türü` ve `Diş adımı (mm)` seçimi eklendi. M3–M39 için sunulan ince adımlar
+[BAT ince diş geometri tablosu](https://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/db/ISO8765_8676_hex_metric_fine.bolt) ile karşılaştırıldı;
+M33×2 ve M39×3 ayrıca [FreeCAD ISO 262 tablosunda](https://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso262def.csv) doğrulandı.
+Bu seçki bütün adımların ISO 8676 kapsamında piyasada bulunabilir altıgen başlı
+cıvatalar olduğu anlamına gelmez. Baş çizimi ince modunda temsili olarak etiketlenir.
+Formül ve yaklaşık `d − P` deliği seçili adımı kullanır. Malzeme sınırları,
+ince dişe özgü deney yükü tablosu ayrıca doğrulanana kadar mevcut muhafazakâr
+sınırlar olarak korunur; ayrıntı [hesap yönteminde](../docs/bolt-calculator.md).
+
+### Baş ölçüleri
+
 [FreeCAD Fasteners](https://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso4017head.csv) ve [cq_warehouse](https://github.com/gumyr/cq_warehouse/blob/daa46507ecc429c0e2dce11d9d5ffd09b12a42af/src/cq_warehouse/hex_head_parameters.csv) geometri tabloları ayrıca incelendi. Örneğin M8 anahtar ağzı 13 mm, M10 16 mm, M12 18 mm ve M22 34 mm karşılaştırıldı. Kaynaklarda nominal/maksimum baş yüksekliği ve M14 anahtar ağzı için farklar bulunduğundan tablo topluca aktarılmadı; standart sürümü ve üretici çizimi esas alınmalıdır. Baş ölçüleri ve yaklaşık `d − P` kılavuz deliği dayanım hesabını etkilemez.
 
-Güncel görseller [examples](examples) klasöründedir. 20 ilgili kontrol geçti: 12 hesap, 6 gerçek Tk ve 2 ölçü verisi kontrolü. Windows/SolidWorks bu Linux ortamında çalıştırılmadı; yeni EXE üretilmedi.
+Güncel görseller [examples](examples) klasöründedir. İnce diş eklemesiyle 26 ilgili kontrol geçti: 15 hesap, 8 gerçek Tk ve 3 ölçü verisi kontrolü. Windows/SolidWorks bu Linux ortamında çalıştırılmadı; yeni EXE üretilmedi.

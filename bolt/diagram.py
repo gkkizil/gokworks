@@ -7,7 +7,8 @@ from bolt.rules import fmt, force_text
 from bolt.dimensions import dimensions
 
 
-def draw_dimensions(canvas, result, appearance, scale, metric='M10', grade='8.8'):
+def draw_dimensions(canvas, result, appearance, scale, metric='M10', grade='8.8',
+                    thread_series='Kaba diş', pitch=None):
     """Draw a side elevation and end view with nominal head dimensions."""
     color = lambda pair: pair[appearance == 'Dark']
     canvas.configure(background=color(PANEL))
@@ -17,7 +18,9 @@ def draw_dimensions(canvas, result, appearance, scale, metric='M10', grade='8.8'
         return
     metric = result.metric if result else metric
     grade = result.grade if result else grade
-    d = dimensions(metric)
+    thread_series = result.thread_series if result else thread_series
+    pitch = result.pitch if result else pitch
+    d = dimensions(metric, thread_series, pitch)
     sx, sy = width/440, height/280
     def line(points, paint=BORDER, **kw):
         return canvas.create_line(*[v*(sx if i % 2 == 0 else sy) for i, v in enumerate(points)],
@@ -43,8 +46,9 @@ def draw_dimensions(canvas, result, appearance, scale, metric='M10', grade='8.8'
              shank_right, bottom-5, shank_right-4, bottom,
              shank_left+4, bottom, shank_left, bottom-5),
             fill=color(INPUT), outline=color(MUTED), width=1.3*scale, tags='dimension_shank')
-    for y in range(round(head_bottom+12), bottom-7, 8):
-        line((shank_left+1, y, shank_right-1, y+4), MUTED, tags='dimension_thread')
+    step = max(4, min(10, round(d.pitch*factor)))
+    for y in range(round(head_bottom+12), bottom-7, step):
+        line((shank_left+1, y, shank_right-1, y+step/2), MUTED, tags='dimension_thread')
     line((left-14, head_top, left-14, head_bottom), ACCENT)
     line((left-19, head_top, left-2, head_top), ACCENT)
     line((left-19, head_bottom, left-2, head_bottom), ACCENT)
@@ -68,8 +72,10 @@ def draw_dimensions(canvas, result, appearance, scale, metric='M10', grade='8.8'
     text(cx, 210, 'KILAVUZ DELİĞİ', MUTED, 9)
     text(cx, 231, f'≈ Ø{fmt(d.tapping_hole, 2)} mm', ACCENT, 15)
     text(cx, 251, 'Yaklaşık d − P', MUTED, 10)
-    text(12, 15, f'{metric} × {fmt(d.pitch, 2)} · ISO 4017', ACCENT, 11, anchor='w')
-    text(12, 276, 'Nominal baş ölçüleri · boy şematik', MUTED, 9, anchor='w')
+    standard = 'İnce diş · baş şematik' if thread_series == 'İnce diş' else 'ISO 4017'
+    text(12, 15, f'{metric} × {fmt(d.pitch, 2)} · {standard}', ACCENT, 11, anchor='w')
+    text(12, 276, ('Temsili' if thread_series == 'İnce diş' else 'Nominal')
+         +' baş ölçüleri · boy şematik', MUTED, 9, anchor='w')
 
 
 def draw(canvas, result, appearance, scale):

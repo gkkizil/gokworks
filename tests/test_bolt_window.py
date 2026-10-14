@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import customtkinter as ctk
 from support.gui import GuiTestCase
-from pdf.settings import load_settings
+from pdf.settings import load_settings, save_settings
 from bolt.rules import force_text
 
 
@@ -193,3 +193,85 @@ class BoltWindowTests(GuiTestCase):
         state['tension'].set('100')
         self.assertIsNone(self.app.bolt_result.shear_limit_with_tension_n)
         self.assertIn('kesme sınırı: yok; çekme tek başına sınırı aşıyor', w['capacity'].cget('text'))
+
+    def test_fine_pitch_changes_geometry_capacity_and_survives_units_page_and_preferences(self):
+        state, w = self.app.bolt_state, self.app.bolt_widgets
+        coarse = self.app.bolt_result
+        self.assertEqual(state['thread_series'].get(), 'Kaba diş')
+        self.assertEqual(state['pitch'].get(), '1,5')
+        self.assertEqual(w['pitch_input'].cget('state'), 'disabled')
+        state['thread_series'].set('İnce diş')
+        self.assertEqual(state['pitch'].get(), '1,25')
+        self.assertEqual(w['pitch_input'].cget('state'), 'normal')
+        self.assertEqual(w['pitch_input'].cget('values'), ['1,25', '1', '0,75'])
+        state['pitch'].set('1')
+        fine = self.app.bolt_result
+        self.assertEqual(fine.thread_series, 'İnce diş')
+        self.assertAlmostEqual(fine.tensile_area, 64.5, delta=.05)
+        self.assertGreater(fine.tensile_area, coarse.tensile_area)
+        self.assertGreater(fine.tension_capacity_n, coarse.tension_capacity_n)
+        self.assertIn('≈ Ø9,00 mm', [w['canvas'].itemcget(item, 'text')
+                                   for item in w['canvas'].find_all() if w['canvas'].type(item) == 'text'])
+        state['tension'].set('invalid')
+        self.assertIsNone(self.app.bolt_result)
+        self.assertIn('≈ Ø9,00 mm', [w['canvas'].itemcget(item, 'text')
+                                   for item in w['canvas'].find_all() if w['canvas'].type(item) == 'text'])
+        state['tension'].set('10')
+        for unit in ('N', 'kg', 'kN'):
+            state['unit'].set(unit)
+            self.assertAlmostEqual(self.app.bolt_result.tension_n, fine.tension_n, places=6)
+            self.assertEqual(self.app.bolt_result.pitch, 1)
+        self.app._copy_bolt_result()
+        self.assertIn('M10 × 1,00 · İnce diş', self.app.clipboard_get())
+        self.app._switch_mode('pdf')
+        self.app._change_theme('Açık')
+        self.app._switch_mode('bolt')
+        self.assertIs(self.app.bolt_widgets, w)
+        self.assertEqual(self.app.bolt_result.pitch, 1)
+        self.app._save_preferences()
+        saved = load_settings(self.settings)
+        self.assertEqual(saved['bolt_thread_series'], 'İnce diş')
+        self.assertEqual(saved['bolt_pitch'], '1')
+        self.close_app()
+        self.open_app()
+        self.app._switch_mode('bolt')
+        self.assertEqual(self.app.bolt_result.thread_series, 'İnce diş')
+        self.assertEqual(self.app.bolt_result.pitch, 1)
+
+    def test_pitch_lists_preserve_valid_choices_and_reset_incompatible_geometry_once(self):
+        from bolt.window import calculate
+        state, w = self.app.bolt_state, self.app.bolt_widgets
+        with patch('bolt.window.calculate', wraps=calculate) as run:
+            state['thread_series'].set('İnce diş')
+            self.assertEqual(run.call_count, 1)
+        state['pitch'].set('1')
+        state['metric'].set('M8')
+        self.assertEqual(state['pitch'].get(), '1')
+        self.assertEqual(w['pitch_input'].cget('values'), ['1', '0,75'])
+        with patch('bolt.window.calculate', wraps=calculate) as run:
+            state['metric'].set('M6')
+            self.assertEqual(run.call_count, 1)
+        self.assertEqual(state['pitch'].get(), '0,75')
+        state['metric'].set('M10')
+        self.assertEqual(state['pitch'].get(), '0,75')
+        state['thread_series'].set('Kaba diş')
+        self.assertEqual(state['pitch'].get(), '1,5')
+        self.assertEqual(w['pitch_input'].cget('state'), 'disabled')
+        self.assertEqual(w['pitch_input'].cget('values'), ['1,5'])
+        state['metric'].set('M12')
+        self.assertEqual(state['pitch'].get(), '1,75')
+        state['thread_series'].set('İnce diş')
+        self.assertEqual(state['pitch'].get(), '1,5')
+        state['pitch'].set('1,75')
+        self.assertIsNone(self.app.bolt_result)
+        self.assertEqual(w['copy'].cget('state'), 'disabled')
+        self.assertFalse(w['canvas'].find_withtag('dimension_head'))
+        state['thread_series'].set('Kaba diş')
+        self.assertEqual(self.app.bolt_result.pitch, 1.75)
+        self.assertEqual(w['copy'].cget('state'), 'normal')
+        self.close_app()
+        save_settings({'bolt_metric': 'M12', 'unrelated_setting': 'keep'}, self.settings)
+        self.open_app()
+        self.app._switch_mode('bolt')
+        self.assertEqual(self.app.bolt_result.thread_series, 'Kaba diş')
+        self.assertEqual(self.app.bolt_result.pitch, 1.75)

@@ -2,7 +2,7 @@
 
 **Mühendislik hesapları → Cıvata hesabı**. SolidWorks bağlantısı gerektirmez. Metrik ölçü, kalite sınıfı, yük türü ve kuvvet girildiğinde sonuç canlı güncellenir. Mavi **Güvenli**, kırmızı **Güvensiz** ve yük girilmediğinde **Yük yok** gösterilir. Hatalı girişte önceki sonuç kaldırılır.
 
-- M3–M39 arasındaki 18 kaba diş ölçüsü; 4.6, 5.6, 8.8, 10.9 ve 12.9 çelik cıvata sınıfları.
+- M3–M39 arasındaki 18 metrik çap; **Kaba diş / İnce diş** ve çapa uygun **Diş adımı (mm)** seçimi. Kaba diş adımı sabittir. İnce dişte örneğin M10 için 1,25 / 1,00 / 0,75 mm sunulur. 4.6, 5.6, 8.8, 10.9 ve 12.9 çelik cıvata sınıfları.
 - Çekme, kesme veya eşzamanlı birleşik yük. **kg yük / Newton (N) / kN** seçimi açılır listeden yapılır. Birim değişikliği girilmiş yükü dönüştürür; kapasite, yük okları ve pano aynı birimi kullanır. kg yük seçiminde kütle standart yerçekimi ile kuvvete çevrilir: **1 kg yük = 9,80665 N**. Önceki kgf tercihleri aynı kuvvet korunarak kg yük seçimine taşınır.
 - Cıvata adedi, tek/çift kesme düzlemi, dişli/dişsiz kesit ve 1–10 arasında emniyet katsayısı. Varsayılan katsayı 2; tüm cıvatalar ve çift kesmedeki düzlemler eşit yük taşır.
 - Yük okları, kapasite kullanımı, eşdeğer/izin verilen gerilme, mevcut emniyet ve çekme alanı. Hesap varsayımlarıyla panoya kopyalanabilir. Seçimler kaydedilir.
@@ -14,6 +14,18 @@ Sol sütunda parametreler ve kısa teknik bilgi, sağda mavi yük sınırı kart
 **Ölçüler** görünümü metrik seçimine göre `d` (nominal çap), `k` (nominal baş yüksekliği), `s` (anahtar ağzı) ve yaklaşık kılavuz deliğini günceller. Baş tablosu ISO 4017 nominal ölçülerini esas alır; DIN 933 ölçüleriyle karıştırılmaz (örneğin ISO M10 anahtar ağzı 16 mm'dir). Cıvata boyu temsili, toleranslar kapsam dışıdır. Yaklaşık `d − P` bir kılavuz deliği ön bilgisidir; bağlantı boşluk deliği ya da kesin matkap seçimi değildir. GitHub geometri tablolarıyla yapılan karşılaştırma ve sürüm farkları [cıvata referans notunda](../bolt/README.md) açıklanır; referans standardı [ISO 4017](https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en).
 
 **Yük gösterimi** seçeneği önceki tek başlı cıvata, somun ve çekme/kesme oklarını korur. Güncel gerçek Tk ekranları: [Koyu](../bolt/examples/bolt-dimensions-dark.png) · [Açık](../bolt/examples/bolt-dimensions-light.png).
+
+İnce diş seçimi çekme/diş kökü alanını, kapasiteyi, marjı, gerekli adedi ve
+yaklaşık kılavuz deliğini yeniler. Dişsiz gövde kesme alanı nominal çapa bağlıdır.
+Çap veya tür değiştiğinde geçerli mevcut adım korunur; uyumsuzsa yeni listenin
+ilk adımı seçilir. Seçimler yeniden açılışta korunur; eski tercihler kaba diş
+olarak açılır. İnce diş çiziminde baş ölçüleri temsili olarak işaretlenir;
+ISO 4017 kaba diş etiketi kullanılmaz.
+
+İnce diş eklemesinde **26 ilgili kontrol geçti**: 15 hesap, 8 gerçek Tk ve
+3 ölçü verisi kontrolü. İnce diş referans alanları, kaba/ince geçişi, geçersiz
+adım, çapa uygun listenin yenilenmesi, birim dönüşümü, sayfa önbelleği ve tercihlerin
+yeniden açılışta korunması kontrol edildi. Açık/koyu gerçek ekranlar güncellendi.
 
 14 Ekim arayüz revizyonunda **14 ilgili kontrol geçti**: 8 hesap, 4 gerçek Tk
 ve 2 ölçü verisi kontrolü. Açık/koyu temada 1240×860 ekran görüntüleri referans
@@ -51,7 +63,7 @@ Mevcut Ft sabitken toplam Fv sınırı = n m Ak/√3 × √[(Sp/s)² − σ²]
 
 Gerekli adet en az 1'dir ve sınırdaki tam sayılar mevcut güvenli/güvensiz hesabıyla karşılaştırılır. Diğer kuvvet tek başına sınırı aşmışsa birleşik yük için geçerli sınır yoktur. Bu sınırlar eklenebilecek yük değildir ve aynı anda kullanılabilecek yeni bir yük çifti oluşturmaz. Marj, seçili deney yükü gerilmesi/emniyet sınırına göredir; akma veya kopma marjı değildir.
 
-Deney yükü gerilmesi `Sp`:
+Hesapta kullanılan muhafazakâr deney yükü gerilmesi `Sp`:
 
 | Sınıf | Sp (MPa) |
 | --- | ---: |
@@ -62,13 +74,13 @@ Deney yükü gerilmesi `Sp`:
 | 10.9 | 830 |
 | 12.9 | 970 |
 
-Malzeme değerlerinin dayanağı ISO 898-1:2013 deney yükü gerilmesi tablosu; kaba diş adımları ISO 261, temel diş geometrisi ISO 68-1 / ISO 724'tür. Sp kopma dayanımı değildir. Von Mises gerilmesinin Sp/s ile karşılaştırılması bu uygulamanın ihtiyatlı statik ön kontrol yöntemidir; ISO 898-1 bir bağlantı tasarım standardı değildir. Dişli kesmede çekme alanından daha küçük olan temel diş kök alanı kullanılır; imalat toleransları ayrıca modellenmez.
+Malzeme değerlerinin dayanağı ISO 898-1:2013 kaba diş deney yükü gerilmesi tablosu; kaba diş adımları ISO 261, temel diş geometrisi ISO 68-1 / ISO 724'tür. İnce dişte de aynı muhafazakâr malzeme sınırları korunur. Özellikle 8.8 / M16 ve altı için 580 MPa kullanılır; ince dişe özgü daha yüksek bir değer, ilgili deney yükü tablosu bu ortamda doğrulanmadan uygulanmaz. İnce adımlar BAT geometri verileri ve FreeCAD ISO 262 tablosuyla karşılaştırılmıştır; [kaynak ve kapsam notu](../bolt/README.md). Sp kopma dayanımı değildir. Von Mises gerilmesinin Sp/s ile karşılaştırılması bu uygulamanın ihtiyatlı statik ön kontrol yöntemidir; ISO 898-1 bir bağlantı tasarım standardı değildir. Dişli kesmede çekme alanından daha küçük olan temel diş kök alanı kullanılır; imalat toleransları ayrıca modellenmez.
 
 Referans erişimleri: [ISO 898-1](https://www.iso.org/obp/ui/#iso:std:iso:898:-1:ed-5:v1:en), [ISO 261](https://www.iso.org/obp/ui/#iso:std:iso:261:ed-2:v1:en), [ISO 724](https://www.iso.org/obp/ui/#iso:std:iso:724:ed-2:v1:en). Standartların tam metni depoya dahil değildir. Önceki revizyonda dış teknik tablo erişimi reddedilmişti. 14 Ekim GitHub incelemesinde BAT, ranf_thread_fast ve bolt-analysis kaynakları okunarak hesap varsayımları karşılaştırıldı; bu karşılaştırma tam bir VDI/ECSS/NASA bağlantı analizi veya standart doğrulaması değildir. [İncelenen sürümler ve uygulanan iyileştirmeler](../bolt/README.md).
 
 ## Kapsam
 
-Bu ekran **cıvata gövdesinin statik ön kontrolünü** yapar. Tam yük taşıma kapasitesine sahip, ilgili sınıfa uygun karbon/alaşımlı çelik cıvata ve oda sıcaklığı kabul edilir. Paslanmaz A2/A4, ince diş, azaltılmış baş/gövde ve özel bağlantı elemanları kapsam dışıdır.
+Bu ekran **cıvata gövdesinin statik ön kontrolünü** yapar. Tam yük taşıma kapasitesine sahip, ilgili sınıfa uygun karbon/alaşımlı çelik cıvata ve oda sıcaklığı kabul edilir. Paslanmaz A2/A4, listede bulunmayan özel diş adımları, azaltılmış baş/gövde ve özel bağlantı elemanları kapsam dışıdır.
 
 Girilen çekme kuvveti cıvataların taşıdığı toplam kuvvettir. Ön sıkmalı bağlantıda dış kuvvet doğrudan bu alana girilmemelidir; ön yük ve bağlantı rijitliği ayrıca hesaplanır. Ön sıkma, diş sıyırması, plaka ezilmesi, kenar yırtılması, kayma/sürtünme, eğilme, eksantriklik, yorulma, darbe ve sıcaklık etkileri hesaplanmaz. Güvenli sonucu bağlantının bütün bu kontrolleri geçtiği anlamına gelmez. Seçilen emniyet katsayısı uygulama gereksinimine göre belirlenmelidir.
 

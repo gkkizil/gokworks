@@ -8,7 +8,18 @@ THREADS = {f'M{d}': (d, p) for d, p in (
     (3, .5), (4, .7), (5, .8), (6, 1), (8, 1.25), (10, 1.5),
     (12, 1.75), (14, 2), (16, 2), (18, 2.5), (20, 2.5), (22, 2.5),
     (24, 3), (27, 3), (30, 3.5), (33, 3.5), (36, 4), (39, 4))}
-# ISO 898-1 proof stress Sp, MPa. 8.8 has a separate value above M16.
+# Curated fine pitches: BAT metric fine geometry, plus ISO 262 M33/M39.
+# This list is not a claim that every option is an ISO 8676 hex-head size.
+FINE_PITCHES = {f'M{d}': pitches for d, pitches in (
+    (3, (.35,)), (4, (.5,)), (5, (.5,)), (6, (.75,)),
+    (8, (1., .75)), (10, (1.25, 1., .75)), (12, (1.5, 1.25, 1.)),
+    (14, (1.5, 1.25, 1.)), (16, (1.5, 1.)), (18, (2., 1.5, 1.)),
+    (20, (2., 1.5, 1.)), (22, (2., 1.5, 1.)), (24, (2., 1.5, 1.)),
+    (27, (2., 1.5, 1.)), (30, (3., 2., 1.5)), (33, (2.,)),
+    (36, (3., 2., 1.5)), (39, (3.,)))}
+THREAD_SERIES = ('Kaba diş', 'İnce diş')
+# ISO 898-1 coarse proof stress Sp, MPa. 8.8 differs above M16.
+# Fine threads retain these conservative bounds; see docs for the material basis.
 PROOF_STRESS = {'4.6': 225., '5.6': 280., '8.8': 580., '10.9': 830., '12.9': 970.}
 MODES = ('Çekme', 'Kesme', 'Birleşik yük')
 UNITS = {'kg': 9.80665, 'N': 1., 'kN': 1000., 'kgf': 9.80665}
@@ -27,6 +38,22 @@ def number(value, title, *, minimum=0., maximum=1e9, integer=False):
     if integer and not result.is_integer():
         raise ValueError(f'{title}: tam sayı girin.')
     return result
+
+
+def pitch_choices(metric, thread_series='Kaba diş'):
+    if metric not in THREADS:
+        raise ValueError('Metrik ölçü: listeden bir değer seçin.')
+    if thread_series not in THREAD_SERIES:
+        raise ValueError('Diş türü: listeden bir değer seçin.')
+    return (THREADS[metric][1],) if thread_series == 'Kaba diş' else FINE_PITCHES[metric]
+
+
+def thread_geometry(metric, thread_series='Kaba diş', pitch=None):
+    choices = pitch_choices(metric, thread_series)
+    selected = choices[0] if pitch is None else number(pitch, 'Diş adımı', minimum=.01, maximum=10)
+    if selected not in choices:
+        raise ValueError('Diş adımı: seçili çap ve diş türü için listeden bir değer seçin.')
+    return THREADS[metric][0], selected
 
 
 @dataclass(frozen=True)
@@ -53,6 +80,7 @@ class Result:
     tension_capacity_n: float
     shear_capacity_n: float
     unit: str
+    thread_series: str = 'Kaba diş'
 
     @property
     def safe(self):
@@ -110,7 +138,8 @@ class Result:
 
 
 def calculate(*, metric='M10', grade='8.8', mode='Çekme', tension='10', shear='0',
-              unit='kN', count='1', safety_factor='2', section='Dişli kesit', planes='Tek kesme'):
+              unit='kN', count='1', safety_factor='2', section='Dişli kesit', planes='Tek kesme',
+              thread_series='Kaba diş', pitch=None):
     for value, choices, title in ((metric, THREADS, 'Metrik ölçü'), (grade, PROOF_STRESS, 'Kalite sınıfı'),
                                   (mode, MODES, 'Yük türü'), (unit, UNITS, 'Yük birimi'),
                                   (section, SECTIONS, 'Kesme kesiti'), (planes, PLANES, 'Kesme düzlemi')):
@@ -120,7 +149,7 @@ def calculate(*, metric='M10', grade='8.8', mode='Çekme', tension='10', shear='
     factor = number(safety_factor, 'Emniyet katsayısı', minimum=1, maximum=10)
     ft = number(tension, 'Çekme yükü')*UNITS[unit] if mode != 'Kesme' else 0.
     fv = number(shear, 'Kesme yükü')*UNITS[unit] if mode != 'Çekme' else 0.
-    diameter, pitch = THREADS[metric]
+    diameter, pitch = thread_geometry(metric, thread_series, pitch)
     tensile_area = pi/4*(diameter-.938194*pitch)**2
     # Thread-root area is intentionally smaller than tensile stress area.
     shear_area = pi/4*(diameter-1.226869*pitch)**2 if section == 'Dişli kesit' else pi/4*diameter**2
@@ -134,7 +163,7 @@ def calculate(*, metric='M10', grade='8.8', mode='Çekme', tension='10', shear='
                   tensile_area, shear_area, ft, fv, sigma, tau, equivalent, allowable,
                   equivalent/allowable, proof/equivalent if equivalent else None,
                   allowable*tensile_area*bolts, allowable/sqrt(3)*shear_area*bolts*shear_planes,
-                  'kg' if unit == 'kgf' else unit)
+                  'kg' if unit == 'kgf' else unit, thread_series)
 
 
 def fmt(value, digits=2):

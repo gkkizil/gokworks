@@ -3,7 +3,7 @@
 import math
 import unittest
 
-from bolt.rules import calculate
+from bolt.rules import FINE_PITCHES, THREADS, calculate, pitch_choices
 
 
 class BoltCalculationTests(unittest.TestCase):
@@ -53,6 +53,46 @@ class BoltCalculationTests(unittest.TestCase):
         self.assertEqual(calculate(grade='12.9').proof_stress, 970)
         self.assertAlmostEqual(calculate(metric='M12').tensile_area, 84.3, delta=.05)
         self.assertAlmostEqual(calculate(metric='M20').tensile_area, 245, delta=.3)
+
+    def test_fine_pitch_matches_reference_stress_areas(self):
+        # BAT's rounded fine-thread geometry: M10x1.25 As61.195; M10x1 As64.497.
+        for pitch, area in (('1,25', 61.195), ('1,00', 64.497)):
+            with self.subTest(pitch=pitch):
+                r = calculate(thread_series='İnce diş', pitch=pitch)
+                self.assertAlmostEqual(r.tensile_area, area, delta=.01)
+                self.assertEqual(r.thread_series, 'İnce diş')
+                self.assertEqual(r.pitch, float(pitch.replace(',', '.')))
+        self.assertEqual(calculate(thread_series='İnce diş').pitch, 1.25)
+        self.assertEqual(pitch_choices('M10'), (1.5,))
+        self.assertEqual(pitch_choices('M10', 'İnce diş'), (1.25, 1., .75))
+
+    def test_fine_pitch_changes_thread_capacity_and_required_count(self):
+        coarse = calculate(grade='10.9', tension='25')
+        fine = calculate(grade='10.9', tension='25', thread_series='İnce diş', pitch='1.25')
+        self.assertFalse(coarse.safe)
+        self.assertTrue(fine.safe)
+        self.assertEqual(coarse.minimum_count, 2)
+        self.assertEqual(fine.minimum_count, 1)
+        self.assertGreater(fine.shear_capacity_n, coarse.shear_capacity_n)
+        # Thread selection does not enlarge the unthreaded shank.
+        shank = dict(grade='10.9', section='Dişsiz gövde', mode='Kesme', shear='10')
+        self.assertEqual(calculate(**shank).shear_capacity_n,
+                         calculate(**shank, thread_series='İnce diş', pitch='1').shear_capacity_n)
+
+    def test_fine_pitch_combinations_and_invalid_selections(self):
+        self.assertEqual(set(FINE_PITCHES), set(THREADS))
+        for metric, pitches in FINE_PITCHES.items():
+            for pitch in pitches:
+                with self.subTest(metric=metric, pitch=pitch):
+                    self.assertLess(pitch, THREADS[metric][1])
+                    self.assertGreater(pitch, 0)
+                    fine = calculate(metric=metric, thread_series='İnce diş', pitch=pitch)
+                    self.assertGreater(fine.tensile_area, calculate(metric=metric).tensile_area)
+        for options in (dict(thread_series='Yanlış'), dict(thread_series='İnce diş', pitch='1.5'),
+                        dict(thread_series='İnce diş', pitch='0'),
+                        dict(thread_series='İnce diş', pitch='nan'), dict(pitch='1.25')):
+            with self.subTest(options=options), self.assertRaises(ValueError):
+                calculate(**options)
 
     def test_force_units_and_decimal_comma(self):
         self.assertAlmostEqual(calculate(tension='1,25').tension_n, 1250)

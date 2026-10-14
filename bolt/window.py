@@ -5,6 +5,7 @@ import customtkinter as ctk
 
 from bolt.diagram import draw, draw_dimensions
 from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, UNIT_LABELS, SECTIONS, PLANES,
+                        THREAD_SERIES, pitch_choices, thread_geometry,
                         SCOPE, calculate, fmt, force_text, number)
 from gui.icons import set_window_icon
 from gui.rendering import configure_changed
@@ -15,18 +16,49 @@ from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
 class BoltView:
     def _create_bolt_state(self, saved):
         defaults = dict(metric='M10', grade='8.8', mode='Çekme', tension='10', shear='4',
-                        unit='kN', count='1', safety_factor='2', section='Dişli kesit', planes='Tek kesme')
+                        unit='kN', count='1', safety_factor='2', section='Dişli kesit', planes='Tek kesme',
+                        thread_series='Kaba diş', pitch='1,5')
         self.bolt_state = {key: tk.StringVar(self, value=str(saved.get('bolt_'+key, value)))
                            for key, value in defaults.items()}
         if self.bolt_state['unit'].get() == 'kgf':
             self.bolt_state['unit'].set('kg')
         for key, choices in (('metric', THREADS), ('grade', PROOF_STRESS), ('mode', MODES),
-                             ('unit', UNITS), ('section', SECTIONS), ('planes', PLANES)):
+                             ('unit', UNITS), ('section', SECTIONS), ('planes', PLANES),
+                             ('thread_series', THREAD_SERIES)):
             if self.bolt_state[key].get() not in choices:
                 self.bolt_state[key].set(defaults[key])
+        metric, series = self.bolt_state['metric'].get(), self.bolt_state['thread_series'].get()
+        try:
+            _, pitch = thread_geometry(metric, series, self.bolt_state['pitch'].get())
+        except ValueError:
+            pitch = pitch_choices(metric, series)[0]
+        self.bolt_state['pitch'].set(self._bolt_pitch_text(pitch))
         self.bolt_result = None
         self.bolt_widgets = {'unit': self.bolt_state['unit'].get(), 'loading': False}
         self.bolt_state['view'] = tk.StringVar(self, value='Ölçüler')
+
+    @staticmethod
+    def _bolt_pitch_text(pitch):
+        return f'{pitch:g}'.replace('.', ',')
+
+    def _sync_bolt_pitch(self):
+        """Refresh available pitches without producing a second calculation."""
+        state, control = self.bolt_state, self.bolt_widgets['pitch_input']
+        metric, series = state['metric'].get(), state['thread_series'].get()
+        try:
+            choices = pitch_choices(metric, series)
+        except ValueError:
+            configure_changed(control, state='disabled')
+            return
+        try:
+            _, pitch = thread_geometry(metric, series, state['pitch'].get())
+        except ValueError:
+            pitch = choices[0]
+        configure_changed(control, values=[self._bolt_pitch_text(value) for value in choices],
+                          state='disabled' if series == 'Kaba diş' else 'normal')
+        selected = self._bolt_pitch_text(pitch)
+        if state['pitch'].get() != selected:
+            state['pitch'].set(selected)
 
     def _bolt_card(self, parent):
         return ctk.CTkFrame(parent, fg_color=PANEL, corner_radius=14, border_width=1, border_color=BORDER)
@@ -69,29 +101,34 @@ class BoltView:
         self._bolt_field(form, 'grade', 'Kalite sınıfı', 1, 1, PROOF_STRESS)
         w['thread'] = self._label(form, '', 10, MUTED)
         w['thread'].grid(row=3, column=0, columnspan=2, sticky='w', padx=8, pady=(6, 0))
-        self._bolt_field(form, 'mode', 'Yük türü', 4, 0, MODES)
-        self._label(form, 'Yük birimi', 11, MUTED).grid(row=4, column=1, sticky='w', padx=8, pady=(12, 5))
+        self._bolt_field(form, 'thread_series', 'Diş türü', 4, 0, THREAD_SERIES)
+        self._bolt_field(form, 'pitch', 'Diş adımı (mm)', 4, 1,
+                         [self._bolt_pitch_text(value) for value in
+                          pitch_choices(self.bolt_state['metric'].get(), self.bolt_state['thread_series'].get())])
+        self._sync_bolt_pitch()
+        self._bolt_field(form, 'mode', 'Yük türü', 6, 0, MODES)
+        self._label(form, 'Yük birimi', 11, MUTED).grid(row=6, column=1, sticky='w', padx=8, pady=(12, 5))
         w['unit_input'] = ctk.CTkOptionMenu(form, values=list(UNIT_LABELS.values()),
             command=self._select_bolt_unit, height=36, width=1, fg_color=INPUT,
             button_color=INPUT, button_hover_color=HOVER, dropdown_fg_color=PANEL,
             dropdown_hover_color=HOVER, dropdown_text_color=TEXT, text_color=TEXT,
             font=(UI_FONT, 12), dynamic_resizing=False)
-        w['unit_input'].grid(row=5, column=1, sticky='ew', padx=8)
-        self._bolt_field(form, 'tension', 'Toplam çekme · Ft', 6, 0)
-        self._bolt_field(form, 'shear', 'Toplam kesme · Fv', 6, 1)
-        self._bolt_field(form, 'section', 'Kesme kesiti', 8, 0, SECTIONS)
-        self._bolt_field(form, 'planes', 'Kesme düzlemi', 8, 1, PLANES)
-        self._bolt_field(form, 'safety_factor', 'Emniyet katsayısı', 10, 0)
-        self._bolt_field(form, 'count', 'Cıvata adedi', 10, 1)
-        self._button(form, 'Yükü hesapla', self._update_bolt_result, primary=True).grid(row=12, column=0, columnspan=2, sticky='ew', padx=8, pady=(14, 0))
+        w['unit_input'].grid(row=7, column=1, sticky='ew', padx=8)
+        self._bolt_field(form, 'tension', 'Toplam çekme · Ft', 8, 0)
+        self._bolt_field(form, 'shear', 'Toplam kesme · Fv', 8, 1)
+        self._bolt_field(form, 'section', 'Kesme kesiti', 10, 0, SECTIONS)
+        self._bolt_field(form, 'planes', 'Kesme düzlemi', 10, 1, PLANES)
+        self._bolt_field(form, 'safety_factor', 'Emniyet katsayısı', 12, 0)
+        self._bolt_field(form, 'count', 'Cıvata adedi', 12, 1)
+        self._button(form, 'Yükü hesapla', self._update_bolt_result, primary=True).grid(row=14, column=0, columnspan=2, sticky='ew', padx=8, pady=(14, 0))
         w['unit_hint'] = self._label(form, '', 10, MUTED, justify='left', wraplength=245)
-        w['unit_hint'].grid(row=13, column=0, columnspan=2, sticky='w', padx=8, pady=(10, 14))
+        w['unit_hint'].grid(row=15, column=0, columnspan=2, sticky='w', padx=8, pady=(10, 14))
         bank = self._bolt_card(left)
         bank.grid(row=1, column=0, sticky='ew')
         bank.grid_columnconfigure(0, weight=1)
         self._label(bank, 'TEKNİK BİLGİ', 13, ACCENT, bold=True).grid(row=0, column=0, sticky='w', padx=14, pady=(14, 8))
         w['bank'] = self._label(bank,
-            'Kaba diş · 4.6 / 5.6 / 8.8 / 10.9 / 12.9\n\n'
+            'Kaba / ince diş · 4.6 / 5.6 / 8.8 / 10.9 / 12.9\n\n'
             'As = π/4 × (d − 0,938194P)²\n'
             'İzin verilen gerilme = Sp / emniyet katsayısı\n'
             'Birleşik yük: σeş = √(σ² + 3τ²)\n\n'
@@ -171,6 +208,12 @@ class BoltView:
         w = self.bolt_widgets
         if w['loading']:
             return
+        if key in ('metric', 'thread_series'):
+            w['loading'] = True
+            try:
+                self._sync_bolt_pitch()
+            finally:
+                w['loading'] = False
         if key == 'unit':
             old, new = w['unit'], self.bolt_state['unit'].get()
             if new in UNITS:
@@ -200,8 +243,12 @@ class BoltView:
         configure_changed(w['tension_input'], state='disabled' if state['mode'].get() == 'Kesme' else 'normal')
         for key, inactive_mode in (('tension', 'Kesme'), ('shear', 'Çekme')):
             configure_changed(w[key+'_input'], text_color=MUTED if state['mode'].get() == inactive_mode else TEXT)
-        diameter, pitch = THREADS[state['metric'].get()]
-        configure_changed(w['thread'], text=f'Ø {diameter} mm · Adım {fmt(pitch)} mm')
+        try:
+            diameter, pitch = thread_geometry(state['metric'].get(), state['thread_series'].get(), state['pitch'].get())
+        except ValueError:
+            configure_changed(w['thread'], text='Diş türünü ve adımını kontrol edin.')
+        else:
+            configure_changed(w['thread'], text=f'Ø {diameter} mm · {state["thread_series"].get()} · Adım {fmt(pitch)} mm')
         try:
             self.bolt_result = r = calculate(**{key: value.get() for key, value in state.items() if key != 'view'})
         except ValueError as error:
@@ -282,11 +329,19 @@ class BoltView:
         scale = self.workspace._get_widget_scaling()
         view = self.bolt_state['view'].get()
         key = (canvas.winfo_width(), canvas.winfo_height(), ctk.get_appearance_mode(), scale, self.bolt_result,
-               view, self.bolt_state['metric'].get(), self.bolt_state['grade'].get())
+               view, self.bolt_state['metric'].get(), self.bolt_state['grade'].get(),
+               self.bolt_state['thread_series'].get(), self.bolt_state['pitch'].get())
         if self.bolt_widgets.get('draw_key') != key:
             if view == 'Ölçüler':
-                draw_dimensions(canvas, self.bolt_result, ctk.get_appearance_mode(), scale,
-                                self.bolt_state['metric'].get(), self.bolt_state['grade'].get())
+                try:
+                    thread_geometry(self.bolt_state['metric'].get(), self.bolt_state['thread_series'].get(),
+                                    self.bolt_state['pitch'].get())
+                except ValueError:
+                    draw(canvas, None, ctk.get_appearance_mode(), scale)
+                else:
+                    draw_dimensions(canvas, self.bolt_result, ctk.get_appearance_mode(), scale,
+                                    self.bolt_state['metric'].get(), self.bolt_state['grade'].get(),
+                                    self.bolt_state['thread_series'].get(), self.bolt_state['pitch'].get())
             else:
                 draw(canvas, self.bolt_result, ctk.get_appearance_mode(), scale)
             self.bolt_widgets['draw_key'] = key
@@ -311,7 +366,7 @@ class BoltView:
         r = self.bolt_result
         if r is None:
             return
-        text = (f'Cıvata hesabı · {r.metric} × {fmt(r.pitch)} · {r.grade}\n'
+        text = (f'Cıvata hesabı · {r.metric} × {fmt(r.pitch)} · {r.thread_series} · {r.grade}\n'
                 f'{r.mode} · {r.count} cıvata · {r.section} · {r.planes} kesme düzlemi\n'
                 f'Seçili birim: {UNIT_LABELS[r.unit]}\n'
                 f'Çekme: {force_text(r.tension_n, r.unit)} · Kesme: {force_text(r.shear_n, r.unit)}\n'
@@ -319,6 +374,8 @@ class BoltView:
                 f'As = {fmt(r.tensile_area)} mm² · Akesme = {fmt(r.shear_area)} mm²\n'
                 f'σ = {fmt(r.tensile_stress)} MPa · τ = {fmt(r.shear_stress)} MPa\n'
                 f'σeş = {fmt(r.equivalent_stress)} MPa · Sp = {fmt(r.proof_stress)} MPa\n'
+                + ('İnce dişte mevcut muhafazakâr Sp sınırı kullanılır.\n' if r.thread_series == 'İnce diş' else '')
+                +
                 f'Emniyet hedefi = {fmt(r.safety_factor)} · İzin verilen = {fmt(r.allowable_stress)} MPa\n'
                 f'Sonuç: {self.bolt_widgets["verdict"].cget("text")} · Kullanım %{fmt(r.utilization*100, 1)}\n'
                 f'Seçili emniyet hedefine göre yük marjı = {self._bolt_margin_text(r)}\n'
@@ -344,7 +401,10 @@ class BoltView:
         self._label(window, 'Statik cıvata dayanımı', 22, bold=True).grid(row=0, column=0, sticky='w', padx=24, pady=20)
         box = ctk.CTkTextbox(window, fg_color=INPUT, text_color=TEXT, font=(UI_FONT, 13), wrap='word')
         box.grid(row=1, column=0, sticky='nsew', padx=24)
-        box.insert('1.0', 'Ölçüler: ISO metrik kaba diş, M3–M39. Malzeme sınıfları: ISO 898-1 çelik cıvatalar.\n\n'
+        box.insert('1.0', 'Ölçüler: ISO metrik kaba ve ince diş, M3–M39. '
+            'İnce dişte çap için sunulan diş adımını seçin; kaba dişte standart adım sabittir. '
+            'Alanlar ve yaklaşık kılavuz deliği seçili adımla hesaplanır. '
+            'Malzeme sınıfları: ISO 898-1 çelik cıvatalar.\n\n'
             'As = π/4 × (d − 0,938194 × P)²\n'
             'Dişli kesmede Ak = π/4 × (d − 1,226869 × P)²; dişsiz gövdede Ak = πd²/4.\n'
             'σ = Ft / (adet × As)\nτ = Fv / (adet × kesme düzlemi × Ak)\n'
@@ -359,8 +419,9 @@ class BoltView:
             'Birleşik yük sınırlarında diğer kuvvet sabit tutulur. Gösterilen değer '
             'toplam kuvvet sınırıdır; eklenebilecek yük değildir. Diğer kuvvet tek başına '
             'sınırı aşıyorsa geçerli sınır yoktur.\n\n'
-            'Deney yükü gerilmesi Sp (MPa): 4.6: 225; 5.6: 280; 8.8: 580 (M16 ve altı), '
-            '600 (M16 üstü); 10.9: 830; 12.9: 970. Sp kopma dayanımı değildir. '
+            'Hesapta kullanılan muhafazakâr deney yükü gerilmesi Sp, kalite sınıfı ve nominal çapa göre belirlenir; '
+            'hesapta kullanılan Sp değeri kopyalanan raporda gösterilir. Sp kopma dayanımı değildir. '
+            'İnce dişte de mevcut muhafazakâr Sp sınırları korunur. '
             'Bu sınırla von Mises karşılaştırması, uygulamanın ihtiyatlı ön kontrol yöntemidir; '
             'ISO 898-1 bir bağlantı tasarım standardı değildir.\n\n'
             'Varsayılan emniyet katsayısı 2’dir; uygulamanızın gerektirdiği katsayıyı seçin. '

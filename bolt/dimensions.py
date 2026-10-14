@@ -1,12 +1,13 @@
 """Nominal ISO 4017 hexagon-head geometry, in millimetres.
 
-These dimensions illustrate a fully threaded hexagon-head screw. They do not
-define tolerances, screw length, a nut, or tightening torque.
+These dimensions illustrate a fully threaded hexagon-head screw. For fine
+threads the head is schematic, not an ISO 8676 dimensional specification.
+They do not define tolerances, screw length, a nut, or tightening torque.
 """
 
 from dataclasses import dataclass
 
-from bolt.rules import THREADS
+from bolt.rules import thread_geometry
 
 
 # Diameter: (nominal head height k, across-flats s). ISO 4017, not DIN 933.
@@ -28,7 +29,7 @@ class Dimensions:
     tapping_hole: float
 
 
-def dimensions(metric):
-    diameter, pitch = THREADS[metric]
+def dimensions(metric, thread_series='Kaba diş', pitch=None):
+    diameter, pitch = thread_geometry(metric, thread_series, pitch)
     height, flats = HEADS[diameter]
     return Dimensions(diameter, pitch, height, flats, diameter-pitch)

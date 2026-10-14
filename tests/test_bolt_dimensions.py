@@ -23,3 +23,12 @@ class BoltDimensionsTests(unittest.TestCase):
                 self.assertGreater(value.across_flats, value.diameter)
                 self.assertGreater(value.head_height, 0)
                 self.assertGreater(value.tapping_hole, 0)
+
+    def test_fine_pitch_changes_approximate_tapping_hole(self):
+        coarse = dimensions('M10')
+        fine = dimensions('M10', 'İnce diş', '.75')
+        self.assertEqual(fine.pitch, .75)
+        self.assertEqual(fine.tapping_hole, 9.25)
+        self.assertEqual(coarse.tapping_hole, 8.5)
+        self.assertEqual(fine.diameter, coarse.diameter)
+        self.assertEqual(fine.across_flats, coarse.across_flats)
