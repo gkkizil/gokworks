@@ -1,6 +1,25 @@
 # Kalınlığa göre manuel K / R atama
 
-**K faktörü / yarıçap → Manuel K / R** sekmesinde üç değer girilir:
+**K faktörü / yarıçap** artık **Manuel K / R** sekmesiyle açılır. SolidWorks'e
+atama her zaman burada girilen değerleri kullanır. **Hesap yardımı** sekmesi
+bağımsız hesap içindir; tablo sonucu montaj atamasına gönderilmez. Buradan
+tarama veya uygulama başlatıldığında da manuel değerler gerekir.
+
+Hedef, SolidWorks ağacındaki **Sac-Levha** unsurunun **Büküm yarıçapı** ve
+**Büküm izni → K-Faktörü** alanlarıdır. Örneğin R=2 mm, K=0,274 girilince
+bu alanlara sırasıyla 2 mm ve 0,274 yazılır; mevcut sac kalınlığı korunur.
+Ana `TemplateSheetMetal` unsuru ve ona bağlı `SheetMetal` gövde unsuru adları
+yerine API türleriyle bulunur; Türkçe ad veya kullanıcı tarafından ad
+değiştirilmesi seçimi etkilemez. İşlem günlüğünde bulunan unsur adları gösterilir.
+
+Üç değer girilir:
+
+14 Ekim 2026 güncellemesinde 18 ilgili kontrol geçti: hesap yardımından atama
+başlatıldığında da yalnız manuel değerlerin kullanılması, tablo çağrısının
+atamaya girmemesi, Sac-Levha ana/alt unsuruna yazma, kalınlık filtresi,
+tarama sırasında sıraya alınan uygulama, kayıt/rapor ve küçük ekran yerleşimi.
+Sol kod incelemesi de tamamlandı. SolidWorks COM sınırı test nesneleriyle
+temsil edildi; gerçek montaj bu bulut ortamında çalıştırılmadı.
 
 | Alan | Örnek |
 | --- | --- |
@@ -14,7 +33,7 @@ doldurulur; başlangıçta bu alanlara üretim değeri atanmaz.
 
 1. Ana montajı SolidWorks'te aktif yapın; **Manuel K / R** sekmesini açın.
 2. Kalınlık, K ve R değerlerini girin.
-3. **Montajı tara** ile yazma yapmadan eşleşmeleri ve önerilen değerleri görün.
+3. **Montajı tara** ile yazma yapmadan eşleşmeleri ve girdiğiniz hedef değerleri görün.
    Uygun parçalar **Uygulamaya hazır** gösterilir; “Önizleme; K/R uygulanmadı”
    açıklaması mevcut ve hedef değerleri ayırır.
 4. **Montaja K/R uygula** ile eşleşen sac parçalarının sac metal parametrelerini
@@ -36,7 +55,7 @@ Birimi dönüştürürken oluşan kayan nokta hataları için sabit `0.000001 mm
 tolerans kullanılır; kalınlıklar iki ondalığa yuvarlanarak eşleştirilmez.
 
 Girdiğiniz **K ve R aynen kullanılır**. Manuel sekme malzeme tablosu, V kalıp
-tahmini, bıçak ölçüsü veya BA kalibrasyonu istemez. Malzeme/takım sekmesindeki
+tahmini, bıçak ölçüsü veya BA kalibrasyonu istemez. Hesap yardımı sekmesindeki
 ayarlar ve manuel değerler ayrı saklanır; iki sekme arasında geçişte korunur.
 K `0–1` aralığında; kalınlık ve R pozitif ve sonlu olmalıdır. Boş/geçersiz
 alanlarla tarama ve uygulama başlatılmaz.

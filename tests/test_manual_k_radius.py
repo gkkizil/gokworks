@@ -18,7 +18,7 @@ from support.solidworks import (
 
 from k_factor import apply as ap
 from k_factor.rules import ManualAssignment, ThicknessMismatch, calculate
-from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB
+from k_factor.window import AUTOMATIC_TAB, MANUAL_TAB, RESULTS_TAB
 from pdf.settings import load_settings
 
 
@@ -126,6 +126,7 @@ class ManualApplyTests(KApplyTestCase):
 class ManualGuiTests(GuiTestCase):
     def test_calibration_fields_follow_method_without_losing_measurements(self):
         self.app._switch_mode('k_factor')
+        self.app._select_k_view(AUTOMATIC_TAB)
         panel = self.app.k_widgets['calibration_panel']
         self.app.update()
         self.assertFalse(panel.winfo_viewable())
@@ -155,6 +156,39 @@ class ManualGuiTests(GuiTestCase):
         for key,value in (('manual_thickness','2'),('manual_k','0,274'),('manual_r','2')):
             self.app.k_state[key].set(value)
         self.app.update()
+
+    def test_default_manual_and_calculated_values_cannot_start_assignment(self):
+        self.app._switch_mode('k_factor')
+        self.assertEqual(self.app.k_state['assignment_mode'].get(), MANUAL_TAB)
+        self.assertEqual(self.app.k_state['manual_k'].get(), '')
+        self.assertEqual(self.app.k_state['manual_r'].get(), '')
+        self.app._select_k_view(AUTOMATIC_TAB)
+        self.assertIsNotNone(self.app._preview_k_calculation())
+        with patch('k_factor.window.update_assembly') as worker:
+            self.app.start_button.invoke()
+            self.app.scan_button.invoke()
+        worker.assert_not_called()
+        self.assertEqual(self.app.k_state['assignment_mode'].get(), MANUAL_TAB)
+        self.assertFalse(self.app.busy)
+
+    def test_apply_from_calculator_uses_only_entered_values_without_table_lookup(self):
+        self.select_manual()
+        self.app.k_state['manual_k'].set('0,274123456')
+        self.app.k_state['manual_r'].set('2,3456789')
+        self.app._select_k_view(AUTOMATIC_TAB)
+        self.assertNotEqual(self.app._preview_k_calculation().k_factor, .274123456)
+        model = SheetPart()
+        assembly = FakeAssembly('/work/main.sldasm', (FakeComponent(model.path),))
+        with solidworks_session(ap, FakeMultiPartApp((model,), assembly), 'kr'), \
+                patch('k_factor.rules.recommended_k', side_effect=AssertionError('No table for assignment')):
+            self.app.start_button.invoke()
+            self.wait_idle()
+        self.assertEqual(self.app.results[0]['status'], 'success', self.app.results[0]['detail'])
+        self.assertEqual(model.states['Default']['k'], .274123456)
+        self.assertAlmostEqual(model.states['Default']['radius'], .0023456789, places=14)
+        self.assertEqual(model.states['Default']['thickness'], .002)
+        self.assertEqual(model.states['Default']['type'], 2)
+        self.assertIn('Sac-Levha', self.app.log_box.get('1.0', 'end'))
 
     def test_tabs_keep_independent_values_and_ignore_invalid_automatic_fields(self):
         self.select_manual()
@@ -301,7 +335,11 @@ class ManualGuiTests(GuiTestCase):
                             self.assertGreaterEqual(widget.winfo_rooty(),canvas.winfo_rooty())
                             self.assertLessEqual(widget.winfo_rooty()+widget.winfo_height(),
                                                  canvas.winfo_rooty()+canvas.winfo_height())
+                    self.app._select_k_view(RESULTS_TAB)
+                    self.settle(.1)
+                    self.assertTrue(self.app.table.winfo_viewable())
                     self.assertGreater(self.app.table.winfo_height(),80)
+                    self.app._select_k_view(MANUAL_TAB)
 
 
 if __name__=='__main__':unittest.main()

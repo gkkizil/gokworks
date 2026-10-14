@@ -74,17 +74,17 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 ## K faktörü / yarıçap
 
-K/R ekranında geniş **Malzeme / Takım**, **Manuel K / R** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
+K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
 
-**Manuel K / R** alt sekmesinde kalınlık, K ve iç R değerlerini doğrudan girebilirsiniz. Örneğin `2 mm → K=0,274, R=2 mm`: aktif montaj ve alt montajlarda yalnızca 2 mm saclar güncellenir, diğer kalınlıklar atlanır. [Manuel atama kılavuzu](docs/manual-k-radius.md).
+**Manuel K / R** sekmesinde kalınlık, K ve R değerlerini girin. Örneğin `2 mm → K=0,274, R=2 mm`: aktif montaj ve alt montajlarda 2 mm sacların **Sac-Levha → Büküm yarıçapı** ve **Büküm izni → K-Faktörü** alanlarına bu değerler yazılır. Diğer kalınlıklar atlanır. [Manuel atama kılavuzu](docs/manual-k-radius.md).
 
-Yeni sekme etkin: malzeme ailesi, üst bıçak uç R/açı ve alt kalıp V/açı seçilir. Katalogda nominal ölçüler ve özel giriş vardır. Otomatik V her parçanın kalınlığına göre seçilir. **Hesapla / kontrol et**, BA/BD formüllerini gösterir; bağımsız BA + ölçülmüş iç R veya dış A/B/düz boy ölçümüyle K kalibre edilebilir.
+**Hesap yardımı**, malzeme ve takım verileriyle BA/BD hesabı veya üretim ölçümleriyle K kalibrasyonu için kullanılır. Bu hesapların sonucu SolidWorks atamasına gönderilmez; tarama ve uygulama her zaman manuel alanlara girilmiş K/R değerlerini kullanır.
 
-**Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir. Seçilen malzeme bütün saclar için varsayılır; CAD malzemesi değişmez.
+**Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Girdiğiniz K ve R aynen yazılır, mevcut kalınlık korunur. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir.
 
 Tarama sürerken sıraya alınan K/R uygulaması, kontroldeki montajı, ana konfigürasyonu ve dosya/konfigürasyon adetlerini yeniden karşılaştırır. Bunlar değişmişse hiçbir parçaya yazmadan durur ve yeniden tarama ister.
 
-Genel tablo ve yaklaşık R hesabı üretim kalibrasyonu değildir. Bu sürüm havada büküm içindir; gauge/malzeme tablosuna bağlı veya özel büküm override'ı olan parçalar açıklamalı hata alır. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
+Hesap yardımındaki genel tablo ve yaklaşık R hesabı havada büküm önerisidir. Manuel atama bu tahminleri kullanmaz. Sac parametreleri gauge/malzeme tablosuna bağlıysa bu bağ açıklamalı olarak bildirilir. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
 
 ## Geometrik toleranslar / GD&T
 

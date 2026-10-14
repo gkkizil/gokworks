@@ -116,6 +116,27 @@ class ParentApplyTests(KApplyTestCase):
         self.assertIn('1 SheetMetal alt unsuru doğrulandı', detail)
         self.assertIn('Katıyı Saca Dönüştür: 1 unsurda', detail)
 
+    def test_sac_levha_ui_parent_gets_exact_user_radius_and_k_factor(self):
+        def sac_levha():
+            feature = self.parent()
+            feature.Name = 'Sac-Levha'
+            return feature
+        self.model.Extension.GetTemplateSheetMetal = sac_levha
+        self.model.feature.Name = 'Sac-Levha1'
+        for states in (self.model.parent_states, self.model.states):
+            states['Default'].update(thickness=.002, type=3, ba=.005)
+        with patch('k_factor.rules.recommended_k', side_effect=AssertionError('No table for assignment')):
+            status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+                                               ManualAssignment('2', '0,274', '2'))
+        self.assertEqual(status, 'success', detail)
+        for states in (self.model.parent_states, self.model.states):
+            state = states['Default']
+            self.assertEqual((state['radius'], state['k'], state['type'], state['thickness']),
+                             (.002, .274, 2, .002))
+        self.assertEqual(self.model.parent_writes, 1)
+        self.assertIn('Sac-Levha (TemplateSheetMetal)', detail)
+        self.assertIn('Sac-Levha1 (SheetMetal)', detail)
+
     def test_folder_api_is_valid_fallback_for_explicit_null_template(self):
         self.model.Extension.GetTemplateSheetMetal = lambda: None
         self.model.FeatureManager.GetSheetMetalFolder = lambda: SimpleNamespace(GetFeature=self.parent)

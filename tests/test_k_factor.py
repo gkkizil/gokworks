@@ -22,7 +22,7 @@ from support.solidworks import (
 )
 
 from k_factor import apply as ap
-from k_factor.window import RESULTS_TAB
+from k_factor.window import AUTOMATIC_TAB, RESULTS_TAB
 from k_factor.rules import (
     Recipe,
     ba_from_outside_dimensions,
@@ -474,6 +474,7 @@ class KGuiTests(GuiTestCase):
 
     def test_measured_ba_and_outside_dimensions_calculator(self):
         self.app._switch_mode('k_factor')
+        self.app._select_k_view(AUTOMATIC_TAB)
         for key,value in dict(method='BA ölçümü',radius='2',ba='4,39822971502571').items():
             self.app.k_state[key].set(value)
         result=self.app._preview_k_calculation()
@@ -483,8 +484,8 @@ class KGuiTests(GuiTestCase):
             self.app.k_state[key].set(value)
         self.assertAlmostEqual(self.app._preview_k_calculation().k_factor,.4)
 
-    def test_invalid_calculation_blocks_worker(self):
-        self.app._switch_mode('k_factor');self.app.k_state['die'].set('nan')
+    def test_invalid_direct_assignment_blocks_worker(self):
+        self.app._switch_mode('k_factor');self.app.k_state['manual_k'].set('nan')
         with patch('k_factor.window.update_assembly') as worker:
             self.app.start_button.invoke();self.app.scan_button.invoke()
         worker.assert_not_called()
@@ -495,6 +496,8 @@ class KGuiTests(GuiTestCase):
         assembly=FakeAssembly('/work/main.sldasm',[FakeComponent(model.path)])
         app=FakeApp(model,previous=assembly)
         self.app._switch_mode('k_factor')
+        self.app.k_state['manual_k'].set('0,274')
+        self.app.k_state['manual_r'].set('2')
         with solidworks_session(ap, app, 'kr'), patch('k_factor.window.update_assembly',wraps=ap.update_assembly) as worker:
             self.app.scan_button.invoke();self.wait_idle()
             self.assertTrue(self.app.results[0]['preview'])
@@ -512,7 +515,7 @@ class KGuiTests(GuiTestCase):
         self.assertEqual(self.app.k_widgets['success_caption'].cget('text'),'Uygulanan')
         self.assertNotIn('K/R uygulanmadı',self.app.status_label.cget('text'))
         self.assertEqual(self.app.results[0]['status'],'success',self.app.results[0]['detail'])
-        self.assertEqual(model.states['Default']['k'],.43)
+        self.assertEqual(model.states['Default']['k'],.274)
         self.assertEqual(model.save_count,0)
         self.assertEqual(self.app.progress.get(),1)
         self.assertEqual(self.app.nav_buttons['k_factor'].cget('state'),'normal')
@@ -532,6 +535,8 @@ class KGuiTests(GuiTestCase):
 
     def test_apply_requested_during_scan_is_preserved_and_stop_cancels_it(self):
         self.app._switch_mode('k_factor')
+        self.app.k_state['manual_k'].set('0,274')
+        self.app.k_state['manual_r'].set('2')
         real_worker = ap.update_assembly
         for outcome in ('apply', 'stop', 'scan_error', 'changed_assembly'):
             with self.subTest(outcome=outcome):
@@ -580,7 +585,7 @@ class KGuiTests(GuiTestCase):
                     self.assertEqual(len(self.app.results),1)
                     self.assertFalse(self.app.results[0]['preview'])
                     self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulandı')
-                    self.assertEqual(model.states['Default']['k'],.43)
+                    self.assertEqual(model.states['Default']['k'],.274)
                     self.assertNotIn('Montaj kontrolü başladı',self.app.log_box.get('1.0','end'))
 
     def test_small_large_and_scaled_layout_in_both_themes(self):

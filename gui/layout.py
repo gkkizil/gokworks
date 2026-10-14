@@ -187,7 +187,7 @@ class WorkspaceLayout:
         return header, actions, labels
 
     def _build_header(self):
-        subtitle = ("Sac parçalarının K faktörünü ve iç büküm yarıçapını ayarlayın." if self.mode == "k_factor" else
+        subtitle = ("Girdiğiniz K ve R değerlerini parçaların Sac-Levha parametrelerine yazın." if self.mode == "k_factor" else
                     "Her teknik resmin tüm sayfalarını tek PDF dosyasına aktarın." if self._is_pdf else
                     "Sac açınımlarını kalınlık ve montaj adediyle adlandırıp kaydedin.")
         self.pdf_header, actions, _ = self._page_header(
