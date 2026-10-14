@@ -3,7 +3,7 @@
 import tkinter as tk
 import customtkinter as ctk
 
-from bolt.diagram import draw
+from bolt.diagram import draw, draw_dimensions
 from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, UNIT_LABELS, SECTIONS, PLANES,
                         SCOPE, calculate, fmt, force_text, number)
 from gui.icons import set_window_icon
@@ -26,6 +26,7 @@ class BoltView:
                 self.bolt_state[key].set(defaults[key])
         self.bolt_result = None
         self.bolt_widgets = {'unit': self.bolt_state['unit'].get(), 'loading': False}
+        self.bolt_state['view'] = tk.StringVar(self, value='Ölçüler')
 
     def _bolt_card(self, parent):
         return ctk.CTkFrame(parent, fg_color=PANEL, corner_radius=14, border_width=1, border_color=BORDER)
@@ -34,11 +35,11 @@ class BoltView:
         self._label(parent, title, 11, MUTED).grid(row=row, column=column, sticky='w', padx=8, pady=(12, 5))
         if choices:
             control = ctk.CTkOptionMenu(parent, variable=self.bolt_state[key], values=list(choices),
-                height=36, width=110, fg_color=INPUT, button_color=INPUT, button_hover_color=HOVER,
+                height=36, width=1, fg_color=INPUT, button_color=INPUT, button_hover_color=HOVER,
                 dropdown_fg_color=PANEL, dropdown_hover_color=HOVER, dropdown_text_color=TEXT,
                 text_color=TEXT, font=(UI_FONT, 12), dropdown_font=(UI_FONT, 12), dynamic_resizing=False)
         else:
-            control = ctk.CTkEntry(parent, textvariable=self.bolt_state[key], width=110, height=36,
+            control = ctk.CTkEntry(parent, textvariable=self.bolt_state[key], width=1, height=36,
                 fg_color=INPUT, text_color=TEXT, border_color=BORDER, font=(UI_FONT, 14))
         control.grid(row=row+1, column=column, sticky='ew', padx=8)
         self.bolt_widgets[key+'_input'] = control
@@ -53,63 +54,87 @@ class BoltView:
         self._button(actions, 'Hesap yöntemi', self._show_bolt_method, width=124).pack()
         body = ctk.CTkFrame(self.workspace, fg_color='transparent')
         body.grid(row=1, column=0, sticky='nsew', padx=24)
-        body.grid_columnconfigure(1, weight=1)
+        body.grid_columnconfigure((0, 1), weight=1, uniform='bolt_columns')
         body.grid_rowconfigure(0, weight=1)
-        form = ctk.CTkScrollableFrame(body, width=270, fg_color=PANEL, corner_radius=14,
-            border_width=1, border_color=BORDER, scrollbar_button_color=BORDER)
-        form.grid(row=0, column=0, sticky='ns', padx=(0, 14))
+        left = ctk.CTkScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
+            scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
+        left.grid(row=0, column=0, sticky='nsew', padx=(0, 12))
+        left.grid_columnconfigure(0, weight=1)
+        w['form'] = left
+        form = self._bolt_card(left)
+        form.grid(row=0, column=0, sticky='ew', pady=(0, 12))
         form.grid_columnconfigure((0, 1), weight=1, uniform='bolt_form')
-        w['form'] = form
-        self._label(form, '01   Cıvata seçimi', 14, bold=True).grid(row=0, column=0, columnspan=2, sticky='w', padx=8, pady=(12, 0))
+        self._label(form, 'CIVATA PARAMETRELERİ', 13, ACCENT, bold=True).grid(row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(16, 0))
         self._bolt_field(form, 'metric', 'Metrik ölçü', 1, 0, THREADS)
         self._bolt_field(form, 'grade', 'Kalite sınıfı', 1, 1, PROOF_STRESS)
         w['thread'] = self._label(form, '', 10, MUTED)
-        w['thread'].grid(row=3, column=0, columnspan=2, sticky='w', padx=8, pady=(6, 4))
-        self._label(form, '02   Yük durumu', 14, bold=True).grid(row=4, column=0, columnspan=2, sticky='w', padx=8, pady=(16, 8))
-        modes = ctk.CTkSegmentedButton(form, variable=self.bolt_state['mode'], values=list(MODES),
-            height=36, fg_color=INPUT, selected_color=ACCENT_BG, selected_hover_color=HOVER,
-            unselected_color=INPUT, unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
-        modes.grid(row=5, column=0, columnspan=2, sticky='ew', padx=8)
-        self._label(form, 'Yük birimi', 11, MUTED).grid(row=6, column=0, columnspan=2, sticky='w', padx=8, pady=(12, 5))
-        w['unit_input'] = ctk.CTkSegmentedButton(form, values=list(UNIT_LABELS.values()),
-            command=self._select_bolt_unit, height=36, fg_color=INPUT,
-            selected_color=ACCENT_BG, selected_hover_color=HOVER, unselected_color=INPUT,
-            unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12))
-        w['unit_input'].grid(row=7, column=0, columnspan=2, sticky='ew', padx=8)
-        self._bolt_field(form, 'tension', 'Toplam çekme · Ft', 8, 0)
-        self._bolt_field(form, 'shear', 'Toplam kesme · Fv', 8, 1)
-        self._bolt_field(form, 'section', 'Kesme kesiti', 10, 0, SECTIONS)
-        self._bolt_field(form, 'planes', 'Kesme düzlemi', 10, 1, PLANES)
-        self._label(form, '03   Güvenlik hedefi', 14, bold=True).grid(row=12, column=0, columnspan=2, sticky='w', padx=8, pady=(20, 0))
-        self._bolt_field(form, 'safety_factor', 'Emniyet katsayısı', 13, 0)
-        self._bolt_field(form, 'count', 'Cıvata adedi', 13, 1)
+        w['thread'].grid(row=3, column=0, columnspan=2, sticky='w', padx=8, pady=(6, 0))
+        self._bolt_field(form, 'mode', 'Yük türü', 4, 0, MODES)
+        self._label(form, 'Yük birimi', 11, MUTED).grid(row=4, column=1, sticky='w', padx=8, pady=(12, 5))
+        w['unit_input'] = ctk.CTkOptionMenu(form, values=list(UNIT_LABELS.values()),
+            command=self._select_bolt_unit, height=36, width=1, fg_color=INPUT,
+            button_color=INPUT, button_hover_color=HOVER, dropdown_fg_color=PANEL,
+            dropdown_hover_color=HOVER, dropdown_text_color=TEXT, text_color=TEXT,
+            font=(UI_FONT, 12), dynamic_resizing=False)
+        w['unit_input'].grid(row=5, column=1, sticky='ew', padx=8)
+        self._bolt_field(form, 'tension', 'Toplam çekme · Ft', 6, 0)
+        self._bolt_field(form, 'shear', 'Toplam kesme · Fv', 6, 1)
+        self._bolt_field(form, 'section', 'Kesme kesiti', 8, 0, SECTIONS)
+        self._bolt_field(form, 'planes', 'Kesme düzlemi', 8, 1, PLANES)
+        self._bolt_field(form, 'safety_factor', 'Emniyet katsayısı', 10, 0)
+        self._bolt_field(form, 'count', 'Cıvata adedi', 10, 1)
+        self._button(form, 'Yükü hesapla', self._update_bolt_result, primary=True).grid(row=12, column=0, columnspan=2, sticky='ew', padx=8, pady=(14, 0))
         w['unit_hint'] = self._label(form, '', 10, MUTED, justify='left', wraplength=245)
-        w['unit_hint'].grid(row=15, column=0, columnspan=2, sticky='w', padx=8, pady=(12, 6))
-        self._label(form, 'Emniyet varsayılanı: 2 · Eşit yük paylaşımı\nKaba diş · karbon / alaşımlı çelik', 10, MUTED,
-                    justify='left').grid(row=16, column=0, columnspan=2, sticky='w', padx=8, pady=(0, 14))
-        details = ctk.CTkScrollableFrame(body, fg_color='transparent', corner_radius=0,
+        w['unit_hint'].grid(row=13, column=0, columnspan=2, sticky='w', padx=8, pady=(10, 14))
+        bank = self._bolt_card(left)
+        bank.grid(row=1, column=0, sticky='ew')
+        bank.grid_columnconfigure(0, weight=1)
+        self._label(bank, 'TEKNİK BİLGİ', 13, ACCENT, bold=True).grid(row=0, column=0, sticky='w', padx=14, pady=(14, 8))
+        w['bank'] = self._label(bank,
+            'Kaba diş · 4.6 / 5.6 / 8.8 / 10.9 / 12.9\n\n'
+            'As = π/4 × (d − 0,938194P)²\n'
+            'İzin verilen gerilme = Sp / emniyet katsayısı\n'
+            'Birleşik yük: σeş = √(σ² + 3τ²)\n\n'
+            'Statik ön kontrol · Eşit yük paylaşımı\n'
+            'Ön sıkma ve bağlantı plakaları ayrıca kontrol edilir.',
+            11, MUTED, justify='left', anchor='w', wraplength=360)
+        w['bank'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 14))
+        details = ctk.CTkScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         details.grid(row=0, column=1, sticky='nsew')
         details.grid_columnconfigure(0, weight=1)
         w['details'] = details
+        banner = ctk.CTkFrame(details, fg_color=('#2F68AD', '#235E9E'), corner_radius=14)
+        banner.grid(row=0, column=0, sticky='ew', pady=(0, 12))
+        banner.grid_columnconfigure(0, weight=1)
+        w['capacity_title'] = self._label(banner, 'ÇEKME YÜK SINIRI', 10, '#DAEAFE', bold=True)
+        w['capacity_title'].grid(row=0, column=0, sticky='ew', padx=16, pady=(14, 2))
+        w['capacity_value'] = self._label(banner, '—', 29, '#FFFFFF', bold=True)
+        w['capacity_value'].grid(row=1, column=0, sticky='ew', padx=16, pady=2)
+        w['capacity_context'] = self._label(banner, '', 10, '#DAEAFE', wraplength=360)
+        w['capacity_context'].grid(row=2, column=0, sticky='ew', padx=16, pady=(2, 14))
         result = self._bolt_card(details)
-        result.grid(row=0, column=0, sticky='ew', pady=(0, 12))
+        result.grid(row=1, column=0, sticky='ew', pady=(0, 12))
         result.grid_columnconfigure(0, weight=1)
         w['result_card'] = result
-        self._label(result, 'CIVATA GÖVDESİ · STATİK ÖN KONTROL', 10, MUTED, True).grid(row=0, column=0, sticky='w', padx=18, pady=(14, 0))
-        w['verdict'] = self._label(result, '', 26, bold=True, anchor='w')
-        w['verdict'].grid(row=1, column=0, sticky='ew', padx=18, pady=(5, 2))
+        w['verdict'] = self._label(result, '', 20, bold=True, anchor='w')
+        w['verdict'].grid(row=1, column=0, sticky='ew', padx=18, pady=(10, 2))
         w['summary'] = self._label(result, '', 11, MUTED, anchor='w', justify='left', wraplength=390)
-        w['summary'].grid(row=2, column=0, sticky='ew', padx=18, pady=(0, 10))
+        w['summary'].grid(row=2, column=0, sticky='ew', padx=18, pady=(0, 6))
         w['progress'] = ctk.CTkProgressBar(result, height=7, fg_color=INPUT, progress_color=ACCENT)
         w['progress'].grid(row=3, column=0, sticky='ew', padx=18)
         w['usage'] = self._label(result, '', 11, MUTED, anchor='w')
-        w['usage'].grid(row=4, column=0, sticky='ew', padx=18, pady=(6, 14))
+        w['usage'].grid(row=4, column=0, sticky='ew', padx=18, pady=(4, 8))
         visual = self._bolt_card(details)
-        visual.grid(row=1, column=0, sticky='ew', pady=(0, 12))
+        visual.grid(row=3, column=0, sticky='ew', pady=(0, 12))
         visual.grid_columnconfigure(0, weight=1)
-        canvas = tk.Canvas(visual, width=1, height=230, highlightthickness=0, borderwidth=0)
-        canvas.grid(row=0, column=0, sticky='ew', padx=8, pady=8)
+        views = ctk.CTkSegmentedButton(visual, variable=self.bolt_state['view'], values=['Ölçüler', 'Yük gösterimi'],
+            height=30, fg_color=INPUT, selected_color=ACCENT_BG, selected_hover_color=HOVER,
+            unselected_color=INPUT, unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
+        views.grid(row=0, column=0, sticky='ew', padx=10, pady=(10, 0))
+        w['view_input'] = views
+        canvas = tk.Canvas(visual, width=1, height=260, highlightthickness=0, borderwidth=0)
+        canvas.grid(row=1, column=0, sticky='ew', padx=8, pady=8)
         w['canvas'] = canvas
         metrics = self._bolt_card(details)
         metrics.grid(row=2, column=0, sticky='ew', pady=(0, 12))
@@ -117,17 +142,17 @@ class BoltView:
         for index, (key, title) in enumerate((('stress', 'Eşdeğer gerilme'), ('allowable', 'İzin verilen gerilme'),
                                             ('factor', 'Mevcut emniyet'), ('area', 'Çekme alanı · As'))):
             row, col = divmod(index, 2)
-            self._label(metrics, title, 10, MUTED).grid(row=row*2, column=col, sticky='w', padx=16, pady=(12, 2))
+            self._label(metrics, title, 10, MUTED).grid(row=row*2, column=col, sticky='w', padx=16, pady=(8, 0))
             w[key] = self._label(metrics, '—', 18, bold=True)
-            w[key].grid(row=row*2+1, column=col, sticky='w', padx=16, pady=(0, 12))
+            w[key].grid(row=row*2+1, column=col, sticky='w', padx=16, pady=(0, 8))
         w['capacity'] = self._label(details, '', 11, MUTED, justify='left', anchor='w', wraplength=400)
-        w['capacity'].grid(row=3, column=0, sticky='ew', padx=4, pady=(0, 10))
+        w['capacity'].grid(row=4, column=0, sticky='ew', padx=4, pady=(0, 10))
         w['scope'] = self._label(details,
             'Ön kontrol · Ön sıkma, diş sıyırması ve bağlantı plakaları ayrıca kontrol edilmelidir.',
             11, MUTED, justify='left', anchor='w', wraplength=400)
-        w['scope'].grid(row=4, column=0, sticky='ew', padx=4, pady=(0, 12))
+        w['scope'].grid(row=5, column=0, sticky='ew', padx=4, pady=(0, 12))
         w['copy'] = self._button(details, 'Hesabı kopyala', self._copy_bolt_result, icon='copy', width=150)
-        w['copy'].grid(row=5, column=0, sticky='w', pady=(0, 10))
+        w['copy'].grid(row=6, column=0, sticky='w', pady=(0, 10))
         self.status_label = self._label(self.workspace, 'Değerleri değiştirdiğinizde sonuç güncellenir.', 11, MUTED, anchor='w')
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(10, 12))
         for key, variable in self.bolt_state.items():
@@ -177,13 +202,15 @@ class BoltView:
         diameter, pitch = THREADS[state['metric'].get()]
         configure_changed(w['thread'], text=f'Ø {diameter} mm · Adım {fmt(pitch)} mm')
         try:
-            self.bolt_result = r = calculate(**{key: value.get() for key, value in state.items()})
+            self.bolt_result = r = calculate(**{key: value.get() for key, value in state.items() if key != 'view'})
         except ValueError as error:
             self.bolt_result = None
             verdict, summary, color, usage = 'Değerleri kontrol edin', str(error), AMBER, 'Hesaplanamadı'
             for key in ('stress', 'allowable', 'factor', 'area'):
                 configure_changed(w[key], text='—')
             configure_changed(w['capacity'], text='Geçerli değerler girildiğinde kapasite burada görünür.')
+            configure_changed(w['capacity_value'], text='—')
+            configure_changed(w['capacity_context'], text='Geçerli yük ve güvenlik değerlerini girin.')
         else:
             verdict = 'Yük yok' if not r.loaded else 'Güvenli' if r.safe else 'Güvensiz'
             color = AMBER if not r.loaded else SUCCESS if r.safe else RED
@@ -199,6 +226,14 @@ class BoltView:
                 f'Çekme: {force_text(r.tension_capacity_n, r.unit)}\n'
                 f'Kesme: {force_text(r.shear_capacity_n, r.unit)}\n'
                 'Birleşik yükte bu iki sınır aynı anda kullanılamaz.'))
+            if r.mode == 'Birleşik yük':
+                configure_changed(w['capacity_title'], text='BİRLEŞİK YÜK · KAPASİTE KULLANIMI')
+                configure_changed(w['capacity_value'], text=f'%{fmt(r.utilization*100, 1)}')
+            else:
+                configure_changed(w['capacity_title'], text=f'{r.mode.upper()} YÜK SINIRI')
+                capacity = r.tension_capacity_n if r.mode == 'Çekme' else r.shear_capacity_n
+                configure_changed(w['capacity_value'], text=force_text(capacity, r.unit))
+            configure_changed(w['capacity_context'], text=f'{r.count} cıvata · {r.mode} · Emniyet {fmt(r.safety_factor, 1)}')
         configure_changed(w['verdict'], text=verdict, text_color=color)
         configure_changed(w['result_card'], border_color=color)
         configure_changed(w['summary'], text=summary)
@@ -211,9 +246,15 @@ class BoltView:
     def _draw_bolt_diagram(self):
         canvas = self.bolt_widgets['canvas']
         scale = self.workspace._get_widget_scaling()
-        key = (canvas.winfo_width(), canvas.winfo_height(), ctk.get_appearance_mode(), scale, self.bolt_result)
+        view = self.bolt_state['view'].get()
+        key = (canvas.winfo_width(), canvas.winfo_height(), ctk.get_appearance_mode(), scale, self.bolt_result,
+               view, self.bolt_state['metric'].get(), self.bolt_state['grade'].get())
         if self.bolt_widgets.get('draw_key') != key:
-            draw(canvas, self.bolt_result, ctk.get_appearance_mode(), scale)
+            if view == 'Ölçüler':
+                draw_dimensions(canvas, self.bolt_result, ctk.get_appearance_mode(), scale,
+                                self.bolt_state['metric'].get(), self.bolt_state['grade'].get())
+            else:
+                draw(canvas, self.bolt_result, ctk.get_appearance_mode(), scale)
             self.bolt_widgets['draw_key'] = key
 
     def _resize_bolt_workspace(self):
@@ -223,9 +264,10 @@ class BoltView:
         w = self.bolt_widgets
         scale = self.workspace._get_widget_scaling()
         width = max(220, w['details'].winfo_width()/scale-38)
-        for key in ('summary', 'capacity', 'scope'):
+        for key in ('summary', 'capacity', 'scope', 'capacity_context'):
             configure_changed(w[key], wraplength=width)
-        height = round(230*scale)
+        configure_changed(w['bank'], wraplength=max(190, w['form'].winfo_width()/scale-38))
+        height = round(260*scale)
         if int(w['canvas'].cget('height')) != height:
             w['canvas'].configure(height=height)
         self._configure_table_style()

@@ -15,6 +15,7 @@ class BoltWindowTests(GuiTestCase):
 
     def test_live_load_modes_and_invalid_input_clear_previous_verdict(self):
         state, w = self.app.bolt_state, self.app.bolt_widgets
+        state['view'].set('Yük gösterimi')
         self.assertEqual(w['verdict'].cget('text'), 'Güvenli')
         state['tension'].set('20')
         self.assertEqual(w['verdict'].cget('text'), 'Güvensiz')
@@ -50,6 +51,7 @@ class BoltWindowTests(GuiTestCase):
 
     def test_units_page_cache_preferences_and_copy_preserve_physical_load(self):
         state, w = self.app.bolt_state, self.app.bolt_widgets
+        state['view'].set('Yük gösterimi')
         before = self.app.bolt_result
         for unit in ('N', 'kg', 'kN'):
             state['unit'].set(unit)
@@ -90,16 +92,51 @@ class BoltWindowTests(GuiTestCase):
             self.app.geometry(size)
             self.app.bolt_widgets['details']._parent_canvas.yview_moveto(0)
             self.settle()
-            for key in ('result_card', 'canvas'):
+            for key in ('result_card', 'capacity_value'):
                 self.assert_inside(self.app.bolt_widgets[key])
             for button in self.app.nav_buttons.values():
                 self.assert_inside(button)
             self.assert_inside(self.app.theme_selector.master)
+            viewport = self.app.bolt_widgets['details']._parent_canvas
+            diagram = self.app.bolt_widgets['canvas']
+            total_height = viewport.bbox('all')[3]
+            top = diagram.winfo_rooty()-viewport.winfo_rooty()+viewport.canvasy(0)
+            viewport.yview_moveto(max(0, (top-12)/total_height))
+            self.app.update()
+            self.assert_inside(diagram)
             for panel, control in (('form', 'safety_factor_input'), ('details', 'copy')):
                 self.app.bolt_widgets[panel]._parent_canvas.yview_moveto(1)
                 self.app.update()
                 self.assert_inside(self.app.bolt_widgets[control])
-            with patch('bolt.window.draw') as render:
+            with patch('bolt.window.draw_dimensions') as render:
                 self.app._draw_bolt_diagram()
                 self.app._resize_bolt_workspace()
                 render.assert_not_called()
+
+    def test_dimensions_and_capacity_follow_metric_units_and_load_mode(self):
+        state, w = self.app.bolt_state, self.app.bolt_widgets
+        self.assertEqual(state['view'].get(), 'Ölçüler')
+        state['metric'].set('M8')
+        texts = [w['canvas'].itemcget(item, 'text') for item in w['canvas'].find_all()
+                 if w['canvas'].type(item) == 'text']
+        self.assertIn('s=13,0 mm', texts)
+        self.assertIn('k=5,3', texts)
+        self.assertIn('≈ Ø6,75 mm', texts)
+        self.assertIn('Yaklaşık d − P', texts)
+        self.assertEqual(len(w['canvas'].find_withtag('dimension_head')), 1)
+        self.assertEqual(len(w['canvas'].find_withtag('dimension_hex')), 1)
+        self.assertIn('kN', w['capacity_value'].cget('text'))
+        one = self.app.bolt_result.tension_capacity_n
+        state['count'].set('2')
+        self.assertAlmostEqual(self.app.bolt_result.tension_capacity_n, 2*one)
+        self.assertIn('2 cıvata', w['capacity_context'].cget('text'))
+        state['mode'].set('Kesme')
+        self.assertIn('KESME', w['capacity_title'].cget('text'))
+        state['unit'].set('N')
+        self.assertTrue(w['capacity_value'].cget('text').endswith(' N'))
+        state['mode'].set('Birleşik yük')
+        self.assertIn('KAPASİTE KULLANIMI', w['capacity_title'].cget('text'))
+        self.assertTrue(w['capacity_value'].cget('text').startswith('%'))
+        state['tension'].set('invalid')
+        self.assertEqual(w['capacity_value'].cget('text'), '—')
+        self.assertTrue(w['canvas'].find_withtag('dimension_head'))

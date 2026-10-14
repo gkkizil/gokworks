@@ -1,12 +1,24 @@
 # Cıvata hesabı
 
-**Mühendislik hesapları → Cıvata hesabı**. SolidWorks bağlantısı gerektirmez. Metrik ölçü, kalite sınıfı, yük türü ve kuvvet girildiğinde sonuç canlı güncellenir. Yeşil **Güvenli**, kırmızı **Güvensiz** ve yük girilmediğinde **Yük yok** gösterilir. Hatalı girişte önceki sonuç kaldırılır.
+**Mühendislik hesapları → Cıvata hesabı**. SolidWorks bağlantısı gerektirmez. Metrik ölçü, kalite sınıfı, yük türü ve kuvvet girildiğinde sonuç canlı güncellenir. Mavi **Güvenli**, kırmızı **Güvensiz** ve yük girilmediğinde **Yük yok** gösterilir. Hatalı girişte önceki sonuç kaldırılır.
 
 - M3–M39 arasındaki 18 kaba diş ölçüsü; 4.6, 5.6, 8.8, 10.9 ve 12.9 çelik cıvata sınıfları.
-- Çekme, kesme veya eşzamanlı birleşik yük. **kg yük / Newton (N) / kN** seçimi görünür düğmelerle yapılır. Birim değişikliği girilmiş yükü dönüştürür; kapasite, yük okları ve pano aynı birimi kullanır. kg yük seçiminde kütle standart yerçekimi ile kuvvete çevrilir: **1 kg yük = 9,80665 N**. Önceki kgf tercihleri aynı kuvvet korunarak kg yük seçimine taşınır.
+- Çekme, kesme veya eşzamanlı birleşik yük. **kg yük / Newton (N) / kN** seçimi açılır listeden yapılır. Birim değişikliği girilmiş yükü dönüştürür; kapasite, yük okları ve pano aynı birimi kullanır. kg yük seçiminde kütle standart yerçekimi ile kuvvete çevrilir: **1 kg yük = 9,80665 N**. Önceki kgf tercihleri aynı kuvvet korunarak kg yük seçimine taşınır.
 - Cıvata adedi, tek/çift kesme düzlemi, dişli/dişsiz kesit ve 1–10 arasında emniyet katsayısı. Varsayılan katsayı 2; tüm cıvatalar ve çift kesmedeki düzlemler eşit yük taşır.
 - Yük okları, kapasite kullanımı, eşdeğer/izin verilen gerilme, mevcut emniyet ve çekme alanı. Hesap varsayımlarıyla panoya kopyalanabilir. Seçimler kaydedilir.
 - Somun altıgen yüzeyler, pah ve iç dişlerle çizilir. Büyütülmüş somun detayı açık deliği gösterir; montaj görünümünde dişli cıvata ucu somundan dışarı uzanır. Görsel ölçeksizdir, bir somun ölçü standardını doğrulamaz.
+
+Sol sütunda parametreler ve kısa teknik bilgi, sağda mavi yük sınırı kartı, sonuç ve dinamik cıvata çizimi bulunur. Kart seçilen adet, emniyet katsayısı ve yük birimini kullanır. Birleşik yükte kart kapasite kullanımını gösterir; bağımsız çekme/kesme sınırları birlikte kullanılabilecek değerler değildir.
+
+**Ölçüler** görünümü metrik seçimine göre `d` (nominal çap), `k` (nominal baş yüksekliği), `s` (anahtar ağzı) ve yaklaşık kılavuz deliğini günceller. Baş tablosu ISO 4017 nominal ölçüleridir; DIN 933 ölçüleriyle karıştırılmaz (örneğin ISO M10 anahtar ağzı 16 mm'dir). Cıvata boyu temsili, toleranslar kapsam dışıdır. Yaklaşık `d − P` bir kılavuz deliği ön bilgisidir; bağlantı boşluk deliği ya da kesin matkap seçimi değildir. Bu revizyonda dış tablo erişimi engellendiği için canlı kaynak karşılaştırması yapılamadı; referans standardı [ISO 4017](https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en).
+
+**Yük gösterimi** seçeneği önceki tek başlı cıvata, somun ve çekme/kesme oklarını korur. Güncel gerçek Tk ekranları: [Koyu](../bolt/examples/bolt-dimensions-dark.png) · [Açık](../bolt/examples/bolt-dimensions-light.png).
+
+14 Ekim arayüz revizyonunda **14 ilgili kontrol geçti**: 8 hesap, 4 gerçek Tk
+ve 2 ölçü verisi kontrolü. Açık/koyu temada 1240×860 ekran görüntüleri referans
+düzenle karşılaştırıldı; ölçü çizimi bu boyutta ilk görünümde tamamen açıktır.
+Küçük pencerede çizime ve girişlere sütun kaydırmalarıyla ulaşılır. Kapasite,
+birim dönüşümü, birleşik yük, geçersiz giriş ve sayfa önbelleği de kontrol edildi.
 
 ## Hesap yöntemi
 

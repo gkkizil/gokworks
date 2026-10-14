@@ -2,8 +2,74 @@
 
 from math import cos, sin, pi
 
-from gui.theme import PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, AMBER, UI_FONT
+from gui.theme import PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG, AMBER, UI_FONT
 from bolt.rules import fmt, force_text
+from bolt.dimensions import dimensions
+
+
+def draw_dimensions(canvas, result, appearance, scale, metric='M10', grade='8.8'):
+    """Draw a side elevation and end view with nominal head dimensions."""
+    color = lambda pair: pair[appearance == 'Dark']
+    canvas.configure(background=color(PANEL))
+    canvas.delete('all')
+    width, height = canvas.winfo_width(), canvas.winfo_height()
+    if width < 10 or height < 10:
+        return
+    metric = result.metric if result else metric
+    grade = result.grade if result else grade
+    d = dimensions(metric)
+    sx, sy = width/440, height/280
+    def line(points, paint=BORDER, **kw):
+        return canvas.create_line(*[v*(sx if i % 2 == 0 else sy) for i, v in enumerate(points)],
+                                  fill=color(paint), width=1.2*scale, **kw)
+    def polygon(points, **kw):
+        return canvas.create_polygon(*[v*(sx if i % 2 == 0 else sy) for i, v in enumerate(points)], **kw)
+    def text(x, y, value, paint=TEXT, size=11, **kw):
+        return canvas.create_text(x*sx, y*sy, text=value, fill=color(paint),
+                                  font=(UI_FONT, -round(size*scale)), **kw)
+    # Common geometry scale within the side elevation; length is illustrative.
+    factor = 80/d.across_flats
+    left, right = 125-d.across_flats*factor/2, 125+d.across_flats*factor/2
+    head_top, head_bottom = 53, 53+d.head_height*factor
+    shank_left, shank_right = 125-d.diameter*factor/2, 125+d.diameter*factor/2
+    bottom = 225
+    line((125, 32, 125, 238), MUTED, dash=(4, 4))
+    polygon((left, head_top+4, left+6, head_top, right-6, head_top,
+             right, head_top+4, right, head_bottom, left, head_bottom),
+            fill=color(INPUT), outline=color(MUTED), width=1.3*scale, tags='dimension_head')
+    line((left+16, head_top, left+16, head_bottom), MUTED)
+    line((right-16, head_top, right-16, head_bottom), MUTED)
+    polygon((shank_left, head_bottom, shank_right, head_bottom,
+             shank_right, bottom-5, shank_right-4, bottom,
+             shank_left+4, bottom, shank_left, bottom-5),
+            fill=color(INPUT), outline=color(MUTED), width=1.3*scale, tags='dimension_shank')
+    for y in range(round(head_bottom+12), bottom-7, 8):
+        line((shank_left+1, y, shank_right-1, y+4), MUTED, tags='dimension_thread')
+    line((left-14, head_top, left-14, head_bottom), ACCENT)
+    line((left-19, head_top, left-2, head_top), ACCENT)
+    line((left-19, head_bottom, left-2, head_bottom), ACCENT)
+    text(left-22, (head_top+head_bottom)/2, f'k={fmt(d.head_height, 1)}', ACCENT, 10, anchor='e')
+    line((shank_left, bottom+14, shank_right, bottom+14), ACCENT)
+    line((shank_left, bottom+8, shank_left, bottom+19), ACCENT)
+    line((shank_right, bottom+8, shank_right, bottom+19), ACCENT)
+    text(125, bottom+29, f'd={fmt(d.diameter, 0)}', ACCENT, 11)
+    cx, cy, radius = 330, 96, 43
+    vertices = tuple(v for i in range(6) for v in
+                     (cx+radius*cos(pi/6+i*pi/3), cy+radius*sin(pi/6+i*pi/3)))
+    polygon(vertices, fill=color(INPUT), outline=color(ACCENT), width=1.8*scale, tags='dimension_hex')
+    text(cx, cy, grade, MUTED, 13)
+    flat_half = radius*cos(pi/6)
+    line((cx-flat_half, cy+radius+15, cx+flat_half, cy+radius+15), ACCENT)
+    line((cx-flat_half, cy+radius+8, cx-flat_half, cy+radius+21), ACCENT)
+    line((cx+flat_half, cy+radius+8, cx+flat_half, cy+radius+21), ACCENT)
+    text(cx, cy+radius+33, f's={fmt(d.across_flats, 1)} mm', ACCENT, 11)
+    canvas.create_rectangle(250*sx, 196*sy, 410*sx, 264*sy,
+                            fill=color(ACCENT_BG), outline=color(ACCENT), width=scale)
+    text(cx, 210, 'KILAVUZ DELİĞİ', MUTED, 9)
+    text(cx, 231, f'≈ Ø{fmt(d.tapping_hole, 2)} mm', ACCENT, 15)
+    text(cx, 251, 'Yaklaşık d − P', MUTED, 10)
+    text(12, 15, f'{metric} × {fmt(d.pitch, 2)} · ISO 4017', ACCENT, 11, anchor='w')
+    text(12, 276, 'Nominal baş ölçüleri · boy şematik', MUTED, 9, anchor='w')
 
 
 def draw(canvas, result, appearance, scale):
