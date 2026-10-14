@@ -26,10 +26,15 @@ class NamingWindowTests(GuiTestCase):
             self.wait_idle()
         self.settle()
 
+    def table_rows(self, parent=''):
+        table = self.app.naming_widgets['table']
+        return [row for child in table.get_children(parent)
+                for row in (child, *self.table_rows(child))]
+
     def test_scan_manual_model_and_paired_drawing_edit_then_save_package(self):
         self.scan()
         widgets = self.app.naming_widgets
-        self.assertEqual(len(widgets['table'].get_children()), 7)
+        self.assertEqual(len(self.table_rows()), 7)
         self.assertEqual(widgets['save'].cget('state'), 'normal')
         index = next(i for i, entry in enumerate(self.app.naming_plan) if Path(entry.source).name == 'Levha.sldprt')
         widgets['table'].selection_set(str(index))
@@ -77,7 +82,8 @@ class NamingWindowTests(GuiTestCase):
         root.write_text(json.dumps(content))
         self.scan()
         widgets = self.app.naming_widgets
-        self.assertEqual(len(widgets['table'].get_children()), 8)
+        self.assertEqual(len(set(widgets['row_indices'].values())), 8)
+        self.assertEqual(len(self.table_rows()), 9)  # Both derived parts reference the same base file.
         self.assertEqual(widgets['save'].cget('state'), 'disabled')
         index = next(i for i, entry in enumerate(self.app.naming_plan) if entry.source == str(second))
         widgets['table'].selection_set(str(index))
@@ -87,6 +93,41 @@ class NamingWindowTests(GuiTestCase):
         with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
             widgets['save'].invoke()
             self.wait_idle()
+        self.assertEqual(self.sw.saves, 1)
+
+    def test_assembly_tree_shared_edit_preserves_branches_and_pack_order(self):
+        root = self.root/'Ana.sldasm'
+        content = json.loads(root.read_text())
+        content['refs'].append(str(self.root/'Cıvata.sldprt'))
+        root.write_text(json.dumps(content))
+        self.scan()
+        widgets = self.app.naming_widgets
+        table = widgets['table']
+        ids = {Path(doc.path).name: str(i) for i, doc in enumerate(self.app.naming_snapshot.documents)}
+        self.assertEqual(table.parent(ids['Alt.sldasm']), ids['Ana.sldasm'])
+        self.assertEqual(table.parent(ids['Cıvata.sldprt']), ids['Alt.sldasm'])
+        self.assertEqual(table.parent(ids['Levha.sldprt']), ids['Ana.sldasm'])
+        self.assertEqual(table.parent(ids['Levha.slddrw']), ids['Levha.sldprt'])
+        self.assertEqual(table.parent(ids['Ana.slddrw']), ids['Ana.sldasm'])
+        # Derived-file dependencies must not appear as extra assembly components.
+        self.assertEqual(table.parent(ids['Taban.sldprt']), ids['Levha.sldprt'])
+        self.assertIn('Referans', table.set(ids['Taban.sldprt'], 'kind'))
+        repeated = next(row for row in self.table_rows() if row.startswith(ids['Cıvata.sldprt']+':'))
+        self.assertEqual(table.parent(repeated), ids['Ana.sldasm'])
+        self.assertIn('Ortak dosya', table.set(repeated, 'kind'))
+        table.item(ids['Alt.sldasm'], open=False)
+        table.selection_set(repeated)
+        with patch('naming.window.simpledialog.askstring', return_value='BHV-R01-630'):
+            self.app._edit_naming_row()
+        self.assertFalse(table.item(ids['Alt.sldasm'], 'open'))
+        self.assertEqual(table.selection(), (repeated,))
+        for row in (repeated, ids['Cıvata.sldprt']):
+            self.assertEqual(table.set(row, 'new'), 'BHV-R01-630.sldprt')
+        self.assertEqual([entry.source for entry in self.app.naming_plan], self.sw.paths)
+        with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
+            widgets['save'].invoke()
+            self.wait_idle()
+        self.assertEqual(list(self.sw.last_mapping), self.sw.paths)
         self.assertEqual(self.sw.saves, 1)
 
     def test_cached_page_and_rules_survive_theme_and_small_window_scaling(self):

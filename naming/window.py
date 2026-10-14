@@ -12,6 +12,7 @@ import customtkinter as ctk
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import PANEL, INPUT, BORDER, TEXT, MUTED, RED, AMBER, SUCCESS, UI_FONT
 from naming.exporter import NameCollision, Rules, plan_names, worker
+from naming.hierarchy import document_rows
 
 
 class NamingView:
@@ -103,8 +104,8 @@ class NamingView:
         widgets['edit'].grid(row=0, column=1, padx=(6, 0))
         widgets['reset'] = self._button(toolbar, 'Elle girilenleri sıfırla', self._reset_naming_overrides, width=150)
         widgets['reset'].grid(row=0, column=2, padx=(6, 0))
-        table = ttk.Treeview(card, columns=('old', 'new', 'kind'), show='headings', selectmode='browse', style='Gok.Treeview')
-        for key, title, width in (('old', 'Mevcut dosya adı', 300), ('new', 'Yeni dosya adı', 300), ('kind', 'Tür', 115)):
+        table = ttk.Treeview(card, columns=('new', 'kind'), show='tree headings', selectmode='browse', style='Gok.Treeview')
+        for key, title, width in (('#0', 'Montaj / mevcut dosya adı', 330), ('new', 'Yeni dosya adı', 300), ('kind', 'Tür', 150)):
             table.heading(key, text=title, anchor='w')
             table.column(key, width=width, minwidth=100, stretch=key != 'kind')
         table.grid(row=1, column=0, sticky='nsew', padx=(12, 0))
@@ -113,7 +114,7 @@ class NamingView:
         hbar = ctk.CTkScrollbar(card, orientation='horizontal', command=table.xview, height=10, fg_color=PANEL, button_color=BORDER)
         hbar.grid(row=2, column=0, sticky='ew', padx=12, pady=(0, 8))
         table.configure(yscrollcommand=bar.set, xscrollcommand=hbar.set)
-        table.bind('<Double-1>', lambda event: self._edit_naming_row())
+        table.bind('<Double-1>', self._double_click_naming_row)
         table.bind('<Return>', lambda event: self._edit_naming_row())
         table.bind('<<TreeviewSelect>>', lambda event: self._naming_buttons())
         widgets['table'] = table
@@ -186,7 +187,7 @@ class NamingView:
             self.naming_plan = plan_names(self.naming_snapshot, destination, rules, self.naming_overrides)
             widgets['valid'] = bool(values['parent'] and Path(values['parent']).is_dir() and not destination.exists())
             draws = sum(doc.kind == 'Teknik resim' for doc in self.naming_snapshot.documents)
-            widgets['summary'].configure(text=f'{len(self.naming_plan)} dosya · {draws} teknik resim · Adı değiştirmek için satırı seçin.')
+            widgets['summary'].configure(text=f'{len(self.naming_plan)} farklı dosya · {draws} teknik resim · Montajları oklarla açıp kapatın.')
             widgets['status'].configure(text='İsimleri kontrol edin, ardından yeni paketi oluşturun.' if widgets['valid'] else
                                           'Çıktı konumunu ve kullanılmamış bir paket klasörü adı seçin.', text_color=MUTED)
         except NameCollision as error:
@@ -205,8 +206,16 @@ class NamingView:
         previous = widgets.pop('render_id', None)
         if previous is not None:
             self.after_cancel(previous)
-        widgets['render'] = iter(enumerate(self.naming_plan))
-        widgets['table'].delete(*widgets['table'].get_children())
+        table = widgets['table']
+        if widgets.get('hierarchy_snapshot') is not self.naming_snapshot:
+            widgets['hierarchy_snapshot'] = self.naming_snapshot
+            widgets['hierarchy_rows'] = document_rows(self.naming_snapshot)
+        rows = widgets['hierarchy_rows'] if self.naming_plan else ()
+        widgets['row_indices'] = {row.iid: row.index for row in rows}
+        # Updating names in place preserves collapsed branches, selection and scroll.
+        widgets['render'] = iter(rows)
+        if not rows:
+            table.delete(*table.get_children())
         self._paint_naming_rows()
         self._naming_buttons()
 
@@ -216,14 +225,35 @@ class NamingView:
         widgets = self.naming_widgets
         widgets.pop('render_id', None)
         deadline = time.perf_counter()+.006
-        for index, entry in widgets['render']:
-            widgets['table'].insert('', 'end', iid=str(index), values=(PureWindowsPath(entry.source).name,
-                PureWindowsPath(entry.destination).name, self.naming_snapshot.documents[index].kind))
+        for row in widgets['render']:
+            entry = self.naming_plan[row.index]
+            kind = self.naming_snapshot.documents[row.index].kind
+            if row.shared:
+                kind += ' · Ortak dosya'
+            elif row.reference:
+                kind += ' · Referans'
+            table = widgets['table']
+            content = dict(text=PureWindowsPath(entry.source).name,
+                           values=(PureWindowsPath(entry.destination).name, kind))
+            if table.exists(row.iid):
+                table.item(row.iid, **content)
+            else:
+                table.insert(row.parent, 'end', iid=row.iid, open=True, **content)
             if time.perf_counter() >= deadline:
                 widgets['render_id'] = self.after(8, self._paint_naming_rows)
                 return
         widgets.pop('render')
         self._naming_buttons()
+
+    def _double_click_naming_row(self, event):
+        table = self.naming_widgets['table']
+        if 'indicator' in table.identify_element(event.x, event.y):
+            return
+        row = table.identify_row(event.y)
+        if row:
+            table.selection_set(row)
+            self._edit_naming_row()
+        return 'break'
 
     def _edit_naming_row(self):
         if self.busy or not self.naming_plan or 'render' in self.naming_widgets:
@@ -231,8 +261,9 @@ class NamingView:
         rows = self.naming_widgets['table'].selection()
         if not rows:
             return
-        entry = self.naming_plan[int(rows[0])]
-        doc = self.naming_snapshot.documents[int(rows[0])]
+        index = self.naming_widgets['row_indices'][rows[0]]
+        entry = self.naming_plan[index]
+        doc = self.naming_snapshot.documents[index]
         if doc.kind == 'Ek dosya':
             return
         name = simpledialog.askstring('Dosya adını düzenle',
@@ -261,7 +292,8 @@ class NamingView:
         widgets['save'].configure(state='normal' if ready else 'disabled')
         rows = widgets['table'].selection()
         can_edit = (not self.busy and bool(self.naming_plan) and bool(rows) and
-                    self.naming_snapshot.documents[int(rows[0])].kind != 'Ek dosya')
+                    rows[0] in widgets.get('row_indices', {}) and
+                    self.naming_snapshot.documents[widgets['row_indices'][rows[0]]].kind != 'Ek dosya')
         widgets['edit'].configure(state='normal' if can_edit else 'disabled')
 
     def _naming_busy(self, value):
