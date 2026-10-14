@@ -22,6 +22,12 @@ ilk adımı seçilir. Seçimler yeniden açılışta korunur; eski tercihler kab
 olarak açılır. İnce diş çiziminde baş ölçüleri temsili olarak işaretlenir;
 ISO 4017 kaba diş etiketi kullanılmaz.
 
+Adım listesinde kaba değer **Standart**, ISO 262 seçili ince ölçüler
+**ISO 262**, diğer sunulan ince geometriler **İnce diş** olarak etiketlenir.
+Çapın standart kaba adımı, ince diş seçiliyken de üst satırda görünür;
+örneğin **M10 standart (kaba): 1,50 mm**. Etiketler hesap girdisine veya
+kaydedilen sayısal adım değerine eklenmez.
+
 İnce diş eklemesinde **26 ilgili kontrol geçti**: 15 hesap, 8 gerçek Tk ve
 3 ölçü verisi kontrolü. İnce diş referans alanları, kaba/ince geçişi, geçersiz
 adım, çapa uygun listenin yenilenmesi, birim dönüşümü, sayfa önbelleği ve tercihlerin

@@ -5,7 +5,7 @@ import customtkinter as ctk
 
 from bolt.diagram import draw, draw_dimensions
 from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, UNIT_LABELS, SECTIONS, PLANES,
-                        THREAD_SERIES, pitch_choices, thread_geometry,
+                        THREAD_SERIES, STANDARD_FINE_PITCHES, pitch_choices, thread_geometry,
                         SCOPE, calculate, fmt, force_text, number)
 from gui.icons import set_window_icon
 from gui.rendering import configure_changed
@@ -34,12 +34,27 @@ class BoltView:
             pitch = pitch_choices(metric, series)[0]
         self.bolt_state['pitch'].set(self._bolt_pitch_text(pitch))
         self.bolt_result = None
-        self.bolt_widgets = {'unit': self.bolt_state['unit'].get(), 'loading': False}
+        self.bolt_widgets = {'unit': self.bolt_state['unit'].get(), 'loading': False,
+                             'pitch_label': tk.StringVar(self, value=self._bolt_pitch_label(metric, series, pitch))}
         self.bolt_state['view'] = tk.StringVar(self, value='Ölçüler')
 
     @staticmethod
     def _bolt_pitch_text(pitch):
         return f'{pitch:g}'.replace('.', ',')
+
+    @staticmethod
+    def _bolt_pitch_label(metric, series, pitch):
+        kind = ('Standart' if series == 'Kaba diş' else
+                'ISO 262' if pitch in STANDARD_FINE_PITCHES.get(metric, ()) else 'İnce diş')
+        return f'{fmt(pitch)} · {kind}'
+
+    def _select_bolt_pitch(self, label):
+        state = self.bolt_state
+        metric, series = state['metric'].get(), state['thread_series'].get()
+        for pitch in pitch_choices(metric, series):
+            if label == self._bolt_pitch_label(metric, series, pitch):
+                state['pitch'].set(self._bolt_pitch_text(pitch))
+                break
 
     def _sync_bolt_pitch(self):
         """Refresh available pitches without producing a second calculation."""
@@ -54,8 +69,9 @@ class BoltView:
             _, pitch = thread_geometry(metric, series, state['pitch'].get())
         except ValueError:
             pitch = choices[0]
-        configure_changed(control, values=[self._bolt_pitch_text(value) for value in choices],
+        configure_changed(control, values=[self._bolt_pitch_label(metric, series, value) for value in choices],
                           state='disabled' if series == 'Kaba diş' else 'normal')
+        self.bolt_widgets['pitch_label'].set(self._bolt_pitch_label(metric, series, pitch))
         selected = self._bolt_pitch_text(pitch)
         if state['pitch'].get() != selected:
             state['pitch'].set(selected)
@@ -66,7 +82,9 @@ class BoltView:
     def _bolt_field(self, parent, key, title, row, column, choices=None):
         self._label(parent, title, 11, MUTED).grid(row=row, column=column, sticky='w', padx=8, pady=(12, 5))
         if choices:
-            control = ctk.CTkOptionMenu(parent, variable=self.bolt_state[key], values=list(choices),
+            control = ctk.CTkOptionMenu(parent,
+                variable=self.bolt_widgets['pitch_label'] if key == 'pitch' else self.bolt_state[key],
+                command=self._select_bolt_pitch if key == 'pitch' else None, values=list(choices),
                 height=36, width=1, fg_color=INPUT, button_color=INPUT, button_hover_color=HOVER,
                 dropdown_fg_color=PANEL, dropdown_hover_color=HOVER, dropdown_text_color=TEXT,
                 text_color=TEXT, font=(UI_FONT, 12), dropdown_font=(UI_FONT, 12), dynamic_resizing=False)
@@ -103,7 +121,8 @@ class BoltView:
         w['thread'].grid(row=3, column=0, columnspan=2, sticky='w', padx=8, pady=(6, 0))
         self._bolt_field(form, 'thread_series', 'Diş türü', 4, 0, THREAD_SERIES)
         self._bolt_field(form, 'pitch', 'Diş adımı (mm)', 4, 1,
-                         [self._bolt_pitch_text(value) for value in
+                         [self._bolt_pitch_label(self.bolt_state['metric'].get(),
+                                                self.bolt_state['thread_series'].get(), value) for value in
                           pitch_choices(self.bolt_state['metric'].get(), self.bolt_state['thread_series'].get())])
         self._sync_bolt_pitch()
         self._bolt_field(form, 'mode', 'Yük türü', 6, 0, MODES)
@@ -243,12 +262,15 @@ class BoltView:
         configure_changed(w['tension_input'], state='disabled' if state['mode'].get() == 'Kesme' else 'normal')
         for key, inactive_mode in (('tension', 'Kesme'), ('shear', 'Çekme')):
             configure_changed(w[key+'_input'], text_color=MUTED if state['mode'].get() == inactive_mode else TEXT)
+        metric = state['metric'].get()
+        configure_changed(w['thread'], text=(f'{metric} standart (kaba): {fmt(THREADS[metric][1])} mm'
+                          if metric in THREADS else 'Metrik ölçüyü seçin.'))
         try:
-            diameter, pitch = thread_geometry(state['metric'].get(), state['thread_series'].get(), state['pitch'].get())
+            _, pitch = thread_geometry(state['metric'].get(), state['thread_series'].get(), state['pitch'].get())
         except ValueError:
-            configure_changed(w['thread'], text='Diş türünü ve adımını kontrol edin.')
+            w['pitch_label'].set('Adımı seçin')
         else:
-            configure_changed(w['thread'], text=f'Ø {diameter} mm · {state["thread_series"].get()} · Adım {fmt(pitch)} mm')
+            w['pitch_label'].set(self._bolt_pitch_label(metric, state['thread_series'].get(), pitch))
         try:
             self.bolt_result = r = calculate(**{key: value.get() for key, value in state.items() if key != 'view'})
         except ValueError as error:
@@ -403,6 +425,8 @@ class BoltView:
         box.grid(row=1, column=0, sticky='nsew', padx=24)
         box.insert('1.0', 'Ölçüler: ISO metrik kaba ve ince diş, M3–M39. '
             'İnce dişte çap için sunulan diş adımını seçin; kaba dişte standart adım sabittir. '
+            'Adım listesindeki Standart etiketi kaba dişi, ISO 262 etiketi standartta seçili ince ölçüleri belirtir. '
+            'Çapın standart kaba adımı ince diş seçiliyken de üst bilgi satırında gösterilir. '
             'Alanlar ve yaklaşık kılavuz deliği seçili adımla hesaplanır. '
             'Malzeme sınıfları: ISO 898-1 çelik cıvatalar.\n\n'
             'As = π/4 × (d − 0,938194 × P)²\n'

@@ -18,6 +18,12 @@ FINE_PITCHES = {f'M{d}': pitches for d, pitches in (
     (27, (2., 1.5, 1.)), (30, (3., 2., 1.5)), (33, (2.,)),
     (36, (3., 2., 1.5)), (39, (3.,)))}
 THREAD_SERIES = ('Kaba diş', 'İnce diş')
+# ISO 262 selected fine pitches; additional fine geometry remains available.
+STANDARD_FINE_PITCHES = {f'M{d}': pitches for d, pitches in (
+    (8, (1.,)), (10, (1.25, 1.)), (12, (1.5, 1.25)),
+    (14, (1.5,)), (16, (1.5,)), (18, (2., 1.5)),
+    (20, (2., 1.5)), (22, (2., 1.5)), (24, (2.,)),
+    (27, (2.,)), (30, (2.,)), (33, (2.,)), (36, (3.,)), (39, (3.,)))}
 # ISO 898-1 coarse proof stress Sp, MPa. 8.8 differs above M16.
 # Fine threads retain these conservative bounds; see docs for the material basis.
 PROOF_STRESS = {'4.6': 225., '5.6': 280., '8.8': 580., '10.9': 830., '12.9': 970.}

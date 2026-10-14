@@ -36,6 +36,10 @@ Formül ve yaklaşık `d − P` deliği seçili adımı kullanır. Malzeme sın�
 ince dişe özgü deney yükü tablosu ayrıca doğrulanana kadar mevcut muhafazakâr
 sınırlar olarak korunur; ayrıntı [hesap yönteminde](../docs/bolt-calculator.md).
 
+Adım seçiminde kaba değer **Standart**, ISO 262 tablosunda seçili ince değerler
+**ISO 262**, diğer sunulan ince geometriler **İnce diş** etiketi taşır.
+Seçilen çapın standart kaba adımı üst satırda her zaman gösterilir.
+
 ### Baş ölçüleri
 
 [FreeCAD Fasteners](https://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso4017head.csv) ve [cq_warehouse](https://github.com/gumyr/cq_warehouse/blob/daa46507ecc429c0e2dce11d9d5ffd09b12a42af/src/cq_warehouse/hex_head_parameters.csv) geometri tabloları ayrıca incelendi. Örneğin M8 anahtar ağzı 13 mm, M10 16 mm, M12 18 mm ve M22 34 mm karşılaştırıldı. Kaynaklarda nominal/maksimum baş yüksekliği ve M14 anahtar ağzı için farklar bulunduğundan tablo topluca aktarılmadı; standart sürümü ve üretici çizimi esas alınmalıdır. Baş ölçüleri ve yaklaşık `d − P` kılavuz deliği dayanım hesabını etkilemez.
