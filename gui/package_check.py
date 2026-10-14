@@ -31,6 +31,9 @@ def run(output):
                 while time.monotonic() < end:
                     app.update()
                     time.sleep(.01)
+            # Inputs update the live result only while their workspace is active.
+            # Naming is now the last page in the package-wide opening check.
+            app._switch_mode('bolt')
             app.bolt_state['unit'].set('kg')
             app.bolt_state['tension'].set('100')
             assert abs(app.bolt_result.tension_n-980.665) < 1e-6
