@@ -18,9 +18,12 @@ class ResultsTabview(ctk.CTkTabview):
 
 class WorkspaceLayout:
     def _workspace_shell(self):
-        workspace = ctk.CTkFrame(self, fg_color=BG, corner_radius=0, border_width=0)
-        workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=16)
-        return workspace
+        # CTk scrollbars flush idle geometry during construction. Keep the page
+        # unmapped until complete so each child does not relayout the window.
+        return ctk.CTkFrame(self, fg_color=BG, corner_radius=0, border_width=0)
+
+    def _show_workspace(self):
+        self.workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=16)
 
     def _build_window(self):
         self.grid_columnconfigure(1, weight=1)
@@ -110,7 +113,7 @@ class WorkspaceLayout:
                 fg_color=NAV_ACTIVE if active else "transparent", hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED, text_color_disabled=NAV_MUTED,
                 font=self._nav_fonts[active],
-                command=lambda selected=key: self._switch_mode(selected),
+                command=lambda selected=key: self._request_mode(selected),
                 state="normal",
             )
             button.grid(row=row if row < 3 else row+1, column=0, sticky="ew", pady=(0, 4))

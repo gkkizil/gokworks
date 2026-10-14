@@ -43,6 +43,7 @@ def _search_text(value):
 
 
 class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _MODES = ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt')
     _BOLT_PAGE_ATTRIBUTES = ('workspace', 'bolt_state', 'bolt_widgets', 'bolt_result', 'status_label')
     _BOM_PAGE_ATTRIBUTES = ('workspace', 'bom_state', 'bom_query', 'bom_result',
                             'bom_widgets', 'status_label', 'progress')
@@ -108,6 +109,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         self._worker_updates = None
         self._last_ui_activity = time.monotonic()
         self._preload_id = None
+        self._navigation_id = None
+        self._requested_mode = None
         self.controls = []
         self.results = []
         self.row_ids = {}
@@ -116,6 +119,7 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         self.k_state = self.k_widgets = self.k_calculation_label = None
         self._create_filter_state()
         self._build_window()
+        self._show_workspace()
         self._remember_page()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._poll_id = self.after(80, self._process_events)
@@ -132,11 +136,11 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         self._preload_id = None
         if self._closed:
             return
-        missing = next((mode for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt')
+        missing = next((mode for mode in self._MODES
                         if mode not in self._pages), None)
         if missing is None:
             return
-        if self.busy or time.monotonic()-self._last_ui_activity < .6:
+        if self.busy or self._navigation_id is not None or time.monotonic()-self._last_ui_activity < .6:
             self._preload_id = self.after(700, self._preload_page)
             return
         self._remember_page()
@@ -181,9 +185,29 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
     def _file_label(self):
         return "teknik resim" if self._is_pdf else "parça"
 
-    def _switch_mode(self, mode):
+    def _request_mode(self, mode):
+        """Coalesce queued clicks before spending time building a new page."""
+        if self._closed or self.busy or mode not in self._MODES:
+            return
         self._note_ui_activity()
-        if self.busy or mode == self.mode or mode not in ("pdf", "dxf_dwg", "k_factor", "iso_fits", "geometric_tolerances", "bom", "bolt"):
+        self._requested_mode = mode
+        if self._navigation_id is None:
+            self._navigation_id = self.after_idle(self._apply_navigation)
+
+    def _apply_navigation(self):
+        self._navigation_id = None
+        mode, self._requested_mode = self._requested_mode, None
+        if mode is not None:
+            self._switch_mode(mode)
+
+    def _switch_mode(self, mode):
+        # Direct programmatic navigation also supersedes any queued click.
+        if self._navigation_id is not None:
+            self.after_cancel(self._navigation_id)
+            self._navigation_id = None
+        self._requested_mode = None
+        self._note_ui_activity()
+        if self._closed or self.busy or mode == self.mode or mode not in self._MODES:
             return
         self._schedule_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
@@ -192,16 +216,33 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
             self._layout_fit_id = None
         self.workspace.unbind("<Configure>")
         self._remember_page()
-        hide_grid(self.workspace)
+        active_mode, active_workspace = self.mode, self.workspace
         self.mode = mode
-        if mode in self._pages:
-            for name, value in self._pages[mode].items():
+        try:
+            if mode in self._pages:
+                for name, value in self._pages[mode].items():
+                    setattr(self, name, value)
+            else:
+                self._create_page_state()
+                self._build_window()
+                self._remember_page()
+        except Exception:
+            if self.workspace is not active_workspace:
+                self._cancel_widget_callbacks(self.workspace)
+                self.workspace.destroy()
+            if self._layout_fit_id is not None:
+                self.after_cancel(self._layout_fit_id)
+                self._layout_fit_id = None
+            self.mode = active_mode
+            for name, value in self._pages[active_mode].items():
                 setattr(self, name, value)
-            self.workspace.grid()
-        else:
-            self._create_page_state()
-            self._build_window()
-            self._remember_page()
+            self.workspace.bind("<Configure>", self._resize_pdf_area)
+            self._resize_pdf_area()
+            raise
+        # Keep the previous screen visible through CTk's construction-time idle
+        # flushes. Swap only when the next page can be shown as a whole.
+        hide_grid(active_workspace)
+        self._show_workspace()
         self.stop_event.clear()
         self.workspace.bind("<Configure>", self._resize_pdf_area)
         self._update_navigation()
@@ -468,6 +509,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         self.detail_window = None
 
     def _resize_pdf_area(self, event=None):
+        if self._closed:
+            return
         if self.mode == 'bolt':
             previous = getattr(self, '_layout_fit_id', None)
             if previous is not None:

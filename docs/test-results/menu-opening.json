@@ -1,0 +1,63 @@
+{
+  "baseline_commit": "7ffd15d754de97877554dc1b3c849472ae4808ac",
+  "before": {
+    "runs": 3,
+    "first_paint_median_ms": {
+      "dxf_dwg": 138.77897799829952,
+      "k_factor": 180.5336860124953,
+      "iso_fits": 167.29963599937037,
+      "geometric_tolerances": 103.96074299933389,
+      "bom": 113.487091002753,
+      "bolt": 102.14765698765405
+    },
+    "all_first_paints_median_ms": 121.3284474943066,
+    "cached_paint_median_ms": 4.5477400126401335,
+    "cached_paint_max_ms": 6.930181989446282,
+    "preload_median_ms": 105.49065450322814,
+    "queued_clicks": [
+      {
+        "elapsed_ms": 720.7679999992251,
+        "pages_created": 6
+      },
+      {
+        "elapsed_ms": 825.8241000003181,
+        "pages_created": 6
+      },
+      {
+        "elapsed_ms": 859.9921610148158,
+        "pages_created": 6
+      }
+    ],
+    "note": "Real Tk on Linux/Xvfb, no SolidWorks. Paint timings include update_idletasks; exclude delayed layout callbacks and navigation animation completion."
+  },
+  "after": {
+    "runs": 3,
+    "first_paint_median_ms": {
+      "dxf_dwg": 104.52159499982372,
+      "k_factor": 145.61490699998103,
+      "iso_fits": 158.82431299542077,
+      "geometric_tolerances": 110.2162960160058,
+      "bom": 94.15456099668518,
+      "bolt": 99.46250301436521
+    },
+    "all_first_paints_median_ms": 108.34774251270574,
+    "cached_paint_median_ms": 4.242830007569864,
+    "cached_paint_max_ms": 6.716261996189132,
+    "preload_median_ms": 72.92497050366364,
+    "queued_clicks": [
+      {
+        "elapsed_ms": 120.91432398301549,
+        "pages_created": 1
+      },
+      {
+        "elapsed_ms": 120.55091600632295,
+        "pages_created": 1
+      },
+      {
+        "elapsed_ms": 97.26394599420018,
+        "pages_created": 1
+      }
+    ],
+    "note": "Real Tk on Linux/Xvfb, no SolidWorks. Paint timings include update_idletasks; exclude delayed layout callbacks and navigation animation completion."
+  }
+}

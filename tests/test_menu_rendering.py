@@ -1,6 +1,7 @@
 """Menus preserve data while skipping unchanged Tk layouts and drawings."""
 
 import time
+import tkinter as tk
 import unittest
 from tkinter import ttk
 from unittest.mock import patch
@@ -22,6 +23,90 @@ class MenuRenderingTests(GuiTestCase):
             self.app.after_cancel(self.app._preload_id)
         self.app._last_ui_activity = time.monotonic()-2
         self.app._preload_page()
+
+    def test_queued_clicks_build_only_last_page_and_keep_form_values(self):
+        self.app.source_folder.set('/saved/source')
+        with patch.object(self.app, '_build_window', wraps=self.app._build_window) as build:
+            for mode in ('dxf_dwg', 'k_factor', 'iso_fits', 'bom', 'bolt'):
+                self.app.nav_buttons[mode].invoke()
+            self.app.update()
+        self.assertEqual(build.call_count, 1)
+        self.assertEqual(set(self.app._pages), {'pdf', 'bolt'})
+        self.assertEqual(self.app.mode, 'bolt')
+        self.assertTrue(self.app.workspace.winfo_viewable())
+        self.app._switch_mode('pdf')
+        self.assertEqual(self.app.source_folder.get(), '/saved/source')
+
+    def test_current_page_or_direct_navigation_supersedes_queued_click(self):
+        self.app.nav_buttons['bom'].invoke()
+        self.app.nav_buttons['pdf'].invoke()
+        self.app.update()
+        self.assertEqual(set(self.app._pages), {'pdf'})
+        self.app.nav_buttons['bom'].invoke()
+        self.app._switch_mode('bolt')
+        self.app.update()
+        self.assertEqual(self.app.mode, 'bolt')
+        self.assertNotIn('bom', self.app._pages)
+
+    def test_queued_navigation_is_discarded_if_worker_starts_or_app_closes(self):
+        self.app.nav_buttons['bom'].invoke()
+        self.app.busy = True
+        try:
+            self.app.update()
+            self.assertEqual(self.app.mode, 'pdf')
+            self.assertEqual(set(self.app._pages), {'pdf'})
+        finally:
+            self.app.busy = False
+        self.app.nav_buttons['bolt'].invoke()
+        pending = self.app._navigation_id
+        self.app._on_close()
+        self.assertNotIn(pending, self.app.tk.splitlist(self.app.tk.call('after', 'info')))
+
+    def test_preloading_never_maps_partial_page(self):
+        mapped = []
+        shell = self.app._workspace_shell
+
+        def capture_shell():
+            workspace = shell()
+            tk.Misc.bind(workspace, '<Map>', lambda event: mapped.append(event.widget)
+                         if event.widget is workspace else None, add='+')
+            return workspace
+
+        with patch.object(self.app, '_workspace_shell', side_effect=capture_shell):
+            self.preload()
+        self.app.update()
+        self.assertEqual(mapped, [])
+        self.app._switch_mode('dxf_dwg')
+        self.app.update()
+        self.assertEqual(mapped, [self.app.workspace])
+
+    def test_first_open_keeps_previous_page_visible_until_ready_and_recovers_on_error(self):
+        active = self.app.workspace
+        self.app.source_folder.set('/saved/source')
+        build = self.app._build_window
+        partial = []
+
+        def broken_build():
+            build()
+            self.app.update_idletasks()
+            self.assertTrue(active.winfo_viewable())
+            self.assertFalse(self.app.workspace.winfo_viewable())
+            partial.append(self.app.workspace)
+            raise RuntimeError('construction failed')
+
+        with patch.object(self.app, '_build_window', side_effect=broken_build):
+            with self.assertRaisesRegex(RuntimeError, 'construction failed'):
+                self.app._switch_mode('bom')
+        self.wait_layout()
+        self.assertIs(self.app.workspace, active)
+        self.assertEqual(self.app.mode, 'pdf')
+        self.assertEqual(self.app.source_folder.get(), '/saved/source')
+        self.assertFalse(partial[0].winfo_exists())
+        self.assertNotIn('bom', self.app._pages)
+        self.app._switch_mode('bom')
+        self.wait_layout()
+        self.assertFalse(active.winfo_viewable())
+        self.assertTrue(self.app.workspace.winfo_viewable())
 
     def test_preloading_keeps_active_page_data_and_settings_unchanged(self):
         workspace = self.app.workspace
