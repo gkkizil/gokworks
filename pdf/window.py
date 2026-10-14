@@ -22,6 +22,7 @@ from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from bom.window import BomView
 from bolt.window import BoltView
+from naming.window import NamingView
 from gui.icons import make_icon, set_window_icon
 from gui.typography import check_turkish_fonts
 from gui.motion import blend, pair
@@ -42,8 +43,10 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
-    _MODES = ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt')
+class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _MODES = ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'naming')
+    _NAMING_PAGE_ATTRIBUTES = ('workspace', 'naming_state', 'naming_snapshot', 'naming_plan',
+                               'naming_overrides', 'naming_widgets', 'status_label', 'progress')
     _BOLT_PAGE_ATTRIBUTES = ('workspace', 'bolt_state', 'bolt_widgets', 'bolt_result', 'status_label')
     _BOM_PAGE_ATTRIBUTES = ('workspace', 'bom_state', 'bom_query', 'bom_result',
                             'bom_widgets', 'status_label', 'progress')
@@ -255,7 +258,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
             self._draw_bolt_diagram()
 
     def _remember_page(self):
-        attributes = (self._BOLT_PAGE_ATTRIBUTES if self.mode == 'bolt' else
+        attributes = (self._NAMING_PAGE_ATTRIBUTES if self.mode == 'naming' else
+                      self._BOLT_PAGE_ATTRIBUTES if self.mode == 'bolt' else
                       self._BOM_PAGE_ATTRIBUTES if self.mode == 'bom' else
                       self._GDT_PAGE_ATTRIBUTES if self.mode == 'geometric_tolerances' else
                       self._ISO_PAGE_ATTRIBUTES if self.mode == 'iso_fits' else self._PAGE_ATTRIBUTES)
@@ -284,6 +288,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
             self._create_bom_state(saved)
         elif self.mode == 'bolt':
             self._create_bolt_state(saved)
+        elif self.mode == 'naming':
+            self._create_naming_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -320,7 +326,7 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
             button.configure(
                 hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree", "bolt": "bolt"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree", "bolt": "bolt", "naming": "copy"}[key],
                                  NAV_ACCENT if active else NAV_MUTED),
                 border_width=0,
                 font=self._nav_fonts[active],
@@ -386,6 +392,9 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if self.mode == 'naming':
+            self.naming_widgets['prefix'].focus_set()
+            return 'break'
         if self.mode == 'bolt':
             key = 'shear' if self.bolt_state['mode'].get() == 'Kesme' else 'tension'
             self.bolt_widgets[key+'_input'].focus_set()
@@ -511,6 +520,12 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
     def _resize_pdf_area(self, event=None):
         if self._closed:
             return
+        if self.mode == 'naming':
+            previous = getattr(self, '_layout_fit_id', None)
+            if previous is not None:
+                self.after_cancel(previous)
+            self._layout_fit_id = self.after(35, self._resize_naming_workspace)
+            return
         if self.mode == 'bolt':
             previous = getattr(self, '_layout_fit_id', None)
             if previous is not None:
@@ -616,14 +631,16 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
                 save_settings(updated, self.settings_path)
             self._pending_preferences.clear()
         except OSError as error:
-            if self.mode in ('iso_fits', 'geometric_tolerances', 'bolt'):
+            if self.mode in ('iso_fits', 'geometric_tolerances', 'bolt', 'bom', 'naming'):
                 self.status_label.configure(text=f'Tercihler kaydedilemedi: {error}', text_color=RED)
             else:
                 self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
 
     def _preference_values(self):
         saved = {'appearance': 'dark' if self.theme_mode.get() == 'Koyu' else 'light'}
-        if self.mode == 'bolt':
+        if self.mode == 'naming':
+            saved.update({f'naming_{key}': value.get() for key, value in self.naming_state.items()})
+        elif self.mode == 'bolt':
             saved.update({f'bolt_{key}': value.get() for key, value in self.bolt_state.items()})
         elif self.mode == 'bom':
             saved['bom_include_excluded'] = self.bom_state['include_excluded'].get()
@@ -737,6 +754,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
                          daemon=False).start()
 
     def _request_stop(self):
+        if self.mode == 'naming':
+            return self._stop_naming()
         if self.mode == 'bom':
             return self._stop_bom()
         self.stop_event.set()
@@ -971,6 +990,8 @@ class GokworksPdfApp(BoltView, BomView, GeometricTolerancesView, IsoFitsView, KF
             self._continue_k_apply(summary)
 
     def _process_events(self):
+        if self.mode == 'naming':
+            return self._process_naming_events()
         if self.mode == 'bom':
             return self._process_bom_events()
         if self._pending_files is not None:

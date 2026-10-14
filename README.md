@@ -42,6 +42,10 @@ tablosunu kopyalamaz. Özel BOM miktar/birim özellikleri, satın alınmış mon
 kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
 Örnek Excel, kaynaklar ve Windows kabul adımları [BOM kılavuzunda](docs/bom.md).
 
+## İsimlendirme aracı
+
+**Aktarım ve montaj → İsimlendirme aracı** bölümünde açık SolidWorks projesini okuyun; ön/son ek, bul–değiştir, numaralı veya dosya başına elle adlandırma kullanın. **Paketi oluştur**, montajı, parçaları ve bulunan teknik resimleri yeni adlarla ayrı bir Pack and Go klasörüne kaydeder. Kaynak proje korunur; yeni dosyaların kayıtlı referansları doğrulanmadan işlem başarılı gösterilmez. [Kullanım, kaynaklar ve sınırlar](naming/README.md).
+
 ## Cıvata hesabı
 
 **Mühendislik hesapları → Cıvata hesabı** altında metrik ölçü, kalite sınıfı ve yükü seçin. Çekme, kesme ve birleşik yük için cıvatanın statik dayanımı, emniyet katsayısı ve güvenli/güvensiz sonucu gösterilir. Yük yönleri canlı cıvata görselinde izlenir. N/kN/kgf, cıvata adedi, tek/çift kesme ve dişli/dişsiz kesit desteklenir. SolidWorks bağlantısı gerekmez.

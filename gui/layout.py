@@ -32,6 +32,8 @@ class WorkspaceLayout:
             self._build_sidebar()
         if self.mode == 'bolt':
             return self._build_bolt_workspace()
+        if self.mode == 'naming':
+            return self._build_naming_workspace()
         if self.mode == 'bom':
             return self._build_bom_workspace()
         if self.mode == 'iso_fits':
@@ -78,6 +80,7 @@ class WorkspaceLayout:
         self.sidebar.grid_columnconfigure(0, weight=1)
         self.sidebar.grid_rowconfigure(4, weight=1)
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        self.sidebar_brand = brand
         brand.grid(row=0, column=0, sticky="ew", padx=16, pady=(18, 18))
         self.brand_logo = make_logo(32)
         self.brand_badge = ctk.CTkLabel(brand, text="", image=self.brand_logo,
@@ -85,8 +88,8 @@ class WorkspaceLayout:
         self.brand_badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
         self._label(brand, "GOKWORKS", 16, NAV_TEXT, bold=True).grid(row=0, column=1, sticky="w")
         self._label(brand, "Mühendislik araçları", 10, NAV_MUTED).grid(row=1, column=1, sticky="w")
-        self._label(self.sidebar, "AKTARIM VE MONTAJ", 10, NAV_MUTED, True).grid(
-            row=1, column=0, sticky="w", padx=22, pady=(0, 10))
+        self.sidebar_category = self._label(self.sidebar, "AKTARIM VE MONTAJ", 10, NAV_MUTED, True)
+        self.sidebar_category.grid(row=1, column=0, sticky="w", padx=22, pady=(0, 10))
         navigation = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         navigation.grid(row=2, column=0, sticky="ew", padx=12)
         navigation.grid_columnconfigure(0, weight=1)
@@ -97,14 +100,15 @@ class WorkspaceLayout:
         for row, (key, title, icon) in enumerate((
             ("pdf", "PDF aktarımı", "file"), ("dxf_dwg", "DXF / DWG", "layers"),
             ("bom", BOM_TITLE, "tree"),
+            ("naming", "İsimlendirme aracı", "copy"),
             ("k_factor", KR_NAV_TITLE, "tools"),
             ("bolt", "Cıvata hesabı", "bolt"),
             ("iso_fits", "ISO geçmeleri", "ruler"),
             ("geometric_tolerances", "Geometrik toleranslar", "target"),
         )):
-            if row == 3:
-                self._label(navigation, "MÜHENDİSLİK HESAPLARI", 10, NAV_MUTED, True).grid(
-                    row=row, column=0, sticky="w", padx=10, pady=(22, 10))
+            if row == 4:
+                self.navigation_section = self._label(navigation, "MÜHENDİSLİK HESAPLARI", 10, NAV_MUTED, True)
+                self.navigation_section.grid(row=row, column=0, sticky="w", padx=10, pady=(22, 10))
             active = key == self.mode
             button = ctk.CTkButton(
                 navigation, text=title, image=self._icon(icon, NAV_ACCENT if active else NAV_MUTED),
@@ -116,9 +120,10 @@ class WorkspaceLayout:
                 command=lambda selected=key: self._request_mode(selected),
                 state="normal",
             )
-            button.grid(row=row if row < 3 else row+1, column=0, sticky="ew", pady=(0, 4))
+            button.grid(row=row if row < 4 else row+1, column=0, sticky="ew", pady=(0, 4))
             self.nav_buttons[key] = button
         footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        self.sidebar_footer = footer
         footer.grid(row=5, column=0, sticky="ew", padx=18, pady=16)
         footer.grid_columnconfigure(0, weight=1)
         self._label(footer, "GÖRÜNÜM", 10, NAV_MUTED, True).grid(row=0, column=0, sticky="w", pady=(0, 8))
@@ -130,10 +135,34 @@ class WorkspaceLayout:
             font=ctk.CTkFont(family=UI_FONT, size=12),
         )
         self.theme_selector.grid(row=1, column=0, sticky="ew")
-        ctk.CTkFrame(footer, height=1, fg_color=NAV_HOVER).grid(row=2, column=0, sticky="ew", pady=18)
-        self._label(footer, "SolidWorks masaüstü", 11, NAV_TEXT, True).grid(row=3, column=0, sticky="w")
-        self._label(footer, "CAD işlemleri için SolidWorks\noturumu açık olmalı.", 10, NAV_MUTED,
-                    justify="left").grid(row=4, column=0, sticky="w", pady=(4, 0))
+        self.sidebar_hint = ctk.CTkFrame(footer, fg_color='transparent')
+        self.sidebar_hint.grid(row=2, column=0, sticky='ew')
+        ctk.CTkFrame(self.sidebar_hint, height=1, fg_color=NAV_HOVER).grid(row=0, column=0, sticky="ew", pady=18)
+        self._label(self.sidebar_hint, "SolidWorks masaüstü", 11, NAV_TEXT, True).grid(row=1, column=0, sticky="w")
+        self._label(self.sidebar_hint, "CAD işlemleri için SolidWorks\noturumu açık olmalı.", 10, NAV_MUTED,
+                    justify="left").grid(row=2, column=0, sticky="w", pady=(4, 0))
+        self.sidebar.bind('<Configure>', self._resize_sidebar, add='+')
+        self._resize_sidebar()
+
+    def _resize_sidebar(self, event=None):
+        if self._closed:
+            return
+        compact = self.sidebar.winfo_height()/self.sidebar._get_widget_scaling() < 780
+        if getattr(self, '_sidebar_compact', None) == compact:
+            return
+        self._sidebar_compact = compact
+        self.sidebar_brand.grid_configure(pady=(8, 10) if compact else (18, 18))
+        self.sidebar_category.grid_configure(pady=(0, 6) if compact else (0, 10))
+        self.navigation_section.grid_configure(pady=(12, 8) if compact else (22, 10))
+        self.sidebar_footer.grid_configure(pady=8 if compact else 16)
+        for button in self.nav_buttons.values():
+            button.configure(height=36 if compact else 44)
+            button.grid_configure(pady=(0, 2 if compact else 4))
+        if compact:
+            from gui.rendering import hide_grid
+            hide_grid(self.sidebar_hint)
+        else:
+            self.sidebar_hint.grid(row=2, column=0, sticky='ew')
 
     def _page_header(self, title, subtitle, section, icon):
         """Shared page identity and a consistent action area."""
@@ -410,7 +439,7 @@ class WorkspaceLayout:
                       foreground=[("selected", color(TEXT))])
             self._table_style_key = style_key
         tables = {page['table'] for page in self._pages.values() if 'table' in page}
-        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom', 'bolt'):
+        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'naming'):
             tables.add(self.table)
         for table in tables:
             if getattr(table, '_gok_style_key', None) == style_key:

@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-14",
+  "documentation_mirror": "https://github.com/pedropaulovc/offline-solidworks-api-docs/blob/b586c9f0c993ae7791e1b8aea79dab2a341a0147/50_extract_type_member_details/metadata/api_member_details.xml",
+  "code_reference": "https://github.com/angelsix/solidworks-api/blob/85a773aedc87b49afda3a65c8bb650f5ba771092/SolidDna/AngelSix.SolidDna/SolidWorks/Models/Model.cs#L271",
+  "live_runtime_verified": false,
+  "members": [
+    {
+      "type": "IModelDocExtension",
+      "member": "GetPackAndGo",
+      "signature": "GetPackAndGo()",
+      "return_type": "PackAndGo"
+    },
+    {
+      "type": "IModelDocExtension",
+      "member": "SavePackAndGo",
+      "signature": "SavePackAndGo( PackAndGo PackAndGo )",
+      "return_type": "System.object"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "GetDocumentNames",
+      "signature": "GetDocumentNames( out System.object DocumentNames )",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "GetDocumentSaveToNames",
+      "signature": "GetDocumentSaveToNames( out System.object PathNameList, out System.object DocumentStatusList )",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "IncludeDrawings",
+      "signature": "IncludeDrawings {get; set;}",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "IncludeSuppressed",
+      "signature": "IncludeSuppressed {get; set;}",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "IncludeToolboxComponents",
+      "signature": "IncludeToolboxComponents {get; set;}",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "SetDocumentSaveToNames",
+      "signature": "SetDocumentSaveToNames( System.object PathNameList )",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "IPackAndGo",
+      "member": "SetSaveToName",
+      "signature": "SetSaveToName( System.bool Override, System.string SaveToName )",
+      "return_type": "System.bool"
+    },
+    {
+      "type": "ISldWorks",
+      "member": "GetDocumentDependencies2",
+      "signature": "GetDocumentDependencies2( System.string Document, System.bool Traverseflag, System.bool Searchflag, System.bool AddReadOnlyInfo )",
+      "return_type": "System.object"
+    }
+  ],
+  "document_status": {
+    "normal": 0,
+    "virtual": 1,
+    "unknown": 2
+  },
+  "save_status": {
+    "success": 0,
+    "bad_input": 1,
+    "file_exists": 2,
+    "empty_target": 3,
+    "save_error": 4
+  }
+}

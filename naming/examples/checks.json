@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-14",
+  "passed": 20,
+  "native_solidworks_tested": false,
+  "scope": "Targeted checks, incremental runs after fixes; no full suite.",
+  "tests": [
+    {
+      "name": "test_gui_flow.GUIFlowTests.test_rapid_menu_clicks_leave_only_final_page_highlighted",
+      "result": "ok"
+    },
+    {
+      "name": "test_menu_rendering.MenuRenderingTests.test_failed_preload_removes_partial_page_and_restores_active_workspace",
+      "result": "ok"
+    },
+    {
+      "name": "test_menu_rendering.MenuRenderingTests.test_preloaded_pages_stay_hidden_after_dpi_changes",
+      "result": "ok"
+    },
+    {
+      "name": "test_menu_rendering.MenuRenderingTests.test_preloading_keeps_active_page_data_and_settings_unchanged",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_byref_getters_and_bstr_array_are_supported",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_cancel_before_or_during_pack_save_leaves_no_completed_output",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_changed_source_after_preview_requires_new_scan",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_existing_output_is_not_overwritten",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_ignored_name_mapping_and_changed_extensions_never_save",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_invalid_names_and_case_insensitive_collisions_block_plan",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_numbered_models_and_manual_names_keep_paired_drawing_name",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_package_updates_assembly_drawing_and_derived_part_references_with_exact_mapping",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_partial_save_and_reference_mismatch_remove_created_outputs",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_unsaved_virtual_missing_and_external_references_block_before_write",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming.NamingTests.test_worker_com_lifecycle_and_cancel_before_connect",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming_window.NamingWindowTests.test_cached_page_and_rules_survive_theme_and_small_window_scaling",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming_window.NamingWindowTests.test_colliding_source_basenames_stay_editable_until_names_are_unique",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming_window.NamingWindowTests.test_invalid_rules_existing_folder_and_failed_rescan_disable_save",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming_window.NamingWindowTests.test_rules_are_saved_and_close_cancels_pending_worker",
+      "result": "ok"
+    },
+    {
+      "name": "test_naming_window.NamingWindowTests.test_scan_manual_model_and_paired_drawing_edit_then_save_package",
+      "result": "ok"
+    }
+  ]
+}

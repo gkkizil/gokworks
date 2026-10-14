@@ -24,7 +24,7 @@ def run(output):
             app = GokworksPdfApp(settings_path=Path(directory)/'settings.json')
             errors = []
             app.report_callback_exception = lambda *args: errors.append(str(args))
-            pages = ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt')
+            pages = app._MODES
             for mode in pages:
                 app._switch_mode(mode)
                 end = time.monotonic()+.15
