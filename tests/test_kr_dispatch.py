@@ -185,7 +185,8 @@ class NativeDispatchApplyTests(KApplyTestCase):
         self.assertEqual(status, 'success', detail)
         self.assertEqual(self.model.save_count, 1)
         self.assertEqual(self.model.config, 'Other')
-        # A subsequent call must still protect edits already present at entry.
+        # A subsequent call must still protect edits made by the user at entry.
+        self.model.dirty = True
         status, detail, _ = self.manual(save=True)
         self.assertEqual(status, 'error')
         self.assertIn('önceden kaydedilmemiş', detail)

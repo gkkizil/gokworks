@@ -13,9 +13,13 @@ sayfasında başarılı çalışmanın **Artifacts → GOKWORKS-Windows-x64-…*
 indirin. ZIP içindeki `GOKWORKS.exe` dosyasını çıkartıp açın.
 GitHub oturumu gerekebilir; paket 30 gün tutulur.
 
-Her paket gerçek Windows ortamında açılır: yedi çalışma alanı, kg/Newton
+Her paket gerçek Windows ortamında açılır: sekiz çalışma alanı, kg/Newton
 dönüşümü, örnek cıvata hesabı, DXF/XLSX yazma ve pywin32 importları kontrol edilir.
 Bu kontrol gerçek SolidWorks oturumuna bağlanmaz. Paket kod imzası taşımaz.
+
+Uygulama paketi yalnız çalıştırılan Python modüllerini, bağımlılıklarını,
+`gui/assets/` kaynaklarını ve `iso_fits/tables.json` verisini içerir.
+Testler, belgeler, ekran görüntüleri ve geçmiş raporlar EXE'ye eklenmez.
 
 Derleme durumu ve doğrudan artifact bağlantısı ayrı
 [`codex/windows-build-status`](https://github.com/gkkizil/gokworks/blob/codex/windows-build-status/latest.json)

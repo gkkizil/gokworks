@@ -19,6 +19,7 @@ SILENT = 1
 PDF_DATA = 1
 SPECIFIED_SHEETS = 3
 DONT_REBUILD = 1
+ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
 
 
 def read_com_value(document, member_name):
@@ -124,7 +125,9 @@ def export_one_drawing(app, drawing, destination, overwrite):
         if model is None:
             errors, warnings = _out_integer(), _out_integer()
             model = app.OpenDoc6(str(drawing), DRAWING, SILENT, "", errors, warnings)
-            opened_here = model is not None
+            # Warning 128 is swFileLoadWarning_AlreadyOpen: retain user ownership.
+            opened_here = model is not None and not (warnings.value & ALREADY_OPEN)
+            activated_here = model is not None  # Opening may also change ActiveDoc.
             if model is None or errors.value:
                 raise RuntimeError(f"Çizim açılamadı. SolidWorks hata kodu: {errors.value}")
             if warnings.value:

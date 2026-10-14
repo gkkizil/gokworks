@@ -241,6 +241,41 @@ class ApplyTests(KApplyTestCase):
         self.assertEqual(len(results),1)
         self.assertEqual(results[0]['quantity'],4)
 
+    def test_saved_batch_handles_two_configurations_without_self_created_dirty_edits(self):
+        self.model.states['Other'] = deepcopy(self.model.states['Default'])
+        self.model.ShowConfiguration2('Other')
+        self.assembly.root.children = tuple(FakeComponent(self.model.path, configuration=name)
+                                            for name in ('Default', 'Other'))
+        switch, save = self.model.ShowConfiguration2, self.model.Save3
+        saved_states, saved_configs = [], []
+
+        def switch_and_dirty(name):
+            previous = self.model.config
+            result = switch(name)
+            if result and previous != self.model.config:
+                self.model.dirty = True
+            return result
+
+        def save_and_clear(*args):
+            result = save(*args)
+            if result:
+                saved_states.append(deepcopy(self.model.states))
+                saved_configs.append(self.model.config)
+                self.model.dirty = False
+            return result
+
+        self.model.ShowConfiguration2 = switch_and_dirty
+        self.model.Save3 = save_and_clear
+        events = self.batch(save=True)
+        results = [value for kind, value in events if kind == 'result']
+        self.assertEqual([row['status'] for row in results], ['success', 'success'], results)
+        self.assertEqual(self.model.save_count, 2)
+        self.assertEqual(saved_configs, ['Other', 'Other'])
+        self.assertEqual(self.model.config, 'Other')
+        self.assertFalse(self.model.dirty)
+        self.assertEqual([saved_states[-1][name]['k'] for name in ('Default', 'Other')], [.43, .43])
+        self.assertIs(self.app.ActiveDoc, self.assembly)
+
     def test_queued_scope_rejects_changed_assembly_configuration_and_references(self):
         scope = self.batch(preview=True)[-1][1]['scope']
         original_path = self.assembly.path

@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Local IDE state and obsolete source copies; version history lives in Git.
+.idea/
+.vscode/
+backups/
+
 # C extensions
 *.so
 
@@ -129,6 +134,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
 .venv
 env/
 venv/

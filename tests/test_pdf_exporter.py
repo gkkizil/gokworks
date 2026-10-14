@@ -147,6 +147,18 @@ class PdfTests(unittest.TestCase):
         self.assertEqual(self.app.activated, [self.model.path, previous.path])
         self.assertFalse(self.app.closed)
 
+    def test_already_open_warning_keeps_borrowed_drawing_and_previous_document(self):
+        previous = FakeDrawing(self.root/'previous.slddrw')
+        for open_error in (0, 2):
+            with self.subTest(open_error=open_error):
+                self.app = FakePdfApp([self.model], opened=[], previous=previous)
+                self.app.open_warning = 128 | 4
+                self.app.open_error = open_error
+                status, detail = self.run_one(overwrite=True)
+                self.assertEqual(status, 'error' if open_error else 'success', detail)
+                self.assertFalse(self.app.closed)
+                self.assertIs(self.app.ActiveDoc, previous)
+
     def test_newly_opened_drawing_is_closed_and_previous_restored(self):
         previous = FakeDrawing(self.root/'previous.slddrw')
         self.app = FakePdfApp([self.model], opened=[], previous=previous)

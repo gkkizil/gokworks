@@ -258,6 +258,10 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
             self._draw_bolt_diagram()
 
     def _remember_page(self):
+        if self.mode == 'naming' and 'preview_id' in self.naming_widgets:
+            # Cache the plan matching the latest fields before leaving the page.
+            # A hidden debounce must not replace a plan already stored here.
+            self._update_naming_preview()
         attributes = (self._NAMING_PAGE_ATTRIBUTES if self.mode == 'naming' else
                       self._BOLT_PAGE_ATTRIBUTES if self.mode == 'bolt' else
                       self._BOM_PAGE_ATTRIBUTES if self.mode == 'bom' else

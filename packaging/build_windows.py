@@ -20,7 +20,8 @@ def main():
             '--collect-data', 'customtkinter', '--collect-data', 'ezdxf',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
-            '--add-data', f'{ROOT / "gui/assets"};gui/assets',
+            '--add-data', f'{ROOT / "gui/assets/gokworks-logo.jpg"};gui/assets',
+            '--add-data', f'{ROOT / "gui/assets/gokworks-logo.ico"};gui/assets',
             '--add-data', f'{ROOT / "iso_fits/tables.json"};iso_fits', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)
     exe = ROOT/'dist/GOKWORKS.exe'

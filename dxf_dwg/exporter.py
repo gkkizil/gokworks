@@ -25,6 +25,7 @@ from solidworks.connection import connect_to_solidworks
 PART, SILENT, SOLID_BODY = 1, 1, 0
 SHEET_METAL, FLAT_GEOMETRY, BEND_LINES = 1, 1, 4
 DONT_REBUILD = 1  # swRebuildOnActivation_e.swDontRebuildActiveDoc
+ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
 ASSEMBLY = 2
 
 
@@ -339,7 +340,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         if model is None:
             errors, warnings = _out_integer(), _out_integer()
             model = app.OpenDoc6(str(part), PART, SILENT, "", errors, warnings)
-            opened_here = model is not None
+            # OpenDoc6 can return a document already loaded by the user's session.
+            opened_here = model is not None and not (warnings.value & ALREADY_OPEN)
+            activated_here = model is not None  # Opening may also change ActiveDoc.
             if model is None or errors.value:
                 raise RuntimeError(f"Parça açılamadı. SolidWorks hata kodu: {errors.value}")
             if warnings.value:

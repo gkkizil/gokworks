@@ -163,6 +163,23 @@ class NamingWindowTests(GuiTestCase):
                                      self.app.nav_buttons['geometric_tolerances'].winfo_height(),
                                      self.app.theme_selector.winfo_rooty())
 
+    def test_immediate_navigation_keeps_delayed_preview_and_edit_in_sync(self):
+        self.scan()
+        self.app.naming_state['prefix'].set('YENİ-')
+        self.app._switch_mode('pdf')  # Leave before the 150 ms preview debounce.
+        self.settle()
+        self.app._switch_mode('naming')
+        table = self.app.naming_widgets['table']
+        index = next(i for i, entry in enumerate(self.app.naming_plan)
+                     if Path(entry.source).name == 'Levha.sldprt')
+        table.selection_set(str(index))
+        self.assertEqual(table.set(str(index), 'new'), 'YENİ-Levha.sldprt')
+        self.assertEqual(Path(self.app.naming_plan[index].destination).name, 'YENİ-Levha.sldprt')
+        with patch('naming.window.simpledialog.askstring', return_value=None) as dialog:
+            self.app._edit_naming_row()
+        self.assertEqual(dialog.call_args.kwargs['initialvalue'], 'YENİ-Levha')
+        self.assertNotIn('preview_id', self.app.naming_widgets)
+
     def test_rules_are_saved_and_close_cancels_pending_worker(self):
         self.app.naming_state['suffix'].set('-R2')
         self.app._switch_mode('pdf')

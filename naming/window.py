@@ -173,7 +173,9 @@ class NamingView:
 
     def _update_naming_preview(self):
         widgets = self.naming_widgets
-        widgets.pop('preview_id', None)
+        pending = widgets.pop('preview_id', None)
+        if pending is not None:
+            self.after_cancel(pending)
         if self.naming_snapshot is None or self.busy:
             return
         try:

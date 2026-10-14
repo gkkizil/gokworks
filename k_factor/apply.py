@@ -782,6 +782,11 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
             if converted_names:
                 notes.append(f"Katıyı Saca Dönüştür: {len(converted_names)} unsurda K/R ve kalınlık geri okumayla doğrulandı.")
             if save:
+                # Switching after Save3 can dirty a borrowed document again.
+                # Save with the user's original configuration already restored,
+                # so the next configuration in this batch starts clean.
+                stage = "Kaydetmeden önce konfigürasyonu geri açma"
+                _show_configuration(model, original_config)
                 stage = "Parça dosyasını kaydetme"
                 errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
                 if not _call_byref(model, "Save3", 1, errors, warnings) or errors.value:

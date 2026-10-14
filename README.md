@@ -2,6 +2,8 @@
 
 SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir; geometrik toleransları ASME GD&T rehberiyle açıklar.
 
+[14 Ekim Astra incelemesi](docs/astra-review.md): K/R kayıt sırası, açık belge koruması ve isimlendirme önizlemesi düzeltmeleri; depo temizliği ve doğrulama kapsamı.
+
 ## Windows'ta çalıştırma
 
 Python 3.12, kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks gerekir. Proje klasöründe:

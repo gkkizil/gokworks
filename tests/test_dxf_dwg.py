@@ -253,6 +253,24 @@ class ExportTests(unittest.TestCase):
                 self.assertEqual(status, 'error')
                 self.assertFalse(model.calls)
 
+    def test_already_open_warning_keeps_borrowed_part_and_restores_assembly(self):
+        for open_error in (0, 2):
+            with self.subTest(open_error=open_error):
+                self.app = FakeApp(self.model, existing=False, previous=self.assembly)
+                self.app.open_error = open_error
+                self.model.Visible = False
+                open_doc = self.app.OpenDoc6
+                def already_open(path, kind, options, configuration, errors, warnings):
+                    model = open_doc(path, kind, options, configuration, errors, warnings)
+                    warnings.value = 128 | 4
+                    return model
+                self.app.OpenDoc6 = already_open
+                status, detail = self.run_one(overwrite=True)
+                self.assertEqual(status, 'error' if open_error else 'success', detail)
+                self.assertFalse(self.app.closed)
+                self.assertFalse(self.model.Visible)
+                self.assertIs(self.app.ActiveDoc, self.assembly)
+
     def test_opened_document_closed_and_previous_restored(self):
         previous = FakePart(self.source/'other.sldprt')
         self.app = FakeApp(self.model, existing=False, previous=previous)
