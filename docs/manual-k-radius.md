@@ -1,5 +1,26 @@
 # Kalınlığa göre manuel K / R atama
 
+## AccessSelections tür uyuşmazlığı düzeltmesi — 15 Ekim 2026
+
+İşlem günlüğündeki `AccessSelections: -2147352571, Tür uyuşmazlığı, 2`
+hatası için parça bağlamındaki boş `Component` parametresi artık açıkça
+`VARIANT(VT_DISPATCH, None)` gönderilir. pywin32, çıplak Python `None`
+değerini `VT_NULL` yapar; bu değer SolidWorks'ün beklediği boş bileşen
+nesnesi değildir. İlgili
+[pywin32 b312 dönüşümü](https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/src/oleargs.cpp#L217)
+incelendi.
+
+Aynı çağrı yolu `AccessSelections` ve `ModifyDefinition` için ana sac,
+alt büküm ve katıdan saca dönüşümde kullanılır. Geri alma da aynı türlenmiş
+parametreyle çalışır. Hata metni sonuç satırının başına alınır; geri alma
+doğrulanamazsa uyarı en başta gösterilir ve dosya kaydedilmez.
+
+K/R ve geri alma akışındaki 76 ilgili kontrol geçti. Üç yeni COM sözleşmesi
+kontrolü, aynı tür hatasını eski kodda yeniden üretti; düzeltilmiş kodda
+kullanıcının K/R değerleri, sac kalınlığı ve önceki büküm ayarlarının geri
+alınması doğrulandı. Dönüştürme unsuru bulunmayan parçalarda farklı ana/gövde
+kalınlıkları yazmadan önce durdurulur. Canlı SolidWorks bu ortamda çalıştırılmadı.
+
 **K faktörü / yarıçap** artık **Manuel K / R** sekmesiyle açılır. SolidWorks'e
 atama her zaman burada girilen değerleri kullanır. **Hesap yardımı** sekmesi
 bağımsız hesap içindir; tablo sonucu montaj atamasına gönderilmez. Buradan

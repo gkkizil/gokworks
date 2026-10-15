@@ -98,6 +98,18 @@ def _call_byref(obj, member, *args):
     return _call(obj, member, *args)
 
 
+def _edit_call(obj, member, *args):
+    """Edit a part feature with an explicit null IComponent2 dispatch.
+
+    pywin32 converts bare None to VT_NULL. SolidWorks requires VT_DISPATCH
+    for the absent Component in part context, including rollback writes.
+    Late binding avoids a child wrapper converting our explicit VARIANT again.
+    """
+    if hasattr(obj, "_oleobj_") and args[-1] is None:
+        args = (*args[:-1], win32com.client.VARIANT(pythoncom.VT_DISPATCH, None))
+    return _call_byref(obj, member, *args)
+
+
 def _out(kind):
     return win32com.client.VARIANT(pythoncom.VT_BYREF | kind, 0 if kind == pythoncom.VT_I4 else False if kind == pythoncom.VT_BOOL else "")
 
@@ -220,13 +232,13 @@ def _converted_overrides(definition):
 
 def _modify_converted(model, feature, flags):
     definition = _read(feature, "GetDefinition")
-    if not _call(definition, "AccessSelections", model, None):
+    if not _edit_call(definition, "AccessSelections", model, None):
         raise RuntimeError("Katıyı Saca Dönüştür seçim erişimi alınamadı.")
     accessed = True
     try:
         for member, value in zip(CONVERT_FLAGS, flags):
             _write(definition, member, value)
-        if not _call(feature, "ModifyDefinition", definition, model, None):
+        if not _edit_call(feature, "ModifyDefinition", definition, model, None):
             raise RuntimeError("Katıyı Saca Dönüştür varsayılan parametreleri kabul edilmedi.")
         accessed = False
         if not _read(model, "EditRebuild3"):
@@ -491,7 +503,7 @@ def _set_allowance(definition, mode, value):
 def _modify(model, feature, state, *, inherit_only=False):
     dimension = _radius_dimension(feature) if not state.overrides else None
     definition = _read(feature, "GetDefinition")
-    if not _call(definition, "AccessSelections", model, None):
+    if not _edit_call(definition, "AccessSelections", model, None):
         raise RuntimeError("SheetMetal seçim erişimi alınamadı.")
     accessed = True
     try:
@@ -514,7 +526,7 @@ def _modify(model, feature, state, *, inherit_only=False):
             _set_allowance(definition, state.allowance_type, value)
         if dimension is None and not inherit_only:
             _write(definition, "BendRadius", state.radius)
-        if not _call(feature, "ModifyDefinition", definition, model, None):
+        if not _edit_call(feature, "ModifyDefinition", definition, model, None):
             raise RuntimeError("SolidWorks K/R değişikliğini kabul etmedi.")
         accessed = False  # ModifyDefinition ends selection access itself.
         if not _read(model, "EditRebuild3"):
@@ -542,7 +554,7 @@ def _modify(model, feature, state, *, inherit_only=False):
 
 def _modify_bend(model, feature, state):
     definition = _read(feature, "GetDefinition")
-    if not _call(definition, "AccessSelections", model, None):
+    if not _edit_call(definition, "AccessSelections", model, None):
         raise RuntimeError(f"{state.name}: büküm seçim erişimi alınamadı.")
     accessed = True
     try:
@@ -552,7 +564,7 @@ def _modify_bend(model, feature, state):
             _write(definition, "BendRadius", state.radius)
         if state.allowance is not None:
             _set_allowance(definition, *state.allowance)
-        if not _call(feature, "ModifyDefinition", definition, model, None):
+        if not _edit_call(feature, "ModifyDefinition", definition, model, None):
             raise RuntimeError(f"{state.name}: büküm ayarları kabul edilmedi.")
         accessed = False
         if not _read(model, "EditRebuild3"):
@@ -801,6 +813,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if align_template and (parent_kind != TEMPLATE_SHEET or not recipe.all_bends):
             raise RuntimeError("Ana sacın varsayılan kalınlığı gerçek sac kalınlığından farklı. "
                                "Kalınlığı koruyarak K/R uygulamak için Tüm bükümlere uygula seçeneğini açın.")
+        if align_template and not any(_features(model, kinds={CONVERT_SOLID})):
+            raise RuntimeError(f"{_read(body_feature, 'Name')}: SheetMetal alt unsuru ana SAC LEVHA "
+                               "kalınlığıyla eşleşmedi; katıdan dönüştürme bulunmadan ana kalınlık değiştirilmedi.")
         inherited_names = _check_inherited_sheet(model, effective, prepare=recipe.all_bends)
         stage = "Katıyı Saca Dönüştür parametre kontrolü"
         converted_names = _check_converted_values(model, effective, prepare=recipe.all_bends)
@@ -893,14 +908,16 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         status = "skipped"
         notes.append(str(error))
     except Exception as error:
-        notes.append(f"{stage}: {error}")
+        # The table truncates long discovery notes. Show the actionable error
+        # first so the user can see it without opening the complete log.
+        notes.insert(0, f"{stage}: {error}")
         if changed and snapshots is not None:
             try:
                 _rollback(model, snapshots)
                 notes.append("Önceki K/R değerleri geri yüklendi ve kontrol edildi.")
                 changed = False
             except Exception as rollback_error:
-                notes.append(f"GERİ ALMA HATASI: {rollback_error}")
+                notes.insert(0, f"GERİ ALMA HATASI: {rollback_error}")
     finally:
         if model is not None and original_config is not None:
             try:

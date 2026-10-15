@@ -81,8 +81,9 @@ class NamingSourceTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.folder = Path(self.temp.name)
         self.com = SimpleNamespace(VT_ARRAY=8192, VT_BSTR=8, VT_BYREF=16384,
-            VT_VARIANT=12, VT_I4=3, CoInitialize=Mock(), CoUninitialize=Mock())
-        self.client = SimpleNamespace(VARIANT=Variant,
+            VT_VARIANT=12, VT_I4=3, VT_DISPATCH=9, DISPATCH_METHOD=1,
+            CoInitialize=Mock(), CoUninitialize=Mock())
+        self.client = SimpleNamespace(VARIANT=Variant, Dispatch=Mock(side_effect=lambda obj: obj),
             dynamic=SimpleNamespace(DumbDispatch=Mock(side_effect=lambda obj: obj)))
         self.enterContext(patch.multiple(naming, pythoncom=self.com,
             win32com=SimpleNamespace(client=self.client)))
@@ -102,7 +103,8 @@ class NamingSourceTests(unittest.TestCase):
         app = SourceApp(self.folder, loaded=True)
         app.source.Visible = True
         naming.scan(app, source_path=app.paths[0])
-        self.assertEqual((app.opens, app.closes, app.activations), ([], [], []))
+        self.assertEqual((app.opens, app.closes), ([], []))
+        self.assertEqual(app.activations, [app.paths[0], app.other_path])
 
     def test_selected_unopened_source_is_reopened_for_save_even_after_active_doc_changes(self):
         app = SourceApp(self.folder)
@@ -193,6 +195,8 @@ class NamingSourceTests(unittest.TestCase):
                 raise MissingOutput('Parametre seçime bağlı değil')
 
         class DynamicPack:
+            _FlagAsMethod = Mock()
+
             def GetDocumentNames(self, names):
                 self_names = ('C:/Ana.sldasm', 'C:/Levha.sldprt')
                 names.value = self_names
@@ -217,22 +221,27 @@ class NamingSourceTests(unittest.TestCase):
             hresult = -2147352561
 
         class Extension:
-            _oleobj_ = object()
-
             def __init__(self, app):
                 self.app = app
                 self.methods = set()
                 self.calls = 0
                 self.failure = None
+                self._oleobj_ = SimpleNamespace(GetIDsOfNames=self.ids, InvokeTypes=self.invoke)
+
+            def ids(self, lcid, name):
+                self.app_test.assertEqual((lcid, name), (0, 'GetPackAndGo'))
+                return 41
+
+            def invoke(self, *args):
+                self.app_test.assertEqual(args, (41, 0, 1, (9, 0), ()))
+                return self.get_pack()
 
             def _FlagAsMethod(self, *names):
                 self.methods.update(names)
 
             @property
             def GetPackAndGo(self):
-                if 'GetPackAndGo' not in self.methods:
-                    raise MissingParameter('Parametre seçime bağlı değil')
-                return self.get_pack
+                raise MissingParameter('Parametre seçime bağlı değil')
 
             def get_pack(self):
                 self.calls += 1
@@ -240,21 +249,50 @@ class NamingSourceTests(unittest.TestCase):
                     raise self.failure
                 return Pack(self.app)
 
+            def SavePackAndGo(self, pg):
+                return self.app.save(pg)
+
         app = App(self.folder)
         typed, dynamic = Extension(app), Extension(app)
+        typed.app_test = dynamic.app_test = self
         app.ActiveDoc.Extension = typed
         self.client.dynamic.DumbDispatch.side_effect = lambda obj: dynamic if obj is typed else obj
         snapshot = naming.scan(app)
         self.assertEqual(snapshot.root, app.paths[0])
         self.assertEqual((typed.calls, dynamic.calls), (0, 1))
         self.client.dynamic.DumbDispatch.assert_called_once_with(typed)
+        self.client.Dispatch.assert_called_once()
+
+        destination = self.folder/'renamed-native'
+        report = naming.execute(app, snapshot,
+            naming.plan_names(snapshot, destination, naming.Rules(prefix='P-')), destination)
+        self.assertEqual(Path(report['root']).name, 'P-Ana.sldasm')
+        self.assertEqual(dynamic.calls, 2)
+        self.assertIn('SavePackAndGo', dynamic.methods)
 
         # A real method failure must surface once, without fallback/retry.
         dynamic.failure = MissingParameter('method failure')
         with self.assertRaisesRegex(RuntimeError, 'GetPackAndGo başlatılamadı.*method failure') as caught:
             naming.scan(app)
         self.assertIs(caught.exception.__cause__, dynamic.failure)
-        self.assertEqual(dynamic.calls, 2)
+        self.assertEqual(dynamic.calls, 3)
+
+    def test_visible_selected_source_is_activated_before_pack_and_go(self):
+        app = SourceApp(self.folder, loaded=True, window=True)
+        app.source.Visible = True
+
+        def get_pack():
+            if app.ActiveDoc is not app.source:
+                raise RuntimeError("(-2147352561, 'Parametre seçime bağlı değil.', None, None)")
+            return Pack(app)
+
+        app.extension.GetPackAndGo = get_pack
+        snapshot = naming.scan(app, source_path=app.paths[0])
+        self.assertEqual(snapshot.root, app.paths[0])
+        self.assertEqual(app.activations, [app.paths[0], app.other_path])
+        self.assertIs(app.ActiveDoc, app.previous)
+        self.assertTrue(app.source.Visible)
+        self.assertEqual((app.opens, app.closes), ([], []))
 
 
 if __name__ == '__main__':

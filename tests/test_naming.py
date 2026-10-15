@@ -72,6 +72,15 @@ class App:
         self.extension = SimpleNamespace(GetPackAndGo=lambda: self.pack_class(self), SavePackAndGo=self.save)
         self.ActiveDoc = SimpleNamespace(GetType=lambda: 2, GetPathName=lambda: self.paths[0],
                                          Extension=self.extension, GetSaveFlag=lambda: self.dirty)
+        self.root_document = self.ActiveDoc
+
+    def ActivateDoc3(self, path, preferences, rebuild, errors):
+        assert preferences is False and rebuild == 1
+        errors.value = 0 if path == self.paths[0] else 1
+        if errors.value:
+            return None
+        self.ActiveDoc = self.root_document
+        return self.ActiveDoc
 
     def GetOpenDocumentByName(self, path):
         return self.ActiveDoc if path == self.paths[0] else None
@@ -95,7 +104,7 @@ class App:
 
 
 def install_com(test):
-    com = SimpleNamespace(VT_ARRAY=8192, VT_BSTR=8, VT_BYREF=16384, VT_VARIANT=12,
+    com = SimpleNamespace(VT_ARRAY=8192, VT_BSTR=8, VT_BYREF=16384, VT_VARIANT=12, VT_I4=3,
                            CoInitialize=Mock(), CoUninitialize=Mock())
     test.enterContext(patch.multiple(naming, pythoncom=com,
                                      win32com=SimpleNamespace(client=SimpleNamespace(VARIANT=Variant))))

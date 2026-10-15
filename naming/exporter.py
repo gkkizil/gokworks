@@ -134,7 +134,7 @@ def _arrays(obj, method_name, count):
         # accepting explicit BYREF VARIANTs. Retry through late-bound dispatch.
         try:
             if hasattr(obj, '_oleobj_'):
-                obj = win32com.client.dynamic.DumbDispatch(obj)
+                obj = _late_bound(obj, method_name)
             method = getattr(obj, method_name)
             outputs = [win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_VARIANT, None)
                        for _ in range(count)]
@@ -212,9 +212,9 @@ def _activate(app, name):
 def _source_document(app, source_path, stop=None):
     """Borrow a selected source, or open and close only our own clean root.
 
-    Pack and Go belongs to ModelDocExtension. Visible existing sources need
-    no activation. Hidden assembly-loaded pointers need a temporary own window
-    and fresh activation pointer before querying their document APIs.
+    Pack and Go belongs to ModelDocExtension. Use the fresh activation pointer
+    for the selected source, including visible documents behind another model.
+    Hidden assembly-loaded sources need a temporary own window too.
     """
     _check(stop)
     if source_path is None:
@@ -256,10 +256,10 @@ def _source_document(app, source_path, stop=None):
         if not visible:
             visibility_changed = True
             model.Visible = True
-            activated = True  # Activation can change ActiveDoc even on failure.
-            model = _activate(app, source_path)
-            if sw._value(model, 'GetType') != kind:
-                raise RuntimeError('Etkinleştirilen kaynak belgenin türü beklenen SolidWorks türü değil.')
+        activated = True  # Activation can change ActiveDoc even on failure.
+        model = _activate(app, source_path)
+        if sw._value(model, 'GetType') != kind:
+            raise RuntimeError('Etkinleştirilen kaynak belgenin türü beklenen SolidWorks türü değil.')
         _check(stop)
         yield model
     except BaseException as error:
@@ -302,6 +302,7 @@ def _source_document(app, source_path, stop=None):
 def _session(app, stop=None, progress=None, *, model=None, source_path=None, require_assembly=False):
     _check(stop)
     model = sw._value(app, 'ActiveDoc') if model is None else model
+    model = _late_bound(model)
     if model is None or sw._value(model, 'GetType') not in (1, 2, 3):
         raise RuntimeError('SolidWorks’te kayıtlı bir montaj, parça veya teknik resim açın.')
     if require_assembly and sw._value(model, 'GetType') != 2:
@@ -310,11 +311,21 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
     if not root:
         raise RuntimeError('Önce açık SolidWorks belgesini kaydedin.')
     try:
-        # DumbDispatch on the application does not propagate to child objects.
-        # GetPackAndGo is a method: dynamic dispatch's initial PROPERTYGET probe
-        # can fail with DISP_E_PARAMNOTOPTIONAL before returning a callable.
-        extension = _late_bound(sw._value(model, 'Extension'), 'GetPackAndGo')
-        pg = extension.GetPackAndGo()
+        extension = _late_bound(sw._value(model, 'Extension'), 'SavePackAndGo')
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks ModelDocExtension okunamadı: {error}') from error
+    try:
+        if hasattr(extension, '_oleobj_'):
+            # GetPackAndGo() -> IDispatch. Specify its complete COM signature
+            # directly; neither property probes nor inferred output arguments
+            # should run while initializing the Pack and Go session.
+            ole = extension._oleobj_
+            dispid = ole.GetIDsOfNames(0, 'GetPackAndGo')
+            raw = ole.InvokeTypes(dispid, 0, pythoncom.DISPATCH_METHOD,
+                                  (pythoncom.VT_DISPATCH, 0), ())
+            pg = win32com.client.Dispatch(raw) if raw is not None else None
+        else:
+            pg = extension.GetPackAndGo()
     except Exception as error:
         raise RuntimeError(f'SolidWorks GetPackAndGo başlatılamadı: {error}') from error
     if pg is None:

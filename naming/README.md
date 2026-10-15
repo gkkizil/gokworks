@@ -23,7 +23,26 @@ Küçük ekranda ayarlar ayrı kaydırılır; önizleme tablosu ve paket düğme
 
 Kaynak ve hedef seçimi iki klasör alanında toplanmıştır. Klasördeki montajların keşfi ve hedefin boşluk/erişim kontrolü arka planda yapılır. Ön/son ek düzenleme veya menü değiştirme sırasında hedef klasör yeniden taranmaz. Hedef tekrar seçildiğinde kontrol yenilenir; kaydetme başlamadan önce arka uç klasörü tekrar doğrular. Eski üst klasör/paket adı ayarları tek hedef yoluna dönüştürülür.
 
-Ekrandaki `SolidWorks GetPackAndGo başlatılamadı: -2147352561` hatası için `ModelDocExtension` ayrıca late-bound sarılır ve `GetPackAndGo` açıkça metot olarak işaretlenir. Böylece COM tür bilgisinin metodu property getter olarak çağırması engellenir. Gerçek metot hataları tekrar denemelerle gizlenmez. Bu davranış [pywin32 dynamic dispatch](https://github.com/mhammond/pywin32/blob/main/com/win32com/client/dynamic.py) ve [metot üretimi](https://github.com/mhammond/pywin32/blob/main/com/win32com/client/build.py) üzerinden incelendi.
+`GetPackAndGo` başlatılırken artık doğrudan `IDispatch.InvokeTypes` kullanılır:
+çağrı türü `DISPATCH_METHOD`, argüman listesi boş, dönüş türü `VT_DISPATCH`
+olarak açıkça verilir. Önceki `_FlagAsMethod` yaklaşımı yerine bu imza,
+property sorgusunu ve çıkış parametresi tahminini devreden çıkarır. Dönen
+Pack and Go nesnesi pywin32 ile sarılır; `SavePackAndGo` ve gerekli BYREF
+liste çağrıları da kendi nesnelerinde metot olarak işaretlenir. Gerçek metot
+hataları tekrar denemelerle gizlenmez. `ModelDocExtension` erişim hatası ile
+`GetPackAndGo` çağrısının hatası ayrı gösterilir.
+
+Klasörden seçilen kaynak, başka bir pencerenin arkasında görünür olsa bile
+etkinleştirilir ve API'nin döndürdüğü güncel belge nesnesi kullanılır. İşlem
+sonunda önceki aktif belge, görünürlük ve konfigürasyon korunur. Kaynağı
+açık olduğu için gereksiz yere kapatma veya kaynak dosyayı yeniden adlandırma
+yapılmaz. COM çağrıları [pywin32 b312](https://github.com/mhammond/pywin32/tree/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client)
+üzerinden incelendi; gerçek SolidWorks oturumunda doğrulama hâlâ gereklidir.
+
+Bu değişiklik için 26 adlandırma/COM/referans koruma kontrolü ve arayüzden
+montajı okuyup model–teknik resim çiftini yeniden adlandırarak kaydetme
+kontrolü geçti. COM sınırı test nesneleriyle temsil edildi; bu kontroller
+canlı SolidWorks'te montaj ilişkilerinin denendiği anlamına gelmez.
 
 İlgili doğrulama: 16 isimlendirme/kayıt, 9 COM/kaynak oturumu, 5 klasör keşfi, 12 isimlendirme arayüzü ve 27 menü/sekme/ayar kontrolü. Son iki isimlendirme arayüzü sorunu — küçük ekranda tablo yüksekliği ve ad çakışması giderildikten sonra kayıt düğmesinin açılması — düzeltildikten sonra ilgili kontroller yeniden geçti. Canlı SolidWorks oturumuna bağlanılmadı; bu güncellemede EXE üretilmedi.
 
