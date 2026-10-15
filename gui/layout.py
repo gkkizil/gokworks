@@ -32,6 +32,8 @@ class WorkspaceLayout:
             self._build_sidebar()
         if self.mode == 'bolt':
             return self._build_bolt_workspace()
+        if self.mode == 'weight':
+            return self._build_weight_workspace()
         if self.mode == 'naming':
             return self._build_naming_workspace()
         if self.mode == 'bom':
@@ -103,6 +105,7 @@ class WorkspaceLayout:
             ("naming", "İsimlendirme aracı", "copy"),
             ("k_factor", KR_NAV_TITLE, "tools"),
             ("bolt", "Cıvata hesabı", "bolt"),
+            ("weight", "Ağırlık hesabı", "weight"),
             ("iso_fits", "ISO geçmeleri", "ruler"),
             ("geometric_tolerances", "Geometrik toleranslar", "target"),
         )):
@@ -439,7 +442,7 @@ class WorkspaceLayout:
                       foreground=[("selected", color(TEXT))])
             self._table_style_key = style_key
         tables = {page['table'] for page in self._pages.values() if 'table' in page}
-        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'naming'):
+        if self.mode not in ('iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'naming', 'weight'):
             tables.add(self.table)
         for table in tables:
             if getattr(table, '_gok_style_key', None) == style_key:

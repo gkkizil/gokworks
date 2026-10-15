@@ -69,6 +69,10 @@ def _draw_icon(name, color):
         line([(9, 9), (9, 21), (15, 21), (15, 9)])
         for y in (12, 15, 18):
             line([(8, y+1), (16, y-1)])
+    elif name == 'weight':
+        circle((9, 2, 15, 8))
+        line([(7, 7), (17, 7), (21, 21), (3, 21), (7, 7)])
+        line([(8, 16), (16, 16)])
     elif name == 'ruler':
         box((3, 7, 21, 17), radius=1)
         for x in (7, 11, 15, 19):

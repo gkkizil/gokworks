@@ -32,13 +32,20 @@ def run(output):
                     app.update()
                     time.sleep(.01)
             # Inputs update the live result only while their workspace is active.
-            # Naming is now the last page in the package-wide opening check.
+            # The package-wide opening check may finish on an independent page.
             app._switch_mode('bolt')
             app.bolt_state['unit'].set('kg')
             app.bolt_state['tension'].set('100')
             assert abs(app.bolt_result.tension_n-980.665) < 1e-6
             assert not calculate(tension='20').safe
             assert calculate(tension='20', grade='12.9').safe
+            app._switch_mode('weight')
+            app.weight_state['kind'].set('Sac levha')
+            app.weight_state['material'].set('Demir / Çelik')
+            for key, value in dict(unit='mm', method='Ölçülerden', density='7850',
+                                   b='1000', t='10', length='2000', count='1').items():
+                app.weight_state[key].set(value)
+            assert abs(app.weight_result.total_mass_kg-157) < 1e-8
             workbook = openpyxl.Workbook()
             workbook.save(Path(directory)/'check.xlsx')
             ezdxf.new('R2010').saveas(Path(directory)/'check.dxf')

@@ -22,6 +22,7 @@ from iso_fits.window import IsoFitsView
 from geometric_tolerances.window import GeometricTolerancesView
 from bom.window import BomView
 from bolt.window import BoltView
+from weight.window import WeightView
 from naming.window import NamingView
 from gui.icons import make_icon, set_window_icon
 from gui.typography import check_turkish_fonts
@@ -43,11 +44,12 @@ def _search_text(value):
     return str(value).casefold().replace("\u0307", "")
 
 
-class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
-    _MODES = ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'naming')
+class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricTolerancesView, IsoFitsView, KFactorView, WorkspaceLayout, ctk.CTk):
+    _MODES = ('pdf', 'dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt', 'naming', 'weight')
     _NAMING_PAGE_ATTRIBUTES = ('workspace', 'naming_state', 'naming_snapshot', 'naming_plan',
                                'naming_overrides', 'naming_widgets', 'status_label', 'progress')
     _BOLT_PAGE_ATTRIBUTES = ('workspace', 'bolt_state', 'bolt_widgets', 'bolt_result', 'status_label')
+    _WEIGHT_PAGE_ATTRIBUTES = ('workspace', 'weight_state', 'weight_widgets', 'weight_result', 'status_label')
     _BOM_PAGE_ATTRIBUTES = ('workspace', 'bom_state', 'bom_query', 'bom_result',
                             'bom_widgets', 'status_label', 'progress')
     _GDT_PAGE_ATTRIBUTES = ('workspace', 'gdt_state', 'gdt_widgets', 'gdt_result',
@@ -256,6 +258,8 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
             self._draw_gdt_diagram()
         elif self.mode == 'bolt':
             self._draw_bolt_diagram()
+        elif self.mode == 'weight':
+            self._draw_weight_diagram()
 
     def _remember_page(self):
         if self.mode == 'naming' and 'preview_id' in self.naming_widgets:
@@ -263,6 +267,7 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
             # A hidden debounce must not replace a plan already stored here.
             self._update_naming_preview()
         attributes = (self._NAMING_PAGE_ATTRIBUTES if self.mode == 'naming' else
+                      self._WEIGHT_PAGE_ATTRIBUTES if self.mode == 'weight' else
                       self._BOLT_PAGE_ATTRIBUTES if self.mode == 'bolt' else
                       self._BOM_PAGE_ATTRIBUTES if self.mode == 'bom' else
                       self._GDT_PAGE_ATTRIBUTES if self.mode == 'geometric_tolerances' else
@@ -294,6 +299,8 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
             self._create_bolt_state(saved)
         elif self.mode == 'naming':
             self._create_naming_state(saved)
+        elif self.mode == 'weight':
+            self._create_weight_state(saved)
 
     def _create_filter_state(self):
         self.search_query = tk.StringVar(self, value="")
@@ -330,7 +337,7 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
             button.configure(
                 hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED,
-                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree", "bolt": "bolt", "naming": "copy"}[key],
+                image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree", "bolt": "bolt", "naming": "copy", "weight": "weight"}[key],
                                  NAV_ACCENT if active else NAV_MUTED),
                 border_width=0,
                 font=self._nav_fonts[active],
@@ -393,9 +400,14 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
             self._draw_gdt_diagram()
         elif self.mode == 'bolt':
             self._draw_bolt_diagram()
+        elif self.mode == 'weight':
+            self._draw_weight_diagram()
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if self.mode == 'weight':
+            self.weight_widgets['length_input'].focus_set()
+            return 'break'
         if self.mode == 'naming':
             self.naming_widgets['prefix'].focus_set()
             return 'break'
@@ -524,6 +536,12 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
     def _resize_pdf_area(self, event=None):
         if self._closed:
             return
+        if self.mode == 'weight':
+            previous = getattr(self, '_layout_fit_id', None)
+            if previous is not None:
+                self.after_cancel(previous)
+            self._layout_fit_id = self.after(35, self._resize_weight_workspace)
+            return
         if self.mode == 'naming':
             previous = getattr(self, '_layout_fit_id', None)
             if previous is not None:
@@ -635,7 +653,7 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
                 save_settings(updated, self.settings_path)
             self._pending_preferences.clear()
         except OSError as error:
-            if self.mode in ('iso_fits', 'geometric_tolerances', 'bolt', 'bom', 'naming'):
+            if self.mode in ('iso_fits', 'geometric_tolerances', 'bolt', 'bom', 'naming', 'weight'):
                 self.status_label.configure(text=f'Tercihler kaydedilemedi: {error}', text_color=RED)
             else:
                 self._append_log(f"Klasör tercihleri kaydedilemedi: {error}")
@@ -644,6 +662,8 @@ class GokworksPdfApp(NamingView, BoltView, BomView, GeometricTolerancesView, Iso
         saved = {'appearance': 'dark' if self.theme_mode.get() == 'Koyu' else 'light'}
         if self.mode == 'naming':
             saved.update({f'naming_{key}': value.get() for key, value in self.naming_state.items()})
+        elif self.mode == 'weight':
+            saved.update({f'weight_{key}': value.get() for key, value in self.weight_state.items()})
         elif self.mode == 'bolt':
             saved.update({f'bolt_{key}': value.get() for key, value in self.bolt_state.items()})
         elif self.mode == 'bom':

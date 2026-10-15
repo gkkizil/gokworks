@@ -54,6 +54,18 @@ kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
 
 Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. **kg yük / Newton (N) / kN** seçimi hem girdiyi hem gösterilen kapasiteyi dönüştürür. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md). [İncelenen GitHub projeleri](bolt/README.md). [Windows EXE indirme ve derleme](packaging/README.md).
 
+## Ağırlık hesabı
+
+**Mühendislik hesapları → Ağırlık hesabı** bölümünde kesiti, malzemeyi,
+ölçüleri, boyu ve adedi seçin. Görseldeki 19 kesit türü; demir/çelik,
+alüminyum, paslanmaz, Delrin, Kestamit ve diğer metal/plastik seçenekleri
+desteklenir. Yoğunluk düzenlenebilir; mm/cm/m dönüşümü, adet başına kg,
+kg/m, toplam ağırlık, kesit çizimi ve pano raporu vardır. SolidWorks gerekmez.
+
+Hadde/kutu profil gibi kesitlerin ölçülerden hesabı köşe yarıçaplarını ve
+eğimleri içermez. **Katalog alanından** seçeneğinde üretici kesit alanını
+cm² olarak girerek hesaplayabilirsiniz. [Kullanım, kaynaklar ve örnekler](weight/README.md).
+
 ## Arayüz ve temalar
 
 Yan menü Aktarım ve montaj ile Mühendislik hesapları olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi tüm ekranları ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
