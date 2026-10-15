@@ -37,3 +37,7 @@ yazma, CSV yolu, tercih kaydı, sayfa önbelleği ve PDF ayrımı doğrulandı.
 Aktarım kontrolleri SolidWorks COM davranışını temsil eden test nesneleriyle
 yapıldı; gerçek Windows/SolidWorks aktarımı bu bulut ortamında çalıştırılmadı.
 EXE oluşturulmadı.
+
+[Klasörleme seçeneğinin güncel ekran görüntüsü](examples/thickness-folders-dark.png).
+Görüntü, kullanıcı tercihlerini değiştirmeden
+`python dxf_dwg/examples/capture.py` ile gerçek Tk ekranından yeniden alınabilir.
