@@ -1,5 +1,5 @@
 {
-  "request_id": "d54f719c-48f4-46dc-bfdd-ae80d763ed23",
-  "requested_at": "2026-10-15T17:53:06.990795+00:00",
-  "reason": "User requested Windows EXE with supplied GÖK logos embedded in the application."
+  "request_id": "f1865570-d484-45e9-95e4-5ba2d9b0bdcc",
+  "requested_at": "2026-10-15T18:10:37.193896+00:00",
+  "reason": "User requested a Windows EXE containing the taskbar icon fix for light/dark theme changes."
 }
