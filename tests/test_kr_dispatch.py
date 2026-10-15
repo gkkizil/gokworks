@@ -70,9 +70,40 @@ class ModeDefinition(Definition):
 
 
 class NativeDispatchApplyTests(KApplyTestCase):
+    @staticmethod
+    def flagged(obj):
+        obj._FlagAsMethod = lambda *names: None
+        return obj
+
     def manual(self, **kwargs):
         return ap.process_part(self.app, self.model.path, 'Default',
                                ManualAssignment(2, .274, 2), **kwargs)
+
+    def test_late_bound_children_mark_methods_before_metadata_can_infer_getters(self):
+        class MetadataDispatch:
+            _oleobj_ = object()
+            def __init__(self):
+                self.methods = set()
+            def _FlagAsMethod(self, *names):
+                self.methods.update(names)
+            def __getattr__(self, name):
+                if name not in self.methods:
+                    raise MemberNotFound()
+                if name == 'GetTemplateSheetMetal':
+                    return lambda: self.feature
+                if name == 'GetUseGaugeTable':
+                    def gauge(used, filename):
+                        used.value = True
+                        return 0
+                    return gauge
+                raise AttributeError(name)
+        dispatch = MetadataDispatch()
+        dispatch.feature = self.model.feature
+        self.assertIs(ap._optional_read(dispatch, 'GetTemplateSheetMetal'), self.model.feature)
+        used, filename = ap._out(ap.pythoncom.VT_BOOL), ap._out(ap.pythoncom.VT_BSTR)
+        self.assertEqual(ap._call_byref(dispatch, 'GetUseGaugeTable', used, filename), 0)
+        self.assertTrue(used.value)
+        self.assertEqual(dispatch.methods, {'GetTemplateSheetMetal', 'GetUseGaugeTable'})
 
     def test_assembly_loaded_proxy_is_replaced_before_reading_sheet_parameters(self):
         model = self.model
@@ -139,7 +170,7 @@ class NativeDispatchApplyTests(KApplyTestCase):
                 # InvokeTypes returns the retval together with output values.
                 return (0, self.feature.model.gauge, '')
         self.model.feature.GetDefinition = lambda: TypedDefinition(self.model.feature)
-        self.client.dynamic.DumbDispatch.side_effect = lambda obj: Definition(obj.feature)
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: self.flagged(Definition(obj.feature))
         status, detail, _ = self.manual()
         self.assertEqual(status, 'success', detail)
         self.assertEqual(self.model.states['Default']['k'], .274)
@@ -156,15 +187,15 @@ class NativeDispatchApplyTests(KApplyTestCase):
         def read_override(parameter, output):
             output.value = parameter == 1
             return 0
-        self.client.dynamic.DumbDispatch.side_effect = lambda obj: SimpleNamespace(
-            GetOverrideDefaultParameter2=read_override)
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: self.flagged(SimpleNamespace(
+            GetOverrideDefaultParameter2=read_override))
         self.assertEqual(ap._sheet_overrides(typed), (False, True))
 
     def test_nested_document_save_uses_explicit_error_and_warning_outputs(self):
         self.model._oleobj_ = object()
         save = self.model.Save3
         self.model.Save3 = lambda *args: (True, 0, 0)
-        self.client.dynamic.DumbDispatch.side_effect = lambda obj: SimpleNamespace(Save3=save)
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: self.flagged(SimpleNamespace(Save3=save))
         status, detail, _ = self.manual(save=True)
         self.assertEqual(status, 'success', detail)
         self.assertEqual(self.model.save_count, 1)

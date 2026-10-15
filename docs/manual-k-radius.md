@@ -12,7 +12,9 @@ Ana `TemplateSheetMetal` unsuru ve ona bağlı `SheetMetal` gövde unsuru adlar�
 yerine API türleriyle bulunur; Türkçe ad veya kullanıcı tarafından ad
 değiştirilmesi seçimi etkilemez. İşlem günlüğünde bulunan unsur adları gösterilir.
 
-Üç değer girilir:
+Her kalınlık için ayrı satıra üç değer girilir. **Satır ekle** ile başka
+kalınlıklar eklenir; **Sil** ile satır kaldırılır. Eski tek satır ayarları ve
+yeni satırlar kaydedilir; sonraki açılışta geri yüklenir.
 
 14 Ekim 2026 güncellemesinde 18 ilgili kontrol geçti: hesap yardımından atama
 başlatıldığında da yalnız manuel değerlerin kullanılması, tablo çağrısının
@@ -21,24 +23,29 @@ tarama sırasında sıraya alınan uygulama, kayıt/rapor ve küçük ekran yerl
 Sol kod incelemesi de tamamlandı. SolidWorks COM sınırı test nesneleriyle
 temsil edildi; gerçek montaj bu bulut ortamında çalıştırılmadı.
 
-| Alan | Örnek |
-| --- | --- |
-| Hedef sac kalınlığı | 2 mm |
-| K faktörü | 0,274 |
-| İç büküm yarıçapı R | 2 mm |
+| Sac kalınlığı (mm) | K faktörü | Yarıçap R (mm) |
+| ---: | ---: | ---: |
+| 1,5 | 0,274 | 1,5 |
+| 2 | 0,30 | 2 |
+| 3 | 0,32 | 3 |
+
+Bu değerler ekran örneğidir; malzeme önerisi değildir. Her satırdaki K ve R
+kullanıcının verdiği değerlerdir. Tek montaj işleminde tüm satırlar eşlenir;
+sac olmayan parçalar ve satırı bulunmayan kalınlıklar atlanır.
 
 Nokta ve virgül ondalık ayırıcı olarak kabul edilir. Hedef kalınlık listeden
 seçilebilir veya özel değer olarak yazılabilir. K ve R kullanıcı tarafından
 doldurulur; başlangıçta bu alanlara üretim değeri atanmaz.
 
 1. Ana montajı SolidWorks'te aktif yapın; **Manuel K / R** sekmesini açın.
-2. Kalınlık, K ve R değerlerini girin.
+2. Kalınlık, K ve R değerlerini girin. Başka kalınlıklar için **Satır ekle** kullanın.
 3. **Montajı tara** ile yazma yapmadan eşleşmeleri ve girdiğiniz hedef değerleri görün.
    Uygun parçalar **Uygulamaya hazır** gösterilir; “Önizleme; K/R uygulanmadı”
    açıklaması mevcut ve hedef değerleri ayırır.
 4. **Montaja K/R uygula** ile eşleşen sac parçalarının sac metal parametrelerini
    güncelleyin. `2 mm → K=0.274, R=2 mm` örneğinde 1, 1.99, 2.01 ve 3 mm
-   saclar atlanır; bu parçalar için K/R yazımı veya dosya kaydı yapılmaz.
+   saclar, kendileri için başka satır girilmediyse atlanır; bu parçalar için
+   K/R yazımı veya dosya kaydı yapılmaz.
 5. Varsayılan değişiklik SolidWorks belleğindedir. Dosyalara da kaydetmek
    isterseniz **Parça dosyalarını kaydet** seçeneğini işaretleyin.
 
@@ -59,6 +66,8 @@ tahmini, bıçak ölçüsü veya BA kalibrasyonu istemez. Hesap yardımı sekmes
 ayarlar ve manuel değerler ayrı saklanır; iki sekme arasında geçişte korunur.
 K `0–1` aralığında; kalınlık ve R pozitif ve sonlu olmalıdır. Boş/geçersiz
 alanlarla tarama ve uygulama başlatılmaz.
+Aynı kalınlık iki satıra girilemez; eşleştirme aralıkları çakışacak kadar yakın
+kalınlıklar da reddedilir. İlk uygun satır rastgele seçilmez.
 
 SolidWorks'e `KFactor=0.274`, büküm payı türü `K factor (2)` ve
 `R=0.002 metre` yazılır. Ana sacın kendisine ait tek yarıçap ölçüsü varsa
@@ -93,6 +102,35 @@ listesi erişilebilir kalır.
 Linux testlerinde gerçek Tk arayüzü çalıştırıldı; SolidWorks COM sınırı test
 nesneleriyle temsil edilir. Gerçek Windows/SolidWorks montajında uygulama
 bu bulut ortamında çalıştırılamaz.
+
+## Çoklu kalınlık ve katıdan dönüştürülen saclar — 15 Ekim 2026
+
+Atama `AssignmentTable` içindeki kullanıcı satırlarıyla yapılır. Kalınlık,
+gövdenin `SheetMetal.Thickness` veya `SolidToSheetMetal.SheetThickness`
+alanından metre cinsinden okunup mm'ye çevrilir. Gövdenin sac bayrağı kapalı
+olsa da etkin `SolidToSheetMetal` unsuru varsa ana sac hedefi ayrıca doğrulanır.
+Gerçek katı parçalar atlanır. K/R okuma için DXF aktarım arayüzü gerekmez.
+
+COM keşif metotları ilgili alt nesnede açıkça metot olarak işaretlenir.
+Sacla ilgisiz unsurların K/R tanımları sorgulanmaz. **Tüm bükümlere uygula**
+açıkken dönüştürme unsurunun özel K/R ayarları ana sac değerlerine bağlanır.
+Ana varsayılan kalınlığı gerçek sacdan farklıysa önce bu varsayılan gerçek
+kalınlığa eşitlenir, sonra miras ayarları değiştirilir. Fiziksel sac kalınlığı
+korunur; bu eşitleme günlükte açıkça gösterilir. Hata halinde eski ana kalınlık,
+K/R ve özel ayarlar geri yüklenip tekrar kontrol edilir. Başka konfigürasyona
+yayılan değişiklikler de geri alınır.
+
+Tek gövdeli sac kapsamı sürer; çok gövdeli veya gauge/malzeme tablosuna bağlı
+parçalar sessizce başarılı gösterilmez. Sonuçta ilgili parça ve engel yazılır.
+
+91 ilgili kural/COM/kayıt kontrolü ve 15 gerçek Tk arayüz kontrolü doğrulandı.
+Karma montaj senaryosunda iki farklı kalınlık ayrı K/R satırlarıyla güncellendi;
+eşleşmeyen sac ve katı parça atlandı. Mevcut konfigürasyon, dosya kayıt durumu,
+geri okuma ve geri alma kontrolleri korundu. Canlı SolidWorks geometrisi bu
+bulutta doğrulanmadı; tam test paketi çalıştırılmadı ve EXE oluşturulmadı.
+
+[Çoklu kalınlık ekranı](../k_factor/examples/thickness-assignments-dark.png) ·
+[Ekranı yeniden çekme](../k_factor/examples/capture.py).
 
 ## SolidWorks 2025 hata incelemesi
 

@@ -53,7 +53,7 @@ class ParentFeature(SheetFeature):
         # Child writes do NOT share this storage. The original child-only
         # implementation would leave the UI-visible parent at K=.5.
         state = model.parent_states[model.config]
-        state.update(radius=definition.BendRadius, type=definition.allowance.Type,
+        state.update(thickness=definition.Thickness, radius=definition.BendRadius, type=definition.allowance.Type,
                      k=definition.allowance.KFactor, ba=definition.allowance.BendAllowance,
                      bd=definition.allowance.BendDeduction,
                      table=definition.allowance.BendTableFile,
@@ -91,6 +91,17 @@ class ParentApplyTests(KApplyTestCase):
     def process(self, **kwargs):
         return ap.process_part(self.app, self.model.path, 'Default',
                                ManualAssignment('1,5', '0,274', '1,5'), **kwargs)
+
+    def test_converted_definition_supplies_actual_thickness_without_sheetmetal_child(self):
+        self.model.FirstFeature = lambda: self.converted
+        self.model.bodies[0].IsSheetMetal = lambda: False
+        self.model.feature.child = None
+        status, detail, result = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(result.thickness_mm, 1.5)
+        self.assertIn('(SolidToSheetMetal)', detail)
+        self.assertEqual(self.model.parent_states['Default']['k'], .274)
+        self.assertEqual(self.model.feature.modify_count, 0)
 
     def test_separate_parent_and_inherited_child_conversion_are_verified(self):
         self.model.ShowConfiguration2('Other')
@@ -136,6 +147,40 @@ class ParentApplyTests(KApplyTestCase):
         self.assertEqual(self.model.parent_writes, 1)
         self.assertIn('Sac-Levha (TemplateSheetMetal)', detail)
         self.assertIn('Sac-Levha1 (SheetMetal)', detail)
+
+    def test_conversion_keeps_actual_thickness_when_template_default_differs(self):
+        self.model.states.pop('Other')
+        self.model.parent_states.pop('Other')
+        self.converted = ConvertedFeature(self.model)
+        self.model.feature.child = self.converted
+        self.model.parent_states['Default']['thickness'] = .001
+        self.converted.flags = dict.fromkeys(self.converted.flags, True)
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+            ManualAssignment(1.5, .274, 2, all_bends=True))
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.states['Default']['thickness'], .0015)
+        self.assertEqual(self.model.parent_states['Default']['thickness'], .0015)
+        self.assertEqual(self.model.states['Default']['radius'], .002)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+        self.assertEqual(tuple(self.converted.flags.values()), (False, False))
+        self.assertIn('gerçek gövde kalınlığı korundu', detail)
+
+    def test_failed_conversion_restores_distinct_template_thickness_and_overrides(self):
+        self.model.states.pop('Other')
+        self.model.parent_states.pop('Other')
+        self.converted = ConvertedFeature(self.model)
+        self.model.feature.child = self.converted
+        self.model.parent_states['Default']['thickness'] = .001
+        self.converted.flags = dict.fromkeys(self.converted.flags, True)
+        before_parent, before_body = deepcopy(self.model.parent_states), deepcopy(self.model.states)
+        self.model.freeze_child = True
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+            ManualAssignment(1.5, .274, 2, all_bends=True))
+        self.assertEqual(status, 'error', detail)
+        self.assertEqual(self.model.parent_states, before_parent)
+        self.assertEqual(self.model.states, before_body)
+        self.assertEqual(tuple(self.converted.flags.values()), (True, True))
+        self.assertEqual(self.model.save_count, 0)
 
     def test_folder_api_is_valid_fallback_for_explicit_null_template(self):
         self.model.Extension.GetTemplateSheetMetal = lambda: None

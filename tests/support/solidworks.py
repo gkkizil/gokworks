@@ -335,7 +335,12 @@ def com_stubs(profile, *, dynamic=False):
     com = SimpleNamespace(**COM_FLAGS[profile], CoInitialize=Mock(), CoUninitialize=Mock())
     client = SimpleNamespace(VARIANT=Variant)
     if dynamic:
-        client.dynamic = SimpleNamespace(DumbDispatch=Mock(side_effect=lambda app: app))
+        def dumb_dispatch(obj):
+            # Native CDispatch supports method metadata registration.
+            if not hasattr(obj, '_FlagAsMethod'):
+                obj._FlagAsMethod = Mock()
+            return obj
+        client.dynamic = SimpleNamespace(DumbDispatch=Mock(side_effect=dumb_dispatch))
     return com, client
 
 

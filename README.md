@@ -1,6 +1,6 @@
 # GOKWORKS
 
-SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara malzeme ve takım seçimiyle K faktörü/iç yarıçap uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir; geometrik toleransları ASME GD&T rehberiyle açıklar.
+SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara kullanıcı tarafından kalınlıklarına göre girilen K faktörü/iç yarıçap değerlerini uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir; geometrik toleransları ASME GD&T rehberiyle açıklar.
 
 [14 Ekim Astra incelemesi](docs/astra-review.md): K/R kayıt sırası, açık belge koruması ve isimlendirme önizlemesi düzeltmeleri; depo temizliği ve doğrulama kapsamı.
 
@@ -92,7 +92,7 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
 
-**Manuel K / R** sekmesinde kalınlık, K ve R değerlerini girin. Örneğin `2 mm → K=0,274, R=2 mm`: aktif montaj ve alt montajlarda 2 mm sacların **Sac-Levha → Büküm yarıçapı** ve **Büküm izni → K-Faktörü** alanlarına bu değerler yazılır. Diğer kalınlıklar atlanır. [Manuel atama kılavuzu](docs/manual-k-radius.md).
+**Manuel K / R** sekmesinde her sac kalınlığının yanına K ve R değerlerini girin; **Satır ekle** ile başka kalınlıklar tanımlayın. Örneğin `1,5 mm → K=0,274, R=1,5 mm` ve `2 mm → K=0,30, R=2 mm` aynı işlemde uygulanır. Aktif montaj ve alt montajlardaki gerçek sac kalınlığı okunarak ilgili satır seçilir; **Sac-Levha → Büküm yarıçapı** ve **Büküm izni → K-Faktörü** güncellenir. Sac olmayan ve girilen kalınlıklara uymayan parçalar atlanır. Katıdan dönüştürülen saclar da etkin dönüşüm ve sac unsurlarından bulunur. [Manuel atama kılavuzu](docs/manual-k-radius.md).
 
 **Hesap yardımı**, malzeme ve takım verileriyle BA/BD hesabı veya üretim ölçümleriyle K kalibrasyonu için kullanılır. Bu hesapların sonucu SolidWorks atamasına gönderilmez; tarama ve uygulama her zaman manuel alanlara girilmiş K/R değerlerini kullanır.
 

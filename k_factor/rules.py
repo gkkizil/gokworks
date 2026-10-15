@@ -151,6 +151,9 @@ class ThicknessMismatch(ValueError):
     """Manuel atamada farklı kalınlığı olan saclar hata değil, atlamadır."""
 
 
+THICKNESS_MATCH_TOLERANCE_MM = 1e-6
+
+
 @dataclass(frozen=True)
 class ManualAssignment:
     thickness_mm: float
@@ -167,6 +170,44 @@ class ManualAssignment:
 
 
 @dataclass(frozen=True)
+class AssignmentTable:
+    """Kullanıcının kalınlığa göre verdiği, hesaplama içermeyen K/R satırları."""
+
+    rows: tuple[ManualAssignment, ...]
+    all_bends: bool = True
+
+    def __post_init__(self):
+        # A frozen dataclass must not retain a caller's mutable list.
+        try:
+            object.__setattr__(self, "rows", tuple(self.rows))
+        except TypeError:
+            raise ValueError("En az bir sac kalınlığı, K faktörü ve yarıçap satırı girin.") from None
+
+    def validate(self):
+        if not self.rows:
+            raise ValueError("En az bir sac kalınlığı, K faktörü ve yarıçap satırı girin.")
+        thicknesses = []
+        for index, row in enumerate(self.rows, 1):
+            if not isinstance(row, ManualAssignment):
+                raise ValueError(f"{index}. satır için sac kalınlığı, K faktörü ve yarıçap girin.")
+            try:
+                row.validate()
+            except ValueError as exc:
+                raise ValueError(f"{index}. satır: {exc}") from None
+            thicknesses.append((number(row.thickness_mm, "Sac kalınlığı"), index))
+        thicknesses.sort()
+        for (previous, previous_index), (current, current_index) in zip(thicknesses, thicknesses[1:]):
+            # Reject overlapping match intervals, even for differently written
+            # nominal values: no measured thickness may select two K/R rows.
+            if math.isclose(current, previous, rel_tol=0,
+                            abs_tol=2 * THICKNESS_MATCH_TOLERANCE_MM):
+                raise ValueError(
+                    f"{previous_index}. ve {current_index}. satırdaki sac kalınlıkları "
+                    "aynı veya eşleştirme sınırında birbirine çok yakın. "
+                    "Her kalınlık için tek K/R satırı girin.")
+
+
+@dataclass(frozen=True)
 class ManualCalculation:
     thickness_mm: float
     k_factor: float
@@ -178,11 +219,19 @@ class ManualCalculation:
 def calculate(thickness_mm, recipe=Recipe()):
     recipe.validate()
     t = number(thickness_mm, "Sac kalınlığı")
+    if isinstance(recipe, AssignmentTable):
+        matches = [row for row in recipe.rows if math.isclose(
+            t, number(row.thickness_mm, "Hedef sac kalınlığı"), rel_tol=0,
+            abs_tol=THICKNESS_MATCH_TOLERANCE_MM)]
+        if not matches:
+            raise ThicknessMismatch(
+                f"Sac kalınlığı {t:.12g} mm; girilen kalınlıklarla eşleşmedi, atlandı.")
+        recipe = matches[0]
     if isinstance(recipe, ManualAssignment):
         target = number(recipe.thickness_mm, "Hedef sac kalınlığı")
         # A fixed 1 nm tolerance only absorbs unit-conversion floating error;
         # it must not grow with thickness or merge nominally different sheets.
-        if not math.isclose(t, target, rel_tol=0, abs_tol=1e-6):
+        if not math.isclose(t, target, rel_tol=0, abs_tol=THICKNESS_MATCH_TOLERANCE_MM):
             raise ThicknessMismatch(f"Sac kalınlığı {t:.12g} mm; hedef {target:.12g} mm ile eşleşmedi, atlandı.")
         return ManualCalculation(t, number(recipe.k_factor, "Manuel K faktörü", zero=True),
                                  number(recipe.radius_mm, "Manuel büküm yarıçapı"))

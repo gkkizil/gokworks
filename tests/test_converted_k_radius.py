@@ -9,9 +9,11 @@ from copy import deepcopy
 from types import SimpleNamespace
 
 from k_factor import apply as ap
-from k_factor.rules import ManualAssignment, Recipe
+from k_factor.rules import AssignmentTable, ManualAssignment, Recipe
 from support.fixtures import KApplyTestCase
-from support.solidworks import FakeFeature
+from support.solidworks import FakeFeature, SheetPart, FakeMultiPartApp, FakeComponent
+from queue import Queue
+from unittest.mock import patch
 
 
 class Dispatch(SimpleNamespace):
@@ -58,10 +60,15 @@ class ConvertedFeature(FakeFeature):
             state['thickness'] += .0001
         if self.leak and self.changed and self.model.config == 'Other':
             state['k'] = self.model.states['Default']['k']
-        return ConvertedDefinition(**self.flags, SheetThickness=state['thickness'],
+        return ConvertedDefinition(**self.flags, AccessSelections=lambda model, component: True,
+                        ReleaseSelectionAccess=lambda: None, SheetThickness=state['thickness'],
                         BendRadius=state['radius'], GetCustomBendAllowance=Dispatch(
                             Type=state['type'], KFactor=state['k'], BendAllowance=state['ba'],
                             BendDeduction=state['bd'], BendTableFile=''))
+
+    def ModifyDefinition(self, definition, model, component):
+        self.flags.update({member: getattr(definition, member) for member in self.flags})
+        return True
 
     def GetErrorCode(self):
         return 1 if self.error_on_change and self.changed else 0
@@ -117,6 +124,56 @@ class ConvertedApplyTests(KApplyTestCase):
                     self.assertEqual(self.model.save_count, 0)
                     self.assertEqual(self.model.states, self.converted.initial)
                     self.converted.flags[flag] = False
+
+    def test_all_bends_normalizes_conversion_flags_and_restores_them_on_failure(self):
+        self.converted.flags = dict.fromkeys(self.converted.flags, True)
+        for fail in (False, True):
+            with self.subTest(fail=fail):
+                self.model.states = deepcopy(self.converted.initial)
+                self.converted.flags = dict.fromkeys(self.converted.flags, True)
+                self.model.readback_fail = fail
+                status, detail, _ = self.process(ManualAssignment(1.5, .274, 1.5, all_bends=True))
+                self.assertEqual(status, 'error' if fail else 'success', detail)
+                self.assertEqual(tuple(self.converted.flags.values()), (fail, fail))
+                if fail:
+                    self.assertIn('geri yüklendi', detail)
+                    self.assertEqual(self.model.states, self.converted.initial)
+
+    def test_assignment_table_mixed_assembly_uses_each_actual_thickness(self):
+        second = SheetPart('/work/two.sldprt', configurations=('Default', 'Other'))
+        unmatched = SheetPart('/work/three.sldprt')
+        unmatched.states['Default']['thickness'] = .003
+        solid = SheetPart('/work/solid.sldprt')
+        solid.bodies[0].IsSheetMetal = lambda: False
+        solid.feature = FakeFeature(kind='Boss')
+        # IsSheetMetal can be false for a converted solid with active sheet features.
+        self.model.bodies[0].IsSheetMetal = lambda: False
+        self.converted.flags = dict.fromkeys(self.converted.flags, True)
+        # Unrelated features must never have their definition queried.
+        unrelated = FakeFeature(kind='Boss')
+        unrelated.GetDefinition = lambda: self.fail('Unrelated feature definition was read')
+        self.converted.next = unrelated
+        second.ShowConfiguration2('Other')
+        untouched = deepcopy(second.states['Other'])
+        models = (self.model, second, unmatched, solid)
+        self.assembly.root.children = tuple(FakeComponent(model.path) for model in models)
+        app = FakeMultiPartApp(models, self.assembly)
+        events = Queue()
+        recipe = AssignmentTable((ManualAssignment(1.5, .274, 1.5), ManualAssignment(2, .32, 2.5)))
+        with patch.object(ap, 'connect_to_solidworks', return_value=app):
+            ap.update_assembly(recipe, events, save=True)
+        results = {item['source']: item for kind, item in events.queue if kind == 'result'}
+        statuses = {item['source'].split(' [')[0]: item['status'] for item in results.values()}
+        self.assertEqual(statuses, {self.model.path: 'success', second.path: 'success',
+                                    unmatched.path: 'skipped', solid.path: 'skipped'})
+        for model, k, radius in ((self.model, .274, .0015), (second, .32, .0025)):
+            self.assertEqual((model.states['Default']['k'], model.states['Default']['radius']), (k, radius))
+            self.assertEqual(model.save_count, 1)
+        self.assertEqual(tuple(self.converted.flags.values()), (False, False))
+        self.assertEqual(second.states['Other'], untouched)
+        self.assertEqual(second.config, 'Other')
+        self.assertEqual((unmatched.save_count, solid.save_count), (0, 0))
+        self.assertIs(app.ActiveDoc, self.assembly)
 
     def test_stale_conversion_values_and_feature_errors_roll_back_without_save(self):
         baseline = deepcopy(self.model.states)

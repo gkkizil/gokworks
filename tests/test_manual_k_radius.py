@@ -62,6 +62,13 @@ class ManualApplyTests(KApplyTestCase):
         self.assertEqual(self.model.save_count,0)
         self.assertIn('Manuel atama',detail)
 
+    def test_parameter_assignment_does_not_query_dxf_export_members(self):
+        def unrelated_export(_):
+            raise AssertionError('K/R must not access the DXF export interface')
+        with patch.object(type(self.model), 'ExportToDWG2', property(unrelated_export)):
+            status, detail, _ = self.manual()
+        self.assertEqual(status, 'success', detail)
+
     def test_mismatched_thickness_skips_even_gauge_override_without_save(self):
         self.model.states['Default']['thickness']=.003
         self.model.gauge=self.model.material_link=True
@@ -195,7 +202,7 @@ class ManualGuiTests(GuiTestCase):
         self.app.k_state['punch'].set('nan')
         result=self.app._preview_k_calculation()
         self.assertEqual(result.k_factor,.274)
-        self.assertIn('yalnız bu kalınlıktaki',self.app.k_calculation_label.cget('text'))
+        self.assertIn('yalnız girilen kalınlıklardaki',self.app.k_calculation_label.cget('text'))
         self.app.k_widgets['assignment_tabs']._buttons_dict[AUTOMATIC_TAB].invoke()
         self.assertIsNone(self.app._preview_k_calculation())
         self.app.k_widgets['assignment_tabs']._buttons_dict[MANUAL_TAB].invoke()

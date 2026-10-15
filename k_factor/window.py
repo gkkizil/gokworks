@@ -1,5 +1,6 @@
 """K/R çalışma alanı: takım kataloğu, elle hesap ve montaj işçisi."""
 
+import json
 import threading
 import tkinter as tk
 
@@ -8,7 +9,7 @@ from gui.rendering import configure_changed, hide_grid
 
 from gui.theme import PANEL, INPUT, BORDER, TEXT, MUTED, RED, AMBER, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
 from k_factor.apply import update_assembly
-from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, calculate,
+from k_factor.rules import (MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, Recipe, ManualAssignment, AssignmentTable, calculate,
                             number, ba_from_outside_dimensions)
 
 AUTO_DIE = "Otomatik (8 × t)"
@@ -72,7 +73,7 @@ class KFactorView:
                         thickness="2", angle="90", radius="", method="Tablo",
                         ba="", outside_a="", outside_b="", flat="")
         defaults.update(punch_angle="85", die_angle="85")
-        defaults.update(assignment_mode=MANUAL_TAB, manual_thickness="2", manual_k="", manual_r="")
+        defaults.update(assignment_mode=MANUAL_TAB, manual_thickness="2", manual_k="", manual_r="", manual_rows="[]")
         self.k_state = {key: tk.StringVar(self, value=str(saved.get(f"kr_{key}", value)))
                         for key, value in defaults.items()}
         if self.k_state["material"].get() not in [m.label for m in MATERIALS]:
@@ -169,15 +170,27 @@ class KFactorView:
         self.k_widgets["manual_panel"] = panel
         for column in range(3):
             panel.grid_columnconfigure(column, weight=1, uniform="manual_kr")
-        self._label(panel, "Sac-Levha parametrelerine doğrudan atama", 14, bold=True).grid(
+        self._label(panel, "Sac kalınlığı → K / R ataması", 14, bold=True).grid(
             row=0, column=0, columnspan=3, sticky="w", padx=16, pady=(14, 8))
-        self._k_field(panel, "manual_thickness", "Hedef sac kalınlığı (mm)", 1, 0,
-                      values=["0.5", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "4", "5", "6", "8", "10", "12", "15", "20"])
-        self._k_field(panel, "manual_k", "K faktörü (0–1)", 1, 1)
-        self._k_field(panel, "manual_r", "Büküm yarıçapı R (mm)", 1, 2)
-        self._label(panel, "Hedef: Sac-Levha → Büküm yarıçapı ve Büküm izni / K-Faktörü.\nÖrnek: 2 mm sac → K: 0,274 · R: 2 mm. Girilen değerler aynen yazılır.",
-                    11, MUTED, wraplength=700, justify="left").grid(
-            row=2, column=0, columnspan=3, sticky="w", padx=16, pady=(4, 8))
+        rows_panel = ctk.CTkFrame(panel, fg_color="transparent")
+        rows_panel.grid(row=1, column=0, columnspan=3, sticky="ew", padx=8)
+        rows_panel.grid_columnconfigure(0, weight=1)
+        self.k_widgets['assignment_rows_panel'] = rows_panel
+        self.k_widgets['assignment_rows'] = []
+        self._add_assignment_row(first=True)
+        try:
+            saved_rows = json.loads(self.k_state['manual_rows'].get())
+            if not isinstance(saved_rows, list):
+                saved_rows = []
+        except (ValueError, TypeError):
+            saved_rows = []
+        for values in saved_rows:
+            if isinstance(values, dict):
+                self._add_assignment_row(values)
+        add = self._button(panel, "Satır ekle", self._add_assignment_row, width=120)
+        add.grid(row=2, column=0, sticky="w", padx=16, pady=(4, 8))
+        self.controls.append(add)
+        self.k_widgets['add_assignment_row'] = add
         summary_band = ctk.CTkFrame(panel, fg_color=ACCENT_BG, corner_radius=10)
         summary_band.grid(row=3, column=0, columnspan=3, sticky="ew", padx=16, pady=(8, 16))
         summary_band.grid_columnconfigure(0, weight=1)
@@ -197,6 +210,71 @@ class KFactorView:
                 row=0, column=0, sticky='w', padx=14, pady=(12, 4))
             self._label(card, hint, 11, MUTED, wraplength=240, justify='left').grid(
                 row=1, column=0, sticky='w', padx=14, pady=(0, 12))
+
+    def _persist_assignment_rows(self, *_):
+        rows = self.k_widgets.get('assignment_rows', [])
+        serialized = json.dumps([
+            {key: row[key].get() for key in ('thickness', 'k', 'r')}
+            for row in rows[1:]], ensure_ascii=False)
+        if self.k_state['manual_rows'].get() != serialized:
+            # Its state trace refreshes the summary once; first-row variables
+            # already have their own state traces.
+            self.k_state['manual_rows'].set(serialized)
+
+    def _add_assignment_row(self, values=None, *, first=False):
+        values = values if isinstance(values, dict) else {}
+        rows = self.k_widgets['assignment_rows']
+        frame = ctk.CTkFrame(self.k_widgets['assignment_rows_panel'], fg_color='transparent')
+        frame.grid(row=len(rows), column=0, sticky='ew')
+        row = {'frame': frame, 'controls': []}
+        for column, (key, alias, label) in enumerate((
+                ('thickness', 'manual_thickness', 'Sac kalınlığı (mm)'),
+                ('k', 'manual_k', 'K faktörü (0–1)'),
+                ('r', 'manual_r', 'Büküm yarıçapı R (mm)'))):
+            frame.grid_columnconfigure(column, weight=1, uniform='assignment')
+            variable = self.k_state[alias] if first else tk.StringVar(self, values.get(key, ''))
+            row[key] = variable
+            # Reuse the existing field factory, preserving first-row aliases.
+            temporary = alias if first else f'_assignment_{id(frame)}_{key}'
+            self.k_state[temporary] = variable
+            self._k_field(frame, temporary, label, 0, column,
+                          values=['0.5', '0.8', '1', '1.2', '1.5', '2', '2.5', '3', '4', '5', '6', '8', '10', '12', '15', '20'] if key == 'thickness' else None)
+            row['controls'].append(self.k_widgets[temporary])
+            if not first:
+                del self.k_state[temporary]
+                del self.k_widgets[temporary]
+            row.setdefault('traces', []).append((variable, variable.trace_add('write', self._persist_assignment_rows)))
+        remove = self._button(frame, 'Sil', lambda: self._remove_assignment_row(row), width=52)
+        remove.grid(row=0, column=3, padx=(4, 8), pady=(24, 0))
+        row['controls'].append(remove)
+        self.controls.append(remove)
+        rows.append(row)
+        if not first and 'manual_summary' in self.k_widgets:
+            self._persist_assignment_rows()
+        return row
+
+    def _remove_assignment_row(self, row):
+        if self.busy:
+            return
+        rows = self.k_widgets['assignment_rows']
+        # Keep the first-row variables and widget aliases stable for preferences.
+        if row is rows[0]:
+            if len(rows) == 1:
+                for key in ('thickness', 'k', 'r'):
+                    row[key].set('')
+                return
+            for key in ('thickness', 'k', 'r'):
+                row[key].set(rows[1][key].get())
+            row = rows[1]
+        for variable, trace in row['traces']:
+            variable.trace_remove('write', trace)
+        rows.remove(row)
+        for control in row['controls']:
+            self.controls.remove(control)
+        row['frame'].destroy()
+        for index, item in enumerate(rows):
+            item['frame'].grid_configure(row=index)
+        self._persist_assignment_rows()
 
     def _sync_k_calibration(self):
         panel = self.k_widgets.get('calibration_panel')
@@ -333,14 +411,21 @@ class KFactorView:
 
     def _manual_k_recipe(self):
         """The only source of values sent to the SolidWorks assignment worker."""
-        values = {key: self.k_state[key].get()
-                  for key in ('manual_thickness', 'manual_k', 'manual_r', 'all_bends')}
-        t = number(values['manual_thickness'], 'Hedef sac kalınlığı')
-        recipe = ManualAssignment(t, number(values['manual_k'], 'Manuel K faktörü', zero=True),
-                                  number(values['manual_r'], 'Manuel büküm yarıçapı'),
-                                  all_bends=values['all_bends'])
-        recipe.validate()
-        return t, recipe
+        rows = self.k_widgets.get('assignment_rows') or [{
+            'thickness': self.k_state['manual_thickness'],
+            'k': self.k_state['manual_k'], 'r': self.k_state['manual_r']}]
+        assignments = []
+        for index, row in enumerate(rows, 1):
+            try:
+                assignments.append(ManualAssignment(
+                    number(row['thickness'].get(), 'Sac kalınlığı'),
+                    number(row['k'].get(), 'Manuel K faktörü', zero=True),
+                    number(row['r'].get(), 'Manuel büküm yarıçapı')))
+            except ValueError as error:
+                raise ValueError(f'{index}. satır: {error}') from None
+        table = AssignmentTable(tuple(assignments), all_bends=self.k_state['all_bends'].get())
+        table.validate()
+        return assignments[0].thickness_mm, table
 
     def _k_recipe(self):
         values = {key: variable.get() for key, variable in self.k_state.items()}
@@ -375,11 +460,11 @@ class KFactorView:
         try:
             thickness, recipe = self._k_recipe()
             result = calculate(thickness, recipe)
-            if isinstance(recipe, ManualAssignment):
+            if isinstance(recipe, AssignmentTable):
                 self.k_calculation_label.configure(
-                    text=f"{thickness:.12g} mm sac → K = {result.k_factor:.12g} · R = {result.radius_mm:.12g} mm\n"
+                    text="\n".join(f"{row.thickness_mm:.12g} mm sac → K = {row.k_factor:.12g} · R = {row.radius_mm:.12g} mm" for row in recipe.rows) + "\n" +
                          "Sac-Levha büküm yarıçapı ve K-Faktörü alanlarına doğrudan yazılır.\n"
-                         "Aktif montaj ve alt montajlarda yalnız bu kalınlıktaki saclar güncellenir.\n"
+                         "Aktif montaj ve alt montajlarda yalnız girilen kalınlıklardaki saclar güncellenir.\n"
                          "Önce Montajı tara ile kontrol edin; ardından Montaja K/R uygula düğmesini kullanın.",
                     text_color=TEXT)
                 return result
@@ -402,7 +487,11 @@ class KFactorView:
     def _start_k_apply(self):
         if self.busy:
             if self.k_widgets.get('operation_preview') and not self.stop_event.is_set():
-                _, recipe = self._manual_k_recipe()
+                try:
+                    _, recipe = self._manual_k_recipe()
+                except ValueError as error:
+                    self.status_label.configure(text=f'K/R sıraya alınmadı · {error}', text_color=RED)
+                    return
                 self.k_widgets['pending_apply'] = (recipe, self.k_state['save'].get())
                 self.start_button.configure(state='disabled', text='Uygulama sıraya alındı…')
                 text = 'K/R uygulama isteği alındı. Montaj kontrolü bitince atama başlayacak.'
@@ -439,8 +528,13 @@ class KFactorView:
             save = self.k_state['save'].get() and not preview
         else:
             recipe, save, expected_scope = request
-        if not isinstance(recipe, ManualAssignment):
+        if not isinstance(recipe, AssignmentTable):
             self.status_label.configure(text='K/R başlatılmadı · Manuel K / R alanlarına uygulanacak değerleri girin.', text_color=RED)
+            return
+        try:
+            recipe.validate()
+        except ValueError as error:
+            self.status_label.configure(text=f'K/R başlatılmadı · {error}', text_color=RED)
             return
         self._save_preferences()
         self.k_widgets['operation_preview'] = preview
@@ -456,9 +550,10 @@ class KFactorView:
                      if preview else 'K/R ataması başladı. Değerler parçalara yazılacak ve geri okunarak kontrol edilecek.')
         self.status_label.configure(text=operation, text_color=MUTED)
         self._append_log(operation)
-        description = (f'Manuel · t={number(recipe.thickness_mm, "Kalınlık"):.12g} mm · '
-                       f'K={number(recipe.k_factor, "K", zero=True):.12g} · R={number(recipe.radius_mm, "R"):.12g} mm'
-                       ' · Hedef: Sac-Levha / Büküm yarıçapı / K-Faktörü')
+        description = 'Manuel · ' + ' | '.join(
+            f't={row.thickness_mm:.12g} mm · K={row.k_factor:.12g} · R={row.radius_mm:.12g} mm'
+            for row in recipe.rows)
+        description += ' · Hedef: Sac-Levha / Büküm yarıçapı / K-Faktörü'
         description += ' · Tüm bükümler' if recipe.all_bends else ' · Mevcut özel büküm ayarları korunacak'
         self._append_log(description + (' · Dosyalar kaydedilecek.' if save else ' · Dosyalar kaydedilmeyecek.'))
         threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),

@@ -209,7 +209,10 @@ class ApplyTests(KApplyTestCase):
 
     def test_non_sheet_and_multi_body_parts(self):
         self.model.bodies[0].IsSheetMetal=lambda:False
+        sheet_feature = self.model.feature
+        self.model.feature = FakeFeature(kind='Boss')
         self.assertEqual(self.process()[0],'skipped')
+        self.model.feature = sheet_feature
         self.model.bodies=[SimpleNamespace(IsSheetMetal=lambda:True)]*2
         self.assertEqual(self.process()[0],'error')
 
