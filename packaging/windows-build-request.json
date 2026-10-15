@@ -1,5 +1,5 @@
 {
-  "request_id": "f1865570-d484-45e9-95e4-5ba2d9b0bdcc",
-  "requested_at": "2026-10-15T18:10:37.193896+00:00",
-  "reason": "User requested a Windows EXE containing the taskbar icon fix for light/dark theme changes."
+  "request_id": "5c420e0d-f632-41a4-8d11-d6e890274054",
+  "requested_at": "2026-10-15T18:14:36.658220+00:00",
+  "reason": "Retry requested EXE using native Windows icon comparisons; Tk does not return ICO paths from wm iconbitmap queries."
 }

@@ -8,6 +8,36 @@ import time
 import traceback
 
 
+def _windows_icon_signatures(app):
+    """Read native small/large icon pixels; Tk's ICO query returns no filename."""
+    import ctypes
+    import hashlib
+    import win32gui
+
+    get_bits = ctypes.windll.gdi32.GetBitmapBits
+    get_bits.argtypes = [ctypes.c_void_p, ctypes.c_long, ctypes.c_void_p]
+    get_bits.restype = ctypes.c_long
+    hwnd = win32gui.GetParent(app.winfo_id())
+    signatures = []
+    for size in (0, 1):  # WM_GETICON: ICON_SMALL, ICON_BIG
+        hicon = win32gui.SendMessage(hwnd, 0x007F, size, 0)
+        assert hicon, f'Windows icon missing: size={size}'
+        _, _, _, mask, color = win32gui.GetIconInfo(hicon)
+        try:
+            assert color, f'Windows color icon missing: size={size}'
+            bitmap = win32gui.GetObject(color)
+            length = bitmap.bmWidthBytes * bitmap.bmHeight
+            pixels = ctypes.create_string_buffer(length)
+            assert get_bits(int(color), length, pixels) == length, 'Cannot read Windows icon pixels'
+            signatures.append((bitmap.bmWidth, bitmap.bmHeight, bitmap.bmBitsPixel,
+                               hashlib.sha256(pixels.raw).hexdigest()))
+        finally:
+            for handle in (mask, color):
+                if handle:
+                    win32gui.DeleteObject(handle)
+    return signatures
+
+
 def run(output):
     report = Path(output)
     result = {'status': 'failed', 'platform': sys.platform, 'frozen': bool(getattr(sys, 'frozen', False))}
@@ -19,12 +49,13 @@ def run(output):
         import ezdxf
         import openpyxl
         from bolt.rules import calculate
-        from gui.icons import WINDOW_ICON_PATH
         from pdf.window import GokworksPdfApp
         with TemporaryDirectory() as directory:
             app = GokworksPdfApp(settings_path=Path(directory)/'settings.json', prepare_navigation=True)
             errors = []
             app.report_callback_exception = lambda *args: errors.append(str(args))
+            app.update()
+            icons = _windows_icon_signatures(app) if sys.platform == 'win32' else None
             # Resolve both theme variants from the frozen bundle and render each.
             for theme in ('Açık', 'Koyu', 'Açık', 'Koyu'):
                 app._change_theme(theme)
@@ -33,7 +64,7 @@ def run(output):
                     app.update()
                     time.sleep(.005)
                 if sys.platform == 'win32':
-                    assert app.tk.call('wm', 'iconbitmap', app._w) == str(WINDOW_ICON_PATH)
+                    assert _windows_icon_signatures(app) == icons, f'Windows icons changed after {theme} theme'
             assert app.brand_logo.cget('light_image').size == (1024, 364)
             assert app.brand_logo.cget('dark_image').size == (1024, 364)
             pages = app._MODES
@@ -64,6 +95,7 @@ def run(output):
             assert not errors, errors
             result.update(status='passed', pages=list(pages), tk=app.tk.call('info', 'patchlevel'),
                           branding_themes=['light', 'dark'],
+                          windows_icon_theme_check='passed' if icons else 'not_run',
                           solidworks_connection_tested=False)
             app._on_close()
             app = None
