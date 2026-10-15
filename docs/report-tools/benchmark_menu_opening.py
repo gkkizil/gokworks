@@ -16,9 +16,9 @@ args = parser.parse_args()
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from pdf.window import GokworksPdfApp
 
-MODES = ('dxf_dwg', 'k_factor', 'iso_fits', 'geometric_tolerances', 'bom', 'bolt')
+MODES = GokworksPdfApp._MODES[1:]
 cold = {mode: [] for mode in MODES}
-warm, preload, bursts = [], [], []
+warm, settled, preload, bursts = [], [], [], []
 
 
 def open_app(path):
@@ -47,6 +47,16 @@ for run in range(args.runs):
             for _ in range(5):
                 for mode in ('pdf', *MODES):
                     warm.append(paint_switch(app, mode))
+            for mode in ('pdf', *MODES):
+                start = time.perf_counter()
+                app._switch_mode(mode)
+                # Include scheduled geometry fits and the sidebar animation,
+                # rather than reporting only synchronous idle drawing time.
+                while app._layout_fit_id is not None or getattr(app, '_nav_anim_id', None) is not None:
+                    app.update()
+                    time.sleep(.001)
+                app.update_idletasks()
+                settled.append((time.perf_counter()-start)*1000)
         finally:
             app._on_close()
 
@@ -83,9 +93,13 @@ data = dict(runs=args.runs,
             all_first_paints_median_ms=statistics.median([v for values in cold.values() for v in values]),
             cached_paint_median_ms=statistics.median(warm),
             cached_paint_max_ms=max(warm),
+            settled_cached_median_ms=statistics.median(settled),
+            settled_cached_max_ms=max(settled),
             preload_median_ms=statistics.median(preload),
             queued_clicks=bursts,
             note='Real Tk on Linux/Xvfb, no SolidWorks. Paint timings include update_idletasks; '
-                 'exclude delayed layout callbacks and navigation animation completion.')
+                 'Cached paint timings exclude delayed callbacks; settled_cached timings include '
+                 'layout callbacks and navigation animation completion. All nine app pages covered; '
+                 'not a measurement of native Windows compositor frames.')
 Path(args.output).write_text(json.dumps(data, indent=2)+'\n', encoding='utf-8')
 print(json.dumps(data, indent=2))

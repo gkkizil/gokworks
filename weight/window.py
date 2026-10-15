@@ -5,7 +5,7 @@ import tkinter as tk
 
 import customtkinter as ctk
 
-from gui.rendering import configure_changed
+from gui.rendering import configure_changed, hide_grid
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        AMBER, RED, HOVER, UI_FONT)
 from weight.diagram import draw, draw_icon
@@ -268,16 +268,22 @@ class WeightView:
             w['material_display'].set(displayed)
         configure_changed(w['density_label'],
             text=f'Sabit yoğunluk: {_fmt(MATERIALS[material], 0)} kg/m³' if material in MATERIALS else '—')
-        geometry = state['method'].get() == 'Ölçülerden'
-        for frame in w['dim_frames'].values():
-            frame.grid_remove()
-        for index, key in enumerate(FIELDS.get(kind, ()) if geometry else ()):
-            w['dim_frames'][key].grid(row=index//2, column=index % 2, sticky='ew', padx=8, pady=(8, 0))
+        method = state['method'].get()
+        geometry = method == 'Ölçülerden'
+        fields = FIELDS.get(kind, ()) if geometry else ()
+        layout = kind, method
+        if w.get('field_layout') != layout:
+            for frame in w['dim_frames'].values():
+                hide_grid(frame)
+            for index, key in enumerate(fields):
+                w['dim_frames'][key].grid(row=index//2, column=index % 2, sticky='ew', padx=8, pady=(8, 0))
+            if geometry:
+                hide_grid(w['area_frame'])
+            else:
+                w['area_frame'].grid()
+            w['field_layout'] = layout
+        for key in fields:
             configure_changed(w[key+'_label'], text=f'{FIELD_LABELS[key]} ({unit})')
-        if geometry:
-            w['area_frame'].grid_remove()
-        else:
-            w['area_frame'].grid()
         configure_changed(w['length_label'], text=f'Boy / uzunluk ({unit})')
         configure_changed(w['shape_title'], text=kind)
         for item, tile in w['tiles'].items():

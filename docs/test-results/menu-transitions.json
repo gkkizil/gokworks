@@ -1,0 +1,82 @@
+{
+  "baseline_commit": "e3ada75",
+  "measurement_date": "2026-10-15",
+  "environment": {
+    "python": "3.13.5",
+    "tk": "8.6.16",
+    "customtkinter": "6.0.0",
+    "display": "Linux/Xvfb :99",
+    "drawing_method": "circle_shapes (font files read-only in both runs)"
+  },
+  "method": "One baseline run from a clean git archive, then one final working-tree run, using the same benchmark script and display. Nine pages: initial PDF, eight cold opens, 45 cached switches, nine settled switches, eight queued clicks. No SolidWorks or native Windows compositor measurement.",
+  "before": {
+    "runs": 1,
+    "first_paint_median_ms": {
+      "dxf_dwg": 108.10674600361381,
+      "k_factor": 142.73779999348335,
+      "iso_fits": 186.11518399848137,
+      "geometric_tolerances": 141.4489360031439,
+      "bom": 107.19929299375508,
+      "bolt": 141.06211900070775,
+      "naming": 86.15904100588523,
+      "weight": 178.41383499035146
+    },
+    "all_first_paints_median_ms": 141.25552750192583,
+    "cached_paint_median_ms": 5.051205997006036,
+    "cached_paint_max_ms": 9.20489699637983,
+    "settled_cached_median_ms": 146.25576400430873,
+    "settled_cached_max_ms": 553.4416849986883,
+    "preload_median_ms": 71.039248505258,
+    "queued_clicks": [
+      {
+        "elapsed_ms": 185.71315601002425,
+        "pages_created": 1
+      }
+    ],
+    "note": "Real Tk on Linux/Xvfb, no SolidWorks. Paint timings include update_idletasks; Cached paint timings exclude delayed callbacks; settled_cached timings include layout callbacks and navigation animation completion. All nine app pages covered; not a measurement of native Windows compositor frames."
+  },
+  "after": {
+    "runs": 1,
+    "first_paint_median_ms": {
+      "dxf_dwg": 100.08897399529815,
+      "k_factor": 140.9708419960225,
+      "iso_fits": 183.7762439972721,
+      "geometric_tolerances": 117.7798580029048,
+      "bom": 96.95411499706097,
+      "bolt": 114.31841700687073,
+      "naming": 93.95241500169504,
+      "weight": 199.74157999968156
+    },
+    "all_first_paints_median_ms": 116.04913750488777,
+    "cached_paint_median_ms": 3.291624001576565,
+    "cached_paint_max_ms": 4.870636999839917,
+    "settled_cached_median_ms": 40.46583399758674,
+    "settled_cached_max_ms": 777.556925007957,
+    "preload_median_ms": 91.84591400116915,
+    "queued_clicks": [
+      {
+        "elapsed_ms": 171.03507099091075,
+        "pages_created": 1
+      }
+    ],
+    "note": "Real Tk on Linux/Xvfb, no SolidWorks. Paint timings include update_idletasks; Cached paint timings exclude delayed callbacks; settled_cached timings include layout callbacks and navigation animation completion. All nine app pages covered; not a measurement of native Windows compositor frames."
+  },
+  "limitations": [
+    "One run per version; no variance estimate or broad speedup claim.",
+    "Settled times include delayed layout and navigation animation completion; removal of the 140 ms animation affects this metric.",
+    "Full update() also processes other ready events. A separate diagnostic run found its first settled PDF switch took 820 ms, with 815 ms inside update() and about 4 ms in _switch_mode. Profiling attributed most time to native Tcl/Tk calls, without identifying their internal cause. Those diagnostic values are not the paired measurements above.",
+    "Settled maximum and hidden preload median increased in the paired measurement."
+  ],
+  "validation": {
+    "unique_gui_checks": 26,
+    "initial_run": {
+      "passed": 25,
+      "failed": 1
+    },
+    "after_kr_fix": {
+      "tab_checks_passed": 4
+    },
+    "full_suite_run": false,
+    "exe_built": false
+  }
+}

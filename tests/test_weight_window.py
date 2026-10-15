@@ -1,5 +1,6 @@
 """Native material weight controls, conversions and cached workspace behavior."""
 
+from contextlib import ExitStack
 from unittest.mock import patch
 
 import customtkinter as ctk
@@ -44,6 +45,51 @@ class WeightWindowTests(GuiTestCase):
         state['kind'].set('HEA')
         self.assertTrue(self.app.weight_result.approximate)
         self.assertIn('Katalog alanı', w['note'].cget('text'))
+
+    def test_value_edits_keep_field_layout_while_kind_method_and_units_stay_current(self):
+        state, w = self.app.weight_state, self.app.weight_widgets
+        frames = (*w['dim_frames'].values(), w['area_frame'])
+
+        def edit_without_layout(updates):
+            with ExitStack() as stack:
+                calls = [stack.enter_context(patch.object(frame, method, wraps=getattr(frame, method)))
+                         for frame in frames for method in ('grid', 'grid_remove')]
+                for key, value in updates.items():
+                    state[key].set(value)
+                self.app.update_idletasks()
+                for call in calls:
+                    call.assert_not_called()
+
+        edit_without_layout(dict(b='120', t='6', length='2000', count='2',
+                                 material='Alüminyum', unit='cm'))
+        self.assertAlmostEqual(self.app.weight_result.total_mass_kg, 7.776)
+        self.assertTrue(w['b_label'].cget('text').endswith('(cm)'))
+        self.assertTrue(w['length_label'].cget('text').endswith('(cm)'))
+
+        state['kind'].set('Boru')
+        for key, frame in w['dim_frames'].items():
+            self.assertEqual(frame.winfo_manager() == 'grid', key in FIELDS['Boru'])
+        for index, key in enumerate(FIELDS['Boru']):
+            self.assertEqual(w['dim_frames'][key].grid_info()['column'], index)
+            self.assertTrue(w[key+'_label'].cget('text').endswith('(cm)'))
+        self.assertFalse(w['area_frame'].winfo_manager())
+
+        state['method'].set('Katalog alanından')
+        self.assertEqual(w['area_frame'].winfo_manager(), 'grid')
+        self.assertFalse(any(frame.winfo_manager() for frame in w['dim_frames'].values()))
+        edit_without_layout(dict(area_cm2='12,5', count='3', material='Paslanmaz', unit='m'))
+        self.assertAlmostEqual(self.app.weight_result.total_mass_kg, 60)
+        self.assertTrue(w['length_label'].cget('text').endswith('(m)'))
+
+        state['method'].set('Ölçülerden')
+        self.addCleanup(lambda: ctk.set_widget_scaling(1))
+        ctk.set_widget_scaling(1.25)
+        self.app.update_idletasks()
+        self.assertFalse(w['area_frame'].winfo_manager())
+        for key, frame in w['dim_frames'].items():
+            self.assertEqual(frame.winfo_manager() == 'grid', key in FIELDS['Boru'])
+        for key in FIELDS['Boru']:
+            self.assertTrue(w[key+'_label'].cget('text').endswith('(m)'))
 
     def test_units_preserve_inactive_dimensions_and_catalogue_mode_clears_invalid_results(self):
         state, w = self.app.weight_state, self.app.weight_widgets

@@ -15,6 +15,27 @@ class ResultsTabview(ctk.CTkTabview):
     # CTk uses this value for both the selector and its reserved grid space.
     _button_height = 34
 
+    def set(self, name):
+        if name not in self._tab_dict:
+            raise ValueError(f"CTkTabview has no tab named '{name}'")
+        if name == self._current_name and self._tab_dict[name].winfo_manager():
+            return
+        self._current_name = name
+        self._segmented_button.set(name)
+        self._set_grid_current_tab()
+        self._tab_dict[name].tkraise()
+        # Paint the replacement while the previous tab remains underneath.
+        # CTk's mouse path unmaps it first; set() instead schedules a captured
+        # 100 ms cleanup that can unmap a newer selection during rapid changes.
+        if self.winfo_viewable():
+            self.update_idletasks()
+        self._grid_forget_all_tabs(exclude_name=self._current_name)
+
+    def _segmented_button_callback(self, selected_name):
+        self.set(selected_name)
+        if self._command is not None:
+            self._command()
+
 
 class WorkspaceLayout:
     def _workspace_shell(self):

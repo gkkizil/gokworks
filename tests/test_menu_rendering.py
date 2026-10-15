@@ -37,6 +37,47 @@ class MenuRenderingTests(GuiTestCase):
         self.app._switch_mode('pdf')
         self.assertEqual(self.app.source_folder.get(), '/saved/source')
 
+    def test_navigation_waits_for_timer_turn_not_construction_idle_flush(self):
+        self.app._request_mode('bom')
+        self.app.update_idletasks()
+        self.assertEqual(self.app.mode, 'pdf')
+        self.assertIsNotNone(self.app._navigation_id)
+        self.app._request_mode('bolt')
+        self.app.update()
+        self.assertEqual(self.app.mode, 'bolt')
+        self.assertNotIn('bom', self.app._pages)
+        self.assertIsNone(getattr(self.app, '_nav_anim_id', None))
+
+    def test_replacement_is_mapped_and_sized_before_previous_page_hides(self):
+        from gui.rendering import hide_grid
+
+        for mode in ('bom', 'pdf', 'weight', 'bom'):
+            previous = self.app.workspace
+            show = self.app._show_workspace
+            swaps = []
+
+            def show_with_previous_visible():
+                self.assertTrue(previous.winfo_viewable())
+                show()
+                self.assertTrue(previous.winfo_viewable())
+
+            def hide_after_paint(widget):
+                if widget is previous:
+                    target = self.app.workspace
+                    self.assertTrue(target.winfo_viewable())
+                    self.assertGreater(target.winfo_width(), 100)
+                    self.assertGreater(target.winfo_height(), 100)
+                    swaps.append(target)
+                hide_grid(widget)
+
+            with self.subTest(mode=mode), \
+                    patch.object(self.app, '_show_workspace', side_effect=show_with_previous_visible), \
+                    patch('pdf.window.hide_grid', side_effect=hide_after_paint):
+                self.app._switch_mode(mode)
+                self.assertEqual(swaps, [self.app.workspace])
+                self.assertFalse(previous.winfo_viewable())
+                self.assertTrue(self.app.workspace.winfo_viewable())
+
     def test_current_page_or_direct_navigation_supersedes_queued_click(self):
         self.app.nav_buttons['bom'].invoke()
         self.app.nav_buttons['pdf'].invoke()

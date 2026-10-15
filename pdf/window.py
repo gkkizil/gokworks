@@ -26,7 +26,6 @@ from weight.window import WeightView
 from naming.window import NamingView
 from gui.icons import make_icon, set_window_icon
 from gui.typography import check_turkish_fonts
-from gui.motion import blend, pair
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
@@ -198,7 +197,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         self._note_ui_activity()
         self._requested_mode = mode
         if self._navigation_id is None:
-            self._navigation_id = self.after_idle(self._apply_navigation)
+            self._navigation_id = self.after(0, self._apply_navigation)
 
     def _apply_navigation(self):
         self._navigation_id = None
@@ -224,18 +223,33 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         self._remember_page()
         active_mode, active_workspace = self.mode, self.workspace
         self.mode = mode
+        cached = mode in self._pages
         try:
-            if mode in self._pages:
+            if cached:
                 for name, value in self._pages[mode].items():
                     setattr(self, name, value)
             else:
                 self._create_page_state()
                 self._build_window()
                 self._remember_page()
+            # Map and paint the replacement below the previous native window.
+            # Merely calling grid() before unmapping the old page leaves an
+            # expose/geometry gap, especially on Windows.
+            self.workspace.lower(active_workspace)
+            self._show_workspace()
+            self.update_idletasks()
+            self._resize_pdf_area(immediate=True)
+            self.update_idletasks()
+            self.workspace.tkraise()
+            hide_grid(active_workspace)
         except Exception:
             if self.workspace is not active_workspace:
-                self._cancel_widget_callbacks(self.workspace)
-                self.workspace.destroy()
+                if cached:
+                    hide_grid(self.workspace)
+                else:
+                    self._pages.pop(mode, None)
+                    self._cancel_widget_callbacks(self.workspace)
+                    self.workspace.destroy()
             if self._layout_fit_id is not None:
                 self.after_cancel(self._layout_fit_id)
                 self._layout_fit_id = None
@@ -245,10 +259,6 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             self.workspace.bind("<Configure>", self._resize_pdf_area)
             self._resize_pdf_area()
             raise
-        # Keep the previous screen visible through CTk's construction-time idle
-        # flushes. Swap only when the next page can be shown as a whole.
-        hide_grid(active_workspace)
-        self._show_workspace()
         self.stop_event.clear()
         self.workspace.bind("<Configure>", self._resize_pdf_area)
         self._update_navigation()
@@ -327,20 +337,12 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
 
     def _update_navigation(self):
         previous = self._nav_active
-        animation = getattr(self, '_nav_anim_id', None)
-        if animation is not None:
-            self.after_cancel(animation)
-            for key, button in self.nav_buttons.items():
-                if key not in (previous, self.mode):
-                    button.configure(fg_color='transparent')
         self._nav_active = self.mode
-        transitions = []
         for key in dict.fromkeys((previous, self.mode)):
-            button = self.nav_buttons[key]
             active = key == self.mode
-            target = NAV_ACTIVE if active else 'transparent'
-            transitions.append((button, pair(button.cget('fg_color'), SIDEBAR), pair(target, SIDEBAR), target))
-            button.configure(
+            configure_changed(
+                self.nav_buttons[key],
+                fg_color=NAV_ACTIVE if active else 'transparent',
                 hover_color=NAV_HOVER,
                 text_color=NAV_ACCENT if active else NAV_MUTED,
                 image=self._icon({"pdf": "file", "dxf_dwg": "layers", "k_factor": "tools", "iso_fits": "ruler", "geometric_tolerances": "target", "bom": "tree", "bolt": "bolt", "naming": "copy", "weight": "weight"}[key],
@@ -348,17 +350,6 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
                 border_width=0,
                 font=self._nav_fonts[active],
             )
-        started = time.monotonic()
-        def frame():
-            if self._closed:
-                return
-            elapsed = min(1, (time.monotonic()-started)/.14)
-            fraction = 1-(1-elapsed)**3
-            for button, start, end, target in transitions:
-                button.configure(fg_color=target if elapsed == 1 else tuple(
-                    blend(a, b, fraction) for a, b in zip(start, end)))
-            self._nav_anim_id = self.after(16, frame) if elapsed < 1 else None
-        self._nav_anim_id = self.after(0, frame)
 
     def _cancel_widget_callbacks(self, widget):
         """Silinen panelin CustomTkinter zamanlayıcılarını da iptal et."""
@@ -539,47 +530,29 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             window.destroy()
         self.detail_window = None
 
-    def _resize_pdf_area(self, event=None):
+    def _resize_pdf_area(self, event=None, *, immediate=False):
         if self._closed:
             return
-        if self.mode == 'weight':
-            previous = getattr(self, '_layout_fit_id', None)
-            if previous is not None:
-                self.after_cancel(previous)
-            self._layout_fit_id = self.after(35, self._resize_weight_workspace)
-            return
-        if self.mode == 'naming':
-            previous = getattr(self, '_layout_fit_id', None)
-            if previous is not None:
-                self.after_cancel(previous)
-            self._layout_fit_id = self.after(35, self._resize_naming_workspace)
-            return
-        if self.mode == 'bolt':
-            previous = getattr(self, '_layout_fit_id', None)
-            if previous is not None:
-                self.after_cancel(previous)
-            self._layout_fit_id = self.after(35, self._resize_bolt_workspace)
-            return
-        if self.mode == 'bom':
-            previous = getattr(self, '_layout_fit_id', None)
-            if previous is not None:
-                self.after_cancel(previous)
-            self._layout_fit_id = self.after(35, self._resize_bom_workspace)
-            return
-        if self.mode in ('iso_fits', 'geometric_tolerances'):
-            previous = getattr(self, '_layout_fit_id', None)
-            if previous is not None:
-                self.after_cancel(previous)
-            callback = self._resize_iso_workspace if self.mode == 'iso_fits' else self._resize_gdt_workspace
-            self._layout_fit_id = self.after(35, callback)
-            return
-        wrap = max(240, self.workspace.winfo_width() - 56)
-        if self.status_label.cget('wraplength') != wrap:
-            self.status_label.configure(wraplength=wrap)
-        previous = getattr(self, "_layout_fit_id", None)
+        callbacks = {
+            'weight': self._resize_weight_workspace,
+            'naming': self._resize_naming_workspace,
+            'bolt': self._resize_bolt_workspace,
+            'bom': self._resize_bom_workspace,
+            'iso_fits': self._resize_iso_workspace,
+            'geometric_tolerances': self._resize_gdt_workspace,
+        }
+        callback = callbacks.get(self.mode, self._fit_pdf_settings)
+        if self.mode not in callbacks:
+            wrap = max(240, self.workspace.winfo_width() - 56)
+            configure_changed(self.status_label, wraplength=wrap)
+        previous = getattr(self, '_layout_fit_id', None)
         if previous is not None:
             self.after_cancel(previous)
-        self._layout_fit_id = self.after(35, self._fit_pdf_settings)
+        self._layout_fit_id = None
+        if immediate:
+            callback()
+        else:
+            self._layout_fit_id = self.after(35, callback)
 
     def _fit_pdf_settings(self):
         self._layout_fit_id = None

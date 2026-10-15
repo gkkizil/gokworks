@@ -215,16 +215,34 @@ class KFactorView:
             self.k_state["assignment_mode"].set(selection)
             return  # The variable trace applies the view once.
         self.k_widgets['assignment_tabs'].set(selection)
-        self.form_panel.grid()
-        if hasattr(self, 'result_tabs') and self.result_tabs.master.master is self.k_widgets['body']:
-            hide_grid(self.result_tabs.master)
         manual = selection == MANUAL_TAB
-        hide_grid(self.k_widgets["automatic_panel"])
-        hide_grid(self.k_widgets["manual_panel"])
-        self.k_widgets["manual_panel" if manual else "automatic_panel"].grid()
+        panel = self.k_widgets["manual_panel" if manual else "automatic_panel"]
+        other = self.k_widgets["automatic_panel" if manual else "manual_panel"]
+        changed = not panel.winfo_manager() or not self.form_panel.winfo_manager()
+        if not panel.winfo_manager():
+            panel.grid()
+        panel.tkraise()
+        if not self.form_panel.winfo_manager():
+            self.form_panel.grid()
+        self.form_panel.tkraise()
         self.k_calculation_label = self.k_widgets["manual_summary" if manual else "automatic_summary"]
         self.settings_body._parent_canvas.yview_moveto(0)
         self._preview_k_calculation()
+        # Keep both the prior assignment and results panel behind the new view
+        # until its native widgets are mapped and painted.
+        if changed and self.workspace.winfo_viewable():
+            self.workspace.update_idletasks()
+        if other.winfo_manager():
+            hide_grid(other)
+            # The two forms have different requested heights. Removing the
+            # old one changes the scrollable canvas window geometry, which
+            # can temporarily unmap its contents even after the first paint.
+            # Settle that change while the results view is still underneath.
+            if changed and self.workspace.winfo_viewable():
+                self.workspace.update_idletasks()
+        if (hasattr(self, 'result_tabs') and self.result_tabs.master.master is self.k_widgets['body']
+                and self.result_tabs.master.winfo_manager()):
+            hide_grid(self.result_tabs.master)
         if hasattr(self, "status_label"):
             self._resize_pdf_area()
 
@@ -232,8 +250,13 @@ class KFactorView:
         if selection != RESULTS_TAB:
             return self._select_k_assignment(selection)
         self.k_widgets['assignment_tabs'].set(RESULTS_TAB)
-        hide_grid(self.form_panel)
-        self.result_tabs.master.grid()
+        if not self.result_tabs.master.winfo_manager():
+            self.result_tabs.master.grid()
+            self.result_tabs.master.tkraise()
+            if self.workspace.winfo_viewable():
+                self.workspace.update_idletasks()
+        if self.form_panel.winfo_manager():
+            hide_grid(self.form_panel)
         self._resize_pdf_area()
 
     def _resize_k_workspace(self):
