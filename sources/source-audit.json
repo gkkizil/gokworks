@@ -1,0 +1,2807 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Europe/Istanbul",
+  "source_commit": "5a5d0a386b7fa814c22d8d61462cf61481c4c518",
+  "branch": "codex/dxf-dwg-gui-report",
+  "scope": "Mevcut takipli repo metin/DOCX kaynakları, kayıtlı konuşma referansları, sabit sürüm lisans okumaları, kurulu Linux paket ve font metadata; Windows EXE içeriği ve bağımsız hukuki/kod benzerliği denetimi kapsam dışı.",
+  "sources": [
+    [
+      "ajisaacs/ExportDxf",
+      "DXF/K/R",
+      "Sac kalınlığı API erişimi ve metre/mm dönüşümü karşılaştırıldı.",
+      "Yalnız API kıyaslaması.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/ajisaacs/ExportDxf/blob/14fa1e69064f743f48edb279edd99681ff0ba783/ExportDXF/Extensions/UnitConversionExtensions.cs#L31\nhttps://github.com/ajisaacs/ExportDxf/blob/14fa1e69064f743f48edb279edd99681ff0ba783/ExportDXF/Utilities/SolidWorksHelper.cs\nhttps://github.com/ajisaacs/ExportDxf/blob/14fa1e69064f743f48edb279edd99681ff0ba783/ExportDXF/Utilities/SolidWorksHelper.cs#L31",
+      "https://github.com/ajisaacs/ExportDxf/tree/14fa1e69064f743f48edb279edd99681ff0ba783",
+      "14fa1e69064f743f48edb279edd99681ff0ba783",
+      "docs/dxf-dwg-verification.md",
+      ""
+    ],
+    [
+      "AmenJlili/power-sm",
+      "K/R",
+      "SheetMetal klasör/alt unsur bulma ve K/R yazma API akışı karşılaştırıldı.",
+      "Kod referansı; Python uygulaması bağımsız.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/AmenJlili/power-sm\nhttps://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L1058\nhttps://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L460\nhttps://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L470\nhttps://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/SheetMetalFolder2.cs#L70\nhttps://github.com/AmenJlili/power-sm/tree/6c835fb712c18df8969500ec247a0768d3af0d37",
+      "https://github.com/AmenJlili/power-sm/tree/6c835fb712c18df8969500ec247a0768d3af0d37",
+      "6c835fb712c18df8969500ec247a0768d3af0d37",
+      "docs/reports/power-sm-adaptation/README.md",
+      ""
+    ],
+    [
+      "angelsix/solidworks-api",
+      "K/R/İsimlendirme",
+      "SolidDNA PackAndGo akışı ve 2023 interop metadata imzaları incelendi.",
+      "Referans incelemesi; DLL dağıtımı tespit edilmedi.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/angelsix/solidworks-api/blob/85a773aedc87b49afda3a65c8bb650f5ba771092/SolidDna/AngelSix.SolidDna/SolidWorks/Models/Model.cs#L271\nhttps://github.com/angelsix/solidworks-api/tree/85a773aedc87b49afda3a65c8bb650f5ba771092/References/2023",
+      "https://github.com/angelsix/solidworks-api/tree/85a773aedc87b49afda3a65c8bb650f5ba771092",
+      "85a773aedc87b49afda3a65c8bb650f5ba771092",
+      "naming/README.md; docs/k-factor-radius.md",
+      ""
+    ],
+    [
+      "bell-jamie/iso-286",
+      "ISO geçme",
+      "IT, temel sapma ve delta tablolarından sayısal veriler çıkarıldı.",
+      "Tablo verisi kullanımı; Rust uygulama kodu kopyalanmadı.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/bell-jamie/iso-286/tree/6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "https://github.com/bell-jamie/iso-286/tree/6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "docs/iso-fits.md; docs/reports/iso-fits/source-comparison.json",
+      ""
+    ],
+    [
+      "Bowserinator/Periodic-Table-JSON",
+      "Ağırlık",
+      "Çinko, kurşun ve titanyum için 3 sayısal yoğunluk alındı; görseller alınmadı.",
+      "Sayısal veri kullanımı.",
+      "CC-BY-SA-3.0",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/Bowserinator/Periodic-Table-JSON/blob/\nhttps://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json",
+      "https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/9090b1c472a1e68f7295e77280f374f8d125cefc/LICENSE.md",
+      "9090b1c472a1e68f7295e77280f374f8d125cefc",
+      "weight/materials.py; weight/materials.md",
+      "f9addd595dfab08de0c6fc611a05a75eefc1473d5c58559d5e5c010743c7a567"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "Ağırlık",
+      "9 malzeme kartından yoğunluklar; Kestamit için genel PA6 yaklaşımı.",
+      "Sayısal veri kullanımı; kart lisansı depo lisansından farklı.",
+      "LGPL-2.1 (LICENSE metni); malzeme kartları ayrı lisanslı",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/Aluminum-Generic.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-230.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-510.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-Generic.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/POM-Homopolymer-Generic.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PP-Generic.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PTFE-Generic.FCMat\nhttps://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PVC-Generic.FCMat",
+      "https://raw.githubusercontent.com/FreeCAD/FreeCAD/384314776045a67fcdf09d49aa29306243578d4f/LICENSE",
+      "384314776045a67fcdf09d49aa29306243578d4f",
+      "weight/materials.py; weight/materials.md",
+      "7ffe1954587c77dfba1cf8eb9b2ea743671fa6e63f9e7a2f258119d42e14eefe"
+    ],
+    [
+      "FreeCAD/FreeCAD-addons",
+      "GD&T",
+      "FreeCAD-GDT deposunu bulmak için eklenti dizini incelendi.",
+      "Yalnız kaynak keşfi.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/FreeCAD/FreeCAD-addons/blob/master/.gitmodules",
+      "https://github.com/FreeCAD/FreeCAD-addons/tree/master",
+      "master",
+      "docs/geometric-tolerances.md",
+      ""
+    ],
+    [
+      "gumyr/cq_warehouse",
+      "Cıvata",
+      "Altıgen baş ölçüleri karşılaştırıldı; tablo topluca aktarılmadı.",
+      "Geometri kıyaslaması.",
+      "Apache-2.0",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/gumyr/cq_warehouse/blob/daa46507ecc429c0e2dce11d9d5ffd09b12a42af/src/cq_warehouse/hex_head_parameters.csv",
+      "https://raw.githubusercontent.com/gumyr/cq_warehouse/daa46507ecc429c0e2dce11d9d5ffd09b12a42af/LICENSE",
+      "daa46507ecc429c0e2dce11d9d5ffd09b12a42af",
+      "bolt/README.md",
+      "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    ],
+    [
+      "Johanss-on/Assem2DXF",
+      "DXF/DWG",
+      "Aktivasyon, konfigürasyon ve düz açınım seçimi karşılaştırıldı.",
+      "Kod akışı karşılaştırması; makro dağıtılmıyor.",
+      "GPL-3.0 (LICENSE metni)",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/Johanss-on/Assem2DXF/blob/32f32c3622248981fada57778ffbf7ebce9d7c48/Assem%202%20DXF%20v3.txt#L519",
+      "https://raw.githubusercontent.com/Johanss-on/Assem2DXF/32f32c3622248981fada57778ffbf7ebce9d7c48/LICENSE",
+      "32f32c3622248981fada57778ffbf7ebce9d7c48",
+      "docs/dxf-dwg-verification.md",
+      "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    ],
+    [
+      "juanvanyo/FreeCAD-GDT",
+      "GD&T",
+      "Ad/çerçeve yapısı ve 14 SVG hash karşılaştırması.",
+      "Kod ve SVG kopyalanmadığı belgelenmiş.",
+      "LGPL-2.1 (LICENSE metni)",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/juanvanyo/FreeCAD-GDT",
+      "https://raw.githubusercontent.com/juanvanyo/FreeCAD-GDT/841518cdd74f6a7dad3321d29937c49dc7dc4b1f/LICENSE",
+      "841518cdd74f6a7dad3321d29937c49dc7dc4b1f",
+      "docs/geometric-tolerances.md; docs/reports/geometric-tolerances/source-comparison.json",
+      "9b872a8a070b8ad329c4bd380fb1bf0000f564c75023ec8e1e6803f15364b9e9"
+    ],
+    [
+      "lachr/Passungsrechner",
+      "ISO geçme",
+      "Sınır sapmaları 1–400 mm karşılaştırıldı; yanlış F8 satırı reddedildi.",
+      "Bağımsız doğrulama tablosu; JS arayüzü kopyalanmadı.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/lachr/Passungsrechner/tree/0289439b1883db363d92e38f1ab352817b4d5a47",
+      "https://github.com/lachr/Passungsrechner/tree/0289439b1883db363d92e38f1ab352817b4d5a47",
+      "0289439b1883db363d92e38f1ab352817b4d5a47",
+      "docs/iso-fits.md",
+      ""
+    ],
+    [
+      "mhammond/pywin32",
+      "SolidWorks/COM",
+      "VARIANT/BYREF, DumbDispatch ve dispatch davranışı; runtime bağımlılığı.",
+      "API incelemesi ve pywin32 312 kullanımı.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "BELİRSİZ",
+      "Çalışma zamanı kütüphanesi dağıtılır; lisans bildiriminin mevcut Windows EXE/ZIP içinde bulunması doğrulanmadı.",
+      "Bağımlılıklar ve Dağıtım Kontrolü sayfalarındaki bildirim adımlarını tamamla.",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/HTML/variant.html\nhttps://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/HTML/variant.html#L138\nhttps://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py\nhttps://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py#L200\nhttps://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py#L361\nhttps://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/test/testPyComTest.py#L457",
+      "https://github.com/mhammond/pywin32/tree/2a277cb5552756c2b4d42b524dc36d25e0bb6354",
+      "2a277cb5552756c2b4d42b524dc36d25e0bb6354",
+      "requirements.txt; docs/program-verification.md",
+      ""
+    ],
+    [
+      "misams/BAT",
+      "Cıvata",
+      "ECSS varsayımları, çekme alanı ve kaba/ince diş geometrisi karşılaştırıldı.",
+      "GPL kodu uygulamaya eklenmediği belgelenmiş; sayısal karşılaştırma.",
+      "GPL-3.0 (LICENSE metni)",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/db/ISO4014_4017_hex_metric.bolt\nhttps://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/db/ISO8765_8676_hex_metric_fine.bolt\nhttps://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/src/Ecss.py\nhttps://github.com/misams/BAT/tree/6f39c08201bba0f4034c281c5a22f8d9927bc0a9",
+      "https://raw.githubusercontent.com/misams/BAT/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/LICENSE",
+      "6f39c08201bba0f4034c281c5a22f8d9927bc0a9",
+      "bolt/README.md",
+      "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    ],
+    [
+      "mozman/ezdxf",
+      "DXF/DWG",
+      "Gerçek DXF okuma ve audit(); test örnekleri üretimi.",
+      "MIT runtime bağımlılığı.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Çalışma zamanı kütüphanesi dağıtılır; lisans bildiriminin mevcut Windows EXE/ZIP içinde bulunması doğrulanmadı.",
+      "Bağımlılıklar ve Dağıtım Kontrolü sayfalarındaki bildirim adımlarını tamamla.",
+      "https://github.com/mozman/ezdxf/tree/df5ef277fcc674d77580143212ec63dd981cc2b3",
+      "https://raw.githubusercontent.com/mozman/ezdxf/df5ef277fcc674d77580143212ec63dd981cc2b3/LICENSE",
+      "df5ef277fcc674d77580143212ec63dd981cc2b3",
+      "requirements.txt; docs/program-verification.md",
+      "db97ca426fc0d2b8124145de0f36181db73e6e713ce642d42fed2efc442edf19"
+    ],
+    [
+      "mvernacc/material-properties-interchange",
+      "Ağırlık",
+      "304 ve 316L kartlarından nominal yoğunluk alındı.",
+      "Sayısal veri; özgün MMPDS/MatWeb metinleri ayrıca okunmadı.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/mvernacc/material-properties-interchange/blob/\nhttps://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_304.yaml\nhttps://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_316L.yaml",
+      "https://raw.githubusercontent.com/mvernacc/material-properties-interchange/561d181d8b2c83c53c17b177c21505c55809fc11/LICENSE.md",
+      "561d181d8b2c83c53c17b177c21505c55809fc11",
+      "weight/materials.md",
+      "bcdead6b3748d5019780715f8e7bcbd3af1bed8bcbb83cedfa619f241b5c73e1"
+    ],
+    [
+      "parkergreene/isofits",
+      "ISO geçme",
+      "Delik/mil sayısal tabloları ve çalışan Python fonksiyonuyla karşılaştırma.",
+      "MIT bildirimi kaynak depoda saklanmış.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/parkergreene/isofits/tree/d3083a941e8071bb12114a28a25274bf99c30ac0",
+      "https://raw.githubusercontent.com/parkergreene/isofits/d3083a941e8071bb12114a28a25274bf99c30ac0/LICENSE",
+      "d3083a941e8071bb12114a28a25274bf99c30ac0",
+      "iso_fits/ISOFITS-LICENSE.txt; docs/iso-fits.md",
+      "2e6abf8fc662fe3de0bcecf84b46c154272c722a5e80e0d94eea1b73d52fd158"
+    ],
+    [
+      "pedropaulovc/offline-solidworks-api-docs",
+      "SolidWorks API",
+      "Resmi yardım erişilemediğinde XML üye imzaları ve açıklamalar doğrulandı.",
+      "Belge aynası incelemesi; belgelerin yeniden dağıtımı tespit edilmedi.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/pedropaulovc/offline-solidworks-api-docs/blob/b586c9f0c993ae7791e1b8aea79dab2a341a0147/50_extract_type_member_details/metadata/api_member_details.xml\nhttps://github.com/pedropaulovc/offline-solidworks-api-docs/releases/tag/v3.12.1\nhttps://github.com/pedropaulovc/offline-solidworks-api-docs/tree/b586c9f0c993ae7791e1b8aea79dab2a341a0147",
+      "https://github.com/pedropaulovc/offline-solidworks-api-docs/tree/b586c9f0c993ae7791e1b8aea79dab2a341a0147",
+      "b586c9f0c993ae7791e1b8aea79dab2a341a0147",
+      "naming/README.md; docs/reports/bom-mass/README.md",
+      ""
+    ],
+    [
+      "RF555/PFM-Calculator",
+      "Ağırlık",
+      "1.2311, 1.2312, 1.2379 için 3 yoğunluk alındı.",
+      "Elle tutulan nominal hesap kataloğu; üretici belgesi değil.",
+      "Doğrulanamadı",
+      "Doğrulanamadı; yaygın lisans adları tarandı",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/RF555/PFM-Calculator/blob/\nhttps://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/README.md\nhttps://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json",
+      "https://github.com/RF555/PFM-Calculator/tree/1be015cb20aad00cec018a13705312073dafac5f",
+      "1be015cb20aad00cec018a13705312073dafac5f",
+      "weight/materials.py; weight/materials.md",
+      ""
+    ],
+    [
+      "robbievanleeuwen/section-properties",
+      "Ağırlık",
+      "Nominal çelik 7850 kg/m³ örneği ve I-profil geometri kapsamı incelendi.",
+      "Sayısal referans; kütüphane/kod dahil edilmedi.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/\nhttps://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst\nhttps://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/src/sectionproperties/pre/library/steel_sections.py",
+      "https://raw.githubusercontent.com/robbievanleeuwen/section-properties/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/LICENSE",
+      "1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf",
+      "weight/README.md; weight/materials.md",
+      "b9a45f9a197adba20ebd838a68118785a326d242d335f32d7ed3ff5baed9432b"
+    ],
+    [
+      "saucecode/ISO286",
+      "ISO geçme",
+      "IT genişliği ve temel sapma sayıları karşılaştırıldı/veri oluşturulurken kullanıldı.",
+      "Sayısal tablo kaynağı; LGPL uygulama kodu alınmadı.",
+      "LGPL-2.1 (LICENSE metni)",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/saucecode/ISO286/tree/f455cecdfc6659f35002bc112e3667f4316eb086",
+      "https://raw.githubusercontent.com/saucecode/ISO286/f455cecdfc6659f35002bc112e3667f4316eb086/LICENSE",
+      "f455cecdfc6659f35002bc112e3667f4316eb086",
+      "docs/iso-fits.md; docs/report-tools/compare_iso_sources.py",
+      "20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331"
+    ],
+    [
+      "scroberts/Engineering-Materials-Database",
+      "Ağırlık",
+      "Genel paslanmaz/316 ve 1.2344/H13 yoğunlukları alındı.",
+      "Sayısal veri; kaynak CC-BY-4.0.",
+      "CC-BY-4.0",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/\nhttps://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/stainless-316.json\nhttps://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json",
+      "https://raw.githubusercontent.com/scroberts/Engineering-Materials-Database/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/LICENSE",
+      "bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad",
+      "weight/materials.py; weight/materials.md",
+      "ee5d0016080df0e8422f6d800e7a55a1625f7f136c5b49b8bcf3d8691ec90ed3"
+    ],
+    [
+      "shaise/FreeCAD_FastenersWB",
+      "Cıvata",
+      "ISO 262 adımları ve ISO 4017 baş ölçüleri karşılaştırıldı.",
+      "Geometri kıyaslaması; kod alınmadı.",
+      "GPL-2.0 (LICENSE metni)",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso262def.csv\nhttps://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso4017head.csv",
+      "https://raw.githubusercontent.com/shaise/FreeCAD_FastenersWB/fddd07af422b7d3a69098b32333711c5eeae184c/LICENSE",
+      "fddd07af422b7d3a69098b32333711c5eeae184c",
+      "bolt/README.md",
+      "c03cea027b4b40e4402fabd08557736727ec3d5bc54ad64ab6472de432198cad"
+    ],
+    [
+      "shaise/FreeCAD_SheetMetal",
+      "K/R",
+      "9 K faktörü tablosu hücresi ve ANSI/DIN/BA formülleri karşılaştırıldı.",
+      "AIR_K sayısal değerleri kullanılıyor; kod değil, veri zinciri de incelenmeli.",
+      "LGPL-2.1 (LICENSE metni)",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Sayısal olguların lisanslı tablo/derleme kapsamından ayrılması ve atıf/dağıtım koşulları tamamlanmalı; bu kayıt ihlal tespiti değildir.",
+      "Kaynak, lisans ve dönüştürme notlarını dağıtıma ekle; lisanssız/standart kökenli veri için izin veya bağımsız birincil kaynak doğrula.",
+      "https://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/SheetMetalNewUnfolder.py\nhttps://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/tools/README.md\nhttps://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/tools/calc-unfold.py",
+      "https://raw.githubusercontent.com/shaise/FreeCAD_SheetMetal/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/LICENSE",
+      "a1cf212d8b86b3849e5cc12070226d5d4bded2a3",
+      "k_factor/rules.py; docs/k-factor-radius.md",
+      "510ccb0ba9b0a9bf99343901040a8ec42f92310704203d2068cea815cbbabb8f"
+    ],
+    [
+      "StephanoisMineur/bolt-analysis",
+      "Cıvata",
+      "Ön sıkma, tork, sıcaklık ve rijitlik girdileri incelendi.",
+      "Kod kopyalanmadığı belgelenmiş referans incelemesi.",
+      "MPL-2.0",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/StephanoisMineur/bolt-analysis/blob/1578baacfe0edb34b529179dbfec347a0a05a50d/main.py\nhttps://github.com/StephanoisMineur/bolt-analysis/tree/1578baacfe0edb34b529179dbfec347a0a05a50d",
+      "https://raw.githubusercontent.com/StephanoisMineur/bolt-analysis/1578baacfe0edb34b529179dbfec347a0a05a50d/LICENSE",
+      "1578baacfe0edb34b529179dbfec347a0a05a50d",
+      "bolt/README.md",
+      "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+    ],
+    [
+      "TomSchimansky/CustomTkinter",
+      "Arayüz",
+      "Sidebar/grid, tema, ölçek, OptionMenu örnekleri; ayrıca runtime bağımlılığı.",
+      "Örnek incelemesi ve kütüphane kullanımı.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "BELİRSİZ",
+      "Çalışma zamanı kütüphanesi dağıtılır; lisans bildiriminin mevcut Windows EXE/ZIP içinde bulunması doğrulanmadı.",
+      "Bağımlılıklar ve Dağıtım Kontrolü sayfalarındaki bildirim adımlarını tamamla.",
+      "https://github.com/TomSchimansky/CustomTkinter/blob/35f954293b0a39c90b2ad99f812ae0b1773cf3a1/examples/complex_example.py\nhttps://github.com/TomSchimansky/CustomTkinter/blob/35f954293b0a39c90b2ad99f812ae0b1773cf3a1/test/manual_integration_tests/test_optionmenu_combobox.py",
+      "https://raw.githubusercontent.com/TomSchimansky/CustomTkinter/35f954293b0a39c90b2ad99f812ae0b1773cf3a1/LICENSE",
+      "35f954293b0a39c90b2ad99f812ae0b1773cf3a1",
+      "docs/reports/final-audit/README.md; requirements.txt",
+      "c973b8600e620159cb0473eb9b08783143e0d9ed5333f350fc933368d94d9e0d"
+    ],
+    [
+      "tpw809/ranf_thread_fast",
+      "Cıvata",
+      "NASA denklemleri, marj ve von Mises ilişkisi incelendi.",
+      "Formül incelemesi; kod veya bağımlılık eklenmedi.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/tpw809/ranf_thread_fast/blob/0f7103b48173d495dc4daf6e22f549606d8ac638/src/thread_fast/materials/material_class.py\nhttps://github.com/tpw809/ranf_thread_fast/blob/0f7103b48173d495dc4daf6e22f549606d8ac638/src/thread_fast/nasa_std_5020/nasa_std_5020b.py\nhttps://github.com/tpw809/ranf_thread_fast/tree/0f7103b48173d495dc4daf6e22f549606d8ac638",
+      "https://raw.githubusercontent.com/tpw809/ranf_thread_fast/0f7103b48173d495dc4daf6e22f549606d8ac638/LICENSE",
+      "0f7103b48173d495dc4daf6e22f549606d8ac638",
+      "bolt/README.md",
+      "3140c43fd04d2d1438a454b62080a3910a528c29f21ebe6ba30ac189af264771"
+    ],
+    [
+      "xarial/codestack",
+      "PDF/DXF/K/R/BOM",
+      "Aktarım, unsur ağacı, adet, montaj ve kütle API örnekleri incelendi.",
+      "Bağımsız Python uygulaması; VBA kopyalanmadığı belgelenmiş.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/xarial/codestack\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/get-cog/MacroMassPrp.vba\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/traversing-tree/Macro.vba\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/write-quantities/Macro.vba\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/compose-flat-bom/Macro.vba\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/features-manager/find-features/Macro.vba\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-all-flat-patterns/Macro.vba#L475\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-all-flat-patterns/index.md\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-dxf-dwg/Macro.vba\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-dxf-dwg/Macro.vba#L1\nhttps://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/import-export/export-sheets-pdf/Macro.vba\nhttps://github.com/xarial/codestack/issues/122",
+      "https://raw.githubusercontent.com/xarial/codestack/0cde3849a184cdbbface61238ef431a6ebb9d530/LICENSE.md",
+      "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "docs/bom.md; docs/dxf-dwg-verification.md; docs/reports/bom-mass/README.md",
+      "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93"
+    ],
+    [
+      "xarial/xcad",
+      "PDF/DXF/K/R/BOM/İsimlendirme",
+      "Kaydetme, parça/gövde, montaj/konfigürasyon API akışları incelendi.",
+      "Bağımsız uygulama; xCAD bağımlılığı yok.",
+      "MIT",
+      "Tam metin / sabit sürüm",
+      "YOK",
+      "Belgelenen kullanım API/formül/akış karşılaştırmasıdır; dış kod/figürün dağıtıldığına dair kayıt yok. Bu sonucun bağımsız kod benzerliği denetimi yapılmadı.",
+      "Kopyalama yapılırsa ilgili dosya lisansını ayrıca uygula; kaynak kayıtlarını koru.",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwAssembly.cs\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwAssembly.cs#L203\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwComponent.cs\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwDocumentCollection.cs#L340\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwPart.cs\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwPart.cs#L34\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwSaveOperation.cs\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwSaveOperation.cs#L360\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/tests/integration/SolidWorks.Tests.Integration/DrawingTest.cs#L279\nhttps://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/thirdpty/SolidWorks.Interop.sldworks.dll",
+      "https://raw.githubusercontent.com/xarial/xcad/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/LICENSE.md",
+      "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+      "docs/program-verification.md; naming/README.md",
+      "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93"
+    ],
+    [
+      "SOLIDWORKS resmi API belgeleri",
+      "SolidWorks API",
+      "Resmi API imzaları referans gösterildi; bazı erişimler 403 verdi, ayna kullanıldı.",
+      "Belge/API incelemesi; belge metinleri pakette yok.",
+      "Dassault Systèmes; açık yeniden dağıtım lisansı doğrulanmadı",
+      "Depodaki erişim ve API kayıtları",
+      "YOK",
+      "API kullanmak, yardım sayfalarının telifini almak anlamına gelmez; belgelenen kullanımda yeniden yayım yok.",
+      "Yardım metinlerini veya interop DLL dosyalarını ayrıca izin almadan dağıtma.",
+      "https://help.solidworks.com/",
+      "",
+      "",
+      "docs/reports/bom-mass/api-contract.json; naming/examples/api-contract.json",
+      ""
+    ],
+    [
+      "ISO 286-1:2010",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "BELİRSİZ",
+      "Tam metin/figür dağıtımı yok; ISO 286 sayısal tablo zinciri ayrıca hak/lisans incelemesi gerektirir.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/obp/ui/#iso:std:iso:286:-1:ed-2:v1:en",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 286-2:2010",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "BELİRSİZ",
+      "Tam metin/figür dağıtımı yok; ISO 286 sayısal tablo zinciri ayrıca hak/lisans incelemesi gerektirir.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/obp/ui/#iso:std:iso:286:-2:ed-2:v1:en",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 898-1",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "YOK",
+      "Kural/formül referansı var; standart metninin veya figürlerinin dağıtımı tespit edilmedi.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/obp/ui/#iso:std:iso:898:-1:ed-5:v1:en",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 261",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "YOK",
+      "Kural/formül referansı var; standart metninin veya figürlerinin dağıtımı tespit edilmedi.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/obp/ui/#iso:std:iso:261:ed-2:v1:en",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 262",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "YOK",
+      "Kural/formül referansı var; standart metninin veya figürlerinin dağıtımı tespit edilmedi.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 724",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "YOK",
+      "Kural/formül referansı var; standart metninin veya figürlerinin dağıtımı tespit edilmedi.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/obp/ui/#iso:std:iso:724:ed-2:v1:en",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 4017",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "YOK",
+      "Kural/formül referansı var; standart metninin veya figürlerinin dağıtımı tespit edilmedi.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ISO 4014 / 8765 / 8676",
+      "Standart / doğrudan veya dolaylı referans",
+      "Geçme toleransları veya cıvata geometri/dayanım tanımları.",
+      "Tam standart metni okunmuş/uygulamaya kopyalanmış sayılmaz; bazı atıflar yalnız kaynak proje dosya adındadır.",
+      "ISO telifli standart; açık içerik lisansı doğrulanmadı",
+      "Yerel kapsam notları",
+      "YOK",
+      "Kural/formül referansı var; standart metninin veya figürlerinin dağıtımı tespit edilmedi.",
+      "Tablo/metin/figür yeniden yayımı için hakları ayrıca kontrol et; ISO onayı veya sertifikası iddia etme.",
+      "https://www.iso.org/",
+      "",
+      "",
+      "docs/iso-fits.md; docs/bolt-calculator.md; bolt/README.md",
+      ""
+    ],
+    [
+      "ASME Y14.5-2018 (kullanıcı PDF belgesi)",
+      "GD&T",
+      "Kullanıcının sağladığı belgedeki bölümlerden kurallar incelendi; açıklama ve vektörler bağımsız yazıldı.",
+      "PDF/standart figürleri GitHub’a dahil edilmedi; R2024 teyit edilmedi.",
+      "ASME telifli; kullanıcının erişim/yeniden kullanım hakkı doğrulanmadı",
+      "Dosya hash ve bölüm kanıtı mevcut",
+      "BELİRSİZ",
+      "Belgeye sahip olmak yeniden dağıtım izni değildir; PDF kullanım hakkı bu denetimde doğrulanamaz.",
+      "PDF veya figür dağıtma; ticari kullanımda özgün açıklamaların ve kapsamın hak kontrolünü yap.",
+      "https://www.asme.org/",
+      "",
+      "",
+      "docs/geometric-tolerances.md; docs/reports/geometric-tolerances/source-comparison.json",
+      ""
+    ],
+    [
+      "ESN Metal – Sac ağırlık hesaplama",
+      "Ağırlık",
+      "Kullanıcı araştırma bağlantısı; erişimler 403 verdi.",
+      "Site okunmadı; kod/tablo/görsel aktarılmadı.",
+      "Doğrulanamadı",
+      "Depodaki erişim kaydı",
+      "YOK",
+      "Erişilemeyen sitenin içeriği alınmış olarak gösterilmedi.",
+      "İleride içerik aktarılırsa izin/lisansı ayrıca doğrula.",
+      "https://www.esnmetal.com/sac-agirlik-hesaplama/",
+      "",
+      "",
+      "weight/README.md",
+      ""
+    ],
+    [
+      "Wikipedia – Bending (metalworking)",
+      "K/R / dolaylı kaynak",
+      "FreeCAD SheetMetal tools/README.md, genel K tablosunun bu maddeden geldiğini söylüyor.",
+      "AIR_K sayısal tablosunun dolaylı kaynak zinciri.",
+      "Wikipedia CC BY-SA; ilgili eski revizyon/koşullar ayrıca doğrulanmadı",
+      "FreeCAD README atfı okundu; Wikipedia metni ayrıca incelenmedi",
+      "BELİRSİZ",
+      "Tablo atıf zinciri ve derleme/veri hakları netleştirilmeli; matematiksel formül ile lisanslı açıklama ayrı.",
+      "Özgün madde sürümünü ve atıf koşullarını belgeleyerek sayısal veri kullanımını değerlendirin.",
+      "https://en.wikipedia.org/wiki/Bending_(metalworking)",
+      "",
+      "",
+      "k_factor/rules.py; FreeCAD SheetMetal tools/README.md",
+      ""
+    ],
+    [
+      "NASA-STD-5020B",
+      "Cıvata / dolaylı referans",
+      "ranf_thread_fast üzerinden dayanım marjı denklemleri",
+      "Özgün standart metni ayrıca incelenmiş veya dağıtılmış sayılmaz.",
+      "Özgün belgenin lisansı ayrıca doğrulanmadı",
+      "GitHub kaynak atıfları",
+      "YOK",
+      "Yalnız yöntem/kapsam karşılaştırması; özgün standart metni kopyalanmadı.",
+      "Uygunluk/sertifika iddiası veya belge dağıtımı öncesi özgün kaynağı doğrula.",
+      "",
+      "",
+      "",
+      "bolt/README.md",
+      ""
+    ],
+    [
+      "ECSS / VDI 2230",
+      "Cıvata / dolaylı referans",
+      "BAT üzerinden bağlantı hesap kapsamı ve varsayımları",
+      "Özgün standart metni ayrıca incelenmiş veya dağıtılmış sayılmaz.",
+      "Özgün belgenin lisansı ayrıca doğrulanmadı",
+      "GitHub kaynak atıfları",
+      "YOK",
+      "Yalnız yöntem/kapsam karşılaştırması; özgün standart metni kopyalanmadı.",
+      "Uygunluk/sertifika iddiası veya belge dağıtımı öncesi özgün kaynağı doğrula.",
+      "",
+      "",
+      "",
+      "bolt/README.md",
+      ""
+    ],
+    [
+      "Kullanıcının sağladığı logo",
+      "Arayüz varlığı",
+      "JPG aynı görüntü; ICO bu görüntüden dönüştürüldü.",
+      "Gerçek uygulama/EXE varlığı.",
+      "Hak sahibi/üçüncü taraf izni doğrulanmadı",
+      "Kullanıcı kaynağı belgeli; telif sahipliği belgesiz",
+      "BELİRSİZ",
+      "Kullanıcının dosya sağlaması, marka/görsel üzerindeki tüm hakları kanıtlamaz.",
+      "Logo hak sahipliğini veya kullanım iznini kayıt altına al.",
+      "",
+      "",
+      "",
+      "gui/assets/README.md; gui/assets/gokworks-logo.jpg; gui/assets/gokworks-logo.ico",
+      ""
+    ],
+    [
+      "Kullanıcının paylaştığı ekran/çizim örnekleri",
+      "Arayüz referansı",
+      "Cıvata, somun, malzeme kesitleri ve arayüz örnekleri tasarım talebi olarak kullanıldı.",
+      "Görsellerin kaynak kimliği/lisansı sohbetten doğrulanamıyor; uygulama şemaları Tk ile çizilmiş.",
+      "Doğrulanamadı",
+      "Sohbet talebi; sahiplik belgesi yok",
+      "BELİRSİZ",
+      "Yalnız esinlenme ile özgün çizim farklıdır; birebir görsel/arayüz hakları doğrulanmadı.",
+      "Görselleri yeniden dağıtma; özgün çizim ve tasarım kanıtlarını koru.",
+      "",
+      "",
+      "",
+      "bolt/diagram.py; weight/diagram.py; kullanıcı sohbet referansları",
+      ""
+    ],
+    [
+      "GOKWORKS kendi kodu / depo lisansı",
+      "Proje sahipliği",
+      "Mevcut repo kökünde proje lisansı bulunamadı.",
+      "Projenin kendi kodu; üçüncü taraf lisanslarını değiştirmez.",
+      "Kök proje lisansı yok",
+      "git ls-files / kök dosya kontrolü",
+      "BELİRSİZ",
+      "Kendi kodunu lisanssız tutmak tek başına ihlal değildir; tüm geçmiş katkıların ve dağıtım şartlarının sahipliği doğrulanmadı.",
+      "Proje sahibinin dağıtım/lisans tercihini ve katkı haklarını netleştir.",
+      "https://github.com/gkkizil/gokworks",
+      "",
+      "",
+      "README.md; git ls-files",
+      ""
+    ]
+  ],
+  "dependencies": [
+    [
+      "customtkinter",
+      "6.0.0",
+      "Doğrudan runtime",
+      "MIT",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi. Metadata CC0 bildirirken gerçek LICENSE metni MIT; bu raporda gerçek dosya esas alındı.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/customtkinter/6.0.0/",
+      "customtkinter-6.0.0.dist-info/licenses/LICENSE",
+      "c973b8600e620159cb0473eb9b08783143e0d9ed5333f350fc933368d94d9e0d",
+      "Creative Commons Zero v1.0 Universal"
+    ],
+    [
+      "darkdetect",
+      "0.8.0",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "Metin doğrulandı; kapsam ayrıca incelenmeli",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/darkdetect/0.8.0/",
+      "darkdetect-0.8.0.dist-info/LICENSE",
+      "69bb84664eff933addcb271c866d67622d9c2c53a5bda31b1a7523569c250afe",
+      "BSD-3-Clause"
+    ],
+    [
+      "et_xmlfile",
+      "2.0.0",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "MIT",
+      "Kurulu paket metadata beyanı",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/et_xmlfile/2.0.0/",
+      "Kurulu METADATA",
+      "",
+      "MIT"
+    ],
+    [
+      "ezdxf",
+      "1.4.3",
+      "Doğrudan runtime",
+      "MIT",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/ezdxf/1.4.3/",
+      "ezdxf-1.4.3.dist-info/licenses/LICENSE",
+      "db97ca426fc0d2b8124145de0f36181db73e6e713ce642d42fed2efc442edf19",
+      "License :: OSI Approved :: MIT License"
+    ],
+    [
+      "fonttools",
+      "4.66.1",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "MIT",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/fonttools/4.66.1/",
+      "fonttools-4.66.1.dist-info/licenses/LICENSE",
+      "6787208f83f659ccbc2223b2fde952ffa6f7e8aca62f1a8a2bf5bc51bb1b2383",
+      "MIT"
+    ],
+    [
+      "numpy",
+      "2.5.4",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/numpy/2.5.4/",
+      "numpy-2.5.4.dist-info/licenses/LICENSE.txt",
+      "4860083caa0de2ac3292ca98bd074bd8f45d8b32624e37b1e70a240bff61e488",
+      "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0"
+    ],
+    [
+      "openpyxl",
+      "3.1.5",
+      "Doğrudan runtime",
+      "MIT",
+      "Kurulu paket metadata beyanı",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/openpyxl/3.1.5/",
+      "Kurulu METADATA",
+      "",
+      "MIT"
+    ],
+    [
+      "packaging",
+      "26.3",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "Apache-2.0 OR BSD-2-Clause",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/packaging/26.3/",
+      "packaging-26.3.dist-info/licenses/LICENSE",
+      "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+      "Apache-2.0 OR BSD-2-Clause"
+    ],
+    [
+      "pillow",
+      "12.1.0",
+      "Doğrudan runtime",
+      "MIT-CMU; gömülü yerel kütüphaneler ayrıca kontrol edilmeli",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/pillow/12.1.0/",
+      "pillow-12.1.0.dist-info/licenses/LICENSE",
+      "30178bf7aff9f8dc82afed35086cd378a9064e77fcb4380485f38b5da3377052",
+      "MIT-CMU"
+    ],
+    [
+      "pip",
+      "26.2.1",
+      "Ortam / kurulum aracı",
+      "MIT",
+      "Tam lisans dosyası",
+      "YOK",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Uygulama içinde dağıtılmazsa ek paketleme işlemi gerekmez.",
+      "https://pypi.org/project/pip/26.2.1/",
+      "pip-26.2.1.dist-info/licenses/LICENSE.txt",
+      "634300a669d49aeae65b12c6c48c924c51a4cdf3d1ff086dc3456dc8bcaa2104",
+      "MIT"
+    ],
+    [
+      "pyparsing",
+      "3.3.3",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "MIT",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/pyparsing/3.3.3/",
+      "pyparsing-3.3.3.dist-info/licenses/LICENSE",
+      "a5425f9dc14ac74d4c5f0b679e941f2442e32cca7452a4418d5b1a49893ebe4e",
+      "MIT"
+    ],
+    [
+      "typing_extensions",
+      "4.16.0",
+      "Dolaylı bağımlılık; Linux ortamında tespit",
+      "Metin doğrulandı; kapsam ayrıca incelenmeli",
+      "Tam lisans dosyası",
+      "BELİRSİZ",
+      "Kurulu sürüm metadata/lisansı doğrulandı; Windows wheel/bundle çözümü ve bildirim içeriği incelenmedi.",
+      "Lisans/telif bildirimini dağıtıma ekle; Windows ortamındaki gerçek sürüm ve alt varlıkları doğrula.",
+      "https://pypi.org/project/typing_extensions/4.16.0/",
+      "typing_extensions-4.16.0.dist-info/licenses/LICENSE",
+      "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "PSF-2.0"
+    ],
+    [
+      "pywin32",
+      "312",
+      "Doğrudan Windows runtime",
+      "PSF",
+      "Sabit sürüm PyPI metadata",
+      "BELİRSİZ",
+      "Windows paketinin lisans bildirimi ve gerçek içeriği ayrıca doğrulanmalı.",
+      "Yalnız geliştirme kullanımını dağıtımdan ayrı tut; dağıtılırsa bildirim ekle.",
+      "https://pypi.org/project/pywin32/312/",
+      "https://pypi.org/pypi/pywin32/312/json",
+      "f142c39d2740c13a932c795fb7f47af150185dbf6713cefa93ee5bd1e030d31f",
+      ""
+    ],
+    [
+      "pyinstaller",
+      "6.16.0",
+      "EXE derleme aracı / bootloader",
+      "GPL-2.0-or-later + bootloader exception",
+      "v6.16.0 COPYING.txt tam metni",
+      "BELİRSİZ",
+      "Derleme aracının GPL lisansı istisna sayesinde uygulamayı otomatik GPL yapmaz.",
+      "Bootloader istisnasını, araç/bootloader değişikliklerini ve üçüncü taraf paket koşullarını koru.",
+      "https://pypi.org/project/pyinstaller/6.16.0/",
+      "https://raw.githubusercontent.com/pyinstaller/pyinstaller/v6.16.0/COPYING.txt",
+      "e23854101f3f308e5278a9d83cab07e65124737afc0d9e64189358fc36cfcd21",
+      ""
+    ],
+    [
+      "python-docx",
+      "1.2.0",
+      "Yalnız rapor üretme aracı",
+      "MIT",
+      "Sabit sürüm PyPI metadata",
+      "YOK",
+      "Rapor/test aracı EXE bağımlılığı olarak tanımlı değil.",
+      "Yalnız geliştirme kullanımını dağıtımdan ayrı tut; dağıtılırsa bildirim ekle.",
+      "https://pypi.org/project/python-docx/1.2.0/",
+      "https://pypi.org/pypi/python-docx/1.2.0/json",
+      "7dc6149fa5a8f34d922a1bfe6730be72bbb889bd879cba60776dccd597fac775",
+      ""
+    ],
+    [
+      "coverage",
+      "7.16.2",
+      "Yalnız test/rapor aracı",
+      "Apache-2.0",
+      "Sabit sürüm PyPI metadata",
+      "YOK",
+      "Rapor/test aracı EXE bağımlılığı olarak tanımlı değil.",
+      "Yalnız geliştirme kullanımını dağıtımdan ayrı tut; dağıtılırsa bildirim ekle.",
+      "https://pypi.org/project/coverage/7.16.2/",
+      "https://pypi.org/pypi/coverage/7.16.2/json",
+      "0d31972356705dff010938f4de1bc47ed0277a05e45dbc303c5c0cb6a055add6",
+      ""
+    ],
+    [
+      "CPython",
+      "3.13 (Windows CI hedefi)",
+      "EXE ile Python runtime dahil olur.",
+      "PSF-2.0; alt bileşenler ek lisanslı",
+      "Python LICENSE metni; denetlenen v3.13.7, gerçek Windows patch sürümü doğrulanmadı",
+      "BELİRSİZ",
+      "Araç/varlık lisansı ile uygulamanın telifi ayrı değerlendirilir.",
+      "Dağıtılan bileşenlerin gerçek lisans ve bildirimlerini koru.",
+      "https://www.python.org/",
+      ".github/workflows/windows-exe.yml; packaging/build_windows.py; kurulu font/paket metadata",
+      "",
+      ""
+    ],
+    [
+      "Tcl/Tk",
+      "8.6 (Linux GUI); Windows sürümü doğrulanmadı",
+      "Tkinter GUI runtime.",
+      "Tcl/Tk BSD tarzı lisans",
+      "Upstream core-8-6-branch license.terms; Windows bundle eşleşmesi doğrulanmadı",
+      "BELİRSİZ",
+      "Araç/varlık lisansı ile uygulamanın telifi ayrı değerlendirilir.",
+      "Dağıtılan bileşenlerin gerçek lisans ve bildirimlerini koru.",
+      "https://www.tcl.tk/",
+      ".github/workflows/windows-exe.yml; packaging/build_windows.py; kurulu font/paket metadata",
+      "",
+      ""
+    ],
+    [
+      "Roboto Regular / Medium",
+      "CustomTkinter wheel içindeki TTF",
+      "CustomTkinter collect-data ile taşınabilen gömülü fontlar.",
+      "Apache-2.0",
+      "TTF nameID 13/14 lisans alanları gerçekten okundu",
+      "BELİRSİZ",
+      "Araç/varlık lisansı ile uygulamanın telifi ayrı değerlendirilir.",
+      "Dağıtılan bileşenlerin gerçek lisans ve bildirimlerini koru.",
+      "http://www.apache.org/licenses/LICENSE-2.0",
+      ".github/workflows/windows-exe.yml; packaging/build_windows.py; kurulu font/paket metadata",
+      "",
+      ""
+    ],
+    [
+      "CustomTkinter shapes font",
+      "Kurulu 6.0.0 wheel",
+      "CustomTkinter collect-data varlığı.",
+      "Paket MIT; fontun ayrı açık lisans alanı boş",
+      "Paket LICENSE metni ve font metadata okundu; fonta özel kapsam kesin değil",
+      "BELİRSİZ",
+      "Araç/varlık lisansı ile uygulamanın telifi ayrı değerlendirilir.",
+      "Dağıtılan bileşenlerin gerçek lisans ve bildirimlerini koru.",
+      "https://github.com/TomSchimansky/CustomTkinter",
+      ".github/workflows/windows-exe.yml; packaging/build_windows.py; kurulu font/paket metadata",
+      "",
+      ""
+    ],
+    [
+      "Pillow / NumPy yerel alt bileşenleri",
+      "Windows wheel içerikleri doğrulanmadı",
+      "JPEG/PNG/OpenBLAS vb. gerçek dağıtılan bileşenler wheel/bundle üzerinden belirlenmeli.",
+      "Bileşene göre MIT/BSD/Zlib vb.; paket lisansı tek başına yeterli değil",
+      "Linux lisans dosyaları var; Windows EXE açılıp incelenmedi",
+      "BELİRSİZ",
+      "Araç/varlık lisansı ile uygulamanın telifi ayrı değerlendirilir.",
+      "Dağıtılan bileşenlerin gerçek lisans ve bildirimlerini koru.",
+      "https://pypi.org/",
+      ".github/workflows/windows-exe.yml; packaging/build_windows.py; kurulu font/paket metadata",
+      "",
+      ""
+    ],
+    [
+      "GitHub Actions checkout / setup-python / upload-artifact",
+      "v4 / v5 / v4",
+      "CI hizmeti; action kaynakları EXE içine kopyalanmıyor.",
+      "Bu denetimde upstream lisansları doğrulanmadı",
+      "Workflow kullanımı yerel olarak doğrulandı",
+      "YOK",
+      "Araç/varlık lisansı ile uygulamanın telifi ayrı değerlendirilir.",
+      "Dağıtılan bileşenlerin gerçek lisans ve bildirimlerini koru.",
+      "https://github.com/actions",
+      ".github/workflows/windows-exe.yml; packaging/build_windows.py; kurulu font/paket metadata",
+      "",
+      ""
+    ]
+  ],
+  "materials": [
+    [
+      "Demir / Çelik",
+      "Genel",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Genel çelik için nominal ağırlık değeri; belirli bir kaliteyi temsil etmez.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "Paslanmaz",
+      "Genel",
+      8000,
+      8.0,
+      "CC-BY-4.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel nominal değer olarak 316 yoğunluğu kullanılır; biliniyorsa malzemenin kalitesini seçin.",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/stainless-316.json",
+      "Kaynak depo lisansı / varsa",
+      "cf5a16a7230a5f2b88d16bc6048a8d0dbec0e0dc20e0d67bc647138280fb7182"
+    ],
+    [
+      "Alüminyum",
+      "Genel",
+      2700,
+      2.7,
+      "LGPL-2.1-or-later",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel alüminyum için nominal değer; alaşım sınıfını ayrıca dikkate alın.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/Aluminum-Generic.FCMat",
+      "Dosya içi License alanı",
+      "4aca403398e91c7faec514fa6f9439a6894894fa7705bba6fb194950a775c127"
+    ],
+    [
+      "Bakır",
+      "Genel",
+      8960,
+      8.96,
+      "LGPL-2.1-or-later",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel bakır için nominal ağırlık değeri.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-Generic.FCMat",
+      "Dosya içi License alanı",
+      "5e5a724bf267e61f79bc87df74904161af029b7676014c9bf617e7d7e1ec27a1"
+    ],
+    [
+      "Pirinç C23000",
+      "Genel",
+      8750,
+      8.75,
+      "LGPL-2.0-or-later",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "C23000 kırmızı pirinç için nominal değer; diğer pirinç alaşımları farklı olabilir.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-230.FCMat",
+      "Dosya içi License alanı",
+      "b50782daccd77d3de3d17b7f6ed2a87592439a1221eaa4e7a28c1bcac41b98dc"
+    ],
+    [
+      "Fosfor bronz C51000",
+      "Genel",
+      8860,
+      8.86,
+      "LGPL-2.0-or-later",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "C51000 fosfor bronzu için nominal değer; diğer bronz alaşımları farklı olabilir.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-510.FCMat",
+      "Dosya içi License alanı",
+      "28c1872f63dc6af10ef747cfd7630c54aca7c4545091c1e6eb144983102b8a0b"
+    ],
+    [
+      "Çinko",
+      "Genel",
+      7140,
+      7.14,
+      "CC-BY-SA-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Elementel çinkonun nominal yoğunluğu kullanılır.",
+      "https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json",
+      "Kaynak depo lisansı / varsa",
+      "361bc5b62b646dd9c4ec870e9b5b81fc2f46ebb7d06eb4324c788db5ab768c97"
+    ],
+    [
+      "Kurşun",
+      "Genel",
+      11340,
+      11.34,
+      "CC-BY-SA-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Elementel kurşunun nominal yoğunluğu kullanılır.",
+      "https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json",
+      "Kaynak depo lisansı / varsa",
+      "361bc5b62b646dd9c4ec870e9b5b81fc2f46ebb7d06eb4324c788db5ab768c97"
+    ],
+    [
+      "Titanyum",
+      "Genel",
+      4506,
+      4.506,
+      "CC-BY-SA-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Elementel titanyumun nominal yoğunluğu kullanılır.",
+      "https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json",
+      "Kaynak depo lisansı / varsa",
+      "361bc5b62b646dd9c4ec870e9b5b81fc2f46ebb7d06eb4324c788db5ab768c97"
+    ],
+    [
+      "S235JR",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Piyasada St37 adıyla anılan grupta; sertifikadaki EN kaliteyi esas alın. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "S275JR",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "S355JR",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Piyasada St52 adıyla anılan grupta; sertifikadaki EN kaliteyi esas alın. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "S355J2",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "DC01 (DKP)",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Soğuk haddelenmiş düşük karbonlu sac. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "DC02 (DKP)",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Soğuk haddelenmiş düşük karbonlu sac. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "DC03 (DKP)",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Soğuk haddelenmiş düşük karbonlu sac. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "DC04 (DKP)",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Soğuk haddelenmiş düşük karbonlu sac. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "DX51D+Z",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Galvanizli sac; hesap çelik taban içindir. Çinko kaplaması dahil değildir.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "DX52D+Z",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Galvanizli sac; hesap çelik taban içindir. Çinko kaplaması dahil değildir.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "S355MC",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Soğuk şekillendirmeye uygun sıcak haddelenmiş sac. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "P265GH",
+      "Sac / Yapı",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Basınçlı kap sacı için nominal ağırlık hesabı. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "C45",
+      "Makine / Takım",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "C45 karbon çeliği. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "C45E (CK45)",
+      "Makine / Takım",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "C45E karbon çeliği; kaliteyi ürün sertifikasından seçin. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "42CrMo4",
+      "Makine / Takım",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Islah çeliği; SAE 4140 ile benzer grupta anılır, birebir eşdeğerlik varsayılmaz. Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "16MnCr5",
+      "Makine / Takım",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "34CrNiMo6",
+      "Makine / Takım",
+      7850,
+      7.85,
+      "MIT",
+      "YOK",
+      "Genel nominal çelik değeri ve MIT örneği; kaynak kodu alınmadı.",
+      "Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "Kaynak depo lisansı / varsa",
+      "6db5b7c102b245136b3ca36531dd996b73013a226d031661894c832b3fe12595"
+    ],
+    [
+      "1.2311",
+      "Plastik kalıp çeliği",
+      7850,
+      7.85,
+      "Doğrulanamadı",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Plastik kalıp çeliği. Nominal yoğunluk 7.850 kg/m³.",
+      "https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json",
+      "Kaynak depo lisansı / varsa",
+      "88b064d96c7b6350d7691f678a7903de4f3aed84478076774f104bcdc8b1ced5"
+    ],
+    [
+      "1.2312",
+      "Plastik kalıp çeliği",
+      7850,
+      7.85,
+      "Doğrulanamadı",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Plastik kalıp çeliği. Nominal yoğunluk 7.850 kg/m³.",
+      "https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json",
+      "Kaynak depo lisansı / varsa",
+      "88b064d96c7b6350d7691f678a7903de4f3aed84478076774f104bcdc8b1ced5"
+    ],
+    [
+      "1.2344",
+      "Sıcak iş takım çeliği",
+      7800,
+      7.8,
+      "CC-BY-4.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Sıcak iş takım çeliği (X40CrMoV5-1 / H13). Nominal yoğunluk 7.800 kg/m³.",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json",
+      "Kaynak depo lisansı / varsa",
+      "dadfc8b2f39429e80a4dc646369fb787769fda9cf58db344d3e17ff7de6dd8d1"
+    ],
+    [
+      "1.2379",
+      "Soğuk iş takım çeliği",
+      7700,
+      7.7,
+      "Doğrulanamadı",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Soğuk iş takım çeliği (D2). Nominal yoğunluk 7.700 kg/m³.",
+      "https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json",
+      "Kaynak depo lisansı / varsa",
+      "88b064d96c7b6350d7691f678a7903de4f3aed84478076774f104bcdc8b1ced5"
+    ],
+    [
+      "304",
+      "Paslanmaz",
+      7916,
+      7.916,
+      "MIT",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "AISI 304 paslanmaz; MMPDS referanslı malzeme kartının nominal yoğunluğu kullanılır.",
+      "https://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_304.yaml",
+      "Kaynak depo lisansı / varsa",
+      "626d02774b8ade5f8b3f7ccaca61288a41c6e506f11146bb5f7d0e6b74d927bc"
+    ],
+    [
+      "316",
+      "Paslanmaz",
+      8000,
+      8.0,
+      "CC-BY-4.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Paslanmaz çelik kalitesi için nominal ağırlık değeri; ürün sertifikası yerine geçmez.",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/stainless-316.json",
+      "Kaynak depo lisansı / varsa",
+      "cf5a16a7230a5f2b88d16bc6048a8d0dbec0e0dc20e0d67bc647138280fb7182"
+    ],
+    [
+      "316L",
+      "Paslanmaz",
+      8000,
+      8.0,
+      "MIT",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Paslanmaz çelik kalitesi için nominal ağırlık değeri; ürün sertifikası yerine geçmez.",
+      "https://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_316L.yaml",
+      "Kaynak depo lisansı / varsa",
+      "f1078dad1208e38bb80a90142c1498bb8b1bada68e504a1b467411583d995741"
+    ],
+    [
+      "Delrin (POM-H)",
+      "Plastikler",
+      1420,
+      1.42,
+      "CC-BY-SA-4.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "POM homopolimer için genel malzeme kartı değeri.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/POM-Homopolymer-Generic.FCMat",
+      "Dosya içi License alanı",
+      "4833e43fad39dc2852e19cf1eedf5c69765fbe12031870ed6846dc356f1b48cf"
+    ],
+    [
+      "Kestamit (PA6G)",
+      "Plastikler",
+      1150,
+      1.15,
+      "CC-BY-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Döküm PA6G için nominal yaklaşım; genel PA6 yoğunluğu kullanılır.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat",
+      "Dosya içi License alanı",
+      "68a5bf9b769260941e6c8b51271a17cbd5238b15db4a161aec1d3bc043d88f14"
+    ],
+    [
+      "PA6",
+      "Plastikler",
+      1150,
+      1.15,
+      "CC-BY-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel PA6 malzeme kartı değeri; nem ve ürün sınıfı gerçek yoğunluğu etkileyebilir.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat",
+      "Dosya içi License alanı",
+      "68a5bf9b769260941e6c8b51271a17cbd5238b15db4a161aec1d3bc043d88f14"
+    ],
+    [
+      "PP",
+      "Plastikler",
+      916,
+      0.916,
+      "CC-BY-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel polipropilen malzeme kartı değeri.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PP-Generic.FCMat",
+      "Dosya içi License alanı",
+      "4164cacdcfd7909241b73baf0c3c15f625219853783767232bb79e967aede506"
+    ],
+    [
+      "PTFE",
+      "Plastikler",
+      2070,
+      2.07,
+      "CC-BY-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel PTFE malzeme kartı değeri.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PTFE-Generic.FCMat",
+      "Dosya içi License alanı",
+      "0686f0b63b21725a21c00cf38f7cf6297a66d5fc0d7dbe7fdf5049f47c0873f7"
+    ],
+    [
+      "PVC",
+      "Plastikler",
+      1380,
+      1.38,
+      "CC-BY-3.0",
+      "BELİRSİZ",
+      "Tekil yoğunluk olgusu; kaynak derlemesinin lisansı otomatik olarak bütün uygulamaya uygulanmış sayılmaz. Atıf/veri hakkı kapsamı ayrıca kontrol edilmeli.",
+      "Genel PVC malzeme kartı değeri.",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PVC-Generic.FCMat",
+      "Dosya içi License alanı",
+      "d2241c579360858ec8cf02a447437ffc5f087f3f34cddc58a8686758434ab723"
+    ]
+  ],
+  "indirect_sources": [
+    [
+      "http://www.matweb.com/search/DataSheet.aspx?MatGUID=1f650966ec834bb8833dd4c6e3116079",
+      "PVC",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "http://www.matweb.com/search/DataSheet.aspx?MatGUID=a882a1c603374e278d062f106dfda95b",
+      "PP",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "http://www.matweb.com/search/datasheet.aspx?MatGUID=4d14eac958e5401a8fd152e1261b6843",
+      "PTFE",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "http://www.matweb.com/search/datasheet.aspx?MatGUID=8d78f3cfcb6f49d595896ce6ce6a2ef1",
+      "Kestamit (PA6G); PA6",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "http://www.matweb.com/search/datasheet.aspx?matguid=abc4415b0f8b490387e3c922237098da",
+      "304",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://copper.org/publications/pub_list/pdf/144-8-mechanical.pdf",
+      "Fosfor bronz C51000; Pirinç C23000",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Lead_(element)",
+      "Lead",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Nylon_6",
+      "Kestamit (PA6G); PA6",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Polyoxymethylene",
+      "Delrin (POM-H)",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Polypropylene",
+      "PP",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Polytetrafluoroethylene",
+      "PTFE",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Polyvinyl_chloride",
+      "PVC",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Titanium",
+      "Titanium",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://en.wikipedia.org/wiki/Zinc",
+      "Zinc",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://www.azom.com/article.aspx?ArticleID=2382",
+      "316L",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://www.eos.info/material-m/download/material-datasheet-stainlesssteel-316l.pdf",
+      "316L",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://www.matweb.com/search/DataSheet.aspx?MatGUID=ae460978fb0a4d7b8c3ce6bf8f4bf52b",
+      "Delrin (POM-H)",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://www.nickelinstitute.org/en/TechnicalLibrary/AISI/9004_High_TemperatureCharacteristicsofStainlessSteel.aspx",
+      "316L",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "https://www.renishaw.com/media/pdf/en/f8cba72a843440d3bd8a09fd5021ad89.pdf",
+      "316L",
+      "Dolaylı: kullanılan kartın kaynak/ürün bağlantısı; özgün sayfanın tam metni ayrıca okunmuş sayılmaz.",
+      "BELİRSİZ",
+      "Bağlantılı site lisansı, GitHub kartının lisansından otomatik devralınmaz."
+    ],
+    [
+      "",
+      "MMPDS-01 / MatWeb / AZoM / Nickel Institute ve diğer bibliyografik atıflar",
+      "Kart içi atıf; yayınların asılları ayrıca doğrulanmadı.",
+      "BELİRSİZ",
+      "GitHub MIT/CC lisansı, üçüncü taraf özgün verisinin tüm haklarını garanti etmez."
+    ]
+  ],
+  "links": [
+    [
+      "AmenJlili/power-sm",
+      "https://github.com/AmenJlili/power-sm",
+      "docs/reports/sheetmetal-discovery/sources.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "AmenJlili/power-sm",
+      "https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L1058",
+      "docs/reports/k-radius/api-contract.json\ndocs/reports/power-sm-adaptation/README.md\ndocs/reports/sheetmetal-discovery/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "AmenJlili/power-sm",
+      "https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L460",
+      "docs/reports/power-sm-adaptation/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "AmenJlili/power-sm",
+      "https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L470",
+      "docs/reports/sheetmetal-discovery/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "AmenJlili/power-sm",
+      "https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/SheetMetalFolder2.cs#L70",
+      "docs/reports/power-sm-adaptation/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "AmenJlili/power-sm",
+      "https://github.com/AmenJlili/power-sm/tree/6c835fb712c18df8969500ec247a0768d3af0d37",
+      "docs/reports/power-sm-adaptation/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "Bowserinator/Periodic-Table-JSON",
+      "https://github.com/Bowserinator/Periodic-Table-JSON/blob/",
+      "weight/materials.py",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "Bowserinator/Periodic-Table-JSON",
+      "https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD-addons",
+      "https://github.com/FreeCAD/FreeCAD-addons/blob/master/.gitmodules",
+      "docs/geometric-tolerances.md\ndocs/report-tools/verify_gdt_reference.py\ndocs/reports/gdt-dimension-audit/source-comparison.json\ndocs/reports/geometric-tolerances/source-comparison.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/",
+      "weight/materials.py",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/Aluminum-Generic.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-230.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-510.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Copper/Copper-Generic.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat",
+      "weight/README.md\nweight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/POM-Homopolymer-Generic.FCMat",
+      "weight/README.md\nweight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PP-Generic.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PTFE-Generic.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "FreeCAD/FreeCAD",
+      "https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PVC-Generic.FCMat",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "Johanss-on/Assem2DXF",
+      "https://github.com/Johanss-on/Assem2DXF/blob/32f32c3622248981fada57778ffbf7ebce9d7c48/Assem%202%20DXF%20v3.txt#L519",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "RF555/PFM-Calculator",
+      "https://github.com/RF555/PFM-Calculator/blob/",
+      "weight/materials.py",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "RF555/PFM-Calculator",
+      "https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/README.md",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "RF555/PFM-Calculator",
+      "https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "StephanoisMineur/bolt-analysis",
+      "https://github.com/StephanoisMineur/bolt-analysis/blob/1578baacfe0edb34b529179dbfec347a0a05a50d/main.py",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "StephanoisMineur/bolt-analysis",
+      "https://github.com/StephanoisMineur/bolt-analysis/tree/1578baacfe0edb34b529179dbfec347a0a05a50d",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "TomSchimansky/CustomTkinter",
+      "https://github.com/TomSchimansky/CustomTkinter/blob/35f954293b0a39c90b2ad99f812ae0b1773cf3a1/examples/complex_example.py",
+      "docs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "TomSchimansky/CustomTkinter",
+      "https://github.com/TomSchimansky/CustomTkinter/blob/35f954293b0a39c90b2ad99f812ae0b1773cf3a1/test/manual_integration_tests/test_optionmenu_combobox.py",
+      "docs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "ajisaacs/ExportDxf",
+      "https://github.com/ajisaacs/ExportDxf/blob/14fa1e69064f743f48edb279edd99681ff0ba783/ExportDXF/Extensions/UnitConversionExtensions.cs#L31",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "ajisaacs/ExportDxf",
+      "https://github.com/ajisaacs/ExportDxf/blob/14fa1e69064f743f48edb279edd99681ff0ba783/ExportDXF/Utilities/SolidWorksHelper.cs",
+      "docs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "ajisaacs/ExportDxf",
+      "https://github.com/ajisaacs/ExportDxf/blob/14fa1e69064f743f48edb279edd99681ff0ba783/ExportDXF/Utilities/SolidWorksHelper.cs#L31",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "angelsix/solidworks-api",
+      "https://github.com/angelsix/solidworks-api/blob/85a773aedc87b49afda3a65c8bb650f5ba771092/SolidDna/AngelSix.SolidDna/SolidWorks/Models/Model.cs#L271",
+      "naming/README.md\nnaming/examples/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "angelsix/solidworks-api",
+      "https://github.com/angelsix/solidworks-api/tree/85a773aedc87b49afda3a65c8bb650f5ba771092/References/2023",
+      "docs/k-factor-radius.md\ndocs/reports/final-audit/README.md\ndocs/reports/k-radius/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "bell-jamie/iso-286",
+      "https://github.com/bell-jamie/iso-286/tree/6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "docs/iso-fits.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "gkkizil/gokworks",
+      "https://github.com/gkkizil/gokworks/actions/runs/38356408737",
+      "docs/reports/bolt/windows-package.json",
+      "İç proje / build kanıtı",
+      "KAPSAM DIŞI"
+    ],
+    [
+      "gkkizil/gokworks",
+      "https://github.com/gkkizil/gokworks/actions/runs/38356408737/artifacts/11792699402",
+      "docs/reports/bolt/windows-package.json",
+      "İç proje / build kanıtı",
+      "KAPSAM DIŞI"
+    ],
+    [
+      "gkkizil/gokworks",
+      "https://github.com/gkkizil/gokworks/actions/runs/38527091279/artifacts/11876681375",
+      "docs/astra-review.md",
+      "İç proje / build kanıtı",
+      "KAPSAM DIŞI"
+    ],
+    [
+      "gkkizil/gokworks",
+      "https://github.com/gkkizil/gokworks/actions/workflows/windows-exe.yml",
+      "packaging/README.md",
+      "İç proje / build kanıtı",
+      "KAPSAM DIŞI"
+    ],
+    [
+      "gkkizil/gokworks",
+      "https://github.com/gkkizil/gokworks/blob/codex/dxf-dwg-gui-report/docs/iso-fits.md",
+      "iso_fits/window.py",
+      "İç proje / build kanıtı",
+      "KAPSAM DIŞI"
+    ],
+    [
+      "gkkizil/gokworks",
+      "https://github.com/gkkizil/gokworks/blob/codex/windows-build-status/latest.json",
+      "packaging/README.md",
+      "İç proje / build kanıtı",
+      "KAPSAM DIŞI"
+    ],
+    [
+      "gumyr/cq_warehouse",
+      "https://github.com/gumyr/cq_warehouse/blob/daa46507ecc429c0e2dce11d9d5ffd09b12a42af/src/cq_warehouse/hex_head_parameters.csv",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "juanvanyo/FreeCAD-GDT",
+      "https://github.com/juanvanyo/FreeCAD-GDT",
+      "docs/geometric-tolerances.md\ndocs/report-tools/verify_gdt_reference.py\ndocs/reports/gdt-dimension-audit/source-comparison.json\ndocs/reports/geometric-tolerances/source-comparison.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "lachr/Passungsrechner",
+      "https://github.com/lachr/Passungsrechner/tree/0289439b1883db363d92e38f1ab352817b4d5a47",
+      "docs/iso-fits.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mhammond/pywin32",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/HTML/variant.html",
+      "docs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mhammond/pywin32",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/HTML/variant.html#L138",
+      "docs/dxf-dwg-verification.md\ndocs/program-verification.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mhammond/pywin32",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py",
+      "docs/reports/kr-workspace-fix/README.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mhammond/pywin32",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py#L200",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mhammond/pywin32",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client/dynamic.py#L361",
+      "docs/manual-k-radius.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mhammond/pywin32",
+      "https://github.com/mhammond/pywin32/blob/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/test/testPyComTest.py#L457",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "misams/BAT",
+      "https://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/db/ISO4014_4017_hex_metric.bolt",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "misams/BAT",
+      "https://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/db/ISO8765_8676_hex_metric_fine.bolt",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "misams/BAT",
+      "https://github.com/misams/BAT/blob/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/BAT/src/Ecss.py",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "misams/BAT",
+      "https://github.com/misams/BAT/tree/6f39c08201bba0f4034c281c5a22f8d9927bc0a9",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "mozman/ezdxf",
+      "https://github.com/mozman/ezdxf/tree/df5ef277fcc674d77580143212ec63dd981cc2b3",
+      "docs/program-verification.md\ntests/fixtures/dxf/README.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mvernacc/material-properties-interchange",
+      "https://github.com/mvernacc/material-properties-interchange/blob/",
+      "weight/materials.py",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mvernacc/material-properties-interchange",
+      "https://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_304.yaml",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "mvernacc/material-properties-interchange",
+      "https://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_316L.yaml",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "parkergreene/isofits",
+      "https://github.com/parkergreene/isofits/tree/d3083a941e8071bb12114a28a25274bf99c30ac0",
+      "docs/iso-fits.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "pedropaulovc/offline-solidworks-api-docs",
+      "https://github.com/pedropaulovc/offline-solidworks-api-docs/blob/b586c9f0c993ae7791e1b8aea79dab2a341a0147/50_extract_type_member_details/metadata/api_member_details.xml",
+      "docs/reports/bom-mass/api-contract.json\nnaming/examples/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "pedropaulovc/offline-solidworks-api-docs",
+      "https://github.com/pedropaulovc/offline-solidworks-api-docs/releases/tag/v3.12.1",
+      "docs/bom.md\ndocs/k-factor-radius.md\ndocs/reports/k-radius/api-contract.json\ndocs/reports/power-sm-adaptation/README.md\ndocs/reports/sheetmetal-discovery/README.md\ndocs/reports/sheetmetal-discovery/sources.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "pedropaulovc/offline-solidworks-api-docs",
+      "https://github.com/pedropaulovc/offline-solidworks-api-docs/tree/b586c9f0c993ae7791e1b8aea79dab2a341a0147",
+      "docs/reports/bom-mass/README.md\nnaming/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "robbievanleeuwen/section-properties",
+      "https://github.com/robbievanleeuwen/section-properties/blob/",
+      "weight/materials.py",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "robbievanleeuwen/section-properties",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst",
+      "weight/README.md\nweight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "robbievanleeuwen/section-properties",
+      "https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/src/sectionproperties/pre/library/steel_sections.py",
+      "weight/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "saucecode/ISO286",
+      "https://github.com/saucecode/ISO286/tree/f455cecdfc6659f35002bc112e3667f4316eb086",
+      "docs/iso-fits.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "scroberts/Engineering-Materials-Database",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/",
+      "weight/materials.py",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "scroberts/Engineering-Materials-Database",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/stainless-316.json",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "scroberts/Engineering-Materials-Database",
+      "https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json",
+      "weight/materials.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "shaise/FreeCAD_FastenersWB",
+      "https://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso262def.csv",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "shaise/FreeCAD_FastenersWB",
+      "https://github.com/shaise/FreeCAD_FastenersWB/blob/fddd07af422b7d3a69098b32333711c5eeae184c/FsData/iso4017head.csv",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "shaise/FreeCAD_SheetMetal",
+      "https://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/SheetMetalNewUnfolder.py",
+      "docs/k-factor-radius.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "shaise/FreeCAD_SheetMetal",
+      "https://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/tools/README.md",
+      "docs/k-factor-radius.md\ndocs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "shaise/FreeCAD_SheetMetal",
+      "https://github.com/shaise/FreeCAD_SheetMetal/blob/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/tools/calc-unfold.py",
+      "docs/k-factor-radius.md\ndocs/reports/final-audit/README.md\ndocs/reports/k-radius/reference-comparison.json",
+      "Harici kaynak / erişim / referans",
+      "BELİRSİZ"
+    ],
+    [
+      "tpw809/ranf_thread_fast",
+      "https://github.com/tpw809/ranf_thread_fast/blob/0f7103b48173d495dc4daf6e22f549606d8ac638/src/thread_fast/materials/material_class.py",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "tpw809/ranf_thread_fast",
+      "https://github.com/tpw809/ranf_thread_fast/blob/0f7103b48173d495dc4daf6e22f549606d8ac638/src/thread_fast/nasa_std_5020/nasa_std_5020b.py",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "tpw809/ranf_thread_fast",
+      "https://github.com/tpw809/ranf_thread_fast/tree/0f7103b48173d495dc4daf6e22f549606d8ac638",
+      "bolt/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack",
+      "docs/reports/sheetmetal-discovery/sources.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/get-cog/MacroMassPrp.vba",
+      "docs/reports/bom-mass/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/traversing-tree/Macro.vba",
+      "docs/bom.md\ndocs/reports/bom/references.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/components/write-quantities/Macro.vba",
+      "docs/bom.md\ndocs/dxf-dwg-verification.md\ndocs/reports/bom/references.json\ndocs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/assembly/compose-flat-bom/Macro.vba",
+      "docs/bom.md\ndocs/reports/bom/references.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/features-manager/find-features/Macro.vba",
+      "docs/program-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-all-flat-patterns/Macro.vba#L475",
+      "docs/reports/sheetmetal-discovery/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-all-flat-patterns/index.md",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-dxf-dwg/Macro.vba",
+      "docs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/document/sheet-metal/export-dxf-dwg/Macro.vba#L1",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/import-export/export-sheets-pdf/Macro.vba",
+      "docs/program-verification.md\ndocs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/codestack",
+      "https://github.com/xarial/codestack/issues/122",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwAssembly.cs",
+      "docs/bom.md\ndocs/reports/bom/references.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwAssembly.cs#L203",
+      "docs/program-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwComponent.cs",
+      "docs/bom.md\ndocs/reports/bom/references.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwDocumentCollection.cs#L340",
+      "docs/k-factor-radius.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwPart.cs",
+      "docs/reports/final-audit/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwPart.cs#L34",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwSaveOperation.cs",
+      "docs/reports/final-audit/README.md\nnaming/README.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwSaveOperation.cs#L360",
+      "docs/program-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/tests/integration/SolidWorks.Tests.Integration/DrawingTest.cs#L279",
+      "docs/dxf-dwg-verification.md",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "xarial/xcad",
+      "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/thirdpty/SolidWorks.Interop.sldworks.dll",
+      "docs/reports/k-radius/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "YOK"
+    ],
+    [
+      "help.solidworks.com",
+      "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~IncludeHiddenBodiesOrComponents.html",
+      "docs/reports/bom-mass/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "help.solidworks.com",
+      "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~Mass.html",
+      "docs/reports/bom-mass/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "help.solidworks.com",
+      "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~Recalculate.html",
+      "docs/reports/bom-mass/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "help.solidworks.com",
+      "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~SelectedItems.html",
+      "docs/reports/bom-mass/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "help.solidworks.com",
+      "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IMassProperty2~UseSystemUnits.html",
+      "docs/reports/bom-mass/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "help.solidworks.com",
+      "https://help.solidworks.com/2026/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~CreateMassProperty2.html",
+      "docs/reports/bom-mass/api-contract.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.esnmetal.com",
+      "https://www.esnmetal.com/sac-agirlik-hesaplama/",
+      "weight/README.md",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.iso.org",
+      "https://www.iso.org/obp/ui/#iso:std:iso:261:ed-2:v1:en",
+      "docs/bolt-calculator.md",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.iso.org",
+      "https://www.iso.org/obp/ui/#iso:std:iso:286:-1:ed-2:v1:en",
+      "docs/iso-fits.md\ndocs/reports/iso-fits/standards-access.json",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.iso.org",
+      "https://www.iso.org/obp/ui/#iso:std:iso:286:-2:ed-2:v1:en",
+      "docs/iso-fits.md\ndocs/reports/iso-fits/standards-access.json\niso_fits/window.py",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.iso.org",
+      "https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en",
+      "docs/bolt-calculator.md",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.iso.org",
+      "https://www.iso.org/obp/ui/#iso:std:iso:724:ed-2:v1:en",
+      "docs/bolt-calculator.md",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ],
+    [
+      "www.iso.org",
+      "https://www.iso.org/obp/ui/#iso:std:iso:898:-1:ed-5:v1:en",
+      "docs/bolt-calculator.md",
+      "Harici kaynak / erişim / referans",
+      "Kaynaklar sayfasına bakınız"
+    ]
+  ],
+  "findings": [
+    [
+      "D-01",
+      "VAR",
+      "Dağıtım lisans bildirimleri açıkça paketlenmiyor",
+      "packaging/build_windows.py; .github/workflows/windows-exe.yml",
+      "Betiğin add-data listesi yalnız logo ve ISO tablosunu; artifact listesi EXE/hash/OKU/smoke dosyalarını sayıyor. ISOFITS-LICENSE.txt için ekleme adımı yok. Kütüphaneler için toplu NOTICE adımı yok.",
+      "Bu bir paketleme/bildirim açığıdır; mevcut EXE ikilisi içindeki tüm dosyalar açılıp incelenmedi, kesinleşmiş ihlal iddiası değildir.",
+      "Dağıtılan dosyalara uygun lisans/NOTICE envanteri ekle, sonra gerçek EXE/ZIP içeriğini doğrula."
+    ],
+    [
+      "D-02",
+      "BELİRSİZ",
+      "FreeCAD malzeme kartlarının kendi lisansları",
+      "FreeCAD FCMat dosyalarının License alanları",
+      "POM-H: CC-BY-SA-4.0; PA6/PP/PTFE/PVC: CC-BY-3.0; metal kartları: LGPL-2.0/2.1-or-later. Depo kökü tek başına yeterli değil.",
+      "Tekil bilimsel olguların telifi ile lisanslı derleme/ifade ve veri tabanı hakları ayrı; kapsam otomatik uygulama copyleft kararı değildir.",
+      "Kart bazında atıf/lisans/uyarlama notları ve bağımsız birincil yoğunluk kaynakları hazırlanmalı."
+    ],
+    [
+      "D-03",
+      "BELİRSİZ",
+      "Lisansı doğrulanamayan sayısal kaynaklar",
+      "bell-jamie/iso-286; RF555/PFM-Calculator",
+      "Yaygın lisans dosyaları bulunamadı; bu, lisansın kesinlikle hiç olmadığı anlamına gelmez.",
+      "ISO tablo verisi ve 3 kalıp çeliği yoğunluğu kullanımının yeniden dağıtım kapsamı net değil.",
+      "Hak sahibinden izin veya bağımsız lisanslı/birincil veri kaynağı doğrula."
+    ],
+    [
+      "D-04",
+      "BELİRSİZ",
+      "Atıf / ShareAlike koşulları",
+      "Bowserinator CC-BY-SA-3.0; scroberts CC-BY-4.0; FreeCAD kartları",
+      "Kaynak dosyaları ticari kullanımı mutlak yasaklamıyor; atıf ve bazı türevler için aynı lisans koşulları olabilir.",
+      "Bir sayısal değerin kullanılması bütün uygulamayı otomatik CC/GPL yapmaz; derleme/veri kullanımının kapsamı ayrıca değerlendirilmeli.",
+      "Dağıtılan veri ve bildirimlerin lisans koşullarını kaynak bazında tamamla."
+    ],
+    [
+      "D-05",
+      "BELİRSİZ",
+      "Kullanıcı görselleri ve ASME belgesinin hakları",
+      "gui/assets/README.md; docs/geometric-tolerances.md",
+      "Logo kaynağı kullanıcı; PDF ve referans görsellerin sahiplik/kullanım izni belgesi yok. PDF/standart figürleri repoya kopyalanmamış.",
+      "Belgeyi görmek ile yeniden yayım hakkı farklıdır.",
+      "Logo sahipliğini kaydet; standart PDF ve örnek görselleri izinsiz dağıtma."
+    ],
+    [
+      "D-06",
+      "BELİRSİZ",
+      "Windows bağımlılık kapanışı doğrulanmadı",
+      "requirements.txt; packaging/windows-requirements.txt; kurulu Linux metadata",
+      "Linux bağımlılıkları kaydedildi; son Windows EXE/wheel SBOM ve lisans ekleri incelenmedi. Bazı dolaylı sürümler kilitli değil.",
+      "Bu rapor çalışır EXE veya tüm işletim sistemi paketleri için tam SBOM değildir.",
+      "Kullanıcı EXE istediğinde gerçek çözülmüş Windows paketlerini ve gömülü alt kütüphane lisanslarını çıkar."
+    ],
+    [
+      "D-07",
+      "YOK",
+      "GPL/LGPL projelerini okumak uygulamayı otomatik GPL yapmaz",
+      "bolt/README.md; naming/README.md; docs/geometric-tolerances.md",
+      "Referans projelerin lisansları ile bağımsız formül/API incelemesi ayrıldı. Kod kopyalanmadığı yerel dokümantasyona dayanır.",
+      "Bağımsızlık beyanı tam kod-benzerliği denetimi değildir; somut kod/veri aktarımı varsa yeniden değerlendir.",
+      "Kaynakları belgeli tut; yeniden kullanılacak her kod/varlık için dosya lisansını kontrol et."
+    ],
+    [
+      "D-08",
+      "BELİRSİZ",
+      "Kayıt ve zaman sınırı",
+      "Mevcut repo + bu konuşmada korunmuş kaynak notları",
+      "110 kayıtlı bağlantı tarandı; 415 takipli dosya taban alınarak metin ve DOCX bağlantıları incelendi.",
+      "Kayıt dışı eski araştırmalar ve ilk commit öncesi kaynağı bilinmeyen içerikler için eksiksizlik garantisi verilemez.",
+      "Yeni kaynakları ve kullanılan dosya/sürümleri bu listeye eklemeye devam et."
+    ]
+  ],
+  "license_evidence": [
+    {
+      "repository": "AmenJlili/power-sm",
+      "revision": "6c835fb712c18df8969500ec247a0768d3af0d37",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/AmenJlili/power-sm/tree/6c835fb712c18df8969500ec247a0768d3af0d37",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "Bowserinator/Periodic-Table-JSON",
+      "revision": "9090b1c472a1e68f7295e77280f374f8d125cefc",
+      "license": "CC-BY-SA-3.0",
+      "url": "https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/9090b1c472a1e68f7295e77280f374f8d125cefc/LICENSE.md",
+      "sha256": "f9addd595dfab08de0c6fc611a05a75eefc1473d5c58559d5e5c010743c7a567",
+      "verified": true
+    },
+    {
+      "repository": "FreeCAD/FreeCAD",
+      "revision": "384314776045a67fcdf09d49aa29306243578d4f",
+      "license": "LGPL-2.1 (LICENSE metni); malzeme kartları ayrı lisanslı",
+      "url": "https://raw.githubusercontent.com/FreeCAD/FreeCAD/384314776045a67fcdf09d49aa29306243578d4f/LICENSE",
+      "sha256": "7ffe1954587c77dfba1cf8eb9b2ea743671fa6e63f9e7a2f258119d42e14eefe",
+      "verified": true
+    },
+    {
+      "repository": "FreeCAD/FreeCAD-addons",
+      "revision": "master",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/FreeCAD/FreeCAD-addons/tree/master",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "Johanss-on/Assem2DXF",
+      "revision": "32f32c3622248981fada57778ffbf7ebce9d7c48",
+      "license": "GPL-3.0 (LICENSE metni)",
+      "url": "https://raw.githubusercontent.com/Johanss-on/Assem2DXF/32f32c3622248981fada57778ffbf7ebce9d7c48/LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "verified": true
+    },
+    {
+      "repository": "RF555/PFM-Calculator",
+      "revision": "1be015cb20aad00cec018a13705312073dafac5f",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/RF555/PFM-Calculator/tree/1be015cb20aad00cec018a13705312073dafac5f",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "StephanoisMineur/bolt-analysis",
+      "revision": "1578baacfe0edb34b529179dbfec347a0a05a50d",
+      "license": "MPL-2.0",
+      "url": "https://raw.githubusercontent.com/StephanoisMineur/bolt-analysis/1578baacfe0edb34b529179dbfec347a0a05a50d/LICENSE",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
+      "verified": true
+    },
+    {
+      "repository": "TomSchimansky/CustomTkinter",
+      "revision": "35f954293b0a39c90b2ad99f812ae0b1773cf3a1",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/TomSchimansky/CustomTkinter/35f954293b0a39c90b2ad99f812ae0b1773cf3a1/LICENSE",
+      "sha256": "c973b8600e620159cb0473eb9b08783143e0d9ed5333f350fc933368d94d9e0d",
+      "verified": true
+    },
+    {
+      "repository": "ajisaacs/ExportDxf",
+      "revision": "14fa1e69064f743f48edb279edd99681ff0ba783",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/ajisaacs/ExportDxf/tree/14fa1e69064f743f48edb279edd99681ff0ba783",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "angelsix/solidworks-api",
+      "revision": "85a773aedc87b49afda3a65c8bb650f5ba771092",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/angelsix/solidworks-api/tree/85a773aedc87b49afda3a65c8bb650f5ba771092",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "bell-jamie/iso-286",
+      "revision": "6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/bell-jamie/iso-286/tree/6580fbecaf167249024c60e35c4b8fbbddb540f4",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "gumyr/cq_warehouse",
+      "revision": "daa46507ecc429c0e2dce11d9d5ffd09b12a42af",
+      "license": "Apache-2.0",
+      "url": "https://raw.githubusercontent.com/gumyr/cq_warehouse/daa46507ecc429c0e2dce11d9d5ffd09b12a42af/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "verified": true
+    },
+    {
+      "repository": "juanvanyo/FreeCAD-GDT",
+      "revision": "841518cdd74f6a7dad3321d29937c49dc7dc4b1f",
+      "license": "LGPL-2.1 (LICENSE metni)",
+      "url": "https://raw.githubusercontent.com/juanvanyo/FreeCAD-GDT/841518cdd74f6a7dad3321d29937c49dc7dc4b1f/LICENSE",
+      "sha256": "9b872a8a070b8ad329c4bd380fb1bf0000f564c75023ec8e1e6803f15364b9e9",
+      "verified": true
+    },
+    {
+      "repository": "lachr/Passungsrechner",
+      "revision": "0289439b1883db363d92e38f1ab352817b4d5a47",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/lachr/Passungsrechner/tree/0289439b1883db363d92e38f1ab352817b4d5a47",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "mhammond/pywin32",
+      "revision": "2a277cb5552756c2b4d42b524dc36d25e0bb6354",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/mhammond/pywin32/tree/2a277cb5552756c2b4d42b524dc36d25e0bb6354",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "misams/BAT",
+      "revision": "6f39c08201bba0f4034c281c5a22f8d9927bc0a9",
+      "license": "GPL-3.0 (LICENSE metni)",
+      "url": "https://raw.githubusercontent.com/misams/BAT/6f39c08201bba0f4034c281c5a22f8d9927bc0a9/LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "verified": true
+    },
+    {
+      "repository": "mozman/ezdxf",
+      "revision": "df5ef277fcc674d77580143212ec63dd981cc2b3",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/mozman/ezdxf/df5ef277fcc674d77580143212ec63dd981cc2b3/LICENSE",
+      "sha256": "db97ca426fc0d2b8124145de0f36181db73e6e713ce642d42fed2efc442edf19",
+      "verified": true
+    },
+    {
+      "repository": "mvernacc/material-properties-interchange",
+      "revision": "561d181d8b2c83c53c17b177c21505c55809fc11",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/mvernacc/material-properties-interchange/561d181d8b2c83c53c17b177c21505c55809fc11/LICENSE.md",
+      "sha256": "bcdead6b3748d5019780715f8e7bcbd3af1bed8bcbb83cedfa619f241b5c73e1",
+      "verified": true
+    },
+    {
+      "repository": "parkergreene/isofits",
+      "revision": "d3083a941e8071bb12114a28a25274bf99c30ac0",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/parkergreene/isofits/d3083a941e8071bb12114a28a25274bf99c30ac0/LICENSE",
+      "sha256": "2e6abf8fc662fe3de0bcecf84b46c154272c722a5e80e0d94eea1b73d52fd158",
+      "verified": true
+    },
+    {
+      "repository": "pedropaulovc/offline-solidworks-api-docs",
+      "revision": "b586c9f0c993ae7791e1b8aea79dab2a341a0147",
+      "license": "Doğrulanamadı",
+      "url": "https://github.com/pedropaulovc/offline-solidworks-api-docs/tree/b586c9f0c993ae7791e1b8aea79dab2a341a0147",
+      "verified": false,
+      "errors": [
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found",
+        "HTTP Error 404: Not Found"
+      ]
+    },
+    {
+      "repository": "robbievanleeuwen/section-properties",
+      "revision": "1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/robbievanleeuwen/section-properties/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/LICENSE",
+      "sha256": "b9a45f9a197adba20ebd838a68118785a326d242d335f32d7ed3ff5baed9432b",
+      "verified": true
+    },
+    {
+      "repository": "saucecode/ISO286",
+      "revision": "f455cecdfc6659f35002bc112e3667f4316eb086",
+      "license": "LGPL-2.1 (LICENSE metni)",
+      "url": "https://raw.githubusercontent.com/saucecode/ISO286/f455cecdfc6659f35002bc112e3667f4316eb086/LICENSE",
+      "sha256": "20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331",
+      "verified": true
+    },
+    {
+      "repository": "scroberts/Engineering-Materials-Database",
+      "revision": "bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad",
+      "license": "CC-BY-4.0",
+      "url": "https://raw.githubusercontent.com/scroberts/Engineering-Materials-Database/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/LICENSE",
+      "sha256": "ee5d0016080df0e8422f6d800e7a55a1625f7f136c5b49b8bcf3d8691ec90ed3",
+      "verified": true
+    },
+    {
+      "repository": "shaise/FreeCAD_FastenersWB",
+      "revision": "fddd07af422b7d3a69098b32333711c5eeae184c",
+      "license": "GPL-2.0 (LICENSE metni)",
+      "url": "https://raw.githubusercontent.com/shaise/FreeCAD_FastenersWB/fddd07af422b7d3a69098b32333711c5eeae184c/LICENSE",
+      "sha256": "c03cea027b4b40e4402fabd08557736727ec3d5bc54ad64ab6472de432198cad",
+      "verified": true
+    },
+    {
+      "repository": "shaise/FreeCAD_SheetMetal",
+      "revision": "a1cf212d8b86b3849e5cc12070226d5d4bded2a3",
+      "license": "LGPL-2.1 (LICENSE metni)",
+      "url": "https://raw.githubusercontent.com/shaise/FreeCAD_SheetMetal/a1cf212d8b86b3849e5cc12070226d5d4bded2a3/LICENSE",
+      "sha256": "510ccb0ba9b0a9bf99343901040a8ec42f92310704203d2068cea815cbbabb8f",
+      "verified": true
+    },
+    {
+      "repository": "tpw809/ranf_thread_fast",
+      "revision": "0f7103b48173d495dc4daf6e22f549606d8ac638",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/tpw809/ranf_thread_fast/0f7103b48173d495dc4daf6e22f549606d8ac638/LICENSE",
+      "sha256": "3140c43fd04d2d1438a454b62080a3910a528c29f21ebe6ba30ac189af264771",
+      "verified": true
+    },
+    {
+      "repository": "xarial/codestack",
+      "revision": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/xarial/codestack/0cde3849a184cdbbface61238ef431a6ebb9d530/LICENSE.md",
+      "sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+      "verified": true
+    },
+    {
+      "repository": "xarial/xcad",
+      "revision": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+      "license": "MIT",
+      "url": "https://raw.githubusercontent.com/xarial/xcad/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/LICENSE.md",
+      "sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+      "verified": true
+    }
+  ]
+}
