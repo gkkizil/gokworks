@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import json
+import threading
 from unittest.mock import patch
 
 import customtkinter as ctk
@@ -17,7 +18,11 @@ class NamingWindowTests(GuiTestCase):
         self.sw = App(self.root)
         install_com(self)
         self.app._switch_mode('naming')
-        self.app.naming_state['parent'].set(str(self.root))
+        self.destination = self.root/'Yeni-montaj'
+        self.app.naming_state['destination'].set(str(self.destination))
+        self.app.naming_state['source_folder'].set(str(self.root))
+        self.app._show_naming_sources((self.root/'Ana.sldasm', self.root/'Alt.sldasm'))
+        self.app._select_naming_assembly('Ana.sldasm')
         self.app.naming_state['prefix'].set('PROJE-')
 
     def scan(self):
@@ -47,7 +52,7 @@ class NamingWindowTests(GuiTestCase):
             self.wait_idle()
         self.assertEqual(self.sw.saves, 1)
         self.assertIn('bağlantıları doğrulandı', self.app.status_label.cget('text'))
-        destination = self.root/'Yeni-paket'
+        destination = self.destination
         self.assertTrue((destination/'ÖZEL-LEVHA.slddrw').is_file())
         self.assertTrue((destination/naming.REPORT_NAME).is_file())
         self.assertEqual(widgets['save'].cget('state'), 'disabled')
@@ -59,7 +64,10 @@ class NamingWindowTests(GuiTestCase):
         self.settle()
         self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
         self.app.naming_state['prefix'].set('PROJE-')
-        (self.root/'Yeni-paket').mkdir()
+        self.destination.mkdir()
+        (self.destination/'existing.txt').write_text('keep')
+        # Reselecting the destination forces a fresh directory check.
+        self.app.naming_state['destination'].set(str(self.destination))
         self.settle()
         self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
         with patch('naming.exporter.connect_to_solidworks', side_effect=RuntimeError('SolidWorks yok')):
@@ -146,9 +154,9 @@ class NamingWindowTests(GuiTestCase):
             for theme in ('Açık', 'Koyu'):
                 self.app._change_theme(theme)
                 self.settle()
-                for key in ('scan', 'save', 'stop', 'table', 'parent', 'prefix', 'mode', 'package', 'suffix', 'start', 'digits'):
+                for key in ('scan', 'save', 'stop', 'table', 'destination', 'prefix', 'mode', 'suffix', 'start', 'digits'):
                     self.assert_inside(self.app.naming_widgets[key])
-                for key in ('active_source', 'source_browse', 'source_pick', 'source_folder', 'source_file'):
+                for key in ('source_browse', 'browse', 'source_folder', 'assembly'):
                     self.assert_inside(self.app.naming_widgets[key])
                 for button in self.app.nav_buttons.values():
                     self.assert_inside(button, self.app.sidebar)
@@ -182,20 +190,29 @@ class NamingWindowTests(GuiTestCase):
         self.assertEqual(dialog.call_args.kwargs['initialvalue'], 'YENİ-Levha')
         self.assertNotIn('preview_id', self.app.naming_widgets)
 
-    def test_folder_and_file_picker_invalidate_old_preview_and_save_selected_source(self):
+    def test_source_folder_with_multiple_assemblies_uses_inline_choice_then_exact_target(self):
         self.scan()
         widgets = self.app.naming_widgets
         source = str(self.root/'Ana.sldasm')
-        with patch('naming.window.filedialog.askdirectory', return_value=str(self.root)), \
-                patch('naming.window.filedialog.askopenfilename', return_value=source) as picker:
+        self.destination.mkdir()  # An existing empty target is accepted directly.
+        with patch('naming.window.filedialog.askdirectory', side_effect=[str(self.root), str(self.destination)]), \
+                patch('naming.window.filedialog.askopenfilename') as file_picker:
             widgets['source_browse'].invoke()
-        self.assertEqual(picker.call_args.kwargs['initialdir'], str(self.root))
+            self.wait_idle()
+            widgets['browse'].invoke()
+        file_picker.assert_not_called()
         self.assertEqual(self.app.naming_state['source_mode'].get(), 'Dosyadan')
         self.assertEqual(self.app.naming_state['source_folder'].get(), str(self.root))
-        self.assertEqual(self.app.naming_state['source_file'].get(), source)
+        self.assertEqual(self.app.naming_state['source_file'].get(), '')
+        self.assertTrue(widgets['assembly_holder'].winfo_viewable())
         self.assertIsNone(self.app.naming_snapshot)
         self.assertFalse(widgets['table'].get_children())
-        self.assertEqual(widgets['save'].cget('state'), 'disabled')
+        with patch('naming.window.worker') as worker:
+            widgets['scan'].invoke()
+        worker.assert_not_called()
+        self.assertIn('ana montajı seçin', widgets['status'].cget('text'))
+        widgets['assembly']._dropdown_callback('Ana.sldasm')
+        self.assertEqual(self.app.naming_state['source_file'].get(), source)
         self.scan()
         self.assertEqual(self.app.naming_snapshot.source_path, source)
         self.assertEqual(widgets['save'].cget('state'), 'normal')
@@ -203,40 +220,87 @@ class NamingWindowTests(GuiTestCase):
             widgets['save'].invoke()
             self.wait_idle()
         self.assertEqual(self.sw.saves, 1)
+        self.assertTrue((self.destination/'PROJE-Ana.sldasm').is_file())
+        self.assertFalse((self.destination/'Yeni-paket').exists())
 
-    def test_cancelled_source_selection_and_empty_folder_cannot_use_stale_plan(self):
+    def test_single_assembly_is_selected_without_a_file_picker_and_busy_pick_is_ignored(self):
+        folder = self.root/'Tek-montaj'
+        folder.mkdir()
+        source = folder/'Tek.SLDASM'
+        source.write_text('{}')
+        with patch('naming.window.filedialog.askdirectory', return_value=str(folder)), \
+                patch('naming.window.filedialog.askopenfilename') as picker:
+            self.app.naming_widgets['source_browse'].invoke()
+            self.wait_idle()
+        picker.assert_not_called()
+        self.assertEqual(self.app.naming_state['source_file'].get(), str(source))
+        self.assertFalse(self.app.naming_widgets['assembly_holder'].winfo_viewable())
+        with patch('naming.window.filedialog.askdirectory') as picker:
+            self.app._naming_busy(True)
+            self.app._pick_naming_source_folder()
+            self.app._pick_naming_folder()
+            self.app._naming_busy(False)
+        picker.assert_not_called()
+
+    def test_cancelled_source_selection_keeps_preview_but_empty_folder_invalidates_it(self):
         self.scan()
         snapshot = self.app.naming_snapshot
         with patch('naming.window.filedialog.askdirectory', return_value=''):
             self.app.naming_widgets['source_browse'].invoke()
         self.assertIs(self.app.naming_snapshot, snapshot)
-        with patch('naming.window.filedialog.askdirectory', return_value=str(self.root)), \
-                patch('naming.window.filedialog.askopenfilename', return_value=''):
+        folder = self.root/'Bos'
+        folder.mkdir()
+        with patch('naming.window.filedialog.askdirectory', return_value=str(folder)):
             self.app.naming_widgets['source_browse'].invoke()
+            self.wait_idle()
+        self.assertEqual(self.app.naming_state['source_file'].get(), '')
+        self.assertIsNone(self.app.naming_snapshot)
+        self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
+        self.assertIn('bulunamadı', self.app.naming_widgets['source'].cget('text'))
         with patch('naming.window.worker') as worker:
             self.app.naming_widgets['scan'].invoke()
+            self.wait_idle()
         worker.assert_not_called()
-        self.assertFalse(self.app.busy)
-        self.assertIsNone(self.app.naming_snapshot)
-        self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
-        self.assertIn('dosyayı seçin', self.app.naming_widgets['status'].cget('text'))
 
-    def test_active_assembly_button_reads_source_and_rejects_active_part(self):
-        self.app.naming_state['source_file'].set(str(self.root/'Levha.sldprt'))
-        with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
-            self.app.naming_widgets['active_source'].invoke()
-            self.wait_idle()
-        self.assertEqual(self.app.naming_state['source_mode'].get(), 'Aktif montaj')
-        self.assertIsNone(self.app.naming_snapshot.source_path)
-        self.assertTrue(self.app.naming_snapshot.require_assembly)
-        self.assertEqual(self.app.naming_state['source_file'].get(), self.sw.paths[0])
-        self.sw.ActiveDoc.GetType = lambda: 1
-        with patch('naming.exporter.connect_to_solidworks', return_value=self.sw):
-            self.app.naming_widgets['active_source'].invoke()
-            self.wait_idle()
-        self.assertIsNone(self.app.naming_snapshot)
-        self.assertIn('montaj', self.app.naming_widgets['status'].cget('text').lower())
-        self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
+    def test_destination_check_runs_outside_tk_and_is_reused_for_rule_edits(self):
+        self.scan()
+        entered, release = threading.Event(), threading.Event()
+        self.addCleanup(release.set)
+        ui_thread = threading.get_ident()
+        threads = []
+        def check(destination, snapshot):
+            threads.append(threading.get_ident())
+            entered.set()
+            release.wait(3)
+            return Path(destination)
+        with patch('naming.window.validate_destination', side_effect=check) as check_folder:
+            self.app.naming_state['destination'].set(str(self.root/'Other-output'))
+            self.app._update_naming_preview()
+            self.assertTrue(entered.wait(1))
+            self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'disabled')
+            self.app.naming_state['prefix'].set('NEW-')
+            self.app._switch_mode('pdf')
+            self.assertEqual(self.app.mode, 'pdf')
+            release.set()
+            self.settle()
+            self.app._switch_mode('naming')
+            self.assertEqual(self.app.naming_widgets['save'].cget('state'), 'normal')
+            check_folder.assert_called_once()
+        self.assertNotEqual(threads, [ui_thread])
+
+    def test_old_parent_and_package_settings_migrate_to_one_destination(self):
+        self.close_app()
+        from pdf.settings import save_settings, load_settings
+        save_settings({'naming_parent': str(self.root), 'naming_package': 'Old-package',
+                       'naming_source_mode': 'Aktif montaj'}, self.settings)
+        self.open_app()
+        self.app._switch_mode('naming')
+        self.assertEqual(self.app.naming_state['destination'].get(), str(self.root/'Old-package'))
+        self.assertNotIn('parent', self.app.naming_state)
+        self.assertNotIn('package', self.app.naming_state)
+        self.assertEqual(self.app.naming_state['source_mode'].get(), 'Dosyadan')
+        self.app._save_preferences()
+        self.assertEqual(load_settings(self.settings)['naming_destination'], str(self.root/'Old-package'))
 
     def test_rules_are_saved_and_close_cancels_pending_worker(self):
         self.app.naming_state['suffix'].set('-R2')

@@ -67,7 +67,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         "k_state", "k_widgets", "k_calculation_label", "results_title", "results_hint", "clear_filter_button",
     )
 
-    def __init__(self, settings_path=SETTINGS_PATH):
+    def __init__(self, settings_path=SETTINGS_PATH, *, prepare_navigation=False):
         saved = load_settings(settings_path)
         appearance = saved.get("appearance", "light")
         ctk.set_appearance_mode(appearance if appearance in ("light", "dark") else "light")
@@ -76,6 +76,8 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         if os.name != "nt":
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         super().__init__()
+        if prepare_navigation:
+            self.withdraw()
         try:
             check_turkish_fonts(self)
         except RuntimeError:
@@ -129,9 +131,38 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._poll_id = self.after(80, self._process_events)
         self.bind("<Control-f>", self._focus_search)
-        for sequence in ('<ButtonPress>', '<KeyPress>', '<MouseWheel>'):
+        for sequence in ('<ButtonPress>', '<KeyPress>', '<MouseWheel>', '<Motion>'):
             self.bind(sequence, self._note_ui_activity, add='+')
-        self._preload_id = self.after(700, self._preload_page)
+        self.bind('<Tab>', self._focus_active_page)
+        self.bind('<Shift-Tab>', lambda event: self._focus_active_page(event, reverse=True))
+        self.bind('<ISO_Left_Tab>', lambda event: self._focus_active_page(event, reverse=True))
+        if prepare_navigation:
+            from gui.startup import prepare_pages
+            prepare_pages(self)
+        else:
+            self._preload_id = self.after(700, self._preload_page)
+
+    def _focus_active_page(self, event, reverse=False):
+        if getattr(self, '_preparing_navigation', False):
+            return 'break'
+        if event.widget.winfo_toplevel() is not self:
+            return
+        candidate = event.widget
+        seen = set()
+        while str(candidate) not in seen:
+            seen.add(str(candidate))
+            candidate = candidate.tk_focusPrev() if reverse else candidate.tk_focusNext()
+            owner = candidate
+            while owner is not None and owner not in (self.workspace, self.sidebar):
+                owner = getattr(owner, 'master', None)
+            if owner is not None:
+                candidate.focus_set()
+                break
+        return 'break'
+
+    def _navigation_layout_key(self):
+        return (self.winfo_width(), self.winfo_height(), self.workspace._get_widget_scaling(),
+                ctk.get_appearance_mode())
 
     def _note_ui_activity(self, event=None):
         self._last_ui_activity = time.monotonic()
@@ -192,10 +223,12 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
 
     def _request_mode(self, mode):
         """Coalesce queued clicks before spending time building a new page."""
-        if self._closed or self.busy or mode not in self._MODES:
+        if (self._closed or self.busy or mode not in self._MODES
+                or getattr(self, '_preparing_navigation', False)):
             return
         self._note_ui_activity()
         self._requested_mode = mode
+        self._update_navigation(mode)
         if self._navigation_id is None:
             self._navigation_id = self.after(0, self._apply_navigation)
 
@@ -213,8 +246,11 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         self._requested_mode = None
         self._note_ui_activity()
         if self._closed or self.busy or mode == self.mode or mode not in self._MODES:
+            if not self._closed:
+                self._update_navigation()
             return
-        self._schedule_preferences()
+        if not getattr(self, '_preparing_navigation', False):
+            self._schedule_preferences()
         layout_fit = getattr(self, "_layout_fit_id", None)
         if layout_fit is not None:
             self.after_cancel(layout_fit)
@@ -232,16 +268,26 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
                 self._create_page_state()
                 self._build_window()
                 self._remember_page()
-            # Map and paint the replacement below the previous native window.
-            # Merely calling grid() before unmapping the old page leaves an
-            # expose/geometry gap, especially on Windows.
-            self.workspace.lower(active_workspace)
-            self._show_workspace()
-            self.update_idletasks()
-            self._resize_pdf_area(immediate=True)
-            self.update_idletasks()
-            self.workspace.tkraise()
-            hide_grid(active_workspace)
+            layout_key = self._navigation_layout_key()
+            ready = (self.workspace.winfo_manager() and
+                     getattr(self.workspace, '_navigation_layout', None) == layout_key)
+            if not ready:
+                # First paint or changed geometry: prepare behind the old page.
+                self.workspace.lower(active_workspace)
+                if not self.workspace.winfo_manager():
+                    self._show_workspace()
+                self.update_idletasks()
+                self._resize_pdf_area(immediate=True)
+                self.update_idletasks()
+                self.workspace._navigation_layout = self._navigation_layout_key()
+            cover = getattr(self, '_startup_cover', None)
+            if cover is None:
+                self.workspace.tkraise()
+            else:
+                self.workspace.lower(cover)
+            # Keep previously visited native windows mapped beneath the new
+            # page. Unmapping/recreating their Windows surfaces on every click
+            # caused a cascade of Configure and expose events.
         except Exception:
             if self.workspace is not active_workspace:
                 if cached:
@@ -256,13 +302,22 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             self.mode = active_mode
             for name, value in self._pages[active_mode].items():
                 setattr(self, name, value)
+            self.workspace.tkraise()
             self.workspace.bind("<Configure>", self._resize_pdf_area)
             self._resize_pdf_area()
+            self._update_navigation()
             raise
         self.stop_event.clear()
         self.workspace.bind("<Configure>", self._resize_pdf_area)
         self._update_navigation()
-        self._resize_pdf_area()
+        if not ready:
+            self._resize_pdf_area()
+        focused = self.focus_get()
+        while focused is not None:
+            if focused is active_workspace:
+                self.workspace.focus_set()
+                break
+            focused = getattr(focused, 'master', None)
         if self.mode == 'iso_fits':
             self._draw_iso_diagram()
         elif self.mode == 'geometric_tolerances':
@@ -271,6 +326,8 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             self._draw_bolt_diagram()
         elif self.mode == 'weight':
             self._draw_weight_diagram()
+        elif self.mode == 'naming':
+            self._naming_buttons()
 
     def _remember_page(self):
         if self.mode == 'naming' and 'preview_id' in self.naming_widgets:
@@ -335,11 +392,12 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             self._icons[key] = make_icon(*key)
         return self._icons[key]
 
-    def _update_navigation(self):
+    def _update_navigation(self, mode=None):
+        mode = self.mode if mode is None else mode
         previous = self._nav_active
-        self._nav_active = self.mode
-        for key in dict.fromkeys((previous, self.mode)):
-            active = key == self.mode
+        self._nav_active = mode
+        for key in dict.fromkeys((previous, mode)):
+            active = key == mode
             configure_changed(
                 self.nav_buttons[key],
                 fg_color=NAV_ACTIVE if active else 'transparent',
@@ -402,6 +460,8 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         self._save_preferences()
 
     def _focus_search(self, event=None):
+        if getattr(self, '_preparing_navigation', False):
+            return 'break'
         if self.mode == 'weight':
             self.weight_widgets['length_input'].focus_set()
             return 'break'
@@ -1098,5 +1158,6 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
 
 
 def main():
-    app = GokworksPdfApp()
-    app.mainloop()
+    app = GokworksPdfApp(prepare_navigation=True)
+    if not app._closed:
+        app.mainloop()

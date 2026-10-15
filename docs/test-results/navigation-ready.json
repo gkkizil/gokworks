@@ -1,0 +1,111 @@
+{
+  "baseline_commit": "b79f585",
+  "measurement_date": "2026-10-15",
+  "environment": {
+    "python": "3.13.5",
+    "tk": "8.6.16",
+    "customtkinter": "6.0.0",
+    "display": "Linux/Xvfb :99",
+    "drawing_method": "circle_shapes"
+  },
+  "script": "docs/report-tools/benchmark_navigation_ready.py",
+  "comparison": "One run from a clean b79f585 archive, then one run from the updated working tree, with the same script and display. Normal startup and a full Tk event loop; baseline idle preloading stays enabled.",
+  "before": {
+    "startup_until_ready_ms": 327.90136999392416,
+    "pages_at_ready": 1,
+    "page_builds_after_ready": 8,
+    "click_median_ms": 150.5817495053634,
+    "click_max_ms": 246.9752570032142,
+    "heartbeat_max_gap_ms": 248.3463670068886,
+    "heartbeat_samples": 121,
+    "clicks": [
+      {
+        "mode": "dxf_dwg",
+        "click_and_events_ms": 54.334487998858094
+      },
+      {
+        "mode": "k_factor",
+        "click_and_events_ms": 164.51978399709333
+      },
+      {
+        "mode": "iso_fits",
+        "click_and_events_ms": 246.9752570032142
+      },
+      {
+        "mode": "geometric_tolerances",
+        "click_and_events_ms": 163.09173800982535
+      },
+      {
+        "mode": "bom",
+        "click_and_events_ms": 107.86053600895684
+      },
+      {
+        "mode": "bolt",
+        "click_and_events_ms": 138.07176100090146
+      },
+      {
+        "mode": "naming",
+        "click_and_events_ms": 109.93145300017204
+      },
+      {
+        "mode": "weight",
+        "click_and_events_ms": 219.894582987763
+      }
+    ],
+    "method": "One run, Linux/Xvfb, real Tk events; normal startup path, 950 ms idle, eight menu clicks with 100 ms dwell. Heartbeat requested every 16 ms. Startup time includes preparing all pages where supported. Baseline idle preloading remains enabled. No native Windows/SolidWorks measurement."
+  },
+  "after": {
+    "startup_until_ready_ms": 1240.9484630043153,
+    "pages_at_ready": 9,
+    "page_builds_after_ready": 0,
+    "click_median_ms": 25.86685449932702,
+    "click_max_ms": 31.838435999816284,
+    "heartbeat_max_gap_ms": 30.38046600704547,
+    "heartbeat_samples": 125,
+    "clicks": [
+      {
+        "mode": "dxf_dwg",
+        "click_and_events_ms": 31.838435999816284
+      },
+      {
+        "mode": "k_factor",
+        "click_and_events_ms": 24.926244994276203
+      },
+      {
+        "mode": "iso_fits",
+        "click_and_events_ms": 23.561876005260274
+      },
+      {
+        "mode": "geometric_tolerances",
+        "click_and_events_ms": 23.188521998235956
+      },
+      {
+        "mode": "bom",
+        "click_and_events_ms": 27.35852600017097
+      },
+      {
+        "mode": "bolt",
+        "click_and_events_ms": 25.480711992713623
+      },
+      {
+        "mode": "naming",
+        "click_and_events_ms": 26.252997005940415
+      },
+      {
+        "mode": "weight",
+        "click_and_events_ms": 28.14942398981657
+      }
+    ],
+    "method": "One run, Linux/Xvfb, real Tk events; normal startup path, 950 ms idle, eight menu clicks with 100 ms dwell. Heartbeat requested every 16 ms. Startup time includes preparing all pages where supported. Baseline idle preloading remains enabled. No native Windows/SolidWorks measurement."
+  },
+  "limitations": [
+    "Page construction cost moved to startup; startup is longer and nine pages are retained.",
+    "One run per version; no variance estimate or native Windows/SolidWorks measurement.",
+    "Click timings include button invocation and one full event update, not a compositor frame measurement.",
+    "Heartbeat requests a callback every 16 ms; its maximum interval measures event-loop responsiveness after startup, not frame rate.",
+    "Not comparable to the legacy lazy-constructor benchmark that cancels idle preloading and primarily flushes idle tasks."
+  ],
+  "validation": {
+    "navigation_gui_checks_passed": 27
+  }
+}

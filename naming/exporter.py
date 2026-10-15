@@ -41,6 +41,28 @@ def valid_stem(value):
     return value
 
 
+def validate_destination(destination, snapshot=None):
+    """Accept the selected exact folder only when it can hold a new package."""
+    if destination is None or not str(destination).strip():
+        raise ValueError('Yeni montajın kaydedileceği hedef klasörü seçin.')
+    folder = Path(destination).expanduser().absolute()
+    try:
+        if folder.exists():
+            if not folder.is_dir():
+                raise ValueError('Hedef konum bir klasör olmalı.')
+            if next(folder.iterdir(), None) is not None:
+                raise ValueError('Hedef klasör boş olmalı. Boş veya yeni bir klasör seçin; var olan dosyaların üzerine yazılmaz.')
+        elif not folder.parent.is_dir():
+            raise ValueError('Hedef klasörün üst klasörü bulunamadı. Mevcut bir konumda yeni klasör seçin.')
+        resolved = folder.resolve()
+        if snapshot is not None and any(Path(doc.path).resolve().is_relative_to(resolved)
+                                        for doc in snapshot.documents):
+            raise ValueError('Kaynak dosyaların bulunduğu klasör hedef olarak kullanılamaz. Ayrı bir hedef klasör seçin.')
+    except OSError as error:
+        raise ValueError(f'Hedef klasöre erişilemiyor: {error}') from error
+    return folder
+
+
 @dataclass(frozen=True)
 class Document:
     path: str
@@ -161,8 +183,12 @@ def _out_integer():
     return win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
 
 
-def _late_bound(app):
-    return win32com.client.dynamic.DumbDispatch(app) if hasattr(app, '_oleobj_') else app
+def _late_bound(app, *methods):
+    if hasattr(app, '_oleobj_'):
+        app = win32com.client.dynamic.DumbDispatch(app)
+        if methods:
+            app._FlagAsMethod(*methods)
+    return app
 
 
 def _configuration(model):
@@ -284,8 +310,11 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
     if not root:
         raise RuntimeError('Önce açık SolidWorks belgesini kaydedin.')
     try:
-        extension = sw._value(model, 'Extension')
-        pg = sw._value(extension, 'GetPackAndGo')
+        # DumbDispatch on the application does not propagate to child objects.
+        # GetPackAndGo is a method: dynamic dispatch's initial PROPERTYGET probe
+        # can fail with DISP_E_PARAMNOTOPTIONAL before returning a callable.
+        extension = _late_bound(sw._value(model, 'Extension'), 'GetPackAndGo')
+        pg = extension.GetPackAndGo()
     except Exception as error:
         raise RuntimeError(f'SolidWorks GetPackAndGo başlatılamadı: {error}') from error
     if pg is None:
@@ -344,6 +373,11 @@ def scan(app, stop=None, progress=None, *, source_path=None, require_assembly=Fa
 
 def plan_names(snapshot, destination, rules=Rules(), overrides=None, *, allow_collisions=False):
     """Keep SW extensions; pair same-folder/same-stem drawings to models."""
+    # Planning is pure path/name work. Folder I/O is validated separately so
+    # editing a prefix or leaving this page cannot block on a network share.
+    if destination is None or not str(destination).strip():
+        raise ValueError('Yeni montajın kaydedileceği hedef klasörü seçin.')
+    destination = Path(destination).expanduser().absolute()
     if not isinstance(rules.start, int) or isinstance(rules.start, bool) or rules.start < 0:
         raise ValueError('Başlangıç numarası sıfır veya pozitif tam sayı olmalı.')
     if not isinstance(rules.digits, int) or not 1 <= rules.digits <= 8:
@@ -397,9 +431,7 @@ def execute(app, snapshot, entries, destination, stop=None, progress=None):
 def _execute(app, snapshot, entries, destination, stop=None, progress=None, *, model=None):
     """Save directly to final paths so moving a staging folder cannot break refs."""
     _check(stop)
-    destination = Path(destination).absolute()
-    if destination.exists() or not destination.parent.is_dir():
-        raise ValueError('Paket klasörü yeni olmalı; üst klasör mevcut olmalı. Var olan dosyaların üzerine yazılmaz.')
+    destination = validate_destination(destination, snapshot)
     fresh, extension, pg = _session(app, stop, progress, model=model,
                                    source_path=snapshot.source_path, require_assembly=snapshot.require_assembly)
     old = {path_key(doc.path): doc for doc in snapshot.documents}
@@ -434,9 +466,13 @@ def _execute(app, snapshot, entries, destination, stop=None, progress=None, *, m
             or not isinstance(states, (tuple, list)) or len(states) != len(targets) or any(type(state) is not int or state != 0 for state in states)):
         raise RuntimeError('SolidWorks dosya adlarını planlandığı gibi eşleştirmedi.')
     _check(stop)
-    # Reserve a new, final directory. Originals and existing packages are never
-    # overwritten. Failed/cancelled output is removed only at our planned paths.
-    destination.mkdir()
+    # The folder picker may return an existing empty folder. Recheck after the
+    # COM planning calls; originals and occupied folders must never be changed.
+    validate_destination(destination, snapshot)
+    created_folder = not destination.exists()
+    if created_folder:
+        destination.mkdir()
+    validate_destination(destination, snapshot)
     complete = False
     try:
         if progress:
@@ -472,10 +508,11 @@ def _execute(app, snapshot, entries, destination, stop=None, progress=None, *, m
                     Path(path).unlink(missing_ok=True)
                 except OSError:
                     pass
-            try:
-                destination.rmdir()
-            except OSError:
-                pass
+            if created_folder:
+                try:
+                    destination.rmdir()
+                except OSError:
+                    pass
 
 
 def worker(events, stop, *, operation='scan', snapshot=None, entries=(), destination=None,

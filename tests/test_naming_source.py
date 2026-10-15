@@ -212,6 +212,50 @@ class NamingSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'GetDocumentNames çıkış parametreleri'):
             naming._arrays(typed, 'GetDocumentNames', 1)
 
+    def test_pack_and_go_child_is_invoked_as_method_without_property_probe(self):
+        class MissingParameter(Exception):
+            hresult = -2147352561
+
+        class Extension:
+            _oleobj_ = object()
+
+            def __init__(self, app):
+                self.app = app
+                self.methods = set()
+                self.calls = 0
+                self.failure = None
+
+            def _FlagAsMethod(self, *names):
+                self.methods.update(names)
+
+            @property
+            def GetPackAndGo(self):
+                if 'GetPackAndGo' not in self.methods:
+                    raise MissingParameter('Parametre seçime bağlı değil')
+                return self.get_pack
+
+            def get_pack(self):
+                self.calls += 1
+                if self.failure:
+                    raise self.failure
+                return Pack(self.app)
+
+        app = App(self.folder)
+        typed, dynamic = Extension(app), Extension(app)
+        app.ActiveDoc.Extension = typed
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: dynamic if obj is typed else obj
+        snapshot = naming.scan(app)
+        self.assertEqual(snapshot.root, app.paths[0])
+        self.assertEqual((typed.calls, dynamic.calls), (0, 1))
+        self.client.dynamic.DumbDispatch.assert_called_once_with(typed)
+
+        # A real method failure must surface once, without fallback/retry.
+        dynamic.failure = MissingParameter('method failure')
+        with self.assertRaisesRegex(RuntimeError, 'GetPackAndGo başlatılamadı.*method failure') as caught:
+            naming.scan(app)
+        self.assertIs(caught.exception.__cause__, dynamic.failure)
+        self.assertEqual(dynamic.calls, 2)
+
 
 if __name__ == '__main__':
     unittest.main()

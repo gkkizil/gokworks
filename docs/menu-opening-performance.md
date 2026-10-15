@@ -1,6 +1,37 @@
 # Menü ve sekme geçişleri — 15 Ekim 2026
 
-## Güncel değişiklikler
+## Güncel mimari: gezinmeden önce hazırlık
+
+Normal uygulama açılışında dokuz çalışma alanı sade bir ilerleme göstergesi altında ana Tk iş parçacığında kurulup gerçek pencere boyutunda çiziliyor. Hazırlık tamamlanınca PDF sayfası açılıyor. Böylece kullanıcı menüler arasında dolaşırken yeni sayfa kurulumu veya 700 ms aralıklarla çalışan ağır arka plan hazırlığı devreye girmiyor. Kurulum maliyeti kaldırılmadı; başlangıca taşındı.
+
+Ziyaret edilmiş sayfaların native pencereleri artık kaldırılıp yeniden eşlenmiyor; aynı alanda birbirinin altında hazır tutuluyor. Pencere boyutu, DPI ve tema değişmediyse geçiş yalnız hazır sayfayı öne alıyor; yeniden yerleşim ve global `update_idletasks()` çağrısı yapmıyor. Geometri veya tema değiştiğinde gereken yerleşim yenileniyor. Form değerleri korunuyor, menü vurgusu tıklamada hemen değişiyor ve klavye odağı aktif sayfa ile yan menüde tutuluyor. Dokuz sayfanın bellekte tutulması bu yaklaşımın maliyetidir.
+
+## Normal açılış ve olay döngüsü ölçümü
+
+Aynı [ölçüm betiği](report-tools/benchmark_navigation_ready.py), önce `b79f585` kodunun temiz arşiv kopyasında, ardından yeni kodda birer tur çalıştırıldı. Python 3.13.5, Tk 8.6.16, CustomTkinter 6.0.0 ve Linux/Xvfb `:99` kullanıldı; iki tarafta da font dosyaları yüklenemediği için `circle_shapes` çizimi kullanıldı.
+
+Bu ölçüm normal açılış yolunu kullanır. Başlangıçtan sonra tam Tk olay döngüsüyle 950 ms beklenir, ardından sekiz menüye 100 ms aralıkla tıklanır. Eski sürümün arka plan hazırlığı açık bırakılır. Olay döngüsünün yanıt vermesini izlemek için her 16 ms'de bir kontrol çağrısı istenir; aşağıdaki aralık, bu çağrılar arasında gözlenen en uzun süredir ve kare hızı ölçümü değildir.
+
+| İşlem | Önce | Sonra |
+| --- | ---: | ---: |
+| Etkileşime hazır açılış | 327,90 ms | 1240,95 ms |
+| Açılış sonunda hazır sayfa | 1 | 9 |
+| Açılış sonrası oluşturulan sayfa | 8 | 0 |
+| Tıklama ve olay işleme süresi, medyan | 150,58 ms | 25,87 ms |
+| Tıklama ve olay işleme süresi, en yüksek | 246,98 ms | 31,84 ms |
+| Olay döngüsü kontrol aralığı, en yüksek | 248,35 ms | 30,38 ms |
+
+Açılış bu koşuda yaklaşık 0,33 saniyeden 1,24 saniyeye çıktı; karşılığında gezinme sırasında sayfa kurulumları ortadan kalktı. Tıklama süresi düğmenin çağrılmasını ve ardından bir tam `update()` çağrısını içerir. Birer tur değişkenliği belirlemeye yetmez. Bu sayılar Windows görüntü birleştiricisinin karelerini veya SolidWorks çalışmasını ölçmez; gerçek Windows akıcılığı için kesin garanti değildir.
+
+Önceki yaklaşık 3 ms hazır sayfa sonucu farklı bir yöntemden geliyordu: o betik arka plan hazırlığını iptal ediyor, varsayılan tembel kurucuyu kullanıyor ve çizimde ağırlıklı olarak idle olaylarını işliyordu. Normal açılıştan hemen sonra görülen hazırlık takılmalarını kapsamıyordu. Yeni 25,87 ms değeriyle eşdeğer değildir. [Ham normal-gezinme sonuçları](test-results/navigation-ready.json) sayfa bazındaki ölçümleri içerir.
+
+27 ilgili gezinme ve sekme GUI kontrolü geçti. Başlangıç hazırlığı, hazır sayfa geçişinde yeniden kurulum/yerleşim yapılmaması, durumun korunması, hızlı seçimler, hata dönüşü, yeniden boyutlandırma, tema ve DPI davranışları denetlendi. Bu rapor tam test paketi veya yeni EXE doğrulaması iddiası içermez.
+
+## Tarihsel çalışma: ilk geçiş düzeltmeleri — 15 Ekim 2026
+
+Aşağıdaki kod davranışı ve ölçümler önceki çalışmaya aittir. Bu bölümdeki eski sayfayı gizleme yaklaşımı güncel kalıcı sayfa katmanlarıyla değiştirilmiştir; aşağıdaki sayılar normal açılış ölçümüyle birleştirilmemelidir.
+
+### Önceki değişiklikler
 
 Ana menüde yeni sayfa mevcut ekranın arkasında görünür duruma getiriliyor, gerçek pencere boyutuna yerleştiriliyor ve çiziliyor. Sonra öne alınıyor; önceki sayfa ancak bundan sonra gizleniyor. Sayfalar ve girilmiş değerler önbellekte korunuyor. Kurulum ya da çizim hatasında önceki ekran geri yükleniyor.
 
@@ -8,7 +39,7 @@ CustomTkinter 6.0.0'ın sonuç sekmelerindeki iki geçiş davranışı değişti
 
 Menüdeki 140 ms renk animasyonu kaldırıldı; yalnız eski ve yeni seçili düğme hemen güncelleniyor. Biriken menü seçimleri `after(0)` ile son seçime indirgeniyor; kontrol oluşturulurken çağrılan `update_idletasks()` yeni bir geçişi başlatmıyor. Ağırlık hesabında sayı, adet, malzeme veya birim değişince alanlar kaldırılıp yeniden yerleştirilmiyor; yerleşim yalnız kesit türü veya hesap yöntemi değişince yenileniyor.
 
-## Güncel ölçüm
+### Önceki ölçüm
 
 Başlangıç: `e3ada75` kodunun temiz `git archive` kopyası. Aynı güncel ölçüm betiğiyle önce başlangıç, ardından son kod birer tur çalıştırıldı. Ortam: Python 3.13.5, Tk 8.6.16, CustomTkinter 6.0.0, Linux/Xvfb `:99`. Font dosyaları salt okunur olduğundan iki tarafta da `circle_shapes` çizimi kullanıldı.
 
@@ -31,7 +62,7 @@ En yüksek tamamlanma süresi ve gizli hazırlama medyanı bu ölçümde arttı.
 
 [Ham güncel sonuçlar](test-results/menu-transitions.json) sayfa bazındaki değerleri ve ölçüm sınırlarını içerir. Windows görüntü birleştiricisi veya SolidWorks ölçülmedi; Linux görünürlük kontrolleri Windows'ta siyah karelerin tamamen giderildiğini kanıtlamaz.
 
-## Güncel kontrol
+### Önceki kontrol
 
 26 benzersiz ilgili GUI kontrolü doğrulandı. İlk çalışmada 25 geçti; sonuçlardan manuel K/R görünümüne dönüşte eski panel gizlenirken hedef alanın henüz görünür olmadığını denetleyen bir kontrol başarısız oldu. Eski hesap formunun kaldırılması kaydırılabilir alanın geometrisini yeniden değiştiriyordu. Sonuç paneli gizlenmeden önce bu yerleşimin tamamlanması sağlandı; assertion değiştirilmeden ilgili dört sekme kontrolü yeniden çalıştırıldı ve geçti.
 

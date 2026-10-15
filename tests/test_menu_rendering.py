@@ -48,35 +48,67 @@ class MenuRenderingTests(GuiTestCase):
         self.assertNotIn('bom', self.app._pages)
         self.assertIsNone(getattr(self.app, '_nav_anim_id', None))
 
-    def test_replacement_is_mapped_and_sized_before_previous_page_hides(self):
-        from gui.rendering import hide_grid
+    def assert_active_page_on_top(self):
+        pages = {page['workspace'] for page in self.app._pages.values()}
+        stack = [child for child in self.app.winfo_children()
+                 if child in pages and child.winfo_manager()]
+        self.assertIs(stack[-1], self.app.workspace)
 
-        for mode in ('bom', 'pdf', 'weight', 'bom'):
-            previous = self.app.workspace
-            show = self.app._show_workspace
-            swaps = []
+    def test_visited_pages_keep_native_surfaces_and_ready_switch_skips_layout(self):
+        previous = self.app.workspace
+        self.app._switch_mode('bom')
+        self.wait_layout()
+        self.assertTrue(previous.winfo_viewable())
+        self.assert_active_page_on_top()
+        self.app._switch_mode('pdf')
+        self.wait_layout()
+        with patch.object(self.app, '_show_workspace') as show, \
+                patch.object(self.app, '_resize_pdf_area') as fit, \
+                patch.object(self.app, 'update_idletasks') as flush:
+            self.app._switch_mode('bom')
+        show.assert_not_called()
+        fit.assert_not_called()
+        flush.assert_not_called()
+        self.assert_active_page_on_top()
 
-            def show_with_previous_visible():
-                self.assertTrue(previous.winfo_viewable())
-                show()
-                self.assertTrue(previous.winfo_viewable())
-
-            def hide_after_paint(widget):
-                if widget is previous:
-                    target = self.app.workspace
-                    self.assertTrue(target.winfo_viewable())
-                    self.assertGreater(target.winfo_width(), 100)
-                    self.assertGreater(target.winfo_height(), 100)
-                    swaps.append(target)
-                hide_grid(widget)
-
-            with self.subTest(mode=mode), \
-                    patch.object(self.app, '_show_workspace', side_effect=show_with_previous_visible), \
-                    patch('pdf.window.hide_grid', side_effect=hide_after_paint):
+    def test_startup_prepares_every_page_before_interactive_navigation(self):
+        from gui.startup import prepare_pages
+        self.app.source_folder.set('/saved/source')
+        prepare_pages(self.app)
+        self.assertEqual(set(self.app._pages), set(self.app._MODES))
+        self.assertIsNone(self.app._preload_id)
+        self.assertIsNone(self.app._startup_cover)
+        self.assertEqual(self.app.mode, 'pdf')
+        self.assertEqual(self.app.source_folder.get(), '/saved/source')
+        with patch.object(self.app, '_build_window') as build, \
+                patch.object(self.app, '_show_workspace') as show:
+            for mode in self.app._MODES[1:]:
                 self.app._switch_mode(mode)
-                self.assertEqual(swaps, [self.app.workspace])
-                self.assertFalse(previous.winfo_viewable())
-                self.assertTrue(self.app.workspace.winfo_viewable())
+                self.assert_active_page_on_top()
+        build.assert_not_called()
+        show.assert_not_called()
+
+    def test_pending_navigation_immediately_highlights_requested_menu(self):
+        self.app._request_mode('bom')
+        self.assertEqual(self.app.mode, 'pdf')
+        self.assertEqual(self.app._nav_active, 'bom')
+        self.app.busy = True
+        try:
+            self.app.update()
+            self.assertEqual(self.app._nav_active, 'pdf')
+        finally:
+            self.app.busy = False
+
+    def test_cached_pages_are_refitted_after_window_geometry_changes(self):
+        self.app._switch_mode('bom')
+        self.wait_layout()
+        self.app._switch_mode('pdf')
+        self.app.geometry('1100x740')
+        self.app.update()
+        with patch.object(self.app, '_resize_pdf_area', wraps=self.app._resize_pdf_area) as fit:
+            self.app._switch_mode('bom')
+        self.assertTrue(any(call.kwargs.get('immediate') for call in fit.call_args_list))
+        self.assert_active_page_on_top()
 
     def test_current_page_or_direct_navigation_supersedes_queued_click(self):
         self.app.nav_buttons['bom'].invoke()
@@ -146,8 +178,9 @@ class MenuRenderingTests(GuiTestCase):
         self.assertNotIn('bom', self.app._pages)
         self.app._switch_mode('bom')
         self.wait_layout()
-        self.assertFalse(active.winfo_viewable())
+        self.assertTrue(active.winfo_viewable())
         self.assertTrue(self.app.workspace.winfo_viewable())
+        self.assert_active_page_on_top()
 
     def test_preloading_keeps_active_page_data_and_settings_unchanged(self):
         workspace = self.app.workspace
@@ -233,7 +266,8 @@ class MenuRenderingTests(GuiTestCase):
             ctk.set_widget_scaling(scale)
             self.settle()
             for mode, page in self.app._pages.items():
-                self.assertEqual(page['workspace'].winfo_manager(), 'grid' if mode == active else '')
+                self.assertEqual(page['workspace'].winfo_manager(), 'grid' if mode in ('pdf', active) else '')
+            self.assert_active_page_on_top()
 
     def test_preloading_preserves_active_iso_manual_state(self):
         self.app._switch_mode('iso_fits')

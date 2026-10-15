@@ -163,6 +163,48 @@ class NamingTests(unittest.TestCase):
         self.assertEqual(file.read_text(), 'original')
         self.assertEqual(self.app.saves, 0)
 
+    def test_selected_empty_folder_is_used_directly_and_references_are_preserved(self):
+        self.destination.mkdir()
+        snapshot, entries = self.plan(prefix='NEW-')
+        report = naming.execute(self.app, snapshot, entries, self.destination)
+        self.assertTrue(report['file_references_verified'])
+        self.assertEqual(Path(report['root']).parent, self.destination)
+        self.assertEqual(Path(report['root']).name, 'NEW-Ana.sldasm')
+        self.assertFalse((self.destination/'Yeni-paket').exists())
+
+    def test_failed_save_preserves_the_selected_existing_empty_folder(self):
+        self.destination.mkdir()
+        snapshot, entries = self.plan(prefix='NEW-')
+        self.app.statuses = ()
+        with self.assertRaises(RuntimeError):
+            naming.execute(self.app, snapshot, entries, self.destination)
+        self.assertTrue(self.destination.is_dir())
+        self.assertEqual(list(self.destination.iterdir()), [])
+
+    def test_destination_filled_after_preview_is_rejected_without_saving(self):
+        self.destination.mkdir()
+        snapshot, entries = self.plan(prefix='NEW-')
+        marker = self.destination/'keep.txt'
+        marker.write_text('keep')
+        with self.assertRaisesRegex(ValueError, 'boş olmalı'):
+            naming.execute(self.app, snapshot, entries, self.destination)
+        self.assertEqual(marker.read_text(), 'keep')
+        self.assertEqual(self.app.saves, 0)
+
+    def test_destination_validation_rejects_sources_files_and_missing_parent(self):
+        snapshot = naming.scan(self.app)
+        for destination in ('', self.folder, self.app.paths[0], self.folder/'missing'/'new'):
+            with self.subTest(destination=destination), self.assertRaises(ValueError):
+                naming.validate_destination(destination, snapshot)
+        self.assertEqual(naming.validate_destination(self.destination, snapshot), self.destination)
+
+    def test_name_planning_does_not_access_the_destination_filesystem(self):
+        snapshot = naming.scan(self.app)
+        with patch.object(Path, 'iterdir', side_effect=AssertionError('filesystem in preview')), \
+                patch.object(Path, 'is_dir', side_effect=AssertionError('filesystem in preview')):
+            entries = naming.plan_names(snapshot, self.destination, naming.Rules(prefix='NEW-'))
+        self.assertEqual(len(entries), len(snapshot.documents))
+
     def test_partial_save_and_reference_mismatch_remove_created_outputs(self):
         for failure in ('status', 'references', 'empty_status'):
             with self.subTest(failure=failure):

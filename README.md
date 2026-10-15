@@ -46,7 +46,7 @@ kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
 
 ## İsimlendirme aracı
 
-**Aktarım ve montaj → İsimlendirme aracı** bölümünde **Kaynak klasör / Dosya seç** ile ana dosyayı belirleyin veya **Aktif montajı kullan** seçin; ön/son ek, bul–değiştir, numaralı veya dosya başına elle adlandırma kullanın. **Paketi oluştur**, montajı, parçaları ve bulunan teknik resimleri yeni adlarla ayrı bir Pack and Go klasörüne kaydeder. Kaynak proje korunur; yeni dosyaların kayıtlı referansları doğrulanmadan işlem başarılı gösterilmez. [Kullanım, kaynaklar ve sınırlar](naming/README.md).
+**Aktarım ve montaj → İsimlendirme aracı** bölümünde montajın bulunduğu **Kaynak klasörü** ve yeni montajın kaydedileceği **Hedef klasörü** seçin. Tek montaj otomatik seçilir; birden çok montaj varsa ekrandaki listeden ana montajı belirleyin. **Montajı oku** ile adları önizleyin; ön/son ek, bul–değiştir, numaralı veya dosya başına elle adlandırma kullanın. **Yeni montajı kaydet**, montajı, parçaları ve bulunan teknik resimleri seçtiğiniz boş/yeni hedef klasöre kaydeder. Kaynak proje korunur; yeni dosyaların kayıtlı referansları doğrulanmadan işlem başarılı gösterilmez. [Kullanım, kaynaklar ve sınırlar](naming/README.md).
 
 ## Cıvata hesabı
 

@@ -4,12 +4,12 @@ SolidWorks dosyalarını yeni adlarla **ayrı bir Pack and Go paketine** aktarı
 
 ## Kullanım
 
-1. **Aktarım ve montaj → İsimlendirme aracı** ekranında kaynak seçin: **Kaynak klasör → Klasör seç** ile klasörü ve açılan dosya penceresinde ana montajı belirleyin; **Dosya seç** ile de doğrudan montaj, parça veya teknik resim seçebilirsiniz. SolidWorks'teki açık montaj için **Aktif montajı kullan** düğmesi montajı hemen okur.
-2. Dosyadan kaynak seçtiyseniz **Dosyaları oku** düğmesine basın. Kaynak dosya önceden açık olmak zorunda değildir; SolidWorks oturumu açık olmalıdır. Bir klasördeki bağımsız dosyaların tümü aynı proje sayılmaz: seçilen ana dosyanın Pack and Go referansları alınır. Kaynağı değiştirmek eski önizlemeyi temizler.
-3. Çıktı için mevcut bir üst klasör ve henüz oluşturulmamış bir **Yeni paket klasörü** adı girin.
+1. **Aktarım ve montaj → İsimlendirme aracı** ekranında **1 · Kaynak klasör** ile montajın bulunduğu klasörü seçin. Bir montaj bulunursa otomatik seçilir; birden çok montaj varsa **Ana montaj** listesinden seçin. Klasör seçiminin ardından ayrı bir dosya penceresi açılmaz. Önce seçilen klasörün içindeki montajlar aranır; doğrudan montaj yoksa alt klasörler de taranır.
+2. **2 · Hedef klasör** ile yeni montajın kaydedileceği boş veya yeni klasörü seçin. Çıktı doğrudan bu klasöre yazılır; ayrıca paket klasörü adı girilmez. Dolu klasörlere veya kaynak dosyaların bulunduğu konuma kayıt engellenir.
+3. **Montajı oku** düğmesine basın. Kaynak montaj önceden açık olmak zorunda değildir; SolidWorks oturumu açık olmalıdır. Seçilen ana montajın Pack and Go referansları alınır. Kaynağı değiştirmek eski önizlemeyi temizler.
 4. Ön/son ek, bul–değiştir veya numaralı isimlendirme seçin. Numaralı modda başlangıç ve basamak sayısı ayarlanır. Dosya uzantıları korunur.
 5. Eski–yeni adları kontrol edin. Tek bir dosya için satırı seçip **Seçili adı düzenle** kullanın. Aynı klasördeki aynı adlı model/teknik resim çifti, modelin yeni adını paylaşır; bağlantılar ayrıca dosya yolu üzerinden eşlenir.
-6. **Paketi oluştur** seçin. Başarıda bütün dosya referansları kontrol edilmiş olur. Paketin içinde `GOKWORKS-isimlendirme.json` eski/yeni yolları ve yeni kök dosyayı gösterir.
+6. **Yeni montajı kaydet** seçin. Başarıda bütün dosya referansları kontrol edilmiş olur. Hedefteki `GOKWORKS-isimlendirme.json` eski/yeni yolları ve yeni kök dosyayı gösterir.
 
 Önizleme montaj ağacı olarak gösterilir: parçalar ve alt montajlar bağlı oldukları montajın altında, teknik resimler ilgili modelin altında görünür. Dalları oklarla açıp kapatabilirsiniz. Birden fazla yerde kullanılan dosya **Ortak dosya** olarak işaretlenir; içeriği ilk dalda açılır ve adını herhangi bir satırdan değiştirmek bütün tekrarları günceller. Parçaya bağlı türetilmiş dosyalar **Referans** olarak gösterilir. Bu ağaç dosya bağlantılarını gösterir; bileşen adetleri veya konfigürasyon bazlı BOM değildir. Numaralar farklı dosyalara verilmeye devam eder ve Pack and Go belge sırası korunur. Adları düzenlerken kapalı dallar, seçili satır ve kaydırma konumu korunur.
 
@@ -19,16 +19,27 @@ Teknik resimler, bastırılmış bileşenler ve Toolbox dosyaları dahil edilir.
 
 Küçük ekranda ayarlar ayrı kaydırılır; önizleme tablosu ve paket düğmesi yerini korur. Açık/koyu tema, %125 ölçek, sayfa önbelleği ve kuralların kaydedilmesi desteklenir. Katı isim çakışmalarında tablo silinmez: dosyalar elle düzeltilebilir, aktarım adlar benzersiz olana kadar kapalıdır.
 
+## Klasörden montaj seçimi — 15 Ekim 2026
+
+Kaynak ve hedef seçimi iki klasör alanında toplanmıştır. Klasördeki montajların keşfi ve hedefin boşluk/erişim kontrolü arka planda yapılır. Ön/son ek düzenleme veya menü değiştirme sırasında hedef klasör yeniden taranmaz. Hedef tekrar seçildiğinde kontrol yenilenir; kaydetme başlamadan önce arka uç klasörü tekrar doğrular. Eski üst klasör/paket adı ayarları tek hedef yoluna dönüştürülür.
+
+Ekrandaki `SolidWorks GetPackAndGo başlatılamadı: -2147352561` hatası için `ModelDocExtension` ayrıca late-bound sarılır ve `GetPackAndGo` açıkça metot olarak işaretlenir. Böylece COM tür bilgisinin metodu property getter olarak çağırması engellenir. Gerçek metot hataları tekrar denemelerle gizlenmez. Bu davranış [pywin32 dynamic dispatch](https://github.com/mhammond/pywin32/blob/main/com/win32com/client/dynamic.py) ve [metot üretimi](https://github.com/mhammond/pywin32/blob/main/com/win32com/client/build.py) üzerinden incelendi.
+
+İlgili doğrulama: 16 isimlendirme/kayıt, 9 COM/kaynak oturumu, 5 klasör keşfi, 12 isimlendirme arayüzü ve 27 menü/sekme/ayar kontrolü. Son iki isimlendirme arayüzü sorunu — küçük ekranda tablo yüksekliği ve ad çakışması giderildikten sonra kayıt düğmesinin açılması — düzeltildikten sonra ilgili kontroller yeniden geçti. Canlı SolidWorks oturumuna bağlanılmadı; bu güncellemede EXE üretilmedi.
+
+[Yeni klasör seçimi ekranı](examples/naming-folders-dark.png), [yeniden çekim betiği](examples/capture.py). Görsel, örnek dosya kayıtlarıyla çalışan gerçek Tk arayüzünden alındı; gerçek CAD dosyası okunduğu anlamına gelmez.
+
 ## Referans koruma
 
 - Windows ad kuralları, dosya yolu uzunluğu, uzantılar ve büyük/küçük harften bağımsız ad çakışmaları doğrulanır.
 - Kaydedilmemiş değişiklik, eksik kaynak, paket dışında kalan referans veya sanal/bilinmeyen Pack and Go belgesi aktarımı engeller. Sanal parçaların adları bu API ile değiştirilemediğinden önce dış dosyaya kaydedilmesi gerekir.
-- Aktif montaj modunda önizlemeden sonra aktif belge değişirse yeniden okuma gerekir. Dosyadan kaynak modunda paketleme, sonradan aktif olan belge yerine seçilmiş kaynak dosyayı kullanır. Her iki modda kaynak boyutu/tarihi veya referans listesi değişirse yeniden okuma gerekir.
+- Paketleme, sonradan aktif olan belge yerine seçilmiş ana montajı kullanır. Kaynak boyutu/tarihi veya referans listesi değişirse yeniden okuma gerekir.
 - Araç, kendisinin açtığı temiz kaynak belgeyi işlem sonunda kapatır; önceden açık belgeler açık tutulur. Önceki aktif belge, geçici görünürlük ve kaynak konfigürasyonu geri yüklenir. Kaynakta kaydedilmemiş değişiklik oluşmuşsa belge veri kaybını önlemek için açık bırakılır ve açıklama gösterilir.
 - `SetDocumentSaveToNames` dizisi, Pack and Go'nun **kendi belge sırasıyla** verilir. Önizlemedeki numaralandırma sırası bu API sırasını değiştirmez. Adlar geri okunup planla karşılaştırılır. `SetSaveToName` için `Override=False` kullanılır; `True` özel dosya eşleştirmesini geçersiz kılabilir.
 - Kaydetme her dosya için başarı kodu dönmelidir. Dosyaların varlığı/boyutu ve `GetDocumentDependencies2` ile diskte kayıtlı referansları denetlenir. Montaj ve resim referanslarının beklenen yeni dosyalara tam olarak eşleşmesi gerekir. Arama klasörleri veya kullanıcı konfigürasyonları değiştirilmez.
 - Çıktı en baştan **nihai klasörüne** yazılır. Bir geçici klasörü sonradan taşımak, dosyalara yazılmış mutlak referansları bozabileceğinden böyle bir taşıma yapılmaz.
 - Hata/iptalde sadece bu işlem için planlanan yeni çıktı dosyaları temizlenir; mevcut paket ve kaynakların üzerine yazılmaz. İşletim sistemi silmeyi engellerse yarım dosyalar kalabilir; hata verilen paket başarılı çıktı olarak kullanılmamalıdır. Pack and Go'nun tek COM çağrısı çalışırken iptal, çağrı tamamlandıktan sonra uygulanır.
+- Önceden seçilmiş boş hedef klasör, işlem başarısız olsa da korunur. Klasörün boşluğu kayıttan önce yeniden kontrol edilir; önizlemeden sonra içine dosya eklendiyse kayıt başlamaz.
 
 Bu kontrol kayıtlı **dosya yolu referanslarını** doğrular. Canlı SolidWorks ortamında mate çözümü, rebuild sonucu ve teknik resim görünüşleri bu bulutta doğrulanmadı. Pack and Go, modelin iç unsur/konfigürasyon bilgilerini taşır; araç bu adları veya geometriyi ayrı ayrı düzenlemez.
 
