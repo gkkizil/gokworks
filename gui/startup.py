@@ -3,6 +3,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+import customtkinter as ctk
+
+from gui.icons import make_logo
 from gui.theme import BG, TEXT, MUTED, UI_FONT
 
 
@@ -22,7 +25,9 @@ def prepare_pages(app):
     cover.place(x=0, y=0, relwidth=1, relheight=1)
     center = tk.Frame(cover, background=background)
     center.place(relx=.5, rely=.5, anchor='center')
-    tk.Label(center, text='GOKWORKS', font=(UI_FONT, 22, 'bold'),
+    ctk.CTkLabel(center, text='', image=make_logo(224), width=224, height=80,
+                 fg_color=background).pack(pady=(0, 12))
+    tk.Label(center, text='GOKWORKS', font=(UI_FONT, 14, 'bold'),
              background=background, foreground=app._apply_appearance_mode(TEXT)).pack(pady=(0, 16))
     label = tk.Label(center, text='Çalışma alanları hazırlanıyor…', font=(UI_FONT, 12),
                      background=background, foreground=app._apply_appearance_mode(MUTED))

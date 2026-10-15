@@ -105,12 +105,12 @@ class WorkspaceLayout:
         brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         self.sidebar_brand = brand
         brand.grid(row=0, column=0, sticky="ew", padx=16, pady=(18, 18))
-        self.brand_logo = make_logo(32)
+        self.brand_logo = make_logo(144)
         self.brand_badge = ctk.CTkLabel(brand, text="", image=self.brand_logo,
-                                       width=42, height=42, fg_color="#FFFFFF", corner_radius=10)
-        self.brand_badge.grid(row=0, column=0, rowspan=2, padx=(0, 10))
-        self._label(brand, "GOKWORKS", 16, NAV_TEXT, bold=True).grid(row=0, column=1, sticky="w")
-        self._label(brand, "Mühendislik araçları", 10, NAV_MUTED).grid(row=1, column=1, sticky="w")
+                                       width=144, height=51, fg_color="transparent")
+        self.brand_badge.grid(row=0, column=0, sticky="w")
+        self._label(brand, "GOKWORKS · Mühendislik araçları", 10, NAV_MUTED).grid(
+            row=1, column=0, sticky="w", pady=(4, 0))
         self.sidebar_category = self._label(self.sidebar, "AKTARIM VE MONTAJ", 10, NAV_MUTED, True)
         self.sidebar_category.grid(row=1, column=0, sticky="w", padx=22, pady=(0, 10))
         navigation = ctk.CTkFrame(self.sidebar, fg_color="transparent")

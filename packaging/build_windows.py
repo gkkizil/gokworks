@@ -14,14 +14,15 @@ def main():
     if sys.platform != 'win32':
         raise SystemExit('Windows EXE oluşturmak için bu betiği Windows üzerinde çalıştırın.')
     args = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onefile', '--windowed',
-            '--name', 'GOKWORKS', '--icon', str(ROOT/'gui/assets/gokworks-logo.ico'),
+            '--name', 'GOKWORKS', '--icon', str(ROOT/'gui/assets/GOK_app_windows.ico'),
             '--distpath', str(ROOT/'dist'), '--workpath', str(ROOT/'build/pyinstaller'),
             '--specpath', str(ROOT/'build'), '--paths', str(ROOT),
             '--collect-data', 'customtkinter', '--collect-data', 'ezdxf',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
-            '--add-data', f'{ROOT / "gui/assets/gokworks-logo.jpg"};gui/assets',
-            '--add-data', f'{ROOT / "gui/assets/gokworks-logo.ico"};gui/assets',
+            '--add-data', f'{ROOT / "gui/assets/GOK_logo_light_UI_1024.png"};gui/assets',
+            '--add-data', f'{ROOT / "gui/assets/GOK_logo_dark_UI_1024.png"};gui/assets',
+            '--add-data', f'{ROOT / "gui/assets/GOK_app_windows.ico"};gui/assets',
             '--add-data', f'{ROOT / "iso_fits/tables.json"};iso_fits', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)
     exe = ROOT/'dist/GOKWORKS.exe'

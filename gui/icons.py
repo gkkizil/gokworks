@@ -10,22 +10,25 @@ from pathlib import Path
 import customtkinter as ctk
 from PIL import Image, ImageDraw, ImageTk
 
-LOGO_PATH = Path(__file__).resolve().parent / "assets" / "gokworks-logo.jpg"
+ASSETS = Path(__file__).resolve().parent / "assets"
+WINDOW_ICON_PATH = ASSETS / "GOK_app_windows.ico"
 
 
-def make_logo(size=40):
-    with Image.open(LOGO_PATH) as source:
-        logo = source.copy()
-    return ctk.CTkImage(light_image=logo, dark_image=logo, size=(size, size))
+def make_logo(width=144):
+    with Image.open(ASSETS / "GOK_logo_light_UI_1024.png") as source:
+        light = source.copy()
+    with Image.open(ASSETS / "GOK_logo_dark_UI_1024.png") as source:
+        dark = source.copy()
+    height = round(width * light.height / light.width)
+    return ctk.CTkImage(light_image=light, dark_image=dark, size=(width, height))
 
 
 def set_window_icon(window):
-    icon_path = LOGO_PATH.with_suffix(".ico")
     if os.name == "nt":
         # Calling CTk's method also prevents its delayed blue default icon.
-        window.iconbitmap(str(icon_path))
+        window.iconbitmap(str(WINDOW_ICON_PATH))
     else:
-        with Image.open(icon_path) as source:
+        with Image.open(WINDOW_ICON_PATH) as source:
             window._window_icon = ImageTk.PhotoImage(source.copy(), master=window)
         window.iconphoto(True, window._window_icon)
 

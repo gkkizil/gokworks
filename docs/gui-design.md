@@ -12,9 +12,18 @@ Ekran ölçeği değiştiğinde gizli ISO manuel formu, filtrelenmiş seçenekle
 
 ## Uygulama logosu
 
-Kullanıcının verdiği G monogramı `gui/assets/gokworks-logo.jpg` olarak aynen saklanır. Yan menü bu görseli ölçeklenebilir CTkImage ile gösterir. Ana pencere, dosya ayrıntıları, ISO kaynakları ve GD&T rehberi aynı pencere simgesini kullanır. Windows `.ico` dosyası yedi boyut içerir; CustomTkinter'ın gecikmeli varsayılan simgesini de devre dışı bırakır. Varlık yolları çalışma dizininden bağımsız çözülür.
+15 Ekim 2026'da paylaşılan GÖK logo paketinin açık ve koyu tema PNG'leri,
+yan menüde ve açılış ekranında en-boy oranı korunarak gösterilir. Tema seçimi
+logoyu da otomatik değiştirir. Ana pencere, dosya ayrıntıları, ISO kaynakları
+ve GD&T rehberi paketteki `GOK_app_windows.ico` simgesini kullanır. Windows
+`.ico` dosyası yedi boyut içerir; CustomTkinter'ın gecikmeli varsayılan
+simgesini de devre dışı bırakır. Varlık yolları çalışma dizininden bağımsız
+çözülür. İki PNG ve ICO, Windows EXE içine gömülür.
 
-Logo değişikliği için mevcut 5 tema/ölçek/menü testi ve 3 ayrıntı/rehber penceresi testi geçti. [Hedefli test çıktısı](test-results/logo-gui-tests.log). 332 testlik önceki tam tarama ve performans karşılaştırması 10 Ekim sürümünün kaydıdır; logo değişikliğinde hesaplama ve dışa aktarma kodu değiştirilmedi.
+Windows paket kontrolü, açılış ekranıyla tüm sayfaları hazırlar ve her iki
+tema logosunu derlenmiş paketten yükleyip gösterir. Önceki logoya ait
+[hedefli test çıktısı](test-results/logo-gui-tests.log) ve 332 testlik tam
+tarama, eski sürümlerin kayıtlarıdır.
 
 ## K/R tarama ve atama ayrımı
 

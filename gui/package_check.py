@@ -21,9 +21,16 @@ def run(output):
         from bolt.rules import calculate
         from pdf.window import GokworksPdfApp
         with TemporaryDirectory() as directory:
-            app = GokworksPdfApp(settings_path=Path(directory)/'settings.json')
+            app = GokworksPdfApp(settings_path=Path(directory)/'settings.json', prepare_navigation=True)
             errors = []
             app.report_callback_exception = lambda *args: errors.append(str(args))
+            # Resolve both theme variants from the frozen bundle and render each.
+            for theme in ('Açık', 'Koyu'):
+                app.theme_mode.set(theme)
+                app._change_theme(theme)
+                app.update()
+            assert app.brand_logo.cget('light_image').size == (1024, 364)
+            assert app.brand_logo.cget('dark_image').size == (1024, 364)
             pages = app._MODES
             for mode in pages:
                 app._switch_mode(mode)
@@ -51,6 +58,7 @@ def run(output):
             ezdxf.new('R2010').saveas(Path(directory)/'check.dxf')
             assert not errors, errors
             result.update(status='passed', pages=list(pages), tk=app.tk.call('info', 'patchlevel'),
+                          branding_themes=['light', 'dark'],
                           solidworks_connection_tested=False)
             app._on_close()
             app = None
