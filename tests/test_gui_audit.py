@@ -4,6 +4,7 @@ import csv
 import unittest
 from pathlib import Path
 from threading import Event
+from types import SimpleNamespace
 from tkinter import ttk
 from unittest.mock import patch
 
@@ -11,6 +12,7 @@ import customtkinter as ctk
 from support.gui import LayoutGuiTestCase
 
 from pdf.settings import load_settings
+from gui.icons import WINDOW_ICON_PATH, set_window_icon
 
 
 class GUIAuditTests(LayoutGuiTestCase):
@@ -46,6 +48,35 @@ class GUIAuditTests(LayoutGuiTestCase):
             self.assertEqual(self.app.theme_mode.get(), label)
             self.assertEqual(load_settings(self.settings)['appearance'], mode.lower())
             self.assertTrue(ttk.Style(self.app).lookup('Gok.Treeview', 'background'))
+
+    def test_windows_icon_survives_theme_remap_without_child_map_updates(self):
+        icon = str(WINDOW_ICON_PATH)
+        native = {}
+
+        def iconbitmap(bitmap=None, default=None):
+            native['icon'] = default if default is not None else bitmap
+
+        # Exercise real Tk Map events on every platform. Only the Windows native
+        # bitmap call is substituted; simulate its reset when the wrapper remaps.
+        with patch('gui.icons.os', SimpleNamespace(name='nt')), \
+                patch.object(self.app, 'iconbitmap', side_effect=iconbitmap) as bitmap:
+            set_window_icon(self.app)
+            binding = self.app._gokworks_icon_map_binding
+            for theme in ('Koyu', 'Açık', 'Koyu', 'Açık'):
+                self.app._change_theme(theme)
+                self.app.update()
+                self.app.withdraw()
+                native['icon'] = 'tk-default'
+                bitmap.reset_mock()
+                self.app.deiconify()
+                self.app.update()
+                self.assertEqual(native['icon'], icon)
+                bitmap.assert_called_once_with(icon)
+                self.assertEqual(self.app._gokworks_icon_map_binding, binding)
+                bitmap.reset_mock()
+                self.app.brand_badge.event_generate('<Map>')
+                self.app.update()
+                bitmap.assert_not_called()
 
     def test_dxf_option_widgets_and_start_button_reach_worker(self):
         self.app.nav_buttons['dxf_dwg'].invoke()

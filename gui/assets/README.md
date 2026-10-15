@@ -9,3 +9,7 @@ Bu dosyalar, kullanıcının 15 Ekim 2026'da paylaştığı
 PNG dosyaları şeffaftır; en-boy oranı korunarak gösterilir. Uygulama tema
 değiştiğinde uygun logoyu otomatik seçer. Bu üç dosya EXE içine de paketlenir;
 yanına ayrıca bir logo klasörü kopyalamak gerekmez.
+
+Windows görev çubuğu için sabit `GOKWORKS.Desktop` uygulama kimliği atanır.
+Tema değişirken pencere yeniden gösterildiğinde ICO tekrar uygulanır;
+görev çubuğu simgesi açık/koyu tema seçimine göre değişmez.

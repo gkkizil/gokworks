@@ -19,16 +19,21 @@ def run(output):
         import ezdxf
         import openpyxl
         from bolt.rules import calculate
+        from gui.icons import WINDOW_ICON_PATH
         from pdf.window import GokworksPdfApp
         with TemporaryDirectory() as directory:
             app = GokworksPdfApp(settings_path=Path(directory)/'settings.json', prepare_navigation=True)
             errors = []
             app.report_callback_exception = lambda *args: errors.append(str(args))
             # Resolve both theme variants from the frozen bundle and render each.
-            for theme in ('Açık', 'Koyu'):
-                app.theme_mode.set(theme)
+            for theme in ('Açık', 'Koyu', 'Açık', 'Koyu'):
                 app._change_theme(theme)
-                app.update()
+                end = time.monotonic()+.05
+                while time.monotonic() < end:
+                    app.update()
+                    time.sleep(.005)
+                if sys.platform == 'win32':
+                    assert app.tk.call('wm', 'iconbitmap', app._w) == str(WINDOW_ICON_PATH)
             assert app.brand_logo.cget('light_image').size == (1024, 364)
             assert app.brand_logo.cget('dark_image').size == (1024, 364)
             pages = app._MODES

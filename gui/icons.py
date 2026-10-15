@@ -12,6 +12,18 @@ from PIL import Image, ImageDraw, ImageTk
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 WINDOW_ICON_PATH = ASSETS / "GOK_app_windows.ico"
+WINDOWS_APP_ID = "GOKWORKS.Desktop"
+
+
+def set_windows_app_identity():
+    """Give the Windows taskbar a stable identity before creating a Tk window."""
+    if os.name == "nt":
+        import ctypes
+        set_app_id = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
+        set_app_id.argtypes = [ctypes.c_wchar_p]
+        set_app_id.restype = ctypes.c_long
+        return set_app_id(WINDOWS_APP_ID) == 0
+    return False
 
 
 def make_logo(width=144):
@@ -26,10 +38,21 @@ def make_logo(width=144):
 def set_window_icon(window):
     if os.name == "nt":
         # Calling CTk's method also prevents its delayed blue default icon.
+        # Set Tk's default too, so a recreated native wrapper inherits our icon.
+        window.iconbitmap(default=str(WINDOW_ICON_PATH))
         window.iconbitmap(str(WINDOW_ICON_PATH))
+        if not getattr(window, "_gokworks_icon_map_binding", None):
+            def restore_icon(event):
+                # CTk withdraws/remaps Windows windows when changing the theme.
+                # Toplevel bind tags also receive child Map events: ignore those.
+                if event.widget is window:
+                    window.iconbitmap(str(WINDOW_ICON_PATH))
+
+            window._gokworks_icon_map_binding = window.bind("<Map>", restore_icon, add="+")
     else:
-        with Image.open(WINDOW_ICON_PATH) as source:
-            window._window_icon = ImageTk.PhotoImage(source.copy(), master=window)
+        if getattr(window, "_window_icon", None) is None:
+            with Image.open(WINDOW_ICON_PATH) as source:
+                window._window_icon = ImageTk.PhotoImage(source.copy(), master=window)
         window.iconphoto(True, window._window_icon)
 
 

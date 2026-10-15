@@ -24,7 +24,7 @@ from bom.window import BomView
 from bolt.window import BoltView
 from weight.window import WeightView
 from naming.window import NamingView
-from gui.icons import make_icon, set_window_icon
+from gui.icons import make_icon, set_window_icon, set_windows_app_identity
 from gui.typography import check_turkish_fonts
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
@@ -75,6 +75,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         configure_widget_theme(ctk.ThemeManager.theme)
         if os.name != "nt":
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
+        set_windows_app_identity()
         super().__init__()
         if prepare_navigation:
             self.withdraw()
@@ -448,6 +449,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             return
         self.theme_mode.set(selection)
         ctk.set_appearance_mode("dark" if selection == "Koyu" else "light")
+        set_window_icon(self)
         self._configure_table_style()
         if self.mode == 'iso_fits':
             self._draw_iso_diagram()
