@@ -2,6 +2,9 @@ name: Windows EXE
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/windows-exe-1d09270-1792086009
 
 permissions:
   contents: write
