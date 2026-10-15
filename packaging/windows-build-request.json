@@ -1,5 +1,5 @@
 {
-  "request_id": "5c420e0d-f632-41a4-8d11-d6e890274054",
-  "requested_at": "2026-10-15T18:14:36.658220+00:00",
-  "reason": "Retry requested EXE using native Windows icon comparisons; Tk does not return ICO paths from wm iconbitmap queries."
+  "request_id": "1a0de023-13b4-4d10-b2e4-8f2f64b76914",
+  "requested_at": "2026-10-15T18:30:16.733420+00:00",
+  "reason": "User requested Windows EXE with K/R COM component argument fixes and Pack and Go initialization fixes."
 }
