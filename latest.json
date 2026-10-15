@@ -1,10 +1,10 @@
 {
-  "commit": "1fe90e85638b40dde99d74a31d78e9417309b3be",
+  "commit": "36d89bfe0c566b5481c471986897e17782cef062",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38527091279",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38527091279/artifacts/11876681375",
-  "bytes": 41713192,
-  "sha256": "2573d8f4a76faffe7d704929a0039e52f702cd2caaf354fe978a61c34957bb5f",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38727553179",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38727553179/artifacts/11968840706",
+  "bytes": 41776746,
+  "sha256": "7e01f519a44c6dfa3b7f8ae4570c1a14bc1602f47d12c8984be2ff3d399d1e26",
   "smoke": {
     "status": "passed",
     "platform": "win32",
@@ -17,7 +17,8 @@
       "geometric_tolerances",
       "bom",
       "bolt",
-      "naming"
+      "naming",
+      "weight"
     ],
     "tk": "8.6.15",
     "solidworks_connection_tested": false
