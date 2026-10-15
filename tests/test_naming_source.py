@@ -82,6 +82,7 @@ class NamingSourceTests(unittest.TestCase):
         self.folder = Path(self.temp.name)
         self.com = SimpleNamespace(VT_ARRAY=8192, VT_BSTR=8, VT_BYREF=16384,
             VT_VARIANT=12, VT_I4=3, VT_DISPATCH=9, DISPATCH_METHOD=1,
+            TKIND_INTERFACE=3, TYPEFLAG_FDUAL=64, IID_IDispatch='IDispatch',
             CoInitialize=Mock(), CoUninitialize=Mock())
         self.client = SimpleNamespace(VARIANT=Variant, Dispatch=Mock(side_effect=lambda obj: obj),
             dynamic=SimpleNamespace(DumbDispatch=Mock(side_effect=lambda obj: obj)))
@@ -261,7 +262,7 @@ class NamingSourceTests(unittest.TestCase):
         self.assertEqual(snapshot.root, app.paths[0])
         self.assertEqual((typed.calls, dynamic.calls), (0, 1))
         self.client.dynamic.DumbDispatch.assert_called_once_with(typed)
-        self.client.Dispatch.assert_called_once()
+        self.client.Dispatch.assert_not_called()
 
         destination = self.folder/'renamed-native'
         report = naming.execute(app, snapshot,
@@ -276,6 +277,74 @@ class NamingSourceTests(unittest.TestCase):
             naming.scan(app)
         self.assertIs(caught.exception.__cause__, dynamic.failure)
         self.assertEqual(dynamic.calls, 3)
+
+    def test_pack_and_go_uses_live_output_signature_without_makepy_wrapping(self):
+        app = App(self.folder)
+        info = SimpleNamespace(GetDocumentation=lambda member: ('IModelDocExtension',),
+                               GetTypeAttr=lambda: (0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 64))
+        # Automation may expose an explicit output hidden by the .NET API.
+        arguments = ((16384 | 9, 2),)
+        desc = (207, (), arguments, 4, 1, 4, 0, 40, (25, 0), 0)
+        entry = SimpleNamespace(dispid=207, names=('GetPackAndGo',), desc=desc)
+        self.client.build = SimpleNamespace(DispatchItem=Mock(return_value=SimpleNamespace(
+            mapFuncs={'GetPackAndGo': entry}, propMapGet={})))
+        raw = SimpleNamespace(GetIDsOfNames=Mock(return_value=207), GetTypeInfo=Mock(return_value=info),
+                              InvokeTypes=Mock(return_value=(0, Pack(app))))
+        app.extension._oleobj_ = raw
+        app.extension._FlagAsMethod = Mock()
+        self.client.Dispatch.side_effect = AssertionError('Automatic makepy factory must not run')
+        snapshot = naming.scan(app)
+        self.assertEqual(snapshot.root, app.paths[0])
+        raw.InvokeTypes.assert_called_once_with(207, 0, 1, (25, 0), arguments)
+        self.client.Dispatch.assert_not_called()
+
+        entry.desc = (207, (), ((8, 1),), 4, 1, 4, 0, 40, (9, 0), 0)
+        raw.InvokeTypes.reset_mock()
+        with self.assertRaisesRegex(RuntimeError, 'Beklenmeyen GetPackAndGo imzası'):
+            naming.scan(app)
+        raw.InvokeTypes.assert_not_called()
+
+    def test_dual_type_info_is_converted_to_automation_before_reading_signature(self):
+        attributes = (0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 64)
+        automation = SimpleNamespace(GetTypeAttr=lambda: attributes,
+                                     GetDocumentation=lambda member: ('IModelDocExtension',))
+        native = SimpleNamespace(GetTypeAttr=lambda: (0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 64),
+                                 GetRefTypeOfImplType=Mock(return_value=41),
+                                 GetRefTypeInfo=Mock(return_value=automation))
+        entry = SimpleNamespace(dispid=207, names=('GetPackAndGo',),
+                                desc=(207, (), (), 4, 1, 4, 0, 40, (9, 0), 0))
+        builder = Mock(return_value=SimpleNamespace(mapFuncs={'GetPackAndGo': entry}, propMapGet={}))
+        self.client.build = SimpleNamespace(DispatchItem=builder)
+        result = naming._pack_signature(SimpleNamespace(GetTypeInfo=lambda: native), 207)
+        self.assertEqual(result[:3], (1, (9, 0), ()))
+        native.GetRefTypeOfImplType.assert_called_once_with(-1)
+        native.GetRefTypeInfo.assert_called_once_with(41)
+        builder.assert_called_once_with(automation, attributes, bForUser=0)
+
+    def test_unknown_pack_result_is_queried_for_dispatch_before_wrapping(self):
+        dispatch = SimpleNamespace(InvokeTypes=Mock(), _FlagAsMethod=Mock())
+        unknown = SimpleNamespace(QueryInterface=Mock(return_value=dispatch))
+        self.assertIs(naming._pack_result(unknown, (13, 0), ()), dispatch)
+        unknown.QueryInterface.assert_called_once_with('IDispatch')
+        self.client.dynamic.DumbDispatch.assert_called_once_with(dispatch)
+        dispatch._FlagAsMethod.assert_called_once()
+
+    def test_pack_and_go_wrap_failure_is_distinct_from_native_call_failure(self):
+        app = App(self.folder)
+        pointer = SimpleNamespace(InvokeTypes=Mock())
+        ole = SimpleNamespace(GetIDsOfNames=lambda *args: 207, InvokeTypes=Mock(return_value=pointer))
+        app.extension._oleobj_ = ole
+        app.extension._FlagAsMethod = Mock()
+
+        def wrap(obj):
+            if obj is pointer:
+                raise RuntimeError('wrapper failure')
+            return obj
+
+        self.client.dynamic.DumbDispatch.side_effect = wrap
+        with self.assertRaisesRegex(RuntimeError, 'nesnesi hazırlanamadı.*wrapper failure'):
+            naming.scan(app)
+        ole.InvokeTypes.assert_called_once()
 
     def test_visible_selected_source_is_activated_before_pack_and_go(self):
         app = SourceApp(self.folder, loaded=True, window=True)

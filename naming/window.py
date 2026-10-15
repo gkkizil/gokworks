@@ -163,6 +163,11 @@ class NamingView:
         widgets['status'] = self.status_label
         widgets['save'] = self._button(footer, 'Yeni montajı kaydet', self._save_naming, primary=True, icon='copy', width=174, state='disabled')
         widgets['save'].grid(row=0, column=1)
+        widgets['copy_error'] = self._button(footer, 'Hatayı kopyala', self._copy_naming_error,
+                                              width=134, icon='copy')
+        widgets['copy_error'].configure(height=30)
+        widgets['copy_error'].grid(row=1, column=0, sticky='w', pady=(4, 0))
+        widgets['copy_error'].grid_remove()
         self.progress = ctk.CTkProgressBar(self.workspace, height=3)
         self.progress.grid(row=5, column=0, sticky='ew', padx=24, pady=(0, 12))
         self.progress.set(0)
@@ -524,6 +529,9 @@ class NamingView:
 
     def _naming_busy(self, value):
         self.busy = value
+        if value:
+            self.naming_widgets.pop('last_error', None)
+            self.naming_widgets['copy_error'].grid_remove()
         for button in self.nav_buttons.values():
             button.configure(state='disabled' if value else 'normal')
         for key in ('scan', 'browse', 'reset', 'source_browse', 'assembly', *self.naming_state):
@@ -581,6 +589,20 @@ class NamingView:
         self.naming_widgets['stop'].configure(state='disabled')
         self.naming_widgets['status'].configure(text='SolidWorks işlemi tamamlanınca durdurulacak…', text_color=AMBER)
 
+    def _show_naming_error(self, error):
+        message = str(error)
+        self.naming_widgets['last_error'] = message
+        summary = message if len(message) <= 200 else message[:200]+'… Ayrıntı için Hatayı kopyala.'
+        self.naming_widgets['status'].configure(text=summary, text_color=RED)
+        self.naming_widgets['copy_error'].grid()
+
+    def _copy_naming_error(self):
+        error = self.naming_widgets.get('last_error')
+        if error:
+            source = self.naming_state['source_file'].get()
+            self.clipboard_clear()
+            self.clipboard_append(f'GOKWORKS · İsimlendirme hatası\nKaynak: {source}\n{error}')
+
     def _process_naming_events(self):
         try:
             for _ in range(100):
@@ -614,6 +636,8 @@ class NamingView:
                         self.naming_widgets['names_valid'] = False
                         self.naming_widgets.pop('destination_check', None)
                         self.naming_widgets['status'].configure(text=f'Yeni montaj kaydedildi; dosya bağlantıları doğrulandı.\n{value["report"]["root"]}', text_color=SUCCESS)
+                    elif value['state'] == 'error':
+                        self._show_naming_error(value['error'])
                     else:
                         self.naming_widgets['status'].configure(text=value.get('error', 'Durduruldu · Tamamlanmamış paket kullanılmaz.'),
                                                                text_color=RED if value['state'] == 'error' else AMBER)

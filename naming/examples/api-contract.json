@@ -76,5 +76,17 @@
     "file_exists": 2,
     "empty_target": 3,
     "save_error": 4
+  },
+  "runtime_signature_strategy": {
+    "date": "2026-10-15",
+    "interop_source": "https://www.nuget.org/packages/SolidWorks.Interop.sldworks/32.1.0",
+    "dll_sha256": "8f535bcd3310cfd878781d1581425a07a278c7d7fad0b73f96f57920c88b9df0",
+    "interface_guid": "99F4D4AF-F268-4EE1-8C55-041F7BECF879",
+    "pack_and_go_guid": "A30DE102-5568-4A39-B7CA-D26B526D293A",
+    "dispid": 207,
+    "managed_input_parameters": 0,
+    "strategy": "Read live Automation FUNCDESC; normalize dual type info; query IDispatch for IUnknown results; wrap without makepy. Report invocation and wrapping separately.",
+    "native_solidworks_verified": false,
+    "reported_user_failure_cause_confirmed": false
   }
 }

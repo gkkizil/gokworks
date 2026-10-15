@@ -15,6 +15,7 @@ pythoncom, win32com = sw.pythoncom, sw.win32com
 _value, _key = sw._value, sw._part_key
 ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
 NEEDS_REBUILD = 2  # swActivateDocError_e.swDocNeedsRebuildWarning
+NOT_ENABLED_ON_TEMPLATE = 2  # swSheetMetalModifierError_NotEnabledOnTemplate
 TEMPLATE_SHEET = "TemplateSheetMetal"
 CONVERT_SOLID = "SolidToSheetMetal"  # IFeature.GetTypeName2; not the display name.
 CONVERT_FLAGS = ("OverrideDefaultSheetMetalParameters", "OverrideDefaultBendAllowanceParameters")
@@ -647,9 +648,14 @@ def _rollback(model, snapshots):
         _show_configuration(model, original)
 
 
-def _check_sheet_defaults(definition):
+def _check_sheet_defaults(definition, *, template=False):
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
     error = _call_byref(definition, "GetUseGaugeTable", used, filename)
+    if template and error == NOT_ENABLED_ON_TEMPLATE:
+        # These output arguments are invalid on a TemplateSheetMetal feature.
+        # The caller must verify the actual SheetMetal body's gauge/material
+        # settings instead; this does not mean the table is unused.
+        return False
     if error != 0:
         raise RuntimeError(f"Sac kalınlık tablosu durumu okunamadı; API hata kodu: {error}")
     if used.value:
@@ -657,10 +663,13 @@ def _check_sheet_defaults(definition):
     # This property is documented as valid only when GetUseGaugeTable is false.
     if bool(_read(definition, "UseMaterialSheetMetalParameters")):
         raise RuntimeError("Sac parametreleri malzemeye bağlı; önce SolidWorks'te bu bağı kaldırın.")
+    return True
 
 
-def _check_defaults(model, parent, *, normalize=False):
-    _check_sheet_defaults(_read(parent, "GetDefinition"))
+def _check_defaults(model, parent, *, normalize=False, notes=None):
+    parent_checked = _check_sheet_defaults(_read(parent, "GetDefinition"),
+                                          template=_feature_kind(parent) == TEMPLATE_SHEET)
+    body_checked = False
     for feature, kind in _features(model):
         if kind == TEMPLATE_SHEET or kind.endswith("Folder"):
             continue
@@ -668,6 +677,7 @@ def _check_defaults(model, parent, *, normalize=False):
             if _identity(feature) != _identity(parent):
                 definition = _read(feature, "GetDefinition")
                 _check_sheet_defaults(definition)
+                body_checked = True
                 if any(_sheet_overrides(definition)) and not normalize:
                     raise RuntimeError(f"{_read(feature, 'Name')}: özel kalınlık/yarıçap veya büküm payı/K parametresi kullanıyor; K/R uygulanmadı.")
             continue
@@ -686,6 +696,12 @@ def _check_defaults(model, parent, *, normalize=False):
                 raise RuntimeError(f"{state.name}: özel büküm ayarı sac kalınlık tablosuna bağlı; K/R uygulanmadı.")
         elif not all(value for _, value in state.defaults):
             raise RuntimeError(f"{state.name} özel büküm parametresi kullanıyor; genel K/R tüm bükümlere geçmez. Tüm bükümlere uygula seçeneğini açın veya SolidWorks'te varsayılan büküm parametrelerini etkinleştirin.")
+    if not parent_checked:
+        if not body_checked:
+            raise RuntimeError("Ana sac şablonunda tablo kontrolü desteklenmiyor ve gövde sacının "
+                               "tablo/malzeme durumu doğrulanamadı; K/R uygulanmadı.")
+        if notes is not None:
+            notes.append("Sac kalınlık tablosu ve malzeme bağları gövde sac unsurundan kontrol edildi.")
 
 
 def _check_inherited_sheet(model, expected, *, expected_names=None, prepare=False):
@@ -805,7 +821,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if before.error_code or before.suppressed:
             raise RuntimeError("SAC LEVHA unsuru bastırılmış veya zaten hata içeriyor; önce parçayı düzeltin.")
         stage = "Malzeme, sac kalınlık tablosu ve özel büküm kontrolleri"
-        _check_defaults(model, feature, normalize=recipe.all_bends)
+        _check_defaults(model, feature, normalize=recipe.all_bends, notes=notes)
         actual_thickness = calculation.thickness_mm / 1000
         effective = replace(before, thickness=actual_thickness)
         align_template = not math.isclose(before.thickness, actual_thickness,

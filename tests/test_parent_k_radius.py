@@ -66,6 +66,22 @@ class ParentFeature(SheetFeature):
         return True
 
 
+class TemplateGaugeUnavailable(ParentDefinition):
+    """Native TemplateSheetMetal reports NotEnabledOnTemplate, not a gauge flag."""
+    def GetUseGaugeTable(self, used, filename):
+        # Outputs are not valid on this result and must never be consumed.
+        used.value, filename.value = True, 'invalid-output.xls'
+        return 2
+
+    @property
+    def UseMaterialSheetMetalParameters(self):
+        raise AssertionError('Material getter is invalid after NotEnabledOnTemplate.')
+
+    @UseMaterialSheetMetalParameters.setter
+    def UseMaterialSheetMetalParameters(self, value):
+        pass
+
+
 class ParentApplyTests(KApplyTestCase):
     def setUp(self):
         super().setUp()
@@ -91,6 +107,59 @@ class ParentApplyTests(KApplyTestCase):
     def process(self, **kwargs):
         return ap.process_part(self.app, self.model.path, 'Default',
                                ManualAssignment('1,5', '0,274', '1,5'), **kwargs)
+
+    def test_template_gauge_code_two_uses_body_checks_for_preview_and_apply(self):
+        before = deepcopy(self.model.parent_states), deepcopy(self.model.states)
+        with patch.object(ParentFeature, 'GetDefinition', lambda f: TemplateGaugeUnavailable(f)):
+            status, detail, _ = self.process(preview=True)
+            self.assertEqual(status, 'success', detail)
+            self.assertEqual((self.model.parent_states, self.model.states), before)
+            status, detail, _ = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.parent_states['Default']['k'], .274)
+        self.assertEqual(self.model.states['Default']['radius'], .0015)
+        self.assertEqual(self.model.parent_states['Other'], before[0]['Other'])
+
+    def test_template_gauge_unavailable_still_blocks_body_gauge_and_material_links(self):
+        with patch.object(ParentFeature, 'GetDefinition', lambda f: TemplateGaugeUnavailable(f)):
+            for attribute in ('gauge', 'material_link'):
+                with self.subTest(attribute=attribute):
+                    setattr(self.model, attribute, True)
+                    before = deepcopy(self.model.parent_states), deepcopy(self.model.states)
+                    status, detail, _ = self.process(save=True)
+                    self.assertEqual(status, 'error', detail)
+                    self.assertIn('tablo bağını kaldırın' if attribute == 'gauge' else 'malzemeye bağlı', detail)
+                    self.assertEqual((self.model.parent_states, self.model.states), before)
+                    self.assertEqual(self.model.parent_writes, 0)
+                    self.assertEqual(self.model.save_count, 0)
+                    setattr(self.model, attribute, False)
+
+    def test_non_template_gauge_errors_are_not_treated_as_unused_tables(self):
+        with patch.object(ParentFeature, 'GetDefinition', lambda f: TemplateGaugeUnavailable(f)):
+            original = self.model.feature.GetDefinition
+            for code in (1, 2, 3, 4):
+                with self.subTest(code=code):
+                    def child_definition():
+                        data = original()
+                        data.GetUseGaugeTable = lambda used, filename: code
+                        return data
+                    self.model.feature.GetDefinition = child_definition
+                    status, detail, _ = self.process(save=True)
+                    self.assertEqual(status, 'error', detail)
+                    self.assertIn(f'API hata kodu: {code}', detail)
+                    self.assertEqual(self.model.parent_writes, 0)
+                    self.assertEqual(self.model.save_count, 0)
+            self.model.feature.GetDefinition = original
+
+    def test_template_gauge_fallback_requires_a_verified_body_sheet(self):
+        self.model.FirstFeature = lambda: self.converted
+        self.model.feature.child = None
+        with patch.object(ParentFeature, 'GetDefinition', lambda f: TemplateGaugeUnavailable(f)):
+            status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('gövde sacının tablo/malzeme durumu doğrulanamadı', detail)
+        self.assertEqual(self.model.parent_writes, 0)
+        self.assertEqual(self.model.save_count, 0)
 
     def test_converted_definition_supplies_actual_thickness_without_sheetmetal_child(self):
         self.model.FirstFeature = lambda: self.converted

@@ -5,7 +5,7 @@ from copy import deepcopy
 from types import SimpleNamespace
 
 from support.fixtures import KApplyTestCase
-from support.solidworks import Definition, SheetFeature
+from support.solidworks import Definition, SheetFeature, Variant
 
 from k_factor import apply as ap
 from k_factor.rules import ManualAssignment
@@ -39,6 +39,12 @@ class NativeDefinition(Definition):
 
     def __call__(self):
         raise MemberNotFound()
+
+    def AccessSelections(self, model, component):
+        # A native definition receives the explicit IDispatch null introduced
+        # for SolidWorks feature editing, rather than a Python None/VT_NULL.
+        assert isinstance(component, Variant) and component.kind == 9 and component.value is None
+        return super().AccessSelections(model, None)
 
 
 class ActiveAllowance:
@@ -170,7 +176,7 @@ class NativeDispatchApplyTests(KApplyTestCase):
                 # InvokeTypes returns the retval together with output values.
                 return (0, self.feature.model.gauge, '')
         self.model.feature.GetDefinition = lambda: TypedDefinition(self.model.feature)
-        self.client.dynamic.DumbDispatch.side_effect = lambda obj: self.flagged(Definition(obj.feature))
+        self.client.dynamic.DumbDispatch.side_effect = lambda obj: self.flagged(NativeDefinition(obj.feature))
         status, detail, _ = self.manual()
         self.assertEqual(status, 'success', detail)
         self.assertEqual(self.model.states['Default']['k'], .274)

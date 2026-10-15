@@ -58,6 +58,25 @@ class NamingWindowTests(GuiTestCase):
         self.assertEqual(widgets['save'].cget('state'), 'disabled')
         self.assertEqual(self.app.nav_buttons['pdf'].cget('state'), 'normal')
 
+    def test_native_error_signature_is_copied_in_full_without_growing_status_label(self):
+        error = 'SolidWorks GetPackAndGo başlatılamadı (API çağrısı): -2147352561 · '+ 'parametre bilgisi; '*40
+        with patch('naming.exporter.connect_to_solidworks', side_effect=RuntimeError(error)):
+            self.app.naming_widgets['scan'].invoke()
+            self.wait_idle()
+        self.app.geometry('1000x690')
+        self.settle()
+        button = self.app.naming_widgets['copy_error']
+        self.assertTrue(button.winfo_viewable())
+        self.assertLess(len(self.app.status_label.cget('text')), 250)
+        button.invoke()
+        copied = self.app.clipboard_get()
+        self.assertIn(error, copied)
+        self.assertIn('Ana.sldasm', copied)
+        self.assert_inside(button)
+        self.scan()
+        self.assertFalse(button.winfo_viewable())
+        self.assertNotIn('last_error', self.app.naming_widgets)
+
     def test_invalid_rules_existing_folder_and_failed_rescan_disable_save(self):
         self.scan()
         self.app.naming_state['prefix'].set('bad:')

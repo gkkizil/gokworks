@@ -1,5 +1,5 @@
 {
-  "request_id": "1a0de023-13b4-4d10-b2e4-8f2f64b76914",
-  "requested_at": "2026-10-15T18:30:16.733420+00:00",
-  "reason": "User requested Windows EXE with K/R COM component argument fixes and Pack and Go initialization fixes."
+  "request_id": "041645e2-b9bd-4870-9713-8493cfa18e99",
+  "requested_at": "2026-10-15T19:02:10.265904+00:00",
+  "reason": "Correct the user-requested EXE after live failures: verify body gauge when template returns 2; inspect live Pack and Go signature and preserve complete diagnostics."
 }

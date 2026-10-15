@@ -1,5 +1,20 @@
 # Kalınlığa göre manuel K / R atama
 
+## Ana sac şablonundaki tablo kontrolü — 15 Ekim 2026
+
+`GetUseGaugeTable` için `swSheetMetalModifierError_NotEnabledOnTemplate = 2`,
+kontrolün `TemplateSheetMetal` üzerinde kullanılamadığını belirtir. Bu kod,
+tablonun kullanılmadığı veya sacın okunamadığı anlamına gelmez. Ana şablonda
+bu sonuç alınırsa geçersiz çıkış değerleri ve malzeme özelliği okunmaz;
+gövdenin `SheetMetal` tanımında tablo ve malzeme bağları doğrulanır.
+
+Gövde kontrolü başarısızsa, gerçek tablo/malzeme bağı varsa veya kontrolü
+tamamlayacak gövde sacı yoksa K/R yazılmaz. Diğer API hata kodları ve gövde
+üzerindeki `2` kodu hâlâ hatadır. Günlük, kontrolün gövde sacından
+tamamlandığını gösterir. Hem önizleme hem uygulama bu yolu kullanır.
+API imzaları ve enum değerleri [sözleşme kaydında](reports/k-radius/api-contract.json)
+bulunur; gerçek SolidWorks doğrulamasının yerini test nesneleri almaz.
+
 ## AccessSelections tür uyuşmazlığı düzeltmesi — 15 Ekim 2026
 
 İşlem günlüğündeki `AccessSelections: -2147352571, Tür uyuşmazlığı, 2`

@@ -184,11 +184,66 @@ def _out_integer():
 
 
 def _late_bound(app, *methods):
-    if hasattr(app, '_oleobj_'):
+    if hasattr(app, '_oleobj_') or hasattr(app, 'InvokeTypes'):
         app = win32com.client.dynamic.DumbDispatch(app)
         if methods:
             app._FlagAsMethod(*methods)
     return app
+
+
+def _pack_signature(ole, dispid):
+    """Use the running server's Automation signature, not a cached makepy map."""
+    fallback = (pythoncom.DISPATCH_METHOD, (pythoncom.VT_DISPATCH, 0), ())
+    try:
+        info = ole.GetTypeInfo()
+        attributes = info.GetTypeAttr()
+        # Match pywin32's MakeOleRepr: InvokeTypes needs the Automation view,
+        # not the HRESULT/retval layout of a dual interface's native vtable.
+        if attributes[5] == pythoncom.TKIND_INTERFACE and attributes[11] & pythoncom.TYPEFLAG_FDUAL:
+            info = info.GetRefTypeInfo(info.GetRefTypeOfImplType(-1))
+            attributes = info.GetTypeAttr()
+        interface = info.GetDocumentation(-1)[0]
+        members = win32com.client.build.DispatchItem(info, attributes, bForUser=0)
+        entries = [entry for mapping in (members.mapFuncs, members.propMapGet)
+                   for entry in mapping.values()
+                   if entry.dispid == dispid and entry.names[0] == 'GetPackAndGo']
+        if not entries:
+            raise RuntimeError(f'{interface}: GetPackAndGo tür bilgisinde bulunamadı')
+        desc = entries[0].desc
+        invoke, result, arguments = desc[4], tuple(desc[8][:2]), tuple(tuple(arg[:2]) for arg in desc[2])
+    except Exception as error:
+        # Some automation servers omit type info. The published interop method
+        # is a zero-input method returning IPackAndGo; retain that exact route.
+        invoke, result, arguments = fallback
+        description = f'yayımlanmış API; tür bilgisi okunamadı: {error}'
+    else:
+        description = f'çalışan API: {interface}'
+    details = f'{description}; DISPID={dispid}; çağrı={invoke}; dönüş={result}; parametreler={arguments}'
+    # GetPackAndGo has no user inputs. Out/retval arguments may be present in
+    # Automation metadata and must be allocated by InvokeTypes, not omitted.
+    required = [arg for arg in arguments if (arg[1] & 1 or not arg[1] & 2) and not arg[1] & 16]
+    if required or invoke not in (1, 2):
+        raise RuntimeError(f'Beklenmeyen GetPackAndGo imzası: {details}')
+    return invoke, result, arguments, details
+
+
+def _pack_result(raw, result_type, arguments):
+    if isinstance(raw, tuple):
+        outputs = sum(bool(flags & 2) for _, flags in arguments)
+        if result_type[0] in (3, 10, 25) and raw and raw[0] != 0:
+            raise RuntimeError(f'GetPackAndGo hata sonucu döndürdü: {raw[0]}')
+        values = raw if result_type[0] in (0, 24) else raw[1:]
+        if outputs != 1 or len(values) != 1:
+            raise RuntimeError('GetPackAndGo tek bir Pack and Go nesnesi döndürmedi.')
+        raw = values[0]
+    if raw is not None and hasattr(raw, 'QueryInterface'):
+        # Runtime type info can describe IPackAndGo as VT_UNKNOWN. Promote its
+        # IUnknown to IDispatch before applying automation properties/methods.
+        raw = raw.QueryInterface(pythoncom.IID_IDispatch)
+    # Raw IDispatch pointers are wrapped without makepy/type-library generation.
+    # Pack and Go setters/getters use explicit method metadata and BYREF arrays.
+    return _late_bound(raw, 'GetDocumentNames', 'GetDocumentNamesCount',
+                       'GetDocumentSaveToNames', 'SetDocumentSaveToNames', 'SetSaveToName')
 
 
 def _configuration(model):
@@ -314,20 +369,21 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
         extension = _late_bound(sw._value(model, 'Extension'), 'SavePackAndGo')
     except Exception as error:
         raise RuntimeError(f'SolidWorks ModelDocExtension okunamadı: {error}') from error
+    signature = 'sıfır parametreli GetPackAndGo'
     try:
         if hasattr(extension, '_oleobj_'):
-            # GetPackAndGo() -> IDispatch. Specify its complete COM signature
-            # directly; neither property probes nor inferred output arguments
-            # should run while initializing the Pack and Go session.
             ole = extension._oleobj_
             dispid = ole.GetIDsOfNames(0, 'GetPackAndGo')
-            raw = ole.InvokeTypes(dispid, 0, pythoncom.DISPATCH_METHOD,
-                                  (pythoncom.VT_DISPATCH, 0), ())
-            pg = win32com.client.Dispatch(raw) if raw is not None else None
+            invoke, result_type, arguments, signature = _pack_signature(ole, dispid)
+            raw = ole.InvokeTypes(dispid, 0, invoke, result_type, arguments)
         else:
-            pg = extension.GetPackAndGo()
+            raw = extension.GetPackAndGo()
     except Exception as error:
-        raise RuntimeError(f'SolidWorks GetPackAndGo başlatılamadı: {error}') from error
+        raise RuntimeError(f'SolidWorks GetPackAndGo başlatılamadı (API çağrısı): {error} · {signature}') from error
+    try:
+        pg = _pack_result(raw, result_type, arguments) if hasattr(extension, '_oleobj_') else raw
+    except Exception as error:
+        raise RuntimeError(f'SolidWorks Pack and Go nesnesi hazırlanamadı: {error} · {signature}') from error
     if pg is None:
         raise RuntimeError('SolidWorks Pack and Go başlatılamadı.')
     for member in ('IncludeDrawings', 'IncludeSuppressed', 'IncludeToolboxComponents'):
