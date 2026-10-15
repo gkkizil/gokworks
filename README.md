@@ -115,7 +115,10 @@ Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal m
 1. SolidWorks'te adetlerin hesaplanacağı **ana montajı aktif yapın** ve doğru montaj konfigürasyonunu seçin. Kullanacağınız parçanın sac metal/açınım unsurlarını kontrol edin.
 2. Uygulamada **DXF / DWG** ekranına geçin.
 3. Kaynak klasörü yazın veya **Gözat** ile bu klasördeki bir `.SLDPRT` dosyasını seçin. Seçim, klasörü belirler; aktarım klasördeki tüm parçalara uygulanır.
-4. Çıktı klasörünü seçin. **Alt klasörleri de tara** açıksa çıktı klasöründe aynı alt klasör yapısı korunur.
+4. Çıktı klasörünü seçin. **Sac kalınlığına göre klasörle** seçeneği başlangıçta açıktır:
+   çıktılar `1,5 mm`, `2 mm` gibi alt klasörlere ayrılır. **Alt klasörleri tara**
+   açıksa kaynak alt klasör yapısı, kalınlık klasörünün içinde korunur. Kalınlığa
+   göre klasörlemeyi kapatırsanız dosyalar doğrudan seçilen çıktı yapısına yazılır.
 5. **DXF** veya **DWG** seçin; yalnız seçtiğiniz biçim kaydedilir. Eski **DXF + DWG** tercihi DXF'e dönüştürülür. Varsayılan çıktı DXF'tir; büküm çizgileri varsayılan olarak kapalıdır. İstenirse **Büküm çizgilerini ekle** seçeneğini açın.
 6. **Klasörü tara** ile listeyi kontrol edin ve **Açınım aktarımını başlat** düğmesine basın.
 7. Dosya bazındaki sonuçları ve **Günlük** sekmesini inceleyin. **Rapor kaydet**, Türkçe karakterleri destekleyen CSV raporu üretir.
@@ -123,6 +126,10 @@ Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal m
 Sol menüdeki **PDF** ve **DXF / DWG** sekmeleri bağımsızdır. Uygulama açıkken sekmeler arasında geçiş yaptığınızda dosya listesi, aktarım sonuçları, günlük ve rapor durumu korunur. Klasörler ve aktarım seçenekleri her ekran için ayrı kaydedilir.
 
 Çıktı adı **PARÇAADI - Sac kalınlığı - Montajdaki toplam adet** biçimindedir. Örneğin `BRAKET - 2 mm - 12 adet.dxf` veya `BRAKET - 1.25 mm - 12 adet.dwg`. Kalınlık, aktif sac metal unsurundan okunur ve SolidWorks'ün metre biriminden milimetreye çevrilir; dosya adına tam sayı veya gerekli ondalık basamaklarla yazılır.
+
+Kalınlığa göre klasörleme örneği: `Çıktı/1,5 mm/BRAKET - 1.5 mm - 12 adet.dxf`.
+Ayar kaydedilir; DXF ve DWG için geçerlidir. Sonuç listesi ve CSV raporu gerçek
+alt klasör yolunu gösterir. [Klasörleme ayrıntıları](dxf_dwg/README.md).
 
 Adetler aktarım başlamadan önce **aktif montajın aktif konfigürasyonundan, alt montajlar dahil** hesaplanır. Aynı alt montaj birden fazla kullanılmışsa her kullanımındaki parçalar sayılır. Aynı dosya ve referans konfigürasyonu birlikte değerlendirilir; farklı geometrilere ait konfigürasyonlar birleştirilmez. Bastırılmış bileşenler sayılmaz; gizli veya malzeme listesinden (BOM) çıkarılmış bileşenler fiziksel adet hesabına dahildir. Kaynak klasördeki montaj dışı parçalar atlanır.
 

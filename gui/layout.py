@@ -263,9 +263,13 @@ class WorkspaceLayout:
             format_menu.pack(fill="x", pady=(0, 8))
             bends = self._checkbox(formats, "Büküm çizgilerini ekle", self.bend_lines)
             bends.pack(anchor="w")
+            thickness = self._checkbox(formats, "Sac kalınlığına göre klasörle", self.group_by_thickness)
+            thickness.pack(anchor="w", pady=(4, 0))
+            self._label(formats, "Çıktı / 1,5 mm / parça.dxf", 10, MUTED,
+                        justify="left").pack(anchor="w", pady=(2, 0))
             self._label(formats, "Adet kaynağı: aktif montaj\nAlt montajlar dahil", 10, MUTED,
                         justify="left").pack(anchor="w", pady=(8, 0))
-            self.controls.extend((format_menu, bends))
+            self.controls.extend((format_menu, bends, thickness))
 
     def _checkbox(self, parent, text, variable):
         return ctk.CTkCheckBox(

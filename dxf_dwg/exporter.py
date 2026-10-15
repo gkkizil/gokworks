@@ -190,7 +190,8 @@ def sheet_thickness_mm(model):
     return thicknesses[0]
 
 
-def named_destinations(part, source, output, formats, thickness_mm, quantity):
+def named_destinations(part, source, output, formats, thickness_mm, quantity,
+                       group_by_thickness=False):
     if not math.isfinite(thickness_mm) or thickness_mm <= 0:
         raise ValueError("Sac kalınlığı geçersiz.")
     if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
@@ -203,7 +204,10 @@ def named_destinations(part, source, output, formats, thickness_mm, quantity):
     if not name:
         raise ValueError("Parça adı geçersiz.")
     stem = f"{name} - {thickness} mm - {quantity} adet"
-    return [Path(output) / relative.parent / f"{stem}.{kind}"
+    folder = Path(output)
+    if group_by_thickness:
+        folder /= f"{thickness.replace('.', ',')} mm"
+    return [folder / relative.parent / f"{stem}.{kind}"
             for kind in normalize_formats(formats)]
 
 
@@ -454,7 +458,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
 
 
 def export_parts(source_folder, output_folder, include_subfolders, overwrite_existing,
-                 events, stop_event=None, formats=("dxf",), bend_lines=False):
+                 events, stop_event=None, formats=("dxf",), bend_lines=False,
+                 group_by_thickness=False):
     """Dosya bazında olaylar gönder; sayaçlar çıktı biçimlerini değil parçaları sayar."""
     summary = {"state": "completed", "total": 0, "processed": 0,
                "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": [],
@@ -495,6 +500,8 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             configurations.setdefault(key[0], []).append((key, references[key][1]))
         events.put(("log", f"Adet kaynağı: {assembly_name} · Konfigürasyon: {assembly_config} · Alt montajlar dahil."))
         events.put(("log", "Dosya adı: PARÇAADI - kalınlık mm - toplam adet. Aynı parça/konfigürasyon sayılır; bastırılmış bileşenler sayılmaz."))
+        if group_by_thickness:
+            events.put(("log", "Çıktılar sac kalınlığına göre klasörlenir (örn. 1,5 mm); kaynak alt klasörleri korunur."))
         for index, part in enumerate(parts, 1):
             if stop_event is not None and stop_event.is_set():
                 summary["state"] = "cancelled"
@@ -510,7 +517,8 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                           if key != _part_key(part, configuration)]
                 metadata.update(thickness_mm=thickness, quantity=quantity, configuration=configuration,
                                 unexported_configurations=others)
-                return named_destinations(part, source, output, formats, thickness, quantity)
+                return named_destinations(part, source, output, formats, thickness, quantity,
+                                          group_by_thickness)
 
             if _part_key(part, "")[0] not in assembly_paths:
                 status, detail = "skipped", "Parça aktif montajda kullanılmıyor; aktarılmadı."

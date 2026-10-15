@@ -58,7 +58,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
                             'iso_search', 'status_label')
     _PAGE_ATTRIBUTES = (
         "source_folder", "output_folder", "include_subfolders", "overwrite_existing",
-        "output_format", "bend_lines", "controls", "results", "row_ids", "stat_values",
+        "output_format", "bend_lines", "group_by_thickness", "controls", "results", "row_ids", "stat_values",
         "workspace", "pdf_header", "start_button", "stop_button", "settings_body", "form_panel",
         "_settings_height", "scan_button", "open_button", "stats_frame", "results_header",
         "report_button", "result_tabs", "table", "empty_state", "log_box", "status_label", "progress",
@@ -102,6 +102,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         if self.output_format.get() not in ("DXF", "DWG"):
             self.output_format.set("DXF")
         self.bend_lines = tk.BooleanVar(self, value=saved.get("dxf_dwg_bend_lines", False) is True)
+        self.group_by_thickness = tk.BooleanVar(self, value=saved.get("dxf_dwg_group_by_thickness", True) is True)
         self.events = queue.Queue()
         self.stop_event = threading.Event()
         self.busy = False
@@ -283,6 +284,11 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         output_format = saved.get("dxf_dwg_format", "DXF")
         self.output_format = tk.StringVar(self, value=output_format if output_format in ("DXF", "DWG") else "DXF")
         self.bend_lines = tk.BooleanVar(self, value=saved.get("dxf_dwg_bend_lines", False) is True)
+        self.group_by_thickness = tk.BooleanVar(self, value=saved.get("dxf_dwg_group_by_thickness", True) is True)
+        if self.mode == "dxf_dwg":
+            variable = self.group_by_thickness
+            variable.trace_add("write", lambda *_: self._schedule_preferences()
+                               if self.mode == "dxf_dwg" and self.group_by_thickness is variable else None)
         self.controls, self.results = [], []
         self.row_ids, self.stat_values = {}, {}
         self._create_filter_state()
@@ -680,7 +686,8 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             saved.update({f'{self.mode}_source': self.source_folder.get(), f'{self.mode}_output': self.output_folder.get(),
                           f'{self.mode}_recursive': self.include_subfolders.get(), f'{self.mode}_overwrite': self.overwrite_existing.get()})
             if not self._is_pdf:
-                saved.update(dxf_dwg_format=self.output_format.get(), dxf_dwg_bend_lines=self.bend_lines.get())
+                saved.update(dxf_dwg_format=self.output_format.get(), dxf_dwg_bend_lines=self.bend_lines.get(),
+                             dxf_dwg_group_by_thickness=self.group_by_thickness.get())
         return saved
 
     def _schedule_preferences(self):
@@ -773,6 +780,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         export_options = {} if self._is_pdf else {
             "formats": (self.output_format.get().lower(),),
             "bend_lines": self.bend_lines.get(),
+            "group_by_thickness": self.group_by_thickness.get(),
         }
         threading.Thread(target=exporter,
                          args=(source, output, self.include_subfolders.get(), self.overwrite_existing.get(), self.events, self.stop_event),

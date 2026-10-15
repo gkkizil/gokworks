@@ -25,6 +25,66 @@ from pdf.settings import load_settings, save_settings
 
 
 class WindowTests(GuiTestCase):
+    def test_thickness_grouping_worker_preferences_and_pdf_isolation(self):
+        key = 'dxf_dwg_group_by_thickness'
+        checkbox_text = 'Sac kalınlığına göre klasörle'
+        self.assertTrue(self.app.group_by_thickness.get())
+        self.assertNotIn(key, self.app._preference_values())
+        self.assertFalse(any(isinstance(control, ctk.CTkCheckBox)
+                             and control.cget('text') == checkbox_text
+                             for control in self.app.controls))
+
+        def worker(source, output, recursive, overwrite, events, stop, **options):
+            events.put(('done', {'state': 'completed', 'total': 0, 'processed': 0,
+                                'succeeded': 0, 'skipped': 0, 'failed': 0, 'error': ''}))
+
+        self.app.source_folder.set(str(self.root))
+        self.app.output_folder.set(str(self.root/'pdf'))
+        with patch('pdf.window.export_drawings', side_effect=worker) as pdf_worker:
+            self.app._start_export()
+            self.wait_idle()
+        self.assertEqual(pdf_worker.call_args.kwargs, {})
+        self.assertNotIn(key, load_settings(self.settings))
+
+        self.app._switch_mode('dxf_dwg')
+        variable, workspace = self.app.group_by_thickness, self.app.workspace
+        self.assertTrue(variable.get())
+        checkbox = next(control for control in self.app.controls
+                        if isinstance(control, ctk.CTkCheckBox) and control.cget('text') == checkbox_text)
+        self.assertTrue(any(isinstance(widget, ctk.CTkLabel)
+                            and widget.cget('text') == 'Çıktı / 1,5 mm / parça.dxf'
+                            for widget in checkbox.master.winfo_children()))
+        self.app.source_folder.set(str(self.root))
+        self.app.output_folder.set(str(self.root/'cad'))
+        with patch('pdf.window.export_parts', side_effect=worker) as dxf_worker:
+            self.app._start_export()
+            self.assertEqual(checkbox.cget('state'), 'disabled')
+            self.wait_idle()
+        self.assertEqual(dxf_worker.call_args.kwargs,
+                         {'formats': ('dxf',), 'bend_lines': False, 'group_by_thickness': True})
+        self.assertEqual(checkbox.cget('state'), 'normal')
+        checkbox.toggle()
+        self.pump_until(lambda: load_settings(self.settings).get(key) is False)
+
+        self.app._switch_mode('pdf')
+        self.assertTrue(self.app.group_by_thickness.get())
+        self.assertNotIn(key, self.app._preference_values())
+        self.app._save_preferences()
+        self.assertFalse(load_settings(self.settings)[key])
+        self.app._switch_mode('dxf_dwg')
+        self.assertIs(self.app.workspace, workspace)
+        self.assertIs(self.app.group_by_thickness, variable)
+        self.assertFalse(variable.get())
+        with patch('pdf.window.export_parts', side_effect=worker) as dxf_worker:
+            self.app._start_export()
+            self.wait_idle()
+        self.assertIs(dxf_worker.call_args.kwargs['group_by_thickness'], False)
+
+        self.app._on_close()
+        self.open_app()
+        self.app._switch_mode('dxf_dwg')
+        self.assertFalse(self.app.group_by_thickness.get())
+
     def test_navigation_retains_independent_preferences(self):
         sidebar = self.app.sidebar
         pdf_page = self.app.workspace
@@ -133,8 +193,8 @@ class WindowTests(GuiTestCase):
         self.assertIn('sheet - 2 mm - 3 adet.dxf', rows[1][1])
         self.assertNotIn('.dwg', rows[1][1])
         self.assertEqual(self.app.results[0]['quantity'], 3)
-        self.assertTrue((self.root/'outputs'/'sheet - 2 mm - 3 adet.dxf').is_file())
-        self.assertFalse((self.root/'outputs'/'sheet - 2 mm - 3 adet.dwg').exists())
+        self.assertTrue((self.root/'outputs'/'2 mm'/'sheet - 2 mm - 3 adet.dxf').is_file())
+        self.assertFalse((self.root/'outputs'/'2 mm'/'sheet - 2 mm - 3 adet.dwg').exists())
         self.assertEqual(len(model.calls), 1)
         self.assertEqual(rows[1][2], 'Başarılı')
 

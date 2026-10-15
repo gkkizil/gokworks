@@ -640,6 +640,37 @@ class ExportTests(unittest.TestCase):
                 self.assertTrue((self.output/f'{stem}.{kind}').is_file())
         self.assertIs(self.app.ActiveDoc, self.assembly)
 
+    def test_grouped_batch_keeps_mixed_thickness_and_same_named_subfolders(self):
+        models = [(self.model, Path('2 mm'), 2, 2)]
+        for folder, quantity in (('left', 3), ('right', 3)):
+            path = self.source/folder/'part.SLDPRT'
+            path.parent.mkdir()
+            path.touch()
+            model = FakePart(path)
+            model.feature.thickness = .0015
+            models.append((model, Path('1,5 mm')/folder, quantity, 1.5))
+        self.assembly.root.children = [FakeComponent(model.path)
+                                       for model, _, quantity, _ in models
+                                       for _ in range(quantity)]
+        self.app = FakeMultiPartApp([model for model, _, _, _ in models], self.assembly)
+        messages = self.run_batch(formats=('dxf', 'dwg'), group_by_thickness=True)
+        self.assertEqual(messages[-1][1]['succeeded'], 3)
+        self.assertTrue(any(kind == 'log' and 'kalınlığına göre klasörlenir' in value
+                            for kind, value in messages))
+        for model, folder, quantity, thickness in models:
+            result = next(value for kind, value in messages
+                          if kind == 'result' and value['source'] == model.path)
+            self.assertEqual((result['quantity'], result['thickness_mm']), (quantity, thickness))
+            expected = [self.output/folder/f'part - {thickness:g} mm - {quantity} adet.{kind}'
+                        for kind in ('dxf', 'dwg')]
+            self.assertEqual(result['output'], ' | '.join(map(str, expected)))
+            self.assertEqual([item['path'] for item in result['outputs']], list(map(str, expected)))
+            self.assertEqual([target.read_bytes() for target in expected], [DXF, DWG])
+            self.assertEqual([Path(call[0]).parent for call in model.calls],
+                             [self.output/folder] * 2)
+        self.assertFalse(list(self.output.rglob('.gokworks-*')))
+        self.assertIs(self.app.ActiveDoc, self.assembly)
+
     def test_missing_invalid_or_ambiguous_thickness_is_rejected(self):
         for feature in (None, FakeFeature(suppressed=True), FakeFeature(thickness=0),
                         FakeFeature(thickness=float('nan')), FakeFeature(thickness=-.001),
@@ -656,6 +687,33 @@ class ExportTests(unittest.TestCase):
         for thickness, quantity in ((0, 1), (float('inf'), 1), (2, 0), (2, 1.5), (2, True)):
             with self.subTest(thickness=thickness, quantity=quantity), self.assertRaises(ValueError):
                 ex.named_destinations(part, self.source, self.output, ('dxf',), thickness, quantity)
+
+    def test_grouped_destinations_use_canonical_thickness_and_keep_default_paths(self):
+        part = self.source/'sub'/'BRAKET.v2.SLDPRT'
+        for thickness, label in ((2, '2'), (1.5, '1.5'), (1.23456789, '1.234568'),
+                                 (.000001, '0.000001')):
+            with self.subTest(thickness=thickness):
+                filename = f'BRAKET.v2 - {label} mm - 12 adet.dxf'
+                self.assertEqual(ex.named_destinations(
+                    part, self.source, self.output, ('dxf',), thickness, 12),
+                    [self.output/'sub'/filename])
+                self.assertEqual(ex.named_destinations(
+                    part, self.source, self.output, ('dxf',), thickness, 12, True),
+                    [self.output/f"{label.replace('.', ',')} mm"/'sub'/filename])
+
+    def test_grouped_batch_rejects_missing_invalid_and_multiple_thicknesses(self):
+        for feature in (None, FakeFeature(thickness=0), FakeFeature(thickness=float('nan')),
+                        FakeFeature(thickness=.0000000001),
+                        FakeFeature(next_feature=FakeFeature('Other', thickness=.003))):
+            self.model.feature = feature
+            with self.subTest(feature=feature):
+                messages = self.run_batch(group_by_thickness=True)
+                self.assertEqual(messages[-1][1]['failed'], 1)
+                result = next(value for kind, value in messages if kind == 'result')
+                self.assertEqual(result['output'], '')
+                self.assertEqual(result['outputs'], [])
+                self.assertFalse(self.model.calls)
+                self.assertFalse(list(self.output.iterdir()))
 
     def test_named_batch_uses_nested_total_for_both_formats(self):
         self.assembly.root.children *= 3
@@ -717,6 +775,58 @@ class ExportTests(unittest.TestCase):
         self.assertEqual(dxf.read_bytes(), b'original')
         self.assertEqual(len(self.model.calls), 1)
         self.assertTrue((self.output/'part - 2 mm - 1 adet.dwg').exists())
+
+    def test_grouped_batch_skips_existing_output_and_exports_only_missing_format(self):
+        folder = self.output/'2 mm'
+        folder.mkdir(parents=True)
+        dxf = folder/'part - 2 mm - 1 adet.dxf'
+        dwg = folder/'part - 2 mm - 1 adet.dwg'
+        dxf.write_bytes(b'original')
+        ungrouped = self.output/dwg.name
+        ungrouped.write_bytes(b'legacy')
+        messages = self.run_batch(formats=('dxf', 'dwg'), group_by_thickness=True)
+        result = next(value for kind, value in messages if kind == 'result')
+        self.assertEqual(messages[-1][1]['succeeded'], 1)
+        self.assertEqual([item['status'] for item in result['outputs']], ['skipped', 'success'])
+        self.assertEqual(result['output'], f'{dxf} | {dwg}')
+        self.assertEqual(dxf.read_bytes(), b'original')
+        self.assertEqual(dwg.read_bytes(), DWG)
+        self.assertEqual(ungrouped.read_bytes(), b'legacy')
+        self.assertEqual(len(self.model.calls), 1)
+        self.model.calls.clear()
+        messages = self.run_batch(formats=('dxf', 'dwg'), group_by_thickness=True)
+        self.assertEqual(messages[-1][1]['skipped'], 1)
+        result = next(value for kind, value in messages if kind == 'result')
+        self.assertEqual([item['status'] for item in result['outputs']], ['skipped', 'skipped'])
+        self.assertEqual(result['output'], f'{dxf} | {dwg}')
+        self.assertFalse(self.model.calls)
+        self.assertFalse(list(folder.glob('.gokworks-*')))
+
+    def test_grouped_batch_overwrite_preserves_original_on_invalid_export(self):
+        folder = self.output/'2 mm'
+        folder.mkdir(parents=True)
+        dxf = folder/'part - 2 mm - 1 adet.dxf'
+        dwg = folder/'part - 2 mm - 1 adet.dwg'
+        for invalid in (False, True):
+            with self.subTest(invalid=invalid):
+                dxf.write_bytes(b'original')
+                dwg.write_bytes(b'original')
+                self.model.invalid = {'.dxf'} if invalid else set()
+                self.model.calls.clear()
+                self.activate_assembly()
+                events = Queue()
+                with patch.object(ex, 'connect_to_solidworks', return_value=self.app):
+                    ex.export_parts(self.source, self.output, True, True, events,
+                                    formats=('dxf', 'dwg'), group_by_thickness=True)
+                messages = list(events.queue)
+                result = next(value for kind, value in messages if kind == 'result')
+                self.assertEqual(result['status'], 'partial' if invalid else 'success')
+                self.assertEqual([item['path'] for item in result['outputs']], [str(dxf), str(dwg)])
+                self.assertEqual(dxf.read_bytes(), b'original' if invalid else DXF)
+                self.assertEqual(dwg.read_bytes(), DWG)
+                self.assertEqual(len(self.model.calls), 2)
+                self.assertTrue(all(Path(call[0]).parent == folder for call in self.model.calls))
+                self.assertFalse(list(folder.glob('.gokworks-*')))
 
 
 if __name__ == '__main__':
