@@ -1,6 +1,6 @@
 # Sabit yoğunluk kataloğu
 
-Ağırlık hesabında aşağıdaki 35 kayıt kullanılır. Yoğunluklar malzemeden otomatik alınır;
+Ağırlık hesabında aşağıdaki 39 kayıt kullanılır. Yoğunluklar malzemeden otomatik alınır;
 arayüzden, eski tercih dosyasından veya hesap çağrısındaki farklı bir yoğunlukla değiştirilemez.
 Değerler kaynaklardaki nominal kütle hesabı değerleridir; üretici sertifikası ya da mekanik
 dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
@@ -46,6 +46,15 @@ dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
 | 16MnCr5 | 7850 | 7,85 | [Kayıt](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst) |
 | 34CrNiMo6 | 7850 | 7,85 | [Kayıt](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst) |
 
+## Kalıp Çelikleri
+
+| Malzeme | kg/m³ | g/cm³ | Referans |
+| --- | ---: | ---: | --- |
+| 1.2311 | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| 1.2312 | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| 1.2344 | 7800 | 7,8 | [Kayıt](https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json) |
+| 1.2379 | 7700 | 7,7 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+
 ## Paslanmaz
 
 | Malzeme | kg/m³ | g/cm³ | Referans |
@@ -68,6 +77,7 @@ dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
 ## Kullanım notları
 
 - Sac/yapı ve makine çeliklerinde 7.850 kg/m³ genel nominal çelik değeri kullanılır. Bağlantılı kaynak bu kütle hesabı temelini destekler; her kalite için ayrı bir ölçüm raporu okunduğu iddia edilmez.
+- Kalıp çelikleri genel çelik değerine eşitlenmez: 1.2379 için 7.700, 1.2344 için 7.800 kg/m³ kullanılır. 1.2344 değeri DIN kalite adını açıkça belirten H13 GitHub kartındandır. 1.2379, 1.2311 ve 1.2312 değerleri PFM Calculator'ın elle tutulan nominal ağırlık kataloğundandır ([birimler](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/README.md)). Üretici teknik föyü veya standart belgesi doğrulanmış gibi sunulmaz.
 - St37/St52, C45/CK45 ve Avrupa/SAE adları kesin eşdeğer kalite olarak birleştirilmez. Kaliteler ayrı kayıtlardır; ticari adlar açıklama notudur.
 - DX51D+Z ve DX52D+Z için çelik taban hesaplanır. Çinko kaplaması ilave kütlesi dahil değildir.
 - 304 değeri MMPDS referansı taşıyan GitHub kartından; 316/316L değerleri bağlantılı GitHub veritabanı kayıtlarından alınmıştır. Özgün MMPDS, MatWeb veya AZoM yayınının tam metninin ayrıca doğrulandığı iddia edilmez.

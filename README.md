@@ -57,9 +57,11 @@ Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğe
 ## Ağırlık hesabı
 
 **Mühendislik hesapları → Ağırlık hesabı** bölümünde kesiti, malzemeyi,
-ölçüleri, boyu ve adedi seçin. Görseldeki 19 kesit türü ve 35 malzeme kaydı
+ölçüleri, boyu ve adedi seçin. Görseldeki 19 kesit türü ve 39 malzeme kaydı
 desteklenir. S235/S275/S355, DC01–DC04 DKP, galvanizli sac, C45/42CrMo4 ve
-304/316/316L dahil kaliteler gruplara ayrılır. Yoğunluk her malzemenin yanında
+304/316/316L dahil kaliteler gruplara ayrılır. **Kalıp Çelikleri** grubunda
+1.2311, 1.2312, 1.2344 ve 1.2379 kendilerine ait sabit yoğunluklarla sunulur.
+Yoğunluk her malzemenin yanında
 gösterilir, otomatik kullanılır ve kullanıcı tarafından değiştirilemez.
 mm/cm/m dönüşümü, adet başına kg, kg/m, toplam ağırlık, sade 2D kesit çizimi
 ve pano raporu vardır. SolidWorks gerekmez.

@@ -13,10 +13,13 @@ kullanıcının referans görselindeki 19 tür bulunur. Boyutlar kesite göre de
 H/I/U aile adları otomatik standart profil boyutu veya katalog ağırlığı seçmez;
 girilen ölçüler esas alınır.
 
-**35 kayıtlı malzeme** Genel, Sac / Yapı, Makine / Takım, Paslanmaz ve
-Plastikler gruplarında sunulur. Yaygın S235JR/S275JR/S355JR/S355J2, DC01–DC04
+**39 kayıtlı malzeme** Genel, Sac / Yapı, Makine / Takım, Kalıp Çelikleri,
+Paslanmaz ve Plastikler gruplarında sunulur. Yaygın S235JR/S275JR/S355JR/S355J2, DC01–DC04
 DKP, DX51D+Z/DX52D+Z galvaniz, S355MC, P265GH, C45, C45E, 42CrMo4, 16MnCr5,
 34CrNiMo6 ve 304/316/316L seçenekleri bulunur. Delrin ve Kestamit korunur.
+Kalıp Çelikleri grubunda 1.2379 soğuk iş, 1.2344 sıcak iş ve 1.2311/1.2312
+plastik kalıp çelikleri bulunur;
+genel çelik yoğunluğu yerine her kalitenin kaynaklı yoğunluğu kullanılır.
 [Tam yoğunluk tablosu ve kaynak bağlantıları](materials.md).
 
 Yoğunluk **sabittir**: menüde g/cm³, yanında kg/m³ olarak gösterilir ve seçilen
@@ -99,6 +102,9 @@ sürümündeki `Metal/Aluminum/Aluminum-Generic.FCMat` ve
 **7.850 kg/m³** için [section-properties örneği](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst)
 `7,85 × 10⁻⁶ kg/mm³` değerini kullanır. Bu değer saf demirin yoğunluğu değildir.
 Diğer sabit kayıtlar ve nominal kaynakları [yoğunluk tablosundadır](materials.md).
+Kalıp çeliklerinde 1.2379 **7.700**, 1.2344 **7.800**, 1.2311/1.2312
+**7.850 kg/m³** kullanılır. Değerler bağlantılı GitHub malzeme kartı ve
+ağırlık hesabı kataloğundan alınmıştır; üretici föyü doğrulaması değildir.
 304 için MMPDS referansı taşıyan GitHub kartı 7.916 kg/m³, 316/316L kartları
 8.000 kg/m³ kullanır; özgün MMPDS/MatWeb/AZoM yayınlarının bu oturumda ayrıca
 okunduğu iddia edilmez. PP 916, PTFE 2.070 ve PVC 1.380 kg/m³ olarak kaynak
@@ -125,6 +131,14 @@ katalog alanı, geçersiz girişler, tercihler, açık/koyu tema, küçük pence
 %125 ölçek kontrol edildi. Windows/SolidWorks veya
 EXE derlemesi çalıştırılmadı.
 
+Kalıp çeliği eklemesinde 13 mevcut hesap/katalog kontrolü geçti. Uygulama açılarak
+200 × 300 × 40 mm levhada 1.2379 için **18,480 kg**, 1.2344 için **18,720 kg**
+sonucu ve sabit yoğunluk gösterimi gerçek ekranlarda doğrulandı.
+
 [Çelik kutu profil, koyu tema](examples/weight-steel-dark.png) ·
-[Delrin mil, açık tema](examples/weight-delrin-light.png).
+[Delrin mil, açık tema](examples/weight-delrin-light.png) ·
+[1.2379 kalıp çeliği](examples/weight-2379-dark.png) ·
+[1.2344 kalıp çeliği](examples/weight-2344-dark.png).
 Gerçek Tk görüntülerini yeniden almak için `weight/examples/capture.py` kullanılır.
+Yalnız kalıp çeliği ekranları için dosya adlarını uzantısız verin:
+`python weight/examples/capture.py weight-2379-dark weight-2344-dark`.
