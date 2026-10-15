@@ -6,7 +6,7 @@ Section dimensions are shown in millimetres; stock length uses the selected unit
 
 import math
 
-from gui.theme import PANEL, INPUT, TEXT, MUTED, ACCENT, UI_FONT
+from gui.theme import PANEL, MUTED, ACCENT, UI_FONT
 
 
 _I_SECTIONS = frozenset(('HEA', 'HP', 'HD', 'HL', 'HE', 'IPE', 'IPN'))
@@ -112,61 +112,19 @@ def _polygon(canvas, points, x, y, factor, **options):
     return canvas.create_polygon(*_coordinates(points, x, y, factor), **options)
 
 
-def _stock(canvas, kind, dimensions, x, y, factor, depth, colors, line_width):
+def _front(canvas, kind, dimensions, x, y, factor, fill, edge, background, line_width):
+    """Draw one flat section, keeping hollow profiles genuinely open."""
     outline, opening, width, height = _section(kind, dimensions)
-    dx, dy = depth, -depth * .47
-    front, edge, side, top, hole = (colors[name] for name in ('front', 'edge', 'side', 'top', 'hole'))
     if outline == 'circle':
-        radius = factor / 2
-        cx, cy = x + radius, y + radius
-        normal = (-dy / math.hypot(dx, dy), dx / math.hypot(dx, dy)) if depth else (0, 1)
-        nx, ny = normal[0] * radius, normal[1] * radius
-        if depth:
-            canvas.create_oval(x + dx, y + dy, x + factor + dx, y + factor + dy,
-                               fill=side, outline=edge, width=line_width)
-            canvas.create_polygon(cx + nx, cy + ny, cx + dx + nx, cy + dy + ny,
-                                  cx + dx - nx, cy + dy - ny, cx - nx, cy - ny,
-                                  fill=side, outline=edge, width=line_width)
-        canvas.create_oval(x, y, x + factor, y + factor, fill=front, outline=edge, width=line_width)
+        canvas.create_oval(x, y, x + factor, y + factor, fill=fill, outline=edge, width=line_width)
         if opening is not None:
             inset = factor * opening
             canvas.create_oval(x + inset, y + inset, x + factor - inset, y + factor - inset,
-                               fill=hole, outline=edge, width=line_width)
-            if depth:
-                canvas.create_arc(x + inset + line_width, y + inset + line_width,
-                                  x + factor - inset - line_width, y + factor - inset - line_width,
-                                  start=225, extent=130, style='arc', outline=side,
-                                  width=max(line_width, inset * .25))
+                               fill=background, outline=edge, width=line_width)
         return width * factor, height * factor
-
-    if depth:
-        _polygon(canvas, outline, x + dx, y + dy, factor, fill=side, outline=edge, width=line_width)
-        for first, second in zip(outline, outline[1:] + outline[:1]):
-            ax, ay = first
-            bx, by = second
-            # Clockwise front outlines expose their top and right edges.
-            outward = (by - ay, ax - bx)
-            if outward[0] * dx + outward[1] * dy > 0:
-                canvas.create_polygon(x + ax * factor, y + ay * factor,
-                                      x + bx * factor, y + by * factor,
-                                      x + bx * factor + dx, y + by * factor + dy,
-                                      x + ax * factor + dx, y + ay * factor + dy,
-                                      fill=top if abs(by - ay) < abs(bx - ax) else side,
-                                      outline=edge, width=line_width)
-    _polygon(canvas, outline, x, y, factor, fill=front, outline=edge, width=line_width)
+    _polygon(canvas, outline, x, y, factor, fill=fill, outline=edge, width=line_width)
     if opening:
-        _polygon(canvas, opening, x, y, factor, fill=hole, outline=edge, width=line_width)
-        if depth:
-            left, top_y = opening[0]
-            right, bottom = opening[2]
-            inset = min((right - left) * .09, (bottom - top_y) * .09)
-            # Interior shading stays inside the opening; never bridges its hole.
-            inner = [(left, bottom), (left + inset, bottom - inset),
-                     (right - inset, bottom - inset), (right, bottom)]
-            _polygon(canvas, inner, x, y, factor, fill=side, outline='')
-            inner = [(left, top_y), (left + inset, top_y + inset),
-                     (left + inset, bottom - inset), (left, bottom)]
-            _polygon(canvas, inner, x, y, factor, fill=top, outline='')
+        _polygon(canvas, opening, x, y, factor, fill=background, outline=edge, width=line_width)
     return width * factor, height * factor
 
 
@@ -175,33 +133,24 @@ def _dimension(canvas, start, end, offset, text, color, background, scale, verti
     ex, ey = end
     width = max(1, scale)
     font = (UI_FONT, -max(9, round(10 * scale)))
-    arrow = (round(5 * scale), round(6 * scale), round(2 * scale))
+    tick = 3 * scale
     if vertical:
         line_x = sx + offset
-        canvas.create_line(sx, sy, line_x - 4 * scale, sy, fill=color, width=width)
-        canvas.create_line(ex, ey, line_x - 4 * scale, ey, fill=color, width=width)
-        canvas.create_line(line_x, sy, line_x, ey, fill=color, width=width, arrow='both', arrowshape=arrow)
-        label = canvas.create_text(line_x - 8 * scale, (sy + ey) / 2, text=text, fill=color,
-                                   font=font, anchor='e', angle=90)
+        canvas.create_line(line_x, sy, line_x, ey, fill=color, width=width)
+        canvas.create_line(line_x - tick, sy, line_x + tick, sy, fill=color, width=width)
+        canvas.create_line(line_x - tick, ey, line_x + tick, ey, fill=color, width=width)
+        canvas.create_text(line_x - 12 * scale, (sy + ey) / 2, text=text, fill=color,
+                           font=font, angle=90)
     else:
         line_y = sy + offset
-        canvas.create_line(sx, sy, sx, line_y + 4 * scale, fill=color, width=width)
-        canvas.create_line(ex, ey, ex, line_y + 4 * scale, fill=color, width=width)
-        canvas.create_line(sx, line_y, ex, line_y, fill=color, width=width, arrow='both', arrowshape=arrow)
-        label = canvas.create_text((sx + ex) / 2, line_y + 11 * scale, text=text, fill=color,
-                                   font=font, anchor='center')
-    # Make annotation text readable over fine dimension lines.
-    bounds = canvas.bbox(label)
-    if bounds:
-        pad = 2 * scale
-        block = canvas.create_rectangle(bounds[0] - pad, bounds[1] - pad,
-                                        bounds[2] + pad, bounds[3] + pad,
-                                        fill=background, outline='')
-        canvas.tag_lower(block, label)
+        canvas.create_line(sx, line_y, ex, line_y, fill=color, width=width)
+        canvas.create_line(sx, line_y - tick, sx, line_y + tick, fill=color, width=width)
+        canvas.create_line(ex, line_y - tick, ex, line_y + tick, fill=color, width=width)
+        canvas.create_text((sx + ex) / 2, line_y + 12 * scale, text=text, fill=color, font=font)
 
 
 def draw(canvas, result, appearance, scale, kind='Sac levha', dimensions=None):
-    """Redraw a responsive stock diagram with verified, result-backed labels."""
+    """Redraw a simple 2D section with minimal, result-backed measurements."""
     scale = _positive(scale, 1)
     kind = str(_value(result, 'kind', kind) or kind)
     method = str(_value(result, 'method', ''))
@@ -212,54 +161,40 @@ def draw(canvas, result, appearance, scale, kind='Sac levha', dimensions=None):
     background = _color(PANEL, appearance)
     accent, muted = _color(ACCENT, appearance), _color(MUTED, appearance)
     dark = str(appearance).lower() in ('dark', 'koyu')
-    colors = dict(front=_mix(accent, background, .64 if dark else .76), edge=accent,
-                  side=_mix(accent, background, .36 if dark else .53),
-                  top=_mix(accent, background, .49 if dark else .63),
-                  hole=_color(INPUT, appearance))
+    fill = _mix(accent, background, .87 if dark else .92)
     canvas.delete('all')
     canvas.configure(background=background, highlightthickness=0)
     width, height = canvas.winfo_width(), canvas.winfo_height()
     if width <= 1:
         width = _positive(canvas.cget('width'), 440 * scale)
     if height <= 1:
-        height = _positive(canvas.cget('height'), 300 * scale)
+        height = _positive(canvas.cget('height'), 250 * scale)
     if width < 100 * scale or height < 100 * scale:
         return
-    canvas.create_text(16 * scale, 17 * scale, text=kind, anchor='w', fill=_color(TEXT, appearance),
-                       font=(UI_FONT, -round(12 * scale), 'bold'))
-    canvas.create_text(width - 16 * scale, 17 * scale, text='KESİT ŞEMATİK', anchor='e', fill=muted,
-                       font=(UI_FONT, -round(9 * scale), 'bold'))
     _, _, aspect_width, aspect_height = _section(kind, dims)
-    room_width, room_height = max(40 * scale, width - 150 * scale), max(35 * scale, height - 137 * scale)
-    depth = min(85 * scale, room_width * .25)
-    factor = min(150 * scale / aspect_height, (room_width - depth) / aspect_width,
-                 (room_height - depth * .47) / aspect_height)
+    room_width, room_height = max(40 * scale, width - 128 * scale), max(25 * scale, height - 112 * scale)
+    factor = min(135 * scale / aspect_height, 180 * scale / aspect_width,
+                 room_width / aspect_width, room_height / aspect_height)
     factor = max(12 * scale, factor)
     front_width, front_height = aspect_width * factor, aspect_height * factor
-    x = (width - front_width - depth) / 2 + 7 * scale
-    y = 53 * scale + depth * .47 + max(0, (room_height - front_height - depth * .47) / 2)
-    _stock(canvas, kind, dims, x, y, factor, depth, colors, max(1, 1.2 * scale))
+    x = (width - front_width) / 2
+    y = max(15 * scale, (height - 76 * scale - front_height) / 2)
+    _front(canvas, kind, dims, x, y, factor, fill, accent, background, max(1, 1.35 * scale))
 
     horizontal = 'd' if kind in ('Mil', 'Boru') else ('' if kind == 'Altıköşe' else 'b')
-    vertical = 't' if kind in ('Sac levha', 'Silme lama') else ('s' if kind == 'Altıköşe' else 'h')
+    vertical = 's' if kind == 'Altıköşe' else 'h'
     if horizontal in actual:
         symbol = 'Ø' if horizontal == 'd' else horizontal
         _dimension(canvas, (x, y + front_height), (x + front_width, y + front_height),
-                   16 * scale, f'{symbol} {_number(actual[horizontal])} mm', muted, background, scale)
+                   14 * scale, f'{symbol} {_number(actual[horizontal])} mm', muted, background, scale)
     if vertical in actual and kind not in ('Mil', 'Boru', 'Kare demir'):
         _dimension(canvas, (x, y), (x, y + front_height), -20 * scale,
                    f'{vertical} {_number(actual[vertical])} mm', muted, background, scale, vertical=True)
 
-    # A short leader annotates thin walls without illegible, overlapping arrows.
-    thickness = [(key, actual[key]) for key in ('t', 'tw', 'tf') if key in actual
-                 and not (vertical == key and key == 't')]
+    thickness = [(key, actual[key]) for key in ('t', 'tw', 'tf') if key in actual]
     if thickness:
-        label_x = min(width - 18 * scale, x + front_width + depth + 16 * scale)
-        label_y = max(47 * scale, y - 6 * scale)
-        canvas.create_line(x + front_width * .78, y + front_height * .11,
-                           label_x - 8 * scale, label_y + 7 * scale, fill=muted,
-                           width=max(1, scale))
-        canvas.create_text(label_x, label_y, text='\n'.join(f'{key} {_number(value)} mm' for key, value in thickness),
+        canvas.create_text(width - 18 * scale, 20 * scale,
+                           text='\n'.join(f'{key} {_number(value)} mm' for key, value in thickness),
                            anchor='ne', justify='right', fill=muted, font=(UI_FONT, -round(10 * scale)))
 
     length = _positive(_value(result, 'length_mm'))
@@ -267,22 +202,16 @@ def draw(canvas, result, appearance, scale, kind='Sac levha', dimensions=None):
         selected = str(_value(result, 'unit', 'mm')).lower().strip()
         unit, divisor = {'cm': ('cm', 10), 'm': ('m', 1000), 'mm': ('mm', 1),
                          'milimetre': ('mm', 1), 'santimetre': ('cm', 10), 'metre': ('m', 1000)}.get(selected, ('mm', 1))
-        label_y = y + front_height * .55 - depth * .2
-        canvas.create_text(width - 18 * scale, label_y,
-                           text=f'Boy {_number(length / divisor)} {unit}', anchor='e', fill=accent,
-                           font=(UI_FONT, -round(11 * scale), 'bold'))
+        canvas.create_text(width / 2, height - 41 * scale,
+                           text=f'Boy: {_number(length / divisor)} {unit}', fill=accent,
+                           font=(UI_FONT, -round(11 * scale)))
 
     area = _positive(_value(result, 'area_mm2'))
     if catalog and area:
-        caption = f'Katalog kesit alanı: {_number(area)} mm²'
-    elif result is None:
-        caption = 'Ölçüleri girerek ağırlığı hesaplayın.'
-    else:
-        caption = 'Ölçüler gerçek değerleri gösterir.'
-    canvas.create_text(width / 2, height - 35 * scale, text=caption, fill=muted,
-                       font=(UI_FONT, -round(10 * scale)), anchor='center')
-    canvas.create_text(width / 2, height - 17 * scale, text='Kesit ve boy çizimi ölçekli değildir.', fill=muted,
-                       font=(UI_FONT, -round(9 * scale)), anchor='center')
+        canvas.create_text(width / 2, height - 63 * scale, text=f'Alan: {_number(area)} mm²',
+                           fill=muted, font=(UI_FONT, -round(10 * scale)))
+    canvas.create_text(width / 2, height - 18 * scale, text='Ölçeksiz kesit', fill=muted,
+                       font=(UI_FONT, -round(9 * scale)))
 
 
 def draw_icon(canvas, kind, color, bg, size=34):

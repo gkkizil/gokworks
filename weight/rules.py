@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 import math
 
-from .materials import MATERIALS
+from .materials import MATERIALS, MATERIAL_ALIASES, MATERIAL_GROUPS, MATERIAL_NOTES, MATERIAL_SOURCES
 
 KINDS = ('Kutu profil', 'Sac levha', 'Boru', 'Köşebent', 'Kare demir',
          'T profil', 'U profil', 'HEA', 'HP', 'HD', 'HL', 'IPN', 'UPE',
@@ -38,7 +38,7 @@ DEFAULT_DIMENSIONS = {'b': 100, 'h': 100, 't': 5, 'tw': 5,
 SCOPE = ('Ağırlık, kesit alanı × boy × yoğunluk ile hesaplanır. Ölçülerden hesaplanan '
          'profil kesitleri köşe ve kök radyüslerini, başlık eğimlerini ve üretim '
          'toleranslarını içermez. Standart profil için katalog kesit alanını '
-         'kullanabilirsiniz. Yoğunluk malzeme sınıfına göre değişir.')
+         'kullanabilirsiniz. Yoğunluk seçilen malzemeye göre sabittir ve değiştirilemez.')
 
 
 def _number(value, label):
@@ -137,6 +137,7 @@ def calculate(*, kind='Sac levha', material='Demir / Çelik', density=None,
               unit='mm', length='1000', count='1', method='Ölçülerden',
               area_cm2=None, **dimensions):
     """Compute one-piece and total weight; parse only the selected method's fields."""
+    material = MATERIAL_ALIASES.get(material, material)
     if kind not in KINDS:
         raise ValueError('Geçerli bir ürün türü seçin.')
     if material not in MATERIALS:
@@ -145,9 +146,10 @@ def calculate(*, kind='Sac levha', material='Demir / Çelik', density=None,
         raise ValueError('Ölçü birimi mm, cm veya m olmalı.')
     if method not in METHODS:
         raise ValueError('Geçerli bir hesaplama yöntemi seçin.')
-    density = _positive(MATERIALS[material] if density is None else density, 'Yoğunluk')
-    if density > 30000:
-        raise ValueError('Yoğunluk 30.000 kg/m³ değerini aşmamalı.')
+    preset_density = MATERIALS[material]
+    if density is not None and _number(density, 'Yoğunluk') != preset_density:
+        raise ValueError('Yoğunluk seçilen malzemeye göre sabittir ve değiştirilemez.')
+    density = float(preset_density)
     number_of_pieces = _positive(count, 'Adet')
     if not number_of_pieces.is_integer() or number_of_pieces > 1000000:
         raise ValueError('Adet 1–1.000.000 arasında bir tam sayı olmalı.')

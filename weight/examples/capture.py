@@ -24,7 +24,7 @@ def main():
             app._switch_mode('weight')
             app.geometry('1240x860+20+20')
             for theme, name, values in (
-                ('Koyu', 'weight-steel-dark', dict(kind='Kutu profil', material='Demir / Çelik',
+                ('Koyu', 'weight-steel-dark', dict(kind='Kutu profil', material='S235JR',
                     b='100', h='100', t='5', length='2000', count='3')),
                 ('Açık', 'weight-delrin-light', dict(kind='Mil', material='Delrin (POM-H)',
                     d='50', length='1000', count='2')),

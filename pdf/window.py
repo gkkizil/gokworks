@@ -649,6 +649,8 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         try:
             saved = load_settings(self.settings_path)
             updated = {**saved, **self._pending_preferences}
+            # Density is now fixed by the material catalogue, never a preference.
+            updated.pop('weight_density', None)
             if updated != saved:
                 save_settings(updated, self.settings_path)
             self._pending_preferences.clear()

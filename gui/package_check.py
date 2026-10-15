@@ -42,7 +42,7 @@ def run(output):
             app._switch_mode('weight')
             app.weight_state['kind'].set('Sac levha')
             app.weight_state['material'].set('Demir / Çelik')
-            for key, value in dict(unit='mm', method='Ölçülerden', density='7850',
+            for key, value in dict(unit='mm', method='Ölçülerden',
                                    b='1000', t='10', length='2000', count='1').items():
                 app.weight_state[key].set(value)
             assert abs(app.weight_result.total_mass_kg-157) < 1e-8

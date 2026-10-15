@@ -1,4 +1,4 @@
-"""Material weight workspace with live geometry and density inputs."""
+"""Material weight workspace with live geometry and fixed catalogue densities."""
 
 from math import isfinite
 import tkinter as tk
@@ -10,6 +10,7 @@ from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        AMBER, RED, HOVER, UI_FONT)
 from weight.diagram import draw, draw_icon
 from weight.rules import (KINDS, MATERIALS, UNITS, METHODS, FIELDS, FIELD_LABELS,
+                          MATERIAL_GROUPS, MATERIAL_NOTES, MATERIAL_SOURCES, MATERIAL_ALIASES,
                           DEFAULT_DIMENSIONS, calculate)
 
 
@@ -38,22 +39,51 @@ class WeightView:
                         unit='mm', length='1000', count='1', method='Ölçülerden', area_cm2='10')
         self.weight_state = {key: tk.StringVar(self, value=str(saved.get('weight_'+key, value)))
                              for key, value in defaults.items()}
+        material = self.weight_state['material'].get()
+        self.weight_state['material'].set(MATERIAL_ALIASES.get(material, material))
         for key, choices in (('kind', KINDS), ('material', MATERIALS), ('unit', UNITS), ('method', METHODS)):
             if self.weight_state[key].get() not in choices:
                 self.weight_state[key].set(defaults[key])
-        density = saved.get('weight_density', MATERIALS[self.weight_state['material'].get()])
-        self.weight_state['density'] = tk.StringVar(self, value=str(density))
+        group = self._weight_material_group(self.weight_state['material'].get())
+        saved_group = saved.get('weight_material_group')
+        if not isinstance(saved_group, str):
+            saved_group = None
+        if self.weight_state['material'].get() in MATERIAL_GROUPS.get(saved_group, ()):
+            group = saved_group
+        self.weight_state['material_group'] = tk.StringVar(self, value=group)
         self.weight_result = None
-        self.weight_widgets = {'loading': False, 'unit': self.weight_state['unit'].get()}
+        self.weight_widgets = {'loading': False, 'unit': self.weight_state['unit'].get(),
+                               'material_display': tk.StringVar(self)}
+
+    @staticmethod
+    def _weight_material_group(material):
+        return next((group for group, materials in MATERIAL_GROUPS.items() if material in materials),
+                    next(iter(MATERIAL_GROUPS)))
+
+    @staticmethod
+    def _weight_material_text(material):
+        density = f'{MATERIALS[material]/1000:g}'.replace('.', ',')
+        return f'{material} · {density} g/cm³'
+
+    def _select_weight_material(self, displayed):
+        group = self.weight_state['material_group'].get()
+        material = next((item for item in MATERIAL_GROUPS.get(group, ())
+                         if self._weight_material_text(item) == displayed), None)
+        if material is not None:
+            self.weight_state['material'].set(material)
 
     def _weight_card(self, parent):
         return ctk.CTkFrame(parent, fg_color=PANEL, corner_radius=14, border_width=1, border_color=BORDER)
 
     def _weight_menu(self, parent, key, values):
-        return ctk.CTkOptionMenu(parent, variable=self.weight_state[key], values=list(values),
+        variable, command = self.weight_state[key], None
+        if key == 'material':
+            variable, command = self.weight_widgets['material_display'], self._select_weight_material
+        return ctk.CTkOptionMenu(parent, variable=variable, values=list(values), command=command,
             width=1, height=34, fg_color=INPUT, button_color=INPUT, button_hover_color=HOVER,
             dropdown_fg_color=PANEL, dropdown_hover_color=HOVER, dropdown_text_color=TEXT,
-            text_color=TEXT, font=(UI_FONT, 12), dropdown_font=(UI_FONT, 12), dynamic_resizing=False)
+            text_color=TEXT, font=(UI_FONT, 11 if key == 'material' else 12),
+            dropdown_font=(UI_FONT, 12), dynamic_resizing=False)
 
     def _weight_input(self, parent, key, title, row, column, choices=None):
         frame = ctk.CTkFrame(parent, fg_color='transparent')
@@ -76,7 +106,7 @@ class WeightView:
         w = self.weight_widgets
         _, actions, _ = self._page_header('Ağırlık hesabı',
             'Kesiti seçin, ölçü ve malzemeden ağırlığı hesaplayın.',
-            'MÜHENDİSLİK / MALZEME', 'layers')
+            'MÜHENDİSLİK / MALZEME', 'weight')
         w['copy'] = self._button(actions, 'Hesabı kopyala', self._copy_weight_result,
                                 icon='copy', width=140)
         w['copy'].pack()
@@ -118,15 +148,26 @@ class WeightView:
         form = self._weight_card(w['form'])
         form.grid(row=1, column=0, sticky='ew')
         form.grid_columnconfigure((0, 1), weight=1, uniform='weight_inputs')
-        self._label(form, 'ÖLÇÜLER VE MALZEME', 12, ACCENT, bold=True).grid(
-            row=0, column=0, columnspan=2, sticky='w', padx=12, pady=(12, 8))
+        self._label(form, 'ÖLÇÜ / MALZEME', 11, ACCENT, bold=True).grid(
+            row=0, column=0, sticky='w', padx=12, pady=(12, 8))
+        group_menu = self._weight_menu(form, 'material_group', MATERIAL_GROUPS)
+        group_menu.configure(height=28, font=(UI_FONT, 11))
+        group_menu.grid(row=0, column=1, sticky='ew', padx=8, pady=(10, 8))
+        w['material_group_input'] = group_menu
         method = ctk.CTkSegmentedButton(form, variable=self.weight_state['method'], values=list(METHODS),
             height=34, fg_color=INPUT, selected_color=ACCENT_BG, selected_hover_color=HOVER,
             unselected_color=INPUT, unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
         method.grid(row=1, column=0, columnspan=2, sticky='ew', padx=8)
         w['method_input'] = method
-        self._weight_input(form, 'material', 'Malzeme', 2, 0, MATERIALS)
-        self._weight_input(form, 'density', 'Yoğunluk (kg/m³)', 2, 1)
+        self._weight_input(form, 'material', 'Malzeme', 2, 0,
+            [self._weight_material_text(item) for item in MATERIAL_GROUPS[self.weight_state['material_group'].get()]])
+        density_frame = ctk.CTkFrame(form, fg_color='transparent')
+        density_frame.grid(row=2, column=1, sticky='ew', padx=8, pady=(8, 0))
+        density_frame.grid_columnconfigure(0, weight=1)
+        self._label(density_frame, 'Sabit yoğunluk', 11, MUTED, anchor='w').grid(
+            row=0, column=0, sticky='ew', pady=(0, 4))
+        w['density_label'] = self._label(density_frame, '', 14, TEXT, bold=True, anchor='w', height=34)
+        w['density_label'].grid(row=1, column=0, sticky='ew')
         self._weight_input(form, 'unit', 'Ölçü birimi', 3, 0, UNITS)
         self._weight_input(form, 'count', 'Adet', 3, 1)
         self._weight_input(form, 'length', 'Boy / uzunluk (mm)', 4, 0)
@@ -138,7 +179,7 @@ class WeightView:
         for index, key in enumerate(key for key in LINEAR_FIELDS if key != 'length'):
             w['dim_frames'][key] = self._weight_input(dimensions, key, FIELD_LABELS[key]+' (mm)', index//2, index % 2)
         w['unit_hint'] = self._label(form,
-            'Birim değişince boy ve kesit ölçüleri dönüştürülür.\nYoğunluğu gerektiğinde elle değiştirebilirsiniz.',
+            'Birim değişince boy ve kesit ölçüleri dönüştürülür.\nYoğunluk seçilen malzemeden alınır ve sabittir.',
             10, MUTED, anchor='w', justify='left', wraplength=350)
         w['unit_hint'].grid(row=6, column=0, columnspan=2, sticky='ew', padx=10, pady=(12, 14))
         details = w['details']
@@ -166,7 +207,7 @@ class WeightView:
         visual.grid_columnconfigure(0, weight=1)
         w['shape_title'] = self._label(visual, '', 13, ACCENT, bold=True, anchor='w')
         w['shape_title'].grid(row=0, column=0, sticky='ew', padx=14, pady=(12, 2))
-        canvas = tk.Canvas(visual, width=1, height=300, highlightthickness=0, borderwidth=0)
+        canvas = tk.Canvas(visual, width=1, height=250, highlightthickness=0, borderwidth=0)
         canvas.grid(row=1, column=0, sticky='ew', padx=8, pady=(0, 8))
         w['canvas'] = canvas
         w['note'] = self._label(details, '', 11, MUTED, anchor='w', justify='left', wraplength=380)
@@ -190,8 +231,15 @@ class WeightView:
             return
         w['loading'] = True
         try:
+            if key == 'material_group':
+                group = state['material_group'].get()
+                if group not in MATERIAL_GROUPS:
+                    group = self._weight_material_group(state['material'].get())
+                    state['material_group'].set(group)
+                if state['material'].get() not in MATERIAL_GROUPS[group]:
+                    state['material'].set(MATERIAL_GROUPS[group][0])
             if key == 'material' and state['material'].get() in MATERIALS:
-                state['density'].set(str(MATERIALS[state['material'].get()]))
+                state['material_group'].set(self._weight_material_group(state['material'].get()))
             if key == 'unit' and state['unit'].get() in UNITS:
                 old, new = w['unit'], state['unit'].get()
                 for field in LINEAR_FIELDS:
@@ -207,6 +255,15 @@ class WeightView:
     def _update_weight_fields(self):
         state, w = self.weight_state, self.weight_widgets
         kind, unit = state['kind'].get(), state['unit'].get()
+        material = state['material'].get()
+        group = state['material_group'].get()
+        configure_changed(w['material_input'],
+            values=[self._weight_material_text(item) for item in MATERIAL_GROUPS.get(group, ())])
+        displayed = self._weight_material_text(material) if material in MATERIALS else 'Malzeme seçin'
+        if w['material_display'].get() != displayed:
+            w['material_display'].set(displayed)
+        configure_changed(w['density_label'],
+            text=f'{_fmt(MATERIALS[material], 0)} kg/m³' if material in MATERIALS else '—')
         geometry = state['method'].get() == 'Ölçülerden'
         for frame in w['dim_frames'].values():
             frame.grid_remove()
@@ -228,13 +285,14 @@ class WeightView:
         state, w = self.weight_state, self.weight_widgets
         self._update_weight_fields()
         try:
-            self.weight_result = r = calculate(**{key: value.get() for key, value in state.items()})
+            self.weight_result = r = calculate(**{key: value.get() for key, value in state.items()
+                                                  if key != 'material_group'})
         except ValueError as error:
             self.weight_result = None
             configure_changed(w['result_title'], text='DEĞERLERİ KONTROL EDİN')
             configure_changed(w['total'], text='—')
             configure_changed(w['context'], text=str(error))
-            configure_changed(w['note'], text='Geçerli ölçü, adet ve yoğunluk girildiğinde sonuç burada görünür.', text_color=AMBER)
+            configure_changed(w['note'], text='Geçerli ölçü, adet ve malzeme seçildiğinde sonuç burada görünür.', text_color=AMBER)
             for key in ('each', 'per_m', 'area', 'volume'):
                 configure_changed(w[key], text='—')
         else:
@@ -248,6 +306,9 @@ class WeightView:
                     if r.approximate else 'Kesit alanı × boy × yoğunluk × adet ile hesaplandı.')
             if r.method == 'Katalog alanından':
                 note = 'Girdiğiniz katalog kesit alanı kullanıldı. Görsel kesit şematiktir.'
+            material_note = MATERIAL_NOTES.get(r.material)
+            if material_note:
+                note += '\n'+material_note
             configure_changed(w['note'], text=note, text_color=MUTED)
         configure_changed(w['copy'], state='normal' if self.weight_result else 'disabled')
         self._draw_weight_diagram()
@@ -289,7 +350,7 @@ class WeightView:
         for key in ('context', 'note'):
             configure_changed(w[key], wraplength=max(200, w['details'].winfo_width()/scale-40))
         configure_changed(w['unit_hint'], wraplength=max(190, w['form'].winfo_width()/scale-40))
-        height = round(300*scale)
+        height = round(250*scale)
         if int(w['canvas'].cget('height')) != height:
             w['canvas'].configure(height=height)
         self._draw_weight_diagram()
@@ -308,6 +369,8 @@ class WeightView:
                   f'Toplam hacim: {_fmt(r.total_volume_m3, 6)} m³\n'
                   f'Toplam ağırlık: {_fmt(r.total_mass_kg)} kg\n'
                   f'{self.weight_widgets["note"].cget("text")}')
+        if source := MATERIAL_SOURCES.get(r.material):
+            report += f'\nYoğunluk kaynağı: {source}'
         self.clipboard_clear()
         self.clipboard_append(report)
         configure_changed(self.status_label, text='Ağırlık hesabı panoya kopyalandı.', text_color=ACCENT)

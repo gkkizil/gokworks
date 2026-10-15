@@ -42,16 +42,48 @@ class WeightTests(unittest.TestCase):
                 self.assertAlmostEqual(result.area_mm2, area)
                 self.assertAlmostEqual(result.mass_kg, area * .00785)
 
-    def test_material_and_custom_density_change_mass_without_changing_geometry(self):
+    def test_material_preset_density_changes_mass_without_changing_geometry(self):
         for material, expected in (('Demir / Çelik', 7.85), ('Alüminyum', 2.7),
                                    ('Delrin (POM-H)', 1.42), ('Kestamit (PA6G)', 1.15)):
             with self.subTest(material=material):
                 result = rules.calculate(material=material, b=100, t=10, count=2)
                 self.assertAlmostEqual(result.mass_kg, expected)
                 self.assertAlmostEqual(result.total_mass_kg, 2 * expected)
-        result = rules.calculate(material='Özel malzeme', density='2000', b=100, t=10)
-        self.assertEqual(result.mass_kg, 2)
-        self.assertEqual(result.density, 2000)
+        result = rules.calculate(material='Pirinç', b=100, t=10)
+        self.assertEqual(result.material, 'Pirinç C23000')
+        self.assertAlmostEqual(result.mass_kg, 8.75)
+        self.assertEqual(rules.calculate(material='Bronz').material, 'Fosfor bronz C51000')
+
+    def test_density_cannot_override_selected_material(self):
+        for material, value in (('Demir / Çelik', 7000), ('Alüminyum', 7850),
+                                ('PP', 910), ('304', 7900), ('Demir / Çelik', '7850,1')):
+            with self.subTest(material=material, value=value), self.assertRaisesRegex(ValueError, 'Yoğunluk.*değiştirilemez'):
+                rules.calculate(material=material, density=value)
+        self.assertEqual(rules.calculate(density='7850,0').density, 7850)
+        with self.assertRaises(ValueError):
+            rules.calculate(material='Özel malzeme', density=7850)
+
+    def test_material_groups_and_sources_cover_each_selectable_material_once(self):
+        names = [name for members in rules.MATERIAL_GROUPS.values() for name in members]
+        self.assertEqual(len(names), len(set(names)))
+        self.assertEqual(set(names), set(rules.MATERIALS))
+        self.assertEqual(set(names), set(rules.MATERIAL_NOTES))
+        self.assertEqual(set(names), set(rules.MATERIAL_SOURCES))
+        self.assertNotIn('Özel malzeme', names)
+        for name in names:
+            self.assertGreater(rules.MATERIALS[name], 0)
+            self.assertTrue(math.isfinite(rules.MATERIALS[name]))
+            self.assertTrue(rules.MATERIAL_NOTES[name])
+            self.assertTrue(rules.MATERIAL_SOURCES[name].startswith('https://'))
+
+    def test_nominal_steel_and_stainless_plate_weights(self):
+        for material in (*rules.MATERIAL_GROUPS['Sac / Yapı'], *rules.MATERIAL_GROUPS['Makine / Takım']):
+            with self.subTest(material=material):
+                result = rules.calculate(material=material, b=1000, t=10, length=2000)
+                self.assertAlmostEqual(result.mass_kg, 157)
+        for material, expected in (('304', 158.32), ('316', 160), ('316L', 160)):
+            with self.subTest(material=material):
+                self.assertAlmostEqual(rules.calculate(material=material, b=1000, t=10, length=2000).mass_kg, expected)
 
     def test_catalog_area_is_cm2_and_ignores_all_geometry_fields(self):
         result = rules.calculate(kind='IPE', method='Katalog alanından', area_cm2='12,34',

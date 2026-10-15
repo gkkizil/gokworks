@@ -13,12 +13,19 @@ kullanıcının referans görselindeki 19 tür bulunur. Boyutlar kesite göre de
 H/I/U aile adları otomatik standart profil boyutu veya katalog ağırlığı seçmez;
 girilen ölçüler esas alınır.
 
-Demir/çelik, paslanmaz çelik, alüminyum, bakır, pirinç, bronz, çinko, kurşun,
-titanyum, Delrin (POM-H), Kestamit (PA6G), PA6, PE-HD, PP, PTFE, PVC ve özel
-malzeme seçenekleri vardır. Yoğunluk **kg/m³** olarak düzenlenebilir.
-Hazır değerler genel malzeme değerleridir; alaşım, üretici, nem ve sıcaklık
-farkları için kendi ürününüzün yoğunluğunu girin. Malzeme seçimi o malzemenin
-başlangıç yoğunluğunu getirir.
+**35 kayıtlı malzeme** Genel, Sac / Yapı, Makine / Takım, Paslanmaz ve
+Plastikler gruplarında sunulur. Yaygın S235JR/S275JR/S355JR/S355J2, DC01–DC04
+DKP, DX51D+Z/DX52D+Z galvaniz, S355MC, P265GH, C45, C45E, 42CrMo4, 16MnCr5,
+34CrNiMo6 ve 304/316/316L seçenekleri bulunur. Delrin ve Kestamit korunur.
+[Tam yoğunluk tablosu ve kaynak bağlantıları](materials.md).
+
+Yoğunluk **sabittir**: menüde g/cm³, yanında kg/m³ olarak gösterilir ve seçilen
+malzemeden otomatik alınır. Yoğunluk giriş alanı, özel malzeme ve elle
+değiştirme seçeneği yoktur. Eski `weight_density` tercihi okunmaz ve bir
+sonraki kayıt sırasında silinir. Hesap API'si de farklı yoğunluk atamasını reddeder.
+Kayıtlı değerler kaynaklardaki nominal ağırlık hesabı değerleridir; mekanik
+dayanım veya malzeme sertifikası yerine geçmez. Aynı yoğunluğu paylaşan
+çelik kalitelerinin ağırlığı aynı çıkabilir; dayanım özellikleri aynı değildir.
 
 ## Kullanım
 
@@ -27,10 +34,13 @@ başlangıç yoğunluğunu getirir.
 3. Adedi girin. Adet başına kg, kg/m, hacim, kesit alanı ve toplam kg canlı güncellenir.
 4. **Hesabı kopyala** girdileri, birimleri, yöntemi ve sonuçları panoya alır.
 
-mm/cm/m değişimi mevcut ölçüleri dönüştürerek fiziksel sonucu korur. Yoğunluk,
-adet ve katalog alanı bu dönüşüme dahil değildir. Katalog alanı her zaman cm²,
-yoğunluk her zaman kg/m³ cinsindendir. Seçimler sayfa değişiminde ve yeniden
+mm/cm/m değişimi mevcut ölçüleri dönüştürerek fiziksel sonucu korur. Adet ve
+katalog alanı bu dönüşüme dahil değildir. Katalog alanı her zaman cm²,
+yoğunluk her zaman seçilen malzemenin kayıtlı değeridir. Seçimler sayfa değişiminde ve yeniden
 açılışta korunur. Geçersiz girişte önceki sonuç kaldırılır.
+
+Kesit görünümü düz, hafif dolgulu **2D ön kesittir**. Perspektif ve gölgeler
+kaldırılmıştır; temel kesit ölçüleri, kısa kalınlık bilgisi ve boy gösterilir.
 
 ## Hesap yöntemi
 
@@ -62,7 +72,7 @@ girdiler kontrol edilir. İçi boş kesitte iç boyut sıfır veya negatif olama
 geometriyle hesaplanır. Hadde köşe yarıçapı, flanş eğimi ve imalat toleransı
 modellenmez; bu sonuçlar “yaklaşık” olarak belirtilir. **Katalog alanından**
 yönteminde üretici katalog alanı cm² olarak girilir (`A = cm² × 100`). Böylece
-gerçek nominal kesit alanı kullanılır; yoğunluk ve boy yine seçilen değerlerdir.
+gerçek nominal kesit alanı kullanılır; yoğunluk malzemeden, boy girişten alınır.
 Bu moddaki çizim ölçülendirilmiş bir katalog çizimi değil, kesit türü şemasıdır.
 
 Örnek: 1.000 × 2.000 × 10 mm çelik levha, 7.850 kg/m³ yoğunlukla **157 kg**;
@@ -88,8 +98,13 @@ sürümündeki `Metal/Aluminum/Aluminum-Generic.FCMat` ve
 `Metal/Copper/Copper-Generic.FCMat` kartlarıyla karşılaştırıldı. Genel çelik
 **7.850 kg/m³** için [section-properties örneği](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst)
 `7,85 × 10⁻⁶ kg/mm³` değerini kullanır. Bu değer saf demirin yoğunluğu değildir.
-Diğer hazır yoğunluklar genel başlangıç değerleridir; ürün sertifikasının
-yerine geçmez. Kesit alanının köşe/eğimlerden etkilenmesi
+Diğer sabit kayıtlar ve nominal kaynakları [yoğunluk tablosundadır](materials.md).
+304 için MMPDS referansı taşıyan GitHub kartı 7.916 kg/m³, 316/316L kartları
+8.000 kg/m³ kullanır; özgün MMPDS/MatWeb/AZoM yayınlarının bu oturumda ayrıca
+okunduğu iddia edilmez. PP 916, PTFE 2.070 ve PVC 1.380 kg/m³ olarak kaynak
+kartlarına göre güncellendi. Kaynağı bu ortamda doğrulanamayan eski PE-HD
+seçeneği çıkarıldı; başka bir polietilen türüne eşlenmedi.
+Kesit alanının köşe/eğimlerden etkilenmesi
 [I profil geometri örneğinde](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/src/sectionproperties/pre/library/steel_sections.py)
 ayrıca incelendi. Bu projelerden kod veya katalog tablosu aktarılmadı.
 
@@ -97,10 +112,17 @@ ayrıca incelendi. Bu projelerden kod veya katalog tablosu aktarılmadı.
 
 ## Doğrulama ve ekranlar
 
-15 Ekim 2026: **14 ilgili kontrol geçti** — 10 hesap, 3 gerçek Tk arayüz ve
-1 tüm sayfaları kapsayan ön yükleme/menü kontrolü. 19 kesit, malzeme/özel
-yoğunluk, adet, mm/cm/m, katalog alanı, geçersiz girişler, tercihler, açık/koyu
-tema, küçük pencere ve %125 ölçek kontrol edildi. Windows/SolidWorks veya
+Sabit katalog ve sade çizim revizyonunda **18 ilgili kontrol geçti**:
+13 hesap, 4 gerçek Tk ve 1 menü ön yükleme kontrolü. Malzeme grupları,
+gerçek menü seçimi, eski yoğunluk tercihlerinin etkisiz olması, backend'de
+yoğunluk değiştirme girişiminin reddi ve galvaniz kaplama açıklaması kontrol edildi.
+
+Galvanizli DX51D+Z / DX52D+Z hesapları **çelik taban** içindir;
+çinko kaplamasının ilave kütlesi hesaplanmaz ve sonuçta açıkça belirtilir.
+
+15 Ekim 2026: 19 kesit, malzeme seçimi, sabit yoğunluk, adet, mm/cm/m,
+katalog alanı, geçersiz girişler, tercihler, açık/koyu tema, küçük pencere ve
+%125 ölçek kontrol edildi. Windows/SolidWorks veya
 EXE derlemesi çalıştırılmadı.
 
 [Çelik kutu profil, koyu tema](examples/weight-steel-dark.png) ·
