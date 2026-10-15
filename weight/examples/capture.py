@@ -23,6 +23,8 @@ def main():
             b='200', t='40', length='300', count='1')),
         ('Koyu', 'weight-2344-dark', dict(kind='Sac levha', material='1.2344',
             b='200', t='40', length='300', count='1')),
+        ('Koyu', 'weight-catalogue-dark', dict(kind='IPE', material='S235JR',
+            method='Katalog alanından', area_cm2='10', unit='mm', length='1000', count='1')),
     )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('screens', nargs='*', help='Capture only these screen names.')
