@@ -40,6 +40,13 @@ MATERIALS = {
 
 MATERIAL_ALIASES = {'Pirinç': 'Pirinç C23000', 'Bronz': 'Fosfor bronz C51000'}
 
+MATERIAL_TYPES = {
+    '1.2311': 'Plastik kalıp çeliği',
+    '1.2312': 'Plastik kalıp çeliği',
+    '1.2344': 'Sıcak iş takım çeliği',
+    '1.2379': 'Soğuk iş takım çeliği',
+}
+
 _STEEL_NOTE = 'Nominal çelik ağırlığı 7.850 kg/m³ ile hesaplanır; mekanik özellik hesabı yapılmaz.'
 MATERIAL_NOTES = {
     'Demir / Çelik': 'Genel çelik için nominal ağırlık değeri; belirli bir kaliteyi temsil etmez.',

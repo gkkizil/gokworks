@@ -48,12 +48,12 @@ dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
 
 ## Kalıp Çelikleri
 
-| Malzeme | kg/m³ | g/cm³ | Referans |
-| --- | ---: | ---: | --- |
-| 1.2311 | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
-| 1.2312 | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
-| 1.2344 | 7800 | 7,8 | [Kayıt](https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json) |
-| 1.2379 | 7700 | 7,7 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| Malzeme | Tür | kg/m³ | g/cm³ | Referans |
+| --- | --- | ---: | ---: | --- |
+| 1.2311 | Plastik kalıp çeliği | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| 1.2312 | Plastik kalıp çeliği | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| 1.2344 | Sıcak iş takım çeliği | 7800 | 7,8 | [Kayıt](https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json) |
+| 1.2379 | Soğuk iş takım çeliği | 7700 | 7,7 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
 
 ## Paslanmaz
 

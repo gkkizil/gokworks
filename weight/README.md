@@ -20,6 +20,9 @@ DKP, DX51D+Z/DX52D+Z galvaniz, S355MC, P265GH, C45, C45E, 42CrMo4, 16MnCr5,
 Kalıp Çelikleri grubunda 1.2379 soğuk iş, 1.2344 sıcak iş ve 1.2311/1.2312
 plastik kalıp çelikleri bulunur;
 genel çelik yoğunluğu yerine her kalitenin kaynaklı yoğunluğu kullanılır.
+Kalite adlarının yanında türleri de yazılır: **1.2344 · Sıcak iş takım çeliği**,
+**1.2379 · Soğuk iş takım çeliği**, **1.2311 / 1.2312 · Plastik kalıp çeliği**.
+Tür bilgisi seçim menüsünde, sonuç kartında ve kopyalanan raporda görünür.
 [Tam yoğunluk tablosu ve kaynak bağlantıları](materials.md).
 
 Yoğunluk **sabittir**: menüde g/cm³, yanında kg/m³ olarak gösterilir ve seçilen

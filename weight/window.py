@@ -9,6 +9,7 @@ from gui.rendering import configure_changed
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        AMBER, RED, HOVER, UI_FONT)
 from weight.diagram import draw, draw_icon
+from weight.materials import MATERIAL_TYPES
 from weight.rules import (KINDS, MATERIALS, UNITS, METHODS, FIELDS, FIELD_LABELS,
                           MATERIAL_GROUPS, MATERIAL_NOTES, MATERIAL_SOURCES, MATERIAL_ALIASES,
                           DEFAULT_DIMENSIONS, calculate)
@@ -61,9 +62,14 @@ class WeightView:
                     next(iter(MATERIAL_GROUPS)))
 
     @staticmethod
-    def _weight_material_text(material):
+    def _weight_material_name(material):
+        description = MATERIAL_TYPES.get(material)
+        return f'{material} · {description}' if description else material
+
+    @classmethod
+    def _weight_material_text(cls, material):
         density = f'{MATERIALS[material]/1000:g}'.replace('.', ',')
-        return f'{material} · {density} g/cm³'
+        return f'{cls._weight_material_name(material)} · {density} g/cm³'
 
     def _select_weight_material(self, displayed):
         group = self.weight_state['material_group'].get()
@@ -159,15 +165,13 @@ class WeightView:
             unselected_color=INPUT, unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 11))
         method.grid(row=1, column=0, columnspan=2, sticky='ew', padx=8)
         w['method_input'] = method
-        self._weight_input(form, 'material', 'Malzeme', 2, 0,
+        material_frame = self._weight_input(form, 'material', 'Malzeme', 2, 0,
             [self._weight_material_text(item) for item in MATERIAL_GROUPS[self.weight_state['material_group'].get()]])
-        density_frame = ctk.CTkFrame(form, fg_color='transparent')
-        density_frame.grid(row=2, column=1, sticky='ew', padx=8, pady=(8, 0))
-        density_frame.grid_columnconfigure(0, weight=1)
-        self._label(density_frame, 'Sabit yoğunluk', 11, MUTED, anchor='w').grid(
-            row=0, column=0, sticky='ew', pady=(0, 4))
-        w['density_label'] = self._label(density_frame, '', 14, TEXT, bold=True, anchor='w', height=34)
-        w['density_label'].grid(row=1, column=0, sticky='ew')
+        material_frame.grid_configure(columnspan=2)
+        w['material_input'].grid_configure(columnspan=2)
+        w['material_label'].grid_configure(sticky='w')
+        w['density_label'] = self._label(material_frame, '', 11, MUTED, anchor='e')
+        w['density_label'].grid(row=0, column=1, sticky='e', pady=(0, 4))
         self._weight_input(form, 'unit', 'Ölçü birimi', 3, 0, UNITS)
         self._weight_input(form, 'count', 'Adet', 3, 1)
         self._weight_input(form, 'length', 'Boy / uzunluk (mm)', 4, 0)
@@ -263,7 +267,7 @@ class WeightView:
         if w['material_display'].get() != displayed:
             w['material_display'].set(displayed)
         configure_changed(w['density_label'],
-            text=f'{_fmt(MATERIALS[material], 0)} kg/m³' if material in MATERIALS else '—')
+            text=f'Sabit yoğunluk: {_fmt(MATERIALS[material], 0)} kg/m³' if material in MATERIALS else '—')
         geometry = state['method'].get() == 'Ölçülerden'
         for frame in w['dim_frames'].values():
             frame.grid_remove()
@@ -298,7 +302,7 @@ class WeightView:
         else:
             configure_changed(w['result_title'], text='YAKLAŞIK TOPLAM AĞIRLIK' if r.approximate else 'TOPLAM AĞIRLIK')
             configure_changed(w['total'], text=f'{_fmt(r.total_mass_kg, 3 if r.total_mass_kg >= .001 else 6)} kg')
-            configure_changed(w['context'], text=f'{r.count} adet · {r.material}\nYoğunluk: {_fmt(r.density, 0)} kg/m³')
+            configure_changed(w['context'], text=f'{r.count} adet · {self._weight_material_name(r.material)}\nYoğunluk: {_fmt(r.density, 0)} kg/m³')
             for key, text in dict(each=f'{_fmt(r.mass_kg)} kg', per_m=f'{_fmt(r.kg_per_m)} kg/m',
                                   area=f'{_fmt(r.area_mm2/100)} cm²', volume=f'{_fmt(r.total_volume_m3, 6)} m³').items():
                 configure_changed(w[key], text=text)
@@ -362,7 +366,7 @@ class WeightView:
         dimensions = ' · '.join(f'{FIELD_LABELS.get(key, key)}: {_fmt(value)} mm'
                                 for key, value in r.dimensions_mm.items() if key != 'length')
         report = (f'Ağırlık hesabı · {r.kind}\nYöntem: {r.method}\n'
-                  f'Malzeme: {r.material} · Yoğunluk: {_fmt(r.density)} kg/m³\n'
+                  f'Malzeme: {self._weight_material_name(r.material)} · Yoğunluk: {_fmt(r.density)} kg/m³\n'
                   f'{dimensions}\nBoy: {_fmt(r.length_mm)} mm · Adet: {r.count}\n'
                   f'Kesit alanı: {_fmt(r.area_mm2/100)} cm²\n'
                   f'Birim boy: {_fmt(r.kg_per_m)} kg/m · Bir adet: {_fmt(r.mass_kg)} kg\n'
