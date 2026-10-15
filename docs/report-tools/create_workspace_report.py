@@ -74,7 +74,7 @@ def main():
         doc.add_picture(str(FOLDER/'screenshots'/f'{name}.png'), width=Cm(17))
         doc.add_paragraph('Gerçek 1240×860 Tk penceresi; SolidWorks verisi veya gerçek CAD başarı sonucu gösterilmez.')
     doc.add_page_break(); doc.add_heading('Yerel SolidWorks 2025 kabul kontrolü', 1)
-    doc.add_paragraph('GitHub dalı codex/dxf-dwg-gui-report. Git ile açılan projede doğru dalda Pull; ZIP ile açılan projede güncel ZIP ayrı klasöre açılmalı. Aynı PyCharm yorumlayıcısına requirements.txt kurulur; main.py çalıştırılır.')
+    doc.add_paragraph('GitHub dalı main. Git ile açılan projede main dalında Pull; ZIP ile açılan projede güncel ZIP ayrı klasöre açılmalı. Aynı PyCharm yorumlayıcısına requirements.txt kurulur; main.py çalıştırılır.')
     doc.add_paragraph('Aktif montajda 2 mm / K=0,274 / R=2 mm ile tara → uygula. İlk kontrol dosya kaydı kapalıyken yapılır. SheetMetal unsurunun doğru konfigürasyonunda K, R, kalınlık ve büküm payı türü kontrol edilir. Başarısızsa yeni aşama/API üyesini içeren tam günlük/CSV gerekir.')
     doc.add_paragraph('Kanıtlar: docs/reports/kr-workspace-fix/README.md, test-run.log, gui-verification-results.json, coverage.json, dispatch-reproduction.json, iso-matching-reproduction.json, iso-source-comparison.json, screenshots.json. Yerel adımlar: docs/local-solidworks-check.md.')
     path = FOLDER/'GOKWORKS_KR_ISO_GUI_Kontrol_2026-10-10.docx'

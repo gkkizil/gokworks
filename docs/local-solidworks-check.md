@@ -5,7 +5,7 @@ bildirilen K/R atama hatasının gerçek montajda giderildiğini doğrulamak iç
 
 ## Doğru sürümü açma
 
-GitHub dalı: `codex/dxf-dwg-gui-report`. PyCharm'da Git ile açtıysanız bu dala
+GitHub dalı: `main`. PyCharm'da Git ile açtıysanız bu dala
 geçip **Git → Pull** kullanın. ZIP ile açtıysanız aynı dalın güncel ZIP'ini
 yeniden indirin; eski klasörü saklayıp yeni klasörü ayrı proje olarak açın.
 ZIP klasöründe `git pull` kullanılamaz.

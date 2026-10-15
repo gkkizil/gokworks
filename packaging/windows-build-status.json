@@ -1,0 +1,27 @@
+{
+  "commit": "454f0b95c7362d4924eec6a1f26a845ddfba0b8a",
+  "status": "success",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38779250641",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38779250641/artifacts/11995132039",
+  "bytes": 42229811,
+  "sha256": "adcead24f0c99181a42bf742cfe2d8c7e6fe5db8d2aa60012bbf6e182eb3e58c",
+  "smoke": {
+    "status": "passed",
+    "platform": "win32",
+    "frozen": true,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "bom",
+      "bolt",
+      "naming",
+      "weight"
+    ],
+    "tk": "8.6.15",
+    "solidworks_connection_tested": false
+  },
+  "source_commit": "1d09270761c6626736d587ef96889f1da7563f98"
+}
