@@ -8,6 +8,11 @@
 
 ## EXE ile kullanım
 
+**İndirme incelemede:** Chrome bu paketi tehlikeli indirme olarak
+işaretledi. Özgün paketin SHA256, yayıncı imzası ve Windows Defender
+kontrolü için ayrı bir inceleme başlatıldı. Önceki açılış/COM kontrolleri
+antivirüs taraması değildir; henüz Chrome uyarısının nedeni doğrulanmadı.
+
 Windows paketini tamamen çıkartıp `GOKWORKS-KR-Deneme.exe` dosyasını açın.
 Yanındaki `GOKWORKS.KR.Native.exe` aynı klasörde kalmalıdır. Python, .NET,
 SDK veya terminal kurulumu/kullanımı gerekmez. SolidWorks kurulu ve açık

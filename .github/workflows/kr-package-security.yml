@@ -1,0 +1,53 @@
+name: Check original K-R Windows package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - k_factor/standalone/windows-security-request.json
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the exact original artifact request
+        id: request
+        shell: pwsh
+        run: |
+          $request = Get-Content k_factor/standalone/windows-security-request.json -Raw | ConvertFrom-Json
+          "artifact_id=$($request.artifact_id)" >> $env:GITHUB_OUTPUT
+          "run_id=$($request.run_id)" >> $env:GITHUB_OUTPUT
+      - name: Download original bytes without executing the package
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.request.outputs.artifact_id }}
+          run-id: ${{ steps.request.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: build/original-kr-package
+          merge-multiple: true
+      - name: Check signatures and scan the exact artifact
+        shell: pwsh
+        run: |
+          ./k_factor/standalone/security/scan-package.ps1 -PackagePath build/original-kr-package -RequestPath k_factor/standalone/windows-security-request.json -ReportPath kr-security.json *> kr-security-job.log
+      - name: Preserve audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KR-original-package-security-${{ github.sha }}
+          path: |
+            kr-security.json
+            kr-security.scan.log
+            kr-security-job.log
+          if-no-files-found: ignore
+      - name: Record exact-package security result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: python packaging/publish_kr_security.py

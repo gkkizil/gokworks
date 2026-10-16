@@ -1,0 +1,12 @@
+{
+  "request_id": "57c2ecfe-ba7e-47fc-8505-78ec9b189bf1",
+  "requested_at": "2026-10-16T12:33:11.844074+00:00",
+  "artifact_id": 12045127794,
+  "run_id": 38899468539,
+  "source_commit": "8a2d8990a7ea808d3b5f155b2f6ad36769134ec6",
+  "reason": "Chrome reported dangerous download. Inspect original artifact bytes without executing them; Authenticode and real Defender custom scan.",
+  "expected_executables": {
+    "GOKWORKS-KR-Deneme.exe": "3df34390b3e298d2564b7afff81859987c3afcf2460073e20b4b094d50e6322c",
+    "GOKWORKS.KR.Native.exe": "080938909e92c8242036f20a16aa345a5b172527b4f316d77f087e2a36c4c94a"
+  }
+}
