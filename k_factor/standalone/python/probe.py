@@ -139,6 +139,8 @@ class EarlyBound:
 def connect(trace):
     if sys.platform != "win32":
         raise ProbeError("Native SolidWorks checks require Windows and a running SolidWorks instance")
+    from k_factor.standalone.runtime import prepare_generated_cache
+    trace.call("PrepareWritableGeneratedCache", prepare_generated_cache)
     import pythoncom
     import win32com.client as client
 

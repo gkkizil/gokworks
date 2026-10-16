@@ -13,12 +13,14 @@
     <Reference Include="SolidWorks.Interop.sldworks">
       <HintPath>$(SolidWorksInteropDir)/SolidWorks.Interop.sldworks.dll</HintPath>
       <EmbedInteropTypes>false</EmbedInteropTypes>
-      <Private>true</Private>
+      <Private Condition="'$(ExternalSolidWorksInterop)' != 'true'">true</Private>
+      <Private Condition="'$(ExternalSolidWorksInterop)' == 'true'">false</Private>
     </Reference>
     <Reference Include="SolidWorks.Interop.swconst">
       <HintPath>$(SolidWorksInteropDir)/SolidWorks.Interop.swconst.dll</HintPath>
       <EmbedInteropTypes>false</EmbedInteropTypes>
-      <Private>true</Private>
+      <Private Condition="'$(ExternalSolidWorksInterop)' != 'true'">true</Private>
+      <Private Condition="'$(ExternalSolidWorksInterop)' == 'true'">false</Private>
     </Reference>
   </ItemGroup>
   <Target Name="CheckSolidWorksInterop" BeforeTargets="ResolveReferences">

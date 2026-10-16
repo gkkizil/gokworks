@@ -9,6 +9,7 @@ internal static class Program
     private static int Main(string[] args)
     {
         Console.OutputEncoding = new UTF8Encoding(false);
+        InstalledInterop.Register();
         var report = new Report();
         string? reportPath = null;
         try

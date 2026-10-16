@@ -1,0 +1,5 @@
+{
+  "request_id": "a6a934e7-7bd3-4f6d-88f4-c92e1b1725fe",
+  "requested_at": "2026-10-16T12:13:19.075383+00:00",
+  "reason": "User-requested standalone K/R desktop EXE with bundled Python and self-contained C# runtime; inspect and restore-after-verification comparison, no main application EXE."
+}

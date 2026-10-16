@@ -1,5 +1,30 @@
 # Bağımsız K/R denemesi: C# → Python
 
+<!-- kr-windows-release:start -->
+Windows'ta çift tıklamayla açılan bağımsız paket hazırlanıyor.
+<!-- kr-windows-release:end -->
+
+## EXE ile kullanım
+
+Windows paketini tamamen çıkartıp `GOKWORKS-KR-Deneme.exe` dosyasını açın.
+Yanındaki `GOKWORKS.KR.Native.exe` aynı klasörde kalmalıdır. Python, .NET,
+SDK veya terminal kurulumu/kullanımı gerekmez. SolidWorks kurulu ve açık
+olmalıdır; API arayüzleri kurulu SolidWorks'ün `api\redist` klasöründen alınır.
+
+Bir sac parçasını kendi penceresinde etkinleştirip **Parçayı oku** düğmesine
+basın. Ardından farklı bir K veya R girip **K/R yazma denemesi** düğmesine
+basın. Araç önce C#, sonra Python ile yazmayı dener, değerleri geri okur ve
+eski değerleri geri yükleyip doğrular. Dosyalar otomatik kaydedilmez.
+İlk denemeyi bir kopyada yapın. İşlem bitene kadar SolidWorks'te belge veya
+konfigürasyon değiştirmeyin. **Rapor klasörü** düğmesi sonuçları açar.
+
+Raporlar ve oluşturulan Python COM arayüzleri kullanıcıya özel
+`%LOCALAPPDATA%\GOKWORKS\KR-Deneme` klasöründedir. Geri alma hatası
+görünürse parçayı kaydetmeyin. Ana GOKWORKS uygulamasının K/R menüsü bu
+ayrı denemeden bağımsızdır.
+
+## Kaynak kodu
+
 Bu klasör, mevcut GOKWORKS K/R işçisinden bağımsız iki uygulama içerir.
 C# sürümü SolidWorks'ün tipli .NET arayüzlerini, Python sürümü kurulu
 SolidWorks'ün tür kitaplığından üretilen MakePy arayüzlerini kullanır.
@@ -12,13 +37,13 @@ bağlantısından kaynaklanan hataları model/unsur davranışından ayırmaktı
 Bu bulutta Windows/SolidWorks yoktur; derleme ve taklit nesne kontrolleri
 gerçek dosyada çalıştığının kanıtı değildir.
 
-## İlk gerçek deneme
+## Kaynak kodundan ilk gerçek deneme
 
 Windows'ta SolidWorks açık olsun. Denenecek `.SLDPRT` dosyasını **ayrı bir
 parça penceresinde etkinleştirin**. İlk denemede dosyanın bir kopyasını
 kullanın. Montaj penceresi bu deneme için kabul edilmez.
 
-Gerekenler: .NET 8 SDK, Python 3 ve `pywin32==312`; SolidWorks ile terminal
+Kaynak kodundan çalıştırmak için: .NET 8 SDK, Python 3 ve `pywin32==312`; SolidWorks ile terminal
 aynı Windows kullanıcısında ve aynı yetki düzeyinde çalışmalıdır.
 SolidWorks API arayüz DLL'leri kurulumun `api\redist` klasöründen alınır;
 bu depoda DLL dağıtılmaz.
