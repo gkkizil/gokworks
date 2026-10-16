@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-10-16T11:52:01.985721+03:00",
+  "source_parent_commit": "fc1125bcbc989c50bf403977a831627caf93da02",
+  "native_solidworks_tested": false,
+  "windows_launcher_executed": false,
+  "production_worker_changed": false,
+  "application_exe_built": false,
+  "csharp": {
+    "sdk": "8.0.426",
+    "target": "net8.0-windows",
+    "build": "passed",
+    "warnings": 0,
+    "errors": 0,
+    "pure_contract_checks_passed": 18,
+    "interop_source": "https://github.com/angelsix/solidworks-api/tree/85a773aedc87b49afda3a65c8bb650f5ba771092/References/2023"
+  },
+  "python": {
+    "transaction_and_binding_tests_passed": 23,
+    "native_com_doubles": true
+  },
+  "comparison": {
+    "acceptance_tests_passed": 7,
+    "native_report_comparison": "not_run"
+  },
+  "negative_cli_check": {
+    "csharp": "Linux native run refused with JSON report and exit2",
+    "python": "Linux native run refused with JSON report and exit2"
+  },
+  "commands": [
+    "dotnet build k_factor/standalone/csharp/Gokworks.KrProbe.csproj -c Release -p:SolidWorksInteropDir=<verified-local-references> -p:UseAppHost=false",
+    "dotnet k_factor/standalone/csharp/bin/Release/net8.0-windows/Gokworks.KrProbe.dll --self-test",
+    "python -m unittest k_factor.standalone.python.test_probe k_factor.standalone.test_compare_reports -v"
+  ],
+  "source_sha256": {
+    "__init__.py": "62ffad79c2e738a167582e28b62428152520ba359bfd6cb2440a7c32d0492867",
+    "compare_reports.py": "6878ee0b62742954079b3e57778faf0a4a88217e2aed3c74593a3779b67356f8",
+    "csharp/Contract.cs": "3bcea0a80764031f1bc2180c16dee3d3e105963d5bdd14145ab1dc0baeebe54b",
+    "csharp/Gokworks.KrProbe.csproj": "0340d8b1c7c688317a50f086487360aed3b1dae40a46a59779e23c77a77d0763",
+    "csharp/Program.cs": "9c0001838f7c56baa173507a7bb58847652899063195a004b13a9985577ae49f",
+    "csharp/SolidWorksEngine.cs": "ceede0a9ff6287cff6f6fa93422dad41b96cbec93643fb775633918c12de6ff5",
+    "python/__init__.py": "bf70474c949ef40aefdd7d1ccf4dad9599be41241df39dd4ebad4b724d5629d5",
+    "python/__main__.py": "602770d5ff286d3df42bf655cd34153e7aaa6b502ae565879293128a54e3a16b",
+    "python/probe.py": "4f493f10a735a82ffea4070f72a4291807fa422e8e6abb0e6189b546747dc3d6",
+    "python/test_probe.py": "521be7684add70042d13146d2c079ba3b582c79a7b14cf56d69cecb668134510",
+    "run-check.ps1": "d6e7865481b6a1872524ea946f8ec8d40b7f6c2633ff6e8c1521150969e31ed7",
+    "test_compare_reports.py": "2cd2935a9940009588f9faa447a9f027621fe7014fcbbec1b0b3e6b019dc6a08"
+  }
+}

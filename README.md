@@ -100,6 +100,11 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 ## K faktörü / yarıçap
 
+Yeni [bağımsız C# → Python K/R denemesi](k_factor/standalone/README.md), açık
+bir parçada okuma, yazma, geri okuma ve eski değere dönüşü iki ayrı motorla
+karşılaştırır. Mevcut menüden bağımsızdır; gerçek SolidWorks doğrulaması
+henüz tamamlanmamıştır.
+
 K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
 
 **Manuel K / R** sekmesinde her sac kalınlığının yanına K ve R değerlerini girin; **Satır ekle** ile başka kalınlıklar tanımlayın. Örneğin `1,5 mm → K=0,274, R=1,5 mm` ve `2 mm → K=0,30, R=2 mm` aynı işlemde uygulanır. Aktif montaj ve alt montajlardaki gerçek sac kalınlığı okunarak ilgili satır seçilir; **Sac-Levha → Büküm yarıçapı** ve **Büküm izni → K-Faktörü** güncellenir. Sac olmayan ve girilen kalınlıklara uymayan parçalar atlanır. Katıdan dönüştürülen saclar da etkin dönüşüm ve sac unsurlarından bulunur. [Manuel atama kılavuzu](docs/manual-k-radius.md).

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "mode": "verify",
+  "tolerance_mm": 0.01,
+  "assignments": [
+    { "thickness_mm": 1.5, "k_factor": 0.31, "radius_mm": 1.8 },
+    { "thickness_mm": 2.0, "k_factor": 0.31, "radius_mm": 1.8 }
+  ]
+}
