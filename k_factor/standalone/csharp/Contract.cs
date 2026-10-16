@@ -11,7 +11,9 @@ public sealed class Request
     public int SchemaVersion { get; init; }
     public string Mode { get; init; } = "inspect";
     public string? DocumentPath { get; init; }
+    public string? Configuration { get; init; }
     public string? FeatureName { get; init; }
+    public FeatureState? ExpectedState { get; init; }
     public List<Assignment> Assignments { get; init; } = [];
     public double ToleranceMm { get; init; } = 0.01;
 
@@ -25,6 +27,8 @@ public sealed class Request
             throw new ArgumentException("document_path must identify a saved .SLDPRT file.");
         if (FeatureName is not null && string.IsNullOrWhiteSpace(FeatureName))
             throw new ArgumentException("feature_name cannot be empty.");
+        if (Configuration is not null && string.IsNullOrWhiteSpace(Configuration))
+            throw new ArgumentException("configuration cannot be empty.");
         if (Assignments is null) throw new ArgumentException("assignments must be an array.");
         foreach (var row in Assignments)
         {

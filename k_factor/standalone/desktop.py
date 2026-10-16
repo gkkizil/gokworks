@@ -15,6 +15,7 @@ from gui.icons import make_logo, set_window_icon
 from gui.theme import BG, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT, PRIMARY_TEXT, SECONDARY, RED, UI_FONT
 from gui.typography import check_turkish_fonts
 from k_factor.standalone.desktop_controller import native_executable, report_directory, run_pair
+from k_factor.standalone.python.probe import ProbeError, validate_request
 
 
 class KrDesktop(ctk.CTk):
@@ -109,16 +110,20 @@ class KrDesktop(ctk.CTk):
                 assignment = {key: float(value.get().strip().replace(",", ".")) for key, value in self.values.items()}
                 if not all(math.isfinite(value) for value in assignment.values()):
                     raise ValueError("Geçerli bir sayı girin.")
+                if not 0 <= assignment["k_factor"] <= 1:
+                    raise ValueError("K faktörü 0 ile 1 arasında olmalı.")
+                if assignment["radius_mm"] < 0:
+                    raise ValueError("İç yarıçap sıfır veya daha büyük olmalı.")
                 before = self.selected["before"]
                 if (before["bend_allowance_type"] == 2 and abs(assignment["k_factor"] - before["k_factor"]) < 1e-8
                         and abs(assignment["radius_mm"] - before["radius_mm"]) < 1e-6):
                     raise ValueError("Yazmayı sınamak için mevcut değerden farklı bir K veya R girin.")
                 request.update(assignments=[assignment], document_path=self.selected["document_path"],
-                               feature_name=before["feature_name"])
-            from k_factor.standalone.python.probe import validate_request
+                               configuration=self.selected["configuration"], feature_name=before["feature_name"],
+                               expected_state=before)
             validate_request(request)
             self.folder = report_directory()
-        except (ValueError, OSError) as error:
+        except (ProbeError, ValueError, OSError) as error:
             self.status.configure(text=str(error), text_color=RED)
             return
         self.busy = True

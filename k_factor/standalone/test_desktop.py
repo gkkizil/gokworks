@@ -44,8 +44,37 @@ class DesktopFlowTests(unittest.TestCase):
         result = run_pair(self.request, self.folder, native_runner=self.native(report), python_runner=python, backend=self.backend)
         self.assertEqual(result["comparison"]["status"], "verified_match")
         self.assertEqual(python.call_args.args[0]["document_path"], report["document_path"])
+        self.assertEqual(python.call_args.args[0]["configuration"], report["configuration"])
+        self.assertEqual(python.call_args.args[0]["expected_state"], report["before"])
         self.assertEqual(python.call_args.args[0]["feature_name"], "Sac-Levha")
         self.assertTrue((self.folder / "comparison.json").exists())
+
+    def test_configuration_switch_between_engines_stops_before_python_write(self):
+        from k_factor.standalone.python.probe import execute
+        from k_factor.standalone.python.test_probe import FakeBinding, FakeModel
+        model = FakeModel()
+        report = native_report("verify")
+        report.update(document_path=model.path, configuration="Original configuration")
+        model.configuration = "Changed configuration"
+        def python(bound):
+            return execute(bound, lambda trace: (SimpleNamespace(ActiveDoc=model), FakeBinding(), lambda: None))
+        with self.assertRaisesRegex(ComparisonFailure, "configuration"):
+            run_pair(self.request, self.folder, native_runner=self.native(report), python_runner=python, backend=self.backend)
+        self.assertEqual(model.modifications, 0)
+        self.assertEqual(model.selection_accesses, 0)
+
+    def test_parameter_edit_between_engines_stops_before_python_write(self):
+        from k_factor.standalone.python.probe import execute
+        from k_factor.standalone.python.test_probe import FakeBinding, FakeModel
+        model = FakeModel()
+        report = native_report("verify")
+        report["document_path"] = model.path
+        model.state["k"] = 0.42
+        def python(bound):
+            return execute(bound, lambda trace: (SimpleNamespace(ActiveDoc=model), FakeBinding(), lambda: None))
+        with self.assertRaisesRegex(ComparisonFailure, "changed since"):
+            run_pair(self.request, self.folder, native_runner=self.native(report), python_runner=python, backend=self.backend)
+        self.assertEqual(model.modifications, 0)
 
     def test_native_failure_or_unverified_restoration_prevents_python(self):
         for failed in (True, False):
@@ -79,6 +108,40 @@ class DesktopFlowTests(unittest.TestCase):
         result = run_pair(dict(schema_version=1, mode="inspect"), self.folder,
                           native_runner=self.native(report), python_runner=lambda request: dict(report, engine="python"), backend=self.backend)
         self.assertEqual(result["comparison"]["status"], "inspection_match")
+
+
+class DesktopInputTests(unittest.TestCase):
+    def test_verify_request_carries_the_previously_read_configuration_and_values(self):
+        from k_factor.standalone.desktop import KrDesktop
+        selected = native_report("inspect")
+        values = {key: SimpleNamespace(get=lambda value=value: value)
+                  for key, value in (("thickness_mm", "2"), ("k_factor", "0.274"), ("radius_mm", "1.5"))}
+        stub = SimpleNamespace(busy=False, selected=selected, values=values, status=Mock(),
+                               entries=[Mock(), Mock(), Mock()], read_button=Mock(), verify_button=Mock(),
+                               folder_button=Mock(), worker=Mock(), append=Mock())
+        with TemporaryDirectory() as directory, \
+             patch("k_factor.standalone.desktop.report_directory", return_value=Path(directory)), \
+             patch("k_factor.standalone.desktop.threading.Thread") as worker:
+            KrDesktop.start(stub, "verify")
+        request = worker.call_args.kwargs["args"][0]
+        self.assertEqual(request["document_path"], selected["document_path"])
+        self.assertEqual(request["configuration"], selected["configuration"])
+        self.assertEqual(request["expected_state"], selected["before"])
+        worker.return_value.start.assert_called_once()
+
+    def test_invalid_values_show_an_error_without_starting_a_worker(self):
+        from k_factor.standalone.desktop import KrDesktop
+        for thickness, k, radius in (("2", "1.1", "1.5"), ("2", "0.274", "-1"), ("0", "0.274", "1.5")):
+            with self.subTest(thickness=thickness, k=k, radius=radius):
+                values = {key: SimpleNamespace(get=lambda value=value: value)
+                          for key, value in zip(("thickness_mm", "k_factor", "radius_mm"), (thickness, k, radius))}
+                status = Mock()
+                stub = SimpleNamespace(busy=False, selected=native_report("inspect"), values=values, status=status)
+                with patch("k_factor.standalone.desktop.threading.Thread") as worker:
+                    KrDesktop.start(stub, "verify")
+                status.configure.assert_called_once()
+                self.assertTrue(status.configure.call_args.kwargs["text"])
+                worker.assert_not_called()
 
 
 class FrozenCacheTests(unittest.TestCase):

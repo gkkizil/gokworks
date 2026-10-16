@@ -66,6 +66,11 @@ class FakeDimension:
     def GetFeatureOwner(self):
         return self.feature if self.own else self.feature.model.other_feature
 
+    def GetSystemValue3(self, configuration, names):
+        if configuration != 1 or names is not EMPTY_CONFIGURATIONS:
+            raise AssertionError("Dimension read must only target the active configuration")
+        return (self.feature.model.state["radius"],)
+
     def SetSystemValue3(self, value, configuration, names):
         if configuration != 1 or names is not EMPTY_CONFIGURATIONS:
             raise AssertionError("Dimension must only target the active configuration")
@@ -293,6 +298,18 @@ class ProbeTests(unittest.TestCase):
                 self.assertEqual(self.model.modifications, 0)
                 setattr(self.model, control, False)
 
+    def test_disabled_gauge_table_accepts_null_filename_but_enabled_table_still_blocks(self):
+        self.model.gauge_file = None  # NULL BSTR is valid when UseGaugeTable is false.
+        report = self.run_probe()
+        self.assertEqual(report["status"], "verified", report["error"])
+        self.assertTrue(report["rollback"]["verified"])
+        self.assertGreater(self.model.material_reads, 0)
+        writes = self.model.modifications
+        self.model.gauge_used = True
+        report = self.run_probe()
+        self.assertEqual(report["status"], "error")
+        self.assertEqual(self.model.modifications, writes)
+
     def test_restore_non_k_allowance_payload(self):
         for kind, key in ((1, "table"), (3, "allowance"), (4, "deduction")):
             with self.subTest(kind=kind):
@@ -326,6 +343,17 @@ class ProbeTests(unittest.TestCase):
         self.assertEqual(report["radius_method"], "bend_radius_definition")
         self.assertEqual(self.model.dimension_writes, 0)
 
+    def test_root_owned_radial_must_match_bend_radius_before_any_mutation(self):
+        dimension = FakeDimension(self.model.feature, "OtherRadius@Sac-Levha")
+        dimension.GetSystemValue3 = lambda *args: (0.005,)
+        self.model.feature.dimensions = [FakeDisplay(dimension)]
+        report = self.run_probe()
+        self.assertEqual(report["status"], "error")
+        self.assertIn("does not match", report["error"])
+        self.assertEqual(self.model.modifications, 0)
+        self.assertEqual(self.model.dimension_writes, 0)
+        self.assertFalse(report["rollback"]["attempted"])
+
     def test_ambiguous_radial_dimensions_prevent_mutation(self):
         self.model.feature.dimensions = [FakeDisplay(FakeDimension(self.model.feature, name)) for name in ("r1", "r2")]
         report = self.run_probe()
@@ -336,6 +364,22 @@ class ProbeTests(unittest.TestCase):
         report = self.run_probe(document_path=r"C:\other.SLDPRT")
         self.assertEqual(report["status"], "error")
         self.assertEqual(self.model.modifications, 0)
+
+    def test_selected_configuration_change_prevents_mutation(self):
+        report = self.run_probe(configuration="Another configuration")
+        self.assertEqual(report["status"], "error")
+        self.assertIn("configuration", report["error"])
+        self.assertEqual(self.model.modifications, 0)
+        self.assertEqual(self.model.selection_accesses, 0)
+
+    def test_parameters_changed_since_inspect_prevent_mutation(self):
+        snapshot = self.run_probe(mode="inspect")["before"]
+        self.model.state["k"] = 0.42
+        report = self.run_probe(expected_state=snapshot)
+        self.assertEqual(report["status"], "error")
+        self.assertIn("changed since", report["error"])
+        self.assertEqual(self.model.modifications, 0)
+        self.assertEqual(self.model.selection_accesses, 0)
 
     def test_unmatched_thickness_skips(self):
         report = self.run_probe(assignments=[{"thickness_mm": 1.5, "k_factor": 0.274, "radius_mm": 1.5}])

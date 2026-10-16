@@ -27,6 +27,13 @@ eski değerleri geri yükleyip doğrular. Dosyalar otomatik kaydedilmez.
 İlk denemeyi bir kopyada yapın. İşlem bitene kadar SolidWorks'te belge veya
 konfigürasyon değiştirmeyin. **Rapor klasörü** düğmesi sonuçları açar.
 
+Kaynak kod, okunan parça yolunu, konfigürasyonu ve sac parametrelerinin
+başlangıç değerlerini yazma isteğine bağlar. Bunlardan biri değişmişse
+yazmaya başlamadan durur; parçayı yeniden okuyun. Aynı kontrol C# ile
+Python arasındaki geçişte de uygulanır. Kaynak kodla son yayımlanan EXE'nin
+sürümü farklı olabilir; indirme bölümündeki **Kaynak** alanı paketin
+hangi commit'ten üretildiğini gösterir.
+
 Raporlar ve oluşturulan Python COM arayüzleri kullanıcıya özel
 `%LOCALAPPDATA%\GOKWORKS\KR-Deneme` klasöründedir. Geri alma hatası
 görünürse parçayı kaydetmeyin. Ana GOKWORKS uygulamasının K/R menüsü bu
@@ -94,6 +101,8 @@ Raporlar tek yerde: `k_factor/standalone/reports/<tarih-saat>/` altında
   atlanır; birden çok eşleşme reddedilir.
 - K, `GetCustomBendAllowance / SetCustomBendAllowance` ile; R, aynı
   unsura ait tek radyal ölçüyle, uygun ölçü yoksa unsur tanımıyla yazılır.
+  Ölçünün mevcut konfigürasyondaki başlangıç değeri ana büküm yarıçapıyla
+  eşleşmelidir; ölçü kimliği yazma ve geri alma sırasında korunur.
   Ölçü yolu yalnız mevcut konfigürasyonu hedefler.
 - Alt bükümlerin özel değerleri, sac kalınlığı, malzeme ve tablo bağları
   değiştirilmez. Ana unsurun geri okunması bütün alt bükümlerin
@@ -105,6 +114,15 @@ Raporlar tek yerde: `k_factor/standalone/reports/<tarih-saat>/` altında
   gösterilir; başarısız sorgunun `false` çıkışı geçerli veri sayılmaz.
   `verify` bu durumu uyarıyla deneyebilir; kalıcı `apply` için kontrollerin
   doğrulanması gerekir. Etkin olduğu bilinen tablo/malzeme kontrolü engeldir.
+  Tablo kapalıysa API'nin geçersiz saydığı dosya adı çıkışı kullanılmaz;
+  Python bu durumda `NULL` dosya adını hata saymaz. `OldArchitecture / 1`
+  gibi diğer doğrulanamayan kontrol durumları yazmayı engellemeye devam eder.
+
+Kalınlık eşleştirmesi seçilen ana unsurun `Thickness` değerini kullanır.
+Bu değer modern parçalarda şablon varsayılanı olabilir; gövdeye özel kalınlık
+ve büküm geçersiz kılmaları bu bağımsız araçta işlenmez. Ana unsurun
+değerlerini doğrulamak, bütün gövdelerin veya alt bükümlerin değiştiğini
+kanıtlamaz.
 
 `apply` modu da her iki motorda vardır: doğrulanan değerleri açık parçada
 bırakır, kaydetmez. Karşılaştırma betiği `apply` sonuçlarını yazma eşdeğerliği
@@ -131,7 +149,14 @@ ve [pywin32 MakePy](https://github.com/mhammond/pywin32/tree/b312/com/win32com/c
 
 ## Bulutta doğrulananlar
 
-C# derlemesi ve 18 saf sözleşme kontrolü, Python/karşılaştırıcı için 30
-odaklı test geçti. Ayrıntılar [validation.json](validation.json) içindedir.
-Python işlem testleri COM test nesneleri kullanır; Windows başlatıcısı ve
-gerçek SolidWorks yazma işlemi bu ortamda çalıştırılmadı.
+İlk kaynak sürümün C# derlemesi, 18 saf sözleşme kontrolü ve
+Python/karşılaştırıcı için 30 odaklı test sonucu [validation.json](validation.json)
+içindedir; bu kayıt o sürüme aittir.
+
+16 Ekim 2026 kaynak düzeltmelerinde C# derlemesi sıfır hata/uyarıyla geçti;
+20 saf sözleşme kontrolü ve değişen Python motoru/masaüstü akışına ait
+37 odaklı test geçti. Konfigürasyon veya başlangıç değerleri değiştiğinde
+hiçbir yazma çağrısı yapılmadığı, kapalı tablonun boş dosya adı ve yanlış
+yarıçap ölçüsünün reddi kontrol edildi. Geçersiz K/R girişleri arayüzde
+gösterilir. Python işlem testleri COM test nesneleri kullanır; bu kontroller
+gerçek SolidWorks yazma denemesi yerine geçmez.

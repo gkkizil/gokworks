@@ -62,7 +62,8 @@ def run_pair(request, folder, *, notify=lambda message: None, native_runner=subp
     if request["mode"] == "verify" and ((csharp.get("rollback") or {}).get("verified") is not True):
         raise ComparisonFailure("C# geri alma işlemi doğrulanamadı. Python başlatılmadı. Parçayı kaydetmeyin.")
     # Bind the second run to the document and root read by the first engine.
-    bound = dict(request, document_path=csharp["document_path"], feature_name=csharp["before"]["feature_name"])
+    bound = dict(request, document_path=csharp["document_path"], configuration=csharp["configuration"],
+                 feature_name=csharp["before"]["feature_name"], expected_state=csharp["before"])
     notify("Python motoru aynı parçayı okuyor…" if request["mode"] == "inspect" else "Python motoru aynı K/R denemesini yapıyor…")
     python = python_runner(bound)
     write_json(python_file, python)

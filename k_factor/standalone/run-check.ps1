@@ -34,7 +34,21 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'C# build failed.' }
     & $dotnet (Join-Path $buildDirectory 'Gokworks.KrProbe.dll') --request $Request --report $csharpReport
     if ($LASTEXITCODE -ne 0) { throw "C# run failed. Report: $csharpReport. Python was not started." }
-    & $PythonCommand -m k_factor.standalone.python --request $Request --report $pythonReport
+    $nativeResult = Get-Content -LiteralPath $csharpReport -Raw -Encoding UTF8 | ConvertFrom-Json
+    $expectedStatus = if ($Mode -eq 'inspect') { 'inspected' } else { 'verified' }
+    if ($nativeResult.status -ne $expectedStatus) { throw "C# did not complete the requested check. Report: $csharpReport. Python was not started." }
+    if ($Mode -eq 'verify' -and $nativeResult.rollback.verified -ne $true) { throw "C# restoration was not verified. Python was not started. Do not save the part. Report: $csharpReport" }
+    # Bind the second engine before any Python write, rather than detecting a
+    # different document/configuration only after both transactions finish.
+    $boundRequest = [ordered]@{}
+    foreach ($property in $requestData.PSObject.Properties) { $boundRequest[$property.Name] = $property.Value }
+    $boundRequest['document_path'] = $nativeResult.document_path
+    $boundRequest['configuration'] = $nativeResult.configuration
+    $boundRequest['feature_name'] = $nativeResult.before.feature_name
+    $boundRequest['expected_state'] = $nativeResult.before
+    $pythonRequest = Join-Path $runDirectory 'python-request.json'
+    $boundRequest | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $pythonRequest -Encoding UTF8
+    & $PythonCommand -m k_factor.standalone.python --request $pythonRequest --report $pythonReport
     if ($LASTEXITCODE -ne 0) { throw "Python run failed. Report: $pythonReport" }
     $comparisonArguments = @((Join-Path $PSScriptRoot 'compare_reports.py'), $csharpReport, $pythonReport, '--output', $comparisonReport)
     if ($Mode -eq 'inspect') { $comparisonArguments += '--inspection' }

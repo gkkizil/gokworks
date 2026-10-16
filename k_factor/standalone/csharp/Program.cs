@@ -86,6 +86,8 @@ internal static class SelfTest
             Check(request.Match(3) is null, "unmatched thickness skips");
             Check(request.Match(2.005)?.RadiusMm == 2, "matching tolerance");
             Check(JsonContract.Read("""{"schema_version":1,"mode":"inspect"}""").Assignments.Count == 0, "inspect needs no assignment");
+            var bound = JsonContract.Read("""{"schema_version":1,"configuration":"Varsayılan","expected_state":{"feature_name":"Sac-Levha","feature_type":"TemplateSheetMetal","thickness_mm":2,"k_factor":0.33,"radius_mm":2,"bend_allowance_type":2}}""");
+            Check(bound.Configuration == "Varsayılan" && bound.ExpectedState?.KFactor == 0.33, "selected configuration and baseline survive request parsing");
             Reject("""{"schema_version":2}""", "unsupported schema");
             Reject("""{"schema_version":1,"schema_version":1}""", "duplicate property");
             Reject("""{"schema_version":1,"unexpected":true}""", "unknown property");
@@ -97,6 +99,7 @@ internal static class SelfTest
             Reject("""{"schema_version":1,"assignments":[{"thickness_mm":2,"k_factor":0.3,"radius_mm":1},{"thickness_mm":2.015,"k_factor":0.4,"radius_mm":2}]}""", "overlapping matching intervals");
             Reject("""{"schema_version":1,"assignments":null}""", "null assignment array");
             Reject("""{"schema_version":1,"mode":null}""", "null mode");
+            Reject("""{"schema_version":1,"configuration":" "}""", "blank configuration");
             var report = new Report { Status = "inspected" };
             using var output = JsonDocument.Parse(JsonSerializer.Serialize(report, JsonContract.Options));
             Check(output.RootElement.GetProperty("engine").GetString() == "csharp", "report engine");

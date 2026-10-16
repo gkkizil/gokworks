@@ -12,6 +12,7 @@ public sealed class SolidWorksEngine
     private IModelDoc2? model;
     private string path = "";
     private string configuration = "";
+    private string? radiusDimensionName;
     private readonly List<FeatureHandle> handles = [];
 
     private sealed record FeatureHandle(IFeature Feature, FeatureInfo Info);
@@ -37,6 +38,8 @@ public sealed class SolidWorksEngine
         configuration = Trace("ConfigurationManager.ActiveConfiguration.Name", () => model.ConfigurationManager.ActiveConfiguration.Name);
         report.DocumentPath = path;
         report.Configuration = configuration;
+        if (request.Configuration is not null && request.Configuration != configuration)
+            throw new InvalidOperationException("The active configuration does not match the selected configuration. Read the part again before writing.");
         Discover();
         report.Features = handles.Select(x => x.Info).ToList();
         if (handles.Count == 0)
@@ -49,6 +52,8 @@ public sealed class SolidWorksEngine
         report.Feature = selected.Info;
         report.Before = selected.Info.State ?? throw new InvalidOperationException($"Selected feature cannot be read: {selected.Info.Error}");
         AssertIdentity();
+        if (request.ExpectedState is not null)
+            AssertEquivalent(request.ExpectedState, report.Before, "Sheet metal parameters changed since the part was read; read the part again");
         if (request.Mode == "inspect")
         {
             report.After = report.Before;
@@ -69,6 +74,7 @@ public sealed class SolidWorksEngine
         var target = new FeatureState(baseline.FeatureName, baseline.FeatureType, baseline.ThicknessMm,
             report.Assignment.KFactor, report.Assignment.RadiusMm, (int)swBendAllowanceTypes_e.swBendAllowanceKFactor);
         AssertEquivalent(baseline, ReadState(Fresh(baseline), "Before.Write"), "The selected feature changed before writing");
+        PrepareRadiusTarget(baseline);
         bool mutationAttempted = false;
         try
         {
@@ -270,8 +276,7 @@ public sealed class SolidWorksEngine
     {
         AssertIdentity();
         var feature = Fresh(state);
-        var radius = RadiusDimension(feature, prefix);
-        report.RadiusMethod = radius is null ? "bend_radius_definition" : "owned_radial_dimension";
+        var radius = radiusDimensionName is null ? null : RequireRadiusDimension(feature, prefix);
         var data = Definition(feature, prefix);
         bool accessed = false;
         bool committed = false;
@@ -322,13 +327,37 @@ public sealed class SolidWorksEngine
         if (radius is not null)
         {
             // Reacquire after ModifyDefinition; the old dimension RCW can be stale.
-            radius = RadiusDimension(Fresh(state), prefix + ".FreshRadius")
-                ?? throw new InvalidOperationException("The owned radial dimension disappeared after ModifyDefinition.");
+            radius = RequireRadiusDimension(Fresh(state), prefix + ".FreshRadius");
+            AssertIdentity();
             int code = Trace(prefix + ".Dimension.SetSystemValue3", () => radius.SetSystemValue3(state.RadiusMm / 1000,
                 (int)swSetValueInConfiguration_e.swSetValue_InThisConfiguration, Array.Empty<string>()));
             if (code != (int)swSetValueReturnStatus_e.swSetValue_Successful)
                 throw new InvalidOperationException($"The radius dimension write failed with status {code}.");
         }
+    }
+
+    private void PrepareRadiusTarget(FeatureState baseline)
+    {
+        var radius = RadiusDimension(Fresh(baseline), "Before.Radius");
+        report.RadiusMethod = radius is null ? "bend_radius_definition" : "owned_radial_dimension";
+        if (radius is null) return;
+        var raw = Trace("Before.Radius.GetSystemValue3", () => radius.GetSystemValue3(
+            (int)swInConfigurationOpts_e.swThisConfiguration, Array.Empty<string>()));
+        if (raw is not Array values || values.Length != 1 || values.GetValue(values.GetLowerBound(0)) is not double value ||
+            !double.IsFinite(value) || Math.Abs(value * 1000 - baseline.RadiusMm) > 0.000001)
+            throw new InvalidOperationException("The owned radial dimension does not match the sheet-metal bend radius in the active configuration. Nothing was changed.");
+        radiusDimensionName = Trace("Before.Radius.FullName", () => radius.FullName);
+        if (string.IsNullOrWhiteSpace(radiusDimensionName))
+            throw new InvalidOperationException("The radius dimension has no stable identity.");
+    }
+
+    private IDimension RequireRadiusDimension(IFeature feature, string prefix)
+    {
+        var radius = RadiusDimension(feature, prefix)
+            ?? throw new InvalidOperationException("The owned radial dimension disappeared after ModifyDefinition.");
+        if (radius.FullName != radiusDimensionName)
+            throw new InvalidOperationException("The radius dimension identity changed; no other dimension will be written.");
+        return radius;
     }
 
     private IDimension? RadiusDimension(IFeature feature, string prefix)

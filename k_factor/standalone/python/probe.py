@@ -23,21 +23,45 @@ def number(value, label):
     return float(value)
 
 
+def validate_snapshot(raw):
+    required = {"feature_name", "feature_type", "thickness_mm", "radius_mm", "bend_allowance_type"}
+    payloads = {"k_factor", "bend_allowance_mm", "bend_deduction_mm", "bend_table_file"}
+    if not isinstance(raw, dict) or not required <= set(raw) or set(raw) - required - payloads:
+        raise ProbeError("expected_state must be a sheet-metal readback snapshot")
+    state = {**dict.fromkeys(payloads), **raw}
+    for key in ("feature_name", "feature_type"):
+        if not isinstance(state[key], str) or not state[key].strip():
+            raise ProbeError(f"expected_state.{key}: nonempty string required")
+    for key in ("thickness_mm", "radius_mm"):
+        state[key] = number(state[key], f"expected_state.{key}")
+    if state["thickness_mm"] <= 0 or state["radius_mm"] < 0 or type(state["bend_allowance_type"]) is not int:
+        raise ProbeError("expected_state contains invalid sheet-metal dimensions or allowance type")
+    member = {1: "bend_table_file", 2: "k_factor", 3: "bend_allowance_mm", 4: "bend_deduction_mm"}.get(state["bend_allowance_type"])
+    if member == "bend_table_file":
+        if not isinstance(state[member], str):
+            raise ProbeError("expected_state.bend_table_file must be a string")
+    elif member is not None:
+        state[member] = number(state[member], f"expected_state.{member}")
+    return state
+
+
 def validate_request(raw):
     if not isinstance(raw, dict) or type(raw.get("schema_version")) is not int or raw["schema_version"] != 1:
         raise ProbeError("schema_version must be 1")
     request = dict(raw)
-    unknown = set(request) - {"schema_version", "mode", "document_path", "feature_name", "assignments", "tolerance_mm"}
+    unknown = set(request) - {"schema_version", "mode", "document_path", "configuration", "feature_name", "expected_state", "assignments", "tolerance_mm"}
     if unknown:
         raise ProbeError(f"Unknown request fields: {', '.join(sorted(unknown))}")
     request.setdefault("mode", "inspect")
     if request.get("mode") not in ("inspect", "verify", "apply"):
         raise ProbeError("mode must be inspect, verify or apply")
-    for key in ("document_path", "feature_name"):
+    for key in ("document_path", "configuration", "feature_name"):
         if request.get(key) is not None and (not isinstance(request[key], str) or not request[key].strip()):
             raise ProbeError(f"{key}: nonempty string required")
     if request.get("document_path") and not request["document_path"].lower().endswith(".sldprt"):
         raise ProbeError("document_path must identify a saved .SLDPRT file")
+    if request.get("expected_state") is not None:
+        request["expected_state"] = validate_snapshot(request["expected_state"])
     tolerance = number(request.get("tolerance_mm", 0.01), "tolerance_mm")
     if tolerance <= 0:
         raise ProbeError("tolerance_mm must be positive")
@@ -171,6 +195,7 @@ class Probe:
         self.trace = Trace(report)
         self.model = None
         self.mutation_attempted = False
+        self.radius_dimension_name = None
 
     def call(self, name, operation):
         return self.trace.call(name, operation)
@@ -300,9 +325,11 @@ class Probe:
             if code != 0:
                 diagnostic["error"] = f"GetUseGaugeTable returned {code}; OUT values are unavailable"
                 return diagnostic
-            if type(used) is not bool or not isinstance(filename, str):
+            if type(used) is not bool:
                 raise ProbeError("GetUseGaugeTable returned invalid OUT types")
-            diagnostic.update(use_gauge_table=used, gauge_table_file=filename)
+            # The filename OUT is documented as valid only when the table is
+            # enabled. NULL BSTR becomes None in pywin32; ignore it when off.
+            diagnostic.update(use_gauge_table=used, gauge_table_file=filename if used and isinstance(filename, str) else None)
             if used:
                 diagnostic["error"] = "Gauge table controls this feature"
                 return diagnostic
@@ -361,8 +388,19 @@ class Probe:
         if code:
             self.report["warnings"].append(f"Feature rebuild warning: {code}")
 
+    def require_radius_dimension(self, feature):
+        dimension = self.radial_dimension(feature)
+        if dimension is None:
+            raise ProbeError("Owned radial dimension disappeared after ModifyDefinition")
+        if self.call("IDimension.FullName", lambda: dimension.FullName) != self.radius_dimension_name:
+            raise ProbeError("Radius dimension identity changed after ModifyDefinition")
+        return dimension
+
     def write(self, feature, target):
+        self.require_identity()
         key = self.feature_key(feature)
+        if self.report["radius_method"] == "owned_radial_dimension":
+            self.require_radius_dimension(feature)
         data = self.definition(feature)
         accessed = False
         consumed = False
@@ -406,9 +444,7 @@ class Probe:
             # Definition modifications can invalidate previously obtained COM
             # dimensions. Reacquire the owning feature before selecting again.
             fresh = self.reacquire(key)
-            dimension = self.radial_dimension(fresh)
-            if dimension is None:
-                raise ProbeError("Owned radial dimension disappeared after ModifyDefinition")
+            dimension = self.require_radius_dimension(fresh)
             self.require_identity()
             result = self.call("IDimension.SetSystemValue3", lambda: dimension.SetSystemValue3(
                 target["radius_mm"] / 1000, 1, self.binding.empty_configurations))
@@ -442,6 +478,8 @@ class Probe:
         self.report.update(document_path=path, configuration=configuration)
         if request.get("document_path") and not same_path(path, request["document_path"]):
             raise ProbeError("Active document does not match request document_path")
+        if request.get("configuration") is not None and configuration != request["configuration"]:
+            raise ProbeError("Active configuration does not match the selected configuration; read the part again")
         candidates = self.discover()
         for key, feature in candidates.items():
             item = {"name": key[0], "type": key[1], "suppressed": False, "parent_name": None}
@@ -467,6 +505,8 @@ class Probe:
         self.report["feature"] = next(item for item in self.report["features"] if item["name"] == key[0] and item["type"] == key[1])
         before, data = self.state(candidates[key])
         self.report["before"] = before
+        if request.get("expected_state") is not None and not self.states_equal(before, request["expected_state"]):
+            raise ProbeError("Sheet metal parameters changed since the part was read; read the part again")
         controls = self.controls(data)
         if request["mode"] == "inspect":
             self.report.update(status="inspected", after=before.copy())
@@ -508,7 +548,18 @@ class Probe:
         current, _ = self.state(candidates[key])
         if not self.states_equal(current, before):
             raise ProbeError("Target state changed before writing")
-        self.report["radius_method"] = "owned_radial_dimension" if self.radial_dimension(candidates[key]) is not None else "bend_radius_definition"
+        dimension = self.radial_dimension(candidates[key])
+        self.report["radius_method"] = "owned_radial_dimension" if dimension is not None else "bend_radius_definition"
+        if dimension is not None:
+            values = self.call("IDimension.GetSystemValue3", lambda: dimension.GetSystemValue3(1, self.binding.empty_configurations))
+            if not isinstance(values, (tuple, list)) or len(values) != 1:
+                raise ProbeError("Radius dimension must return one value for the active configuration")
+            actual_radius_mm = number(values[0], "API radius dimension value") * 1000
+            if not math.isclose(actual_radius_mm, before["radius_mm"], rel_tol=0, abs_tol=1e-6):
+                raise ProbeError("Owned radial dimension does not match the sheet-metal bend radius; nothing was changed")
+            self.radius_dimension_name = self.call("IDimension.FullName", lambda: dimension.FullName)
+            if not isinstance(self.radius_dimension_name, str) or not self.radius_dimension_name:
+                raise ProbeError("Radius dimension has no stable identity")
         self.check_feature_error(candidates[key])
         self.mutation_attempted = False
         original_error = None
