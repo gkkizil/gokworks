@@ -151,6 +151,178 @@ class ParentApplyTests(KApplyTestCase):
                     self.assertEqual(self.model.save_count, 0)
             self.model.feature.GetDefinition = original
 
+    def test_inherited_body_code_two_uses_verified_parent_for_preview_apply_and_undo(self):
+        original = self.model.feature.GetDefinition
+
+        def body_definition():
+            data = original()
+            def unavailable(used, filename):
+                used.value, filename.value = True, 'invalid-output.xls'
+                return 2
+            data.GetUseGaugeTable = unavailable
+            return data
+
+        self.model.feature.GetDefinition = body_definition
+        before = deepcopy(self.model.parent_states), deepcopy(self.model.states)
+        status, detail, result = self.process(preview=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('ana sac unsurundan doğrulandı', detail)
+        self.assertEqual((self.model.parent_states, self.model.states), before)
+        self.assertEqual(self.model.parent_writes, 0)
+        status, detail, result = self.process()
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual((self.model.states['Default']['k'], self.model.states['Default']['radius']), (.274, .0015))
+        self.assertEqual(self.model.states['Other'], before[1]['Other'])
+        self.model.parent_states, self.model.states = deepcopy(before)
+        self.model.freeze_child = True
+        status, detail, result = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('geri yüklendi', detail)
+        self.assertEqual((self.model.parent_states, self.model.states), before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_body_gauge_fallback_requires_verified_parent_and_no_overrides(self):
+        original = self.model.feature.GetDefinition
+        for code in (1, 2, 3, 4):
+            for overrides in ((False, False), (True, False), (False, True)):
+                with self.subTest(code=code, overrides=overrides):
+                    self.model.overrides = dict(enumerate(overrides))
+                    def body_definition():
+                        data = original()
+                        data.GetUseGaugeTable = lambda used, filename: code
+                        return data
+                    self.model.feature.GetDefinition = body_definition
+                    status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+                        ManualAssignment(1.5, .274, 1.5, all_bends=True), preview=True)
+                    self.assertEqual(status, 'success' if code == 2 and not any(overrides) else 'error', detail)
+                    if status == 'error':
+                        self.assertIn(f'API hata kodu: {code}', detail)
+                        self.assertIn('Gövde sac unsuru', detail)
+                    self.assertEqual(self.model.parent_writes, 0)
+
+    def test_parent_gauge_and_material_block_body_code_two_inheritance(self):
+        original = self.model.feature.GetDefinition
+        def body_definition():
+            data = original()
+            data.GetUseGaugeTable = lambda used, filename: 2
+            return data
+        self.model.feature.GetDefinition = body_definition
+        for attribute in ('parent_gauge', 'parent_material'):
+            with self.subTest(attribute=attribute):
+                setattr(self.model, attribute, True)
+                status, detail, _ = self.process(save=True)
+                self.assertEqual(status, 'error', detail)
+                self.assertEqual(self.model.parent_writes, 0)
+                self.assertEqual(self.model.save_count, 0)
+                setattr(self.model, attribute, False)
+
+    def _set_multiple_bodies(self, flags):
+        self.model.bodies = [SimpleNamespace(IsSheetMetal=lambda flag=flag: flag,
+            GetFeatures=lambda: (self.model.feature,)) for flag in flags]
+
+    def test_one_sheet_and_regular_solid_preview_apply_preserve_other_configuration(self):
+        self._set_multiple_bodies((True, False))
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(preview=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('1 normal katı gövde K/R kapsamı dışında', detail)
+        self.assertEqual(self.model.states, before)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+        self.assertEqual(self.model.states['Other'], before['Other'])
+        self.assertEqual(len(self.model.bodies), 2)
+        self.assertEqual(self.model.save_count, 1)
+
+    def test_same_thickness_sheet_bodies_share_parent_with_ownership_and_readback(self):
+        self._set_multiple_bodies((True, True, True))
+        second = SheetFeature(self.model)
+        second.Name = 'Sac-Levha2'
+        second.GetDefinition = lambda: ChildDefinition(second)
+        self.model.feature.next = second
+        self.model.bodies[1].GetFeatures = lambda: (second,)
+        recipe = ManualAssignment(1.5, .274, 1.5, all_bends=True)
+        before = deepcopy(self.model.states)
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default', recipe, preview=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.states, before)
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default', recipe, save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('3 sac gövdesi', detail)
+        self.assertIn('2 SheetMetal alt unsuru doğrulandı', detail)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+        self.assertEqual(self.model.states['Other'], before['Other'])
+
+    def test_multiple_sheet_targets_must_have_one_template_and_no_mixed_solids(self):
+        for failure in ('templates', 'mixed'):
+            with self.subTest(failure=failure):
+                self._set_multiple_bodies((True, True, False) if failure == 'mixed' else (True, True))
+                self.model.feature.next = FakeFeature('Other-template', ap.TEMPLATE_SHEET) if failure == 'templates' else None
+                status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+                    ManualAssignment(1.5, .274, 1.5, all_bends=True), save=True)
+                self.assertEqual(status, 'error', detail)
+                self.assertEqual(self.model.parent_writes, 0)
+                self.assertEqual(self.model.save_count, 0)
+
+    def test_multibody_missing_ownership_and_unreadable_sheet_flags_never_write(self):
+        for failure in ('missing', 'unreadable'):
+            with self.subTest(failure=failure):
+                self._set_multiple_bodies((True, False))
+                if failure == 'missing':
+                    self.model.bodies[0].GetFeatures = lambda: (FakeFeature(kind='Boss'),)
+                else:
+                    self.model.bodies[1].IsSheetMetal = lambda: None
+                status, detail, _ = self.process(save=True)
+                self.assertEqual(status, 'error', detail)
+                self.assertEqual(self.model.parent_writes, 0)
+                self.assertEqual(self.model.save_count, 0)
+
+    def test_multi_sheet_requires_all_bends_and_rejects_mixed_feature_thicknesses(self):
+        self._set_multiple_bodies((True, True))
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('Tüm bükümlere uygula', detail)
+        child = FakeFeature('SheetMetal-other', 'SheetMetal', thickness=.002)
+        self.model.feature.next = child
+        status, detail, _ = ap.process_part(self.app, self.model.path, 'Default',
+            ManualAssignment(1.5, .274, 1.5, all_bends=True), save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('farklı kalınlıkta', detail)
+        self.assertEqual(self.model.parent_writes, 0)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_multibody_failed_readback_restores_parameters_without_saving(self):
+        self._set_multiple_bodies((True, False))
+        self.model.freeze_child = True
+        before = deepcopy(self.model.parent_states), deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('geri yüklendi', detail)
+        self.assertEqual((self.model.parent_states, self.model.states), before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_changed_body_inventory_after_rebuild_rolls_back_before_save(self):
+        self._set_multiple_bodies((True, False))
+        before = deepcopy(self.model.parent_states), deepcopy(self.model.states)
+        bodies = tuple(self.model.bodies)
+        modify = ParentFeature.ModifyDefinition
+
+        def modify_and_rebuild(feature, definition, model, component):
+            result = modify(feature, definition, model, component)
+            model.bodies = list(bodies)
+            if definition.allowance.KFactor == .274:
+                model.bodies.append(SimpleNamespace(IsSheetMetal=lambda: False))
+            return result
+
+        with patch.object(ParentFeature, 'ModifyDefinition', modify_and_rebuild):
+            status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('gövde sayısı değişti', detail)
+        self.assertIn('geri yüklendi', detail)
+        self.assertEqual((self.model.parent_states, self.model.states), before)
+        self.assertEqual(len(self.model.bodies), 2)
+        self.assertEqual(self.model.save_count, 0)
+
     def test_template_gauge_fallback_requires_a_verified_body_sheet(self):
         self.model.FirstFeature = lambda: self.converted
         self.model.feature.child = None

@@ -13,6 +13,11 @@ from solidworks.connection import connect_to_solidworks
 pythoncom, win32com = sw.pythoncom, sw.win32com
 CAD_TYPES = {'.sldprt': 'Parça', '.sldasm': 'Montaj', '.slddrw': 'Teknik resim'}
 REPORT_NAME = 'GOKWORKS-isimlendirme.json'
+# Both documented interfaces are dual (derive from IDispatch). Preserve the
+# requested interface pointer instead of asking the object for its default
+# IDispatch, which can expose a different Automation view.
+MODEL_EXTENSION_IID = '{99F4D4AF-F268-4EE1-8C55-041F7BECF879}'
+PACK_AND_GO_IID = '{A30DE102-5568-4A39-B7CA-D26B526D293A}'
 
 
 class Cancelled(Exception):
@@ -191,33 +196,78 @@ def _late_bound(app, *methods):
     return app
 
 
+def _dual_interface(obj, iid):
+    ole = getattr(obj, '_oleobj_', obj)
+    if hasattr(ole, 'QueryInterface'):
+        # The second IID controls only pywin32's Python wrapper. The first IID
+        # is the actual interface requested from SolidWorks, and stays intact.
+        return ole.QueryInterface(pythoncom.MakeIID(iid), pythoncom.IID_IDispatch)
+    return obj
+
+
+def _pack_member(info, dispid):
+    """Bind this member without enumerating unrelated extension methods."""
+    compiler = info.GetTypeComp()
+    for invoke in (1, 2):
+        try:
+            kind, desc = compiler.Bind('GetPackAndGo', invoke)
+        except Exception:
+            continue
+        if kind == 1 and desc[0] == dispid:
+            break
+    else:
+        raise RuntimeError('GetPackAndGo üyesi tür bilgisinde bağlanamadı')
+    members = win32com.client.build.DispatchItem()
+    members._AddFunc_(info, desc, 0)
+    return next(entry for mapping in (members.mapFuncs, members.propMapGet)
+                for entry in mapping.values()
+                if entry.dispid == dispid and entry.names[0] == 'GetPackAndGo')
+
+
 def _pack_signature(ole, dispid):
     """Use the running server's Automation signature, not a cached makepy map."""
     fallback = (pythoncom.DISPATCH_METHOD, (pythoncom.VT_DISPATCH, 0), ())
     try:
         info = ole.GetTypeInfo()
-        attributes = info.GetTypeAttr()
-        # Match pywin32's MakeOleRepr: InvokeTypes needs the Automation view,
-        # not the HRESULT/retval layout of a dual interface's native vtable.
-        if attributes[5] == pythoncom.TKIND_INTERFACE and attributes[11] & pythoncom.TYPEFLAG_FDUAL:
-            info = info.GetRefTypeInfo(info.GetRefTypeOfImplType(-1))
+        try:
+            entry = _pack_member(info, dispid)
+            binding = 'ITypeComp.Bind'
+        except Exception:
+            # Compatibility for servers without ITypeComp. Unlike the primary
+            # path this may need the alternate view of a dual interface.
             attributes = info.GetTypeAttr()
-        interface = info.GetDocumentation(-1)[0]
-        members = win32com.client.build.DispatchItem(info, attributes, bForUser=0)
-        entries = [entry for mapping in (members.mapFuncs, members.propMapGet)
-                   for entry in mapping.values()
-                   if entry.dispid == dispid and entry.names[0] == 'GetPackAndGo']
-        if not entries:
-            raise RuntimeError(f'{interface}: GetPackAndGo tür bilgisinde bulunamadı')
-        desc = entries[0].desc
+            if attributes[5] == pythoncom.TKIND_INTERFACE and attributes[11] & pythoncom.TYPEFLAG_FDUAL:
+                info = info.GetRefTypeInfo(info.GetRefTypeOfImplType(-1))
+                attributes = info.GetTypeAttr()
+            members = win32com.client.build.DispatchItem(info, attributes, bForUser=0)
+            entry = next(entry for mapping in (members.mapFuncs, members.propMapGet)
+                         for entry in mapping.values()
+                         if entry.dispid == dispid and entry.names[0] == 'GetPackAndGo')
+            binding = 'üye tablosu'
+        try:
+            interface = info.GetDocumentation(-1)[0]
+        except Exception:
+            # A cosmetic type name is not needed to invoke the bound member.
+            # Some servers reject the -1 documentation index too.
+            interface = 'IModelDocExtension'
+        desc = entry.desc
         invoke, result, arguments = desc[4], tuple(desc[8][:2]), tuple(tuple(arg[:2]) for arg in desc[2])
+        if desc[3] != 4:
+            # Native dual FUNCDESC carries HRESULT and [out, retval]; Invoke
+            # takes that retval as its return value, never as a user argument.
+            retvals = [arg for arg in arguments if arg[1] & 8]
+            # _AddFunc_ resolves VT_HRESULT to VT_I4 along with user types.
+            if result[0] not in (3, 25) or len(retvals) != 1 or not retvals[0][1] & 2:
+                raise RuntimeError('GetPackAndGo yerel dönüş imzası doğrulanamadı')
+            result = (retvals[0][0] & ~pythoncom.VT_BYREF, 0)
+            arguments = tuple(arg for arg in arguments if not arg[1] & 8)
     except Exception as error:
         # Some automation servers omit type info. The published interop method
         # is a zero-input method returning IPackAndGo; retain that exact route.
         invoke, result, arguments = fallback
         description = f'yayımlanmış API; tür bilgisi okunamadı: {error}'
     else:
-        description = f'çalışan API: {interface}'
+        description = f'çalışan API: {interface}; üye bağlama={binding}'
     details = f'{description}; DISPID={dispid}; çağrı={invoke}; dönüş={result}; parametreler={arguments}'
     # GetPackAndGo has no user inputs. Out/retval arguments may be present in
     # Automation metadata and must be allocated by InvokeTypes, not omitted.
@@ -236,10 +286,8 @@ def _pack_result(raw, result_type, arguments):
         if outputs != 1 or len(values) != 1:
             raise RuntimeError('GetPackAndGo tek bir Pack and Go nesnesi döndürmedi.')
         raw = values[0]
-    if raw is not None and hasattr(raw, 'QueryInterface'):
-        # Runtime type info can describe IPackAndGo as VT_UNKNOWN. Promote its
-        # IUnknown to IDispatch before applying automation properties/methods.
-        raw = raw.QueryInterface(pythoncom.IID_IDispatch)
+    if raw is not None:
+        raw = _dual_interface(raw, PACK_AND_GO_IID)
     # Raw IDispatch pointers are wrapped without makepy/type-library generation.
     # Pack and Go setters/getters use explicit method metadata and BYREF arrays.
     return _late_bound(raw, 'GetDocumentNames', 'GetDocumentNamesCount',
@@ -366,7 +414,8 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
     if not root:
         raise RuntimeError('Önce açık SolidWorks belgesini kaydedin.')
     try:
-        extension = _late_bound(sw._value(model, 'Extension'), 'SavePackAndGo')
+        extension = _late_bound(_dual_interface(sw._value(model, 'Extension'), MODEL_EXTENSION_IID),
+                                'SavePackAndGo')
     except Exception as error:
         raise RuntimeError(f'SolidWorks ModelDocExtension okunamadı: {error}') from error
     signature = 'sıfır parametreli GetPackAndGo'
@@ -375,6 +424,7 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
             ole = extension._oleobj_
             dispid = ole.GetIDsOfNames(0, 'GetPackAndGo')
             invoke, result_type, arguments, signature = _pack_signature(ole, dispid)
+            signature = f'IModelDocExtension; {signature}'
             raw = ole.InvokeTypes(dispid, 0, invoke, result_type, arguments)
         else:
             raw = extension.GetPackAndGo()

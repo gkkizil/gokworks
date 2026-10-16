@@ -23,12 +23,17 @@ Küçük ekranda ayarlar ayrı kaydırılır; önizleme tablosu ve paket düğme
 
 Kaynak ve hedef seçimi iki klasör alanında toplanmıştır. Klasördeki montajların keşfi ve hedefin boşluk/erişim kontrolü arka planda yapılır. Ön/son ek düzenleme veya menü değiştirme sırasında hedef klasör yeniden taranmaz. Hedef tekrar seçildiğinde kontrol yenilenir; kaydetme başlamadan önce arka uç klasörü tekrar doğrular. Eski üst klasör/paket adı ayarları tek hedef yoluna dönüştürülür.
 
-`GetPackAndGo` için çalışan SolidWorks nesnesinin Automation imzası okunur.
-Dual arayüzün vtable görünümü önce Automation görünümüne çevrilir; çağrı
-türü, dönüş ve çıkış parametreleri `IDispatch.InvokeTypes` çağrısına aktarılır.
-Tür bilgisi yayımlanmıyorsa belgelenmiş sıfır girişli imza kullanılır.
-`VT_UNKNOWN` dönüşü `QueryInterface(IID_IDispatch)` ile dönüştürülür ve
-nesne `DumbDispatch` ile sarılır; otomatik makepy üretimi çalıştırılmaz.
+`GetPackAndGo` için önce resmi `IModelDocExtension` GUID'siyle
+`QueryInterface` uygulanır. pywin32'nin ikinci `IID_IDispatch` argümanı
+yalnız Python sarmalayıcısının türünü belirler; istenen dual arayüzün
+adresini nesnenin varsayılan `IDispatch` arayüzüne geri çevirmez.
+Çalışan nesnenin `ITypeComp.Bind` üyesi sadece `GetPackAndGo` için okunur;
+başka üyelerin veya alternate dual görünümün `Geçersiz dizin` vermesi bu
+yolu engellemez. Metot veya property-get olarak bulunan gerçek çağrı türü
+korunur; yerel HRESULT/`[out, retval]` imzası Automation dönüşüne çevrilir.
+`ITypeComp` yoksa eski tür tablosu yolu; tür bilgisi de yoksa belgelenmiş
+sıfır girişli imza kullanılır. Dönüş, resmi `IPackAndGo` GUID'siyle aynı
+şekilde sarılır. Otomatik makepy üretimi çalıştırılmaz.
 `SavePackAndGo` ve gerekli liste çağrıları da metot olarak işaretlenir.
 
 `ModelDocExtension` erişimi, gerçek API çağrısı ve dönen nesnenin hazırlanması
@@ -38,8 +43,10 @@ kopyalar; uzun teknik ayrıntılar durum etiketini büyütmez.
 
 SolidWorks 32.1.0 interop DLL'inde `IModelDocExtension.GetPackAndGo`
 DISPID **207**, sıfır giriş ve `PackAndGo` arayüz dönüşü olarak doğrulandı.
-Bu, kullanıcıdaki `-2147352561` hatasının canlı ortam nedenini tek başına
-kanıtlamaz. Kullanıcının SolidWorks oturumunda yeniden doğrulama gerekir.
+16 Ekim'deki canlı günlük, önceki genel çağrının `-2147352561` ve tür
+bilgisinin `-2147352565` verdiğini doğruladı. Genel IDispatch yerine açık
+dual arayüz seçimi ve tek üye bağlama bu hatalı yolu değiştirir; canlı
+SolidWorks'te sorunun giderildiği henüz doğrulanmadı.
 
 Klasörden seçilen kaynak, başka bir pencerenin arkasında görünür olsa bile
 etkinleştirilir ve API'nin döndürdüğü güncel belge nesnesi kullanılır. İşlem
@@ -48,7 +55,11 @@ açık olduğu için gereksiz yere kapatma veya kaynak dosyayı yeniden adlandı
 yapılmaz. COM çağrıları [pywin32 b312](https://github.com/mhammond/pywin32/tree/2a277cb5552756c2b4d42b524dc36d25e0bb6354/com/win32com/client)
 üzerinden incelendi; gerçek SolidWorks oturumunda doğrulama hâlâ gereklidir.
 
-Bu değişiklik için 30 adlandırma/COM/referans koruma kontrolü ve iki arayüz
+Bu değişiklik için 36 adlandırma/COM/referans koruma kontrolü geçti. Açık
+arayüz seçimi, bozuk alternate dual görünümden bağımsız üye bağlama ve
+yerel retval/Automation dönüşü ve geçersiz dokümantasyon dizininden bağımsız
+çağrı bunlara dahildir. Model–teknik resim yeniden adlandırma/kaydetme arayüz
+kontrolü de tekrar geçti. Önceki sürümde iki arayüz
 kontrolü geçti: model–teknik resim çiftini yeniden adlandırıp kaydetme ve
 tam hata metnini küçük pencerede kopyalama. COM sınırı test nesneleriyle temsil edildi; bu kontroller
 canlı SolidWorks'te montaj ilişkilerinin denendiği anlamına gelmez.

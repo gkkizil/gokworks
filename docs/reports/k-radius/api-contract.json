@@ -534,5 +534,13 @@
       "finding": "ChangeBendZone gets FeatureManager.GetSheetMetalFolder().GetFeature(), changes its CustomBendAllowance, calls SetCustomBendAllowance and ModifyDefinition on the folder feature.",
       "scope": "Corroborates parent-target selection; does not prove behavior on the user model or establish the full failure/rollback contract."
     }
-  ]
+  ],
+  "gauge_and_multibody_policy_2026_10_16": {
+    "native_solidworks_verified": false,
+    "reported_failure": "Parent and child were resolved, but GetUseGaugeTable returned 2. The old message did not identify the failing feature.",
+    "body_code_2_fallback": "Only after verified parent gauge/material checks and two successfully read False child override flags; preserve all successful body gauge/material blockers and reject other status codes.",
+    "unavailable_outputs": "Do not consume gauge/material output values after nonzero status.",
+    "multibody": "Require per-body GetFeatures ownership coverage; multiple sheet bodies require a shared TemplateSheetMetal, uniform actual thickness, and all_bends. Recheck body classification counts and coverage after rebuild and rollback.",
+    "user_model_verified": false
+  }
 }

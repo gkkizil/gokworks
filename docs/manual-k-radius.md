@@ -1,19 +1,43 @@
 # Kalınlığa göre manuel K / R atama
 
-## Ana sac şablonundaki tablo kontrolü — 15 Ekim 2026
+## Ana ve gövde sacında tablo kontrolü — 16 Ekim 2026
 
-`GetUseGaugeTable` için `swSheetMetalModifierError_NotEnabledOnTemplate = 2`,
-kontrolün `TemplateSheetMetal` üzerinde kullanılamadığını belirtir. Bu kod,
-tablonun kullanılmadığı veya sacın okunamadığı anlamına gelmez. Ana şablonda
-bu sonuç alınırsa geçersiz çıkış değerleri ve malzeme özelliği okunmaz;
-gövdenin `SheetMetal` tanımında tablo ve malzeme bağları doğrulanır.
+Kullanıcının günlüğünde ana `TemplateSheetMetal` ve gövde `SheetMetal`
+bulunmasına rağmen `GetUseGaugeTable` için kod `2` alınıyordu. Eski hata
+metni bu çağrının hangi unsurda başarısız olduğunu belirtmiyordu. Yeni hata
+metninde unsur adı/türü ve API adı bulunur. Bu kod, tablonun kullanılmadığı
+anlamına gelmez; başarısız çağrının çıkış değerleri veya malzeme özelliği okunmaz.
 
-Gövde kontrolü başarısızsa, gerçek tablo/malzeme bağı varsa veya kontrolü
-tamamlayacak gövde sacı yoksa K/R yazılmaz. Diğer API hata kodları ve gövde
-üzerindeki `2` kodu hâlâ hatadır. Günlük, kontrolün gövde sacından
-tamamlandığını gösterir. Hem önizleme hem uygulama bu yolu kullanır.
+Ana şablonda kod `2` varsa gövdede başarılı tablo/malzeme kontrolü gerekir.
+Gövde kod `2` döndürürse yalnızca ana şablon kontrolü başarılı olmuş ve
+gövdenin iki özel parametre bayrağı da kapalıysa ana unsurun doğrulanmış
+durumu kullanılabilir. Gövdedeki başarılı kontrol gerçek tablo veya malzeme
+bağı gösterirse işlem durur. Her iki kaynak kullanılamıyorsa, bağımsız ayarlar
+varsa veya başka hata kodu alınırsa yazılmaz. Bu durumlar önizlemede de aynıdır.
 API imzaları ve enum değerleri [sözleşme kaydında](reports/k-radius/api-contract.json)
 bulunur; gerçek SolidWorks doğrulamasının yerini test nesneleri almaz.
+
+## Çok gövdeli parçalar — 16 Ekim 2026
+
+Tek sac gövdesi yanında normal katılar bulunan parça, gövdenin sac unsuruyla
+bağı doğrulandığında işlenir; normal katılar K/R kapsamı dışında kalır.
+Birden fazla sac gövdesinde ortak ana `TemplateSheetMetal`, aynı gerçek sac
+kalınlığı ve **Tüm bükümlere uygula** gerekir; bu durumda bütün katı gövdeler
+sac olmalıdır. Her sac gövdesinin `IBody2.GetFeatures`
+ile bulunan sac/dönüştürme unsurlarına bağlı olduğu doğrulanır. Bir unsurun
+birden fazla gövde üretmesine izin verilir; gövde ve unsur sayıları eşit olmak
+zorunda değildir.
+
+Farklı kalınlıklar ortak ana ayarla değiştirilmez. Gövde bağı okunamıyorsa
+yazılmaz. Uygulama sonrasında gövde sınıfları/sayıları, sac unsurlarının K/R
+değerleri ve kalınlıklar tekrar kontrol edilir; başarısızlıkta geri alma ve
+gövde kontrolü yapılır. Kullanıcının `ARMJR075001` dosyasının bu koşulları
+sağladığı bu ortamda doğrulanmadı.
+
+113 ilgili K/R arka uç ve COM sözleşmesi kontrolü geçti. Önizlemenin yazmaması,
+kod 2 için doğrulanmış üst/gövde kaynağı, gerçek tablo/malzeme engelleri,
+aynı/farklı kalınlıklı gövdeler, gövde sahipliği, gövde sayısının değişmesi,
+diğer konfigürasyonlar ve hata sonrasında geri alma kontrol edildi.
 
 ## AccessSelections tür uyuşmazlığı düzeltmesi — 15 Ekim 2026
 
@@ -110,8 +134,9 @@ SolidWorks'e `KFactor=0.274`, büküm payı türü `K factor (2)` ve
 `SetSystemValue3` ile yalnız hedef konfigürasyona yazılır; ölçü yoksa
 `BendRadius` unsur tanımı kullanılır. Mevcut sac kalınlığı değiştirilmez. Önceki
 K/R sürümündeki geri okuma, rebuild, konfigürasyonların korunması, hata
-halinde geri alma ve önceki montaja dönüş kontrolleri kullanılır. Çok gövdeli,
-gauge/malzeme tablosuna bağlı parçalar için destek sınırları sürer;
+halinde geri alma ve önceki montaja dönüş kontrolleri kullanılır. Farklı
+kalınlıklı/bağı doğrulanamayan çok gövdeli veya gauge/malzeme tablosuna bağlı
+parçalar için destek sınırları sürer;
 [ayrıntılar](k-factor-radius.md).
 
 **Tüm bükümlere uygula** başlangıçta açıktır. Özel K/R kullanan destekli

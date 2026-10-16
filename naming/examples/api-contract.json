@@ -78,15 +78,21 @@
     "save_error": 4
   },
   "runtime_signature_strategy": {
-    "date": "2026-10-15",
+    "date": "2026-10-16",
     "interop_source": "https://www.nuget.org/packages/SolidWorks.Interop.sldworks/32.1.0",
     "dll_sha256": "8f535bcd3310cfd878781d1581425a07a278c7d7fad0b73f96f57920c88b9df0",
     "interface_guid": "99F4D4AF-F268-4EE1-8C55-041F7BECF879",
     "pack_and_go_guid": "A30DE102-5568-4A39-B7CA-D26B526D293A",
     "dispid": 207,
     "managed_input_parameters": 0,
-    "strategy": "Read live Automation FUNCDESC; normalize dual type info; query IDispatch for IUnknown results; wrap without makepy. Report invocation and wrapping separately.",
+    "strategy": "Request explicit IModelDocExtension dual-interface pointer with QueryInterface(iid, IID_IDispatch); bind GetPackAndGo alone with ITypeComp.Bind for METHOD/PROPERTYGET; resolve types through pywin32 _AddFunc_; normalize native HRESULT/[out, retval] to Automation return; preserve explicit IPackAndGo pointer; no makepy factory.",
     "native_solidworks_verified": false,
-    "reported_user_failure_cause_confirmed": false
+    "reported_user_failure_cause_confirmed": false,
+    "reported_user_errors": {
+      "GetPackAndGo": -2147352561,
+      "type_information": -2147352565
+    },
+    "pywin32_queryinterface_evidence": "com/win32com/src/PyIUnknown.cpp QueryInterface passes the requested pointer directly to the Python wrapper selected by useIID; both SW interfaces are dual.",
+    "typecomp_bind_evidence": "com/win32com/src/extensions/PyIType.cpp ITypeCompBind returns (DESCKIND, FUNCDESC); com/win32com/client/build.py DispatchItem._AddFunc_ resolves user-defined return/argument types."
   }
 }

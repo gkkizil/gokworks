@@ -31,7 +31,7 @@ BEND_DEFAULTS.update(Hem=("UseDefaultBendAllowance",),
 
 
 COM_METHODS = {"GetTemplateSheetMetal", "GetSheetMetalFolder", "GetSheetMetals",
-               "GetFeature", "GetDefinition", "GetCustomBendAllowance"}
+               "GetFeature", "GetDefinition", "GetCustomBendAllowance", "GetFeatures"}
 
 
 def _method_dispatch(obj, member):
@@ -264,7 +264,7 @@ def _tracked_features(model):
     return result
 
 
-def _body_feature(model, parent, kind):
+def _body_feature(model, parent, kind, *, multiple=False):
     if kind == "SheetMetal":
         return parent
     children = [f for f, kind in _features(model, kinds={"SheetMetal"})]
@@ -272,9 +272,40 @@ def _body_feature(model, parent, kind):
         converted = [f for f, _ in _features(model, kinds={CONVERT_SOLID})]
         if len(converted) == 1:
             return converted[0]
+    if multiple and children:
+        thicknesses = [float(_read(_read(child, "GetDefinition"), "Thickness")) for child in children]
+        if not all(math.isclose(t, thicknesses[0], rel_tol=0, abs_tol=1e-10) for t in thicknesses):
+            raise RuntimeError("Sac gövdeleri farklı kalınlıkta; ortak Sac-Levha ayarıyla K/R atanmadı. "
+                               "Kalınlıklar: " + ", ".join(f"{t*1000:g} mm" for t in thicknesses))
+        # Every body's ownership is checked separately. These definitions
+        # share one thickness and therefore the same whole-part K/R target.
+        return children[0]
     if len(children) != 1:
         raise RuntimeError("Tek sac gövdesi için bir aktif SheetMetal alt unsuru gerekir.")
     return children[0]
+
+
+def _body_inventory(model):
+    bodies = tuple(_solid_bodies(model))
+    flags = tuple(_read(body, "IsSheetMetal") for body in bodies)
+    if any(value is None for value in flags):
+        raise RuntimeError("Gövdenin sac metal durumu okunamadı; K/R atanmadı.")
+    return bodies, tuple(bool(value) for value in flags)
+
+
+def _check_body_coverage(model, bodies, flags, *, expected=None):
+    signature = len(bodies), sum(flags)
+    if expected is not None and signature != expected:
+        raise RuntimeError("K/R sonrasında katı/sac gövde sayısı değişti; işlem geri alınıyor.")
+    controllers = {_identity(feature) for feature, _ in
+                   _features(model, kinds={"SheetMetal", CONVERT_SOLID})}
+    for index, (body, sheet) in enumerate(zip(bodies, flags), 1):
+        if not sheet:
+            continue
+        features = _read(body, "GetFeatures")
+        if not features or not any(_identity(feature) in controllers for feature in features if feature is not None):
+            raise RuntimeError(f"{index}. sac gövdesinin SheetMetal/dönüştürme unsuruyla bağı doğrulanamadı; K/R atanmadı.")
+    return signature
 
 
 @dataclass(frozen=True)
@@ -648,16 +679,17 @@ def _rollback(model, snapshots):
         _show_configuration(model, original)
 
 
-def _check_sheet_defaults(definition, *, template=False):
+def _check_sheet_defaults(definition, *, allow_unavailable=False, source=""):
     used, filename = _out(pythoncom.VT_BOOL), _out(pythoncom.VT_BSTR)
     error = _call_byref(definition, "GetUseGaugeTable", used, filename)
-    if template and error == NOT_ENABLED_ON_TEMPLATE:
-        # These output arguments are invalid on a TemplateSheetMetal feature.
-        # The caller must verify the actual SheetMetal body's gauge/material
-        # settings instead; this does not mean the table is unused.
+    if allow_unavailable and error == NOT_ENABLED_ON_TEMPLATE:
+        # Never consume out arguments on an unsuccessful call. The caller
+        # must establish a verified controlling source; code 2 alone does not
+        # prove that gauge/material links are disabled.
         return False
     if error != 0:
-        raise RuntimeError(f"Sac kalınlık tablosu durumu okunamadı; API hata kodu: {error}")
+        raise RuntimeError(f"{source + ': ' if source else ''}Sac kalınlık tablosu durumu okunamadı; "
+                           f"GetUseGaugeTable API hata kodu: {error}")
     if used.value:
         raise RuntimeError("Sac kalınlık tablosuna bağlı parça; önce SolidWorks'te tablo bağını kaldırın.")
     # This property is documented as valid only when GetUseGaugeTable is false.
@@ -667,8 +699,11 @@ def _check_sheet_defaults(definition, *, template=False):
 
 
 def _check_defaults(model, parent, *, normalize=False, notes=None):
+    parent_kind = _feature_kind(parent)
+    parent_label = f"{_read(parent, 'Name')} ({parent_kind})"
     parent_checked = _check_sheet_defaults(_read(parent, "GetDefinition"),
-                                          template=_feature_kind(parent) == TEMPLATE_SHEET)
+                                          allow_unavailable=parent_kind == TEMPLATE_SHEET,
+                                          source=f"Ana sac unsuru {parent_label}")
     body_checked = False
     for feature, kind in _features(model):
         if kind == TEMPLATE_SHEET or kind.endswith("Folder"):
@@ -676,9 +711,18 @@ def _check_defaults(model, parent, *, normalize=False, notes=None):
         if kind == "SheetMetal":
             if _identity(feature) != _identity(parent):
                 definition = _read(feature, "GetDefinition")
-                _check_sheet_defaults(definition)
-                body_checked = True
-                if any(_sheet_overrides(definition)) and not normalize:
+                overrides = _sheet_overrides(definition)
+                # A body whose K/R comes from a verified template need not
+                # expose this template-level gauge API itself. Still consume
+                # and enforce any successful body gauge/material result.
+                inherited = parent_kind == TEMPLATE_SHEET and parent_checked and not any(overrides)
+                checked = _check_sheet_defaults(definition, allow_unavailable=inherited,
+                            source=f"Gövde sac unsuru {_read(feature, 'Name')} ({kind})")
+                body_checked = body_checked or checked
+                if not checked and notes is not None:
+                    notes.append(f"{_read(feature, 'Name')}: tablo API'si kod 2; özel K/R ayarı yok, "
+                                 f"tablo/malzeme durumu ana sac unsurundan doğrulandı ({parent_label}).")
+                if any(overrides) and not normalize:
                     raise RuntimeError(f"{_read(feature, 'Name')}: özel kalınlık/yarıçap veya büküm payı/K parametresi kullanıyor; K/R uygulanmadı.")
             continue
         if kind == CONVERT_SOLID:
@@ -761,6 +805,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
     opened = changed = False
     visibility_changed = False
     snapshots = None
+    body_signature = None
     notes, status, calculation = [], "error", None
     stage = "Parça açma"
     try:
@@ -800,19 +845,35 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         stage = "Konfigürasyon ve sac gövdeleri"
         _show_configuration(model, configuration)
         configuration = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
-        bodies = _solid_bodies(model)
-        if not bodies or (not any(_value(body, "IsSheetMetal") for body in bodies)
+        bodies, body_flags = _body_inventory(model)
+        if not bodies or (not any(body_flags)
                           and not any(_features(model, kinds={CONVERT_SOLID}))):
             raise NotSheetMetal("Sac metal değil.")
-        if len(bodies) != 1:
-            raise RuntimeError("Çok gövdeli parça desteklenmiyor; ayrı sac parçalar kullanın.")
         stage = "Sac unsuru ve kalınlığı"
         feature, parent_kind = _parent(model, notes=notes)
-        body_feature = _body_feature(model, feature, parent_kind)
+        multiple_sheets = sum(body_flags) > 1
+        if len(bodies) > 1:
+            if not any(body_flags):
+                raise RuntimeError("Çok gövdeli dönüşümde sac gövdeleri doğrulanamadı; K/R atanmadı.")
+            if multiple_sheets and (parent_kind != TEMPLATE_SHEET or not recipe.all_bends):
+                raise RuntimeError(f"{sum(body_flags)} sac gövdesi bulundu; ortak ana Sac-Levha ve "
+                                   "Tüm bükümlere uygula seçeneği gerekiyor.")
+            if multiple_sheets:
+                if not all(body_flags):
+                    raise RuntimeError("Birden fazla sac ve normal katı gövde birlikte bulundu; "
+                                       "ortak K/R kapsamı doğrulanamadı.")
+                templates = {_identity(feature)} | {
+                    _identity(item) for item, _ in _features(model, kinds={TEMPLATE_SHEET})}
+                if len(templates) != 1:
+                    raise RuntimeError("Çok gövdeli parçada birden fazla ana Sac-Levha bulundu; K/R atanmadı.")
+            body_signature = _check_body_coverage(model, bodies, body_flags)
+            notes.append(f"Gövde kapsamı: {sum(body_flags)} sac gövdesi; "
+                         f"{len(bodies)-sum(body_flags)} normal katı gövde K/R kapsamı dışında.")
+        body_feature = _body_feature(model, feature, parent_kind, multiple=multiple_sheets)
         body_kind = _feature_kind(body_feature)
         notes.append(f"Gövde sac unsuru: {_read(body_feature, 'Name')} ({body_kind}).")
-        # Single-body support makes this the unique body-level SheetMetal
-        # definition, not the template's potentially different default thickness.
+        # Use a body-level SheetMetal definition, not the template's potentially
+        # different default thickness. Multiple sheet bodies must agree first.
         # Nonmatching manual sheets stop before allowance/override API calls.
         calculation = calculate(float(_read(_read(body_feature, "GetDefinition"),
                                        "SheetThickness" if body_kind == CONVERT_SOLID else "Thickness")) * 1000, recipe)
@@ -885,6 +946,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
             _check_bends(model, bends_before, recipe.all_bends)
             _check_inherited_sheet(model, target, expected_names=inherited_names)
             _check_converted_values(model, target, expected_names=converted_names)
+            if body_signature is not None:
+                current_bodies, current_flags = _body_inventory(model)
+                _check_body_coverage(model, current_bodies, current_flags, expected=body_signature)
             if converted_names:
                 notes.append(f"Katıyı Saca Dönüştür: {len(converted_names)} unsurda K/R ve kalınlık geri okumayla doğrulandı.")
             if save:
@@ -930,6 +994,14 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         if changed and snapshots is not None:
             try:
                 _rollback(model, snapshots)
+                if body_signature is not None:
+                    current_config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
+                    try:
+                        _show_configuration(model, configuration)
+                        current_bodies, current_flags = _body_inventory(model)
+                        _check_body_coverage(model, current_bodies, current_flags, expected=body_signature)
+                    finally:
+                        _show_configuration(model, current_config)
                 notes.append("Önceki K/R değerleri geri yüklendi ve kontrol edildi.")
                 changed = False
             except Exception as rollback_error:

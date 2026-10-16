@@ -83,6 +83,7 @@ class NamingSourceTests(unittest.TestCase):
         self.com = SimpleNamespace(VT_ARRAY=8192, VT_BSTR=8, VT_BYREF=16384,
             VT_VARIANT=12, VT_I4=3, VT_DISPATCH=9, DISPATCH_METHOD=1,
             TKIND_INTERFACE=3, TYPEFLAG_FDUAL=64, IID_IDispatch='IDispatch',
+            MakeIID=lambda value: value,
             CoInitialize=Mock(), CoUninitialize=Mock())
         self.client = SimpleNamespace(VARIANT=Variant, Dispatch=Mock(side_effect=lambda obj: obj),
             dynamic=SimpleNamespace(DumbDispatch=Mock(side_effect=lambda obj: obj)))
@@ -321,13 +322,95 @@ class NamingSourceTests(unittest.TestCase):
         native.GetRefTypeInfo.assert_called_once_with(41)
         builder.assert_called_once_with(automation, attributes, bForUser=0)
 
-    def test_unknown_pack_result_is_queried_for_dispatch_before_wrapping(self):
+    def test_unknown_pack_result_preserves_explicit_pack_interface_before_wrapping(self):
         dispatch = SimpleNamespace(InvokeTypes=Mock(), _FlagAsMethod=Mock())
         unknown = SimpleNamespace(QueryInterface=Mock(return_value=dispatch))
         self.assertIs(naming._pack_result(unknown, (13, 0), ()), dispatch)
-        unknown.QueryInterface.assert_called_once_with('IDispatch')
+        unknown.QueryInterface.assert_called_once_with(naming.PACK_AND_GO_IID, 'IDispatch')
         self.client.dynamic.DumbDispatch.assert_called_once_with(dispatch)
         dispatch._FlagAsMethod.assert_called_once()
+
+    def test_extension_uses_requested_dual_interface_instead_of_default_dispatch(self):
+        app = App(self.folder)
+        pointer = SimpleNamespace(GetIDsOfNames=Mock(return_value=207),
+                                  InvokeTypes=Mock(return_value=Pack(app)))
+        correct = SimpleNamespace(_oleobj_=pointer, _FlagAsMethod=Mock())
+        wrong = SimpleNamespace(QueryInterface=Mock(return_value=correct),
+                                InvokeTypes=Mock(side_effect=AssertionError('Default dispatch invoked')))
+        app.extension._oleobj_ = wrong
+        self.assertEqual(naming.scan(app).root, app.paths[0])
+        wrong.QueryInterface.assert_called_once_with(naming.MODEL_EXTENSION_IID, 'IDispatch')
+        wrong.InvokeTypes.assert_not_called()
+        pointer.InvokeTypes.assert_called_once_with(207, 0, 1, (9, 0), ())
+
+    def test_member_binding_avoids_failing_dual_conversion_and_full_table_enumeration(self):
+        # A valid member remains usable when a server cannot provide the
+        # alternate dual view or an unrelated function descriptor.
+        desc = (207, (), (), 4, 1, 4, 0, 40, (9, 0), 0)
+        entry = SimpleNamespace(dispid=207, names=('GetPackAndGo',), desc=desc)
+        table = SimpleNamespace(mapFuncs={}, propMapGet={})
+        table._AddFunc_ = Mock(side_effect=lambda *args: table.mapFuncs.update(GetPackAndGo=entry))
+        builder = Mock(return_value=table)
+        self.client.build = SimpleNamespace(DispatchItem=builder)
+        info = SimpleNamespace(GetTypeComp=Mock(return_value=SimpleNamespace(
+            Bind=Mock(return_value=(1, desc)))),
+            GetTypeAttr=Mock(side_effect=RuntimeError('Invalid index')),
+            GetDocumentation=lambda member: ('IModelDocExtension',))
+        result = naming._pack_signature(SimpleNamespace(GetTypeInfo=lambda: info), 207)
+        self.assertEqual(result[:3], (1, (9, 0), ()))
+        self.assertIn('çalışan API', result[3])
+        info.GetTypeComp().Bind.assert_called_once_with('GetPackAndGo', 1)
+        info.GetTypeAttr.assert_not_called()
+        builder.assert_called_once_with()
+        table._AddFunc_.assert_called_once_with(info, desc, 0)
+
+    def test_native_retval_is_converted_to_automation_return_without_extra_user_input(self):
+        for result_type in (9, 13):
+            with self.subTest(result_type=result_type):
+                # pywin32 _AddFunc_ has resolved native VT_HRESULT to VT_I4.
+                desc = (207, (), ((16384 | result_type, 2 | 8),), 1, 1, 4, 0, 40, (3, 0), 0)
+                entry = SimpleNamespace(dispid=207, names=('GetPackAndGo',), desc=desc)
+                table = SimpleNamespace(mapFuncs={'GetPackAndGo': entry}, propMapGet={}, _AddFunc_=Mock())
+                self.client.build = SimpleNamespace(DispatchItem=lambda: table)
+                info = SimpleNamespace(GetTypeComp=lambda: SimpleNamespace(Bind=lambda *args: (1, desc)),
+                                       GetDocumentation=lambda member: ('IModelDocExtension',))
+                result = naming._pack_signature(SimpleNamespace(GetTypeInfo=lambda: info), 207)
+                self.assertEqual(result[:3], (1, (result_type, 0), ()))
+
+    def test_member_binding_preserves_live_property_get_invocation(self):
+        desc = (207, (), (), 4, 2, 4, 0, 40, (9, 0), 0)
+        entry = SimpleNamespace(dispid=207, names=('GetPackAndGo',), desc=desc)
+        table = SimpleNamespace(mapFuncs={}, propMapGet={'GetPackAndGo': entry}, _AddFunc_=Mock())
+        self.client.build = SimpleNamespace(DispatchItem=lambda: table)
+        bind = Mock(side_effect=[(0, None), (1, desc)])
+        info = SimpleNamespace(GetTypeComp=lambda: SimpleNamespace(Bind=bind),
+                               GetDocumentation=lambda member: ('IModelDocExtension',))
+        result = naming._pack_signature(SimpleNamespace(GetTypeInfo=lambda: info), 207)
+        self.assertEqual(result[:3], (2, (9, 0), ()))
+        self.assertEqual(bind.call_args_list[0].args, ('GetPackAndGo', 1))
+        self.assertEqual(bind.call_args_list[1].args, ('GetPackAndGo', 2))
+
+    def test_member_binding_survives_invalid_documentation_and_method_binding(self):
+        desc = (207, (), (), 4, 2, 4, 0, 40, (9, 0), 0)
+        entry = SimpleNamespace(dispid=207, names=('GetPackAndGo',), desc=desc)
+        table = SimpleNamespace(mapFuncs={}, propMapGet={'GetPackAndGo': entry}, _AddFunc_=Mock())
+        self.client.build = SimpleNamespace(DispatchItem=lambda: table)
+        bind = Mock(side_effect=[RuntimeError('Invalid index'), (1, desc)])
+        info = SimpleNamespace(GetTypeComp=lambda: SimpleNamespace(Bind=bind),
+                              GetDocumentation=Mock(side_effect=RuntimeError('Invalid index')))
+        result = naming._pack_signature(SimpleNamespace(GetTypeInfo=lambda: info), 207)
+        self.assertEqual(result[:3], (2, (9, 0), ()))
+        self.assertIn('ITypeComp.Bind', result[3])
+        self.assertIn('çalışan API', result[3])
+
+    def test_wrong_extension_interface_fails_before_pack_call_or_source_write(self):
+        app = App(self.folder)
+        ole = SimpleNamespace(QueryInterface=Mock(side_effect=RuntimeError('No interface')),
+                              InvokeTypes=Mock())
+        app.extension._oleobj_ = ole
+        with self.assertRaisesRegex(RuntimeError, 'ModelDocExtension okunamadı.*No interface'):
+            naming.scan(app)
+        ole.InvokeTypes.assert_not_called()
 
     def test_pack_and_go_wrap_failure_is_distinct_from_native_call_failure(self):
         app = App(self.folder)
