@@ -14,6 +14,7 @@ from gui.rendering import configure_changed, hide_grid
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT)
 from iso_fits.diagram import draw
+from iso_fits.selection_diagram import draw_selection
 from iso_fits.manual import (calculate_manual, compare_classes, usage_hint,
                              TARGETS, closest_pair, closest_classes, compatibility)
 from iso_fits.rules import (classes, calculate, PRESETS, CLASSIFICATION,
@@ -24,6 +25,9 @@ VIEWS = ('Montaj kesiti', 'Tolerans bölgeleri')
 METHODS = ('ISO seçimi', 'Manuel kontrol')
 BASES = ('Tümü', 'Delik esaslı', 'Mil esaslı')
 COLORS = {'clearance': SUCCESS, 'transition': AMBER, 'interference': RED}
+SECTION_HELP = ('D: delik çapı · d: mil çapı · g: tek taraftaki boşluk / çakışma.\n'
+                'Kesit eş merkezli ve ölçeksizdir; küçük farklar görünür çizilir.\n'
+                'Kırmızı alan: deformasyon öncesi boyutsal çakışma.')
 SOURCE_TEXT = '''ISO 286 · Delik ve mil geçmeleri
 
 Nominal çap, delik ve mil için ortak ana ölçüdür. Bu ekran 1–400 mm aralığında, tablolarla doğrulanan 11 delik ve 18 mil sınıfını sunar. Delik sınıfı büyük harfle, mil sınıfı küçük harfle gösterilir. Örneğin H7/h6, H7 deliği ile h6 milinin eşleşmesidir.
@@ -128,8 +132,10 @@ class IsoFitsView:
         self.iso_widgets['unit'].grid(row=0, column=1, sticky='e')
         self.iso_widgets['basis'] = self._iso_menu(toolbar, 'basis', BASES, width=200)
         self.iso_widgets['basis'].grid(row=1, column=0, columnspan=2, sticky='ew', pady=(8, 4))
-        self._label(toolbar, 'Delik esası: H… / mil esası: …/h\nGeçme türü seçilen çapa göre hesaplanır.',
-                    10, MUTED, justify='left').grid(row=2, column=0, columnspan=2, sticky='w', pady=(2, 0))
+        basis_help = self._label(toolbar, 'Delik esası: H… / mil esası: …/h\nGeçme türü seçilen çapa göre hesaplanır.',
+                    10, MUTED, justify='left')
+        basis_help.grid(row=2, column=0, columnspan=2, sticky='w', pady=(2, 0))
+        self.iso_widgets['basis_help'] = basis_help
         self.iso_search = tk.StringVar(self, value='')
         search_frame = ctk.CTkFrame(form, fg_color='transparent')
         search_frame.grid(row=4, column=0, sticky='ew', padx=16, pady=(8, 8))
@@ -138,6 +144,10 @@ class IsoFitsView:
         self.iso_widgets['search'] = ctk.CTkEntry(search_frame, textvariable=self.iso_search, height=36, fg_color=INPUT,
                                                 text_color=TEXT, border_color=BORDER, font=(UI_FONT, 11))
         self.iso_widgets['search'].grid(row=0, column=1, sticky='ew')
+        filters = self._button(search_frame, 'Filtreler', self._toggle_iso_filters, width=66)
+        filters.configure(height=30)
+        filters.grid(row=0, column=2, padx=(6, 0))
+        self.iso_widgets['filters'] = filters
         presets = ctk.CTkScrollableFrame(form, fg_color='transparent', corner_radius=0,
                                         scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         presets.grid(row=5, column=0, sticky='nsew', padx=(8, 4), pady=(0, 8))
@@ -151,8 +161,9 @@ class IsoFitsView:
         self.iso_widgets['preset_buttons'] = {}
         for preset in PRESETS:
             button = ctk.CTkButton(presets, text=f'{preset.code}\n{preset.label}', command=lambda p=preset: self._select_iso_preset(p),
-                                   height=54, anchor='w', corner_radius=7, border_width=1, border_color=BORDER,
+                                   height=50, anchor='w', corner_radius=8, border_width=0, border_color=BORDER,
                                    fg_color='transparent', hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 12, 'bold'))
+            button._text_label.configure(justify='left')
             self.iso_widgets['preset_buttons'][preset.code] = button
         self.iso_widgets['iso_inputs'] = (selectors, toolbar, search_frame, presets)
         self._build_manual_inputs(form)
@@ -163,6 +174,7 @@ class IsoFitsView:
         details._scrollbar.configure(width=8, height=24)
         self.iso_widgets['details'] = details
         diagram = self._iso_card(details)
+        self.iso_widgets['diagram'] = diagram
         diagram.grid(row=1, column=0, sticky='ew', pady=(0, 12))
         diagram.grid_columnconfigure(0, weight=1)
         views = ctk.CTkSegmentedButton(diagram, variable=self.iso_state['view'], values=list(VIEWS),
@@ -180,16 +192,15 @@ class IsoFitsView:
                                          unselected_hover_color=HOVER, text_color=TEXT, font=(UI_FONT, 10))
         samples.grid(row=2, column=0, sticky='ew', padx=14, pady=(8, 4))
         self.iso_widgets['sample'] = samples
-        self.iso_widgets['section_help'] = self._label(diagram,
-            'D: delik çapı · d: mil çapı · g: tek taraftaki boşluk / çakışma.\n'
-            'Kesit eş merkezli ve ölçeksizdir; küçük farklar görünür çizilir.\n'
-            'Kırmızı alan: deformasyon öncesi boyutsal çakışma.', 10, MUTED, wraplength=400)
+        self.iso_widgets['section_help'] = self._label(diagram, SECTION_HELP, 10, MUTED, wraplength=400)
         self.iso_widgets['section_help'].grid(row=3, column=0, padx=14, pady=(2, 10))
         result = self._iso_card(details)
+        self.iso_widgets['result_card'] = result
         result.grid(row=0, column=0, sticky='ew', pady=(0, 12))
         result.grid_columnconfigure((0, 1), weight=1)
-        self._label(result, 'Geçme sonucu · delik − mil', 11, MUTED, True).grid(
-            row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 0))
+        caption = self._label(result, 'Geçme sonucu · delik − mil', 11, MUTED, True)
+        caption.grid(row=0, column=0, columnspan=2, sticky='w', padx=14, pady=(12, 0))
+        self.iso_widgets['result_caption'] = caption
         self.iso_widgets['kind'] = self._label(result, '', 18, bold=True)
         self.iso_widgets['kind'].grid(row=1, column=0, columnspan=2, sticky='w', padx=14, pady=(6, 8))
         for column, key in enumerate(('minimum', 'maximum')):
@@ -370,11 +381,7 @@ class IsoFitsView:
 
     def _update_iso_result(self):
         manual = self.iso_state['method'].get() == 'Manuel kontrol'
-        for widget in self.iso_widgets['iso_inputs']:
-            hide_grid(widget) if manual else widget.grid()
-        self.iso_widgets['manual_inputs'].grid() if manual else hide_grid(self.iso_widgets['manual_inputs'])
-        self.iso_widgets['comparison'].grid() if manual else hide_grid(self.iso_widgets['comparison'])
-        self.iso_widgets['assessment'].grid() if manual else hide_grid(self.iso_widgets['assessment'])
+        self._layout_iso_presentation(manual)
         try:
             if manual:
                 fit = calculate_manual(self.iso_state['diameter'].get(),
@@ -442,7 +449,7 @@ class IsoFitsView:
         signed_limits = (f'Cmin = {format_deviation(fit.minimum_clearance_nm, unit)} · '
                          f'Cmax = {format_deviation(fit.maximum_clearance_nm, unit)}\n'
                          'C = delik − mil: (+) boşluk, (−) sıkılık, 0 temas.\n')
-        configure_changed(self.iso_widgets['explanation'], text=signed_limits+explanation)
+        configure_changed(self.iso_widgets['explanation'], text=(signed_limits if manual else '')+explanation)
         for key, band in [('hole', fit.hole), ('shaft', fit.shaft)]:
             configure_changed(self.iso_widgets[key+'_limits'], text=f'{format_mm(band.minimum_mm)} / {format_mm(band.maximum_mm)} mm')
             configure_changed(self.iso_widgets[key+'_deviations'], text=f'{format_deviation(band.lower_nm, unit)} / {format_deviation(band.upper_nm, unit)}')
@@ -453,21 +460,60 @@ class IsoFitsView:
         self._filter_iso_presets()
         self._draw_iso_diagram()
 
+    def _toggle_iso_filters(self):
+        self.iso_widgets['filters_open'] = not self.iso_widgets.get('filters_open', False)
+        self._layout_iso_presentation(False)
+        self._resize_pdf_area()
+
+    def _layout_iso_presentation(self, manual):
+        widgets = self.iso_widgets
+        expanded = widgets.get('filters_open', False)
+        key = manual, expanded, self.iso_state['basis'].get()
+        if widgets.get('presentation_key') == key:
+            return
+        for widget in widgets['iso_inputs']:
+            hide_grid(widget) if manual else widget.grid()
+        for name in ('manual_inputs', 'comparison', 'assessment'):
+            widgets[name].grid() if manual else hide_grid(widgets[name])
+        for name in ('basis', 'basis_help'):
+            widgets[name].grid() if not manual and expanded else hide_grid(widgets[name])
+        configure_changed(widgets['filters'], text='Kapat' if expanded else
+                          'Filtreli' if self.iso_state['basis'].get() != 'Tümü' else 'Filtreler')
+        # Only ISO selection changes presentation. Restore the exact existing
+        # manual card layout whenever the user returns to manual tolerances.
+        widgets['diagram'].grid_configure(row=1 if manual else 0)
+        widgets['result_card'].grid_configure(row=0 if manual else 1)
+        widgets['result_caption'].grid_configure(columnspan=2 if manual else 1)
+        configure_changed(widgets['result_caption'], text='Geçme sonucu · delik − mil' if manual else 'GEÇME SONUCU')
+        widgets['kind'].grid_configure(row=1 if manual else 0, column=0 if manual else 1,
+            columnspan=2 if manual else 1, sticky='w' if manual else 'e',
+            pady=(6, 8) if manual else (10, 8))
+        for name in ('minimum', 'maximum'):
+            widgets[name+'_title'].grid_configure(row=2 if manual else 1)
+            widgets[name].grid_configure(row=3 if manual else 2)
+        widgets['presentation_key'] = key
+
     def _draw_iso_diagram(self):
         canvas = self.iso_widgets['canvas']
         scale = self.workspace._get_widget_scaling()
         section = self.iso_state['view'].get() == 'Montaj kesiti'
-        configure_changed(canvas, height=round((310 if section else 220)*scale))
+        manual = self.iso_state['method'].get() == 'Manuel kontrol'
+        configure_changed(canvas, height=round((310 if manual else 260)*scale) if section else round(220*scale))
         help_label = self.iso_widgets['section_help']
+        configure_changed(help_label, text=SECTION_HELP if manual else
+                          'Şematik kesit · Küçük boşluk ve sıkılıklar görünürlük için büyütülür.')
         if section and not help_label.winfo_manager():
             help_label.grid()
         elif not section and help_label.winfo_manager():
             hide_grid(help_label)
         state = (self.iso_result, self.iso_state['view'].get(), self.iso_state['sample'].get(),
                  ctk.get_appearance_mode(), self.workspace._get_widget_scaling(),
-                 canvas.winfo_width(), canvas.winfo_height())
+                 canvas.winfo_width(), canvas.winfo_height(), manual)
         if getattr(canvas, '_drawing_state', None) != state:
-            draw(canvas, *state[:5])
+            if section and not manual:
+                draw_selection(canvas, self.iso_result, state[3], scale, self.iso_state['sample'].get())
+            else:
+                draw(canvas, *state[:5])
             canvas._drawing_state = state
 
     def _resize_iso_workspace(self):

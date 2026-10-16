@@ -10,7 +10,7 @@ from support.gui import GuiTestCase
 
 from gui.theme import INPUT
 from iso_fits import rules
-from iso_fits.window import SAMPLES, VIEWS
+from iso_fits.window import SAMPLES, VIEWS, SECTION_HELP
 
 
 class IsoRulesTests(unittest.TestCase):
@@ -104,6 +104,46 @@ class IsoGuiTests(GuiTestCase):
     def iso(self):
         self.app.nav_buttons['iso_fits'].invoke()
         self.settle()
+
+    def test_minimal_selection_keeps_samples_filters_and_manual_panels(self):
+        self.iso()
+        widgets = self.app.iso_widgets
+        self.assertFalse(widgets['basis'].winfo_viewable())
+        self.assertTrue(widgets['view'].winfo_viewable())
+        self.assertTrue(widgets['sample'].winfo_viewable())
+        self.assertEqual(widgets['diagram'].grid_info()['row'], 0)
+        widgets['filters'].invoke()
+        self.assertTrue(widgets['basis'].winfo_manager())
+        self.app.iso_state['basis'].set('Mil esaslı')
+        visible = [p for p in rules.PRESETS if widgets['preset_buttons'][p.code].winfo_manager()]
+        self.assertTrue(visible)
+        self.assertTrue(all(p.basis == 'Mil esaslı' for p in visible))
+        widgets['filters'].invoke()
+        self.assertEqual(widgets['filters'].cget('text'), 'Filtreli')
+        self.app.iso_state['method'].set('Manuel kontrol')
+        self.assertEqual(widgets['diagram'].grid_info()['row'], 1)
+        self.assertEqual(widgets['result_card'].grid_info()['row'], 0)
+        for key in ('manual_inputs', 'comparison', 'assessment'):
+            self.assertTrue(widgets[key].winfo_manager())
+        self.assertEqual(widgets['section_help'].cget('text'), SECTION_HELP)
+
+    def test_compact_iso_section_uses_exact_selected_sample_and_keeps_overall_kind(self):
+        self.iso()
+        self.app.iso_state['hole'].set('H7')
+        self.app.iso_state['shaft'].set('k6')
+        fit = self.app.iso_result
+        canvas = self.app.iso_widgets['canvas']
+        for sample, tag in ((SAMPLES[0], 'overlap'), (SAMPLES[2], 'clearance')):
+            self.app.iso_state['sample'].set(sample)
+            self.app.update()
+            self.assertIs(self.app.iso_result, fit)
+            self.assertEqual(len(canvas.find_withtag(tag)), 2)
+            self.assertEqual(self.app.iso_widgets['kind'].cget('text'), 'Ara geçme')
+            hole, shaft = fit.sample(sample)
+            text = ' '.join(canvas.itemcget(item, 'text') for item in canvas.find_all()
+                            if canvas.type(item) == 'text')
+            self.assertIn(rules.format_mm(hole), text)
+            self.assertIn(rules.format_mm(shaft), text)
 
     def test_default_and_every_preset(self):
         self.iso()

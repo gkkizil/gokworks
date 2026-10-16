@@ -1,5 +1,26 @@
 # ISO geçme toleransları
 
+## ISO seçiminde sade görünüm — 16 Ekim 2026
+
+**Montaj kesiti / Tolerans bölgeleri** ve **En az boşluk / Orta değer / En çok
+boşluk** seçimleri korunur. ISO seçiminde kesit üste alınır, daha az çizgi ve
+etiketle gösterilir; sonuç kartı ve ölçü sınırları yerinde kalır. Tekrar eden
+açıklamalar kısaltılır. Delik/mil esaslı filtre **Filtreler** düğmesiyle açılır;
+filtre kapatıldığında seçili esas korunur ve düğmede **Filtreli** yazılır.
+
+**Manuel kontrol** ekranının girdileri, montaj uyumu, ISO karşılaştırması,
+ölçü sınırları, ayrıntılı kesiti ve yerleşimi değişmedi. 1440×900, %100 ölçekte
+açık ve koyu tema için önce/sonra ekran pikselleri aynı çıktı; kayıt
+[burada](test-results/iso-minimal.json). Hesap tabloları, CSV/pano hassasiyeti ve
+üç örneğin gerçek ölçüleri değişmedi. Yeni kesit de ölçeksizdir ve montaj
+kuvveti/sıcaklık yöntemi önermez.
+
+[Koyu görünüm](screenshots/iso-minimal-dark.png) ·
+[Açık görünüm](screenshots/iso-minimal-light.png) ·
+[Önce/sonra](screenshots/iso-minimal-comparison.png)
+
+## Kullanım
+
 Yan menüde **ISO GEÇMELERİ** ekranı bulunur. Nominal çapı yazın, delik ve mil sınıfını seçin veya soldaki delik/mil esaslı eşleşme örneklerinden birine tıklayın. Virgül ve nokta kabul edilir. Hesap SolidWorks bağlantısı olmadan çalışır; CAD parametrelerini değiştirmez.
 
 Delik/mil alt ve üst ölçüleri, EI/ES ve ei/es sapmaları, boşluk veya sıkılık sınırları gösterilir. **mm / µm** seçimi sapma ve geçme sonuçlarının birimini değiştirir; nominal çap ve parça ölçüleri mm olarak kalır. **CSV kaydet** UTF-8 BOM, noktalı virgül ve ondalık virgülle Excel'e uygun rapor oluşturur. **Sonucu kopyala** bütün sayısal sonuçları panoya verir. Tema ve seçimler yeniden açılışta korunur.

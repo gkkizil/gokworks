@@ -163,6 +163,7 @@ class ManualIsoRulesTests(unittest.TestCase):
 class ManualIsoGuiTests(GuiTestCase):
     def manual(self):
         self.app.nav_buttons['iso_fits'].invoke()
+        self.pump_until(lambda: self.app.mode == 'iso_fits')
         self.app.iso_widgets['method']._buttons_dict['Manuel kontrol'].invoke()
         self.settle()
 

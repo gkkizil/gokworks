@@ -1,11 +1,11 @@
-"""Section dimensions, radial differences and selected/overall fit states."""
+"""Preserved manual section dimensions, radial differences and sample states."""
 
 import unittest
 
 import customtkinter as ctk
 from support.gui import GuiTestCase
 
-from iso_fits.rules import format_mm
+from iso_fits.rules import format_mm, format_deviation
 from iso_fits.window import SAMPLES
 
 
@@ -16,6 +16,14 @@ class IsoSectionTests(GuiTestCase):
         self.app._switch_mode('iso_fits')
         self.app.iso_state['hole'].set(hole)
         self.app.iso_state['shaft'].set(shaft)
+        fit = self.app.iso_result
+        # Detailed diameter/radial annotations remain in the manual screen.
+        # Exercise identical limit bands there after the ISO-only simplification.
+        self.app.iso_state['method'].set('Manuel kontrol')
+        self.app._set_manual_inputs([
+            (key, format_deviation(value).split(' ')[0]) for key, value in (
+                ('hole_lower', fit.hole.lower_nm), ('hole_upper', fit.hole.upper_nm),
+                ('shaft_lower', fit.shaft.lower_nm), ('shaft_upper', fit.shaft.upper_nm))])
         self.settle()
         return self.app.iso_widgets['canvas']
 

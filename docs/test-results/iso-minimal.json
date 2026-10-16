@@ -1,0 +1,26 @@
+{
+  "viewport": [
+    1440,
+    900
+  ],
+  "dpi": 1,
+  "manual_preservation": {
+    "Açık": {
+      "pixel_difference_bbox": null,
+      "pixel_sha256_before": "caf31949553e17705514c0c812785b4752f1266fd464dd7ab2ef8888a981ee50",
+      "pixel_sha256_after": "caf31949553e17705514c0c812785b4752f1266fd464dd7ab2ef8888a981ee50"
+    },
+    "Koyu": {
+      "pixel_difference_bbox": null,
+      "pixel_sha256_before": "a25f09b18b7aae51244bc5fecca3da289c40b3d1229605976cde2c2298eb6956",
+      "pixel_sha256_after": "a25f09b18b7aae51244bc5fecca3da289c40b3d1229605976cde2c2298eb6956"
+    }
+  },
+  "native_solidworks_used": false,
+  "platform": "Linux/Xvfb",
+  "scope": "ISO-only visual simplification; keep view/sample selectors and existing result sections.",
+  "screenshots": [
+    "docs/screenshots/iso-minimal-dark.png",
+    "docs/screenshots/iso-minimal-light.png"
+  ]
+}
