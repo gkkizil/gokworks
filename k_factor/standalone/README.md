@@ -1,9 +1,9 @@
 # Bağımsız K/R denemesi: C# → Python
 
 <!-- kr-windows-release:start -->
-**Windows paketi:** [K/R deneme aracını indir](https://github.com/gkkizil/gokworks/actions/runs/38899468539/artifacts/12045127794). ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. İki EXE aynı klasörde kalsın. Python ve .NET kurulumu gerekmez.
+**Windows paketi:** [K/R deneme aracını indir](https://github.com/gkkizil/gokworks/actions/runs/38902089258/artifacts/12047305175). ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. Alt klasörleri koruyun; EXE’yi tek başına taşımayın. Python ve .NET kurulumu gerekmez.
 
-[Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/38899468539) · Kaynak: `8a2d899` · [SHA256 ve açılış kontrolü](windows-build-status.json)
+[Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/38902089258) · Kaynak: `8b94bd9` · [SHA256, Defender taraması ve açılış kontrolü](windows-build-status.json)
 <!-- kr-windows-release:end -->
 
 ## EXE ile kullanım
