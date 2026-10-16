@@ -167,7 +167,7 @@ class NamingView:
                                               width=134, icon='copy')
         widgets['copy_error'].configure(height=30)
         widgets['copy_error'].grid(row=1, column=0, sticky='w', pady=(4, 0))
-        widgets['copy_error'].grid_remove()
+        hide_grid(widgets['copy_error'])
         self.progress = ctk.CTkProgressBar(self.workspace, height=3)
         self.progress.grid(row=5, column=0, sticky='ew', padx=24, pady=(0, 12))
         self.progress.set(0)
@@ -531,7 +531,7 @@ class NamingView:
         self.busy = value
         if value:
             self.naming_widgets.pop('last_error', None)
-            self.naming_widgets['copy_error'].grid_remove()
+            hide_grid(self.naming_widgets['copy_error'])
         for button in self.nav_buttons.values():
             button.configure(state='disabled' if value else 'normal')
         for key in ('scan', 'browse', 'reset', 'source_browse', 'assembly', *self.naming_state):

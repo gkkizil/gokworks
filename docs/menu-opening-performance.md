@@ -1,5 +1,7 @@
 # Menü ve sekme geçişleri — 15 Ekim 2026
 
+16 Ekim'de pencere boyutlandırma akışı da düzenlendi: saklanan sayfalar artık son boyutlarında kalıyor, yalnız açık sayfa esniyor. Mimari ve önce/sonra ölçümü için [pencere boyutlandırma notu](window-resizing.md).
+
 ## Güncel mimari: gezinmeden önce hazırlık
 
 Normal uygulama açılışında dokuz çalışma alanı sade bir ilerleme göstergesi altında ana Tk iş parçacığında kurulup gerçek pencere boyutunda çiziliyor. Hazırlık tamamlanınca PDF sayfası açılıyor. Böylece kullanıcı menüler arasında dolaşırken yeni sayfa kurulumu veya 700 ms aralıklarla çalışan ağır arka plan hazırlığı devreye girmiyor. Kurulum maliyeti kaldırılmadı; başlangıca taşındı.

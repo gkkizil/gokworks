@@ -27,6 +27,7 @@ from naming.window import NamingView
 from gui.icons import make_icon, set_window_icon, set_windows_app_identity
 from gui.typography import check_turkish_fonts
 from gui.rendering import configure_changed, hide_grid
+from gui.window_geometry import configure_window_geometry
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
                        NAV_ACTIVE, NAV_ACCENT, NAV_MUTED, NAV_HOVER,
@@ -86,11 +87,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             raise
         set_window_icon(self)
         self.title("GOKWORKS • SolidWorks otomasyonu")
-        window_scale = self._get_window_scaling()
-        width = min(1240, max(1000, int(self.winfo_screenwidth()/window_scale)-24))
-        height = min(860, max(690, int(self.winfo_screenheight()/window_scale)-32))
-        self.geometry(f"{width}x{height}")
-        self.minsize(1000, 690)
+        configure_window_geometry(self)
         self.configure(fg_color=BG)
         self.settings_path = settings_path
         self.mode = "pdf"
@@ -188,7 +185,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             self._build_window()
             self._remember_page()
             self.workspace.unbind('<Configure>')
-            hide_grid(self.workspace)
+            self._hide_workspace(self.workspace)
         except Exception:
             if self.workspace is not active['workspace']:
                 self._cancel_widget_callbacks(self.workspace)
@@ -277,22 +274,25 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
                 self.workspace.lower(active_workspace)
                 if not self.workspace.winfo_manager():
                     self._show_workspace()
+                else:
+                    self._resume_workspace(self.workspace)
                 self.update_idletasks()
                 self._resize_pdf_area(immediate=True)
                 self.update_idletasks()
                 self.workspace._navigation_layout = self._navigation_layout_key()
-            cover = getattr(self, '_startup_cover', None)
-            if cover is None:
-                self.workspace.tkraise()
             else:
-                self.workspace.lower(cover)
+                self._resume_workspace(self.workspace)
+            # The viewport clips parked pages and remains below the root's
+            # startup cover. Only siblings inside that viewport are raised.
+            self.workspace.tkraise()
+            self._park_workspace(active_workspace)
             # Keep previously visited native windows mapped beneath the new
             # page. Unmapping/recreating their Windows surfaces on every click
             # caused a cascade of Configure and expose events.
         except Exception:
             if self.workspace is not active_workspace:
                 if cached:
-                    hide_grid(self.workspace)
+                    self._hide_workspace(self.workspace)
                 else:
                     self._pages.pop(mode, None)
                     self._cancel_widget_callbacks(self.workspace)
@@ -595,6 +595,8 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
     def _resize_pdf_area(self, event=None, *, immediate=False):
         if self._closed:
             return
+        if event is not None:
+            self._note_ui_activity()
         callbacks = {
             'weight': self._resize_weight_workspace,
             'naming': self._resize_naming_workspace,
@@ -605,16 +607,21 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         }
         callback = callbacks.get(self.mode, self._fit_pdf_settings)
         if self.mode not in callbacks:
-            wrap = max(240, self.workspace.winfo_width() - 56)
+            wrap = max(240, self.workspace.winfo_width()/self.workspace._get_widget_scaling() - 56)
             configure_changed(self.status_label, wraplength=wrap)
         previous = getattr(self, '_layout_fit_id', None)
         if previous is not None:
+            if not immediate:
+                return
             self.after_cancel(previous)
         self._layout_fit_id = None
         if immediate:
             callback()
         else:
-            self._layout_fit_id = self.after(35, callback)
+            # Throttle, rather than restarting a trailing debounce on every
+            # Configure. The layout follows a live resize instead of waiting
+            # for the user to release the window border.
+            self._layout_fit_id = self.after(16, callback)
 
     def _fit_pdf_settings(self):
         self._layout_fit_id = None
@@ -623,8 +630,21 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
         scale = self.settings_body._get_widget_scaling()
         if getattr(self, "_table_style_key", None) != (ctk.get_appearance_mode(), scale):
             self._configure_table_style()
+        compact = self.workspace.winfo_height()/scale < 740
+        header_changed = getattr(self.pdf_header, '_compact', None) != compact
+        if header_changed:
+            for key, row in (('eyebrow', 0), ('subtitle', 2)):
+                label = self.pdf_header._labels[key]
+                if compact:
+                    hide_grid(label)
+                else:
+                    label.grid(row=row, column=1, sticky='w', pady=(0, 3 if row == 0 else 0))
+            self.pdf_header._compact = compact
         if self.mode == 'k_factor':
-            return self._resize_k_workspace()
+            self._resize_k_workspace()
+            if header_changed:
+                self._layout_fit_id = self.after(16, self._fit_pdf_settings)
+            return
         width = self.workspace.winfo_width()/scale
         form_width = max(288, min(350, (width-60)*.35))
         width_changed = abs(self.form_panel.cget("width")-form_width) > .5
@@ -640,20 +660,23 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             scrollbar.grid()
         elif not needs_scroll and scrollbar.winfo_manager():
             hide_grid(scrollbar)
-        if width_changed:
-            self._layout_fit_id = self.after(40, self._fit_pdf_settings)
+        if width_changed or header_changed:
+            self._layout_fit_id = self.after(16, self._fit_pdf_settings)
 
     def _fit_results_toolbar(self, result_width):
         key = (round(result_width), self.workspace._get_widget_scaling())
         if getattr(self.files_toolbar, '_layout_key', None) == key:
             return
         self.files_toolbar._layout_key = key
-        self.results_title.configure(wraplength=max(90, result_width-190))
-        self.results_hint.configure(wraplength=max(100, result_width-135))
-        self.empty_hint.configure(wraplength=max(150, min(360, result_width-80)))
+        configure_changed(self.results_title, wraplength=max(90, result_width-190))
+        configure_changed(self.results_hint, wraplength=max(100, result_width-135))
+        configure_changed(self.empty_hint, wraplength=max(150, min(360, result_width-80)))
         # Search keeps the full width when the result panel is narrow; filters
         # move to the next row instead of forcing controls beyond the viewport.
         narrow = result_width < 560
+        if getattr(self.files_toolbar, '_narrow', None) == narrow:
+            return
+        self.files_toolbar._narrow = narrow
         search = self.search_entry.master
         search.grid(row=0, column=0, columnspan=3 if narrow else 1, sticky="ew",
                               padx=(0, 0 if narrow else 8), pady=(0, 6 if narrow else 0))

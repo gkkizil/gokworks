@@ -50,7 +50,7 @@ class MenuRenderingTests(GuiTestCase):
 
     def assert_active_page_on_top(self):
         pages = {page['workspace'] for page in self.app._pages.values()}
-        stack = [child for child in self.app.winfo_children()
+        stack = [child for child in self.app.viewport.winfo_children()
                  if child in pages and child.winfo_manager()]
         self.assertIs(stack[-1], self.app.workspace)
 
@@ -266,7 +266,7 @@ class MenuRenderingTests(GuiTestCase):
             ctk.set_widget_scaling(scale)
             self.settle()
             for mode, page in self.app._pages.items():
-                self.assertEqual(page['workspace'].winfo_manager(), 'grid' if mode in ('pdf', active) else '')
+                self.assertEqual(page['workspace'].winfo_manager(), 'place' if mode in ('pdf', active) else '')
             self.assert_active_page_on_top()
 
     def test_preloading_preserves_active_iso_manual_state(self):

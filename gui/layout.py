@@ -5,6 +5,7 @@ from tkinter import ttk
 import customtkinter as ctk
 
 from gui.icons import make_logo
+from gui.rendering import configure_changed
 from gui.text import BOM_TITLE, KR_TITLE, KR_NAV_TITLE
 from gui.theme import (BG, SIDEBAR, PANEL, INPUT, BORDER, TEXT, MUTED, ACCENT,
                        ACCENT_BG, SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT, MONO_FONT,
@@ -41,14 +42,41 @@ class WorkspaceLayout:
     def _workspace_shell(self):
         # CTk scrollbars flush idle geometry during construction. Keep the page
         # unmapped until complete so each child does not relayout the window.
-        return ctk.CTkFrame(self, fg_color=BG, corner_radius=0, border_width=0)
+        workspace = ctk.CTkFrame(self.viewport, fg_color=BG, corner_radius=0, border_width=0)
+        # The viewport owns the page size. Children must not change a cached
+        # page's requested size while it is parked beneath the current page.
+        workspace.grid_propagate(False)
+        return workspace
 
     def _show_workspace(self):
-        self.workspace.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=16)
+        self._resume_workspace(self.workspace)
+
+    def _resume_workspace(self, workspace):
+        workspace.place(in_=self.viewport, x=0, y=0, relwidth=1, relheight=1)
+
+    def _park_workspace(self, workspace):
+        # Retain the native surface and its current pixels for quick menu
+        # switches, but stop resizing every background page with the window.
+        scale = workspace._get_widget_scaling()
+        configure_changed(workspace, width=workspace.winfo_width()/scale,
+                          height=workspace.winfo_height()/scale)
+        workspace.place(in_=self.viewport, x=0, y=0, relwidth='', relheight='')
+
+    @staticmethod
+    def _hide_workspace(workspace):
+        if workspace.winfo_manager() == 'place':
+            workspace.place_forget()
+        else:
+            from gui.rendering import hide_grid
+            hide_grid(workspace)
 
     def _build_window(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
+        if not hasattr(self, 'viewport'):
+            self.viewport = ctk.CTkFrame(self, width=1, height=1, fg_color=BG, corner_radius=0)
+            self.viewport.grid(row=0, column=1, sticky='nsew', padx=(0, 20), pady=16)
+            self.viewport.grid_propagate(False)
         if not hasattr(self, "sidebar"):
             self._build_sidebar()
         if self.mode == 'bolt':
@@ -171,16 +199,18 @@ class WorkspaceLayout:
     def _resize_sidebar(self, event=None):
         if self._closed:
             return
-        compact = self.sidebar.winfo_height()/self.sidebar._get_widget_scaling() < 780
-        if getattr(self, '_sidebar_compact', None) == compact:
+        height = self.sidebar.winfo_height()/self.sidebar._get_widget_scaling()
+        compact, short = height < 780, height < 650
+        density = compact, short
+        if getattr(self, '_sidebar_density', None) == density:
             return
-        self._sidebar_compact = compact
+        self._sidebar_density = density
         self.sidebar_brand.grid_configure(pady=(8, 10) if compact else (18, 18))
         self.sidebar_category.grid_configure(pady=(0, 6) if compact else (0, 10))
         self.navigation_section.grid_configure(pady=(12, 8) if compact else (22, 10))
         self.sidebar_footer.grid_configure(pady=8 if compact else 16)
         for button in self.nav_buttons.values():
-            button.configure(height=36 if compact else 44)
+            button.configure(height=30 if short else 36 if compact else 44)
             button.grid_configure(pady=(0, 2 if compact else 4))
         if compact:
             from gui.rendering import hide_grid
@@ -214,10 +244,11 @@ class WorkspaceLayout:
         subtitle = ("Girdiğiniz K ve R değerlerini parçaların Sac-Levha parametrelerine yazın." if self.mode == "k_factor" else
                     "Her teknik resmin tüm sayfalarını tek PDF dosyasına aktarın." if self._is_pdf else
                     "Sac açınımlarını kalınlık ve montaj adediyle adlandırıp kaydedin.")
-        self.pdf_header, actions, _ = self._page_header(
+        self.pdf_header, actions, labels = self._page_header(
             KR_TITLE if self.mode == "k_factor" else "PDF aktarımı" if self._is_pdf else "DXF / DWG açınımı",
             subtitle, "MÜHENDİSLİK / SAC METAL" if self.mode == "k_factor" else "AKTARIM / BELGELER",
             "tools" if self.mode == "k_factor" else "file" if self._is_pdf else "layers")
+        self.pdf_header._labels = labels
         self.start_button = self._button(actions, self._start_text, self._start_export,
                                          primary=True, icon="arrow", width=224)
         self.start_button.configure(height=42)

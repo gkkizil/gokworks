@@ -129,7 +129,7 @@ class GeometricTolerancesView:
         for row, key, height in [(1, 'frame', 62), (2, 'canvas', 214)]:
             canvas = tk.Canvas(diagram, height=height, borderwidth=0, highlightthickness=0)
             canvas.grid(row=row, column=0, sticky='ew', padx=12)
-            canvas.bind('<Configure>', lambda _: self._draw_gdt_diagram() if self.mode == 'geometric_tolerances' else None)
+            canvas.bind('<Configure>', lambda event: self._resize_pdf_area(event) if self.mode == 'geometric_tolerances' else None)
             self.gdt_widgets[key] = canvas
         self.gdt_widgets['zone'] = self._label(diagram, '', 12, TEXT, justify='left', anchor='w', wraplength=400)
         self.gdt_widgets['zone'].grid(row=3, column=0, sticky='ew', padx=14, pady=(6, 14))

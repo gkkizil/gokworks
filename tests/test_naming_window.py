@@ -173,6 +173,7 @@ class NamingWindowTests(GuiTestCase):
             for theme in ('Açık', 'Koyu'):
                 self.app._change_theme(theme)
                 self.settle()
+                self.assertFalse(self.app.naming_widgets['copy_error'].winfo_viewable())
                 for key in ('scan', 'save', 'stop', 'table', 'destination', 'prefix', 'mode', 'suffix', 'start', 'digits'):
                     self.assert_inside(self.app.naming_widgets[key])
                 for key in ('source_browse', 'browse', 'source_folder', 'assembly'):

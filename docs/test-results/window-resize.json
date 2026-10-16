@@ -1,0 +1,131 @@
+{
+  "measured_at": "2026-10-16T03:52:19.730497+00:00",
+  "baseline_commit": "f8e96a8",
+  "baseline": {
+    "pages_prepared": 9,
+    "measurements": [
+      {
+        "mode": "pdf",
+        "resize_median_ms": 90.48279201670084,
+        "resize_max_ms": 120.24562200531363,
+        "configure_by_page": {
+          "weight": 16,
+          "naming": 16,
+          "bolt": 16,
+          "bom": 16,
+          "geometric_tolerances": 16,
+          "iso_fits": 16,
+          "k_factor": 16,
+          "dxf_dwg": 16,
+          "pdf": 16
+        },
+        "inactive_configure_events": 128
+      },
+      {
+        "mode": "weight",
+        "resize_median_ms": 82.86046200373676,
+        "resize_max_ms": 104.87186099635437,
+        "configure_by_page": {
+          "weight": 16,
+          "naming": 16,
+          "bolt": 16,
+          "bom": 16,
+          "geometric_tolerances": 16,
+          "iso_fits": 16,
+          "k_factor": 16,
+          "dxf_dwg": 16,
+          "pdf": 16
+        },
+        "inactive_configure_events": 128
+      }
+    ],
+    "method": "One Linux/Xvfb run; production startup, all nine pages prepared. Sixteen window size changes from 1000×690 to 1440×900 and back per page, each followed by real Tk update(). Not a Windows frame-rate measurement."
+  },
+  "candidate": {
+    "pages_prepared": 9,
+    "measurements": [
+      {
+        "mode": "pdf",
+        "resize_median_ms": 19.03749699704349,
+        "resize_max_ms": 33.180291997268796,
+        "configure_by_page": {
+          "pdf": 16
+        },
+        "inactive_configure_events": 0
+      },
+      {
+        "mode": "weight",
+        "resize_median_ms": 32.747042991104536,
+        "resize_max_ms": 41.646855999715626,
+        "configure_by_page": {
+          "weight": 16
+        },
+        "inactive_configure_events": 0
+      }
+    ],
+    "method": "One Linux/Xvfb run; production startup, all nine pages prepared. Sixteen window size changes from 1000×690 to 1440×900 and back per page, each followed by real Tk update(). Not a Windows frame-rate measurement."
+  },
+  "navigation": {
+    "startup_until_ready_ms": 1344.4311650237069,
+    "pages_at_ready": 9,
+    "page_builds_after_ready": 0,
+    "click_median_ms": 25.830404993030243,
+    "click_max_ms": 34.2973500082735,
+    "heartbeat_max_gap_ms": 37.6088009797968,
+    "heartbeat_samples": 125,
+    "clicks": [
+      {
+        "mode": "dxf_dwg",
+        "click_and_events_ms": 33.729102986399084
+      },
+      {
+        "mode": "k_factor",
+        "click_and_events_ms": 28.28051001415588
+      },
+      {
+        "mode": "iso_fits",
+        "click_and_events_ms": 26.778356987051666
+      },
+      {
+        "mode": "geometric_tolerances",
+        "click_and_events_ms": 23.09792398591526
+      },
+      {
+        "mode": "bom",
+        "click_and_events_ms": 24.88245299900882
+      },
+      {
+        "mode": "bolt",
+        "click_and_events_ms": 24.49932400486432
+      },
+      {
+        "mode": "naming",
+        "click_and_events_ms": 23.7819520116318
+      },
+      {
+        "mode": "weight",
+        "click_and_events_ms": 34.2973500082735
+      }
+    ],
+    "method": "One run, Linux/Xvfb, real Tk events; normal startup path, 950 ms idle, eight menu clicks with 100 ms dwell. Heartbeat requested every 16 ms. Startup time includes preparing all pages where supported. Baseline idle preloading remains enabled. No native Windows/SolidWorks measurement."
+  },
+  "validation": {
+    "native_tk": true,
+    "inactive_pages_remain_mapped": true,
+    "inactive_resize_events": 0,
+    "dpi_scales": [
+      1,
+      1.25,
+      1.5
+    ],
+    "sizes": [
+      "1000x690",
+      "1366x768",
+      "1400x900",
+      "1920x1080"
+    ],
+    "full_test_suite_run": false,
+    "windows_frame_rate_measured": false,
+    "new_exe_requested": false
+  }
+}

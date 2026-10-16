@@ -214,7 +214,7 @@ class BoltView:
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(10, 12))
         for key, variable in self.bolt_state.items():
             variable.trace_add('write', lambda *_, key=key: self._bolt_changed(key) if self.mode == 'bolt' else None)
-        canvas.bind('<Configure>', lambda _: self._draw_bolt_diagram() if self.mode == 'bolt' else None)
+        canvas.bind('<Configure>', lambda event: self._resize_pdf_area(event) if self.mode == 'bolt' else None)
         self.workspace.bind('<Configure>', self._resize_pdf_area)
         self._update_bolt_result()
         self._resize_pdf_area()

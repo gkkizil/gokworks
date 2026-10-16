@@ -237,7 +237,7 @@ class IsoFitsView:
             variable.trace_add('write', lambda *_, callback=callback: callback()
                                if self.mode == 'iso_fits' and not self._iso_loading else None)
         self.iso_search.trace_add('write', lambda *_: self._filter_iso_presets() if self.mode == 'iso_fits' else None)
-        canvas.bind('<Configure>', lambda _: self._draw_iso_diagram() if self.mode == 'iso_fits' else None)
+        canvas.bind('<Configure>', lambda event: self._resize_pdf_area(event) if self.mode == 'iso_fits' else None)
         self.workspace.bind('<Configure>', self._resize_pdf_area)
         self._update_iso_result()
         self._resize_pdf_area()

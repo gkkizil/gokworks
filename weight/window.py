@@ -221,7 +221,7 @@ class WeightView:
         self.status_label.grid(row=2, column=0, sticky='ew', padx=24, pady=(10, 12))
         for key, variable in self.weight_state.items():
             variable.trace_add('write', lambda *_, key=key: self._weight_changed(key) if self.mode == 'weight' else None)
-        canvas.bind('<Configure>', lambda _: self._draw_weight_diagram() if self.mode == 'weight' else None)
+        canvas.bind('<Configure>', lambda event: self._resize_pdf_area(event) if self.mode == 'weight' else None)
         self.workspace.bind('<Configure>', self._resize_pdf_area)
         self._update_weight_result()
         self._resize_pdf_area()
