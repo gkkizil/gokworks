@@ -1,17 +1,17 @@
 {
-  "commit": "4a6e180c80bed113ec3f2cb796d42cd85fa74f24",
-  "request_id": "a6a934e7-7bd3-4f6d-88f4-c92e1b1725fe",
+  "commit": "8a2d8990a7ea808d3b5f155b2f6ad36769134ec6",
+  "request_id": "55dab8f1-3c8e-4c23-9631-625f28ca392b",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38899014115",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38899014115/artifacts/12044743761",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38899468539",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38899468539/artifacts/12045127794",
   "files": {
     "GOKWORKS-KR-Deneme.exe": {
-      "bytes": 24444261,
-      "sha256": "a016a98907c581139907dd92f26df0bea3c604f537cf3ce55fe61af778dc3115"
+      "bytes": 24444419,
+      "sha256": "3df34390b3e298d2564b7afff81859987c3afcf2460073e20b4b094d50e6322c"
     },
     "GOKWORKS.KR.Native.exe": {
       "bytes": 67547781,
-      "sha256": "ad09826bcee3c8818246fa0432a96ef8ff7a8dfbfd4581d6398d258ae4f560f3"
+      "sha256": "080938909e92c8242036f20a16aa345a5b172527b4f316d77f087e2a36c4c94a"
     }
   },
   "smoke": {
@@ -19,6 +19,7 @@
     "frozen": true,
     "platform": "win32",
     "solidworks_connection_tested": false,
+    "generated_com_interface_test": "Scripting.Dictionary passed",
     "tk": "8.6.15",
     "writable_makepy_cache": true,
     "native_self_test": {
