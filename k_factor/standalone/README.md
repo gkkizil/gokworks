@@ -1,7 +1,9 @@
 # Bağımsız K/R denemesi: C# → Python
 
 <!-- kr-windows-release:start -->
-Windows'ta çift tıklamayla açılan bağımsız paket hazırlanıyor.
+**Windows paketi:** [K/R deneme aracını indir](https://github.com/gkkizil/gokworks/actions/runs/38899014115/artifacts/12044743761). ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. İki EXE aynı klasörde kalsın. Python ve .NET kurulumu gerekmez.
+
+[Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/38899014115) · Kaynak: `4a6e180` · [SHA256 ve açılış kontrolü](windows-build-status.json)
 <!-- kr-windows-release:end -->
 
 ## EXE ile kullanım
