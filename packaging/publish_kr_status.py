@@ -16,22 +16,30 @@ START, END = "<!-- kr-windows-release:start -->", "<!-- kr-windows-release:end -
 
 def main():
     request = json.loads(Path(BASE + "/windows-build-request.json").read_text(encoding="utf-8"))
-    report = {"commit": os.environ["GITHUB_SHA"], "request_id": request["request_id"],
+    report = {"commit": os.environ["GITHUB_SHA"], "request_id": request["request_id"], "distribution": "directory",
               "status": os.environ["BUILD_STATUS"],
               "run_url": f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}',
               "download_url": os.environ.get("ARTIFACT_URL", ""), "files": {}}
-    for path in Path("dist/kr-probe").glob("*.exe"):
-        report["files"][path.name] = {"bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-    smoke = Path("dist/kr-probe/windows-smoke.json")
+    package = Path("dist/kr-probe/GOKWORKS-KR-Deneme")
+    for relative in ("GOKWORKS-KR-Deneme.exe", "native/Gokworks.KrProbe.exe"):
+        path = package / relative
+        if path.exists():
+            report["files"][relative] = {"bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+    smoke = package / "windows-smoke.json"
     if smoke.exists():
         report["smoke"] = json.loads(smoke.read_text(encoding="utf-8"))
+    security = Path("build/kr-security-report.json")
+    if security.exists():
+        report["security"] = json.loads(security.read_text(encoding="utf-8-sig"))
     if report["status"] != "success":
         log = Path("kr-windows-build.log")
         if log.exists():
             report["build_log_tail"] = log.read_text(encoding="utf-8", errors="replace")[-16000:]
     else:
-        if not report["download_url"] or report.get("smoke", {}).get("status") != "passed" or len(report["files"]) != 2:
-            raise RuntimeError("Success requires both executables, artifact URL, and packaged smoke check.")
+        if (not report["download_url"] or report.get("smoke", {}).get("status") != "passed" or len(report["files"]) != 2
+                or report.get("security", {}).get("status") != "no_detection"
+                or report["security"].get("source_commit") != report["commit"]):
+            raise RuntimeError("Success requires both entrypoints, artifact URL, packaged smoke, and a matching completed Defender scan.")
     payload = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     with TemporaryDirectory() as temporary:
         env = {**os.environ, "GIT_INDEX_FILE": str(Path(temporary) / "index")}
@@ -44,9 +52,9 @@ def main():
                 readme = git("show", f"{parent}:{BASE}/README.md")
                 block = (f'{START}\n**Windows paketi:** [K/R deneme aracını indir]({report["download_url"]}). '
                          'ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. '
-                         'İki EXE aynı klasörde kalsın. Python ve .NET kurulumu gerekmez.\n\n'
+                         'Alt klasörleri koruyun; EXE’yi tek başına taşımayın. Python ve .NET kurulumu gerekmez.\n\n'
                          f'[Derleme kaydı]({report["run_url"]}) · Kaynak: `{report["commit"][:7]}` · '
-                         f'[SHA256 ve açılış kontrolü](windows-build-status.json)\n{END}')
+                         f'[SHA256, Defender taraması ve açılış kontrolü](windows-build-status.json)\n{END}')
                 readme, count = re.subn(re.escape(START) + r".*?" + re.escape(END), lambda match: block, readme, flags=re.S)
                 if count != 1:
                     raise RuntimeError("K/R README release marker missing or duplicated")

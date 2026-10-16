@@ -14,6 +14,9 @@ from k_factor.standalone.python.probe import execute, validate_request
 
 def native_executable():
     directory = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
+    installed = directory / "native/Gokworks.KrProbe.exe"
+    if installed.is_file():
+        return installed
     return directory / "GOKWORKS.KR.Native.exe"
 
 
@@ -44,7 +47,7 @@ def run_pair(request, folder, *, notify=lambda message: None, native_runner=subp
     write_json(request_file, request)
     helper = Path(backend) if backend is not None else native_executable()
     if not helper.is_file():
-        raise ComparisonFailure("C# motoru bulunamadı. ZIP dosyasını tamamen çıkartın; iki EXE aynı klasörde olmalı.")
+        raise ComparisonFailure("C# motoru bulunamadı. ZIP dosyasını tüm alt klasörleriyle çıkartın; EXE'yi tek başına taşımayın.")
     notify("C# motoru sac parametrelerini okuyor…" if request["mode"] == "inspect" else "C# motoru K/R yazma ve geri alma denemesi yapıyor…")
     # No timeout/TerminateProcess during writes: rollback must finish before exit.
     result = native_runner([str(helper), "--request", str(request_file), "--report", str(csharp_file)],

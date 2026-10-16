@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GOKWORKS-KR-Deneme-Windows-x64-${{ github.sha }}
-          path: dist/kr-probe/
+          path: dist/kr-probe/GOKWORKS-KR-Deneme/
           if-no-files-found: error
           retention-days: 30
       - name: Upload build log
@@ -48,7 +48,9 @@ jobs:
           name: KR-Windows-build-log-${{ github.sha }}
           path: |
             kr-windows-build.log
-            dist/kr-probe/windows-smoke.json
+            dist/kr-probe/GOKWORKS-KR-Deneme/windows-smoke.json
+            build/kr-security-report.json
+            build/kr-security-report.scan.log
           if-no-files-found: ignore
       - name: Record standalone download on main
         if: always()

@@ -21,6 +21,7 @@ $report = [ordered]@{
 }
 $removed = @()
 $restorePreferences = @{}
+$verifiedFiles = @{}
 $scanLog = [IO.Path]::ChangeExtension([IO.Path]::GetFullPath($ReportPath), '.scan.log')
 try {
     # This script may alter exclusions ONLY on the disposable GitHub runner.
@@ -32,23 +33,33 @@ try {
     $request = Get-Content -LiteralPath $RequestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $report.artifact_id = $request.artifact_id
     $report.source_commit = $request.source_commit
-    foreach ($property in $request.expected_executables.PSObject.Properties) {
-        if ([IO.Path]::GetFileName($property.Name) -ne $property.Name) { throw 'Expected executable must be a filename.' }
-        $path = Join-Path $PackagePath $property.Name
+    $expected = if ($request.expected_files) { $request.expected_files } else { $request.expected_executables }
+    foreach ($property in $expected.PSObject.Properties) {
+        if ([IO.Path]::IsPathRooted($property.Name)) { throw 'Manifest entries must be relative paths.' }
+        $path = [IO.Path]::GetFullPath((Join-Path $PackagePath $property.Name))
+        if (-not $path.StartsWith($PackagePath.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Manifest path escapes the package.'
+        }
         $digest = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($digest -ne $property.Value) { throw "Original artifact hash mismatch: $($property.Name)" }
-        $signature = Get-AuthenticodeSignature -LiteralPath $path
-        $report.files[$property.Name] = @{
-            sha256 = $digest
-            bytes = (Get-Item -LiteralPath $path).Length
-            authenticode_status = $signature.Status.ToString()
-            signer = if ($signature.SignerCertificate) { $signature.SignerCertificate.Subject } else { $null }
+        $verifiedFiles[$property.Name.Replace('\', '/')] = $digest
+        if ([IO.Path]::GetExtension($path) -eq '.exe') {
+            $signature = Get-AuthenticodeSignature -LiteralPath $path
+            $report.files[$property.Name] = @{
+                sha256 = $digest
+                bytes = (Get-Item -LiteralPath $path).Length
+                authenticode_status = $signature.Status.ToString()
+                signer = if ($signature.SignerCertificate) { $signature.SignerCertificate.Subject } else { $null }
+            }
         }
     }
     $unexpected = @(Get-ChildItem -LiteralPath $PackagePath -Recurse -File | Where-Object {
-        $_.Extension -in @('.exe', '.dll', '.ps1', '.cmd', '.bat', '.vbs', '.js') -and -not $report.files.ContainsKey($_.Name)
+        $relative = [IO.Path]::GetRelativePath($PackagePath, $_.FullName).Replace('\', '/')
+        ($request.expected_files -or $_.Extension -in @('.exe', '.dll', '.pyd', '.ps1', '.cmd', '.bat', '.vbs', '.js')) -and -not $verifiedFiles.ContainsKey($relative)
     })
     if ($unexpected.Count) { throw "Unexpected executable/script in the original package: $($unexpected.Name -join ', ')" }
+    $report.verified_file_count = $verifiedFiles.Count
+    $report.manifest_sha256 = (Get-FileHash -LiteralPath $RequestPath -Algorithm SHA256).Hash.ToLowerInvariant()
     $service = Get-Service -Name WinDefend -ErrorAction Stop
     if ($service.Status -ne 'Running') { Start-Service -Name WinDefend -ErrorAction Stop }
     try { Update-MpSignature -ErrorAction Stop }
@@ -116,9 +127,9 @@ try {
         throw 'Defender reported a detection during this scan. Check the recorded resources; do not publish or execute this package.'
     }
     if ($report.scan_exit_code -ne 0) { throw "Defender scan did not complete successfully: exit $($report.scan_exit_code)" }
-    foreach ($name in @($report.files.Keys)) {
+    foreach ($name in @($verifiedFiles.Keys)) {
         $path = Join-Path $PackagePath $name
-        if (-not (Test-Path -LiteralPath $path) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $report.files[$name].sha256) {
+        if (-not (Test-Path -LiteralPath $path) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $verifiedFiles[$name]) {
             throw "The package changed or was quarantined during the scan: $name"
         }
     }

@@ -8,13 +8,15 @@
 
 ## EXE ile kullanım
 
-**İndirme incelemede:** Chrome bu paketi tehlikeli indirme olarak
-işaretledi. Özgün paketin SHA256, yayıncı imzası ve Windows Defender
-kontrolü için ayrı bir inceleme başlatıldı. Önceki açılış/COM kontrolleri
-antivirüs taraması değildir; henüz Chrome uyarısının nedeni doğrulanmadı.
+Chrome önceki paketi tehlikeli indirme olarak işaretledi. Özgün iki EXE'nin
+hashleri doğrulandı, yayıncı imzası bulunmadı ve güncel Windows Defender
+taramasında tehdit tespit edilmedi. [Özgün paket taraması](windows-security-status.json).
+Chrome uyarısının kesin nedeni doğrulanmadı. Yeni standart klasör paketi,
+yayınlanmadan ve çalıştırılmadan önce ayrıca taranır. Defender sonucu,
+Chrome'un paketi kabul edeceğini veya kesin güvenli olduğunu kanıtlamaz.
 
 Windows paketini tamamen çıkartıp `GOKWORKS-KR-Deneme.exe` dosyasını açın.
-Yanındaki `GOKWORKS.KR.Native.exe` aynı klasörde kalmalıdır. Python, .NET,
+`_internal` ve `native` alt klasörlerini koruyun. Python, .NET,
 SDK veya terminal kurulumu/kullanımı gerekmez. SolidWorks kurulu ve açık
 olmalıdır; API arayüzleri kurulu SolidWorks'ün `api\redist` klasöründen alınır.
 

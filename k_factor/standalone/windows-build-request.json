@@ -1,5 +1,5 @@
 {
-  "request_id": "55dab8f1-3c8e-4c23-9631-625f28ca392b",
-  "requested_at": "2026-10-16T12:16:58.429778+00:00",
-  "reason": "Standalone K/R EXE with real frozen COM type-library generation smoke test; bundled Python and self-contained C# runtime; no main application build."
+  "request_id": "6a5a180c-9033-47a3-893d-056ef9a0b268",
+  "requested_at": "2026-10-16T12:38:56.275899+00:00",
+  "reason": "Chrome blocked original self-extracting package. Build standard directory distribution, hash every file and require real Defender/PUA/archive scan before executing or publishing; no main application build."
 }
