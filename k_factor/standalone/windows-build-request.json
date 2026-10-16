@@ -1,5 +1,5 @@
 {
-  "request_id": "a6a934e7-7bd3-4f6d-88f4-c92e1b1725fe",
-  "requested_at": "2026-10-16T12:13:19.075383+00:00",
-  "reason": "User-requested standalone K/R desktop EXE with bundled Python and self-contained C# runtime; inspect and restore-after-verification comparison, no main application EXE."
+  "request_id": "55dab8f1-3c8e-4c23-9631-625f28ca392b",
+  "requested_at": "2026-10-16T12:16:58.429778+00:00",
+  "reason": "Standalone K/R EXE with real frozen COM type-library generation smoke test; bundled Python and self-contained C# runtime; no main application build."
 }

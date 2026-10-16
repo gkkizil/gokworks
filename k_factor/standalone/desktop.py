@@ -203,6 +203,25 @@ def self_check(destination):
         import pywintypes
         from win32com.client import gencache
         assert not gencache.is_readonly and not gencache.is_zip
+        # Exercise real typelib generation inside the frozen EXE using the
+        # standard in-memory Windows dictionary; this does not open SolidWorks.
+        from k_factor.standalone.python.probe import EarlyBound, Trace, report_template
+        import win32com.client as client
+        pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
+        try:
+            raw = client.Dispatch("Scripting.Dictionary")
+            info = raw._oleobj_.GetTypeInfo()
+            typelib = info.GetContainingTypeLib()[0]
+            guid, lcid, _platform, major, minor, _flags = typelib.GetLibAttr()
+            module = gencache.EnsureModule(guid, lcid, major, minor, bValidateFile=True, bForDemand=False)
+            binding = EarlyBound(client, pythoncom, module, Trace(report_template()))
+            dictionary = binding.cast(raw, info.GetDocumentation(-1)[0])
+            dictionary.Add("GOKWORKS-KR", 1)
+            assert dictionary.Exists("GOKWORKS-KR") and dictionary.Count == 1
+            dictionary.RemoveAll()
+            result["generated_com_interface_test"] = "Scripting.Dictionary passed"
+        finally:
+            pythoncom.CoUninitialize()
         native = native_executable()
         checked = subprocess.run([str(native), "--self-test"], check=True, capture_output=True, text=True,
                                  encoding="utf-8", creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))

@@ -151,7 +151,7 @@ def connect(trace):
                              lambda: app._oleobj_.GetTypeInfo().GetContainingTypeLib()[0])
         guid, lcid, _platform, major, minor, _flags = typelib.GetLibAttr()
         module = trace.call("gencache.EnsureModule", lambda: client.gencache.EnsureModule(
-            guid, lcid, major, minor, bForDemand=False))
+            guid, lcid, major, minor, bValidateFile=True, bForDemand=False))
         if module is None:
             raise ProbeError("Could not generate running SolidWorks type library wrappers")
         binding = EarlyBound(client, pythoncom, module, trace)
