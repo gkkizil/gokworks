@@ -1,18 +1,18 @@
 {
-  "commit": "8b94bd997990c6eb60897134d856830320d12c86",
-  "request_id": "6a5a180c-9033-47a3-893d-056ef9a0b268",
+  "commit": "909c946af41c75c497750124c224b5c130cd3f14",
+  "request_id": "d8c2533c-1a28-426c-9a06-4d241f18c735",
   "distribution": "directory",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38902089258",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38902089258/artifacts/12047305175",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39051754285",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39051754285/artifacts/12107109517",
   "files": {
     "GOKWORKS-KR-Deneme.exe": {
-      "bytes": 3520792,
-      "sha256": "26fd97844d7ebb89942137aba846a20f000fd0854aa730738f1464d27354cbf6"
+      "bytes": 3522762,
+      "sha256": "e2aed1a7b8e38b1aab30f7860a03f33171537cac0ba12383c73bc403a6765780"
     },
     "native/Gokworks.KrProbe.exe": {
       "bytes": 151552,
-      "sha256": "996624eade07c9a84666ea7573aa828f37095e9ad6c7c2b7bd850d39d2c8db15"
+      "sha256": "a5257a54dc5319b48c947f8bb2e5da28f92f6fe128cad15e055444996cb1da86"
     }
   },
   "smoke": {
@@ -26,7 +26,7 @@
     "native_self_test": {
       "status": "passed",
       "engine": "csharp",
-      "checks": 18,
+      "checks": 20,
       "native_solidworks_tested": false
     },
     "standalone_gui_opened": true,
@@ -35,51 +35,51 @@
   },
   "security": {
     "status": "no_detection",
-    "started_at": "2026-10-16T12:41:50.6718768Z",
-    "finished_at": "2026-10-16T12:42:00.7507026Z",
+    "started_at": "2026-10-17T17:00:47.7984060Z",
+    "finished_at": "2026-10-17T17:01:06.4797694Z",
     "artifact_id": null,
-    "source_commit": "8b94bd997990c6eb60897134d856830320d12c86",
+    "source_commit": "909c946af41c75c497750124c224b5c130cd3f14",
     "files": {
-      "native/createdump.exe": {
-        "signer": "CN=.NET, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
-        "sha256": "beba75ffcd188a0ce594c304c737caf16681e1af19bdd7bb47b3f0eb8636c320",
-        "bytes": 71512,
-        "authenticode_status": "Valid"
-      },
       "native/Gokworks.KrProbe.exe": {
+        "authenticode_status": "NotSigned",
+        "sha256": "a5257a54dc5319b48c947f8bb2e5da28f92f6fe128cad15e055444996cb1da86",
         "signer": null,
-        "sha256": "996624eade07c9a84666ea7573aa828f37095e9ad6c7c2b7bd850d39d2c8db15",
-        "bytes": 151552,
-        "authenticode_status": "NotSigned"
+        "bytes": 151552
+      },
+      "native/createdump.exe": {
+        "authenticode_status": "Valid",
+        "sha256": "beba75ffcd188a0ce594c304c737caf16681e1af19bdd7bb47b3f0eb8636c320",
+        "signer": "CN=.NET, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+        "bytes": 71512
       },
       "GOKWORKS-KR-Deneme.exe": {
+        "authenticode_status": "NotSigned",
+        "sha256": "e2aed1a7b8e38b1aab30f7860a03f33171537cac0ba12383c73bc403a6765780",
         "signer": null,
-        "sha256": "26fd97844d7ebb89942137aba846a20f000fd0854aa730738f1464d27354cbf6",
-        "bytes": 3520792,
-        "authenticode_status": "NotSigned"
+        "bytes": 3522762
       }
     },
     "defender": {
       "antivirus_enabled": true,
-      "custom_scan_preferences": {
-        "PUAProtection": 1,
-        "ScanAvgCPULoadFactor": 50,
-        "DisableArchiveScanning": false,
-        "DisableScriptScanning": false
-      },
-      "engine_version": "1.1.26090.9",
-      "signature_version": "1.461.55.0",
+      "running_mode": "Normal",
       "original_path_exclusions": [
         "C:\\",
         "D:\\"
       ],
-      "signature_updated_at": "2026-10-16T07:18:40.0000000Z",
+      "scanner": "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26090.9-0\\MpCmdRun.exe",
+      "custom_scan_preferences": {
+        "ScanAvgCPULoadFactor": 50,
+        "PUAProtection": 1,
+        "DisableArchiveScanning": false,
+        "DisableScriptScanning": false
+      },
+      "service_enabled": true,
       "original_extension_exclusions": [
         null
       ],
-      "running_mode": "Normal",
-      "scanner": "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26090.9-0\\MpCmdRun.exe",
-      "service_enabled": true
+      "signature_version": "1.461.74.0",
+      "signature_updated_at": "2026-10-17T11:07:43.0000000Z",
+      "engine_version": "1.1.26090.9"
     },
     "excluded_paths_temporarily_removed": [
       "D:\\"
@@ -89,6 +89,6 @@
     "error": null,
     "limitations": "A local Defender scan is not a Chrome Safe Browsing verdict or proof of safety.",
     "verified_file_count": 1211,
-    "manifest_sha256": "758c93167144cb7d5f6df00794b32021dd459f06e16ed5d28dc481e870637c61"
+    "manifest_sha256": "17eba3fa36239d2a383ccd3e3b61d08ec476b3491781b08c05bdd75423004cdb"
   }
 }
