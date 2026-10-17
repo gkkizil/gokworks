@@ -100,6 +100,30 @@ internal static class SelfTest
             Reject("""{"schema_version":1,"assignments":null}""", "null assignment array");
             Reject("""{"schema_version":1,"mode":null}""", "null mode");
             Reject("""{"schema_version":1,"configuration":" "}""", "blank configuration");
+            Check(SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                { GaugeStatusCode = 0, UseGaugeTable = false, UseMaterialParameters = false }), "known unlinked template accepts direct edit");
+            Check(SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                { GaugeStatusCode = 2 }), "template unsupported gauge getter accepts direct edit");
+            Check(SheetMetalControlPolicy.AllowsDefinitionWrite("SheetMetal", new ControlState
+                { GaugeStatusCode = 1 }), "legacy unsupported gauge getter accepts direct edit");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("SheetMetal", new ControlState
+                { GaugeStatusCode = 2 }), "template status is restricted to template");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                { GaugeStatusCode = 1 }), "legacy status is restricted to legacy");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                { GaugeStatusCode = 2, UseGaugeTable = true }), "positive gauge link blocks direct edit");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("SheetMetal", new ControlState
+                { GaugeStatusCode = 1, UseMaterialParameters = true }), "positive material link blocks direct edit");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                { GaugeStatusCode = 2, Error = "COM failure" }), "real API error blocks direct edit");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                { GaugeStatusCode = 0 }), "successful getter needs actual unlinked controls");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("SolidBodyFolder", new ControlState
+                { GaugeStatusCode = 0, UseGaugeTable = false, UseMaterialParameters = false }), "non-sheet candidate cannot be modified");
+            Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", null), "missing controls block direct edit");
+            foreach (int status in new[] { -1, 3, 4, 5, 9 })
+                Check(!SheetMetalControlPolicy.AllowsDefinitionWrite("TemplateSheetMetal", new ControlState
+                    { GaugeStatusCode = status }), "unsupported genuine gauge status " + status);
             var report = new Report { Status = "inspected" };
             using var output = JsonDocument.Parse(JsonSerializer.Serialize(report, JsonContract.Options));
             Check(output.RootElement.GetProperty("engine").GetString() == "csharp", "report engine");

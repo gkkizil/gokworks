@@ -1,4 +1,4 @@
-# Bağımsız K/R denemesi: C# → Python
+# Bağımsız Sac-Levha K/R ataması
 
 <!-- kr-windows-release:start -->
 **Windows paketi:** [K/R deneme aracını indir](https://github.com/gkkizil/gokworks/actions/runs/39051754285/artifacts/12107109517). ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. Alt klasörleri koruyun; EXE’yi tek başına taşımayın. Python ve .NET kurulumu gerekmez.
@@ -6,157 +6,91 @@
 [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39051754285) · Kaynak: `909c946` · [SHA256, Defender taraması ve açılış kontrolü](windows-build-status.json)
 <!-- kr-windows-release:end -->
 
-## EXE ile kullanım
+## Kullanım
 
-Chrome önceki paketi tehlikeli indirme olarak işaretledi. Özgün iki EXE'nin
-hashleri doğrulandı, yayıncı imzası bulunmadı ve güncel Windows Defender
-taramasında tehdit tespit edilmedi. [Özgün paket taraması](windows-security-status.json).
-Chrome uyarısının kesin nedeni doğrulanmadı. Yeni standart klasör paketi,
-yayınlanmadan ve çalıştırılmadan önce ayrıca taranır. Defender sonucu,
-Chrome'un paketi kabul edeceğini veya kesin güvenli olduğunu kanıtlamaz.
+1. SolidWorks'te kaydedilmiş sac parçasını kendi penceresinde açın.
+2. **Parçayı oku** düğmesine basın. Ana Sac-Levha unsuru, mevcut
+   konfigürasyon, kalınlık, K ve iç yarıçap okunur.
+3. İstediğiniz K faktörünü ve iç yarıçapı **mm** olarak girin.
+4. **K/R uygula** düğmesine basın. Değerler yazılır, parça yeniden
+   oluşturulur ve yeni unsur tanımından geri okunarak kontrol edilir.
+5. Başarılı atamada **yeni değerler açık parçada kalır**. SolidWorks'te
+   kontrol edip kaydedin. Araç dosyayı kendiliğinden kaydetmez.
 
-Windows paketini tamamen çıkartıp `GOKWORKS-KR-Deneme.exe` dosyasını açın.
-`_internal` ve `native` alt klasörlerini koruyun. Python, .NET,
-SDK veya terminal kurulumu/kullanımı gerekmez. SolidWorks kurulu ve açık
-olmalıdır; API arayüzleri kurulu SolidWorks'ün `api\redist` klasöründen alınır.
+ZIP'i bütün alt klasörleriyle çıkartın. `GOKWORKS-KR-Deneme.exe` dosyasını
+tek başına taşımayın; dosya adı önceki paketlerle uyumluluk için korunmuştur.
+Yeni pencerenin başlığı **K/R ataması**, işlem düğmesi **K/R uygula** olur.
+Güncel arayüz: [K/R atama ekranı](../../docs/screenshots/kr-direct-assignment.png).
+Python veya .NET kurmanız gerekmez. SolidWorks kurulu ve açık olmalıdır;
+yerel API DLL'leri kurulumun `api\redist` klasöründen alınır, pakette dağıtılmaz.
 
-Bir sac parçasını kendi penceresinde etkinleştirip **Parçayı oku** düğmesine
-basın. Ardından farklı bir K veya R girip **K/R yazma denemesi** düğmesine
-basın. Araç önce C#, sonra Python ile yazmayı dener, değerleri geri okur ve
-eski değerleri geri yükleyip doğrular. Dosyalar otomatik kaydedilmez.
-İlk denemeyi bir kopyada yapın. İşlem bitene kadar SolidWorks'te belge veya
-konfigürasyon değiştirmeyin. **Rapor klasörü** düğmesi sonuçları açar.
+Okunan belge/konfigürasyon veya başlangıç değerleri değişirse uygulama
+yazmaya başlamadan durur. Parçayı yeniden okuyun. Aynı değerleri tekrar
+uygulamak geçerlidir. Yazma ya da geri okuma hatasında eski parametreleri
+geri yüklemek denenir. Geri alma doğrulanamazsa **parçayı kaydetmeyin**
+uyarısı gösterilir. Başarılı atamada geri alma yapılmaz.
 
-Kaynak kod, okunan parça yolunu, konfigürasyonu ve sac parametrelerinin
-başlangıç değerlerini yazma isteğine bağlar. Bunlardan biri değişmişse
-yazmaya başlamadan durur; parçayı yeniden okuyun. Aynı kontrol C# ile
-Python arasındaki geçişte de uygulanır. Kaynak kodla son yayımlanan EXE'nin
-sürümü farklı olabilir; indirme bölümündeki **Kaynak** alanı paketin
-hangi commit'ten üretildiğini gösterir.
+## Ekrandaki okuma hatasının giderilmesi
 
-Raporlar ve oluşturulan Python COM arayüzleri kullanıcıya özel
-`%LOCALAPPDATA%\GOKWORKS\KR-Deneme` klasöründedir. Geri alma hatası
-görünürse parçayı kaydetmeyin. Ana GOKWORKS uygulamasının K/R menüsü bu
-ayrı denemeden bağımsızdır.
+Önceki masaüstü uygulaması C# okumasından sonra zorunlu Python COM
+karşılaştırması çalıştırıyordu. Kullanıcının ekranındaki
+`(-2147319765, 'Eleman bulunamadı.') / TYPE_E_ELEMENTNOTFOUND` hatası bu
+ikinci aşamada çıktı; C# motorunun okuduğu parça da arayüze gösterilemedi.
+Bu akış, kullanıcının Sac-Levha parametrelerini doğrudan değiştirme isteğiyle
+uyuşmuyordu. Ayrıca eski ana düğme bir yazma **denemesiydi** ve başarılı
+olunca eski değerleri geri yüklüyordu.
 
-## Kaynak kodu
+Masaüstünün normal okuma ve atama yolu artık yalnız tipli C# motorunu
+kullanır. Python tür kitaplığı oluşturma veya iki motorun uyuşması bu yolun
+koşulu değildir. Python COM hatasının alt düzey nedeni bu değişiklikle
+kanıtlanmış veya giderilmiş sayılmaz; hatalı zorunlu bağımlılık kaldırılmıştır.
 
-Bu klasör, mevcut GOKWORKS K/R işçisinden bağımsız iki uygulama içerir.
-C# sürümü SolidWorks'ün tipli .NET arayüzlerini, Python sürümü kurulu
-SolidWorks'ün tür kitaplığından üretilen MakePy arayüzlerini kullanır.
-Tür dönüşümleri önbellekteki arayüz sınıfına açık `QueryInterface` ile
-yapılır; her çağrıda MakePy yeniden çalıştırılmaz.
-Python uygulaması C# çalıştırmaz ve `k_factor/apply.py` dosyasını kullanmaz.
+Şablon Sac-Levha unsurunda `GetUseGaugeTable=2 / NotEnabledOnTemplate`,
+eski `SheetMetal` unsurunda `1 / OldArchitecture` o kontrol sorgusunun
+desteklenmediğini bildirir. Doğru unsur türünde bu durum, K/R tanımı
+setter'larını engellemez. Başarısız sorgunun OUT değerleri `false` sayılmaz;
+tablo veya malzeme bağları kapatılmaz. Bilinen etkin bağlar ve gerçek API
+hataları atamayı durdurur. Başarı için K/R'nin yeniden oluşturma sonrasında
+hedef değerlerle eşleşmesi gerekir.
 
-Amaç, aynı gerçek parçada aynı API akışını karşılaştırarak Python–COM
-bağlantısından kaynaklanan hataları model/unsur davranışından ayırmaktır.
-Bu bulutta Windows/SolidWorks yoktur; derleme ve taklit nesne kontrolleri
-gerçek dosyada çalıştığının kanıtı değildir.
+## Kapsam ve raporlar
 
-## Kaynak kodundan ilk gerçek deneme
+Yalnız açık `.SLDPRT` dosyasının mevcut konfigürasyonundaki benzersiz ana
+`TemplateSheetMetal` veya eski tek `SheetMetal` tanımı değiştirilir. Alt
+bükümlerin ve gövdelerin özel geçersiz kılma ayarları korunur. Ana unsurun
+okunması bütün alt bükümlerin veya çok gövdeli parçanın değiştiğini kanıtlamaz.
+Kalınlık, ana unsurun değeridir; şablon varsayılanıyla gövde kalınlığı
+farklı olabilir. Montaj dolaşımı bu bağımsız araçta yoktur.
 
-Windows'ta SolidWorks açık olsun. Denenecek `.SLDPRT` dosyasını **ayrı bir
-parça penceresinde etkinleştirin**. İlk denemede dosyanın bir kopyasını
-kullanın. Montaj penceresi bu deneme için kabul edilmez.
+K, `GetCustomBendAllowance / SetCustomBendAllowance` ve `ModifyDefinition`
+ile yazılır. R, başlangıç değeri ana yarıçapla eşleşen tek sahipli radyal
+ölçü üzerinden mevcut konfigürasyona yazılır; uygun ölçü yoksa unsurun
+`BendRadius` setter'ı kullanılır. Ölçü kimliği korunur. Başarıda kalınlık,
+aktif büküm payı türü ve hedef K/R yeniden okunur. Aktif büküm payı türleri
+1–4 hata halinde geri yükleme için desteklenir.
 
-Kaynak kodundan çalıştırmak için: .NET 8 SDK, Python 3 ve `pywin32==312`; SolidWorks ile terminal
-aynı Windows kullanıcısında ve aynı yetki düzeyinde çalışmalıdır.
-SolidWorks API arayüz DLL'leri kurulumun `api\redist` klasöründen alınır;
-bu depoda DLL dağıtılmaz.
+**Rapor klasörü**, `%LOCALAPPDATA%\GOKWORKS\KR-Deneme\reports` altındaki
+son işlem dosyalarını açar. `csharp.json` gerçek native çağrı sırasını,
+önce/sonra değerlerini ve varsa geri alma sonucunu içerir.
 
-Depo kökünde PowerShell'den önce yalnız okuma:
+Bu araç ana GOKWORKS montaj K/R menüsünden bağımsızdır. Ana uygulamaya
+aktarma için gerçek SolidWorks parçasındaki sonuçlar ayrıca doğrulanmalıdır.
 
-```powershell
-& .\k_factor\standalone\run-check.ps1 -Mode inspect
-```
+## İsteğe bağlı geliştirici tanısı
 
-Kurulum farklı bir konumdaysa `-SolidWorksInteropDir 'D:\...\api\redist'`
-verin. Python yolu için `-PythonCommand 'C:\...\python.exe'` kullanılabilir.
-Betik önce C#'ı derler/çalıştırır, başarılıysa Python'u çalıştırır ve
-iki okuma raporunu karşılaştırır. `inspection_match` yalnız okuma uyumudur.
+Bağımsız Python çevirisi ve C#/Python karşılaştırması kaynak kodda bulunur;
+masaüstünün **Parçayı oku / K/R uygula** yolu bunları çalıştırmaz.
+`run-check.ps1 -Mode inspect` yalnız okumaları karşılaştırır;
+`-Mode verify` iki motorla geçici yazma ve geri alma tanısıdır. Bu tanı için
+.NET 8 SDK, Python ve pywin32 gerekir. Normal EXE kullanımı için gerekmez.
 
-`examples/verify.json` içindeki kalınlık/K/R satırlarını düzenleyin.
-**Mevcut K/R'den farklı bir hedef seçin**; değişmeyen değerler yazma
-başarısı sayılmaz. Ardından:
+Kaynak yöntem olarak [Power-SM](https://github.com/AmenJlili/power-sm/tree/6c835fb712c18df8969500ec247a0768d3af0d37)
+ve [SolidWorks API belgeleri](https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISheetMetalFeatureData.html)
+incelendi. Mevcut C# kodu bağımsız yazıldı; Power-SM kaynak dosyaları kopyalanmadı.
 
-```powershell
-& .\k_factor\standalone\run-check.ps1 -Mode verify
-```
-
-`verify` gerçekten yazar, yeniden oluşturur, yeni tanımdan hedef K/R'yi
-okur; sonra eski büküm payı türünü/değerini ve R'yi geri yükleyip kontrol
-eder. Başarılı sonuç `verified_match` olur. C# başarısızsa Python
-başlatılmaz. Hiçbir mod dosyayı otomatik kaydetmez. Geri alma hatası
-raporlanırsa dosyayı kaydetmeyin.
-
-Raporlar tek yerde: `k_factor/standalone/reports/<tarih-saat>/` altında
-`csharp.json`, `python.json` ve `comparison.json`. Bu klasör Git'e eklenmez.
-
-## Kapsam
-
-- Yalnız etkin, diske daha önce kaydedilmiş parça ve mevcut konfigürasyon.
-- Modern sacda `GetTemplateSheetMetal` ile ana unsur; eski sacda benzersiz
-  `SheetMetal` unsuru. Belirsiz seçimde işlem durur.
-- Gerçek sac kalınlığı girilen satırlarla eşleştirilir. Eşleşmeyen parça
-  atlanır; birden çok eşleşme reddedilir.
-- K, `GetCustomBendAllowance / SetCustomBendAllowance` ile; R, aynı
-  unsura ait tek radyal ölçüyle, uygun ölçü yoksa unsur tanımıyla yazılır.
-  Ölçünün mevcut konfigürasyondaki başlangıç değeri ana büküm yarıçapıyla
-  eşleşmelidir; ölçü kimliği yazma ve geri alma sırasında korunur.
-  Ölçü yolu yalnız mevcut konfigürasyonu hedefler.
-- Alt bükümlerin özel değerleri, sac kalınlığı, malzeme ve tablo bağları
-  değiştirilmez. Ana unsurun geri okunması bütün alt bükümlerin
-  değiştiği anlamına gelmez.
-- Derlenen API sözleşmesinde okunup geri yüklenebilen büküm payı türleri
-  1–4 desteklenir. Diğer türler incelenir; geri alma güvenceye alınamadığı
-  için yazılmaz.
-- Gauge kodu `2 / NotEnabledOnTemplate`, incelemede ham durumuyla
-  gösterilir; başarısız sorgunun `false` çıkışı geçerli veri sayılmaz.
-  `verify` bu durumu uyarıyla deneyebilir; kalıcı `apply` için kontrollerin
-  doğrulanması gerekir. Etkin olduğu bilinen tablo/malzeme kontrolü engeldir.
-  Tablo kapalıysa API'nin geçersiz saydığı dosya adı çıkışı kullanılmaz;
-  Python bu durumda `NULL` dosya adını hata saymaz. `OldArchitecture / 1`
-  gibi diğer doğrulanamayan kontrol durumları yazmayı engellemeye devam eder.
-
-Kalınlık eşleştirmesi seçilen ana unsurun `Thickness` değerini kullanır.
-Bu değer modern parçalarda şablon varsayılanı olabilir; gövdeye özel kalınlık
-ve büküm geçersiz kılmaları bu bağımsız araçta işlenmez. Ana unsurun
-değerlerini doğrulamak, bütün gövdelerin veya alt bükümlerin değiştiğini
-kanıtlamaz.
-
-`apply` modu da her iki motorda vardır: doğrulanan değerleri açık parçada
-bırakır, kaydetmez. Karşılaştırma betiği `apply` sonuçlarını yazma eşdeğerliği
-kanıtı saymaz; karşılaştırma için `verify` kullanın.
-
-Montajdaki bütün parçaları işleme, başka konfigürasyonlara geçme ve özel
-alt bükümleri ana değerlere bağlama mevcut uygulamada kalır. Yeni motorun
-o akışa alınması için önce bu yerel denemenin gerçek SolidWorks raporları
-gereklidir. Buradaki araç mevcut uygulama menüsüne henüz bağlanmamıştır.
-
-## Kaynak ve yöntem
-
-[Power-SM](https://github.com/AmenJlili/power-sm/tree/6c835fb712c18df8969500ec247a0768d3af0d37)
-K/R yöntemi için incelendi. Yeni kod bağımsız yazılmıştır; Power-SM kaynak
-dosyaları kopyalanmamıştır.
-[K yöntemi](https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/PowerGeometry_Form.cs#L1058),
-[R yöntemi](https://github.com/AmenJlili/power-sm/blob/6c835fb712c18df8969500ec247a0768d3af0d37/PowerSM/PowerSM/SheetMetalFolder2.cs#L70).
-R için kaynak projedeki bütün konfigürasyonları etkileyebilen eski çağrı
-yerine konfigürasyon kapsamı belirtilen `SetSystemValue3` kullanılır.
-
-API sözleşmeleri: SolidWorks 2023 interop metadata'sı,
-[SolidWorks API belgeleri](https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISheetMetalFeatureData.html)
-ve [pywin32 MakePy](https://github.com/mhammond/pywin32/tree/b312/com/win32com/client).
-
-## Bulutta doğrulananlar
-
-İlk kaynak sürümün C# derlemesi, 18 saf sözleşme kontrolü ve
-Python/karşılaştırıcı için 30 odaklı test sonucu [validation.json](validation.json)
-içindedir; bu kayıt o sürüme aittir.
-
-16 Ekim 2026 kaynak düzeltmelerinde C# derlemesi sıfır hata/uyarıyla geçti;
-20 saf sözleşme kontrolü ve değişen Python motoru/masaüstü akışına ait
-37 odaklı test geçti. Konfigürasyon veya başlangıç değerleri değiştiğinde
-hiçbir yazma çağrısı yapılmadığı, kapalı tablonun boş dosya adı ve yanlış
-yarıçap ölçüsünün reddi kontrol edildi. Geçersiz K/R girişleri arayüzde
-gösterilir. Python işlem testleri COM test nesneleri kullanır; bu kontroller
-gerçek SolidWorks yazma denemesi yerine geçmez.
+Derleme ve kontrol nesneleri gerçek SolidWorks yazma denemesi değildir.
+Windows paket açılış kontrolü gerçek Sac-Levha dosyasına yazmaz.
+Bu değişiklikte native derlemesi sıfır hata/uyarıyla, 36 saf native kontrolü
+ve 16 odaklı masaüstü kontrolü geçti. Gerçek Tk düğmeleriyle okuma → atama →
+tekrar atama akışı, native test raporlarıyla kontrol edildi; bu bir gerçek
+SolidWorks parça denemesi değildir.

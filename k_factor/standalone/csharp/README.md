@@ -1,6 +1,7 @@
-# Typed SolidWorks K/R probe
+# Typed SolidWorks K/R assignment engine
 
-This is a separate experiment, independent of GOKWORKS's production K/R writer.
+This is the native engine used by the standalone K/R assignment desktop,
+independent of GOKWORKS's production assembly K/R writer.
 It uses the installed, strongly typed SolidWorks COM interfaces, without C#
 `dynamic`, reflection dispatch, or a new SolidWorks process.
 
@@ -28,7 +29,7 @@ dotnet .\bin\Release\net8.0-windows\Gokworks.KrProbe.dll `
 ```
 
 See the [shared instructions](../README.md) for the request schema and sequential
-C#/Python comparison workflow.
+native desktop workflow. C#/Python comparison is an optional developer diagnostic.
 
 - `inspect` reads available sheet-metal definitions. Gauge-table status code `2`
   is recorded as `NotEnabledOnTemplate`, rather than incorrectly interpreted as
@@ -36,9 +37,12 @@ C#/Python comparison workflow.
 - `verify` writes the matched K/R values, rebuilds, reads them again, then restores
   and checks the complete original active bend-allowance payload and radius.
   A reported `verified` requires both target and restoration checks to pass.
-  This temporary experiment permits gauge status `2` with an explicit warning.
 - `apply` leaves the verified K/R values in the active configuration, unsaved.
-  Gauge/material control must be confirmed writable; unknown control blocks it.
+  This is the desktop's normal assignment mode; successful edits are not restored.
+- Gauge getter status `2` is supported only on `TemplateSheetMetal`, status `1`
+  only on legacy `SheetMetal`. They are reported as unavailable getter results,
+  not interpreted as false OUT values. Known gauge/material links or genuine
+  errors block writes; no control or child override is disabled.
 - No mode saves files. A failed restoration is reported explicitly; do not save
   such a document.
 

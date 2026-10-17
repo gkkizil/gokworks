@@ -2,25 +2,28 @@
 
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
 import sys
 from tempfile import TemporaryDirectory
 from types import ModuleType, SimpleNamespace
+import time
 import unittest
 from unittest.mock import Mock, patch
 
-from k_factor.standalone.desktop_controller import ComparisonFailure, run_pair
+from k_factor.standalone.desktop_controller import ComparisonFailure, run_native, run_pair
 from k_factor.standalone import runtime
 
 
 def native_report(mode):
     before = dict(feature_name="Sac-Levha", feature_type="TemplateSheetMetal", thickness_mm=2.0,
                   k_factor=0.33, radius_mm=2.0, bend_allowance_type=2)
-    after = dict(before, k_factor=0.274, radius_mm=1.5) if mode == "verify" else before.copy()
-    return dict(schema_version=1, engine="csharp", status="verified" if mode == "verify" else "inspected",
+    after = dict(before, k_factor=0.274, radius_mm=1.5) if mode in ("verify", "apply") else before.copy()
+    return dict(schema_version=1, engine="csharp", status={"verify": "verified", "apply": "applied", "inspect": "inspected"}[mode],
                 error=None, warnings=[], document_path=r"C:\işler\üst.sldprt", configuration="Varsayılan",
                 before=before, after=after, assignment=dict(thickness_mm=2.0, k_factor=0.274, radius_mm=1.5),
-                rollback=dict(status="restored_after_verification", attempted=True, verified=True, restored_state=before))
+                rollback=(dict(status="restored_after_verification", attempted=True, verified=True, restored_state=before)
+                          if mode == "verify" else None))
 
 
 class DesktopFlowTests(unittest.TestCase):
@@ -111,23 +114,40 @@ class DesktopFlowTests(unittest.TestCase):
 
 
 class DesktopInputTests(unittest.TestCase):
-    def test_verify_request_carries_the_previously_read_configuration_and_values(self):
+    def test_apply_request_carries_the_previously_read_configuration_and_values(self):
         from k_factor.standalone.desktop import KrDesktop
         selected = native_report("inspect")
         values = {key: SimpleNamespace(get=lambda value=value: value)
                   for key, value in (("thickness_mm", "2"), ("k_factor", "0.274"), ("radius_mm", "1.5"))}
         stub = SimpleNamespace(busy=False, selected=selected, values=values, status=Mock(),
-                               entries=[Mock(), Mock(), Mock()], read_button=Mock(), verify_button=Mock(),
+                               entries=[Mock(), Mock(), Mock()], read_button=Mock(), apply_button=Mock(),
                                folder_button=Mock(), worker=Mock(), append=Mock())
         with TemporaryDirectory() as directory, \
              patch("k_factor.standalone.desktop.report_directory", return_value=Path(directory)), \
              patch("k_factor.standalone.desktop.threading.Thread") as worker:
-            KrDesktop.start(stub, "verify")
+            KrDesktop.start(stub, "apply")
         request = worker.call_args.kwargs["args"][0]
         self.assertEqual(request["document_path"], selected["document_path"])
         self.assertEqual(request["configuration"], selected["configuration"])
         self.assertEqual(request["expected_state"], selected["before"])
+        self.assertEqual(request["mode"], "apply")
         worker.return_value.start.assert_called_once()
+
+    def test_repeated_apply_uses_last_applied_values_as_baseline(self):
+        from k_factor.standalone.desktop import KrDesktop
+        selected = native_report("apply")
+        values = {key: SimpleNamespace(get=lambda value=value: value)
+                  for key, value in (("thickness_mm", "2"), ("k_factor", "0.31"), ("radius_mm", "1.8"))}
+        stub = SimpleNamespace(busy=False, selected=selected, values=values, status=Mock(),
+                               entries=[Mock(), Mock(), Mock()], read_button=Mock(), apply_button=Mock(),
+                               folder_button=Mock(), worker=Mock(), append=Mock())
+        with TemporaryDirectory() as directory, \
+             patch("k_factor.standalone.desktop.report_directory", return_value=Path(directory)), \
+             patch("k_factor.standalone.desktop.threading.Thread") as worker:
+            KrDesktop.start(stub, "apply")
+        request = worker.call_args.kwargs["args"][0]
+        self.assertEqual(request["expected_state"], selected["after"])
+        self.assertEqual(request["assignments"][0]["k_factor"], 0.31)
 
     def test_invalid_values_show_an_error_without_starting_a_worker(self):
         from k_factor.standalone.desktop import KrDesktop
@@ -138,10 +158,114 @@ class DesktopInputTests(unittest.TestCase):
                 status = Mock()
                 stub = SimpleNamespace(busy=False, selected=native_report("inspect"), values=values, status=status)
                 with patch("k_factor.standalone.desktop.threading.Thread") as worker:
-                    KrDesktop.start(stub, "verify")
+                    KrDesktop.start(stub, "apply")
                 status.configure.assert_called_once()
                 self.assertTrue(status.configure.call_args.kwargs["text"])
                 worker.assert_not_called()
+
+
+class NativeAssignmentTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.folder = Path(self.temporary.name)
+        self.backend = self.folder / 'native.exe'
+        self.backend.write_bytes(b'fake')
+        self.request = dict(schema_version=1, mode='apply', assignments=[
+            dict(thickness_mm=2, k_factor=0.274, radius_mm=1.5)])
+
+    def run_report(self, report):
+        def native(args, **kwargs):
+            Path(args[args.index('--report')+1]).write_text(json.dumps(report), encoding='utf-8')
+            return SimpleNamespace(returncode=2 if report['status'] == 'error' else 0, stdout='', stderr='')
+        return run_native(self.request, self.folder, native_runner=native, backend=self.backend)
+
+    def test_native_apply_keeps_written_values_and_never_calls_python_com(self):
+        report = native_report('apply')
+        with patch('k_factor.standalone.desktop_controller.execute', side_effect=RuntimeError('TYPE_E_ELEMENTNOTFOUND')) as python:
+            result = self.run_report(report)
+        python.assert_not_called()
+        self.assertEqual(result['csharp']['status'], 'applied')
+        self.assertEqual(result['csharp']['after']['k_factor'], 0.274)
+        self.assertIsNone(result['csharp']['rollback'])
+        self.assertFalse((self.folder / 'python.json').exists())
+
+    def test_preview_or_temporary_verification_cannot_count_as_apply(self):
+        for mode in ('inspect', 'verify'):
+            with self.subTest(mode=mode), self.assertRaises(ComparisonFailure):
+                self.run_report(native_report(mode))
+
+    def test_apply_rejects_wrong_readback_and_exposes_native_rollback_failure(self):
+        report = native_report('apply')
+        report['after']['radius_mm'] = 9
+        with self.assertRaisesRegex(ComparisonFailure, 'doğrulanamadı'):
+            self.run_report(report)
+        report.update(status='error', error='ModifyDefinition failed', rollback=dict(attempted=True, verified=False))
+        with self.assertRaisesRegex(ComparisonFailure, 'Parçayı kaydetmeyin'):
+            self.run_report(report)
+
+    def test_applying_existing_values_is_a_valid_idempotent_assignment(self):
+        report = native_report('apply')
+        report['before'] = report['after'].copy()
+        self.assertEqual(self.run_report(report)['csharp']['status'], 'applied')
+
+
+@unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'), 'Real Tk display required')
+class NativeDesktopGuiTests(unittest.TestCase):
+    def test_real_buttons_read_apply_and_reapply_without_verify_or_python(self):
+        from k_factor.standalone.desktop import KrDesktop
+        with TemporaryDirectory() as directory:
+            folder = Path(directory)
+            backend = folder / 'native.exe'
+            backend.write_bytes(b'fake')
+            state = native_report('inspect')['before'].copy()
+            modes, errors = [], []
+            def native(args, **kwargs):
+                request = json.loads(Path(args[args.index('--request')+1]).read_text(encoding='utf-8'))
+                mode = request['mode']
+                modes.append(mode)
+                report = native_report(mode)
+                report['before'] = state.copy()
+                if mode == 'apply':
+                    for key, value in state.items():
+                        self.assertEqual(request['expected_state'][key], value)
+                    report['assignment'] = request['assignments'][0]
+                    state.update(k_factor=report['assignment']['k_factor'], radius_mm=report['assignment']['radius_mm'])
+                report['after'] = state.copy()
+                Path(args[args.index('--report')+1]).write_text(json.dumps(report), encoding='utf-8')
+                return SimpleNamespace(returncode=0, stdout='', stderr='')
+            def run(request, destination, **kwargs):
+                return run_native(request, destination, native_runner=native, backend=backend, **kwargs)
+            app = KrDesktop()
+            app.report_callback_exception = lambda *args: errors.append(str(args))
+            def complete():
+                deadline = time.monotonic() + 3
+                while app.busy and time.monotonic() < deadline:
+                    app.update()
+                    time.sleep(.005)
+                app.update()
+                self.assertFalse(app.busy)
+                self.assertFalse(errors)
+            try:
+                with patch('k_factor.standalone.desktop.run_native', side_effect=run), \
+                     patch('k_factor.standalone.desktop.report_directory', side_effect=lambda: folder / f'run-{len(modes)}'):
+                    app.read_button.invoke()
+                    complete()
+                    self.assertEqual(app.apply_button.cget('state'), 'normal')
+                    app.apply_button.invoke()
+                    complete()
+                    self.assertEqual(state['k_factor'], 0.274)
+                    self.assertEqual(state['radius_mm'], 1.5)
+                    app.values['k_factor'].set('0,31')
+                    app.values['radius_mm'].set('1,8')
+                    app.apply_button.invoke()
+                    complete()
+                self.assertEqual(modes, ['inspect', 'apply', 'apply'])
+                self.assertEqual(state['k_factor'], 0.31)
+                self.assertEqual(state['radius_mm'], 1.8)
+                self.assertIn('Uygulandı', app.status.cget('text'))
+            finally:
+                app.close()
 
 
 class FrozenCacheTests(unittest.TestCase):

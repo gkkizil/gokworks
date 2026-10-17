@@ -1,4 +1,4 @@
-"""Sequential native/early-bound runs. Worker code never touches Tk widgets."""
+"""Native K/R assignment; cross-language comparison is an optional diagnostic."""
 
 from datetime import datetime
 import json
@@ -35,20 +35,19 @@ class ComparisonFailure(RuntimeError):
     pass
 
 
-def run_pair(request, folder, *, notify=lambda message: None, native_runner=subprocess.run, python_runner=execute, backend=None):
-    """Stop before Python when C# did not verify/restore the selected part."""
+def run_native(request, folder, *, notify=lambda message: None, native_runner=subprocess.run, backend=None):
+    """Read or write with the typed native engine, without Python COM binding."""
     request = validate_request(request)
-    if request["mode"] not in ("inspect", "verify"):
-        raise ComparisonFailure("Masaüstü denemesi yalnız inspect ve verify modlarını destekler.")
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     request_file = folder / "request.json"
-    csharp_file, python_file = folder / "csharp.json", folder / "python.json"
+    csharp_file = folder / "csharp.json"
     write_json(request_file, request)
     helper = Path(backend) if backend is not None else native_executable()
     if not helper.is_file():
         raise ComparisonFailure("C# motoru bulunamadı. ZIP dosyasını tüm alt klasörleriyle çıkartın; EXE'yi tek başına taşımayın.")
-    notify("C# motoru sac parametrelerini okuyor…" if request["mode"] == "inspect" else "C# motoru K/R yazma ve geri alma denemesi yapıyor…")
+    notify("SolidWorks sac parametreleri okunuyor…" if request["mode"] == "inspect" else "Sac-Levha K/R değerleri yazılıyor ve geri okunuyor…")
+    csharp_file.unlink(missing_ok=True)
     # No timeout/TerminateProcess during writes: rollback must finish before exit.
     result = native_runner([str(helper), "--request", str(request_file), "--report", str(csharp_file)],
                            capture_output=True, text=True, encoding="utf-8", errors="replace",
@@ -56,11 +55,41 @@ def run_pair(request, folder, *, notify=lambda message: None, native_runner=subp
     if not csharp_file.is_file():
         raise ComparisonFailure("C# motoru rapor oluşturamadı: " + (result.stderr or result.stdout or f"çıkış kodu {result.returncode}")[-3000:])
     csharp = json.loads(csharp_file.read_text(encoding="utf-8-sig"))
-    expected = "inspected" if request["mode"] == "inspect" else "verified"
-    if result.returncode != 0 or csharp.get("status") != expected:
-        raise ComparisonFailure("C# denemesi tamamlanamadı. Python başlatılmadı.\n" + str(csharp.get("error") or "; ".join(csharp.get("warnings", [])) or csharp.get("status")))
+    expected = {"inspect": "inspected", "apply": "applied", "verify": "verified"}[request["mode"]]
+    if (result.returncode != 0 or csharp.get("status") != expected or csharp.get("error")
+            or csharp.get("schema_version") != 1 or csharp.get("engine") != "csharp"):
+        detail = str(csharp.get("error") or "; ".join(csharp.get("warnings", [])) or csharp.get("status"))
+        rollback = csharp.get("rollback") or {}
+        if rollback.get("attempted") and rollback.get("verified") is not True:
+            detail = "Eski değerler geri yüklenip doğrulanamadı. Parçayı kaydetmeyin.\n" + detail
+        raise ComparisonFailure("SolidWorks işlemi tamamlanamadı.\n" + detail)
     if request["mode"] == "verify" and ((csharp.get("rollback") or {}).get("verified") is not True):
         raise ComparisonFailure("C# geri alma işlemi doğrulanamadı. Python başlatılmadı. Parçayı kaydetmeyin.")
+    if request["mode"] == "apply":
+        # A preview/exit code alone must never be presented as an assignment.
+        before, after, assignment = (csharp.get(key) for key in ("before", "after", "assignment"))
+        if not all(isinstance(state, dict) for state in (before, after, assignment)):
+            raise ComparisonFailure("K/R atamasının geri okuma raporu eksik. Sonucu SolidWorks'te kontrol edin.")
+        if (after.get("bend_allowance_type") != 2
+                or any(type(after.get(key)) not in (int, float) or type(assignment.get(key)) not in (int, float)
+                       or not abs(after[key] - assignment[key]) <= tolerance
+                       for key, tolerance in (("k_factor", 1e-8), ("radius_mm", 1e-6)))
+                or any(after.get(key) != before.get(key) for key in ("feature_name", "feature_type"))
+                or type(after.get("thickness_mm")) not in (int, float)
+                or type(before.get("thickness_mm")) not in (int, float)
+                or not abs(after["thickness_mm"] - before["thickness_mm"]) <= 1e-6):
+            raise ComparisonFailure("K/R ataması geri okunarak doğrulanamadı. Raporu ve SolidWorks değerlerini kontrol edin.")
+    return {"csharp": csharp, "folder": str(folder)}
+
+
+def run_pair(request, folder, *, notify=lambda message: None, native_runner=subprocess.run, python_runner=execute, backend=None):
+    """Optional diagnostic only; the assignment desktop never calls this."""
+    request = validate_request(request)
+    if request["mode"] not in ("inspect", "verify"):
+        raise ComparisonFailure("Karşılaştırma yalnız inspect ve verify modlarını destekler.")
+    result = run_native(request, folder, notify=notify, native_runner=native_runner, backend=backend)
+    folder, csharp = Path(folder), result["csharp"]
+    python_file = folder / "python.json"
     # Bind the second run to the document and root read by the first engine.
     bound = dict(request, document_path=csharp["document_path"], configuration=csharp["configuration"],
                  feature_name=csharp["before"]["feature_name"], expected_state=csharp["before"])

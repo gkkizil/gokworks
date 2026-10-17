@@ -1,5 +1,5 @@
 {
-  "request_id": "d8c2533c-1a28-426c-9a06-4d241f18c735",
-  "requested_at": "2026-10-17T16:58:59.446718+00:00",
-  "reason": "User-requested standalone K/R Windows EXE from latest main: selected configuration/baseline binding, null gauge filename handling, validated radius target and visible input errors. Require Defender scan and frozen Windows opening check; build independent K/R tool only."
+  "request_id": "53120d5b-119d-49b3-a4bd-f6d1f4c7f85e",
+  "requested_at": "2026-10-17T17:17:10.544268+00:00",
+  "reason": "Correct the just-requested K/R executable after user failure: C#-only inspect/apply, no mandatory Python COM parity, successful assignments remain in the open part, legitimate sheet-metal gauge-getter statuses no longer block direct definition writes. Require Defender scan and frozen Windows UI check."
 }

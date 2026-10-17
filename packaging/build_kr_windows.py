@@ -81,15 +81,18 @@ def main():
     checksums = {path.relative_to(PACKAGE).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest() for path in (desktop, backend)}
     (PACKAGE / "SHA256.txt").write_text("".join(f"{digest}  {name}\n" for name, digest in checksums.items()), encoding="utf-8")
     (PACKAGE / "OKU.txt").write_text(
-        "GOKWORKS · K/R Denemesi · Windows 10/11 x64\n\n"
+        "GOKWORKS · K/R Ataması · Windows 10/11 x64\n\n"
         "ZIP dosyasını tüm alt klasörleriyle çıkartın. EXE'yi tek başına taşımayın.\n"
         "GOKWORKS-KR-Deneme.exe dosyasına çift tıklayın.\n"
         "Python, .NET ve terminal kurulumu/kullanımı gerekmez.\n\n"
         "SolidWorks kurulu ve açık olmalı. Sac parçayı kendi penceresinde etkinleştirin.\n"
-        "İlk denemeyi bir kopyada yapın. Önce Parçayı oku düğmesine basın.\n"
-        "K ve R girip K/R yazma denemesi düğmesine basın.\n"
-        "Önce C#, sonra Python yazar, geri okur ve eski değerleri geri yükler.\n"
-        "Otomatik kayıt yapılmaz. Geri alma hatası varsa parçayı kaydetmeyin.\n"
+        "Önce Parçayı oku düğmesine basın.\n"
+        "K ve iç yarıçapı mm olarak girip K/R uygula düğmesine basın.\n"
+        "Native motor K/R'yi yazar, yeniden oluşturur ve geri okuyarak doğrular.\n"
+        "Başarılı atamada yeni değerler açık parçada kalır; eski değerler geri yüklenmez.\n"
+        "Dosyayı SolidWorks'te kendiniz kaydedin. Otomatik kayıt yapılmaz.\n"
+        "Yalnız hata durumunda geri alma denenir. Geri alma hatası varsa parçayı kaydetmeyin.\n"
+        "Atama için Python COM karşılaştırması gerekmez.\n"
         "İşlem bitene kadar SolidWorks'te belge veya konfigürasyon değiştirmeyin.\n"
         "Rapor klasörü düğmesi ayrıntılı sonuçları açar.\n\n"
         "SolidWorks API dosyaları yerel kurulumdan alınır; bu pakette dağıtılmaz.\n"

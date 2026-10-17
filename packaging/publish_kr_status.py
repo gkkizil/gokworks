@@ -50,7 +50,7 @@ def main():
             files = {BASE + "/windows-build-status.json": payload}
             if report["status"] == "success":
                 readme = git("show", f"{parent}:{BASE}/README.md")
-                block = (f'{START}\n**Windows paketi:** [K/R deneme aracını indir]({report["download_url"]}). '
+                block = (f'{START}\n**Windows paketi:** [K/R atama aracını indir]({report["download_url"]}). '
                          'ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. '
                          'Alt klasörleri koruyun; EXE’yi tek başına taşımayın. Python ve .NET kurulumu gerekmez.\n\n'
                          f'[Derleme kaydı]({report["run_url"]}) · Kaynak: `{report["commit"][:7]}` · '

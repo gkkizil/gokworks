@@ -68,7 +68,7 @@ public sealed class SolidWorksEngine
             return report;
         }
         ValidateBaseline(report.Before);
-        ValidateControls(selected.Info.Controls, request.Mode);
+        ValidateControls(selected.Info);
         CheckFeatureError(selected.Feature, "Before.GetErrorCode2");
         var baseline = report.Before;
         var target = new FeatureState(baseline.FeatureName, baseline.FeatureType, baseline.ThicknessMm,
@@ -121,8 +121,11 @@ public sealed class SolidWorksEngine
                 {
                     var name = Trace("Feature.Name", () => feature.Name);
                     var kind = Trace($"{name}.GetTypeName2", () => feature.GetTypeName2());
-                    bool suppressed = IsSuppressed(feature);
-                    if (!suppressed && kind is "SheetMetal" or "TemplateSheetMetal") Add(feature, name, kind, parent);
+                    bool sheetMetal = kind is "SheetMetal" or "TemplateSheetMetal";
+                    // History/UI/body folders need not expose configuration
+                    // suppression. Only a real sheet-metal candidate requires it.
+                    bool suppressed = sheetMetal && IsSuppressed(feature);
+                    if (sheetMetal && !suppressed) Add(feature, name, kind, parent);
                     if (!suppressed)
                         Walk(Trace($"{name}.GetFirstSubFeature", () => feature.GetFirstSubFeature() as IFeature), name, true);
                 }
@@ -245,15 +248,24 @@ public sealed class SolidWorksEngine
         return controls;
     }
 
-    private void ValidateControls(ControlState? controls, string mode)
+    private void ValidateControls(FeatureInfo selected)
     {
-        if (controls?.Writable == true) return;
-        if (mode == "verify" && controls is { GaugeStatusCode: 2, Error: null })
+        var controls = selected.Controls;
+        if (!SheetMetalControlPolicy.AllowsDefinitionWrite(selected.Type, controls))
+            throw new InvalidOperationException($"Selected definition is not established as writable: GetUseGaugeTable={controls?.GaugeStatusCode}, gauge={controls?.UseGaugeTable}, material={controls?.UseMaterialParameters}, error={controls?.Error}. No control was disabled.");
+        if (selected.Type == "TemplateSheetMetal" && controls?.GaugeStatusCode == 2)
         {
-            report.Warnings.Add("GetUseGaugeTable=2 (NotEnabledOnTemplate): gauge/material control is unknown. Only temporary verify is allowed with mandatory baseline restoration; persistent apply is blocked.");
-            return;
+            // A successful body getter can still establish an active link.
+            // An unavailable optional child getter does not prevent editing
+            // this template's independent definition parameters.
+            var linked = handles.FirstOrDefault(x => x.Info.Type == "SheetMetal" &&
+                SheetMetalControlPolicy.HasKnownLinkedControls(x.Info.Controls));
+            if (linked is not null)
+                throw new InvalidOperationException($"Sheet-metal body {linked.Info.Name} reports active gauge-table or material parameters. No control was disabled.");
+            report.Warnings.Add("GetUseGaugeTable=2 (NotEnabledOnTemplate): the gauge getter is unavailable on this template. Its K/R definition will be edited and read back after rebuild; gauge/material controls and child overrides are left unchanged.");
         }
-        throw new InvalidOperationException($"Selected definition is not established as writable: GetUseGaugeTable={controls?.GaugeStatusCode}, gauge={controls?.UseGaugeTable}, material={controls?.UseMaterialParameters}, error={controls?.Error}. No control was disabled.");
+        else if (selected.Type == "SheetMetal" && controls?.GaugeStatusCode == 1)
+            report.Warnings.Add("GetUseGaugeTable=1 (OldArchitecture): the gauge getter is unavailable on this legacy definition. Its K/R definition will be edited and read back after rebuild; gauge/material controls are left unchanged.");
     }
 
     private static void ValidateBaseline(FeatureState state)
