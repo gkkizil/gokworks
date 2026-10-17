@@ -9,6 +9,8 @@ from tkinter import filedialog, simpledialog, ttk
 
 import customtkinter as ctk
 
+from gui.widgets import AppScrollbar, AppOptionMenu, AppScrollableFrame
+
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import PANEL, INPUT, BORDER, TEXT, MUTED, RED, AMBER, SUCCESS, UI_FONT
 from naming.exporter import NameCollision, Rules, plan_names, validate_destination, worker
@@ -86,13 +88,13 @@ class NamingView:
         chooser.grid_columnconfigure(1, weight=1)
         self._label(chooser, 'Ana montaj', 11, MUTED).grid(row=0, column=0, sticky='w', padx=(0, 10))
         widgets['assembly_choice'] = tk.StringVar(self, value='Ana montajı seçin')
-        widgets['assembly'] = ctk.CTkOptionMenu(chooser, variable=widgets['assembly_choice'],
+        widgets['assembly'] = AppOptionMenu(chooser, variable=widgets['assembly_choice'],
             values=['Ana montajı seçin'], command=self._select_naming_assembly, height=32,
             width=1, dynamic_resizing=False, font=(UI_FONT, 12))
         widgets['assembly'].grid(row=0, column=1, sticky='ew')
         widgets['assembly_holder'] = chooser
         widgets['source_choices'] = {}
-        form = ctk.CTkScrollableFrame(self.workspace, fg_color=PANEL, border_width=1,
+        form = AppScrollableFrame(self.workspace, fg_color=PANEL, border_width=1,
                                       border_color=BORDER, corner_radius=16, height=245)
         widgets['form'] = form
         # CTk's scrollbar otherwise requests a 200 px minimum viewport.
@@ -105,7 +107,7 @@ class NamingView:
             holder.grid(row=row, column=col, sticky='ew', padx=(14 if col == 0 else 4, 14 if col == 3 else 4), pady=(10 if row == 0 else 0, 8))
             holder.grid_columnconfigure(0, weight=1)
             self._label(holder, label, 11, MUTED).grid(row=0, column=0, sticky='w')
-            control = (ctk.CTkOptionMenu(holder, variable=self.naming_state[key], values=['Ön / son ek', 'Numaralı'],
+            control = (AppOptionMenu(holder, variable=self.naming_state[key], values=['Ön / son ek', 'Numaralı'],
                                          height=36, width=1, dynamic_resizing=False, font=(UI_FONT, 12)) if key == 'mode' else
                        ctk.CTkEntry(holder, textvariable=self.naming_state[key], height=36, width=1, font=(UI_FONT, 12)))
             control.grid(row=1, column=0, sticky='ew')
@@ -145,9 +147,9 @@ class NamingView:
             table.heading(key, text=title, anchor='w')
             table.column(key, width=width, minwidth=100, stretch=key != 'kind')
         table.grid(row=1, column=0, sticky='nsew', padx=(12, 0))
-        bar = ctk.CTkScrollbar(card, command=table.yview, width=10, fg_color=PANEL, button_color=BORDER)
+        bar = AppScrollbar(card, command=table.yview, width=10, fg_color=PANEL, button_color=BORDER)
         bar.grid(row=1, column=1, sticky='ns', padx=(0, 10))
-        hbar = ctk.CTkScrollbar(card, orientation='horizontal', command=table.xview, height=10, fg_color=PANEL, button_color=BORDER)
+        hbar = AppScrollbar(card, orientation='horizontal', command=table.xview, height=10, fg_color=PANEL, button_color=BORDER)
         hbar.grid(row=2, column=0, sticky='ew', padx=12, pady=(0, 8))
         table.configure(yscrollcommand=bar.set, xscrollcommand=hbar.set)
         table.bind('<Double-1>', self._double_click_naming_row)

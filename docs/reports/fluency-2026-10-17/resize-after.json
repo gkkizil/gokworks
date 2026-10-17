@@ -1,0 +1,24 @@
+{
+  "pages_prepared": 9,
+  "measurements": [
+    {
+      "mode": "pdf",
+      "resize_median_ms": 22.54275800078176,
+      "resize_max_ms": 43.206650007050484,
+      "configure_by_page": {
+        "pdf": 16
+      },
+      "inactive_configure_events": 0
+    },
+    {
+      "mode": "weight",
+      "resize_median_ms": 29.045761009911075,
+      "resize_max_ms": 44.698773010168225,
+      "configure_by_page": {
+        "weight": 16
+      },
+      "inactive_configure_events": 0
+    }
+  ],
+  "method": "One Linux/Xvfb run; production startup, all nine pages prepared. Sixteen window size changes from 1000\u00d7690 to 1440\u00d7900 and back per page, each followed by real Tk update(). Not a Windows frame-rate measurement."
+}

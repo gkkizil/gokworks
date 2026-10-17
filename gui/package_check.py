@@ -68,12 +68,30 @@ def run(output):
             assert app.brand_logo.cget('light_image').size == (1024, 364)
             assert app.brand_logo.cget('dark_image').size == (1024, 364)
             pages = app._MODES
+            navigation = []
             for mode in pages:
+                started = time.perf_counter()
                 app._switch_mode(mode)
+                app.update()
+                navigation.append({'mode': mode, 'click_and_events_ms': (time.perf_counter()-started)*1000})
                 end = time.monotonic()+.15
                 while time.monotonic() < end:
                     app.update()
                     time.sleep(.01)
+                assert app.workspace.winfo_viewable(), f'Workspace not visible: {mode}'
+            # Exercise the real frozen Windows controls after a compact/large
+            # window change. These are current-run samples, not an FPS claim.
+            resize = []
+            for geometry in ('1000x690', '1280x800', '1100x740'):
+                started = time.perf_counter()
+                app.geometry(geometry)
+                app.update()
+                resize.append({'geometry': geometry, 'resize_and_events_ms': (time.perf_counter()-started)*1000})
+                end = time.monotonic()+.08
+                while time.monotonic() < end:
+                    app.update()
+                    time.sleep(.005)
+                assert app.workspace.winfo_width() == app.viewport.winfo_width(), 'Workspace width did not follow window'
             # Inputs update the live result only while their workspace is active.
             # The package-wide opening check may finish on an independent page.
             app._switch_mode('bolt')
@@ -96,6 +114,7 @@ def run(output):
             result.update(status='passed', pages=list(pages), tk=app.tk.call('info', 'patchlevel'),
                           branding_themes=['light', 'dark'],
                           windows_icon_theme_check='passed' if icons else 'not_run',
+                          navigation_samples=navigation, resize_samples=resize,
                           solidworks_connection_tested=False)
             app._on_close()
             app = None

@@ -5,6 +5,8 @@ import threading
 import tkinter as tk
 
 import customtkinter as ctk
+
+from gui.widgets import AppOptionMenu, AppScrollableFrame
 from gui.rendering import configure_changed, hide_grid
 
 from gui.theme import PANEL, INPUT, BORDER, TEXT, MUTED, RED, AMBER, SECONDARY, HOVER, UI_FONT, ACCENT_BG, ACCENT
@@ -87,7 +89,7 @@ class KFactorView:
         self.k_widgets = {}
 
     def _build_k_settings(self):
-        self.settings_body = ctk.CTkScrollableFrame(
+        self.settings_body = AppScrollableFrame(
             self.form_panel, height=340, corner_radius=0, fg_color="transparent",
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         self.settings_body.grid(row=0, column=0, sticky="nsew", padx=6, pady=(8, 0))
@@ -388,7 +390,7 @@ class KFactorView:
         holder.grid_columnconfigure(0, weight=1)
         self._label(holder, label, 12, MUTED, wraplength=240, justify="left").grid(row=0, column=0, sticky="w", pady=(0, 6))
         if values and readonly:
-            field = ctk.CTkOptionMenu(
+            field = AppOptionMenu(
                 holder, variable=self.k_state[key], values=values, height=42,
                 fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
                 dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,

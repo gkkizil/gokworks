@@ -1,5 +1,5 @@
 {
-  "request_id": "4785797c-c35e-4e09-8bdb-9dfcd21bb221",
-  "requested_at": "2026-10-16T04:16:15.386186+00:00",
-  "reason": "User-requested Windows EXE with the latest main workspace resize, display DPI bounds, and compact-window fixes (source 06ad5ef)."
+  "request_id": "6733e9b9-9dc7-4568-bab5-7baab83e393c",
+  "requested_at": "2026-10-17T10:09:59.352569+00:00",
+  "reason": "User-requested full GOKWORKS Windows EXE after Product Design fluency review: event-loop-safe controls, root resize filtering, and frozen navigation/resize checks on main."
 }

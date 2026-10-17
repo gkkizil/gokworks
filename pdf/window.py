@@ -26,7 +26,7 @@ from weight.window import WeightView
 from naming.window import NamingView
 from gui.icons import make_icon, set_window_icon, set_windows_app_identity
 from gui.typography import check_turkish_fonts
-from gui.rendering import configure_changed, hide_grid
+from gui.rendering import configure_changed, hide_grid, limit_root_configure_events
 from gui.window_geometry import configure_window_geometry
 from gui.theme import (BG, PANEL, INPUT, TEXT, MUTED, ACCENT, ACCENT_BG,
                        SUCCESS, AMBER, RED, SECONDARY, HOVER, UI_FONT, SIDEBAR, BORDER,
@@ -78,6 +78,7 @@ class GokworksPdfApp(NamingView, WeightView, BoltView, BomView, GeometricToleran
             ctk.ThemeManager.theme["CTkFont"]["family"] = UI_FONT
         set_windows_app_identity()
         super().__init__()
+        limit_root_configure_events(self)
         if prepare_navigation:
             self.withdraw()
         try:

@@ -7,6 +7,8 @@ from tkinter import filedialog
 import webbrowser
 
 import customtkinter as ctk
+
+from gui.widgets import AppOptionMenu, AppScrollableFrame
 from gui.icons import set_window_icon
 from gui.text import turkish_upper
 from gui.rendering import configure_changed, hide_grid
@@ -71,7 +73,7 @@ class IsoFitsView:
                             border_width=1, border_color=BORDER)
 
     def _iso_menu(self, parent, key, values, width=130):
-        return ctk.CTkOptionMenu(parent, variable=self.iso_state[key], values=list(values),
+        return AppOptionMenu(parent, variable=self.iso_state[key], values=list(values),
                                 width=width, height=36, fg_color=SECONDARY,
                                 button_color=SECONDARY, button_hover_color=HOVER,
                                 dropdown_fg_color=PANEL, dropdown_hover_color=HOVER,
@@ -148,7 +150,7 @@ class IsoFitsView:
         filters.configure(height=30)
         filters.grid(row=0, column=2, padx=(6, 0))
         self.iso_widgets['filters'] = filters
-        presets = ctk.CTkScrollableFrame(form, fg_color='transparent', corner_radius=0,
+        presets = AppScrollableFrame(form, fg_color='transparent', corner_radius=0,
                                         scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         presets.grid(row=5, column=0, sticky='nsew', padx=(8, 4), pady=(0, 8))
         presets.grid_columnconfigure(0, weight=1)
@@ -167,7 +169,7 @@ class IsoFitsView:
             self.iso_widgets['preset_buttons'][preset.code] = button
         self.iso_widgets['iso_inputs'] = (selectors, toolbar, search_frame, presets)
         self._build_manual_inputs(form)
-        details = ctk.CTkScrollableFrame(body, fg_color='transparent', corner_radius=0,
+        details = AppScrollableFrame(body, fg_color='transparent', corner_radius=0,
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         details.grid(row=0, column=1, sticky='nsew')
         details.grid_columnconfigure(0, weight=1)
@@ -254,7 +256,7 @@ class IsoFitsView:
         self._resize_pdf_area()
 
     def _build_manual_inputs(self, form):
-        panel = ctk.CTkScrollableFrame(form, fg_color='transparent', corner_radius=0,
+        panel = AppScrollableFrame(form, fg_color='transparent', corner_radius=0,
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         panel.grid(row=2, column=0, rowspan=4, sticky='nsew', padx=(8, 4), pady=(0, 8))
         panel.grid_columnconfigure((0, 1), weight=1, uniform='manual_columns')

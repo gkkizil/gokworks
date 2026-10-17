@@ -1,0 +1,54 @@
+{
+  "steps": [
+    {
+      "screenshot": "01-pdf.png",
+      "description": "Normal açılış: PDF çalışma alanı",
+      "mode": "pdf",
+      "window_title": "GOKWORKS • SolidWorks otomasyonu",
+      "bounds": [
+        0,
+        0,
+        1240,
+        860
+      ]
+    },
+    {
+      "screenshot": "02-iso.png",
+      "description": "Menüden ISO geçmeleri: seçim ve kesit",
+      "mode": "iso_fits",
+      "window_title": "GOKWORKS • SolidWorks otomasyonu",
+      "bounds": [
+        0,
+        0,
+        1240,
+        860
+      ]
+    },
+    {
+      "screenshot": "03-compact.png",
+      "description": "Ağırlık hesabı: küçük penceredeki içerik",
+      "mode": "weight",
+      "window_title": "GOKWORKS • SolidWorks otomasyonu",
+      "bounds": [
+        0,
+        0,
+        1000,
+        690
+      ]
+    },
+    {
+      "screenshot": "04-expanded.png",
+      "description": "Ağırlık hesabı: yeniden büyütülen pencere",
+      "mode": "weight",
+      "window_title": "GOKWORKS • SolidWorks otomasyonu",
+      "bounds": [
+        0,
+        0,
+        1440,
+        900
+      ]
+    }
+  ],
+  "errors": [],
+  "environment": "Linux/Xvfb, Python 3.13/Tk8.6; real desktop screenshot at Tk window bounds; no Windows/SolidWorks performance claim"
+}

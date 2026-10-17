@@ -5,6 +5,8 @@ import tkinter as tk
 
 import customtkinter as ctk
 
+from gui.widgets import AppOptionMenu, AppScrollableFrame
+
 from gui.rendering import configure_changed, hide_grid
 from gui.theme import (PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        AMBER, RED, HOVER, UI_FONT)
@@ -85,7 +87,7 @@ class WeightView:
         variable, command = self.weight_state[key], None
         if key == 'material':
             variable, command = self.weight_widgets['material_display'], self._select_weight_material
-        return ctk.CTkOptionMenu(parent, variable=variable, values=list(values), command=command,
+        return AppOptionMenu(parent, variable=variable, values=list(values), command=command,
             width=1, height=34, fg_color=INPUT, button_color=INPUT, button_hover_color=HOVER,
             dropdown_fg_color=PANEL, dropdown_hover_color=HOVER, dropdown_text_color=TEXT,
             text_color=TEXT, font=(UI_FONT, 11 if key == 'material' else 12),
@@ -121,7 +123,7 @@ class WeightView:
         body.grid_columnconfigure((0, 1), weight=1, uniform='weight_columns')
         body.grid_rowconfigure(0, weight=1)
         for column, key in enumerate(('form', 'details')):
-            panel = ctk.CTkScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
+            panel = AppScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
                 scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
             panel.grid(row=0, column=column, sticky='nsew', padx=(0, 12) if column == 0 else 0)
             panel.grid_columnconfigure(0, weight=1)
@@ -132,7 +134,7 @@ class WeightView:
         selector.grid_columnconfigure(0, weight=1)
         self._label(selector, 'KESİT SEÇİMİ', 12, ACCENT, bold=True).grid(
             row=0, column=0, sticky='w', padx=12, pady=(12, 6))
-        listing = ctk.CTkScrollableFrame(selector, height=174, width=1, fg_color='transparent',
+        listing = AppScrollableFrame(selector, height=174, width=1, fg_color='transparent',
             corner_radius=0, scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         listing.grid(row=1, column=0, sticky='ew', padx=(6, 2), pady=(0, 8))
         listing.grid_columnconfigure((0, 1, 2), weight=1, uniform='weight_kinds')

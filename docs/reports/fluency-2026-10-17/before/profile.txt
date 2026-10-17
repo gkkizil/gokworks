@@ -1,0 +1,53 @@
+         1931454 function calls (1802796 primitive calls) in 2.489 seconds
+
+   Ordered by: cumulative time
+   List reduced from 387 to 45 due to restriction <45>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+111492/1352    1.676    0.000    2.475    0.002 {method 'call' of '_tkinter.tkapp' objects}
+       64    0.000    0.000    2.465    0.039 ctk_tk.py:148(update)
+       64    0.000    0.000    2.465    0.039 __init__.py:1468(update)
+17185/1969    0.021    0.000    1.475    0.001 __init__.py:2066(__call__)
+   387/87    0.000    0.000    1.247    0.014 __init__.py:1472(update_idletasks)
+   203/89    0.002    0.000    1.180    0.013 ctk_scrollbar.py:135(_draw)
+   171/80    0.001    0.000    1.150    0.014 ctk_scrollbar.py:292(set)
+4644/1939    0.009    0.000    1.054    0.001 ctk_base_class.py:182(_update_dimensions_event)
+   148/56    0.001    0.000    0.903    0.016 ctk_optionmenu.py:186(_draw)
+    16780    0.097    0.000    0.475    0.000 __init__.py:1720(_substitute)
+      234    0.001    0.000    0.288    0.001 __init__.py:863(callit)
+     4070    0.009    0.000    0.238    0.000 draw_engine.py:97(draw_rounded_rect_with_border)
+       18    0.000    0.000    0.234    0.013 window.py:233(_apply_navigation)
+       18    0.001    0.000    0.234    0.013 window.py:239(_switch_mode)
+     4070    0.021    0.000    0.222    0.000 draw_engine.py:326(__draw_rounded_rect_with_border_circle_shapes)
+   184580    0.048    0.000    0.174    0.000 __init__.py:1726(getint_event)
+    30213    0.034    0.000    0.173    0.000 ctk_canvas.py:83(coords)
+     2023    0.006    0.000    0.165    0.000 ctk_frame.py:94(_draw)
+   244956    0.155    0.000    0.155    0.000 {method 'getint' of '_tkinter.tkapp' objects}
+    16780    0.031    0.000    0.105    0.000 {built-in method builtins.any}
+     1041    0.004    0.000    0.083    0.000 ctk_button.py:184(_draw)
+    30213    0.022    0.000    0.082    0.000 __init__.py:2964(coords)
+   335600    0.050    0.000    0.074    0.000 __init__.py:1733(<genexpr>)
+    11705    0.020    0.000    0.061    0.000 ctk_tk.py:101(_update_dimensions_event)
+     3246    0.005    0.000    0.058    0.000 __init__.py:1805(_configure)
+    30213    0.013    0.000    0.057    0.000 __init__.py:3075(gettags)
+      420    0.002    0.000    0.052    0.000 rendering.py:4(configure_changed)
+    16798    0.032    0.000    0.044    0.000 __init__.py:1667(nametowidget)
+     1438    0.001    0.000    0.042    0.000 __init__.py:1818(configure)
+    12475    0.004    0.000    0.041    0.000 __init__.py:3067(find_withtag)
+       50    0.001    0.000    0.041    0.001 window.py:354(_resize_weight_workspace)
+       18    0.000    0.000    0.040    0.002 __init__.py:785(focus_set)
+    12475    0.007    0.000    0.037    0.000 __init__.py:3033(find)
+   376732    0.031    0.000    0.031    0.000 {built-in method builtins.isinstance}
+      256    0.001    0.000    0.031    0.000 ctk_base_class.py:113(configure)
+      787    0.002    0.000    0.024    0.000 ctk_label.py:176(_draw)
+     1433    0.004    0.000    0.024    0.000 ctk_canvas.py:103(itemconfig)
+       49    0.001    0.000    0.023    0.000 ctk_button.py:354(configure)
+    12255    0.007    0.000    0.023    0.000 __init__.py:1451(winfo_width)
+      187    0.001    0.000    0.022    0.000 ctk_label.py:211(configure)
+       52    0.001    0.000    0.022    0.000 window.py:326(_draw_weight_diagram)
+       18    0.000    0.000    0.021    0.001 ctk_button.py:566(invoke)
+       18    0.000    0.000    0.021    0.001 layout.py:172(<lambda>)
+       18    0.000    0.000    0.021    0.001 window.py:222(_request_mode)
+       36    0.000    0.000    0.021    0.001 window.py:396(_update_navigation)
+
+

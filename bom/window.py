@@ -10,6 +10,8 @@ from tkinter import filedialog, ttk
 
 import customtkinter as ctk
 
+from gui.widgets import AppScrollbar
+
 from bom.exporter import Cancelled, export_excel, scan_worker
 from gui.icons import set_window_icon
 from gui.rendering import configure_changed, hide_grid
@@ -187,9 +189,9 @@ class BomView:
                              stretch=column not in ('qty', 'kind', 'mass', 'total_mass'), anchor=anchor)
             table.configure(selectmode='browse')
             table.grid(row=1, column=0, sticky='nsew')
-            vertical = ctk.CTkScrollbar(tab, command=table.yview, width=10, fg_color=PANEL, button_color=BORDER)
+            vertical = AppScrollbar(tab, command=table.yview, width=10, fg_color=PANEL, button_color=BORDER)
             vertical.grid(row=1, column=1, sticky='ns')
-            horizontal = ctk.CTkScrollbar(tab, orientation='horizontal', command=table.xview, height=10,
+            horizontal = AppScrollbar(tab, orientation='horizontal', command=table.xview, height=10,
                                          fg_color=PANEL, button_color=BORDER)
             horizontal.grid(row=2, column=0, sticky='ew')
             table.configure(yscrollcommand=vertical.set, xscrollcommand=horizontal.set)

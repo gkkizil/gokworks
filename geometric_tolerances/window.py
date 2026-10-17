@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import filedialog
 
 import customtkinter as ctk
+
+from gui.widgets import AppOptionMenu, AppScrollableFrame
 from gui.icons import set_window_icon
 from gui.text import turkish_upper
 from gui.rendering import configure_changed, hide_grid
@@ -66,7 +68,7 @@ class GeometricTolerancesView:
                               placeholder_text='Tür veya kullanım ara', font=(UI_FONT, 12))
         search.grid(row=0, column=1, sticky='ew')
         self.gdt_widgets['search'] = search
-        listing = ctk.CTkScrollableFrame(catalog, fg_color='transparent', corner_radius=0,
+        listing = AppScrollableFrame(catalog, fg_color='transparent', corner_radius=0,
                                          scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         listing.grid(row=2, column=0, sticky='nsew', padx=(8, 4), pady=(0, 8))
         listing.grid_columnconfigure(0, weight=1)
@@ -82,7 +84,7 @@ class GeometricTolerancesView:
             self.gdt_widgets['choices'][item.key] = button
         self.gdt_widgets['count'] = self._label(catalog, '', 10, MUTED)
         self.gdt_widgets['count'].grid(row=3, column=0, sticky='w', padx=16, pady=(0, 12))
-        details = ctk.CTkScrollableFrame(body, fg_color='transparent', corner_radius=0,
+        details = AppScrollableFrame(body, fg_color='transparent', corner_radius=0,
                                          scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         details.grid(row=0, column=1, sticky='nsew')
         details.grid_columnconfigure(0, weight=1)
@@ -111,7 +113,7 @@ class GeometricTolerancesView:
             self.gdt_widgets[key] = entry
         self._label(inputs, 'Referans sırası (datum)', 10, MUTED, True, wraplength=170,
                     justify='left', anchor='w').grid(row=2, column=0, sticky='ew', padx=14, pady=(12, 5))
-        menu = ctk.CTkOptionMenu(inputs, variable=self.gdt_state['datum'], values=list(DATUM_CHOICES),
+        menu = AppOptionMenu(inputs, variable=self.gdt_state['datum'], values=list(DATUM_CHOICES),
             width=140, height=36, fg_color=SECONDARY, button_color=SECONDARY, button_hover_color=HOVER,
             dropdown_fg_color=PANEL, dropdown_hover_color=HOVER, dropdown_text_color=TEXT, text_color=TEXT,
             text_color_disabled=MUTED, font=(UI_FONT, 12), dropdown_font=(UI_FONT, 12))

@@ -4,6 +4,8 @@ from tkinter import ttk
 
 import customtkinter as ctk
 
+from gui.widgets import AppScrollbar, AppOptionMenu, AppScrollableFrame
+
 from gui.icons import make_logo
 from gui.rendering import configure_changed
 from gui.text import BOM_TITLE, KR_TITLE, KR_NAV_TITLE
@@ -262,7 +264,7 @@ class WorkspaceLayout:
         if self.mode == "k_factor":
             return self._build_k_settings()
         height = 340
-        self.settings_body = ctk.CTkScrollableFrame(
+        self.settings_body = AppScrollableFrame(
             self.form_panel, height=height, corner_radius=0, fg_color="transparent",
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED,
         )
@@ -422,7 +424,7 @@ class WorkspaceLayout:
             fg_color=INPUT, text_color=TEXT, border_width=0, font=(UI_FONT, 12),
         )
         self.search_entry.grid(row=0, column=1, sticky="ew", padx=(0, 6), pady=1)
-        self.filter_menu = ctk.CTkOptionMenu(
+        self.filter_menu = AppOptionMenu(
             self.files_toolbar, variable=self.status_filter,
             values=["Tüm durumlar", "Bekleyen", "İşleniyor", "Başarılı", "Atlanan", "Hatalı"],
             width=132, height=32, fg_color=SECONDARY, button_color=SECONDARY,
@@ -444,10 +446,10 @@ class WorkspaceLayout:
             self.table.heading(name, text=caption, anchor="w")
             self.table.column(name, width=width, minwidth=80, stretch=name != "status")
         self.table.grid(row=1, column=0, sticky="nsew")
-        scroll = ctk.CTkScrollbar(files_tab, command=self.table.yview, width=10,
+        scroll = AppScrollbar(files_tab, command=self.table.yview, width=10,
                                   fg_color=PANEL, button_color=BORDER, button_hover_color=MUTED)
         scroll.grid(row=1, column=1, sticky="ns")
-        horizontal = ctk.CTkScrollbar(files_tab, orientation="horizontal", command=self.table.xview,
+        horizontal = AppScrollbar(files_tab, orientation="horizontal", command=self.table.xview,
                                       height=10, fg_color=PANEL, button_color=BORDER, button_hover_color=MUTED)
         horizontal.grid(row=2, column=0, sticky="ew")
         self.table.configure(yscrollcommand=scroll.set, xscrollcommand=horizontal.set)

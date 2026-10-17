@@ -3,6 +3,8 @@
 import tkinter as tk
 import customtkinter as ctk
 
+from gui.widgets import AppOptionMenu, AppScrollableFrame
+
 from bolt.diagram import draw, draw_dimensions
 from bolt.rules import (THREADS, PROOF_STRESS, MODES, UNITS, UNIT_LABELS, SECTIONS, PLANES,
                         THREAD_SERIES, STANDARD_FINE_PITCHES, pitch_choices, thread_geometry,
@@ -82,7 +84,7 @@ class BoltView:
     def _bolt_field(self, parent, key, title, row, column, choices=None):
         self._label(parent, title, 11, MUTED).grid(row=row, column=column, sticky='w', padx=8, pady=(12, 5))
         if choices:
-            control = ctk.CTkOptionMenu(parent,
+            control = AppOptionMenu(parent,
                 variable=self.bolt_widgets['pitch_label'] if key == 'pitch' else self.bolt_state[key],
                 command=self._select_bolt_pitch if key == 'pitch' else None, values=list(choices),
                 height=36, width=1, fg_color=INPUT, button_color=INPUT, button_hover_color=HOVER,
@@ -106,7 +108,7 @@ class BoltView:
         body.grid(row=1, column=0, sticky='nsew', padx=24)
         body.grid_columnconfigure((0, 1), weight=1, uniform='bolt_columns')
         body.grid_rowconfigure(0, weight=1)
-        left = ctk.CTkScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
+        left = AppScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         left.grid(row=0, column=0, sticky='nsew', padx=(0, 12))
         left.grid_columnconfigure(0, weight=1)
@@ -127,7 +129,7 @@ class BoltView:
         self._sync_bolt_pitch()
         self._bolt_field(form, 'mode', 'Yük türü', 6, 0, MODES)
         self._label(form, 'Yük birimi', 11, MUTED).grid(row=6, column=1, sticky='w', padx=8, pady=(12, 5))
-        w['unit_input'] = ctk.CTkOptionMenu(form, values=list(UNIT_LABELS.values()),
+        w['unit_input'] = AppOptionMenu(form, values=list(UNIT_LABELS.values()),
             command=self._select_bolt_unit, height=36, width=1, fg_color=INPUT,
             button_color=INPUT, button_hover_color=HOVER, dropdown_fg_color=PANEL,
             dropdown_hover_color=HOVER, dropdown_text_color=TEXT, text_color=TEXT,
@@ -156,7 +158,7 @@ class BoltView:
             'Ön sıkma ve bağlantı plakaları ayrıca kontrol edilir.',
             11, MUTED, justify='left', anchor='w', wraplength=360)
         w['bank'].grid(row=1, column=0, sticky='ew', padx=14, pady=(0, 14))
-        details = ctk.CTkScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
+        details = AppScrollableFrame(body, width=1, fg_color='transparent', corner_radius=0,
             scrollbar_button_color=BORDER, scrollbar_button_hover_color=MUTED)
         details.grid(row=0, column=1, sticky='nsew')
         details.grid_columnconfigure(0, weight=1)
