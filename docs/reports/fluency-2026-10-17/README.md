@@ -98,3 +98,16 @@ ve o koşuya ait menü / boyutlandırma süre örnekleri eklendi. Gerçek derlem
 sonucu ve indirme bağlantısı [güncel paket kaydında](../../../packaging/latest-windows.json)
 yer alır; kaynak kod kontrolü Windows paketinin çalıştığını tek başına kanıtlamaz.
 SolidWorks ile CAD işlemleri bu incelemede çalıştırılmadı.
+
+Windows x64 derlemesi `9343f00` başarıyla tamamlandı. Gerçek dondurulmuş
+EXE'de dokuz ekran, açık/koyu tema ve Windows simgesi kontrolü geçti.
+[Paketi indir](https://github.com/gkkizil/gokworks/actions/runs/39023882637/artifacts/12097314894)
+· [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39023882637).
+
+Bu Windows koşusunda PDF'de kalma dışındaki menü / olay örnekleri
+29,80–64,54 ms, üç boyutlandırma örneği 340,56–427,24 ms çıktı.
+Windows üzerinde bir önceki sürüm aynı koşullarda çalıştırılmadığı için
+bunlar Windows hızlanma oranı değildir. Boyutlandırma maliyeti bu ortamda
+hâlâ yüksek; tamamen akıcı hale geldiği söylenemez. Linux ölçümünü Windows'a
+taşıyan veya tek bir açılış kontrolünü gerçek kullanıcının ekran deneyimi
+yerine koyan bir iddiada bulunulmuyor.
