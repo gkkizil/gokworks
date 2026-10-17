@@ -1,9 +1,9 @@
 # Bağımsız Sac-Levha K/R ataması
 
 <!-- kr-windows-release:start -->
-**Windows paketi:** [K/R deneme aracını indir](https://github.com/gkkizil/gokworks/actions/runs/39051754285/artifacts/12107109517). ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. Alt klasörleri koruyun; EXE’yi tek başına taşımayın. Python ve .NET kurulumu gerekmez.
+**Windows paketi:** [K/R atama aracını indir](https://github.com/gkkizil/gokworks/actions/runs/39053084291/artifacts/12108791079). ZIP dosyasını çıkartıp **GOKWORKS-KR-Deneme.exe** dosyasını açın. Alt klasörleri koruyun; EXE’yi tek başına taşımayın. Python ve .NET kurulumu gerekmez.
 
-[Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39051754285) · Kaynak: `909c946` · [SHA256, Defender taraması ve açılış kontrolü](windows-build-status.json)
+[Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39053084291) · Kaynak: `fda7848` · [SHA256, Defender taraması ve açılış kontrolü](windows-build-status.json)
 <!-- kr-windows-release:end -->
 
 ## Kullanım
