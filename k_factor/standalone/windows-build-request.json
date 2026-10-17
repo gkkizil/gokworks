@@ -1,5 +1,5 @@
 {
-  "request_id": "6a5a180c-9033-47a3-893d-056ef9a0b268",
-  "requested_at": "2026-10-16T12:38:56.275899+00:00",
-  "reason": "Chrome blocked original self-extracting package. Build standard directory distribution, hash every file and require real Defender/PUA/archive scan before executing or publishing; no main application build."
+  "request_id": "d8c2533c-1a28-426c-9a06-4d241f18c735",
+  "requested_at": "2026-10-17T16:58:59.446718+00:00",
+  "reason": "User-requested standalone K/R Windows EXE from latest main: selected configuration/baseline binding, null gauge filename handling, validated radius target and visible input errors. Require Defender scan and frozen Windows opening check; build independent K/R tool only."
 }
