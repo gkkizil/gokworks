@@ -1,10 +1,10 @@
 {
-  "commit": "003da7fd4fc466e832284e1e507a958ed0807971",
+  "commit": "9343f00a4c6f4124a548bc5cb4b5b5ca08bdc346",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38849760824",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/38849760824/artifacts/12023854793",
-  "bytes": 42331177,
-  "sha256": "a581dc31022c70b752fbdfb8aee4e9328f00445426c40fa2a5370bd38dab31c0",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39023882637",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39023882637/artifacts/12097314894",
+  "bytes": 42346002,
+  "sha256": "6c077027453edf478e7d05a71b36f3d2d0544ae907586c14cdef3d60c3a7dc5b",
   "smoke": {
     "status": "passed",
     "platform": "win32",
@@ -26,6 +26,58 @@
       "dark"
     ],
     "windows_icon_theme_check": "passed",
+    "navigation_samples": [
+      {
+        "mode": "pdf",
+        "click_and_events_ms": 0.04340000000979671
+      },
+      {
+        "mode": "dxf_dwg",
+        "click_and_events_ms": 52.17719999998849
+      },
+      {
+        "mode": "k_factor",
+        "click_and_events_ms": 39.925799999991796
+      },
+      {
+        "mode": "iso_fits",
+        "click_and_events_ms": 47.4365999999975
+      },
+      {
+        "mode": "geometric_tolerances",
+        "click_and_events_ms": 42.19540000002553
+      },
+      {
+        "mode": "bom",
+        "click_and_events_ms": 29.79529999998931
+      },
+      {
+        "mode": "bolt",
+        "click_and_events_ms": 50.494600000007495
+      },
+      {
+        "mode": "naming",
+        "click_and_events_ms": 35.71629999999004
+      },
+      {
+        "mode": "weight",
+        "click_and_events_ms": 64.53859999999167
+      }
+    ],
+    "resize_samples": [
+      {
+        "geometry": "1000x690",
+        "resize_and_events_ms": 350.93450000002235
+      },
+      {
+        "geometry": "1280x800",
+        "resize_and_events_ms": 427.24340000000893
+      },
+      {
+        "geometry": "1100x740",
+        "resize_and_events_ms": 340.5574999999885
+      }
+    ],
     "solidworks_connection_tested": false
   }
 }
