@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-10-18T15:44:54.014487+03:00",
+  "repository": "https://github.com/gkkizil/gokworks",
+  "branch": "main",
+  "base_snapshot_commit": "f9f5b475436420544cb014b61b21a405c8160eca",
+  "application": {
+    "kr_assignment_engine": "k_factor.sheetmetal_parameters",
+    "kr_assignment_location": "GOKWORKS / K faktörü ve yarıçap / Manuel K-R"
+  },
+  "latest_windows_package": {
+    "commit": "0de14d8bfa1cb0e4e285e5268549b78ae679aeee",
+    "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39127520707/artifacts/12136434427",
+    "sha256": "cb293d56d39df473562fd9297b2dda5b0f2ad124cd874485ea36cbf65736c4ce",
+    "bytes": 42358532
+  }
+}
