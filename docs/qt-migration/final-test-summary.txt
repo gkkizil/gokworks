@@ -36,4 +36,4 @@ tests/test_dxf_dwg.py: 62 warnings
     return fn(self, *args, **kwargs)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-518 passed, 131 warnings, 878 subtests passed in 92.36s (0:01:32)
+519 passed, 131 warnings, 878 subtests passed in 94.02s (0:01:34)

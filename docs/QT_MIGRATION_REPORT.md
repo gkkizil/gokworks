@@ -75,8 +75,8 @@ Qt testleri gerçek widget/model/event-loop kullanır; yalnız CAD sınırı sah
 nesnelerle kontrol edilir. Eski widget iç yapısına bağlı iddialar yerine kullanıcı
 davranışı sınanır. Ana suite komutu `python -m pytest -q`.
 
-Son Linux kontrolü: **518 test geçti** (410 mevcut motor/ayar testi + 108 Qt
-senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 92,36 s.
+Son Linux kontrolü: **519 test geçti** (410 mevcut motor/ayar testi + 109 Qt
+senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 94,02 s.
 131 uyarı ezdxf/pyparsing’in mevcut API kullanımlarına aittir; hata olarak gizlenmedi.
 [Makine tarafından okunabilir sonuç](qt-migration/validation.json),
 [komut sonucu](qt-migration/final-test-summary.txt),
@@ -162,3 +162,9 @@ isimlendirme testlerinde COM sınırı her platformda açıkça mock edildi.
 Test iddiaları veya üretim motorları bu nedenle gevşetilmedi/değiştirilmedi.
 Etkilenen 129 regresyon Linux’ta yeniden geçti. Windows tekrar koşusu aşağıda
 nihai derleme sonucuyla birlikte kaydedilecektir.
+
+Son ayar kontrollerinde eski kgf → kg ve malzeme takma adları sayısal
+değeri koruyarak aktarıldı. JSON içindeki geçersiz tema/mod türleri ve bozuk
+Qt pencere geometrisi açılışı engellemeden güvenli varsayılana döner.
+Temizle düğmeleri yalnız filtreyi temizler; dosya sonuçlarını/günlüğü silmez.
+Yeni tarama önceki arama filtresini sıfırlar. Bu iki akışın hedefli testleri geçti.

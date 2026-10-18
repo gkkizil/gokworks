@@ -271,6 +271,8 @@ def test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel(window, qtbot
     assert len(wb.sheetnames) >= 2
     assert any('Parça 10' == cell.value for row in wb.worksheets[0] for cell in row)
     wb.close()
+    page.clear_search()
+    assert page.result is not None and page.parts_proxy.rowCount() == 2
     page.clear()
     assert page.result is None and page.parts_model.rowCount() == 0
 
@@ -293,6 +295,14 @@ def test_results_filter_sort_reports_full_errors_and_csv(window, tmp_path):
     with path.open(encoding='utf-8-sig') as stream:
         rows = list(csv.reader(stream, delimiter=';'))
     assert len(rows) == 3 and 'COM failure' in rows[1]
+    panel.clear_button.click()
+    assert panel.proxy.rowCount() == 2 and len(panel.results) == 2
+    panel.search.setText('missing')
+    panel.filter.setCurrentIndex(1)
+    panel.reset()
+    panel.files(['new'])
+    assert panel.proxy.rowCount() == 1
+    assert not panel.search.text() and panel.filter.currentIndex() == 0
 
 
 def naming_snapshot(tmp_path):

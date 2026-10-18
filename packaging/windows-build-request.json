@@ -1,5 +1,5 @@
 {
-  "request_id": "eeabcb6c-d368-48eb-aceb-ab7ba2c7d9ad",
-  "requested_at": "2026-10-18T13:48:08.195695+00:00",
-  "reason": "Final Qt candidate: safe fallback for malformed JSON/Qt window preferences, legacy preferences preserved, portable Windows regression fixtures, native EXE/DPI smoke."
+  "request_id": "e4101438-51b1-4cba-bb09-004ba3795eac",
+  "requested_at": "2026-10-18T13:51:34.615585+00:00",
+  "reason": "Final verified Qt build: 519 Linux tests passed; keep clear-filter actions non-destructive and reset filters on a new scan; run complete Windows regressions and native EXE DPI smoke."
 }

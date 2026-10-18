@@ -245,8 +245,6 @@ class BasePage(QWidget):
             control.setEnabled(not busy)
         if hasattr(self, 'stop_button'):
             self.stop_button.setEnabled(busy)
-        if hasattr(self, 'results'):
-            self.results.clear_button.setEnabled(not busy)
 
     def handle_events(self, events):
         for kind, value in events:
@@ -277,7 +275,7 @@ class ResultsPanel(QWidget):
             self.filter.addItem(LABELS[value], value)
         self.copy_log = button('Günlüğü kopyala', self.copy_log_text)
         self.save = button('Rapor kaydet', self.save_dialog)
-        self.clear_button = button('Temizle', self.reset)
+        self.clear_button = button('Temizle', self.clear_filters)
         toolbar.addWidget(self.search, 1)
         toolbar.addWidget(self.filter)
         toolbar.addWidget(self.save)
@@ -315,9 +313,17 @@ class ResultsPanel(QWidget):
         QShortcut(QKeySequence('Return'), self.table, activated=lambda: self.show_details(self.table.currentIndex()))
 
     def reset(self):
+        self.clear_filters()
         self.results.clear()
         self.model.replace([])
         self.log.clear()
+
+    def clear_filters(self):
+        self.search.clear()
+        self.filter.setCurrentIndex(0)
+        self.search_timer.stop()
+        self.proxy.set_query('')
+        self.proxy.set_status(None)
 
     def files(self, sources):
         self.model.replace([dict(source=str(path), status='pending', detail='') for path in sources])

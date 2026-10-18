@@ -39,7 +39,7 @@ class BomPage(BasePage):
         toolbar.addWidget(self.search, 1)
         toolbar.addWidget(button('Tümünü aç', self.expand_all))
         toolbar.addWidget(button('Daralt', lambda: self.tree.collapseAll()))
-        toolbar.addWidget(button('Temizle', self.clear))
+        toolbar.addWidget(button('Temizle', self.clear_search))
         toolbar.addWidget(button('Dosya yolunu kopyala', self.copy_path))
         self.layout.addLayout(toolbar)
         self.tabs = QTabWidget()
@@ -93,6 +93,12 @@ class BomPage(BasePage):
         self.export_button.setEnabled(False)
         self.selection.setText('Bir satır seçerek ayrıntıları görün. Excel’e tüm montaj aktarılır.')
         self.summary.setText('Henüz montaj okunmadı.')
+
+    def clear_search(self):
+        self.search.clear()
+        self.search_timer.stop()
+        self.parts_proxy.set_query('')
+        self.tree_proxy.set_query('')
 
     def scan(self):
         if not self.can_start():
