@@ -77,13 +77,33 @@
     "skipped": 0,
     "subtests_passed": 878,
     "seconds": 94.84,
-    "command": "QT_QPA_PLATFORM=offscreen python -m pytest -q",
-    "backend_byte_identical_files": 38
+    "command": "QT_QPA_PLATFORM=offscreen python -m pytest -q --timeout=60 --timeout-method=thread",
+    "backend_byte_identical_files": 38,
+    "followup_model_audit_test": "1 passed after separating structural diagnostics from production timing"
   },
   "windows": {
-    "state": "building",
-    "source_commit": "3144fefc5e6b71b4139ee4f5208b6359535a70d7",
-    "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39147655499"
+    "state": "success",
+    "source_commit": "daef9139c0371ac6dc2539c24457fcf88f7a0ea1",
+    "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39148248720",
+    "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39148248720/artifacts/12144740169",
+    "main_tests_passed": 519,
+    "skipped": 1,
+    "subtests_passed": 878,
+    "seconds": 166.777,
+    "skip_details": [
+      {
+        "name": "tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
+        "reason": "Unix hard-link publication path"
+      }
+    ],
+    "native_platform": "windows",
+    "exe_sha256": "39e135e5e0e834e63479b94c1f4c3245e2c28c724d4fcf45a23b3b7bb88c770e",
+    "dpi_checks": [
+      "100%",
+      "125%",
+      "150%"
+    ],
+    "solidworks_live": false
   },
   "limitations": [
     "No live SolidWorks server in Linux",

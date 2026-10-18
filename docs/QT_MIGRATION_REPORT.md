@@ -3,6 +3,10 @@
 Depo: `gkkizil/gokworks` · Dal: `codex/pyside6-migration` · Başlangıç: `5f01e53`.
 Ana dal birleştirilmedi. Yedek depoya bu çalışma kapsamında erişilmedi.
 
+**Son durum:** dokuz Qt modülü tamamlandı. Linux: 520 test geçti. Windows:
+519 test geçti, Unix’e özgü 1 test atlandı; 878 alt senaryo geçti. Windows EXE
+üretildi ve native Qt açılış/üç ölçek kontrolünü geçti. Canlı SolidWorks testi yok.
+
 ## Mimari ve korunan işlevler
 
 Ana uygulama Python/PySide6 6.10.3 + Qt Widgets kullanır. `main.py` ve
@@ -85,11 +89,11 @@ senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 94,84 s.
 
 | Linux/Xvfb ölçümü | Önceki Tk sürümü | Qt sürümü |
 |---|---:|---:|
-| Aynı profilli tekrar: 18 menü tıklaması + 46 resize | 1,850 s | 0,668 s |
-| Menü geçişi ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 19,81 / 30,82 ms |
-| Resize ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 11,40 / 24,62 ms |
-| 50.000 satır yükleme / filtreleme | aynı ölçüm yok | 46,68 / 111,86 ms |
-| Qt pencere oluşturma + ilk çizim (import sonrası) | aynı ölçüm yok | 1.209 ms |
+| Aynı profilli tekrar: 18 menü tıklaması + 46 resize | 1,850 s | 0,570 s |
+| Menü geçişi ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 20,37 / 42,45 ms |
+| Resize ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 11,57 / 56,59 ms |
+| 50.000 satır yükleme / filtreleme | aynı ölçüm yok | 40,09 / 93,65 ms |
+| Qt pencere oluşturma + ilk çizim (import sonrası) | aynı ölçüm yok | 1.153 ms |
 
 Karşılaştırma aynı Linux/Xvfb/Python 3.13 ortamında, aynı 64 adımlı
 navigasyon/resize dizisiyle yapıldı. Grafik sunucusuna verilen işlemler ölçülür;
@@ -114,7 +118,31 @@ iki tema, dört çözünürlük ve üç DPI ölçeği kontrolü; XLSX/DXF bağı
 SHA256 ve artifact. Sonuç yayıncısı yalnız derlemenin **kaynak dalına** yazar.
 Geliştirme derlemesi `main` veya yedek depoyu değiştiremez.
 
-Windows derleme sonucu: **hazırlanıyor; başarılı olduğuna dair henüz iddia yok**.
+Windows derleme sonucu: **başarılı**.
+
+- [Windows paketini indir](https://github.com/gkkizil/gokworks/actions/runs/39148248720/artifacts/12144740169)
+- [Gerçek derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39148248720)
+- Paket kaynak commit’i: `daef9139c0371ac6dc2539c24457fcf88f7a0ea1`.
+- EXE SHA256: `39e135e5e0e834e63479b94c1f4c3245e2c28c724d4fcf45a23b3b7bb88c770e`.
+- EXE boyutu: 9.785.982 bayt; ZIP ayrıca Qt DLL’lerini içerir.
+- Native platform: `windows`, Qt/PySide6 6.10.3, Python 3.13.16,
+  Windows Server 2025/26100 CI. Bu, fiziksel Windows 10/11 kullanıcı kabulü değildir.
+- Build betiği EXE’yi ayrı süreçlerde `%100`, `%125`, `%150` ölçeklerde açtı;
+  her süreçte dokuz ekran, iki tema ve dört boyut kontrolü geçti. Ek ölçeklerin
+  `windows-smoke-1.25.json` ve `windows-smoke-1.5.json` kanıtları artifact içindedir.
+- BOM XLSX, DXF bağımlılığı, cıvata kg→N, ağırlık 157 kg ve sıfır Tk importu
+  donmuş uygulamada doğrulandı. COM DLL’leri yüklendi; SolidWorks’e bağlanılmadı.
+- Windows regresyonları: 519 geçti, 1 atlandı, 878 alt senaryo geçti; failure/error yok.
+  Atlanan mevcut test yalnız Unix hard-link yayınlama yoluna aittir.
+
+Windows native ölçümü: menü geçişi ortanca/en uzun **32,94/54,58 ms**; resize
+**24,36/50,40 ms**. 50.000 satır yükleme **65,33 ms**, filtreleme **163,22 ms**.
+Bunlar aynı packaged açılış kontrolünde event-loop işleme süreleridir; FPS veya
+canlı SolidWorks performansı değildir.
+
+ZIP’in **tamamını** çıkartıp `GOKWORKS/GOKWORKS.exe` çalıştırılmalıdır;
+`_internal` klasörü taşınırken korunmalıdır. Python kurulumu gerekmez.
+[Derleme/ölçüm kanıtı](qt-migration/windows-build.json).
 
 ## Sınırlar ve gerçek SolidWorks kontrolleri
 
@@ -160,8 +188,7 @@ yolla aynı değildi; ayrıca doğrudan isimlendirme testleri kurulu pywin32 var
 gerçek VARIANT üretiyordu. PDF/DXF test kökleri canonical hale getirildi ve
 isimlendirme testlerinde COM sınırı her platformda açıkça mock edildi.
 Test iddiaları veya üretim motorları bu nedenle gevşetilmedi/değiştirilmedi.
-Etkilenen 129 regresyon Linux’ta yeniden geçti. Windows tekrar koşusu aşağıda
-nihai derleme sonucuyla birlikte kaydedilecektir.
+Etkilenen 129 regresyon Linux’ta yeniden geçti. Son tekrar koşusu başarılıdır; nihai sonuç Windows paketleme bölümündedir.
 
 Son ayar kontrollerinde eski kgf → kg ve malzeme takma adları sayısal
 değeri koruyarak aktarıldı. JSON içindeki geçersiz tema/mod türleri ve bozuk

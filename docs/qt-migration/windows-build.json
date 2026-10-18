@@ -1,0 +1,91 @@
+{
+  "commit": "daef9139c0371ac6dc2539c24457fcf88f7a0ea1",
+  "status": "success",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39148248720",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39148248720/artifacts/12144740169",
+  "bytes": 9785982,
+  "sha256": "39e135e5e0e834e63479b94c1f4c3245e2c28c724d4fcf45a23b3b7bb88c770e",
+  "smoke": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "python": "3.13.16",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "qt_platform": "windows",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "bolt",
+      "weight"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 1071.65,
+    "navigation_median_ms": 32.94,
+    "navigation_max_ms": 54.58,
+    "resize_median_ms": 24.36,
+    "resize_max_ms": 50.4,
+    "table_50000_load_ms": 65.33,
+    "table_50000_filter_ms": 163.22,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "solidworks_live_tested": false,
+    "checks": [
+      "nine modules",
+      "two themes",
+      "resolution matrix",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "no Tk runtime"
+    ]
+  },
+  "regressions": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "1398",
+      "time": "166.777",
+      "timestamp": "2026-10-18T17:10:15.360968+00:00",
+      "hostname": "runnervm0xl3a"
+    }
+  ],
+  "test_failures": [],
+  "test_skips": [
+    {
+      "name": "tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
+      "reason": "Unix hard-link publication path"
+    }
+  ]
+}

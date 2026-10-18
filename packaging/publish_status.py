@@ -21,7 +21,8 @@ def git(*args, data=None, env=None):
 def release_block(report):
     return (f'{RELEASE_START}\n'
             f'**Güncel Windows EXE:** [GOKWORKS paketini indir]({report["download_url"]})\n\n'
-            'ZIP dosyasını çıkartıp **GOKWORKS.exe** dosyasını açın. Windows 10/11 x64; Python kurulumu gerekmez.\n\n'
+            'ZIP dosyasının tamamını çıkartıp **GOKWORKS/GOKWORKS.exe** dosyasını açın. '
+            '`_internal` klasörü EXE yanında kalmalıdır. Windows 10/11 x64; Python kurulumu gerekmez.\n\n'
             f'Uygulama kodu: `{report.get("source_commit", report["commit"])[:7]}` · '
             f'[Derleme kaydı]({report["run_url"]}) · '
             '[Paket bilgisi ve SHA256](packaging/latest-windows.json)\n'

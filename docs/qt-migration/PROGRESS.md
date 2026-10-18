@@ -34,3 +34,12 @@ ve native EXE/DPI kontrolleriyle yeniden derleniyor. Canlı SolidWorks testi yok
 Ana runtime’dan Tk/CustomTkinter çıkarıldı, eski kullanılmayan mixin’ler kaldırıldı.
 Lisanslar, envanter, test eşleştirmesi ve migrasyon raporu eklendi. Windows sonucu
 ve son ölçüm kanıtları derleme tamamlandığında rapora işlenecek.
+
+## Nihai sonuç
+
+520 Linux testi, 519 Windows testi + 878 alt senaryo geçti. Windows’ta yalnız
+Unix hard-link yoluna ait 1 test atlandı. K/R geçiş/kapanış yarışı düzeltildi.
+50.000 satırın kapsamlı Qt denetimi ile üretim performansı ayrı sınandı.
+Native Windows EXE üretildi; dokuz ekran, iki tema, dört boyut ve üç ölçek geçti.
+Son rapor: docs/QT_MIGRATION_REPORT.md. Canlı SolidWorks testi ve fiziksel
+çoklu monitör kabulü bu ortamda yapılamadı. Ana dal ve yedek depo korunur.

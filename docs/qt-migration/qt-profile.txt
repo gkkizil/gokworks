@@ -1,53 +1,53 @@
-         49079 function calls in 0.667 seconds
+         51930 function calls in 0.569 seconds
 
    Ordered by: cumulative time
    List reduced from 130 to 45 due to restriction <45>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-       64    0.422    0.007    0.560    0.009 {built-in method processEvents}
-     5516    0.107    0.000    0.110    0.000 models.py:46(data)
-       18    0.000    0.000    0.067    0.004 {method 'click' of 'PySide6.QtWidgets.QAbstractButton' objects}
-       18    0.000    0.000    0.066    0.004 app.py:79(<lambda>)
-       18    0.001    0.000    0.066    0.004 app.py:143(navigate)
-       18    0.061    0.003    0.065    0.004 {method 'setCurrentWidget' of 'PySide6.QtWidgets.QStackedWidget' objects}
-       46    0.037    0.001    0.040    0.001 {method 'resize' of 'PySide6.QtWidgets.QWidget' objects}
-     1706    0.008    0.000    0.008    0.000 models.py:41(headerData)
-       46    0.002    0.000    0.008    0.000 icons.py:78(paintEvent)
-      788    0.001    0.000    0.005    0.000 models.py:65(flags)
+       64    0.354    0.006    0.481    0.008 {built-in method processEvents}
+     5712    0.098    0.000    0.102    0.000 models.py:46(data)
+       18    0.000    0.000    0.057    0.003 {method 'click' of 'PySide6.QtWidgets.QAbstractButton' objects}
+       18    0.000    0.000    0.057    0.003 app.py:79(<lambda>)
+       18    0.001    0.000    0.057    0.003 app.py:147(navigate)
+       18    0.053    0.003    0.055    0.003 {method 'setCurrentWidget' of 'PySide6.QtWidgets.QStackedWidget' objects}
+       46    0.029    0.001    0.031    0.001 {method 'resize' of 'PySide6.QtWidgets.QWidget' objects}
+     1654    0.007    0.000    0.007    0.000 models.py:41(headerData)
+       46    0.002    0.000    0.006    0.000 icons.py:78(paintEvent)
+      816    0.001    0.000    0.004    0.000 models.py:65(flags)
        46    0.004    0.000    0.004    0.000 {method 'drawPixmap' of 'PySide6.QtGui.QPainter' objects}
-       54    0.001    0.000    0.003    0.000 diagrams.py:173(resizeEvent)
-     2798    0.002    0.000    0.003    0.000 enum.py:695(__call__)
-      788    0.002    0.000    0.003    0.000 {function TableModel.flags at 0x7ffad1f740e0}
-     8278    0.002    0.000    0.002    0.000 {method 'isValid' of 'PySide6.QtCore.QModelIndex' objects}
-        2    0.000    0.000    0.002    0.001 settings.py:34(flush)
-      790    0.001    0.000    0.002    0.000 models.py:35(rowCount)
-       54    0.001    0.000    0.002    0.000 {method 'fitInView' of 'PySide6.QtWidgets.QGraphicsView' objects}
-       98    0.001    0.000    0.001    0.000 models.py:167(data)
-      298    0.001    0.000    0.001    0.000 models.py:162(headerData)
-     2798    0.001    0.000    0.001    0.000 enum.py:1156(__new__)
-        2    0.000    0.000    0.001    0.001 settings.py:18(save_settings)
-     6402    0.001    0.000    0.001    0.000 {method 'column' of 'PySide6.QtCore.QModelIndex' objects}
-     6448    0.001    0.000    0.001    0.000 {method 'get' of 'dict' objects}
-      235    0.000    0.000    0.001    0.000 models.py:148(index)
-     5516    0.001    0.000    0.001    0.000 {method 'row' of 'PySide6.QtCore.QModelIndex' objects}
-      788    0.000    0.000    0.001    0.000 models.py:38(columnCount)
-      888    0.000    0.000    0.001    0.000 enum.py:199(__get__)
-       54    0.001    0.000    0.001    0.000 {function EngineeringDiagram.resizeEvent at 0x7ffac14ea8e0}
-        2    0.000    0.000    0.001    0.000 _local.py:550(write_text)
-        2    0.000    0.000    0.001    0.000 _abc.py:644(write_text)
-       18    0.001    0.000    0.001    0.000 {method 'setText' of 'PySide6.QtWidgets.QLabel' objects}
-     2067    0.000    0.000    0.000    0.000 {built-in method builtins.len}
-        4    0.000    0.000    0.000    0.000 {method '__exit__' of '_io._IOBase' objects}
+      217    0.003    0.000    0.003    0.000 models.py:167(data)
+       52    0.001    0.000    0.003    0.000 diagrams.py:173(resizeEvent)
+     2752    0.001    0.000    0.002    0.000 enum.py:695(__call__)
+      816    0.001    0.000    0.002    0.000 {function TableModel.flags at 0x7fc3e2298040}
+     8896    0.002    0.000    0.002    0.000 {method 'isValid' of 'PySide6.QtCore.QModelIndex' objects}
+      818    0.001    0.000    0.001    0.000 models.py:35(rowCount)
+        2    0.000    0.000    0.001    0.001 settings.py:34(flush)
+      276    0.001    0.000    0.001    0.000 models.py:162(headerData)
+      386    0.001    0.000    0.001    0.000 models.py:148(index)
+       52    0.001    0.000    0.001    0.000 {method 'fitInView' of 'PySide6.QtWidgets.QGraphicsView' objects}
+     6808    0.001    0.000    0.001    0.000 {method 'get' of 'dict' objects}
+     2752    0.001    0.000    0.001    0.000 enum.py:1156(__new__)
+     6745    0.001    0.000    0.001    0.000 {method 'column' of 'PySide6.QtCore.QModelIndex' objects}
+     5712    0.001    0.000    0.001    0.000 {method 'row' of 'PySide6.QtCore.QModelIndex' objects}
+      816    0.000    0.000    0.001    0.000 models.py:38(columnCount)
+        2    0.000    0.000    0.001    0.000 settings.py:18(save_settings)
+      914    0.000    0.000    0.001    0.000 enum.py:199(__get__)
+     2424    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+       52    0.000    0.000    0.000    0.000 {function EngineeringDiagram.resizeEvent at 0x7fc3d185e840}
        46    0.000    0.000    0.000    0.000 {method 'setRenderHint' of 'PySide6.QtGui.QPainter' objects}
         2    0.000    0.000    0.000    0.000 {method 'sync' of 'PySide6.QtCore.QSettings' objects}
       162    0.000    0.000    0.000    0.000 {method 'setChecked' of 'PySide6.QtWidgets.QAbstractButton' objects}
-        2    0.000    0.000    0.000    0.000 _local.py:329(parent)
-      235    0.000    0.000    0.000    0.000 {method 'createIndex' of 'PySide6.QtCore.QAbstractItemModel' objects}
+      386    0.000    0.000    0.000    0.000 {method 'createIndex' of 'PySide6.QtCore.QAbstractItemModel' objects}
        18    0.000    0.000    0.000    0.000 settings.py:28(set)
-        4    0.000    0.000    0.000    0.000 _local.py:531(open)
-        4    0.000    0.000    0.000    0.000 {built-in method _io.open}
         2    0.000    0.000    0.000    0.000 _local.py:541(read_text)
-      888    0.000    0.000    0.000    0.000 enum.py:1337(value)
-        6    0.000    0.000    0.000    0.000 _local.py:500(__init__)
+      914    0.000    0.000    0.000    0.000 enum.py:1337(value)
+        2    0.000    0.000    0.000    0.000 _abc.py:628(read_text)
+        4    0.000    0.000    0.000    0.000 _local.py:531(open)
+       46    0.000    0.000    0.000    0.000 {method 'rect' of 'PySide6.QtGui.QPixmap' objects}
+        4    0.000    0.000    0.000    0.000 {built-in method _io.open}
+       18    0.000    0.000    0.000    0.000 {method 'setText' of 'PySide6.QtWidgets.QLabel' objects}
+      115    0.000    0.000    0.000    0.000 models.py:154(parent)
+       52    0.000    0.000    0.000    0.000 {method 'sceneRect' of 'PySide6.QtWidgets.QGraphicsView' objects}
+        2    0.000    0.000    0.000    0.000 _local.py:329(parent)
 
 

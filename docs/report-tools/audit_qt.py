@@ -37,11 +37,16 @@ def audit(destination):
         w.resize(1024,700)
         app.processEvents()
         w.grab().save(str(destination/'weight-compact.png'))
+        # Match the baseline's expanded weight page and original _MODES order.
+        w.resize(1440,900)
+        app.processEvents()
+        replay_modes = ('pdf','dxf_dwg','k_factor','iso_fits','geometric_tolerances',
+                        'bom','bolt','naming','weight')
         profile = cProfile.Profile()
         profile.enable()
         start = time.perf_counter()
         for _ in range(2):
-            for mode in w.pages:
+            for mode in replay_modes:
                 w.navigation[mode].click()
                 app.processEvents()
             for width in range(1000,1441,20):

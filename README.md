@@ -5,7 +5,7 @@ Güncel uygulama kodunun tek çalışma dalı **[main](https://github.com/gkkizi
 <!-- windows-release:start -->
 **Güncel Windows EXE:** [GOKWORKS paketini indir](https://github.com/gkkizil/gokworks/actions/runs/39148248720/artifacts/12144740169)
 
-ZIP dosyasını çıkartıp **GOKWORKS.exe** dosyasını açın. Windows 10/11 x64; Python kurulumu gerekmez.
+ZIP dosyasının tamamını çıkartıp **GOKWORKS/GOKWORKS.exe** dosyasını açın. `_internal` klasörü EXE yanında kalmalıdır. Windows 10/11 x64; Python kurulumu gerekmez.
 
 Uygulama kodu: `daef913` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39148248720) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 <!-- windows-release:end -->

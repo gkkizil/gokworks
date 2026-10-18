@@ -6,6 +6,7 @@ D	bom/window.py
 A	docs/QT_MIGRATION_REPORT.md
 A	docs/THIRD_PARTY_NOTICES.md
 A	docs/qt-migration/PROGRESS.md
+A	docs/qt-migration/changed-files.txt
 A	docs/qt-migration/engine-integrity.json
 A	docs/qt-migration/final-test-summary.txt
 A	docs/qt-migration/gui-test-mapping.json
@@ -26,6 +27,7 @@ A	docs/qt-migration/screenshots/weight-compact.png
 A	docs/qt-migration/screenshots/weight-dark.png
 A	docs/qt-migration/tk-profile.txt
 A	docs/qt-migration/validation.json
+A	docs/qt-migration/windows-build.json
 A	docs/report-tools/audit_qt.py
 D	geometric_tolerances/window.py
 D	gui/layout.py
@@ -61,19 +63,30 @@ D	k_factor/window.py
 M	main.py
 D	naming/window.py
 M	packaging/build_windows.py
+M	packaging/latest-windows.json
 A	packaging/licenses/GPL-3.0-only.txt
 A	packaging/licenses/LGPL-3.0-only.txt
 A	packaging/licenses/Pillow-LICENSE.txt
 A	packaging/licenses/PySide6-LGPL.txt
 A	packaging/licenses/Qt-LGPL-3.0-only.txt
 A	packaging/licenses/Qt-LicenseRef-Qt-Commercial.txt
+A	packaging/licenses/QtBase-FreeType-FTL.TXT
+A	packaging/licenses/QtBase-FreeType-GPLv2.TXT
 A	packaging/licenses/QtBase-double-conversion_LICENSE
+A	packaging/licenses/QtBase-freetype-BDF-LICENSE.txt
+A	packaging/licenses/QtBase-freetype-LICENSE.txt
+A	packaging/licenses/QtBase-freetype-PCF-LICENSE.txt
+A	packaging/licenses/QtBase-freetype-ZLIB-LICENSE.txt
+A	packaging/licenses/QtBase-harfbuzz-ng-COPYING
 A	packaging/licenses/QtBase-harfbuzz-ng_qt_attribution.json
 A	packaging/licenses/QtBase-libpng_LICENSE
 A	packaging/licenses/QtBase-libpng_qt_attribution.json
 A	packaging/licenses/QtBase-md4c_LICENSE.md
+A	packaging/licenses/QtBase-pcre2-LICENCE.md
+A	packaging/licenses/QtBase-pcre2-LICENSE-SLJIT
 A	packaging/licenses/QtBase-rfc6234_LICENSE
 A	packaging/licenses/QtBase-tinycbor_LICENSE
+A	packaging/licenses/QtBase-zlib-LICENSE
 A	packaging/licenses/QtBase-zlib_qt_attribution.json
 A	packaging/licenses/ezdxf-LICENSE.txt
 A	packaging/licenses/openpyxl-MIT.txt
@@ -111,6 +124,7 @@ R100	tests/test_ui_language.py	tests/legacy_tk/test_ui_language.py
 R100	tests/test_weight_window.py	tests/legacy_tk/test_weight_window.py
 A	tests/legacy_tk/test_workspace_layout.py
 M	tests/test_converted_k_radius.py
+M	tests/test_dxf_dwg.py
 M	tests/test_geometric_tolerances.py
 M	tests/test_iso_fits.py
 M	tests/test_iso_matching.py
@@ -118,6 +132,8 @@ M	tests/test_iso_tolerance_audit.py
 M	tests/test_k_factor.py
 M	tests/test_manual_iso.py
 M	tests/test_manual_k_radius.py
+M	tests/test_naming.py
+M	tests/test_pdf_exporter.py
 A	tests/test_qt_workflows.py
 M	tests/test_settings_and_connection.py
 M	tests/test_workspace_layout.py
