@@ -11,7 +11,7 @@ from ..components import label, show_details
 class WeightPage(CalculationPage):
     def __init__(self, context):
         previous = context.settings.get('weight_material')
-        if previous in r.MATERIAL_ALIASES:
+        if isinstance(previous, str) and previous in r.MATERIAL_ALIASES:
             context.settings.set('weight_material', r.MATERIAL_ALIASES[previous])
         super().__init__(context, 'Ağırlık hesabı', 'Kesiti ve malzemeyi seçin; parça ve toplam ağırlığı görün.', 'weight_')
         self.action('Yöntem ve kaynaklar', self.show_sources)

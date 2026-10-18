@@ -135,6 +135,20 @@ def test_settings_io_error_keeps_pending_changes(qapp, tmp_path):
     assert store.flush()
 
 
+def test_invalid_preference_types_and_qt_geometry_fall_back_without_crash(qtbot, tmp_path):
+    path = tmp_path/'settings.json'
+    path.write_text(json.dumps(dict(appearance=[],mode={},weight_material=[],naming_parent=[1],future='keep')))
+    settings = SettingsStore(path)
+    settings.qt.setValue('window/geometry','invalid geometry')
+    settings.qt.sync()
+    w = MainWindow(path)
+    qtbot.addWidget(w)
+    assert w.mode == 'pdf' and w.appearance == 'dark'
+    assert w.pages['weight'].result is not None
+    assert w.settings.get('future') == 'keep'
+    w.close()
+
+
 @pytest.mark.parametrize('folder', [False, True])
 def test_native_browse_accept_and_cancel(qapp, tmp_path, folder):
     widget = PathPicker('before', folder=folder)

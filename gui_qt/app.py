@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('GOKWORKS · Mühendislik araçları')
         self.setWindowIcon(QIcon(str(ASSETS / 'GOK_app_windows.ico')))
         self.settings = SettingsStore(parent=self) if settings_path is None else SettingsStore(settings_path, self)
-        self.appearance = self.settings.get('appearance', 'dark')
+        self.appearance = str(self.settings.get('appearance', 'dark'))
         if self.appearance not in COLORS:
             self.appearance = 'dark'
         self.jobs = JobManager(self)
@@ -124,14 +124,18 @@ class MainWindow(QMainWindow):
         self.jobs.finished.connect(self.finished_job)
         self.set_theme(self.appearance)
         initial = self.settings.get('mode', 'pdf')
-        self.navigate(initial if initial in self.pages else 'pdf')
+        self.navigate(initial if isinstance(initial, str) and initial in self.pages else 'pdf')
         self.restore_window()
         QShortcut(QKeySequence('Ctrl+,'), self, activated=self.show_settings)
 
     def restore_window(self):
         geometry = self.settings.qt.value('window/geometry')
         if geometry:
-            self.restoreGeometry(geometry)
+            try:
+                self.restoreGeometry(geometry)
+            except (TypeError, ValueError):
+                # A damaged INI value must not prevent the JSON/CAD workflow opening.
+                pass
         screen = self.screen() or QGuiApplication.primaryScreen()
         if screen:
             available = screen.availableGeometry()

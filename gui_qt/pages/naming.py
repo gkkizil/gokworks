@@ -47,7 +47,7 @@ class NamingPage(BasePage):
         destination = self.settings.get('naming_destination')
         if destination is None:
             parent = self.settings.get('naming_parent', '')
-            destination = str(Path(parent) / self.settings.get('naming_package', 'Yeni-paket')) if parent else ''
+            destination = str(Path(parent) / str(self.settings.get('naming_package', 'Yeni-paket'))) if isinstance(parent, str) and parent else ''
         self.destination = self.form.path('destination', 'Yeni montajın kaydedileceği klasör', destination)
         self.form.combo('mode', 'İsimlendirme yöntemi', ('Ön / son ek', 'Numaralı'), 'Ön / son ek')
         self.form.text('prefix', 'Ön ek')

@@ -1,5 +1,5 @@
 {
-  "request_id": "173c03ae-50b3-4bd9-acbb-a4083fe628d7",
-  "requested_at": "2026-10-18T13:46:15.241335+00:00",
-  "reason": "Final Qt package including Windows-portable COM tests, legacy kgf/material preference migration and complete Qt notices."
+  "request_id": "eeabcb6c-d368-48eb-aceb-ab7ba2c7d9ad",
+  "requested_at": "2026-10-18T13:48:08.195695+00:00",
+  "reason": "Final Qt candidate: safe fallback for malformed JSON/Qt window preferences, legacy preferences preserved, portable Windows regression fixtures, native EXE/DPI smoke."
 }
