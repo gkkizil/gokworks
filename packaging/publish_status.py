@@ -86,6 +86,11 @@ def main():
         from xml.etree import ElementTree
         suites = ElementTree.parse(tests).getroot()
         report['regressions'] = [dict(suite.attrib) for suite in suites.iter('testsuite')]
+        report['test_failures'] = [dict(name=case.get('classname','')+'.'+case.get('name',''),
+                                       message=failure.get('message','')[:600])
+                                  for case in suites.iter('testcase') for failure in case.findall('failure')]
+        report['test_skips'] = [dict(name=case.get('classname','')+'.'+case.get('name',''),reason=skip.get('message',''))
+                               for case in suites.iter('testcase') for skip in case.findall('skipped')]
     tests_log = Path('windows-tests.log')
     if report['status'] == 'failure' and tests_log.exists():
         report['test_log_tail'] = tests_log.read_text(encoding='utf-8', errors='replace')[-22000:]

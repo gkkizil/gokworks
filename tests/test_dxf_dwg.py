@@ -26,7 +26,9 @@ class ExportTests(unittest.TestCase):
     def setUp(self):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        # Windows runners may expose RUNNER~1; exporters canonicalize paths.
+        # Give the synthetic assembly the same actual path as scanned files.
+        self.root = Path(self.temp.name).resolve()
         self.source = self.root / 'source'
         self.source.mkdir()
         self.part = self.source / 'part.SLDPRT'

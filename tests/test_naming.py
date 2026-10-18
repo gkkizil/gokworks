@@ -118,6 +118,8 @@ class NamingTests(unittest.TestCase):
         self.folder = Path(self.temp.name)
         self.app = App(self.folder)
         self.destination = self.folder/'new-package'
+        # Direct engine tests must isolate pywin32 even when it is installed.
+        install_com(self)
 
     def plan(self, **rules):
         snapshot = naming.scan(self.app)

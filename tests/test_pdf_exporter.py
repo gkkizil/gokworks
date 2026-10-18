@@ -15,7 +15,8 @@ class PdfTests(unittest.TestCase):
     def setUp(self):
         self.temp = TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        # Match exporter canonical paths, including Windows short-name aliases.
+        self.root = Path(self.temp.name).resolve()
         self.source = self.root/'source'
         self.source.mkdir()
         self.drawing = self.source/'drawing.SLDDRW'

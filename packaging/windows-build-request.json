@@ -1,5 +1,5 @@
 {
-  "request_id": "07003988-e5e8-442e-806d-6bb474c2da29",
-  "requested_at": "2026-10-18T13:37:51.558670+00:00",
-  "reason": "Qt migration final source: off-thread naming plans, cache-backed filters, 518 Linux regression tests passed; Windows diagnostics and native three-scale EXE smoke checks."
+  "request_id": "8c28baee-20c2-43b6-97f3-3550c7561fe7",
+  "requested_at": "2026-10-18T13:44:19.862400+00:00",
+  "reason": "Windows portable regression setup: canonical temp paths and explicitly mocked pywin32; unchanged CAD/formula engines; create and open final Qt EXE at three DPI scales."
 }

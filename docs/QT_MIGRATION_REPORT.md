@@ -150,3 +150,15 @@ bağımlılıklar, başsız gerçek Qt açılış kontrolü ve test komutu çal�
 Ağ/secret/depo üyeliği değiştirilmedi. Bu taslak kaydı ortamı yayımlamaz;
 gelecek görevler için kullanıcı ortam ayarlarından kaydedip yayımlamalıdır.
 Çalışan Xvfb süreci snapshot ile taşınmaz; başlangıç talimatı bunu açıklar.
+
+## Windows ön kontrolünde düzeltilen test hazırlığı
+
+İlk iki Windows koşusu paket oluşturmadan durdu. İkinci koşunun ayrıntılı
+günlüğünde 31 başarısızlık ve 1 atlama görüldü. İki test hazırlığı farkı bulundu:
+Windows geçici klasörlerinin RUNNER~1 kısa adı, motorun resolve ettiği tam
+yolla aynı değildi; ayrıca doğrudan isimlendirme testleri kurulu pywin32 varken
+gerçek VARIANT üretiyordu. PDF/DXF test kökleri canonical hale getirildi ve
+isimlendirme testlerinde COM sınırı her platformda açıkça mock edildi.
+Test iddiaları veya üretim motorları bu nedenle gevşetilmedi/değiştirilmedi.
+Etkilenen 129 regresyon Linux’ta yeniden geçti. Windows tekrar koşusu aşağıda
+nihai derleme sonucuyla birlikte kaydedilecektir.
