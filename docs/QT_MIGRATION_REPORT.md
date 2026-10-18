@@ -211,3 +211,11 @@ gevşetilmeden performans ayrı, denetleyici bağlanmamış üretim modellerinde
 ölçülür. Hedefli Linux testi yeniden geçti. Windows’ta Unix hard-link yayınlama
 yoluna ait mevcut bir test platform gerekçesiyle atlanır; atlama sonuçtan ayrı
 raporlanır.
+
+## Arayüz ayrıntıları düzeltmesi · 2026-10-18
+
+ISO geçme açıklamaları ve örnek seçim sekmeleri, manuel ISO'nun tam montaj
+değerlendirmesi, geometrik toleransların ölçüm/üretim notları ve cıvata kapasite
+kullanım çubuğu geri getirildi. [Güncel ekranlar ve doğrulama](qt-migration/restored-details/README.md).
+İlgili 60 Qt testi geçti. Raporda bağlantısı verilen Windows paketine bu sonraki kaynak
+kod düzeltmesi dahil değildir; bu adımda yeni EXE üretilmedi.

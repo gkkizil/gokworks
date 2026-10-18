@@ -1,0 +1,23 @@
+{
+  "native_platform": "xcb",
+  "navigation_max_ms": 14.646225994511042,
+  "navigation_median_ms": 10.638649997417815,
+  "screenshots": [
+    "bolt-combined-dark.png",
+    "bolt-compact-dark.png",
+    "bolt-dark.png",
+    "bolt-light.png",
+    "bolt-load-dark.png",
+    "bolt-overload-dark.png",
+    "gdt-assessment.png",
+    "geometric_tolerances-dark.png",
+    "geometric_tolerances-light.png",
+    "iso-manual-comparison.png",
+    "iso-manual-compatibility.png",
+    "iso-manual-dark.png",
+    "iso-manual-limits.png",
+    "iso_fits-dark.png",
+    "iso_fits-light.png"
+  ],
+  "solidworks_live": false
+}

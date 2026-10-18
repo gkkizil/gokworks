@@ -6,7 +6,7 @@ from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE
 from geometric_tolerances import rules as r
 from geometric_tolerances.diagram import draw
 from .calculations import CalculationPage
-from ..components import configure_view, show_details
+from ..components import card, label, configure_view, show_details
 from ..models import TreeModel, FilterProxy, Column
 
 
@@ -26,6 +26,12 @@ class GdtPage(CalculationPage):
         f.set_value('measured', '')
         # Measured errors describe this inspection only; never persist them.
         self.settings.values.pop('gdt_measured', None)
+        self.datum_help = label('', 'muted')
+        self.size_rule_help = label('Toplam boyut toleransı, üst ve alt ölçü sınırlarının farkıdır. '
+                                    'ASME 8.4: bu yüzey örneğinde geometrik tolerans bu değerden küçük olmalıdır. '
+                                    'MMC zarfı burada ölçülmez.', 'muted')
+        self.extra_layout.addWidget(self.datum_help)
+        self.extra_layout.addWidget(self.size_rule_help)
         self.search = QLineEdit()
         self.search.setPlaceholderText('Tolerans türü ara…')
         self.extra_layout.addWidget(self.search)
@@ -46,7 +52,40 @@ class GdtPage(CalculationPage):
         self.extra_layout.addWidget(self.catalog)
         self.add_diagram('frame', 'Tolerans çerçevesi', height=120)
         self.add_diagram('zone', 'Tolerans bölgesi', height=300)
+        self.diagram_tabs.setCurrentIndex(1)
+        self.right.removeWidget(self.details)
+        self.measurement_label = label()
+        self.note_label = label()
+        self.assessment_label = label()
+        for index, (title, widget) in enumerate((('Toleransın anlamı', self.details),
+                                                ('Nasıl ölçülür?', self.measurement_label),
+                                                ('Üretim / tasarım notu', self.note_label),
+                                                ('Ölçüm karşılaştırması', self.assessment_label))):
+            panel, body = card(title)
+            widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            body.addWidget(widget)
+            self.right.insertWidget(self.right.indexOf(self.diagram_tabs) + 1 + index, panel)
         self.update_result()
+
+    @staticmethod
+    def assessment_text(spec):
+        relation = (f'Boyut ilişkisi: t < {r.fmt(spec.size_tolerance)} mm kontrol edildi; MMC zarfı ölçülmedi.\n'
+                    if spec.size_tolerance is not None else
+                    'Boyut toleransı girilmedi. ASME Kural 1 kapsamındaki boyut ve şekil ilişkisini ayrıca kontrol edin.\n'
+                    if spec.characteristic.group == 'Şekil' else '')
+        if spec.measured is None:
+            return relation + ('Ölçüm girilmedi. İlgili özellik için değerlendirilmiş toplam geometrik hatayı girin; '
+                               'tek çap veya nokta ölçüsü yeterli değildir.')
+        verdict = 'Girilen hata tolerans içinde' if spec.accepted else 'Girilen hata tolerans dışında'
+        if spec.margin == 0:
+            verdict += ' · tam sınırda'
+        return (relation + f'{verdict}\nHata {r.fmt(spec.measured)} mm; sınır {r.fmt(spec.tolerance)} mm.\n'
+                f'Kalan pay: {r.fmt(spec.margin)} mm.\n'
+                'Yalnızca hata ≤ t karşılaştırması; tam resim/model uygunluğu, ölçüm belirsizliği ve kalite kabulü değerlendirilmez.')
+
+    def invalid(self, error):
+        super().invalid(error)
+        self.assessment_label.setText('Geçerli belirtim olmadan karşılaştırma yapılmaz.')
 
     def changed(self, key):
         if key == 'measured':
@@ -65,7 +104,15 @@ class GdtPage(CalculationPage):
     def update_result(self):
         item = CHARACTERISTICS[self.kind]
         f = self.form
-        self.details.setText(item.description + '\n\n' + item.zone + '\n\nMesafe girişinin anlamı: ' + MEASUREMENT_INPUTS.get(item.key, '') + '\n\n' + item.measurement + '\n\n' + item.note + '\n\nKullanım: ' + item.example)
+        self.details.setText(item.description + '\n\nTolerans bölgesi: ' + item.zone)
+        self.measurement_label.setText('Ölçüm girişinin anlamı: ' + MEASUREMENT_INPUTS.get(
+            item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.') + '\n\n' + item.measurement)
+        self.note_label.setText(item.note + '\n\nKullanım örneği: ' + item.example)
+        self.datum_help.setText({
+            'none': 'Şekil toleransında referans (datum) kullanılmaz.',
+            'optional': 'Referans seçimi isteğe bağlıdır. Teorik ölçüler ve profil ayrıca tanımlanmalıdır.',
+            'required': 'Bu örnek referans gerektirir. A, B, C sırası referans önceliğini belirler.'}[item.datum])
+        self.size_rule_help.setVisible(item.group == 'Şekil')
         f.fields['datum'].setEnabled(item.active and item.datum != 'none')
         f.show_field('size_tolerance', item.group == 'Şekil')
         for key in ('size', 'tolerance', 'measured', 'size_tolerance'):
@@ -82,7 +129,10 @@ class GdtPage(CalculationPage):
         self.headline.setText(item.name + ' · ' + ('Øt' if item.diametrical else 't') + ' = ' + r.fmt(spec.tolerance) + ' mm')
         assessment = ('Ölçüm girilmedi.' if spec.accepted is None else
                       ('Tolerans içinde' if spec.accepted else 'Tolerans dışında') + f' · Kalan pay: {r.fmt(spec.margin)} mm')
-        self.summary.setText(f'{item.english} · § {item.reference}\n{assessment}')
+        amount = (f'\nRadyal pay: {r.fmt(spec.tolerance/2)} mm' if item.diametrical else
+                  f'\nNormal sınır: ±{r.fmt(spec.tolerance/2)} mm' if item.group == 'Profil' else '')
+        self.summary.setText(f'{item.english} · § {item.reference}\n{assessment}' + amount)
+        self.assessment_label.setText(self.assessment_text(spec))
         rows = [('Standart', 'ASME Y14.5-2018'), ('Bölüm', item.reference), ('Özellik', item.name), ('Kategori', item.group),
                 ('İngilizce', item.english), ('Açıklama', item.description), ('Gösterim boyutu (mm)', r.fmt(spec.size)),
                 ('Toplam tolerans t (mm)', r.fmt(spec.tolerance)), ('Referans sırası', ' | '.join(spec.datums) or 'Yok'),
@@ -91,6 +141,8 @@ class GdtPage(CalculationPage):
                 ('İlgili boyut toleransı (mm)', '' if spec.size_tolerance is None else r.fmt(spec.size_tolerance)),
                 ('Ölçülmüş toplam hata (mm)', '' if spec.measured is None else r.fmt(spec.measured)),
                 ('Aritmetik karşılaştırma', assessment),
+                ('Ölçüm değerlendirmesi', self.assessment_label.text()),
+                ('Referans açıklaması', self.datum_help.text()),
                 ('Kapsam', 'Öğretici şema. Hata ≤ t karşılaştırması; tam resim/model uygunluğu ve ölçüm belirsizliği değerlendirilmez. Boyut özelliğinde RFS / datum boyut özelliğinde RMB. Şekil-boyut ilişkisi ve MMC zarfı ayrıca kontrol edilir.')]
         self.present(rows)
         for key in ('frame', 'zone'):

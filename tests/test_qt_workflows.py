@@ -481,6 +481,112 @@ def test_bolt_standard_and_fine_pitch_choices(window, metric):
         assert page.result.pitch == page.form.fields['pitch'].currentData()
 
 
+@pytest.mark.parametrize('ratio,verdict,progress', [(0, 'Yük yok', 0), (.5, 'Güvenli', 500), (1.5, 'Güvensiz', 1000)])
+def test_bolt_safety_graph_reports_real_overload_and_resets_invalid_input(window, ratio, verdict, progress):
+    page = window.pages['bolt']
+    window.navigate('bolt')
+    page.form.set_value('unit', 'N')
+    capacity = page.result.tension_capacity_n
+    page.form.set_value('tension', str(capacity * ratio))
+    page.update_result()
+    assert page.safety_card.isVisible()
+    assert verdict in page.safety_verdict.text()
+    assert page.safety_progress.value() == progress
+    assert f'%{bolt.fmt(ratio*100, 1)}' in page.safety_usage.text()
+    page.copy_report()
+    assert 'aynı anda kullanılamaz' in QApplication.clipboard().text()
+    if ratio > 1:
+        assert '2 cıvata' in page.safety_usage.text()
+        assert '−%' in page.safety_usage.text()
+    window.set_theme('light')
+    assert page.safety_progress.value() == progress
+    page.form.set_value('tension', '')
+    page.update_result()
+    assert page.result is None and page.safety_progress.value() == 0
+    assert 'Hesaplanamadı' in page.safety_verdict.text()
+    assert not page.safety_usage.text()
+    assert 'Çekme:' not in page.capacity_text.text()
+
+
+def test_bolt_load_diagram_selection_is_restored_and_combined_limits_are_explained(qtbot, tmp_path):
+    path = tmp_path/'settings.json'
+    path.write_text(json.dumps(dict(bolt_view='Yük gösterimi', bolt_mode='Birleşik yük')))
+    w = MainWindow(path)
+    qtbot.addWidget(w)
+    page = w.pages['bolt']
+    assert page.diagram_tabs.currentWidget() is page.diagrams['load']
+    assert page.diagrams['load'].scene().items()
+    assert 'sabitken çekme sınırı' in page.capacity_text.text()
+    assert 'sabitken kesme sınırı' in page.capacity_text.text()
+    assert 'eklenebilecek yük değildir' in page.capacity_text.text()
+    page.diagram_tabs.setCurrentIndex(0)
+    w.close()
+    assert json.loads(path.read_text())['bolt_view'] == 'Ölçüler'
+
+
+@pytest.mark.parametrize('shaft,fragment', [('h6', 'Minimum boşluk sıfır; bu bir ara geçme değildir'),
+                                         ('k6', 'ölçüsüne göre boşluk veya sıkılık'),
+                                         ('s6', 'Sıkılık aralığı')])
+def test_iso_fit_explanation_is_visible_and_follows_limits_and_units(window, shaft, fragment):
+    page = window.pages['iso_fits']
+    window.navigate('iso_fits')
+    page.form.set_value('shaft', shaft)
+    page.update_result()
+    assert page.details.isVisible() and fragment in page.details.text()
+    assert 'Kullanım yorumu' in page.usage_label.text()
+    assert 'Kırmızı alan' in page.section_help.text()
+    assert 'en sık oluşacak ölçü' in page.section_help.text()
+    page.form.set_value('unit', 'µm')
+    page.update_result()
+    if shaft != 'h6':
+        assert 'µm' in page.details.text()
+    page.copy_report()
+    assert fragment in QApplication.clipboard().text()
+    page.form.set_value('diameter', '0')
+    page.update_result()
+    assert page.result is None and fragment not in page.details.text()
+    assert not page.usage_label.text()
+
+
+def test_manual_iso_keeps_full_reference_distance_notes_and_scrollable_tabs(window):
+    page = window.pages['iso_fits']
+    page.form.set_value('method', 'Manuel kontrol')
+    for key, value in dict(hole_lower='-0,05', hole_upper='0', shaft_lower='-0,1', shaft_upper='0,1').items():
+        page.form.set_value(key, value)
+    page.update_result()
+    assert (page.result.minimum_clearance_nm, page.result.maximum_clearance_nm) == (-150000, 100000)
+    assert 'tolerans genişliğini aşıyor' in page.compatibility_label.text()
+    assert 'En büyük tek limit farkı' in page.compatibility_label.text()
+    assert 'Girilen − ISO' in page.comparison_label.text()
+    assert '11 delik / 18 mil' in page.comparison_label.text()
+    for index, title in enumerate(('Montaj uyumu', 'Ölçü sınırları', 'ISO karşılaştırması')):
+        assert page.manual_tabs.tabText(index) == title
+        assert page.manual_tabs.widget(index).widget().text()
+    page.copy_report()
+    assert 'tolerans genişliğini aşıyor' in QApplication.clipboard().text()
+
+
+def test_gdt_retains_measurement_instructions_size_rule_and_boundary_assessment(window):
+    page = window.pages['geometric_tolerances']
+    window.navigate('geometric_tolerances')
+    assert 'üst ve alt ölçü sınırlarının farkı' in page.size_rule_help.text()
+    assert 'referans (datum) kullanılmaz' in page.datum_help.text()
+    assert 'Ölçüm girişinin anlamı' in page.measurement_label.text()
+    assert 'Boyut toleransı girilmedi' in page.assessment_label.text()
+    page.form.set_value('size_tolerance', '0,1')
+    page.form.set_value('measured', '0,05')
+    page.update_result()
+    assert 'tam sınırda' in page.assessment_label.text()
+    assert 'MMC zarfı ölçülmedi' in page.assessment_label.text()
+    assert 'ölçüm belirsizliği' in page.assessment_label.text()
+    page.copy_report()
+    assert 'MMC zarfı ölçülmedi' in QApplication.clipboard().text()
+    page.form.set_value('tolerance', '')
+    page.update_result()
+    assert page.result is None
+    assert 'tam sınırda' not in page.assessment_label.text()
+
+
 @pytest.mark.parametrize('kind', weight.KINDS)
 def test_weight_all_shapes_and_native_sections(window, kind):
     page = window.pages['weight']
@@ -533,6 +639,12 @@ def test_iso_views_samples_manual_limits_matching_and_report(window, manual):
             page.update_result()
             assert page.result is not None
             assert page.diagrams['fit'].scene().items()
+            assert page.view_tabs.tabText(page.view_tabs.currentIndex()) == view
+            assert page.sample_tabs.tabText(page.sample_tabs.currentIndex()) == sample
+    page.view_tabs.setCurrentIndex(0)
+    page.sample_tabs.setCurrentIndex(0)
+    assert page.form.value('view') == 'Montaj kesiti'
+    assert page.form.value('sample') == 'En az boşluk'
     if manual:
         assert (page.result.minimum_clearance_nm,page.result.maximum_clearance_nm) == (-150000,100000)
         assert page.manual_tabs.count() == 3
