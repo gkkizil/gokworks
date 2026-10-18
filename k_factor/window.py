@@ -376,13 +376,10 @@ class KFactorView:
         self.open_button.grid(row=0, column=1, sticky="ew")
         save = self._checkbox(actions, "Parça dosyalarını kaydet", self.k_state["save"])
         save.grid(row=0, column=2, sticky="w", padx=(20, 0))
-        scope = self._checkbox(actions, "Tüm bükümlere uygula", self.k_state["all_bends"])
-        scope.grid(row=1, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self._label(actions, "Özel K/R değerleri ana sac ayarlarını kullanır. Kalınlık korunur.",
-                    11, MUTED, anchor="w", wraplength=280).grid(
-                        row=1, column=2, sticky="w", padx=(20, 0), pady=(10, 0))
-        self.k_widgets["all_bends"] = scope
-        self.controls.extend((self.scan_button, self.open_button, save, scope))
+        self._label(actions, "Yalnız Sac-Levha K faktörü ve iç yarıçap değiştirilir. Sac kalınlığı korunur.",
+                    11, MUTED, anchor="w", wraplength=760).grid(
+                        row=1, column=0, columnspan=3, sticky="w", pady=(10, 0))
+        self.controls.extend((self.scan_button, self.open_button, save))
 
     def _k_field(self, panel, key, label, row, column, *, values=None, readonly=False):
         holder = ctk.CTkFrame(panel, fg_color="transparent")
@@ -425,7 +422,7 @@ class KFactorView:
                     number(row['r'].get(), 'Manuel büküm yarıçapı')))
             except ValueError as error:
                 raise ValueError(f'{index}. satır: {error}') from None
-        table = AssignmentTable(tuple(assignments), all_bends=self.k_state['all_bends'].get())
+        table = AssignmentTable(tuple(assignments), all_bends=False)
         table.validate()
         return assignments[0].thickness_mm, table
 
@@ -556,7 +553,7 @@ class KFactorView:
             f't={row.thickness_mm:.12g} mm · K={row.k_factor:.12g} · R={row.radius_mm:.12g} mm'
             for row in recipe.rows)
         description += ' · Hedef: Sac-Levha / Büküm yarıçapı / K-Faktörü'
-        description += ' · Tüm bükümler' if recipe.all_bends else ' · Mevcut özel büküm ayarları korunacak'
+        description += ' · Doğrudan Sac-Levha parametreleri · Büküm tablosu kullanılmaz'
         self._append_log(description + (' · Dosyalar kaydedilecek.' if save else ' · Dosyalar kaydedilmeyecek.'))
         threading.Thread(target=update_assembly, args=(recipe, self.events, self.stop_event),
                          kwargs=dict(preview=preview, save=save, expected_scope=expected_scope),

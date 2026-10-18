@@ -31,28 +31,25 @@ dotnet .\bin\Release\net8.0-windows\Gokworks.KrProbe.dll `
 See the [shared instructions](../README.md) for the request schema and sequential
 native desktop workflow. C#/Python comparison is an optional developer diagnostic.
 
-- `inspect` reads available sheet-metal definitions. Gauge-table status code `2`
-  is recorded as `NotEnabledOnTemplate`, rather than incorrectly interpreted as
-  `false` or used to abort feature discovery.
+- `inspect` reads available sheet-metal definitions. No gauge-table query is
+  required for discovery, inspection or assignment.
 - `verify` writes the matched K/R values, rebuilds, reads them again, then restores
   and checks the complete original active bend-allowance payload and radius.
   A reported `verified` requires both target and restoration checks to pass.
 - `apply` leaves the verified K/R values in the active configuration, unsaved.
   This is the desktop's normal assignment mode; successful edits are not restored.
-- Gauge getter status `2` is supported only on `TemplateSheetMetal`, status `1`
-  only on legacy `SheetMetal`. They are reported as unavailable getter results,
-  not interpreted as false OUT values. Known gauge/material links or genuine
-  errors block writes; no control or child override is disabled.
+- No gauge/bend table is evaluated or used to choose K/R. Material and table
+  links, thickness and child overrides are not modified. If another control
+  rejects or overwrites a requested parameter, rebuild/readback fails the
+  assignment and triggers restoration.
 - No mode saves files. A failed restoration is reported explicitly; do not save
   such a document.
 
 K writes use `GetCustomBendAllowance`, the active payload followed by `Type`,
-`SetCustomBendAllowance`, and `ModifyDefinition`. Radius writes prefer exactly one
-radial display dimension owned by the selected definition, using
-`SetSystemValue3` for the current configuration. With no owned radial dimension,
-the probe tests the documented `BendRadius` setter and requires a successful
-readback. `radius_method` records the route used. Diameter dimensions and
-dimensions belonging to subfeatures are never used as radius targets.
+`SetCustomBendAllowance`, and `ModifyDefinition`. Radius writes use the documented
+`ISheetMetalFeatureData.BendRadius` setter directly, in metres, followed by a
+rebuild and fresh readback. No display-dimension discovery or dimension write
+is involved. `radius_method` is `bend_radius_definition`.
 
 `--self-test` validates pure parsing, matching, and report serialization without
 connecting to SolidWorks. A successful build or self-test is **not** a native

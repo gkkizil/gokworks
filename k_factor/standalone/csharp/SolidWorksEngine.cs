@@ -12,7 +12,6 @@ public sealed class SolidWorksEngine
     private IModelDoc2? model;
     private string path = "";
     private string configuration = "";
-    private string? radiusDimensionName;
     private readonly List<FeatureHandle> handles = [];
 
     private sealed record FeatureHandle(IFeature Feature, FeatureInfo Info);
@@ -68,13 +67,12 @@ public sealed class SolidWorksEngine
             return report;
         }
         ValidateBaseline(report.Before);
-        ValidateControls(selected.Info);
         CheckFeatureError(selected.Feature, "Before.GetErrorCode2");
         var baseline = report.Before;
         var target = new FeatureState(baseline.FeatureName, baseline.FeatureType, baseline.ThicknessMm,
             report.Assignment.KFactor, report.Assignment.RadiusMm, (int)swBendAllowanceTypes_e.swBendAllowanceKFactor);
         AssertEquivalent(baseline, ReadState(Fresh(baseline), "Before.Write"), "The selected feature changed before writing");
-        PrepareRadiusTarget(baseline);
+        report.RadiusMethod = "bend_radius_definition";
         bool mutationAttempted = false;
         try
         {
@@ -163,7 +161,6 @@ public sealed class SolidWorksEngine
         var info = new FeatureInfo { Name = name, Type = kind, Suppressed = false, ParentName = parent };
         try { info.State = ReadState(feature, $"Inspect.{name}"); }
         catch (Exception ex) { info.Error = Describe(ex); }
-        info.Controls = ReadControls(feature, $"Inspect.{name}");
         handles.Add(new FeatureHandle(feature, info));
     }
 
@@ -220,54 +217,6 @@ public sealed class SolidWorksEngine
         return result;
     }
 
-    private ControlState ReadControls(IFeature feature, string prefix)
-    {
-        var controls = new ControlState();
-        try
-        {
-            var data = Definition(feature, prefix + ".Controls");
-            bool use = false;
-            string file = "";
-            int status = Trace(prefix + ".GetUseGaugeTable", () => data.GetUseGaugeTable(out use, out file));
-            controls.GaugeStatusCode = status;
-            controls.GaugeStatusName = status switch
-            {
-                0 => "NoError", 1 => "OldArchitecture", 2 => "NotEnabledOnTemplate",
-                3 => "InvalidProperty", 4 => "UnspecifiedError", 5 => "GaugeTablePathNotEmpty", _ => "Unknown"
-            };
-            if (status == 0)
-            {
-                controls.UseGaugeTable = use;
-                controls.GaugeTableFile = file;
-                if (!use)
-                    controls.UseMaterialParameters = Trace(prefix + ".UseMaterialSheetMetalParameters", () => data.UseMaterialSheetMetalParameters);
-            }
-            // Error/status codes make out arguments unavailable; never interpret them as false.
-        }
-        catch (Exception ex) { controls.Error = Describe(ex); }
-        return controls;
-    }
-
-    private void ValidateControls(FeatureInfo selected)
-    {
-        var controls = selected.Controls;
-        if (!SheetMetalControlPolicy.AllowsDefinitionWrite(selected.Type, controls))
-            throw new InvalidOperationException($"Selected definition is not established as writable: GetUseGaugeTable={controls?.GaugeStatusCode}, gauge={controls?.UseGaugeTable}, material={controls?.UseMaterialParameters}, error={controls?.Error}. No control was disabled.");
-        if (selected.Type == "TemplateSheetMetal" && controls?.GaugeStatusCode == 2)
-        {
-            // A successful body getter can still establish an active link.
-            // An unavailable optional child getter does not prevent editing
-            // this template's independent definition parameters.
-            var linked = handles.FirstOrDefault(x => x.Info.Type == "SheetMetal" &&
-                SheetMetalControlPolicy.HasKnownLinkedControls(x.Info.Controls));
-            if (linked is not null)
-                throw new InvalidOperationException($"Sheet-metal body {linked.Info.Name} reports active gauge-table or material parameters. No control was disabled.");
-            report.Warnings.Add("GetUseGaugeTable=2 (NotEnabledOnTemplate): the gauge getter is unavailable on this template. Its K/R definition will be edited and read back after rebuild; gauge/material controls and child overrides are left unchanged.");
-        }
-        else if (selected.Type == "SheetMetal" && controls?.GaugeStatusCode == 1)
-            report.Warnings.Add("GetUseGaugeTable=1 (OldArchitecture): the gauge getter is unavailable on this legacy definition. Its K/R definition will be edited and read back after rebuild; gauge/material controls are left unchanged.");
-    }
-
     private static void ValidateBaseline(FeatureState state)
     {
         // Type 5 is not exposed by the pinned, strongly typed interop contract.
@@ -288,7 +237,6 @@ public sealed class SolidWorksEngine
     {
         AssertIdentity();
         var feature = Fresh(state);
-        var radius = radiusDimensionName is null ? null : RequireRadiusDimension(feature, prefix);
         var data = Definition(feature, prefix);
         bool accessed = false;
         bool committed = false;
@@ -315,7 +263,7 @@ public sealed class SolidWorksEngine
                 allowance.Type = state.BendAllowanceType;
             });
             Trace(prefix + ".SetCustomBendAllowance", () => data.SetCustomBendAllowance(allowance));
-            if (radius is null) Trace(prefix + ".BendRadius.set", () => data.BendRadius = state.RadiusMm / 1000);
+            Trace(prefix + ".BendRadius.set", () => data.BendRadius = state.RadiusMm / 1000);
             committed = Trace(prefix + ".ModifyDefinition", () => feature.ModifyDefinition(data, model!, null!));
             if (!committed) throw new InvalidOperationException("ModifyDefinition returned false.");
         }
@@ -336,62 +284,6 @@ public sealed class SolidWorksEngine
                 }
             }
         }
-        if (radius is not null)
-        {
-            // Reacquire after ModifyDefinition; the old dimension RCW can be stale.
-            radius = RequireRadiusDimension(Fresh(state), prefix + ".FreshRadius");
-            AssertIdentity();
-            int code = Trace(prefix + ".Dimension.SetSystemValue3", () => radius.SetSystemValue3(state.RadiusMm / 1000,
-                (int)swSetValueInConfiguration_e.swSetValue_InThisConfiguration, Array.Empty<string>()));
-            if (code != (int)swSetValueReturnStatus_e.swSetValue_Successful)
-                throw new InvalidOperationException($"The radius dimension write failed with status {code}.");
-        }
-    }
-
-    private void PrepareRadiusTarget(FeatureState baseline)
-    {
-        var radius = RadiusDimension(Fresh(baseline), "Before.Radius");
-        report.RadiusMethod = radius is null ? "bend_radius_definition" : "owned_radial_dimension";
-        if (radius is null) return;
-        var raw = Trace("Before.Radius.GetSystemValue3", () => radius.GetSystemValue3(
-            (int)swInConfigurationOpts_e.swThisConfiguration, Array.Empty<string>()));
-        if (raw is not Array values || values.Length != 1 || values.GetValue(values.GetLowerBound(0)) is not double value ||
-            !double.IsFinite(value) || Math.Abs(value * 1000 - baseline.RadiusMm) > 0.000001)
-            throw new InvalidOperationException("The owned radial dimension does not match the sheet-metal bend radius in the active configuration. Nothing was changed.");
-        radiusDimensionName = Trace("Before.Radius.FullName", () => radius.FullName);
-        if (string.IsNullOrWhiteSpace(radiusDimensionName))
-            throw new InvalidOperationException("The radius dimension has no stable identity.");
-    }
-
-    private IDimension RequireRadiusDimension(IFeature feature, string prefix)
-    {
-        var radius = RadiusDimension(feature, prefix)
-            ?? throw new InvalidOperationException("The owned radial dimension disappeared after ModifyDefinition.");
-        if (radius.FullName != radiusDimensionName)
-            throw new InvalidOperationException("The radius dimension identity changed; no other dimension will be written.");
-        return radius;
-    }
-
-    private IDimension? RadiusDimension(IFeature feature, string prefix)
-    {
-        var dimensions = new Dictionary<string, IDimension>(StringComparer.Ordinal);
-        var display = Trace(prefix + ".GetFirstDisplayDimension", () => feature.GetFirstDisplayDimension() as IDisplayDimension);
-        int count = 0;
-        while (display is not null)
-        {
-            if (++count > 256) throw new InvalidOperationException("Display dimension traversal exceeded the safety limit.");
-            if (Trace(prefix + ".DisplayDimension.Type2", () => display.Type2) == (int)swDimensionType_e.swRadialDimension)
-            {
-                var dimension = Trace(prefix + ".DisplayDimension.GetDimension2", () => display.GetDimension2(0))
-                    ?? throw new InvalidOperationException("The radial display dimension has no dimension object.");
-                var owner = Trace(prefix + ".Dimension.GetFeatureOwner", () => dimension.GetFeatureOwner());
-                if (owner is not null && owner.Name == feature.Name && owner.GetTypeName2() == feature.GetTypeName2())
-                    dimensions[dimension.FullName] = dimension;
-            }
-            display = Trace(prefix + ".GetNextDisplayDimension", () => feature.GetNextDisplayDimension(display) as IDisplayDimension);
-        }
-        if (dimensions.Count > 1) throw new InvalidOperationException("The selected definition owns more than one radial dimension; the radius target is ambiguous.");
-        return dimensions.Values.SingleOrDefault();
     }
 
     private void RebuildAndCheck(FeatureState state, string prefix)

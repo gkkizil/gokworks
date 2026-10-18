@@ -1,6 +1,10 @@
 # K faktörü / yarıçap
 
-Ekranın iki alt sekmesi vardır: **Malzeme / Takım** ve **Manuel K / R**.
+Ekranda **Manuel K / R**, **Hesap yardımı** ve **Montaj sonuçları** sekmeleri vardır.
+
+Manuel montaj ataması doğrudan Sac-Levha parametrelerini değiştirir; bu
+belgedeki eski hesap/alt büküm eşitleme yolu manuel arayüzde kullanılmaz.
+Güncel akış ve sınırlar [manuel atama kılavuzundadır](manual-k-radius.md).
 Bu belge malzeme/takım hesabını anlatır. Kalınlık eşleştirerek doğrudan kullanıcı
 K/R değerlerini yazmak için [manuel atama kılavuzuna](manual-k-radius.md) bakın.
 

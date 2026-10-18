@@ -75,27 +75,6 @@ public sealed class ControlState
     [JsonIgnore] public bool Writable => GaugeStatusCode == 0 && UseGaugeTable == false && UseMaterialParameters == false && Error is null;
 }
 
-public static class SheetMetalControlPolicy
-{
-    public static bool HasKnownLinkedControls(ControlState? controls) =>
-        controls?.UseGaugeTable == true || controls?.UseMaterialParameters == true;
-
-    public static bool AllowsDefinitionWrite(string featureType, ControlState? controls)
-    {
-        if (featureType is not ("SheetMetal" or "TemplateSheetMetal") || controls is null ||
-            controls.Error is not null || HasKnownLinkedControls(controls)) return false;
-        // These statuses describe where the gauge-table getter is supported.
-        // They do not disable the definition's K/R setters. Leave the unknown
-        // OUT values unknown and verify the requested definition after rebuild.
-        return controls.Writable || ((featureType, controls.GaugeStatusCode) switch
-        {
-            ("TemplateSheetMetal", 2) => true,
-            ("SheetMetal", 1) => true,
-            _ => false
-        });
-    }
-}
-
 public sealed class FeatureInfo
 {
     public string Name { get; init; } = "";

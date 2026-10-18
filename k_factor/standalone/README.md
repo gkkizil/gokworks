@@ -45,13 +45,11 @@ kullanır. Python tür kitaplığı oluşturma veya iki motorun uyuşması bu yo
 koşulu değildir. Python COM hatasının alt düzey nedeni bu değişiklikle
 kanıtlanmış veya giderilmiş sayılmaz; hatalı zorunlu bağımlılık kaldırılmıştır.
 
-Şablon Sac-Levha unsurunda `GetUseGaugeTable=2 / NotEnabledOnTemplate`,
-eski `SheetMetal` unsurunda `1 / OldArchitecture` o kontrol sorgusunun
-desteklenmediğini bildirir. Doğru unsur türünde bu durum, K/R tanımı
-setter'larını engellemez. Başarısız sorgunun OUT değerleri `false` sayılmaz;
-tablo veya malzeme bağları kapatılmaz. Bilinen etkin bağlar ve gerçek API
-hataları atamayı durdurur. Başarı için K/R'nin yeniden oluşturma sonrasında
-hedef değerlerle eşleşmesi gerekir.
+Normal C# ataması `GetUseGaugeTable` sorgusunu kullanmaz. K/R, kullanıcının
+girdiği değerlerdir; gauge/büküm tablosundan hesaplanmaz. Tablo ve malzeme
+bağları kapatılmaz. Başarı için K/R'nin yeniden oluşturma sonrasında hedef
+değerlerle eşleşmesi gerekir; SolidWorks değeri reddeder veya başka bir ayar
+geri yazarsa hata bildirilir ve eski parametreler geri yüklenir.
 
 ## Kapsam ve raporlar
 
@@ -63,9 +61,8 @@ Kalınlık, ana unsurun değeridir; şablon varsayılanıyla gövde kalınlığ�
 farklı olabilir. Montaj dolaşımı bu bağımsız araçta yoktur.
 
 K, `GetCustomBendAllowance / SetCustomBendAllowance` ve `ModifyDefinition`
-ile yazılır. R, başlangıç değeri ana yarıçapla eşleşen tek sahipli radyal
-ölçü üzerinden mevcut konfigürasyona yazılır; uygun ölçü yoksa unsurun
-`BendRadius` setter'ı kullanılır. Ölçü kimliği korunur. Başarıda kalınlık,
+ile yazılır. R doğrudan `ISheetMetalFeatureData.BendRadius` alanına metre
+cinsinden yazılır. Görünen ölçüler taranmaz veya değiştirilmez. Başarıda kalınlık,
 aktif büküm payı türü ve hedef K/R yeniden okunur. Aktif büküm payı türleri
 1–4 hata halinde geri yükleme için desteklenir.
 
@@ -90,7 +87,7 @@ incelendi. Mevcut C# kodu bağımsız yazıldı; Power-SM kaynak dosyaları kopy
 
 Derleme ve kontrol nesneleri gerçek SolidWorks yazma denemesi değildir.
 Windows paket açılış kontrolü gerçek Sac-Levha dosyasına yazmaz.
-Bu değişiklikte native derlemesi sıfır hata/uyarıyla, 36 saf native kontrolü
-ve 16 odaklı masaüstü kontrolü geçti. Gerçek Tk düğmeleriyle okuma → atama →
-tekrar atama akışı, native test raporlarıyla kontrol edildi; bu bir gerçek
-SolidWorks parça denemesi değildir.
+18 Ekim 2026 revizyonunda native derlemesi sıfır hata/uyarıyla ve 20 saf
+native kontrolüyle geçti. Önceki paket için yapılan Windows açılış kontrolü
+bu yeni kaynak revizyonunun canlı SolidWorks testi değildir. Bu revizyonda
+yeni EXE üretilmedi.

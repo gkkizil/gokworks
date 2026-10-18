@@ -1,7 +1,8 @@
 """Aktif montajın referans konfigürasyonlarına K/R önizleme ve uygulama.
 
-COM nesneleri yalnızca çalışan iş parçacığında alınır. Tüm bükümler seçeneği
-özel K/R tanımlarını ana sac ayarlarına bağlar; kalınlık ve malzeme korunur.
+COM nesneleri yalnızca çalışan iş parçacığında alınır. Manuel montaj ataması
+doğrudan ana Sac-Levha K/R parametrelerini değiştirir. Eski hesap/inheritance
+yardımcıları geriye uyumluluk için ayrı yolda korunur.
 """
 
 from dataclasses import dataclass, replace
@@ -9,6 +10,7 @@ import math
 
 from dxf_dwg import exporter as sw
 from k_factor.rules import AssignmentTable, ManualAssignment, ThicknessMismatch, calculate, material_by_key, number
+from k_factor.sheetmetal_parameters import ParameterEdit, NoSheetMetal
 from solidworks.connection import connect_to_solidworks
 
 pythoncom, win32com = sw.pythoncom, sw.win32com
@@ -798,13 +800,18 @@ class NotSheetMetal(Exception):
     pass
 
 
-def process_part(app, path, configuration, recipe, *, preview=False, save=False):
-    """Tek dosya/konfigürasyon. Hatalı değişiklikleri bellekte geri al."""
+def process_part(app, path, configuration, recipe, *, preview=False, save=False, parameter_only=False):
+    """Tek dosya/konfigürasyon; parameter_only ana Sac-Levha'yı doğrudan düzenler.
+
+    Montaj işçisi manuel isteklerde parameter_only=True kullanır. False,
+    eski hesap/alt büküm mirası API'sini kullanan çağrılar için korunur.
+    """
     model = None
     original_config = None
     opened = changed = False
     visibility_changed = False
     snapshots = None
+    parameter_editor = None
     body_signature = None
     notes, status, calculation = [], "error", None
     stage = "Parça açma"
@@ -845,152 +852,198 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False)
         stage = "Konfigürasyon ve sac gövdeleri"
         _show_configuration(model, configuration)
         configuration = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
-        bodies, body_flags = _body_inventory(model)
-        if not bodies or (not any(body_flags)
-                          and not any(_features(model, kinds={CONVERT_SOLID}))):
-            raise NotSheetMetal("Sac metal değil.")
-        stage = "Sac unsuru ve kalınlığı"
-        feature, parent_kind = _parent(model, notes=notes)
-        multiple_sheets = sum(body_flags) > 1
-        if len(bodies) > 1:
-            if not any(body_flags):
-                raise RuntimeError("Çok gövdeli dönüşümde sac gövdeleri doğrulanamadı; K/R atanmadı.")
-            if multiple_sheets and (parent_kind != TEMPLATE_SHEET or not recipe.all_bends):
-                raise RuntimeError(f"{sum(body_flags)} sac gövdesi bulundu; ortak ana Sac-Levha ve "
-                                   "Tüm bükümlere uygula seçeneği gerekiyor.")
-            if multiple_sheets:
-                if not all(body_flags):
-                    raise RuntimeError("Birden fazla sac ve normal katı gövde birlikte bulundu; "
-                                       "ortak K/R kapsamı doğrulanamadı.")
-                templates = {_identity(feature)} | {
-                    _identity(item) for item, _ in _features(model, kinds={TEMPLATE_SHEET})}
-                if len(templates) != 1:
-                    raise RuntimeError("Çok gövdeli parçada birden fazla ana Sac-Levha bulundu; K/R atanmadı.")
-            body_signature = _check_body_coverage(model, bodies, body_flags)
-            notes.append(f"Gövde kapsamı: {sum(body_flags)} sac gövdesi; "
-                         f"{len(bodies)-sum(body_flags)} normal katı gövde K/R kapsamı dışında.")
-        body_feature = _body_feature(model, feature, parent_kind, multiple=multiple_sheets)
-        body_kind = _feature_kind(body_feature)
-        notes.append(f"Gövde sac unsuru: {_read(body_feature, 'Name')} ({body_kind}).")
-        # Use a body-level SheetMetal definition, not the template's potentially
-        # different default thickness. Multiple sheet bodies must agree first.
-        # Nonmatching manual sheets stop before allowance/override API calls.
-        calculation = calculate(float(_read(_read(body_feature, "GetDefinition"),
-                                       "SheetThickness" if body_kind == CONVERT_SOLID else "Thickness")) * 1000, recipe)
-        stage = "Mevcut K/R ve büküm payı okuma"
-        before = _state(feature, parent_kind)
-        if before.error_code or before.suppressed:
-            raise RuntimeError("SAC LEVHA unsuru bastırılmış veya zaten hata içeriyor; önce parçayı düzeltin.")
-        stage = "Malzeme, sac kalınlık tablosu ve özel büküm kontrolleri"
-        _check_defaults(model, feature, normalize=recipe.all_bends, notes=notes)
-        actual_thickness = calculation.thickness_mm / 1000
-        effective = replace(before, thickness=actual_thickness)
-        align_template = not math.isclose(before.thickness, actual_thickness,
-                                          rel_tol=0, abs_tol=1e-10)
-        if align_template and (parent_kind != TEMPLATE_SHEET or not recipe.all_bends):
-            raise RuntimeError("Ana sacın varsayılan kalınlığı gerçek sac kalınlığından farklı. "
-                               "Kalınlığı koruyarak K/R uygulamak için Tüm bükümlere uygula seçeneğini açın.")
-        if align_template and not any(_features(model, kinds={CONVERT_SOLID})):
-            raise RuntimeError(f"{_read(body_feature, 'Name')}: SheetMetal alt unsuru ana SAC LEVHA "
-                               "kalınlığıyla eşleşmedi; katıdan dönüştürme bulunmadan ana kalınlık değiştirilmedi.")
-        inherited_names = _check_inherited_sheet(model, effective, prepare=recipe.all_bends)
-        stage = "Katıyı Saca Dönüştür parametre kontrolü"
-        converted_names = _check_converted_values(model, effective, prepare=recipe.all_bends)
-        bends_before = [_bend_state(feature, kind) for feature, kind in
-                        _features(model, include_suppressed=True, kinds=BEND_DEFAULTS)]
-        if not preview:
-            if preexisting_changes:
-                raise RuntimeError("Parçada önceden kaydedilmemiş değişiklik var; önce SolidWorks'te kaydedin veya dosyaları kaydet seçeneğini kapatın.")
-            stage = "Konfigürasyonların yedeğini alma"
-            snapshots = _capture(model)
-            target = replace(effective, radius=calculation.radius_mm / 1000,
-                             allowance_type=2, k_factor=calculation.k_factor)
-            changed = True  # COM setters can mutate even if ModifyDefinition fails.
-            if recipe.all_bends:
-                if align_template:
-                    stage = "Gerçek sac kalınlığını koruyarak ana varsayılanı eşitleme"
-                    parent, _ = _parent(model)
-                    _modify(model, parent, effective)
-                    notes.append(f"Ana varsayılan kalınlığı {before.thickness*1000:g} mm → "
-                                 f"{actual_thickness*1000:g} mm; gerçek gövde kalınlığı korundu.")
-                stage = "Alt bükümleri ana K/R ayarlarına bağlama"
-                updated = _normalize_bends(model)
-                if updated:
-                    notes.append(f"Ana K/R ayarlarına bağlanan unsurlar: {', '.join(updated)}.")
-            stage = "K/R yazma ve yeniden oluşturma"
-            # Configuration capture invalidates previous COM definitions and
-            # can invalidate feature wrappers. Resolve again before mutation.
-            feature, kind = _parent(model)
-            if _identity(feature) != (before.name, before.kind):
-                raise RuntimeError("SAC LEVHA hedefi konfigürasyon yedeğinden sonra değişti.")
-            radius_route = _modify(model, feature, target)
-            if radius_route:
-                notes.append(f"R atama yolu: {radius_route}.")
-            stage = "K/R geri okuma ve konfigürasyon doğrulaması"
-            feature, kind = _parent(model)
-            after = _state(feature, kind)
-            if not _same([target], [after]):
-                raise RuntimeError("K/R yazma sonrası değerler geri okumada eşleşmedi.")
-            for name, untouched in snapshots.items():
-                if name != configuration:
-                    _show_configuration(model, name)
-                    if not _same(untouched, _states(model)):
-                        raise RuntimeError(f"Değişiklik başka konfigürasyona yayıldı ({name}); işlem geri alınıyor. Parametreleri konfigürasyona özel tanımlayın.")
-            _show_configuration(model, configuration)
-            # Fresh reads after the configuration round-trip, including parent.
-            feature, kind = _parent(model)
-            after = _state(feature, kind)
-            if not _same([target], [after]):
-                raise RuntimeError("SAC LEVHA K/R konfigürasyon dönüşünde eşleşmedi.")
-            _check_defaults(model, feature)
-            _check_bends(model, bends_before, recipe.all_bends)
-            _check_inherited_sheet(model, target, expected_names=inherited_names)
-            _check_converted_values(model, target, expected_names=converted_names)
-            if body_signature is not None:
-                current_bodies, current_flags = _body_inventory(model)
-                _check_body_coverage(model, current_bodies, current_flags, expected=body_signature)
-            if converted_names:
-                notes.append(f"Katıyı Saca Dönüştür: {len(converted_names)} unsurda K/R ve kalınlık geri okumayla doğrulandı.")
-            if save:
-                # Switching after Save3 can dirty a borrowed document again.
-                # Save with the user's original configuration already restored,
-                # so the next configuration in this batch starts clean.
-                stage = "Kaydetmeden önce konfigürasyonu geri açma"
-                _show_configuration(model, original_config)
-                stage = "Parça dosyasını kaydetme"
-                errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
-                if not _call_byref(model, "Save3", 1, errors, warnings) or errors.value:
-                    raise RuntimeError(f"Parça kaydedilemedi; hata kodu: {errors.value}. Dosyanın durumunu SolidWorks'te kontrol edin.")
-                notes.append("Parça dosyası kaydedildi.")
-                if warnings.value:
-                    notes.append(f"Kaydetme uyarısı: {warnings.value}")
+        if parameter_only:
+            if not isinstance(recipe, (ManualAssignment, AssignmentTable)):
+                raise ValueError("Doğrudan Sac-Levha ataması için manuel K/R değerleri gerekli.")
+            recipe.validate()
+            stage = "Sac-Levha parametrelerini doğrudan okuma"
+            parameter_editor = ParameterEdit(model)
+            calculation = parameter_editor.prepare(recipe)
+            before = parameter_editor.before
+            notes.append(f"Hedef: {before.name} ({before.kind}) · ISheetMetalFeatureData · "
+                         f"Gerçek sac kalınlığı: {calculation.thickness_mm:.12g} mm.")
+            if preview:
+                notes.insert(0, f"Önizleme; K/R uygulanmadı. Hedef K={calculation.k_factor:.12g}, "
+                             f"R={calculation.radius_mm:.12g} mm.")
             else:
-                notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
-            previous = f"K={before.k_factor:.12g}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
-            notes.append(f"SAC LEVHA: {after.name} ({after.kind}) · Konfigürasyon: {configuration} · "
-                         f"Önceki {previous}, R={before.radius*1000:.12g} mm → "
-                         f"Doğrulanan K={after.k_factor:.12g}, R={after.radius*1000:.12g} mm · "
-                         f"{len(inherited_names)} SheetMetal alt unsuru doğrulandı.")
-            notes.insert(0, f"K/R uygulandı ve geri okumayla doğrulandı: K={after.k_factor:.12g}, "
-                         f"R={after.radius*1000:.12g} mm, t={after.thickness*1000:.12g} mm.")
+                if preexisting_changes:
+                    raise RuntimeError("Parçada önceden kaydedilmemiş değişiklik var; önce SolidWorks'te "
+                                       "kaydedin veya dosyaları kaydet seçeneğini kapatın.")
+                stage = "Sac-Levha K/R yazma, yeniden oluşturma ve geri okuma"
+                parameter_editor.apply()
+                changed = parameter_editor.changed
+                after = parameter_editor.after
+                if save:
+                    stage = "Kaydetmeden önce konfigürasyonu geri açma"
+                    _show_configuration(model, original_config)
+                    stage = "Parça dosyasını kaydetme"
+                    errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
+                    if not _call_byref(model, "Save3", 1, errors, warnings) or errors.value:
+                        raise RuntimeError(f"Parça kaydedilemedi; hata kodu: {errors.value}.")
+                    notes.append("Parça dosyası kaydedildi.")
+                    if warnings.value:
+                        notes.append(f"Kaydetme uyarısı: {warnings.value}")
+                else:
+                    notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
+                notes.insert(0, f"Sac-Levha parametreleri geri okumayla doğrulandı: "
+                             f"K={after.allowance_value:.12g}, R={after.radius*1000:.12g} mm.")
+            notes.append("Büküm tablosundan değer alınmadı. Kalınlık, malzeme ve özel alt büküm ayarları korundu.")
+            status = "success"
         else:
-            current = f"K={before.k_factor:.4f}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
-            notes.insert(0, f"Önizleme; K/R uygulanmadı. Mevcut {current}, R={before.radius*1000:.3f} mm.")
-        if recipe.all_bends:
-            notes.append("Kapsam: tüm bükümler; özel K/R ayarları ana sacı kullanır, sac kalınlığı korunur.")
-        if isinstance(recipe, (ManualAssignment, AssignmentTable)):
-            notes.append(f"{'Manuel atama hedefi' if preview else 'Manuel atama'} · K={calculation.k_factor:.12g} · R={calculation.radius_mm:.12g} mm · t={calculation.thickness_mm:.12g} mm")
-        else:
-            notes.append(f"K={calculation.k_factor:.4f} · R={calculation.radius_mm:.3f} mm · t={calculation.thickness_mm:g} mm · V={calculation.die_opening_mm:g} mm · BA({calculation.angle_deg:g}°)={calculation.ba_mm:.5f} mm")
-        notes.extend(calculation.notes)
-        status = "success"
-    except (NotSheetMetal, ThicknessMismatch) as error:
+            bodies, body_flags = _body_inventory(model)
+            if not bodies or (not any(body_flags)
+                              and not any(_features(model, kinds={CONVERT_SOLID}))):
+                raise NotSheetMetal("Sac metal değil.")
+            stage = "Sac unsuru ve kalınlığı"
+            feature, parent_kind = _parent(model, notes=notes)
+            multiple_sheets = sum(body_flags) > 1
+            if len(bodies) > 1:
+                if not any(body_flags):
+                    raise RuntimeError("Çok gövdeli dönüşümde sac gövdeleri doğrulanamadı; K/R atanmadı.")
+                if multiple_sheets and (parent_kind != TEMPLATE_SHEET or not recipe.all_bends):
+                    raise RuntimeError(f"{sum(body_flags)} sac gövdesi bulundu; ortak ana Sac-Levha ve "
+                                       "Tüm bükümlere uygula seçeneği gerekiyor.")
+                if multiple_sheets:
+                    if not all(body_flags):
+                        raise RuntimeError("Birden fazla sac ve normal katı gövde birlikte bulundu; "
+                                           "ortak K/R kapsamı doğrulanamadı.")
+                    templates = {_identity(feature)} | {
+                        _identity(item) for item, _ in _features(model, kinds={TEMPLATE_SHEET})}
+                    if len(templates) != 1:
+                        raise RuntimeError("Çok gövdeli parçada birden fazla ana Sac-Levha bulundu; K/R atanmadı.")
+                body_signature = _check_body_coverage(model, bodies, body_flags)
+                notes.append(f"Gövde kapsamı: {sum(body_flags)} sac gövdesi; "
+                             f"{len(bodies)-sum(body_flags)} normal katı gövde K/R kapsamı dışında.")
+            body_feature = _body_feature(model, feature, parent_kind, multiple=multiple_sheets)
+            body_kind = _feature_kind(body_feature)
+            notes.append(f"Gövde sac unsuru: {_read(body_feature, 'Name')} ({body_kind}).")
+            # Use a body-level SheetMetal definition, not the template's potentially
+            # different default thickness. Multiple sheet bodies must agree first.
+            # Nonmatching manual sheets stop before allowance/override API calls.
+            calculation = calculate(float(_read(_read(body_feature, "GetDefinition"),
+                                           "SheetThickness" if body_kind == CONVERT_SOLID else "Thickness")) * 1000, recipe)
+            stage = "Mevcut K/R ve büküm payı okuma"
+            before = _state(feature, parent_kind)
+            if before.error_code or before.suppressed:
+                raise RuntimeError("SAC LEVHA unsuru bastırılmış veya zaten hata içeriyor; önce parçayı düzeltin.")
+            stage = "Malzeme, sac kalınlık tablosu ve özel büküm kontrolleri"
+            _check_defaults(model, feature, normalize=recipe.all_bends, notes=notes)
+            actual_thickness = calculation.thickness_mm / 1000
+            effective = replace(before, thickness=actual_thickness)
+            align_template = not math.isclose(before.thickness, actual_thickness,
+                                              rel_tol=0, abs_tol=1e-10)
+            if align_template and (parent_kind != TEMPLATE_SHEET or not recipe.all_bends):
+                raise RuntimeError("Ana sacın varsayılan kalınlığı gerçek sac kalınlığından farklı. "
+                                   "Kalınlığı koruyarak K/R uygulamak için Tüm bükümlere uygula seçeneğini açın.")
+            if align_template and not any(_features(model, kinds={CONVERT_SOLID})):
+                raise RuntimeError(f"{_read(body_feature, 'Name')}: SheetMetal alt unsuru ana SAC LEVHA "
+                                   "kalınlığıyla eşleşmedi; katıdan dönüştürme bulunmadan ana kalınlık değiştirilmedi.")
+            inherited_names = _check_inherited_sheet(model, effective, prepare=recipe.all_bends)
+            stage = "Katıyı Saca Dönüştür parametre kontrolü"
+            converted_names = _check_converted_values(model, effective, prepare=recipe.all_bends)
+            bends_before = [_bend_state(feature, kind) for feature, kind in
+                            _features(model, include_suppressed=True, kinds=BEND_DEFAULTS)]
+            if not preview:
+                if preexisting_changes:
+                    raise RuntimeError("Parçada önceden kaydedilmemiş değişiklik var; önce SolidWorks'te kaydedin veya dosyaları kaydet seçeneğini kapatın.")
+                stage = "Konfigürasyonların yedeğini alma"
+                snapshots = _capture(model)
+                target = replace(effective, radius=calculation.radius_mm / 1000,
+                                 allowance_type=2, k_factor=calculation.k_factor)
+                changed = True  # COM setters can mutate even if ModifyDefinition fails.
+                if recipe.all_bends:
+                    if align_template:
+                        stage = "Gerçek sac kalınlığını koruyarak ana varsayılanı eşitleme"
+                        parent, _ = _parent(model)
+                        _modify(model, parent, effective)
+                        notes.append(f"Ana varsayılan kalınlığı {before.thickness*1000:g} mm → "
+                                     f"{actual_thickness*1000:g} mm; gerçek gövde kalınlığı korundu.")
+                    stage = "Alt bükümleri ana K/R ayarlarına bağlama"
+                    updated = _normalize_bends(model)
+                    if updated:
+                        notes.append(f"Ana K/R ayarlarına bağlanan unsurlar: {', '.join(updated)}.")
+                stage = "K/R yazma ve yeniden oluşturma"
+                # Configuration capture invalidates previous COM definitions and
+                # can invalidate feature wrappers. Resolve again before mutation.
+                feature, kind = _parent(model)
+                if _identity(feature) != (before.name, before.kind):
+                    raise RuntimeError("SAC LEVHA hedefi konfigürasyon yedeğinden sonra değişti.")
+                radius_route = _modify(model, feature, target)
+                if radius_route:
+                    notes.append(f"R atama yolu: {radius_route}.")
+                stage = "K/R geri okuma ve konfigürasyon doğrulaması"
+                feature, kind = _parent(model)
+                after = _state(feature, kind)
+                if not _same([target], [after]):
+                    raise RuntimeError("K/R yazma sonrası değerler geri okumada eşleşmedi.")
+                for name, untouched in snapshots.items():
+                    if name != configuration:
+                        _show_configuration(model, name)
+                        if not _same(untouched, _states(model)):
+                            raise RuntimeError(f"Değişiklik başka konfigürasyona yayıldı ({name}); işlem geri alınıyor. Parametreleri konfigürasyona özel tanımlayın.")
+                _show_configuration(model, configuration)
+                # Fresh reads after the configuration round-trip, including parent.
+                feature, kind = _parent(model)
+                after = _state(feature, kind)
+                if not _same([target], [after]):
+                    raise RuntimeError("SAC LEVHA K/R konfigürasyon dönüşünde eşleşmedi.")
+                _check_defaults(model, feature)
+                _check_bends(model, bends_before, recipe.all_bends)
+                _check_inherited_sheet(model, target, expected_names=inherited_names)
+                _check_converted_values(model, target, expected_names=converted_names)
+                if body_signature is not None:
+                    current_bodies, current_flags = _body_inventory(model)
+                    _check_body_coverage(model, current_bodies, current_flags, expected=body_signature)
+                if converted_names:
+                    notes.append(f"Katıyı Saca Dönüştür: {len(converted_names)} unsurda K/R ve kalınlık geri okumayla doğrulandı.")
+                if save:
+                    # Switching after Save3 can dirty a borrowed document again.
+                    # Save with the user's original configuration already restored,
+                    # so the next configuration in this batch starts clean.
+                    stage = "Kaydetmeden önce konfigürasyonu geri açma"
+                    _show_configuration(model, original_config)
+                    stage = "Parça dosyasını kaydetme"
+                    errors, warnings = _out(pythoncom.VT_I4), _out(pythoncom.VT_I4)
+                    if not _call_byref(model, "Save3", 1, errors, warnings) or errors.value:
+                        raise RuntimeError(f"Parça kaydedilemedi; hata kodu: {errors.value}. Dosyanın durumunu SolidWorks'te kontrol edin.")
+                    notes.append("Parça dosyası kaydedildi.")
+                    if warnings.value:
+                        notes.append(f"Kaydetme uyarısı: {warnings.value}")
+                else:
+                    notes.append("Bellekte uygulandı; dosyaya kaydedilmedi. SolidWorks'te kontrol edip kaydedin.")
+                previous = f"K={before.k_factor:.12g}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
+                notes.append(f"SAC LEVHA: {after.name} ({after.kind}) · Konfigürasyon: {configuration} · "
+                             f"Önceki {previous}, R={before.radius*1000:.12g} mm → "
+                             f"Doğrulanan K={after.k_factor:.12g}, R={after.radius*1000:.12g} mm · "
+                             f"{len(inherited_names)} SheetMetal alt unsuru doğrulandı.")
+                notes.insert(0, f"K/R uygulandı ve geri okumayla doğrulandı: K={after.k_factor:.12g}, "
+                             f"R={after.radius*1000:.12g} mm, t={after.thickness*1000:.12g} mm.")
+            else:
+                current = f"K={before.k_factor:.4f}" if before.allowance_type == 2 else f"büküm payı tipi={before.allowance_type}"
+                notes.insert(0, f"Önizleme; K/R uygulanmadı. Mevcut {current}, R={before.radius*1000:.3f} mm.")
+            if recipe.all_bends:
+                notes.append("Kapsam: tüm bükümler; özel K/R ayarları ana sacı kullanır, sac kalınlığı korunur.")
+            if isinstance(recipe, (ManualAssignment, AssignmentTable)):
+                notes.append(f"{'Manuel atama hedefi' if preview else 'Manuel atama'} · K={calculation.k_factor:.12g} · R={calculation.radius_mm:.12g} mm · t={calculation.thickness_mm:.12g} mm")
+            else:
+                notes.append(f"K={calculation.k_factor:.4f} · R={calculation.radius_mm:.3f} mm · t={calculation.thickness_mm:g} mm · V={calculation.die_opening_mm:g} mm · BA({calculation.angle_deg:g}°)={calculation.ba_mm:.5f} mm")
+            notes.extend(calculation.notes)
+            status = "success"
+    except (NotSheetMetal, NoSheetMetal, ThicknessMismatch) as error:
         status = "skipped"
         notes.append(str(error))
     except Exception as error:
         # The table truncates long discovery notes. Show the actionable error
         # first so the user can see it without opening the complete log.
         notes.insert(0, f"{stage}: {error}")
+        if parameter_editor is not None and parameter_editor.changed:
+            changed = True
+            try:
+                parameter_editor.rollback()
+                changed = False
+                notes.append("Önceki Sac-Levha parametreleri geri yüklendi ve kontrol edildi.")
+            except Exception as rollback_error:
+                notes.insert(0, f"GERİ ALMA HATASI: {rollback_error}. Parçayı kaydetmeyin.")
         if changed and snapshots is not None:
             try:
                 _rollback(model, snapshots)
@@ -1084,7 +1137,8 @@ def update_assembly(recipe, events, stop_event=None, *, preview=False, save=Fals
                 break
             events.put(("current", source))
             status, detail, calculation = process_part(app, path, configuration, recipe,
-                                                        preview=preview, save=save)
+                                                        preview=preview, save=save,
+                                                        parameter_only=isinstance(recipe, (ManualAssignment, AssignmentTable)))
             summary["processed"] += 1
             summary[{"success": "succeeded", "skipped": "skipped", "error": "failed"}[status]] += 1
             result = dict(source=source, output=path, status=status,

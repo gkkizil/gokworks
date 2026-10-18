@@ -115,7 +115,7 @@ K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** v
 
 Tarama sürerken sıraya alınan K/R uygulaması, kontroldeki montajı, ana konfigürasyonu ve dosya/konfigürasyon adetlerini yeniden karşılaştırır. Bunlar değişmişse hiçbir parçaya yazmadan durur ve yeniden tarama ister.
 
-Hesap yardımındaki genel tablo ve yaklaşık R hesabı havada büküm önerisidir. Manuel atama bu tahminleri kullanmaz. Sac parametreleri gauge/malzeme tablosuna bağlıysa bu bağ açıklamalı olarak bildirilir. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
+Hesap yardımındaki genel tablo ve yaklaşık R hesabı havada büküm önerisidir. Manuel atama bu tahminleri ve `GetUseGaugeTable` sorgusunu kullanmaz. K, `GetCustomBendAllowance / SetCustomBendAllowance`; R, doğrudan `ISheetMetalFeatureData.BendRadius` ile yazılır. Alt büküm ayarları korunur. Başarı için yeniden oluşturma sonrası ana K/R geri okuması gerekir. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
 
 ## Geometrik toleranslar / GD&T
 
