@@ -396,6 +396,10 @@ def test_kr_exact_inputs_preview_labels_and_queued_scope(window, qtbot, outcome)
         assert page.pending_apply is not None
         release.set()
         qtbot.waitUntil(lambda: not window.jobs.busy)
+        # Idle means the entire queued operation is complete, not the gap
+        # before an unparented timer starts another job after this mock exits.
+        if outcome == 'completed':
+            assert len(calls) == 2
         QApplication.processEvents()
         qtbot.waitUntil(lambda: not window.jobs.busy)
     assert len(calls) == (2 if outcome == 'completed' else 1)
@@ -423,6 +427,26 @@ def test_kr_stop_discards_queued_apply_and_helper_never_overwrites(window, qtbot
         page.apply()
         page.stop_button.click()
         qtbot.waitUntil(lambda: not window.jobs.busy)
+    assert len(calls) == 1 and page.pending_apply is None
+
+
+def test_close_at_preview_completion_does_not_start_queued_cad_write(window, qtbot):
+    page = window.pages['k_factor']
+    page.rows_model.replace([dict(thickness='2',k='0,274',r='1,5')])
+    release = threading.Event()
+    calls = []
+    def update(recipe, sink, stop, **kwargs):
+        calls.append(kwargs)
+        release.wait(2)
+        sink.put(('done',dict(state='completed',scope=('assembly','Default','signature'))))
+    window.jobs.finished.connect(window.close)
+    with patch('gui_qt.pages.kr.engine.update_assembly',side_effect=update):
+        page.scan()
+        page.apply()
+        release.set()
+        qtbot.waitUntil(lambda: not window.jobs.busy)
+        QApplication.processEvents()
+    assert window.closing and not window.isVisible()
     assert len(calls) == 1 and page.pending_apply is None
 
 

@@ -210,7 +210,9 @@ class KrPage(BasePage):
 
     def job_finished(self):
         pending, self.pending_apply = self.pending_apply, None
-        if pending and self.summary and self.summary.get('state') == 'completed' and self.summary.get('scope'):
+        if pending and not self.context.closing and self.summary and self.summary.get('state') == 'completed' and self.summary.get('scope'):
             recipe, save = pending
             scope = self.summary['scope']
-            QTimer.singleShot(0, lambda: self.start_operation(recipe, False, save, scope))
+            # Start in the finished slot: exposing an idle interval with an
+            # unparented timer lets close/test teardown race the next CAD job.
+            self.start_operation(recipe, False, save, scope)

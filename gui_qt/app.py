@@ -244,6 +244,7 @@ class MainWindow(QMainWindow):
                 self.closing = False
                 event.ignore()
                 return
+        self.closing = True
         event.accept()
 
 

@@ -14,7 +14,7 @@ GÖK görselleri kullanıcı tarafından sağlanan mevcut marka varlıklarıdır
 | ezdxf | 1.4.3 | MIT; geçişli bağımlılık bildirimleri de dağıtılır. |
 | openpyxl | 3.1.5 | MIT; et-xmlfile izinli lisansı. |
 | PyInstaller | 6.16.0 | GPL v2+ ve bootloader istisnası; oluşturulan uygulamayı GPL yapmaz. |
-| pytest / pytest-qt | 9.0.2 / 4.5.0 | MIT; yalnız geliştirme/test ortamında, dağıtımda bulunmaz. |
+| pytest / pytest-qt / pytest-timeout | 9.0.2 / 4.5.0 / 2.4.0 | MIT; yalnız geliştirme/test ortamında, uygulama çalışma yolunda bulunmaz. |
 
 ## LGPL ile ticari dağıtım
 

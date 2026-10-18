@@ -168,3 +168,10 @@ değeri koruyarak aktarıldı. JSON içindeki geçersiz tema/mod türleri ve boz
 Qt pencere geometrisi açılışı engellemeden güvenli varsayılana döner.
 Temizle düğmeleri yalnız filtreyi temizler; dosya sonuçlarını/günlüğü silmez.
 Yeni tarama önceki arama filtresini sıfırlar. Bu iki akışın hedefli testleri geçti.
+
+Windows’ta bir sonraki koşu K/R önizleme → sıradaki atama testinde tamamlanmadı.
+Bitmiş işten sonra atamayı başlatan sahipsiz QTimer kaldırıldı. Yeni iş artık
+finished slotu içinde başlar; iki iş arasında arayüze yanlış bir boşta durumu
+sunulmaz. Kapatma kabul edildiyse bekleyen atama başlamaz. İş bittiği anda
+kapatma ve sonraki CAD yazısını engelleme senaryosu eklendi. Windows testleri
+artık test adını ve 60 saniyede takılan testin thread dökümünü kaydeder.
