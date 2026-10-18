@@ -3,7 +3,7 @@ name: Windows EXE
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, codex/pyside6-migration]
     paths:
       - packaging/windows-build-request.json
 
@@ -30,6 +30,10 @@ jobs:
             packaging/windows-requirements.txt
       - name: Install build dependencies
         run: python -m pip install -r packaging/windows-requirements.txt
+      - name: Validate regression suite on Windows
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pytest -q --junitxml=windows-tests.xml
       - name: Build and open the packaged EXE
         run: python packaging/build_windows.py *> windows-build.log
       - name: Upload Windows package
@@ -38,10 +42,11 @@ jobs:
         with:
           name: GOKWORKS-Windows-x64-${{ github.sha }}
           path: |
-            dist/GOKWORKS.exe
+            dist/GOKWORKS/
             dist/SHA256.txt
             dist/OKU.txt
-            dist/windows-smoke.json
+            dist/windows-smoke*.json
+            dist/windows-smoke*.png
           if-no-files-found: error
           retention-days: 30
       - name: Upload build log
@@ -51,7 +56,8 @@ jobs:
           name: Windows-build-log-${{ github.sha }}
           path: |
             windows-build.log
-            dist/windows-smoke.json
+            dist/windows-smoke*.json
+            windows-tests.xml
           if-no-files-found: ignore
       - name: Record downloadable build status
         if: always()

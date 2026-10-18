@@ -1,0 +1,34 @@
+[
+  {
+    "file": "QtBase-libpng_LICENSE",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/libpng/LICENSE"
+  },
+  {
+    "file": "QtBase-md4c_LICENSE.md",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/md4c/LICENSE.md"
+  },
+  {
+    "file": "QtBase-double-conversion_LICENSE",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/double-conversion/LICENSE"
+  },
+  {
+    "file": "QtBase-tinycbor_LICENSE",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/tinycbor/LICENSE"
+  },
+  {
+    "file": "QtBase-rfc6234_LICENSE",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/rfc6234/LICENSE"
+  },
+  {
+    "file": "QtBase-harfbuzz-ng_qt_attribution.json",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/harfbuzz-ng/qt_attribution.json"
+  },
+  {
+    "file": "QtBase-libpng_qt_attribution.json",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/libpng/qt_attribution.json"
+  },
+  {
+    "file": "QtBase-zlib_qt_attribution.json",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/zlib/qt_attribution.json"
+  }
+]

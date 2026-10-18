@@ -1,0 +1,53 @@
+# GOKWORKS Qt sürümü — üçüncü taraf lisansları
+
+Bu inceleme 18 Ekim 2026 tarihli geliştirme dalına aittir. Yeni arayüz kodu
+proje için yazılmıştır; üçüncü taraf hazır arayüz veya ücretli ikon kopyalanmadı.
+GÖK görselleri kullanıcı tarafından sağlanan mevcut marka varlıklarıdır.
+
+| Bileşen | Sürüm | Lisans / kullanım |
+|---|---|---|
+| PySide6, Shiboken6 | 6.10.3 | LGPL-3.0-only veya GPL seçenekleri / ticari Qt lisansı. Bu paket LGPL yolunu kullanır. |
+| Qt Core, Gui, Widgets | 6.10.3 | LGPL v3 seçeneği. QML, Quick, WebEngine, Charts kullanılmaz. |
+| Python | 3.13 | PSF lisansı; paketleyicinin Python çalışma zamanı dahildir. |
+| pywin32 | 312 | BSD tarzı izinli lisans; kaynak başına ek bildirimler olabilir. |
+| Pillow | 12.1.0 | MIT-CMU; mevcut bağımlılık korunur. |
+| ezdxf | 1.4.3 | MIT; geçişli bağımlılık bildirimleri de dağıtılır. |
+| openpyxl | 3.1.5 | MIT; et-xmlfile izinli lisansı. |
+| PyInstaller | 6.16.0 | GPL v2+ ve bootloader istisnası; oluşturulan uygulamayı GPL yapmaz. |
+| pytest / pytest-qt | 9.0.2 / 4.5.0 | MIT; yalnız geliştirme/test ortamında, dağıtımda bulunmaz. |
+
+## LGPL ile ticari dağıtım
+
+LGPL, koşulları karşılandığında kapalı kaynak ve ticari uygulamayla kullanılabilir.
+Bu cümle koşulsuz bir “telif sorunu yok” garantisi değildir.
+
+- EXE `--onedir --noupx` ile paketlenir. Qt/PySide paylaşımlı kütüphaneleri
+  `_internal` altında ayrı bulunur; tek EXE içine kilitlenmez.
+- Alıcıların LGPL kütüphanelerini uyumlu değiştirilmiş sürümlerle değiştirmesine
+  ve bunun için hata ayıklama/tersine mühendisliğe izin verilmelidir. Sonradan
+  hazırlanacak EULA bu hakkı engellememelidir. Bu depoda engelleyici EULA yoktur.
+- Lisans metinleri, telif bildirimleri, kaynak sürümleri ve kaynak edinme bilgisi
+  `GOKWORKS/_internal/licenses` içinde birlikte dağıtılır.
+- Qt veya PySide kaynakları değiştirilmedi. Değiştirilirse ilgili kaynak ve
+  değişiklikler LGPL koşullarıyla sağlanmalı; kurulum bilgisi yükümlülüğü ürünün
+  dağıtım biçimine göre ayrıca karşılanmalıdır.
+- Yeni Qt modülleri eklenirse lisansı yeniden incelenmeli; yalnız GPL sunulan
+  modüller bu izin değerlendirmesine otomatik dahil değildir.
+- GÖK markasının, CAD dosyalarının ve mühendislik standart metinlerinin hakları
+  ilgili sahiplerindedir. Uygulama ISO/ASME standartlarının tam metnini dağıtmaz.
+
+## Sürüme bağlı kaynaklar
+
+- [PySide/Shiboken 6.10.3 kaynak ağacı](https://github.com/pyside/pyside-setup/tree/6.10.3)
+- [Qt Base 6.10.3 kaynak ağacı](https://github.com/qt/qtbase/tree/6.10.3)
+- [Qt 6.10.3 açık kaynak indirmeleri](https://download.qt.io/archive/qt/6.10/6.10.3/single/)
+- [Qt for Python lisans açıklaması](https://doc.qt.io/qtforpython-6/licenses.html)
+- [Qt LGPL yükümlülükleri](https://www.qt.io/licensing/open-source-lgpl-obligations)
+- [pywin32 b312 lisansı](https://github.com/mhammond/pywin32/blob/b312/win32/License.txt)
+- [PyInstaller lisansı ve istisnası](https://pyinstaller.org/en/v6.16.0/license.html)
+
+`packaging/licenses` kanonik LGPL/GPL metinlerini, kullanılan dağıtımlardan
+alınan izinli lisansları ve Qt üçüncü taraf bildirimlerini içerir. Derleme betiği
+ayrıca kurulu bağımlılıkların lisans dosyalarını ve paket/sürüm/lisans envanterini
+toplar. Ticari dağıtım öncesinde gerçek DLL envanteri, lisans bildirimlerinin
+yeterliliği ve nihai EULA dağıtıcı tarafından kontrol edilmelidir.

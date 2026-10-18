@@ -244,6 +244,9 @@ class MainWindow(QMainWindow):
 
 
 def create_application(argv=None):
+    existing = QApplication.instance()
+    if existing is not None and existing.applicationName() == 'GOKWORKS':
+        return existing
     set_application_identity()
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QApplication.instance() or QApplication(sys.argv if argv is None else argv)

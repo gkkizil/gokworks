@@ -24,7 +24,7 @@ py -3.12 -m venv .venv
 .venv\Scripts\python.exe main.py
 ```
 
-Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz için `customtkinter==6.0.0` ve ölçeklenebilir ikonlar için `Pillow==12.1.0` kullanılır.
+Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz `PySide6==6.10.3` ve Qt Widgets kullanır. Hesaplama ve CAD motorları Python olarak korunur. Qt sürümü `codex/pyside6-migration` geliştirme dalındadır; önceki sürüm Git geçmişinde korunur.
 
 ## BOM - Ürün ağacı
 
@@ -186,14 +186,15 @@ Linux'taki otomatik testler gerçek SolidWorks üretimini doğrulayamaz. Windows
 Harici test bağımlılığı gerekmez:
 
 ```powershell
-.venv\Scripts\python.exe -m unittest discover -s tests -v
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.venv\Scripts\python.exe -m pytest -q
 ```
 
 Linux bulut ortamındaki sanal ekranla:
 
 ```bash
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cache \
-  /workspace/.cloud-setup/gui-venv/bin/python -m unittest discover -s tests -v
+  python -m pytest -q
 ```
 
 Son kapsamlı kontrolde **335 test geçti**; 133 gerçek GUI testi dahildir. [Son test çıktısı](docs/test-results/latest-tests.log), [güncel K/R, tek biçim ve menü akıcılığı](docs/gui-design.md#güncel-kr-alanı-ve-menü-geçişleri). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. Tek biçim DXF/DWG üretimi, eski ayarın dönüşümü, hızlı menü geçişleri, çizim önbelleği, boşta sayfa ön yükleme ve 4000 dosyalık liste hazırlanırken Durdur erişimi ayrıca sınandı. 10.000 satırlık sonuç listesinde toplu filtreleme, seçim/veri korunması ve canlı sonuçların sırası kontrol edildi. ISO kesitinde çap okları, çapsal/tek taraflı fark, sıfır temas ve ara geçmenin farklı örnekleri doğrulandı. [Yeni kesit görünümü](docs/screenshots/iso-section-clearance-dark.png). DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. İşçi olaylarının toplu çiziminde sonuç/günlük sırası, son özetin korunması, her turdaki olay sınırı ve günlük kaydırma konumu da kontrol edildi. [GUI akıcılık ölçümleri](docs/test-results/gui-responsiveness.json). Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
@@ -239,8 +240,30 @@ bash /workspace/.cloud-setup/start.sh
 cd /workspace/gokworks
 DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user \
 XDG_CACHE_HOME=/workspace/.cloud-setup/cache \
-/workspace/.cloud-setup/gui-venv/bin/python main.py
+python main.py
 ```
 
-Testleri de aynı yorumlayıcıyla `-m unittest discover -s tests -v` kullanarak
+Testleri de aynı yorumlayıcıyla `-m pytest -q` kullanarak
 çalıştırın. Windows'ta yukarıdaki Python 3.12 kurulum adımları geçerlidir.
+
+## Qt geliştirme sürümü
+
+Dokuz çalışma alanı tek Qt ana penceresinde korunur. Menü geçişleri ekranları
+yeniden oluşturmaz. Uzun CAD ve dosya işlemleri QThread üzerinde çalışır;
+işlem sırasında diğer menüler kullanılabilir. Aynı anda bir CAD/dosya işi çalışır.
+
+- Başlatma: `python main.py` veya `python -m gui_qt`
+- Bağımlılıklar: `python -m pip install -r requirements-dev.txt`
+- Regresyonlar: `python -m pytest -q` (Linux başsız: `QT_QPA_PLATFORM=offscreen`)
+- Paket açılış kontrolü: `python main.py --self-check qt-smoke.json`
+- Windows derleme: `python packaging/build_windows.py` (Windows/Python 3.13 x64)
+
+Windows ZIP’inin **tamamını** çıkartın; `GOKWORKS/GOKWORKS.exe` dosyasını açın.
+`_internal` klasörü EXE yanında kalmalıdır. Python kurulumu gerekmez.
+
+Eski JSON ayarları yerinde korunur; Qt pencere ayarları aynı konumda ayrı
+`settings.qt.ini` dosyasında tutulur. K/R kayıt seçimi her açılışta kapalıdır.
+
+[Migrasyon raporu](docs/QT_MIGRATION_REPORT.md) ·
+[Lisanslar](docs/THIRD_PARTY_NOTICES.md) ·
+[Test envanteri](docs/qt-migration/inventory.json)

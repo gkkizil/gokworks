@@ -169,7 +169,9 @@ class ConvertedApplyTests(KApplyTestCase):
         for model, k, radius in ((self.model, .274, .0015), (second, .32, .0025)):
             self.assertEqual((model.states['Default']['k'], model.states['Default']['radius']), (k, radius))
             self.assertEqual(model.save_count, 1)
-        self.assertEqual(tuple(self.converted.flags.values()), (False, False))
+        # Manual mode changes the main SheetMetal K/R only. Conversion-specific
+        # child override flags must remain untouched (current production contract).
+        self.assertEqual(tuple(self.converted.flags.values()), (True, True))
         self.assertEqual(second.states['Other'], untouched)
         self.assertEqual(second.config, 'Other')
         self.assertEqual((unmatched.save_count, solid.save_count), (0, 0))

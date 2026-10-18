@@ -84,7 +84,7 @@ class ConnectionTests(unittest.TestCase):
 class EntryPointTests(unittest.TestCase):
     def test_main_script_calls_application_entrypoint(self):
         entry = Path(__file__).resolve().parents[1]/'main.py'
-        with patch('pdf.window.main') as start:
+        with patch('gui_qt.app.main') as start:
             runpy.run_path(str(entry), run_name='__main__')
         start.assert_called_once_with()
 

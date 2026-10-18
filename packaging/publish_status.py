@@ -1,4 +1,4 @@
-"""Keep build metadata and the latest successful download on the main branch."""
+"""Publish build results only to the source branch; never cross-write main."""
 
 import hashlib
 import json
@@ -29,8 +29,10 @@ def release_block(report):
 
 
 def publish(report):
-    """Add metadata to the newest main tree; never replace unrelated files."""
-    branch = 'refs/heads/main'
+    """Add metadata to the latest source-branch tree; preserve unrelated files."""
+    branch = os.environ.get('GITHUB_REF', '')
+    if not branch.startswith('refs/heads/'):
+        raise RuntimeError('Derleme kaydı için kaynak dal refs/heads/ biçiminde gerekli.')
     payload = json.dumps(report, ensure_ascii=False, indent=2)+'\n'
     with TemporaryDirectory() as temporary:
         env = {**os.environ, 'GIT_INDEX_FILE': str(Path(temporary)/'index')}
@@ -70,7 +72,7 @@ def main():
     report = {'commit': os.environ['GITHUB_SHA'], 'status': os.environ['BUILD_STATUS'],
               'run_url': f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}',
               'download_url': os.environ.get('ARTIFACT_URL', '')}
-    exe = Path('dist/GOKWORKS.exe')
+    exe = Path('dist/GOKWORKS/GOKWORKS.exe')
     if exe.exists():
         report.update(bytes=exe.stat().st_size, sha256=hashlib.sha256(exe.read_bytes()).hexdigest())
     smoke = Path('dist/windows-smoke.json')

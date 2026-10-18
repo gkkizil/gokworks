@@ -114,7 +114,7 @@ class BoltPage(CalculationPage):
                              ('Çekme sabitken kesme sınırı', result.shear_limit_with_tension_n)):
             rows.append((title, 'Geçerli sınır yok' if force is None else r.force_text(force, result.unit)))
         rows.extend((key, value) for key, value in values.items())
-        rows += [('Sonuç', verdict), ('Yöntem ve kapsam', METHOD)]
+        rows += [('Sonuç', verdict), ('Yöntem', METHOD), ('Kapsam', r.SCOPE)]
         self.present(rows)
         self.diagrams['dimensions'].render_geometry(lambda scene: draw_dimensions(scene, result, self.appearance, 1))
         self.diagrams['load'].render_geometry(lambda scene: draw(scene, result, self.appearance, 1))

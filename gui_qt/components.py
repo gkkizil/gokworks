@@ -245,6 +245,8 @@ class BasePage(QWidget):
             control.setEnabled(not busy)
         if hasattr(self, 'stop_button'):
             self.stop_button.setEnabled(busy)
+        if hasattr(self, 'results'):
+            self.results.clear_button.setEnabled(not busy)
 
     def handle_events(self, events):
         for kind, value in events:
@@ -275,10 +277,12 @@ class ResultsPanel(QWidget):
             self.filter.addItem(LABELS[value], value)
         self.copy_log = button('Günlüğü kopyala', self.copy_log_text)
         self.save = button('Rapor kaydet', self.save_dialog)
+        self.clear_button = button('Temizle', self.reset)
         toolbar.addWidget(self.search, 1)
         toolbar.addWidget(self.filter)
         toolbar.addWidget(self.save)
         toolbar.addWidget(self.copy_log)
+        toolbar.addWidget(self.clear_button)
         self.layout.addLayout(toolbar)
         self.tabs = QTabWidget()
         self.table = configure_view(QTableView())

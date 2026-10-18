@@ -28,6 +28,7 @@ class TableModel(QAbstractTableModel):
         super().__init__(parent)
         self.columns = tuple(columns)
         self.rows = list(rows)
+        self.search_cache = [search_text(' '.join(map(str, row.values()))) for row in self.rows]
         self.editable = set(editable)
         self.positions = {str(row.get('source', i)): i for i, row in enumerate(self.rows)}
 
@@ -72,6 +73,7 @@ class TableModel(QAbstractTableModel):
             return False
         key = self.columns[index.column()].key
         self.rows[index.row()][key] = str(value)
+        self.search_cache[index.row()] = search_text(' '.join(map(str, self.rows[index.row()].values())))
         self.dataChanged.emit(index, index, [Qt.DisplayRole, Qt.EditRole])
         self.edited.emit(index.row(), key, value)
         return True
@@ -79,6 +81,7 @@ class TableModel(QAbstractTableModel):
     def replace(self, rows):
         self.beginResetModel()
         self.rows = list(rows)
+        self.search_cache = [search_text(' '.join(map(str, row.values()))) for row in self.rows]
         self.positions = {str(row.get('source', i)): i for i, row in enumerate(self.rows)}
         self.endResetModel()
 
@@ -89,6 +92,7 @@ class TableModel(QAbstractTableModel):
         start = len(self.rows)
         self.beginInsertRows(QModelIndex(), start, start + len(rows) - 1)
         self.rows.extend(rows)
+        self.search_cache.extend(search_text(' '.join(map(str, row.values()))) for row in rows)
         for i in range(start, len(self.rows)):
             self.positions[str(self.rows[i].get('source', i))] = i
         self.endInsertRows()
@@ -99,6 +103,7 @@ class TableModel(QAbstractTableModel):
             self.append([row])
         else:
             self.rows[position].update(row)
+            self.search_cache[position] = search_text(' '.join(map(str, self.rows[position].values())))
             self.dataChanged.emit(self.index(position, 0), self.index(position, len(self.columns) - 1))
 
 
@@ -108,6 +113,7 @@ class TreeNode:
     parent_node: object = None
     children: list = field(default_factory=list)
     row: int = 0
+    search: str = ''
 
 
 class TreeModel(QAbstractItemModel):
@@ -122,6 +128,7 @@ class TreeModel(QAbstractItemModel):
         self.root = TreeNode({})
         self.nodes = {str(row[key]): TreeNode(dict(row)) for row in rows}
         for node in self.nodes.values():
+            node.search = search_text(' '.join(map(str, node.values.values())))
             parent_node = self.nodes.get(str(node.values.get(parent, '')), self.root)
             if parent_node is node:
                 parent_node = self.root
@@ -185,19 +192,25 @@ class FilterProxy(QSortFilterProxyModel):
         self.setDynamicSortFilter(True)
 
     def set_query(self, query):
+        self.beginFilterChange()
         self.query = search_text(query)
-        self.invalidateFilter()
+        self.endFilterChange(QSortFilterProxyModel.Direction.Rows)
 
     def set_status(self, status):
+        self.beginFilterChange()
         self.status = status
-        self.invalidateFilter()
+        self.endFilterChange(QSortFilterProxyModel.Direction.Rows)
 
     def filterAcceptsRow(self, source_row, source_parent):
         model = self.sourceModel()
-        index = model.index(source_row, 0, source_parent)
-        row = model.data(index, Qt.UserRole) or {}
+        if isinstance(model, TableModel):
+            row = model.rows[source_row]
+            searchable = model.search_cache[source_row]
+        else:
+            node = model.index(source_row, 0, source_parent).internalPointer()
+            row, searchable = node.values, node.search
         return ((self.status is None or row.get('status') == self.status)
-                and (not self.query or self.query in search_text(' '.join(map(str, row.values())))))
+                and (not self.query or self.query in searchable))
 
     def lessThan(self, left, right):
         a, b = left.data(Qt.UserRole + 1), right.data(Qt.UserRole + 1)

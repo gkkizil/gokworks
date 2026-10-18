@@ -10,7 +10,7 @@ from naming import exporter as engine
 from naming.hierarchy import document_rows
 from .. import services
 from ..models import TreeModel, FilterProxy, Column
-from ..components import BasePage, ValueForm, card, scroll, label, button, configure_view, show_details
+from ..components import BasePage, ValueForm, card, scroll, label, button, configure_view, show_details, open_folder
 
 
 class NamingPage(BasePage):
@@ -21,6 +21,7 @@ class NamingPage(BasePage):
         self.overrides = {}
         self.use_active = False
         self.valid_plan = False
+        self.last_report = None
         self.scan_button = self.action('Dosyaları oku', self.scan, primary=True)
         self.save_button = self.action('Paketi oluştur', self.save)
         self.save_button.setEnabled(False)
@@ -61,6 +62,7 @@ class NamingPage(BasePage):
         self.edit_button = button('Seçili adı düzenle', self.edit_selected)
         toolbar.addWidget(self.edit_button)
         toolbar.addWidget(button('Elle girilenleri sıfırla', self.reset_overrides))
+        toolbar.addWidget(button('Hedef klasörünü aç', lambda: open_folder(self.destination.text()) if self.destination.text() else None))
         layout.addLayout(toolbar)
         self.tree = configure_view(QTreeView())
         self.model = TreeModel((Column('Montaj / mevcut dosya adı', 'name'), Column('Yeni dosya adı', 'new_name'),
@@ -226,7 +228,8 @@ class NamingPage(BasePage):
                     self.set_status('Dosyalar okundu; yeni adları kontrol edin.')
                 elif value['state'] == 'saved':
                     self.valid_plan = False
-                    self.set_status('Paket oluşturuldu; yeni dosyaların referansları doğrulandı.')
+                    self.last_report = value.get('report')
+                    self.set_status('Paket oluşturuldu; yeni dosyaların referansları doğrulandı. Rapor: ' + str(self.last_report or self.destination.text()))
                 elif value['state'] == 'cancelled':
                     self.set_status('İşlem durduruldu.')
                 else:

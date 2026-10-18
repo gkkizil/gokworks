@@ -47,7 +47,7 @@ class IsoPage(CalculationPage):
         self.extra_layout.addWidget(self.search)
         self.presets = configure_view(QTreeView())
         self.preset_model = TreeModel((Column('Hazır geçmeler', 'name'),))
-        self.preset_proxy = FilterProxy(self)
+        self.preset_proxy = FilterProxy(self, tree=True)
         self.preset_proxy.setSourceModel(self.preset_model)
         self.presets.setModel(self.preset_proxy)
         self.presets.setMinimumHeight(250)

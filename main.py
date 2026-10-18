@@ -1,6 +1,6 @@
 """GOKWORKS uygulamasını başlatır."""
 
-from pdf.window import main
+from gui_qt.app import main
 
 
 if __name__ == "__main__":

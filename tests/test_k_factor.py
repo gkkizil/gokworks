@@ -8,9 +8,7 @@ from threading import Event
 from types import SimpleNamespace
 from unittest.mock import patch
 
-import customtkinter as ctk
 from support.fixtures import KApplyTestCase
-from support.gui import GuiTestCase
 from support.solidworks import (
     FakeApp,
     FakeAssembly,
@@ -22,7 +20,6 @@ from support.solidworks import (
 )
 
 from k_factor import apply as ap
-from k_factor.window import AUTOMATIC_TAB, RESULTS_TAB
 from k_factor.rules import (
     Recipe,
     ba_from_outside_dimensions,
@@ -460,155 +457,6 @@ class ApplyTests(KApplyTestCase):
         self.com.CoUninitialize.assert_called_once()
 
 
-class KGuiTests(GuiTestCase):
-    def test_navigation_title_preferences_and_theme_persistence(self):
-        self.app.nav_buttons['k_factor'].invoke();self.app.update()
-        self.assertEqual(self.app.mode,'k_factor')
-        self.assertEqual(self.app.nav_buttons['k_factor'].cget('text'),'K faktörü / yarıçap')
-        self.app.k_state['punch'].set('1,5')
-        self.app.k_state['die'].set('17')
-        workspace=self.app.workspace
-        self.app._change_theme('Koyu')
-        self.app._switch_mode('dxf_dwg');self.app._switch_mode('pdf');self.app._switch_mode('k_factor')
-        self.assertIs(self.app.workspace,workspace)
-        self.assertEqual(self.app.k_state['punch'].get(),'1,5')
-        self.assertEqual(self.app.k_state['die'].get(),'17')
-        self.assertEqual(load_settings(self.settings)['kr_punch'],'1,5')
-
-    def test_measured_ba_and_outside_dimensions_calculator(self):
-        self.app._switch_mode('k_factor')
-        self.app._select_k_view(AUTOMATIC_TAB)
-        for key,value in dict(method='BA ölçümü',radius='2',ba='4,39822971502571').items():
-            self.app.k_state[key].set(value)
-        result=self.app._preview_k_calculation()
-        self.assertAlmostEqual(result.k_factor,.4)
-        self.assertIn('Ölçümden K',self.app.k_calculation_label.cget('text'))
-        for key,value in dict(ba='',outside_a='50',outside_b='40',flat='86.3982297150257').items():
-            self.app.k_state[key].set(value)
-        self.assertAlmostEqual(self.app._preview_k_calculation().k_factor,.4)
-
-    def test_invalid_direct_assignment_blocks_worker(self):
-        self.app._switch_mode('k_factor');self.app.k_state['manual_k'].set('nan')
-        with patch('k_factor.window.update_assembly') as worker:
-            self.app.start_button.invoke();self.app.scan_button.invoke()
-        worker.assert_not_called()
-        self.assertFalse(self.app.busy)
-
-    def test_real_preview_and_apply_worker_result_events(self):
-        model=SheetPart()
-        assembly=FakeAssembly('/work/main.sldasm',[FakeComponent(model.path)])
-        app=FakeApp(model,previous=assembly)
-        self.app._switch_mode('k_factor')
-        self.app.k_state['manual_k'].set('0,274')
-        self.app.k_state['manual_r'].set('2')
-        with solidworks_session(ap, app, 'kr'), patch('k_factor.window.update_assembly',wraps=ap.update_assembly) as worker:
-            self.app.scan_button.invoke();self.wait_idle()
-            self.assertTrue(self.app.results[0]['preview'])
-            self.assertIn('K/R uygulanmadı',self.app.status_label.cget('text'))
-            self.assertIn('Montaja K/R uygula',self.app.status_label.cget('text'))
-            self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulamaya hazır')
-            self.assertEqual(self.app.k_widgets['success_caption'].cget('text'),'Hazır')
-            self.app.status_filter.set('Uygulamaya hazır');self.app.update()
-            self.assertEqual(len(self.app.table.get_children()),1)
-            self.assertEqual(model.feature.modify_count,0)
-            self.app.start_button.invoke();self.wait_idle()
-        self.assertEqual([call.kwargs['preview'] for call in worker.call_args_list],[True,False])
-        self.assertFalse(self.app.results[0]['preview'])
-        self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulandı')
-        self.assertEqual(self.app.k_widgets['success_caption'].cget('text'),'Uygulanan')
-        self.assertNotIn('K/R uygulanmadı',self.app.status_label.cget('text'))
-        self.assertEqual(self.app.results[0]['status'],'success',self.app.results[0]['detail'])
-        self.assertEqual(model.states['Default']['k'],.274)
-        self.assertEqual(model.save_count,0)
-        self.assertEqual(self.app.progress.get(),1)
-        self.assertEqual(self.app.nav_buttons['k_factor'].cget('state'),'normal')
-
-        # Reproduce the reported symptom: Apply receives preview-only results.
-        model.states['Default']['k']=.5
-        before=deepcopy(model.states)
-        def preview_instead(*args,**kwargs):
-            kwargs['preview']=True
-            ap.update_assembly(*args,**kwargs)
-        with solidworks_session(ap,app,'kr'), patch('k_factor.window.update_assembly',side_effect=preview_instead):
-            self.app.start_button.invoke();self.wait_idle()
-        self.assertEqual(model.states,before)
-        self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulamaya hazır')
-        self.assertIn('uygulama isteğine yalnız kontrol sonucu geldi',self.app.status_label.cget('text'))
-        self.assertEqual(self.app.result_tabs.get(),'Günlük')
-
-    def test_apply_requested_during_scan_is_preserved_and_stop_cancels_it(self):
-        self.app._switch_mode('k_factor')
-        self.app.k_state['manual_k'].set('0,274')
-        self.app.k_state['manual_r'].set('2')
-        real_worker = ap.update_assembly
-        for outcome in ('apply', 'stop', 'scan_error', 'changed_assembly'):
-            with self.subTest(outcome=outcome):
-                release = Event()
-                calls = []
-                model = SheetPart()
-                model.material_link = outcome == 'scan_error'
-                assembly = FakeAssembly('/work/main.sldasm',[FakeComponent(model.path)])
-                app = FakeApp(model,previous=assembly)
-
-                def gated_worker(*args, **kwargs):
-                    calls.append(kwargs['preview'])
-                    if kwargs['preview']:
-                        release.wait(3)
-                    if not kwargs['preview'] and outcome == 'changed_assembly':
-                        app.ActiveDoc = app.previous = FakeAssembly('/work/other.sldasm',
-                                                                   [FakeComponent(model.path)])
-                    real_worker(*args, **kwargs)
-
-                with solidworks_session(ap, app, 'kr'), patch('k_factor.window.update_assembly',side_effect=gated_worker):
-                    self.app.scan_button.invoke()
-                    self.assertEqual(self.app.start_button.cget('state'),'normal')
-                    self.app.start_button.invoke()
-                    self.assertIn('pending_apply',self.app.k_widgets)
-                    self.assertEqual(self.app.start_button.cget('state'),'disabled')
-                    if outcome == 'stop':
-                        self.app.stop_button.invoke()
-                    release.set()
-                    self.wait_idle()
-                self.assertNotIn('pending_apply',self.app.k_widgets)
-                if outcome == 'stop':
-                    self.assertEqual(calls,[True])
-                    self.assertEqual(model.feature.modify_count,0)
-                    self.assertIn('Durduruldu',self.app.status_label.cget('text'))
-                elif outcome == 'scan_error':
-                    self.assertEqual(calls,[True])
-                    self.assertEqual(model.feature.modify_count,0)
-                    self.assertIn('K/R uygulanmadı',self.app.status_label.cget('text'))
-                elif outcome == 'changed_assembly':
-                    self.assertEqual(calls, [True, False])
-                    self.assertEqual(model.feature.modify_count, 0)
-                    self.assertIn('Kontrolden sonra montaj', self.app.status_label.cget('text'))
-                    self.assertEqual(self.app.results, [])
-                else:
-                    self.assertEqual(calls,[True,False])
-                    self.assertEqual(len(self.app.results),1)
-                    self.assertFalse(self.app.results[0]['preview'])
-                    self.assertEqual(self.app.table.item('file_0','values')[1],'Uygulandı')
-                    self.assertEqual(model.states['Default']['k'],.274)
-                    self.assertNotIn('Montaj kontrolü başladı',self.app.log_box.get('1.0','end'))
-
-    def test_small_large_and_scaled_layout_in_both_themes(self):
-        self.app._switch_mode('k_factor')
-        self.app._select_k_view(RESULTS_TAB)
-        try:
-            for size,scale in (('1000x690',1),('1240x860',1),('1400x900',1.25)):
-                ctk.set_widget_scaling(scale)
-                self.app.geometry(size)
-                for theme in ('Açık','Koyu'):
-                    with self.subTest(size=size,theme=theme):
-                        self.app._change_theme(theme)
-                        self.wait_layout()
-                        for widget in (self.app.start_button,self.app.stop_button,self.app.scan_button,
-                                       self.app.open_button,self.app.table,
-                                       self.app.status_label,self.app.nav_buttons['k_factor']):
-                            self.assert_inside(widget)
-                        self.assertGreater(self.app.table.winfo_height(),80)
-        finally:
-            ctk.set_widget_scaling(1)
 
 
 if __name__=='__main__': unittest.main()

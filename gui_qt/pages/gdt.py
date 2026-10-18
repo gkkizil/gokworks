@@ -36,7 +36,7 @@ class GdtPage(CalculationPage):
         rows += [dict(id=item.key, parent=item.group, name=f'{item.name} · {item.english}' + (' (eski)' if not item.active else ''), key=item.key,
                       example=item.example) for item in CATALOG]
         self.catalog_model.replace(rows)
-        self.catalog_proxy = FilterProxy(self)
+        self.catalog_proxy = FilterProxy(self, tree=True)
         self.catalog_proxy.setSourceModel(self.catalog_model)
         self.catalog.setModel(self.catalog_proxy)
         self.catalog.expandAll()
