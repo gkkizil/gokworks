@@ -1,10 +1,10 @@
 {
-  "commit": "9343f00a4c6f4124a548bc5cb4b5b5ca08bdc346",
+  "commit": "0de14d8bfa1cb0e4e285e5268549b78ae679aeee",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39023882637",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39023882637/artifacts/12097314894",
-  "bytes": 42346002,
-  "sha256": "6c077027453edf478e7d05a71b36f3d2d0544ae907586c14cdef3d60c3a7dc5b",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39127520707",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39127520707/artifacts/12136434427",
+  "bytes": 42358532,
+  "sha256": "cb293d56d39df473562fd9297b2dda5b0f2ad124cd874485ea36cbf65736c4ce",
   "smoke": {
     "status": "passed",
     "platform": "win32",
@@ -29,55 +29,56 @@
     "navigation_samples": [
       {
         "mode": "pdf",
-        "click_and_events_ms": 0.04340000000979671
+        "click_and_events_ms": 0.06040000005214097
       },
       {
         "mode": "dxf_dwg",
-        "click_and_events_ms": 52.17719999998849
+        "click_and_events_ms": 135.11570000002848
       },
       {
         "mode": "k_factor",
-        "click_and_events_ms": 39.925799999991796
+        "click_and_events_ms": 85.84630000001425
       },
       {
         "mode": "iso_fits",
-        "click_and_events_ms": 47.4365999999975
+        "click_and_events_ms": 94.88400000003594
       },
       {
         "mode": "geometric_tolerances",
-        "click_and_events_ms": 42.19540000002553
+        "click_and_events_ms": 88.13259999999445
       },
       {
         "mode": "bom",
-        "click_and_events_ms": 29.79529999998931
+        "click_and_events_ms": 63.60530000000608
       },
       {
         "mode": "bolt",
-        "click_and_events_ms": 50.494600000007495
+        "click_and_events_ms": 101.98009999999158
       },
       {
         "mode": "naming",
-        "click_and_events_ms": 35.71629999999004
+        "click_and_events_ms": 73.0034000000046
       },
       {
         "mode": "weight",
-        "click_and_events_ms": 64.53859999999167
+        "click_and_events_ms": 127.49220000000605
       }
     ],
     "resize_samples": [
       {
         "geometry": "1000x690",
-        "resize_and_events_ms": 350.93450000002235
+        "resize_and_events_ms": 629.2071000000306
       },
       {
         "geometry": "1280x800",
-        "resize_and_events_ms": 427.24340000000893
+        "resize_and_events_ms": 783.9779999999905
       },
       {
         "geometry": "1100x740",
-        "resize_and_events_ms": 340.5574999999885
+        "resize_and_events_ms": 537.6464999999939
       }
     ],
+    "kr_assignment_engine": "k_factor.sheetmetal_parameters",
     "solidworks_connection_tested": false
   }
 }
