@@ -100,10 +100,9 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 ## K faktörü / yarıçap
 
-Yeni [bağımsız C# → Python K/R denemesi](k_factor/standalone/README.md), açık
-bir parçada okuma, yazma, geri okuma ve eski değere dönüşü iki ayrı motorla
-karşılaştırır. Mevcut menüden bağımsızdır; gerçek SolidWorks doğrulaması
-henüz tamamlanmamıştır.
+K/R ataması GOKWORKS içindeki **K faktörü / yarıçap → Manuel K / R** menüsünde
+çalışır. Ana uygulama kendi parametre düzenleyicisini kullanır; ayrı bir K/R
+programı, C# yardımcı EXE veya .NET kurulumu gerekmez.
 
 K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
 

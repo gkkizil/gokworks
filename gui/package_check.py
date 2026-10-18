@@ -49,6 +49,7 @@ def run(output):
         import ezdxf
         import openpyxl
         from bolt.rules import calculate
+        from k_factor import sheetmetal_parameters
         from pdf.window import GokworksPdfApp
         with TemporaryDirectory() as directory:
             app = GokworksPdfApp(settings_path=Path(directory)/'settings.json', prepare_navigation=True)
@@ -115,6 +116,7 @@ def run(output):
                           branding_themes=['light', 'dark'],
                           windows_icon_theme_check='passed' if icons else 'not_run',
                           navigation_samples=navigation, resize_samples=resize,
+                          kr_assignment_engine=sheetmetal_parameters.__name__,
                           solidworks_connection_tested=False)
             app._on_close()
             app = None

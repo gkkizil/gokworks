@@ -1,4 +1,0 @@
-customtkinter==6.0.0
-Pillow==12.1.0
-pywin32==312
-pyinstaller==6.16.0

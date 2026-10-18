@@ -20,6 +20,7 @@ def main():
             '--collect-data', 'customtkinter', '--collect-data', 'ezdxf',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
+            '--exclude-module', 'k_factor.standalone',
             '--add-data', f'{ROOT / "gui/assets/GOK_logo_light_UI_1024.png"};gui/assets',
             '--add-data', f'{ROOT / "gui/assets/GOK_logo_dark_UI_1024.png"};gui/assets',
             '--add-data', f'{ROOT / "gui/assets/GOK_app_windows.ico"};gui/assets',
