@@ -1,0 +1,121 @@
+"""PDF and sheet-metal exports using the existing file-safe service engines."""
+
+from pathlib import Path
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QSplitter, QWidget, QVBoxLayout
+
+from pdf.exporter import export_drawings
+from dxf_dwg.exporter import export_parts
+from .. import services
+from ..components import BasePage, ValueForm, ResultsPanel, card, scroll, button, open_folder
+
+
+class ExportPage(BasePage):
+    def __init__(self, context, mode):
+        self.mode = mode
+        pdf = mode == 'pdf'
+        super().__init__(context, 'PDF aktarımı' if pdf else 'DXF / DWG aktarımı',
+                         'Teknik resimlerin tüm sayfalarını tek PDF dosyasına aktarın.' if pdf else
+                         'Sac parçalarının açınımlarını kalınlıklarına göre düzenleyin.')
+        self.scan_button = self.action('Klasörü tara', self.scan)
+        self.start_button = self.action('Aktarımı başlat', self.start_export, primary=True)
+        self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
+        self.stop_button.setEnabled(False)
+        self.splitter = QSplitter(Qt.Vertical)
+        panel, body = card('Kaynak ve çıktı')
+        self.form = ValueForm(self.settings, mode + '_')
+        self.source = self.form.path('source', 'Kaynak klasör')
+        self.output = self.form.path('output', 'Çıktı klasörü')
+        self.form.check('recursive', 'Alt klasörleri tara', True)
+        self.form.check('overwrite', 'Mevcut çıktıların üzerine yaz', False)
+        if not pdf:
+            self.form.combo('format', 'Çıktı türü', ('DXF', 'DWG'), 'DXF')
+            self.form.check('bend_lines', 'Büküm çizgilerini ekle', False)
+            self.form.check('group_by_thickness', 'Sac kalınlığına göre klasörle', True)
+        body.addWidget(self.form)
+        body.addWidget(button('Çıktı klasörünü aç', lambda: open_folder(self.output.text()) if self.output.text() else None))
+        self.controls.append(self.form)
+        self.results = ResultsPanel()
+        self.splitter.addWidget(scroll(panel))
+        self.splitter.addWidget(self.results)
+        self.splitter.setStretchFactor(0, 0)
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setSizes([235 if pdf else 330, 440])
+        self.layout.addWidget(self.splitter, 1)
+        self.finish_layout()
+
+    def validate(self, *, output=False):
+        values = self.form.values()
+        if not values['source'].strip() or not Path(values['source']).is_dir():
+            raise ValueError('Kaynak klasörü bulunamadı. Bir klasör seçin.')
+        if output and (not values['output'].strip() or Path(values['output']).exists() and not Path(values['output']).is_dir()):
+            raise ValueError('Geçerli bir çıktı klasörü seçin.')
+        return values
+
+    def scan(self):
+        if not self.can_start():
+            return
+        try:
+            values = self.validate()
+        except ValueError as error:
+            return self.set_status(error, True)
+        self.results.reset()
+        mode = self.mode
+        self.jobs.start(self, lambda sink, stop: services.scan_files(mode, values['source'], values['recursive'], sink, stop))
+        self.set_status('Dosyalar taranıyor…')
+
+    def start_export(self):
+        if not self.can_start():
+            return
+        try:
+            values = self.validate(output=True)
+        except ValueError as error:
+            return self.set_status(error, True)
+        self.settings.flush()
+        self.results.reset()
+        mode = self.mode
+
+        def operation(sink, stop):
+            args = (values['source'], values['output'], values['recursive'], values['overwrite'], sink, stop)
+            if mode == 'pdf':
+                export_drawings(*args)
+            else:
+                export_parts(*args, formats=(values['format'].lower(),), bend_lines=values['bend_lines'],
+                             group_by_thickness=values['group_by_thickness'])
+
+        self.jobs.start(self, operation)
+        self.set_status('Aktarım hazırlanıyor…')
+
+    def handle_events(self, events):
+        for kind, value in events:
+            if kind == 'files':
+                self.results.files(value)
+            elif kind == 'current':
+                self.results.model.upsert(dict(source=value, status='running'))
+            elif kind == 'result':
+                if self.mode == 'dxf_dwg' and value.get('thickness_mm') is not None:
+                    value = dict(value, detail=f"{value['thickness_mm']:g} mm · {value.get('quantity', 1)} adet · {value['detail']}")
+                self.results.result(value)
+            elif kind in ('phase', 'log'):
+                self.set_status(value)
+                if kind == 'log':
+                    self.results.append_log(value)
+            elif kind == 'progress':
+                self.progressChanged.emit(*value)
+            elif kind == 'done':
+                state = value.get('state')
+                if state == 'preview':
+                    self.set_status(f"Tarama tamamlandı · {value['total']} dosya. Henüz aktarım yapılmadı.")
+                elif state == 'error':
+                    self.set_status(value.get('error', 'Aktarım tamamlanamadı.'), True)
+                    self.results.append_log(value.get('error', ''))
+                    self.results.tabs.setCurrentIndex(1)
+                elif state == 'cancelled':
+                    self.set_status('İşlem durduruldu; tamamlanan çıktılar korundu.')
+                elif state == 'empty':
+                    self.set_status('Kaynak klasörde uygun dosya bulunamadı.')
+                else:
+                    self.set_status(f"Tamamlandı · {value.get('succeeded', 0)} başarılı, {value.get('skipped', 0)} atlanan, {value.get('failed', 0)} hatalı")
+            elif kind == 'job_error':
+                self.results.append_log(value['error'])
+                self.set_status(value['error'], True)
