@@ -86,7 +86,8 @@ def test_settings_restart_preserves_all_modules_and_unknown_values(qtbot, tmp_pa
     original = {'appearance': 'dark', 'pdf_source': '/old/pdf', 'dxf_dwg_format': 'DWG',
                 'kr_manual_thickness': '1,5', 'kr_manual_k': '0,274', 'kr_manual_r': '1,5',
                 'kr_manual_rows': '[{"thickness":"2","k":"0,33","r":"2"}]',
-                'weight_material_group': 'Kalıp Çelikleri', 'weight_material': '1.2379',
+                'weight_material_group': 'Genel', 'weight_material': 'Pirinç',
+                'bolt_unit': 'kgf', 'bolt_tension': '100',
                 'naming_parent': str(tmp_path), 'naming_package': 'Yeni', 'future': {'keep': 1}}
     path.write_text(json.dumps(original))
     w = MainWindow(path)
@@ -95,7 +96,9 @@ def test_settings_restart_preserves_all_modules_and_unknown_values(qtbot, tmp_pa
     assert w.pages['dxf_dwg'].form.value('format') == 'DWG'
     assert w.pages['k_factor'].recipe().rows[0].k_factor == .274
     assert len(w.pages['k_factor'].recipe().rows) == 2
-    assert w.pages['weight'].result.material == '1.2379'
+    assert w.pages['weight'].result.material == 'Pirinç C23000'
+    assert w.pages['weight'].result.density == 8750
+    assert w.pages['bolt'].result.tension_n == pytest.approx(980.665)
     assert w.pages['naming'].destination.text() == str(tmp_path/'Yeni')
     w.navigate('weight')
     w.set_theme('light')

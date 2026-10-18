@@ -30,5 +30,37 @@
   {
     "file": "QtBase-zlib_qt_attribution.json",
     "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/zlib/qt_attribution.json"
+  },
+  {
+    "file": "QtBase-harfbuzz-ng-COPYING",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/harfbuzz-ng/COPYING"
+  },
+  {
+    "file": "QtBase-zlib-LICENSE",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/zlib/LICENSE"
+  },
+  {
+    "file": "QtBase-freetype-LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/freetype/LICENSE.txt"
+  },
+  {
+    "file": "QtBase-freetype-ZLIB-LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/freetype/ZLIB-LICENSE.txt"
+  },
+  {
+    "file": "QtBase-freetype-BDF-LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/freetype/BDF-LICENSE.txt"
+  },
+  {
+    "file": "QtBase-freetype-PCF-LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/freetype/PCF-LICENSE.txt"
+  },
+  {
+    "file": "QtBase-pcre2-LICENCE.md",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/pcre2/LICENCE.md"
+  },
+  {
+    "file": "QtBase-pcre2-LICENSE-SLJIT",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/pcre2/LICENSE-SLJIT"
   }
 ]

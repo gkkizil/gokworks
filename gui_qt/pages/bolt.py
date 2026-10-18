@@ -18,6 +18,8 @@ METHOD = ('As = π/4 × (d − 0,938194P)²\n'
 
 class BoltPage(CalculationPage):
     def __init__(self, context):
+        if context.settings.get('bolt_unit') == 'kgf':
+            context.settings.set('bolt_unit', 'kg')
         super().__init__(context, 'Cıvata hesabı', 'Metrik ölçü, kalite ve yük ile statik dayanım kontrolü.', 'bolt_')
         self.action('Hesap yöntemi', lambda: show_details(self, 'Cıvata hesabı', METHOD))
         f = self.form
