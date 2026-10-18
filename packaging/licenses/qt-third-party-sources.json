@@ -62,5 +62,13 @@
   {
     "file": "QtBase-pcre2-LICENSE-SLJIT",
     "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/pcre2/LICENSE-SLJIT"
+  },
+  {
+    "file": "QtBase-FreeType-FTL.TXT",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/freetype/docs/FTL.TXT"
+  },
+  {
+    "file": "QtBase-FreeType-GPLv2.TXT",
+    "url": "https://raw.githubusercontent.com/qt/qtbase/6.10.3/src/3rdparty/freetype/docs/GPLv2.TXT"
   }
 ]

@@ -75,8 +75,8 @@ Qt testleri gerçek widget/model/event-loop kullanır; yalnız CAD sınırı sah
 nesnelerle kontrol edilir. Eski widget iç yapısına bağlı iddialar yerine kullanıcı
 davranışı sınanır. Ana suite komutu `python -m pytest -q`.
 
-Son Linux kontrolü: **519 test geçti** (410 mevcut motor/ayar testi + 109 Qt
-senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 94,02 s.
+Son Linux kontrolü: **520 test geçti** (410 mevcut motor/ayar testi + 110 Qt
+senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 94,84 s.
 131 uyarı ezdxf/pyparsing’in mevcut API kullanımlarına aittir; hata olarak gizlenmedi.
 [Makine tarafından okunabilir sonuç](qt-migration/validation.json),
 [komut sonucu](qt-migration/final-test-summary.txt),
@@ -89,7 +89,7 @@ senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 94,02 s.
 | Menü geçişi ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 19,81 / 30,82 ms |
 | Resize ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 11,40 / 24,62 ms |
 | 50.000 satır yükleme / filtreleme | aynı ölçüm yok | 46,68 / 111,86 ms |
-| Qt açılışı (tüm sayfalar dahil) | aynı ölçüm yok | 1.209 ms |
+| Qt pencere oluşturma + ilk çizim (import sonrası) | aynı ölçüm yok | 1.209 ms |
 
 Karşılaştırma aynı Linux/Xvfb/Python 3.13 ortamında, aynı 64 adımlı
 navigasyon/resize dizisiyle yapıldı. Grafik sunucusuna verilen işlemler ölçülür;
@@ -175,3 +175,12 @@ finished slotu içinde başlar; iki iş arasında arayüze yanlış bir boşta d
 sunulmaz. Kapatma kabul edildiyse bekleyen atama başlamaz. İş bittiği anda
 kapatma ve sonraki CAD yazısını engelleme senaryosu eklendi. Windows testleri
 artık test adını ve 60 saniyede takılan testin thread dökümünü kaydeder.
+
+Sonraki Windows koşusunda K/R/kapatma dahil işlev testleri geçti; yalnız model
+performans testindeki 15 s sınırı 17,29 s birleşik süreyle aşıldı. Bu süre,
+uygulamada bulunmayan QAbstractItemModelTester’ın 50.000 satırı kapsamlı
+doğrulamasını da içeriyordu. Yapı denetimi aynı veriyle korunur; süre sınırı
+gevşetilmeden performans ayrı, denetleyici bağlanmamış üretim modellerinde
+ölçülür. Hedefli Linux testi yeniden geçti. Windows’ta Unix hard-link yayınlama
+yoluna ait mevcut bir test platform gerekçesiyle atlanır; atlama sonuçtan ayrı
+raporlanır.

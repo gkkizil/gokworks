@@ -577,13 +577,20 @@ def test_models_are_valid_and_large_data_creates_no_row_widgets(qapp):
     testers = [QAbstractItemModelTester(model, QAbstractItemModelTester.FailureReportingMode.Warning) for model in (table,tree)]
     before = len(QApplication.allWidgets())
     rows = [dict(id=str(i),parent=str((i-1)//5) if i else '',name=f'Parça {i}',mass=i/10) for i in range(50000)]
-    start = perf_counter()
     table.replace(rows)
     tree.replace(rows)
     assert table.rowCount() == 50000 and tree.rowCount() == 1
     assert len(QApplication.allWidgets()) == before
+    # The attached Qt diagnostic tester traverses the complete model on reset.
+    # Keep that correctness audit, but measure production models separately:
+    # the application does not attach QAbstractItemModelTester to user data.
+    runtime_table = TableModel(columns)
+    runtime_tree = TreeModel(columns)
+    start = perf_counter()
+    runtime_table.replace(rows)
+    runtime_tree.replace(rows)
     proxy = FilterProxy(tree=True)
-    proxy.setSourceModel(tree)
+    proxy.setSourceModel(runtime_tree)
     proxy.set_query('Parça 49999')
     assert proxy.rowCount() == 1
     assert perf_counter()-start < 15

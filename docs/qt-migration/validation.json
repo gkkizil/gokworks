@@ -71,17 +71,19 @@
   "linux": {
     "framework": "PySide6 6.10.3 / Qt Widgets",
     "business_tests": 410,
-    "qt_cases": 109,
-    "passed": 519,
+    "qt_cases": 110,
+    "passed": 520,
     "failed": 0,
     "skipped": 0,
     "subtests_passed": 878,
-    "seconds": 94.02,
+    "seconds": 94.84,
     "command": "QT_QPA_PLATFORM=offscreen python -m pytest -q",
     "backend_byte_identical_files": 38
   },
   "windows": {
-    "state": "building"
+    "state": "building",
+    "source_commit": "3144fefc5e6b71b4139ee4f5208b6359535a70d7",
+    "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39147655499"
   },
   "limitations": [
     "No live SolidWorks server in Linux",

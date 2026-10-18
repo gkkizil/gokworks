@@ -4,6 +4,10 @@ Bu inceleme 18 Ekim 2026 tarihli geliştirme dalına aittir. Yeni arayüz kodu
 proje için yazılmıştır; üçüncü taraf hazır arayüz veya ücretli ikon kopyalanmadı.
 GÖK görselleri kullanıcı tarafından sağlanan mevcut marka varlıklarıdır.
 
+Qt’nin üçüncü taraf font bileşeni için bildirim: Portions of this software are
+copyright © The FreeType Project (https://freetype.org). All rights reserved.
+FreeType için dağıtıma eklenen FTL koşulları esas alınır; metin lisans klasöründedir.
+
 | Bileşen | Sürüm | Lisans / kullanım |
 |---|---|---|
 | PySide6, Shiboken6 | 6.10.3 | LGPL-3.0-only veya GPL seçenekleri / ticari Qt lisansı. Bu paket LGPL yolunu kullanır. |

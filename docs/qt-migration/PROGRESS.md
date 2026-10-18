@@ -24,8 +24,8 @@ byte olarak aynı kaldı. Büyük isimlendirme planları da worker’a taşınd�
 
 ## Aşama 7 — doğrulama
 
-Linux: 519 test geçti, 878 alt senaryo geçti. Önceki Tk testlerinden 210 yöntem
-arşivde aynen korunur; 109 Qt senaryosu bunların davranış karşılıklarını kapsar.
+Linux: 520 test geçti, 878 alt senaryo geçti. Önceki Tk testlerinden 210 yöntem
+arşivde aynen korunur; 110 Qt senaryosu bunların davranış karşılıklarını kapsar.
 Windows ilk denemesi başarısız oldu; ilk kayıtta aşama ayrıntısı yoktu. Gelişmiş test günlükleri
 ve native EXE/DPI kontrolleriyle yeniden derleniyor. Canlı SolidWorks testi yok.
 

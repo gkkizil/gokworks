@@ -197,8 +197,8 @@ DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cach
   python -m pytest -q
 ```
 
-Qt migrasyonunda Linux üzerinde **519 test ve 878 alt senaryo geçti**: 410
-mevcut motor/ayar regresyonu ve 109 Qt arayüz senaryosu. Dosya koruma,
+Qt migrasyonunda Linux üzerinde **520 test ve 878 alt senaryo geçti**: 410
+mevcut motor/ayar regresyonu ve 110 Qt arayüz senaryosu. Dosya koruma,
 konfigürasyon, geri alma, iptal, menü geçişleri, gerçek Qt modelleri, 50 bin
 satır, birim dönüşümleri ve teknik şemalar kontrol edilir. SolidWorks sınırı
 test nesneleriyle sınanır; gerçek SolidWorks doğrulaması olarak sunulmaz.
