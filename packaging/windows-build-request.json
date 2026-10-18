@@ -1,5 +1,5 @@
 {
-  "request_id": "6733e9b9-9dc7-4568-bab5-7baab83e393c",
-  "requested_at": "2026-10-17T10:09:59.352569+00:00",
-  "reason": "User-requested full GOKWORKS Windows EXE after Product Design fluency review: event-loop-safe controls, root resize filtering, and frozen navigation/resize checks on main."
+  "request_id": "ca734715-d56c-4220-a7b1-2dbe85fea0bc",
+  "requested_at": "2026-10-18T12:29:55.113584+00:00",
+  "reason": "User-requested full GOKWORKS Windows EXE from main with direct embedded SheetMetal K/R assignment; separate K/R application excluded."
 }
