@@ -43,6 +43,20 @@ geometri arayüzüdür; Tk/Tcl nesnesi veya bitmap ekran kopyası kullanılmaz.
 | Cıvata | M3–M39, kalite 4.6–12.9, kaba/ince adım ve standart etiketi, çekme/kesme/birleşik yük, kg/N/kN fiziksel dönüşümü, emniyet/adet/kesit/düzlem, yük ve ölçü şeması, kapsamlı sonuç raporu. |
 | Ağırlık | 19 kesit, malzeme grupları ve kalıp çeliği açıklamaları, değiştirilemeyen yoğunluk, mm/cm/m dönüşümü, ölçüler/katalog alanı, adet, parça/toplam ağırlık, kesit şeması ve rapor. |
 
+## Değiştirilen dosyalar
+
+[Tam değişiklik listesi](qt-migration/changed-files.txt) Git başlangıç commit’ine
+göre tutulur. Yeni uygulama `gui_qt/` içindedir: ana pencere, ayarlar, worker,
+tema/ikonlar, modeller, ortak bileşenler, vektör sahnesi ve dokuz sayfa.
+`main.py`, `pdf/window.py`, `gui/package_check.py` başlatma/kontrol yolları Qt’ye
+yönlendirildi. Kullanılmayan eski yedi `window.py` mixin’i ve beş Tk GUI yardımcısı
+kaldırıldı; asılları `5f01e53` geçmişinde korunur.
+
+`requirements.txt` / `requirements-dev.txt`, `pytest.ini`, Windows build ve sonuç
+yayınlama betikleri/iş akışı güncellendi. İş mantığı testleri yerinde korunurken
+eski GUI testlerinin asılları arşive taşındı; `tests/test_qt_workflows.py` eklendi.
+README, migrasyon/test/performans kanıtları ve lisans bildirimleri güncellendi.
+
 ## Test ve ölçümler
 
 Başlangıç envanteri: 140 izlenen Python dosyası, 620 test yöntemi.
@@ -61,8 +75,32 @@ Qt testleri gerçek widget/model/event-loop kullanır; yalnız CAD sınırı sah
 nesnelerle kontrol edilir. Eski widget iç yapısına bağlı iddialar yerine kullanıcı
 davranışı sınanır. Ana suite komutu `python -m pytest -q`.
 
-İlk doğrulama: **410 mevcut motor testi geçti; 106 Qt akış testi geçti**.
-Son bütünleşik sonuç ve performans kanıtı bu rapora derleme sonrasında eklenir.
+Son Linux kontrolü: **518 test geçti** (410 mevcut motor/ayar testi + 108 Qt
+senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 92,36 s.
+131 uyarı ezdxf/pyparsing’in mevcut API kullanımlarına aittir; hata olarak gizlenmedi.
+[Makine tarafından okunabilir sonuç](qt-migration/validation.json),
+[komut sonucu](qt-migration/final-test-summary.txt),
+[38 dosyanın SHA256 karşılaştırması](qt-migration/engine-integrity.json),
+[Qt ekranları](qt-migration/screenshots).
+
+| Linux/Xvfb ölçümü | Önceki Tk sürümü | Qt sürümü |
+|---|---:|---:|
+| Aynı profilli tekrar: 18 menü tıklaması + 46 resize | 1,850 s | 0,668 s |
+| Menü geçişi ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 19,81 / 30,82 ms |
+| Resize ortanca / en uzun | aynı ölçüm ayrı tutulmadı | 11,40 / 24,62 ms |
+| 50.000 satır yükleme / filtreleme | aynı ölçüm yok | 46,68 / 111,86 ms |
+| Qt açılışı (tüm sayfalar dahil) | aynı ölçüm yok | 1.209 ms |
+
+Karşılaştırma aynı Linux/Xvfb/Python 3.13 ortamında, aynı 64 adımlı
+navigasyon/resize dizisiyle yapıldı. Grafik sunucusuna verilen işlemler ölçülür;
+insanın algıladığı ekran gecikmesi veya fiziksel monitör FPS’i değildir. Profil
+koşulları yükü etkiler; Windows sonucu ayrıca raporlanır. Qt ölçümleri
+[qt-linux-smoke.json](qt-migration/qt-linux-smoke.json) ve profillerde bulunur.
+
+20 ardışık worker yaşam döngüsünde çalışan QThread kalmadığı, tekrarlanan
+navigasyonda sayfa nesnelerinin aynı kaldığı, 50.000 satır eklenmesinin yeni
+widget oluşturmadığı test edildi. Bu kontroller uzun süreli işletim sistemi
+bellek sızıntısı analizinin yerine geçmez.
 
 ## Windows paketleme
 
@@ -103,3 +141,12 @@ Kod imzası yoktur. Ticari dağıtım için LGPL/EULA ve diğer bildirimler
 Eski bağımsız `k_factor/standalone` denemesi tarihsel kaynaktır; yeni uygulamanın
 çalışma veya paketleme yolunda bulunmaz. Eski rapor araçları önceki commit’e ait
 kanıtları üretir; güncel Qt denetimi ayrı araçla yapılır.
+
+## Bulut geliştirme ortamı
+
+Kurulum/başlangıç talimatları cloud-environment-onboarding:setup ile Qt’ye
+güncellendi ve taslak olarak kaydedildi. Python 3.13 venv yenilemesi, pinned
+bağımlılıklar, başsız gerçek Qt açılış kontrolü ve test komutu çalıştırıldı.
+Ağ/secret/depo üyeliği değiştirilmedi. Bu taslak kaydı ortamı yayımlamaz;
+gelecek görevler için kullanıcı ortam ayarlarından kaydedip yayımlamalıdır.
+Çalışan Xvfb süreci snapshot ile taşınmaz; başlangıç talimatı bunu açıklar.

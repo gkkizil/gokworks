@@ -1,0 +1,124 @@
+M	.github/workflows/windows-exe.yml
+M	.gitignore
+M	README.md
+D	bolt/window.py
+D	bom/window.py
+A	docs/QT_MIGRATION_REPORT.md
+A	docs/THIRD_PARTY_NOTICES.md
+A	docs/qt-migration/PROGRESS.md
+A	docs/qt-migration/engine-integrity.json
+A	docs/qt-migration/final-test-summary.txt
+A	docs/qt-migration/gui-test-mapping.json
+A	docs/qt-migration/inventory.json
+A	docs/qt-migration/qt-linux-smoke.json
+A	docs/qt-migration/qt-profile.txt
+A	docs/qt-migration/qt-replay.json
+A	docs/qt-migration/screenshots/bolt-dark.png
+A	docs/qt-migration/screenshots/bolt-light.png
+A	docs/qt-migration/screenshots/bom-dark.png
+A	docs/qt-migration/screenshots/dxf_dwg-dark.png
+A	docs/qt-migration/screenshots/geometric_tolerances-dark.png
+A	docs/qt-migration/screenshots/iso_fits-dark.png
+A	docs/qt-migration/screenshots/k_factor-dark.png
+A	docs/qt-migration/screenshots/naming-dark.png
+A	docs/qt-migration/screenshots/pdf-dark.png
+A	docs/qt-migration/screenshots/weight-compact.png
+A	docs/qt-migration/screenshots/weight-dark.png
+A	docs/qt-migration/tk-profile.txt
+A	docs/qt-migration/validation.json
+A	docs/report-tools/audit_qt.py
+D	geometric_tolerances/window.py
+D	gui/layout.py
+D	gui/motion.py
+M	gui/package_check.py
+D	gui/rendering.py
+D	gui/startup.py
+D	gui/widgets.py
+A	gui_qt/__init__.py
+A	gui_qt/__main__.py
+A	gui_qt/app.py
+A	gui_qt/components.py
+A	gui_qt/diagrams.py
+A	gui_qt/icons.py
+A	gui_qt/models.py
+A	gui_qt/package_check.py
+A	gui_qt/pages/__init__.py
+A	gui_qt/pages/bolt.py
+A	gui_qt/pages/bom.py
+A	gui_qt/pages/calculations.py
+A	gui_qt/pages/export.py
+A	gui_qt/pages/gdt.py
+A	gui_qt/pages/iso.py
+A	gui_qt/pages/kr.py
+A	gui_qt/pages/naming.py
+A	gui_qt/pages/weight.py
+A	gui_qt/services.py
+A	gui_qt/settings.py
+A	gui_qt/theme.py
+A	gui_qt/workers.py
+D	iso_fits/window.py
+D	k_factor/window.py
+M	main.py
+D	naming/window.py
+M	packaging/build_windows.py
+A	packaging/licenses/GPL-3.0-only.txt
+A	packaging/licenses/LGPL-3.0-only.txt
+A	packaging/licenses/Pillow-LICENSE.txt
+A	packaging/licenses/PySide6-LGPL.txt
+A	packaging/licenses/Qt-LGPL-3.0-only.txt
+A	packaging/licenses/Qt-LicenseRef-Qt-Commercial.txt
+A	packaging/licenses/QtBase-double-conversion_LICENSE
+A	packaging/licenses/QtBase-harfbuzz-ng_qt_attribution.json
+A	packaging/licenses/QtBase-libpng_LICENSE
+A	packaging/licenses/QtBase-libpng_qt_attribution.json
+A	packaging/licenses/QtBase-md4c_LICENSE.md
+A	packaging/licenses/QtBase-rfc6234_LICENSE
+A	packaging/licenses/QtBase-tinycbor_LICENSE
+A	packaging/licenses/QtBase-zlib_qt_attribution.json
+A	packaging/licenses/ezdxf-LICENSE.txt
+A	packaging/licenses/openpyxl-MIT.txt
+A	packaging/licenses/pywin32-LICENSE.txt
+A	packaging/licenses/qt-third-party-sources.json
+M	packaging/publish_status.py
+M	packaging/windows-build-request.json
+M	packaging/windows-build-status.json
+M	pdf/window.py
+A	pytest.ini
+A	requirements-dev.txt
+M	requirements.txt
+A	tests/legacy_tk/README.md
+R100	tests/test_bolt_window.py	tests/legacy_tk/test_bolt_window.py
+R100	tests/test_bom_window.py	tests/legacy_tk/test_bom_window.py
+R100	tests/test_export_window.py	tests/legacy_tk/test_export_window.py
+R100	tests/test_file_list_rendering.py	tests/legacy_tk/test_file_list_rendering.py
+R100	tests/test_final_gui.py	tests/legacy_tk/test_final_gui.py
+A	tests/legacy_tk/test_geometric_tolerances.py
+R100	tests/test_gui_audit.py	tests/legacy_tk/test_gui_audit.py
+R100	tests/test_gui_flow.py	tests/legacy_tk/test_gui_flow.py
+A	tests/legacy_tk/test_iso_fits.py
+A	tests/legacy_tk/test_iso_matching.py
+R100	tests/test_iso_section.py	tests/legacy_tk/test_iso_section.py
+A	tests/legacy_tk/test_iso_tolerance_audit.py
+A	tests/legacy_tk/test_k_factor.py
+R100	tests/test_kr_assignment_window.py	tests/legacy_tk/test_kr_assignment_window.py
+A	tests/legacy_tk/test_manual_iso.py
+A	tests/legacy_tk/test_manual_k_radius.py
+R100	tests/test_menu_rendering.py	tests/legacy_tk/test_menu_rendering.py
+R100	tests/test_naming_window.py	tests/legacy_tk/test_naming_window.py
+R100	tests/test_rendering_events.py	tests/legacy_tk/test_rendering_events.py
+R100	tests/test_tab_rendering.py	tests/legacy_tk/test_tab_rendering.py
+R100	tests/test_ui_language.py	tests/legacy_tk/test_ui_language.py
+R100	tests/test_weight_window.py	tests/legacy_tk/test_weight_window.py
+A	tests/legacy_tk/test_workspace_layout.py
+M	tests/test_converted_k_radius.py
+M	tests/test_geometric_tolerances.py
+M	tests/test_iso_fits.py
+M	tests/test_iso_matching.py
+M	tests/test_iso_tolerance_audit.py
+M	tests/test_k_factor.py
+M	tests/test_manual_iso.py
+M	tests/test_manual_k_radius.py
+A	tests/test_qt_workflows.py
+M	tests/test_settings_and_connection.py
+M	tests/test_workspace_layout.py
+D	weight/window.py

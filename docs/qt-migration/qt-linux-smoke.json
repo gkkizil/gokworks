@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "framework": "PySide6 / Qt Widgets",
+  "pyside": "6.10.3",
+  "qt": "6.10.3",
+  "python": "3.13.5",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "qt_platform": "xcb",
+  "dpi_scale": 1.0,
+  "pages": [
+    "pdf",
+    "dxf_dwg",
+    "bom",
+    "naming",
+    "k_factor",
+    "iso_fits",
+    "geometric_tolerances",
+    "bolt",
+    "weight"
+  ],
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "resolutions": [
+    [
+      1024,
+      700
+    ],
+    [
+      1366,
+      768
+    ],
+    [
+      1920,
+      1080
+    ],
+    [
+      2560,
+      1440
+    ]
+  ],
+  "startup_ms": 1209.47,
+  "navigation_median_ms": 19.81,
+  "navigation_max_ms": 30.82,
+  "resize_median_ms": 11.4,
+  "resize_max_ms": 24.62,
+  "table_50000_load_ms": 46.68,
+  "table_50000_filter_ms": 111.86,
+  "tk_imports": [],
+  "kr_assignment_engine": "embedded Python SheetMetal parameters",
+  "solidworks_live_tested": false,
+  "checks": [
+    "nine modules",
+    "two themes",
+    "resolution matrix",
+    "vector diagrams",
+    "bolt kg/N",
+    "weight 157 kg",
+    "BOM XLSX",
+    "DXF dependency",
+    "no Tk runtime"
+  ]
+}

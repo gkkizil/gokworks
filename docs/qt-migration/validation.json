@@ -1,0 +1,93 @@
+{
+  "baseline_commit": "5f01e53cc5a46bdcde26b97588969722ff94fe34",
+  "baseline": {
+    "total": 620,
+    "failures": 9,
+    "errors": 6,
+    "seconds": 250.59,
+    "details": [
+      {
+        "outcome": "ERROR",
+        "id": "test_real_entrypoint_runs_tk_loop_and_closes_cleanly (test_export_window.WindowTests.test_real_entrypoint_runs_tk_loop_and_closes_cleanly)"
+      },
+      {
+        "outcome": "ERROR",
+        "id": "test_all_k_fields_can_be_scrolled_into_settings_viewport (test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport)"
+      },
+      {
+        "outcome": "ERROR",
+        "id": "test_all_pages_results_tabs_and_resolution_scale_matrix (test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix)"
+      },
+      {
+        "outcome": "ERROR",
+        "id": "test_every_dropdown_value_runs_its_real_menu_command (test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command)"
+      },
+      {
+        "outcome": "ERROR",
+        "id": "test_dxf_option_widgets_and_start_button_reach_worker (test_gui_audit.GUIAuditTests.test_dxf_option_widgets_and_start_button_reach_worker)"
+      },
+      {
+        "outcome": "ERROR",
+        "id": "test_rapid_menu_clicks_leave_only_final_page_highlighted (test_gui_flow.GUIFlowTests.test_rapid_menu_clicks_leave_only_final_page_highlighted)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_assignment_table_mixed_assembly_uses_each_actual_thickness (test_converted_k_radius.ConvertedApplyTests.test_assignment_table_mixed_assembly_uses_each_actual_thickness)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_browse_buttons_choose_and_cancel_in_both_modules (test_gui_audit.GUIAuditTests.test_browse_buttons_choose_and_cancel_in_both_modules)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_repeated_navigation_and_theme_buttons_keep_page_state (test_gui_audit.GUIAuditTests.test_repeated_navigation_and_theme_buttons_keep_page_state)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_scan_failure_releases_controls_and_reports_reason (test_gui_audit.GUIAuditTests.test_scan_failure_releases_controls_and_reports_reason)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_scan_stop_button_and_disabled_navigation (test_gui_audit.GUIAuditTests.test_scan_stop_button_and_disabled_navigation)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_k_scan_automatically_opens_full_result_view (test_gui_flow.GUIFlowTests.test_k_scan_automatically_opens_full_result_view)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_selected_dwg_exports_only_dwg_even_when_dxf_would_fail (test_gui_flow.GUIFlowTests.test_selected_dwg_exports_only_dwg_even_when_dxf_would_fail)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_navigation_theme_and_preferences_after_restart (test_iso_fits.IsoGuiTests.test_navigation_theme_and_preferences_after_restart)"
+      },
+      {
+        "outcome": "FAIL",
+        "id": "test_apply_requested_during_scan_is_preserved_and_stop_cancels_it (test_k_factor.KGuiTests.test_apply_requested_during_scan_is_preserved_and_stop_cancels_it) (outcome='scan_error')"
+      }
+    ]
+  },
+  "linux": {
+    "framework": "PySide6 6.10.3 / Qt Widgets",
+    "business_tests": 410,
+    "qt_cases": 108,
+    "passed": 518,
+    "failed": 0,
+    "skipped": 0,
+    "subtests_passed": 878,
+    "seconds": 92.36,
+    "command": "QT_QPA_PLATFORM=offscreen python -m pytest -q",
+    "backend_byte_identical_files": 38
+  },
+  "windows": {
+    "state": "building",
+    "source_commit": "c4a8d40875b8da1afa4c1ff2511b043614d9576d",
+    "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39132390332"
+  },
+  "limitations": [
+    "No live SolidWorks server in Linux",
+    "CI DPI checks do not prove physical mixed-DPI monitor behavior",
+    "Historical Tk tests are retained separately, not counted as passed"
+  ]
+}

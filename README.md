@@ -16,7 +16,7 @@ SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; 
 
 ## Windows'ta çalıştırma
 
-Python 3.12, kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks gerekir. Proje klasöründe:
+Python 3.13, kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks gerekir. Proje klasöründe:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -183,7 +183,7 @@ Linux'taki otomatik testler gerçek SolidWorks üretimini doğrulayamaz. Windows
 
 ## Otomatik testler
 
-Harici test bağımlılığı gerekmez:
+Test bağımlılıklarını kurup Qt ve motor regresyonlarını birlikte çalıştırın:
 
 ```powershell
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt
@@ -197,11 +197,18 @@ DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cach
   python -m pytest -q
 ```
 
-Son kapsamlı kontrolde **335 test geçti**; 133 gerçek GUI testi dahildir. [Son test çıktısı](docs/test-results/latest-tests.log), [güncel K/R, tek biçim ve menü akıcılığı](docs/gui-design.md#güncel-kr-alanı-ve-menü-geçişleri). Testler; COM çağrılarını temsil eden test nesneleriyle PDF sayfaları, seçenek bitleri, belge yaşam döngüsü, dosya koruma, kısmi başarısızlık, durdurma, montaj adetleri, konfigürasyon eşleştirme, kalınlık ve dosya adlarını; gerçek Tk arayüzüyle tarama, tercihler, rapor, küçük pencere, boş liste yönlendirmesi ve işlem sırasında kapanışı sınar. Tek biçim DXF/DWG üretimi, eski ayarın dönüşümü, hızlı menü geçişleri, çizim önbelleği, boşta sayfa ön yükleme ve 4000 dosyalık liste hazırlanırken Durdur erişimi ayrıca sınandı. 10.000 satırlık sonuç listesinde toplu filtreleme, seçim/veri korunması ve canlı sonuçların sırası kontrol edildi. ISO kesitinde çap okları, çapsal/tek taraflı fark, sıfır temas ve ara geçmenin farklı örnekleri doğrulandı. [Yeni kesit görünümü](docs/screenshots/iso-section-clearance-dark.png). DXF okuyucu dört gerçek R12/R2018 ASCII/ikili örnek ve bozuk dosyalarla çalıştırılır. Örnekler ezdxf ile üretilmiştir, SolidWorks çıktısı değildir. İşçi olaylarının toplu çiziminde sonuç/günlük sırası, son özetin korunması, her turdaki olay sınırı ve günlük kaydırma konumu da kontrol edildi. [GUI akıcılık ölçümleri](docs/test-results/gui-responsiveness.json). Ayarlar, bağlantı ve program giriş noktası da test edilir. Ekran olmayan Linux oturumunda arayüz testleri atlanır. Sanal ekranın başlatılması bulut ortamının kayıtlı başlangıç talimatlarında bulunur.
+Qt migrasyonunda Linux üzerinde **518 test ve 878 alt senaryo geçti**: 410
+mevcut motor/ayar regresyonu ve 108 Qt arayüz senaryosu. Dosya koruma,
+konfigürasyon, geri alma, iptal, menü geçişleri, gerçek Qt modelleri, 50 bin
+satır, birim dönüşümleri ve teknik şemalar kontrol edilir. SolidWorks sınırı
+test nesneleriyle sınanır; gerçek SolidWorks doğrulaması olarak sunulmaz.
+Linux’ta Qt testleri `QT_QPA_PLATFORM=offscreen` ile ekran olmadan çalışır.
 
-Sonuçlar, test kapsamı, bulunan sorunlar ve GitHub kıyaslaması [tüm programın doğrulama raporunda](docs/program-verification.md) kayıtlıdır. DXF/DWG referanslarının ayrıntıları ve geçmiş çalışma bildirimleri için [DXF/DWG doğrulama raporuna](docs/dxf-dwg-verification.md) bakın.
+[Güncel migrasyon raporu](docs/QT_MIGRATION_REPORT.md),
+[test envanteri ve sonuçlar](docs/qt-migration/validation.json). Önceki Tk
+testleri `tests/legacy_tk` altında değişmeden saklanır; Qt sonucu olarak sayılmaz.
 
-## GUI yeniden kontrolü ve Word raporu
+## Önceki Tk sürümlerinin GUI ve Word raporları (tarihsel)
 
 K/R öncesi GUI denetiminde 140 testin tamamı geçti; 34'ü gerçek Tk GUI testidir. Ek kabul testleri gerçek düğme komutlarını, Ctrl+F/çift tıklama/Enter/Escape olaylarını, diyalog iptallerini, filtreli CSV raporunu ve 12 yerleşim alt senaryosunu kapsar. İlk yerleşim açıkça zamanlanarak açılışın Configure olayına bağımlılığı giderildi.
 
@@ -229,22 +236,20 @@ PDF, DXF/DWG ve K/R formları solda; sonuçlar sağda tam yüksekliği kullanır
 
 K/R COM nesnesi okuma ve aktif büküm payı alanına yazma düzeltildi; hata metinleri artık aşama ve API üyesini içerir. [Güncel ekranlar, Word raporu ve test kanıtları](docs/reports/kr-workspace-fix/README.md). Gerçek SolidWorks 2025 kabul kontrolü [yerel kılavuzdadır](docs/local-solidworks-check.md); bu Linux ortamında gerçek CAD ataması çalıştırılmadı.
 
-## Bulutta Türkçe karakterleri doğru görüntüleme
+## Linux bulut ortamında Qt
 
-Linux arayüzü için Python 3.13 / Tk 8.6 ortamı hazırlanmıştır. Bazı Tk
-kurulumları Türkçe harfleri çizmeyebilir; uygulama böyle bir durumda eksik
-yazılar göstermek yerine açıklayıcı bir hata verir.
+Python 3.13/PySide6 ortamı `/workspace/.cloud-setup/qt-venv` konumundadır.
+Başsız açılış kontrolü:
 
 ```bash
-bash /workspace/.cloud-setup/start.sh
 cd /workspace/gokworks
-DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user \
-XDG_CACHE_HOME=/workspace/.cloud-setup/cache \
-python main.py
+QT_QPA_PLATFORM=offscreen XDG_CACHE_HOME=/workspace/.cloud-setup/cache \
+/workspace/.cloud-setup/qt-venv/bin/python main.py --self-check /tmp/qt-smoke.json
 ```
 
-Testleri de aynı yorumlayıcıyla `-m pytest -q` kullanarak
-çalıştırın. Windows'ta yukarıdaki Python 3.12 kurulum adımları geçerlidir.
+Ekran görüntüleri için Xvfb çalışırken `DISPLAY=:99` kullanın ve
+`QT_QPA_PLATFORM` seçeneğini kaldırın. Kayıtlı bulut kurulum/başlangıç talimatları
+Qt ortamına güncellendi. Yayımlama işlemi çalışan Xvfb süreçlerini taşımaz.
 
 ## Qt geliştirme sürümü
 
