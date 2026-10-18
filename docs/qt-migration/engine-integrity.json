@@ -1,0 +1,230 @@
+[
+  {
+    "path": "bolt/__init__.py",
+    "baseline_sha256": "d743a256a5337e543fec1e54ce0f8156f611ebd822eb3ce119219ad1efe07066",
+    "current_sha256": "d743a256a5337e543fec1e54ce0f8156f611ebd822eb3ce119219ad1efe07066",
+    "unchanged": true
+  },
+  {
+    "path": "bolt/diagram.py",
+    "baseline_sha256": "fe2de3c34533b7edf85a276eae05372ff748fbbd60921a66e6ff60a2b9abc1b2",
+    "current_sha256": "fe2de3c34533b7edf85a276eae05372ff748fbbd60921a66e6ff60a2b9abc1b2",
+    "unchanged": true
+  },
+  {
+    "path": "bolt/dimensions.py",
+    "baseline_sha256": "a559e0512a3633519f2a77713994b6475a6120ca9e07ff864dba75f46332acff",
+    "current_sha256": "a559e0512a3633519f2a77713994b6475a6120ca9e07ff864dba75f46332acff",
+    "unchanged": true
+  },
+  {
+    "path": "bolt/rules.py",
+    "baseline_sha256": "631d26dd6d49018ca73895af80b586927c3852b454901f56a7e88b5322ca8e46",
+    "current_sha256": "631d26dd6d49018ca73895af80b586927c3852b454901f56a7e88b5322ca8e46",
+    "unchanged": true
+  },
+  {
+    "path": "bom/__init__.py",
+    "baseline_sha256": "269780d3c46dd644ba8bab546950349ada4134338b54849d566570898877702d",
+    "current_sha256": "269780d3c46dd644ba8bab546950349ada4134338b54849d566570898877702d",
+    "unchanged": true
+  },
+  {
+    "path": "bom/exporter.py",
+    "baseline_sha256": "1863bf819d07853765b74db60d8803eb4661964dccb36eecfd866a6daca4c291",
+    "current_sha256": "1863bf819d07853765b74db60d8803eb4661964dccb36eecfd866a6daca4c291",
+    "unchanged": true
+  },
+  {
+    "path": "dxf_dwg/__init__.py",
+    "baseline_sha256": "bb9d726644a16f909ac570b4a6529c10a4c5536757b75d3a3e8a0d98cdc3f62d",
+    "current_sha256": "bb9d726644a16f909ac570b4a6529c10a4c5536757b75d3a3e8a0d98cdc3f62d",
+    "unchanged": true
+  },
+  {
+    "path": "dxf_dwg/examples/capture.py",
+    "baseline_sha256": "ad55e844e0af1c7d8aba5f3b03560e404d36cd3e76bce1f7c044b46e6ce3e789",
+    "current_sha256": "ad55e844e0af1c7d8aba5f3b03560e404d36cd3e76bce1f7c044b46e6ce3e789",
+    "unchanged": true
+  },
+  {
+    "path": "dxf_dwg/exporter.py",
+    "baseline_sha256": "449108bc216aaf54f7b4ee1cc45ea3cfe3db2439246a9f3370f3468b34c815f2",
+    "current_sha256": "449108bc216aaf54f7b4ee1cc45ea3cfe3db2439246a9f3370f3468b34c815f2",
+    "unchanged": true
+  },
+  {
+    "path": "geometric_tolerances/__init__.py",
+    "baseline_sha256": "49be4421dc5d66f58582332b890254496e794c6332ecd97ca821f6e819d4c97a",
+    "current_sha256": "49be4421dc5d66f58582332b890254496e794c6332ecd97ca821f6e819d4c97a",
+    "unchanged": true
+  },
+  {
+    "path": "geometric_tolerances/catalog.py",
+    "baseline_sha256": "c2b5427622775e03c620f04e1fb08e49e164ef80c1ea94739f000177c2dd7bb1",
+    "current_sha256": "c2b5427622775e03c620f04e1fb08e49e164ef80c1ea94739f000177c2dd7bb1",
+    "unchanged": true
+  },
+  {
+    "path": "geometric_tolerances/diagram.py",
+    "baseline_sha256": "3154575966682c8d763052530399ceb0253c604b7f9a0313271b3e42330bc3ab",
+    "current_sha256": "3154575966682c8d763052530399ceb0253c604b7f9a0313271b3e42330bc3ab",
+    "unchanged": true
+  },
+  {
+    "path": "geometric_tolerances/rules.py",
+    "baseline_sha256": "13c3760871b30c449f439c004a4e6bc381685adcb280414160149e7044a7cdcd",
+    "current_sha256": "13c3760871b30c449f439c004a4e6bc381685adcb280414160149e7044a7cdcd",
+    "unchanged": true
+  },
+  {
+    "path": "iso_fits/__init__.py",
+    "baseline_sha256": "9ab306f4913f52ee79e73dc7835300dabe0f4d76c923c02f6929de4601e0a7ae",
+    "current_sha256": "9ab306f4913f52ee79e73dc7835300dabe0f4d76c923c02f6929de4601e0a7ae",
+    "unchanged": true
+  },
+  {
+    "path": "iso_fits/diagram.py",
+    "baseline_sha256": "ca2cf7a0e87a4f7b3e8b239fec5295eccb1d11efe3105d223f67b9a483f88ac7",
+    "current_sha256": "ca2cf7a0e87a4f7b3e8b239fec5295eccb1d11efe3105d223f67b9a483f88ac7",
+    "unchanged": true
+  },
+  {
+    "path": "iso_fits/manual.py",
+    "baseline_sha256": "5809fb8e1565266006014fe79c174440fbe5e76dd8725627185bef34afec7160",
+    "current_sha256": "5809fb8e1565266006014fe79c174440fbe5e76dd8725627185bef34afec7160",
+    "unchanged": true
+  },
+  {
+    "path": "iso_fits/rules.py",
+    "baseline_sha256": "4faf15be2221fd448294c39080bc6c602fa0d459daad327ebb8f4916ca266982",
+    "current_sha256": "4faf15be2221fd448294c39080bc6c602fa0d459daad327ebb8f4916ca266982",
+    "unchanged": true
+  },
+  {
+    "path": "iso_fits/selection_diagram.py",
+    "baseline_sha256": "f297e94337f9e7d8decaae447365b597a8779992441d083fbc958291ad49bcbc",
+    "current_sha256": "f297e94337f9e7d8decaae447365b597a8779992441d083fbc958291ad49bcbc",
+    "unchanged": true
+  },
+  {
+    "path": "k_factor/__init__.py",
+    "baseline_sha256": "46fface833feb0cfde3ee5cd71589be667affb9978b87cf779dd656049d8ebcd",
+    "current_sha256": "46fface833feb0cfde3ee5cd71589be667affb9978b87cf779dd656049d8ebcd",
+    "unchanged": true
+  },
+  {
+    "path": "k_factor/apply.py",
+    "baseline_sha256": "03d8c4ceafa20aede5f12a2399ca3769f832bfa4908feaaeb4041aad54efd46c",
+    "current_sha256": "03d8c4ceafa20aede5f12a2399ca3769f832bfa4908feaaeb4041aad54efd46c",
+    "unchanged": true
+  },
+  {
+    "path": "k_factor/examples/capture.py",
+    "baseline_sha256": "9bf23e62d84154cb8f041bca727343badb1507b6ae7bda3698601df23096072c",
+    "current_sha256": "9bf23e62d84154cb8f041bca727343badb1507b6ae7bda3698601df23096072c",
+    "unchanged": true
+  },
+  {
+    "path": "k_factor/rules.py",
+    "baseline_sha256": "17b36114c6effba1dc554c4bac3462801c1fc9d8a4918ab6def942a6e6b1a5a8",
+    "current_sha256": "17b36114c6effba1dc554c4bac3462801c1fc9d8a4918ab6def942a6e6b1a5a8",
+    "unchanged": true
+  },
+  {
+    "path": "k_factor/sheetmetal_parameters.py",
+    "baseline_sha256": "1d1643a5bb4c5530903a7641c3a9f29b72faba358d5fb25ac82277f9729a3434",
+    "current_sha256": "1d1643a5bb4c5530903a7641c3a9f29b72faba358d5fb25ac82277f9729a3434",
+    "unchanged": true
+  },
+  {
+    "path": "naming/__init__.py",
+    "baseline_sha256": "bd8f4b713269d57949d33c7cfa53f7a0f38ad52af2a46cef1b41f22a109cf63c",
+    "current_sha256": "bd8f4b713269d57949d33c7cfa53f7a0f38ad52af2a46cef1b41f22a109cf63c",
+    "unchanged": true
+  },
+  {
+    "path": "naming/examples/capture.py",
+    "baseline_sha256": "37b80e242aa52133069144ee8a8713617c8d19d98465dea11a3d02229b1a2939",
+    "current_sha256": "37b80e242aa52133069144ee8a8713617c8d19d98465dea11a3d02229b1a2939",
+    "unchanged": true
+  },
+  {
+    "path": "naming/exporter.py",
+    "baseline_sha256": "b288f9f185d1a5247f254c9866123e99c22e3fa3dee17a4d89a855d17dcd763f",
+    "current_sha256": "b288f9f185d1a5247f254c9866123e99c22e3fa3dee17a4d89a855d17dcd763f",
+    "unchanged": true
+  },
+  {
+    "path": "naming/hierarchy.py",
+    "baseline_sha256": "81bde4db7c5d8e74eb74f654c261a9bbd2350fb6569db3685ac696d37bf5a402",
+    "current_sha256": "81bde4db7c5d8e74eb74f654c261a9bbd2350fb6569db3685ac696d37bf5a402",
+    "unchanged": true
+  },
+  {
+    "path": "naming/source.py",
+    "baseline_sha256": "7f56e583cb265e8134982d50e4b21fdfabd53cd49494f7b6f0e92e5a204db23d",
+    "current_sha256": "7f56e583cb265e8134982d50e4b21fdfabd53cd49494f7b6f0e92e5a204db23d",
+    "unchanged": true
+  },
+  {
+    "path": "pdf/__init__.py",
+    "baseline_sha256": "57749b3a37e8d041288a279c13f0aa7d48d4dfd804eae33e975fefe4672693a4",
+    "current_sha256": "57749b3a37e8d041288a279c13f0aa7d48d4dfd804eae33e975fefe4672693a4",
+    "unchanged": true
+  },
+  {
+    "path": "pdf/exporter.py",
+    "baseline_sha256": "725d86f264061d1817aca0f9c984e9d2204a893cee59e45bf9570000837b4933",
+    "current_sha256": "725d86f264061d1817aca0f9c984e9d2204a893cee59e45bf9570000837b4933",
+    "unchanged": true
+  },
+  {
+    "path": "pdf/settings.py",
+    "baseline_sha256": "9d44e6369baadf5e6371d8049920c069b2da9a772f9acd7ea40d545af3573bd2",
+    "current_sha256": "9d44e6369baadf5e6371d8049920c069b2da9a772f9acd7ea40d545af3573bd2",
+    "unchanged": true
+  },
+  {
+    "path": "solidworks/__init__.py",
+    "baseline_sha256": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+    "current_sha256": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+    "unchanged": true
+  },
+  {
+    "path": "solidworks/connection.py",
+    "baseline_sha256": "91bab738f37ba5c6b3972b0ff17b7b3955b340e23c656fea47d94f4b26fbf1c3",
+    "current_sha256": "91bab738f37ba5c6b3972b0ff17b7b3955b340e23c656fea47d94f4b26fbf1c3",
+    "unchanged": true
+  },
+  {
+    "path": "weight/__init__.py",
+    "baseline_sha256": "82bc813e5ebe99c63f2e70237c80581982c0846a66cb9866bfde178ce6d9a35f",
+    "current_sha256": "82bc813e5ebe99c63f2e70237c80581982c0846a66cb9866bfde178ce6d9a35f",
+    "unchanged": true
+  },
+  {
+    "path": "weight/diagram.py",
+    "baseline_sha256": "8183334953dd295a15ec0fd5672a671436b6abe2f7d63ba5306e975f3f9f1b2a",
+    "current_sha256": "8183334953dd295a15ec0fd5672a671436b6abe2f7d63ba5306e975f3f9f1b2a",
+    "unchanged": true
+  },
+  {
+    "path": "weight/examples/capture.py",
+    "baseline_sha256": "caa793df5714a8e2c4f9e1f16b38234e54078209eb19445d5c2a00aa3a5663de",
+    "current_sha256": "caa793df5714a8e2c4f9e1f16b38234e54078209eb19445d5c2a00aa3a5663de",
+    "unchanged": true
+  },
+  {
+    "path": "weight/materials.py",
+    "baseline_sha256": "dcb4f21536da1424a20252c16fbb34c17158cff53f267c615a9679bf3e31eb99",
+    "current_sha256": "dcb4f21536da1424a20252c16fbb34c17158cff53f267c615a9679bf3e31eb99",
+    "unchanged": true
+  },
+  {
+    "path": "weight/rules.py",
+    "baseline_sha256": "f390b72cc86b59cebc46ec4e03985f4caca63e71bd7b03cbf08749ebb4c5e0bf",
+    "current_sha256": "f390b72cc86b59cebc46ec4e03985f4caca63e71bd7b03cbf08749ebb4c5e0bf",
+    "unchanged": true
+  }
+]

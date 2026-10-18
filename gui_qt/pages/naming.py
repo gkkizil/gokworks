@@ -22,6 +22,8 @@ class NamingPage(BasePage):
         self.use_active = False
         self.valid_plan = False
         self.last_report = None
+        self.preview_pending = False
+        self.plan_signature = None
         self.scan_button = self.action('Dosyaları oku', self.scan, primary=True)
         self.save_button = self.action('Paketi oluştur', self.save)
         self.save_button.setEnabled(False)
@@ -88,6 +90,7 @@ class NamingPage(BasePage):
         self.form.changed.connect(self.form_changed)
         self.last_error = ''
         self.finish_layout()
+        self.jobs.finished.connect(self.schedule_preview)
 
     def set_busy(self, busy):
         super().set_busy(busy)
@@ -104,13 +107,15 @@ class NamingPage(BasePage):
             self.save_button.setEnabled(False)
             self.plan_message.setText('Kaynak değişti. Dosyaları yeniden okuyun.')
         else:
+            self.valid_plan = False
+            self.save_button.setEnabled(False)
             self.preview_timer.start()
 
     def discover(self):
         if not self.can_start():
             return
         source = self.source_folder.text()
-        if not source or not Path(source).is_dir():
+        if not source:
             return self.set_status('Montajın bulunduğu kaynak klasörü seçin.', True)
         self.jobs.start(self, lambda sink, stop: services.discover_assemblies(source, sink, stop))
         self.set_status('Klasördeki montaj dosyaları aranıyor…')
@@ -130,7 +135,7 @@ class NamingPage(BasePage):
         source = None if self.use_active else self.source_file.text()
         if not self.use_active and not source:
             return self.discover()
-        if source and (not Path(source).is_file() or PureWindowsPath(source).suffix.lower() not in engine.CAD_TYPES):
+        if source and PureWindowsPath(source).suffix.lower() not in engine.CAD_TYPES:
             return self.set_status('Geçerli bir SolidWorks montaj, parça veya teknik resim dosyası seçin.', True)
         active = self.use_active
         self.jobs.start(self, lambda sink, stop: engine.worker(sink, stop, operation='scan',
@@ -147,36 +152,50 @@ class NamingPage(BasePage):
         if self.snapshot is None:
             self.save_button.setEnabled(False)
             return
+        if self.jobs.busy:
+            self.preview_pending = True
+            return
+        self.preview_pending = False
         values = self.form.values()
+        snapshot, overrides = self.snapshot, dict(self.overrides)
+        signature = (id(snapshot), dict(values), dict(overrides))
+        self.jobs.start(self, lambda sink, stop: self.prepare_plan(snapshot, values, overrides, signature, sink, stop))
+
+    @staticmethod
+    def prepare_plan(snapshot, values, overrides, signature, sink, stop):
+        """Filesystem validation and potentially large plans never run on GUI thread."""
         try:
-            destination = engine.validate_destination(values['destination'], self.snapshot)
+            destination = engine.validate_destination(values['destination'], snapshot)
             rules = engine.Rules(prefix=values['prefix'], suffix=values['suffix'], find=values['find'],
                 replacement=values['replacement'], numbered=values['mode'] == 'Numaralı',
                 start=int(values['start']), digits=int(values['digits']))
-            self.entries = engine.plan_names(self.snapshot, destination, rules, self.overrides, allow_collisions=True)
-            targets = [engine.path_key(item.destination) for item in self.entries]
+            entries = engine.plan_names(snapshot, destination, rules, overrides, allow_collisions=True)
+            targets = [engine.path_key(item.destination) for item in entries]
             duplicates = {key for key, count in Counter(targets).items() if count > 1}
             rows = []
-            for row in document_rows(self.snapshot):
-                doc = self.snapshot.documents[row.index]
-                entry = self.entries[row.index]
+            for row in document_rows(snapshot):
+                if stop.is_set():
+                    return
+                doc = snapshot.documents[row.index]
+                entry = entries[row.index]
                 rows.append(dict(id=row.iid, parent=row.parent, source=doc.path, index=row.index,
                     name=PureWindowsPath(doc.path).name + (' · ortak parça' if row.shared else ''),
                     new_name=PureWindowsPath(entry.destination).name, kind=doc.kind,
                     status='error' if engine.path_key(entry.destination) in duplicates else 'pending'))
-            self.model.replace(rows)
-            self.tree.expandToDepth(1)
             if duplicates:
-                raise engine.NameCollision('Yeni dosya adları çakışıyor. Seçili adları düzenleyin veya numaralı isimlendirme kullanın.')
+                sink.put(('naming_plan', dict(rows=rows,entries=entries,signature=signature,
+                    error='Yeni dosya adları çakışıyor. Seçili adları düzenleyin veya numaralı isimlendirme kullanın.')))
+                return
             # Full validation also protects the reserved report filename.
-            engine.plan_names(self.snapshot, destination, rules, self.overrides)
-            self.valid_plan = True
-            self.plan_message.setText(f'{len(self.entries)} dosya · Hedef: {destination}')
-            self.last_error = ''
+            engine.plan_names(snapshot, destination, rules, overrides)
+            if not stop.is_set():
+                sink.put(('naming_plan', dict(rows=rows,entries=entries,signature=signature,destination=str(destination))))
         except (ValueError, OSError) as error:
-            self.plan_message.setText(str(error))
-            self.last_error = str(error)
-        self.save_button.setEnabled(not self.busy and self.valid_plan)
+            sink.put(('naming_plan', dict(error=str(error),signature=signature)))
+
+    def schedule_preview(self):
+        if self.preview_pending and not self.context.closing:
+            self.preview_timer.start()
 
     def edit_selected(self, *args):
         if self.busy or self.snapshot is None:
@@ -203,7 +222,9 @@ class NamingPage(BasePage):
     def save(self):
         if not self.can_start():
             return
-        self.update_preview()
+        if self.plan_signature != (id(self.snapshot), self.form.values(), self.overrides):
+            self.update_preview()
+            return self.set_status('Önizleme güncelleniyor. Tamamlandığında Paketi oluştur düğmesini kullanın.')
         if not self.valid_plan:
             return self.set_status(self.last_error or 'Önce geçerli bir isimlendirme planı oluşturun.', True)
         snapshot, entries, destination = self.snapshot, self.entries, self.destination.text()
@@ -213,7 +234,19 @@ class NamingPage(BasePage):
 
     def handle_events(self, events):
         for kind, value in events:
-            if kind == 'assemblies':
+            if kind == 'naming_plan':
+                self.plan_signature = value['signature']
+                if value['signature'] != (id(self.snapshot), self.form.values(), self.overrides):
+                    self.preview_pending = True
+                    continue
+                self.entries = value.get('entries', ())
+                self.last_error = value.get('error', '')
+                self.valid_plan = not self.last_error
+                if 'rows' in value:
+                    self.model.replace(value['rows'])
+                    self.tree.expandToDepth(1)
+                self.plan_message.setText(self.last_error or f"{len(self.entries)} dosya · Hedef: {value['destination']}")
+            elif kind == 'assemblies':
                 self.assemblies.clear()
                 for path in value:
                     self.assemblies.addItem(PureWindowsPath(path).name, path)

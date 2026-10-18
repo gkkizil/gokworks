@@ -30,10 +30,17 @@ jobs:
             packaging/windows-requirements.txt
       - name: Install build dependencies
         run: python -m pip install -r packaging/windows-requirements.txt
+      - name: Record build start on the source branch
+        env:
+          BUILD_STATUS: building
+        run: python packaging/publish_status.py
       - name: Validate regression suite on Windows
+        env:
+          QT_QPA_PLATFORM: offscreen
+          PYTHONUTF8: '1'
         run: |
           python -m pip install -r requirements-dev.txt
-          python -m pytest -q --junitxml=windows-tests.xml
+          python -m pytest -q --junitxml=windows-tests.xml *> windows-tests.log
       - name: Build and open the packaged EXE
         run: python packaging/build_windows.py *> windows-build.log
       - name: Upload Windows package
@@ -58,6 +65,7 @@ jobs:
             windows-build.log
             dist/windows-smoke*.json
             windows-tests.xml
+            windows-tests.log
           if-no-files-found: ignore
       - name: Record downloadable build status
         if: always()

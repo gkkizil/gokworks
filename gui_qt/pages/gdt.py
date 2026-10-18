@@ -30,6 +30,7 @@ class GdtPage(CalculationPage):
         self.search.setPlaceholderText('Tolerans türü ara…')
         self.extra_layout.addWidget(self.search)
         self.catalog = configure_view(QTreeView())
+        self.catalog.setSortingEnabled(False)
         self.catalog.setMinimumHeight(300)
         self.catalog_model = TreeModel((Column('Tolerans türü', 'name'),))
         rows = [dict(id=group, parent='', name=group) for group in GROUPS]

@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         outer.setSpacing(0)
         self.sidebar = QFrame()
         self.sidebar.setObjectName('sidebar')
-        self.sidebar.setFixedWidth(224)
+        self.sidebar.setFixedWidth(244)
         side = QVBoxLayout(self.sidebar)
         side.setContentsMargins(15, 14, 15, 16)
         self.logo = BrandLogo()

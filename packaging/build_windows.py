@@ -26,7 +26,7 @@ def collect_licenses():
             if any(term in file.name.lower() for term in ('license', 'licence', 'copying', 'notice')) and file.suffix.lower() in ('', '.txt', '.md', '.rst'):
                 source = distribution.locate_file(file)
                 if source.is_file():
-                    shutil.copy2(source, target/(name+'-'+file.name))
+                    shutil.copy2(source, target/(name+'-'+str(file).replace('/', '_').replace('\\', '_')))
     for name in ('LICENSE.txt','LICENSE'):
         source = Path(sys.base_prefix)/name
         if source.is_file():

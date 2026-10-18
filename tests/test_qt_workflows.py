@@ -302,6 +302,7 @@ def test_naming_folder_source_exact_destination_hierarchy_and_collision(window, 
     page.form.set_value('suffix','630')
     page.form.set_value('digits','2')
     page.load_snapshot(snapshot)
+    qtbot.waitUntil(lambda: page.valid_plan and not window.jobs.busy)
     assert page.valid_plan and len(page.entries) == 4
     assert page.model.rowCount() == 1
     assert all('BHV-R' in entry.destination and '630' in entry.destination for entry in page.entries)
@@ -309,16 +310,40 @@ def test_naming_folder_source_exact_destination_hierarchy_and_collision(window, 
     page.overrides[path_key(snapshot.documents[1].path)] = 'same'
     page.overrides[path_key(snapshot.documents[0].path)] = 'same'
     page.update_preview()
+    qtbot.waitUntil(lambda: not window.jobs.busy)
     assert not page.valid_plan and not page.save_button.isEnabled()
     page.reset_overrides()
+    qtbot.waitUntil(lambda: not window.jobs.busy)
     assert page.valid_plan
     (tmp_path/'target').mkdir()
     (tmp_path/'target'/'keep.txt').write_text('keep')
     page.update_preview()
+    qtbot.waitUntil(lambda: not window.jobs.busy)
     assert not page.valid_plan
     assert (tmp_path/'target'/'keep.txt').read_text() == 'keep'
     page.source_file.setText(snapshot.root)
     assert page.snapshot is None
+
+
+def test_naming_plan_filesystem_checks_are_off_gui_thread(window, qtbot, tmp_path):
+    page = window.pages['naming']
+    snapshot = naming_snapshot(tmp_path)
+    page.destination.setText(str(tmp_path/'new'))
+    release = threading.Event()
+    calls = []
+    from naming.exporter import validate_destination
+    def delayed(*args):
+        calls.append(QThread.currentThread())
+        release.wait(2)
+        return validate_destination(*args)
+    with patch('gui_qt.pages.naming.engine.validate_destination',side_effect=delayed):
+        page.load_snapshot(snapshot)
+        qtbot.waitUntil(lambda: bool(calls))
+        window.navigate('bolt')
+        assert window.stack.currentWidget() is window.pages['bolt']
+        assert calls[0] is not QApplication.instance().thread()
+        release.set()
+        qtbot.waitUntil(lambda: page.valid_plan and not window.jobs.busy)
 
 
 @pytest.mark.parametrize('outcome', ['completed','error','cancelled'])
@@ -519,3 +544,12 @@ def test_repeated_worker_lifecycle_has_no_running_threads(window, qtbot):
         qtbot.waitUntil(lambda: not window.jobs.busy)
         QApplication.processEvents()
     assert not any(thread.isRunning() for thread in window.findChildren(QThread))
+
+
+def test_vector_labels_keep_engineering_center_coordinates(qapp):
+    from gui_qt.diagrams import VectorScene
+    scene = VectorScene(500,300)
+    item = scene.create_text(250,150,text='MİL Ø50',anchor='center',font=('Segoe UI',-14),fill='#ABCDEF')
+    center = item.sceneBoundingRect().center()
+    assert center.x() == pytest.approx(250)
+    assert center.y() == pytest.approx(150)

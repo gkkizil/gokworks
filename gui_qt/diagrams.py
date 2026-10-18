@@ -135,8 +135,8 @@ class VectorScene(QGraphicsScene):
         item.document().setDefaultTextOption(document_options)
         bounds = item.boundingRect()
         anchor = options.get('anchor', 'center')
-        dx = 0 if 'w' in anchor else bounds.width() if 'e' in anchor else bounds.width()/2
-        dy = 0 if 'n' in anchor else bounds.height() if 's' in anchor else bounds.height()/2
+        dx = bounds.width()/2 if anchor == 'center' else 0 if 'w' in anchor else bounds.width() if 'e' in anchor else bounds.width()/2
+        dy = bounds.height()/2 if anchor == 'center' else 0 if 'n' in anchor else bounds.height() if 's' in anchor else bounds.height()/2
         item.setPos(float(x) - dx, float(y) - dy)
         self.addItem(item)
         return self._register(item, options)

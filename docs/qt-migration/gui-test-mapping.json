@@ -2,1051 +2,2386 @@
   {
     "original": "test_bolt_window.BoltWindowTests.test_live_load_modes_and_invalid_input_clear_previous_verdict",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_units_page_cache_preferences_and_copy_preserve_physical_load",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_small_window_dpi_and_unchanged_diagram",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_dimensions_and_capacity_follow_metric_units_and_load_mode",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_minimum_count_and_target_margin_are_advisory_and_cleared_when_invalid",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_combined_limits_hold_other_load_fixed_and_copy_the_same_units",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_fine_pitch_changes_geometry_capacity_and_survives_units_page_and_preferences",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_pitch_lists_preserve_valid_choices_and_reset_incompatible_geometry_once",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bolt_window.BoltWindowTests.test_standard_pitch_labels_and_selection_keep_numeric_calculation",
     "archive": "tests/legacy_tk/test_bolt_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bolt_standard_and_fine_pitch_choices",
+      "test_bolt_unit_conversion_and_all_load_modes"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_real_scan_nested_tree_filter_and_excel_export_preserve_full_bom",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_weights_show_in_preview_details_and_excel_in_both_views",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_missing_mass_warns_and_export_keeps_part_with_unknown_weight",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_page_cache_themes_small_window_and_scaling_keep_controls_visible",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_failed_rescan_discards_stale_results_and_disables_export",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_detail_dialog_copies_its_row_and_hidden_or_cleared_selection_stays_consistent",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_metrics_tree_controls_and_selected_component_details",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_empty_search_can_be_cleared_without_changing_export_or_metrics",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_cancelling_large_preview_clears_partial_rows_and_prevents_export",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_large_search_cache_preserves_unicode_selection_and_rescan_results",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_unchanged_bom_layout_and_selection_do_not_redraw_widgets",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_export_cancel_and_failure_preserve_preview_and_existing_file",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_bom_window.BomWindowTests.test_close_during_scan_requests_stop_and_waits_for_worker",
     "archive": "tests/legacy_tk/test_bom_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel",
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_models_are_valid_and_large_data_creates_no_row_widgets",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_thickness_grouping_worker_preferences_and_pdf_isolation",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_navigation_retains_independent_preferences",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_dxf_scan_and_navigation_locked_during_worker",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_pdf_scan_regression",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_full_dxf_worker_and_csv_report",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_empty_list_hint_follows_scan_reset_and_independent_tabs",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_empty_dxf_worker_message",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_source_dialog_filters_parts",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_full_pdf_worker_and_turkish_csv_report",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_invalid_source_and_output_keep_worker_idle",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_connection_failure_releases_controls_and_shows_error",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_restart_loads_both_modules_and_rejects_invalid_format",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_stop_then_close_waits_for_active_worker",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_report_write_failure_is_displayed",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_themes_preserve_both_pages_and_reload_preference",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_search_status_filters_and_live_results_keep_full_counts",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_rescan_deletes_detached_rows_and_resets_filters",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_filters_are_independent_between_modules",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_details_show_full_paths_and_copy_to_clipboard",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_theme_change_while_busy_preserves_worker_controls",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_scaled_interface_keeps_table_text_and_icons_usable",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_real_entrypoint_runs_tk_loop_and_closes_cleanly",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_export_window.WindowTests.test_minimum_window_size_keeps_controls_and_results_visible",
     "archive": "tests/legacy_tk/test_export_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_file_list_rendering.FileListRenderingTests.test_ten_thousand_rows_filter_in_bulk_without_losing_data_or_selection",
     "archive": "tests/legacy_tk/test_file_list_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_file_list_rendering.FileListRenderingTests.test_out_of_order_results_restore_scan_order_and_refresh_searchable_details",
     "archive": "tests/legacy_tk/test_file_list_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_file_list_rendering.FileListRenderingTests.test_new_list_with_no_matches_detaches_inserted_rows_and_reuses_ids",
     "archive": "tests/legacy_tk/test_file_list_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_file_list_rendering.FileListRenderingTests.test_row_cache_and_live_updates_remain_independent_between_three_modules",
     "archive": "tests/legacy_tk/test_file_list_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_final_gui.FinalGUIAuditTests.test_all_pages_results_tabs_and_resolution_scale_matrix",
     "archive": "tests/legacy_tk/test_final_gui.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_final_gui.FinalGUIAuditTests.test_every_dropdown_value_runs_its_real_menu_command",
     "archive": "tests/legacy_tk/test_final_gui.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_final_gui.FinalGUIAuditTests.test_all_k_fields_can_be_scrolled_into_settings_viewport",
     "archive": "tests/legacy_tk/test_final_gui.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_final_gui.FinalGUIAuditTests.test_readable_theme_contrast_and_primary_buttons",
     "archive": "tests/legacy_tk/test_final_gui.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_final_gui.FinalGUIAuditTests.test_startup_fits_supported_monitor_sizes_and_window_dpi",
     "archive": "tests/legacy_tk/test_final_gui.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_angularity_draws_45_degrees_with_perpendicular_width",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_position_diameter_arrow_reaches_both_cylinder_boundaries",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_profile_boundaries_are_centered_normal_offsets_and_arrow_meets_them",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_long_frame_numbers_fit_cells_and_canvas_at_three_scales",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_measurement_definition_and_half_width_export_follow_feature",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_deleted_symbols_are_educational_only_and_cannot_export_a_current_frame",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_rule_one_surface_size_relation_blocks_export_and_clears_on_feature_change",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_all_fourteen_buttons_draw_zones_symbols_and_frames_in_both_themes",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_no_stale_result_on_invalid_tolerance_or_measured_error",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy",
+      "test_worker_error_releases_controls_and_keeps_full_message"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_real_datum_dropdown_and_required_reference_error",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy",
+      "test_worker_error_releases_controls_and_keeps_full_message"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_measured_comparison_clears_when_feature_changes",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_search_filter_empty_state_and_keyboard_focus",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_csv_copy_cancel_and_save_error_use_current_specification",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_page_cache_preferences_theme_and_guide",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_corrupt_saved_choices_fall_back_but_invalid_numeric_values_are_visible",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_geometric_tolerances.GeometricGuiTests.test_resolution_scale_matrix_scroll_access_and_circle_aspect",
     "archive": "tests/legacy_tk/test_geometric_tolerances.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_gdt_catalog_frames_measurement_acceptance_and_legacy"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_browse_buttons_choose_and_cancel_in_both_modules",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_native_browse_accept_and_cancel",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_theme_selector_buttons_apply_and_save_choice",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_windows_icon_survives_theme_remap_without_child_map_updates",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_dxf_option_widgets_and_start_button_reach_worker",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_scan_stop_button_and_disabled_navigation",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_declining_close_keeps_worker_and_window_alive",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_filtered_csv_report_button_still_writes_all_results",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_ctrl_f_search_entry_and_clear_button_bindings",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_mouse_double_click_and_escape_close_details",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_output_folder_button_delegates_or_reports_error",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_scan_failure_releases_controls_and_reports_reason",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_repeated_navigation_and_theme_buttons_keep_page_state",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_audit.GUIAuditTests.test_layout_matrix_keeps_primary_controls_inside_window",
     "archive": "tests/legacy_tk/test_gui_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_legacy_combined_format_migrates_and_stays_single_on_restart",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_selected_dwg_exports_only_dwg_even_when_dxf_would_fail",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_invalid_format_does_not_start_worker_or_clear_existing_results",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_rapid_navigation_defers_io_and_close_flushes_every_page",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_preference_retry_keeps_departed_page_snapshot",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_rapid_menu_clicks_leave_only_final_page_highlighted",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_k_result_view_preserves_manual_recipe_and_fixed_actions",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_k_scan_automatically_opens_full_result_view",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_large_preview_yields_to_stop_before_completing_list",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_large_worker_list_precedes_results_and_done",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_worker_batch_retains_every_result_and_log_with_one_visible_update",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_worker_batch_keeps_total_event_order_and_final_summary_in_each_module",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_worker_log_burst_yields_between_batches_without_losing_messages",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_gui_flow.GUIFlowTests.test_log_scrolling_stays_with_reader_and_follows_again_at_bottom",
     "archive": "tests/legacy_tk/test_gui_flow.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_minimal_selection_keeps_samples_filters_and_manual_panels",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_compact_iso_section_uses_exact_selected_sample_and_keeps_overall_kind",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_default_and_every_preset",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_every_dropdown_item",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_invalid_input_clears_values_and_disables_export",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_interference_and_transition_metrics",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_both_views_and_three_sample_sizes",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_csv_clipboard_cancel_and_write_error",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_iso_views_samples_manual_limits_matching_and_report",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_navigation_theme_and_preferences_after_restart",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_search_sources_dialog_and_catalog_link",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_fits.IsoGuiTests.test_resolutions_themes_scaling_and_scroll_reachability",
     "archive": "tests/legacy_tk/test_iso_fits.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_every_hole_band_updates_native_labels_and_report_without_h7_fallback",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_default_manual_example_does_not_suggest_common_h7_preset",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_equal_distance_and_distant_references_are_visible",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_entry_edit_invalid_recovery_and_navigation_preserve_new_match",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_basis_filters_and_clicks_show_non_h7_transition_examples",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_basis_search_diameter_regrouping_and_persistence",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_matching.ManualMatchingGuiTests.test_shorter_filtered_list_stays_visible_after_manual_form",
     "archive": "tests/legacy_tk/test_iso_matching.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_section.IsoSectionTests.test_diameter_arrows_span_parts_and_radial_arrow_is_half_the_difference",
     "archive": "tests/legacy_tk/test_iso_section.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_section.IsoSectionTests.test_transition_endpoints_show_different_samples_with_same_overall_kind",
     "archive": "tests/legacy_tk/test_iso_section.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_section.IsoSectionTests.test_zero_difference_is_contact_without_gap_or_overlap_and_recovers",
     "archive": "tests/legacy_tk/test_iso_section.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_section.IsoSectionTests.test_manual_half_micron_radial_value_and_negative_gap_are_exact",
     "archive": "tests/legacy_tk/test_iso_section.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_section.IsoSectionTests.test_small_window_both_themes_and_dpi_keep_labels_inside_canvas",
     "archive": "tests/legacy_tk/test_iso_section.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_section.IsoSectionTests.test_view_change_restores_height_and_hides_section_legend",
     "archive": "tests/legacy_tk/test_iso_section.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_tolerance_audit.ToleranceGuiAuditTests.test_positive_twenty_micron_clearance_never_disappears_with_common_offset",
     "archive": "tests/legacy_tk/test_iso_tolerance_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_tolerance_audit.ToleranceGuiAuditTests.test_twenty_micron_interference_has_negative_signed_difference",
     "archive": "tests/legacy_tk/test_iso_tolerance_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_tolerance_audit.ToleranceGuiAuditTests.test_unilateral_example_section_card_csv_and_clipboard_agree",
     "archive": "tests/legacy_tk/test_iso_tolerance_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_tolerance_audit.ToleranceGuiAuditTests.test_nearest_transition_reference_cannot_replace_positive_actual_clearance",
     "archive": "tests/legacy_tk/test_iso_tolerance_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_iso_tolerance_audit.ToleranceGuiAuditTests.test_transition_positive_twenty_micron_sample_remains_a_positive_clearance",
     "archive": "tests/legacy_tk/test_iso_tolerance_audit.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_k_factor.KGuiTests.test_navigation_title_preferences_and_theme_persistence",
     "archive": "tests/legacy_tk/test_k_factor.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_kr_stop_discards_queued_apply_and_helper_never_overwrites",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_k_factor.KGuiTests.test_measured_ba_and_outside_dimensions_calculator",
     "archive": "tests/legacy_tk/test_k_factor.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_kr_stop_discards_queued_apply_and_helper_never_overwrites"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_k_factor.KGuiTests.test_invalid_direct_assignment_blocks_worker",
     "archive": "tests/legacy_tk/test_k_factor.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_kr_stop_discards_queued_apply_and_helper_never_overwrites"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_k_factor.KGuiTests.test_real_preview_and_apply_worker_result_events",
     "archive": "tests/legacy_tk/test_k_factor.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_kr_stop_discards_queued_apply_and_helper_never_overwrites"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_k_factor.KGuiTests.test_apply_requested_during_scan_is_preserved_and_stop_cancels_it",
     "archive": "tests/legacy_tk/test_k_factor.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_kr_stop_discards_queued_apply_and_helper_never_overwrites",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_k_factor.KGuiTests.test_small_large_and_scaled_layout_in_both_themes",
     "archive": "tests/legacy_tk/test_k_factor.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_kr_stop_discards_queued_apply_and_helper_never_overwrites"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_kr_assignment_window.AssignmentWindowTests.test_preview_and_worker_capture_complete_table",
     "archive": "tests/legacy_tk/test_kr_assignment_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_kr_assignment_window.AssignmentWindowTests.test_rows_persist_remove_and_duplicate_blocks_assignment",
     "archive": "tests/legacy_tk/test_kr_assignment_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_kr_assignment_window.AssignmentWindowTests.test_helper_values_do_not_fill_manual_rows_or_apply",
     "archive": "tests/legacy_tk/test_kr_assignment_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_kr_assignment_window.AssignmentWindowTests.test_queued_apply_keeps_row_snapshot",
     "archive": "tests/legacy_tk/test_kr_assignment_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_actual_example_button_and_every_target_menu",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_compatibility_clears_on_invalid_input_and_hides_in_iso_mode",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_joint_report_includes_target_reference_and_actual_values",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_target_persistence_and_assessment_can_be_scrolled_into_view",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_real_method_button_and_example_results",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_live_inputs_units_exact_comparison_and_invalid_recovery",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_iso_selection_manual_values_and_restart_remain_independent",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_manual_csv_and_clipboard_include_actual_values_and_match_scope",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_manual_focus_diagrams_and_both_themes",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_iso.ManualIsoGuiTests.test_small_large_scaled_forms_and_comparison_are_reachable",
     "archive": "tests/legacy_tk/test_manual_iso.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_iso_views_samples_manual_limits_matching_and_report"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_calibration_fields_follow_method_without_losing_measurements",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_default_manual_and_calculated_values_cannot_start_assignment",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_apply_from_calculator_uses_only_entered_values_without_table_lookup",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_tabs_keep_independent_values_and_ignore_invalid_automatic_fields",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_invalid_manual_inputs_block_scan_and_apply",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_failed_assignment_exposes_complete_reason_and_copies_log",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_real_preview_apply_and_csv_report_from_gui",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_manual_preferences_reload_and_save_choice_starts_off",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_manual_gui_preserves_custom_bends_after_preview_and_assignment",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_manual_k_radius.ManualGuiTests.test_manual_fields_scroll_into_view_and_actions_remain_visible",
     "archive": "tests/legacy_tk/test_manual_k_radius.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_kr_exact_inputs_preview_labels_and_queued_scope"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_queued_clicks_build_only_last_page_and_keep_form_values",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_navigation_waits_for_timer_turn_not_construction_idle_flush",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_visited_pages_keep_native_surfaces_and_ready_switch_skips_layout",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_startup_prepares_every_page_before_interactive_navigation",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_pending_navigation_immediately_highlights_requested_menu",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_cached_pages_are_refitted_after_window_geometry_changes",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_current_page_or_direct_navigation_supersedes_queued_click",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_queued_navigation_is_discarded_if_worker_starts_or_app_closes",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_preloading_never_maps_partial_page",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_first_open_keeps_previous_page_visible_until_ready_and_recovers_on_error",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_error_releases_controls_and_keeps_full_message",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_preloading_keeps_active_page_data_and_settings_unchanged",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_failed_preload_removes_partial_page_and_restores_active_workspace",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_preloading_waits_during_worker_and_recent_input",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_new_pages_reuse_table_styles_and_theme_and_scale_still_refresh_them",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_preloaded_pages_stay_hidden_after_dpi_changes",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_preloading_preserves_active_iso_manual_state",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_conditional_forms_and_filtered_choices_stay_hidden_after_dpi_changes",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_iso_sample_and_view_changes_only_redraw_diagram",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_iso_filter_reuses_layout_and_updates_selected_pair",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_diagram_cache_invalidates_on_data_theme_size_and_invalid_input",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_menu_rendering.MenuRenderingTests.test_gdt_numeric_change_does_not_rebuild_catalog_or_static_heading",
     "archive": "tests/legacy_tk/test_menu_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_scan_manual_model_and_paired_drawing_edit_then_save_package",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_native_error_signature_is_copied_in_full_without_growing_status_label",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread",
+      "test_worker_error_releases_controls_and_keeps_full_message"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_invalid_rules_existing_folder_and_failed_rescan_disable_save",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_colliding_source_basenames_stay_editable_until_names_are_unique",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_assembly_tree_shared_edit_preserves_branches_and_pack_order",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_cached_page_and_rules_survive_theme_and_small_window_scaling",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_immediate_navigation_keeps_delayed_preview_and_edit_in_sync",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_source_folder_with_multiple_assemblies_uses_inline_choice_then_exact_target",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_single_assembly_is_selected_without_a_file_picker_and_busy_pick_is_ignored",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_cancelled_source_selection_keeps_preview_but_empty_folder_invalidates_it",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_destination_check_runs_outside_tk_and_is_reused_for_rule_edits",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_old_parent_and_package_settings_migrate_to_one_destination",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread",
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_naming_window.NamingWindowTests.test_rules_are_saved_and_close_cancels_pending_worker",
     "archive": "tests/legacy_tk/test_naming_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_close_cancel_waits_without_terminating_worker",
+      "test_naming_folder_source_exact_destination_hierarchy_and_collision",
+      "test_naming_plan_filesystem_checks_are_off_gui_thread",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_rendering_events.RenderingEventTests.test_option_menu_does_not_run_unrelated_idle_callbacks_while_painting",
     "archive": "tests/legacy_tk/test_rendering_events.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_rendering_events.RenderingEventTests.test_scrollable_frame_thumb_paints_without_reentering_layout",
     "archive": "tests/legacy_tk/test_rendering_events.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_rendering_events.RenderingEventTests.test_unchanged_scroll_fractions_skip_redraw_but_changed_values_paint",
     "archive": "tests/legacy_tk/test_rendering_events.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_rendering_events.RenderingEventTests.test_child_resize_skips_root_size_queries_but_window_resize_reaches_ctk",
     "archive": "tests/legacy_tk/test_rendering_events.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_tab_rendering.TabRenderingTests.test_result_tab_paints_replacement_before_unmapping_previous",
     "archive": "tests/legacy_tk/test_tab_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_tab_rendering.TabRenderingTests.test_rapid_programmatic_and_mouse_tab_changes_keep_latest_visible",
     "archive": "tests/legacy_tk/test_tab_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_tab_rendering.TabRenderingTests.test_selected_result_survives_theme_and_dpi_changes",
     "archive": "tests/legacy_tk/test_tab_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_tab_rendering.TabRenderingTests.test_k_views_paint_replacement_before_unmapping_previous",
     "archive": "tests/legacy_tk/test_tab_rendering.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_ui_language.TurkishRenderingTests.test_turkish_letters_are_drawable_in_ui_and_log_fonts",
     "archive": "tests/legacy_tk/test_ui_language.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_ui_language.TurkishRenderingTests.test_uppercase_headings_use_turkish_dotted_i",
     "archive": "tests/legacy_tk/test_ui_language.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_ui_language.TurkishRenderingTests.test_missing_glyph_is_reported_instead_of_silently_losing_a_letter",
     "archive": "tests/legacy_tk/test_ui_language.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_weight_window.WeightWindowTests.test_all_section_choices_update_fields_density_and_piece_totals",
     "archive": "tests/legacy_tk/test_weight_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_weight_all_shapes_and_native_sections",
+      "test_weight_material_densities_tool_names_and_unit_conversion"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_weight_window.WeightWindowTests.test_value_edits_keep_field_layout_while_kind_method_and_units_stay_current",
     "archive": "tests/legacy_tk/test_weight_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_weight_all_shapes_and_native_sections",
+      "test_weight_material_densities_tool_names_and_unit_conversion"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_weight_window.WeightWindowTests.test_units_preserve_inactive_dimensions_and_catalogue_mode_clears_invalid_results",
     "archive": "tests/legacy_tk/test_weight_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_weight_all_shapes_and_native_sections",
+      "test_weight_material_densities_tool_names_and_unit_conversion"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_weight_window.WeightWindowTests.test_cached_preferences_theme_small_window_and_drawing_cache",
     "archive": "tests/legacy_tk/test_weight_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_weight_all_shapes_and_native_sections",
+      "test_weight_material_densities_tool_names_and_unit_conversion"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_weight_window.WeightWindowTests.test_material_groups_readonly_density_menu_selection_and_legacy_preferences",
     "archive": "tests/legacy_tk/test_weight_window.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_settings_io_error_keeps_pending_changes",
+      "test_settings_restart_preserves_all_modules_and_unknown_values",
+      "test_weight_all_shapes_and_native_sections",
+      "test_weight_material_densities_tool_names_and_unit_conversion"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_workspace_layout.WorkspaceLayoutTests.test_only_active_page_resizes_without_unmapping_cached_native_surfaces",
     "archive": "tests/legacy_tk/test_workspace_layout.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_workspace_layout.WorkspaceLayoutTests.test_layout_follows_continuous_resize_before_drag_ends",
     "archive": "tests/legacy_tk/test_workspace_layout.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_workspace_layout.WorkspaceLayoutTests.test_operation_work_areas_stay_large_when_scrolling_and_switching_forms",
     "archive": "tests/legacy_tk/test_workspace_layout.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   },
   {
     "original": "test_workspace_layout.WorkspaceLayoutTests.test_independent_reference_pages_keep_their_work_areas_after_operation_pages",
     "archive": "tests/legacy_tk/test_workspace_layout.py",
-    "qt_module": "tests/test_qt_workflows.py"
+    "qt_module": "tests/test_qt_workflows.py",
+    "qt_tests": [
+      "test_every_page_theme_and_cached_navigation",
+      "test_folder_scan_worker_and_dwg_options",
+      "test_resolution_all_pages_have_usable_viewport",
+      "test_results_filter_sort_reports_full_errors_and_csv",
+      "test_worker_is_responsive_navigable_and_cancellable"
+    ],
+    "mapping": "Grouped behavior replacement; Tk internal widget assertions are historical, not counted as passed Qt tests."
   }
 ]

@@ -46,9 +46,9 @@ class ExportPage(BasePage):
 
     def validate(self, *, output=False):
         values = self.form.values()
-        if not values['source'].strip() or not Path(values['source']).is_dir():
-            raise ValueError('Kaynak klasörü bulunamadı. Bir klasör seçin.')
-        if output and (not values['output'].strip() or Path(values['output']).exists() and not Path(values['output']).is_dir()):
+        if not values['source'].strip():
+            raise ValueError('Bir kaynak klasörü seçin.')
+        if output and not values['output'].strip():
             raise ValueError('Geçerli bir çıktı klasörü seçin.')
         return values
 
@@ -76,6 +76,9 @@ class ExportPage(BasePage):
         mode = self.mode
 
         def operation(sink, stop):
+            target = Path(values['output'])
+            if target.exists() and not target.is_dir():
+                raise ValueError('Çıktı konumu bir klasör olmalı.')
             args = (values['source'], values['output'], values['recursive'], values['overwrite'], sink, stop)
             if mode == 'pdf':
                 export_drawings(*args)

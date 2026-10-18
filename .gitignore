@@ -62,6 +62,8 @@ cover/
 
 # Django stuff:
 *.log
+windows-tests.xml
+packaging/licenses/installed/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal

@@ -81,6 +81,14 @@ def main():
     log = Path('windows-build.log')
     if report['status'] != 'success' and log.exists():
         report['build_log_tail'] = log.read_text(encoding='utf-8', errors='replace')[-12000:]
+    tests = Path('windows-tests.xml')
+    if tests.exists():
+        from xml.etree import ElementTree
+        suites = ElementTree.parse(tests).getroot()
+        report['regressions'] = [dict(suite.attrib) for suite in suites.iter('testsuite')]
+    tests_log = Path('windows-tests.log')
+    if report['status'] == 'failure' and tests_log.exists():
+        report['test_log_tail'] = tests_log.read_text(encoding='utf-8', errors='replace')[-22000:]
     publish(report)
 
 

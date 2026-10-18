@@ -46,6 +46,7 @@ class IsoPage(CalculationPage):
         self.search.setPlaceholderText('Hazır geçme ara…')
         self.extra_layout.addWidget(self.search)
         self.presets = configure_view(QTreeView())
+        self.presets.setSortingEnabled(False)
         self.preset_model = TreeModel((Column('Hazır geçmeler', 'name'),))
         self.preset_proxy = FilterProxy(self, tree=True)
         self.preset_proxy.setSourceModel(self.preset_model)

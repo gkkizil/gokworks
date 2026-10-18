@@ -1,5 +1,5 @@
 {
-  "request_id": "ff34a636-ec5a-418a-ad52-907f2e57eb35",
-  "requested_at": "2026-10-18T13:30:26.332331+00:00",
-  "reason": "User-authorized full Qt migration: nine PySide6 workspaces, original CAD engines, onedir Windows package, all pages and DPI smoke checks; development branch only."
+  "request_id": "07003988-e5e8-442e-806d-6bb474c2da29",
+  "requested_at": "2026-10-18T13:37:51.558670+00:00",
+  "reason": "Qt migration final source: off-thread naming plans, cache-backed filters, 518 Linux regression tests passed; Windows diagnostics and native three-scale EXE smoke checks."
 }

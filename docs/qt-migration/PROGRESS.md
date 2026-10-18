@@ -16,6 +16,21 @@ Uzun işler QThread/QObject üzerinden çalışacak, COM nesneleri GUI'ye taşı
 Başlangıç ekranları ve profil Linux/Xvfb ile alındı. Mevcut testlerin başlangıç
 sonuçları ayrıca kaydediliyor; başarısızlıklar migrasyon sonucu gibi gösterilmeyecek.
 
-## Aşamalar 2–8
+## Aşamalar 2–6 — tamamlandı
 
-Uygulama sürüyor. Bu dosya tamamlanma raporu değildir.
+Dokuz Qt sayfası, cache’li navigasyon, modeller, arka plan işleri, ayar geçişi,
+vektör şemalar ve iptal/kapatma akışları uygulandı. 38 motor/geometri dosyası
+byte olarak aynı kaldı. Büyük isimlendirme planları da worker’a taşındı.
+
+## Aşama 7 — doğrulama
+
+Linux: 518 test geçti, 878 alt senaryo geçti. Önceki Tk testlerinden 210 yöntem
+arşivde aynen korunur; 108 Qt senaryosu bunların davranış karşılıklarını kapsar.
+Windows ilk denemesi regresyon adımında başarısız oldu; gelişmiş test günlükleri
+ve native EXE/DPI kontrolleriyle yeniden derleniyor. Canlı SolidWorks testi yok.
+
+## Aşama 8 — temizlik ve belge
+
+Ana runtime’dan Tk/CustomTkinter çıkarıldı, eski kullanılmayan mixin’ler kaldırıldı.
+Lisanslar, envanter, test eşleştirmesi ve migrasyon raporu eklendi. Windows sonucu
+ve son ölçüm kanıtları derleme tamamlandığında rapora işlenecek.
