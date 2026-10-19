@@ -21,6 +21,7 @@ from .pages.bolt import BoltPage
 from .pages.weight import WeightPage
 from .pages.iso import IsoPage
 from .pages.gdt import GdtPage
+from .pages.tolerance_stack import ToleranceStackPage
 
 
 MODULES = (
@@ -31,6 +32,7 @@ MODULES = (
     ('k_factor', 'K faktörü / yarıçap', 'MÜHENDİSLİK HESAPLARI'),
     ('iso_fits', 'ISO geçme toleransları', 'MÜHENDİSLİK HESAPLARI'),
     ('geometric_tolerances', 'Geometrik toleranslar', 'MÜHENDİSLİK HESAPLARI'),
+    ('tolerance_stack', 'Tolerans yığılması', 'MÜHENDİSLİK HESAPLARI'),
     ('bolt', 'Cıvata hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('weight', 'Ağırlık hesabı', 'MÜHENDİSLİK HESAPLARI'),
 )
@@ -113,6 +115,7 @@ class MainWindow(QMainWindow):
         factories = dict(pdf=lambda: ExportPage(self, 'pdf'), dxf_dwg=lambda: ExportPage(self, 'dxf_dwg'),
                          bom=lambda: BomPage(self), naming=lambda: NamingPage(self), k_factor=lambda: KrPage(self),
                          iso_fits=lambda: IsoPage(self), geometric_tolerances=lambda: GdtPage(self),
+                         tolerance_stack=lambda: ToleranceStackPage(self),
                          bolt=lambda: BoltPage(self), weight=lambda: WeightPage(self))
         for mode, factory in factories.items():
             page = factory()

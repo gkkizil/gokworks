@@ -1,0 +1,64 @@
+{
+  "tolerance_types": {
+    "0": "Yok",
+    "1": "BASIC",
+    "2": "Asimetrik",
+    "3": "Limit",
+    "4": "Simetrik",
+    "5": "Minimum",
+    "6": "Maksimum",
+    "7": "ISO geçme",
+    "8": "ISO geçme + tolerans",
+    "9": "Yalnız geçme toleransı",
+    "10": "Blok",
+    "11": "Genel"
+  },
+  "dimension_types": {
+    "1": "ordinate",
+    "2": "linear",
+    "3": "angle",
+    "4": "arc",
+    "5": "radius",
+    "6": "diameter",
+    "7": "ordinate",
+    "8": "ordinate",
+    "9": "linear",
+    "10": "chamfer",
+    "11": "horizontal",
+    "12": "vertical",
+    "13": "unknown",
+    "14": "radius",
+    "15": "diameter"
+  },
+  "ModelDoc2_IID": "{B90793FB-EF3D-4B80-A5C4-99959CDB6CEB}",
+  "DrawingDoc_IID": "{83A33D33-27C5-11CE-BFD4-00400513BB57}",
+  "tolerance_values": {
+    "methods": [
+      "GetMinValue2",
+      "GetMaxValue2"
+    ],
+    "return_type": "Int32 status",
+    "out_type": "double BYREF VT_R8",
+    "variant_type": 16389
+  },
+  "nominal": {
+    "method": "GetSystemValue3",
+    "configuration_mode": 3,
+    "configuration_names": "VT_ARRAY | VT_BSTR",
+    "length_unit": "metre",
+    "angle_unit": "radian"
+  },
+  "copy": {
+    "method": "IModelDocExtension.SaveAs",
+    "options": 3,
+    "meaning": "Silent | Copy; SaveReferenced is NOT set"
+  },
+  "new_sheet": {
+    "method": "IDrawingDoc.NewSheet3",
+    "paper": 12,
+    "template": 13,
+    "width_m": 0.42,
+    "height_m": 0.297
+  },
+  "live_solidworks_tested": false
+}

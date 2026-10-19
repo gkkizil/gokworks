@@ -1,10 +1,13 @@
 """Açık SolidWorks oturumuna bağlanma yardımcıları."""
 
 
-def connect_to_solidworks():
+def connect_to_solidworks(*, raw=False):
     """Çalışan SolidWorks oturumuna bağlan."""
     try:
-        import win32com.client
+        if raw:
+            import pythoncom
+        else:
+            import win32com.client
     except ImportError as error:
         raise RuntimeError(
             "SolidWorks bağlantısı için pywin32 paketi gerekli. "
@@ -12,6 +15,11 @@ def connect_to_solidworks():
         ) from error
 
     try:
+        if raw:
+            # Avoid win32com's automatic MakePy/type-info wrapping for callers
+            # that invoke the published dual interfaces explicitly.
+            active = pythoncom.GetActiveObject(pythoncom.CLSIDFromProgID("SldWorks.Application"))
+            return active.QueryInterface(pythoncom.IID_IDispatch)
         return win32com.client.GetActiveObject("SldWorks.Application")
     except Exception as error:
         raise RuntimeError(

@@ -1,0 +1,35 @@
+{
+  "references": [
+    {
+      "repository": "https://github.com/xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "license": "MIT",
+      "use": "Drawing traversal adapted"
+    },
+    {
+      "repository": "https://github.com/robertdosa/EasyStackup",
+      "commit": "007cef8b02e2a367bb10b5f37d5064d2fde27462",
+      "license": "MIT",
+      "use": "Signed intervals/asymmetric centers reviewed/adapted"
+    },
+    {
+      "repository": "https://github.com/saurabh-krishnan/tolerancing",
+      "commit": "1d5fc4ad196679d09f86495c900666c58cc73bdb",
+      "license": "MIT",
+      "use": "Independent moments/units/capability reviewed/adapted"
+    },
+    {
+      "repository": "https://github.com/jrstauff2/TolStack",
+      "commit": "0af8a6d9c41843c749ccb04416dde9a616c57426",
+      "license": "No standard LICENSE file; README free-use statement",
+      "use": "3D extension concepts only; no source copied"
+    }
+  ],
+  "interop_contract_source": {
+    "repository": "https://github.com/angelsix/solidworks-api",
+    "commit": "58787e2cefdcc03aebc15a51bd52ba151f3969d4",
+    "inspected": "References/2023/SolidWorks.Interop.{swconst,sldworks}.dll metadata",
+    "redistributed": false
+  },
+  "online_official_help": "Attempted; access returned HTTP 403. Not treated as verified web access."
+}

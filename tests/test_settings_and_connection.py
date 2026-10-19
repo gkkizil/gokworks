@@ -49,6 +49,20 @@ class SettingsTests(unittest.TestCase):
 
 
 class ConnectionTests(unittest.TestCase):
+    def test_raw_connection_uses_existing_idispatch_without_win32com_type_wrapping(self):
+        calls=[]
+        class Active:
+            def QueryInterface(self,iid):calls.append(('query',iid));return self
+            def GetTypeInfo(self):raise AssertionError('Type information must not be requested')
+        active=Active()
+        pythoncom=ModuleType('pythoncom')
+        pythoncom.IID_IDispatch='IDispatch'
+        pythoncom.CLSIDFromProgID=lambda name: calls.append(('progid',name)) or 'CLSID'
+        pythoncom.GetActiveObject=lambda clsid: calls.append(('existing',clsid)) or active
+        with patch.dict(sys.modules,{'pythoncom':pythoncom}):
+            self.assertIs(connect_to_solidworks(raw=True),active)
+        self.assertEqual(calls,[('progid','SldWorks.Application'),('existing','CLSID'),('query','IDispatch')])
+
     def stub_modules(self, get_active):
         package, client = ModuleType('win32com'), ModuleType('win32com.client')
         package.__path__ = []

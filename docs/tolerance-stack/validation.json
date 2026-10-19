@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-19",
+  "platform": "Linux / Python 3.13 / PySide6 6.10.3",
+  "full_regression": {
+    "main_passed": 615,
+    "subtests_passed": 878,
+    "skipped": 2,
+    "failures": 0,
+    "errors": 0,
+    "summary": "615 passed, 2 skipped, 131 warnings, 878 subtests passed in 202.36s (0:03:22)"
+  },
+  "final_connection_checks": {
+    "main_passed": 69,
+    "subtests_passed": 5,
+    "failures": 0,
+    "errors": 0,
+    "note": "Overlaps full regression. Executed after final optional raw IDispatch connection and provenance note changes."
+  },
+  "live_solidworks": {
+    "executed": false,
+    "reason": "No Windows/SolidWorks session in this environment; two opt-in tests skipped."
+  },
+  "windows_exe": {
+    "built": false,
+    "packaging_support_updated": true
+  },
+  "qt_smokes": [
+    {
+      "scale": "1.25",
+      "status": "passed",
+      "qt_platform": "offscreen",
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "weight"
+      ],
+      "checks": [
+        "ten modules",
+        "two themes",
+        "resolution matrix",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "no Tk runtime"
+      ],
+      "startup_ms": 274.33,
+      "navigation_median_ms": 19.46,
+      "navigation_max_ms": 44.64,
+      "solidworks_live_tested": false
+    },
+    {
+      "scale": "1.5",
+      "status": "passed",
+      "qt_platform": "offscreen",
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "weight"
+      ],
+      "checks": [
+        "ten modules",
+        "two themes",
+        "resolution matrix",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "no Tk runtime"
+      ],
+      "startup_ms": 282.09,
+      "navigation_median_ms": 20.38,
+      "navigation_max_ms": 33.62,
+      "solidworks_live_tested": false
+    }
+  ],
+  "final_layout_checks": {
+    "passed": 6,
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "sizes": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ]
+    ],
+    "assertion": "Library and chain tables retain visible rows in independently scrollable panes; all tabs fit compact width.",
+    "note": "Final compact layout refinement after full regression. Overlapping test cases, not an additional total."
+  }
+}

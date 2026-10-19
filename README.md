@@ -92,6 +92,22 @@ Yan menü Aktarım ve montaj ile Mühendislik hesapları olarak gruplandı. Sade
 
 [Güncel ekran galerisi](docs/ui-preview/README.md), [açık tema](docs/ui-preview/screenshots/iso-fits-light.png), [siyah tema](docs/ui-preview/screenshots/dxf-dwg-dark.png), [GUI tasarım/doğrulama notları](docs/gui-design.md) ve [menü akıcılığı ölçümleri](docs/menu-responsiveness.md).
 
+## Tolerans yığılması
+
+**Mühendislik Hesapları → Tolerans yığılması** altında aktif veya seçilen birden
+fazla `.SLDDRW` teknik resmindeki ölçüleri okuyun; fonksiyonel zincire +/− yönüyle
+ekleyip datum/eksen ilişkisini doğrulayın. SolidWorks olmadan manuel ölçü ve ISO
+286 delik/mil aktarımı çalışır. Worst-Case, RSS ve seed destekli Monte Carlo;
+normal/uniform/üçgensel dağılım, katkı grafiği ve varsayımsal Cp/Cpk desteklenir.
+
+Analiz JSON, PDF ve Excel olarak kaydedilir. Teknik resme yalnız ayrı analiz
+notları/analiz sayfaları eklenir. Kaynak dosyaya kayıt varsayılan değildir;
+analizli kopya ve açık onayla doğrulanmış yedekli kaynak kaydı ayrı seçeneklerdir.
+Gerçek SolidWorks kabul testleri bu Linux ortamında çalıştırılmadı.
+[Kullanım, matematik, API ve lisanslar](docs/tolerance-stack.md) ·
+[Güncel ekranlar](docs/tolerance-stack/screenshots) ·
+[Örnek analiz / PDF / Excel](tolerance_stack/examples).
+
 ## ISO GEÇMELERİ
 
 Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–400 mm**, 11 delik ve 18 mil sınıfı için ölçü/sapma limitleri, boşluk/sıkılık, şematik kesit ve doğrusal tolerans bölgeleri gösterilir. Üç örnek ölçü, mm/µm, arama, CSV ve pano desteklenir. **Manuel kontrol** menüsünde kendi delik/mil alt ve üst sapmalarınızı girin: boşluk/sıkılık ve ISO tablosunda tam/en yakın eşleşme hesaplanır. **Montaj hedefi** menüsü bütün limitlerde kayar, ara veya sıkı geçmeye uygunluğu açıklar; en yakın ISO çift ve yaygın geçme ayrıca gösterilir. SolidWorks bağlantısı gerektirmez.
@@ -253,7 +269,7 @@ Qt ortamına güncellendi. Yayımlama işlemi çalışan Xvfb süreçlerini taş
 
 ## Qt geliştirme sürümü
 
-Dokuz çalışma alanı tek Qt ana penceresinde korunur. Menü geçişleri ekranları
+On çalışma alanı tek Qt ana penceresinde korunur. Menü geçişleri ekranları
 yeniden oluşturmaz. Uzun CAD ve dosya işlemleri QThread üzerinde çalışır;
 işlem sırasında diğer menüler kullanılabilir. Aynı anda bir CAD/dosya işi çalışır.
 

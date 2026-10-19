@@ -56,6 +56,14 @@ def check(output):
         assert weight.result.total_mass_kg == 157
         assert w.pages['iso_fits'].result is not None
         assert w.pages['geometric_tolerances'].result is not None
+        from tolerance_stack.calculator import calculate
+        from tolerance_stack.report import export_excel as stack_excel, export_pdf as stack_pdf
+        stack=w.pages['tolerance_stack'];stack.load_example();stack.project.confirm()
+        stack_result=calculate(stack.project)
+        assert tuple(map(str,(stack_result.nominal,stack_result.minimum,stack_result.maximum))) == ('0.20','0.02','0.38')
+        stack.show_result(stack_result)
+        stack_excel(stack.project,stack_result,Path(folder)/'ToleranceStack.xlsx')
+        stack_pdf(stack.project,stack_result,Path(folder)/'ToleranceStack.pdf')
         assert not w.pages['k_factor'].save_files.isChecked()
         from .models import TableModel, Column, FilterProxy
         model = TableModel((Column('Parça','name'),Column('Adet','quantity')))
@@ -98,7 +106,8 @@ def check(output):
                       resize_max_ms=round(max(resize_times),2),table_50000_load_ms=round(load_ms,2),
                       table_50000_filter_ms=round(filter_ms,2),tk_imports=forbidden,
                       kr_assignment_engine='embedded Python SheetMetal parameters',
-                      solidworks_live_tested=False,checks=['nine modules','two themes','resolution matrix',
+                      solidworks_live_tested=False,checks=['ten modules','two themes','resolution matrix',
+                      'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency','no Tk runtime'])
         w.close()
         return report

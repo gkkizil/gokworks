@@ -1,5 +1,20 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Tolerans yığılması modülü · 19 Ekim 2026
+
+CodeStack (©2025 Xarial Pty Limited), EasyStackup (©2026 github.com/robertdosa)
+ve tolerancing (©2026 saurabh-krishnan) referansları MIT lisansları doğrulanarak
+incelendi/uyarlandı. Tam bildirimler `packaging/licenses/tolerance-stack/`
+altında korunur ve Windows lisans klasörüne birlikte dağıtılır. Bu projeler
+çalışma bağımlılığı olarak kurulmaz. [Kullanım kapsamı ve sürümler](tolerance-stack.md).
+
+TolStack deposunda standart lisans dosyası doğrulanamadı; README'deki genel
+izin ifadesi MIT olarak yorumlanmadı. 3D yaklaşımı incelendi, kod kopyalanmadı.
+SolidWorks interop DLL'leri yalnız API meta verisini kontrol etmek için dış
+geliştirme ortamında okundu; GOKWORKS içine eklenmedi veya dağıtılmadı.
+
+## Mevcut Qt sürümü bildirimleri
+
 Bu inceleme 18 Ekim 2026 tarihli geliştirme dalına aittir. Yeni arayüz kodu
 proje için yazılmıştır; üçüncü taraf hazır arayüz veya ücretli ikon kopyalanmadı.
 GÖK görselleri kullanıcı tarafından sağlanan mevcut marka varlıklarıdır.

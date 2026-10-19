@@ -46,6 +46,15 @@ def icon(name, color='#80B6F5'):
         painter.drawRect(8, 15, 31, 26)
         painter.drawArc(16, 4, 15, 20, 0, 180 * 16)
         painter.drawLine(24, 23, 24, 33)
+    elif name == 'tolerance_stack':
+        for y in (11,24,37):
+            painter.drawLine(7,y,41,y)
+            painter.drawLine(10,y-4,10,y+4)
+            painter.drawLine(37,y-4,37,y+4)
+        painter.drawLine(13,8,18,11)
+        painter.drawLine(18,11,13,14)
+        painter.drawLine(35,21,30,24)
+        painter.drawLine(30,24,35,27)
     elif name == 'iso_fits':
         painter.drawEllipse(6, 6, 35, 35)
         painter.drawEllipse(14, 14, 19, 19)

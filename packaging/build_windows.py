@@ -76,6 +76,8 @@ def main():
         'ZIP dosyasının tamamını çıkartın. GOKWORKS klasöründeki GOKWORKS.exe dosyasını açın.\n'
         '_internal klasörü EXE yanında kalmalıdır; yalnız EXE dosyasını taşımayın. Python kurulumu gerekmez.\n'
         'Cıvata, ISO geçme ve geometrik tolerans ekranları SolidWorks olmadan açılır.\n'
+        'Tolerans yığılması manuel analiz, Monte Carlo ve PDF/Excel raporları yerel çalışır.\n'
+        'Teknik resim ölçü okuma/anotasyon işlemleri için açık SolidWorks oturumu gerekir.\n'
         'CAD aktarımı ve montaj işlemleri için SolidWorks kurulu ve açık olmalıdır.\n'
         'Ayarlar %APPDATA%\\GOKWORKS altında saklanır.\n'
         'Bu deneme paketi kod imzası taşımaz.\n\n'
