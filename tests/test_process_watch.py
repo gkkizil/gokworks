@@ -38,7 +38,8 @@ def test_old_fault_from_reused_pid_is_not_this_process():
     event_xml(pid='0x34c9'), event_xml(pid='invalid'), event_xml(event='1001'),
     event_xml(provider='Other application'), event_xml(exception='PRIVATE'),
     '<not-xml', 'x'*(256*1024+1),
-])
+], ids=['other_pid', 'invalid_pid', 'other_event', 'other_provider',
+        'invalid_exception', 'malformed_xml', 'oversized_xml'])
 def test_unrelated_or_invalid_event_is_not_a_cause(xml):
     assert watch._fault_details(xml, 13512) is None
 
