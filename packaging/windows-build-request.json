@@ -1,5 +1,6 @@
 {
-  "request_id": "a3491e88-3210-46af-8d6f-171fe8410b4c",
-  "requested_at": "2026-10-18T17:09:09.347085+00:00",
-  "reason": "Keep 50k-row Qt structural auditing separate from production performance timing without relaxing its bound; full Windows regressions and final native EXE build."
+  "request_id": "ca805c83-dfe0-45e4-a0d6-a63ca4ab8ba1",
+  "requested_at": "2026-10-19T03:44:55.159123+00:00",
+  "source_commit": "d9710da745ee0256d8920dd2ca70d3b616989b27",
+  "reason": "User-requested current GOKWORKS Windows EXE, including restored engineering details and integrated tolerance stack-up module; run Windows regressions and frozen application checks."
 }
