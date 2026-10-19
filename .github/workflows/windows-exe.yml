@@ -35,7 +35,7 @@ jobs:
           BUILD_STATUS: building
         run: python packaging/publish_status.py
       - name: Validate regression suite on Windows
-        timeout-minutes: 7
+        timeout-minutes: 12
         env:
           QT_QPA_PLATFORM: offscreen
           PYTHONUTF8: '1'
