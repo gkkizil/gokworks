@@ -1,15 +1,19 @@
 {
-  "commit": "93c3051935c6a3136e5b80b55378f7f8e5cfe02d",
+  "commit": "cbd42c20838679f8520ce220ff353c6758a29f3f",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39238813638",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39238813638/artifacts/12181555071",
-  "bytes": 9942560,
-  "sha256": "75ed78d6a43f96bc8472878689b6090556a9afe1d5b7fbda249fe783c38803a8",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39246105693",
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39246105693-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/39246105693/artifacts/12184281025",
+  "bytes": 78826676,
+  "sha256": "ef70a4c347cfd0e906c6c6930024b8e3317a5a81fed31b8e33544da85304463e",
   "smoke": {
     "status": "passed",
     "framework": "PySide6 / Qt Widgets",
     "pyside": "6.10.3",
     "qt": "6.10.3",
+    "distribution": "onefile",
+    "external_qt_verified": false,
+    "pdf_exit_observer": "passed",
     "python": "3.13.16",
     "platform": "Windows-2025Server-10.0.26100-SP0",
     "qt_platform": "windows",
@@ -48,13 +52,13 @@
         1440
       ]
     ],
-    "startup_ms": 1469.02,
-    "navigation_median_ms": 34.84,
-    "navigation_max_ms": 92.79,
-    "resize_median_ms": 25.49,
-    "resize_max_ms": 136.3,
-    "table_50000_load_ms": 83.46,
-    "table_50000_filter_ms": 166.77,
+    "startup_ms": 874.16,
+    "navigation_median_ms": 38.35,
+    "navigation_max_ms": 86.75,
+    "resize_median_ms": 26.91,
+    "resize_max_ms": 1055.3,
+    "table_50000_load_ms": 52.7,
+    "table_50000_filter_ms": 126.33,
     "tk_imports": [],
     "kr_assignment_engine": "embedded Python SheetMetal parameters",
     "pdf_export_engine": "isolated COM process",
@@ -72,18 +76,244 @@
       "DXF dependency",
       "Pack and Go interop source bundled",
       "isolated PDF worker startup/IPC",
+      "embedded licenses and export",
       "no Tk runtime"
     ]
   },
+  "distribution": "onefile",
+  "smoke_scales": [
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.25,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "weight"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 722.41,
+      "navigation_median_ms": 27.71,
+      "navigation_max_ms": 61.46,
+      "resize_median_ms": 18.27,
+      "resize_max_ms": 37.71,
+      "table_50000_load_ms": 49.65,
+      "table_50000_filter_ms": 122.78,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "ten modules",
+        "two themes",
+        "resolution matrix",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": true,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.5,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "weight"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 427.17,
+      "navigation_median_ms": 30.94,
+      "navigation_max_ms": 61.17,
+      "resize_median_ms": 20.84,
+      "resize_max_ms": 42.56,
+      "table_50000_load_ms": 47.83,
+      "table_50000_filter_ms": 120.8,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "ten modules",
+        "two themes",
+        "resolution matrix",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.0,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "weight"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 874.16,
+      "navigation_median_ms": 38.35,
+      "navigation_max_ms": 86.75,
+      "resize_median_ms": 26.91,
+      "resize_max_ms": 1055.3,
+      "table_50000_load_ms": 52.7,
+      "table_50000_filter_ms": 126.33,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "ten modules",
+        "two themes",
+        "resolution matrix",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    }
+  ],
   "regressions": [
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "6",
-      "tests": "1553",
-      "time": "406.384",
-      "timestamp": "2026-10-19T10:38:48.202243+00:00",
+      "tests": "1574",
+      "time": "304.171",
+      "timestamp": "2026-10-19T11:39:31.988527+00:00",
       "hostname": "runnervm0xl3a"
     }
   ],

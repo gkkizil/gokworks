@@ -3,11 +3,11 @@
 Güncel uygulama kodunun tek çalışma dalı **[main](https://github.com/gkkizil/gokworks/tree/main)** dalıdır.
 
 <!-- windows-release:start -->
-**Güncel Windows EXE:** [GOKWORKS paketini indir](https://github.com/gkkizil/gokworks/actions/runs/39238813638/artifacts/12181555071)
+**Güncel Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39246105693-1/GOKWORKS.exe)
 
-ZIP dosyasının tamamını çıkartıp **GOKWORKS/GOKWORKS.exe** dosyasını açın. `_internal` klasörü EXE yanında kalmalıdır. Windows 10/11 x64; Python kurulumu gerekmez.
+**GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
-Uygulama kodu: `93c3051` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39238813638) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+Uygulama kodu: `cbd42c2` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39246105693) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 <!-- windows-release:end -->
 
 SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara kullanıcı tarafından kalınlıklarına göre girilen K faktörü/iç yarıçap değerlerini uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir; geometrik toleransları ASME GD&T rehberiyle açıklar.
