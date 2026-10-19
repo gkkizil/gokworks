@@ -20,7 +20,7 @@ FLAGS = frozenset(('IncludeDrawings', 'IncludeSuppressed', 'IncludeToolboxCompon
                    'IncludeSimulationResults', 'FlattenToSingleFolder'))
 TEXTS = frozenset(('AddPrefix', 'AddSuffix'))
 # Paths are environment values, never interpolated into PowerShell source.
-LOADER = r"""+$ErrorActionPreference = 'Stop'
+LOADER = r"""$ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false)
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 try {
