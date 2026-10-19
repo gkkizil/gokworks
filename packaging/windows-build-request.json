@@ -1,6 +1,6 @@
 {
-  "request_id": "90c3c503-ca51-4b9f-b1cd-9cc7f199dcee",
-  "requested_at": "2026-10-19T08:27:42.892580+00:00",
-  "source_commit": "bc39cb9969d89ce7ce674ee04fbab0acfc9aecad",
-  "reason": "Retry user-requested PDF-fix EXE. New PDF/COM and Qt crash-containment tests passed on Windows; the overall pytest process exited without JUnit after GUI tests. Capture native stdout/stderr and process exit code directly, retaining the full suite and all timeouts."
+  "request_id": "94c345e3-0962-475c-b842-a2a9f117d22c",
+  "requested_at": "2026-10-19T09:56:43.644462+00:00",
+  "source_commit": "1abbebe1782e1c31faef6fa6c1472fd959e41822",
+  "reason": "User-requested GOKWORKS EXE with Qt fatal-message capture, persistent PDF/GUI phase diagnostics, explicit queued UI slot and corrected COM application release in the connection check. The reported user crash remains unconfirmed without its Windows event record."
 }
