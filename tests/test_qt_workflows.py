@@ -759,6 +759,37 @@ def test_repeated_worker_lifecycle_has_no_running_threads(window, qtbot):
     assert not any(thread.isRunning() for thread in window.findChildren(QThread))
 
 
+def test_native_thread_cleanup_keeps_job_locked_without_blocking_gui(window, qtbot, monkeypatch):
+    page = window.pages['pdf']
+    release = threading.Event()
+    cleanup_done = threading.Event()
+    window.jobs.start(page, lambda sink, stop: release.wait(2))
+    thread = window.jobs.thread
+    actual_wait = thread.wait
+    join_calls = []
+    destroyed = []
+    def delayed_native_join(timeout):
+        join_calls.append(timeout)
+        return cleanup_done.is_set() and actual_wait(timeout)
+    monkeypatch.setattr(thread, 'wait', delayed_native_join)
+    thread.destroyed.connect(lambda: destroyed.append(cleanup_done.is_set()))
+    release.set()
+    qtbot.waitUntil(lambda: bool(join_calls))
+    assert window.jobs.busy and not page.start_button.isEnabled()
+    assert window.jobs.thread is thread and window.jobs.owner is page
+    assert not destroyed
+    heartbeat = []
+    QTimer.singleShot(0, lambda: heartbeat.append(True))
+    qtbot.waitUntil(lambda: bool(heartbeat))
+    assert not window.jobs.start(window.pages['bom'], lambda sink, stop: None)
+    cleanup_done.set()
+    qtbot.waitUntil(lambda: not window.jobs.busy)
+    qtbot.waitUntil(lambda: bool(destroyed))
+    assert destroyed == [True]
+    assert set(join_calls) == {0}
+    assert page.start_button.isEnabled()
+
+
 def test_vector_labels_keep_engineering_center_coordinates(qapp):
     from gui_qt.diagrams import VectorScene
     scene = VectorScene(500,300)

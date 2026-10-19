@@ -4,7 +4,7 @@ import threading
 import time
 import traceback
 
-from PySide6.QtCore import QObject, QThread, Signal, Slot, Qt
+from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot, Qt
 from solidworks import diagnostics
 
 
@@ -61,6 +61,11 @@ class JobManager(QObject):
         self.worker = None
         self.owner = None
         self.stop = None
+        self._joining = False
+        self.join_timer = QTimer(self)
+        self.join_timer.setSingleShot(True)
+        self.join_timer.setInterval(5)
+        self.join_timer.timeout.connect(self._finished)
 
     @property
     def busy(self):
@@ -81,7 +86,6 @@ class JobManager(QObject):
         self.worker.completed.connect(self.worker.deleteLater)
         self.worker.completed.connect(self.thread.quit)
         self.thread.finished.connect(self._finished)
-        self.thread.finished.connect(self.thread.deleteLater)
         owner.set_busy(True)
         self.busyChanged.emit(True)
         self.thread.start()
@@ -95,9 +99,26 @@ class JobManager(QObject):
 
     @Slot()
     def _finished(self):
-        diagnostics.record('qt_job_finished_received')
+        thread = self.thread
+        if thread is None:
+            return
+        if not self._joining:
+            diagnostics.record('qt_job_finished_received')
+        # QThread.finished precedes native thread-local destructors. Keep all
+        # owned references and the CAD lock until the OS thread has also exited.
+        # A blocking wait here can deadlock Python cleanup that needs the GIL.
+        if not thread.wait(0):
+            if not self._joining:
+                diagnostics.record('qt_job_native_join_pending')
+            self._joining = True
+            self.join_timer.start()
+            return
+        self.join_timer.stop()
+        self._joining = False
+        diagnostics.record('qt_job_native_joined')
         owner = self.owner
         self.thread = self.worker = self.owner = self.stop = None
+        thread.deleteLater()
         if owner is not None:
             owner.set_busy(False)
         self.busyChanged.emit(False)

@@ -32,6 +32,20 @@ bir süreçten belge kapatma denenmez.
 geçilmez. COM içinde yanıt vermeyen bir kayıt zorla kesilmez. Bu durumda arayüz
 açık kalır; işlem bitmeden ikinci bir CAD işi başlatılmaz.
 
+Qt iş yöneticisi, `QThread.finished` sinyalinden sonra işletim sistemi iş
+parçacığının da tamamen bitmesini `wait(0)` ile kontrol eder. Sinyal, native
+thread-local temizliğinden önce gelebilir. Temizlik sürerken iş kilidi ve nesne
+referansları korunur; GUI'yi bloklamak yerine kısa Qt zamanlayıcısıyla yeniden
+kontrol edilir. QThread ancak bu aşamadan sonra silinir. Bu sıra PDF dahil bütün
+arka plan işlerinde uygulanır.
+
+Linux üzerinde gerçek bir C++ thread-local yıkıcısını 300 ms geciktiren deneyde
+eski akış, temizlik bitmeden boşta/iş bitti bildirimlerini gönderiyordu. Yeni
+akışta her iki bildirim de native temizlikten sonra gönderildi. Hedefli Qt
+kontrolleri; kilidin korunmasını, arayüzün çalışmasını, iptali ve sıradaki K/R
+işlemlerini kapsar. Bu deney, kullanıcının Windows'taki kapanmasının kesin
+nedenini tek başına doğrulamaz; güncel GUI/PDF kayıtlarıyla eşleştirilmelidir.
+
 ## Tanılama
 
 Windows: `%LOCALAPPDATA%\GOKWORKS\logs`. Bu konum yazılamazsa sistemin geçici
