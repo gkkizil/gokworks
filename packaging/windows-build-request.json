@@ -1,6 +1,6 @@
 {
-  "request_id": "afc6975d-ae0d-4582-8832-e7c1b82abef1",
-  "requested_at": "2026-10-19T10:37:44.968308+00:00",
-  "source_commit": "dc27bdf0561d315a4f4e7e81f495d8474a42d934",
-  "reason": "User-requested Windows EXE with native Qt thread cleanup synchronization and independent GUI/PDF process exit monitoring. Includes Windows process-handle tests; the reported SolidWorks PDF crash remains unconfirmed pending its native exit/fault information."
+  "request_id": "86bb37d1-b150-453c-a172-cbb8eeeb255c",
+  "requested_at": "2026-10-19T11:38:30.719425+00:00",
+  "source_commit": "4f89b2b636a756d7383619573fd3321e070b1e1b",
+  "reason": "User requested a single distributable GOKWORKS.exe with no companion folder. Includes drawing-reference tolerance fixes; relocated onefile/DPI/PDF/observer/embedded-license and compatible external-Qt checks; direct GitHub EXE release asset."
 }
