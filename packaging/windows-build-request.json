@@ -1,6 +1,6 @@
 {
-  "request_id": "4edd526a-8118-4bb8-8e69-3c2d6d1b97ef",
-  "requested_at": "2026-10-19T04:40:35.660009+00:00",
-  "source_commit": "0022418aad5d62d52c72c3fa7fdf7f8a7b4a26b3",
-  "reason": "User-requested EXE with tolerance connection and typed Pack and Go fixes. The first Windows regression step reached its seven-minute job budget while passing GUI checks; allow the full suite to finish, retaining all assertions and per-test timeouts."
+  "request_id": "6db5f083-27e2-4498-a89d-dfd585f0ba9c",
+  "requested_at": "2026-10-19T08:21:46.007024+00:00",
+  "source_commit": "d00b9292a664f214194c166aba4d64a69a91deeb",
+  "reason": "User-requested GOKWORKS EXE with isolated PDF COM worker, safe COM cleanup and crash diagnostics. Include Windows decimal/hex exit codes and verify frozen PDF worker startup/IPC."
 }

@@ -223,7 +223,7 @@ def export_drawings(source_folder, output_folder, include_subfolders,
     if fault is not None:
         phase = context.get('phase', '')
         code = process.returncode if process is not None else None
-        exit_code = f'0x{code & 0xffffffff:08X}' if code is not None and os.name == 'nt' else str(code)
+        exit_code = f'{code} (0x{code & 0xffffffff:08X})' if code is not None and os.name == 'nt' else str(code)
         stage = _PHASES.get(phase, 'yardımcı süreci başlatma')
         detail = f'{fault} Aşama: {stage}. Çıkış kodu: {exit_code}.'
         if terminal and terminal.get('error'):
