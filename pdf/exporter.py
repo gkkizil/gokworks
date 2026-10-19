@@ -101,7 +101,7 @@ def _validate_pdf(path):
             raise RuntimeError("PDF dosyası eksik veya dosya sonu bulunamadı.")
 
 
-def export_one_drawing(app, drawing, destination, overwrite):
+def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None):
     """Tüm sayfaları geçici PDF dosyasına aktar; başarılı dosyayı hedefe taşı."""
     destination = Path(destination)
     if destination.exists():
@@ -114,13 +114,18 @@ def export_one_drawing(app, drawing, destination, overwrite):
     model = None
     previous_name = None
     activated_here = False
+    data = extension = active = activated = drawing_api = previous = None
     notes = []
+    mark = checkpoint or (lambda *args, **kwargs: None)
     try:
+        mark('prepare_pdf', temporary=str(temporary), output=str(destination))
         destination.parent.mkdir(parents=True, exist_ok=True)
         app = _late_bound(app)
         previous = read_com_value(app, "ActiveDoc")
         if previous is not None:
             previous_name = _document_name(previous)
+        previous = None
+        mark('open_document')
         model = app.GetOpenDocumentByName(str(drawing))
         if model is None:
             errors, warnings = _out_integer(), _out_integer()
@@ -137,10 +142,12 @@ def export_one_drawing(app, drawing, destination, overwrite):
         if _path_key(read_com_value(model, "GetPathName")) != _path_key(drawing):
             raise RuntimeError("SolidWorks istenen teknik resim yerine farklı belge döndürdü; aktarım yapılmadı.")
 
+        mark('pdf_options')
         data = app.GetExportFileData(PDF_DATA)
         if data is None:
             raise RuntimeError("PDF dışa aktarma ayarları alınamadı.")
-        names = read_com_value(_drawing_api(model), "GetSheetNames")
+        drawing_api = _drawing_api(model)
+        names = read_com_value(drawing_api, "GetSheetNames")
         if isinstance(names, str):
             names = (names,)
         if not names:
@@ -150,6 +157,7 @@ def export_one_drawing(app, drawing, destination, overwrite):
             raise RuntimeError("Teknik resmin tüm sayfaları seçilemedi.")
         data.ViewPdfAfterSaving = False
         data.ExportAs3D = False
+        mark('activate_document')
         active = read_com_value(app, "ActiveDoc")
         model_name = _document_name(model)
         if active is None or os.path.normcase(_document_name(active)) != os.path.normcase(model_name):
@@ -165,13 +173,16 @@ def export_one_drawing(app, drawing, destination, overwrite):
             raise RuntimeError("Aktif SolidWorks belgesi kaynak teknik resim değil; aktarım yapılmadı.")
         errors, warnings = _out_integer(), _out_integer()
         extension = _late_bound(read_com_value(model, "Extension"))
+        mark('save_pdf')
         saved = extension.SaveAs(str(temporary), 0, SILENT, data, errors, warnings)
         if not _com_success(saved) or errors.value:
             raise RuntimeError(f"PDF kaydedilemedi. SolidWorks hata kodu: {errors.value}")
+        mark('validate_pdf')
         _validate_pdf(temporary)
         if warnings.value:
             notes.append(f"Kaydetme uyarısı: {warnings.value}")
         try:
+            mark('publish_pdf')
             if overwrite:
                 os.replace(temporary, destination)
             elif os.name == "nt":
@@ -193,15 +204,23 @@ def export_one_drawing(app, drawing, destination, overwrite):
             notes.append(f"Geçici PDF temizlenemedi: {error}")
         if opened_here and model is not None:
             try:
-                app.CloseDoc(read_com_value(model, "GetTitle"))
+                title = read_com_value(model, "GetTitle")
+                # Drop child interfaces while the document and COM apartment
+                # still exist. No wrapper should outlive our CloseDoc call.
+                data = extension = active = activated = drawing_api = model = None
+                mark('close_document')
+                app.CloseDoc(title)
             except Exception as error:
                 notes.append(f"Çizim kapatılamadı: {error}")
+        data = extension = active = activated = drawing_api = model = previous = None
         if previous_name and (opened_here or activated_here):
             try:
+                mark('restore_document')
                 errors = _out_integer()
                 restored = app.ActivateDoc3(previous_name, False, DONT_REBUILD, errors)
                 if restored is None or errors.value:
                     raise RuntimeError(f"SolidWorks hata kodu: {errors.value}")
+                restored = None
             except Exception as error:
                 notes.append(f"Önceki belge etkinleştirilemedi: {error}")
     if notes:
@@ -210,12 +229,15 @@ def export_one_drawing(app, drawing, destination, overwrite):
 
 
 def export_drawings(source_folder, output_folder, include_subfolders,
-                    overwrite_existing, events, stop_event=None):
+                    overwrite_existing, events, stop_event=None, *, checkpoint=None):
     """Arayüz kuyruğuna durum, sonuç ve bitiş olayları gönder."""
     summary = {"state": "completed", "total": 0, "processed": 0,
                "succeeded": 0, "skipped": 0, "failed": 0, "error": ""}
     initialized = False
+    app = None
+    mark = checkpoint or (lambda *args, **kwargs: None)
     try:
+        mark('scan')
         source = Path(source_folder).resolve()
         output = Path(output_folder).resolve()
         events.put(("phase", "Teknik resimler taranıyor…"))
@@ -238,6 +260,7 @@ def export_drawings(source_folder, output_folder, include_subfolders,
         pythoncom.CoInitialize()
         initialized = True
         events.put(("phase", "SolidWorks'e bağlanılıyor…"))
+        mark('connect')
         app = connect_to_solidworks()
         events.put(("log", f"{len(drawings)} teknik resim bulundu. Her teknik resmin tüm sayfaları tek PDF dosyasına aktarılacak."))
 
@@ -246,8 +269,12 @@ def export_drawings(source_folder, output_folder, include_subfolders,
                 summary["state"] = "cancelled"
                 break
             target = pdf_destination(drawing, source, output)
+            mark('drawing', index=index)
             events.put(("current", drawing))
-            status, detail = export_one_drawing(app, drawing, target, overwrite_existing)
+            if checkpoint is None:
+                status, detail = export_one_drawing(app, drawing, target, overwrite_existing)
+            else:
+                status, detail = export_one_drawing(app, drawing, target, overwrite_existing, checkpoint=checkpoint)
             counter = {"success": "succeeded", "skipped": "skipped", "error": "failed"}[status]
             summary[counter] += 1
             summary["processed"] = index
@@ -262,6 +289,9 @@ def export_drawings(source_folder, output_folder, include_subfolders,
     finally:
         try:
             if initialized:
+                mark('release_application')
+                app = None
+                mark('uninitialize_com')
                 pythoncom.CoUninitialize()
         except Exception as error:
             message = f"SolidWorks bağlantısı temizlenemedi: {error}"

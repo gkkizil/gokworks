@@ -80,6 +80,7 @@ def main():
         'Tolerans yığılması manuel analiz, Monte Carlo ve PDF/Excel raporları yerel çalışır.\n'
         'Teknik resim ölçü okuma/anotasyon işlemleri için açık SolidWorks oturumu gerekir.\n'
         'CAD aktarımı ve montaj işlemleri için SolidWorks kurulu ve açık olmalıdır.\n'
+        'PDF aktarımı ayrı yardımcı süreçte çalışır; hata kayıtları %LOCALAPPDATA%\\GOKWORKS\\logs altındadır.\n'
         'Ayarlar %APPDATA%\\GOKWORKS altında saklanır.\n'
         'Bu deneme paketi kod imzası taşımaz.\n\n'
         'PySide6/Qt dinamik DLL dosyaları LGPL v3 kapsamında ayrı paketlenmiştir.\n'

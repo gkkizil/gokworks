@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QSplitter, QWidget, QVBoxLayout
 
-from pdf.exporter import export_drawings
+from pdf.process import export_drawings
 from dxf_dwg.exporter import export_parts
 from .. import services
 from ..components import BasePage, ValueForm, ResultsPanel, card, scroll, button, open_folder

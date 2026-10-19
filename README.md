@@ -155,6 +155,13 @@ Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal m
 
 Sol menüdeki **PDF** ve **DXF / DWG** sekmeleri bağımsızdır. Uygulama açıkken sekmeler arasında geçiş yaptığınızda dosya listesi, aktarım sonuçları, günlük ve rapor durumu korunur. Klasörler ve aktarım seçenekleri her ekran için ayrı kaydedilir.
 
+PDF aktarımı ayrı bir yardımcı süreçte çalışır. Aktarım süreci beklenmedik şekilde
+kapanırsa ana pencere açık kalır; tamamlanan PDF'ler ve mevcut dosyalar korunur.
+**Durdur**, devam eden SolidWorks kaydını tamamlayıp sonraki çizime geçmeden durur.
+Hata aşaması ve tanılama kaydı yolu **Günlük** sekmesinde gösterilir. Windows
+kayıtları `%LOCALAPPDATA%\GOKWORKS\logs` klasöründedir.
+[PDF aktarımı ve çökme tanılaması](pdf/README.md).
+
 Çıktı adı **PARÇAADI - Sac kalınlığı - Montajdaki toplam adet** biçimindedir. Örneğin `BRAKET - 2 mm - 12 adet.dxf` veya `BRAKET - 1.25 mm - 12 adet.dwg`. Kalınlık, aktif sac metal unsurundan okunur ve SolidWorks'ün metre biriminden milimetreye çevrilir; dosya adına tam sayı veya gerekli ondalık basamaklarla yazılır.
 
 Kalınlığa göre klasörleme örneği: `Çıktı/1,5 mm/BRAKET - 1.5 mm - 12 adet.dxf`.

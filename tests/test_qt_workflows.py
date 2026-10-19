@@ -226,6 +226,45 @@ def test_worker_error_releases_controls_and_keeps_full_message(window, qtbot):
     assert page.scan_button.isEnabled()
 
 
+def test_pdf_native_worker_exit_keeps_gui_responsive_and_releases_controls(window, qtbot, tmp_path, monkeypatch):
+    from pdf import process as pdf
+    monkeypatch.setenv('LOCALAPPDATA', str(tmp_path/'local'))
+    helper = Path(__file__).parent/'support/pdf_worker.py'
+    monkeypatch.setattr(pdf, '_command', lambda request:
+        [sys.executable, str(helper), 'delayed_crash', str(request)])
+    page = window.pages['pdf']
+    source = tmp_path/'source'
+    source.mkdir()
+    (source/'çizim.SLDDRW').touch()
+    (source/'ikinci.SLDDRW').touch()
+    page.source.setText(str(source))
+    page.output.setText(str(tmp_path/'out'))
+    heartbeat = []
+    timer = QTimer(window)
+    timer.setInterval(10)
+    timer.timeout.connect(lambda: heartbeat.append(True))
+    timer.start()
+    try:
+        page.start_button.click()
+        assert window.jobs.busy and not page.start_button.isEnabled()
+        window.navigate('iso_fits')
+        assert window.stack.currentWidget() is window.pages['iso_fits']
+        qtbot.waitUntil(lambda: not window.jobs.busy, timeout=8000)
+    finally:
+        timer.stop()
+    assert len(heartbeat) >= 5
+    assert window.isVisible() and page.start_button.isEnabled()
+    assert not page.stop_button.isEnabled()
+    assert 'PDF kaydı' in page.status_text and '23' in page.status_text
+    assert page.results.model.rowCount() == 2
+    assert (tmp_path/'out/çizim.pdf').is_file()
+    assert not list((tmp_path/'out').glob('.gokworks-*.pdf'))
+    # A second real service job must be possible after the abrupt worker exit.
+    page.scan_button.click()
+    qtbot.waitUntil(lambda: not window.jobs.busy)
+    assert page.results.model.rowCount() == 2
+
+
 def test_close_cancel_waits_without_terminating_worker(window, qtbot):
     page = window.pages['pdf']
     window.jobs.start(page, lambda sink, stop: stop.wait(3))

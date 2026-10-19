@@ -266,6 +266,8 @@ def create_application(argv=None):
 
 
 def main():
+    from solidworks.diagnostics import enable
+    enable('gui')
     app = create_application()
     window = MainWindow()
     window.show()

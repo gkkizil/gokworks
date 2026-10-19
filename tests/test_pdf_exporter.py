@@ -1,4 +1,5 @@
 import unittest
+import weakref
 from pathlib import Path
 from queue import Queue
 from tempfile import TemporaryDirectory
@@ -306,6 +307,51 @@ class PdfTests(unittest.TestCase):
             ex.export_drawings(self.source, self.output, True, False, events)
         self.assertEqual(list(events.queue)[-1][1]['state'], 'error')
         self.com.CoUninitialize.assert_called_once()
+
+    def test_application_reference_is_released_before_uninitializing_com(self):
+        references, released = [], []
+        class Application:
+            pass
+        def connect():
+            application = Application()
+            references.append(weakref.ref(application))
+            return application
+        def export(*args):
+            return 'success', 'done'
+        self.com.CoUninitialize.side_effect = lambda: released.append(references[0]() is None)
+        with patch.object(ex, 'connect_to_solidworks', new=connect), patch.object(ex, 'export_one_drawing', new=export):
+            ex.export_drawings(self.source, self.output, True, False, Queue())
+        self.assertEqual(released, [True], 'COM objects must be released before CoUninitialize')
+
+    def test_child_interfaces_are_released_before_closing_owned_document(self):
+        references, released = [], []
+        model = self.model
+        class Extension:
+            def SaveAs(self, *args):
+                return model.save_as(*args)
+        class Drawing:
+            GetType = model.GetType
+            GetTitle = model.GetTitle
+            GetPathName = model.GetPathName
+            GetSheetNames = model.GetSheetNames
+            @property
+            def Extension(self):
+                extension = Extension()
+                references.append(weakref.ref(extension))
+                return extension
+        wrapper = Drawing()
+        self.app.OpenDoc6 = lambda *args: wrapper
+        self.app.GetOpenDocumentByName = lambda *args: None
+        self.app.ActiveDoc = wrapper
+        def close(title):
+            released.append(all(reference() is None for reference in references))
+        self.app.CloseDoc = close
+        # The fake SaveAs normally checks identity against the fake drawing.
+        # Delegate that check to its wrapper, just as the COM API does.
+        self.model.app = SimpleNamespace(ActiveDoc=self.model)
+        self.assertEqual(self.run_one()[0], 'success')
+        self.assertTrue(references)
+        self.assertEqual(released, [True])
 
     def test_missing_pywin32_returns_error_and_done(self):
         with patch.object(ex, 'pythoncom', None):

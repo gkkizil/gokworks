@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import platform
+from queue import Queue
 import statistics
 import sys
 import tempfile
@@ -90,6 +91,17 @@ def check(output):
         assert dxf.stat().st_size > 100
         from naming.native import HOST_SOURCE
         assert HOST_SOURCE.is_file(), 'Gömülü Pack and Go interop kaynağı eksik.'
+        # Launch the actual bundled EXE in worker mode. An empty folder tests
+        # frozen imports and IPC without touching an open SolidWorks session.
+        from pdf.process import export_drawings
+        pdf_source = Path(folder)/'empty-pdf-source'
+        pdf_source.mkdir()
+        pdf_events = Queue()
+        export_drawings(pdf_source, Path(folder)/'pdf-output', True, False, pdf_events)
+        pdf_messages = list(pdf_events.queue)
+        assert pdf_messages[-1][0] == 'done'
+        assert pdf_messages[-1][1]['state'] == 'empty', pdf_messages
+        assert sum(kind == 'done' for kind, value in pdf_messages) == 1
         if os.name == 'nt':
             import pythoncom, win32com.client
             pythoncom.CoInitialize()
@@ -108,10 +120,11 @@ def check(output):
                       resize_max_ms=round(max(resize_times),2),table_50000_load_ms=round(load_ms,2),
                       table_50000_filter_ms=round(filter_ms,2),tk_imports=forbidden,
                       kr_assignment_engine='embedded Python SheetMetal parameters',
+                      pdf_export_engine='isolated COM process',
                       solidworks_live_tested=False,checks=['ten modules','two themes','resolution matrix',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
-                      'Pack and Go interop source bundled','no Tk runtime'])
+                      'Pack and Go interop source bundled','isolated PDF worker startup/IPC','no Tk runtime'])
         w.close()
         return report
 
