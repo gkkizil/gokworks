@@ -57,11 +57,24 @@ class ConnectionTests(unittest.TestCase):
         active=Active()
         pythoncom=ModuleType('pythoncom')
         pythoncom.IID_IDispatch='IDispatch'
-        pythoncom.CLSIDFromProgID=lambda name: calls.append(('progid',name)) or 'CLSID'
         pythoncom.GetActiveObject=lambda clsid: calls.append(('existing',clsid)) or active
         with patch.dict(sys.modules,{'pythoncom':pythoncom}):
             self.assertIs(connect_to_solidworks(raw=True),active)
-        self.assertEqual(calls,[('progid','SldWorks.Application'),('existing','CLSID'),('query','IDispatch')])
+        self.assertEqual(calls,[('existing','SldWorks.Application'),('query','IDispatch')])
+
+    @unittest.skipUnless(sys.platform == 'win32', 'Gerçek pywin32 API kontrolü Windows gerektirir.')
+    def test_raw_connection_uses_real_pywin32_exports_without_a_running_cad_server(self):
+        import pythoncom
+
+        active = Mock()
+        dispatch = object()
+        active.QueryInterface.return_value = dispatch
+        # Keep the real module and constants; only the running CAD server is
+        # replaced. Invented pythoncom functions must fail this contract test.
+        with patch.object(pythoncom, 'GetActiveObject', return_value=active) as get_active:
+            self.assertIs(connect_to_solidworks(raw=True), dispatch)
+        get_active.assert_called_once_with('SldWorks.Application')
+        active.QueryInterface.assert_called_once_with(pythoncom.IID_IDispatch)
 
     def stub_modules(self, get_active):
         package, client = ModuleType('win32com'), ModuleType('win32com.client')

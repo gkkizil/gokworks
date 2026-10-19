@@ -18,7 +18,9 @@ def connect_to_solidworks(*, raw=False):
         if raw:
             # Avoid win32com's automatic MakePy/type-info wrapping for callers
             # that invoke the published dual interfaces explicitly.
-            active = pythoncom.GetActiveObject(pythoncom.CLSIDFromProgID("SldWorks.Application"))
+            # GetActiveObject resolves a ProgID itself (PyWinObject_AsIID).
+            # CLSIDFromProgID is a Windows API, not a pythoncom export.
+            active = pythoncom.GetActiveObject("SldWorks.Application")
             return active.QueryInterface(pythoncom.IID_IDispatch)
         return win32com.client.GetActiveObject("SldWorks.Application")
     except Exception as error:

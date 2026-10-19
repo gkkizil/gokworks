@@ -228,3 +228,23 @@ Gerçek Qt açılışı, iki tema ve dört çözünürlük, manuel A−B−C ör
 dosyaları doğrulandı. [Sonuç özeti](tolerance-stack/validation.json) ve
 [manuel örnek kanıtı](tolerance-stack/example-validation.json).
 Bu adımda yeni Windows EXE üretilmedi; önceki EXE yeni modülü içermez.
+
+### SolidWorks bağlantı düzeltmesi · 19 Ekim 2026
+
+İlk Windows paketinde `pythoncom.CLSIDFromProgID` bulunamadığı için ham
+COM bağlantısı başlamıyordu. Bu, SolidWorks'ün kapalı olduğu anlamına gelmez.
+pywin32 312'nin `GetActiveObject` uygulaması ProgID metnini doğrudan kabul eder;
+bağlantı artık `pythoncom.GetActiveObject("SldWorks.Application")` ve ardından
+`QueryInterface(IID_IDispatch)` kullanır. MakePy veya yeni bir SolidWorks
+oturumu oluşturulmaz. Sözleşme pywin32'nin
+[GetActiveObject / PyWinObject_AsIID](https://github.com/mhammond/pywin32/blob/b312/com/win32com/src/PythonCOM.cpp)
+ve [ProgID çözümlemesi](https://github.com/mhammond/pywin32/blob/b312/win32/src/PyIID.cpp)
+üzerinden kontrol edildi.
+
+Eski testteki gerçekte bulunmayan sahte fonksiyon kaldırıldı. Tolerans oturumu
+artık bağlantı yardımcısını değiştirmeden test edilir; bağlantı hatasında COM
+apartment'ının serbest bırakılması da doğrulanır. Gerçek pywin32 modülünü koruyup
+yalnız çalışan CAD sunucusunu taklit eden ek test Windows'ta çalışır.
+Hedefli Linux kontrolü: **35 test ve 5 alt senaryo geçti; Windows pywin32 testi
+atlandı**. Bu kontrol canlı SolidWorks testi değildir. Düzeltme sonrasında
+EXE otomatik üretilmedi; önceden indirilmiş paket bu düzeltmeyi içermez.

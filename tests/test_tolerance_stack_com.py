@@ -167,6 +167,44 @@ def test_session_coinitializes_on_worker_and_never_closes_user_owned_document(dr
     assert calls==['init','uninit']
 
 
+def test_session_uses_real_connection_path_without_type_wrapping_or_progid_helper(drawing):
+    import sys
+    calls=[]
+    class Active:
+        def QueryInterface(self,iid):
+            calls.append(('query',iid));return self
+        def GetIDsOfNames(self,lcid,name):return name
+        def Invoke(self,member,lcid,flags,result,*args):
+            calls.append((member,flags))
+            if member=='ActiveDoc':return drawing
+            if member=='ActivateDoc3':return drawing
+            raise AssertionError(member)
+        def GetTypeInfo(self,*args):raise AssertionError('Type information must not be requested')
+    active=Active()
+    pythoncom=NS(CoInitialize=lambda:calls.append('init'),CoUninitialize=lambda:calls.append('uninit'),
+                 IID_IDispatch='IDispatch',
+                 GetActiveObject=lambda name:calls.append(('existing',name)) or active)
+    with patch.dict(sys.modules,{'pythoncom':pythoncom}):
+        with com.Session() as session:
+            assert session.document() is drawing
+    assert calls==['init',('existing','SldWorks.Application'),('query','IDispatch'),
+                   ('ActiveDoc',2),('ActiveDoc',2),('ActivateDoc3',1),'uninit']
+
+
+def test_session_connection_failure_releases_com_apartment():
+    import sys
+    calls=[]
+    def unavailable(name):
+        calls.append(('existing',name))
+        raise RuntimeError('Running CAD session unavailable')
+    pythoncom=NS(CoInitialize=lambda:calls.append('init'),CoUninitialize=lambda:calls.append('uninit'),
+                 GetActiveObject=unavailable)
+    with patch.dict(sys.modules,{'pythoncom':pythoncom}):
+        with pytest.raises(RuntimeError,match='Running CAD session unavailable'):
+            with com.Session():raise AssertionError('Unavailable session must not be entered')
+    assert calls==['init',('existing','SldWorks.Application'),'uninit']
+
+
 def test_drawing_and_model_use_their_published_com_iids_without_makepy(drawing):
     import sys
     calls=[]
