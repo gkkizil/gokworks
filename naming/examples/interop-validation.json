@@ -22,12 +22,39 @@
     "subtests_passed": 28,
     "skipped": 3,
     "failures": 0,
-    "skips": ["Real Windows pywin32 exports", "Windows PowerShell typed compilation", "Opt-in live native SolidWorks read-only scan"],
-    "coverage": ["Reported Automation error reproduced", "Typed client used only for matching binding error", "Assembly/drawing dependency graph preserved in doubles", "Source files unchanged", "Cancellation and failed-write cleanup", "Interop client release", "UTF-8 stdio and broken connection", "Tolerance stack raw connection and COM apartment cleanup"]
+    "skips": [
+      "Real Windows pywin32 exports",
+      "Windows PowerShell typed compilation",
+      "Opt-in live native SolidWorks read-only scan"
+    ],
+    "coverage": [
+      "Reported Automation error reproduced",
+      "Typed client used only for matching binding error",
+      "Assembly/drawing dependency graph preserved in doubles",
+      "Source files unchanged",
+      "Cancellation and failed-write cleanup",
+      "Interop client release",
+      "UTF-8 stdio and broken connection",
+      "Tolerance stack raw connection and COM apartment cleanup"
+    ]
   },
-  "qt_naming_tests": {"passed": 4},
-  "source_qt_smoke": {"status": "passed", "modules": 10, "live_solidworks": false},
-  "windows_binding_checks": "See windows-bindings.json for the separate actual Windows CI result.",
+  "qt_naming_tests": {
+    "passed": 4
+  },
+  "source_qt_smoke": {
+    "status": "passed",
+    "modules": 10,
+    "live_solidworks": false
+  },
+  "windows_binding_checks": {
+    "status": "success",
+    "tested_source_commit": "d1840d7447e9cf2436fd858be344d7b4bd9bdf59",
+    "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39199385108",
+    "passed": 20,
+    "skipped": 0,
+    "live_solidworks_tested": false,
+    "exe_built": false
+  },
   "live_solidworks_tested": false,
   "native_cad_save_tested": false,
   "exe_built": false

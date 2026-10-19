@@ -61,6 +61,12 @@ PowerShell 5.1 derleyicisini kontrol eder; yalnız test için kullanılan refera
 DLL'sini sabit commit ve SHA256 ile doğrular. EXE üretmez, SolidWorks çalıştırmaz.
 Son Windows sonucu `../examples/windows-bindings.json` içinde yayımlanır.
 
+Son [gerçek Windows kontrolü](https://github.com/gkkizil/gokworks/actions/runs/39199385108):
+**20 test geçti, atlanan/başarısız test yok**. Gerçek pywin32 API dışa aktarımları
+ve gerçek Windows PowerShell derleyicisi kullanıldı. İlk başlatıcı sözdizimi
+hatası bu kontrolle yakalanıp düzeltildi. Bu sonuç canlı SolidWorks testi değildir;
+EXE oluşturulmadı.
+
 Canlı, salt okunur kabul testi açık kullanıcı oturumunda ve kaydedilmiş, temiz
 bir test montajı üzerinde çalıştırılır:
 

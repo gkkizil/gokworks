@@ -248,3 +248,6 @@ yalnız çalışan CAD sunucusunu taklit eden ek test Windows'ta çalışır.
 Hedefli Linux kontrolü: **35 test ve 5 alt senaryo geçti; Windows pywin32 testi
 atlandı**. Bu kontrol canlı SolidWorks testi değildir. Düzeltme sonrasında
 EXE otomatik üretilmedi; önceden indirilmiş paket bu düzeltmeyi içermez.
+Sonraki [Windows API kontrolünde](https://github.com/gkkizil/gokworks/actions/runs/39199385108)
+gerçek pywin32 modülüyle bağlantı sözleşmesi de geçti. Bu kontrol çalışan CAD
+sunucusunu taklit eder; canlı teknik resim okuma başarısı olarak yorumlanmamalıdır.
