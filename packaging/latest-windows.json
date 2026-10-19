@@ -1,10 +1,10 @@
 {
-  "commit": "570c52adebc5cf23f36dad70231aa6dde53bc0aa",
+  "commit": "ff946ac39db76980b4b2871c5f8a584b32d59a0e",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39200663317",
-  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39200663317/artifacts/12164500044",
-  "bytes": 9918961,
-  "sha256": "89844ecca5edd7c72ae965ca70bb3f09e29b3859915af8ec3a219fd4a50fb21a",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39222929362",
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39222929362/artifacts/12173405380",
+  "bytes": 9932002,
+  "sha256": "b37561249ba6aee9a3b2ef1c580dd1f7095da34c5e6f51f0ec09b2afed118843",
   "smoke": {
     "status": "passed",
     "framework": "PySide6 / Qt Widgets",
@@ -48,15 +48,16 @@
         1440
       ]
     ],
-    "startup_ms": 2027.24,
-    "navigation_median_ms": 38.31,
-    "navigation_max_ms": 86.29,
-    "resize_median_ms": 27.83,
-    "resize_max_ms": 100.39,
-    "table_50000_load_ms": 70.55,
-    "table_50000_filter_ms": 167.44,
+    "startup_ms": 1645.83,
+    "navigation_median_ms": 44.18,
+    "navigation_max_ms": 140.12,
+    "resize_median_ms": 34.48,
+    "resize_max_ms": 249.48,
+    "table_50000_load_ms": 69.39,
+    "table_50000_filter_ms": 164.97,
     "tk_imports": [],
     "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "pdf_export_engine": "isolated COM process",
     "solidworks_live_tested": false,
     "checks": [
       "ten modules",
@@ -70,6 +71,7 @@
       "BOM XLSX",
       "DXF dependency",
       "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
       "no Tk runtime"
     ]
   },
@@ -79,9 +81,9 @@
       "errors": "0",
       "failures": "0",
       "skipped": "5",
-      "tests": "1518",
-      "time": "411.292",
-      "timestamp": "2026-10-19T04:41:40.937398+00:00",
+      "tests": "1533",
+      "time": "439.512",
+      "timestamp": "2026-10-19T08:29:02.198973+00:00",
       "hostname": "runnervm0xl3a"
     }
   ],
