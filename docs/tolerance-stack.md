@@ -17,7 +17,11 @@ bulut API’si, NumPy, OCC veya yeni GUI bağımlılığı gerektirmez.
    CAD ölçülerinin ortak fonksiyonel çerçeveye eşlemesi açıkça belirtilmelidir.
 4. `Çap` ve `radyüs` kendiliğinden doğrusal terim olmaz. Örneğin çapsal boşluk
    `D−d` için katsayılar `+1/−1`, radyal boşluk `(D−d)/2` için `+0,5/−0,5` olur.
-   Açısal ölçüler, referans/BASIC ölçüler, yay/pah ve GD&T bu yolla dönüştürülmez.
+   Açısal ölçüler, BASIC ölçüler, yay/pah ve GD&T bu yolla dönüştürülmez.
+   Referans ölçülerde **Ölçüyü düzenle** ile nominal ve analiz toleransları
+   doğrulanmalıdır. Geometrik tür korunur; açı veya türü bilinmeyen referans
+   ölçü doğrusal ölçüye çevrilmez. Zincire eklerken de bu düzenleyici açılır;
+   iptal edilirse ölçü eklenmez. Onay yalnız analize aittir, CAD ölçüsü değişmez.
 5. Analiz ayarlarında kritik boşluğu, zincir uçlarını, kabul sınırlarını,
    yöntemi ve dağılım varsayımlarını belirtin. Boş kabul sınırı sınırsızdır;
    iki sınır da boşsa uygun/uygun değil sonucu üretilmez.
@@ -90,7 +94,15 @@ konum, profil, diklik, paralellik, MMR/MMC/LMC formülleri kullanılmaz.
 `DrawingDoc.GetViews` → tüm sayfalar/görünümler → `GetFirstDisplayDimension5`
 → `GetNext5` ile dolaşılır. `GetDimension2(0)`, `GetSystemValue3`,
 `DimensionTolerance.GetMinValue2/GetMaxValue2` ve `Annotation.GetPosition`
-kullanılır. Konfigürasyon açıkça belirtilir; API metre/radyanları görüntüdeki
+kullanılır. Modelden alınan ölçülerde görünümün konfigürasyonu açıkça belirtilir.
+Çizime ait referans ölçüler, parçanın konfigürasyon adı zorlanmadan çizim
+bağlamında `swThisConfiguration / Empty` ile okunur. Belirtilmiş konfigürasyonun OLE çağrısında
+hem BSTR dizisi hem tek BSTR sözleşmesi desteklenir; gerektiğinde aynı kapsamda
+salt okunur `GetSystemValue2`, çizim referansında `SystemValue` kullanılır.
+Model ölçüsünün istenen konfigürasyonu okunamıyorsa aktif modelin farklı
+konfigürasyonuna geçilip değer alınmaz. Tek değer olmayan veya sonlu olmayan
+çıktı reddedilir. Ölçü adı okunamaması, bağımsız nominal okumayı engellemez.
+API metre/radyanları görüntüdeki
 yuvarlanmış metinden bağımsız ele alınır. Çizimdeki görüntü birimi ayrıca kaydedilir.
 
 Kaynak dosya/sayfa/görünüm/model/konfigürasyon, ölçü tam adı, kalıcı anotasyon
@@ -98,8 +110,12 @@ referansı, konum ve özgün API veri imzası her kayıtta bulunur. Uygunsa kayn
 anotasyonu SolidWorks’te seçerek vurgulamak mümkündür.
 
 `GetMinValue2/GetMaxValue2` dönüşü tolerans değildir: Int32 durum kodu ve
-`VT_BYREF | VT_R8` çıktı ayrı işlenir. Başarısız API kodu hiçbir zaman sıfır
-tolerans veya nominal ölçüye çevrilmez. ModelDoc2/DrawingDoc dual arayüzleri
+`VT_BYREF | VT_R8` çıktı ayrı işlenir. Dönüş `swDimensionToleranceWarning_e`
+değeridir: 0 ilgili sınırın geçerli, 1 bu tolerans türünde geçersiz olduğunu
+belirtir. Simetrik toleransın büyüklüğü `GetMaxValue2` ile alınır; `−t/+t`
+oluşturulurken bağımsız olmayan alt sınır API'si çağrılmaz. Geçersiz/okunamayan
+sınır hiçbir zaman sıfır tolerans veya nominal ölçüye çevrilmez.
+ModelDoc2/DrawingDoc dual arayüzleri
 yayımlanmış IID’lerle ayrılır; MakePy/type-info üretimi kullanılmaz.
 Çağrılar worker’ın COM apartment’ında yapılır; GUI’ye COM nesnesi taşınmaz.
 
@@ -111,6 +127,22 @@ Genel/blok tolerans için çizimde gerçek genel tolerans notu ve başarılı sa
 API değeri gerekir; **ISO 2768 sınıfı tahmin edilmez**. Yalnız nottan tablo
 çıkarma yapılmaz. Delik/mil çift gösterimi tek bir ölçüye zorla indirgenmez.
 Görünen değer override içeriyorsa otomatik kullanılmaz; manuel inceleme gerekir.
+
+`Type2` geometrik türü `geometry_kind` alanında ayrıca tutulur. Referansın
+nominal/tolerans verisi eksik olsa bile uzunluk türü biliniyorsa düzenleyicide
+tamamlanabilir; analiz için açık doğrulama gerekir. Değerler `manual_override`
+olarak işaretlenir; kaynak yolu, ölçü kimliği, konfigürasyon ve özgün API imzası
+korunur. Yeniden tarama/kaynak kontrolü bu özgün imzayla yapılır. Yeni alanı
+içermeyen eski JSON projeleri açılabilir; geometrisi bilinmeyen eski referans
+ölçüler yeniden taranmalıdır.
+Okuma imzası değiştiğinden önceki CAD analizlerinde de yeniden tarama gerekebilir.
+
+GetSystemValue3, IsReferenceDim, Type2 ve tolerans durumları, yerel doğrulanmış
+SolidWorks 2023 interop tanımları ve CodeStack `export-dimensions` akışıyla
+karşılaştırıldı. COM testleri çizim referansı/konfigürasyon ayrımını, simetrik
+bandı, bilinmeyen toleransı ve yanlış konfigürasyona düşmeme kuralını denetler.
+Bu kontroller gerçek SolidWorks oturumunun yerini tutmaz; kullanıcının
+çiziminde nominal/tolerans okuma Windows/SolidWorks üzerinde ayrıca doğrulanmalıdır.
 
 ## Revizyon ve çıktı güvenliği
 

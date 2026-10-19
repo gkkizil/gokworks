@@ -6,6 +6,8 @@ from ..components import ValueForm,label
 from tolerance_stack.models import manual_dimension,iso_dimension,Term,UNITS,length,number
 
 KINDS={'Doğrusal':'linear','Yatay (görünüm)':'horizontal','Düşey (görünüm)':'vertical','Ordinat':'ordinate','Çap':'diameter','Radyüs':'radius'}
+KIND_TITLES={**{key:title for title,key in KINDS.items()},'reference':'Referans ölçü','basic':'Temel (BASIC)',
+             'angle':'Açısal','arc':'Yay uzunluğu','chamfer':'Pah','gdt':'GD&T','unknown':'Türü bilinmiyor'}
 DIST={'Analiz ayarını kullan':'inherit','Normal':'normal','Uniform':'uniform','Üçgensel':'triangular'}
 
 
@@ -36,13 +38,19 @@ class DimensionDialog(Editor):
         super().__init__(parent,'Analiz ölçüsü · CAD ölçüsü değiştirilmez')
         self.original=dimension;f=self.form
         f.text('name','Ölçü adı',dimension.name if dimension else '')
-        f.combo('kind','Tür',KINDS,next((title for title,key in KINDS.items() if dimension and key==dimension.kind),'Doğrusal'))
+        native_kind=(dimension.geometry_kind if dimension.kind=='reference' else dimension.kind) if dimension else ''
+        f.combo('kind','Tür',KINDS,next((title for title,key in KINDS.items() if key==native_kind),'Doğrusal'))
         f.combo('unit','Giriş birimi',UNITS,'mm')
         f.combo('mode','Tolerans girişi',('Alt / üst sapma','Simetrik ±','Alt / üst ölçü limiti'))
         f.text('nominal','Nominal',dimension.nominal if dimension and dimension.nominal is not None else '')
         f.text('lower','Alt sapma / alt ölçü',dimension.lower if dimension and dimension.lower is not None else '')
         f.text('upper','Üst sapma / üst ölçü / ±',dimension.upper if dimension and dimension.upper is not None else '')
         f.text('note','Açıklama / genel tolerans kaynağı',dimension.note if dimension else '')
+        if dimension and dimension.kind=='reference':
+            f.fields['kind'].setEnabled(False)
+            f.check('reference_confirmed','Referans ölçünün nominalini ve analiz toleranslarını doğruladım.',False)
+            self.body.insertWidget(0,label('Referans ölçü, kaynak geometrinin türü korunarak yalnız bu analizde kullanılabilir. '
+                'Toleransın çizimde veya üretim şartlarında tanımlı olduğunu kontrol edin.','muted'))
         self.body.insertWidget(0,label('Bilinmeyen toleranslara varsayılan değer atanmaz. '
             'Burada yapılan değişiklik yalnız analize uygulanır; üretim ölçüsünü değiştirmez.','muted'))
 
@@ -58,10 +66,20 @@ class DimensionDialog(Editor):
         if not f.value('name').strip() or lower>upper: raise ValueError('Ad boş veya alt sapma üst sapmadan büyük.')
         dimension=manual_dimension(f.value('name'),nominal,lower,upper,kind=KINDS[f.value('kind')],note=f.value('note'))
         if self.original:
-            if self.original.kind in ('angle','gdt','basic','reference','arc','chamfer'):
+            if self.original.kind=='reference':
+                if self.original.geometry_kind not in KINDS.values():
+                    raise ValueError('Referans ölçünün geometrik türü 1D uzunluk olarak doğrulanamadı; teknik resmi yeniden tarayın.')
+                if not f.value('reference_confirmed'):
+                    raise ValueError('Referans ölçünün nominalini ve analiz toleranslarını doğrulayın.')
+                if dimension.kind!=self.original.geometry_kind:
+                    raise ValueError('Referans ölçünün kaynak geometrik türü değiştirilemez.')
+            elif self.original.kind in ('angle','gdt','basic','arc','chamfer'):
                 raise ValueError('Bu ölçü türü için doğrulanmış 1D model yok; türü değiştirerek zincire alınamaz.')
             dimension=replace(self.original,name=dimension.name,nominal=nominal,lower=lower,upper=upper,
                 kind=dimension.kind,note=f.value('note'),display_unit='mm',provenance='manual_override' if self.original.source else 'manual')
+            if self.original.kind=='reference':
+                dimension=replace(dimension,tolerance_type='Manuel · '+f.value('mode'),
+                    note=dimension.note+'\nReferans ölçünün nominali ve toleransları kullanıcı tarafından analiz için doğrulandı.')
         return dimension
 
 

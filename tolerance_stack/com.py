@@ -67,13 +67,17 @@ def config_array(configuration): return variant(0x2008,(configuration,)) if conf
 
 
 def tolerance_value(tolerance,member):
-    # IDimensionTolerance.GetMin/MaxValue2: HRESULT-style status Int32 and
-    # exactly one [out] double. Do not confuse status 2 with a tolerance.
+    # Int32 swDimensionToleranceWarning_e and one [out] double, not an HRESULT
+    # or the tolerance itself. 1 means this bound is not valid for this type.
     output=variant(0x4005,float('nan'))
     status=call(tolerance,member,output)
     if isinstance(status,(tuple,list)):
         if len(status)!=2: raise RuntimeError('Tolerans API çıktı yapısı geçersiz.')
         status,output.value=status
+    if status==1:
+        bound='Alt' if member=='GetMinValue2' else 'Üst'
+        raise RuntimeError(f'{bound} tolerans bu tolerans türü için tanımlı değil (API kodu: 1). '
+                           'Analiz için gerekli toleransı çizimden doğrulayıp manuel tamamlayın.')
     if status!=0:
         raise RuntimeError(f'Tolerans değeri okunamadı; API hata kodu: {status}.')
     return output.value

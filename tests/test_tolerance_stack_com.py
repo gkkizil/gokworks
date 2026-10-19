@@ -120,6 +120,86 @@ def test_asymmetric_and_reference_angular_and_diameter_classification(drawing):
     assert [d.kind for d in dims]==['linear','angle','reference','diameter']
 
 
+def test_drawing_reference_uses_drawing_context_and_only_valid_symmetric_bound(drawing):
+    class ReferenceDimension(Dimension):
+        def GetSystemValue3(self,which,names):
+            self.config_calls.append((which,names.varianttype,names.value))
+            if which!=1 or names.varianttype!=0:
+                raise RuntimeError('Reference dimension is not a part configuration parameter')
+            return (self.value,)
+    class Symmetric(Tolerance):
+        def GetMinValue2(self,output):
+            raise AssertionError('Symmetric tolerance has no independent lower deviation')
+    dimension=ReferenceDimension(tolerance=Symmetric())
+    drawing.groups[0][0].displays=[Display(dimension,reference=True)]
+    dimensions,_=reader.read_document(drawing)
+    d=dimensions[0]
+    assert (d.nominal,d.lower,d.upper)==(D(50),D('-.1'),D('.1'))
+    assert (d.kind,d.geometry_kind,d.configuration)==('reference','linear','Default')
+    assert dimension.config_calls==[(1,0,None)]
+    assert 'Nominal ölçü okunamadı' not in d.note and 'API kodu' not in d.note
+
+
+def test_named_configuration_accepts_documented_single_bstr_without_active_fallback(drawing):
+    class SingleString(Dimension):
+        def GetSystemValue3(self,which,names):
+            assert which==3
+            if not isinstance(names,str):raise RuntimeError('Array rejected by OLE server')
+            assert names=='Default'
+            return (self.value,)
+    drawing.groups[0][0].displays=[Display(SingleString())]
+    dims,_=reader.read_document(drawing)
+    assert dims[0].nominal==50
+
+
+def test_failed_named_configuration_never_substitutes_active_model_value(drawing):
+    class Unavailable(Dimension):
+        def GetSystemValue3(self,which,names):
+            assert which==3
+            raise RuntimeError('Requested configuration unavailable')
+        def GetSystemValue2(self,name):
+            assert name=='Default'
+            raise RuntimeError('Requested configuration unavailable')
+        @property
+        def SystemValue(self):raise AssertionError('Active model configuration must not be substituted')
+    drawing.groups[0][0].displays=[Display(Unavailable())]
+    dims,_=reader.read_document(drawing)
+    assert dims[0].nominal is None and 'Nominal ölçü okunamadı' in dims[0].note
+    assert dims[0].upper==D('.1')  # Nominal failure does not erase independent valid tolerance data.
+
+
+def test_missing_full_name_does_not_erase_valid_nominal_or_annotation_identity(drawing):
+    display=drawing.groups[0][0].displays[0]
+    display.dimension=NS(GetSystemValue3=lambda *args:(.05,),Tolerance=Tolerance())
+    dims,_=reader.read_document(drawing)
+    assert dims[0].nominal==50 and dims[0].api_name==''
+    assert dims[0].name==display.annotation.name and 'API ölçü adı okunamadı' in dims[0].note
+
+
+def test_reference_system_value_compatibility_fallback_keeps_units_and_angular_kind(drawing):
+    dimension=NS(FullName='Reference angle',Tolerance=Tolerance(),SystemValue=.5)
+    display=drawing.groups[0][0].displays[0]
+    display.dimension=dimension;display.reference=True;display.Type2=3
+    dims,_=reader.read_document(drawing)
+    assert dims[0].nominal==D('.5') and dims[0].display_unit=='rad'
+    assert dims[0].kind=='reference' and dims[0].geometry_kind=='angle'
+
+
+@pytest.mark.parametrize('value,expected',[(.05,D(50)),((.05,.06),None),(float('nan'),None),(True,None)])
+def test_nominal_single_value_validation_does_not_pick_an_arbitrary_configuration(drawing,value,expected):
+    dimension=drawing.groups[0][0].displays[0].dimension
+    dimension.GetSystemValue3=lambda *args:value
+    dims,_=reader.read_document(drawing)
+    assert dims[0].nominal==expected
+
+
+def test_warning_one_leaves_unknown_tolerance_and_its_output_is_never_a_limit(drawing):
+    drawing.groups[0][0].displays[0].dimension.Tolerance=Tolerance(kind=2,status=1,lower=42,upper=42)
+    dims,_=reader.read_document(drawing)
+    assert dims[0].nominal==50 and dims[0].lower is None and dims[0].upper is None
+    assert 'bu tolerans türü için tanımlı değil' in dims[0].note and 'API kodu: 1' in dims[0].note
+
+
 def test_iso_api_values_match_verified_table_and_combined_callout_is_not_collapsed(drawing):
     from iso_fits.rules import limits
     band=limits(50,'H7','hole')

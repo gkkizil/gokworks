@@ -8,6 +8,8 @@ def validate_dimension(dimension):
         raise ValueError('Ölçü kimliği, adı veya türü geçersiz.')
     if dimension.display_unit not in (*UNITS, 'rad', 'deg', 'unknown'):
         raise ValueError(f'{dimension.name}: birim tanınmıyor.')
+    if not isinstance(dimension.geometry_kind,str) or dimension.geometry_kind and dimension.geometry_kind not in KINDS:
+        raise ValueError(f'{dimension.name}: kaynak ölçünün geometrik türü tanınmıyor.')
     for value in (dimension.nominal, dimension.lower, dimension.upper):
         if value is not None:
             number(value, dimension.name)
@@ -61,7 +63,10 @@ def validate(project, *, confirmed=True):
         if identity in used:
             raise ValueError(f'{dimension.name}: aynı kaynak ölçü iki kez kullanılmış. Bağımsız kabul edilemez; zinciri düzeltin.')
         used.add(identity)
-        if dimension.kind in ('angle', 'gdt', 'basic', 'reference', 'arc', 'chamfer', 'unknown'):
+        if dimension.kind=='reference':
+            raise ValueError(f'{dimension.name}: referans ölçü. Ölçüyü düzenle ile nominal/tolerans değerlerini '
+                             've analizde kullanımını doğrulayın; üretim ölçüsü değiştirilmez.')
+        if dimension.kind in ('angle', 'gdt', 'basic', 'arc', 'chamfer', 'unknown'):
             raise ValueError(f'{dimension.name}: {dimension.kind} türü doğrudan 1D uzunluk zincirine alınamaz. Ayrı matematiksel model gerekli.')
         if dimension.kind in ('diameter', 'radius') and not term.relation.strip():
             raise ValueError(f'{dimension.name}: çap/radyüsün doğrusal fonksiyonel ilişkisini ve katsayısını açıkça tanımlayın.')

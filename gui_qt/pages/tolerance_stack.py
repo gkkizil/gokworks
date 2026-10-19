@@ -14,14 +14,15 @@ from tolerance_stack.diagram import draw_chain,draw_contributions,draw_histogram
 from ..components import BasePage,ValueForm,PathPicker,card,label,button,scroll,configure_view,show_details
 from ..models import Column,TableModel,FilterProxy
 from ..diagrams import EngineeringDiagram
-from .stack_dialogs import MemorySettings,DimensionDialog,TermDialog,IsoPairDialog,KINDS,DIST
+from .stack_dialogs import MemorySettings,DimensionDialog,TermDialog,IsoPairDialog,KINDS,KIND_TITLES,DIST
 
 
 METHODS={'Worst-Case':'worst_case','Worst-Case + RSS':'rss','Worst-Case + RSS + Monte Carlo':'all'}
 DISTRIBUTIONS={'Normal':'normal','Uniform':'uniform','Üçgensel':'triangular'}
 HELP=('1. Aktif .SLDDRW teknik resmini veya birden fazla dosyayı okuyun; SolidWorks olmadan manuel ölçü ekleyebilirsiniz.\n'
       '2. Yalnız fonksiyonel zincire ait ölçüleri seçip +/− yönüyle ekleyin. Başlangıç/bitiş ve ortak datum/ekseni tanımlayın.\n'
-      '3. Çap/radyüs için doğrusal ilişkiyi açıklayın. Açılar, BASIC/referans ölçüler ve GD&T doğrudan kullanılamaz.\n'
+      '3. Çap/radyüs için doğrusal ilişkiyi açıklayın. Referans ölçüleri önce düzenleyip analiz toleranslarını doğrulayın. '
+      'Açılar, BASIC ve GD&T doğrudan kullanılamaz.\n'
       '4. Tolerans bilinmiyorsa manuel tamamlayın. ISO 2768 veya genel tolerans kendiliğinden atanmaz.\n'
       '5. Ayarlarda kabul sınırlarını ve dağılım varsayımlarını belirleyin. Zinciri doğrulayıp hesaplayın.\n'
       '6. WC tüm sınırları kapsar; RSS istatistiksel bir aralıktır. Normal dağılım kesilmiyorsa tolerans dışı örnekler mümkündür.\n'
@@ -226,7 +227,7 @@ class ToleranceStackPage(BasePage):
             rows.append(dict(id=d.id,name=d.name,nominal=None if d.nominal is None else float(d.nominal),
                 lower=None if d.lower is None else float(d.lower),upper=None if d.upper is None else float(d.upper),
                 minimum=None if d.minimum is None else float(d.minimum),maximum=None if d.maximum is None else float(d.maximum),
-                location=f'{d.sheet} / {d.view}',kind=d.kind,type=next((title for title,key in KINDS.items() if key==d.kind),d.kind)+' · '+d.tolerance_type,source=d.source or 'Manuel',
+                location=f'{d.sheet} / {d.view}',kind=d.kind,type=KIND_TITLES.get(d.kind,d.kind)+' · '+d.tolerance_type,source=d.source or 'Manuel',
                 missing=d.nominal is None or d.lower is None or d.upper is None,note=d.note,configuration=d.configuration))
         self.library_model.replace(rows)
         dimensions={d.id:d for d in self.project.dimensions}
@@ -254,16 +255,25 @@ class ToleranceStackPage(BasePage):
     def edit_dimension(self,*args):
         d=self.selected_dimension()
         if d is None:return
-        if d.kind in ('angle','gdt','basic','reference','arc','chamfer'):
+        if d.kind=='reference' and d.geometry_kind not in KINDS.values():
+            show_details(self,'Referans ölçü',d.note+'\nKaynak geometrik tür 1D uzunluk olarak doğrulanamadı. '
+                'Teknik resmi yeniden tarayın. Açısal ölçüler, yay ve pahlar bu yolla uzunluğa çevrilemez.');return
+        if d.kind in ('angle','gdt','basic','arc','chamfer'):
             show_details(self,'Ölçü sınıflandırması',d.kind+'\n'+d.note+'\nBu tür için doğrulanmış ayrı matematiksel model gerekli.');return
         dialog=DimensionDialog(self,d)
-        if dialog.exec():
-            self.project.dimensions=[dialog.value if item.id==d.id else item for item in self.project.dimensions]
-            self.invalidate();self.refresh()
+        try:
+            if dialog.exec():
+                self.project.dimensions=[dialog.value if item.id==d.id else item for item in self.project.dimensions]
+                self.invalidate();self.refresh()
+                return dialog.value
+        finally:dialog.deleteLater()
 
     def add_selected(self,direction):
         d=self.selected_dimension()
         if d is None:self.set_status('Önce bir ölçü seçin.',True);return
+        if d.kind=='reference':
+            d=self.edit_dimension()
+            if d is None:return
         self.append_dimension(d,direction)
 
     def append_dimension(self,d,direction,*,factor=1,relation=''):

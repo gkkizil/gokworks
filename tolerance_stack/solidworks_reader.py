@@ -27,7 +27,35 @@ DIMENSION_TYPES={1:'ordinate',2:'linear',3:'angle',4:'arc',5:'radius',6:'diamete
 
 def signature(dimension):
     return digest({key:getattr(dimension,key) for key in ('nominal','lower','upper','kind','tolerance_type','source',
-        'sheet','view','configuration','model','api_name','display_text','position','physical_id')})
+        'sheet','view','configuration','model','api_name','display_text','position','physical_id','geometry_kind')})
+
+
+def nominal_value(dimension, configuration, reference):
+    """Read drawing references in drawing context; imported dimensions by name.
+
+    A drawing-owned reference is not a model parameter in the view's referenced
+    part configuration. Never substitute the active model configuration when
+    reading an imported dimension in a specifically named configuration.
+    """
+    current=reference or not configuration
+    attempts=[('GetSystemValue3',(1 if current else 3,com.config_array('' if current else configuration)))]
+    if not current:
+        # Both BSTR and SAFEARRAY(BSTR) are explicitly supported by the OLE API.
+        attempts.append(('GetSystemValue3',(3,configuration)))
+    attempts.append(('GetSystemValue2',('' if current else configuration,)))
+    error=None
+    for member,args in attempts:
+        try:
+            value=com.call(dimension,member,*args)
+            if isinstance(value,(tuple,list)):
+                if len(value)!=1:raise ValueError('Tek bir konfigürasyon değeri alınamadı.')
+                value=value[0]
+            return number(value)
+        except (RuntimeError,ValueError) as failure:error=failure
+    if reference:
+        try:return number(com.get(dimension,'SystemValue'))
+        except (RuntimeError,ValueError) as failure:error=failure
+    raise RuntimeError('Nominal ölçü okunamadı; manuel tamamlayın. '+str(error))
 
 
 def drawing_unit(model,angular=False):
@@ -43,7 +71,14 @@ def read_dimension(model,view,display,source,sheet,view_name,sequence,general_no
     notes=[];nominal=lower=upper=None;position=();persist='';api_name='';dimension=None
     try:kind=DIMENSION_TYPES.get(com.get(display,'Type2'),'unknown')
     except RuntimeError:kind='unknown';notes.append('Ölçü türü okunamadı; manuel sınıflandırma gerekli.')
+    geometry_kind=kind
     angular=kind=='angle'
+    try:reference=bool(com.call(display,'IsReferenceDim'))
+    except RuntimeError:
+        reference=False;kind='unknown';notes.append('Ölçünün referans durumu okunamadı; manuel sınıflandırma gerekli.')
+    if reference:
+        kind='reference'
+        notes.append('Referans ölçü: analizde kullanmadan önce nominal değeri ve tolerans kaynağını doğrulayın.')
     tolerance_type='Bilinmiyor'
     configuration=str(com.optional(view,'ReferencedConfiguration',property=True,default='') or '')
     reference_model=str(com.optional(view,'GetReferencedModelName',default='') or '')
@@ -57,14 +92,14 @@ def read_dimension(model,view,display,source,sheet,view_name,sequence,general_no
     except RuntimeError: notes.append('Anotasyon kalıcı referansı/konumu okunamadı; sayfa ve görünüm ile bulunabilir.')
     try:
         dimension=com.call(display,'GetDimension2',0)
-        api_name=str(com.get(dimension,'FullName'))
-        values=com.call(dimension,'GetSystemValue3',3 if configuration else 1,com.config_array(configuration))
-        if not isinstance(values,(tuple,list)) or len(values)!=1:
-            raise RuntimeError('Nominal değer tek konfigürasyona bağlanamadı.')
-        nominal=number(values[0])*(1 if angular else 1000)
-    except (RuntimeError,ValueError): notes.append('Nominal ölçü/konfigürasyon okunamadı; manuel tamamlayın.')
+        if dimension is None:raise RuntimeError('Teknik resmin ölçü nesnesi alınamadı.')
+    except RuntimeError as error:notes.append(str(error))
+    if dimension is not None:
+        try:api_name=str(com.get(dimension,'FullName') or '')
+        except RuntimeError:notes.append('API ölçü adı okunamadı; anotasyon kimliği kullanılıyor.')
+        try:nominal=nominal_value(dimension,configuration,reference)*(1 if angular else 1000)
+        except (RuntimeError,ValueError) as error:notes.append(str(error))
     try:
-        reference=bool(com.call(display,'IsReferenceDim'))
         tolerance=com.get(dimension,'Tolerance')
         tol_kind=int(com.get(tolerance,'Type'))
         tolerance_type=TOLERANCE_TYPES.get(tol_kind,f'Desteklenmeyen API türü {tol_kind}')
@@ -72,8 +107,11 @@ def read_dimension(model,view,display,source,sheet,view_name,sequence,general_no
         elif reference: kind='reference'
         if tol_kind in (2,3,4,7,8,9,10,11):
             factor=1 if angular else 1000
-            lower=number(com.tolerance_value(tolerance,'GetMinValue2'))*factor
             upper=number(com.tolerance_value(tolerance,'GetMaxValue2'))*factor
+            if tol_kind==4:
+                if upper<0:raise ValueError('Simetrik tolerans büyüklüğü negatif olamaz.')
+                lower=-upper
+            else:lower=number(com.tolerance_value(tolerance,'GetMinValue2'))*factor
             if lower>upper: raise ValueError('Alt/üst tolerans tutarsız.')
             evidence=[text for text in general_notes if re.search(r'ISO\s*2768|genel\s+tolerans|general\s+toleranc|unless.+specified',text,re.I)]
             if tol_kind in (10,11) and (not evidence or lower==upper==0):
@@ -104,7 +142,8 @@ def read_dimension(model,view,display,source,sheet,view_name,sequence,general_no
         model=reference_model,api_name=api_name,persistent_ref=persist,
         physical_id=digest((com.path_key(reference_model or source),configuration,api_name)) if api_name else '',
         position=position,display_unit='rad' if angular else 'mm',display_text=text,provenance='solidworks',
-        note='\n'.join(notes)+f'\nÇizim gösterim birimi: {(units or {}).get(angular) or drawing_unit(model,angular)}; hesap birimi: '+('rad' if angular else 'mm'))
+        note='\n'.join(notes)+f'\nÇizim gösterim birimi: {(units or {}).get(angular) or drawing_unit(model,angular)}; hesap birimi: '+('rad' if angular else 'mm'),
+        geometry_kind=geometry_kind)
     return replace(record,original_signature=signature(record))
 
 

@@ -77,6 +77,7 @@ class Dimension:
     provenance: str = 'manual'
     original_signature: str = ''  # original API values, retained after manual completion
     note: str = ''
+    geometry_kind: str = ''  # Native Type2, retained even when classified as reference/BASIC.
 
     def __post_init__(self):
         for key in ('nominal', 'lower', 'upper'):

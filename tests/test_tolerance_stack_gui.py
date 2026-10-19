@@ -12,7 +12,7 @@ from gui_qt.pages.stack_dialogs import DimensionDialog,IsoPairDialog
 from tolerance_stack.models import manual_dimension
 from tolerance_stack.calculator import Cancelled
 from tolerance_stack import solidworks_reader as reader
-from test_tolerance_stack_com import Drawing
+from test_tolerance_stack_com import Drawing,Display,Dimension,Tolerance
 
 
 @pytest.fixture
@@ -69,6 +69,74 @@ def test_native_manual_limits_units_and_iso_pair_editors(window):
     page.append_dimension(shaft,-1,factor=factor,relation=relation);page.confirm_box.setChecked(True)
     assert page.project.confirmed_digest
     dialog.deleteLater();iso.deleteLater()
+
+
+def test_reference_with_missing_values_can_be_confirmed_and_added_without_cad_edits(window,tmp_path):
+    from tolerance_stack.calculator import calculate
+    from tolerance_stack.storage import save_project,load_project
+    path=tmp_path/'Referans.SLDDRW';path.write_bytes(b'untouched drawing')
+    drawing=Drawing(path)
+    display=Display(Dimension(tolerance=Tolerance(kind=2,status=1)),reference=True)
+    display.dimension.GetSystemValue3=lambda *args:None
+    drawing.groups[0][0].displays=[display]
+    dimensions,source=reader.read_document(drawing)
+    original=dimensions[0]
+    assert original.kind=='reference' and original.geometry_kind=='linear' and original.nominal is None
+    page=window.pages['tolerance_stack'];page.project.dimensions=dimensions;page.project.sources=[source]
+    page.refresh();page.library.selectRow(0)
+    native_exec=DimensionDialog.exec
+    def confirm(dialog):
+        def complete():
+            assert not dialog.form.fields['kind'].isEnabled()
+            for key,value in dict(nominal='50',lower='-0,1',upper='0,1').items():dialog.form.set_value(key,value)
+            with pytest.raises(ValueError,match='doğrulayın'):dialog.read_value()
+            dialog.form.set_value('reference_confirmed',True)
+            dialog.submit()
+        QTimer.singleShot(0,complete)
+        return native_exec(dialog)
+    with patch.object(DimensionDialog,'exec',confirm):page.add_selected(1)
+    assert len(page.project.terms)==1
+    d=page.project.dimensions[0]
+    assert (d.kind,d.geometry_kind,d.provenance)==('linear','linear','manual_override')
+    assert d.tolerance_type=='Manuel · Alt / üst sapma'
+    assert d.id==original.id and d.original_signature==original.original_signature
+    assert d.source==original.source and d.configuration==original.configuration
+    page.project.terms[0]=replace(page.project.terms[0],relation='Çizim X → montaj X; datum A')
+    page.project.method='worst_case';page.project.confirm()
+    with patch.object(reader,'read_sources',return_value=(dimensions,[source])):reader.verify_live(page.project)
+    result=calculate(page.project)
+    assert (float(result.minimum),float(result.maximum))==(49.9,50.1)
+    project_file=tmp_path/'reference.gokstack.json'
+    save_project(page.project,project_file)
+    loaded,_=load_project(project_file)
+    assert loaded.dimensions==page.project.dimensions
+    assert not loaded.confirmed_digest
+    assert path.read_bytes()==b'untouched drawing' and drawing.dirty is False
+
+
+def test_cancel_reference_completion_does_not_add_to_chain(window):
+    page=window.pages['tolerance_stack']
+    d=replace(manual_dimension('Ref','50','-.1','.1'),kind='reference',geometry_kind='linear')
+    page.project.dimensions=[d];page.refresh();page.library.selectRow(0)
+    native_exec=DimensionDialog.exec
+    def cancel(dialog):
+        QTimer.singleShot(0,dialog.reject)
+        return native_exec(dialog)
+    with patch.object(DimensionDialog,'exec',cancel):page.add_selected(1)
+    assert page.project.terms==[] and page.project.dimensions==[d]
+
+
+@pytest.mark.parametrize('geometry',['angle','arc','chamfer','unknown',''])
+def test_reference_angle_or_unverified_geometry_cannot_be_disguised_as_linear(window,geometry):
+    page=window.pages['tolerance_stack']
+    d=replace(manual_dimension('Ref','50','-.1','.1'),kind='reference',geometry_kind=geometry)
+    dialog=DimensionDialog(page,d);dialog.form.set_value('reference_confirmed',True)
+    with pytest.raises(ValueError,match='geometrik türü'):dialog.read_value()
+    page.project.dimensions=[d];page.refresh();page.library.selectRow(0)
+    with patch('gui_qt.pages.tolerance_stack.show_details') as details:
+        page.add_selected(1);assert details.called
+    assert not page.project.terms
+    dialog.deleteLater()
 
 
 def test_library_filter_search_and_numeric_sort_do_not_create_row_widgets(window):
