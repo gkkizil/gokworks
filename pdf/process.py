@@ -15,6 +15,7 @@ import tempfile
 import time
 
 from solidworks import diagnostics
+from solidworks.process_watch import start_watch
 
 
 WORKER_FLAG = '--pdf-export-worker'
@@ -186,6 +187,7 @@ def export_drawings(source_folder, output_folder, include_subfolders,
             process = subprocess.Popen(_command(request), stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            start_watch(process.pid, diagnostic_log, 'pdf-worker')
             diagnostics.record(f'pdf_process_started pid={process.pid}')
             pending = b''
             with event_path.open('rb') as stream:
@@ -242,10 +244,5 @@ def export_drawings(source_folder, output_folder, include_subfolders,
             summary['processed'] += 1
             events.put(('result', dict(source=current, status='error', detail=detail)))
         summary.update(state='error', error=detail)
-    elif diagnostic_log and summary['state'] != 'error' and not summary['failed']:
-        try:
-            diagnostic_log.unlink(missing_ok=True)
-        except OSError:
-            pass
     events.put(('done', summary))
     diagnostics.record('pdf_transport_done state='+summary['state'])

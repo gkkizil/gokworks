@@ -8,6 +8,9 @@ def main():
 
 if __name__ == "__main__":
     import sys
+    if len(sys.argv) == 6 and sys.argv[1] == '--process-exit-watch':
+        from solidworks.process_watch import run_watch
+        raise SystemExit(run_watch(int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]))
     if len(sys.argv) == 3 and sys.argv[1] == '--pdf-export-worker':
         from pdf.process import run_worker
         raise SystemExit(run_worker(sys.argv[2]))

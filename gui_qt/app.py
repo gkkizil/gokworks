@@ -1,5 +1,6 @@
 """GOKWORKS Qt desktop shell: persistent pages, asynchronous jobs and safe close."""
 
+import os
 import sys
 from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, QSize
@@ -270,8 +271,10 @@ def create_application(argv=None):
 
 def main():
     from solidworks.diagnostics import enable
+    from solidworks.process_watch import start_watch
     from .diagnostics import install
-    enable('gui')
+    log = enable('gui')
+    start_watch(os.getpid(), log, 'gui')
     install()
     app = create_application()
     app.lastWindowClosed.connect(lambda: diagnostics.record('gui_last_window_closed'))
