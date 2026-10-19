@@ -1,6 +1,102 @@
 {
   "commit": "17d6f3bb5de624dfc8739af86699d4f98afa1c8b",
-  "status": "building",
+  "status": "success",
   "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39196153524",
-  "download_url": ""
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/39196153524/artifacts/12162540481",
+  "bytes": 9907271,
+  "sha256": "19951475f76fc0c460733b04cd28dc9f770c15f49b30338c85bca8265fe7a1e8",
+  "smoke": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "python": "3.13.16",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "qt_platform": "windows",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "weight"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 2228.7,
+    "navigation_median_ms": 44.73,
+    "navigation_max_ms": 83.2,
+    "resize_median_ms": 30.12,
+    "resize_max_ms": 165.62,
+    "table_50000_load_ms": 73.41,
+    "table_50000_filter_ms": 179.37,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "solidworks_live_tested": false,
+    "checks": [
+      "ten modules",
+      "two themes",
+      "resolution matrix",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "no Tk runtime"
+    ]
+  },
+  "regressions": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "3",
+      "tests": "1496",
+      "time": "357.954",
+      "timestamp": "2026-10-19T03:46:05.050783+00:00",
+      "hostname": "runnervm0xl3a"
+    }
+  ],
+  "test_failures": [],
+  "test_skips": [
+    {
+      "name": "tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
+      "reason": "Unix hard-link publication path"
+    },
+    {
+      "name": "tests.test_tolerance_stack_live.test_live_read_all_sheets_is_readonly_and_revision_matches",
+      "reason": "Gerçek SolidWorks/Windows ve GOKWORKS_TEST_SLDDRW seçimi yok; canlı CAD testi çalıştırılmadı."
+    },
+    {
+      "name": "tests.test_tolerance_stack_live.test_live_native_analysis_copy_preserves_original_and_model_references",
+      "reason": "Ayrı analizli kopya kaydı için açık opt-in yok."
+    }
+  ]
 }
