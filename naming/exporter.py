@@ -9,6 +9,7 @@ import re
 
 from dxf_dwg import exporter as sw
 from solidworks.connection import connect_to_solidworks
+from . import native
 
 pythoncom, win32com = sw.pythoncom, sw.win32com
 CAD_TYPES = {'.sldprt': 'Parça', '.sldasm': 'Montaj', '.slddrw': 'Teknik resim'}
@@ -419,6 +420,7 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
     except Exception as error:
         raise RuntimeError(f'SolidWorks ModelDocExtension okunamadı: {error}') from error
     signature = 'sıfır parametreli GetPackAndGo'
+    pg = None
     try:
         if hasattr(extension, '_oleobj_'):
             ole = extension._oleobj_
@@ -429,13 +431,39 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
         else:
             raw = extension.GetPackAndGo()
     except Exception as error:
-        raise RuntimeError(f'SolidWorks GetPackAndGo başlatılamadı (API çağrısı): {error} · {signature}') from error
-    try:
-        pg = _pack_result(raw, result_type, arguments) if hasattr(extension, '_oleobj_') else raw
-    except Exception as error:
-        raise RuntimeError(f'SolidWorks Pack and Go nesnesi hazırlanamadı: {error} · {signature}') from error
+        message = f'SolidWorks GetPackAndGo başlatılamadı (API çağrısı): {error} · {signature}'
+        if getattr(error, 'hresult', None) != -2147352561:
+            raise RuntimeError(message) from error
+        # A missing-parameter Automation error occurs before this zero-input
+        # getter executes. Use the installed SW dual interface through .NET;
+        # do not retry guessed InvokeTypes signatures or add dummy parameters.
+        try:
+            if progress:
+                progress('Pack and Go · SolidWorks .NET interop bağlantısı hazırlanıyor…')
+            pg = native.open_pack(app, root)
+        except Exception as interop_error:
+            raise RuntimeError(f'{message} · .NET interop bağlantısı: {interop_error}') from error
+    if pg is None:
+        try:
+            pg = _pack_result(raw, result_type, arguments) if hasattr(extension, '_oleobj_') else raw
+        except Exception as error:
+            raise RuntimeError(f'SolidWorks Pack and Go nesnesi hazırlanamadı: {error} · {signature}') from error
     if pg is None:
         raise RuntimeError('SolidWorks Pack and Go başlatılamadı.')
+    try:
+        snapshot = _snapshot(app, model, pg, root, source_path, require_assembly, stop, progress)
+    except BaseException:
+        _close_pack(pg)
+        raise
+    return snapshot, extension, pg
+
+
+def _close_pack(pg):
+    if isinstance(pg, native.Pack):
+        pg.close()
+
+
+def _snapshot(app, model, pg, root, source_path, require_assembly, stop, progress):
     for member in ('IncludeDrawings', 'IncludeSuppressed', 'IncludeToolboxComponents'):
         try:
             setattr(pg, member, True)
@@ -477,15 +505,18 @@ def _session(app, stop=None, progress=None, *, model=None, source_path=None, req
         if progress and (index == 1 or index == count or index % 25 == 0):
             progress(f'Dosyalar ve bağlantılar okunuyor · {index}/{count}')
     _check(stop)
-    return Snapshot(root, tuple(documents), source_path, require_assembly), extension, pg
+    return Snapshot(root, tuple(documents), source_path, require_assembly)
 
 
 def scan(app, stop=None, progress=None, *, source_path=None, require_assembly=False):
     source_path = str(Path(source_path).absolute()) if source_path is not None else None
     with _source_document(app, source_path, stop) as model:
-        snapshot, _, _ = _session(app, stop, progress, model=model,
-                                  source_path=source_path, require_assembly=require_assembly)
-    return snapshot
+        snapshot, _, pg = _session(app, stop, progress, model=model,
+                                   source_path=source_path, require_assembly=require_assembly)
+        try:
+            return snapshot
+        finally:
+            _close_pack(pg)
 
 
 def plan_names(snapshot, destination, rules=Rules(), overrides=None, *, allow_collisions=False):
@@ -551,6 +582,13 @@ def _execute(app, snapshot, entries, destination, stop=None, progress=None, *, m
     destination = validate_destination(destination, snapshot)
     fresh, extension, pg = _session(app, stop, progress, model=model,
                                    source_path=snapshot.source_path, require_assembly=snapshot.require_assembly)
+    try:
+        return _save_package(app, snapshot, entries, destination, stop, progress, fresh, extension, pg)
+    finally:
+        _close_pack(pg)
+
+
+def _save_package(app, snapshot, entries, destination, stop, progress, fresh, extension, pg):
     old = {path_key(doc.path): doc for doc in snapshot.documents}
     current = {path_key(doc.path): doc for doc in fresh.documents}
     if path_key(fresh.root) != path_key(snapshot.root) or old != current:
@@ -594,7 +632,7 @@ def _execute(app, snapshot, entries, destination, stop=None, progress=None, *, m
     try:
         if progress:
             progress('SolidWorks bağlantıları koruyarak yeni paketi oluşturuyor…')
-        statuses = extension.SavePackAndGo(pg)
+        statuses = pg.save() if isinstance(pg, native.Pack) else extension.SavePackAndGo(pg)
         if (not isinstance(statuses, (tuple, list)) or len(statuses) != len(targets)
                 or any(type(status) is not int or status != 0 for status in statuses)):
             raise RuntimeError(f'Pack and Go bütün dosyaları kaydedemedi. Durum kodları: {statuses}')

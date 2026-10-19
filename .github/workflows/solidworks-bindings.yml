@@ -1,0 +1,66 @@
+name: SolidWorks connection and Pack and Go bindings
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, codex/pyside6-migration]
+    paths:
+      - solidworks/connection.py
+      - naming/native.py
+      - naming/interop/**
+      - tests/test_naming_native.py
+      - tests/test_settings_and_connection.py
+      - .github/workflows/solidworks-bindings.yml
+      - packaging/publish_binding_status.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: solidworks-bindings-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bindings:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install existing test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Record binding check start
+        env:
+          BINDING_STATUS: building
+        run: python packaging/publish_binding_status.py
+      - name: Fetch pinned interop reference for compilation only
+        shell: powershell
+        run: |
+          $dll = Join-Path $env:RUNNER_TEMP 'SolidWorks.Interop.sldworks.dll'
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/angelsix/solidworks-api/58787e2cefdcc03aebc15a51bd52ba151f3969d4/References/2023/SolidWorks.Interop.sldworks.dll' -OutFile $dll
+          if ((Get-FileHash $dll -Algorithm SHA256).Hash.ToLowerInvariant() -ne '7a6bf74d2a9f60563959d738c3c85f825f257c9def2a3bec464511aaebfc88e4') { throw 'Interop reference checksum mismatch' }
+          "GOKWORKS_INTEROP_TEST_DLL=$dll" >> $env:GITHUB_ENV
+      - name: Verify actual pywin32 exports and Windows PowerShell typed compilation
+        env:
+          QT_QPA_PLATFORM: offscreen
+          PYTHONUTF8: '1'
+        run: python -m pytest -q tests/test_naming_native.py tests/test_settings_and_connection.py -k "native or raw_connection" --junitxml=binding-tests.xml *> binding-tests.log
+      - name: Preserve check evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SolidWorks-binding-checks-${{ github.sha }}
+          path: |
+            binding-tests.xml
+            binding-tests.log
+          if-no-files-found: ignore
+      - name: Record binding check result
+        if: always()
+        env:
+          BINDING_STATUS: ${{ job.status }}
+        run: python packaging/publish_binding_status.py

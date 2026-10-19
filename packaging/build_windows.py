@@ -54,7 +54,8 @@ def main():
             '--add-data', f'{ROOT / "gui/assets/GOK_logo_light_UI_1024.png"};gui/assets',
             '--add-data', f'{ROOT / "gui/assets/GOK_logo_dark_UI_1024.png"};gui/assets',
             '--add-data', f'{ROOT / "gui/assets/GOK_app_windows.ico"};gui/assets',
-            '--add-data', f'{ROOT / "iso_fits/tables.json"};iso_fits', str(ROOT/'main.py')]
+            '--add-data', f'{ROOT / "iso_fits/tables.json"};iso_fits',
+            '--add-data', f'{ROOT / "naming/interop/PackAndGoHost.cs"};naming/interop', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)
     exe = ROOT/'dist/GOKWORKS/GOKWORKS.exe'
     if exe.read_bytes()[:2] != b'MZ':

@@ -1,5 +1,10 @@
 # İsimlendirme aracı
 
+**19 Ekim 2026:** `GetPackAndGo` parametre bağlama hatası için uygulamaya gömülü
+[güçlü türlenmiş .NET interop yolu](interop/README.md) eklendi. Güncel Qt
+arayüzü, kaynak sahipliği ve dosya referansı doğrulamaları korunur. Aşağıdaki
+eski Tk ekranları tarihsel kayıttır; güncel arayüz `gui_qt/pages/naming.py` içindedir.
+
 SolidWorks dosyalarını yeni adlarla **ayrı bir Pack and Go paketine** aktarır. Montaj, parça, alt montaj, türetilmiş parça ve bulunan teknik resim dosyalarının yolları aynı eşleştirmeyle güncellenir. Kaynak dosyalarda yerinde yeniden adlandırma yapılmaz; mevcut proje ve ona dışarıdan bağlı dosyalar kendi adlarıyla kullanılmaya devam eder. Yeni proje, çıktı klasöründeki montaj/teknik resim üzerinden açılır.
 
 ## Kullanım

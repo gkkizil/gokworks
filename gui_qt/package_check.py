@@ -88,6 +88,8 @@ def check(output):
         dxf = Path(folder)/'test.dxf'
         ezdxf.new().saveas(dxf)
         assert dxf.stat().st_size > 100
+        from naming.native import HOST_SOURCE
+        assert HOST_SOURCE.is_file(), 'Gömülü Pack and Go interop kaynağı eksik.'
         if os.name == 'nt':
             import pythoncom, win32com.client
             pythoncom.CoInitialize()
@@ -108,7 +110,8 @@ def check(output):
                       kr_assignment_engine='embedded Python SheetMetal parameters',
                       solidworks_live_tested=False,checks=['ten modules','two themes','resolution matrix',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
-                      'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency','no Tk runtime'])
+                      'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
+                      'Pack and Go interop source bundled','no Tk runtime'])
         w.close()
         return report
 

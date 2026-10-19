@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-19",
+  "reported_error": {
+    "member": "IModelDocExtension.GetPackAndGo",
+    "hresult": -2147352561,
+    "type_information_hresult": -2147352565,
+    "live_server_internal_cause_verified": false
+  },
+  "route": "On the specific Automation missing-parameter error, call installed strongly typed SolidWorks .NET dual interfaces in an owned STA client; retain Python source ownership, naming plan and dependency validation.",
+  "compile": {
+    "status": "passed",
+    "target": ".NET Framework 4.8",
+    "compiler": ".NET SDK 8.0.426 Roslyn",
+    "errors": 0,
+    "warnings": 0,
+    "interop_reference": "https://github.com/angelsix/solidworks-api/blob/58787e2cefdcc03aebc15a51bd52ba151f3969d4/References/2023/SolidWorks.Interop.sldworks.dll",
+    "interop_sha256": "7a6bf74d2a9f60563959d738c3c85f825f257c9def2a3bec464511aaebfc88e4",
+    "reference_redistributed": false
+  },
+  "linux_targeted_tests": {
+    "passed": 95,
+    "subtests_passed": 28,
+    "skipped": 3,
+    "failures": 0,
+    "skips": ["Real Windows pywin32 exports", "Windows PowerShell typed compilation", "Opt-in live native SolidWorks read-only scan"],
+    "coverage": ["Reported Automation error reproduced", "Typed client used only for matching binding error", "Assembly/drawing dependency graph preserved in doubles", "Source files unchanged", "Cancellation and failed-write cleanup", "Interop client release", "UTF-8 stdio and broken connection", "Tolerance stack raw connection and COM apartment cleanup"]
+  },
+  "qt_naming_tests": {"passed": 4},
+  "source_qt_smoke": {"status": "passed", "modules": 10, "live_solidworks": false},
+  "windows_binding_checks": "See windows-bindings.json for the separate actual Windows CI result.",
+  "live_solidworks_tested": false,
+  "native_cad_save_tested": false,
+  "exe_built": false
+}
