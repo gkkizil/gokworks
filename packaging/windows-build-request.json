@@ -1,6 +1,6 @@
 {
-  "request_id": "ca805c83-dfe0-45e4-a0d6-a63ca4ab8ba1",
-  "requested_at": "2026-10-19T03:44:55.159123+00:00",
-  "source_commit": "d9710da745ee0256d8920dd2ca70d3b616989b27",
-  "reason": "User-requested current GOKWORKS Windows EXE, including restored engineering details and integrated tolerance stack-up module; run Windows regressions and frozen application checks."
+  "request_id": "66323364-b3be-4dbf-ba0f-4db214e5d028",
+  "requested_at": "2026-10-19T04:31:14.292413+00:00",
+  "source_commit": "b1f0257edb7efcb03ba75eb5a1bafa8646d22813",
+  "reason": "User-requested Windows EXE with fixed tolerance stack raw connection and typed native Pack and Go interop fallback. Include embedded C# host source; validate Windows regressions and frozen application startup."
 }
