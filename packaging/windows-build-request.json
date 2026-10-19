@@ -1,6 +1,6 @@
 {
-  "request_id": "6db5f083-27e2-4498-a89d-dfd585f0ba9c",
-  "requested_at": "2026-10-19T08:21:46.007024+00:00",
-  "source_commit": "d00b9292a664f214194c166aba4d64a69a91deeb",
-  "reason": "User-requested GOKWORKS EXE with isolated PDF COM worker, safe COM cleanup and crash diagnostics. Include Windows decimal/hex exit codes and verify frozen PDF worker startup/IPC."
+  "request_id": "90c3c503-ca51-4b9f-b1cd-9cc7f199dcee",
+  "requested_at": "2026-10-19T08:27:42.892580+00:00",
+  "source_commit": "bc39cb9969d89ce7ce674ee04fbab0acfc9aecad",
+  "reason": "Retry user-requested PDF-fix EXE. New PDF/COM and Qt crash-containment tests passed on Windows; the overall pytest process exited without JUnit after GUI tests. Capture native stdout/stderr and process exit code directly, retaining the full suite and all timeouts."
 }

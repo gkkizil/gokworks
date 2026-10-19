@@ -41,7 +41,7 @@ jobs:
           PYTHONUTF8: '1'
         run: |
           python -m pip install -r requirements-dev.txt
-          python -m pytest -vv --timeout=60 --timeout-method=thread --junitxml=windows-tests.xml *> windows-tests.log
+          python packaging/run_windows_tests.py
       - name: Build and open the packaged EXE
         run: python packaging/build_windows.py *> windows-build.log
       - name: Upload Windows package
