@@ -3,34 +3,49 @@
 from dataclasses import replace
 from pathlib import Path
 
-from PySide6.QtCore import Qt,QSignalBlocker,QFileSystemWatcher
+from PySide6.QtCore import Qt,QSignalBlocker,QFileSystemWatcher,QTimer
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QSplitter,QTabWidget,QLineEdit,QComboBox,
-    QTableView,QCheckBox,QFileDialog,QMessageBox,QApplication)
+    QTableView,QCheckBox,QFileDialog,QMessageBox,QApplication,QMenu)
 
 from tolerance_stack.models import Project,Term,number,fmt,manual_dimension,snapshot as project_snapshot
 from tolerance_stack.calculator import calculate,Cancelled,check_cancel
+from tolerance_stack.chain import validate,ChainIssue
 from tolerance_stack import storage,solidworks_reader,drawing_writer,report
 from tolerance_stack.diagram import draw_chain,draw_contributions,draw_histogram
 from ..components import BasePage,ValueForm,PathPicker,card,label,button,scroll,configure_view,show_details
 from ..models import Column,TableModel,FilterProxy
-from ..diagrams import EngineeringDiagram
 from .stack_dialogs import MemorySettings,DimensionDialog,TermDialog,IsoPairDialog,KINDS,KIND_TITLES,DIST
+from .stack_widgets import Disclosure,StackDiagram,compact,short_name
 
 
 METHODS={'Worst-Case':'worst_case','Worst-Case + RSS':'rss','Worst-Case + RSS + Monte Carlo':'all'}
 DISTRIBUTIONS={'Normal':'normal','Uniform':'uniform','Üçgensel':'triangular'}
-HELP=('1. Aktif .SLDDRW teknik resmini veya birden fazla dosyayı okuyun; SolidWorks olmadan manuel ölçü ekleyebilirsiniz.\n'
-      '2. Yalnız fonksiyonel zincire ait ölçüleri seçip +/− yönüyle ekleyin. Başlangıç/bitiş ve ortak datum/ekseni tanımlayın.\n'
-      '3. Çap/radyüs için doğrusal ilişkiyi açıklayın. Referans ölçüleri önce düzenleyip analiz toleranslarını doğrulayın. '
-      'Açılar, BASIC ve GD&T doğrudan kullanılamaz.\n'
-      '4. Tolerans bilinmiyorsa manuel tamamlayın. ISO 2768 veya genel tolerans kendiliğinden atanmaz.\n'
-      '5. Ayarlarda kabul sınırlarını ve dağılım varsayımlarını belirleyin. Zinciri doğrulayıp hesaplayın.\n'
-      '6. WC tüm sınırları kapsar; RSS istatistiksel bir aralıktır. Normal dağılım kesilmiyorsa tolerans dışı örnekler mümkündür.\n'
-      '7. Cp/Cpk ve PPM varsayımsaldır; gerçek proses kabiliyeti değildir. Sıfır gözlenen hata, sıfır gerçek PPM garantilemez.\n'
-      '8. Sonuçları PDF/Excel olarak veya teknik resme ayrı GOKWORKS anotasyonları olarak aktarın.\n'
-      '9. Varsayılan işlem kaynak çizimi kaydetmez. Farklı kaydet kopyada çalışır. Kaynağa kayıt ayrıca açık onay ve doğrulanmış yedek gerektirir.\n'
-      '10. Projeyi JSON olarak kaydedin. Açılan dosyanın eski sonucu güncel sayılmaz; kaynakları doğrulayıp tekrar hesaplayın.\n\n'
-      'Bu sürüm 1D doğrusal analiz içindir. Korelasyon, konum/profil/MMC/LMC ve 3D GD&T hesapları desteklenmez.')
+HELP=('1 · ÖLÇÜLERİ AL\n'
+      'SolidWorks’te teknik resmi açıp Aktif resmi oku düğmesine basın. Dosya seç ve oku ile birden fazla '
+      'resim de seçebilirsiniz. SolidWorks olmadan Manuel ölçü veya ISO geçme kullanın.\n\n'
+      '2 · NEYİ HESAPLAYACAĞINIZI KURUN\n'
+      'Soldan bir ölçü seçin. Sonuca eklenecekse + Topla, çıkarılacaksa − Çıkar düğmesine basın. '
+      'Örneğin A=50, B=20 ve C=29,8 ise kalan mesafe A−B−C=0,2 mm olur. '
+      'Yalnız bu mesafeyi oluşturan ölçüleri ekleyin; çizimdeki bütün ölçüler aynı hesabın parçası değildir.\n\n'
+      '3 · KONTROL EDİP HESAPLAYIN\n'
+      'Gerçek teknik resimde ölçülerin aynı doğrultuda ve ortak referansa göre alındığını kontrol edin. '
+      'Şema yalnız seçiminizi gösterir; CAD geometrisini doğrulamaz. Kontrol kutusunu işaretleyip Hesapla düğmesine basın. '
+      'Doğrusal ölçüler için ayrıca açıklama yazmanız gerekmez. Eksik değer varsa ekrandaki düzeltme düğmesini kullanın.\n\n'
+      'KABUL ARALIĞI\n'
+      'Sonucun hangi sınırlar içinde kalmasını istediğinizi Analiz ayarlarından girin. Örneğin 0–0,4 mm. '
+      'Sınırlar boşsa yalnız değerler hesaplanır; uygunluk kararı verilmez.\n\n'
+      'SONUÇLAR\n'
+      'Worst-Case: bütün ölçüler tolerans uçlarına geldiğinde oluşabilecek en küçük/en büyük sonuç. '
+      'RSS: bağımsız ölçülerin istatistiksel hesabı. Monte Carlo: seçilen dağılımlarla yapılan benzetim. '
+      'RSS, PPM ve Cp/Cpk gerçek üretim verisiyle doğrulanmış proses kabiliyeti değildir.\n\n'
+      'ÖZEL ÖLÇÜLER\n'
+      'Referans ölçüyü ve toleransını önce kontrol edin. Çap/radyüs için hangi mesafeyi temsil ettiğini '
+      'Ölçü ayarlarından seçin. Açı, BASIC ve GD&T bu doğrusal hesapta desteklenmez. '
+      'Bilinmeyen toleranslar tahmin edilmez.\n\n'
+      'KAYDETME VE AKTARMA\n'
+      'Proje menüsü analizi kaydeder/açar. Sonuçlardan PDF/Excel alınabilir. Teknik resme aktar '
+      'ayrı analiz notları ekler; üretim ölçülerini değiştirmez. Kaynağa kayıt açık onay ve yedek gerektirir. '
+      'Kaynak ölçü değişirse eski sonuç kaldırılır ve yeniden hesaplama gerekir.')
 
 
 class StackTable(TableModel):
@@ -38,6 +53,9 @@ class StackTable(TableModel):
         if role==Qt.TextAlignmentRole and index.isValid() and self.columns[index.column()].key in (
             'nominal','lower','upper','minimum','maximum','variance','wc','factor'):
             return Qt.AlignRight|Qt.AlignVCenter
+        if role==Qt.ToolTipRole and index.isValid():
+            row=self.rows[index.row()]
+            return row.get('tooltip') or super().data(index,role)
         return super().data(index,role)
 
 
@@ -57,106 +75,184 @@ class LibraryFilter(FilterProxy):
 
 class ToleranceStackPage(BasePage):
     def __init__(self,context):
-        super().__init__(context,'Tolerans yığılması','Teknik resim ölçülerinden doğrulanmış 1D fonksiyonel zincir oluşturun.')
+        super().__init__(context,'Tolerans yığılması','Ölçüleri seçin, toplayın veya çıkarın; kalan mesafenin sınırlarını görün.')
         self.project=Project();self.result=None;self.selected_files=[];self.loading=False
-        self.dirty=False;self.active_operation='';self.project_path='';self.metadata_error=''
+        self.dirty=False;self.active_operation='';self.project_path='';self.metadata_error='';self.metadata_field=''
+        self.current_issue=None
         self.source_watcher=QFileSystemWatcher(self)
         self.source_watcher.fileChanged.connect(self.source_changed)
-        self.action('Proje aç',self.open_project)
-        self.action('Proje kaydet',self.save_project)
-        self.action('Rehber',lambda:show_details(self,'Tolerans yığılması · Rehber',HELP))
+        project_button=self.action('Proje',None)
+        project_menu=QMenu(project_button)
+        for title,callback in (('Yeni analiz',self.new_project),('Proje aç…',self.open_project),('Proje kaydet…',self.save_project),
+                               ('Kaynakların güncelliğini kontrol et',self.check_sources)):
+            project_menu.addAction(title,callback)
+        project_button.setMenu(project_menu)
+        self.action('Örnekle dene',self.load_example)
+        self.action('Nasıl kullanılır?',lambda:show_details(self,'Tolerans yığılması · Kullanım',HELP))
         self.stop_button=self.action('Durdur',self.jobs.cancel,locked=False);self.stop_button.setEnabled(False)
         source,body=card()
+        body.setContentsMargins(14,10,14,10);body.setSpacing(6)
         toolbar=QHBoxLayout()
-        self.active_button=button('Aktif teknik resmi oku',lambda:self.scan(active=True))
-        self.choose_button=button('Dosya seç',self.choose_sources)
-        self.scan_button=button('Ölçüleri tara',self.scan)
-        self.check_button=button('Kaynakları doğrula',self.check_sources)
+        toolbar.addWidget(label('Teknik resimden ölçü al','section'),1)
+        self.active_button=button('Aktif resmi oku',lambda:self.scan(active=True),primary=True)
+        self.choose_button=button('Dosya seç ve oku',self.choose_sources)
+        self.scan_button=button('Yeniden tara',self.scan)
+        self.check_button=button('Güncelliği kontrol et',self.check_sources)
+        self.check_button.setVisible(False)
         for widget in (self.active_button,self.choose_button,self.scan_button,self.check_button): toolbar.addWidget(widget)
         body.addLayout(toolbar)
-        self.source_info=label('SolidWorks: henüz bağlanılmadı · Manuel analiz çevrimdışı çalışır.','muted')
+        self.source_info=label('Açık teknik resmi okuyun veya Manuel ölçü ile SolidWorks olmadan başlayın.','muted')
         body.addWidget(self.source_info);self.layout.addWidget(source)
         self.splitter=QSplitter(Qt.Horizontal)
-        library,left=card('Teknik resim ölçüleri')
+        library,left=card()
+        left.setContentsMargins(12,12,12,12);left.setSpacing(8)
+        library_heading=QHBoxLayout();library_heading.addWidget(label('1 · Ölçüleri seç','section'),1)
+        self.library_count=label('0 ölçü','muted');library_heading.addWidget(self.library_count);left.addLayout(library_heading)
+        manual_row=QHBoxLayout()
+        manual_row.addWidget(button('Manuel ölçü',self.add_manual));manual_row.addWidget(button('ISO geçme',self.add_iso));left.addLayout(manual_row)
         search=QHBoxLayout();self.search=QLineEdit();self.search.setPlaceholderText('Ölçü, sayfa, görünüm veya kaynak ara…')
         self.filter=QComboBox();self.filter.addItems(('Tümü','Doğrusal','Çap / radyüs','Eksik tolerans','Desteklenmeyen'))
+        self.filter.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon);self.filter.setMinimumContentsLength(6)
+        self.filter.setMaximumWidth(145)
         search.addWidget(self.search,1);search.addWidget(self.filter);left.addLayout(search)
         self.library=configure_view(QTableView());self.library.setMinimumWidth(250)
-        self.library.setMinimumHeight(185)
-        self.library_model=StackTable((Column('Ölçü','name'),Column('Nominal mm','nominal',fmt),Column('Alt sapma','lower',fmt),
-            Column('Üst sapma','upper',fmt),Column('Minimum mm','minimum',fmt),Column('Maksimum mm','maximum',fmt),
+        self.library.setMinimumHeight(200)
+        self.library_model=StackTable((Column('Ölçü','name'),Column('mm','nominal',compact),
+            Column('Tolerans','tolerance'),Column('Durum','readiness'),
+            Column('Alt sapma','lower',fmt),Column('Üst sapma','upper',fmt),
+            Column('Minimum mm','minimum',fmt),Column('Maksimum mm','maximum',fmt),
             Column('Sayfa / görünüm','location'),Column('Tür / tolerans','type'),Column('Kaynak','source')))
         self.library_proxy=LibraryFilter(self);self.library_proxy.setSourceModel(self.library_model)
         self.library.setModel(self.library_proxy);self.library.setColumnWidth(0,190)
-        for index,width in enumerate((140,95,85,85,95,95,160,160,240)):self.library.setColumnWidth(index,width)
+        self.library.horizontalHeader().setMinimumSectionSize(48)
+        for index,width in enumerate((65,60,95,105,95,95,100,100,180,170,240)):self.library.setColumnWidth(index,width)
+        for index in range(4,self.library_model.columnCount()):self.library.setColumnHidden(index,True)
         self.search.textChanged.connect(self.library_proxy.set_query);self.filter.currentTextChanged.connect(self.library_proxy.set_category)
+        self.library.selectionModel().currentRowChanged.connect(self.selection_changed)
         self.library.doubleClicked.connect(self.edit_dimension);left.addWidget(self.library,1)
-        self.expand_library=button('Ölçü tablosunu genişlet')
+        self.selection_info=label('Bir ölçü seçin. Sonuca eklemek için +, çıkarmak için − kullanın.','muted')
+        self.selection_info.setMinimumHeight(36);left.addWidget(self.selection_info)
+        add_row=QHBoxLayout()
+        self.add_plus=button('+ Topla',lambda:self.add_selected(1),primary=True)
+        self.add_minus=button('− Çıkar',lambda:self.add_selected(-1))
+        add_row.addWidget(self.add_plus);add_row.addWidget(self.add_minus);left.insertLayout(3,add_row)
+        left.addWidget(label('Örnek: dış ölçü (+) − içteki parçalar (−) = kalan boşluk','muted'))
+        edit_row=QHBoxLayout()
+        self.edit_dimension_button=button('Ölçüyü düzenle',self.edit_dimension)
+        self.locate_button=button('Kaynağı göster',self.locate)
+        edit_row.addWidget(self.edit_dimension_button);edit_row.addWidget(self.locate_button);left.addLayout(edit_row)
+        self.expand_library=button('Tüm sütunları göster')
         self.expand_library.setCheckable(True)
-        self.expand_library.toggled.connect(lambda checked:self.tabs.setVisible(not checked))
+        self.expand_library.toggled.connect(self.toggle_library)
         left.addWidget(self.expand_library)
-        for choices in ((('+ Zincire ekle',lambda:self.add_selected(1)),('− Zincire ekle',lambda:self.add_selected(-1))),
-                        (('Manuel ölçü',self.add_manual),('ISO geçme',self.add_iso)),
-                        (('Ölçüyü düzenle',self.edit_dimension),('Kaynağı göster',self.locate)),
-                        (('Yeni analiz',self.new_project),('Örneği yükle',self.load_example))):
-            row=QHBoxLayout()
-            for text,callback in choices: row.addWidget(button(text,callback))
-            left.addLayout(row)
-        left.addWidget(label('Çift tıklama: yalnız analiz verisini düzenler. Üretim ölçüleri değiştirilmez.','muted'))
-        library_scroll=scroll(library);library_scroll.setMinimumWidth(330)
+        left.addWidget(label('Değişiklikler yalnız analize uygulanır. CAD ölçüleri korunur.','muted'))
+        library_scroll=scroll(library);library_scroll.setMinimumWidth(320)
         self.splitter.addWidget(library_scroll)
-        self.tabs=QTabWidget();self.splitter.addWidget(self.tabs);self.splitter.setSizes([490,700]);self.splitter.setChildrenCollapsible(False)
+        self.right_host=QWidget();right=QVBoxLayout(self.right_host);right.setContentsMargins(0,0,0,0);right.setSpacing(8)
+        self.tabs=QTabWidget();right.addWidget(self.tabs,1)
+        self.splitter.addWidget(self.right_host);self.splitter.setSizes([400,780]);self.splitter.setChildrenCollapsible(False)
         self.layout.addWidget(self.splitter,1)
         self.chain_host=QWidget();chain=QVBoxLayout(self.chain_host);chain.setContentsMargins(0,0,0,0)
-        self.chain_diagram=EngineeringDiagram(width=700,height=220);self.chain_diagram.setMinimumHeight(200)
+        chain.setSpacing(8)
+        self.chain_title=label('2 · Zinciri kur','section');chain.addWidget(self.chain_title)
+        self.formula=label('Sonuç = seçtiğiniz ölçülerin toplamı / farkı','section');chain.addWidget(self.formula)
+        self.chain_diagram=StackDiagram(width=700,height=150);self.chain_diagram.setMinimumHeight(130);self.chain_diagram.setMaximumHeight(150)
         chain.addWidget(self.chain_diagram)
         self.chain_table=configure_view(QTableView());self.chain_table.setSortingEnabled(False)
         self.chain_table.setMinimumHeight(170)
-        self.chain_model=StackTable((Column('Terim','label'),Column('Ölçü','name'),Column('Yön','direction'),Column('Katsayı','factor',fmt),
-            Column('Başlangıç','start'),Column('Bitiş','end'),Column('Eksen / datum','frame'),Column('İlişki / dağılım','relation')))
+        self.chain_model=StackTable((Column('Sıra','label'),Column('Ölçü','name'),Column('İşlem','direction'),
+            Column('mm','nominal',compact),Column('Kontrol','check'),Column('Katsayı','factor',fmt),
+            Column('Başlangıç','start'),Column('Bitiş','end'),Column('Doğrultu / referans','frame'),Column('İlişki / dağılım','relation')))
         self.chain_table.setModel(self.chain_model);self.chain_table.doubleClicked.connect(self.edit_term);chain.addWidget(self.chain_table,1)
-        for index,width in enumerate((55,130,50,75,80,80,95,240)):self.chain_table.setColumnWidth(index,width)
-        for choices in ((('Yukarı',lambda:self.move_term(-1)),('Aşağı',lambda:self.move_term(1)),('İlişkiyi düzenle',self.edit_term)),
-                        (('Çıkar',self.remove_term),('Noktaları sıraya bağla',self.relink))):
-            actions=QHBoxLayout()
-            for title,callback in choices:actions.addWidget(button(title,callback))
-            chain.addLayout(actions)
-        self.confirm_box=QCheckBox('Fonksiyonel zinciri doğruladım.');self.confirm_box.toggled.connect(self.confirm_chain)
-        chain.addWidget(self.confirm_box)
-        chain.addWidget(label('Yönleri, başlangıç/bitiş noktalarını ve kaynak görünümlerinin ortak datum/eksen ilişkisini doğrulayın.','muted'))
-        self.calculate_button=button('Analizi hesapla',self.start_calculation,primary=True);chain.addWidget(self.calculate_button)
-        chain.addWidget(label('Tüm çizim ölçüleri kendiliğinden toplanmaz. Aynı fiziksel ölçünün tekrarı, eksik tolerans ve süreksiz zincir hesabı engeller.','muted'))
+        self.chain_table.horizontalHeader().setMinimumSectionSize(40)
+        for index,width in enumerate((45,110,100,90,150,75,80,80,140,240)):self.chain_table.setColumnWidth(index,width)
+        for index in range(5,self.chain_model.columnCount()):self.chain_table.setColumnHidden(index,True)
+        actions=QHBoxLayout()
+        self.term_controls=[]
+        for title,callback in (('↑',lambda:self.move_term(-1)),('↓',lambda:self.move_term(1)),
+                               ('+ / −',self.flip_term),('Düzenle',self.edit_term),('Çıkar',self.remove_term)):
+            control=button(title,callback);actions.addWidget(control);self.term_controls.append(control)
+        self.term_controls[0].setToolTip('Seçili ölçüyü yukarı taşı');self.term_controls[1].setToolTip('Seçili ölçüyü aşağı taşı')
+        self.term_controls[2].setToolTip('Seçili ölçünün toplama / çıkarma yönünü değiştir')
+        self.term_controls[3].setToolTip('Seçili ölçünün yönünü, kullanımını ve gelişmiş ayarlarını düzenle')
+        self.chain_table.selectionModel().currentRowChanged.connect(self.update_term_controls)
+        chain.insertLayout(3,actions)
+        self.chain_details=QCheckBox('Bağlantı ve dağılım ayrıntıları')
+        self.chain_details.toggled.connect(self.toggle_chain_details);chain.addWidget(self.chain_details)
+        self.chain_footer=QWidget();footer=QVBoxLayout(self.chain_footer);footer.setContentsMargins(0,0,0,0);footer.setSpacing(6)
+        self.acceptance_button=button('',self.show_settings);footer.addWidget(self.acceptance_button)
+        self.review,review_body=card();review_body.setContentsMargins(12,10,12,10);review_body.setSpacing(6)
+        self.review_title=label('Sonraki adım','section');review_body.addWidget(self.review_title)
+        self.review_text=label('Ölçülerinizi soldaki listeden ekleyin.','muted');review_body.addWidget(self.review_text)
+        self.fix_button=button('Düzelt',self.fix_issue);review_body.addWidget(self.fix_button,alignment=Qt.AlignLeft)
+        footer.insertWidget(0,self.review)
+        self.confirm_box=QCheckBox('Ortak doğrultuyu ve + / − yönlerini kontrol ettim.')
+        self.confirm_box.setToolTip('Gerçek çizimde ölçülerin aynı doğrultuda ve ortak referansa göre alındığını kontrol edin. '
+            'Şema CAD geometrisini doğrulamaz. Doğrusal ölçüler için ayrıca açıklama yazmanız gerekmez.')
+        self.confirm_box.toggled.connect(self.confirm_chain);footer.addWidget(self.confirm_box)
+        self.calculate_button=button('Hesapla ve sonuçları göster',self.start_calculation,primary=True);footer.addWidget(self.calculate_button)
+        right.addWidget(self.chain_footer)
+        self.tabs.currentChanged.connect(lambda index:self.chain_footer.setVisible(index==0))
         self.tabs.addTab(scroll(self.chain_host),'Zincir')
-        settings,settings_body=card('Analiz ve dağılım ayarları')
+        settings,settings_body=card('İstenen sonuç ve hesap yöntemi')
         self.form=ValueForm(MemorySettings(),'')
-        for key,title in (('name','Analiz adı'),('critical','Kritik fonksiyonel ölçü'),('start','Zincir başlangıcı'),('end','Zincir bitişi'),('datum','Ortak fonksiyonel datum')):
+        for key,title in (('name','Analiz adı'),('critical','Hesaplanan mesafenin adı')):
             self.form.text(key,title,getattr(self.project,key))
-        self.form.combo('axis','Doğrusal eksen',('X','Y','Z'),'X')
-        self.form.text('acceptance_min','Minimum kabul · mm (boş = sınır yok)','0')
-        self.form.text('acceptance_max','Maksimum kabul · mm (boş = sınır yok)','')
+        self.form.text('acceptance_min','İstenen en küçük sonuç · mm','0').setPlaceholderText('Boş bırakırsanız alt sınır aranmaz')
+        self.form.text('acceptance_max','İstenen en büyük sonuç · mm','').setPlaceholderText('Boş bırakırsanız üst sınır aranmaz')
         self.form.combo('method','Hesap yöntemi',METHODS,'Worst-Case + RSS + Monte Carlo')
+        settings_body.addWidget(self.form)
+        settings_body.addWidget(label('Örnek: boşluğun 0–0,4 mm arasında kalması gerekiyorsa alt sınıra 0, üst sınıra 0,4 yazın. '
+            'İki alan da boşsa uygunluk kararı verilmez.','muted'))
+        settings_body.addWidget(label('Worst-Case: olası en küçük ve en büyük sonuç. RSS: istatistiksel aralık. '
+            'Monte Carlo: dağılımlarla benzetim. RSS ve benzetim üretim garantisi değildir.','muted'))
+        frame=QWidget();frame_body=QVBoxLayout(frame);frame_body.setContentsMargins(0,0,0,0)
+        frame_form=ValueForm(MemorySettings(),'')
+        for key,title in (('start','Zincir başlangıcı'),('end','Zincir bitişi'),('datum','Ortak referans (datum)')):
+            frame_form.text(key,title,getattr(self.project,key))
+        frame_form.combo('axis','Ölçüm doğrultusu',('X','Y','Z'),'X');frame_body.addWidget(frame_form)
+        frame_body.addWidget(label('X / Y / Z bu analizin doğrultusunu, referans ise ölçülerin dayandığı ortak noktayı tanımlar. '
+            'Çizimde yatay veya düşey görünmek, montajda aynı doğrultuda olmak anlamına gelmez.','muted'))
+        frame_body.addWidget(button('Noktaları sıraya bağla',self.relink))
+        self.frame_section=Disclosure('Gelişmiş · Doğrultu ve bağlantı noktaları',frame);settings_body.addWidget(self.frame_section)
+        statistics=QWidget();statistics_body=QVBoxLayout(statistics);statistics_body.setContentsMargins(0,0,0,0)
+        statistics_form=ValueForm(MemorySettings(),'')
+        f=self.form;self.form=statistics_form
         self.form.combo('distribution','Varsayılan dağılım',DISTRIBUTIONS,'Normal')
         self.form.text('input_sigma','Normal giriş bandı: ±nσ','3');self.form.text('output_sigma','RSS sonuç bandı: ±nσ','3')
         self.form.check('truncate_normal','Normal dağılımı tolerans sınırlarında kes',True)
-        self.form.text('samples','Monte Carlo örnek sayısı','50000');self.form.text('seed','Seed (boş = rastgele)','42')
+        self.form.text('samples','Benzetim sayısı (Monte Carlo)','50000');self.form.text('seed','Rastgelelik anahtarı (seed)','42')
         self.form.check('independent','RSS / MC girdileri bağımsız kabul ediliyor',True)
         self.form.check('offline_snapshot','CAD ölçülerini çevrimdışı anlık görüntü olarak kullan',False)
-        settings_body.addWidget(self.form)
-        settings_body.addWidget(label('Asimetrik toleransta nominal ve bant merkezi ayrıdır. Normal girdide varsayılan σ = yarı genişlik / 3; '
+        statistics_body.addWidget(self.form)
+        statistics_body.addWidget(label('Asimetrik toleransta nominal ve bant merkezi ayrıdır. Normal girdide varsayılan σ = yarı genişlik / 3; '
             'Uniform ve üçgensel dağılım kendi varyanslarını kullanır. RSS/MC korelasyon modeli içermez. '
             'Çevrimdışı CAD verisi açık SolidWorks oturumuna karşı doğrulanamaz; bu seçim teknik resme aktarımı engeller.','muted'))
-        self.form.changed.connect(self.form_changed);self.tabs.addTab(scroll(settings),'Ayarlar')
+        self.form=f
+        self.statistics_section=Disclosure('Gelişmiş · Dağılım ve benzetim ayarları',statistics);settings_body.addWidget(self.statistics_section)
+        # Keep the page's single form API while the actual controls live in small, named sections.
+        for section_form in (frame_form,statistics_form):
+            self.form.fields.update(section_form.fields);section_form.changed.connect(self.form_changed)
+        settings_body.addStretch()
+        self.form.changed.connect(self.form_changed);self.settings_scroll=scroll(settings)
+        self.tabs.addTab(self.settings_scroll,'Analiz ayarları')
         results,results_body=card()
-        self.headline=label('Zinciri doğrulayıp hesaplayın','result');results_body.addWidget(self.headline)
-        self.result_summary=label('Worst-Case, RSS ve Monte Carlo sonuçları burada gösterilir.');results_body.addWidget(self.result_summary)
-        self.assumptions=label('Hesap sonucu henüz yok.','muted');results_body.addWidget(self.assumptions)
-        plots=QTabWidget();self.contribution_diagram=EngineeringDiagram(width=700,height=320);self.histogram=EngineeringDiagram(width=700,height=300)
+        self.headline=label('3 · Hesap sonucu','result');results_body.addWidget(self.headline)
+        self.result_summary=label('Ölçüleri zincire ekleyip Hesapla düğmesine basın.');results_body.addWidget(self.result_summary)
+        self.result_cards={};cards=QHBoxLayout()
+        for key,title in (('nominal','Nominal sonuç'),('minimum','En küçük olası sonuç'),('maximum','En büyük olası sonuç')):
+            tile,tile_body=card();tile_body.setContentsMargins(12,10,12,10);tile_body.addWidget(label(title,'muted'))
+            value=label('—','section');tile_body.addWidget(value);self.result_cards[key]=value;cards.addWidget(tile)
+        results_body.addLayout(cards)
+        plots=QTabWidget();self.contribution_diagram=StackDiagram(width=700,height=320);self.histogram=StackDiagram(width=700,height=300)
         plots.addTab(self.contribution_diagram,'Tolerans katkıları');plots.addTab(self.histogram,'Monte Carlo dağılımı');results_body.addWidget(plots)
         self.critical_label=label();results_body.addWidget(self.critical_label)
         self.metrics=configure_view(QTableView());self.metrics.setMinimumHeight(230)
         self.metric_model=StackTable((Column('Sonuç / açıklama','name'),Column('Değer','value')));self.metrics.setModel(self.metric_model)
         self.metrics.setSortingEnabled(False)
-        results_body.addWidget(self.metrics)
+        details=QWidget();details_body=QVBoxLayout(details);details_body.setContentsMargins(0,0,0,0)
+        self.assumptions=label('Hesap sonucu henüz yok.','muted');details_body.addWidget(self.assumptions);details_body.addWidget(self.metrics)
+        results_body.addWidget(Disclosure('Tüm sonuçlar ve hesap varsayımları',details))
         outputs=QHBoxLayout()
         for title,callback in (('Sonucu kopyala',self.copy_result),('PDF raporu',lambda:self.export_report('pdf')),('Excel raporu',lambda:self.export_report('xlsx'))):
             outputs.addWidget(button(title,callback))
@@ -174,26 +270,168 @@ class ToleranceStackPage(BasePage):
             'Anotasyon ekle seçeneği çizimi yalnız açık oturumda değiştirir; dosyayı kaydetmez. '
             'Farklı kaydet yeni bir .SLDDRW üretir ve model referanslarını kontrol eder. '
             'Kaynak üzerine kayıt ayrı açık onay, kayıt dışı değişiklik kontrolü ve doğrulanmış yedek gerektirir.','muted'))
-        self.tabs.addTab(scroll(output),'Teknik resim')
-        self.controls.extend((self.active_button,self.choose_button,self.scan_button,self.check_button,library,self.chain_host,self.form,output,results))
-        self.finish_layout();self.refresh()
+        self.tabs.addTab(scroll(output),'Teknik resme aktar')
+        self.controls.extend((source,library,self.chain_host,self.chain_footer,settings,output,results))
+        self.finish_layout()
+        self.status_details.clicked.disconnect()
+        self.status_details.clicked.connect(lambda:show_details(self,'İşlem ayrıntısı',getattr(self,'technical_details',self.status_text)))
+        self.column_timer=QTimer(self);self.column_timer.setSingleShot(True);self.column_timer.setInterval(20)
+        self.column_timer.timeout.connect(self.fit_columns)
+        self.splitter.splitterMoved.connect(lambda *args:self.column_timer.start())
+        self.refresh();self.selection_changed()
 
     @property
     def appearance(self): return 'Dark' if self.context.appearance=='dark' else 'Light'
+
+    def set_status(self,text,error=False):
+        self.technical_details=str(text)
+        message=str(text)
+        if error and any(token in message for token in ('Traceback','HRESULT','DISP_','(-2147','pythoncom','pywintypes')):
+            message='SolidWorks işlemi tamamlanamadı. Teknik resmin açık olduğundan emin olup yeniden deneyin. Teknik hata Ayrıntı düğmesinde.'
+        super().set_status(message,error)
+
+    def toggle_library(self,expanded):
+        self.right_host.setVisible(not expanded)
+        for index in range(4,self.library_model.columnCount()):self.library.setColumnHidden(index,not expanded)
+        self.expand_library.setText('Zincire geri dön' if expanded else 'Tüm sütunları göster')
+        self.column_timer.start()
+
+    def toggle_chain_details(self,expanded):
+        for index in range(5,self.chain_model.columnCount()):self.chain_table.setColumnHidden(index,not expanded)
+        self.fit_columns()
+
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        if hasattr(self,'column_timer'):self.column_timer.start()
+
+    def fit_columns(self):
+        # Status remains in the selected-measurement summary and inline guidance on narrow windows.
+        self.library.setColumnHidden(3,not self.expand_library.isChecked() and self.library.viewport().width()<330)
+        self.chain_table.setColumnHidden(4,not self.chain_details.isChecked() and self.chain_table.viewport().width()<520)
+
+    @staticmethod
+    def dimension_state(d):
+        if d.kind not in (*KINDS.values(),'reference'):return 'Kullanılamaz'
+        if d.nominal is None:return 'Değer eksik'
+        if d.lower is None or d.upper is None:return 'Tolerans eksik'
+        if d.kind=='reference':return 'Kontrol gerekli'
+        if d.kind in ('diameter','radius'):return 'İlişki seçin'
+        return 'Hazır'
+
+    def selection_changed(self,*args):
+        d=self.selected_dimension()
+        for control in (self.add_plus,self.add_minus,self.edit_dimension_button,self.locate_button):control.setEnabled(d is not None)
+        if d is None:
+            self.selection_info.setText('Bir ölçü seçin. Sonuca eklemek için +, çıkarmak için − kullanın.')
+        else:
+            self.selection_info.setText(f'{short_name(d)} · {compact(d.nominal)} mm · {self.dimension_state(d)}\n'
+                +(f'{d.sheet} / {d.view}' if d.source else 'Manuel analiz ölçüsü'))
+            self.selection_info.setToolTip(d.name+'\n'+(d.source or 'Manuel')+'\n'+d.note)
+
+    def update_term_controls(self,*args):
+        index=self.chain_index()
+        for control in self.term_controls:control.setEnabled(index>=0)
+        self.term_controls[0].setEnabled(index>0)
+        self.term_controls[1].setEnabled(0<=index<len(self.project.terms)-1)
+
+    def review_candidate(self):
+        """Preview a *potential* explicit confirmation; never persist this on review alone."""
+        candidate=project_snapshot(self.project)
+        dimensions={d.id:d for d in candidate.dimensions}
+        candidate.terms=[replace(t,alignment_confirmed=True)
+            if (d:=dimensions.get(t.dimension_id)) and d.source and
+               d.kind in ('linear','horizontal','vertical','ordinate') and t.factor==1 and
+               t.axis==candidate.axis and t.datum==candidate.datum else t for t in candidate.terms]
+        return candidate
+
+    def readiness_issue(self):
+        if self.metadata_error:
+            section=('statistics' if self.metadata_field in ('input_sigma','output_sigma','samples','seed') else
+                'frame' if self.metadata_field in ('start','end','axis','datum') else 'settings')
+            return ChainIssue(self.metadata_error,action='İlgili ayarı düzelt',target=section)
+        try:validate(self.review_candidate(),confirmed=False)
+        except ChainIssue as error:return error
+        except ValueError as error:return ChainIssue(str(error),action='Analiz ayarlarını aç')
+        return None
+
+    def update_guidance(self):
+        self.current_issue=self.readiness_issue()
+        self.review.setVisible(self.current_issue is not None and bool(self.project.terms))
+        if self.current_issue:
+            self.review_title.setText('Önce bunu tamamlayın' if self.project.terms else 'Başlamak için')
+            self.review_text.setText(str(self.current_issue))
+            self.fix_button.setText(self.current_issue.action or 'Ölçü listesini aç')
+            self.fix_button.setVisible(bool(self.current_issue.action))
+        else:
+            confirmed=bool(self.project.confirmed_digest) and self.project.confirmed_digest==self.project.fingerprint()
+            self.review_title.setText('Hesaplamaya hazır' if confirmed else 'Son kontrol · Yönler doğru mu?')
+            self.review_text.setText('Hesapla düğmesiyle sonuç aralığını ve katkı grafiklerini görebilirsiniz.' if confirmed else
+                '+ sonuca ekler, − çıkarır. Gerçek çizimde ortak doğrultuyu ve referansı kontrol edip aşağıdaki kutuyu işaretleyin.')
+            self.fix_button.setVisible(False)
+        self.confirm_box.setEnabled(bool(self.project.terms) and self.current_issue is None)
+        self.calculate_button.setEnabled(bool(self.project.terms) and self.current_issue is None)
+        low,high=self.project.acceptance_min,self.project.acceptance_max
+        criterion=(f'{compact(low)} … {compact(high)} mm' if low is not None and high is not None else
+            f'En az {compact(low)} mm' if low is not None else f'En fazla {compact(high)} mm' if high is not None else 'Sınır girilmedi')
+        self.acceptance_button.setText('İstenen sonuç: '+criterion+'  ·  Düzenle')
+        by_id={d.id:d for d in self.project.dimensions};parts=[];nominal=number(0)
+        for i,t in enumerate(self.project.terms):
+            if i<10:parts.append(('− ' if t.direction<0 else '+ ' if i else '')+f'L{i+1}'+(f' × {compact(t.factor)}' if t.factor!=1 else ''))
+            d=by_id.get(t.dimension_id)
+            if d is None or d.nominal is None:nominal=None
+            elif nominal is not None:nominal+=d.nominal*t.direction*t.factor
+        formula='Sonuç = '+' '.join(parts) if parts else 'Örnek: dış ölçü − iç ölçü = kalan boşluk'
+        if len(self.project.terms)>10:formula+=' …'
+        if parts and nominal is not None:formula+=f'  =  {compact(nominal)} mm (nominal)'
+        self.formula.setText(formula)
+        self.update_term_controls()
+
+    def show_settings(self,section=None):
+        self.tabs.setCurrentIndex(1)
+        if section=='frame':self.frame_section.toggle.setChecked(True)
+        elif section=='statistics':self.statistics_section.toggle.setChecked(True)
+        key=self.metadata_field or ('axis' if section=='frame' else 'samples' if section=='statistics' else 'acceptance_min')
+        field=self.form.fields[key]
+        self.settings_scroll.ensureWidgetVisible(field);field.setFocus()
+
+    def select_library_id(self,dimension_id):
+        self.search.clear();self.filter.setCurrentText('Tümü')
+        for row in range(self.library_proxy.rowCount()):
+            if self.library_proxy.index(row,0).data(Qt.UserRole)['id']==dimension_id:
+                self.library.selectRow(row);self.library.scrollTo(self.library_proxy.index(row,0));return True
+        return False
+
+    def fix_issue(self):
+        issue=self.current_issue
+        if issue is None:return
+        self.expand_library.setChecked(False)
+        self.tabs.setCurrentIndex(0)
+        if issue.term_index is not None:self.chain_table.selectRow(issue.term_index)
+        if issue.target=='dimension':
+            if self.select_library_id(issue.dimension_id):self.edit_dimension()
+        elif issue.target=='term':self.edit_term()
+        elif issue.target=='relink':self.relink()
+        elif issue.target=='confirm':self.confirm_box.setFocus()
+        elif issue.target=='scan':self.scan() if self.selected_files else self.scan(active=True)
+        elif issue.target=='select_term':self.chain_table.setFocus()
+        elif issue.target=='library':self.library.setFocus()
+        else:self.show_settings(issue.target)
 
     def invalidate(self):
         self.project.invalidate();self.result=None;self.dirty=True
         with QSignalBlocker(self.confirm_box): self.confirm_box.setChecked(False)
         self.headline.setText('Zinciri doğrulayıp yeniden hesaplayın');self.result_summary.clear()
         self.metric_model.replace([]);self.assumptions.setText('Girdiler değişti; önceki sonuç güncel sayılmaz.');self.critical_label.clear()
+        for value in self.result_cards.values():value.setText('—')
+        self.update_guidance()
         self.draw()
 
     def capture_settings(self):
         f=self.form;p=replace(self.project)
         for key in ('name','critical','start','end','axis','datum'): setattr(p,key,f.value(key).strip())
-        for key in ('acceptance_min','acceptance_max'):
-            setattr(p,key,number(f.value(key),key) if f.value(key).strip() else None)
-        for key in ('input_sigma','output_sigma'): setattr(p,key,number(f.value(key),key))
+        for key,title in (('acceptance_min','İstenen en küçük sonuç'),('acceptance_max','İstenen en büyük sonuç')):
+            setattr(p,key,number(f.value(key),title) if f.value(key).strip() else None)
+        for key in ('input_sigma','output_sigma'): setattr(p,key,number(f.value(key),'İstatistiksel bant katsayısı'))
         samples=number(f.value('samples'),'Örnek sayısı')
         if samples!=samples.to_integral_value(): raise ValueError('Örnek sayısı tam sayı olmalı.')
         p.samples=int(samples)
@@ -202,9 +440,10 @@ class ToleranceStackPage(BasePage):
         p.seed=int(seed) if seed is not None else None
         p.method=METHODS[f.value('method')];p.distribution=DISTRIBUTIONS[f.value('distribution')]
         for key in ('independent','truncate_normal','offline_snapshot'): setattr(p,key,f.value(key))
-        self.project=p;self.metadata_error=''
+        self.project=p;self.metadata_error='';self.metadata_field=''
 
     def load_form(self):
+        self.metadata_error='';self.metadata_field=''
         self.loading=True
         try:
             for key in self.form.fields:
@@ -218,23 +457,48 @@ class ToleranceStackPage(BasePage):
         if self.loading:return
         self.invalidate()
         try:self.capture_settings()
-        except ValueError as error:self.metadata_error=str(error);self.set_status(str(error),True)
-        self.draw()
+        except ValueError as error:self.metadata_error=str(error);self.metadata_field=key;self.set_status(str(error),True)
+        self.draw();self.update_guidance()
 
     def refresh(self):
+        selected=self.selected_dimension()
+        selected_id=selected.id if selected else None
+        chain_index=self.chain_index()
         rows=[]
         for d in self.project.dimensions:
-            rows.append(dict(id=d.id,name=d.name,nominal=None if d.nominal is None else float(d.nominal),
+            tolerance=('Eksik' if d.lower is None or d.upper is None else '±'+compact(d.upper) if d.lower==-d.upper else
+                       f'{compact(d.lower)} / {"+" if d.upper>0 else ""}{compact(d.upper)}')
+            rows.append(dict(id=d.id,name=short_name(d),full_name=d.name,nominal=None if d.nominal is None else float(d.nominal),
                 lower=None if d.lower is None else float(d.lower),upper=None if d.upper is None else float(d.upper),
                 minimum=None if d.minimum is None else float(d.minimum),maximum=None if d.maximum is None else float(d.maximum),
                 location=f'{d.sheet} / {d.view}',kind=d.kind,type=KIND_TITLES.get(d.kind,d.kind)+' · '+d.tolerance_type,source=d.source or 'Manuel',
-                missing=d.nominal is None or d.lower is None or d.upper is None,note=d.note,configuration=d.configuration))
+                missing=d.nominal is None or d.lower is None or d.upper is None,note=d.note,configuration=d.configuration,
+                tolerance=tolerance,readiness=self.dimension_state(d),tooltip=f'{d.name}\n{self.dimension_state(d)}\n'
+                f'{d.source or "Manuel ölçü"}\n{d.sheet} / {d.view}\n{d.note}'))
         self.library_model.replace(rows)
+        self.library_count.setText(f'{len(rows)} ölçü')
         dimensions={d.id:d for d in self.project.dimensions}
-        self.chain_model.replace([dict(label=f'L{i}',name=dimensions[t.dimension_id].name if t.dimension_id in dimensions else 'Kaynak ölçü silinmiş',
-            direction='+' if t.direction>0 else '−',factor=float(t.factor),start=t.start,end=t.end,frame=t.axis+' / '+t.datum,
-            relation=t.relation+' · '+next(title for title,key in DIST.items() if key==t.distribution),index=i-1) for i,t in enumerate(self.project.terms,1)])
-        self.draw()
+        self.chain_model.replace([dict(label=f'L{i}',name=short_name(dimensions[t.dimension_id]) if t.dimension_id in dimensions else 'Ölçü bulunamadı',
+            direction='Topla (+)' if t.direction>0 else 'Çıkar (−)',factor=float(t.factor),start=t.start,end=t.end,frame=t.axis+' / '+t.datum,
+            nominal=dimensions[t.dimension_id].nominal if t.dimension_id in dimensions else None,
+            check=self.term_state(t,dimensions.get(t.dimension_id)),
+            relation=(t.relation or ('Doğrultu kullanıcı tarafından kontrol edildi' if t.alignment_confirmed else ''))+' · '+next(title for title,key in DIST.items() if key==t.distribution),
+            tooltip=(dimensions[t.dimension_id].name if t.dimension_id in dimensions else 'Kaynak ölçü bulunamadı')+f'\n{t.start} → {t.end}\n{t.axis} / {t.datum}\n{t.relation}',
+            index=i-1) for i,t in enumerate(self.project.terms,1)])
+        for row in range(self.library_proxy.rowCount()):
+            if selected_id is None or self.library_proxy.index(row,0).data(Qt.UserRole)['id']==selected_id:
+                self.library.selectRow(row);break
+        if 0<=chain_index<len(self.project.terms):self.chain_table.selectRow(chain_index)
+        self.selection_changed();self.update_guidance();self.draw()
+
+    def term_state(self,term,dimension):
+        if dimension is None:return 'Kaynak eksik'
+        state=self.dimension_state(dimension)
+        if state not in ('Hazır','İlişki seçin'):return state
+        if dimension.kind in ('diameter','radius') and not term.relation.strip():return 'İlişki seçin'
+        if term.axis!=self.project.axis or term.datum!=self.project.datum:return 'Doğrultu farklı'
+        if not dimension.source:return 'Manuel giriş'
+        return 'Kontrol edildi' if term.alignment_confirmed or term.relation else 'Onay bekliyor'
 
     def draw(self):
         self.chain_diagram.render_geometry(lambda scene:draw_chain(scene,self.project,self.appearance))
@@ -249,22 +513,27 @@ class ToleranceStackPage(BasePage):
 
     def add_manual(self):
         dialog=DimensionDialog(self)
-        if dialog.exec():
-            self.project.dimensions.append(dialog.value);self.invalidate();self.refresh()
+        try:
+            if dialog.exec():
+                self.project.dimensions.append(dialog.value);self.invalidate();self.refresh();self.select_library_id(dialog.value.id)
+                self.set_status('Ölçü eklendi. + Topla veya − Çıkar ile hesabınıza katın.')
+        finally:dialog.deleteLater()
 
     def edit_dimension(self,*args):
         d=self.selected_dimension()
         if d is None:return
         if d.kind=='reference' and d.geometry_kind not in KINDS.values():
-            show_details(self,'Referans ölçü',d.note+'\nKaynak geometrik tür 1D uzunluk olarak doğrulanamadı. '
-                'Teknik resmi yeniden tarayın. Açısal ölçüler, yay ve pahlar bu yolla uzunluğa çevrilemez.');return
+            show_details(self,'Bu ölçü henüz kullanılamıyor','Bu referans ölçünün doğrusal mı, açısal mı olduğu okunamadı. '
+                'Önce teknik resmi yeniden tarayın. Açılar, yay ve pah ölçüleri bu doğrusal hesaba eklenemez.\n\nTeknik ayrıntı:\n'+d.note);return
         if d.kind in ('angle','gdt','basic','arc','chamfer'):
-            show_details(self,'Ölçü sınıflandırması',d.kind+'\n'+d.note+'\nBu tür için doğrulanmış ayrı matematiksel model gerekli.');return
+            show_details(self,'Bu ölçü doğrusal hesapta kullanılamıyor',KIND_TITLES.get(d.kind,d.kind)+
+                '\nBu modül yalnız aynı doğrultudaki mesafeleri toplar veya çıkarır. '
+                'Açı, BASIC ve geometrik tolerans kontrolleri ayrı hesap gerektirir.\n\nTeknik ayrıntı:\n'+d.note);return
         dialog=DimensionDialog(self,d)
         try:
             if dialog.exec():
                 self.project.dimensions=[dialog.value if item.id==d.id else item for item in self.project.dimensions]
-                self.invalidate();self.refresh()
+                self.invalidate();self.refresh();self.select_library_id(d.id)
                 return dialog.value
         finally:dialog.deleteLater()
 
@@ -274,6 +543,15 @@ class ToleranceStackPage(BasePage):
         if d.kind=='reference':
             d=self.edit_dimension()
             if d is None:return
+        if d.kind not in KINDS.values():
+            self.edit_dimension();return
+        if any(t.dimension_id==d.id or (d.physical_id and next((item.physical_id for item in self.project.dimensions if item.id==t.dimension_id),'')==d.physical_id)
+               for t in self.project.terms):
+            self.set_status('Bu fiziksel ölçü zincirde zaten var; aynı ölçü iki kez kullanılamaz. İşlemini değiştirmek için zincirdeki satırı seçip + / − Değiştir düğmesini kullanın.',True)
+            for row,t in enumerate(self.project.terms):
+                item=next((item for item in self.project.dimensions if item.id==t.dimension_id),None)
+                if item and (item.id==d.id or d.physical_id and item.physical_id==d.physical_id):self.chain_table.selectRow(row);break
+            return
         self.append_dimension(d,direction)
 
     def append_dimension(self,d,direction,*,factor=1,relation=''):
@@ -284,17 +562,21 @@ class ToleranceStackPage(BasePage):
         self.project.terms.append(Term(d.id,direction,start,end,self.project.axis,self.project.datum,factor,relation))
         self.expand_library.setChecked(False)
         self.project.end=end;self.load_form();self.invalidate();self.refresh()
+        self.select_library_id(d.id);self.tabs.setCurrentIndex(0)
         self.chain_table.selectRow(len(self.project.terms)-1)
-        if d.source and not relation:self.set_status('Kaynak görünümün ortak datum/eksen eşlemesini İlişkiyi düzenle düğmesiyle açıklayın.')
+        self.set_status(f'{short_name(d)} zincire {"toplanacak (+)" if direction>0 else "çıkarılacak (−)"} olarak eklendi. '
+            'Yön yanlışsa + / − Değiştir düğmesini kullanın.')
         if sum((item.physical_id or item.id)==(d.physical_id or d.id) for t in self.project.terms for item in self.project.dimensions if item.id==t.dimension_id)>1:
             self.set_status('Aynı fiziksel ölçü tekrar eklendi; bağımsız kabul edilemez. Hesaplamadan önce düzeltin.',True)
 
     def add_iso(self):
         dialog=IsoPairDialog(self)
-        if dialog.exec():
-            hole,shaft,factor,relation=dialog.value
-            self.project.dimensions.extend((hole,shaft));self.append_dimension(hole,1,factor=factor,relation=relation)
-            self.append_dimension(shaft,-1,factor=factor,relation=relation)
+        try:
+            if dialog.exec():
+                hole,shaft,factor,relation=dialog.value
+                self.project.dimensions.extend((hole,shaft));self.append_dimension(hole,1,factor=factor,relation=relation)
+                self.append_dimension(shaft,-1,factor=factor,relation=relation)
+        finally:dialog.deleteLater()
 
     def chain_index(self):
         index=self.chain_table.currentIndex();return index.row() if index.isValid() else -1
@@ -305,19 +587,45 @@ class ToleranceStackPage(BasePage):
         term=self.project.terms[index];d=next((d for d in self.project.dimensions if d.id==term.dimension_id),None)
         if d is None:self.set_status('Kaynak ölçü bulunamadı; yeniden tarayın.',True);return
         dialog=TermDialog(self,term,d)
-        if dialog.exec():self.project.terms[index]=dialog.value;self.invalidate();self.refresh()
+        try:
+            if dialog.exec():
+                self.project.terms[index]=dialog.value;self.invalidate();self.refresh();self.chain_table.selectRow(index)
+        finally:dialog.deleteLater()
+
+    def flip_term(self):
+        index=self.chain_index()
+        if index<0:return
+        term=self.project.terms[index];self.project.terms[index]=replace(term,direction=-term.direction)
+        self.invalidate();self.refresh();self.chain_table.selectRow(index)
+        self.set_status(f'L{index+1}: işlem {"Topla (+)" if term.direction<0 else "Çıkar (−)"} olarak değiştirildi. Formülü kontrol edin.')
+
+    def default_points(self):
+        return (self.project.start=='P0' and self.project.end==f'P{len(self.project.terms)}' and
+            all(t.start==f'P{i}' and t.end==f'P{i+1}' for i,t in enumerate(self.project.terms)))
+
+    def link_default_points(self):
+        self.project.terms=[replace(t,start=f'P{i}',end=f'P{i+1}') for i,t in enumerate(self.project.terms)]
+        self.project.end=f'P{len(self.project.terms)}' if self.project.terms else ''
+        self.load_form()
 
     def move_term(self,direction):
         index=self.chain_index();target=index+direction
         if index<0 or not 0<=target<len(self.project.terms):return
+        automatic=self.default_points()
         self.project.terms[index],self.project.terms[target]=self.project.terms[target],self.project.terms[index]
+        if automatic:self.link_default_points()
         self.invalidate();self.refresh();self.chain_table.selectRow(target)
-        self.set_status('Sıra değişti. Fonksiyonel bağlantıları inceleyin veya Noktaları sıraya bağla düğmesini kullanın.')
+        self.set_status('Ölçü sırası değişti. + / − yönleri korundu; formülü kontrol edin.' if automatic else
+            'Sıra değişti. Özel başlangıç/bitiş bağlantılarını kontrol edin veya Bağlantıları düzelt düğmesini kullanın.')
 
     def remove_term(self):
         index=self.chain_index()
         if index<0:return
-        self.project.terms.pop(index);self.invalidate();self.refresh()
+        automatic=self.default_points()
+        self.project.terms.pop(index)
+        if automatic:self.link_default_points()
+        self.invalidate();self.refresh()
+        if self.project.terms:self.chain_table.selectRow(min(index,len(self.project.terms)-1))
 
     def relink(self):
         if not self.project.terms:return
@@ -325,15 +633,16 @@ class ToleranceStackPage(BasePage):
         for i,t in enumerate(self.project.terms):
             end=self.project.end if i==len(self.project.terms)-1 else f'{self.project.start}-N{i+1}'
             self.project.terms[i]=replace(t,start=start,end=end);start=end
-        self.invalidate();self.refresh();self.set_status('Şematik zincir bağlandı. Gerçek datum/konum ilişkisini ayrıca doğrulayın.')
+        self.invalidate();self.refresh();self.set_status('Bağlantılar sıraya göre yeniden kuruldu. Gerçek çizimdeki ölçü sırasını ve + / − yönlerini kontrol edin.')
 
     def confirm_chain(self,checked):
         if not checked:self.invalidate();return
         try:
-            self.capture_settings();self.project.confirm();self.set_status('Fonksiyonel zincir doğrulandı; hesaplanabilir.')
+            self.capture_settings();candidate=self.review_candidate();candidate.confirm();self.project=candidate
+            self.refresh();self.set_status('Ölçü yönleri ve ortak doğrultu kontrolü kaydedildi. Hesapla düğmesine basabilirsiniz.')
         except ValueError as error:
             with QSignalBlocker(self.confirm_box):self.confirm_box.setChecked(False)
-            self.set_status(str(error),True)
+            self.update_guidance();self.set_status(str(error),True)
 
     def start_job(self,name,operation):
         if not self.can_start():return False
@@ -346,8 +655,15 @@ class ToleranceStackPage(BasePage):
     def start_calculation(self):
         try:
             self.capture_settings()
-            if self.project.confirmed_digest!=self.project.fingerprint():raise ValueError('Önce fonksiyonel zinciri doğrulayın.')
-        except ValueError as error:self.set_status(str(error),True);return
+            issue=self.readiness_issue()
+            if issue:raise issue
+            if self.project.confirmed_digest!=self.project.fingerprint():
+                self.current_issue=ChainIssue('Son bir kontrol gerekiyor: ölçüler aynı doğrultuda ve ortak referansa göre mi alındı? '
+                    'Doğrulama kutusunu işaretleyip tekrar Hesapla düğmesine basın.',action='Doğrulama kutusuna git',target='confirm')
+                self.review_title.setText('Son kontrol gerekli');self.review_text.setText(str(self.current_issue))
+                self.fix_button.setText(self.current_issue.action);self.fix_button.show();self.review.show();self.confirm_box.setFocus()
+                self.set_status(str(self.current_issue),True);return
+        except ValueError as error:self.update_guidance();self.set_status(str(error),True);return
         snapshot=project_snapshot(self.project)
         self.result=None;self.headline.setText('Kaynaklar doğrulanıyor ve hesaplanıyor…')
         def operation(sink,stop):
@@ -359,11 +675,12 @@ class ToleranceStackPage(BasePage):
 
     def choose_sources(self):
         paths,_=QFileDialog.getOpenFileNames(self,'Teknik resimleri seç','','SolidWorks (*.SLDDRW *.slddrw)')
-        if paths:self.selected_files=paths;self.source_info.setText(f'{len(paths)} teknik resim seçildi. Ölçüleri tara düğmesine basın.')
+        if paths:
+            self.selected_files=paths;self.source_info.setText(f'{len(paths)} teknik resim seçildi; ölçüler okunuyor…');self.scan()
 
     def scan(self,checked=False,*,active=False):
         paths=None if active else tuple(self.selected_files)
-        if not active and not paths:self.set_status('Teknik resim dosyalarını seçin veya Aktif teknik resmi oku düğmesini kullanın.',True);return
+        if not active and not paths:self.set_status('Önce Dosya seç ve oku veya Aktif resmi oku düğmesine basın.',True);return
         def operation(sink,stop):
             result=solidworks_reader.read_sources(paths,stop=stop,progress=lambda count:sink.put(('stack_phase',f'{count} ölçü okunuyor…')) if count%25==0 else None)
             check_cancel(stop)
@@ -383,9 +700,10 @@ class ToleranceStackPage(BasePage):
         self.watch_sources()
         if sources and not self.target.text():self.target.setText(sources[0].path)
         self.invalidate();self.refresh()
-        self.source_info.setText(f'SolidWorks: okundu · {len(self.project.sources)} teknik resim · {len(self.project.dimensions)} ölçü/anotasyon. '
-            'Kaynak veya zincir değişti; yeniden doğrulayın.')
-        self.set_status('Ölçüler okundu. Bilinmeyen toleransları tamamlayıp fonksiyonel ölçüleri seçin.')
+        self.source_info.setText(f'SolidWorks · {len(self.project.sources)} teknik resim · {len(self.project.dimensions)} ölçü. '
+            'Hesapta kullanacağınız ölçüleri soldan seçin.')
+        self.expand_library.setChecked(False);self.tabs.setCurrentIndex(0)
+        self.set_status('Ölçüler okundu. + Topla veya − Çıkar ile zincirinizi kurun; eksik değerler listede belirtilir.')
 
     def check_sources(self):
         snapshot=project_snapshot(self.project)
@@ -406,8 +724,12 @@ class ToleranceStackPage(BasePage):
         if value.project_digest!=self.project.fingerprint():self.set_status('Hesap sırasında girdiler değişti; sonuç kullanılmadı.',True);return
         self.result=value
         self.headline.setText(report.verdict(value.worst_case_pass)+' · '+value.kind)
-        self.result_summary.setText(f'Nominal: {fmt(value.nominal)} mm\nWorst-Case: {fmt(value.minimum)} … {fmt(value.maximum)} mm\n'
-            f'Dağılım merkezi: {fmt(value.mean)} mm · RSS: {fmt(value.rss_minimum)} … {fmt(value.rss_maximum)} mm')
+        for key in self.result_cards:self.result_cards[key].setText(compact(getattr(value,key))+' mm')
+        summary='En küçük/en büyük değerler, tüm ölçülerin tolerans uçlarından hesaplanır (Worst-Case).'
+        if value.rss_minimum is not None:
+            summary+=f'\nİstatistiksel aralık (RSS): {compact(value.rss_minimum)} … {compact(value.rss_maximum)} mm. Bu aralık garanti değildir.'
+        if value.worst_case_pass is None:summary+='\nKabul sınırı girilmedi; uygunluk değerlendirilmedi.'
+        self.result_summary.setText(summary)
         if self.project.sources:self.result_summary.setText(self.result_summary.text()+f'\nKaynak doğrulama: {value.timestamp} (UTC). '
             'Disk değişiklikleri izlenir; kaydedilmemiş SolidWorks değişiklikleri yeniden kontrolde/aktarımda okunur.')
         self.assumptions.setText('\n'.join(value.assumptions))
@@ -415,7 +737,7 @@ class ToleranceStackPage(BasePage):
         self.metrics.setColumnWidth(0,260)
         critical=sorted(value.contributions,key=lambda x:x.variance_percent if x.variance_percent is not None else x.worst_case_percent,reverse=True)[:3]
         self.critical_label.setText('Kritik ölçüler: '+' · '.join(c.name+f' %{fmt(c.variance_percent if c.variance_percent is not None else c.worst_case_percent,1)}' for c in critical))
-        self.draw();self.tabs.setCurrentIndex(2);self.set_status('Analiz tamamlandı; sonuçlar varsayımları ve kaynak bilgileriyle doğrulandı.')
+        self.draw();self.tabs.setCurrentIndex(2);self.set_status('Hesap tamamlandı. Sonuçlar, katkı grafikleri ve PDF/Excel çıktıları hazır.')
 
     def copy_result(self):
         if self.result is None:return
@@ -482,6 +804,7 @@ class ToleranceStackPage(BasePage):
         self.project=Project();self.project_path='';self.selected_files=[];self.result=None
         self.target.setText('');self.source_info.setText('Yeni manuel analiz · SolidWorks kaynağı yok.');self.watch_sources()
         self.load_form();self.invalidate();self.refresh();self.dirty=False
+        self.expand_library.setChecked(False);self.tabs.setCurrentIndex(0)
 
     def load_example(self):
         if not self.confirm_discard():return
@@ -490,8 +813,8 @@ class ToleranceStackPage(BasePage):
         self.project.terms=[Term(d.id,1 if i==0 else -1,f'P{i}',f'P{i+1}',datum='A') for i,d in enumerate(self.project.dimensions)]
         self.project.end='P3';self.project_path='';self.selected_files=[]
         self.target.setText('');self.source_info.setText('Manuel örnek · SolidWorks kaynağı yok.');self.watch_sources()
-        self.load_form();self.invalidate();self.refresh();self.tabs.setCurrentIndex(0)
-        self.set_status('Örnek yüklendi. Beklenen Worst-Case: 0,02 … 0,38 mm; nominal 0,20 mm. Zinciri doğrulayın.')
+        self.load_form();self.invalidate();self.refresh();self.expand_library.setChecked(False);self.tabs.setCurrentIndex(0)
+        self.set_status('Örnek: 50 − 20 − 29,8 = 0,2 mm. Kontrol kutusunu işaretleyip Hesapla düğmesine basın.')
 
     def save_project(self):
         try:self.capture_settings()

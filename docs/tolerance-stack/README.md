@@ -3,6 +3,9 @@
 [Kullanım, mimari, matematik ve CAD güvenliği](../tolerance-stack.md) ·
 [Örnek JSON / PDF / Excel](../../tolerance_stack/examples)
 
+**Güncel arayüz:** [Sadeleştirilmiş kullanım akışı ve ekran görüntüleri](usability/README.md).
+Alt kısımdaki eski ekranlar önceki arayüzün geliştirme kayıtlarıdır.
+
 Bu klasör gerçek Qt ekranlarını ve çalıştırılmış kontrol sonuçlarını içerir.
 Ekranlardaki analiz **manuel A−B−C örneğidir**; gerçek SolidWorks çalıştırıldığı
 iddia edilmez.

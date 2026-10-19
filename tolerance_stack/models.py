@@ -120,6 +120,7 @@ class Term:
     mean: Decimal | None = None
     sigma: Decimal | None = None
     mode: Decimal | None = None
+    alignment_confirmed: bool = False  # Explicit user confirmation, never inferred from drawing position.
 
     def __post_init__(self):
         for key in ('factor', 'mean', 'sigma', 'mode'):

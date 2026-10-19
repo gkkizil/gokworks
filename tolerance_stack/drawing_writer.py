@@ -49,6 +49,7 @@ def analysis_lines(project,result):
                  f'  {Path(d.source).name or "Manuel"} · {d.sheet} · {d.view} · {d.configuration}',
                  f'  ID: {d.api_name or d.id} · Veri: {d.provenance}']
         if t.relation: rows.append('  İlişki: '+t.relation)
+        if t.alignment_confirmed: rows.append('  Ortak doğrultu / referans: kullanıcı doğruladı; CAD geometrisinden çıkarılmadı.')
     if result.monte_carlo:
         mc=result.monte_carlo
         rows += [f'MC: n={mc["samples"]}, seed={mc["seed"]}, ortalama={fmt(mc["mean"])} mm, σ={fmt(mc["sigma"])} mm',

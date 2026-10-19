@@ -1,0 +1,33 @@
+{
+  "runs": [
+    {
+      "report": "stack-usability-checks.xml",
+      "tests": 113,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "report": "stack-usability-final-gui.xml",
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "report": "stack-usability-final-layout.xml",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "unique_cases": 116,
+  "unique_passed": 116,
+  "unique_failed": 0,
+  "unique_skipped": 0,
+  "scope": "Tolerance stack mathematics, mocked CAD reader/writer, storage/reports, Qt workflows and responsive layout",
+  "platform": "Linux / Qt offscreen",
+  "solidworks_live_tested": false,
+  "windows_exe_built": false
+}

@@ -51,12 +51,13 @@ def dimension_rows(project):
                fmt(d.minimum),fmt(d.maximum),d.tolerance_type,d.kind,term.relation,
                project.distribution if term.distribution=='inherit' else term.distribution,
                '' if term.mean is None else fmt(term.mean),'' if term.sigma is None else fmt(term.sigma),
-               '' if term.mode is None else fmt(term.mode),d.source,d.sheet,d.view,d.model,d.configuration,d.api_name or d.id,d.provenance,d.note)
+               '' if term.mode is None else fmt(term.mode),d.source,d.sheet,d.view,d.model,d.configuration,d.api_name or d.id,d.provenance,d.note,
+               'Kullanıcı doğruladı' if term.alignment_confirmed else 'İlişki açıklamasında' if term.relation else 'Manuel ölçü')
 
 
 HEADERS=('Etiket','Ölçü','Yön','Katsayı','Başlangıç','Bitiş','Nominal mm','Alt sapma mm','Üst sapma mm',
          'Minimum mm','Maksimum mm','Tolerans tipi','Tür','Fonksiyonel ilişki','Dağılım','Merkez mm','σ mm','Tepe mm',
-         'Kaynak çizim','Sayfa','Görünüm','Model','Konfigürasyon','Ölçü kimliği','Veri kaynağı','Not')
+         'Kaynak çizim','Sayfa','Görünüm','Model','Konfigürasyon','Ölçü kimliği','Veri kaynağı','Not','Ortak doğrultu / referans kontrolü')
 
 
 def export_excel(project,result,path,*,overwrite=False,stop=None):
@@ -109,7 +110,7 @@ def export_pdf(project,result,path,*,overwrite=False,stop=None):
         for row in dimension_rows(project):
             check_cancel(stop)
             html.append('<p><b>'+escape(f'{row[0]} · {row[1]} · yön {row[2]:+d} × {row[3]}')+'</b><br>'+escape(
-                f'Nominal {row[6]} / alt {row[7]} / üst {row[8]} mm\n{row[18]} · {row[19]} · {row[20]} · {row[22]}\n{row[13]} · {row[14]} · {row[25]}').replace('\n','<br>')+'</p>')
+                f'Nominal {row[6]} / alt {row[7]} / üst {row[8]} mm\n{row[18]} · {row[19]} · {row[20]} · {row[22]}\n{row[13]} · {row[14]} · {row[25]}\nDoğrultu kontrolü: {row[26]}').replace('\n','<br>')+'</p>')
         writer=QPdfWriter(str(temporary));writer.setResolution(96);writer.setPageSize(QPageSize(QPageSize.A4))
         writer.setPageMargins(QMarginsF(14,14,14,14),QPageLayout.Millimeter)
         writer.setTitle(project.name);writer.setCreator('GOKWORKS Tolerance Stack-Up 1.0')

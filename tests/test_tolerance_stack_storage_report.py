@@ -90,3 +90,19 @@ def test_real_unicode_pdf_is_complete_and_cancel_does_not_leave_a_report(qapp,tm
     stop=threading.Event();stop.set()
     with pytest.raises(Cancelled):report.export_pdf(p,r,tmp_path/'cancelled.pdf',stop=stop)
     assert not (tmp_path/'cancelled.pdf').exists()
+
+
+def test_alignment_confirmation_roundtrips_and_old_projects_remain_readable(tmp_path):
+    p=example();p.terms[0]=replace(p.terms[0],alignment_confirmed=True)
+    path=tmp_path/'alignment.json';storage.save_project(p,path)
+    loaded,_=storage.load_project(path)
+    assert loaded.terms[0].alignment_confirmed and not loaded.confirmed_digest
+    assert list(report.dimension_rows(loaded))[0][-1]=='Kullanıcı doğruladı'
+    data=json.loads(path.read_text())
+    for term in data['project']['terms']:term.pop('alignment_confirmed')
+    path.write_text(json.dumps(data))
+    legacy,_=storage.load_project(path)
+    assert not any(t.alignment_confirmed for t in legacy.terms)
+    data['project']['terms'][0]['alignment_confirmed']='true'
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError,match='doğrultu kontrolü'):storage.load_project(path)

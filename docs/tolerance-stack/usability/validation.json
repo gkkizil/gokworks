@@ -1,0 +1,16 @@
+{
+  "example": "Manual A-B-C, 50 - 20 - 29.80",
+  "qt_platform": "offscreen",
+  "expected": [
+    "0.20",
+    "0.02",
+    "0.38"
+  ],
+  "actual": [
+    "0.20",
+    "0.02",
+    "0.38"
+  ],
+  "screenshots": 5,
+  "solidworks_live_tested": false
+}

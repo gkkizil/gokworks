@@ -140,3 +140,25 @@ def test_no_acceptance_means_no_yield_or_capability_and_cancel_does_not_publish(
     assert r.worst_case_pass is None and r.monte_carlo['ppm'] is None and r.monte_carlo['cpk'] is None
     stop=threading.Event();stop.set()
     with pytest.raises(Cancelled): calculate(p,stop=stop)
+
+
+def test_explicit_cad_alignment_is_auditable_and_does_not_replace_other_engineering_checks():
+    from tolerance_stack.chain import ChainIssue
+    p=example();p.dimensions[0]=replace(p.dimensions[0],source='drawing.SLDDRW')
+    with pytest.raises(ChainIssue) as issue:p.confirm()
+    assert issue.value.target=='confirm' and issue.value.term_index==0
+    p.terms[0]=replace(p.terms[0],alignment_confirmed=True);p.confirm()
+    assert calculate(p).minimum==D('.02')
+    p.dimensions[0]=replace(p.dimensions[0],upper=None)
+    with pytest.raises(ChainIssue) as issue:p.confirm()
+    assert issue.value.target=='dimension' and issue.value.dimension_id==p.dimensions[0].id
+    p.dimensions[0]=replace(p.dimensions[0],upper=D('.1'),kind='diameter')
+    with pytest.raises(ChainIssue,match='çap veya radyüs'):p.confirm()
+    p.dimensions[0]=replace(p.dimensions[0],kind='linear')
+    p.terms[0]=replace(p.terms[0],factor=D('.5'))
+    with pytest.raises(ChainIssue,match='katsayı'):p.confirm()
+
+
+def test_alignment_confirmation_must_be_a_boolean():
+    p=example();p.terms[0]=replace(p.terms[0],alignment_confirmed='yes')
+    with pytest.raises(ValueError,match='doğrultusu kontrolü'):p.confirm()

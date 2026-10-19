@@ -19,7 +19,8 @@ def text(canvas,c,x,y,value,**kwargs):
 def draw_chain(canvas,project,appearance):
     c,w,h=setup(canvas,appearance)
     if not project.terms:
-        text(canvas,c,w/2,h/2,'Ölçü seçin, yönünü ve fonksiyonel başlangıç/bitişini tanımlayın.');return
+        text(canvas,c,w/2,h/2-10,'Soldan bir ölçü seçip + Topla veya − Çıkar ile başlayın.',width=w-45)
+        text(canvas,c,w/2,h/2+20,'Örnek: 50 − 20 − 29,8 = 0,2 mm');return
     dimensions={d.id:d for d in project.dimensions};shown=project.terms[:10]
     step=(w-70)/max(1,len(shown));y=h*.45
     for i,t in enumerate(shown):
@@ -27,13 +28,11 @@ def draw_chain(canvas,project,appearance):
         x0,x1=(a+7,b-7) if t.direction>0 else (b-7,a+7)
         canvas.create_line(x0,y,x1,y,fill=c['accent'],width=2,arrow='last',arrowshape=(7,9,4))
         canvas.create_line(a,y-9,a,y+9,fill=c['muted'])
-        text(canvas,c,(a+b)/2,y-28,f'L{i+1}  {"+" if t.direction>0 else "−"}×{t.factor}')
+        text(canvas,c,(a+b)/2,y-25,f'L{i+1}  {"+" if t.direction>0 else "−"}'+(f' ×{t.factor}' if t.factor!=1 else ''))
         text(canvas,c,(a+b)/2,y+30,fmt(d.nominal,3) if d else 'Silinmiş',width=step-6)
-        text(canvas,c,a,y+60,t.start,width=step-6)
-    text(canvas,c,w-35,y+60,shown[-1].end,anchor='e')
-    text(canvas,c,25,22,'FONKSİYONEL 1D ZİNCİR · Şematik, ölçeksiz',anchor='w')
-    text(canvas,c,25,h-20,f'{project.critical} · {project.axis} / {project.datum}'+
-         (f' · İlk 10 / {len(project.terms)} gösteriliyor; tümü tabloda ve raporda.' if len(project.terms)>10 else ''),anchor='w')
+    text(canvas,c,25,18,'Ölçü zinciri · + ekler / − çıkarır',anchor='w')
+    text(canvas,c,25,h-16,'Şematik · CAD geometrisi doğrulanmaz.'+
+         (f' İlk 10 / {len(project.terms)} ölçü; tümü tabloda.' if len(project.terms)>10 else ''),anchor='w',width=w-50)
 
 
 def draw_contributions(canvas,result,appearance):

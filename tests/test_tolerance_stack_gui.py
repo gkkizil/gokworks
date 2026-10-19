@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt,QThread,QTimer
 from PySide6.QtWidgets import QApplication,QFileDialog,QMessageBox
 
 from gui_qt.app import MainWindow,create_application
-from gui_qt.pages.stack_dialogs import DimensionDialog,IsoPairDialog
+from gui_qt.pages.stack_dialogs import DimensionDialog,IsoPairDialog,TermDialog
 from tolerance_stack.models import manual_dimension
 from tolerance_stack.calculator import Cancelled
 from tolerance_stack import solidworks_reader as reader
@@ -46,15 +46,17 @@ def test_module_example_complete_analysis_and_edit_invalidates_every_result(wind
 
 def test_chain_reorder_remove_relink_and_duplicate_are_user_controlled(window):
     page=window.pages['tolerance_stack'];page.load_example();page.chain_table.selectRow(1);page.move_term(-1)
+    assert [(t.start,t.end) for t in page.project.terms]==[('P0','P1'),('P1','P2'),('P2','P3')]
+    assert [t.direction for t in page.project.terms]==[-1,1,-1]
+    assert not page.confirm_box.isChecked()
     page.confirm_box.setChecked(True)
-    assert not page.confirm_box.isChecked() and 'süreksiz' in page.status_text
-    page.relink();page.confirm_box.setChecked(True);assert page.project.confirmed_digest
-    page.chain_table.selectRow(1);page.remove_term();page.relink();page.confirm_box.setChecked(True)
+    assert page.project.confirmed_digest
+    page.chain_table.selectRow(1);page.remove_term();page.confirm_box.setChecked(True)
     assert len(page.project.terms)==2 and page.project.confirmed_digest
     duplicate=page.project.terms[0].dimension_id
     row=next(i for i in range(page.library_proxy.rowCount()) if page.library_proxy.index(i,0).data(Qt.UserRole)['id']==duplicate)
-    page.library.selectRow(row);page.add_selected(1);page.confirm_box.setChecked(True)
-    assert not page.confirm_box.isChecked() and 'iki kez' in page.status_text
+    page.library.selectRow(row);page.add_selected(1)
+    assert len(page.project.terms)==2 and 'iki kez' in page.status_text
 
 
 def test_native_manual_limits_units_and_iso_pair_editors(window):
@@ -154,9 +156,8 @@ def test_multi_source_scan_runs_off_gui_thread_and_retains_chain_identity(window
     page=window.pages['tolerance_stack'];path=tmp_path/'a.SLDDRW';path.write_bytes(b'first drawing')
     drawing=Drawing(path);dims,s=reader.read_document(drawing);threads=[]
     def read(paths,**kwargs):threads.append(QThread.currentThread());return dims,[s]
-    with patch.object(QFileDialog,'getOpenFileNames',return_value=([str(path)],'')):page.choose_sources()
-    with patch.object(reader,'read_sources',side_effect=read):
-        page.scan_button.click();qtbot.waitUntil(lambda:not window.jobs.busy)
+    with patch.object(QFileDialog,'getOpenFileNames',return_value=([str(path)],'')),patch.object(reader,'read_sources',side_effect=read):
+        page.choose_button.click();qtbot.waitUntil(lambda:not window.jobs.busy)
     assert len(page.project.dimensions)==1 and threads[0] is not window.thread()
     page.library.selectRow(0);page.add_selected(1)
     changed=replace(dims[0],nominal=dims[0].nominal+1,original_signature='changed')
@@ -226,3 +227,115 @@ def test_stack_workspaces_remain_usable_in_both_themes_and_sizes(window,theme,si
         assert window.stack.geometry().right()<window.width()
         assert page.library.viewport().height()>=120
         assert page.chain_table.viewport().height()>=100
+    page.tabs.setCurrentIndex(0);QApplication.processEvents()
+    assert page.calculate_button.isVisible()
+    point=page.calculate_button.mapTo(window,page.calculate_button.rect().bottomRight())
+    assert window.rect().contains(point)
+
+
+def test_drawing_linear_chain_needs_one_explicit_alignment_confirmation_without_free_text(window):
+    from decimal import Decimal
+    from tolerance_stack.calculator import calculate
+    from tolerance_stack.chain import ChainIssue
+    page=window.pages['tolerance_stack']
+    a=manual_dimension('RD3@Görünüm1@Parça.Drawing','53.5','-.1','.1',source='Parça.SLDDRW')
+    b=manual_dimension('RD4@Görünüm1@Parça.Drawing','1.5','-.05','.05',source='Parça.SLDDRW')
+    page.project.dimensions=[a,b];page.project.method='worst_case'
+    page.append_dimension(a,1);page.append_dimension(b,-1)
+    assert page.current_issue is None
+    assert not any(t.alignment_confirmed or t.relation for t in page.project.terms)
+    with pytest.raises(ChainIssue):calculate(page.project)
+    page.start_calculation()
+    assert not window.jobs.busy and page.current_issue.target=='confirm'
+    page.confirm_box.setChecked(True)
+    assert page.project.confirmed_digest and all(t.alignment_confirmed for t in page.project.terms)
+    assert all(t.relation=='' for t in page.project.terms)
+    result=calculate(page.project)
+    assert (result.nominal,result.minimum,result.maximum)==tuple(map(Decimal,('52.0','51.85','52.15')))
+    page.chain_table.selectRow(1);page.flip_term()
+    assert not page.confirm_box.isChecked() and not page.project.confirmed_digest
+    assert page.project.terms[1].direction==1 and '55' in page.formula.text()
+
+
+def test_missing_tolerance_fix_opens_the_correct_measurement_even_after_filtering(window):
+    page=window.pages['tolerance_stack'];page.load_example()
+    missing=replace(page.project.dimensions[1],lower=None)
+    page.project.dimensions[1]=missing;page.refresh()
+    assert page.current_issue.target=='dimension' and page.current_issue.term_index==1
+    assert 'L2' in page.review_text.text() and 'eksik' in page.review_text.text()
+    page.search.setText('A');edited=[]
+    with patch.object(page,'edit_dimension',side_effect=lambda:edited.append(page.selected_dimension().id)):
+        page.fix_button.click()
+    assert edited==[missing.id] and page.chain_index()==1
+
+
+def test_custom_point_connections_are_not_silently_changed_by_reordering(window):
+    page=window.pages['tolerance_stack'];page.load_example()
+    page.project.terms[0]=replace(page.project.terms[0],end='Yüzey B')
+    page.project.terms[1]=replace(page.project.terms[1],start='Yüzey B')
+    original=page.project.terms[1]
+    page.refresh();page.chain_table.selectRow(1);page.move_term(-1)
+    assert page.project.terms[0]==original and page.current_issue.target=='relink'
+    page.confirm_box.setChecked(True);assert not page.confirm_box.isChecked()
+    page.fix_button.click();page.confirm_box.setChecked(True)
+    assert page.project.confirmed_digest
+
+
+def test_alignment_checkbox_does_not_override_different_axes_or_diameter_relationship(window):
+    page=window.pages['tolerance_stack'];page.load_example()
+    page.project.terms[0]=replace(page.project.terms[0],axis='Y');page.refresh()
+    page.confirm_box.setChecked(True)
+    assert not page.confirm_box.isChecked() and page.current_issue.target=='term'
+    assert page.project.terms[0].axis=='Y' and not page.project.terms[0].alignment_confirmed
+    dialog=TermDialog(page,page.project.terms[0],page.project.dimensions[0])
+    assert dialog.frame_section.toggle.isChecked();dialog.deleteLater()
+    page.project.terms[0]=replace(page.project.terms[0],axis='X')
+    page.project.dimensions[0]=replace(page.project.dimensions[0],kind='diameter');page.refresh()
+    page.confirm_box.setChecked(True)
+    assert not page.confirm_box.isChecked() and page.current_issue.target=='term'
+    dialog=TermDialog(page,page.project.terms[0],page.project.dimensions[0])
+    with pytest.raises(ValueError,match='seçin'):dialog.read_value()
+    dialog.form.set_value('use','Çaptan yarıçap mesafesi (×0,5)')
+    term=dialog.read_value();assert str(term.factor)=='0.5' and term.relation
+    page.project.terms[0]=term;page.refresh();page.confirm_box.setChecked(True)
+    assert page.project.confirmed_digest;dialog.deleteLater()
+
+
+def test_basic_settings_are_visible_and_advanced_settings_remain_available(window):
+    page=window.pages['tolerance_stack'];page.load_example();page.acceptance_button.click()
+    assert page.tabs.currentIndex()==1
+    assert page.form.fields['acceptance_min'].isVisible() and page.form.fields['acceptance_max'].isVisible()
+    assert not page.form.fields['axis'].isVisible() and not page.form.fields['seed'].isVisible()
+    page.show_settings('frame');assert page.form.fields['axis'].isVisible()
+    page.show_settings('statistics');assert page.form.fields['seed'].isVisible()
+    page.form.set_value('acceptance_max','-1');page.tabs.setCurrentIndex(0)
+    assert page.current_issue.target=='settings' and 'en küçük' in page.review_text.text()
+
+
+@pytest.mark.parametrize('theme',['dark','light'])
+def test_error_and_fix_button_remain_visible_at_small_window_sizes(window,theme):
+    window.resize(1024,700);window.set_theme(theme)
+    page=window.pages['tolerance_stack'];page.load_example()
+    page.project.dimensions[1]=replace(page.project.dimensions[1],upper=None);page.refresh();QApplication.processEvents()
+    for control in (page.fix_button,page.calculate_button,page.confirm_box):
+        assert control.isVisible()
+        assert window.rect().contains(control.mapTo(window,control.rect().bottomRight()))
+
+
+@pytest.mark.parametrize('size',[(1024,700),(1366,768)])
+def test_compact_diagram_reflows_without_shrinking_text_and_keeps_add_actions_visible(window,qtbot,size):
+    window.resize(*size);page=window.pages['tolerance_stack'];page.load_example()
+    qtbot.waitUntil(lambda:page.chain_diagram.vector.width==max(360,page.chain_diagram.viewport().width()))
+    assert page.chain_diagram.transform().m11()>.85
+    for control in (page.add_plus,page.add_minus,page.calculate_button):
+        assert control.isVisible() and window.rect().contains(control.mapTo(window,control.rect().bottomRight()))
+
+
+def test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis(window):
+    page=window.pages['tolerance_stack'];page.load_example();page.show_settings('statistics')
+    page.form.set_value('seed','abc');page.tabs.setCurrentIndex(0)
+    assert page.current_issue.target=='statistics' and not page.calculate_button.isEnabled()
+    page.fix_button.click();assert page.form.fields['seed'].hasFocus()
+    with patch.object(page,'confirm_discard',return_value=True):page.new_project()
+    assert page.metadata_error=='' and page.metadata_field=='' and page.project.terms==[]
+    assert not page.calculate_button.isEnabled()

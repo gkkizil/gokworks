@@ -6,36 +6,54 @@ bulut API’si, NumPy, OCC veya yeni GUI bağımlılığı gerektirmez.
 
 ## Kullanım
 
-1. SolidWorks’te bir `.SLDDRW` açıp **Aktif teknik resmi oku** düğmesini kullanın.
-   Alternatif olarak **Dosya seç** ile birden fazla çizim seçip **Ölçüleri tara**
-   düğmesine basın. Çizimin önce kaydedilmiş olması gerekir; araç ilk kaydı yapmaz.
-2. Soldaki tabloyu arayın/filtreleyin. **Ölçü tablosunu genişlet** bütün sütunlara
-   yer açar. Çift tıklama yalnız analiz verisini düzenler. Kaynak çizime değer yazmaz.
-3. İlgili ölçüleri `+` veya `−` yönüyle zincire ekleyin. **İlişkiyi düzenle** ile
-   başlangıç/bitiş noktalarını, ortak datum/eksen eşlemesini ve gerekli katsayıyı
-   açıklayın. Çizim görünümündeki yatay/düşey konum montaj ekseni sayılmaz.
-   CAD ölçülerinin ortak fonksiyonel çerçeveye eşlemesi açıkça belirtilmelidir.
-4. `Çap` ve `radyüs` kendiliğinden doğrusal terim olmaz. Örneğin çapsal boşluk
+1. **Ölçüleri alın.** SolidWorks’te bir `.SLDDRW` açıp **Aktif resmi oku** düğmesine
+   basın. **Dosya seç ve oku** birden fazla çizimi seçer ve okumayı kendiliğinden
+   başlatır. **Yeniden tara** seçili kaynakları günceller. Çizimin önce kaydedilmiş
+   olması gerekir. SolidWorks olmadan **Manuel ölçü** ile başlayabilirsiniz.
+2. **Zinciri kurun.** Soldan bir ölçü seçin. Sonuca eklenecekse **+ Topla**,
+   çıkarılacaksa **− Çıkar** kullanın. Örneğin `50 − 20 − 29,8 = 0,2 mm`.
+   Formül ve şema seçimlerinizi gösterir. Zincirdeki satırın **+ / −** düğmesi
+   işlemi değiştirir; oklar sırayı, **Çıkar** satırı kaldırır. Normal P0/P1…
+   bağlantıları sıralama/silme sırasında yeniden numaralanır. Kullanıcının özel
+   nokta adları kendiliğinden değiştirilmez; tutarsızsa **Bağlantıları düzelt** gösterilir.
+3. **Kontrol edip hesaplayın.** Gerçek çizimde ölçülerin aynı doğrultuda ve ortak
+   referansa göre alındığını, +/− yönlerini kontrol edin. Alt kısımdaki **Ortak
+   doğrultuyu ve + / − yönlerini kontrol ettim** kutusunu işaretleyip **Hesapla
+   ve sonuçları göster** düğmesine basın. Şema CAD geometrisini doğrulamaz.
+   Doğrusal CAD ölçüleri için serbest metin açıklaması zorunlu değildir; açık
+   kullanıcı onayı `Term.alignment_confirmed` alanına kaydedilir. Onay önizleme
+   sırasında atanmaz. Eski projelerdeki açık ilişki açıklamaları desteklenir.
+   Doğrultusu/referansı farklı ölçüler, eksik toleranslar ve dönüşüm gerektiren
+   ölçüler bu kutuyla geçerli hale gelmez. Hata kartı ilgili satırı ve tek
+   tıklamayla açılabilen düzeltme işlemini gösterir.
+4. `Çap` ve `radyüs` kendiliğinden doğrusal terim olmaz. **Düzenle → Ölçü nasıl
+   kullanılacak?** alanından doğrudan çap/radyüs veya yarım/iki kat mesafe
+   ilişkisini seçin. Özel katsayı için açıklama gerekir. Örneğin çapsal boşluk
    `D−d` için katsayılar `+1/−1`, radyal boşluk `(D−d)/2` için `+0,5/−0,5` olur.
    Açısal ölçüler, BASIC ölçüler, yay/pah ve GD&T bu yolla dönüştürülmez.
    Referans ölçülerde **Ölçüyü düzenle** ile nominal ve analiz toleransları
    doğrulanmalıdır. Geometrik tür korunur; açı veya türü bilinmeyen referans
    ölçü doğrusal ölçüye çevrilmez. Zincire eklerken de bu düzenleyici açılır;
    iptal edilirse ölçü eklenmez. Onay yalnız analize aittir, CAD ölçüsü değişmez.
-5. Analiz ayarlarında kritik boşluğu, zincir uçlarını, kabul sınırlarını,
-   yöntemi ve dağılım varsayımlarını belirtin. Boş kabul sınırı sınırsızdır;
+5. **İstenen sonuç … Düzenle** düğmesi kabul aralığını açar. **Analiz ayarları**
+   sekmesinde mesafenin adını, kabul sınırlarını ve hesap yöntemini belirtin.
+   Doğrultu, bağlantı noktaları ve dağılım ayarları gelişmiş bölümlerde korunur.
+   Boş kabul sınırı sınırsızdır;
    iki sınır da boşsa uygun/uygun değil sonucu üretilmez.
-6. Zincirin fonksiyonel ilişkisini doğrulayan kutuyu işaretleyip hesaplayın.
-   Her veri değişikliği onayı ve görünür eski sonucu kaldırır. Sıralama/çıkarma
-   sonrasında gerçek noktaları düzeltin veya **Noktaları sıraya bağla** ile
-   şematik bağlantıyı yeniden kurup ayrıca doğrulayın.
-7. Sonuçlar, varsayımlar, kritik ölçüler ve katkı/histogram grafikleri sonuç
-   sekmesindedir. PDF/Excel ve panoya aktarım bulunur.
-8. **Proje kaydet** sürümlü `.gokstack.json` oluşturur. Açılan projedeki eski
+6. Her veri değişikliği onayı ve görünür eski sonucu kaldırır. Aynı fiziksel
+   ölçü arayüzden ikinci kez eklenmez; dışarıdan açılan projelerdeki tekrarlar
+   hesap motorunda da engellenir. Eksik toleranslar varsayılmaz.
+7. Sonuçlar nominal, en küçük/en büyük olası sonuç kartlarında gösterilir.
+   Katkı grafikleri ve Monte Carlo histogramı korunur; istatistiksel aralık
+   Worst-Case garantisi olarak sunulmaz. **Tüm sonuçlar ve hesap varsayımları**
+   ayrıntıları açar. PDF/Excel ve panoya aktarım bulunur. **Teknik resme aktar**
+   ayrı analiz anotasyonlarını oluşturur. Dar pencerede temel düğmeler sabit
+   kalır; ikincil sütunlar seçili ölçü özeti ve ayrıntı görünümünden okunabilir.
+8. **Proje → Proje kaydet** sürümlü `.gokstack.json` oluşturur. Açılan projedeki eski
    sonuç yalnız arşivdir; kaynak kontrolü ve yeniden hesaplama gerekir.
    Analiz projeleri kendiliğinden kaydedilmez; uygulamadan çıkmadan kaydedin.
 
-SolidWorks olmadan **Manuel ölçü**, **ISO geçme** ve **Örneği yükle** çalışır.
+SolidWorks olmadan **Manuel ölçü**, **ISO geçme** ve **Örnekle dene** çalışır.
 Manuel giriş, sapma, simetrik ± veya gerçek alt/üst ölçü limiti kabul eder.
 Giriş birimleri mm/cm/m/in/µm olabilir; bütün uzunluklar içeride Decimal mm’dir.
 

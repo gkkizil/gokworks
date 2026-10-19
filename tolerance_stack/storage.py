@@ -103,6 +103,8 @@ def load_project(path):
         for key in ('independent','truncate_normal','offline_snapshot'):
             if not isinstance(getattr(project,key),bool):raise ValueError('Proje mantıksal alanı geçersiz.')
         for term in project.terms:
+            if not isinstance(term.alignment_confirmed,bool):
+                raise ValueError('Ölçünün doğrultu kontrolü geçersiz; projeyi yeniden açın.')
             if term.distribution not in ('inherit',*DISTRIBUTIONS) or type(term.direction) is not int or term.direction not in (-1,1):
                 raise ValueError('Kayıtlı ölçü zinciri dağılımı/yönü geçersiz.')
             if not all(isinstance(getattr(term,key),str) for key in ('dimension_id','start','end','axis','datum','relation')):
