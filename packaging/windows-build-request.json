@@ -1,6 +1,6 @@
 {
-  "request_id": "94c345e3-0962-475c-b842-a2a9f117d22c",
-  "requested_at": "2026-10-19T09:56:43.644462+00:00",
-  "source_commit": "1abbebe1782e1c31faef6fa6c1472fd959e41822",
-  "reason": "User-requested GOKWORKS EXE with Qt fatal-message capture, persistent PDF/GUI phase diagnostics, explicit queued UI slot and corrected COM application release in the connection check. The reported user crash remains unconfirmed without its Windows event record."
+  "request_id": "afc6975d-ae0d-4582-8832-e7c1b82abef1",
+  "requested_at": "2026-10-19T10:37:44.968308+00:00",
+  "source_commit": "dc27bdf0561d315a4f4e7e81f495d8474a42d934",
+  "reason": "User-requested Windows EXE with native Qt thread cleanup synchronization and independent GUI/PDF process exit monitoring. Includes Windows process-handle tests; the reported SolidWorks PDF crash remains unconfirmed pending its native exit/fault information."
 }
