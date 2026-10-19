@@ -286,8 +286,10 @@ işlem sırasında diğer menüler kullanılabilir. Aynı anda bir CAD/dosya iş
 - Paket açılış kontrolü: `python main.py --self-check qt-smoke.json`
 - Windows derleme: `python packaging/build_windows.py` (Windows/Python 3.13 x64)
 
-Windows ZIP’inin **tamamını** çıkartın; `GOKWORKS/GOKWORKS.exe` dosyasını açın.
-`_internal` klasörü EXE yanında kalmalıdır. Python kurulumu gerekmez.
+Güncel tek dosya dağıtımında yalnız **GOKWORKS.exe** taşınır ve çalıştırılır.
+Yanında `_internal` veya Python kurulumu gerekmez. Kaynaklar açılışta geçici
+klasöre açılır; ayarlar kullanıcı profilinde korunur. Lisanslar uygulamadaki
+**Lisanslar** düğmesinden okunabilir ve kaydedilebilir.
 
 Eski JSON ayarları yerinde korunur; Qt pencere ayarları aynı konumda ayrı
 `settings.qt.ini` dosyasında tutulur. K/R kayıt seçimi her açılışta kapalıdır.

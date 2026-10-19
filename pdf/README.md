@@ -3,6 +3,10 @@
 Qt ekranı `pdf.process.export_drawings` ile bir yardımcı süreç başlatır. Kaynak
 koddan `main.py --pdf-export-worker <istek.json>`, Windows paketinde aynı EXE'nin
 özel çalışma biçimi kullanılır. Yardımcı süreç arayüz açmaz; ek kurulum gerektirmez.
+Tek EXE dağıtımında PDF işçisi, ömrü boyunca açık kalan ana uygulamanın geçici
+kaynaklarını yeniden kullanır. Çıkış izleyicisi bağımsız geçici kaynaklarla
+başlatılır. İzlenen PID, onefile başlatıcısından değil `worker_ready` mesajındaki
+gerçek Python işçisinden alınır; Windows hata olayı doğru süreçle eşleştirilir.
 İstek ve JSON satırı olayları özel geçici klasörde tutulup işlem sonunda silinir.
 Windowed EXE'de stdout bulunması gerekmez. Yeni bağımlılık eklenmemiştir.
 

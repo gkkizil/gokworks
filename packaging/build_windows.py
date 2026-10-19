@@ -8,6 +8,8 @@ import subprocess
 import sys
 import importlib.metadata
 import shutil
+import argparse
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,11 +39,16 @@ def collect_licenses():
 def main():
     if sys.platform != 'win32':
         raise SystemExit('Windows EXE oluşturmak için bu betiği Windows üzerinde çalıştırın.')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--onedir', action='store_true', help='Developer option: unpacked distribution')
+    options = parser.parse_args()
+    mode = 'onedir' if options.onedir else 'onefile'
     collect_licenses()
-    args = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir', '--windowed', '--noupx',
+    args = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--'+mode, '--windowed', '--noupx',
             '--name', 'GOKWORKS', '--icon', str(ROOT/'gui/assets/GOK_app_windows.ico'),
             '--distpath', str(ROOT/'dist'), '--workpath', str(ROOT/'build/pyinstaller'),
             '--specpath', str(ROOT/'build'), '--paths', str(ROOT),
+            '--runtime-hook', str(ROOT/'packaging/runtime_hook.py'),
             '--collect-data', 'ezdxf',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
@@ -57,25 +64,43 @@ def main():
             '--add-data', f'{ROOT / "iso_fits/tables.json"};iso_fits',
             '--add-data', f'{ROOT / "naming/interop/PackAndGoHost.cs"};naming/interop', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)
-    exe = ROOT/'dist/GOKWORKS/GOKWORKS.exe'
+    exe = ROOT/('dist/GOKWORKS/GOKWORKS.exe' if options.onedir else 'dist/GOKWORKS.exe')
     if exe.read_bytes()[:2] != b'MZ':
         raise RuntimeError('Üretilen dosya Windows yürütülebilir dosyası değil.')
     report = ROOT/'dist/windows-smoke.json'
     reports = []
-    for scale in ('1', '1.25', '1.5'):
-        scaled_report = report if scale == '1' else report.with_name(f'windows-smoke-{scale}.json')
-        subprocess.run([str(exe), '--self-check', str(scaled_report)], cwd=ROOT, check=True, timeout=180,
-                       env={**os.environ, 'QT_SCALE_FACTOR': scale})
-        result = json.loads(scaled_report.read_text(encoding='utf-8'))
-        if result.get('status') != 'passed':
-            raise RuntimeError(f'Paket açılış kontrolü başarısız: {result}')
-        reports.append(result)
+    with tempfile.TemporaryDirectory(prefix='GOKWORKS dağıtım kontrolü ') as folder:
+        deploy = Path(folder)
+        runnable = exe if options.onedir else deploy/'GOKWORKS.exe'
+        if not options.onedir:
+            shutil.copy2(exe, runnable)
+        for scale in ('1', '1.25', '1.5'):
+            scaled_report = report if scale == '1' else report.with_name(f'windows-smoke-{scale}.json')
+            env = {**os.environ, 'QT_SCALE_FACTOR': scale}
+            env.pop('PYTHONPATH', None)
+            env.pop('PYTHONHOME', None)
+            env.pop('GOKWORKS_LIBRARY_DIR', None)
+            # Also prove compatible external Qt/PySide packages can replace
+            # the bundled libraries without repacking the application.
+            if scale == '1.5':
+                import PySide6
+                env['GOKWORKS_LIBRARY_DIR'] = str(Path(PySide6.__file__).resolve().parent.parent)
+            subprocess.run([str(runnable), '--self-check', str(scaled_report)], cwd=deploy, check=True, timeout=240, env=env)
+            result = json.loads(scaled_report.read_text(encoding='utf-8'))
+            if result.get('status') != 'passed' or result.get('distribution') != mode:
+                raise RuntimeError(f'Paket açılış kontrolü başarısız: {result}')
+            if scale == '1.5' and not result.get('external_qt_verified'):
+                raise RuntimeError('Harici Qt kitaplıklarıyla çalıştırma kontrolü başarısız.')
+            if not options.onedir and list(deploy.iterdir()) != [runnable]:
+                raise RuntimeError('Tek EXE dağıtımında yan dosya oluştu.')
+            reports.append(result)
     digest = hashlib.sha256(exe.read_bytes()).hexdigest()
-    (ROOT/'dist/SHA256.txt').write_text(f'{digest}  GOKWORKS/GOKWORKS.exe\n', encoding='utf-8')
+    (ROOT/'dist/SHA256.txt').write_text(f'{digest}  {exe.relative_to(ROOT/"dist").as_posix()}\n', encoding='utf-8')
     (ROOT/'dist/OKU.txt').write_text(
-        'GOKWORKS · Windows 10/11 x64\n\n'
-        'ZIP dosyasının tamamını çıkartın. GOKWORKS klasöründeki GOKWORKS.exe dosyasını açın.\n'
-        '_internal klasörü EXE yanında kalmalıdır; yalnız EXE dosyasını taşımayın. Python kurulumu gerekmez.\n'
+        'GOKWORKS · Windows 10/11 x64\n\n'+
+        ('GOKWORKS klasöründeki GOKWORKS.exe dosyasını _internal ile birlikte taşıyın.\n' if options.onedir else
+         'Yalnız GOKWORKS.exe dosyasını taşıyıp dağıtabilirsiniz. Yanında klasör gerekmez.\n')+
+        'Python kurulumu gerekmez. Tek EXE kaynakları açılışta geçici klasöre açılır.\n'
         'Cıvata, ISO geçme ve geometrik tolerans ekranları SolidWorks olmadan açılır.\n'
         'Tolerans yığılması manuel analiz, Monte Carlo ve PDF/Excel raporları yerel çalışır.\n'
         'Teknik resim ölçü okuma/anotasyon işlemleri için açık SolidWorks oturumu gerekir.\n'
@@ -83,9 +108,14 @@ def main():
         'PDF aktarımı ayrı yardımcı süreçte çalışır; hata kayıtları %LOCALAPPDATA%\\GOKWORKS\\logs altındadır.\n'
         'Ayarlar %APPDATA%\\GOKWORKS altında saklanır.\n'
         'Bu deneme paketi kod imzası taşımaz.\n\n'
-        'PySide6/Qt dinamik DLL dosyaları LGPL v3 kapsamında ayrı paketlenmiştir.\n'
-        'Lisanslar: GOKWORKS/_internal/licenses/THIRD_PARTY_NOTICES.md\n\n'
+        'PySide6/Qt dinamik DLL dosyaları LGPL v3 kapsamında dağıtılır.\n'
+        'Gömülü lisanslar uygulamadaki Lisanslar düğmesinden okunabilir ve kaydedilebilir.\n'
+        'Uyumlu Qt/PySide kitaplıkları GOKWORKS_LIBRARY_DIR ile değiştirilebilir.\n\n'
         f'Kaynak commit: {os.environ.get("GITHUB_SHA", "yerel derleme")}\n', encoding='utf-8')
+    (ROOT/'dist/release-notes.md').write_text(
+        'Windows 10/11 x64 · Tek dosya GOKWORKS.exe. Yanında klasör veya Python kurulumu gerekmez.\n\n'
+        'Lisanslar uygulamadaki Lisanslar ekranındadır. CAD işlemleri kurulu ve açık SolidWorks gerektirir.\n\n'
+        f'SHA256: `{digest}`\n\nKaynak: `{os.environ.get("GITHUB_SHA", "yerel derleme")}`\n', encoding='utf-8')
     print(json.dumps({'exe': str(exe), 'bytes': exe.stat().st_size, 'sha256': digest, 'smoke': reports}))
 
 

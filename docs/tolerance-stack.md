@@ -182,8 +182,8 @@ tema, vektör sahne ve durum altyapılarını kullanır. `stack_dialogs.py` yaln
 analiz verisini düzenler. Navigasyon sayfayı yeniden oluşturmaz veya COM çağırmaz.
 
 Yeni runtime paketi kurulmaz. PDF mevcut Qt Gui ile, Excel mevcut openpyxl ile
-oluşur. `packaging/build_windows.py` mevcut PyInstaller onedir mekanizmasını
-korur. Paket açılış kontrolü on modülü, örnek limit hesabını ve gerçek PDF/XLSX
+oluşur. `packaging/build_windows.py` PyInstaller ile tek EXE üretir;
+Qt/Python ve lisanslar gömülüdür. Paket açılış kontrolü on modülü, örnek limit hesabını ve gerçek PDF/XLSX
 çıktısını kapsar. Referans MIT bildirimleri mevcut lisans paketine eklenir.
 
 ## İncelenen kaynaklar ve lisanslar

@@ -44,19 +44,23 @@ jobs:
           python packaging/run_windows_tests.py
       - name: Build and open the packaged EXE
         run: python packaging/build_windows.py *> windows-build.log
-      - name: Upload Windows package
+      - name: Upload single executable
         id: artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GOKWORKS-Windows-x64-${{ github.sha }}
-          path: |
-            dist/GOKWORKS/
-            dist/SHA256.txt
-            dist/OKU.txt
-            dist/windows-smoke*.json
-            dist/windows-smoke*.png
+          name: GOKWORKS-Tek-EXE-Windows-x64-${{ github.sha }}
+          path: dist/GOKWORKS.exe
           if-no-files-found: error
           retention-days: 30
+      - name: Publish direct EXE download
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "windows-onefile-${env:GITHUB_RUN_ID}-${env:GITHUB_RUN_ATTEMPT}"
+          gh release create $tag dist/GOKWORKS.exe --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "GOKWORKS Windows - Tek EXE" --prerelease --notes-file dist/release-notes.md *> windows-release.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "download_url=https://github.com/$env:GITHUB_REPOSITORY/releases/download/$tag/GOKWORKS.exe" >> $env:GITHUB_OUTPUT
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
@@ -64,7 +68,11 @@ jobs:
           name: Windows-build-log-${{ github.sha }}
           path: |
             windows-build.log
+            windows-release.log
             dist/windows-smoke*.json
+            dist/windows-smoke*.png
+            dist/SHA256.txt
+            dist/OKU.txt
             windows-tests.xml
             windows-tests.log
           if-no-files-found: ignore
@@ -73,4 +81,5 @@ jobs:
         env:
           BUILD_STATUS: ${{ job.status }}
           ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          DIRECT_EXE_URL: ${{ steps.release.outputs.download_url }}
         run: python packaging/publish_status.py

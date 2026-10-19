@@ -40,13 +40,19 @@ FreeType için dağıtıma eklenen FTL koşulları esas alınır; metin lisans k
 LGPL, koşulları karşılandığında kapalı kaynak ve ticari uygulamayla kullanılabilir.
 Bu cümle koşulsuz bir “telif sorunu yok” garantisi değildir.
 
-- EXE `--onedir --noupx` ile paketlenir. Qt/PySide paylaşımlı kütüphaneleri
-  `_internal` altında ayrı bulunur; tek EXE içine kilitlenmez.
+- Varsayılan dağıtım `--onefile --noupx` biçimindedir. Qt/PySide paylaşımlı
+  kütüphaneleri açılışta geçici klasöre açılır; uygulamaya statik bağlanmaz.
+- Uyumlu değiştirilmiş Qt/PySide/Shiboken paketleri `GOKWORKS_LIBRARY_DIR`
+  klasöründen yüklenebilir. Runtime hook bu yolu Qt yüklenmeden önce uygular.
+  Bu değiştirme mekanizması gerçek paket açılış kontrolünde doğrulanır.
+  Geliştirici açık klasörlü dağıtımı `packaging/build_windows.py --onedir`
+  ile de yeniden oluşturabilir. Kullanım ayrıntıları `packaging/README.md` içindedir.
 - Alıcıların LGPL kütüphanelerini uyumlu değiştirilmiş sürümlerle değiştirmesine
   ve bunun için hata ayıklama/tersine mühendisliğe izin verilmelidir. Sonradan
   hazırlanacak EULA bu hakkı engellememelidir. Bu depoda engelleyici EULA yoktur.
 - Lisans metinleri, telif bildirimleri, kaynak sürümleri ve kaynak edinme bilgisi
-  `GOKWORKS/_internal/licenses` içinde birlikte dağıtılır.
+  EXE içindeki `licenses` kaynaklarında birlikte dağıtılır. Uygulamadaki
+  **Lisanslar** ekranından okunur veya **Lisansları kaydet** ile tam arşiv alınır.
 - Qt veya PySide kaynakları değiştirilmedi. Değiştirilirse ilgili kaynak ve
   değişiklikler LGPL koşullarıyla sağlanmalı; kurulum bilgisi yükümlülüğü ürünün
   dağıtım biçimine göre ayrıca karşılanmalıdır.

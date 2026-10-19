@@ -53,6 +53,21 @@ def test_real_cli_empty_source_starts_without_solidworks(paths):
     assert len([event for event in records if event[0] == 'done']) == 1
 
 
+def test_observer_uses_worker_ready_pid_instead_of_extraction_launcher(paths):
+    real_popen = subprocess.Popen
+    children, watched = [], []
+    class Launcher:
+        def __init__(self,*args,**kwargs):
+            self.child=real_popen(*args,**kwargs);children.append(self.child)
+            self.pid=self.child.pid+1000000
+        def __getattr__(self,name):return getattr(self.child,name)
+    with patch.object(pdf.subprocess,'Popen',Launcher),patch.object(pdf,'start_watch',
+            side_effect=lambda pid,log,role:watched.append((pid,role))):
+        records,result=run(paths,'crash')
+    assert result['state']=='error'
+    assert watched==[(children[0].pid,'pdf-worker')]
+
+
 def test_real_worker_exports_all_sheets_with_fake_com_and_no_qt(paths):
     (paths[0]/'ikinci.SLDDRW').unlink()
     records, result = run(paths, 'com_export')

@@ -92,7 +92,10 @@ class MainWindow(QMainWindow):
         menu_scroll = scroll(menu)
         menu_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         side.addWidget(menu_scroll, 1)
-        side.addWidget(button('Ayarlar', self.show_settings))
+        tools = QHBoxLayout()
+        tools.addWidget(button('Ayarlar', self.show_settings))
+        tools.addWidget(button('Lisanslar', self.show_licenses))
+        side.addLayout(tools)
         self.theme_picker = QComboBox()
         self.theme_picker.addItem('Koyu tema', 'dark')
         self.theme_picker.addItem('Açık tema', 'light')
@@ -225,6 +228,12 @@ class MainWindow(QMainWindow):
                      'Mevcut JSON ayarlarınız korunur. Pencere konumu ve boyutu ayrı Qt ayarlarında saklanır.\n\n'
                      'SolidWorks: açık oturum · Windows 10/11 · 2025 SP5\nArayüz: PySide6 / Qt Widgets\n'
                      'K/R: kaydet seçimi her açılışta kapalıdır.\n\nTema seçimini sol panelin altından değiştirebilirsiniz.')
+
+    def show_licenses(self):
+        from .licenses import LicensesDialog
+        dialog = LicensesDialog(self)
+        try:dialog.exec()
+        finally:dialog.deleteLater()
 
     def closeEvent(self, event):
         diagnostics.record(f'gui_close_requested busy={self.jobs.busy} closing={self.closing}')

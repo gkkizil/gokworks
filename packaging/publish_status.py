@@ -19,10 +19,13 @@ def git(*args, data=None, env=None):
 
 
 def release_block(report):
+    single = report.get('distribution') == 'onefile'
+    instructions = ('**GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. ' if single else
+                    'ZIP dosyasının tamamını çıkartıp **GOKWORKS/GOKWORKS.exe** dosyasını açın. '
+                    '`_internal` klasörü EXE yanında kalmalıdır. ')
     return (f'{RELEASE_START}\n'
-            f'**Güncel Windows EXE:** [GOKWORKS paketini indir]({report["download_url"]})\n\n'
-            'ZIP dosyasının tamamını çıkartıp **GOKWORKS/GOKWORKS.exe** dosyasını açın. '
-            '`_internal` klasörü EXE yanında kalmalıdır. Windows 10/11 x64; Python kurulumu gerekmez.\n\n'
+            f'**Güncel Windows EXE:** [GOKWORKS{(".exe" if single else " paketini")} indir]({report["download_url"]})\n\n'
+            +instructions+'Windows 10/11 x64; Python kurulumu gerekmez.\n\n'+
             f'Uygulama kodu: `{report.get("source_commit", report["commit"])[:7]}` · '
             f'[Derleme kaydı]({report["run_url"]}) · '
             '[Paket bilgisi ve SHA256](packaging/latest-windows.json)\n'
@@ -72,16 +75,24 @@ def publish(report):
 def main():
     report = {'commit': os.environ['GITHUB_SHA'], 'status': os.environ['BUILD_STATUS'],
               'run_url': f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}',
-              'download_url': os.environ.get('ARTIFACT_URL', '')}
-    exe = Path('dist/GOKWORKS/GOKWORKS.exe')
+              'download_url': os.environ.get('DIRECT_EXE_URL') or os.environ.get('ARTIFACT_URL', ''),
+              'artifact_url': os.environ.get('ARTIFACT_URL', '')}
+    exe = Path('dist/GOKWORKS.exe')
+    if not exe.exists():exe = Path('dist/GOKWORKS/GOKWORKS.exe')
     if exe.exists():
         report.update(bytes=exe.stat().st_size, sha256=hashlib.sha256(exe.read_bytes()).hexdigest())
     smoke = Path('dist/windows-smoke.json')
     if smoke.exists():
         report['smoke'] = json.loads(smoke.read_text(encoding='utf-8'))
+        report['distribution'] = report['smoke'].get('distribution', 'onedir')
+        report['smoke_scales'] = [json.loads(path.read_text(encoding='utf-8'))
+                                  for path in sorted(Path('dist').glob('windows-smoke*.json'))]
     log = Path('windows-build.log')
     if report['status'] != 'success' and log.exists():
         report['build_log_tail'] = log.read_text(encoding='utf-8', errors='replace')[-12000:]
+    release_log = Path('windows-release.log')
+    if report['status'] != 'success' and release_log.exists():
+        report['release_log_tail'] = release_log.read_text(encoding='utf-8', errors='replace')[-4000:]
     tests = Path('windows-tests.xml')
     if tests.exists():
         from xml.etree import ElementTree

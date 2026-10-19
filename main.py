@@ -1,5 +1,10 @@
 """GOKWORKS uygulamasını başlatır."""
 
+from solidworks.runtime import configure_libraries
+
+# Reapply the explicit library/plugin selection after built-in Qt runtime hooks.
+configure_libraries()
+
 def main():
     # The internal PDF worker must start without importing Qt or creating a GUI.
     from gui_qt.app import main as run

@@ -108,7 +108,11 @@ bellek sızıntısı analizinin yerine geçmez.
 
 ## Windows paketleme
 
-PyInstaller 6.16.0, Python 3.13 x64, `--onedir --windowed --noupx`.
+Güncel varsayılan çıktı PyInstaller 6.16.0 / Python 3.13 x64 ile
+`--onefile --windowed --noupx` biçimindedir; yalnız `GOKWORKS.exe` taşınır.
+Lisanslar gömülüdür ve uygulamadan okunup kaydedilebilir. Açık klasörlü
+geliştirici çıktısı `--onedir` seçeneğiyle korunur.
+Bu bölümün aşağıdaki ilk migrasyon ölçümleri eski `onedir` paketine aittir.
 Qt platform DLL/eklentileri PyInstaller’ın PySide6 hook’larıyla toplanır.
 Tk/_tkinter/CustomTkinter ve emekli bağımsız K/R aracı açıkça hariç tutulur.
 Logo ve ICO dosyaları paket içinde korunur. Lisans dosyaları beraber dağıtılır.

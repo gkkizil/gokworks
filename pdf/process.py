@@ -142,6 +142,12 @@ def export_drawings(source_folder, output_folder, include_subfolders,
         if kind == 'worker_ready':
             if not isinstance(value, dict) or value.get('protocol') != PROTOCOL:
                 raise ValueError('PDF yardımcı süreç sürümü uyumsuz.')
+            pid = value.get('pid')
+            if type(pid) is not int or pid <= 0:
+                raise ValueError('PDF yardımcı süreç kimliği okunamadı.')
+            # In onefile mode Popen.pid may belong to the extraction launcher.
+            # Observe the actual Python worker for native exit/event matching.
+            start_watch(pid, diagnostic_log, 'pdf-worker')
             diagnostics.record('pdf_transport_ready')
             return
         if kind not in ('counts', 'progress', 'total'):
@@ -183,11 +189,14 @@ def export_drawings(source_folder, output_folder, include_subfolders,
                 diagnostic_log=str(diagnostic_log) if diagnostic_log else None),
                 ensure_ascii=False), encoding='utf-8')
             event_path.touch()
-            env = dict(os.environ, PYINSTALLER_RESET_ENVIRONMENT='1')
+            # The owned worker always finishes before normal GUI shutdown, so
+            # it can reuse the live onefile extraction. Independent exit
+            # observers still use RESET_ENVIRONMENT=1 to outlive the GUI.
+            env = dict(os.environ)
+            env.pop('PYINSTALLER_RESET_ENVIRONMENT', None)
             process = subprocess.Popen(_command(request), stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
-            start_watch(process.pid, diagnostic_log, 'pdf-worker')
             diagnostics.record(f'pdf_process_started pid={process.pid}')
             pending = b''
             with event_path.open('rb') as stream:

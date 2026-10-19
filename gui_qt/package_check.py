@@ -97,11 +97,59 @@ def check(output):
         pdf_source = Path(folder)/'empty-pdf-source'
         pdf_source.mkdir()
         pdf_events = Queue()
-        export_drawings(pdf_source, Path(folder)/'pdf-output', True, False, pdf_events)
+        local_before = os.environ.get('LOCALAPPDATA')
+        diagnostic_root = Path(folder)/'diagnostics'
+        os.environ['LOCALAPPDATA'] = str(diagnostic_root)
+        try:export_drawings(pdf_source, Path(folder)/'pdf-output', True, False, pdf_events)
+        finally:
+            if local_before is None:os.environ.pop('LOCALAPPDATA', None)
+            else:os.environ['LOCALAPPDATA'] = local_before
         pdf_messages = list(pdf_events.queue)
         assert pdf_messages[-1][0] == 'done'
         assert pdf_messages[-1][1]['state'] == 'empty', pdf_messages
         assert sum(kind == 'done' for kind, value in pdf_messages) == 1
+        observer = 'not applicable'
+        if os.name == 'nt' and getattr(sys, 'frozen', False):
+            deadline = time.monotonic()+45
+            while True:
+                traces = '\n'.join(p.read_text(encoding='utf-8') for p in (diagnostic_root/'GOKWORKS/logs').glob('GOKWORKS-pdf-worker-*.log'))
+                if 'process_exit target=pdf-worker' in traces:
+                    assert 'process_watch_ready target=pdf-worker' in traces
+                    assert 'code=0 (0x00000000)' in traces, traces
+                    assert 'process_watch_failed' not in traces and 'process_watch_unavailable' not in traces, traces
+                    observer = 'passed'
+                    break
+                if time.monotonic() >= deadline:raise RuntimeError('Paketlenmiş çıkış izleyicisi doğrulanamadı: '+traces)
+                app.processEvents();time.sleep(.1)
+        from .licenses import license_files, export_licenses
+        import zipfile
+        notices = license_files()
+        assert 'THIRD_PARTY_NOTICES.md' in notices and any('LGPL' in key for key in notices)
+        notice_archive = Path(folder)/'licenses.zip'
+        export_licenses(notice_archive, notices)
+        with zipfile.ZipFile(notice_archive) as archive:
+            assert archive.testzip() is None
+            assert set(archive.namelist()) == set(notices)
+        external_qt = False
+        requested_library = os.environ.get('GOKWORKS_LIBRARY_DIR')
+        if requested_library:
+            import PySide6, shiboken6
+            library_root = Path(requested_library).resolve()
+            assert Path(PySide6.__file__).resolve().is_relative_to(library_root)
+            assert Path(shiboken6.__file__).resolve().is_relative_to(library_root)
+            if os.name == 'nt':
+                import ctypes
+                from ctypes import wintypes
+                api = ctypes.WinDLL('kernel32', use_last_error=True)
+                api.GetModuleHandleW.argtypes = [wintypes.LPCWSTR]
+                api.GetModuleHandleW.restype = wintypes.HMODULE
+                api.GetModuleFileNameW.argtypes = [wintypes.HMODULE, wintypes.LPWSTR, wintypes.DWORD]
+                api.GetModuleFileNameW.restype = wintypes.DWORD
+                name = ctypes.create_unicode_buffer(32768)
+                module = api.GetModuleHandleW('Qt6Core.dll')
+                assert module and api.GetModuleFileNameW(module, name, len(name))
+                assert Path(name.value).resolve().is_relative_to(library_root), name.value
+            external_qt = True
         if os.name == 'nt':
             import pythoncom, win32com.client
             pythoncom.CoInitialize()
@@ -111,7 +159,11 @@ def check(output):
         app.processEvents()
         screenshot = Path(output).with_suffix('.png')
         assert w.grab().save(str(screenshot))
+        frozen = getattr(sys, 'frozen', False)
+        distribution = ('onedir' if Path(sys._MEIPASS).resolve().is_relative_to(Path(sys.executable).resolve().parent)
+                        else 'onefile') if frozen else 'source'
         report = dict(status='passed',framework='PySide6 / Qt Widgets',pyside=pyside_version,qt=qVersion(),
+                      distribution=distribution, external_qt_verified=external_qt,pdf_exit_observer=observer,
                       python=platform.python_version(),platform=platform.platform(),qt_platform=app.platformName(),
                       dpi_scale=app.primaryScreen().devicePixelRatio(),pages=pages,themes=['dark','light'],
                       resolutions=[[1024,700],[1366,768],[1920,1080],[2560,1440]],
@@ -124,7 +176,8 @@ def check(output):
                       solidworks_live_tested=False,checks=['ten modules','two themes','resolution matrix',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
-                      'Pack and Go interop source bundled','isolated PDF worker startup/IPC','no Tk runtime'])
+                      'Pack and Go interop source bundled','isolated PDF worker startup/IPC',
+                      'embedded licenses and export','no Tk runtime'])
         w.close()
         return report
 
