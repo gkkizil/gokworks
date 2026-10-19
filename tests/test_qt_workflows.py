@@ -233,6 +233,9 @@ def test_pdf_native_worker_exit_keeps_gui_responsive_and_releases_controls(windo
     monkeypatch.setattr(pdf, '_command', lambda request:
         [sys.executable, str(helper), 'delayed_crash', str(request)])
     page = window.pages['pdf']
+    receiver_threads = []
+    page.results.model.dataChanged.connect(lambda *args:
+        receiver_threads.append(QThread.currentThread() is QApplication.instance().thread()), Qt.DirectConnection)
     source = tmp_path/'source'
     source.mkdir()
     (source/'çizim.SLDDRW').touch()
@@ -254,6 +257,7 @@ def test_pdf_native_worker_exit_keeps_gui_responsive_and_releases_controls(windo
         timer.stop()
     assert len(heartbeat) >= 5
     assert window.isVisible() and page.start_button.isEnabled()
+    assert receiver_threads and all(receiver_threads)
     assert not page.stop_button.isEnabled()
     assert 'PDF kaydı' in page.status_text and '23' in page.status_text
     assert page.results.model.rowCount() == 2

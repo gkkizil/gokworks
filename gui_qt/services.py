@@ -3,6 +3,7 @@
 from pathlib import Path
 from pdf.exporter import find_drawings
 from dxf_dwg.exporter import find_parts
+from solidworks import diagnostics
 
 
 def scan_files(mode, source, recursive, events, stop):
@@ -32,12 +33,14 @@ def write_bom(result, path, events, stop):
 
 def check_connection(events, stop):
     initialized = False
+    app = None
     try:
         import pythoncom
         from solidworks.connection import connect_to_solidworks
         from pdf.exporter import read_com_value
         pythoncom.CoInitialize()
         initialized = True
+        diagnostics.record('connection_check_connect')
         app = connect_to_solidworks()
         revision = str(read_com_value(app, 'RevisionNumber'))
         events.put(('connection_done', dict(connected=True, revision=revision)))
@@ -45,4 +48,7 @@ def check_connection(events, stop):
         events.put(('connection_done', dict(connected=False, error=str(error))))
     finally:
         if initialized:
+            diagnostics.record('connection_check_release_application')
+            app = None
+            diagnostics.record('connection_check_uninitialize_com')
             pythoncom.CoUninitialize()

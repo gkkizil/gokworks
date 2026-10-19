@@ -1,13 +1,14 @@
 """PDF and sheet-metal exports using the existing file-safe service engines."""
 
 from pathlib import Path
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QSplitter, QWidget, QVBoxLayout
 
 from pdf.process import export_drawings
 from dxf_dwg.exporter import export_parts
 from .. import services
 from ..components import BasePage, ValueForm, ResultsPanel, card, scroll, button, open_folder
+from solidworks import diagnostics
 
 
 class ExportPage(BasePage):
@@ -89,8 +90,12 @@ class ExportPage(BasePage):
         self.jobs.start(self, operation)
         self.set_status('Aktarım hazırlanıyor…')
 
+    @Slot(object)
     def handle_events(self, events):
         for kind, value in events:
+            traced = kind not in ('counts', 'progress', 'total')
+            if traced:
+                diagnostics.record(f'export_ui_before mode={self.mode} event={kind}')
             if kind == 'files':
                 self.results.files(value)
             elif kind == 'current':
@@ -122,3 +127,5 @@ class ExportPage(BasePage):
             elif kind == 'job_error':
                 self.results.append_log(value['error'])
                 self.set_status(value['error'], True)
+            if traced:
+                diagnostics.record(f'export_ui_after mode={self.mode} event={kind}')

@@ -62,6 +62,17 @@ def test_real_worker_exports_all_sheets_with_fake_com_and_no_qt(paths):
     assert not list(paths[1].glob('.gokworks-*.pdf'))
 
 
+def test_failed_export_keeps_phase_history_in_worker_log(paths):
+    (paths[0]/'ikinci.SLDDRW').unlink()
+    records, result = run(paths, 'com_failure')
+    assert result['failed'] == 1
+    log = next((paths[0].parent/'local/GOKWORKS/logs').glob('GOKWORKS-pdf-worker-*.log')).read_text()
+    assert 'pdf_phase phase=save_pdf index=1' in log
+    assert 'pdf_phase phase=uninitialize_com index=1' in log
+    assert 'normal_python_shutdown' in log
+    assert 'çizim.SLDDRW' not in log and str(paths[0]) not in log
+
+
 def test_abnormal_exit_keeps_parent_completed_files_and_originals(paths):
     records, result = run(paths, 'crash')
     assert result['state'] == 'error'

@@ -72,6 +72,7 @@ def run_worker(request_path):
         if phase == 'drawing':
             context.clear()
         context.update(values, phase=phase)
+        diagnostics.record(f'pdf_phase phase={phase} index={context.get("index", 0)}')
         try:
             temporary = folder/'phase.tmp'
             temporary.write_text(json.dumps(context, ensure_ascii=False), encoding='utf-8')
@@ -140,7 +141,10 @@ def export_drawings(source_folder, output_folder, include_subfolders,
         if kind == 'worker_ready':
             if not isinstance(value, dict) or value.get('protocol') != PROTOCOL:
                 raise ValueError('PDF yardımcı süreç sürümü uyumsuz.')
+            diagnostics.record('pdf_transport_ready')
             return
+        if kind not in ('counts', 'progress', 'total'):
+            diagnostics.record('pdf_transport_event='+kind)
         if kind in ('counts', 'done'):
             if not isinstance(value, dict):
                 raise ValueError('PDF aktarım özeti okunamadı.')
@@ -182,6 +186,7 @@ def export_drawings(source_folder, output_folder, include_subfolders,
             process = subprocess.Popen(_command(request), stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            diagnostics.record(f'pdf_process_started pid={process.pid}')
             pending = b''
             with event_path.open('rb') as stream:
                 while True:
@@ -221,6 +226,7 @@ def export_drawings(source_folder, output_folder, include_subfolders,
             _cleanup_temporary(context, output_folder)
 
     if fault is not None:
+        diagnostics.record('pdf_transport_failed')
         phase = context.get('phase', '')
         code = process.returncode if process is not None else None
         exit_code = f'{code} (0x{code & 0xffffffff:08X})' if code is not None and os.name == 'nt' else str(code)
@@ -242,3 +248,4 @@ def export_drawings(source_folder, output_folder, include_subfolders,
         except OSError:
             pass
     events.put(('done', summary))
+    diagnostics.record('pdf_transport_done state='+summary['state'])

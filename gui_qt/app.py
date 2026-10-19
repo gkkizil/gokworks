@@ -13,6 +13,7 @@ from .theme import apply_theme, COLORS
 from .icons import BrandLogo, ASSETS, icon, set_application_identity
 from .components import label, button, scroll, show_details
 from . import services
+from solidworks import diagnostics
 from .pages.export import ExportPage
 from .pages.bom import BomPage
 from .pages.naming import NamingPage
@@ -225,6 +226,7 @@ class MainWindow(QMainWindow):
                      'K/R: kaydet seçimi her açılışta kapalıdır.\n\nTema seçimini sol panelin altından değiştirebilirsiniz.')
 
     def closeEvent(self, event):
+        diagnostics.record(f'gui_close_requested busy={self.jobs.busy} closing={self.closing}')
         if self.jobs.busy:
             event.ignore()
             if not self.closing:
@@ -248,6 +250,7 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return
         self.closing = True
+        diagnostics.record('gui_close_accepted')
         event.accept()
 
 
@@ -267,8 +270,15 @@ def create_application(argv=None):
 
 def main():
     from solidworks.diagnostics import enable
+    from .diagnostics import install
     enable('gui')
+    install()
     app = create_application()
+    app.lastWindowClosed.connect(lambda: diagnostics.record('gui_last_window_closed'))
+    app.aboutToQuit.connect(lambda: diagnostics.record('gui_about_to_quit'))
     window = MainWindow()
     window.show()
-    return app.exec()
+    diagnostics.record('gui_ready')
+    result = app.exec()
+    diagnostics.record(f'gui_event_loop_returned code={result}')
+    return result

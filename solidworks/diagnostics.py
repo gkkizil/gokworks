@@ -51,6 +51,17 @@ def record(message, path=None):
         pass
 
 
+def snapshot(label):
+    """Capture Python stacks before a native library aborts (not just on SIGSEGV)."""
+    record(label)
+    try:
+        if _stream is not None and _stream.tell() < 1024*1024:
+            faulthandler.dump_traceback(file=_stream, all_threads=True)
+            _stream.flush()
+    except (OSError, ValueError, RuntimeError):
+        pass
+
+
 def enable(role, path=None):
     global _stream, _path, _original_hook, _exception_hook
     if _stream is not None:
@@ -92,6 +103,7 @@ def enable(role, path=None):
 def close():
     global _stream, _path, _original_hook, _exception_hook
     if _stream is not None:
+        record('normal_python_shutdown')
         faulthandler.disable()
         _stream.close()
         _stream = None

@@ -44,6 +44,19 @@ içerir; CAD içeriği, COM nesneleri veya Python yerel değişkenleri yazılmaz
 dosya yolları kullanıcıya gösterilen sonuçlarda bulunabilir; özel işlem dosyaları
 iş sonunda silinir.
 
+PDF işçisi her API aşamasını `pdf_phase` olarak kendi kalıcı kaydına yazar.
+Ana süreç; iş başlangıcı/bitişi, PDF işçisiyle iletişim, tablo olaylarının
+öncesi/sonrası ve pencerenin normal kapanışını ayrı işaretler. Böylece ana süreç
+kesilse bile geçici işlem klasörüne bağlı kalmadan son aşama görülebilir.
+
+Qt'nin ölümcül `qFatal` mesajı, Windows'ta Python istisnası üretmeden süreci
+sonlandırabilir. Ana arayüzdeki Qt mesaj işleyicisi bu mesajı ve Python çağrı
+yığınını Qt sonlandırmasından **önce** kaydeder. Genel widget metinleri kayda
+alınmaz; tanınan Qt çalışma zamanı mesajlarındaki nesne adları/yollar temizlenir.
+Yalnız `role=... pid=... python=...` satırı içeren bir eski kayıt, kapanmanın
+nedenini belirlemez. Windows Application Error (olay 1000) kaydındaki uygulama,
+hatalı modül ve istisna kodu ayrıca incelenmelidir.
+
 ## Doğrulama
 
 ```bash

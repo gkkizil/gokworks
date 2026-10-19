@@ -26,7 +26,7 @@ def summary(state='completed', total=1, processed=1, succeeded=1):
                 succeeded=succeeded, skipped=0, failed=0, error='')
 
 
-if mode == 'com_export':
+if mode in ('com_export', 'com_failure'):
     from types import SimpleNamespace
     from pdf import exporter
     from pdf.process import run_worker
@@ -36,6 +36,7 @@ if mode == 'com_export':
         return SimpleNamespace(kind=kind, value=value)
 
     drawing = FakeDrawing(source/'çizim.SLDDRW')
+    drawing.save_ok = mode == 'com_export'
     application = FakePdfApp([drawing], opened=[])
     exporter.pythoncom = SimpleNamespace(VT_BYREF=1, VT_I4=2, VT_ARRAY=4, VT_BSTR=8,
                                         CoInitialize=lambda: None, CoUninitialize=lambda: None)

@@ -5,6 +5,7 @@ import time
 import traceback
 
 from PySide6.QtCore import QObject, QThread, Signal, Slot, Qt
+from solidworks import diagnostics
 
 
 class EventSink:
@@ -36,13 +37,17 @@ class JobWorker(QObject):
 
     @Slot()
     def run(self):
+        diagnostics.record('qt_worker_run_started')
         sink = EventSink(self.batch.emit)
         try:
             self.operation(sink, self.stop)
         except Exception as error:
+            diagnostics.record('qt_worker_exception='+type(error).__name__)
             sink.put(('job_error', {'error': str(error), 'traceback': traceback.format_exc()}))
         finally:
+            diagnostics.record('qt_worker_flush_started')
             sink.flush()
+            diagnostics.record('qt_worker_completed_signal')
             self.completed.emit()
 
 
@@ -66,6 +71,7 @@ class JobManager(QObject):
             owner.set_status('Başka bir işlem sürüyor. Tamamlanmasını bekleyin veya durdurun.', error=True)
             return False
         self.owner = owner
+        diagnostics.record('qt_job_start owner='+type(owner).__name__)
         self.stop = threading.Event()
         self.thread = QThread(self)
         self.worker = JobWorker(operation, self.stop)
@@ -89,6 +95,7 @@ class JobManager(QObject):
 
     @Slot()
     def _finished(self):
+        diagnostics.record('qt_job_finished_received')
         owner = self.owner
         self.thread = self.worker = self.owner = self.stop = None
         if owner is not None:
@@ -97,3 +104,4 @@ class JobManager(QObject):
         self.finished.emit()
         if owner is not None:
             owner.job_finished()
+        diagnostics.record('qt_job_finished_delivered')
