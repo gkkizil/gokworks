@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: windows-exe-${{ github.ref }}
@@ -20,7 +21,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        id: checkout
       - uses: actions/setup-python@v5
+        id: python
         with:
           python-version: '3.13'
           architecture: x64
@@ -28,8 +31,20 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             packaging/windows-requirements.txt
+      - name: Read requested previous failure diagnostics
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $request = Get-Content packaging/windows-build-request.json -Raw | ConvertFrom-Json
+          if ($request.diagnose_run) {
+            gh run view $request.diagnose_run --repo $env:GITHUB_REPOSITORY --log-failed *> windows-previous-failure.log
+          }
+          exit 0
       - name: Install build dependencies
-        run: python -m pip install -r packaging/windows-requirements.txt
+        id: dependencies
+        run: |
+          python -m pip install -r packaging/windows-requirements.txt *> windows-setup.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-setup.log; exit $LASTEXITCODE }
       - name: Record build start on the source branch
         env:
           BUILD_STATUS: building
@@ -40,7 +55,8 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           PYTHONUTF8: '1'
         run: |
-          python -m pip install -r requirements-dev.txt
+          python -m pip install -r requirements-dev.txt *> windows-test-setup.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
           python packaging/run_windows_tests.py tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python packaging/run_windows_tests.py
@@ -71,6 +87,9 @@ jobs:
           path: |
             windows-build.log
             windows-release.log
+            windows-setup.log
+            windows-test-setup.log
+            windows-previous-failure.log
             dist/windows-smoke*.json
             dist/windows-smoke*.png
             dist/SHA256.txt
@@ -84,4 +103,7 @@ jobs:
           BUILD_STATUS: ${{ job.status }}
           ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
           DIRECT_EXE_URL: ${{ steps.release.outputs.download_url }}
+          CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
+          PYTHON_SETUP_OUTCOME: ${{ steps.python.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
         run: python packaging/publish_status.py

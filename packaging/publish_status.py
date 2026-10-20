@@ -77,6 +77,13 @@ def main():
               'run_url': f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{os.environ["GITHUB_RUN_ID"]}',
               'download_url': os.environ.get('DIRECT_EXE_URL') or os.environ.get('ARTIFACT_URL', ''),
               'artifact_url': os.environ.get('ARTIFACT_URL', '')}
+    report['setup_steps'] = {name: os.environ[key] for name,key in (
+        ('checkout','CHECKOUT_OUTCOME'),('python','PYTHON_SETUP_OUTCOME'),('dependencies','DEPENDENCIES_OUTCOME')) if os.environ.get(key)}
+    for filename,key in (('windows-previous-failure.log','previous_failure_log_tail'),
+                         ('windows-setup.log','setup_log_tail'),('windows-test-setup.log','test_setup_log_tail')):
+        path = Path(filename)
+        if path.is_file() and (filename == 'windows-previous-failure.log' or report['status'] == 'failure'):
+            report[key] = path.read_text(encoding='utf-8',errors='replace')[-16000:]
     exe = Path('dist/GOKWORKS.exe')
     if not exe.exists():exe = Path('dist/GOKWORKS/GOKWORKS.exe')
     if exe.exists():
