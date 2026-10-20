@@ -35,7 +35,6 @@ Net/brüt/fire ağırlıkları, alan verimi ve dağıtılmış malzeme/operasyon
 maliyetleri hesaplanır. Doğrulanmış yerleşim DXF, çizimli Excel/PDF ve
 taşınabilir proje olarak kaydedilir. SolidWorks gerekmez.
 [Kullanım ve sınırlar](nesting/README.md) · [Algoritma, lisanslar ve doğrulama](docs/nesting.md).
-Bu kaynak değişikliği yukarıdaki mevcut EXE'ye henüz dahil değildir.
 
 ## BOM - Ürün ağacı
 

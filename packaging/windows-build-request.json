@@ -1,6 +1,6 @@
 {
-  "request_id": "01a211cc-59ba-4c79-90e7-ad0fc6547a38",
-  "requested_at": "2026-10-20T04:40:09.741358+00:00",
-  "source_commit": "2d9952423f6e05472db72ceecd37a1a55e9c5c19",
-  "reason": "Retry the requested single-file Windows EXE after bounding native test hangs and cleaning up Qt test windows. Run the previously stalled focus/reset case first, retain the full regression suite and all relocated onefile opening checks. Includes revised tolerance stack UI."
+  "request_id": "0f2d88f4-6910-4413-8b9f-ced9236a9f7d",
+  "requested_at": "2026-10-20T06:13:38.146866+00:00",
+  "source_commit": "dbc3b996d1b1d19e03f5ec3f5b69362ecdc2c67f",
+  "reason": "User requested the latest standalone GOKWORKS.exe, including the real-contour NFP nesting and sheet cost module, reports, embedded Shapely/GEOS and Clear button fixes. Retain the full Windows regression suite and all relocated single-file EXE/DPI checks."
 }
