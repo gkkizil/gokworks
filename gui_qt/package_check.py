@@ -52,10 +52,13 @@ def check(output):
         torque = w.pages['bolt_torque']
         assert abs(torque.result.torque_nm - 51.958678824053294) < 1e-8
         assert abs(torque.result.preload_kn - 25.979339412026646) < 1e-8
+        assert torque.section_diagram.vector.tagged['section_torque'][0].toPlainText() == 'T ≈ 51,96 N·m'
+        assert torque.section_diagram.vector.tagged['bolt_shank']
         torque.form.set_value('condition', 'Hafif yağlı')
         torque.update_result()
         assert torque.result.k == .15
         assert abs(torque.result.torque_nm - 38.96900911803997) < 1e-8
+        assert torque.section_diagram.vector.tagged['section_torque'][0].toPlainText() == 'T ≈ 38,97 N·m'
         torque.copy_result()
         assert 'Tahmini Sıkma Torku' in QApplication.clipboard().text()
         weight = w.pages['weight']
@@ -221,6 +224,7 @@ def check(output):
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'live press-brake tooling profiles and dimensions',
                       'quick bolt torque / 51.96 Nm / 25.98 kN / clipboard',
+                      'torque joint section / live thread and preload',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',

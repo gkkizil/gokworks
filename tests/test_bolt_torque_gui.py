@@ -4,7 +4,7 @@ import gc
 
 import pytest
 from PySide6.QtCore import QCoreApplication, QEvent
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QGraphicsTextItem
 
 from bolt_torque.rules import calculate
 from gui_qt.app import create_application, MainWindow
@@ -85,10 +85,48 @@ def test_invalid_input_clears_stale_result_and_cannot_copy(window,qtbot):
     page.form.set_value('k','nan');page.copy_result()
     assert page.result is None and page.torque_value.text()=='—'
     assert not page.copy_button.isEnabled()
+    assert 'section_empty' in page.section_diagram.vector.tagged
+    assert 'section_torque' not in page.section_diagram.vector.tagged
+    assert 'bolt_shank' not in page.section_diagram.vector.tagged
     assert QApplication.clipboard().text()=='keep'
     page.form.set_value('k','0,20')
     qtbot.waitUntil(lambda:page.result is not None)
     assert page.copy_button.isEnabled()
+    assert 'section_empty' not in page.section_diagram.vector.tagged
+    assert 'bolt_shank' in page.section_diagram.vector.tagged
+
+
+def test_section_follows_selected_thread_and_live_torque_without_changing_calculation(window,qtbot):
+    page=window.pages['bolt_torque'];f=page.form
+    original_bolt=window.pages['bolt'].result
+    original_shank=page.section_diagram.vector.tagged['bolt_shank'][0].polygon()
+    original_threads=len(page.section_diagram.vector.tagged['bolt_thread'])
+    for key,value in dict(metric='M12',thread_series='İnce diş',condition='Hafif yağlı',
+                          k='0,18',preload_percent='65',grade='10.9').items():f.set_value(key,value)
+    f.fields['pitch'].setCurrentIndex(f.fields['pitch'].findData(1.25))
+    qtbot.waitUntil(lambda:page.result.metric=='M12' and page.result.pitch_mm==1.25)
+    tags=page.section_diagram.vector.tagged
+    assert tags['section_selection'][0].toPlainText()=='M12 × 1,25 · 10.9'
+    assert tags['section_dimensions'][0].toPlainText()=='d = 12 mm · P = 1,25 mm'
+    assert tags['section_torque'][0].toPlainText()=='T ≈ '+page.torque_value.text()
+    assert tags['section_preload'][0].toPlainText()=='Ön yük F = '+page.preload_value.text().split(': ',1)[1]
+    assert tags['bolt_shank'][0].polygon()!=original_shank
+    assert len(tags['bolt_thread'])!=original_threads
+    assert tags['nut_profile'] and tags['clamped_parts']
+    assert '1.25 mm' in page.section_diagram.accessibleDescription()
+    assert page.result==calculate(metric='M12',thread_series='İnce diş',pitch=1.25,
+                                  grade='10.9',condition='Hafif yağlı',k=.18,preload_percent=65)
+    assert window.pages['bolt'].result==original_bolt
+
+
+def test_zero_preload_is_a_valid_section_without_load_arrows(window,qtbot):
+    page=window.pages['bolt_torque'];page.form.set_value('preload_percent','0')
+    qtbot.waitUntil(lambda:page.result.preload_n==0)
+    tags=page.section_diagram.vector.tagged
+    assert tags['bolt_shank']
+    assert tags['section_torque'][0].toPlainText()=='T ≈ 0,00 N·m'
+    assert tags['section_preload'][0].toPlainText()=='Ön yük F = 0,00 kN'
+    assert not tags.get('preload_arrow') and not tags.get('torque_arrow')
 
 
 def test_settings_restart_preserves_custom_k_fine_pitch_and_percentage(window,qtbot,tmp_path):
@@ -115,5 +153,10 @@ def test_compact_wide_layout_and_copy_remain_accessible(window,qtbot,theme):
         assert page.form.fields['preload_percent'].width()>80
         assert page.torque_value.text().endswith('N·m')
         assert page.copy_button.isVisible() and page.copy_button.isEnabled()
+        diagram=page.section_diagram
+        for item in diagram.vector.items():
+            if isinstance(item,QGraphicsTextItem):
+                assert diagram.sceneRect().contains(item.sceneBoundingRect())
+                assert diagram.viewport().rect().contains(diagram.mapFromScene(item.sceneBoundingRect()).boundingRect())
         assert window.stack.geometry().right()<window.width()
         assert not window.grab().isNull()

@@ -6,6 +6,11 @@ Bağımsız hesap motoru `rules.py`; yeni bağımlılık veya SolidWorks gerekti
 - M3–M36, normal/ince adım; 4.8, 5.8, 8.8, 10.9, 12.9.
 - Kuru K=0,20, hafif yağlı K=0,15; elle K girişi ve varsayılan %70 ön yük.
 - Tahmini tork N·m, ön yük kN, tek tuşla pano ve kayıtlı seçimler.
+- Canlı bağlantı kesiti: cıvata, somun, taralı iki parça, sıkma momenti ve hedef
+  ön yük okları. Çap/adım ve hesap değerleri çizim üzerinde güncellenir.
+
+Kesit şematik ve ölçeksizdir. Baş/somun ölçüsü, delik ve parça kalınlığı
+atanmaz; bağlantı kapasitesi veya üretim resmi anlamına gelmez.
 
 [Hesap formülleri, ISO dayanım temeli ve sınırlar](../docs/bolt-torque.md).
 

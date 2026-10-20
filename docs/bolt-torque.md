@@ -44,6 +44,20 @@ tabloya yazılır. Ekrandaki alan hesaplanan değerdir.
 K, boyutsuz **tork katsayısıdır**; diş sürtünme katsayısı veya sac büküm K
 faktörü değildir. Mevcut K/R aracı ve `bolt.rules.PROOF_STRESS` değiştirilmez.
 
+### Canlı bağlantı kesiti
+
+Sonuç kartında cıvata, somun ve farklı tarama yönleriyle iki sıkılan parçanın
+boyuna kesiti bulunur. Seçilen nominal `d`, `P`, kalite sınıfı, tahmini `T` ve
+hedef ön yük `F` çizimde güncellenir. Çap gövde oranını, adım diş çizgilerinin
+aralığını değiştirir. Karşılıklı eksenel oklar cıvatadaki hedef çekme ön yükünü
+gösterir; dış servis yükünü göstermez. %0 ön yükte kesit ve sıfır değerleri
+korunur, yük/tork okları gösterilmez. Geçersiz girişte eski sonuç kaldırılır.
+
+Çizim şematik ve ölçeksizdir; baş, somun, parça, delik ve sıkma boyu ölçüleri
+temsili olup sayısal olarak verilmez. Bağlantı kapasitesi hesaplanmaz. Çizim
+mevcut sonucu kullanır; hesap motorunu, pano raporunu veya diğer modülleri
+değiştirmez. Açık/koyu tema ve pencere boyutuyla birlikte ölçeklenir.
+
 ## ISO 898-1 dayanım temeli
 
 Hesapta çekme dayanımı `Rm` veya deney yükü gerilmesi `Sp` yerine aşağıdaki
@@ -101,6 +115,7 @@ olduğu için aynı kalite ve hedef yüzdeyle ön yük/tork artar.
 
 - `bolt_torque/rules.py`: bağımsız hesap, doğrulama, dayanım ve sonuç modeli.
 - `gui_qt/pages/torque.py`: mevcut kartlar/formlar, tema, ayarlar ve tek tuşla pano.
+- `gui_qt/torque_diagram.py`: canlı cıvata–somun kesiti ve yük/tork gösterimi.
 - `tests/test_bolt_torque.py`: referans sonuçlar, bütün sunulan çap/adım/kalite
   kombinasyonları, M16 sınırı, birimler, manuel K, yüzdeler ve geçersiz girdiler.
 - `tests/test_bolt_torque_gui.py`: gerçek Qt girişleri, normal/ince adım,

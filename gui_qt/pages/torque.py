@@ -8,6 +8,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QBoxLayout, QApplication
 from bolt.rules import THREADS, STANDARD_FINE_PITCHES
 from bolt_torque import rules as r
 from ..components import BasePage, ValueForm, card, label, scroll, button
+from ..diagrams import EngineeringDiagram
+from ..torque_diagram import draw_section
 
 
 def fmt(value, digits=2):
@@ -58,8 +60,17 @@ class TorquePage(BasePage):
         self.selection_label = label('', 'muted')
         self.basis_label = label()
         self.strength_label = label('', 'muted')
-        for widget in (self.torque_value, self.preload_value, self.selection_label,
-                       self.basis_label, self.strength_label):
+        for widget in (self.torque_value, self.preload_value, self.selection_label):
+            widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            output.addWidget(widget)
+        output.addWidget(label('Bağlantı kesiti', 'section'))
+        self.section_diagram = EngineeringDiagram(width=500, height=300)
+        self.section_diagram.setMinimumHeight(230)
+        self.section_diagram.setMaximumHeight(300)
+        self.section_diagram.setAccessibleName('Cıvata, somun ve sıkılan parçaların şematik kesiti')
+        output.addWidget(self.section_diagram)
+        output.addWidget(label('Şematik · ölçeksiz. Parça boyları temsilidir; bağlantı kapasitesi değerlendirilmez.', 'muted'))
+        for widget in (self.basis_label, self.strength_label):
             widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
             output.addWidget(widget)
         output.addWidget(label('T = K × F × d\nF = As × akma dayanımı × ön yük oranı', 'muted'))
@@ -142,6 +153,7 @@ class TorquePage(BasePage):
             self.copy_button.setEnabled(False)
             self.k_hint.setText('K katsayısını elle girebilir veya varsayılanına dönebilirsiniz.')
             self.reset_k_button.show()
+            self.refresh_section(None)
             self.set_status(str(error), True)
             return
         self.torque_value.setText(f'{fmt(result.torque_nm)} N·m')
@@ -156,7 +168,17 @@ class TorquePage(BasePage):
                            f'{result.condition} varsayımı: {r.DEFAULT_K[result.condition]:g}'.replace('.', ','))
         self.reset_k_button.setVisible(result.custom_k)
         self.copy_button.setEnabled(True)
+        self.refresh_section(result)
         self.set_status('Sonuç güncel · Tork N·m, ön yük kN olarak gösteriliyor.')
+
+    def refresh_section(self, result):
+        self.section_diagram.render_geometry(
+            lambda scene: draw_section(scene, result, self.context.appearance, fmt))
+        self.section_diagram.setAccessibleDescription(
+            ('Kesit için geçerli hesap girdileri gerekli.' if result is None else
+             f'{self.selection_label.text()}; nominal çap {result.diameter_mm:g} mm; '
+             f'diş adımı {result.pitch_mm:g} mm; tahmini tork {fmt(result.torque_nm)} N·m; '
+             f'hedef ön yük {fmt(result.preload_kn)} kN. Şematik ve ölçeksiz.'))
 
     def copy_result(self):
         # Read current fields even if the short live-update timer is pending.

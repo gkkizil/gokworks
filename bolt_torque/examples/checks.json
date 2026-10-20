@@ -1,44 +1,30 @@
 {
   "status": "passed",
   "platform": "Linux / Qt offscreen; Python sources",
-  "pytest_primary_tests": 226,
+  "pytest_primary_tests": 90,
   "additional_bolt_subtests": 63,
-  "repeated_final_gui_tests": 8,
+  "repeated_final_layout_tests": 2,
   "test_runs": {
-    "bolt-torque-tests.xml": [
+    "bolt-torque-section-tests.xml": [
       {
         "name": "pytest",
         "errors": "0",
         "failures": "0",
         "skipped": "0",
-        "tests": "151",
-        "time": "15.587",
-        "timestamp": "2026-10-20T10:28:21.916798+00:00",
-        "hostname": "2f2e13dbc055"
+        "tests": "153",
+        "time": "18.171",
+        "timestamp": "2026-10-20T10:42:48.043695+00:00"
       }
     ],
-    "bolt-torque-regression.xml": [
+    "bolt-torque-section-layout.xml": [
       {
         "name": "pytest",
         "errors": "0",
         "failures": "0",
         "skipped": "0",
-        "tests": "138",
-        "time": "234.569",
-        "timestamp": "2026-10-20T10:29:51.496344+00:00",
-        "hostname": "2f2e13dbc055"
-      }
-    ],
-    "bolt-torque-gui-final.xml": [
-      {
-        "name": "pytest",
-        "errors": "0",
-        "failures": "0",
-        "skipped": "0",
-        "tests": "8",
-        "time": "16.594",
-        "timestamp": "2026-10-20T10:31:13.039702+00:00",
-        "hostname": "2f2e13dbc055"
+        "tests": "2",
+        "time": "4.196",
+        "timestamp": "2026-10-20T10:44:48.805954+00:00"
       }
     ]
   },
@@ -58,6 +44,28 @@
       "weight",
       "nesting"
     ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
     "checks": [
       "12 modules",
       "two themes",
@@ -65,6 +73,7 @@
       "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
       "live press-brake tooling profiles and dimensions",
       "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
       "tolerance stack 0.20 / 0.02 / 0.38 mm",
       "tolerance stack PDF/XLSX",
       "vector diagrams",
@@ -77,6 +86,12 @@
       "embedded licenses and export",
       "no Tk runtime"
     ]
+  },
+  "prior_calculator_baseline": {
+    "commit": "cf12a35",
+    "pytest_primary_tests": 226,
+    "additional_bolt_subtests": 63,
+    "note": "Previous calculator integration baseline; not rerun in full for this section drawing change."
   },
   "windows_exe_built": false,
   "solidworks_live_tested": false
