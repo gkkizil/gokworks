@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "framework": "PySide6 / Qt Widgets",
+  "pyside": "6.10.3",
+  "qt": "6.10.3",
+  "distribution": "source",
+  "external_qt_verified": false,
+  "pdf_exit_observer": "not applicable",
+  "python": "3.13.5",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "qt_platform": "offscreen",
+  "dpi_scale": 1.0,
+  "pages": [
+    "pdf",
+    "dxf_dwg",
+    "bom",
+    "naming",
+    "k_factor",
+    "iso_fits",
+    "geometric_tolerances",
+    "tolerance_stack",
+    "bolt",
+    "bolt_torque",
+    "weight",
+    "nesting"
+  ],
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "resolutions": [
+    [
+      1024,
+      700
+    ],
+    [
+      1366,
+      768
+    ],
+    [
+      1920,
+      1080
+    ],
+    [
+      2560,
+      1440
+    ]
+  ],
+  "startup_ms": 448.23,
+  "navigation_median_ms": 15.4,
+  "navigation_max_ms": 34.98,
+  "resize_median_ms": 8.68,
+  "resize_max_ms": 39.81,
+  "table_50000_load_ms": 38.31,
+  "table_50000_filter_ms": 141.97,
+  "tk_imports": [],
+  "kr_assignment_engine": "embedded Python SheetMetal parameters",
+  "pdf_export_engine": "isolated COM process",
+  "solidworks_live_tested": false,
+  "checks": [
+    "12 modules",
+    "two themes",
+    "resolution matrix",
+    "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+    "nesting shared parts-and-layout workspace / document plate tabs",
+    "live press-brake tooling profiles and dimensions",
+    "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+    "torque joint section / live thread and preload",
+    "tolerance stack 0.20 / 0.02 / 0.38 mm",
+    "tolerance stack PDF/XLSX",
+    "vector diagrams",
+    "bolt kg/N",
+    "weight 157 kg",
+    "BOM XLSX",
+    "DXF dependency",
+    "Pack and Go interop source bundled",
+    "isolated PDF worker startup/IPC",
+    "embedded licenses and export",
+    "no Tk runtime"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "qt_platform": "offscreen",
+  "cycles": 20,
+  "worker_expected_exit_code": 23,
+  "recovery_durations_ms": [
+    577.64,
+    483.92,
+    493.18,
+    576.27,
+    485.64,
+    543.82,
+    481.81,
+    486.94,
+    517.55,
+    488.38,
+    550.96,
+    485.06,
+    568.63,
+    589.84,
+    480.37,
+    524.32,
+    553.14,
+    596.99,
+    453.23,
+    476.07
+  ],
+  "heartbeat_count": 996,
+  "all_result_callbacks_on_gui_thread": true,
+  "source_files_preserved": true,
+  "clear_after_failure": true,
+  "solidworks_live_tested": false
+}

@@ -1,0 +1,41 @@
+         56748 function calls in 1.114 seconds
+
+   Ordered by: cumulative time
+   List reduced from 389 to 35 due to restriction <35>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    1.091    1.091 app.py:202(set_theme)
+        1    0.000    0.000    1.064    1.064 theme.py:15(apply_theme)
+        1    1.016    1.016    1.063    1.063 {method 'setStyleSheet' of 'PySide6.QtWidgets.QApplication' objects}
+     6717    0.027    0.000    0.027    0.000 models.py:41(headerData)
+        1    0.023    0.023    0.024    0.024 {built-in method processEvents}
+       11    0.000    0.000    0.019    0.002 diagrams.py:168(render_geometry)
+        4    0.000    0.000    0.016    0.004 calculations.py:180(theme_changed)
+       59    0.002    0.000    0.008    0.000 diagrams.py:122(create_text)
+        1    0.000    0.000    0.007    0.007 bolt.py:171(update_result)
+     7955    0.003    0.000    0.005    0.000 enum.py:695(__call__)
+        1    0.000    0.000    0.005    0.005 iso.py:203(update_result)
+     1212    0.004    0.000    0.004    0.000 models.py:162(headerData)
+     1989    0.003    0.000    0.004    0.000 models.py:148(index)
+        1    0.000    0.000    0.004    0.004 torque.py:209(theme_changed)
+        1    0.000    0.000    0.004    0.004 torque.py:149(update_result)
+      197    0.001    0.000    0.004    0.000 diagrams.py:77(create_line)
+        1    0.000    0.000    0.004    0.004 torque.py:183(refresh_section)
+        1    0.000    0.000    0.004    0.004 kr.py:224(theme_changed)
+        1    0.000    0.000    0.004    0.004 kr.py:185(calculate_helper)
+        1    0.000    0.000    0.004    0.004 torque.py:185(<lambda>)
+        1    0.000    0.000    0.004    0.004 torque_diagram.py:13(draw_section)
+        1    0.000    0.000    0.003    0.003 kr.py:208(<lambda>)
+        1    0.000    0.000    0.003    0.003 tooling_diagram.py:20(draw_tooling)
+      160    0.003    0.000    0.003    0.000 models.py:167(data)
+        1    0.000    0.000    0.003    0.003 bolt.py:213(<lambda>)
+        1    0.000    0.000    0.003    0.003 diagram.py:81(draw)
+        1    0.000    0.000    0.003    0.003 bolt.py:212(<lambda>)
+        1    0.000    0.000    0.003    0.003 diagram.py:10(draw_dimensions)
+      255    0.002    0.000    0.002    0.000 diagrams.py:49(_pen)
+     7955    0.002    0.000    0.002    0.000 enum.py:1156(__new__)
+        1    0.000    0.000    0.002    0.002 gdt.py:114(update_result)
+       59    0.002    0.000    0.002    0.000 {method 'setPlainText' of 'PySide6.QtWidgets.QGraphicsTextItem' objects}
+       14    0.000    0.000    0.002    0.000 tooling_diagram.py:28(text)
+       59    0.002    0.000    0.002    0.000 {method 'setFont' of 'PySide6.QtWidgets.QGraphicsTextItem' objects}
+        3    0.000    0.000    0.002    0.001 manual.py:156(usage_hint)

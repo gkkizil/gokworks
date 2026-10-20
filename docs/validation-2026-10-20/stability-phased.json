@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "platform": "offscreen",
+  "cycles": 10,
+  "navigation_count": 360,
+  "resize_count": 360,
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "sizes": [
+    [
+      820,
+      560
+    ],
+    [
+      1024,
+      700
+    ],
+    [
+      1440,
+      900
+    ]
+  ],
+  "sidebar_states": [
+    "labels",
+    "icons"
+  ],
+  "widgets_before": 1931,
+  "widgets_after": 1931,
+  "navigation_median_ms": 9.31,
+  "navigation_max_ms": 53.88,
+  "resize_median_ms": 5.88,
+  "resize_max_ms": 46.33,
+  "theme_change_count": 10,
+  "theme_change_median_ms": 1122.83,
+  "theme_change_max_ms": 1202.79,
+  "heartbeat_samples": 661,
+  "heartbeat_max_interval_ms": 1202.73,
+  "settings_restart": "passed",
+  "input_and_result_preservation": "passed",
+  "cad_calls_made": false,
+  "native_windows_tested": false,
+  "performance_note": "Source/offscreen Linux; concurrent test load, not a Windows timing guarantee."
+}

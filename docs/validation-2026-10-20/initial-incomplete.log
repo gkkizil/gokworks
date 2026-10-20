@@ -1,0 +1,55 @@
+........................................................... [  6%]
+............................................................. [ 13%]
+....................................................................................... [ 22%]
+............................................................ [ 29%]
+....................................................................................................... [ 40%]
+..ss............................................................... [ 48%]
+............................................................................................................................................................ss [ 65%]
+............................................Fatal Python error: Aborted
+
+Thread 0x00007fb8009606c0 (most recent call first):
+  <no Python frame>
+
+Current thread 0x00007fb81be58780 (most recent call first):
+  File "/workspace/gokworks/gui_qt/components.py", line 419 in append_log
+  File "/workspace/gokworks/gui_qt/components.py", line 415 in result
+  File "/workspace/gokworks/gui_qt/pages/export.py", line 123 in handle_events
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pytestqt/qt_compat.py", line 160 in exec
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pytestqt/wait_signal.py", line 58 in wait
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pytestqt/qtbot.py", line 503 in wait
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pytestqt/qtbot.py", line 600 in waitUntil
+  File "/workspace/gokworks/tests/test_qt_workflows.py", line 255 in test_pdf_native_worker_exit_keeps_gui_responsive_and_releases_controls
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/python.py", line 166 in pytest_pyfunc_call
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_execution.py", line 147 in _multicall
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_manager.py", line 183 in _hookexec
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_caller.py", line 197 in __call__
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/python.py", line 1720 in runtest
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/runner.py", line 179 in pytest_runtest_call
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_execution.py", line 147 in _multicall
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_manager.py", line 183 in _hookexec
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_caller.py", line 197 in __call__
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/runner.py", line 245 in <lambda>
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/runner.py", line 353 in from_call
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/runner.py", line 244 in call_and_report
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/runner.py", line 137 in runtestprotocol
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/runner.py", line 118 in pytest_runtest_protocol
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_execution.py", line 147 in _multicall
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_manager.py", line 183 in _hookexec
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_caller.py", line 197 in __call__
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/main.py", line 396 in pytest_runtestloop
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_execution.py", line 147 in _multicall
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_manager.py", line 183 in _hookexec
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_caller.py", line 197 in __call__
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/main.py", line 372 in _main
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/main.py", line 318 in wrap_session
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/main.py", line 365 in pytest_cmdline_main
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_execution.py", line 147 in _multicall
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_manager.py", line 183 in _hookexec
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pluggy/_caller.py", line 197 in __call__
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/config/__init__.py", line 199 in main
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/_pytest/config/__init__.py", line 223 in console_main
+  File "/workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/pytest/__main__.py", line 9 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+
+Extension modules: shiboken6.Shiboken, PySide6.QtCore, PySide6.QtGui, PySide6.QtWidgets, PySide6.QtTest, ezdxf.acc.vector, numpy._core._multiarray_umath, numpy.linalg._umath_linalg, ezdxf.acc.matrix44, ezdxf.acc.construct, ezdxf.acc.bezier4p, ezdxf.acc.bezier3p, ezdxf.acc.bspline, ezdxf.acc.mapbox_earcut, ezdxf.acc.np_support, shapely.lib, shapely._geos, shapely._geometry_helpers, PIL._imaging, PySide6.QtPdf, PIL._imagingmath (total: 21)

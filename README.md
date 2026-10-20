@@ -223,6 +223,11 @@ Linux'taki otomatik testler gerçek SolidWorks üretimini doğrulayamaz. Windows
 
 ## Otomatik testler
 
+[20 Ekim 2026 genel uygulama testi](docs/validation-2026-10-20/README.md):
+güncel PySide6 ekranları, hesap motorları, dosya işlemleri, DPI/kararlılık
+kontrolleri, PDF hata kurtarma denemeleri ve açık bulgular. Gerçek Windows /
+SolidWorks işlemleri ayrıca belirtilir.
+
 Test bağımlılıklarını kurup Qt ve motor regresyonlarını birlikte çalıştırın:
 
 ```powershell
