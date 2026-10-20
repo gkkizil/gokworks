@@ -259,9 +259,12 @@ class BasePage(QWidget):
 
 
 class ResultsPanel(QWidget):
+    cleared = Signal()
+
     def __init__(self, parent=None, *, success_label='Başarılı'):
         super().__init__(parent)
         self.results = []
+        self.busy = False
         self.success_label = success_label
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -275,7 +278,8 @@ class ResultsPanel(QWidget):
             self.filter.addItem(LABELS[value], value)
         self.copy_log = button('Günlüğü kopyala', self.copy_log_text)
         self.save = button('Rapor kaydet', self.save_dialog)
-        self.clear_button = button('Temizle', self.clear_filters)
+        self.clear_button = button('Temizle', self.clear)
+        self.clear_button.setToolTip('Dosya listesini, işlem sonuçlarını ve günlüğü temizle')
         toolbar.addWidget(self.search, 1)
         toolbar.addWidget(self.filter)
         toolbar.addWidget(self.save)
@@ -317,6 +321,19 @@ class ResultsPanel(QWidget):
         self.results.clear()
         self.model.replace([])
         self.log.clear()
+        self.tabs.setCurrentIndex(0)
+        self.refresh_count()
+
+    def clear(self):
+        if self.busy:
+            return False
+        self.reset()
+        self.cleared.emit()
+        return True
+
+    def set_busy(self, busy):
+        self.busy = busy
+        self.clear_button.setEnabled(not busy)
 
     def clear_filters(self):
         self.search.clear()

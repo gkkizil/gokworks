@@ -69,6 +69,7 @@ class KrPage(BasePage):
         helper_body.addWidget(label('Hesap sonucu manuel satırlara otomatik aktarılmaz. Üretim değerlerini Manuel K / R bölümüne kendiniz girin.', 'muted'))
         self.tabs.addTab(scroll(helper), 'Hesap yardımı')
         self.results = ResultsPanel(success_label='Uygulandı')
+        self.results.cleared.connect(self.results_cleared)
         self.tabs.addTab(self.results, 'Montaj sonuçları')
         self.layout.addWidget(self.tabs, 1)
         self.controls.extend((self.rows, self.add_row, self.remove_row, self.save_form))
@@ -131,8 +132,15 @@ class KrPage(BasePage):
 
     def set_busy(self, busy):
         super().set_busy(busy)
+        self.results.set_busy(busy)
         if busy and self.preview and self.pending_apply is None:
             self.apply_button.setEnabled(True)
+
+    def results_cleared(self):
+        self.summary = None
+        self.pending_apply = None
+        self.preview = False
+        self.set_status('Montaj sonuçları ve işlem günlüğü temizlendi.')
 
     def scan(self):
         if not self.can_start():

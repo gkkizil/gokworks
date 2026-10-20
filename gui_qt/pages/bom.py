@@ -39,7 +39,10 @@ class BomPage(BasePage):
         toolbar.addWidget(self.search, 1)
         toolbar.addWidget(button('Tümünü aç', self.expand_all))
         toolbar.addWidget(button('Daralt', lambda: self.tree.collapseAll()))
-        toolbar.addWidget(button('Temizle', self.clear_search))
+        self.clear_button = button('Temizle', self.clear)
+        self.clear_button.setToolTip('Parça listesini ve ürün ağacını temizle')
+        toolbar.addWidget(self.clear_button)
+        self.controls.append(self.clear_button)
         toolbar.addWidget(button('Dosya yolunu kopyala', self.copy_path))
         self.layout.addLayout(toolbar)
         self.tabs = QTabWidget()
@@ -87,12 +90,14 @@ class BomPage(BasePage):
             return
         self.expand_timer.stop()
         self.expand_pending.clear()
+        self.clear_search()
         self.result = None
         self.parts_model.replace([])
         self.tree_model.replace([])
         self.export_button.setEnabled(False)
         self.selection.setText('Bir satır seçerek ayrıntıları görün. Excel’e tüm montaj aktarılır.')
         self.summary.setText('Henüz montaj okunmadı.')
+        self.set_status('Parça listesi ve ürün ağacı temizlendi.')
 
     def clear_search(self):
         self.search.clear()

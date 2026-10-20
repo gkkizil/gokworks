@@ -338,14 +338,90 @@ def test_results_filter_sort_reports_full_errors_and_csv(window, tmp_path):
     with path.open(encoding='utf-8-sig') as stream:
         rows = list(csv.reader(stream, delimiter=';'))
     assert len(rows) == 3 and 'COM failure' in rows[1]
-    panel.clear_button.click()
+    panel.clear_filters()
     assert panel.proxy.rowCount() == 2 and len(panel.results) == 2
     panel.search.setText('missing')
     panel.filter.setCurrentIndex(1)
-    panel.reset()
+    panel.clear_button.click()
+    assert panel.model.rowCount() == 0 and panel.results == [] and panel.log.toPlainText() == ''
     panel.files(['new'])
     assert panel.proxy.rowCount() == 1
     assert not panel.search.text() and panel.filter.currentIndex() == 0
+
+
+@pytest.mark.parametrize('mode',['pdf','dxf_dwg','k_factor'])
+@pytest.mark.parametrize('completed',[False,True],ids=['scanned','completed'])
+def test_clear_button_empties_results_logs_counters_and_page_state(window,qtbot,tmp_path,mode,completed):
+    window.navigate(mode);page=window.pages[mode];panel=page.results
+    source=tmp_path/'part.SLDPRT';source.write_bytes(b'original CAD')
+    output=tmp_path/'export.pdf';output.write_bytes(b'existing output')
+    if mode in ('pdf','dxf_dwg'):
+        page.source.setText(str(tmp_path));page.output.setText(str(tmp_path/'output'))
+        inputs=page.form.values()
+    else:
+        inputs=[dict(row) for row in page.rows_model.rows]
+        page.preview=True;page.summary=dict(state='completed',scope='old scope');page.pending_apply=('old recipe',False)
+    panel.files([str(source),'other.SLDPRT'])
+    if completed:
+        panel.result(dict(source=str(source),status='success',detail='Complete',output=str(output)))
+        panel.result(dict(source='other.SLDPRT',status='error',detail='Old error'))
+    panel.append_log('Previous operation')
+    page.set_status('Previous error',True)
+    panel.search.setText('missing');panel.filter.setCurrentIndex(1);panel.tabs.setCurrentIndex(1)
+    panel.clear_button.click()
+    assert panel.model.rowCount()==0 and panel.proxy.rowCount()==0 and panel.model.positions=={}
+    assert panel.results==[] and panel.log.toPlainText()==''
+    assert panel.counter.text()=='0 / 0 dosya · 0 sonuç'
+    assert not panel.search.text() and panel.filter.currentIndex()==0 and not panel.search_timer.isActive()
+    assert panel.proxy.query=='' and panel.proxy.status is None and panel.tabs.currentIndex()==0
+    assert not panel.table.currentIndex().isValid()
+    assert 'temizlendi' in page.status_text and not page.status_details.isVisible()
+    assert source.read_bytes()==b'original CAD' and output.read_bytes()==b'existing output'
+    if mode=='k_factor':
+        assert page.summary is None and page.pending_apply is None and page.preview is False
+        assert page.rows_model.rows==inputs
+    else:assert page.form.values()==inputs
+    qtbot.wait(130)
+    panel.files(['new.SLDPRT']);assert panel.proxy.rowCount()==1 and len(panel.results)==0
+
+
+def test_bom_clear_button_empties_both_views_and_pending_filters(window,qtbot):
+    page=window.pages['bom'];window.navigate('bom');page.load_result(sample_bom())
+    page.parts.setCurrentIndex(page.parts_proxy.index(0,0))
+    page.search.setText('Parça 2');page.filter();page.expand_all()
+    page.clear_button.click()
+    assert page.result is None and page.parts_model.rowCount()==0 and page.tree_model.rowCount()==0
+    assert page.parts_proxy.rowCount()==0 and page.tree_proxy.rowCount()==0
+    assert page.parts_model.positions=={} and page.tree_model.nodes=={}
+    assert not page.search.text() and page.parts_proxy.query==page.tree_proxy.query==''
+    assert not page.search_timer.isActive() and not page.expand_timer.isActive() and page.expand_pending==[]
+    assert not page.export_button.isEnabled() and 'Henüz montaj' in page.summary.text()
+    assert 'temizlendi' in page.status_text
+    qtbot.wait(150)
+    page.load_result(sample_bom())
+    assert page.parts_proxy.rowCount()==2 and page.export_button.isEnabled()
+
+
+@pytest.mark.parametrize('mode',['pdf','dxf_dwg','k_factor','bom'])
+def test_clear_is_blocked_during_the_current_job_and_works_when_it_finishes(window,qtbot,mode):
+    page=window.pages[mode];release=threading.Event()
+    if mode=='bom':page.load_result(sample_bom());control=page.clear_button
+    else:page.results.files(['keep.SLDPRT']);page.results.append_log('Keep log');control=page.results.clear_button
+    def operation(sink,stop):
+        while not release.wait(.02):
+            if stop.is_set():return
+    assert window.jobs.start(page,operation)
+    assert not control.isEnabled()
+    control.click()
+    if mode=='bom':
+        page.clear();assert page.result is not None and page.parts_model.rowCount()==2
+    else:
+        assert page.results.clear() is False
+        assert page.results.model.rowCount()==1 and page.results.log.toPlainText()=='Keep log'
+    release.set();qtbot.waitUntil(lambda:not window.jobs.busy)
+    assert control.isEnabled();control.click()
+    if mode=='bom':assert page.result is None and page.parts_model.rowCount()==0
+    else:assert page.results.model.rowCount()==0 and page.results.log.toPlainText()==''
 
 
 def naming_snapshot(tmp_path):

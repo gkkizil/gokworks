@@ -37,6 +37,7 @@ class ExportPage(BasePage):
         body.addWidget(button('Çıktı klasörünü aç', lambda: open_folder(self.output.text()) if self.output.text() else None))
         self.controls.append(self.form)
         self.results = ResultsPanel()
+        self.results.cleared.connect(lambda:self.set_status('Dosya listesi ve işlem günlüğü temizlendi.'))
         self.splitter.addWidget(scroll(panel))
         self.splitter.addWidget(self.results)
         self.splitter.setStretchFactor(0, 0)
@@ -44,6 +45,10 @@ class ExportPage(BasePage):
         self.splitter.setSizes([235 if pdf else 330, 440])
         self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
+
+    def set_busy(self, busy):
+        super().set_busy(busy)
+        self.results.set_busy(busy)
 
     def validate(self, *, output=False):
         values = self.form.values()

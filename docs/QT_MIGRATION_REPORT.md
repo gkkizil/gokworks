@@ -197,7 +197,10 @@ Etkilenen 129 regresyon Linux’ta yeniden geçti. Son tekrar koşusu başarıl�
 Son ayar kontrollerinde eski kgf → kg ve malzeme takma adları sayısal
 değeri koruyarak aktarıldı. JSON içindeki geçersiz tema/mod türleri ve bozuk
 Qt pencere geometrisi açılışı engellemeden güvenli varsayılana döner.
-Temizle düğmeleri yalnız filtreyi temizler; dosya sonuçlarını/günlüğü silmez.
+Temizle düğmeleri PDF/DXF/DWG ve K/R ekranlarında dosya listesini, işlem
+sonuçlarını, günlüğü ve sayaçları sıfırlar. BOM ekranında parça listesi ve ürün
+ağacı birlikte temizlenir. Arama filtreleri de sıfırlanır; kaynak/çıktı dosyaları
+ve kullanıcının ayarları korunur. Geçerli işlem sürerken Temizle kapalıdır.
 Yeni tarama önceki arama filtresini sıfırlar. Bu iki akışın hedefli testleri geçti.
 
 Windows’ta bir sonraki koşu K/R önizleme → sıradaki atama testinde tamamlanmadı.
