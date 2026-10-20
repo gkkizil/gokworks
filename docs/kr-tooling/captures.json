@@ -1,0 +1,168 @@
+[
+  {
+    "name": "straight-single-v-dark",
+    "theme": "dark",
+    "size": [
+      1680,
+      960
+    ],
+    "inputs": {
+      "material": "Düşük karbonlu çelik — genel",
+      "punch_type": "Düz bıçak",
+      "die_type": "Tek V kalıp",
+      "punch": "4",
+      "die": "Otomatik (8 × t)",
+      "punch_angle": "67",
+      "die_angle": "60",
+      "thickness": "2",
+      "angle": "90",
+      "radius": "",
+      "ba": "",
+      "outside_a": "",
+      "outside_b": "",
+      "flat": "",
+      "method": "Tablo"
+    },
+    "result": {
+      "thickness_mm": 2.0,
+      "die_opening_mm": 16,
+      "radius_mm": 4.0,
+      "table_k": 0.43,
+      "k_factor": 0.43,
+      "ba_mm": 7.634070148223198,
+      "bd_mm": 4.365929851776801,
+      "angle_deg": 90.0,
+      "calibrated": false,
+      "notes": [
+        "Genel havada büküm önerisi; takım kapasitesi ve malzeme uygunluğunu üretimde kontrol edin.",
+        "R ≈ max(bıçak R, 0.16 × V); ölçülmüş R daha güvenilirdir.",
+        "Yarıçap tahmininde bıçak yarıçapı baskındır; üretim ölçümüyle kontrol edin.",
+        "Büküm payı hesabı tabloya dayalıdır; K faktörünü doğrulamak için üretim ölçümü gerekir."
+      ]
+    },
+    "compact": false
+  },
+  {
+    "name": "gooseneck-double-v-dark",
+    "theme": "dark",
+    "size": [
+      1680,
+      960
+    ],
+    "inputs": {
+      "material": "Düşük karbonlu çelik — genel",
+      "punch_type": "Kaz boynu",
+      "die_type": "Çift V kalıp",
+      "punch": "1,5",
+      "die": "24",
+      "punch_angle": "60",
+      "die_angle": "60",
+      "thickness": "3",
+      "angle": "110",
+      "radius": "4,5",
+      "ba": "",
+      "outside_a": "",
+      "outside_b": "",
+      "flat": "",
+      "method": "Tablo"
+    },
+    "result": {
+      "thickness_mm": 3.0,
+      "die_opening_mm": 24.0,
+      "radius_mm": 4.5,
+      "table_k": 0.43,
+      "k_factor": 0.43,
+      "ba_mm": 11.116002005951884,
+      "bd_mm": 10.306218095179833,
+      "angle_deg": 110.0,
+      "calibrated": false,
+      "notes": [
+        "Genel havada büküm önerisi; takım kapasitesi ve malzeme uygunluğunu üretimde kontrol edin.",
+        "Büküm payı hesabı tabloya dayalıdır; K faktörünü doğrulamak için üretim ölçümü gerekir."
+      ]
+    },
+    "compact": false
+  },
+  {
+    "name": "gooseneck-double-v-light",
+    "theme": "light",
+    "size": [
+      1680,
+      960
+    ],
+    "inputs": {
+      "material": "Düşük karbonlu çelik — genel",
+      "punch_type": "Kaz boynu",
+      "die_type": "Çift V kalıp",
+      "punch": "1,5",
+      "die": "24",
+      "punch_angle": "60",
+      "die_angle": "60",
+      "thickness": "3",
+      "angle": "110",
+      "radius": "4,5",
+      "ba": "",
+      "outside_a": "",
+      "outside_b": "",
+      "flat": "",
+      "method": "Tablo"
+    },
+    "result": {
+      "thickness_mm": 3.0,
+      "die_opening_mm": 24.0,
+      "radius_mm": 4.5,
+      "table_k": 0.43,
+      "k_factor": 0.43,
+      "ba_mm": 11.116002005951884,
+      "bd_mm": 10.306218095179833,
+      "angle_deg": 110.0,
+      "calibrated": false,
+      "notes": [
+        "Genel havada büküm önerisi; takım kapasitesi ve malzeme uygunluğunu üretimde kontrol edin.",
+        "Büküm payı hesabı tabloya dayalıdır; K faktörünü doğrulamak için üretim ölçümü gerekir."
+      ]
+    },
+    "compact": false
+  },
+  {
+    "name": "compact-dark",
+    "theme": "dark",
+    "size": [
+      1024,
+      700
+    ],
+    "inputs": {
+      "material": "Düşük karbonlu çelik — genel",
+      "punch_type": "Kaz boynu",
+      "die_type": "Çift V kalıp",
+      "punch": "1,5",
+      "die": "24",
+      "punch_angle": "60",
+      "die_angle": "60",
+      "thickness": "3",
+      "angle": "110",
+      "radius": "4,5",
+      "ba": "",
+      "outside_a": "",
+      "outside_b": "",
+      "flat": "",
+      "method": "Tablo"
+    },
+    "result": {
+      "thickness_mm": 3.0,
+      "die_opening_mm": 24.0,
+      "radius_mm": 4.5,
+      "table_k": 0.43,
+      "k_factor": 0.43,
+      "ba_mm": 11.116002005951884,
+      "bd_mm": 10.306218095179833,
+      "angle_deg": 110.0,
+      "calibrated": false,
+      "notes": [
+        "Genel havada büküm önerisi; takım kapasitesi ve malzeme uygunluğunu üretimde kontrol edin.",
+        "Büküm payı hesabı tabloya dayalıdır; K faktörünü doğrulamak için üretim ölçümü gerekir."
+      ]
+    },
+    "compact": true
+  }
+]

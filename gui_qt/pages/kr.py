@@ -2,13 +2,59 @@
 
 import json
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QTabWidget, QTableView, QHBoxLayout
+from PySide6.QtWidgets import (QTabWidget, QTableView, QHBoxLayout, QSplitter,
+                              QStackedWidget, QWidget, QVBoxLayout)
 
 from k_factor import apply as engine
 from k_factor.rules import (ManualAssignment, AssignmentTable, Recipe, calculate, number,
                             MATERIALS, DIE_OPENINGS, PUNCH_RADII, TOOL_ANGLES, ba_from_outside_dimensions)
 from ..components import BasePage, ValueForm, ResultsPanel, card, scroll, button, label, configure_view
 from ..models import TableModel, Column
+from ..diagrams import EngineeringDiagram
+from ..tooling_diagram import draw_tooling, PUNCH_TYPES, DIE_TYPES
+
+
+class HelperWorkspace(QStackedWidget):
+    """Keep a live preview beside the form, or above it on narrow windows."""
+
+    def __init__(self, inputs, preview):
+        super().__init__()
+        self.inputs, self.preview = inputs, preview
+        self.input_scroll, self.preview_scroll = scroll(inputs), scroll(preview)
+        self.wide = QSplitter(Qt.Horizontal)
+        self.wide.addWidget(self.input_scroll)
+        self.wide.addWidget(self.preview_scroll)
+        self.wide.setChildrenCollapsible(False)
+        self.wide.setStretchFactor(0, 2)
+        self.wide.setStretchFactor(1, 3)
+        self.column = QWidget()
+        self.column_layout = QVBoxLayout(self.column)
+        self.column_layout.setContentsMargins(0, 0, 0, 0)
+        self.column_scroll = scroll(self.column)
+        self.addWidget(self.wide)
+        self.addWidget(self.column_scroll)
+        self.compact = None
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        compact = event.size().width() < 940
+        if compact != self.compact:
+            self.compact = compact
+            if compact:
+                self.input_scroll.takeWidget()
+                self.preview_scroll.takeWidget()
+                self.column_layout.addWidget(self.preview)
+                self.column_layout.addWidget(self.inputs)
+                self.setCurrentWidget(self.column_scroll)
+            else:
+                self.column_layout.removeWidget(self.preview)
+                self.column_layout.removeWidget(self.inputs)
+                self.input_scroll.setWidget(self.inputs)
+                self.preview_scroll.setWidget(self.preview)
+                self.setCurrentWidget(self.wide)
+                self.wide.setSizes([round(event.size().width() * .40), round(event.size().width() * .60)])
+            self.preview.show()
+            self.inputs.show()
 
 
 class KrPage(BasePage):
@@ -53,6 +99,8 @@ class KrPage(BasePage):
         helper, helper_body = card('Hesap yardımı · atamadan bağımsız')
         self.helper = ValueForm(self.settings, 'kr_')
         self.helper.combo('material', 'Malzeme', [item.label for item in MATERIALS])
+        self.helper.combo('punch_type', 'Üst bıçak türü', PUNCH_TYPES)
+        self.helper.combo('die_type', 'Alt kalıp türü', DIE_TYPES)
         self.helper.combo('punch', 'Üst bıçak uç R (mm)', [str(value) for value in PUNCH_RADII], '1', editable=True)
         self.helper.combo('die', 'Kalıp V açıklığı (mm)', ['Otomatik (8 × t)'] + [str(value) for value in DIE_OPENINGS], editable=True)
         self.helper.combo('punch_angle', 'Üst bıçak açısı (°)', [str(x) for x in TOOL_ANGLES], '85', editable=True)
@@ -64,16 +112,36 @@ class KrPage(BasePage):
             self.helper.text(key, title, default)
         self.helper.combo('method', 'Hesap yöntemi', ('Tablo', 'BA ölçümü'))
         helper_body.addWidget(self.helper)
+        helper_body.addWidget(label('Üst bıçak / kalıp türü çizimin gövde biçimini seçer. '
+                                   'Uç R, V açıklığı ve açılar girilen değerlerden alınır.', 'muted'))
+        helper_body.addStretch()
+        tooling, tooling_body = card('Abkant takım kesiti')
+        self.tool_diagram = EngineeringDiagram(width=800, height=520)
+        self.tool_diagram.setMinimumHeight(360)
+        self.tool_diagram.setMaximumHeight(520)
+        self.tool_diagram.setAccessibleName('Abkant üst bıçak, alt kalıp ve büküm numunesi')
+        tooling_body.addWidget(self.tool_diagram, 1)
+        tooling_body.addWidget(label('Şematik · ölçeksiz. Takım gövde ölçüleri temsilidir. '
+                                    'Çift V kalıpta girilen değerler soldaki aktif ağza aittir.', 'muted'))
+        tooling_body.addWidget(label('Hesap sonucu', 'section'))
         self.calculation_text = label('', 'section')
-        helper_body.addWidget(self.calculation_text)
-        helper_body.addWidget(label('Hesap sonucu manuel satırlara otomatik aktarılmaz. Üretim değerlerini Manuel K / R bölümüne kendiniz girin.', 'muted'))
-        self.tabs.addTab(scroll(helper), 'Hesap yardımı')
+        self.calculation_text.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        tooling_body.addWidget(self.calculation_text)
+        self.calculation_notes = label('', 'muted')
+        tooling_body.addWidget(self.calculation_notes)
+        tooling_body.addWidget(label('Hesap sonucu manuel satırlara otomatik aktarılmaz. Üretim değerlerini Manuel K / R bölümüne kendiniz girin.', 'muted'))
+        self.helper_workspace = HelperWorkspace(helper, tooling)
+        self.tabs.addTab(self.helper_workspace, 'Hesap yardımı')
         self.results = ResultsPanel(success_label='Uygulandı')
         self.results.cleared.connect(self.results_cleared)
         self.tabs.addTab(self.results, 'Montaj sonuçları')
         self.layout.addWidget(self.tabs, 1)
         self.controls.extend((self.rows, self.add_row, self.remove_row, self.save_form))
-        self.helper.changed.connect(self.calculate_helper)
+        self.helper_timer = QTimer(self)
+        self.helper_timer.setSingleShot(True)
+        self.helper_timer.setInterval(60)
+        self.helper_timer.timeout.connect(self.calculate_helper)
+        self.helper.changed.connect(lambda key: self.helper_timer.start())
         self.finish_layout()
         self.calculate_helper()
 
@@ -107,6 +175,8 @@ class KrPage(BasePage):
 
     def calculate_helper(self, *args):
         values = self.helper.values()
+        for key in ('ba', 'outside_a', 'outside_b', 'flat'):
+            self.helper.show_field(key, values['method'] == 'BA ölçümü')
         try:
             thickness = number(values['thickness'], 'Numune kalınlığı')
             radius = number(values['radius'], 'İç yarıçap') if values['radius'].strip() else None
@@ -124,11 +194,26 @@ class KrPage(BasePage):
                 punch_angle_deg=number(values['punch_angle'], 'Üst bıçak açısı'), die_angle_deg=number(values['die_angle'], 'Kalıp açısı'))
             self.helper_result = result = calculate(thickness, recipe)
             self.calculation_text.setText(f'K = {result.k_factor:.6g} · İç R = {result.radius_mm:.6g} mm\n'
-                f'V = {result.die_opening_mm:g} mm · BA = {result.ba_mm:.9g} mm · BD = {result.bd_mm:.9g} mm\n'
-                + '\n'.join(result.notes))
+                f'V = {result.die_opening_mm:g} mm · BA = {result.ba_mm:.9g} mm · BD = {result.bd_mm:.9g} mm')
+            self.calculation_notes.setText('\n'.join(result.notes))
+            self.tool_diagram.render_geometry(lambda scene: draw_tooling(scene, recipe, result,
+                values['punch_type'], values['die_type'], self.context.appearance))
+            self.tool_diagram.setAccessibleDescription(
+                f"{values['punch_type']}; uç R {recipe.punch_radius_mm:g} mm; "
+                f"üst bıçak açısı {recipe.punch_angle_deg:g} derece; {values['die_type']}; "
+                f"V {result.die_opening_mm:g} mm; alt kalıp açısı {recipe.die_angle_deg:g} derece; "
+                f"sac kalınlığı {thickness:g} mm; büküm açısı {result.angle_deg:g} derece; "
+                f"iç yarıçap {result.radius_mm:g} mm. Şematik, ölçeksiz.")
         except (ValueError, StopIteration) as error:
             self.helper_result = None
             self.calculation_text.setText(str(error))
+            self.calculation_notes.clear()
+            self.tool_diagram.render_geometry(lambda scene: draw_tooling(scene, None, None,
+                values['punch_type'], values['die_type'], self.context.appearance))
+            self.tool_diagram.setAccessibleDescription(str(error))
+
+    def theme_changed(self):
+        self.calculate_helper()
 
     def set_busy(self, busy):
         super().set_busy(busy)

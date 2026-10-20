@@ -137,6 +137,8 @@ K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** v
 
 **Hesap yardımı**, malzeme ve takım verileriyle BA/BD hesabı veya üretim ölçümleriyle K kalibrasyonu için kullanılır. Bu hesapların sonucu SolidWorks atamasına gönderilmez; tarama ve uygulama her zaman manuel alanlara girilmiş K/R değerlerini kullanır.
 
+Hesap yardımındaki [canlı abkant takım kesiti](docs/kr-tooling/README.md), düz / kaz boynu üst bıçak ve tek / çift V kalıp seçimlerini gösterir. Uç R, V açıklığı, takım açıları, sac kalınlığı ve büküm açısı çizim üzerinde güncellenir. Sacın iç R'si uç R'den ayrı gösterilir; gövdeler şematik ve ölçeksizdir. Geniş pencerede form ile çizim yan yana, dar pencerede tek sütunda kalır.
+
 **Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Girdiğiniz K ve R aynen yazılır, mevcut kalınlık korunur. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir.
 
 Tarama sürerken sıraya alınan K/R uygulaması, kontroldeki montajı, ana konfigürasyonu ve dosya/konfigürasyon adetlerini yeniden karşılaştırır. Bunlar değişmişse hiçbir parçaya yazmadan durur ve yeniden tarama ister.

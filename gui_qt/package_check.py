@@ -57,6 +57,18 @@ def check(output):
         assert weight.result.total_mass_kg == 157
         assert w.pages['iso_fits'].result is not None
         assert w.pages['geometric_tolerances'].result is not None
+        kr = w.pages['k_factor']
+        kr.tabs.setCurrentIndex(1)
+        kr.helper.set_value('punch_type', 'Kaz boynu')
+        kr.helper.set_value('die_type', 'Çift V kalıp')
+        kr.calculate_helper()
+        assert kr.helper_result.die_opening_mm == 16
+        for tag, expected in (('punch_type', 'Kaz boynu'), ('die_type', 'Çift V kalıp'),
+                              ('die_opening', 'V = 16 mm'), ('thickness', 't = 2 mm')):
+            item = kr.tool_diagram.vector.tagged[tag][0]
+            assert item.toPlainText() == expected
+            assert kr.tool_diagram.sceneRect().contains(item.sceneBoundingRect())
+        kr.tabs.setCurrentIndex(0)
         from tolerance_stack.calculator import calculate
         from tolerance_stack.report import export_excel as stack_excel, export_pdf as stack_pdf
         stack=w.pages['tolerance_stack'];stack.load_example();stack.project.confirm()
@@ -198,6 +210,7 @@ def check(output):
                       pdf_export_engine='isolated COM process',
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
+                      'live press-brake tooling profiles and dimensions',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',

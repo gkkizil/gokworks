@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "platform": "Linux / Qt offscreen; source build",
+  "pytest": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "39",
+      "time": "77.961",
+      "timestamp": "2026-10-20T08:41:25.029106+00:00",
+      "hostname": "2f2e13dbc055"
+    }
+  ],
+  "geometry_combinations": 192,
+  "geometry_scope": "2 themes × 4 window sizes × 2 upper profiles × 2 lower profiles × 6 angle sets; all labels inside scene and actual graphics viewport",
+  "source_smoke": {
+    "status": "passed",
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "weight",
+      "nesting"
+    ],
+    "checks": [
+      "11 modules",
+      "two themes",
+      "resolution matrix",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "live press-brake tooling profiles and dimensions",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "screenshots": [
+    "straight-single-v-dark.png",
+    "gooseneck-double-v-dark.png",
+    "gooseneck-double-v-light.png",
+    "compact-dark.png"
+  ],
+  "solidworks_live_tested": false,
+  "windows_exe_built": false
+}

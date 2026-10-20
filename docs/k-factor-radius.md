@@ -37,6 +37,31 @@ parçanın montaj adedi sonuçta gösterilir. Bastırılmış bileşenler işlen
 
 ## Gömülü takım ölçüleri
 
+### Canlı abkant takım kesiti
+
+**Hesap yardımı** içinde üst bıçak, alt kalıp ve büküm numunesi ayrı kesitlerle
+gösterilir. Üst bıçakta **Düz bıçak / Kaz boynu**, alt kalıpta **Tek V kalıp /
+Çift V kalıp** seçilebilir. Seçilen aile kesitteki gövde biçimini değiştirir.
+Üreticiye ait bir takım kataloğu veya gövde ölçüsü varsayılmaz.
+
+Çizimdeki `Rp` üst bıçak uç yarıçapıdır; `İç R` ise sacın hesaplanan veya
+ölçülen iç yarıçapıdır. Bu iki değer ayrı gösterilir. `V`, `αp` (üst bıçak
+açısı), `αv` (kalıp açısı), `t` (numune kalınlığı) ve `β` (düz sactan dönülen
+büküm açısı) girişlerle birlikte güncellenir. Otomatik V, numunenin kalınlığına
+göre seçilen gerçek açıklığı gösterir. Çift V görünümünde girilen değerler
+soldaki mavi işaretli aktif ağza aittir; ikinci ağız ölçülendirilmez.
+
+Kesitler şematik ve ölçeksizdir. Takım gövde ölçüleri temsilidir; görünüm,
+takımların bir arada temasını, çarpışmayı veya kapasiteyi hesaplamaz.
+Geniş pencerede girişler ve çizim yan yanadır. Dar pencerede aynı kontroller
+ve çizim tek sütunda, tek kaydırma alanında korunur. BA ölçüm yöntemi
+seçildiğinde doğrudan BA ve alternatif A/B/açınım girişleri açılır; yöntem
+değişince önceden girilen ölçümler silinmez.
+
+Hesap sonucu ve üretim notları çizimin altında yer alır. Seçimler kaydedilir.
+Bu alan bağımsız hesap yardımıdır: manuel K/R satırlarını veya SolidWorks
+parçalarını değiştirmez. [Örnek ekranlar](kr-tooling/README.md).
+
 | Özellik | Genel ölçü seçenekleri |
 | --- | --- |
 | Üst bıçak uç R, mm | 0.5, 0.8, 1, 1.5, 2, 3, 4, 5, 6 |
