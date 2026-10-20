@@ -1,10 +1,11 @@
 from dataclasses import replace
 from pathlib import Path
+import gc
 import threading
 from unittest.mock import patch
 
 import pytest
-from PySide6.QtCore import Qt,QThread,QTimer
+from PySide6.QtCore import Qt,QThread,QTimer,QCoreApplication,QEvent
 from PySide6.QtWidgets import QApplication,QFileDialog,QMessageBox
 
 from gui_qt.app import MainWindow,create_application
@@ -21,7 +22,11 @@ def window(qtbot,tmp_path):
     qtbot.addWidget(w);w.show();w.navigate('tolerance_stack')
     yield w
     if w.jobs.busy:w.jobs.cancel();qtbot.waitUntil(lambda:not w.jobs.busy,timeout=10000)
+    assert w.settings.flush(),w.settings.last_error
     w.close()
+    w.deleteLater()
+    QCoreApplication.sendPostedEvents(None,QEvent.DeferredDelete)
+    gc.collect()
 
 
 def compute(page,window,qtbot):
@@ -331,11 +336,12 @@ def test_compact_diagram_reflows_without_shrinking_text_and_keeps_add_actions_vi
         assert control.isVisible() and window.rect().contains(control.mapTo(window,control.rect().bottomRight()))
 
 
-def test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis(window):
+def test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis(window,qtbot):
     page=window.pages['tolerance_stack'];page.load_example();page.show_settings('statistics')
     page.form.set_value('seed','abc');page.tabs.setCurrentIndex(0)
     assert page.current_issue.target=='statistics' and not page.calculate_button.isEnabled()
-    page.fix_button.click();assert page.form.fields['seed'].hasFocus()
+    window.activateWindow();page.fix_button.click()
+    qtbot.waitUntil(lambda:page.form.fields['seed'].hasFocus(),timeout=2000)
     with patch.object(page,'confirm_discard',return_value=True):page.new_project()
     assert page.metadata_error=='' and page.metadata_field=='' and page.project.terms==[]
     assert not page.calculate_button.isEnabled()

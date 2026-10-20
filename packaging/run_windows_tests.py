@@ -9,7 +9,9 @@ import sys
 def main():
     root = Path(__file__).resolve().parents[1]
     command = [sys.executable, '-X', 'faulthandler', '-m', 'pytest', '-vv',
-               '--timeout=60', '--timeout-method=thread', '--junitxml=windows-tests.xml']
+               '--timeout=60', '--timeout-method=thread',
+               '-o', 'faulthandler_timeout=60', '-o', 'faulthandler_exit_on_timeout=true',
+               '--junitxml=windows-tests.xml', *sys.argv[1:]]
     with (root/'windows-tests.log').open('w', encoding='utf-8') as log:
         result = subprocess.run(command, cwd=root, stdout=log, stderr=subprocess.STDOUT,
                                 env={**os.environ, 'PYTHONUTF8': '1', 'PYTHONFAULTHANDLER': '1'})
