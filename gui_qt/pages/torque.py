@@ -45,6 +45,9 @@ class TorquePage(BasePage):
         f.combo('condition', 'Bağlantı koşulu', r.CONDITIONS)
         f.text('k', 'K tork katsayısı', str(r.DEFAULT_K[f.value('condition')]).replace('.', ','))
         f.text('preload_percent', 'Hedef ön yük · %', '70')
+        # Let WrapLongRows move the label above the field rather than squeeze
+        # numeric input on platforms with wider font metrics.
+        for field in f.fields.values(): field.setMinimumWidth(112)
         inputs.addWidget(f)
         self.k_hint = label('', 'muted')
         inputs.addWidget(self.k_hint)
