@@ -75,8 +75,10 @@ class IsoPage(CalculationPage):
         self.extra_layout.addWidget(self.presets)
         self.search.textChanged.connect(self.preset_proxy.set_query)
         self.presets.clicked.connect(self.select_preset)
-        self.add_diagram('fit', 'Montaj ve tolerans şeması', height=260)
-        self.diagram_tabs.setMaximumHeight(280)
+        # The manual section includes result labels through y=290. Keep them
+        # inside the scene and reserve matching space above the sample tabs.
+        self.add_diagram('fit', 'Montaj ve tolerans şeması', height=320)
+        self.diagram_tabs.setMaximumHeight(340)
         self.diagram_tabs.tabBar().hide()
         self.view_tabs = QTabBar()
         self.sample_tabs = QTabBar()
