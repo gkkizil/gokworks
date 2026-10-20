@@ -42,6 +42,11 @@ def icon(name, color='#80B6F5'):
         painter.drawRect(16, 20, 10, 21)
         for y in (25, 30, 35):
             painter.drawLine(16, y, 26, y - 3)
+    elif name == 'nesting':
+        painter.drawRect(5, 6, 38, 35)
+        painter.drawRect(10, 11, 14, 12)
+        painter.drawRect(28, 11, 10, 24)
+        painter.drawRect(10, 27, 14, 8)
     elif name == 'weight':
         painter.drawRect(8, 15, 31, 26)
         painter.drawArc(16, 4, 15, 20, 0, 180 * 16)

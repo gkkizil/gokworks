@@ -50,6 +50,7 @@ def main():
             '--specpath', str(ROOT/'build'), '--paths', str(ROOT),
             '--runtime-hook', str(ROOT/'packaging/runtime_hook.py'),
             '--collect-data', 'ezdxf',
+            '--collect-all', 'shapely',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
             '--exclude-module', 'k_factor.standalone',

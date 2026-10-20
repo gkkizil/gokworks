@@ -46,3 +46,13 @@ def test_onefile_release_instructions_do_not_require_external_folder():
     assert 'GOKWORKS.exe' in text and 'tek başına' in text and '_internal' not in text
     report['distribution'] = 'onedir'
     assert '_internal' in publisher.release_block(report)
+
+
+def test_optional_shapely_geos_replacement_and_embedded_license(tmp_path,monkeypatch):
+    monkeypatch.delenv('GOKWORKS_LIBRARY_DIR',raising=False)
+    monkeypatch.setenv('GOKWORKS_GEOMETRY_DIR',str(tmp_path))
+    with pytest.raises(RuntimeError,match='GEOS'): configure_libraries()
+    (tmp_path/'shapely').mkdir(); (tmp_path/'shapely/__init__.py').write_text('')
+    monkeypatch.setattr(sys,'path',list(sys.path)); configure_libraries()
+    assert sys.path[0] == str(tmp_path.resolve())
+    assert 'nesting/Shapely-LICENSE_GEOS' in license_files()

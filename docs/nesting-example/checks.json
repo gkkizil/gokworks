@@ -1,0 +1,15 @@
+{
+  "engine": "GOKWORKS NFP",
+  "engine_version": "1.0",
+  "part_count": 22,
+  "sheet_count": 1,
+  "gross_weight": 3.768,
+  "net_weight": 2.1153328548936394,
+  "waste_weight": 1.6526671451063604,
+  "efficiency": 56.13940697700742,
+  "material_cost": 169.56,
+  "elapsed": 1.9614356090023648,
+  "iterations": 12,
+  "validated": true,
+  "source": "Generated real DXF contours; same production import/engine/report code."
+}

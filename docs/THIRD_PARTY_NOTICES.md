@@ -1,5 +1,33 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Nesting ve sac maliyeti · 20 Ekim 2026
+
+Yeni çalışma bağımlılığı **Shapely 2.1.2 (BSD-3-Clause)** ve tekerlekteki
+dinamik **GEOS (LGPL-2.1)** kitaplıklarıdır. Kurulu dağıtımın özgün lisansları
+`packaging/licenses/nesting/` altında korunur; EXE lisans arşivine eklenir.
+GEOS değiştirilmedi. Kaynakları: https://github.com/libgeos/geos ve
+https://github.com/shapely/shapely/tree/2.1.2 . Tam GEOS sürümü kurulu
+Shapely'nin `geos_version_string` değeriyle görülebilir; derlemenin wheel
+envanteri dağıtımla saklanır. Python 3.13 Windows x64 wheel'i doğrulandı;
+gerçek Windows EXE kontrolü sonraki istenen derlemede yapılır.
+
+GOKWORKS NFP motoru bu proje için yazılmıştır. SVGnest'in NFP, önbellek,
+rotasyon ve sıralama araması yaklaşımı incelendi; özgün Python uygulaması
+Shapely/GEOS üzerinde çalışır. SVGnest MIT bildirimi referans kaydı olarak
+korunur. SVGnest/Deepnest JavaScript kodu, libnest2d/pynest2d C++ kodu veya
+GPL kapsamlı Deepnest bileşenleri uygulamaya kopyalanmadı/bağlanmadı.
+Pyclipper çalışma bağımlılığı değildir. [İncelenen dosyalar ve seçim](nesting.md).
+
+LGPL kitaplıklarıyla ticari dağıtım, lisans koşullarının karşılanmasına bağlıdır.
+Qt değiştirme mekanizmasına ek olarak `GOKWORKS_GEOMETRY_DIR`, uyumlu
+`shapely/` ve wheel'in `shapely.libs/` klasörlerini içeren bir dizinden
+Shapely/GEOS yüklemeye izin verir. Windows DLL arama dizinleri açılışta
+ayarlanır. Bu seçeneği kullanmak normal kullanıcı için gerekli değildir.
+Alıcıların kitaplığı değiştirme/hata ayıklama hakları kısıtlanmamalıdır.
+Uyumlu değiştirilmiş GEOS'un kaynakları/derleme bilgileri ilgili dağıtım
+yükümlülükleriyle birlikte sağlanmalıdır. Üretim son kullanıcısı ek klasör
+taşımaz; varsayılan tek EXE dağıtımı korunur.
+
 ## Tolerans yığılması modülü · 19 Ekim 2026
 
 CodeStack (©2025 Xarial Pty Limited), EasyStackup (©2026 github.com/robertdosa)

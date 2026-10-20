@@ -19,12 +19,23 @@ SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; 
 Python 3.13, kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks gerekir. Proje klasöründe:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.13 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe main.py
 ```
 
 Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz `PySide6==6.10.3` ve Qt Widgets kullanır. Hesaplama ve CAD motorları Python olarak korunur. Qt sürümü `codex/pyside6-migration` geliştirme dalındadır; önceki sürüm Git geçmişinde korunur.
+
+## Nesting ve sac maliyeti
+
+**Mühendislik Hesapları → Nesting · Sac maliyeti** gerçek DXF konturlarını
+NFP tabanlı aramayla birden fazla levhaya yerleştirir. Parça adedi, malzeme,
+kalınlık, sac stoku/fiyatı, dönüş açıları ve kesim payları tanımlanabilir.
+Net/brüt/fire ağırlıkları, alan verimi ve dağıtılmış malzeme/operasyon
+maliyetleri hesaplanır. Doğrulanmış yerleşim DXF, çizimli Excel/PDF ve
+taşınabilir proje olarak kaydedilir. SolidWorks gerekmez.
+[Kullanım ve sınırlar](nesting/README.md) · [Algoritma, lisanslar ve doğrulama](docs/nesting.md).
+Bu kaynak değişikliği yukarıdaki mevcut EXE'ye henüz dahil değildir.
 
 ## BOM - Ürün ağacı
 

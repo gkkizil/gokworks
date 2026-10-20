@@ -1,5 +1,10 @@
 # GOKWORKS — Qt migrasyon raporu
 
+20 Ekim 2026 eklemesi: mevcut Qt mimarisine **Nesting · Sac maliyeti**
+sayfası eklendi; toplam 11 kalıcı modül vardır. Gerçek kontur NFP motoru,
+DXF/Excel/PDF, hesaplar ve ayrı Qt/regresyon testleri için
+[teslim kaydı](nesting.md). Aşağıdaki ilk migrasyon sayıları tarihsel kayıttır.
+
 Depo: `gkkizil/gokworks` · Dal: `codex/pyside6-migration` · Başlangıç: `5f01e53`.
 Ana dal birleştirilmedi. Yedek depoya bu çalışma kapsamında erişilmedi.
 

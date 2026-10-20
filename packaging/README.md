@@ -17,7 +17,7 @@ paketi yalnız `GOKWORKS.exe` içerir. Ayrıca GitHub ön sürümünde doğrudan
 indirme bağlantısı yayımlanır. EXE tek başına başka klasöre/PC'ye taşınabilir.
 GitHub oturumu gerekebilir; paket 30 gün tutulur.
 
-Her paket gerçek Windows ortamında açılır: on çalışma alanı, kg/Newton
+Her paket gerçek Windows ortamında açılır: mevcut çalışma alanları, kg/Newton
 dönüşümü, örnek cıvata hesabı, DXF/XLSX yazma ve pywin32 importları kontrol edilir.
 EXE kaynak ağacından ayrı, boş ve Türkçe karakter/boşluk içeren klasöre kopyalanır;
 yanında başka dosya olmadan üç DPI ölçeğinde çalıştırılır. PDF yardımcı süreci
@@ -27,6 +27,11 @@ PDF işçisi açık ana paketin geçici kaynaklarını kullanır; normal kapanı
 bitmeden ana pencere kapanmaz. Ana pencereden bağımsız çıkış izleyicisi kendi
 geçici kaynaklarıyla çalışarak ana pencerenin kapanışından sonra da kayıt yazabilir.
 Bu kontrol gerçek SolidWorks oturumuna bağlanmaz. Paket kod imzası taşımaz.
+
+Nesting modülü için Shapely/GEOS kitaplıkları `--collect-all shapely` ile
+toplanır. Paket kontrolünde gerçek delikli DXF okunur, NFP yerleşimi yapılır,
+49,0625 kg referansı denetlenir ve DXF/Excel/PDF oluşturulur. Bu yeni kontroller
+bir sonraki istenen Windows derlemesinde de gerçek EXE üzerinde çalışacaktır.
 
 Uygulama paketi yalnız çalıştırılan Python modüllerini, bağımlılıklarını,
 `gui/assets/` kaynaklarını ve `iso_fits/tables.json` verisini içerir.
@@ -56,6 +61,12 @@ ayarlanabilir. Python 3.13 x64 / Qt-PySide ABI uyumu gerekir. Bu yol özel runti
 hook ile Qt yüklenmeden önce uygulanır; üçüncü DPI kontrolü dış paketlerden
 yüklenen PySide/Shiboken ve gerçek Qt6Core DLL konumunu da doğrular. Normal
 kullanımda bu değişken veya dış kitaplık gerekmez.
+
+Shapely/GEOS için ayrı `GOKWORKS_GEOMETRY_DIR` yolu kullanılabilir. Bu dizin
+uyumlu CPython 3.13 x64 `shapely/` ve wheel'in `shapely.libs/` klasörlerini
+içermelidir. GEOS LGPL-2.1 ve Shapely BSD lisansları EXE lisans arşivindedir;
+bu seçenek kitaplık değiştirmek isteyen alıcılar içindir, normal kullanımda
+ek dosya/klasör gerektirmez.
 
 Geliştirici gerekirse `python packaging/build_windows.py --onedir` ile açık
 klasörlü bir dağıtım üretebilir; kullanıcıya verilen varsayılan çıktı tek EXE'dir.

@@ -65,6 +65,29 @@ def check(output):
         stack.show_result(stack_result)
         stack_excel(stack.project,stack_result,Path(folder)/'ToleranceStack.xlsx')
         stack_pdf(stack.project,stack_result,Path(folder)/'ToleranceStack.pdf')
+        from nesting.materials import new_project
+        from nesting.dxf_import import read_dxf
+        from nesting.engine import nest
+        from nesting.accounting import calculate as nesting_cost, mass as nesting_mass
+        from nesting.dxf_export import export_dxf as nesting_dxf
+        from nesting.report import export_excel as nesting_excel, export_pdf as nesting_pdf
+        import ezdxf
+        sample = Path(folder)/'Nesting-input.dxf'
+        doc = ezdxf.new(); doc.units = 4
+        doc.modelspace().add_lwpolyline([(0,0),(100,0),(100,50),(0,50)],close=True)
+        doc.modelspace().add_circle((25,25),5); doc.saveas(sample)
+        nesting_project = new_project(); nesting_project.parts = read_dxf(sample,quantity=3)
+        nesting_project.options.quality = 'Hızlı'; nesting_project.options.seconds = 2
+        nesting_result = nest(nesting_project)
+        assert len(nesting_result.placements) == 3 and not nesting_result.unplaced
+        assert abs(nesting_mass(1250*2500,2,7850)-49.0625) < 1e-9
+        nesting_totals = nesting_cost(nesting_project,nesting_result)
+        assert nesting_totals['net_weight'] <= nesting_totals['gross_weight']
+        nesting_dxf(nesting_project,nesting_result,Path(folder)/'Nesting-DXF')
+        nesting_excel(nesting_project,nesting_result,Path(folder)/'Nesting.xlsx')
+        nesting_pdf(nesting_project,nesting_result,Path(folder)/'Nesting.pdf')
+        w.pages['nesting'].project = nesting_project
+        w.pages['nesting'].refresh(); w.pages['nesting'].show_result(nesting_result,nesting_totals)
         assert not w.pages['k_factor'].save_files.isChecked()
         from .models import TableModel, Column, FilterProxy
         model = TableModel((Column('Parça','name'),Column('Adet','quantity')))
@@ -173,7 +196,8 @@ def check(output):
                       table_50000_filter_ms=round(filter_ms,2),tk_imports=forbidden,
                       kr_assignment_engine='embedded Python SheetMetal parameters',
                       pdf_export_engine='isolated COM process',
-                      solidworks_live_tested=False,checks=['ten modules','two themes','resolution matrix',
+                      solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
+                      'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',

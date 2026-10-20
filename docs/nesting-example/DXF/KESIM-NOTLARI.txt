@@ -1,0 +1,9 @@
+GOKWORKS · NOMİNAL BİTMİŞ PARÇA KONTURLARI · birim mm
+PART_OUTER/PART_INNER kesim geometrisidir. Diğer katmanlar operatör bilgisidir.
+Kerf 0.2 mm: çizgiye CAM takım telafisi UYGULANMADI; tezgâhta ayarlayın.
+Çarpışma mesafesi max(parça aralığı, kerf) + eğri hata paylarıdır. Ortak kesim yoktur.
+Özgün DXF eğrileri korunur; özgün geometri yoksa aşağıdaki kiriş toleransları geçerlidir.
+GW-001: eğri 0 mm; uç hareketi 0 mm; kaynak SHA256 173fe0fe9c8d21a901013b90125b43e41ce5f04a2a520c49abc57a3f56990b5d
+GW-002: eğri 0.02 mm; uç hareketi 0 mm; kaynak SHA256 f26f4649a4ff62b6013ac31a812f94c8df3ca95f44c5a7c478f988eee2fc1874
+GW-003: eğri 0.02 mm; uç hareketi 4.28626e-15 mm; kaynak SHA256 adc1b70c849eb539cd184e7e97c5b41b1becd430208cf13882b2d54a068d3aee
+Motor: GOKWORKS NFP 1.0 · Matematiksel optimum garantisi yok.
