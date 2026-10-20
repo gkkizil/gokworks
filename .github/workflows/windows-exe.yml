@@ -62,6 +62,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
           python packaging/run_windows_tests.py tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python packaging/run_windows_tests.py tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python packaging/run_windows_tests.py
       - name: Build and open the packaged EXE
         run: python packaging/build_windows.py *> windows-build.log

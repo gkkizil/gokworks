@@ -2,7 +2,7 @@
 
 from PySide6.QtCore import Qt, QRectF, QTimer
 from PySide6.QtGui import QPainter, QPen, QColor
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QDialogButtonBox, QGraphicsView, QGraphicsScene)
+from PySide6.QtWidgets import (QDialog, QVBoxLayout, QDialogButtonBox, QGraphicsView, QGraphicsScene, QSizePolicy)
 
 from ..components import ValueForm, label, scroll
 from ..models import TableModel
@@ -55,7 +55,10 @@ class Editor(QDialog):
 class NestingCanvas(QGraphicsView):
     def __init__(self):
         super().__init__()
-        self.setScene(QGraphicsScene(self)); self.setMinimumHeight(80); self.setMinimumWidth(0)
+        self.setScene(QGraphicsScene(self)); self.setMinimumSize(0,0)
+        # The sheet takes the remaining space. A minimum viewport height can
+        # force Qt to overlap the result labels at native Windows font sizes.
+        self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Ignored)
         self.setRenderHint(QPainter.Antialiasing); self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         # fitInView must not toggle scrollbars and start another resize/layout

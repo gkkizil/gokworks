@@ -130,6 +130,11 @@ class NestingPage(BasePage):
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
+        compact_height = event.size().height() < 640
+        if compact_height != getattr(self,'compact_height',None):
+            self.compact_height = compact_height
+            self.layout.setContentsMargins(24,12 if compact_height else 20,24,10 if compact_height else 16)
+            self.layout.setSpacing(8 if compact_height else 14)
         if hasattr(self,'stock_layout'):
             self.stock_layout.setDirection(QBoxLayout.LeftToRight if self.width() >= 1000 else QBoxLayout.TopToBottom)
 

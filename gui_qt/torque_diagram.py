@@ -5,6 +5,7 @@ Head, nut, grip, hole and plate geometry is illustrative, not catalogue data.
 """
 
 from math import floor
+from PySide6.QtGui import QTextOption
 
 from .theme import COLORS
 
@@ -19,9 +20,23 @@ def draw_section(scene, result, appearance, format_value):
                                  width=options.pop('width', 1.2), **options)
 
     def text(x, y, value, *, tag=None, color=None, bold=False, **options):
-        return scene.create_text(x, y, text=value, fill=color or c['text'],
+        item = scene.create_text(x, y, text=value, fill=color or c['text'],
                                  font=('Segoe UI', -17, 'bold') if bold else ('Segoe UI', -16),
                                  tags=tag or (), **options)
+        if options.get('width') and tag != 'section_empty':
+            # Numeric captions stay on one line. Segoe UI on Windows has
+            # different metrics from the fallback fonts used on Linux.
+            option = item.document().defaultTextOption()
+            option.setWrapMode(QTextOption.NoWrap)
+            item.document().setDefaultTextOption(option)
+            item.setTextWidth(-1)
+            bounds = item.boundingRect()
+            item.setPos(x-bounds.width()/2,y-bounds.height()/2)
+        bounds = item.sceneBoundingRect(); area = scene.sceneRect().adjusted(8,8,-8,-8)
+        dx = max(area.left()-bounds.left(),min(0,area.right()-bounds.right()))
+        dy = max(area.top()-bounds.top(),min(0,area.bottom()-bounds.bottom()))
+        item.moveBy(dx,dy)
+        return item
 
     def polygon(points, tag, *, fill=None, outline=None):
         return scene.create_polygon(points, fill=fill or c['input'],
