@@ -1,6 +1,6 @@
 {
-  "request_id": "f3907112-eddf-439e-9818-38ed937070fb",
-  "requested_at": "2026-10-20T12:00:36.957145+00:00",
-  "source_commit": "463194f4e241e0ba9261741e078f619dee19f3c7",
-  "reason": "User requested a single GOKWORKS.exe with the live quick torque section, simplified Nesting workflow and AutoCAD-style plate tabs. Run full Windows regression and frozen onefile checks at all configured DPI scales."
+  "request_id": "6cb34d31-cccb-4794-9783-6abc2c7c4f67",
+  "requested_at": "2026-10-20T12:15:08.768365+00:00",
+  "source_commit": "62a2b71af7b5ab12900b66a3b8b971e9278bc56c",
+  "reason": "Retry requested standalone EXE after fixing native Windows font bounds in the live torque section and flexible Nesting viewport at the minimum window size. Run the three failed GUI checks first, then the complete Windows regression suite and frozen onefile DPI checks."
 }
