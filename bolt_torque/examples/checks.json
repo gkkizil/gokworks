@@ -1,0 +1,83 @@
+{
+  "status": "passed",
+  "platform": "Linux / Qt offscreen; Python sources",
+  "pytest_primary_tests": 226,
+  "additional_bolt_subtests": 63,
+  "repeated_final_gui_tests": 8,
+  "test_runs": {
+    "bolt-torque-tests.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "151",
+        "time": "15.587",
+        "timestamp": "2026-10-20T10:28:21.916798+00:00",
+        "hostname": "2f2e13dbc055"
+      }
+    ],
+    "bolt-torque-regression.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "138",
+        "time": "234.569",
+        "timestamp": "2026-10-20T10:29:51.496344+00:00",
+        "hostname": "2f2e13dbc055"
+      }
+    ],
+    "bolt-torque-gui-final.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "8",
+        "time": "16.594",
+        "timestamp": "2026-10-20T10:31:13.039702+00:00",
+        "hostname": "2f2e13dbc055"
+      }
+    ]
+  },
+  "source_smoke": {
+    "status": "passed",
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "nesting"
+    ],
+    "checks": [
+      "12 modules",
+      "two themes",
+      "resolution matrix",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "windows_exe_built": false,
+  "solidworks_live_tested": false
+}

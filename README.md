@@ -125,6 +125,10 @@ Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–
 
 Ø50 H8/f7: **0,025–0,089 mm boşluk**. H7/h6 minimum sıfır boşlukla boşluklu; H7/k6 ara; H7/p6 sıkı geçmedir. Tür çapa göre hesaplanır. ISO 286-1/-2:2010 standart temeli, GitHub tablolarının karşılaştırması, resmî metne erişim sınırı ve elle kontrol [ISO kılavuzundadır](docs/iso-fits.md). [Açık](docs/reports/fit-compatibility/screenshots/iso-light.png) / [koyu](docs/reports/fit-compatibility/screenshots/iso-dark.png) gerçek ekranlar. [Manuel tolerans ekranı](docs/reports/fit-compatibility/screenshots/iso-manual-dark.png).
 
+## Hızlı Cıvata Tork Hesabı
+
+**Mühendislik Hesapları → Hızlı tork hesabı**: M3–M36 normal/ince diş, 4.8–12.9 sınıfları, kuru/yağlı koşul, elle değiştirilen K ve varsayılan %70 ön yük oranıyla hızlı tahmin. **Tahmini Sıkma Torku** N·m, ön yük kN gösterilir; sonuç tek tuşla kopyalanır. K=0,20/0,15 yaklaşık varsayımlardır; kritik bağlantılarda üretici şartnamesi esas alınır. [Hesap, ISO dayanım temeli ve kullanım](docs/bolt-torque.md).
+
 ## K faktörü / yarıçap
 
 K/R ataması GOKWORKS içindeki **K faktörü / yarıçap → Manuel K / R** menüsünde

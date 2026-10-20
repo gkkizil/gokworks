@@ -1,0 +1,74 @@
+[
+  {
+    "name": "torque-dark",
+    "theme": "dark",
+    "size": [
+      1440,
+      900
+    ],
+    "result": {
+      "metric": "M10",
+      "diameter_mm": 10,
+      "pitch_mm": 1.5,
+      "thread_series": "Normal diş",
+      "grade": "8.8",
+      "condition": "Kuru",
+      "k": 0.2,
+      "preload_percent": 70.0,
+      "tensile_area_mm2": 57.9895969018452,
+      "yield_strength_mpa": 640.0,
+      "strength_symbol": "ReL",
+      "strength_basis": "ISO 898-1 · minimum ReL · d ≤ 16 mm",
+      "preload_n": 25979.339412026646,
+      "torque_nm": 51.958678824053294
+    }
+  },
+  {
+    "name": "torque-small",
+    "theme": "dark",
+    "size": [
+      1024,
+      700
+    ],
+    "result": {
+      "metric": "M10",
+      "diameter_mm": 10,
+      "pitch_mm": 1.5,
+      "thread_series": "Normal diş",
+      "grade": "8.8",
+      "condition": "Kuru",
+      "k": 0.2,
+      "preload_percent": 70.0,
+      "tensile_area_mm2": 57.9895969018452,
+      "yield_strength_mpa": 640.0,
+      "strength_symbol": "ReL",
+      "strength_basis": "ISO 898-1 · minimum ReL · d ≤ 16 mm",
+      "preload_n": 25979.339412026646,
+      "torque_nm": 51.958678824053294
+    }
+  },
+  {
+    "name": "torque-light",
+    "theme": "light",
+    "size": [
+      1440,
+      900
+    ],
+    "result": {
+      "metric": "M18",
+      "diameter_mm": 18,
+      "pitch_mm": 1.5,
+      "thread_series": "İnce diş",
+      "grade": "10.9",
+      "condition": "Hafif yağlı",
+      "k": 0.18,
+      "preload_percent": 65.0,
+      "tensile_area_mm2": 216.23424523462148,
+      "yield_strength_mpa": 940.0,
+      "strength_symbol": "Rp0,2",
+      "strength_basis": "ISO 898-1 · minimum Rp0,2",
+      "preload_n": 132119.12383835373,
+      "torque_nm": 428.06596123626605
+    }
+  }
+]

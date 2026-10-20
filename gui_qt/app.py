@@ -20,6 +20,7 @@ from .pages.bom import BomPage
 from .pages.naming import NamingPage
 from .pages.kr import KrPage
 from .pages.bolt import BoltPage
+from .pages.torque import TorquePage
 from .pages.weight import WeightPage
 from .pages.iso import IsoPage
 from .pages.gdt import GdtPage
@@ -37,6 +38,7 @@ MODULES = (
     ('geometric_tolerances', 'Geometrik toleranslar', 'MÜHENDİSLİK HESAPLARI'),
     ('tolerance_stack', 'Tolerans yığılması', 'MÜHENDİSLİK HESAPLARI'),
     ('bolt', 'Cıvata hesabı', 'MÜHENDİSLİK HESAPLARI'),
+    ('bolt_torque', 'Hızlı tork hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('weight', 'Ağırlık hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
 )
@@ -123,7 +125,8 @@ class MainWindow(QMainWindow):
                          bom=lambda: BomPage(self), naming=lambda: NamingPage(self), k_factor=lambda: KrPage(self),
                          iso_fits=lambda: IsoPage(self), geometric_tolerances=lambda: GdtPage(self),
                          tolerance_stack=lambda: ToleranceStackPage(self),
-                         bolt=lambda: BoltPage(self), weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self))
+                         bolt=lambda: BoltPage(self), bolt_torque=lambda: TorquePage(self),
+                         weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self))
         for mode, factory in factories.items():
             page = factory()
             page.statusChanged.connect(lambda text, error, page=page: self.page_status(page, text, error))

@@ -33,7 +33,7 @@ def icon(name, color='#80B6F5'):
         for y in (23, 36):
             painter.drawLine(12, y, 27, y)
             painter.drawRoundedRect(QRectF(27, y - 5, 15, 10), 2, 2)
-    elif name == 'bolt':
+    elif name in ('bolt', 'bolt_torque'):
         path = QPainterPath()
         for i, (x, y) in enumerate(((11, 7), (31, 7), (37, 13), (31, 20), (11, 20), (5, 13))):
             path.moveTo(x, y) if i == 0 else path.lineTo(x, y)

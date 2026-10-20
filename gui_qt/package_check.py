@@ -49,6 +49,15 @@ def check(output):
         bolt.form.set_value('tension','100')
         bolt.update_result()
         assert abs(bolt.result.tension_n-980.665) < .000001
+        torque = w.pages['bolt_torque']
+        assert abs(torque.result.torque_nm - 51.958678824053294) < 1e-8
+        assert abs(torque.result.preload_kn - 25.979339412026646) < 1e-8
+        torque.form.set_value('condition', 'Hafif yağlı')
+        torque.update_result()
+        assert torque.result.k == .15
+        assert abs(torque.result.torque_nm - 38.96900911803997) < 1e-8
+        torque.copy_result()
+        assert 'Tahmini Sıkma Torku' in QApplication.clipboard().text()
         weight = w.pages['weight']
         weight.form.set_value('kind','Sac levha')
         for key, value in [('b','2000'),('t','10'),('length','1000')]:
@@ -211,6 +220,7 @@ def check(output):
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'live press-brake tooling profiles and dimensions',
+                      'quick bolt torque / 51.96 Nm / 25.98 kN / clipboard',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',
