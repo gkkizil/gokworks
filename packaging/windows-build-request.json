@@ -1,6 +1,6 @@
 {
-  "request_id": "0f2d88f4-6910-4413-8b9f-ced9236a9f7d",
-  "requested_at": "2026-10-20T06:13:38.146866+00:00",
-  "source_commit": "dbc3b996d1b1d19e03f5ec3f5b69362ecdc2c67f",
-  "reason": "User requested the latest standalone GOKWORKS.exe, including the real-contour NFP nesting and sheet cost module, reports, embedded Shapely/GEOS and Clear button fixes. Retain the full Windows regression suite and all relocated single-file EXE/DPI checks."
+  "request_id": "8717689f-5443-48f3-9c89-7126c02150cc",
+  "requested_at": "2026-10-20T07:49:11.999593+00:00",
+  "source_commit": "1456cc9b9d0281c0f052229321ac1973b316cfea",
+  "reason": "User requested the updated standalone GOKWORKS.exe after the bulk DXF import and sequential plate fixes. Include visible per-file statuses, parser-error isolation, retry/cancel persistence, NFP 1.1 plate-first filling, plate navigation and consistent report plate numbers. Retain Windows regressions and relocated onefile opening checks."
 }
