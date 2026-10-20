@@ -1,6 +1,6 @@
 {
-  "request_id": "6cb34d31-cccb-4794-9783-6abc2c7c4f67",
-  "requested_at": "2026-10-20T12:15:08.768365+00:00",
-  "source_commit": "62a2b71af7b5ab12900b66a3b8b971e9278bc56c",
-  "reason": "Retry requested standalone EXE after fixing native Windows font bounds in the live torque section and flexible Nesting viewport at the minimum window size. Run the three failed GUI checks first, then the complete Windows regression suite and frozen onefile DPI checks."
+  "request_id": "7b66ba73-d557-4a20-a3a0-c75f8e9eb22d",
+  "requested_at": "2026-10-20T12:17:29.022717+00:00",
+  "source_commit": "7c03c2efc399ce582daacd6f68772984aea9e2c9",
+  "reason": "Produce the requested standalone GOKWORKS.exe. Native Windows Nesting minimum-window check now passes; use minimum input widths and form row wrapping for the torque screen. Preserve the targeted layout gate, full regression suite and frozen onefile DPI checks."
 }
