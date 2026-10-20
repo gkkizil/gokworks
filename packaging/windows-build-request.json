@@ -1,7 +1,6 @@
 {
-  "request_id": "5cbead93-7429-4463-993a-d984262c0b14",
-  "requested_at": "2026-10-20T07:56:23.538947+00:00",
-  "source_commit": "1c00da7bee969648ded4b14cb93fddb60cc92421",
-  "diagnose_run": 39389357467,
-  "reason": "Produce requested standalone EXE with bulk DXF and sequential plate fixes from 1456cc9. Use UTF-8 for Windows build steps and ASCII-safe status console output; retain full regression and frozen onefile checks."
+  "request_id": "f3907112-eddf-439e-9818-38ed937070fb",
+  "requested_at": "2026-10-20T12:00:36.957145+00:00",
+  "source_commit": "463194f4e241e0ba9261741e078f619dee19f3c7",
+  "reason": "User requested a single GOKWORKS.exe with the live quick torque section, simplified Nesting workflow and AutoCAD-style plate tabs. Run full Windows regression and frozen onefile checks at all configured DPI scales."
 }
