@@ -3,24 +3,42 @@
 GOKWORKS → **Mühendislik Hesapları → Nesting · Sac maliyeti**.
 Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı gerekmez.
 
-1. **DXF dosyalarını yükle**: birden fazla dosya seçin. Malzeme, kalınlık,
+1. **1 · Parçalar → DXF ekle**: birden fazla dosya seçin. Malzeme, kalınlık,
    adet ve eğri toleransını belirtin. `$INSUNITS` yoksa mm/cm/inch seçimini
    açıkça yapın. Yardımcı katmanları adlarıyla `;` kullanarak dışlayın.
    Seçilen her dosya hemen listede görünür; okunamayanlar hata açıklamasıyla
    kalır. Dosyaya çift tıklayıp ayarlarını düzeltip yeniden okuyabilirsiniz.
 2. Parçaya çift tıklayarak kod, açıklama, adet, kalınlık ve malzemeyi düzenleyin.
-   Alan, sınır ölçüleri ve dış/iç çevreler aynı pencerede gösterilir.
-3. **Saclar ve malzemeler**: özel ölçü veya 1000×2000, 1250×2500,
+   Alan, sınır ölçüleri ve dış/iç çevreler aynı pencerede gösterilir. Ctrl/Shift
+   ile birden fazla satırı seçip birlikte kaldırabilirsiniz. Dosya yolu ve
+   hata açıklaması satır üzerinde bekleyince, bütün okuma kayıtları
+   **Yükleme ayrıntıları** içinde görünür.
+3. **2 · Sac ve ayarlar**: özel ölçü veya 1000×2000, 1250×2500,
    1500×3000, 2000×4000 şablonunu seçin. Stok adedini ve TL/kg ya da
-   TL/levha fiyatını girin. Özel malzeme ve yoğunluk eklenebilir.
-4. **Yerleşim ve maliyet ayarları**: kenar payı, bitmiş parça aralığı,
-   kerf, dönüş açıları/açı adımı, hadde yönü, süre ve kaliteyi ayarlayın.
-5. **Yerleştir**: arama arka planda çalışır. Levhayı listeden seçin;
+   TL/levha fiyatını sac satırına çift tıklayarak girin. **Malzeme kütüphanesi**
+   penceresinde özel malzeme ve yoğunluk eklenebilir.
+4. Aynı sekmede kenar payı, parça aralığı, döndürme ve kaliteyi ayarlayın.
+   Kerf, açı/adım, hadde yönü, süre ve seed **Gelişmiş ayarları göster** içinde;
+   operasyon giderleri, kâr ve KDV **Kesim ve ek maliyetler** içindedir.
+   Bu bölümleri kapatmak girilen değerleri sıfırlamaz.
+5. **Yerleştir → 3 · Yerleşim**: arama arka planda çalışır.
+   AutoCAD benzeri **1. plaka / 2. plaka / 3. plaka** sekmelerine tıklayın;
+   çok sayıda plaka varsa sekme çubuğunu kaydırın. Odak sekmedeyken
+   klavyenin sol/sağ oklarıyla da geçilebilir.
    tekerlekle yakınlaştırın, sürükleyerek kaydırın, **Sığdır** ile görünümü sıfırlayın.
-   **Durdur**, o ana kadar bulunan doğrulanmış sonucu korur. Küçük pencerede
-   parça listesi ayrı sekmeye geçer; geniş pencerede solda kalır.
-6. **Doğrula**, **Hesap ayrıntıları**, **DXF dışa aktar**, **Excel raporu**,
-   **PDF raporu**, **Kaydet / Proje aç** mevcut projedeki gerçek verileri kullanır.
+   **Durdur**, o ana kadar bulunan doğrulanmış sonucu korur.
+   **Parça adlarını göster** ile çizim üzerindeki adları açıp kapatın;
+   tam ad ve koordinatlar, parça üzerinde bekleyince görünür. Üç adım hem
+   dar hem geniş pencerede aynı yerde kalır; yerleşim özeti görünümün altındadır.
+6. **Ayrıntılar**: maliyet dökümü ve yeniden doğrulama.
+   **Dışa aktar**: DXF / Excel / PDF; tüm parçalar yerleşmeden açılmaz.
+   **Proje**: kaydet, aç ve yeni proje. Kaydedilen analizler mevcut geometriyi kullanır.
+
+Ekrandaki toplam, sac ve operasyon giderleri ile kâr/KDV'yi içerir.
+Malzeme bedeli ayrıca gösterilir; kullanılan bir sacın fiyatı sıfırsa
+**Sac fiyatı eksik** yazılır. Eksik yerleşimin maliyeti **Kısmi hesap** olarak
+işaretlenir. Yalnız fiyat değişikliği aynı koordinatları yeniden kullanır ve
+seçili fiziksel plakayı korur.
 
 Fiyat/yoğunluk/operasyon gideri değişikliği aynı koordinatları arka planda
 yeniden doğrulayarak maliyeti günceller. Kontur, adet, kalınlık, stok/ölçü veya
@@ -122,3 +140,4 @@ gerçek Windows paket kontrolü sonraki istenen EXE derlemesinde çalışacak.
 
 Referanslar ve lisans değerlendirmesi: [teknik rapor](../docs/nesting.md).
 [Toplu yükleme ve plaka sırası düzeltmesi](../docs/nesting-bulk/README.md).
+[Sade arayüz incelemesi ve plaka sekmeleri](../docs/nesting-usability/README.md).

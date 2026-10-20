@@ -46,10 +46,10 @@ def main():
         page.project.sheets[0].name = '100 × 100'; page.project.sheets[0].price_kg = 45
         page.form.set_value('margin','5'); page.form.set_value('quality','Hızlı'); page.form.set_value('seconds','5')
         page.start_nest(); wait()
-        assert validate_result(page.project,page.result) and page.sheet_picker.count() == 3
+        assert validate_result(page.project,page.result) and page.sheet_tabs.count() == 3
         counts = Counter(p.sheet_number for p in page.result.placements)
         assert counts == {1:4,2:4,3:2}
-        page.sheet_picker.setCurrentIndex(2); app.processEvents(); page.canvas.fit()
+        page.sheet_tabs.setCurrentIndex(2); app.processEvents(); page.canvas.fit()
         assert w.grab().save(str(output/'three-plates-dark.png'))
         (output/'checks.json').write_text(json.dumps(dict(selected=10,ready_before_retry=9,errors_before_retry=1,
             ready_after_retry=10,plates=3,parts_per_plate=counts,validated=True,engine_version=page.result.engine_version),indent=2)+'\n')

@@ -1,0 +1,134 @@
+{
+  "status": "passed",
+  "platform": "Linux / PySide6 Qt offscreen / Python sources",
+  "pytest_tests": 74,
+  "repeated_final_gui_tests": 3,
+  "test_runs": {
+    "verified-final.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "74",
+        "time": "38.684",
+        "timestamp": "2026-10-20T11:50:46.346835+00:00"
+      }
+    ],
+    "final-layout.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "3",
+        "time": "7.609",
+        "timestamp": "2026-10-20T11:54:32.007300+00:00"
+      }
+    ]
+  },
+  "source_smoke": {
+    "status": "passed",
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "nesting"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "checks": [
+      "12 modules",
+      "two themes",
+      "resolution matrix",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "nesting three-step workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "gui_resize_matrix": [
+    [
+      1440,
+      960
+    ],
+    [
+      1024,
+      700
+    ],
+    [
+      820,
+      560
+    ]
+  ],
+  "plate_tabs_tested": 20,
+  "real_dxf_capture": {
+    "source": "Real Qt workspace, ten generated DXFs, production import and NFP engine; no fabricated placements.",
+    "selected": 10,
+    "ready_before_retry": 9,
+    "failed_before_retry": 1,
+    "ready_after_retry": 10,
+    "part_count": 10,
+    "plates": 3,
+    "parts_per_plate": {
+      "1": 4,
+      "2": 4,
+      "3": 2
+    },
+    "selected_plate": 2,
+    "validated": true,
+    "engine": "GOKWORKS NFP",
+    "engine_version": "1.1",
+    "screenshots": [
+      "01-parts-dark.png",
+      "02-stock-dark.png",
+      "03-plates-dark.png",
+      "04-plates-light.png",
+      "05-plates-small.png"
+    ],
+    "windows_exe_built": false,
+    "solidworks_required": false
+  },
+  "windows_exe_built": false,
+  "solidworks_live_tested": false
+}

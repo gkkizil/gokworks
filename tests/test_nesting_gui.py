@@ -6,7 +6,7 @@ import threading
 
 import ezdxf
 import pytest
-from PySide6.QtCore import QEvent, QCoreApplication, QTimer, Qt
+from PySide6.QtCore import QEvent, QCoreApplication, QTimer, Qt, QPoint, QItemSelectionModel
 from PySide6.QtWidgets import QFileDialog
 
 from gui_qt.app import MainWindow,create_application
@@ -46,18 +46,31 @@ def test_real_import_nest_invalidate_and_source_preserved(window,qtbot,tmp_path)
     assert 'yeniden' in page.status_text
 
 
-def test_responsive_parts_panel_returns_after_resize_and_themes(window,qtbot,tmp_path):
+def test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes(window,qtbot,tmp_path):
     page = load_parts(window,qtbot,tmp_path)
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
     for theme in ('dark','light'):
         window.set_theme(theme)
-        for width,height in [(1440,960),(1024,768),(820,620),(1440,960)]:
+        for width,height in [(1440,960),(1024,700),(820,560),(1440,960)]:
             window.resize(width,height); qtbot.wait(60)
-            if page.compact:
-                assert page.tabs.indexOf(page.parts_panel) == 0
-                page.tabs.setCurrentWidget(page.parts_panel)
-            else:
-                assert page.splitter.widget(0) is page.parts_panel
-                assert page.parts_panel.isVisible()
+            assert page.tabs.count() == 3
+            assert page.tabs.indexOf(page.parts_panel) == 0
+            assert page.tabs.indexOf(page.stock_widget) == 1
+            assert page.tabs.indexOf(page.preview_scroll) == 2
+            page.tabs.setCurrentWidget(page.parts_panel); qtbot.wait(30)
+            assert page.next_button.isVisible() and page.next_button.isEnabled()
+            assert page.part_table.horizontalScrollBar().maximum() == 0
+            page.next_button.click(); assert page.tabs.currentWidget() is page.stock_widget
+            assert page.nest_button.isVisible() and page.nest_button.isEnabled()
+            page.tabs.setCurrentWidget(page.preview_scroll); qtbot.wait(30)
+            previous_bottom = 0
+            for widget in (page.sheet_tabs,page.current_note,page.canvas,page.labels_toggle,page.summary,page.cost_summary):
+                top = widget.mapTo(page,QPoint(0,0)).y()
+                assert top >= previous_bottom
+                previous_bottom = top+widget.height()
+                assert page.rect().contains(widget.mapTo(page,widget.rect().bottomRight()))
+            assert page.canvas.viewport().rect().contains(page.canvas.mapFromScene(page.canvas.sceneRect()).boundingRect())
             assert not window.grab().isNull()
             assert page.width() >= 550
 
@@ -93,6 +106,8 @@ def test_cost_only_changes_reprice_same_coordinates_in_background(window,qtbot,t
     assert [(p.x,p.y,p.angle) for p in page.result.placements] == coordinates
     from nesting.accounting import calculate
     assert calculate(page.project,page.result)['setup'] == 25
+    assert 'Toplam 25,00 TL' in page.cost_summary.text()
+    assert 'Malzeme 0,00 TL' in page.cost_summary.text() and 'Sac fiyatı eksik' in page.cost_summary.text()
 
 
 def test_project_open_save_and_reports_use_jobs(window,qtbot,tmp_path,monkeypatch):
@@ -196,12 +211,50 @@ def test_three_plates_are_numbered_and_browsable(window,qtbot):
     page.form.set_value('quality','Hızlı'); page.start_nest()
     qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
     assert page.result is not None and not page.result.unplaced
-    assert page.sheet_picker.count() == 3
-    assert [page.sheet_picker.itemText(i).split(' · ')[0] for i in range(3)] == ['1. plaka','2. plaka','3. plaka']
-    assert '1/3 plaka' in page.current_note.text() and not page.previous_sheet.isEnabled()
-    page.next_sheet.click(); assert page.sheet_picker.currentIndex() == 1 and '2/3 plaka' in page.current_note.text()
-    page.next_sheet.click(); assert page.sheet_picker.currentIndex() == 2 and not page.next_sheet.isEnabled()
-    page.previous_sheet.click(); assert page.sheet_picker.currentIndex() == 1
+    assert page.sheet_tabs.count() == 3
+    assert [page.sheet_tabs.tabText(i) for i in range(3)] == ['1. plaka','2. plaka','3. plaka']
+    assert '1/3 plaka' in page.current_note.text()
+    qtbot.mouseClick(page.sheet_tabs,Qt.LeftButton,pos=page.sheet_tabs.tabRect(1).center())
+    assert page.sheet_tabs.currentIndex() == 1 and '2/3 plaka' in page.current_note.text()
+    assert page.canvas.key == page.sheet_tabs.tabData(1)
+    qtbot.keyClick(page.sheet_tabs,Qt.Key_Right)
+    assert page.sheet_tabs.currentIndex() == 2 and page.canvas.key == page.sheet_tabs.tabData(2)
+    qtbot.keyClick(page.sheet_tabs,Qt.Key_Left); assert page.sheet_tabs.currentIndex() == 1
+
+
+def test_many_document_tabs_scroll_to_last_physical_plate_in_small_window(window,qtbot):
+    from nesting.models import Part
+    from shapely.geometry import box
+    page=window.pages['nesting']; window.resize(820,620)
+    page.project.parts=[Part.create('P',box(0,0,35,35),quantity=20)]
+    sheet=page.project.sheets[0]; sheet.width=sheet.height=60
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    assert page.sheet_tabs.count()==20 and page.sheet_tabs.usesScrollButtons()
+    page.sheet_tabs.setCurrentIndex(19); qtbot.wait(50)
+    assert page.sheet_tabs.rect().contains(page.sheet_tabs.tabRect(19).center())
+    assert page.canvas.key==(sheet.id,20) and '20/20 plaka' in page.current_note.text()
+    assert page.sheet_tabs.width()<page.width()
+
+
+def test_document_tabs_keep_distinct_sheet_keys_for_different_materials_and_thicknesses(window,qtbot):
+    from dataclasses import replace
+    from nesting.models import Part,uid
+    from shapely.geometry import box
+    page=window.pages['nesting']; first=page.project.sheets[0]
+    second=replace(first,id=uid(),material=page.project.materials[3].id,thickness=1.5)
+    page.project.sheets.append(second)
+    page.project.parts=[Part.create('Steel',box(0,0,35,35)),
+        Part.create('Stainless',box(0,0,35,35),material=second.material,thickness=1.5)]
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    assert page.sheet_tabs.count()==2
+    assert {page.sheet_tabs.tabData(i) for i in range(2)}=={(first.id,1),(second.id,1)}
+    for i in range(2):
+        page.sheet_tabs.setCurrentIndex(i)
+        sheet=page.project.sheet(page.canvas.key[0])
+        assert page.project.material(sheet.material).name in page.sheet_tabs.tabToolTip(i)
+        assert len(page.canvas.part_labels)==1
 
 
 def test_unmatched_thickness_targets_stock_instead_of_silently_omitting_parts(window,qtbot,tmp_path):
@@ -223,3 +276,111 @@ def test_problem_sources_remain_visible_after_project_save_open(window,qtbot,tmp
     assert len(page.imports) == 2 and page.part_model.rowCount() == 2
     assert any(e['status'] == 'error' for e in page.imports) and len(page.project.parts) == 1
     page.start_nest(); assert not window.jobs.busy and 'henüz hazır değil' in page.status_text
+
+
+def test_incomplete_nest_disables_all_exports_before_opening_file_dialog(window,qtbot,monkeypatch):
+    from nesting.models import Part
+    from shapely.geometry import box
+    page=window.pages['nesting']
+    page.project.parts=[Part.create('P',box(0,0,35,35),quantity=5)]
+    sheet=page.project.sheets[0]; sheet.width=sheet.height=100; sheet.stock=1
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    assert page.result and len(page.result.unplaced)==1
+    assert '1 parça yerleşmedi' in page.summary.text()
+    assert 'Kısmi hesap' in page.cost_summary.text()
+    assert page.details_button.isEnabled() and page.detail_button.isEnabled()
+    for control in (page.export_button,page.dxf_button,page.excel_button,page.pdf_button):
+        assert not control.isEnabled()
+    def forbidden(*args,**kwargs): raise AssertionError('Incomplete export must stop before file selection')
+    monkeypatch.setattr(QFileDialog,'getExistingDirectory',forbidden)
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',forbidden)
+    page.export_dxf(); page.export_report('excel'); page.export_report('pdf')
+    assert not window.jobs.busy and 'tüm parçalar' in page.status_text
+    sheet.stock=2; page.start_nest(); qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    assert not page.result.unplaced and page.export_button.isEnabled()
+
+
+def test_multiple_selected_rows_remove_correct_parts_and_failed_sources_through_sort_filter(window,qtbot):
+    from nesting.models import Part
+    from shapely.geometry import box
+    page=window.pages['nesting']
+    page.project.parts=[Part.create(code,box(0,0,20,10)) for code in ('Keep-A','Remove-B','Remove-A','Keep-B')]
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    page.imports=[dict(id='bad',source='Remove-bad.dxf',status='error',detail='Open contour',options={})]
+    page.refresh(); page.tabs.setCurrentWidget(page.parts_panel)
+    page.search.setText('Remove'); page.part_table.sortByColumn(0,Qt.DescendingOrder)
+    assert page.part_proxy.rowCount()==3
+    for row in range(3):
+        page.part_table.selectionModel().select(page.part_proxy.index(row,0),QItemSelectionModel.Select|QItemSelectionModel.Rows)
+    assert page.remove_part_button.isEnabled() and not page.edit_part_button.isEnabled()
+    assert '(3)' in page.remove_part_button.text()
+    page.remove_part_button.click()
+    assert {p.code for p in page.project.parts}=={'Keep-A','Keep-B'}
+    assert not page.imports and page.result is None and not page.export_button.isEnabled()
+    page.search.clear(); assert page.part_proxy.rowCount()==2
+
+
+def test_cost_refresh_preserves_selected_physical_plate_and_includes_vat_profit(window,qtbot,monkeypatch):
+    from nesting.models import Part
+    from shapely.geometry import box
+    from nesting.accounting import calculate
+    page=window.pages['nesting']; page.project.parts=[Part.create('P',box(0,0,35,35),quantity=9)]
+    sheet=page.project.sheets[0]; sheet.width=sheet.height=100; sheet.price_kg=45
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    page.sheet_tabs.setCurrentIndex(1); selected=page.selected_sheet_key()
+    original=[(p.part_id,p.sheet_number,p.x,p.y,p.angle) for p in page.result.placements]
+    def forbidden(*args,**kwargs): raise AssertionError('Repricing must reuse verified placement')
+    monkeypatch.setattr('nesting.engine.nest',forbidden)
+    page.cost_form.set_value('setup','25'); page.cost_form.set_value('profit_percent','10'); page.cost_form.set_value('vat_percent','20')
+    qtbot.waitUntil(lambda:page.result is not None and not window.jobs.busy,timeout=8000)
+    assert page.selected_sheet_key()==selected and page.sheet_tabs.currentIndex()==1
+    assert [(p.part_id,p.sheet_number,p.x,p.y,p.angle) for p in page.result.placements]==original
+    totals=calculate(page.project,page.result)
+    assert page.totals==totals and totals['total']>totals['material_cost']+25
+    from gui_qt.pages.nesting import fmt
+    assert f"Toplam {fmt(totals['total'],2)} TL" in page.cost_summary.text()
+
+
+def test_collapsed_advanced_settings_are_preserved_and_saved_costs_remain_visible(window,qtbot):
+    page=window.pages['nesting']; page.tabs.setCurrentWidget(page.stock_widget)
+    assert not page.advanced_button.isChecked() and not page.cost_form.isVisible()
+    page.form.set_value('kerf','.35'); page.form.set_value('angles','0;180'); page.form.set_value('seed','73')
+    page.cost_form.set_value('setup','25'); page.read_parameters(); page.sync_forms()
+    assert page.cost_toggle.isChecked() and page.cost_form.isVisible()
+    page.advanced_button.click(); assert page.form.fields['kerf'].isVisible()
+    assert page.form.value('kerf')=='0.35' and page.form.value('angles')=='0.0;180.0'
+    page.advanced_button.click(); page.read_parameters()
+    assert page.project.options.kerf==.35 and page.project.options.angles==[0,180]
+    assert page.project.options.seed==73 and page.project.operations.setup==25
+
+
+def test_material_library_still_edits_project_materials(window,qtbot,monkeypatch):
+    from PySide6.QtWidgets import QDialog
+    page=window.pages['nesting']
+    def execute(dialog):
+        if isinstance(dialog,Editor):
+            dialog.form.set_value('density','8000'); dialog.submit()
+        else:
+            page.material_table.selectRow(0); page.edit_material()
+        return QDialog.Accepted
+    monkeypatch.setattr(QDialog,'exec',execute)
+    page.show_materials()
+    assert page.project.materials[0].density==8000
+    assert page.material_table is None
+
+
+def test_part_names_toggle_does_not_rebuild_geometry_or_lose_full_source_tooltip(window,qtbot,tmp_path):
+    page=load_parts(window,qtbot,tmp_path)
+    page.project.parts[0].code='A very long part code that must not overlap adjacent parts'
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    items=set(page.canvas.scene().items())
+    assert len(page.canvas.part_labels)==3
+    assert all(len(item.text())<=18 and page.project.parts[0].code in item.toolTip() for item in page.canvas.part_labels)
+    page.labels_toggle.setChecked(False)
+    assert all(not item.isVisible() for item in page.canvas.part_labels)
+    assert set(page.canvas.scene().items())==items
+    page.labels_toggle.setChecked(True); assert all(item.isVisible() for item in page.canvas.part_labels)

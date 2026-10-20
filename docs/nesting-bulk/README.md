@@ -19,10 +19,10 @@ parça sığmıyorsa daha küçük parçalarla boşlukları kullanır. Hiçbiri 
 sonraki stok plakasını açar; 1 → 2 → 3 sırası korunur. Dışbükey ayrıştırmalar
 parça/dönüş başına önbelleğe alınır. Malzeme/kalınlık eşleşmesi, kenar/kerf
 payları, stok ve bağımsız kontur doğrulaması korunur. Eksik kalınlık/stok açıkça
-belirtilip **Saclar ve malzemeler** sekmesi açılır; farklı kalınlıklar karıştırılmaz.
+belirtilip **Sac ve ayarlar** sekmesi açılır; farklı kalınlıklar karıştırılmaz.
 
-Ekranda **1. plaka, 2. plaka, 3. plaka** listesi ve önceki/sonraki düğmeleri
-bulunur. Plakadaki parça sayısı ve verim ayrıca gösterilir. Excel/PDF'de de aynı
+Ekranda **1. plaka, 2. plaka, 3. plaka** belge sekmeleri bulunur.
+Plakadaki parça sayısı ve verim ayrıca gösterilir. Excel/PDF'de de aynı
 fiziksel plaka numaraları kullanılır. Boş çizim alanındaki yazı zoom ile büyümez.
 
 ## Kanıt
@@ -45,3 +45,6 @@ yerleşim bağımsız kontur doğrulamasını da geçti. Kullanıcının ekran g
 asıl DXF dosyaları bu ortamda bulunmadığından onların özel geometri sorunu
 tekrar üretildiği iddia edilmez; gerçek bozuk DXF ile kuyruğun kesilmesi doğrulandı.
 Bu düzeltme için EXE otomatik üretilmedi; önceki EXE bu kaynak değişikliklerini içermez.
+
+Güncel üç adımlı arayüz, kaydırılabilir plaka sekmeleri ve yeniden yapılan
+kontroller: [Nesting kullanım incelemesi](../nesting-usability/README.md).

@@ -1,0 +1,27 @@
+{
+  "source": "Real Qt workspace, ten generated DXFs, production import and NFP engine; no fabricated placements.",
+  "selected": 10,
+  "ready_before_retry": 9,
+  "failed_before_retry": 1,
+  "ready_after_retry": 10,
+  "part_count": 10,
+  "plates": 3,
+  "parts_per_plate": {
+    "1": 4,
+    "2": 4,
+    "3": 2
+  },
+  "selected_plate": 2,
+  "validated": true,
+  "engine": "GOKWORKS NFP",
+  "engine_version": "1.1",
+  "screenshots": [
+    "01-parts-dark.png",
+    "02-stock-dark.png",
+    "03-plates-dark.png",
+    "04-plates-light.png",
+    "05-plates-small.png"
+  ],
+  "windows_exe_built": false,
+  "solidworks_required": false
+}

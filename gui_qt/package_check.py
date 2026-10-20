@@ -112,6 +112,10 @@ def check(output):
         nesting_pdf(nesting_project,nesting_result,Path(folder)/'Nesting.pdf')
         w.pages['nesting'].project = nesting_project
         w.pages['nesting'].refresh(); w.pages['nesting'].show_result(nesting_result,nesting_totals)
+        assert w.pages['nesting'].tabs.count() == 3
+        assert w.pages['nesting'].sheet_tabs.tabText(0) == '1. plaka'
+        assert w.pages['nesting'].canvas.key == (nesting_project.sheets[0].id,1)
+        assert w.pages['nesting'].export_button.isEnabled()
         assert not w.pages['k_factor'].save_files.isChecked()
         from .models import TableModel, Column, FilterProxy
         model = TableModel((Column('Parça','name'),Column('Adet','quantity')))
@@ -222,6 +226,7 @@ def check(output):
                       pdf_export_engine='isolated COM process',
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
+                      'nesting three-step workspace / document plate tabs',
                       'live press-brake tooling profiles and dimensions',
                       'quick bolt torque / 51.96 Nm / 25.98 kN / clipboard',
                       'torque joint section / live thread and preload',
