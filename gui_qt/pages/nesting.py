@@ -287,7 +287,9 @@ class NestingPage(BasePage):
         self.form = f = ValueForm(Values(), '')
         f.text('gap','Parça aralığı · mm',3); f.text('margin','Kenar payı · mm',10)
         f.check('rotation','Parçalar döndürülebilsin',True)
-        f.combo('quality','Arama kalitesi',('Hızlı','Dengeli','Yüksek'),'Dengeli')
+        quality = f.combo('quality','Yerleşim kalitesi',('Hızlı','Dengeli','Yüksek'),'Dengeli')
+        quality.setToolTip('Hızlı daha az, Yüksek daha fazla yerleşim denemesi yapar. Hesaplama süresi sınırı her durumda geçerlidir.')
+        quality.setAccessibleName('Yerleşim kalitesi')
         self.advanced_button = button('Gelişmiş ayarları göster')
         self.advanced_button.setCheckable(True)
         f.form.addRow(self.advanced_button)
@@ -295,13 +297,19 @@ class NestingPage(BasePage):
         f.text('angles','İzinli açılar · ; ile ayırın','0;90;180;270')
         f.text('angle_step','Serbest açı adımı · ° (boşsa yukarıdaki liste)','')
         f.check('grain_locked','Hadde yönünü koru · yalnız 0° / 180°',False)
-        f.text('seconds','En fazla arama süresi · sn',15)
-        f.text('seed','Arama başlangıç değeri (seed)',42)
+        seconds = f.text('seconds','Yerleşim hesaplama süresi · sn',15)
+        seconds.setToolTip('İzin verilen en uzun hesaplama süresi. Daha erken bitebilir; süre dolunca bulunan en iyi geçerli yerleşim gösterilir.')
+        seconds.setAccessibleName('Yerleşim hesaplama süresi, saniye')
+        seed = f.text('seed','Deneme sırası kodu',42)
+        seed.setAccessibleName('Deneme sırası kodu')
+        self.seed_hint = label('Varsayılan 42; değiştirmeniz gerekmez. Bu kod, farklı yerleşimlerin hangi sırayla deneneceğini belirler.', 'muted')
+        seed.setToolTip(self.seed_hint.text()); f.form.addRow(self.seed_hint)
         self.advanced_note = label('Aynalama ve delik içine yerleşim kapalıdır. Kerf telafisi CAM tarafında yapılır. '
                                    'Yerleşim aralığı, parça aralığı ile kerf değerinin büyüğü ve kontur hata paylarıdır.', 'muted')
         f.form.addRow(self.advanced_note)
         def advanced(visible):
             for key in ('kerf','angles','angle_step','grain_locked','seconds','seed'): f.show_field(key,visible)
+            self.seed_hint.setVisible(visible)
             self.advanced_note.setVisible(visible)
             self.advanced_button.setText('Gelişmiş ayarları gizle' if visible else 'Gelişmiş ayarları göster')
         self.advanced_button.toggled.connect(advanced); advanced(False)
@@ -326,10 +334,10 @@ class NestingPage(BasePage):
         else:
             try: angles = [float(v.strip().replace(',','.')) for v in f.value('angles').split(';') if v.strip()]
             except ValueError: raise ValueError('Dönüş açılarını 0;90;180;270 biçiminde girin.') from None
-        titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği',seconds='Arama süresi')
+        titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği',seconds='Yerleşim hesaplama süresi')
         o = Options(**{k:number(f.value(k),titles[k]) for k in titles},
                     rotation=f.value('rotation'), angles=angles, grain_locked=f.value('grain_locked'),
-                    quality=f.value('quality'),seed=integer(f.value('seed'),'Seed',minimum=0,maximum=2**32-1))
+                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1))
         operations = Operations(**{key:number(self.cost_form.value(key),self.cost_form.form.labelForField(self.cost_form.fields[key]).text())
                                    for key in asdict(self.project.operations)})
         self.project.options = o; self.project.operations = operations
@@ -621,7 +629,7 @@ class NestingPage(BasePage):
     def can_export(self):
         if not self.can_start() or self.result is None: return False
         if self.result.unplaced:
-            self.set_status('Çıktı almak için tüm parçalar yerleşmeli. Sac stokunu/ölçüsünü veya arama süresini artırın.',True)
+            self.set_status('Çıktı almak için tüm parçalar yerleşmeli. Sac stokunu/ölçüsünü veya yerleşim hesaplama süresini artırın.',True)
             return False
         return True
 

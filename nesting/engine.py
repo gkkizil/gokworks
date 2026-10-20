@@ -176,7 +176,7 @@ def nest(project, *, stop=None, progress=None):
                         placements.append(p); previous.append(p); pending.pop(index)
                         if progress:
                             progress(min(99, int(100*(time.monotonic()-started)/o.seconds)),
-                                     f'{trial+1}. arama · {len(sheets)}. plaka · {len(placements)}/{len(order)} parça')
+                                     f'{trial+1}. yerleşim denemesi · {len(sheets)}. plaka · {len(placements)}/{len(order)} parça')
                     else:
                         blocked.add(part.id); index += 1
                 if progress:

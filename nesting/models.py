@@ -210,11 +210,11 @@ class Project:
             raise ValueError('Döndürme ve hadde kilidi doğru/yanlış olmalı.')
         for key in ('gap', 'margin', 'kerf'):
             number(getattr(o, key), key)
-        number(o.seconds, 'Optimizasyon süresi', positive=True)
+        number(o.seconds, 'Yerleşim hesaplama süresi', positive=True)
         if o.seconds > 600 or o.quality not in ('Hızlı', 'Dengeli', 'Yüksek'):
-            raise ValueError('Süre en fazla 600 saniye; kalite Hızlı, Dengeli veya Yüksek olmalı.')
+            raise ValueError('Yerleşim hesaplama süresi en fazla 600 saniye; yerleşim kalitesi Hızlı, Dengeli veya Yüksek olmalı.')
         if not o.angles or len(o.angles) > 360 or any(not math.isfinite(a) for a in o.angles):
             raise ValueError('1–360 geçerli dönüş açısı tanımlayın.')
-        integer(o.seed, 'Seed', minimum=0, maximum=2**32-1)
+        integer(o.seed, 'Deneme sırası kodu', minimum=0, maximum=2**32-1)
         for key, value in asdict(self.operations).items():
             number(value, key)

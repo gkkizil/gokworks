@@ -18,10 +18,13 @@ Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı
    TL/levha fiyatını sac satırına çift tıklayarak girin. **Malzeme kütüphanesi**
    penceresinde özel malzeme ve yoğunluk eklenebilir.
 4. Aynı sekmede kenar payı, parça aralığı, döndürme ve kaliteyi ayarlayın.
-   Kerf, açı/adım, hadde yönü, süre ve seed **Gelişmiş ayarları göster** içinde;
-   operasyon giderleri, kâr ve KDV **Kesim ve ek maliyetler** içindedir.
+   Kerf, açı/adım, hadde yönü, **Yerleşim hesaplama süresi** ve **Deneme sırası kodu**
+   (seed) **Gelişmiş ayarları göster** içinde. Süre, hesabın en uzun çalışma
+   süresidir; daha erken bitebilir. Deneme sırası kodu varsayılan 42 olarak
+   bırakılabilir; farklı yerleşimlerin denenme sırasını belirler.
+   Operasyon giderleri, kâr ve KDV **Kesim ve ek maliyetler** içindedir.
    Bu bölümleri kapatmak girilen değerleri sıfırlamaz.
-5. **Yerleştir → 3 · Yerleşim**: arama arka planda çalışır.
+5. **Yerleştir → 3 · Yerleşim**: yerleşim hesabı arka planda çalışır.
    AutoCAD benzeri **1. plaka / 2. plaka / 3. plaka** sekmelerine tıklayın;
    çok sayıda plaka varsa sekme çubuğunu kaydırın. Odak sekmedeyken
    klavyenin sol/sağ oklarıyla da geçilebilir.
@@ -59,7 +62,7 @@ izinli dönüşler ve farklı levha boyutu seçimleri denenir.
 Her fiziksel plaka, kalan uygun parçalarla doldurulduktan sonra sonraki
 plaka açılır. Ekrandaki ve rapordaki numaralar 1 → 2 → 3 olarak ilerler.
 Skor sırasıyla yerleşmeyen adet, kullanılan levha adedi, satın alınan alan
-ve yerleşimin yüksekliğidir. Hızlı/Dengeli/Yüksek en fazla 3/12/40 arama
+ve yerleşimin yüksekliğidir. Hızlı/Dengeli/Yüksek en fazla 3/12/40 yerleşim
 denemesidir; zaman sınırı daha erken durdurabilir. Genetik algoritma
 veya kanıtlanmış matematiksel optimum olduğu iddia edilmez.
 
@@ -108,7 +111,7 @@ adedinden gelir. Tezgâh süresi, giriş/çıkış yolu ve ortak kesim uydurulma
 - Büyük tekrar kullanılabilir kalıntı sınıflandırması/hurda kredisi bu
   sürümde yoktur. Bütün artık alan raporlanır, maliyetten düşülmez.
 - En fazla 100 MB giriş/proje, 20.000 içe aktarılmış kontur noktası,
-  10.000 parça örneği ve 600 saniye arama sınırı vardır. Karmaşık konturlarda
+  10.000 parça örneği ve 600 saniye hesaplama sınırı vardır. Karmaşık konturlarda
   GEOS işlemi tamamlanana kadar iptal isteği kısa süre bekleyebilir.
 
 ## Proje ve katmanlar
