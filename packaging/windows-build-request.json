@@ -1,6 +1,6 @@
 {
-  "request_id": "86bb37d1-b150-453c-a172-cbb8eeeb255c",
-  "requested_at": "2026-10-19T11:38:30.719425+00:00",
-  "source_commit": "4f89b2b636a756d7383619573fd3321e070b1e1b",
-  "reason": "User requested a single distributable GOKWORKS.exe with no companion folder. Includes drawing-reference tolerance fixes; relocated onefile/DPI/PDF/observer/embedded-license and compatible external-Qt checks; direct GitHub EXE release asset."
+  "request_id": "4feaea7a-4fe1-4736-8315-d42d9530f8c3",
+  "requested_at": "2026-10-20T04:21:50.985936+00:00",
+  "source_commit": "d736f0729fbac86b6a6dfd083f371b4981f39019",
+  "reason": "User requested a fresh single distributable GOKWORKS.exe including the simplified tolerance stack workflow, actionable validation messages, explicit drawing alignment confirmation, and responsive controls. Keep onefile delivery with no companion folder."
 }
