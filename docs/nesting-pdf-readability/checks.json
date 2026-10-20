@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-20",
+  "source_project": "docs/nesting-example/Ornek.goknest.json",
+  "source_part_count": 22,
+  "source_sheet_count": 1,
+  "before_body_color": "#eeeeee",
+  "before_body_font_pt": 9,
+  "after_body_color": "#17212b",
+  "after_body_font_pt": 10.5,
+  "pages": 4,
+  "theme_rasters_identical": true,
+  "github_urls_in_pdf": false,
+  "source_DXF_files_unchanged": true,
+  "project_fingerprint_unchanged": true,
+  "page_details": [
+    {
+      "page": 1,
+      "colors": [
+        "#17212b",
+        "#334155"
+      ],
+      "font_sizes_pt": [
+        9.0,
+        10.5,
+        14.25,
+        15.75,
+        21.0
+      ],
+      "link_annotations": 0,
+      "text_span_count": 50
+    },
+    {
+      "page": 2,
+      "colors": [
+        "#17212b",
+        "#334155"
+      ],
+      "font_sizes_pt": [
+        9.0,
+        10.5,
+        12.75,
+        15.75
+      ],
+      "link_annotations": 0,
+      "text_span_count": 84
+    },
+    {
+      "page": 3,
+      "colors": [
+        "#17212b",
+        "#334155"
+      ],
+      "font_sizes_pt": [
+        9.0,
+        10.5,
+        15.75
+      ],
+      "link_annotations": 0,
+      "text_span_count": 119
+    },
+    {
+      "page": 4,
+      "colors": [
+        "#12243a",
+        "#17212b",
+        "#334155"
+      ],
+      "font_sizes_pt": [
+        8.25,
+        9.0,
+        10.5,
+        12.0
+      ],
+      "link_annotations": 0,
+      "text_span_count": 27
+    }
+  ],
+  "permanent_tests": "tests/test_nesting_pdf_report.py",
+  "limitations": "Offscreen Linux Qt rendering and real PDF inspection; no physical printer or Windows PDF viewer run.",
+  "opaque_white_paper": true,
+  "test_command": "QT_QPA_PLATFORM=offscreen python -m pytest tests/test_nesting_pdf_report.py tests/test_nesting.py -q",
+  "tests_passed": 56
+}

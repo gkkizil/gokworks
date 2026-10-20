@@ -1,6 +1,5 @@
 """Atomic Excel/PDF exports with live accounting and every sheet's actual layout."""
 
-from html import escape
 from io import BytesIO
 
 from tolerance_stack.storage import atomic_write
@@ -85,42 +84,66 @@ def export_excel(project, result, path, *, overwrite=False, stop=None):
 def export_pdf(project, result, path, *, overwrite=False, stop=None):
     totals = calculate(project, result, stop=stop)
     def write(temporary):
-        from PySide6.QtCore import QRectF, QMarginsF, Qt
-        from PySide6.QtGui import QPdfWriter, QPainter, QPageSize, QPageLayout, QTextDocument, QFont, QColor
+        from PySide6.QtCore import QRectF, QMarginsF, QSizeF, Qt
+        from PySide6.QtGui import (QAbstractTextDocumentLayout, QPdfWriter, QPainter, QPageSize,
+                                  QPageLayout, QTextDocument, QFont, QColor, QPalette)
+        from .pdf_report import report_html
         writer = QPdfWriter(str(temporary)); writer.setResolution(96); writer.setPageSize(QPageSize(QPageSize.A4))
         writer.setPageMargins(QMarginsF(12,12,12,12), QPageLayout.Millimeter)
         writer.setTitle(project.name); writer.setCreator('GOKWORKS Nesting')
-        text = ['<h1>GOKWORKS · Nesting ve sac maliyeti</h1><table border="1" cellpadding="4" width="100%">']
-        for key, value in summary_rows(project, result, totals): text.append(f'<tr><td>{escape(str(key))}</td><td>{escape(str(value))}</td></tr>')
-        text.append('</table><h2>Parça özeti</h2>')
-        for p in totals['part_summary']:
-            text.append('<p>'+escape(f"{p['code']} · {p['material']} · {p['thickness']:g} mm · {p['quantity']} adet · {p['weight']:.5f} kg/adet · Toplam {p['total_weight']:.5f} kg · {p['area']:.3f} mm²/adet · {p['sheets']} · {p['allocation']:.2f} TL")+'</p>')
-        text.append('<h2>Yerleşen örnekler</h2>')
-        for p in totals['parts']:
-            text.append('<p>'+escape(f"{p['code']} #{p['instance']} · {p['material']} · {p['thickness']:g} mm · {p['weight']:.5f} kg · {p['area']:.3f} mm² · {p['sheet']} · {p['allocation']:.2f} TL")+'</p>')
-        text.append('<h2>Malzeme yoğunlukları · yaklaşık başlangıç değerleri</h2>')
-        for m in project.materials: text.append('<p>'+escape(f'{m.name}: {m.density:g} kg/m³ · {m.source}')+'</p>')
-        for p in project.parts: text.append('<p>'+escape(f'{p.code}: eğri toleransı {p.curve_tolerance:g} mm; uç {p.join_tolerance:g} mm; gerçek uç hareketi {p.endpoint_error:g} mm; kaynak SHA256 {p.source_sha256}')+'</p>')
-        document = QTextDocument(); document.setDefaultFont(QFont('Arial', 9)); document.setHtml(''.join(text)); document.setTextWidth(writer.width())
+        # Give Qt a real page size before layout so tables wrap and paginate as
+        # tables, rather than cutting a single long document at arbitrary rows.
+        footer_height = 28
+        page_height = writer.height()-footer_height
+        document = QTextDocument(); document.setDocumentMargin(0)
+        body_font = QFont('Arial'); body_font.setPointSizeF(10.5)
+        document.setDefaultFont(body_font)
+        document.documentLayout().setPaintDevice(writer)
+        document.setPageSize(QSizeF(writer.width(), page_height))
+        document.setHtml(report_html(project, result, totals))
+        context = QAbstractTextDocumentLayout.PaintContext()
+        for role in (QPalette.Text, QPalette.WindowText, QPalette.ButtonText):
+            context.palette.setColor(role, QColor('#17212b'))
+        pages = document.pageCount()+len(totals['sheets'])
         painter = QPainter(writer)
         try:
-            for offset in range(0, int(document.size().height())+1, writer.height()):
+            def white_page():
+                # Paint the actual paper, including margins. QtPdf renders
+                # unpainted PDF regions as transparent; PDF consumers should
+                # always receive a white production report.
+                layout = writer.pageLayout()
+                full = layout.fullRectPixels(writer.resolution())
+                area = layout.paintRectPixels(writer.resolution())
+                painter.fillRect(QRectF(-area.x(), -area.y(), full.width(), full.height()), QColor('#ffffff'))
+
+            def footer(number):
+                painter.setPen(QColor('#334155')); painter.setFont(QFont('Arial', 9))
+                painter.drawText(QRectF(0, writer.height()-22, writer.width(), 22),
+                                 Qt.AlignVCenter | Qt.AlignRight, f'GOKWORKS · {number} / {pages}')
+
+            for index in range(document.pageCount()):
                 check_cancel(stop)
-                if offset and not writer.newPage(): raise RuntimeError('PDF sayfası oluşturulamadı.')
-                painter.save(); painter.setClipRect(QRectF(0,0,writer.width(),writer.height())); painter.translate(0,-offset)
-                document.drawContents(painter, QRectF(0,offset,writer.width(),writer.height())); painter.restore()
-            for s in totals['sheets']:
+                if index and not writer.newPage(): raise RuntimeError('PDF sayfası oluşturulamadı.')
+                white_page()
+                offset = index*page_height
+                painter.save(); painter.setClipRect(QRectF(0,0,writer.width(),page_height)); painter.translate(0,-offset)
+                context.clip = QRectF(0,offset,writer.width(),page_height)
+                document.documentLayout().draw(painter, context); painter.restore()
+                footer(index+1)
+            for index, s in enumerate(totals['sheets'], document.pageCount()+1):
                 check_cancel(stop)
                 if not writer.newPage(): raise RuntimeError('PDF yerleşim sayfası oluşturulamadı.')
-                painter.setPen(QColor('#24466c')); painter.setFont(QFont('Arial', 12, QFont.Bold))
+                white_page()
+                painter.setPen(QColor('#17212b')); painter.setFont(QFont('Arial', 12, QFont.Bold))
                 painter.drawText(QRectF(0,0,writer.width(),60), Qt.TextWordWrap,
                                  f"{s['plate']}. plaka · {s['name']} · {s['material']} · {s['width']:g} × {s['height']:g} × {s['thickness']:g} mm")
-                painter.setFont(QFont('Arial', 9))
+                painter.setFont(body_font)
                 painter.drawText(QRectF(0,65,writer.width(),85), Qt.TextWordWrap,
                                  f"Brüt {s['gross_weight']:.5f} kg · Net {s['net_weight']:.5f} kg · Fire {s['waste_weight']:.5f} kg\n"
                                  f"Verim %{s['efficiency']:.2f} · Malzeme {s['material_cost']:.2f} TL · {s['pricing']} {s['price']:g}\n"
                                  'Nominal kesim konturları; kerf telafisi CAM/tezgâhta uygulanır.')
-                draw_sheet(painter, QRectF(0,150,writer.width(),writer.height()-170), project, result, (s['id'],s['number']))
+                draw_sheet(painter, QRectF(0,150,writer.width(),writer.height()-190), project, result, (s['id'],s['number']))
+                footer(index)
         finally: painter.end()
         del writer
         content = temporary.read_bytes()

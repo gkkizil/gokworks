@@ -4,10 +4,10 @@ from copy import deepcopy
 from dataclasses import asdict, replace
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout, QTabWidget, QTabBar,
+from PySide6.QtCore import Qt, QTimer, QEvent, QItemSelectionModel
+from PySide6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout, QTabBar, QSplitter,
     QTableView, QLineEdit, QFileDialog, QDialog, QMenu, QHeaderView,
-    QAbstractItemView, QDialogButtonBox, QCheckBox)
+    QAbstractItemView, QDialogButtonBox, QCheckBox, QApplication)
 
 from ..components import BasePage, card, label, button, scroll, configure_view, show_details, ValueForm
 from ..models import TableModel, Column, FilterProxy
@@ -45,41 +45,77 @@ class NestingPage(BasePage):
         project_menu.addSeparator()
         self.new_button = project_menu.addAction('Yeni proje', self.new_project)
         self.action('Proje',None).setMenu(project_menu)
-        name_row = QHBoxLayout(); name_row.addWidget(label('Proje adı', 'muted'))
+        # A compact project header; the working surface has no wizard tabs.
+        heading = self.layout.itemAt(0).layout(); captions = heading.itemAt(0).layout()
+        captions.itemAt(0).widget().setText('Nesting')
+        captions.itemAt(0).widget().setStyleSheet('font-size: 21px; font-weight: 650;')
+        captions.itemAt(1).widget().hide(); heading.setStretch(0,0)
         self.name = QLineEdit(self.project.name); self.name.textEdited.connect(self.name_changed)
-        name_row.addWidget(self.name,1); self.controls.append(self.name)
-        self.layout.addLayout(name_row)
-        self.tabs = QTabWidget(); self.layout.addWidget(self.tabs,1)
+        self.name.setMinimumWidth(0); self.name.setAccessibleName('Nesting proje adı')
+        self.name.setToolTip('Proje adı'); heading.insertWidget(1,self.name,1); self.controls.append(self.name)
+        commands = QHBoxLayout(); commands.setSpacing(8)
+        self.parts_toggle = button('Parçalar'); self.parts_toggle.setCheckable(True); self.parts_toggle.setChecked(True)
+        self.parts_toggle.setToolTip('Parça listesini gizle / göster. Panel kenarını sürükleyerek genişliğini ayarlayın.')
+        self.parts_toggle.toggled.connect(self.toggle_parts); commands.addWidget(self.parts_toggle)
+        self.settings_button = button('Sac ve ayarlar',self.show_settings); commands.addWidget(self.settings_button)
+        self.controls.append(self.settings_button)
+        commands.addStretch()
+        self.stop_button = button('Durdur',self.jobs.cancel); self.stop_button.hide(); commands.addWidget(self.stop_button)
+        self.nest_button = button('Yerleştir',self.start_nest,primary=True); commands.addWidget(self.nest_button)
+        self.nest_button.setToolTip('Birinci plakadan başlayarak, stok adedi kadar plakayı sırayla doldur')
+        self.controls.append(self.nest_button); self.layout.addLayout(commands)
+        self.workspace = QSplitter(Qt.Horizontal); self.workspace.setChildrenCollapsible(False)
+        self.workspace.setHandleWidth(8); self.workspace.setAccessibleName('Parçalar ve sac yerleşimi')
+        self.layout.addWidget(self.workspace,1)
         left, left_layout = card()
-        self.parts_panel = left
+        self.parts_panel = left; left.setMinimumWidth(216)
+        left_layout.setContentsMargins(10,10,10,10); left_layout.setSpacing(8)
+        title_row = QHBoxLayout(); title_row.addWidget(label('Parçalar','section')); title_row.addStretch()
+        self.import_button = button('DXF ekle', self.import_dialog, primary=True); title_row.addWidget(self.import_button)
+        left_layout.addLayout(title_row); self.controls.append(self.import_button)
         part_tools = QHBoxLayout()
-        self.import_button = button('DXF ekle', self.import_dialog, primary=True); part_tools.addWidget(self.import_button)
         self.search = QLineEdit(); self.search.setPlaceholderText('Parça veya dosya ara…'); self.search.setClearButtonEnabled(True)
+        self.search.setAccessibleName('Parçalarda ara')
         part_tools.addWidget(self.search,1); left_layout.addLayout(part_tools)
-        self.part_model = NestingTableModel([Column('Dosya / parça','code'),Column('Adet','quantity'),
+        self.part_model = NestingTableModel([Column('Parça','display_code'),Column('Adet','quantity'),
             Column('t · mm','thickness',lambda v:fmt(v,2)),Column('Malzeme','material'),
             Column('Durum','status',lambda s:IMPORT_LABELS.get(s,s))])
         self.part_proxy = FilterProxy(self); self.part_proxy.setSourceModel(self.part_model)
         self.part_table = configure_view(QTableView()); self.part_table.setModel(self.part_proxy)
         self.part_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.part_table.horizontalHeader().setMinimumSectionSize(40)
+        self.part_table.horizontalHeader().setMinimumSectionSize(32)
         self.part_table.horizontalHeader().setStretchLastSection(False)
         self.part_table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        for i, width in enumerate((200,60,85,115,105)): self.part_table.setColumnWidth(i,width)
+        for i, width in enumerate((140,42,60,115,105)): self.part_table.setColumnWidth(i,width)
+        # The compact list keeps its numeric columns visible. Full material,
+        # import status and source remain in the row tooltip and properties.
+        self.part_table.hideColumn(3); self.part_table.hideColumn(4)
+        self.part_table.verticalHeader().setDefaultSectionSize(32)
+        self.part_table.setToolTip('Çift tık: adet, malzeme ve kalınlık. Ctrl / Shift: çoklu seçim. Satır üzerinde bekleyin: kaynak ve yükleme durumu.')
         self.part_table.doubleClicked.connect(self.edit_part); self.search.textChanged.connect(self.part_proxy.set_query)
-        self.part_table.selectionModel().selectionChanged.connect(self.update_part_actions)
+        self.part_table.selectionModel().selectionChanged.connect(self.part_selection_changed)
         left_layout.addWidget(self.part_table,1)
         buttons = QHBoxLayout()
         self.edit_part_button = button('Düzenle', self.edit_part); buttons.addWidget(self.edit_part_button)
-        self.remove_part_button = button('Seçileni kaldır', self.remove_part); buttons.addWidget(self.remove_part_button)
+        self.remove_part_button = button('Kaldır', self.remove_part); buttons.addWidget(self.remove_part_button)
         buttons.addStretch()
-        self.import_report_button = button('Yükleme ayrıntıları', self.show_import_report); buttons.addWidget(self.import_report_button)
+        self.import_report_button = button('…', self.show_import_report); buttons.addWidget(self.import_report_button)
+        self.import_report_button.setAccessibleName('DXF yükleme ayrıntıları'); self.import_report_button.setToolTip('DXF yükleme ayrıntıları')
         left_layout.addLayout(buttons)
         self.import_info = label('Henüz DXF seçilmedi.', 'muted'); left_layout.addWidget(self.import_info)
-        self.part_info = label('Çift tık: adet, malzeme ve kalınlık. Ctrl / Shift: çoklu seçim.', 'muted'); left_layout.addWidget(self.part_info)
-        self.tabs.addTab(left,'1 · Parçalar'); self.controls.append(left)
-        self.stock_widget = self.build_stock(); self.tabs.addTab(self.stock_widget, '2 · Sac ve ayarlar')
-        preview = QWidget(); layout = QVBoxLayout(preview); layout.setContentsMargins(0,8,0,0)
+        self.workspace.addWidget(left)
+        self.controls.extend([self.edit_part_button,self.remove_part_button])
+        self.settings_dialog = QDialog(self); self.settings_dialog.setWindowTitle('Nesting · Sac ve ayarlar')
+        self.settings_dialog.setWindowModality(Qt.WindowModal)
+        settings_layout = QVBoxLayout(self.settings_dialog)
+        settings_layout.addWidget(label('Sac stokunu ve yerleşim koşullarını buradan düzenleyin. Değişiklikler projeye hemen uygulanır.','muted'))
+        self.settings_error = label('','error'); self.settings_error.hide(); settings_layout.addWidget(self.settings_error)
+        self.stock_widget = self.build_stock(); settings_layout.addWidget(self.stock_widget,1)
+        self.settings_dialog.installEventFilter(self)
+        close = QDialogButtonBox(QDialogButtonBox.Close); close.button(QDialogButtonBox.Close).setText('Kapat')
+        close.rejected.connect(self.settings_dialog.reject); settings_layout.addWidget(close)
+        preview, layout = card(); preview.setMinimumWidth(220)
+        layout.setContentsMargins(10,10,10,10); layout.setSpacing(8)
         toolbar = QHBoxLayout(); self.sheet_tabs = QTabBar()
         self.sheet_tabs.setObjectName('nestingPlates')
         self.sheet_tabs.setDocumentMode(True); self.sheet_tabs.setDrawBase(False)
@@ -89,23 +125,26 @@ class NestingPage(BasePage):
         self.sheet_tabs.setToolTip('Plaka sekmesine tıklayın veya sol / sağ ok tuşlarıyla geçin.')
         self.sheet_tabs.currentChanged.connect(self.render_sheet); toolbar.addWidget(self.sheet_tabs,1)
         self.canvas = NestingCanvas()
+        self.canvas.partActivated.connect(self.select_canvas_part)
         self.fit_button = button('Sığdır', self.canvas.fit); toolbar.addWidget(self.fit_button)
-        layout.addLayout(toolbar)
-        self.current_note = label('Yerleşim hazır olduğunda plakaları burada inceleyebilirsiniz.', 'muted')
-        self.current_note.setToolTip('Tekerlek: yakınlaştır · Sürükle: kaydır')
-        layout.addWidget(self.current_note)
-        layout.addWidget(self.canvas,1)
-        self.labels_toggle = QCheckBox('Parça adlarını göster'); self.labels_toggle.setChecked(True)
+        self.labels_toggle = QCheckBox('Adlar'); self.labels_toggle.setChecked(True)
+        self.labels_toggle.setAccessibleName('Yerleşimde parça adlarını göster')
         self.labels_toggle.toggled.connect(self.canvas.set_labels_visible)
         self.labels_toggle.setToolTip('Uzun veya çok sayıdaki parça adlarını gizleyebilirsiniz. Ayrıntılar parça üzerinde bekleyince görünür.')
-        layout.addWidget(self.labels_toggle)
+        toolbar.addWidget(self.labels_toggle); layout.addLayout(toolbar)
+        self.current_note = label('DXF ekleyin, sacı tanımlayın ve Yerleştir düğmesine basın.', 'muted')
+        self.current_note.setToolTip('Tekerlek: yakınlaştır · Sürükle: kaydır · Parçaya tıkla: listede seç')
+        layout.addWidget(self.current_note); layout.addWidget(self.canvas,1)
         self.summary = label('Henüz yerleşim yok.', 'subtitle'); layout.addWidget(self.summary)
         self.cost_summary = label('', 'section'); layout.addWidget(self.cost_summary)
         # The viewport itself resizes: an outer scroll area clips the sheet and
         # puts the summary below the fold, even when fitInView succeeds.
-        self.preview_scroll = preview; self.tabs.addTab(preview, '3 · Yerleşim')
+        self.preview_scroll = preview; self.workspace.addWidget(preview)
+        self.workspace.setStretchFactor(0,0); self.workspace.setStretchFactor(1,1)
+        self.workspace.setSizes([330,750]); self.parts_width = 330
+        self.workspace.splitterMoved.connect(lambda *_:self.update_result_text())
         self.controls.extend([self.stock_widget, self.parameters])
-        footer = QHBoxLayout()
+        footer = QHBoxLayout(); footer.setSpacing(8)
         detail_menu = QMenu(self)
         self.detail_button = detail_menu.addAction('Hesap ve maliyet ayrıntıları',self.show_calculations)
         self.verify_button = detail_menu.addAction('Yerleşimi yeniden doğrula',self.verify)
@@ -116,34 +155,74 @@ class NestingPage(BasePage):
         self.pdf_button = export_menu.addAction('PDF raporu…',lambda:self.export_report('pdf'))
         self.export_button = button('Dışa aktar'); self.export_button.setMenu(export_menu); footer.addWidget(self.export_button)
         footer.addStretch()
-        self.stop_button = button('Durdur',self.jobs.cancel); self.stop_button.hide(); footer.addWidget(self.stop_button)
-        self.next_button = button('Sac ve ayarlara geç',lambda:self.tabs.setCurrentWidget(self.stock_widget))
-        footer.addWidget(self.next_button); self.controls.append(self.next_button)
-        self.nest_button = button('Yerleştir', self.start_nest, primary=True); footer.addWidget(self.nest_button)
-        self.nest_button.setToolTip('Parçaları, stok adedi sınırında, birinci plakadan başlayarak sırayla yerleştir')
+        layout.addLayout(footer)
         self.result_controls = [self.verify_button,self.detail_button,self.dxf_button,self.excel_button,self.pdf_button]
-        self.controls.append(self.nest_button); self.controls.extend(self.result_controls)
-        self.layout.addLayout(footer); self.finish_layout()
-        self.tabs.currentChanged.connect(self.update_buttons); self.refresh()
+        self.controls.extend(self.result_controls)
+        self.finish_layout(); self.refresh()
+        # Local density only: other GOKWORKS modules retain their current style.
+        self.setStyleSheet('QPushButton { padding: 5px 10px; } QLineEdit { padding: 5px 7px; } '
+                           'QHeaderView::section { padding: 7px 4px; }')
+        self.layout.setContentsMargins(16,12,16,10); self.layout.setSpacing(8)
         self.style_sheet_tabs()
-        self.set_status('1 · DXF ekle ile bir veya birden fazla dosya seçin.')
+        self.set_status('DXF ekleyin · Sac ve ayarlardan stok tanımlayın · Yerleştir')
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
-        compact_height = event.size().height() < 640
-        if compact_height != getattr(self,'compact_height',None):
-            self.compact_height = compact_height
-            self.layout.setContentsMargins(24,12 if compact_height else 20,24,10 if compact_height else 16)
-            self.layout.setSpacing(8 if compact_height else 14)
-        if hasattr(self,'stock_layout'):
-            self.stock_layout.setDirection(QBoxLayout.LeftToRight if self.width() >= 1000 else QBoxLayout.TopToBottom)
+        if hasattr(self,'workspace') and self.parts_panel.isVisible():
+            # Keep a useful drawing area at the application's minimum width.
+            maximum = max(216,int(self.workspace.width()*.42))
+            sizes = self.workspace.sizes()
+            if sizes[0] > maximum: self.workspace.setSizes([maximum,max(220,self.workspace.width()-maximum-8)])
+        if hasattr(self,'cost_summary'): QTimer.singleShot(0,self.update_result_text)
+
+    def eventFilter(self, watched, event):
+        if watched is getattr(self,'settings_dialog',None) and event.type() == QEvent.Resize:
+            self.stock_layout.setDirection(QBoxLayout.LeftToRight if watched.width() >= 1040 else QBoxLayout.TopToBottom)
+        return super().eventFilter(watched,event)
+
+    def show_settings(self, *, error=''):
+        if not self.can_start(): return
+        self.settings_error.setText(str(error)); self.settings_error.setVisible(bool(error))
+        if not self.settings_dialog.isVisible():
+            bounds = self.screen().availableGeometry()
+            self.settings_dialog.resize(min(1100,bounds.width()-40),min(740,bounds.height()-60))
+        self.settings_dialog.open()
+        if error: self.stock_widget.verticalScrollBar().setValue(0)
+
+    def toggle_parts(self, visible):
+        if not hasattr(self,'workspace'): return
+        if not visible: self.parts_width = self.workspace.sizes()[0]
+        self.parts_panel.setVisible(visible)
+        if visible:
+            width = min(self.parts_width,max(216,int(self.workspace.width()*.42)))
+            self.workspace.setSizes([width,max(220,self.workspace.width()-width-8)])
+        self.parts_toggle.setText('Parçalar' if visible else 'Parçaları göster')
+
+    def part_selection_changed(self):
+        self.update_part_actions()
+        if hasattr(self,'canvas'):
+            self.canvas.set_selected_parts({index.data(Qt.UserRole)['id'] for index in self.part_table.selectionModel().selectedRows()
+                                            if index.data(Qt.UserRole).get('kind') == 'part'})
+
+    def select_canvas_part(self, part_id):
+        if not part_id: return self.part_table.clearSelection()
+        self.parts_toggle.setChecked(True)
+        # A click on the drawing should still find a row hidden by the search.
+        row = next((i for i in range(self.part_proxy.rowCount()) if self.part_proxy.index(i,0).data(Qt.UserRole)['id'] == part_id),None)
+        if row is None:
+            self.search.clear()
+            row = next((i for i in range(self.part_proxy.rowCount()) if self.part_proxy.index(i,0).data(Qt.UserRole)['id'] == part_id),None)
+        if row is not None:
+            index = self.part_proxy.index(row,0)
+            self.part_table.selectionModel().setCurrentIndex(index,QItemSelectionModel.ClearAndSelect|QItemSelectionModel.Rows)
+            self.part_table.scrollTo(index)
 
     def update_part_actions(self):
         if not hasattr(self,'edit_part_button'): return
         count = len(self.part_table.selectionModel().selectedRows())
         self.edit_part_button.setEnabled(not self.busy and count == 1)
         self.remove_part_button.setEnabled(not self.busy and count > 0)
-        self.remove_part_button.setText(f'Seçilenleri kaldır ({count})' if count > 1 else 'Seçileni kaldır')
+        self.remove_part_button.setText(f'Kaldır ({count})' if count > 1 else 'Kaldır')
 
     def selected(self, table):
         return table.currentIndex().data(Qt.UserRole) if table.currentIndex().isValid() else None
@@ -174,7 +253,7 @@ class NestingPage(BasePage):
         self.result = None; self.sheet_totals = []; self.totals = None
         self.clear_sheet_tabs()
         self.render_sheet()
-        self.summary.setText('Yerleşim bekleniyor.'); self.cost_summary.setText('')
+        self.summary.setText('Yerleşim bekleniyor.'); self.summary.setToolTip(''); self.cost_summary.setText('')
         self.current_note.setText('Parça ve sac bilgilerini tamamlayıp Yerleştir düğmesine basın.')
         self.update_buttons()
         if had_result: self.set_status('Parça, sac veya ayarlar değişti. Güncel sonuç için yeniden otomatik yerleşim yapın.')
@@ -192,6 +271,11 @@ class NestingPage(BasePage):
 
     def reprice(self):
         if self.price_candidate is None or self.busy or self.jobs.busy: return
+        # An editor runs its own event loop. Wait for its draft to be accepted
+        # or discarded before taking a price snapshot of the live project.
+        modal = QApplication.activeModalWidget()
+        if modal is not None and modal is not self.settings_dialog:
+            self.price_timer.start(); return
         signature,candidate = self.price_candidate
         try:
             self.read_parameters()
@@ -216,9 +300,6 @@ class NestingPage(BasePage):
             control.setEnabled(complete)
         self.export_button.setToolTip('Tüm parçalar yerleştiğinde DXF, Excel veya PDF kaydedebilirsiniz.'
                                      if not complete else 'DXF, Excel veya PDF kaydet')
-        self.next_button.setVisible(self.tabs.currentWidget() is self.parts_panel)
-        self.nest_button.setVisible(self.tabs.currentWidget() is not self.parts_panel)
-        self.next_button.setEnabled(not self.busy and bool(self.project.parts))
         self.nest_button.setEnabled(not self.busy and bool(self.project.parts))
         self.stop_button.setVisible(self.busy)
         self.sheet_tabs.setEnabled(bool(self.sheet_totals))
@@ -238,7 +319,8 @@ class NestingPage(BasePage):
     def new_project(self):
         if not self.can_start(): return
         self.project = new_project(); self.result = None; self.imports = []; self.sync_forms(); self.refresh(); self.invalidate()
-        self.search.clear(); self.tabs.setCurrentWidget(self.parts_panel)
+        self.search.clear(); self.parts_toggle.setChecked(True)
+        self.settings_dialog.reject()
         self.set_status('Yeni proje hazır. Kaynak DXF dosyaları değiştirilmez.')
 
     def build_stock(self):
@@ -360,9 +442,10 @@ class NestingPage(BasePage):
         rows = []
         for p in self.project.parts:
             g = p.polygon; m = self.project.material(p.material)
-            rows.append(dict(id=p.id,code=p.code,quantity=p.quantity,thickness=p.thickness,weight=mass(g.area,p.thickness,m.density),
+            rows.append(dict(id=p.id,code=p.code,display_code=p.code,quantity=p.quantity,thickness=p.thickness,weight=mass(g.area,p.thickness,m.density),
                              material=m.name,status='success',source=p.source,detail='Kesim konturu hazır.',kind='part'))
-        rows.extend(dict(id=e['id'],code=Path(e['source']).name,quantity=None,thickness=e['options'].get('thickness',2),weight=None,
+        rows.extend(dict(id=e['id'],code=Path(e['source']).name,display_code=Path(e['source']).name+' · '+IMPORT_LABELS[e['status']],
+                         quantity=None,thickness=e['options'].get('thickness',2),weight=None,
                          material=next((m.name for m in self.project.materials if m.id == e['options'].get('material','S235JR')),'—'),
                          status=e['status'],source=e['source'],detail=e['detail'],kind='import')
                     for e in self.imports if e['status'] != 'success')
@@ -377,7 +460,7 @@ class NestingPage(BasePage):
         self.update_buttons()
         counts = {status:sum(e['status'] == status for e in self.imports) for status in IMPORT_LABELS}
         if self.imports:
-            self.import_info.setText(f"{len(self.imports)} dosya seçildi · {counts['success']} hazır · {counts['error']} sorunlu"
+            self.import_info.setText(f"{len(self.imports)} dosya · {counts['success']} hazır · {counts['error']} sorunlu"
                                      + (f" · {counts['pending']+counts['running']} bekliyor" if counts['pending']+counts['running'] else '')
                                      + (f" · {counts['cancelled']} durduruldu" if counts['cancelled'] else ''))
         else: self.import_info.setText(f'{len(self.project.parts)} parça hazır.' if self.project.parts else 'Henüz DXF seçilmedi.')
@@ -408,6 +491,7 @@ class NestingPage(BasePage):
         finally: dialog.deleteLater()
 
     def edit_sheet(self, *args, new=False):
+        if not self.can_start(): return
         row = self.selected(self.sheet_table)
         if not new and not row: return self.set_status('Düzenlemek için bir sac seçin.')
         item = Sheet(uid(),'Yeni sac') if new else self.project.sheet(row['id'])
@@ -437,11 +521,13 @@ class NestingPage(BasePage):
         finally: dialog.deleteLater()
 
     def remove_sheet(self):
+        if not self.can_start(): return
         row = self.selected(self.sheet_table)
         if row:
             self.project.sheets = [s for s in self.project.sheets if s.id != row['id']]; self.invalidate(); self.refresh()
 
     def edit_part(self, *args):
+        if not self.can_start(): return
         if len(self.part_table.selectionModel().selectedRows()) > 1:
             return self.set_status('Özelliklerini düzenlemek için tek parça seçin.')
         row = self.selected(self.part_table)
@@ -516,7 +602,7 @@ class NestingPage(BasePage):
         if not self.can_start(): return
         files = list(files)
         if not files: return
-        self.search.clear(); self.invalidate(); self.tabs.setCurrentWidget(self.parts_panel)
+        self.search.clear(); self.invalidate(); self.parts_toggle.setChecked(True)
         entries = []
         for path in files:
             if retry_id:
@@ -541,22 +627,23 @@ class NestingPage(BasePage):
         if not self.can_start(): return
         problems = [e for e in self.imports if e['status'] != 'success']
         if problems:
-            self.tabs.setCurrentWidget(self.parts_panel)
+            self.parts_toggle.setChecked(True)
             return self.set_status(f'{len(problems)} dosya henüz hazır değil. Listede Okunamadı/Durduruldu yazan dosyaya çift tıklayıp yeniden okuyun veya Kaldır ile çıkarın.',True)
         try: self.read_parameters(); self.project.validate()
-        except ValueError as error: return self.set_status(error,True)
+        except ValueError as error:
+            self.set_status(error,True); return self.show_settings(error=str(error))
         missing = self.missing_stock()
         if missing:
-            self.tabs.setCurrentWidget(self.stock_widget)
-            return self.set_status('Sac tanımı / stok eksik: '+', '.join(f'{self.project.material(material).name} · {thickness:g} mm' for material,thickness in missing)
-                                   + '. Sac ekle ile uygun kalınlıkta sac tanımlayın veya stok adedini artırın.',True)
+            error = 'Sac tanımı / stok eksik: '+', '.join(f'{self.project.material(material).name} · {thickness:g} mm' for material,thickness in missing)
+            error += '. Sac ekle ile uygun kalınlıkta sac tanımlayın veya stok adedini artırın.'
+            self.set_status(error,True); return self.show_settings(error=error)
         self.invalidate(); self.preferred_sheet = None; snapshot = deepcopy(self.project)
         def operation(sink,stop):
             from nesting.engine import nest
             result = nest(snapshot,stop=stop,progress=lambda percent,text:sink.put(('nest_progress',(percent,100,text))))
             totals = calculate(snapshot,result,complete=False)
             sink.put(('nest_result',(result,totals)))
-        self.jobs.start(self,operation); self.tabs.setCurrentWidget(self.preview_scroll); self.set_status('Kontur yerleşimi aranıyor…')
+        self.jobs.start(self,operation); self.set_status('Parçalar plakalara yerleştiriliyor…')
 
     def show_result(self,result,totals=None):
         self.result = result
@@ -572,13 +659,7 @@ class NestingPage(BasePage):
         selected = next((i for i in range(self.sheet_tabs.count()) if self.sheet_tabs.tabData(i) == self.preferred_sheet),-1)
         if selected >= 0: self.sheet_tabs.setCurrentIndex(selected)
         self.sheet_tabs.blockSignals(False); self.preferred_sheet = None
-        self.summary.setText(f"{totals['part_count']} parça · {totals['sheet_count']} levha · Verim %{fmt(totals['efficiency'],1)}"
-                             + (f" · {len(result.unplaced)} parça yerleşmedi" if result.unplaced else '') + '\n'
-                             f"Brüt {fmt(totals['gross_weight'])} kg · Net {fmt(totals['net_weight'])} kg · Fire {fmt(totals['waste_weight'])} kg")
-        unpriced = any(s['price'] == 0 for s in totals['sheets'])
-        prefix = 'Kısmi hesap' if result.unplaced else 'Toplam'
-        self.cost_summary.setText(f"{prefix} {fmt(totals['total'],2)} TL · Malzeme {fmt(totals['material_cost'],2)} TL"
-                                  + (' · Sac fiyatı eksik' if unpriced else ''))
+        self.update_result_text()
         self.cost_summary.setToolTip('Girilen sac, kesim, hazırlık, sabit gider, kâr ve KDV toplamı. '
                                      'Sıfır bırakılan fiyat ve giderler hesaba eklenmez.')
         self.render_sheet(); self.update_buttons()
@@ -587,8 +668,25 @@ class NestingPage(BasePage):
             self.set_status(f'{len(result.unplaced)} parça yerleşmedi: '+', '.join(codes)+'. Sac ölçüsü/stokunu ve süreyi kontrol edin. Üretim çıktısı kapalı.',True)
         else: self.set_status(f'Yerleşim doğrulandı · {totals["part_count"]} parça · {totals["sheet_count"]} levha · {result.elapsed:.1f} sn')
 
+    def update_result_text(self):
+        if self.result is None or self.totals is None: return
+        totals = self.totals; compact = self.preview_scroll.width() < 490
+        full = (f"{totals['part_count']} parça · {totals['sheet_count']} levha · Verim %{fmt(totals['efficiency'],1)}"
+                             + (f" · {len(self.result.unplaced)} parça yerleşmedi" if self.result.unplaced else '') + '\n'
+                             f"Brüt {fmt(totals['gross_weight'])} kg · Net {fmt(totals['net_weight'])} kg · Fire {fmt(totals['waste_weight'])} kg")
+        self.summary.setToolTip(full)
+        self.summary.setText((f"{totals['part_count']} parça · {totals['sheet_count']} levha · %{fmt(totals['efficiency'],1)}"
+                             + (f"\n{len(self.result.unplaced)} parça yerleşmedi" if self.result.unplaced else '')
+                             + f"\nNet {fmt(totals['net_weight'])} kg") if compact else full)
+        unpriced = any(s['price'] == 0 for s in totals['sheets'])
+        prefix = 'Kısmi hesap' if self.result.unplaced else 'Toplam'
+        self.cost_summary.setText(f"{prefix} {fmt(totals['total'],2)} TL"
+                                  + (f" · Malzeme {fmt(totals['material_cost'],2)} TL" if not compact else '')
+                                  + (' · Sac fiyatı eksik' if unpriced else ''))
+
     def render_sheet(self):
         self.canvas.render(self.project,self.result,self.selected_sheet_key())
+        self.part_selection_changed()
         index = self.sheet_tabs.currentIndex(); count = self.sheet_tabs.count()
         if self.result is not None and 0 <= index < len(self.sheet_totals):
             s = self.sheet_totals[index]
@@ -604,7 +702,7 @@ class NestingPage(BasePage):
         self.sheet_tabs.setStyleSheet(f'''
             QTabBar#nestingPlates::tab {{ background: {c['input']}; color: {c['muted']};
                 border: 1px solid {c['border']}; border-top-left-radius: 5px; border-top-right-radius: 5px;
-                margin-right: 3px; padding: 7px 15px; }}
+                margin-right: 3px; padding: 5px 12px; }}
             QTabBar#nestingPlates::tab:selected {{ background: {c['selected']}; color: {c['accent']};
                 border-bottom: 2px solid {c['accent']}; }}
             QTabBar#nestingPlates::tab:hover {{ color: {c['text']}; }}
@@ -704,7 +802,7 @@ class NestingPage(BasePage):
                 self.price_candidate = None; self.price_timer.stop()
                 self.project,result,self.imports,totals = value
                 self.search.clear(); self.sync_forms(); self.refresh(); self.show_result(result,totals)
-                self.tabs.setCurrentWidget(self.preview_scroll if result is not None else self.parts_panel)
+                self.parts_toggle.setChecked(True)
                 if result is None: self.set_status('Proje açıldı. Otomatik yerleşim yapabilirsiniz.')
             elif kind == 'nest_message': self.set_status(value)
             elif kind == 'job_error':

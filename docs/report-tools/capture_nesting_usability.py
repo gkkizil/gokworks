@@ -1,4 +1,4 @@
-"""Capture the integrated three-step workflow with real DXFs and plate tabs.
+"""Capture the unified parts-and-layout workspace with real DXFs and plate tabs.
 
 QT_QPA_PLATFORM=offscreen python docs/report-tools/capture_nesting_usability.py
 """
@@ -15,13 +15,14 @@ sys.path.insert(0,str(ROOT))
 
 import ezdxf
 from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 from gui_qt.app import create_application,MainWindow
 from nesting.validation import validate_result
 
 
 def main():
     app=create_application([])
-    output=ROOT/'docs/nesting-usability'; output.mkdir(parents=True,exist_ok=True)
+    output=ROOT/'docs/nesting-workspace'; output.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='gokworks-nesting-review-') as folder:
         folder=Path(folder); paths=[]
         for index in range(1,11):
@@ -45,7 +46,7 @@ def main():
 
         def capture(name):
             QTest.qWait(80)
-            if page.tabs.currentWidget() is page.preview_scroll: page.canvas.fit()
+            page.canvas.fit()
             assert w.grab().save(str(output/name))
 
         page.import_files(paths); wait()
@@ -58,23 +59,28 @@ def main():
         sheet=page.project.sheets[0]
         sheet.width=sheet.height=100; sheet.name='100 × 100'; sheet.price_kg=45
         page.form.set_value('margin','5'); page.form.set_value('quality','Hızlı'); page.form.set_value('seconds','5')
-        page.refresh(); page.tabs.setCurrentWidget(page.stock_widget)
-        capture('02-stock-dark.png')
+        page.refresh(); page.show_settings(); QTest.qWait(80)
+        assert page.settings_dialog.grab().save(str(output/'02-stock-dark.png'))
+        page.settings_dialog.reject()
         page.start_nest(); wait()
         assert validate_result(page.project,page.result)
         counts=Counter(p.sheet_number for p in page.result.placements)
         assert counts=={1:4,2:4,3:2} and page.sheet_tabs.count()==3
         page.sheet_tabs.setCurrentIndex(1)
         assert page.canvas.key==(sheet.id,2)
+        selected=next(i for i in range(page.part_proxy.rowCount()) if page.part_proxy.index(i,0).data(Qt.UserRole)['id'] in page.canvas.part_items)
+        page.part_table.selectRow(selected)
         capture('03-plates-dark.png')
         w.set_theme('light'); capture('04-plates-light.png')
         w.set_theme('dark'); w.resize(1024,700); capture('05-plates-small.png')
+        w.resize(820,560); capture('06-plates-minimum.png')
+        page.parts_toggle.click(); capture('07-drawing-focus.png')
         (output/'capture.json').write_text(json.dumps(dict(
             source='Real Qt workspace, ten generated DXFs, production import and NFP engine; no fabricated placements.',
             selected=10,ready_before_retry=9,failed_before_retry=1,ready_after_retry=10,
             part_count=len(page.result.placements),plates=3,parts_per_plate=dict(counts),
             selected_plate=2,validated=True,engine=page.result.engine,engine_version=page.result.engine_version,
-            screenshots=['01-parts-dark.png','02-stock-dark.png','03-plates-dark.png','04-plates-light.png','05-plates-small.png'],
+            screenshots=['01-parts-dark.png','02-stock-dark.png','03-plates-dark.png','04-plates-light.png','05-plates-small.png','06-plates-minimum.png','07-drawing-focus.png'],
             windows_exe_built=False,solidworks_required=False),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         assert w.settings.flush(); w.close()
 

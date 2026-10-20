@@ -3,7 +3,11 @@
 GOKWORKS → **Mühendislik Hesapları → Nesting · Sac maliyeti**.
 Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı gerekmez.
 
-1. **1 · Parçalar → DXF ekle**: birden fazla dosya seçin. Malzeme, kalınlık,
+Parçalar solda, sac yerleşimi sağda **aynı çalışma alanındadır**. Panel
+kenarını sürükleyerek genişliği ayarlayın; **Parçalar** ile listeyi gizleyip
+çizimi büyütün. Proje adı üst çubuktan değiştirilebilir.
+
+1. **DXF ekle**: birden fazla dosya seçin. Malzeme, kalınlık,
    adet ve eğri toleransını belirtin. `$INSUNITS` yoksa mm/cm/inch seçimini
    açıkça yapın. Yardımcı katmanları adlarıyla `;` kullanarak dışlayın.
    Seçilen her dosya hemen listede görünür; okunamayanlar hata açıklamasıyla
@@ -12,27 +16,34 @@ Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı
    Alan, sınır ölçüleri ve dış/iç çevreler aynı pencerede gösterilir. Ctrl/Shift
    ile birden fazla satırı seçip birlikte kaldırabilirsiniz. Dosya yolu ve
    hata açıklaması satır üzerinde bekleyince, bütün okuma kayıtları
-   **Yükleme ayrıntıları** içinde görünür.
-3. **2 · Sac ve ayarlar**: özel ölçü veya 1000×2000, 1250×2500,
+   **… (DXF yükleme ayrıntıları)** içinde görünür. Dar listede parça, adet
+   ve kalınlık gösterilir; malzeme ve yükleme durumu satır ipucundadır.
+3. **Sac ve ayarlar** düğmesi: özel ölçü veya 1000×2000, 1250×2500,
    1500×3000, 2000×4000 şablonunu seçin. Stok adedini ve TL/kg ya da
    TL/levha fiyatını sac satırına çift tıklayarak girin. **Malzeme kütüphanesi**
    penceresinde özel malzeme ve yoğunluk eklenebilir.
-4. Aynı sekmede kenar payı, parça aralığı, döndürme ve kaliteyi ayarlayın.
+4. Aynı pencerede kenar payı, parça aralığı, döndürme ve kaliteyi ayarlayın.
    Kerf, açı/adım, hadde yönü, **Yerleşim hesaplama süresi** ve **Deneme sırası kodu**
    (seed) **Gelişmiş ayarları göster** içinde. Süre, hesabın en uzun çalışma
    süresidir; daha erken bitebilir. Deneme sırası kodu varsayılan 42 olarak
    bırakılabilir; farklı yerleşimlerin denenme sırasını belirler.
    Operasyon giderleri, kâr ve KDV **Kesim ve ek maliyetler** içindedir.
    Bu bölümleri kapatmak girilen değerleri sıfırlamaz.
-5. **Yerleştir → 3 · Yerleşim**: yerleşim hesabı arka planda çalışır.
+   Değişiklikler hemen uygulanır; **Kapat** ile çalışma alanına dönün.
+   Pencereyi kapatıp açmak değerleri, seçimi veya sonucu sıfırlamaz.
+5. **Yerleştir**: yerleşim hesabı arka planda çalışır; liste ve çizim aynı
+   ekranda kalır. Eksik sac/stok veya geçersiz ayarda açıklama ile ayarlar açılır.
    AutoCAD benzeri **1. plaka / 2. plaka / 3. plaka** sekmelerine tıklayın;
    çok sayıda plaka varsa sekme çubuğunu kaydırın. Odak sekmedeyken
    klavyenin sol/sağ oklarıyla da geçilebilir.
    tekerlekle yakınlaştırın, sürükleyerek kaydırın, **Sığdır** ile görünümü sıfırlayın.
    **Durdur**, o ana kadar bulunan doğrulanmış sonucu korur.
-   **Parça adlarını göster** ile çizim üzerindeki adları açıp kapatın;
-   tam ad ve koordinatlar, parça üzerinde bekleyince görünür. Üç adım hem
-   dar hem geniş pencerede aynı yerde kalır; yerleşim özeti görünümün altındadır.
+   **Adlar** ile çizim üzerindeki adları açıp kapatın;
+   tam ad ve koordinatlar, parça üzerinde bekleyince görünür.
+   Listeden seçilen parçanın bütün örnekleri çizimde belirginleşir.
+   Çizimde parçaya tıklayınca listede seçilir; sürüklemek seçimi değiştirmez.
+   Yerleşim özeti görünümün altındadır. Küçük pencerede özet kısalır;
+   brüt/net/fire bilgisi ipucunda ve **Ayrıntılar** içinde korunur.
 6. **Ayrıntılar**: maliyet dökümü ve yeniden doğrulama.
    **Dışa aktar**: DXF / Excel / PDF; tüm parçalar yerleşmeden açılmaz.
    **Proje**: kaydet, aç ve yeni proje. Kaydedilen analizler mevcut geometriyi kullanır.
@@ -126,7 +137,7 @@ JSON/Excel/PDF atomik; çok levhalı DXF klasörü tüm levhalar hazır olunca
 yayımlanır. Mevcut DXF klasörünün üstüne yazılmaz.
 
 Paketler: `models`, `materials`, `geometry`, `dxf_import`, `engine`,
-`validation`, `accounting`, `dxf_export`, `storage`, `report`, `render`.
+`validation`, `accounting`, `dxf_export`, `storage`, `report`, `pdf_report`, `render`.
 Qt sayfası `gui_qt/pages/nesting.py`; editör/kanvas `nesting_widgets.py`.
 Mevcut JobManager, tablo modeli, tema, lisans ve atomik dosya altyapısı kullanılır.
 
@@ -144,3 +155,5 @@ gerçek Windows paket kontrolü sonraki istenen EXE derlemesinde çalışacak.
 Referanslar ve lisans değerlendirmesi: [teknik rapor](../docs/nesting.md).
 [Toplu yükleme ve plaka sırası düzeltmesi](../docs/nesting-bulk/README.md).
 [Sade arayüz incelemesi ve plaka sekmeleri](../docs/nesting-usability/README.md).
+[Birleşik çalışma alanı ve güncel ekranlar](../docs/nesting-workspace/README.md).
+[Okunabilir PDF ve örnek rapor](../docs/nesting-pdf-readability/README.md).

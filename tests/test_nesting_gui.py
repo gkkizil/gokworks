@@ -54,18 +54,15 @@ def test_steps_and_result_stay_accessible_without_clipping_after_resize_and_them
         window.set_theme(theme)
         for width,height in [(1440,960),(1024,700),(820,560),(1440,960)]:
             window.resize(width,height); qtbot.wait(60)
-            assert page.tabs.count() == 3
-            assert page.tabs.indexOf(page.parts_panel) == 0
-            assert page.tabs.indexOf(page.stock_widget) == 1
-            assert page.tabs.indexOf(page.preview_scroll) == 2
-            page.tabs.setCurrentWidget(page.parts_panel); qtbot.wait(30)
-            assert page.next_button.isVisible() and page.next_button.isEnabled()
+            assert page.workspace.count() == 2
+            assert page.parts_panel.isVisible() and page.preview_scroll.isVisible()
+            assert page.part_table.isVisible() and page.canvas.isVisible()
             assert page.part_table.horizontalScrollBar().maximum() == 0
-            page.next_button.click(); assert page.tabs.currentWidget() is page.stock_widget
             assert page.nest_button.isVisible() and page.nest_button.isEnabled()
-            page.tabs.setCurrentWidget(page.preview_scroll); qtbot.wait(30)
+            assert page.canvas.width() >= 190 and page.canvas.height() >= 60
+            assert page.parts_panel.mapTo(page,QPoint(page.parts_panel.width(),0)).x() <= page.preview_scroll.mapTo(page,QPoint(0,0)).x()
             previous_bottom = 0
-            for widget in (page.sheet_tabs,page.current_note,page.canvas,page.labels_toggle,page.summary,page.cost_summary):
+            for widget in (page.sheet_tabs,page.current_note,page.canvas,page.summary,page.cost_summary,page.export_button):
                 top = widget.mapTo(page,QPoint(0,0)).y()
                 assert top >= previous_bottom
                 previous_bottom = top+widget.height()
@@ -73,6 +70,15 @@ def test_steps_and_result_stay_accessible_without_clipping_after_resize_and_them
             assert page.canvas.viewport().rect().contains(page.canvas.mapFromScene(page.canvas.sceneRect()).boundingRect())
             assert not window.grab().isNull()
             assert page.width() >= 550
+            key = page.canvas.key; result = page.result
+            page.parts_toggle.click(); qtbot.wait(60)
+            assert not page.parts_panel.isVisible() and page.canvas.key == key
+            page.parts_toggle.click(); qtbot.wait(60)
+            assert page.parts_panel.isVisible() and page.result is result
+            page.settings_button.click(); qtbot.wait(30)
+            assert page.settings_dialog.isVisible() and page.stock_widget.isVisible()
+            page.settings_dialog.reject()
+            assert page.result is result and page.canvas.key == key
 
 
 def test_background_job_keeps_navigation_alive_and_can_cancel(window,qtbot,tmp_path):
@@ -92,6 +98,7 @@ def test_invalid_parameters_cannot_start_job(window,qtbot,tmp_path):
     page.form.set_value('seconds','0'); page.start_nest()
     assert not window.jobs.busy and page.result is None
     assert 'süresi' in page.status_text
+    assert page.settings_dialog.isVisible() and 'süresi' in page.settings_error.text()
 
 
 def test_cost_only_changes_reprice_same_coordinates_in_background(window,qtbot,tmp_path,monkeypatch):
@@ -156,7 +163,7 @@ def test_multiselect_lists_every_source_immediately_and_continues_after_bad_file
     assert len(page.project.parts) == 4 and page.part_model.rowCount() == 5
     assert {Path(r['source']).name for r in page.part_model.rows} == {Path(f).name for f in files}
     assert sum(r['status'] == 'error' for r in page.part_model.rows) == 1
-    assert '5 dosya seçildi' in page.import_info.text() and '1 sorunlu' in page.import_info.text()
+    assert '5 dosya' in page.import_info.text() and '1 sorunlu' in page.import_info.text()
     qtbot.wait(120)
     assert 'Yükleme tamamlandı' in page.status_text and 'okunuyor' not in page.status_text
     page.start_nest(); assert not window.jobs.busy and 'henüz hazır değil' in page.status_text
@@ -261,7 +268,8 @@ def test_unmatched_thickness_targets_stock_instead_of_silently_omitting_parts(wi
     page = load_parts(window,qtbot,tmp_path); page.project.parts[0].thickness = 1.5
     page.start_nest()
     assert not window.jobs.busy and page.result is None
-    assert page.tabs.currentWidget() is page.stock_widget and '1.5 mm' in page.status_text
+    assert page.settings_dialog.isVisible() and '1.5 mm' in page.status_text
+    assert '1.5 mm' in page.settings_error.text()
 
 
 def test_problem_sources_remain_visible_after_project_save_open(window,qtbot,tmp_path,monkeypatch):
@@ -309,7 +317,7 @@ def test_multiple_selected_rows_remove_correct_parts_and_failed_sources_through_
     page.form.set_value('quality','Hızlı'); page.start_nest()
     qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
     page.imports=[dict(id='bad',source='Remove-bad.dxf',status='error',detail='Open contour',options={})]
-    page.refresh(); page.tabs.setCurrentWidget(page.parts_panel)
+    page.refresh()
     page.search.setText('Remove'); page.part_table.sortByColumn(0,Qt.DescendingOrder)
     assert page.part_proxy.rowCount()==3
     for row in range(3):
@@ -345,7 +353,7 @@ def test_cost_refresh_preserves_selected_physical_plate_and_includes_vat_profit(
 
 
 def test_collapsed_advanced_settings_are_preserved_and_saved_costs_remain_visible(window,qtbot):
-    page=window.pages['nesting']; page.tabs.setCurrentWidget(page.stock_widget)
+    page=window.pages['nesting']; page.show_settings()
     assert not page.advanced_button.isChecked() and not page.cost_form.isVisible()
     page.form.set_value('kerf','.35'); page.form.set_value('angles','0;180'); page.form.set_value('seed','73')
     page.cost_form.set_value('setup','25'); page.read_parameters(); page.sync_forms()
@@ -384,3 +392,73 @@ def test_part_names_toggle_does_not_rebuild_geometry_or_lose_full_source_tooltip
     assert all(not item.isVisible() for item in page.canvas.part_labels)
     assert set(page.canvas.scene().items())==items
     page.labels_toggle.setChecked(True); assert all(item.isVisible() for item in page.canvas.part_labels)
+
+
+def test_canvas_and_filtered_sorted_parts_share_selection_without_rebuilding_geometry(window,qtbot):
+    from nesting.models import Part
+    from shapely.geometry import box
+    page=window.pages['nesting']
+    page.project.parts=[Part.create('Zinc',box(0,0,35,35),quantity=2),Part.create('Alpha',box(0,0,20,25))]
+    page.refresh(); page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    page.part_table.sortByColumn(0,Qt.AscendingOrder)
+    page.part_table.selectRow(1)
+    selected=page.project.parts[0].id; other=page.project.parts[1].id
+    items=set(page.canvas.scene().items()); transform=page.canvas.transform()
+    assert page.canvas.selected_part_ids=={selected}
+    assert len(page.canvas.part_items[selected])==2
+    assert all(item.pen().widthF()==3 for item in page.canvas.part_items[selected])
+    assert page.part_proxy.index(1,0).data(Qt.UserRole)['id']==selected
+    # A drawing click reveals a row excluded by the current text filter.
+    page.search.setText('Zinc')
+    item=page.canvas.part_items[other][0]
+    point=page.canvas.mapFromScene(item.path().boundingRect().center())
+    qtbot.mouseClick(page.canvas.viewport(),Qt.LeftButton,pos=point)
+    assert page.search.text()=='' and page.selected(page.part_table)['id']==other
+    assert page.canvas.selected_part_ids=={other}
+    assert set(page.canvas.scene().items())==items and page.canvas.transform()==transform
+    tip=page.part_proxy.index(0,0).data(Qt.ToolTipRole)
+    assert 'Malzeme:' in tip and 'Durum: Hazır' in tip
+    # Panning is not interpreted as clicking another part or blank background.
+    qtbot.mousePress(page.canvas.viewport(),Qt.LeftButton,pos=point)
+    qtbot.mouseMove(page.canvas.viewport(),point+QPoint(25,20))
+    qtbot.mouseRelease(page.canvas.viewport(),Qt.LeftButton,pos=point+QPoint(25,20))
+    assert page.canvas.selected_part_ids=={other}
+    window.set_theme('light')
+    assert page.canvas.selected_part_ids=={other}
+    assert all(item.pen().widthF()==3 for item in page.canvas.part_items[other])
+
+
+def test_settings_close_keeps_values_and_splitter_keeps_selected_plate_and_zoom(window,qtbot,tmp_path):
+    page=load_parts(window,qtbot,tmp_path)
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    page.part_table.selectRow(0); result=page.result; key=page.canvas.key
+    page.settings_button.click(); qtbot.wait(30)
+    assert page.settings_dialog.isVisible()
+    page.advanced_button.click()
+    page.settings_dialog.reject(); page.settings_button.click(); qtbot.wait(30)
+    assert page.advanced_button.isChecked() and page.form.fields['seed'].isVisible()
+    assert page.result is result and page.selected(page.part_table)['id']==page.project.parts[0].id
+    page.settings_dialog.reject()
+    page.canvas.auto_fit=False; page.canvas.scale(1.2,1.2); transform=page.canvas.transform()
+    page.workspace.setSizes([400,700]); qtbot.wait(80)
+    assert page.canvas.transform()==transform and page.canvas.key==key and page.result is result
+
+
+def test_pending_cost_refresh_waits_for_nested_editor_then_resumes(window,qtbot,tmp_path):
+    page=load_parts(window,qtbot,tmp_path)
+    page.form.set_value('quality','Hızlı'); page.start_nest()
+    qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
+    coordinates=[(p.x,p.y,p.angle) for p in page.result.placements]
+    page.show_settings(); page.cost_form.set_value('setup','25')
+    editor=Editor(page,'Sac düzenleme',lambda f:f.text('draft','Taslak',''),lambda f:f.value('draft'))
+    qtbot.addWidget(editor); editor.setModal(True); editor.show(); qtbot.wait(30)
+    assert page.price_candidate is not None
+    page.reprice()
+    assert not window.jobs.busy and page.price_timer.isActive()
+    assert page.price_candidate is not None
+    editor.reject()
+    qtbot.waitUntil(lambda:page.result is not None and not window.jobs.busy,timeout=8000)
+    assert [(p.x,p.y,p.angle) for p in page.result.placements]==coordinates
+    assert page.totals['setup']==25

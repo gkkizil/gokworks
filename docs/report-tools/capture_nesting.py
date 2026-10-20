@@ -59,7 +59,7 @@ def main():
         w.show(); w.navigate('nesting')
         for theme,width,height in [('dark',1440,960),('light',1440,960),('dark',1024,768)]:
             w.set_theme(theme); w.resize(width,height); app.processEvents()
-            page.tabs.setCurrentWidget(page.preview_scroll); app.processEvents(); page.canvas.fit()
+            app.processEvents(); page.canvas.fit()
             assert w.grab().save(str(target/f'nesting-{theme}-{width}.png'))
         w.settings.flush(); w.close()
     (target/'checks.json').write_text(json.dumps(dict(engine=result.engine,engine_version=result.engine_version,
