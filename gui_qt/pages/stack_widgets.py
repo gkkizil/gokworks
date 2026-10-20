@@ -1,8 +1,8 @@
 """Small native widgets shared by the tolerance workspace and its editors."""
 
 from PySide6.QtCore import Qt,QTimer
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QToolButton
 from ..diagrams import EngineeringDiagram
+from ..components import Disclosure
 
 
 class StackDiagram(EngineeringDiagram):
@@ -30,31 +30,6 @@ class StackDiagram(EngineeringDiagram):
     def resizeEvent(self,event):
         super().resizeEvent(event)
         if hasattr(self,'resize_timer'):self.resize_timer.start()
-
-
-class Disclosure(QWidget):
-    """Keep specialist controls available without crowding the main workflow."""
-
-    def __init__(self, title, content, parent=None, *, expanded=False):
-        super().__init__(parent)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(8)
-        self.toggle = QToolButton()
-        self.toggle.setText(title)
-        self.toggle.setCheckable(True)
-        self.toggle.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        self.content = content
-        layout.addWidget(self.toggle, alignment=Qt.AlignLeft)
-        layout.addWidget(content)
-        self.toggle.toggled.connect(self.set_expanded)
-        self.toggle.setChecked(expanded)
-        self.set_expanded(expanded)
-
-    def set_expanded(self, expanded):
-        self.content.setVisible(expanded)
-        self.toggle.setArrowType(Qt.DownArrow if expanded else Qt.RightArrow)
-        self.toggle.setAccessibleDescription('Açık' if expanded else 'Kapalı')
 
 
 def compact(value, digits=4):

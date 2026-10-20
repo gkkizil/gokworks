@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QProgressBar
 from bolt import rules as r
 from bolt.diagram import draw, draw_dimensions
 from .calculations import CalculationPage
-from ..components import card, label, show_details
+from ..components import Disclosure, card, label, show_details
 from ..theme import COLORS
 
 
@@ -23,7 +23,7 @@ class BoltPage(CalculationPage):
         if context.settings.get('bolt_unit') == 'kgf':
             context.settings.set('bolt_unit', 'kg')
         super().__init__(context, 'Cıvata hesabı', 'Metrik ölçü, kalite ve yük ile statik dayanım kontrolü.', 'bolt_')
-        self.action('Hesap yöntemi', lambda: show_details(self, 'Cıvata hesabı', METHOD))
+        self.info_action('Hesap yöntemi', lambda: show_details(self, 'Cıvata hesabı', METHOD))
         f = self.form
         f.combo('metric', 'Metrik ölçü', r.THREADS, 'M10')
         f.combo('grade', 'Kalite sınıfı', r.PROOF_STRESS, '8.8')
@@ -72,7 +72,8 @@ class BoltPage(CalculationPage):
                                  'Statik yük ve eşit yük paylaşımı kabul edilir. '
                                  'Ön sıkma, diş sıyırması ve bağlantı plakaları ayrıca kontrol edilir.'))
         technical.addWidget(label('kg yük × 9,80665 = N. Birim değişince girilen yükler dönüştürülür.', 'muted'))
-        self.extra_layout.addWidget(technical_card)
+        self.technical_section = Disclosure('Formüller ve kapsam',technical_card)
+        self.extra_layout.addWidget(self.technical_section)
         self.sync_pitch()
         self.update_result()
 

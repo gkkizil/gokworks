@@ -69,6 +69,7 @@ class KrPage(BasePage):
         self.stop_button.setEnabled(False)
         self.tabs = QTabWidget()
         manual, body = card('Sac kalınlığı → K / R ataması')
+        manual.setProperty('card',False)
         first = {key: str(self.settings.get('kr_manual_' + field, default))
                  for key, field, default in (('thickness', 'thickness', '2'), ('k', 'k', ''), ('r', 'r', ''))}
         try:
@@ -83,7 +84,11 @@ class KrPage(BasePage):
         self.rows.setSortingEnabled(False)
         self.rows.setModel(self.rows_model)
         self.rows_model.edited.connect(self.persist_rows)
-        body.addWidget(self.rows, 1)
+        self.rows_model.rowsInserted.connect(self.fit_assignment_rows)
+        self.rows_model.modelReset.connect(self.fit_assignment_rows)
+        self.fit_assignment_rows()
+        body.addWidget(label('Kalınlığa göre K ve R girin → Montajı tara → Montaja K/R uygula', 'muted'))
+        body.addWidget(self.rows)
         actions = QHBoxLayout()
         self.add_row = button('Satır ekle', self.add_assignment)
         self.remove_row = button('Seçili satırı sil', self.remove_assignment)
@@ -95,6 +100,7 @@ class KrPage(BasePage):
         self.save_files = self.save_form.check('save', 'Parça dosyalarını kaydet', False, persist=False)
         body.addWidget(self.save_form)
         body.addWidget(label('Yalnız ana Sac-Levha K faktörü ve iç yarıçapı değiştirilir. Kalınlık ve özel alt büküm ayarları korunur. Büküm tablosundan değer alınmaz.', 'muted'))
+        body.addStretch(1)
         self.tabs.addTab(manual, 'Manuel K / R')
         helper, helper_body = card('Hesap yardımı · atamadan bağımsız')
         self.helper = ValueForm(self.settings, 'kr_')
@@ -144,6 +150,9 @@ class KrPage(BasePage):
         self.helper.changed.connect(lambda key: self.helper_timer.start())
         self.finish_layout()
         self.calculate_helper()
+
+    def fit_assignment_rows(self, *args):
+        self.rows.setFixedHeight(min(280,max(86,38+self.rows_model.rowCount()*32)))
 
     def persist_rows(self, *args):
         first = self.rows_model.rows[0]

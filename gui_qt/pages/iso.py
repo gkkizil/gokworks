@@ -1,13 +1,13 @@
 """ISO 286 selection and independent manual limits with exact Decimal results."""
 
 from PySide6.QtCore import Qt, QSignalBlocker
-from PySide6.QtWidgets import QLineEdit, QTreeView, QTabWidget, QTabBar
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTreeView, QTabWidget, QTabBar
 from iso_fits import rules as r
 from iso_fits import manual as m
 from iso_fits.diagram import draw
 from iso_fits.selection_diagram import draw_selection
 from .calculations import CalculationPage
-from ..components import card, label, scroll, configure_view, show_details
+from ..components import Disclosure, card, label, scroll, configure_view, show_details
 from ..models import TreeModel, FilterProxy, Column
 
 
@@ -46,7 +46,7 @@ Standart temeli ISO 286-1:2010 ve ISO 286-2:2010’dur. Karşılaştırılan aç
 class IsoPage(CalculationPage):
     def __init__(self, context):
         super().__init__(context, 'ISO geçme toleransları', 'ISO sınıfı seçin veya kendi ölçü sınırlarınızı kontrol edin.', 'iso_')
-        self.action('Geçme rehberi', lambda: show_details(self, 'ISO tolerans rehberi', GUIDE))
+        self.info_action('Geçme rehberi', lambda: show_details(self, 'ISO tolerans rehberi', GUIDE))
         f = self.form
         f.combo('method', 'Hesap yöntemi', ('ISO seçimi', 'Manuel kontrol'))
         f.text('diameter', 'Nominal çap · mm', '50')
@@ -64,15 +64,21 @@ class IsoPage(CalculationPage):
         f.combo('basis', 'Geçme esası', ('Tümü', 'Delik esaslı', 'Mil esaslı'))
         self.search = QLineEdit()
         self.search.setPlaceholderText('Hazır geçme ara…')
-        self.extra_layout.addWidget(self.search)
+        preset_content = QWidget()
+        preset_layout = QVBoxLayout(preset_content)
+        preset_layout.setContentsMargins(0, 0, 0, 0)
+        preset_layout.setSpacing(6)
+        preset_layout.addWidget(self.search)
         self.presets = configure_view(QTreeView())
         self.presets.setSortingEnabled(False)
         self.preset_model = TreeModel((Column('Hazır geçmeler', 'name'),))
         self.preset_proxy = FilterProxy(self, tree=True)
         self.preset_proxy.setSourceModel(self.preset_model)
         self.presets.setModel(self.preset_proxy)
-        self.presets.setMinimumHeight(250)
-        self.extra_layout.addWidget(self.presets)
+        self.presets.setMinimumHeight(180)
+        preset_layout.addWidget(self.presets)
+        self.preset_section = Disclosure('Hazır geçme örnekleri', preset_content)
+        self.extra_layout.addWidget(self.preset_section)
         self.search.textChanged.connect(self.preset_proxy.set_query)
         self.presets.clicked.connect(self.select_preset)
         # The manual section includes result labels through y=290. Keep them
@@ -100,7 +106,10 @@ class IsoPage(CalculationPage):
         explanation.addWidget(self.usage_label)
         self.right.insertWidget(self.right.indexOf(self.sample_tabs) + 1, self.explanation_card)
         self.section_help = label(SECTION_HELP, 'muted')
-        self.right.insertWidget(self.right.indexOf(self.sample_tabs) + 1, self.section_help)
+        self.section_summary = label('', 'muted')
+        self.right.insertWidget(self.right.indexOf(self.sample_tabs) + 1, self.section_summary)
+        self.section_notes = Disclosure('Şemayı okuma ve kapsam', self.section_help)
+        self.right.insertWidget(self.right.indexOf(self.explanation_card) + 1, self.section_notes)
         self.manual_tabs = QTabWidget()
         self.compatibility_label = label()
         self.limits_label = label()
@@ -188,6 +197,7 @@ class IsoPage(CalculationPage):
         super().invalid(error)
         self.details.setText('Geçerli sınırlar girildiğinde geçme açıklaması burada görünür.')
         self.usage_label.clear()
+        self.section_summary.clear()
         self.section_help.setText(SECTION_HELP)
 
     def update_result(self):
@@ -202,6 +212,7 @@ class IsoPage(CalculationPage):
             f.show_field(key, not manual)
         self.search.setVisible(not manual)
         self.presets.setVisible(not manual)
+        self.preset_section.setVisible(not manual)
         self.manual_tabs.setVisible(manual)
         self.populate_presets()
         try:
@@ -220,7 +231,8 @@ class IsoPage(CalculationPage):
         self.details.setText(explanation)
         self.usage_label.setText('Kullanım yorumu (öneri): ' + m.usage_hint(fit) + '\n' +
                                 HELP.split('\n')[1] + '\n' + HELP.split('\n')[4])
-        self.section_help.setVisible(f.value('view') == 'Montaj kesiti')
+        self.section_summary.setVisible(f.value('view') == 'Montaj kesiti')
+        self.section_notes.setVisible(f.value('view') == 'Montaj kesiti')
         rows = [('Standart', 'ISO 286-1:2010 / ISO 286-2:2010'), ('Hesap yöntemi', f.value('method')),
                 ('Nominal çap (mm)', r.format_mm(fit.hole.nominal_mm)), ('Geçme türü', r.CLASSIFICATION[fit.kind]),
                 ('Delik sınıfı', fit.hole.code), ('Mil sınıfı', fit.shaft.code)]
@@ -239,6 +251,9 @@ class IsoPage(CalculationPage):
         self.section_help.setText(f'{sample} · D = {r.format_mm(hole)} mm · d = {r.format_mm(shaft)} mm\n'
                                   f'Çapsal fark = {r.format_mm(hole-shaft, signed=True)} mm · '
                                   f'Tek tarafta g = {r.format_mm(abs(hole-shaft)/2)} mm\n' + SECTION_HELP)
+        self.section_summary.setText(f'D = {r.format_mm(hole)} mm · d = {r.format_mm(shaft)} mm\n'
+                                     f'Çapsal fark = {r.format_mm(hole-shaft, signed=True)} mm · '
+                                     f'g = {r.format_mm(abs(hole-shaft)/2)} mm · Ölçeksiz şema')
         if manual:
             check = m.compatibility(fit, f.value('target'))
             nearest = m.closest_pair(fit)

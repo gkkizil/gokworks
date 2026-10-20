@@ -28,36 +28,39 @@ def apply_theme(app, appearance):
         QWidget { color: %(text)s; font-family: "Segoe UI", "DejaVu Sans"; font-size: 13px; }
         QMainWindow, QDialog { background: %(bg)s; }
         QFrame#sidebar { background: %(sidebar)s; border-right: 1px solid %(border)s; }
-        QFrame[card="true"] { background: %(panel)s; border: 1px solid %(border)s; border-radius: 12px; }
-        QLabel[role="title"] { font-size: 25px; font-weight: 650; }
+        QFrame[card="true"] { background: %(panel)s; border: 1px solid %(border)s; border-radius: 9px; }
+        QLabel[role="title"] { font-size: 21px; font-weight: 650; }
         QLabel[role="subtitle"], QLabel[role="muted"] { color: %(muted)s; }
-        QLabel[role="result"] { font-size: 29px; font-weight: 700; color: %(accent)s; }
+        QLabel[role="result"] { font-size: 26px; font-weight: 700; color: %(accent)s; }
         QLabel[role="error"] { color: %(danger)s; }
-        QLabel[role="section"] { font-size: 15px; font-weight: 650; }
+        QLabel[role="section"] { font-size: 14px; font-weight: 650; }
         QPushButton, QToolButton { background: %(input)s; border: 1px solid %(border)s;
-            border-radius: 7px; padding: 8px 13px; min-height: 18px; }
+            border-radius: 6px; padding: 5px 10px; min-height: 18px; }
         QPushButton:hover, QToolButton:hover { background: %(selected)s; border-color: %(accent)s; }
         QPushButton:pressed { background: %(selected)s; }
+        QPushButton:focus, QToolButton:focus { border-color: %(accent)s; }
         QPushButton:disabled { color: %(muted)s; }
         QPushButton[primary="true"] { background: %(accent)s; color: %(sidebar)s; font-weight: 700; border: 0; }
-        QPushButton[nav="true"] { text-align: left; background: transparent; border: 0; padding: 11px 12px; }
+        QPushButton[nav="true"] { text-align: left; background: transparent; border: 0; padding: 7px 9px; }
         QPushButton[nav="true"]:checked { background: %(selected)s; color: %(accent)s; font-weight: 650; }
+        QToolButton[disclosure="true"] { background: transparent; border: 0; padding: 3px 2px; min-height: 22px;
+            color: %(accent)s; text-align: left; }
         QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox { background: %(input)s;
-            border: 1px solid %(border)s; border-radius: 6px; padding: 7px; min-height: 20px; }
+            border: 1px solid %(border)s; border-radius: 6px; padding: 5px 7px; min-height: 20px; }
         QLineEdit:focus, QComboBox:focus { border-color: %(accent)s; }
         QComboBox::drop-down { border: 0; width: 22px; }
         QComboBox QAbstractItemView { background: %(panel)s; selection-background-color: %(selected)s; }
-        QCheckBox { spacing: 8px; padding: 5px 0; }
+        QCheckBox { spacing: 7px; padding: 3px 0; }
         QCheckBox::indicator { width: 17px; height: 17px; }
         QTableView, QTreeView, QListView, QPlainTextEdit, QTextBrowser { background: %(panel)s;
             alternate-background-color: %(input)s; border: 1px solid %(border)s; border-radius: 7px;
             selection-background-color: %(selected)s; selection-color: %(text)s; }
         QHeaderView::section { background: %(input)s; border: 0; border-bottom: 1px solid %(border)s;
-            color: %(muted)s; padding: 10px; text-align: left; font-weight: 600; }
-        QAbstractItemView::item { padding: 5px; }
+            color: %(muted)s; padding: 7px 6px; text-align: left; font-weight: 600; }
+        QAbstractItemView::item { padding: 4px; }
         QAbstractItemView::item:selected { background: %(selected)s; }
         QTabWidget::pane { border: 0; }
-        QTabBar::tab { background: transparent; color: %(muted)s; padding: 10px 17px;
+        QTabBar::tab { background: transparent; color: %(muted)s; padding: 7px 12px;
             border-bottom: 2px solid transparent; }
         QTabBar::tab:selected { color: %(accent)s; border-bottom: 2px solid %(accent)s; }
         QScrollArea { border: 0; background: transparent; }
@@ -69,5 +72,6 @@ def apply_theme(app, appearance):
         QSplitter::handle { background: %(bg)s; width: 8px; height: 8px; }
         QStatusBar { background: %(sidebar)s; border-top: 1px solid %(border)s; }
         QMenu { background: %(panel)s; border: 1px solid %(border)s; }
+        QMenu::item { padding: 6px 12px; }
         QMenu::item:selected { background: %(selected)s; }
     ''' % c)

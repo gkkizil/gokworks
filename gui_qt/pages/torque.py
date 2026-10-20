@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QBoxLayout, QApplication
 
 from bolt.rules import THREADS, STANDARD_FINE_PITCHES
 from bolt_torque import rules as r
-from ..components import BasePage, ValueForm, card, label, scroll, button
+from ..components import BasePage, ValueForm, Disclosure, card, label, scroll, button
 from ..diagrams import EngineeringDiagram
 from ..torque_diagram import draw_section
 
@@ -27,6 +27,8 @@ class TorquePage(BasePage):
         self.compact = None
         self.copy_button = self.action('Sonucu kopyala', self.copy_result)
         self.copy_button.setEnabled(False)
+        self.compact_result=label('—','section');self.compact_result.hide()
+        self.compact_result.setAccessibleName('Tahmini tork ve ön yük');self.layout.addWidget(self.compact_result)
         content = QWidget()
         body = QVBoxLayout(content)
         body.setContentsMargins(0, 0, 0, 0)
@@ -53,9 +55,10 @@ class TorquePage(BasePage):
         inputs.addWidget(self.k_hint)
         self.reset_k_button = button('Varsayılan K’yı kullan', self.reset_k)
         inputs.addWidget(self.reset_k_button)
-        inputs.addWidget(label(r.K_ASSUMPTION, 'muted'))
-        inputs.addWidget(label('Bağlantı koşulunu değiştirince K, o koşulun varsayılanına döner. '
-                               'Ardından K’yı elle düzenleyebilirsiniz.', 'muted'))
+        assumptions = label(r.K_ASSUMPTION+'\n\nBağlantı koşulunu değiştirince K, o koşulun varsayılanına döner. '
+                            'Ardından K’yı elle düzenleyebilirsiniz.','muted')
+        self.assumptions_section = Disclosure('K katsayısı hakkında',assumptions)
+        inputs.addWidget(self.assumptions_section)
 
         self.output_card, output = card('Tahmini Sıkma Torku')
         self.torque_value = label('—', 'result')
@@ -100,6 +103,7 @@ class TorquePage(BasePage):
         if hasattr(self, 'columns') and compact != self.compact:
             self.compact = compact
             self.columns.setDirection(QBoxLayout.TopToBottom if compact else QBoxLayout.LeftToRight)
+            self.compact_result.setVisible(compact)
 
     def sync_pitch(self):
         metric, series = self.form.value('metric'), self.form.value('thread_series')
@@ -150,6 +154,7 @@ class TorquePage(BasePage):
         except ValueError as error:
             self.result = None
             self.torque_value.setText('—')
+            self.compact_result.setText('Değerleri kontrol edin')
             self.preload_value.setText('Değerleri kontrol edin')
             for widget in (self.selection_label, self.basis_label, self.strength_label):
                 widget.clear()
@@ -160,6 +165,7 @@ class TorquePage(BasePage):
             self.set_status(str(error), True)
             return
         self.torque_value.setText(f'{fmt(result.torque_nm)} N·m')
+        self.compact_result.setText(f'{fmt(result.torque_nm)} N·m · Ön yük {fmt(result.preload_kn)} kN')
         self.preload_value.setText(f'Hesaplanan ön yük: {fmt(result.preload_kn)} kN')
         pitch_text = f'{result.pitch_mm:g}'.replace('.', ',')
         self.selection_label.setText(f'{result.metric} × {pitch_text} · {result.grade} · {result.condition}')

@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-20T21:12:38.234800+03:00",
+  "full_suite": {
+    "passed": 895,
+    "skipped": 7,
+    "subtests_passed": 878,
+    "seconds": 434.05,
+    "log": "full-tests.txt"
+  },
+  "final_gui": {
+    "passed": 23,
+    "deselected": 142,
+    "seconds": 48.08,
+    "log": "final-gui-tests.txt"
+  },
+  "solidworks_live_tested": false,
+  "windows_exe_built": false,
+  "final_shared_tolerance": {
+    "passed": 5,
+    "deselected": 27,
+    "seconds": 8.92
+  },
+  "final_calculator_cards": {
+    "passed": 6,
+    "seconds": 11.67
+  }
+}

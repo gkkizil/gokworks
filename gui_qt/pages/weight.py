@@ -14,7 +14,7 @@ class WeightPage(CalculationPage):
         if isinstance(previous, str) and previous in r.MATERIAL_ALIASES:
             context.settings.set('weight_material', r.MATERIAL_ALIASES[previous])
         super().__init__(context, 'Ağırlık hesabı', 'Kesiti ve malzemeyi seçin; parça ve toplam ağırlığı görün.', 'weight_')
-        self.action('Yöntem ve kaynaklar', self.show_sources)
+        self.info_action('Yöntem ve kaynaklar', self.show_sources)
         f = self.form
         f.combo('kind', 'Kesit türü', r.KINDS, 'Sac levha')
         f.combo('material_group', 'Malzeme grubu', r.MATERIAL_GROUPS, 'Genel')
@@ -27,6 +27,9 @@ class WeightPage(CalculationPage):
         f.text('count', 'Adet', '1')
         self.density_label = label('', 'subtitle')
         self.extra_layout.addWidget(self.density_label)
+        self.catalog_hint = label('Profil kataloğundaki kesit alanını cm² olarak girin. En ve kalınlık yerine bu alan kullanılır.','muted')
+        self.extra_layout.addWidget(self.catalog_hint)
+        f.fields['area_cm2'].setToolTip(self.catalog_hint.text())
         self.old_unit = f.value('unit')
         self.add_diagram('section', 'Kesit şeması')
         self.update_materials()
@@ -78,6 +81,7 @@ class WeightPage(CalculationPage):
         for key in r.DEFAULT_DIMENSIONS:
             self.form.show_field(key, key == 'length' or (geometry and key in r.FIELDS[values['kind']]))
         self.form.show_field('area_cm2', not geometry)
+        self.catalog_hint.setVisible(not geometry)
         for key in r.DEFAULT_DIMENSIONS:
             self.form.form.labelForField(self.form.fields[key]).setText(f'{r.FIELD_LABELS[key]} · {values["unit"]}')
         material = values['material']

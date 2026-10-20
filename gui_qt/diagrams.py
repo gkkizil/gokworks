@@ -168,6 +168,11 @@ class EngineeringDiagram(QGraphicsView):
     def render_geometry(self, renderer):
         self.renderer = renderer
         renderer(self.vector)
+        # Font metrics differ across platforms. Include real text bounds so a
+        # caption near the nominal scene edge is never clipped by fitInView.
+        bounds = QRectF(0,0,self.vector.width,self.vector.height)
+        if self.vector.items(): bounds = bounds.united(self.vector.itemsBoundingRect().adjusted(-4,-4,4,4))
+        self.vector.setSceneRect(bounds)
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
 
     def resizeEvent(self, event):

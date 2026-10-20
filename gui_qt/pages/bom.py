@@ -4,13 +4,13 @@ from dataclasses import asdict
 from pathlib import PureWindowsPath
 
 from PySide6.QtCore import Qt, QTimer, QPersistentModelIndex
-from PySide6.QtWidgets import (QHBoxLayout, QVBoxLayout, QLineEdit, QTabWidget,
-    QTableView, QTreeView, QSplitter, QFileDialog, QApplication)
+from PySide6.QtWidgets import (QHBoxLayout, QLineEdit, QTabWidget,
+    QTableView, QTreeView, QFileDialog, QApplication, QToolButton, QMenu, QHeaderView)
 
 from bom.exporter import scan_worker
 from .. import services
 from ..models import Column, TableModel, TreeModel, FilterProxy
-from ..components import BasePage, ValueForm, card, label, button, configure_view, show_details
+from ..components import BasePage, ValueForm, Disclosure, label, button, configure_view, show_details
 
 
 def mass(value):
@@ -28,7 +28,8 @@ class BomPage(BasePage):
         self.stop_button.setEnabled(False)
         self.form = ValueForm(self.settings, 'bom_')
         self.form.check('include_excluded', 'BOM dışında bırakılan bileşenleri dahil et', False)
-        self.layout.addWidget(self.form)
+        self.options = Disclosure('Okuma seçenekleri', self.form)
+        self.layout.addWidget(self.options)
         self.controls.append(self.form)
         self.summary = label('SolidWorks’te ana montajı etkinleştirip Montajı oku düğmesine basın.', 'muted')
         self.layout.addWidget(self.summary)
@@ -37,13 +38,31 @@ class BomPage(BasePage):
         self.search.setPlaceholderText('Parça, montaj, konfigürasyon veya dosya yolu ara…')
         self.search.setClearButtonEnabled(True)
         toolbar.addWidget(self.search, 1)
-        toolbar.addWidget(button('Tümünü aç', self.expand_all))
-        toolbar.addWidget(button('Daralt', lambda: self.tree.collapseAll()))
+        self.tree_tools = QToolButton()
+        self.tree_tools.setText('Ağaç')
+        self.tree_tools.setAccessibleName('Ürün ağacı görünüm seçenekleri')
+        self.tree_tools.setPopupMode(QToolButton.InstantPopup)
+        tree_menu = QMenu(self.tree_tools)
+        tree_menu.addAction('Tümünü aç', self.expand_all)
+        tree_menu.addAction('Tümünü daralt', lambda: self.tree.collapseAll())
+        self.tree_tools.setMenu(tree_menu)
+        self.tree_tools.hide()
+        toolbar.addWidget(self.tree_tools)
         self.clear_button = button('Temizle', self.clear)
         self.clear_button.setToolTip('Parça listesini ve ürün ağacını temizle')
         toolbar.addWidget(self.clear_button)
         self.controls.append(self.clear_button)
-        toolbar.addWidget(button('Dosya yolunu kopyala', self.copy_path))
+        self.more_button = QToolButton()
+        self.more_button.setText('Diğer')
+        self.more_button.setAccessibleName('BOM satır işlemleri')
+        self.more_button.setPopupMode(QToolButton.InstantPopup)
+        menu = QMenu(self.more_button)
+        menu.addAction('Dosya yolunu kopyala', self.copy_path)
+        self.columns_action = menu.addAction('Teknik sütunları göster')
+        self.columns_action.setCheckable(True)
+        self.columns_action.toggled.connect(self.show_technical_columns)
+        self.more_button.setMenu(menu)
+        toolbar.addWidget(self.more_button)
         self.layout.addLayout(toolbar)
         self.tabs = QTabWidget()
         self.parts = configure_view(QTableView())
@@ -60,9 +79,18 @@ class BomPage(BasePage):
         self.tree_proxy = FilterProxy(self, tree=True)
         self.tree_proxy.setSourceModel(self.tree_model)
         self.tree.setModel(self.tree_proxy)
-        self.tree.setColumnWidth(0, 330)
+        self.tree.setColumnWidth(0, 240)
+        for column, width in enumerate((200, 65, 135, 125, 150, 210, 170)):
+            self.parts.setColumnWidth(column, width)
+        self.parts.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
+        self.parts.horizontalHeader().setStretchLastSection(False)
+        self.tree.header().setSectionResizeMode(0,QHeaderView.Stretch)
+        self.tree.header().setStretchLastSection(False)
+        for column,width in enumerate((200,70,85,115)):self.tree.setColumnWidth(column,width)
+        self.show_technical_columns(False)
         self.tabs.addTab(self.parts, 'Parça listesi')
         self.tabs.addTab(self.tree, 'Ürün ağacı')
+        self.tabs.currentChanged.connect(lambda index: self.tree_tools.setVisible(index == 1))
         self.parts.doubleClicked.connect(self.details)
         self.tree.doubleClicked.connect(self.details)
         self.layout.addWidget(self.tabs, 1)
@@ -80,6 +108,11 @@ class BomPage(BasePage):
         self.expand_timer.timeout.connect(self.expand_batch)
         self.expand_pending = []
         self.finish_layout()
+
+    def show_technical_columns(self, visible):
+        if not hasattr(self,'parts'): return
+        for column in range(4,self.parts_model.columnCount()): self.parts.setColumnHidden(column,not visible)
+        for column in range(4,self.tree_model.columnCount()): self.tree.setColumnHidden(column,not visible)
 
     def set_busy(self, busy):
         super().set_busy(busy)

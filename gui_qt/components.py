@@ -8,7 +8,8 @@ from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
     QFileDialog, QTableView, QTreeView, QHeaderView, QAbstractItemView,
-    QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication)
+    QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication,
+    QToolButton, QBoxLayout, QMenu)
 
 from .models import Column, TableModel, FilterProxy, LABELS
 
@@ -34,11 +35,40 @@ def card(title=None):
     widget = QFrame()
     widget.setProperty('card', True)
     layout = QVBoxLayout(widget)
-    layout.setContentsMargins(18, 16, 18, 16)
-    layout.setSpacing(12)
+    layout.setContentsMargins(12, 10, 12, 10)
+    layout.setSpacing(8)
     if title:
         layout.addWidget(label(title, 'section'))
     return widget, layout
+
+
+class Disclosure(QWidget):
+    """Optional controls stay alive and retain values when their section closes."""
+    expandedChanged = Signal(bool)
+
+    def __init__(self, title, content, parent=None, *, expanded=False):
+        super().__init__(parent)
+        layout = QVBoxLayout(self); layout.setContentsMargins(0,0,0,0); layout.setSpacing(8)
+        self.toggle = QToolButton(); self.toggle.setText(title)
+        self.toggle.setCheckable(True); self.toggle.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.toggle.setProperty('disclosure', True)
+        self.content = content
+        layout.addWidget(self.toggle, alignment=Qt.AlignLeft); layout.addWidget(content)
+        self.toggle.toggled.connect(self.set_expanded)
+        self.set_expanded(expanded)
+
+    def is_expanded(self):
+        return self.toggle.isChecked()
+
+    def set_expanded(self, expanded):
+        expanded = bool(expanded)
+        changed = self.toggle.isChecked() != expanded
+        blocked = self.toggle.blockSignals(True); self.toggle.setChecked(expanded); self.toggle.blockSignals(blocked)
+        self.content.setVisible(expanded)
+        self.toggle.setArrowType(Qt.DownArrow if expanded else Qt.RightArrow)
+        self.toggle.setAccessibleDescription('Açık' if expanded else 'Kapalı')
+        # Button toggles and programmatic changes share one notification.
+        if changed or self.sender() is self.toggle: self.expandedChanged.emit(expanded)
 
 
 def scroll(widget):
@@ -62,7 +92,7 @@ def configure_view(view):
     header.setDefaultSectionSize(180)
     header.setMinimumSectionSize(60)
     if isinstance(view, QTableView):
-        view.verticalHeader().setDefaultSectionSize(38)
+        view.verticalHeader().setDefaultSectionSize(32)
     view.setMinimumWidth(0)
     return view
 
@@ -109,14 +139,16 @@ class ValueForm(QWidget):
         self.fields = {}
         self.form = QFormLayout(self)
         self.form.setContentsMargins(0, 0, 0, 0)
-        self.form.setSpacing(12)
+        self.form.setSpacing(8)
         self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
     def _bind(self, key, widget, default, signal):
         self.fields[key] = widget
         widget.setObjectName(f'{self.prefix}{key}')
-        widget.setAccessibleName(key)
+        if isinstance(widget,(QLineEdit,QComboBox)): widget.setMinimumWidth(112)
+        caption = self.form.labelForField(widget)
+        widget.setAccessibleName(caption.text() if caption is not None else widget.text() if isinstance(widget,QCheckBox) else key)
         signal.connect(lambda *args, key=key: self._changed(key))
         return widget
 
@@ -193,21 +225,34 @@ class BasePage(QWidget):
         self.controls = []
         self.status_text = ''
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(24, 20, 24, 16)
-        self.layout.setSpacing(14)
-        heading = QHBoxLayout()
+        self.layout.setContentsMargins(16, 12, 16, 10)
+        self.layout.setSpacing(10)
+        heading = QBoxLayout(QBoxLayout.LeftToRight)
+        self.heading = heading
         captions = QVBoxLayout()
-        captions.setSpacing(5)
-        captions.addWidget(label(title, 'title'))
-        captions.addWidget(label(description, 'subtitle'))
+        captions.setSpacing(3)
+        self.title_label = label(title, 'title'); self.description_label = label(description, 'subtitle')
+        captions.addWidget(self.title_label); captions.addWidget(self.description_label)
         heading.addLayout(captions, 1)
         self.actions = QHBoxLayout()
+        self.actions.setSpacing(6)
+        self.actions.setAlignment(Qt.AlignRight)
         heading.addLayout(self.actions)
         self.layout.addLayout(heading)
         self.status = label('Hazır', 'muted')
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # Keep command labels readable instead of squeezing a long heading and
+        # several actions into the same narrow row. Nesting adds an inline
+        # project field to its header and deliberately manages that layout.
+        if self.heading.count() == 2:
+            required = self.title_label.fontMetrics().horizontalAdvance(self.title_label.text())+self.actions.sizeHint().width()+40
+            self.heading.setDirection(QBoxLayout.TopToBottom if self.width()-32 < required else QBoxLayout.LeftToRight)
+
     def action(self, title, callback, *, primary=False, locked=True):
         widget = button(title, callback, primary=primary)
+        if title == 'Durdur': widget.hide()
         self.actions.addWidget(widget)
         if locked:
             self.controls.append(widget)
@@ -245,6 +290,7 @@ class BasePage(QWidget):
             control.setEnabled(not busy)
         if hasattr(self, 'stop_button'):
             self.stop_button.setEnabled(busy)
+            self.stop_button.setVisible(busy)
 
     def handle_events(self, events):
         for kind, value in events:
@@ -278,12 +324,18 @@ class ResultsPanel(QWidget):
             self.filter.addItem(LABELS[value], value)
         self.copy_log = button('Günlüğü kopyala', self.copy_log_text)
         self.save = button('Rapor kaydet', self.save_dialog)
+        self.report_menu = button('Rapor')
+        report_menu = QMenu(self.report_menu)
+        report_menu.addAction('Raporu CSV kaydet…', self.save_dialog)
+        report_menu.addAction('Günlüğü kopyala', self.copy_log_text)
+        self.report_menu.setMenu(report_menu); self.report_menu.hide()
         self.clear_button = button('Temizle', self.clear)
         self.clear_button.setToolTip('Dosya listesini, işlem sonuçlarını ve günlüğü temizle')
         toolbar.addWidget(self.search, 1)
         toolbar.addWidget(self.filter)
         toolbar.addWidget(self.save)
         toolbar.addWidget(self.copy_log)
+        toolbar.addWidget(self.report_menu)
         toolbar.addWidget(self.clear_button)
         self.layout.addLayout(toolbar)
         self.tabs = QTabWidget()
@@ -294,8 +346,10 @@ class ResultsPanel(QWidget):
         self.proxy = FilterProxy(self)
         self.proxy.setSourceModel(self.model)
         self.table.setModel(self.proxy)
-        self.table.setColumnWidth(0, 360)
-        self.table.setColumnWidth(1, 120)
+        self.table.horizontalHeader().setStretchLastSection(False)
+        self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2,QHeaderView.Stretch)
+        self.table.setColumnWidth(1, 100)
         self.table.doubleClicked.connect(self.show_details)
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
@@ -315,6 +369,12 @@ class ResultsPanel(QWidget):
         self.proxy.rowsRemoved.connect(self.refresh_count)
         QShortcut(QKeySequence.Find, self, activated=self.search.setFocus)
         QShortcut(QKeySequence('Return'), self.table, activated=lambda: self.show_details(self.table.currentIndex()))
+
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        compact = event.size().width() < 820
+        self.save.setVisible(not compact); self.copy_log.setVisible(not compact)
+        self.report_menu.setVisible(compact)
 
     def reset(self):
         self.clear_filters()
@@ -397,6 +457,7 @@ def show_details(parent, title, text):
     content.setPlainText(str(text))
     layout.addWidget(content)
     actions = QDialogButtonBox(QDialogButtonBox.Close)
+    actions.button(QDialogButtonBox.Close).setText('Kapat')
     copy = actions.addButton('Kopyala', QDialogButtonBox.ActionRole)
     copy.clicked.connect(lambda: QApplication.clipboard().setText(str(text)))
     actions.rejected.connect(dialog.reject)

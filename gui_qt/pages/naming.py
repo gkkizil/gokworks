@@ -4,13 +4,13 @@ from pathlib import Path, PureWindowsPath
 from collections import Counter
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (QHBoxLayout, QComboBox, QTreeView, QInputDialog,
-                              QSplitter, QVBoxLayout, QApplication)
+                              QSplitter, QVBoxLayout, QWidget, QToolButton, QMenu, QHeaderView)
 
 from naming import exporter as engine
 from naming.hierarchy import document_rows
 from .. import services
 from ..models import TreeModel, FilterProxy, Column
-from ..components import BasePage, ValueForm, card, scroll, label, button, configure_view, show_details, open_folder
+from ..components import BasePage, ValueForm, Disclosure, card, scroll, label, button, configure_view, open_folder
 
 
 class NamingPage(BasePage):
@@ -29,42 +29,79 @@ class NamingPage(BasePage):
         self.save_button.setEnabled(False)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
-        splitter = QSplitter(Qt.Vertical)
-        panel, body = card('Kaynak montaj ve hedef')
+        self.splitter = QSplitter(Qt.Vertical)
+        panel, body = card('Kaynak ve yeni paket')
         self.form = ValueForm(self.settings, 'naming_')
-        self.source_folder = self.form.path('source_folder', 'Montajın bulunduğu klasör')
-        self.source_file = self.form.path('source_file', 'Kaynak montaj / dosya', folder=False)
-        self.discover_button = button('Klasördeki montajları bul', self.discover)
-        self.active_button = button('Aktif montajı kullan', self.read_active)
-        choices = QHBoxLayout()
-        choices.addWidget(self.discover_button)
-        choices.addWidget(self.active_button)
-        self.assemblies = QComboBox()
-        self.assemblies.setPlaceholderText('Klasörden montaj seçin…')
-        self.assemblies.activated.connect(self.choose_assembly)
-        choices.addWidget(self.assemblies, 1)
-        self.form.form.addRow(choices)
+        self.source_folder = self.form.path('source_folder', 'Montaj klasörü')
         destination = self.settings.get('naming_destination')
         if destination is None:
             parent = self.settings.get('naming_parent', '')
             destination = str(Path(parent) / str(self.settings.get('naming_package', 'Yeni-paket'))) if isinstance(parent, str) and parent else ''
-        self.destination = self.form.path('destination', 'Yeni montajın kaydedileceği klasör', destination)
-        self.form.combo('mode', 'İsimlendirme yöntemi', ('Ön / son ek', 'Numaralı'), 'Ön / son ek')
-        self.form.text('prefix', 'Ön ek')
-        self.form.text('suffix', 'Son ek')
-        self.form.text('start', 'Başlangıç numarası', '1')
-        self.form.text('digits', 'Numara basamak sayısı', '3')
-        self.form.text('find', 'Bul')
-        self.form.text('replacement', 'Yerine yaz')
+        self.destination = self.form.path('destination', 'Yeni paket klasörü', destination)
         body.addWidget(self.form)
-        body.addWidget(label('Hedef klasör yeni veya boş olmalı. Teknik resimler, bastırılmış parçalar ve Toolbox bileşenleri dahil edilir.', 'muted'))
-        splitter.addWidget(scroll(panel))
+
+        self.source_options_form = ValueForm(self.settings, 'naming_')
+        self.source_file = self.source_options_form.path('source_file','Kaynak dosya',folder=False)
+        self.discover_button = button('Montajları bul', self.discover)
+        self.active_button = button('Aktif montajı kullan', self.read_active)
+        self.source_options_form.form.addRow(self.active_button)
+        self.assemblies = QComboBox()
+        self.assemblies.setMinimumWidth(0)
+        self.assemblies.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.assemblies.setPlaceholderText('Klasörden montaj seçin…')
+        self.assemblies.setAccessibleName('Klasörde bulunan montajlar')
+        self.assemblies.activated.connect(self.choose_assembly)
+        choices=QHBoxLayout();choices.addWidget(self.assemblies,1);choices.addWidget(self.discover_button)
+        self.form.form.addRow(label('Kaynak montaj'),choices)
+        self.source_folder.choose.clicked.connect(lambda:self.discover() if self.source_folder.text() else None)
+        self.source_options = Disclosure('Dosyadan seç / aktif montajı kullan', self.source_options_form)
+        body.addWidget(self.source_options)
+
+        rules = QWidget()
+        rules_layout = QVBoxLayout(rules)
+        rules_layout.setContentsMargins(0, 0, 0, 0)
+        rules_layout.setSpacing(8)
+        self.rules_form = ValueForm(self.settings, 'naming_')
+        self.rules_form.combo('mode', 'Yöntem', ('Ön / son ek', 'Numaralı'), 'Ön / son ek')
+        rules_layout.addWidget(self.rules_form)
+        paired = QHBoxLayout()
+        self.name_left = ValueForm(self.settings, 'naming_')
+        self.name_left.text('prefix', 'Ön ek')
+        self.name_left.text('start', 'Başlangıç', '1').setToolTip('Başlangıç numarası')
+        self.name_left.text('find', 'Bul')
+        self.name_right = ValueForm(self.settings, 'naming_')
+        self.name_right.text('suffix', 'Son ek')
+        self.name_right.text('digits', 'Basamak', '3').setToolTip('Numara basamak sayısı')
+        self.name_right.text('replacement', 'Yerine yaz')
+        paired.addWidget(self.name_left, 1)
+        paired.addWidget(self.name_right, 1)
+        rules_layout.addLayout(paired)
+        for subform in (self.source_options_form, self.rules_form, self.name_left, self.name_right):
+            self.form.fields.update(subform.fields)
+            subform.changed.connect(self.form.changed)
+        self.rules_options = Disclosure('İsimlendirme kuralları', rules)
+        body.addWidget(self.rules_options)
+        self.safety_note = label('Hedef klasör yeni veya boş olmalı. Teknik resimler, bastırılmış parçalar ve Toolbox bileşenleri dahil edilir.', 'muted')
+        body.addWidget(self.safety_note)
+        self.source_scroll = scroll(panel)
+        self.source_scroll.setMinimumHeight(0)
+        self.splitter.addWidget(self.source_scroll)
         preview, layout = card('İsimlendirme önizlemesi')
         toolbar = QHBoxLayout()
         self.edit_button = button('Seçili adı düzenle', self.edit_selected)
         toolbar.addWidget(self.edit_button)
-        toolbar.addWidget(button('Elle girilenleri sıfırla', self.reset_overrides))
-        toolbar.addWidget(button('Hedef klasörünü aç', lambda: open_folder(self.destination.text()) if self.destination.text() else None))
+        toolbar.addStretch()
+        self.more_button = QToolButton()
+        self.more_button.setText('Diğer')
+        self.more_button.setAccessibleName('İsimlendirme önizleme işlemleri')
+        self.more_button.setPopupMode(QToolButton.InstantPopup)
+        menu = QMenu(self.more_button)
+        self.reset_action = menu.addAction('Elle girilenleri sıfırla', self.reset_overrides)
+        menu.addAction('Hedef klasörünü aç', lambda: open_folder(self.destination.text()) if self.destination.text() else None)
+        self.source_column_action=menu.addAction('Kaynak dosya sütununu göster');self.source_column_action.setCheckable(True)
+        self.source_column_action.toggled.connect(lambda visible:self.tree.setColumnHidden(3,not visible))
+        self.more_button.setMenu(menu)
+        toolbar.addWidget(self.more_button)
         layout.addLayout(toolbar)
         self.tree = configure_view(QTreeView())
         self.model = TreeModel((Column('Montaj / mevcut dosya adı', 'name'), Column('Yeni dosya adı', 'new_name'),
@@ -72,22 +109,32 @@ class NamingPage(BasePage):
         self.proxy = FilterProxy(self, tree=True)
         self.proxy.setSourceModel(self.model)
         self.tree.setModel(self.proxy)
-        self.tree.setColumnWidth(0, 350)
-        self.tree.setColumnWidth(1, 300)
+        self.tree.setColumnWidth(0, 240)
+        self.tree.setColumnWidth(1, 230)
+        self.tree.setColumnWidth(2, 100)
+        self.tree.header().setStretchLastSection(False)
+        self.tree.header().setSectionResizeMode(0,QHeaderView.Stretch)
+        self.tree.header().setSectionResizeMode(1,QHeaderView.Stretch)
+        self.tree.setColumnHidden(3,True)
         self.tree.doubleClicked.connect(self.edit_selected)
         layout.addWidget(self.tree, 1)
         self.plan_message = label('Kaynak montajı seçip Dosyaları oku düğmesine basın.', 'muted')
         layout.addWidget(self.plan_message)
-        splitter.addWidget(preview)
-        splitter.setSizes([300, 420])
-        splitter.setStretchFactor(1, 1)
-        self.layout.addWidget(splitter, 1)
-        self.controls.extend((self.form, self.discover_button, self.active_button, self.edit_button))
+        self.splitter.addWidget(preview)
+        self.splitter.setSizes([225, 600])
+        self.splitter.setStretchFactor(0, 0)
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setChildrenCollapsible(False)
+        self.layout.addWidget(self.splitter, 1)
+        self.controls.extend((self.form, self.source_options_form, rules,
+                              self.discover_button, self.active_button, self.edit_button))
         self.preview_timer = QTimer(self)
         self.preview_timer.setSingleShot(True)
         self.preview_timer.setInterval(150)
         self.preview_timer.timeout.connect(self.update_preview)
         self.form.changed.connect(self.form_changed)
+        self.rules_form.changed.connect(lambda key: self.update_rule_fields() if key == 'mode' else None)
+        self.update_rule_fields()
         self.last_error = ''
         self.finish_layout()
         self.jobs.finished.connect(self.schedule_preview)
@@ -95,8 +142,17 @@ class NamingPage(BasePage):
     def set_busy(self, busy):
         super().set_busy(busy)
         self.save_button.setEnabled(not busy and self.valid_plan)
+        self.reset_action.setEnabled(not busy)
+
+    def update_rule_fields(self):
+        numbered = self.form.value('mode') == 'Numaralı'
+        self.name_left.show_field('start', numbered)
+        self.name_right.show_field('digits', numbered)
+        self.rules_options.toggle.setText('İsimlendirme kuralları · ' + self.form.value('mode'))
 
     def form_changed(self, key):
+        if key=='source_folder':
+            self.source_file.setText('');self.assemblies.clear()
         if key.startswith('source_'):
             self.snapshot = None
             self.entries = ()
@@ -134,6 +190,9 @@ class NamingPage(BasePage):
             return
         source = None if self.use_active else self.source_file.text()
         if not self.use_active and not source:
+            if self.assemblies.count()>1:
+                self.assemblies.setFocus()
+                return self.set_status('Kaynak montaj listesinden işlenecek montajı seçin.',True)
             return self.discover()
         if source and PureWindowsPath(source).suffix.lower() not in engine.CAD_TYPES:
             return self.set_status('Geçerli bir SolidWorks montaj, parça veya teknik resim dosyası seçin.', True)
@@ -251,7 +310,11 @@ class NamingPage(BasePage):
                 for path in value:
                     self.assemblies.addItem(PureWindowsPath(path).name, path)
                 if len(value) == 1:
+                    self.assemblies.setCurrentIndex(0)
                     self.source_file.setText(str(value[0]))
+                elif value:
+                    self.source_file.setText('')
+                    self.assemblies.setCurrentIndex(-1)
                 self.set_status(f'{len(value)} montaj bulundu. Montajı seçip Dosyaları oku düğmesine basın.')
             elif kind == 'naming_phase':
                 self.set_status(value)

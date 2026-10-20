@@ -2,12 +2,12 @@
 
 from pathlib import Path
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QSplitter, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QSplitter, QHBoxLayout
 
 from pdf.process import export_drawings
 from dxf_dwg.exporter import export_parts
 from .. import services
-from ..components import BasePage, ValueForm, ResultsPanel, card, scroll, button, open_folder
+from ..components import BasePage, ValueForm, ResultsPanel, Disclosure, card, scroll, button, open_folder
 from solidworks import diagnostics
 
 
@@ -27,22 +27,34 @@ class ExportPage(BasePage):
         self.form = ValueForm(self.settings, mode + '_')
         self.source = self.form.path('source', 'Kaynak klasör')
         self.output = self.form.path('output', 'Çıktı klasörü')
-        self.form.check('recursive', 'Alt klasörleri tara', True)
-        self.form.check('overwrite', 'Mevcut çıktıların üzerine yaz', False)
         if not pdf:
             self.form.combo('format', 'Çıktı türü', ('DXF', 'DWG'), 'DXF')
-            self.form.check('bend_lines', 'Büküm çizgilerini ekle', False)
-            self.form.check('group_by_thickness', 'Sac kalınlığına göre klasörle', True)
+        self.options_form = ValueForm(self.settings, mode + '_')
+        self.options_form.check('recursive', 'Alt klasörleri tara', True)
+        self.options_form.check('overwrite', 'Mevcut çıktıların üzerine yaz', False)
+        if not pdf:
+            self.options_form.check('bend_lines', 'Büküm çizgilerini ekle', False)
+            self.options_form.check('group_by_thickness', 'Sac kalınlığına göre klasörle', True)
+        # Keep the original complete value interface used by the service boundary.
+        self.form.fields.update(self.options_form.fields)
+        self.options_form.changed.connect(self.form.changed)
         body.addWidget(self.form)
-        body.addWidget(button('Çıktı klasörünü aç', lambda: open_folder(self.output.text()) if self.output.text() else None))
-        self.controls.append(self.form)
+        self.options = Disclosure('Aktarım seçenekleri', self.options_form)
+        options_row = QHBoxLayout()
+        options_row.addWidget(self.options, 1)
+        options_row.addWidget(button('Çıktıyı aç', lambda: open_folder(self.output.text()) if self.output.text() else None), 0, Qt.AlignTop)
+        body.addLayout(options_row)
+        self.controls.extend((self.form, self.options_form))
         self.results = ResultsPanel()
         self.results.cleared.connect(lambda:self.set_status('Dosya listesi ve işlem günlüğü temizlendi.'))
-        self.splitter.addWidget(scroll(panel))
+        self.source_scroll = scroll(panel)
+        self.source_scroll.setMinimumHeight(0)
+        self.splitter.addWidget(self.source_scroll)
         self.splitter.addWidget(self.results)
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)
-        self.splitter.setSizes([235 if pdf else 330, 440])
+        self.splitter.setSizes([160 if pdf else 195, 700])
+        self.splitter.setChildrenCollapsible(False)
         self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
 

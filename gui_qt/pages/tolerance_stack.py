@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt,QSignalBlocker,QFileSystemWatcher,QTimer
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QSplitter,QTabWidget,QLineEdit,QComboBox,
-    QTableView,QCheckBox,QFileDialog,QMessageBox,QApplication,QMenu)
+    QTableView,QCheckBox,QFileDialog,QMessageBox,QApplication,QMenu,QDialog,QDialogButtonBox)
 
 from tolerance_stack.models import Project,Term,number,fmt,manual_dimension,snapshot as project_snapshot
 from tolerance_stack.calculator import calculate,Cancelled,check_cancel
@@ -87,19 +87,25 @@ class ToleranceStackPage(BasePage):
                                ('Kaynakların güncelliğini kontrol et',self.check_sources)):
             project_menu.addAction(title,callback)
         project_button.setMenu(project_menu)
-        self.action('Örnekle dene',self.load_example)
-        self.action('Nasıl kullanılır?',lambda:show_details(self,'Tolerans yığılması · Kullanım',HELP))
+        project_menu.addSeparator();project_menu.addAction('Örnekle dene',self.load_example)
+        self.action('Yardım',lambda:show_details(self,'Tolerans yığılması · Kullanım',HELP))
+        self.library_button=self.action('Ölçü listesi',self.show_library,locked=False);self.library_button.hide()
         self.stop_button=self.action('Durdur',self.jobs.cancel,locked=False);self.stop_button.setEnabled(False)
         source,body=card()
         body.setContentsMargins(14,10,14,10);body.setSpacing(6)
         toolbar=QHBoxLayout()
-        toolbar.addWidget(label('Teknik resimden ölçü al','section'),1)
+        toolbar.addWidget(label('Ölçü kaynağı','section'),1)
         self.active_button=button('Aktif resmi oku',lambda:self.scan(active=True),primary=True)
         self.choose_button=button('Dosya seç ve oku',self.choose_sources)
         self.scan_button=button('Yeniden tara',self.scan)
         self.check_button=button('Güncelliği kontrol et',self.check_sources)
         self.check_button.setVisible(False)
-        for widget in (self.active_button,self.choose_button,self.scan_button,self.check_button): toolbar.addWidget(widget)
+        toolbar.addWidget(self.active_button);toolbar.addWidget(self.choose_button)
+        source_menu=QMenu(self)
+        source_menu.addAction('Seçili kaynakları yeniden tara',lambda:self.scan_button.click())
+        source_menu.addAction('Kaynakların güncelliğini kontrol et',self.check_sources)
+        source_more=button('Diğer');source_more.setMenu(source_menu);toolbar.addWidget(source_more)
+        self.scan_button.setParent(source);self.scan_button.hide()
         body.addLayout(toolbar)
         self.source_info=label('Açık teknik resmi okuyun veya Manuel ölçü ile SolidWorks olmadan başlayın.','muted')
         body.addWidget(self.source_info);self.layout.addWidget(source)
@@ -116,7 +122,7 @@ class ToleranceStackPage(BasePage):
         self.filter.setMaximumWidth(145)
         search.addWidget(self.search,1);search.addWidget(self.filter);left.addLayout(search)
         self.library=configure_view(QTableView());self.library.setMinimumWidth(250)
-        self.library.setMinimumHeight(200)
+        self.library.setMinimumHeight(150)
         self.library_model=StackTable((Column('Ölçü','name'),Column('mm','nominal',compact),
             Column('Tolerans','tolerance'),Column('Durum','readiness'),
             Column('Alt sapma','lower',fmt),Column('Üst sapma','upper',fmt),
@@ -131,12 +137,13 @@ class ToleranceStackPage(BasePage):
         self.library.selectionModel().currentRowChanged.connect(self.selection_changed)
         self.library.doubleClicked.connect(self.edit_dimension);left.addWidget(self.library,1)
         self.selection_info=label('Bir ölçü seçin. Sonuca eklemek için +, çıkarmak için − kullanın.','muted')
-        self.selection_info.setMinimumHeight(36);left.addWidget(self.selection_info)
+        self.selection_info.setMinimumHeight(0);left.addWidget(self.selection_info)
         add_row=QHBoxLayout()
         self.add_plus=button('+ Topla',lambda:self.add_selected(1),primary=True)
         self.add_minus=button('− Çıkar',lambda:self.add_selected(-1))
         add_row.addWidget(self.add_plus);add_row.addWidget(self.add_minus);left.insertLayout(3,add_row)
-        left.addWidget(label('Örnek: dış ölçü (+) − içteki parçalar (−) = kalan boşluk','muted'))
+        self.add_plus.setToolTip('Örnek: dış ölçü (+) − içteki parçalar (−) = kalan boşluk')
+        self.add_minus.setToolTip(self.add_plus.toolTip())
         edit_row=QHBoxLayout()
         self.edit_dimension_button=button('Ölçüyü düzenle',self.edit_dimension)
         self.locate_button=button('Kaynağı göster',self.locate)
@@ -146,8 +153,14 @@ class ToleranceStackPage(BasePage):
         self.expand_library.toggled.connect(self.toggle_library)
         left.addWidget(self.expand_library)
         left.addWidget(label('Değişiklikler yalnız analize uygulanır. CAD ölçüleri korunur.','muted'))
-        library_scroll=scroll(library);library_scroll.setMinimumWidth(320)
-        self.splitter.addWidget(library_scroll)
+        self.library_scroll=scroll(library);self.library_scroll.setMinimumWidth(300)
+        self.splitter.addWidget(self.library_scroll)
+        self.library_dialog=QDialog(self);self.library_dialog.setWindowTitle('Tolerans yığılması · Ölçü listesi')
+        self.library_dialog.setWindowModality(Qt.WindowModal)
+        self.library_dialog_body=QVBoxLayout(self.library_dialog)
+        close=QDialogButtonBox(QDialogButtonBox.Close);close.button(QDialogButtonBox.Close).setText('Zincire dön')
+        close.rejected.connect(self.library_dialog.reject);self.library_dialog_body.addWidget(close)
+        self.compact_library=False
         self.right_host=QWidget();right=QVBoxLayout(self.right_host);right.setContentsMargins(0,0,0,0);right.setSpacing(8)
         self.tabs=QTabWidget();right.addWidget(self.tabs,1)
         self.splitter.addWidget(self.right_host);self.splitter.setSizes([400,780]);self.splitter.setChildrenCollapsible(False)
@@ -291,7 +304,7 @@ class ToleranceStackPage(BasePage):
         super().set_status(message,error)
 
     def toggle_library(self,expanded):
-        self.right_host.setVisible(not expanded)
+        self.right_host.setVisible(self.compact_library or not expanded)
         for index in range(4,self.library_model.columnCount()):self.library.setColumnHidden(index,not expanded)
         self.expand_library.setText('Zincire geri dön' if expanded else 'Tüm sütunları göster')
         self.column_timer.start()
@@ -302,7 +315,26 @@ class ToleranceStackPage(BasePage):
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
+        if hasattr(self,'library_dialog'):
+            compact=event.size().width()<760
+            if compact!=self.compact_library:
+                self.compact_library=compact
+                if compact:
+                    self.library_dialog_body.insertWidget(0,self.library_scroll,1)
+                    self.right_host.show()
+                else:
+                    self.library_dialog.reject();self.library_dialog_body.removeWidget(self.library_scroll)
+                    self.splitter.insertWidget(0,self.library_scroll);self.library_scroll.show()
+                    self.right_host.setVisible(not self.expand_library.isChecked())
+                    self.splitter.setSizes([340,max(360,self.width()-380)])
+                self.library_button.setVisible(compact)
         if hasattr(self,'column_timer'):self.column_timer.start()
+
+    def show_library(self):
+        if self.compact_library:
+            bounds=self.screen().availableGeometry()
+            self.library_dialog.resize(min(620,bounds.width()-40),min(720,bounds.height()-60))
+            self.library_dialog.open()
 
     def fit_columns(self):
         # Status remains in the selected-measurement summary and inline guidance on narrow windows.

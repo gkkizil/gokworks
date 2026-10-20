@@ -1,19 +1,19 @@
 """ASME GD&T catalogue, native vector frames and measurement comparisons."""
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QTreeView, QLineEdit
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeView, QLineEdit, QTabWidget
 from geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
 from geometric_tolerances import rules as r
 from geometric_tolerances.diagram import draw
 from .calculations import CalculationPage
-from ..components import card, label, configure_view, show_details
+from ..components import card, label, scroll, configure_view, show_details
 from ..models import TreeModel, FilterProxy, Column
 
 
 class GdtPage(CalculationPage):
     def __init__(self, context):
         super().__init__(context, 'Geometrik toleranslar', 'ASME Y14.5-2018 · Tolerans çerçevesi, bölge ve ölçüm karşılaştırması.', 'gdt_')
-        self.action('Okuma rehberi', lambda: show_details(self, 'GD&T rehberi', GUIDE))
+        self.info_action('Okuma rehberi', lambda: show_details(self, 'GD&T rehberi', GUIDE))
         self.kind = self.settings.get('gdt_kind', 'cylindricity')
         if self.kind not in CHARACTERISTICS:
             self.kind = 'cylindricity'
@@ -22,7 +22,7 @@ class GdtPage(CalculationPage):
         f.text('tolerance', 'Toplam tolerans t · mm', '0,05')
         f.combo('datum', 'Referans sırası', r.DATUM_CHOICES, 'A')
         f.text('size_tolerance', 'İlgili boyut toleransı · mm', '')
-        f.text('measured', 'Ölçülmüş toplam geometrik hata · mm', '')
+        f.text('measured', 'Toplam geometrik hata · mm', '')
         f.set_value('measured', '')
         # Measured errors describe this inspection only; never persist them.
         self.settings.values.pop('gdt_measured', None)
@@ -31,13 +31,13 @@ class GdtPage(CalculationPage):
                                     'ASME 8.4: bu yüzey örneğinde geometrik tolerans bu değerden küçük olmalıdır. '
                                     'MMC zarfı burada ölçülmez.', 'muted')
         self.extra_layout.addWidget(self.datum_help)
-        self.extra_layout.addWidget(self.size_rule_help)
+        f.fields['size_tolerance'].setToolTip(self.size_rule_help.text())
         self.search = QLineEdit()
         self.search.setPlaceholderText('Tolerans türü ara…')
         self.extra_layout.addWidget(self.search)
         self.catalog = configure_view(QTreeView())
         self.catalog.setSortingEnabled(False)
-        self.catalog.setMinimumHeight(300)
+        self.catalog.setMinimumHeight(200)
         self.catalog_model = TreeModel((Column('Tolerans türü', 'name'),))
         rows = [dict(id=group, parent='', name=group) for group in GROUPS]
         rows += [dict(id=item.key, parent=item.group, name=f'{item.name} · {item.english}' + (' (eski)' if not item.active else ''), key=item.key,
@@ -55,16 +55,26 @@ class GdtPage(CalculationPage):
         self.diagram_tabs.setCurrentIndex(1)
         self.right.removeWidget(self.details)
         self.measurement_label = label()
+        self.measurement_hint = label('', 'muted')
         self.note_label = label()
         self.assessment_label = label()
-        for index, (title, widget) in enumerate((('Toleransın anlamı', self.details),
-                                                ('Nasıl ölçülür?', self.measurement_label),
-                                                ('Üretim / tasarım notu', self.note_label),
-                                                ('Ölçüm karşılaştırması', self.assessment_label))):
-            panel, body = card(title)
+        panel, body = card()
+        self.explanation_tabs = QTabWidget()
+        overview = QWidget()
+        overview_body = QVBoxLayout(overview)
+        overview_body.setContentsMargins(8, 8, 8, 8)
+        overview_body.setSpacing(8)
+        for widget in (self.details, self.measurement_hint, self.assessment_label):
             widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            body.addWidget(widget)
-            self.right.insertWidget(self.right.indexOf(self.diagram_tabs) + 1 + index, panel)
+            overview_body.addWidget(widget)
+        self.explanation_tabs.addTab(overview, 'Anlam ve kontrol')
+        for title, widget in (('Ölçüm rehberi', self.measurement_label),
+                              ('Üretim notu', self.note_label),
+                              ('Boyut ilişkisi', self.size_rule_help)):
+            widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            self.explanation_tabs.addTab(scroll(widget), title)
+        body.addWidget(self.explanation_tabs)
+        self.right.insertWidget(self.right.indexOf(self.diagram_tabs) + 1, panel)
         self.update_result()
 
     @staticmethod
@@ -107,12 +117,16 @@ class GdtPage(CalculationPage):
         self.details.setText(item.description + '\n\nTolerans bölgesi: ' + item.zone)
         self.measurement_label.setText('Ölçüm girişinin anlamı: ' + MEASUREMENT_INPUTS.get(
             item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.') + '\n\n' + item.measurement)
+        self.measurement_hint.setText('Ölçüm girişi: ' + MEASUREMENT_INPUTS.get(
+            item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.'))
+        f.fields['measured'].setToolTip(self.measurement_label.text())
         self.note_label.setText(item.note + '\n\nKullanım örneği: ' + item.example)
         self.datum_help.setText({
             'none': 'Şekil toleransında referans (datum) kullanılmaz.',
             'optional': 'Referans seçimi isteğe bağlıdır. Teorik ölçüler ve profil ayrıca tanımlanmalıdır.',
             'required': 'Bu örnek referans gerektirir. A, B, C sırası referans önceliğini belirler.'}[item.datum])
         self.size_rule_help.setVisible(item.group == 'Şekil')
+        self.explanation_tabs.setTabVisible(3, item.group == 'Şekil')
         f.fields['datum'].setEnabled(item.active and item.datum != 'none')
         f.show_field('size_tolerance', item.group == 'Şekil')
         for key in ('size', 'tolerance', 'measured', 'size_tolerance'):

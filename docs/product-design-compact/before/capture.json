@@ -1,0 +1,22 @@
+{
+  "source": "Native PySide6 screenshots, default module states; no live SolidWorks",
+  "size": [
+    1440,
+    900
+  ],
+  "theme": "dark",
+  "modules": [
+    "pdf",
+    "dxf_dwg",
+    "bom",
+    "naming",
+    "k_factor",
+    "iso_fits",
+    "geometric_tolerances",
+    "tolerance_stack",
+    "bolt",
+    "bolt_torque",
+    "weight",
+    "nesting"
+  ]
+}

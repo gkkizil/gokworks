@@ -7,12 +7,12 @@ from PySide6.QtCore import Qt, QTimer, QSize
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QGuiApplication
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
     QVBoxLayout, QFrame, QStackedWidget, QProgressBar, QComboBox, QMessageBox,
-    QDialog, QDialogButtonBox)
+    QDialog, QDialogButtonBox, QToolButton, QCheckBox)
 from .settings import SettingsStore
 from .workers import JobManager
 from .theme import apply_theme, COLORS
 from .icons import BrandLogo, ASSETS, icon, set_application_identity
-from .components import label, button, scroll, show_details
+from .components import label, button, scroll, show_details, Disclosure, card
 from . import services
 from solidworks import diagnostics
 from .pages.export import ExportPage
@@ -66,23 +66,30 @@ class MainWindow(QMainWindow):
         outer.setSpacing(0)
         self.sidebar = QFrame()
         self.sidebar.setObjectName('sidebar')
-        self.sidebar.setFixedWidth(244)
+        self.sidebar.setFixedWidth(232)
+        self.sidebar_collapsed = False
+        self.section_labels = []
         side = QVBoxLayout(self.sidebar)
-        side.setContentsMargins(15, 14, 15, 16)
+        side.setContentsMargins(10, 8, 10, 10); side.setSpacing(6)
+        brand = QHBoxLayout(); brand.setSpacing(6)
         self.logo = BrandLogo()
-        side.addWidget(self.logo)
-        side.addWidget(label('GOKWORKS', 'section'))
-        side.addWidget(label('Mühendislik araçları', 'muted'))
+        self.logo.setFixedSize(124,42)
+        brand.addWidget(self.logo); brand.addStretch()
+        self.menu_toggle = QToolButton(); self.menu_toggle.setText('‹')
+        self.menu_toggle.setFixedSize(30,30); self.menu_toggle.clicked.connect(self.toggle_sidebar)
+        brand.addWidget(self.menu_toggle); side.addLayout(brand)
+        self.brand_label = label('GOKWORKS','section'); side.addWidget(self.brand_label)
         menu = QWidget()
         menu_layout = QVBoxLayout(menu)
-        menu_layout.setContentsMargins(0, 12, 0, 0)
-        menu_layout.setSpacing(4)
+        menu_layout.setContentsMargins(0, 0, 0, 0)
+        menu_layout.setSpacing(2)
         group = None
         for mode, title, section in MODULES:
             if section != group:
                 caption = label(section, 'muted')
-                caption.setStyleSheet('font-size:10px; padding-top:12px; padding-bottom:6px;')
+                caption.setStyleSheet('font-size:10px; padding-top:8px; padding-bottom:4px;')
                 menu_layout.addWidget(caption)
+                self.section_labels.append(caption)
                 group = section
             nav = button(title, lambda checked=False, key=mode: self.navigate(key))
             nav.setProperty('nav', True)
@@ -97,8 +104,10 @@ class MainWindow(QMainWindow):
         menu_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         side.addWidget(menu_scroll, 1)
         tools = QHBoxLayout()
-        tools.addWidget(button('Ayarlar', self.show_settings))
-        tools.addWidget(button('Lisanslar', self.show_licenses))
+        tools.setSpacing(6)
+        self.settings_button = button('Ayarlar', self.show_settings)
+        self.licenses_button = button('Lisanslar', self.show_licenses)
+        tools.addWidget(self.settings_button); tools.addWidget(self.licenses_button)
         side.addLayout(tools)
         self.theme_picker = QComboBox()
         self.theme_picker.addItem('Koyu tema', 'dark')
@@ -139,7 +148,27 @@ class MainWindow(QMainWindow):
         initial = self.settings.get('mode', 'pdf')
         self.navigate(initial if isinstance(initial, str) and initial in self.pages else 'pdf')
         self.restore_window()
+        self.set_sidebar_collapsed(self.settings.get('sidebar_collapsed',False) is True)
         QShortcut(QKeySequence('Ctrl+,'), self, activated=self.show_settings)
+        QShortcut(QKeySequence('Ctrl+B'),self,activated=self.toggle_sidebar)
+
+    def toggle_sidebar(self):
+        self.set_sidebar_collapsed(not self.sidebar_collapsed)
+
+    def set_sidebar_collapsed(self, collapsed):
+        self.sidebar_collapsed = bool(collapsed)
+        self.sidebar.setFixedWidth(64 if collapsed else 232)
+        self.logo.setVisible(not collapsed); self.brand_label.setVisible(not collapsed)
+        for caption in self.section_labels: caption.setVisible(not collapsed)
+        for key,title,_ in MODULES:
+            nav = self.navigation[key]; nav.setText('' if collapsed else title)
+            nav.setStyleSheet('text-align: center; padding: 8px 0;' if collapsed else '')
+        self.menu_toggle.setText('›' if collapsed else '‹')
+        self.menu_toggle.setToolTip('Menüyü genişlet · Ctrl+B' if collapsed else 'Menüyü daralt · Ctrl+B')
+        self.menu_toggle.setAccessibleName('Menüyü genişlet' if collapsed else 'Menüyü daralt')
+        self.settings_button.setVisible(not collapsed); self.licenses_button.setVisible(not collapsed)
+        self.theme_picker.setVisible(not collapsed)
+        self.settings.set('sidebar_collapsed',self.sidebar_collapsed)
 
     def restore_window(self):
         geometry = self.settings.qt.value('window/geometry')
@@ -174,6 +203,10 @@ class MainWindow(QMainWindow):
         if appearance not in COLORS:
             return
         self.appearance = appearance
+        if hasattr(self,'theme_picker'):
+            blocked = self.theme_picker.blockSignals(True)
+            self.theme_picker.setCurrentIndex(0 if appearance == 'dark' else 1)
+            self.theme_picker.blockSignals(blocked)
         apply_theme(QApplication.instance(), appearance)
         self.logo.set_appearance(appearance)
         for mode, nav in self.navigation.items():
@@ -228,11 +261,26 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(0, self.close)
 
     def show_settings(self):
-        show_details(self, 'Uygulama ayarları',
-                     f'Ayar dosyası: {self.settings.path}\n\nKlasörler, işlem seçenekleri ve hesap tercihleri otomatik kaydedilir. '
-                     'Mevcut JSON ayarlarınız korunur. Pencere konumu ve boyutu ayrı Qt ayarlarında saklanır.\n\n'
-                     'SolidWorks: açık oturum · Windows 10/11 · 2025 SP5\nArayüz: PySide6 / Qt Widgets\n'
-                     'K/R: kaydet seçimi her açılışta kapalıdır.\n\nTema seçimini sol panelin altından değiştirebilirsiniz.')
+        dialog=QDialog(self);dialog.setWindowTitle('GOKWORKS · Uygulama ayarları');dialog.resize(480,300)
+        layout=QVBoxLayout(dialog);layout.setSpacing(10)
+        panel,body=card('Görünüm')
+        body.addWidget(label('Tema','muted'))
+        appearance=QComboBox();appearance.setObjectName('appearancePreference');appearance.setAccessibleName('Uygulama teması')
+        appearance.addItem('Koyu tema','dark');appearance.addItem('Açık tema','light')
+        appearance.setCurrentIndex(0 if self.appearance=='dark' else 1)
+        appearance.currentIndexChanged.connect(lambda:self.set_theme(appearance.currentData()));body.addWidget(appearance)
+        compact=QCheckBox('Sol menüyü simgelere daralt');compact.setObjectName('compactNavigationPreference')
+        compact.setChecked(self.sidebar_collapsed);compact.toggled.connect(self.set_sidebar_collapsed);body.addWidget(compact)
+        body.addWidget(label('Menüyü Ctrl+B ile de daraltıp genişletebilirsiniz.','muted'));layout.addWidget(panel)
+        layout.addWidget(label('Tercihler ve girdiğiniz değerler otomatik kaydedilir.','muted'))
+        details=label(f'Ayar dosyası: {self.settings.path}\n\nPencere konumu ve boyutu ayrıca korunur. '
+            'SolidWorks araçları açık oturumu kullanır; hesap araçları bağlantı olmadan çalışır. '
+            'K/R dosya kaydetme seçimi her açılışta kapalıdır.\n\nArayüz: PySide6 / Qt Widgets.','muted')
+        layout.addWidget(Disclosure('Dosya ve çalışma bilgileri',details));layout.addStretch()
+        close=QDialogButtonBox(QDialogButtonBox.Close);close.button(QDialogButtonBox.Close).setText('Kapat')
+        close.rejected.connect(dialog.reject);layout.addWidget(close)
+        try:dialog.exec()
+        finally:self.settings.flush();dialog.deleteLater()
 
     def show_licenses(self):
         from .licenses import LicensesDialog
