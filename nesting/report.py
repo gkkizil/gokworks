@@ -33,7 +33,7 @@ PART_COLUMNS = [('Parça kodu','code'),('Açıklama','description'),('Örnek','i
                 ('Kalınlık mm','thickness'),('Net alan mm²','area'),('Tek parça kg','weight'),('Levha','sheet'),
                 ('Dağıtılmış maliyet TL','allocation'),('Dış çevre mm','outer_perimeter'),('Delik çevresi mm','inner_perimeter'),
                 ('Kaynak','source'),('SHA256','sha256')]
-SHEET_COLUMNS = [('Levha','number'),('Sac adı','name'),('En mm','width'),('Boy mm','height'),('Kalınlık mm','thickness'),
+SHEET_COLUMNS = [('Plaka','plate'),('Sac adı','name'),('En mm','width'),('Boy mm','height'),('Kalınlık mm','thickness'),
                  ('Malzeme','material'),('Yoğunluk kg/m³','density'),('Brüt kg','gross_weight'),('Net kg','net_weight'),
                  ('Fire kg','waste_weight'),('Verim %','efficiency'),('Malzeme TL','material_cost'),('Fiyat modeli','pricing'),('Birim fiyat','price')]
 
@@ -70,7 +70,7 @@ def export_excel(project, result, path, *, overwrite=False, stop=None):
                     elif isinstance(cell.value, float): cell.number_format = '0.0000'
         for index, s in enumerate(totals['sheets'], 1):
             check_cancel(stop)
-            sheet = book.create_sheet(f'Yerleşim {index:03d}'); sheet['A1'] = f"{s['name']} / {s['number']} · {s['material']} · {s['thickness']} mm"
+            sheet = book.create_sheet(f'Yerleşim {index:03d}'); sheet['A1'] = f"{s['plate']}. plaka · {s['name']} · {s['material']} · {s['thickness']} mm"
             sheet['A1'].data_type = 's'
             image = Image(BytesIO(sheet_png(project, result, (s['id'], s['number'])))); image.width = 900; image.height = 630
             sheet.add_image(image, 'A3')
@@ -114,7 +114,7 @@ def export_pdf(project, result, path, *, overwrite=False, stop=None):
                 if not writer.newPage(): raise RuntimeError('PDF yerleşim sayfası oluşturulamadı.')
                 painter.setPen(QColor('#24466c')); painter.setFont(QFont('Arial', 12, QFont.Bold))
                 painter.drawText(QRectF(0,0,writer.width(),60), Qt.TextWordWrap,
-                                 f"{s['name']} / {s['number']} · {s['material']} · {s['width']:g} × {s['height']:g} × {s['thickness']:g} mm")
+                                 f"{s['plate']}. plaka · {s['name']} · {s['material']} · {s['width']:g} × {s['height']:g} × {s['thickness']:g} mm")
                 painter.setFont(QFont('Arial', 9))
                 painter.drawText(QRectF(0,65,writer.width(),85), Qt.TextWordWrap,
                                  f"Brüt {s['gross_weight']:.5f} kg · Net {s['net_weight']:.5f} kg · Fire {s['waste_weight']:.5f} kg\n"

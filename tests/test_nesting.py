@@ -3,7 +3,10 @@
 from dataclasses import replace
 import json
 import math
+import re
 import threading
+from collections import Counter
+from queue import Queue
 
 import ezdxf
 import pytest
@@ -18,6 +21,7 @@ from nesting.materials import new_project
 from nesting.models import Part, Sheet, Material, Placement, number
 from nesting.storage import save_project, load_project
 from nesting.validation import validate_result
+from nesting.batch_import import import_batch
 
 
 def drawing(tmp_path, build, *, unit=4, name='Part.dxf'):
@@ -163,6 +167,63 @@ def test_second_sheet_and_stock_exhaustion():
     with pytest.raises(ValueError,match='yerleşmedi'): validate_result(p,r)
 
 
+def test_plates_are_filled_in_order_one_two_three():
+    p = project([Part.create('A',box(0,0,40,40),quantity=9)],width=100,height=100)
+    r = nest(p)
+    numbers = [x.sheet_number for x in r.placements]
+    assert numbers == sorted(numbers)
+    assert Counter(numbers) == {1:4,2:4,3:1}
+    assert not r.unplaced and validate_result(p,r)
+
+
+def test_smaller_remaining_part_fills_first_plate_before_second_is_opened():
+    p = project([Part.create('Large',box(0,0,60,70),quantity=2),Part.create('Strip',box(0,0,20,90))],width=100,height=100)
+    p.options.margin = p.options.gap = p.options.kerf = 0; p.options.rotation = False
+    r = nest(p)
+    assert [x.sheet_number for x in r.placements] == [1,1,2]
+    assert p.part(r.placements[1].part_id).code == 'Strip'
+    assert not r.unplaced and validate_result(p,r)
+
+
+def test_all_selected_sources_survive_a_real_dxf_parser_error(tmp_path):
+    a = drawing(tmp_path,lambda m,d:rectangle(m),name='First.dxf')
+    bad = drawing(tmp_path,lambda m,d:rectangle(m),name='Broken.dxf')
+    broken,replacements = re.subn(r'\n *10\n','\nBAD-CODE\n',bad.read_text(),count=1)
+    assert replacements == 1; bad.write_text(broken)
+    b = drawing(tmp_path,lambda m,d:rectangle(m,60,30),name='Last.dxf')
+    with pytest.raises(ezdxf.DXFStructureError): ezdxf.readfile(bad)
+    sink = Queue(); entries = [dict(id=str(i),source=str(p)) for i,p in enumerate((a,bad,b))]
+    import_batch(entries,{},sink,threading.Event())
+    events = list(sink.queue)
+    completed = [v for k,v in events if k == 'nest_file' and v['status'] != 'running']
+    assert [v['status'] for v in completed] == ['success','error','success']
+    assert completed[-1]['parts'][0].area == 1800
+    assert events[-1][0] == 'nest_import_done' and events[-1][1]['selected'] == 3
+    assert events[-1][1]['ready'] == 2 and events[-1][1]['errors'] == 1
+
+
+def test_batch_cancel_keeps_finished_files_and_reports_every_pending_source(tmp_path):
+    files = [drawing(tmp_path,lambda m,d:rectangle(m),name=f'P{i}.dxf') for i in range(3)]
+    stop = threading.Event()
+    class Sink(Queue):
+        def put(self,event):
+            super().put(event)
+            if event[0] == 'nest_file' and event[1]['status'] == 'success': stop.set()
+    sink = Sink(); import_batch([dict(id=str(i),source=str(p)) for i,p in enumerate(files)],{},sink,stop)
+    completed = [v for k,v in sink.queue if k == 'nest_file' and v['status'] != 'running']
+    assert [v['status'] for v in completed] == ['success','cancelled','cancelled']
+    assert completed[0]['parts'] and list(sink.queue)[-1][1]['cancelled'] == 2
+
+
+def test_import_error_list_roundtrips_without_losing_valid_geometry(tmp_path):
+    p = project(); path = tmp_path/'partial.goknest.json'
+    imports = [dict(id='bad',source='Missing-unit.dxf',status='error',detail='DXF birimi tanımlı değil.',options=dict(thickness=1.5,unit=None))]
+    save_project(p,path,imports=imports)
+    loaded,result,sources = load_project(path,with_imports=True)
+    assert len(loaded.parts) == 1 and result is None and sources == imports
+    assert load_project(path)[0].fingerprint() == p.fingerprint()
+
+
 def test_search_considers_large_sheet_to_reduce_sheet_count():
     p = project([Part.create('A',box(0,0,75,75),quantity=4)],width=100,height=100)
     p.sheets.append(replace(p.sheets[0],id='large',name='Large',width=200,height=200))
@@ -207,6 +268,9 @@ def test_different_materials_and_thicknesses_never_mix():
     r = nest(p)
     assert len({x.sheet_id for x in r.placements}) == 3
     assert validate_result(p,r)
+    totals = calculate(p,r)
+    assert [s['plate'] for s in totals['sheets']] == [1,2,3]
+    assert {row['plate'] for row in totals['parts']} == {1,2,3}
 
 
 def test_costs_allocated_exactly_and_optional_operations_separate():

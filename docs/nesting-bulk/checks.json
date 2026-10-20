@@ -1,0 +1,14 @@
+{
+  "selected": 10,
+  "ready_before_retry": 9,
+  "errors_before_retry": 1,
+  "ready_after_retry": 10,
+  "plates": 3,
+  "parts_per_plate": {
+    "1": 4,
+    "2": 4,
+    "3": 2
+  },
+  "validated": true,
+  "engine_version": "1.1"
+}

@@ -83,10 +83,11 @@ def convex_sum(a, b):
     return Polygon(result).convex_hull
 
 
-def minkowski(a, b, checkpoint=lambda: None):
+def minkowski(a, b, checkpoint=lambda: None, *, parts_a=None, parts_b=None):
     """A ⊕ B via convex decomposition, not bounding rectangles (own implementation)."""
     pieces = []
-    aa,bb = convex_parts(a,checkpoint),convex_parts(b,checkpoint)
+    aa = convex_parts(a,checkpoint) if parts_a is None else parts_a
+    bb = convex_parts(b,checkpoint) if parts_b is None else parts_b
     for pa in aa:
         for pb in bb:
             checkpoint()

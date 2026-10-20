@@ -6,6 +6,8 @@ Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı
 1. **DXF dosyalarını yükle**: birden fazla dosya seçin. Malzeme, kalınlık,
    adet ve eğri toleransını belirtin. `$INSUNITS` yoksa mm/cm/inch seçimini
    açıkça yapın. Yardımcı katmanları adlarıyla `;` kullanarak dışlayın.
+   Seçilen her dosya hemen listede görünür; okunamayanlar hata açıklamasıyla
+   kalır. Dosyaya çift tıklayıp ayarlarını düzeltip yeniden okuyabilirsiniz.
 2. Parçaya çift tıklayarak kod, açıklama, adet, kalınlık ve malzemeyi düzenleyin.
    Alan, sınır ölçüleri ve dış/iç çevreler aynı pencerede gösterilir.
 3. **Saclar ve malzemeler**: özel ölçü veya 1000×2000, 1250×2500,
@@ -26,7 +28,7 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 
 ## Hesap ve algoritma
 
-Motor adı **GOKWORKS NFP 1.0**. Gerçek kontur çarpışma alanı,
+Motor adı **GOKWORKS NFP 1.1**. Gerçek kontur çarpışma alanı,
 `A ⊕ (−B)` Minkowski toplamıdır. İçbükey poligonlar kısıtlı Delaunay
 üçgenlemesine ayrılır; yalnız dışbükey kalan birleşimler birleştirilir.
 Dışbükey parçaların Minkowski toplamları birleştirilerek No-Fit Polygon
@@ -36,6 +38,8 @@ aday koordinatlar bulunur; her aday ayrıca gerçek konturla kontrol edilir.
 
 Alan/boyut sıralamaları, tekrarlanabilir rastgele sıra değişimleri,
 izinli dönüşler ve farklı levha boyutu seçimleri denenir.
+Her fiziksel plaka, kalan uygun parçalarla doldurulduktan sonra sonraki
+plaka açılır. Ekrandaki ve rapordaki numaralar 1 → 2 → 3 olarak ilerler.
 Skor sırasıyla yerleşmeyen adet, kullanılan levha adedi, satın alınan alan
 ve yerleşimin yüksekliğidir. Hızlı/Dengeli/Yüksek en fazla 3/12/40 arama
 denemesidir; zaman sınırı daha erken durdurabilir. Genetik algoritma
@@ -117,3 +121,4 @@ ağırlık/Excel/PDF/DXF denemesi eklendi. Bu değişiklik için EXE üretilmedi
 gerçek Windows paket kontrolü sonraki istenen EXE derlemesinde çalışacak.
 
 Referanslar ve lisans değerlendirmesi: [teknik rapor](../docs/nesting.md).
+[Toplu yükleme ve plaka sırası düzeltmesi](../docs/nesting-bulk/README.md).

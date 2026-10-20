@@ -22,7 +22,7 @@ def calculate(project, result, *, complete=True, stop=None):
         groups[(p.sheet_id, p.sheet_number)].append(p)
     sheets = []; parts = []; material_total = Decimal(0)
     cut_mm = 0.; piercings = 0
-    for (sheet_id, number), placements in groups.items():
+    for plate, ((sheet_id, number), placements) in enumerate(groups.items(),1):
         sheet = project.sheet(sheet_id); material = project.material(sheet.material)
         gross_area = sheet.width*sheet.height
         gross_mass = mass(gross_area, sheet.thickness, material.density)
@@ -40,14 +40,14 @@ def calculate(project, result, *, complete=True, stop=None):
             parts.append(dict(id=part.id, code=part.code, description=part.description, instance=placement.instance,
                               material=material.name, density=material.density, thickness=part.thickness,
                               area=part.area, weight=mass(part.area, part.thickness, material.density),
-                              sheet=f'{sheet.name} / {number}', sheet_id=sheet_id, sheet_number=number,
+                              sheet=f'{plate}. plaka · {sheet.name}', plate=plate, sheet_id=sheet_id, sheet_number=number,
                               allocation=float(allocation), perimeter=length,
                               outer_perimeter=sum(p.exterior.length for p in polygons(g)),
                               inner_perimeter=sum(r.length for p in polygons(g) for r in p.interiors),
                               holes=holes, source=part.source, sha256=part.source_sha256))
         if net_area > gross_area+1e-6 or net_mass > gross_mass+1e-9:
             raise ValueError('Brüt / net alan veya ağırlık tutarsızlığı.')
-        sheets.append(dict(id=sheet_id, number=number, name=sheet.name, material=material.name,
+        sheets.append(dict(id=sheet_id, number=number, plate=plate, name=sheet.name, material=material.name,
                            width=sheet.width, height=sheet.height, thickness=sheet.thickness, density=material.density,
                            gross_area=gross_area, net_area=net_area, waste_area=gross_area-net_area,
                            gross_weight=gross_mass, net_weight=net_mass, waste_weight=gross_mass-net_mass,

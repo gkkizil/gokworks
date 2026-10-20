@@ -50,19 +50,24 @@ class NestingCanvas(QGraphicsView):
         self.auto_fit = True
         self.resize_timer = QTimer(self); self.resize_timer.setSingleShot(True); self.resize_timer.setInterval(40)
         self.resize_timer.timeout.connect(lambda:self.fit() if self.auto_fit else None)
+        self.empty_label = label('DXF dosyalarını ekleyin, ardından Yerleştir düğmesine basın.', 'muted')
+        self.empty_label.setParent(self.viewport()); self.empty_label.setAlignment(Qt.AlignCenter)
+        self.empty_label.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.empty()
 
     def empty(self):
         self.scene().clear()
-        text = self.scene().addText('DXF parçalarını yükleyin ve Otomatik yerleşim düğmesine basın.')
-        text.setDefaultTextColor(QColor(COLORS[self.theme]['muted']))
-        text.setTextWidth(340); self.scene().setSceneRect(text.boundingRect()); self.fit()
+        self.scene().setSceneRect(QRectF(0,0,100,100))
+        self.empty_label.setStyleSheet('font-size: 13px; color: '+COLORS[self.theme]['muted']+';')
+        self.empty_label.setGeometry(self.viewport().rect().adjusted(24,24,-24,-24))
+        self.empty_label.show(); self.fit()
 
     def render(self, project, result, key):
         self.project, self.result, self.key = project, result, key
         self.scene().clear()
         if result is None or key is None:
             return self.empty()
+        self.empty_label.hide()
         colors = COLORS[self.theme]; self.setBackgroundBrush(QColor(colors['bg']))
         sheet = project.sheet(key[0]); pen = QPen(QColor(colors['muted'])); pen.setCosmetic(True)
         self.scene().addRect(QRectF(0,-sheet.height,sheet.width,sheet.height), pen, QColor(colors['panel']))
@@ -89,6 +94,7 @@ class NestingCanvas(QGraphicsView):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        if hasattr(self,'empty_label'): self.empty_label.setGeometry(self.viewport().rect().adjusted(24,24,-24,-24))
         if hasattr(self,'resize_timer'): self.resize_timer.start()
 
     def wheelEvent(self, event):

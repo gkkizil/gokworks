@@ -69,3 +69,7 @@ Boş proje/şablon kaydı ve gerçek uç birleştirme hata payı da denetlendi. 
 kontrolü 11 modül, 2 tema, 4 çözünürlük ve NFP/DXF/Excel/PDF için geçti.
 Geometri ilerleme bildirimleri 80 ms'de bir birleştirilir; fitInView sırasında
 scrollbar değişimiyle yeniden boyutlandırma döngüsü engellenir.
+
+NFP 1.1 güncellemesi: [toplu DXF listesi, hata/iptal koruması ve sıralı fiziksel
+plaka doldurma](nesting-bulk/README.md). Yeni kaynaklarda yükleme kayıtları
+projeyle saklanır; rapor ve arayüzün plaka numaraları eşleştirilmiştir.

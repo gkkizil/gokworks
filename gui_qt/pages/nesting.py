@@ -16,8 +16,11 @@ from nesting.models import Material, Sheet, Options, Operations, uid, number, in
 from nesting.geometry import polygons
 from nesting.accounting import mass, calculate
 
+IMPORT_LABELS = {'pending':'Sırada', 'running':'Okunuyor', 'success':'Hazır', 'error':'Okunamadı', 'cancelled':'Durduruldu'}
+
 
 def fmt(v):
+    if v is None: return '—'
     return f'{v:,.3f}'.replace(',', '_').replace('.', ',').replace('_', '.')
 
 
@@ -26,6 +29,7 @@ class NestingPage(BasePage):
         super().__init__(context, 'Nesting · Sac maliyeti',
                          'DXF parçalarını yükleyin, sac stokunu tanımlayın ve gerçek konturlarla yerleştirin.')
         self.project = new_project(); self.result = None; self.loading = False
+        self.imports = []; self.sheet_totals = []
         self.price_candidate = None
         self.price_timer = QTimer(self); self.price_timer.setSingleShot(True); self.price_timer.setInterval(220)
         self.price_timer.timeout.connect(self.reprice)
@@ -45,20 +49,27 @@ class NestingPage(BasePage):
         left.setMinimumWidth(230); self.parts_panel = left; self.compact = False
         self.import_button = button('DXF dosyalarını yükle', self.import_dialog, primary=True); left_layout.addWidget(self.import_button)
         self.search = QLineEdit(); self.search.setPlaceholderText('Parça ara…'); self.search.setClearButtonEnabled(True); left_layout.addWidget(self.search)
-        self.part_model = TableModel([Column('Parça','code'),Column('Adet','quantity'),Column('Kalınlık','thickness',fmt),Column('Net kg','weight',fmt)])
+        self.part_model = TableModel([Column('Dosya / parça','code'),Column('Durum','status',lambda s:IMPORT_LABELS.get(s,s)),
+                                     Column('Adet','quantity'),Column('Kalınlık','thickness',fmt),Column('Net kg','weight',fmt),Column('Açıklama','detail')])
         self.part_proxy = FilterProxy(self); self.part_proxy.setSourceModel(self.part_model)
         self.part_table = configure_view(QTableView()); self.part_table.setModel(self.part_proxy)
-        for i, width in enumerate((160,55,80,90)): self.part_table.setColumnWidth(i,width)
+        for i, width in enumerate((180,95,55,80,90,360)): self.part_table.setColumnWidth(i,width)
         self.part_table.doubleClicked.connect(self.edit_part); self.search.textChanged.connect(self.part_proxy.set_query)
         left_layout.addWidget(self.part_table,1)
         buttons = QHBoxLayout(); buttons.addWidget(button('Düzenle', self.edit_part)); buttons.addWidget(button('Kaldır', self.remove_part)); left_layout.addLayout(buttons)
+        self.import_info = label('Henüz DXF seçilmedi.', 'muted'); left_layout.addWidget(self.import_info)
+        self.import_report_button = button('Yükleme ayrıntıları', self.show_import_report); left_layout.addWidget(self.import_report_button)
         self.part_info = label('Çift tıklayarak adet, malzeme ve kalınlığı düzenleyin.', 'muted'); left_layout.addWidget(self.part_info)
         self.splitter.addWidget(left); self.controls.append(left)
         self.tabs = QTabWidget()
         preview = QWidget(); layout = QVBoxLayout(preview); layout.setContentsMargins(0,8,0,0)
         toolbar = QHBoxLayout(); self.sheet_picker = QComboBox(); self.sheet_picker.setMinimumContentsLength(10)
         self.sheet_picker.currentIndexChanged.connect(self.render_sheet); toolbar.addWidget(self.sheet_picker,1)
+        self.previous_sheet = button('‹', lambda:self.change_sheet(-1)); self.previous_sheet.setToolTip('Önceki plaka')
+        self.next_sheet = button('›', lambda:self.change_sheet(1)); self.next_sheet.setToolTip('Sonraki plaka')
+        toolbar.addWidget(self.previous_sheet); toolbar.addWidget(self.next_sheet)
         self.canvas = NestingCanvas()
+        self.previous_sheet.setEnabled(False); self.next_sheet.setEnabled(False)
         toolbar.addWidget(button('Sığdır', self.canvas.fit)); toolbar.addWidget(button('+', lambda:self.canvas.scale(1.25,1.25)))
         toolbar.addWidget(button('−', lambda:self.canvas.scale(.8,.8))); layout.addLayout(toolbar)
         self.current_note = label('2 · Saclar ve malzemeler sekmesinden ölçüleri ve fiyatları belirleyin.', 'muted'); layout.addWidget(self.current_note)
@@ -116,7 +127,7 @@ class NestingPage(BasePage):
         if not preserve_price_candidate:
             self.price_candidate = None; self.price_timer.stop()
         had_result = self.result is not None
-        self.result = None; self.canvas.render(self.project,None,None); self.sheet_picker.clear()
+        self.result = None; self.sheet_totals = []; self.canvas.render(self.project,None,None); self.sheet_picker.clear()
         self.summary.setText('Yerleşim bekleniyor.'); self.cost_summary.setText('')
         self.update_buttons()
         if had_result: self.set_status('Parça, sac veya ayarlar değişti. Güncel sonuç için yeniden otomatik yerleşim yapın.')
@@ -162,7 +173,7 @@ class NestingPage(BasePage):
             self.progressChanged.emit(value[0],value[1]); self.set_status(value[2])
 
     def new_project(self):
-        self.project = new_project(); self.result = None; self.sync_forms(); self.refresh(); self.invalidate()
+        self.project = new_project(); self.result = None; self.imports = []; self.sync_forms(); self.refresh(); self.invalidate()
         self.set_status('Yeni proje hazır. Kaynak DXF dosyaları değiştirilmez.')
 
     def build_stock(self):
@@ -174,7 +185,10 @@ class NestingPage(BasePage):
         self.sheet_table.doubleClicked.connect(self.edit_sheet); layout.addWidget(self.sheet_table,1)
         row = QHBoxLayout()
         for text, callback in [('Sac ekle',lambda:self.edit_sheet(new=True)),('Düzenle',self.edit_sheet),('Kaldır',self.remove_sheet)]: row.addWidget(button(text,callback))
-        layout.addLayout(row); layout.addWidget(label('Malzeme kütüphanesi · yaklaşık yoğunluklar, projeye özel düzenlenebilir', 'section'))
+        layout.addLayout(row)
+        layout.addWidget(label('Stok adedi kadar plaka otomatik kullanılır: 1. plaka doldurulur, kalan parçalar 2., 3. plakaya geçer. '
+                               'Farklı kalınlık ve malzemeler için ayrı sac tanımlayın.', 'muted'))
+        layout.addWidget(label('Malzeme kütüphanesi · yaklaşık yoğunluklar, projeye özel düzenlenebilir', 'section'))
         self.material_model = TableModel([Column('Malzeme','name'),Column('Yoğunluk kg/m³','density',fmt),Column('Kaynak','source')])
         self.material_table = configure_view(QTableView()); self.material_table.setModel(self.material_model)
         self.material_table.doubleClicked.connect(self.edit_material); layout.addWidget(self.material_table,1)
@@ -235,10 +249,26 @@ class NestingPage(BasePage):
         rows = []
         for p in self.project.parts:
             g = p.polygon; m = self.project.material(p.material)
-            rows.append(dict(id=p.id,code=p.code,quantity=p.quantity,thickness=p.thickness,weight=mass(g.area,p.thickness,m.density)))
+            rows.append(dict(id=p.id,code=p.code,quantity=p.quantity,thickness=p.thickness,weight=mass(g.area,p.thickness,m.density),
+                             status='success',source=p.source,detail='Kesim konturu hazır.',kind='part'))
+        rows.extend(dict(id=e['id'],code=Path(e['source']).name,quantity=None,thickness=e['options'].get('thickness',2),weight=None,
+                         status=e['status'],source=e['source'],detail=e['detail'],kind='import')
+                    for e in self.imports if e['status'] != 'success')
         self.part_model.replace(rows)
         self.sheet_model.replace([dict(asdict(s),price=f'{s.price_sheet:g} TL/levha' if s.pricing == 'sheet' else f'{s.price_kg:g} TL/kg') for s in self.project.sheets])
         self.material_model.replace([asdict(m) for m in self.project.materials]); self.update_buttons()
+        counts = {status:sum(e['status'] == status for e in self.imports) for status in IMPORT_LABELS}
+        if self.imports:
+            self.import_info.setText(f"{len(self.imports)} dosya seçildi · {counts['success']} hazır · {counts['error']} sorunlu"
+                                     + (f" · {counts['pending']+counts['running']} bekliyor" if counts['pending']+counts['running'] else '')
+                                     + (f" · {counts['cancelled']} durduruldu" if counts['cancelled'] else ''))
+        else: self.import_info.setText(f'{len(self.project.parts)} parça hazır.' if self.project.parts else 'Henüz DXF seçilmedi.')
+
+    def show_import_report(self):
+        lines = [self.import_info.text(), 'Okunamayan dosyaya çift tıklayıp birim/katman ayarlarını düzenleyerek yeniden deneyebilirsiniz.']
+        for e in self.imports:
+            lines.append(f"\n{Path(e['source']).name} · {IMPORT_LABELS[e['status']]}\n{e['detail']}")
+        show_details(self,'DXF yükleme ayrıntıları','\n'.join(lines))
 
     def edit_material(self, *args, new=False):
         row = self.selected(self.material_table)
@@ -296,6 +326,9 @@ class NestingPage(BasePage):
     def edit_part(self, *args):
         row = self.selected(self.part_table)
         if not row: return self.set_status('Düzenlemek için bir parça seçin.')
+        if row.get('kind') == 'import':
+            entry = next(e for e in self.imports if e['id'] == row['id'])
+            return self.configure_import([entry['source']], defaults=entry['options'], retry_id=entry['id'], detail=entry['detail'])
         item = self.project.part(row['id']); bounds = item.polygon.bounds
         def build(f):
             f.text('code','Parça kodu',item.code); f.text('description','Açıklama',item.description)
@@ -319,49 +352,76 @@ class NestingPage(BasePage):
     def remove_part(self):
         row = self.selected(self.part_table)
         if row:
-            self.project.parts = [p for p in self.project.parts if p.id != row['id']]; self.invalidate(); self.refresh()
+            if row.get('kind') == 'import':
+                self.imports = [e for e in self.imports if e['id'] != row['id']]
+            else:
+                self.project.parts = [p for p in self.project.parts if p.id != row['id']]
+            self.invalidate(); self.refresh()
 
     def import_dialog(self):
         if not self.can_start(): return
         files,_ = QFileDialog.getOpenFileNames(self,'DXF dosyalarını yükle','','DXF (*.dxf *.DXF)')
         if not files: return
+        self.configure_import(files)
+
+    def configure_import(self, files, *, defaults=None, retry_id=None, detail=''):
+        if not self.can_start(): return
+        defaults = defaults or {}
         def build(f):
-            self.material_field(f,self.project.materials[0].id)
-            f.text('thickness','Sac kalınlığı · mm',2); f.text('quantity','Her parça için adet',1)
-            f.combo('unit','Yalnız DXF birimi tanımsızsa',('İşlemi durdur ve bildir','mm','cm','inch'))
-            f.text('tolerance','Eğri kiriş toleransı · mm',.02); f.text('join_tolerance','Uç birleştirme toleransı · mm',.001)
-            f.text('excluded_layers','Dışlanacak katmanlar · ; ile ayırın','')
-            f.check('grouped','Her dosyadaki bağımsız konturları tek grup olarak tut',False)
+            f.form.addRow(label(f'{len(files)} DXF dosyası seçildi. Hepsi yükleme listesine eklenecek.', 'section'))
+            if detail: f.form.addRow(label(detail,'error'))
+            self.material_field(f,defaults.get('material',self.project.materials[0].id))
+            f.text('thickness','Sac kalınlığı · mm',defaults.get('thickness',2)); f.text('quantity','Her parça için adet',defaults.get('quantity',1))
+            f.combo('unit',"DXF'de birim yazmıyorsa",('Birim seçilmedi','mm','cm','inch'),defaults.get('unit') or 'Birim seçilmedi')
+            f.text('tolerance','Eğri kiriş toleransı · mm',defaults.get('tolerance',.02)); f.text('join_tolerance','Uç birleştirme toleransı · mm',defaults.get('join_tolerance',.001))
+            f.text('excluded_layers','Dışlanacak katmanlar · ; ile ayırın',';'.join(defaults.get('excluded_layers',[])))
+            f.check('grouped','Her dosyadaki bağımsız konturları tek grup olarak tut',defaults.get('grouped',False))
             f.form.addRow(label('Ölçülendirme, yazı, tarama ve kapalı/dondurulmuş katmanlar kesime alınmaz. '
                                 'Açık veya hatalı kontur sessizce onarılmaz. Kaynak DXF değiştirilmez.', 'muted'))
         def parse(f):
             return dict(material=self.material_value(f),thickness=number(f.value('thickness'),'Kalınlık',positive=True),
-                        quantity=integer(f.value('quantity'),'Adet'),unit=None if f.value('unit').startswith('İşlemi') else f.value('unit'),
+                        quantity=integer(f.value('quantity'),'Adet'),unit=None if f.value('unit') == 'Birim seçilmedi' else f.value('unit'),
                         tolerance=number(f.value('tolerance'),'Eğri toleransı',positive=True),
                         join_tolerance=number(f.value('join_tolerance'),'Uç toleransı',positive=True),
                         excluded_layers=[s.strip() for s in f.value('excluded_layers').split(';') if s.strip()],grouped=f.value('grouped'))
         dialog = Editor(self,'DXF içe aktarma seçenekleri',build,parse)
         try:
-            if dialog.exec() == QDialog.Accepted: self.import_files(files,**dialog.value)
+            if dialog.exec() == QDialog.Accepted: self.import_files(files,retry_id=retry_id,**dialog.value)
         finally: dialog.deleteLater()
 
-    def import_files(self, files, **options):
+    def import_files(self, files, *, retry_id=None, **options):
         if not self.can_start(): return
+        files = list(files)
+        if not files: return
+        self.search.clear(); self.invalidate()
+        entries = []
+        for path in files:
+            if retry_id:
+                entry = next(e for e in self.imports if e['id'] == retry_id)
+                entry.update(source=str(path),status='pending',detail='Yeniden okuma sırasında.',options=deepcopy(options))
+            else:
+                entry = dict(id=uid(),source=str(path),status='pending',detail='Okuma sırasında.',options=deepcopy(options))
+                self.imports.append(entry)
+            entries.append(deepcopy(entry))
+        self.refresh()
         def operation(sink,stop):
-            from nesting.dxf_import import read_dxf, check_cancel
-            parts = []; errors = []
-            for i,path in enumerate(files,1):
-                check_cancel(stop)
-                try: parts.extend(read_dxf(path,stop=stop,**options))
-                except (ValueError,OSError) as error: errors.append(f'{Path(path).name}: {error}')
-                sink.put(('nest_progress',(i,len(files),'DXF konturları okunuyor…')))
-            sink.put(('nest_import',(parts,errors)))
-        self.jobs.start(self,operation); self.set_status('DXF geometrileri okunuyor…')
+            from nesting.batch_import import import_batch
+            import_batch(entries,options,sink,stop)
+        self.jobs.start(self,operation); self.set_status(f'{len(files)} DXF dosyası sıraya eklendi; konturlar okunuyor…')
 
     def start_nest(self):
         if not self.can_start(): return
+        problems = [e for e in self.imports if e['status'] != 'success']
+        if problems:
+            return self.set_status(f'{len(problems)} dosya henüz hazır değil. Listede Okunamadı/Durduruldu yazan dosyaya çift tıklayıp yeniden okuyun veya Kaldır ile çıkarın.',True)
         try: self.read_parameters(); self.project.validate()
         except ValueError as error: return self.set_status(error,True)
+        missing = sorted({(part.material,part.thickness) for part in self.project.parts
+                          if not any(s.material == part.material and abs(s.thickness-part.thickness) <= 1e-7 and s.stock > 0 for s in self.project.sheets)})
+        if missing:
+            self.tabs.setCurrentWidget(self.stock_widget)
+            return self.set_status('Sac tanımı / stok eksik: '+', '.join(f'{self.project.material(material).name} · {thickness:g} mm' for material,thickness in missing)
+                                   + '. Sac ekle ile uygun kalınlıkta sac tanımlayın veya stok adedini artırın.',True)
         self.invalidate(); snapshot = deepcopy(self.project)
         def operation(sink,stop):
             from nesting.engine import nest
@@ -374,9 +434,10 @@ class NestingPage(BasePage):
         self.result = result
         if result is None: return self.invalidate()
         totals = totals or calculate(self.project,result,complete=False)
+        self.sheet_totals = totals['sheets']
         self.sheet_picker.clear()
-        for s in totals['sheets']:
-            self.sheet_picker.addItem(f"{s['name']} / {s['number']} · {s['material']} · {s['thickness']:g} mm",(s['id'],s['number']))
+        for index,s in enumerate(totals['sheets'],1):
+            self.sheet_picker.addItem(f"{index}. plaka · {s['name']} · {s['material']} · {s['thickness']:g} mm",(s['id'],s['number']))
         self.summary.setText(f"{totals['part_count']} parça · {totals['sheet_count']} levha · Verim %{fmt(totals['efficiency'])}\n"
                              f"Brüt {fmt(totals['gross_weight'])} kg · Net {fmt(totals['net_weight'])} kg · Fire {fmt(totals['waste_weight'])} kg")
         self.cost_summary.setText(f"{fmt(totals['material_cost'])} TL · Sac malzemesi")
@@ -390,6 +451,16 @@ class NestingPage(BasePage):
 
     def render_sheet(self):
         self.canvas.render(self.project,self.result,self.sheet_picker.currentData())
+        index = self.sheet_picker.currentIndex(); count = self.sheet_picker.count()
+        self.previous_sheet.setEnabled(index > 0); self.next_sheet.setEnabled(0 <= index < count-1)
+        if self.result is not None and 0 <= index < len(self.sheet_totals):
+            s = self.sheet_totals[index]
+            quantity = sum((p.sheet_id,p.sheet_number) == (s['id'],s['number']) for p in self.result.placements)
+            self.current_note.setText(f"{index+1}/{count} plaka · {quantity} parça · Verim %{fmt(s['efficiency'])} · Tekerlek: zoom · Sürükle: kaydır")
+
+    def change_sheet(self, direction):
+        index = self.sheet_picker.currentIndex()+direction
+        if 0 <= index < self.sheet_picker.count(): self.sheet_picker.setCurrentIndex(index)
 
     def theme_changed(self):
         self.canvas.theme = self.context.appearance; self.render_sheet()
@@ -440,10 +511,10 @@ class NestingPage(BasePage):
         except ValueError as error: return self.set_status(error,True)
         path,_ = QFileDialog.getSaveFileName(self,'Nesting projesini kaydet','Nesting.goknest.json','Nesting (*.goknest.json)')
         if not path: return
-        project,result = deepcopy(self.project),deepcopy(self.result)
+        project,result,imports = deepcopy(self.project),deepcopy(self.result),deepcopy(self.imports)
         def operation(sink,stop):
             from nesting.storage import save_project
-            save_project(project,path,result,overwrite=True,stop=stop); sink.put(('nest_message','Proje, geometrileriyle birlikte kaydedildi.'))
+            save_project(project,path,result,overwrite=True,stop=stop,imports=imports); sink.put(('nest_message','Proje, geometrileri ve DXF yükleme listesiyle kaydedildi.'))
         self.jobs.start(self,operation)
 
     def open_project(self):
@@ -452,23 +523,39 @@ class NestingPage(BasePage):
         if not path: return
         def operation(sink,stop):
             from nesting.storage import load_project
-            sink.put(('nest_project',load_project(path)))
+            sink.put(('nest_project',load_project(path,with_imports=True)))
         self.jobs.start(self,operation)
 
     def handle_events(self,events):
+        imports_changed = False
         for kind,value in events:
             if kind == 'nest_progress':
                 self.pending_progress = value
                 if not self.progress_timer.isActive(): self.progress_timer.start()
-            elif kind == 'nest_import':
-                parts,errors = value
-                if parts: self.project.parts.extend(parts); self.invalidate(); self.refresh()
-                self.set_status((f'{len(parts)} parça yüklendi.\n' if parts else '')+'\n'.join(errors) if errors else f'{len(parts)} parça yüklendi. Adetleri kontrol edip otomatik yerleşimi başlatın.', bool(errors))
+            elif kind == 'nest_file':
+                entry = next((e for e in self.imports if e['id'] == value['id']),None)
+                if entry is not None:
+                    entry.update(status=value['status'],detail=value['detail'])
+                    if value['parts']: self.project.parts.extend(value['parts'])
+                    imports_changed = True
+            elif kind == 'nest_import_done':
+                self.progress_timer.stop(); self.pending_progress = None
+                self.refresh()
+                self.set_status(f"Yükleme tamamlandı · {value['selected']} dosya · {value['ready']} hazır · {value['parts']} parça · "
+                                f"{value['errors']} okunamadı · {value['cancelled']} durduruldu. "
+                                + ('Sorunlu dosyalar listede; ayrıntı için çift tıklayın.' if value['errors'] or value['cancelled'] else 'Yerleştir ile plakaları sırayla doldurun.'),
+                                bool(value['errors'] or value['cancelled']))
             elif kind == 'nest_result':
                 self.progress_timer.stop(); self.pending_progress = None; self.show_result(*value)
             elif kind == 'nest_project':
                 self.price_candidate = None; self.price_timer.stop()
-                self.project,result = value; self.sync_forms(); self.refresh(); self.show_result(result)
+                self.project,result,self.imports = value; self.sync_forms(); self.refresh(); self.show_result(result)
                 if result is None: self.set_status('Proje açıldı. Otomatik yerleşim yapabilirsiniz.')
             elif kind == 'nest_message': self.set_status(value)
-            elif kind == 'job_error': self.set_status(value['error'],True)
+            elif kind == 'job_error':
+                self.progress_timer.stop(); self.pending_progress = None
+                for entry in self.imports:
+                    if entry['status'] in ('pending','running'):
+                        entry.update(status='error',detail='Dosya okunamadı: '+value['error']); imports_changed = True
+                self.set_status(value['error'],True)
+        if imports_changed: self.refresh()

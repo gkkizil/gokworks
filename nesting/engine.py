@@ -13,7 +13,7 @@ from shapely import affinity, union_all
 from shapely.geometry import box, Point
 
 from . import ENGINE, ENGINE_VERSION
-from .geometry import footprint, rotated, minkowski
+from .geometry import footprint, rotated, minkowski, convex_parts
 from .models import Placement, Result
 from .validation import validate_result
 
@@ -36,7 +36,7 @@ def nest(project, *, stop=None, progress=None):
     project.validate()
     started = time.monotonic(); deadline = started+project.options.seconds
     o = project.options; rng = random.Random(o.seed)
-    cache = {}; rotated_cache = {}; best = None; iterations = 0
+    cache = {}; rotated_cache = {}; convex_cache = {}; best = None; iterations = 0
     instances = [(p, i) for p in project.parts for i in range(1, p.quantity+1)]
     digest = project.fingerprint()
 
@@ -55,7 +55,13 @@ def nest(project, *, stop=None, progress=None):
         if key not in cache:
             fixed = geometry(fixed_part, fixed_angle)
             reflected = affinity.scale(geometry(moving_part, moving_angle), -1, -1, origin=(0, 0))
-            obstacle = minkowski(fixed, reflected, checkpoint)
+            fixed_key = (fixed_part.id, fixed_angle, False)
+            reflected_key = (moving_part.id, moving_angle, True)
+            if fixed_key not in convex_cache:
+                convex_cache[fixed_key] = convex_parts(fixed, checkpoint)
+            if reflected_key not in convex_cache:
+                convex_cache[reflected_key] = convex_parts(reflected, checkpoint)
+            obstacle = minkowski(fixed, reflected, checkpoint, parts_a=convex_cache[fixed_key], parts_b=convex_cache[reflected_key])
             distance = max(o.gap, o.kerf)+fixed_part.geometry_error+moving_part.geometry_error
             # Mitre expansion conservatively contains the round Euclidean offset.
             cache[key] = obstacle.buffer(distance+2e-6, join_style=2) if distance else obstacle
@@ -129,37 +135,53 @@ def nest(project, *, stop=None, progress=None):
                 rng.shuffle(order)
         interrupted = False
         try:
-            for index, (part, instance) in enumerate(order):
+            pending = list(order)
+            while pending:
                 checkpoint()
-                found = False
-                for sheet, number, previous in sheets:
-                    if sheet.material != part.material or abs(sheet.thickness-part.thickness) > 1e-7:
-                        continue
+                part, instance = pending.pop(0)
+                choices = [s for s in project.sheets if s.material == part.material
+                           and abs(s.thickness-part.thickness) <= 1e-7 and counts[s.id] < s.stock]
+                if trial % 3 == 2:
+                    rng.shuffle(choices)
+                else:
+                    choices.sort(key=lambda s: s.width*s.height, reverse=trial % 3 == 0)
+                opening = None
+                for sheet in choices:
+                    point = candidate(part, sheet, [])
+                    if point:
+                        opening = (sheet, point); break
+                if opening is None:
+                    remaining.append(part.id)
+                    continue
+                sheet, point = opening
+                counts[sheet.id] += 1; number = counts[sheet.id]
+                _, x, y, angle = point
+                first = Placement(part.id, instance, sheet.id, number, x, y, angle)
+                previous = [first]; placements.append(first); sheets.append((sheet, number, previous))
+                blocked = set(); index = 0
+                # Fill this physical plate before opening another one. A large
+                # part that cannot fit does not prevent smaller remaining parts
+                # from filling its gaps. An already rejected shape cannot become
+                # placeable by adding more obstacles, so cache that rejection.
+                while index < len(pending):
+                    checkpoint()
+                    part, instance = pending[index]
+                    if (part.id in blocked or sheet.material != part.material
+                            or abs(sheet.thickness-part.thickness) > 1e-7):
+                        index += 1; continue
                     point = candidate(part, sheet, previous)
                     if point:
                         _, x, y, angle = point
                         p = Placement(part.id, instance, sheet.id, number, x, y, angle)
-                        placements.append(p); previous.append(p); found = True; break
-                if not found:
-                    choices = [s for s in project.sheets if s.material == part.material
-                               and abs(s.thickness-part.thickness) <= 1e-7 and counts[s.id] < s.stock]
-                    if trial % 3 == 2:
-                        rng.shuffle(choices)
+                        placements.append(p); previous.append(p); pending.pop(index)
+                        if progress:
+                            progress(min(99, int(100*(time.monotonic()-started)/o.seconds)),
+                                     f'{trial+1}. arama · {len(sheets)}. plaka · {len(placements)}/{len(order)} parça')
                     else:
-                        # Try both fewer large sheets and less purchased area;
-                        # choosing only the smallest sheet can needlessly split a job.
-                        choices.sort(key=lambda s: s.width*s.height, reverse=trial % 3 == 0)
-                    for sheet in choices:
-                        point = candidate(part, sheet, [])
-                        if point:
-                            _, x, y, angle = point; counts[sheet.id] += 1
-                            p = Placement(part.id, instance, sheet.id, counts[sheet.id], x, y, angle)
-                            placements.append(p); sheets.append((sheet, counts[sheet.id], [p])); found = True; break
-                if not found:
-                    remaining.append(part.id)
+                        blocked.add(part.id); index += 1
                 if progress:
                     progress(min(99, int(100*(time.monotonic()-started)/o.seconds)),
-                             f'{trial+1}. arama · {len(placements)}/{len(order)} parça · {len(sheets)} levha')
+                             f'{len(sheets)}. plaka tamamlandı · {len(previous)} parça · {len(pending)} bekliyor')
         except SearchEnded:
             interrupted = True
             used = {(p.part_id, p.instance) for p in placements}
