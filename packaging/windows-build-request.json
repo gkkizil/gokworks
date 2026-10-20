@@ -1,7 +1,7 @@
 {
-  "request_id": "b814a149-56f1-4e3b-806f-070b79db303a",
-  "requested_at": "2026-10-20T07:51:51.769247+00:00",
-  "source_commit": "4a668e0f6e863a11cc70ed053a0742c7d28edf32",
-  "diagnose_run": 39389055665,
-  "reason": "Retry the requested standalone EXE after a pre-test Windows setup failure. Preserve dependency-install logs and retrieve the preceding failed Actions log for diagnosis. Includes all bulk DXF and sequential plate fixes from 1456cc9; keep the full Windows tests and onefile checks."
+  "request_id": "5cbead93-7429-4463-993a-d984262c0b14",
+  "requested_at": "2026-10-20T07:56:23.538947+00:00",
+  "source_commit": "1c00da7bee969648ded4b14cb93fddb60cc92421",
+  "diagnose_run": 39389357467,
+  "reason": "Produce requested standalone EXE with bulk DXF and sequential plate fixes from 1456cc9. Use UTF-8 for Windows build steps and ASCII-safe status console output; retain full regression and frozen onefile checks."
 }

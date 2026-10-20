@@ -11,6 +11,9 @@ permissions:
   contents: write
   actions: read
 
+env:
+  PYTHONUTF8: '1'
+
 concurrency:
   group: windows-exe-${{ github.ref }}
   cancel-in-progress: true

@@ -64,7 +64,9 @@ def publish(report):
                 f'Windows build {report["commit"][:8]}: {report["status"]}')
             push = subprocess.run(['git', 'push', 'origin', f'{commit}:{branch}'], capture_output=True, text=True)
             if push.returncode == 0:
-                print(payload)
+                # Status files retain Unicode; console output must also work on
+                # Windows legacy code pages when a diagnostic includes a BOM.
+                print(json.dumps(report, ensure_ascii=True, indent=2))
                 return
             # Retry only when someone advanced main while this result was saved.
             latest = git('ls-remote', 'origin', branch).split()[0]
