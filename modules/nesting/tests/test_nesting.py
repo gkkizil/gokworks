@@ -354,10 +354,10 @@ def test_costs_allocated_exactly_and_optional_operations_separate():
     assert t['total'] > t['material_cost']+t['cut_cost']+t['piercing_cost']
 
 
-def test_no_part_in_hole_and_grain_rotation_restrictions():
+def test_holes_are_used_automatically_and_grain_rotation_restrictions():
     ring = Polygon([(0,0),(90,0),(90,90),(0,90)], [[(10,10),(80,10),(80,80),(10,80)]])
     p = project([Part.create('ring',ring),Part.create('inner',box(0,0,50,50))],width=110,height=110)
-    r = nest(p); assert len({x.sheet_number for x in r.placements}) == 2
+    r = nest(p); assert len({x.sheet_number for x in r.placements}) == 1
     p = project([Part.create('A',box(0,0,120,30))],width=60,height=160)
     r = nest(p); assert not r.unplaced
     assert r.placements[0].angle in (90,270)

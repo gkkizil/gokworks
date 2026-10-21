@@ -74,6 +74,9 @@ NFP 1.1 güncellemesi: [toplu DXF listesi, hata/iptal koruması ve sıralı fizi
 plaka doldurma](nesting-bulk/README.md). Yeni kaynaklarda yükleme kayıtları
 projeyle saklanır; rapor ve arayüzün plaka numaraları eşleştirilmiştir.
 
+NFP 1.3 güncellemesi: [delik içi yerleşim, GitHub incelemesi, lisanslar,
+kontur kesim sırası ve gerçek DXF önce/sonra örneği](nesting-hole-placement/README.md).
+
 20 Ekim arayüz incelemesi: [üç sabit adım, AutoCAD benzeri plaka sekmeleri,
 eksik çıktı engeli, tam maliyet özeti ve görsel kanıtlar](nesting-usability/README.md).
 Motor formülleri ve DXF/rapor biçimleri korunur; yeni bağımlılık eklenmedi.

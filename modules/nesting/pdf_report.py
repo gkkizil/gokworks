@@ -49,6 +49,9 @@ def report_html(project, result, totals):
         f'<p><b>Proje:</b> {_text(project.name)}<br><b>Rapor zamanı (UTC):</b> {_text(result.timestamp)}<br>'
         f'<b>Motor:</b> {_text(result.engine)} {_text(result.engine_version)}</p>',
         '<p>Bağımsız geometri kontrolü geçti. En iyi bulunan sonuçtur; optimum garantisi yoktur.</p>',
+        '<p><b>Delik içi yerleşim:</b> Otomatik. '
+        'Delik içindeki küçük parçalar çevrelerindeki delik kesilmeden önce kesilmelidir. '
+        'DXF yanındaki KESIM-SIRASI.csv sırasını CAM içinde uygulayın.</p>',
         '<h2>Üretim özeti</h2>']
     text.append(_metrics([
         ('Parça adedi', totals['part_count']), ('Kullanılan levha', totals['sheet_count']),
@@ -81,7 +84,7 @@ def report_html(project, result, totals):
         ('Kerf mm', _number(project.options.kerf)),
         ('Hadde yönü', '0°/180° ile sınırlı' if project.options.grain_locked else 'Parça bazlı / serbest')]))
     text.append('<p><b>Kerf:</b> Nominal kontur; CAM kesim yolu telafisi uygulanmadı. '
-                'Mesafe max(aralık, kerf) + eğri hata payları. Aynalama ve delik içi yerleşim desteklenmez.</p>'
+                'Mesafe max(aralık, kerf) + eğri hata payları. Aynalama kapalıdır; uygun delik içleri otomatik kullanılır.</p>'
                 '<p><b>Maliyet dağıtımı:</b> Her levhanın satın alma bedeli, yerleşen parçaların net alanı '
                 'oranında dağıtılır; toplam kuruşu kuruşuna korunur.</p>'
                 '<p><b>Kalıntılar:</b> Delikler dahil bütün boş alan fire/kalan alanıdır. '

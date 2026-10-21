@@ -1,0 +1,18 @@
+{
+  "before": {
+    "sheet_count": 2,
+    "part_count": 14,
+    "gross_weight": 1.20576,
+    "net_weight": 0.4010130158796579,
+    "waste_weight": 0.8047469841203421,
+    "efficiency": 33.25811238386228
+  },
+  "after": {
+    "sheet_count": 1,
+    "part_count": 14,
+    "gross_weight": 0.60288,
+    "net_weight": 0.4010130158796579,
+    "waste_weight": 0.2018669841203421,
+    "efficiency": 66.51622476772457
+  }
+}

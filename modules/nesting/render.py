@@ -34,7 +34,8 @@ def draw_sheet(painter, rectangle, project, result, key):
         color = PALETTE[project.parts.index(part) % len(PALETTE)]
         painter.setBrush(QColor(color)); painter.drawPath(painter_path(g))
         minx, miny, maxx, maxy = g.bounds
-        painter.save(); painter.translate((minx+maxx)/2, -(miny+maxy)/2); painter.scale(1/scale, 1/scale)
+        center=g.representative_point()
+        painter.save(); painter.translate(center.x,-center.y); painter.scale(1/scale, 1/scale)
         painter.setPen(QColor('#12243a')); painter.setFont(QFont('Arial', 8))
         painter.drawText(QRectF(-(maxx-minx)*scale/2, -12, (maxx-minx)*scale, 24), Qt.AlignCenter, part.code)
         painter.restore(); painter.setPen(pen)

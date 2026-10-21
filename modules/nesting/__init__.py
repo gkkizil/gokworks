@@ -1,4 +1,4 @@
 """Local true-contour nesting, material accounting and portable project files."""
 
 ENGINE = 'GOKWORKS NFP'
-ENGINE_VERSION = '1.2'
+ENGINE_VERSION = '1.3'

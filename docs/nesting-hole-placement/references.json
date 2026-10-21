@@ -1,0 +1,74 @@
+[
+  {
+    "project": "SVGnest",
+    "repository": "https://github.com/Jack000/SVGnest",
+    "commit": "1248dc21efd3f90d1aa52ba5785e27e5217ed2c9",
+    "path": "LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/Jack000/SVGnest/1248dc21efd3f90d1aa52ba5785e27e5217ed2c9/LICENSE.txt",
+    "bytes": 1075,
+    "sha256": "63249e67e62c3c4142252688c170ab27fa401f55a96f12b54cd6187ba2f699af"
+  },
+  {
+    "project": "SVGnest",
+    "repository": "https://github.com/Jack000/SVGnest",
+    "commit": "1248dc21efd3f90d1aa52ba5785e27e5217ed2c9",
+    "path": "svgnest.js",
+    "url": "https://raw.githubusercontent.com/Jack000/SVGnest/1248dc21efd3f90d1aa52ba5785e27e5217ed2c9/svgnest.js",
+    "bytes": 26457,
+    "sha256": "0d084b819d8a7436d59d724a24bd091634e643b03727c8660bc2fb6288b0161d"
+  },
+  {
+    "project": "SVGnest",
+    "repository": "https://github.com/Jack000/SVGnest",
+    "commit": "1248dc21efd3f90d1aa52ba5785e27e5217ed2c9",
+    "path": "util/placementworker.js",
+    "url": "https://raw.githubusercontent.com/Jack000/SVGnest/1248dc21efd3f90d1aa52ba5785e27e5217ed2c9/util/placementworker.js",
+    "bytes": 7926,
+    "sha256": "6b560b72eed530c7a775ebdcd5f5fb2be6059f7480be01812562b8bcd0404d4b"
+  },
+  {
+    "project": "Deepnest",
+    "repository": "https://github.com/deepnest-next/deepnest",
+    "commit": "e33e8889df40fed870dd4c2c68be27fd46ea0fdc",
+    "path": "LICENSE",
+    "url": "https://raw.githubusercontent.com/deepnest-next/deepnest/e33e8889df40fed870dd4c2c68be27fd46ea0fdc/LICENSE",
+    "bytes": 1366,
+    "sha256": "479c0e6c9160265d3627d0f4fe793087f5ae3654b52babc223f3ebcddf3c22cd"
+  },
+  {
+    "project": "Deepnest",
+    "repository": "https://github.com/deepnest-next/deepnest",
+    "commit": "e33e8889df40fed870dd4c2c68be27fd46ea0fdc",
+    "path": "LICENSES.md",
+    "url": "https://raw.githubusercontent.com/deepnest-next/deepnest/e33e8889df40fed870dd4c2c68be27fd46ea0fdc/LICENSES.md",
+    "bytes": 743,
+    "sha256": "77487aa0083fbb5332c0dc16af35beab853e51722aa10e4507b63c081c57a704"
+  },
+  {
+    "project": "Deepnest",
+    "repository": "https://github.com/deepnest-next/deepnest",
+    "commit": "e33e8889df40fed870dd4c2c68be27fd46ea0fdc",
+    "path": "main/deepnest.js",
+    "url": "https://raw.githubusercontent.com/deepnest-next/deepnest/e33e8889df40fed870dd4c2c68be27fd46ea0fdc/main/deepnest.js",
+    "bytes": 45044,
+    "sha256": "a5a94ee2b5707b288fff29a725dc5bcab39e51febc837f936cda84dc7b97ddda"
+  },
+  {
+    "project": "libnest2d",
+    "repository": "https://github.com/tamasmeszaros/libnest2d",
+    "commit": "663daa69e1d7478669f714218e27681edbc96640",
+    "path": "LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/tamasmeszaros/libnest2d/663daa69e1d7478669f714218e27681edbc96640/LICENSE.txt",
+    "bytes": 7635,
+    "sha256": "f361bfaa2b63576ba829b3fb608f3f8baf5c25df51ebaba8c3554a7f3108e87d"
+  },
+  {
+    "project": "libnest2d",
+    "repository": "https://github.com/tamasmeszaros/libnest2d",
+    "commit": "663daa69e1d7478669f714218e27681edbc96640",
+    "path": "README.md",
+    "url": "https://raw.githubusercontent.com/tamasmeszaros/libnest2d/663daa69e1d7478669f714218e27681edbc96640/README.md",
+    "bytes": 7810,
+    "sha256": "4b09dee4c9e06c5472419a6ebb452d2bc05615aa4e8940627f236b75653aec0e"
+  }
+]

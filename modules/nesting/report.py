@@ -22,10 +22,12 @@ def summary_rows(project, result, totals):
             ('Kenar payı mm', project.options.margin), ('Bitmiş parça aralığı mm', project.options.gap), ('Kerf mm', project.options.kerf),
             ('Kerf açıklaması', 'Nominal kontur; CAM kesim yolu telafisi uygulanmadı. Mesafe max(aralık, kerf) + eğri hata payları.'),
             ('Maliyet dağıtımı', 'Her levhanın satın alma bedeli, yerleşen parçaların net alanı oranında dağıtılır; toplam kuruşu kuruşuna korunur.'),
-            ('Kalıntılar', 'Bütün boş alanlar, delikler dahil fire/kalan alanıdır. Yeniden kullanım veya hurda kredisi düşülmedi.'),
+            ('Kalıntılar', 'Yerleşen parçalar dışındaki alan fire/kalan alanıdır. Deliklere yerleşen parçalar net alana dahildir; hurda kredisi düşülmedi.'),
             ('Süre tahmini', 'Hesaplanmaz; kesim ve piercing bedelleri girilen birim fiyatlardan gelir.'),
             ('Hadde yönü', '0°/180° ile sınırlı' if project.options.grain_locked else 'Parça bazlı / serbest'),
-            ('Aynalama / delik içi yerleşim', 'Kapalı / desteklenmiyor'), ('Hesap birimi', 'mm; kg; TL')]
+            ('Aynalama', 'Kapalı'), ('Delik içi yerleşim', 'Otomatik'),
+            ('Kesim sırası', 'Önce iç içe küçük konturlar; DXF yanındaki KESIM-SIRASI.csv CAM içinde uygulanmalıdır.'),
+            ('Hesap birimi', 'mm; kg; TL')]
 
 
 PART_COLUMNS = [('Parça kodu','code'),('Açıklama','description'),('Örnek','instance'),('Malzeme','material'),

@@ -12,11 +12,12 @@ envanteri dağıtımla saklanır. Python 3.13 Windows x64 wheel'i doğrulandı;
 gerçek Windows EXE kontrolü sonraki istenen derlemede yapılır.
 
 GOKWORKS NFP motoru bu proje için yazılmıştır. SVGnest'in NFP, önbellek,
-rotasyon ve sıralama araması yaklaşımı incelendi; özgün Python uygulaması
+rotasyon, sıralama araması ve `useHoles` / iç NFP yaklaşımı incelendi; özgün Python uygulaması
 Shapely/GEOS üzerinde çalışır. SVGnest MIT bildirimi referans kaydı olarak
 korunur. SVGnest/Deepnest JavaScript kodu, libnest2d/pynest2d C++ kodu veya
 GPL kapsamlı Deepnest bileşenleri uygulamaya kopyalanmadı/bağlanmadı.
 Pyclipper çalışma bağımlılığı değildir. [İncelenen dosyalar ve seçim](nesting.md).
+[Delik içi yerleşim için sabit commit ve lisans kanıtları](nesting-hole-placement/README.md).
 
 LGPL kitaplıklarıyla ticari dağıtım, lisans koşullarının karşılanmasına bağlıdır.
 Qt değiştirme mekanizmasına ek olarak `GOKWORKS_GEOMETRY_DIR`, uyumlu

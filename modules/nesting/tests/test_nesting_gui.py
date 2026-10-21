@@ -6,7 +6,7 @@ import threading
 
 import ezdxf
 import pytest
-from PySide6.QtCore import QEvent, QCoreApplication, QTimer, Qt, QPoint, QItemSelectionModel
+from PySide6.QtCore import QEvent, QCoreApplication, QTimer, Qt, QPoint, QPointF, QItemSelectionModel
 from PySide6.QtWidgets import QFileDialog
 
 from gui_qt.app import MainWindow,create_application
@@ -100,6 +100,31 @@ def test_invalid_parameters_cannot_start_job(window,qtbot,tmp_path):
     assert not window.jobs.busy and page.result is None
     assert 'süresi' in page.status_text
     assert page.settings_dialog.isVisible() and 'süresi' in page.settings_error.text()
+
+
+def test_holes_are_automatic_without_a_setting_and_nested_parts_remain_selectable(window,qtbot):
+    from shapely.geometry import box
+    from modules.nesting.models import Part
+    from modules.nesting.geometry import placed
+    from modules.nesting.tests.test_hole_nesting import setup,frame
+    page=window.pages['nesting']
+    page.project=setup([Part.create('Frame',frame()),Part.create('Insert',box(0,0,25,25),quantity=4)])
+    page.sync_forms();page.refresh()
+    assert 'nest_in_holes' not in page.form.fields
+    page.start_nest();qtbot.waitUntil(lambda:not window.jobs.busy,timeout=10000)
+    assert not page.result.unplaced and len(page.result.placements)==5
+    assert page.sheet_tabs.count()==1 and page.dxf_button.isEnabled()
+    # Highlighting the surrounding frame must not cover/hide an insert's hit area.
+    page.canvas.set_selected_parts({page.project.parts[0].id})
+    child=next(p for p in page.result.placements if p.part_id==page.project.parts[1].id)
+    center=placed(page.project.parts[1],child).representative_point()
+    item=page.canvas.scene().itemAt(QPointF(center.x,-center.y),page.canvas.transform())
+    assert item.data(0)==page.project.parts[1].id
+    page.form.set_value('gap','6')
+    assert page.result is None and not page.dxf_button.isEnabled()
+    page.start_nest();qtbot.waitUntil(lambda:not window.jobs.busy,timeout=10000)
+    assert page.project.options.gap==6
+    assert page.result is not None
 
 
 def test_cost_only_changes_reprice_same_coordinates_in_background(window,qtbot,tmp_path,monkeypatch):

@@ -397,7 +397,7 @@ class NestingPage(BasePage):
         seed.setAccessibleName('Deneme sırası kodu')
         self.seed_hint = label('Varsayılan 42; değiştirmeniz gerekmez. Bu kod, farklı yerleşimlerin hangi sırayla deneneceğini belirler.', 'muted')
         seed.setToolTip(self.seed_hint.text()); f.form.addRow(self.seed_hint)
-        self.advanced_note = label('Aynalama ve delik içine yerleşim kapalıdır. Kerf telafisi CAM tarafında yapılır. '
+        self.advanced_note = label('Uygun delik içleri otomatik kullanılır. Aynalama kapalıdır. Delik içindeki parçalar, çevrelerindeki delik kesilmeden önce kesilmelidir. Kerf telafisi CAM tarafında yapılır. '
                                    'Yerleşim aralığı, parça aralığı ile kerf değerinin büyüğü ve kontur hata paylarıdır.', 'muted')
         f.form.addRow(self.advanced_note)
         def advanced(visible):

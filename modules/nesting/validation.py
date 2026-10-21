@@ -6,7 +6,7 @@ import math
 from shapely.geometry import box
 from shapely.strtree import STRtree
 
-from modules.nesting.geometry import placed, footprint
+from modules.nesting.geometry import placed
 
 EPS = 1e-6
 
@@ -45,7 +45,7 @@ def validate_result(project, result, *, complete=True, stop=None):
         margin = project.options.margin+part.geometry_error+project.options.kerf/2
         if not box(margin-EPS, margin-EPS, sheet.width-margin+EPS, sheet.height-margin+EPS).covers(geometry):
             raise ValueError(part.code + ': sac kenar payı aşıldı.')
-        collision = footprint(geometry)
+        collision = geometry
         groups[(sheet.id, p.sheet_number)].append((collision, part))
     for rows in groups.values():
         shapes = [g for g,_ in rows]; tree = STRtree(shapes)

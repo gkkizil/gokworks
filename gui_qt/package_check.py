@@ -110,6 +110,18 @@ def check(output):
         nesting_dxf(nesting_project,nesting_result,Path(folder)/'Nesting-DXF')
         nesting_excel(nesting_project,nesting_result,Path(folder)/'Nesting.xlsx')
         nesting_pdf(nesting_project,nesting_result,Path(folder)/'Nesting.pdf')
+        from shapely.geometry import Polygon,box
+        from modules.nesting.models import Part
+        hole_project=new_project()
+        hole_project.sheets[0].width=110;hole_project.sheets[0].height=110;hole_project.sheets[0].stock=1
+        hole_project.options.margin=4;hole_project.options.seconds=.7;hole_project.options.quality='Hızlı'
+        hole_project.parts=[Part.create('Host',Polygon(box(0,0,90,90).exterior,[box(10,10,80,80).exterior])),
+                            Part.create('Insert',box(0,0,25,25),quantity=4)]
+        hole_result=nest(hole_project)
+        assert len(hole_result.placements)==5 and not hole_result.unplaced
+        assert len({p.sheet_number for p in hole_result.placements})==1
+        nesting_dxf(hole_project,hole_result,Path(folder)/'Hole-nesting-DXF')
+        assert (Path(folder)/'Hole-nesting-DXF/KESIM-SIRASI.csv').is_file()
         w.pages['nesting'].project = nesting_project
         w.pages['nesting'].refresh(); w.pages['nesting'].show_result(nesting_result,nesting_totals)
         assert w.pages['nesting'].workspace.count() == 2
@@ -228,6 +240,7 @@ def check(output):
                       pdf_export_engine='isolated COM process',
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
+                      'hole nesting / five parts on one plate / contour cut-order CSV',
                       'nesting shared parts-and-layout workspace / document plate tabs',
                       'live press-brake tooling profiles and dimensions',
                       'quick bolt torque / 51.96 Nm / 25.98 kN / clipboard',

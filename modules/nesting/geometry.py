@@ -1,4 +1,4 @@
-"""Rigid placement transforms and collision footprints; holes are never nestable."""
+"""Rigid material transforms and filled outer envelopes for placement ordering."""
 
 from shapely import affinity, union_all
 from shapely.geometry import Polygon

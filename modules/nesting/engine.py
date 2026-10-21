@@ -10,10 +10,10 @@ import random
 import time
 
 from shapely import affinity, union_all
-from shapely.geometry import box, Point
+from shapely.geometry import box, Point, Polygon
 
 from modules.nesting import ENGINE, ENGINE_VERSION
-from modules.nesting.geometry import footprint, rotated, minkowski, convex_parts
+from modules.nesting.geometry import footprint, rotated, minkowski, convex_parts, polygons
 from modules.nesting.models import Placement, Result
 from modules.nesting.validation import validate_result
 
@@ -49,7 +49,7 @@ def nest(project, *, stop=None, progress=None):
     def geometry(part, angle):
         key = (part.id, angle)
         if key not in rotated_cache:
-            rotated_cache[key] = footprint(rotated(part, angle))
+            rotated_cache[key] = rotated(part, angle)
         return rotated_cache[key]
 
     def nfp(fixed_part, fixed_angle, moving_part, moving_angle):
@@ -76,6 +76,8 @@ def nest(project, *, stop=None, progress=None):
         fixed = [(old, affinity.translate(geometry(parts[old.part_id],old.angle),old.x,old.y),
                   max(o.gap,o.kerf)+part.geometry_error+parts[old.part_id].geometry_error)
                  for old in previous]
+        holes = [(Polygon(ring),distance) for _,shape,distance in fixed
+                 for polygon in polygons(shape) for ring in polygon.interiors]
         # Test simple edge/corner placements for every rotation before paying
         # for an NFP. Bounds generate candidates; exact contours approve them.
         # The first complete pass never waits on convex decomposition, so one
@@ -91,6 +93,33 @@ def nest(project, *, stop=None, progress=None):
                 if right < left-1e-7 or top < bottom-1e-7:
                     continue
                 points = {(left,bottom),(right,bottom),(left,top),(right,top)}
+                usable_holes = []
+                for hole,distance in holes:
+                    checkpoint()
+                    a,b,c,d = hole.bounds
+                    clearance = distance+2e-6 if distance else 0
+                    low_x,high_x = a+clearance-x0,c-clearance-x1
+                    low_y,high_y = b+clearance-y0,d-clearance-y1
+                    if high_x < low_x-1e-7 or high_y < low_y-1e-7:
+                        continue
+                    usable_holes.append(hole)
+                    fractions = (0,.5,1) if hole.equals(hole.envelope) else tuple(i/6 for i in range(7))
+                    xs = tuple(low_x+(high_x-low_x)*f for f in fractions)
+                    ys = tuple(low_y+(high_y-low_y)*f for f in fractions)
+                    points.update((x,y) for x in xs for y in ys)
+                    # Retain fast placements for several parts within one hole.
+                    # These are only proposals: the curved/concave material and
+                    # every other part are still checked below at full precision.
+                    for _,neighbor,gap in fixed:
+                        checkpoint()
+                        u,v,w,z = neighbor.bounds
+                        if w<a or u>c or z<b or v>d:
+                            continue
+                        pad = gap+2e-6 if gap else 0
+                        points.update((x,y) for x in (*xs,u-x0,w-x1)
+                                      for y in (z+pad-y0,v-pad-y1))
+                        points.update((x,y) for x in (w+pad-x0,u-pad-x1)
+                                      for y in (*ys,v-y0,z-y1))
                 if precise:
                     # Exact-fit translation domains can be lines or points.
                     if abs(right-left)<1e-7 and abs(top-bottom)<1e-7:
@@ -115,24 +144,36 @@ def nest(project, *, stop=None, progress=None):
                         after,before = c+clearance-x0,a-clearance-x1
                         points.update((x,y) for x in (left,right,a-x0,c-x1) for y in (above,below))
                         points.update((x,y) for x in (after,before) for y in (bottom,top,b-y0,d-y1))
-                for x,y in sorted(points,key=lambda xy:(xy[1],xy[0])):
-                    checkpoint()
-                    if not (left-1e-7<=x<=right+1e-7 and bottom-1e-7<=y<=top+1e-7):
-                        continue
-                    translated = affinity.translate(g,x,y)
-                    if any(translated.intersection(shape).area>1e-6 or translated.distance(shape)+1e-6<distance
-                           for _,shape,distance in fixed):
-                        continue
-                    score = (y+y1,x+x1,angle)
-                    if winner is None or score<winner[0]:
-                        winner = (score,x,y,angle)
-                    break
+                ordered = sorted(points,key=lambda xy:(xy[1],xy[0]))
+                for want_hole in ((True,False) if usable_holes else (False,)):
+                    found = False
+                    for x,y in ordered:
+                        checkpoint()
+                        if not (left-1e-7<=x<=right+1e-7 and bottom-1e-7<=y<=top+1e-7):
+                            continue
+                        translated = affinity.translate(g,x,y)
+                        inside = any(hole.covers(translated) for hole in usable_holes)
+                        if inside != want_hole:
+                            continue
+                        if any(translated.intersection(shape).area>1e-6 or translated.distance(shape)+1e-6<distance
+                               for _,shape,distance in fixed):
+                            continue
+                        score = (0 if inside else 1,y+y1,x+x1,angle)
+                        if winner is None or score<winner[0]:
+                            winner = (score,x,y,angle)
+                        found = True
+                        break
+                    if found:
+                        break
         return winner
 
     max_trials = {'Hızlı': 3, 'Dengeli': 12, 'Yüksek': 40}[o.quality]
     for trial in range(max_trials+1):
         placements = []; remaining = []; sheets = []; counts = Counter()
-        order = sorted(instances, key=lambda item: item[0].area, reverse=True)
+        # Perforated/thin frames must precede small solid inserts: net material
+        # area alone can otherwise put the intended insert on the sheet first.
+        outer_areas = {p.id:footprint(p.polygon).area for p in project.parts}
+        order = sorted(instances, key=lambda item: (outer_areas.get(item[0].id,item[0].area),item[0].area), reverse=True)
         if trial == 1:
             order.sort(key=lambda item: max(item[0].polygon.bounds[2:]), reverse=True)
         elif trial > 1:

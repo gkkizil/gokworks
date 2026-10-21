@@ -157,6 +157,10 @@ levha boyutunu, stok adedini, fiyatı ve yerleşim paylarını tanımlayın.
 **Yerleştir** ile hesabı başlatın. Motor, uygun parçalarla ilk plakayı doldurup
 gerektikçe sonraki plakaya geçer. **1. plaka / 2. plaka / …** sekmeleriyle
 yerleşimleri inceleyin; tamamlanan yerleşimi **Dışa aktar** menüsünden kaydedin.
+Sığan küçük parçalar büyük parçaların deliklerine otomatik ve öncelikli
+yerleştirilir; ayrıca seçenek açmanız gerekmez. DXF yanındaki `KESIM-SIRASI.csv`, bu
+parçaların çevreleyen deliklerden önce kesilmesi için önerilen sırayı içerir;
+bu sıra CAM yazılımında uygulanmalıdır.
 
 ## Kayıtlar ve çalışma kapsamı
 

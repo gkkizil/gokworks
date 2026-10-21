@@ -23,6 +23,9 @@ kenarını sürükleyerek genişliği ayarlayın; **Parçalar** ile listeyi gizl
    TL/levha fiyatını sac satırına çift tıklayarak girin. **Malzeme kütüphanesi**
    penceresinde özel malzeme ve yoğunluk eklenebilir.
 4. Aynı pencerede kenar payı, parça aralığı, döndürme ve kaliteyi ayarlayın.
+   Sığan küçük parçalar büyük parçaların deliklerine **otomatik** yerleştirilir;
+   bunun için ayrı bir seçenek yoktur. Eski projeler de açılır; **Yerleştir**
+   ile yeniden hesaplandığında delik içleri otomatik değerlendirilir.
    Kerf, açı/adım, hadde yönü, **Yerleşim hesaplama süresi** ve **Deneme sırası kodu**
    (seed) **Gelişmiş ayarları göster** içinde. Süre, hesabın en uzun çalışma
    süresidir; daha erken bitebilir. Deneme sırası kodu varsayılan 42 olarak
@@ -60,13 +63,19 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 
 ## Hesap ve algoritma
 
-Motor adı **GOKWORKS NFP 1.2**. Önce hızlı ve doğrulanmış bir başlangıç
+Motor adı **GOKWORKS NFP 1.3**. Önce hızlı ve doğrulanmış bir başlangıç
 yerleşimi oluşturulur; kalan sürede NFP aramasıyla iyileştirilir. Ayrıntılı
 konturun hesabı süreyi tüketirse önceki en iyi yerleşim korunur. Kenar ve
 köşe adayları gerçek konturlar, aralıklar ve kenar paylarıyla denetlenir;
 parça geometrisi sınır dikdörtgeniyle değiştirilmez.
 
 [Boş levhaya rağmen eksik yerleşim düzeltmesi ve tekrar üretim](../../docs/nesting-contour-fill/README.md).
+
+[Delik içi yerleşim, GitHub kaynakları ve önce/sonra örneği](../../docs/nesting-hole-placement/README.md).
+Çarpışmalar gerçek malzeme poligonlarıyla hesaplanır;
+delikler doldurulmaz. Büyük çerçeveler dış alanlarına göre önce yerleşir.
+Delik içi adaylar da kerf, parça aralığı ve iki parçanın kontur hata paylarından
+geçer. Dairesel/içbükey deliklerin sınır dikdörtgeni yerleşim onayı değildir.
 
 Gerçek kontur çarpışma alanı,
 `A ⊕ (−B)` Minkowski toplamıdır. İçbükey poligonlar kısıtlı Delaunay
@@ -92,7 +101,8 @@ malzeme/kalınlık, stok, izinli açılar ve örnek/adet tutarlılığını kont
 eksik proje üretim DXF/PDF/Excel çıktısına gönderilemez, JSON kaydedilebilir.
 
 `kg = net alan (mm²) × t (mm) × yoğunluk (kg/m³) / 10⁹`.
-Delikler net alandan düşülür ve fireye dahildir. `1250×2500×2×7850/10⁹`
+Delikler ana parçanın net alanından düşülür; içlerine yerleşen küçük parçalar
+net alana eklenir. Yalnız kullanılmayan alan fire/kalan alandır. `1250×2500×2×7850/10⁹`
 sonucu **49,0625 kg**'dır. Fire = brüt − net; verim = net/brüt alan × 100.
 Levha maliyeti TL/kg × brüt kg veya doğrudan TL/levhadır.
 Her levhanın maliyeti kendi parçalarının net alanlarına dağıtılır; kuruş
@@ -117,7 +127,7 @@ adedinden gelir. Tezgâh süresi, giriş/çıkış yolu ve ortak kesim uydurulma
   birleştirildiyse gerçekleşen en büyük hareket ayrıca kaydedilir ve hem
   parça aralığına hem kenar payına eklenir.
 - Hadde yönü kaynak DXF'in X doğrultusudur; kilit yalnız 0°/180° kabul eder.
-  Aynalama ve delik içine parça yerleştirme kapalıdır. İç içe adalar ayrı
+  Aynalama kapalıdır. Delik içine yerleşim otomatiktir. İç içe adalar ayrı
   parçalar ya da dosya bazında rijit bir grup olarak içe alınabilir.
 - Kerf ve bitmiş parça mesafesi farklı ayarlardır. Çarpışma aralığı
   `max(mesafe, kerf) + eğri hata payları`; kenar güvenliği
@@ -126,7 +136,13 @@ adedinden gelir. Tezgâh süresi, giriş/çıkış yolu ve ortak kesim uydurulma
 - DXF **nominal bitmiş parça konturudur**, telafili CAM takım yolu değildir.
   Makinede kerf telafisi uygulanmalıdır. Özgün ARC/CIRCLE korunur;
   `PART_OUTER/PART_INNER` kesim, diğer üç katman operatör bilgisidir.
-  Çıkışla birlikte `KESIM-NOTLARI.txt` yazılır. Kaynak dosyaya dokunulmaz.
+  Çıkışla birlikte `KESIM-NOTLARI.txt` ve `KESIM-SIRASI.csv` yazılır.
+  Küçük parçaların konturları onları çevreleyen deliklerden, iç konturlar kendi
+  dış konturlarından önce önerilir; özgün ARC/CIRCLE bu sıra ile korunur.
+  Kontur sırası DXF nesnelerine plaka/sıra XDATA bilgisiyle de eklenir.
+  CAM yazılımı DXF nesnelerini yeniden sıralayabilir: CSV'deki öncelikler CAM
+  içinde uygulanmalıdır. Bu çıktı telafili CAM yolu değildir.
+  Kaynak dosyaya dokunulmaz.
 - Büyük tekrar kullanılabilir kalıntı sınıflandırması/hurda kredisi bu
   sürümde yoktur. Bütün artık alan raporlanır, maliyetten düşülmez.
 - En fazla 100 MB giriş/proje, 20.000 içe aktarılmış kontur noktası,
@@ -144,7 +160,7 @@ bir sonuç güncel kabul edilmez. Bozuk proje/yerleşim reddedilir.
 JSON/Excel/PDF atomik; çok levhalı DXF klasörü tüm levhalar hazır olunca
 yayımlanır. Mevcut DXF klasörünün üstüne yazılmaz.
 
-Paketler: `models`, `materials`, `geometry`, `dxf_import`, `engine`,
+Paketler: `models`, `materials`, `geometry`, `dxf_import`, `engine`, `cutting`,
 `validation`, `accounting`, `dxf_export`, `storage`, `report`, `pdf_report`, `render`.
 Qt sayfası `modules/nesting/ui.py`; editör/kanvas `nesting_widgets.py`.
 Mevcut JobManager, tablo modeli, tema, lisans ve atomik dosya altyapısı kullanılır.
