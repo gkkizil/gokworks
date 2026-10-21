@@ -1,7 +1,21 @@
 {
   "commit": "55c67652804a64d81766376764eb04b9082b80bf",
-  "status": "building",
+  "status": "success",
   "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39552732188",
   "live_solidworks_tested": false,
-  "exe_built": false
+  "exe_built": false,
+  "suites": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "20",
+      "time": "8.021",
+      "timestamp": "2026-10-21T06:00:55.211260+00:00",
+      "hostname": "runnervmuzpk7"
+    }
+  ],
+  "failures": [],
+  "skips": []
 }
