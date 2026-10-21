@@ -18,6 +18,15 @@ CONDITIONS = ('Kuru', 'Hafif yağlı')
 DEFAULT_K = {'Kuru': .20, 'Hafif yağlı': .15}
 K_ASSUMPTION = ('Kuru K = 0,20 ve hafif yağlı K = 0,15 yaklaşık varsayımlardır. '
                 'Gerçek K, kaplama, yağ ve yüzey koşullarına bağlıdır.')
+K_SURFACE_GUIDE = (
+    ('0,10–0,13', 'Pürüzsüz, çok iyi yağlanmış yüzey'),
+    ('0,15', 'Hafif yağlı standart çelik'),
+    ('0,20', 'Kuru, kaplamasız standart çelik'),
+    ('0,22–0,25', 'Bazı kuru çinko kaplamalı yüzeyler'),
+    ('0,30+', 'Yüksek sürtünme; doğrulanmış veri gerekir'),
+)
+K_GUIDE_NOTE = ('Yaklaşık başvuru değerleridir; yüzey, kaplama ve yağlayıcıya göre değişir. '
+                'Paslı/kirli cıvatalarda bu tabloyu kullanmayın.')
 MANUFACTURER_NOTE = 'Kritik bağlantılarda üretici şartnamesini esas alın.'
 
 

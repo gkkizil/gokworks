@@ -3,7 +3,7 @@
 from math import isfinite
 
 from PySide6.QtCore import Qt, QTimer, QSignalBlocker
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QBoxLayout, QApplication
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QBoxLayout, QFormLayout, QApplication
 
 from modules.bolt.rules import THREADS, STANDARD_FINE_PITCHES
 from modules.bolt_torque import rules as r
@@ -55,6 +55,21 @@ class TorquePage(BasePage):
         inputs.addWidget(self.k_hint)
         self.reset_k_button = button('Varsayılan K’yı kullan', self.reset_k)
         inputs.addWidget(self.reset_k_button)
+        inputs.addWidget(label('Yüzeye göre yaklaşık K', 'section'))
+        self.k_guide = QWidget()
+        self.k_guide.setAccessibleName('Yüzey durumuna göre yaklaşık K tork katsayıları')
+        guide = QFormLayout(self.k_guide)
+        guide.setContentsMargins(0,0,0,0); guide.setSpacing(4)
+        guide.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        self.k_guide_rows = []
+        for value,description in r.K_SURFACE_GUIDE:
+            coefficient,caption = label(value,'section'),label(description,'muted')
+            for widget in (coefficient,caption): widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            guide.addRow(coefficient,caption)
+            self.k_guide_rows.append((coefficient,caption))
+        inputs.addWidget(self.k_guide)
+        self.k_guide_note = label(r.K_GUIDE_NOTE,'muted')
+        inputs.addWidget(self.k_guide_note)
         assumptions = label(r.K_ASSUMPTION+'\n\nBağlantı koşulunu değiştirince K, o koşulun varsayılanına döner. '
                             'Ardından K’yı elle düzenleyebilirsiniz.','muted')
         self.assumptions_section = Disclosure('K katsayısı hakkında',assumptions)

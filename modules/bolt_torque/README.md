@@ -8,6 +8,9 @@ Bağımsız hesap motoru `rules.py`; yeni bağımlılık veya SolidWorks gerekti
 - Tahmini tork N·m, ön yük kN, tek tuşla pano ve kayıtlı seçimler.
 - Canlı bağlantı kesiti: cıvata, somun, taralı iki parça, sıkma momenti ve hedef
   ön yük okları. Çap/adım ve hesap değerleri çizim üzerinde güncellenir.
+- K alanının altında yüzey/yağlama için kısa bir yaklaşık değer rehberi sürekli
+  görünür. Değerler otomatik atanmaz; kuru/yağlı varsayılanları ve elle K girişi
+  korunur. Kaplama tek başına K belirlemez; paslı/kirli bağlantıya tablo uygulanmaz.
 
 Kesit şematik ve ölçeksizdir. Baş/somun ölçüsü, delik ve parça kalınlığı
 atanmaz; bağlantı kapasitesi veya üretim resmi anlamına gelmez.

@@ -50,6 +50,20 @@ def test_condition_defaults_manual_override_and_reset(window,qtbot):
     qtbot.waitUntil(lambda:page.result.k==.2)
 
 
+@pytest.mark.parametrize('theme',('dark','light'))
+def test_surface_k_reference_is_visible_without_opening_help_and_preserves_inputs(window,qtbot,theme):
+    window.set_theme(theme);page=window.pages['bolt_torque']
+    page.form.set_value('k','0,18');page.update_timer.stop();page.update_result()
+    expected=page.result
+    for size in ((1440,900),(820,620)):
+        window.resize(*size);qtbot.wait(20)
+        assert page.k_guide.isVisible() and not page.assumptions_section.is_expanded()
+        assert [a.text() for a,b in page.k_guide_rows]==['0,10–0,13','0,15','0,20','0,22–0,25','0,30+']
+        assert all(a.isVisible() and b.isVisible() for a,b in page.k_guide_rows)
+        assert 'Yaklaşık' in page.k_guide_note.text() and 'Paslı/kirli' in page.k_guide_note.text()
+        assert page.result==expected and page.form.value('k')=='0,18'
+
+
 def test_fine_pitch_grade_boundary_and_live_preload(window,qtbot):
     page=window.pages['bolt_torque'];f=page.form
     f.set_value('metric','M18');f.set_value('thread_series','İnce diş')
