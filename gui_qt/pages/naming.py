@@ -4,13 +4,14 @@ from pathlib import Path, PureWindowsPath
 from collections import Counter
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (QHBoxLayout, QComboBox, QTreeView, QInputDialog,
-                              QSplitter, QVBoxLayout, QWidget, QToolButton, QMenu, QHeaderView)
+                              QVBoxLayout, QWidget, QToolButton, QMenu, QHeaderView)
 
 from naming import exporter as engine
 from naming.hierarchy import document_rows
 from .. import services
 from ..models import TreeModel, FilterProxy, Column
-from ..components import BasePage, ValueForm, Disclosure, card, scroll, label, button, configure_view, open_folder
+from ..components import (BasePage, ValueForm, Disclosure, card, label, button,
+                           configure_view, open_folder, TransferWorkspace)
 
 
 class NamingPage(BasePage):
@@ -29,7 +30,6 @@ class NamingPage(BasePage):
         self.save_button.setEnabled(False)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
-        self.splitter = QSplitter(Qt.Vertical)
         panel, body = card('Kaynak ve yeni paket')
         self.form = ValueForm(self.settings, 'naming_')
         self.source_folder = self.form.path('source_folder', 'Montaj klasörü')
@@ -38,23 +38,26 @@ class NamingPage(BasePage):
             parent = self.settings.get('naming_parent', '')
             destination = str(Path(parent) / str(self.settings.get('naming_package', 'Yeni-paket'))) if isinstance(parent, str) and parent else ''
         self.destination = self.form.path('destination', 'Yeni paket klasörü', destination)
+        self.form.stack_fields()
         body.addWidget(self.form)
 
         self.source_options_form = ValueForm(self.settings, 'naming_')
         self.source_file = self.source_options_form.path('source_file','Kaynak dosya',folder=False)
+        self.source_options_form.stack_fields()
         self.discover_button = button('Montajları bul', self.discover)
         self.active_button = button('Aktif montajı kullan', self.read_active)
         self.source_options_form.form.addRow(self.active_button)
         self.assemblies = QComboBox()
         self.assemblies.setMinimumWidth(0)
         self.assemblies.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
-        self.assemblies.setPlaceholderText('Klasörden montaj seçin…')
+        self.assemblies.setPlaceholderText('Montaj seçin…')
         self.assemblies.setAccessibleName('Klasörde bulunan montajlar')
         self.assemblies.activated.connect(self.choose_assembly)
-        choices=QHBoxLayout();choices.addWidget(self.assemblies,1);choices.addWidget(self.discover_button)
+        choices=QVBoxLayout();choices.addWidget(self.assemblies);choices.addWidget(self.discover_button)
         self.form.form.addRow(label('Kaynak montaj'),choices)
         self.source_folder.choose.clicked.connect(lambda:self.discover() if self.source_folder.text() else None)
-        self.source_options = Disclosure('Dosyadan seç / aktif montajı kullan', self.source_options_form)
+        self.source_options = Disclosure('Dosya / aktif montaj', self.source_options_form)
+        self.source_options.toggle.setToolTip('Dosyadan seç veya SolidWorks’teki aktif montajı kullan')
         body.addWidget(self.source_options)
 
         rules = QWidget()
@@ -63,32 +66,33 @@ class NamingPage(BasePage):
         rules_layout.setSpacing(8)
         self.rules_form = ValueForm(self.settings, 'naming_')
         self.rules_form.combo('mode', 'Yöntem', ('Ön / son ek', 'Numaralı'), 'Ön / son ek')
+        self.rules_form.stack_fields()
         rules_layout.addWidget(self.rules_form)
-        paired = QHBoxLayout()
+        paired = QVBoxLayout(); paired.setSpacing(8)
         self.name_left = ValueForm(self.settings, 'naming_')
         self.name_left.text('prefix', 'Ön ek')
         self.name_left.text('start', 'Başlangıç', '1').setToolTip('Başlangıç numarası')
-        self.name_left.text('find', 'Bul')
         self.name_right = ValueForm(self.settings, 'naming_')
         self.name_right.text('suffix', 'Son ek')
         self.name_right.text('digits', 'Basamak', '3').setToolTip('Numara basamak sayısı')
-        self.name_right.text('replacement', 'Yerine yaz')
-        paired.addWidget(self.name_left, 1)
-        paired.addWidget(self.name_right, 1)
+        self.name_left.stack_fields(); self.name_right.stack_fields()
+        paired.addWidget(self.name_left)
+        paired.addWidget(self.name_right)
         rules_layout.addLayout(paired)
-        for subform in (self.source_options_form, self.rules_form, self.name_left, self.name_right):
+        self.replacement_form=ValueForm(self.settings,'naming_')
+        self.replacement_form.text('find','Bul'); self.replacement_form.text('replacement','Yerine yaz')
+        self.replacement_form.stack_fields(); rules_layout.addWidget(self.replacement_form)
+        for subform in (self.source_options_form, self.rules_form, self.name_left, self.name_right,self.replacement_form):
             self.form.fields.update(subform.fields)
             subform.changed.connect(self.form.changed)
-        self.rules_options = Disclosure('İsimlendirme kuralları', rules)
+        self.rules_options = Disclosure('İsimlendirme kuralları', rules, expanded=True)
         body.addWidget(self.rules_options)
         self.safety_note = label('Hedef klasör yeni veya boş olmalı. Teknik resimler, bastırılmış parçalar ve Toolbox bileşenleri dahil edilir.', 'muted')
         body.addWidget(self.safety_note)
-        self.source_scroll = scroll(panel)
-        self.source_scroll.setMinimumHeight(0)
-        self.splitter.addWidget(self.source_scroll)
         preview, layout = card('İsimlendirme önizlemesi')
         toolbar = QHBoxLayout()
-        self.edit_button = button('Seçili adı düzenle', self.edit_selected)
+        self.edit_button = button('Adı düzenle', self.edit_selected)
+        self.edit_button.setToolTip('Seçili dosyanın yeni adını düzenle')
         toolbar.addWidget(self.edit_button)
         toolbar.addStretch()
         self.more_button = QToolButton()
@@ -120,11 +124,9 @@ class NamingPage(BasePage):
         layout.addWidget(self.tree, 1)
         self.plan_message = label('Kaynak montajı seçip Dosyaları oku düğmesine basın.', 'muted')
         layout.addWidget(self.plan_message)
-        self.splitter.addWidget(preview)
-        self.splitter.setSizes([225, 600])
-        self.splitter.setStretchFactor(0, 0)
-        self.splitter.setStretchFactor(1, 1)
-        self.splitter.setChildrenCollapsible(False)
+        self.preview_panel=preview
+        self.splitter=TransferWorkspace(self,panel,preview)
+        self.source_scroll=self.splitter.source_scroll
         self.layout.addWidget(self.splitter, 1)
         self.controls.extend((self.form, self.source_options_form, rules,
                               self.discover_button, self.active_button, self.edit_button))
@@ -148,7 +150,7 @@ class NamingPage(BasePage):
         numbered = self.form.value('mode') == 'Numaralı'
         self.name_left.show_field('start', numbered)
         self.name_right.show_field('digits', numbered)
-        self.rules_options.toggle.setText('İsimlendirme kuralları · ' + self.form.value('mode'))
+        self.rules_options.toggle.setText('Kurallar · ' + self.form.value('mode'))
 
     def form_changed(self, key):
         if key=='source_folder':

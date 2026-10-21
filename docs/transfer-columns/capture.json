@@ -1,0 +1,118 @@
+{
+  "platform": "Linux / Qt offscreen",
+  "sample_data": "Synthetic UI examples, no live SolidWorks connection",
+  "captures": [
+    {
+      "file": "pdf-dark-1440.png",
+      "mode": "pdf",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ],
+      "columns": [
+        330,
+        840
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "dxf_dwg-dark-1440.png",
+      "mode": "dxf_dwg",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ],
+      "columns": [
+        330,
+        840
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "bom-dark-1440.png",
+      "mode": "bom",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ],
+      "columns": [
+        330,
+        840
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "naming-dark-1440.png",
+      "mode": "naming",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ],
+      "columns": [
+        330,
+        840
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "pdf-light-1440.png",
+      "mode": "pdf",
+      "theme": "light",
+      "size": [
+        1440,
+        900
+      ],
+      "columns": [
+        330,
+        840
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "pdf-dark-820.png",
+      "mode": "pdf",
+      "theme": "dark",
+      "size": [
+        820,
+        560
+      ],
+      "columns": [
+        230,
+        320
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "bom-dark-820.png",
+      "mode": "bom",
+      "theme": "dark",
+      "size": [
+        820,
+        560
+      ],
+      "columns": [
+        230,
+        320
+      ],
+      "source_horizontal_overflow": 0
+    },
+    {
+      "file": "naming-dark-820.png",
+      "mode": "naming",
+      "theme": "dark",
+      "size": [
+        820,
+        560
+      ],
+      "columns": [
+        230,
+        320
+      ],
+      "source_horizontal_overflow": 0
+    }
+  ]
+}

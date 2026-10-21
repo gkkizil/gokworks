@@ -1,13 +1,13 @@
 """PDF and sheet-metal exports using the existing file-safe service engines."""
 
 from pathlib import Path
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QSplitter, QHBoxLayout
+from PySide6.QtCore import Slot
 
 from pdf.process import export_drawings
 from dxf_dwg.exporter import export_parts
 from .. import services
-from ..components import BasePage, ValueForm, ResultsPanel, Disclosure, card, scroll, button, open_folder
+from ..components import (BasePage, ValueForm, ResultsPanel, Disclosure, card, button,
+                          open_folder, TransferWorkspace, SourceFiles)
 from solidworks import diagnostics
 
 
@@ -22,7 +22,6 @@ class ExportPage(BasePage):
         self.start_button = self.action('Aktarımı başlat', self.start_export, primary=True)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
-        self.splitter = QSplitter(Qt.Vertical)
         panel, body = card('Kaynak ve çıktı')
         self.form = ValueForm(self.settings, mode + '_')
         self.source = self.form.path('source', 'Kaynak klasör')
@@ -31,30 +30,25 @@ class ExportPage(BasePage):
             self.form.combo('format', 'Çıktı türü', ('DXF', 'DWG'), 'DXF')
         self.options_form = ValueForm(self.settings, mode + '_')
         self.options_form.check('recursive', 'Alt klasörleri tara', True)
-        self.options_form.check('overwrite', 'Mevcut çıktıların üzerine yaz', False)
+        self.options_form.check('overwrite', 'Üzerine yaz', False).setToolTip('Mevcut çıktıların üzerine yaz')
         if not pdf:
             self.options_form.check('bend_lines', 'Büküm çizgilerini ekle', False)
-            self.options_form.check('group_by_thickness', 'Sac kalınlığına göre klasörle', True)
+            self.options_form.check('group_by_thickness', 'Kalınlığa göre klasörle', True)
         # Keep the original complete value interface used by the service boundary.
         self.form.fields.update(self.options_form.fields)
         self.options_form.changed.connect(self.form.changed)
         body.addWidget(self.form)
-        self.options = Disclosure('Aktarım seçenekleri', self.options_form)
-        options_row = QHBoxLayout()
-        options_row.addWidget(self.options, 1)
-        options_row.addWidget(button('Çıktıyı aç', lambda: open_folder(self.output.text()) if self.output.text() else None), 0, Qt.AlignTop)
-        body.addLayout(options_row)
+        self.form.stack_fields()
+        self.options = Disclosure('Aktarım seçenekleri', self.options_form, expanded=True)
+        body.addWidget(self.options)
+        body.addWidget(button('Çıktıyı aç', lambda: open_folder(self.output.text()) if self.output.text() else None))
         self.controls.extend((self.form, self.options_form))
         self.results = ResultsPanel()
         self.results.cleared.connect(lambda:self.set_status('Dosya listesi ve işlem günlüğü temizlendi.'))
-        self.source_scroll = scroll(panel)
-        self.source_scroll.setMinimumHeight(0)
-        self.splitter.addWidget(self.source_scroll)
-        self.splitter.addWidget(self.results)
-        self.splitter.setStretchFactor(0, 0)
-        self.splitter.setStretchFactor(1, 1)
-        self.splitter.setSizes([160 if pdf else 195, 700])
-        self.splitter.setChildrenCollapsible(False)
+        self.source_files = SourceFiles(self.results)
+        body.addWidget(self.source_files,1)
+        self.splitter = TransferWorkspace(self,panel,self.results)
+        self.source_scroll = self.splitter.source_scroll
         self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
 

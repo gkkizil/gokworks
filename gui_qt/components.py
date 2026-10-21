@@ -1,7 +1,7 @@
 """Shared Qt Widgets: forms, persistent workspaces and model-backed results."""
 
 import csv
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from PySide6.QtCore import Qt, QTimer, Signal, QUrl
 from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut
@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
     QFileDialog, QTableView, QTreeView, QHeaderView, QAbstractItemView,
     QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication,
-    QToolButton, QBoxLayout, QMenu)
+    QToolButton, QBoxLayout, QMenu, QSplitter, QSizePolicy, QListView)
 
 from .models import Column, TableModel, FilterProxy, LABELS
 
@@ -213,6 +213,119 @@ class ValueForm(QWidget):
     def show_field(self, key, visible):
         self.form.setRowVisible(self.fields[key], visible)
 
+    def stack_fields(self):
+        """Labels above inputs keep the narrow transfer column readable."""
+        self.form.setRowWrapPolicy(QFormLayout.WrapAllRows)
+        for widget in self.fields.values():
+            if isinstance(widget, PathPicker):
+                widget.choose.setText('Seç…')
+                widget.choose.setToolTip(widget.dialog_title)
+
+
+class TransferWorkspace(QSplitter):
+    """Two persistent vertical columns: source/commands and full-height results."""
+    def __init__(self, page, source, results):
+        super().__init__(Qt.Horizontal)
+        self.setObjectName('transferWorkspace')
+        self.setChildrenCollapsible(False); self.setHandleWidth(6)
+        self.source_column = QWidget()
+        self.source_column.setMinimumWidth(220); self.source_column.setMaximumWidth(400)
+        body = QVBoxLayout(self.source_column); body.setContentsMargins(0,0,0,0); body.setSpacing(8)
+        self.source_scroll = scroll(source)
+        self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        body.addWidget(self.source_scroll,1)
+        # Reuse the actual command widgets and their busy/stop connections.
+        page.heading.removeItem(page.actions); page.actions.setParent(None)
+        page.actions.setDirection(QBoxLayout.TopToBottom)
+        page.actions.setAlignment(Qt.AlignmentFlag(0))
+        body.addLayout(page.actions)
+        results.setMinimumWidth(0)
+        self.addWidget(self.source_column); self.addWidget(results)
+        self.setStretchFactor(0,0); self.setStretchFactor(1,1)
+        self._preferred_source_width = 330
+        self._fitting_columns = False
+        self.setSizes([330,850])
+        self.splitterMoved.connect(self._remember_width)
+
+    def _remember_width(self,position,index):
+        if not self._fitting_columns:
+            self._preferred_source_width = self.sizes()[0]
+
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        # Keep the result tools usable at the application's minimum window size.
+        # Remember the user's divider position so widening restores their layout.
+        self._fitting_columns = True
+        try:
+            maximum = min(400,max(220,self.width()-self.handleWidth()-320))
+            self.source_column.setMaximumWidth(maximum)
+            width = min(maximum,self._preferred_source_width)
+            self.setSizes([width,max(0,self.width()-self.handleWidth()-width)])
+        finally:
+            self._fitting_columns = False
+
+
+class SearchToolbar(QWidget):
+    """Search above commands when the results column is narrow."""
+    def __init__(self, search, commands):
+        super().__init__()
+        self.setMinimumWidth(0)
+        self.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
+        self.box = QBoxLayout(QBoxLayout.TopToBottom,self)
+        self.box.setContentsMargins(0,0,0,0); self.box.setSpacing(6)
+        self.box.addWidget(search,1)
+        tools = QWidget(); row = QHBoxLayout(tools)
+        row.setContentsMargins(0,0,0,0); row.setSpacing(6)
+        for command in commands: row.addWidget(command)
+        self.box.addWidget(tools)
+
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        self.box.setDirection(QBoxLayout.TopToBottom if self.width()<600 else QBoxLayout.LeftToRight)
+
+
+class SourceFileProxy(FilterProxy):
+    def data(self,index,role=Qt.DisplayRole):
+        if role==Qt.DisplayRole:
+            row = super().data(index,Qt.UserRole)
+            if row: return PureWindowsPath(str(row.get('source',''))).name
+        return super().data(index,role)
+
+
+class SourceFiles(QWidget):
+    """A virtual source inventory backed by the existing export model."""
+    def __init__(self,results):
+        super().__init__()
+        body=QVBoxLayout(self); body.setContentsMargins(0,0,0,0); body.setSpacing(6)
+        self.counter=label('Kaynak dosyalar · 0','section'); body.addWidget(self.counter)
+        self.search=QLineEdit(); self.search.setPlaceholderText('Kaynak dosya ara…')
+        self.search.setClearButtonEnabled(True); self.search.setAccessibleName('Kaynak dosyalarda ara')
+        body.addWidget(self.search)
+        self.proxy=SourceFileProxy(self); self.proxy.setSourceModel(results.model)
+        self.view=QListView(); self.view.setModel(self.proxy); self.view.setUniformItemSizes(True)
+        self.view.setMinimumWidth(0); self.view.setMinimumHeight(96)
+        self.view.setTextElideMode(Qt.ElideMiddle); self.view.setAlternatingRowColors(True)
+        self.view.setAccessibleName('Kaynak klasörde bulunan dosyalar')
+        self.view.setToolTip('Kaynak klasördeki uygun dosyalar aktarılır. Bir dosyaya tıklayarak sağdaki durumunu görebilirsiniz.')
+        body.addWidget(self.view,1)
+        self.timer=QTimer(self); self.timer.setSingleShot(True); self.timer.setInterval(100)
+        self.search.textChanged.connect(lambda:self.timer.start())
+        self.timer.timeout.connect(lambda:self.proxy.set_query(self.search.text()))
+        def select(index):
+            source_index=self.proxy.mapToSource(index)
+            target=results.proxy.mapFromSource(source_index)
+            if source_index.isValid() and not target.isValid():
+                results.clear_filters()
+                target=results.proxy.mapFromSource(source_index)
+            if target.isValid():
+                results.tabs.setCurrentIndex(0); results.table.setCurrentIndex(target); results.table.scrollTo(target)
+        self.view.clicked.connect(select)
+        def count(*args):
+            total=results.model.rowCount(); self.counter.setText(f'Kaynak dosyalar · {total}')
+            if not total:
+                self.search.clear(); self.timer.stop(); self.proxy.set_query('')
+        for signal in (results.model.modelReset,results.model.rowsInserted,results.model.rowsRemoved): signal.connect(count)
+
 
 class BasePage(QWidget):
     statusChanged = Signal(str, bool)
@@ -314,7 +427,6 @@ class ResultsPanel(QWidget):
         self.success_label = success_label
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        toolbar = QHBoxLayout()
         self.search = QLineEdit()
         self.search.setPlaceholderText('Dosya adı, yol veya açıklama ara…')
         self.search.setClearButtonEnabled(True)
@@ -328,16 +440,12 @@ class ResultsPanel(QWidget):
         report_menu = QMenu(self.report_menu)
         report_menu.addAction('Raporu CSV kaydet…', self.save_dialog)
         report_menu.addAction('Günlüğü kopyala', self.copy_log_text)
-        self.report_menu.setMenu(report_menu); self.report_menu.hide()
+        self.report_menu.setMenu(report_menu)
+        self.save.hide(); self.copy_log.hide()
         self.clear_button = button('Temizle', self.clear)
         self.clear_button.setToolTip('Dosya listesini, işlem sonuçlarını ve günlüğü temizle')
-        toolbar.addWidget(self.search, 1)
-        toolbar.addWidget(self.filter)
-        toolbar.addWidget(self.save)
-        toolbar.addWidget(self.copy_log)
-        toolbar.addWidget(self.report_menu)
-        toolbar.addWidget(self.clear_button)
-        self.layout.addLayout(toolbar)
+        self.toolbar=SearchToolbar(self.search,(self.filter,self.save,self.copy_log,self.report_menu,self.clear_button))
+        self.layout.addWidget(self.toolbar)
         self.tabs = QTabWidget()
         self.table = configure_view(QTableView())
         self.model = TableModel((Column('Dosya / parça', 'source'),

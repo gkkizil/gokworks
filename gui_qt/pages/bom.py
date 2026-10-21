@@ -4,13 +4,14 @@ from dataclasses import asdict
 from pathlib import PureWindowsPath
 
 from PySide6.QtCore import Qt, QTimer, QPersistentModelIndex
-from PySide6.QtWidgets import (QHBoxLayout, QLineEdit, QTabWidget,
+from PySide6.QtWidgets import (QVBoxLayout, QWidget, QLineEdit, QTabWidget,
     QTableView, QTreeView, QFileDialog, QApplication, QToolButton, QMenu, QHeaderView)
 
 from bom.exporter import scan_worker
 from .. import services
 from ..models import Column, TableModel, TreeModel, FilterProxy
-from ..components import BasePage, ValueForm, Disclosure, label, button, configure_view, show_details
+from ..components import (BasePage, ValueForm, Disclosure, label, button, configure_view,
+                           show_details, card, TransferWorkspace, SearchToolbar)
 
 
 def mass(value):
@@ -27,17 +28,18 @@ class BomPage(BasePage):
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
         self.form = ValueForm(self.settings, 'bom_')
-        self.form.check('include_excluded', 'BOM dışında bırakılan bileşenleri dahil et', False)
-        self.options = Disclosure('Okuma seçenekleri', self.form)
-        self.layout.addWidget(self.options)
+        self.form.check('include_excluded', 'BOM dışındakileri dahil et', False)
+        self.options = Disclosure('Okuma seçenekleri', self.form, expanded=True)
+        source, source_layout = card('Kaynak montaj')
+        source_layout.addWidget(self.options)
         self.controls.append(self.form)
         self.summary = label('SolidWorks’te ana montajı etkinleştirip Montajı oku düğmesine basın.', 'muted')
-        self.layout.addWidget(self.summary)
-        toolbar = QHBoxLayout()
+        source_layout.addWidget(self.summary)
+        self.results_panel = QWidget(); result_layout = QVBoxLayout(self.results_panel)
+        result_layout.setContentsMargins(0,0,0,0); result_layout.setSpacing(8)
         self.search = QLineEdit()
         self.search.setPlaceholderText('Parça, montaj, konfigürasyon veya dosya yolu ara…')
         self.search.setClearButtonEnabled(True)
-        toolbar.addWidget(self.search, 1)
         self.tree_tools = QToolButton()
         self.tree_tools.setText('Ağaç')
         self.tree_tools.setAccessibleName('Ürün ağacı görünüm seçenekleri')
@@ -47,10 +49,8 @@ class BomPage(BasePage):
         tree_menu.addAction('Tümünü daralt', lambda: self.tree.collapseAll())
         self.tree_tools.setMenu(tree_menu)
         self.tree_tools.hide()
-        toolbar.addWidget(self.tree_tools)
         self.clear_button = button('Temizle', self.clear)
         self.clear_button.setToolTip('Parça listesini ve ürün ağacını temizle')
-        toolbar.addWidget(self.clear_button)
         self.controls.append(self.clear_button)
         self.more_button = QToolButton()
         self.more_button.setText('Diğer')
@@ -62,8 +62,8 @@ class BomPage(BasePage):
         self.columns_action.setCheckable(True)
         self.columns_action.toggled.connect(self.show_technical_columns)
         self.more_button.setMenu(menu)
-        toolbar.addWidget(self.more_button)
-        self.layout.addLayout(toolbar)
+        self.toolbar = SearchToolbar(self.search,(self.tree_tools,self.clear_button,self.more_button))
+        result_layout.addWidget(self.toolbar)
         self.tabs = QTabWidget()
         self.parts = configure_view(QTableView())
         self.parts_model = TableModel((Column('Parça adı', 'name'), Column('Adet', 'quantity'),
@@ -93,9 +93,19 @@ class BomPage(BasePage):
         self.tabs.currentChanged.connect(lambda index: self.tree_tools.setVisible(index == 1))
         self.parts.doubleClicked.connect(self.details)
         self.tree.doubleClicked.connect(self.details)
-        self.layout.addWidget(self.tabs, 1)
+        result_layout.addWidget(self.tabs, 1)
+        self.source_tree = configure_view(QTreeView())
+        self.source_tree.setModel(self.tree_proxy); self.source_tree.setHeaderHidden(True)
+        self.source_tree.setAccessibleName('Kaynak montaj ve parça seçimi')
+        self.source_tree.setMinimumHeight(96)
+        for column in range(1,self.tree_model.columnCount()): self.source_tree.setColumnHidden(column,True)
+        self.source_tree.selectionModel().currentChanged.connect(self.select_source)
+        source_layout.addWidget(self.source_tree,1)
         self.selection = label('Bir satır seçerek ayrıntıları görün. Excel’e tüm montaj aktarılır.', 'muted')
-        self.layout.addWidget(self.selection)
+        source_layout.addWidget(self.selection)
+        self.splitter = TransferWorkspace(self,source,self.results_panel)
+        self.source_scroll = self.splitter.source_scroll
+        self.layout.addWidget(self.splitter,1)
         for view in (self.parts, self.tree):
             view.selectionModel().currentChanged.connect(self.select_row)
         self.search_timer = QTimer(self)
@@ -151,6 +161,7 @@ class BomPage(BasePage):
         self.parts_model.replace([asdict(part) for part in result.parts])
         self.tree_model.replace([dict(asdict(node), id=node.number) for node in result.tree])
         self.tree.expandToDepth(0)
+        self.source_tree.expandToDepth(0)
         self.summary.setText(f'{PureWindowsPath(result.assembly).name} · {result.configuration}\n'
             f'{len(result.parts)} farklı parça · {result.total_parts} adet · Toplam: {mass(result.total_mass_kg)} kg · '
             f'Bastırılmış: {result.suppressed} · BOM dışı: {result.excluded}')
@@ -184,6 +195,21 @@ class BomPage(BasePage):
             return
         row = index.data(Qt.UserRole) or {}
         self.selection.setText(f"{row.get('name', '')} · {row.get('configuration', '')}\n{row.get('path', '')}")
+
+    def select_source(self,index,previous=None):
+        self.select_row(index)
+        if not index.isValid(): return
+        row=index.data(Qt.UserRole) or {}
+        key=(str(PureWindowsPath(row.get('path',''))).casefold(),row.get('configuration',''))
+        for number,part in enumerate(self.parts_model.rows):
+            if (str(PureWindowsPath(part['path'])).casefold(),part['configuration'])==key:
+                target=self.parts_proxy.mapFromSource(self.parts_model.index(number,0))
+                if target.isValid():
+                    self.tabs.setCurrentIndex(0)
+                    self.parts.setCurrentIndex(target); self.parts.scrollTo(target)
+                    return
+        self.tabs.setCurrentIndex(1)
+        self.tree.setCurrentIndex(index); self.tree.scrollTo(index)
 
     def details(self, index):
         if index.isValid():

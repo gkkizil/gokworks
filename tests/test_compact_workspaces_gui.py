@@ -61,9 +61,9 @@ def test_sidebar_toggle_preserves_cached_pages_and_uses_labeled_icons(window,qtb
 
 
 @pytest.mark.parametrize('mode',('pdf','dxf_dwg'))
-def test_hidden_transfer_options_are_still_used_and_retained(window,mode):
+def test_visible_transfer_options_are_used_and_retained(window,mode):
     page=window.pages[mode];window.navigate(mode)
-    assert not page.options.is_expanded()
+    assert page.options.is_expanded()
     page.form.set_value('recursive',False);page.form.set_value('overwrite',True)
     page.options.set_expanded(True);assert page.options_form.fields['overwrite'].isChecked()
     page.options.set_expanded(False);assert page.form.values()['overwrite'] is True
@@ -125,3 +125,77 @@ def test_naming_multiple_found_assemblies_requires_an_explicit_selection(window)
     page=window.pages['naming'];page.handle_events([('assemblies',['A.SLDASM','B.SLDASM'])])
     assert page.assemblies.currentIndex()==-1
     page.scan();assert not window.jobs.busy and 'listesinden' in page.status_text
+
+
+@pytest.mark.parametrize('mode',('pdf','dxf_dwg','bom','naming'))
+def test_transfer_columns_keep_sources_left_results_right_and_commands_visible(window,qtbot,mode):
+    page=window.pages[mode];window.navigate(mode)
+    for width,height in ((1440,900),(820,560),(1440,900)):
+        window.resize(width,height);qtbot.wait(30)
+        workspace=page.splitter
+        left,right=workspace.widget(0),workspace.widget(1)
+        assert workspace.orientation()==Qt.Horizontal
+        assert 220<=left.width()<=400
+        assert right.width()>=320
+        assert left.geometry().right()<right.geometry().left()
+        assert abs(left.height()-right.height())<2
+        assert page.source_scroll.horizontalScrollBar().maximum()==0
+        assert page.source_scroll.geometry().bottom()<page.scan_button.mapTo(left,QPoint()).y()
+        assert page.scan_button.width()>left.width()-8
+        if width==1440:
+            assert left.width()==330 and right.width()>left.width()*2
+        for number in range(page.actions.count()):
+            control=page.actions.itemAt(number).widget()
+            if control.isVisible():
+                assert left.rect().contains(control.mapTo(left,control.rect().bottomRight()))
+    workspace.moveSplitter(385,1)
+    assert workspace.sizes()[0]==385
+    window.resize(820,560);qtbot.wait(30)
+    assert workspace.sizes()[1]>=320
+    window.resize(1440,900);qtbot.wait(30)
+    assert workspace.sizes()[0]==385
+
+
+@pytest.mark.parametrize('mode',('pdf','dxf_dwg'))
+def test_source_inventory_selection_filters_and_clear_share_the_export_model(window,qtbot,mode):
+    page=window.pages[mode];window.navigate(mode)
+    paths=['C:/Çizimler/Üst sac.SLDPRT','C:/Çizimler/Alt sac.SLDPRT']
+    page.handle_events([('files',paths),('result',dict(source=paths[0],status='success',detail='Aktarıldı'))])
+    inventory=page.source_files;results=page.results
+    assert inventory.proxy.sourceModel() is results.model
+    assert inventory.proxy.rowCount()==2
+    assert inventory.proxy.index(0,0).data()=='Üst sac.SLDPRT'
+    assert inventory.proxy.index(0,0).data(Qt.ToolTipRole)==paths[0]
+    results.filter.setCurrentIndex(results.filter.findData('success'))
+    assert results.proxy.rowCount()==1 and inventory.proxy.rowCount()==2
+    # Clicking an input reveals its result even if a prior output filter hid it.
+    inventory.view.clicked.emit(inventory.proxy.index(1,0))
+    assert results.table.currentIndex().data(Qt.UserRole)['source']==paths[1]
+    assert results.filter.currentData() is None
+    inventory.search.setText('Üst');qtbot.wait(130)
+    assert inventory.proxy.rowCount()==1
+    page.set_busy(True);results.clear_button.click()
+    assert inventory.proxy.rowCount()==1 and results.model.rowCount()==2
+    page.set_busy(False);results.clear_button.click()
+    assert inventory.proxy.rowCount()==results.model.rowCount()==0
+    assert inventory.search.text()=='' and results.results==[]
+    assert inventory.counter.text()=='Kaynak dosyalar · 0'
+
+
+def test_bom_source_selection_shows_part_or_assembly_results_and_clear(window):
+    from bom.exporter import Part,Node,Result
+    page=window.pages['bom'];window.navigate('bom')
+    page.load_result(Result('C:/Ana.SLDASM','Default',
+        (Part('Kapak','C:/Kapak.SLDPRT','Default',2,1.5,3.),),
+        (Node('1','',1,'Ana','Ana','Montaj','C:/Ana.SLDASM','Default'),
+         Node('1.1','1',2,'Kapak','Kapak-1','Parça','C:/Kapak.SLDPRT','Default',1.5)),0,0,False))
+    root=page.tree_proxy.index(0,0)
+    page.source_tree.setCurrentIndex(root)
+    assert page.tabs.currentWidget() is page.tree and page.tree.currentIndex()==root
+    child=page.tree_proxy.index(0,0,root)
+    page.source_tree.setCurrentIndex(child)
+    assert page.tabs.currentWidget() is page.parts
+    assert page.parts.currentIndex().data(Qt.UserRole)['name']=='Kapak'
+    page.clear_button.click()
+    assert page.source_tree.model().rowCount()==page.parts_model.rowCount()==0
+    assert not page.export_button.isEnabled()
