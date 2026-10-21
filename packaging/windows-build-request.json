@@ -1,6 +1,7 @@
 {
-  "request_id": "20261021-c3d9efa-onefile",
-  "requested_at": "2026-10-21T02:59:19+00:00",
-  "source_commit": "c3d9efa4a839c7b8d6fe7078ce283e7afb62783a",
-  "reason": "User requested a fresh standalone GOKWORKS.exe after the full application validation. Package the latest compact interfaces and combined nesting workspace from this source branch. Preserve Windows regressions, frozen onefile launch/DPI checks, embedded licenses and direct EXE release. No backup repository changes."
+  "request_id": "20261021-bb9ce87-onefile",
+  "requested_at": "2026-10-21T03:15:36+00:00",
+  "source_commit": "bb9ce87",
+  "reason": "Rebuild the requested standalone EXE with a responsive plate-tab toolbar. Run PDF text and plate-scroll regressions first on the native Windows platform used by the distributed EXE, then retain the full Windows suite and frozen onefile DPI checks. Do not change the backup repository.",
+  "diagnose_run": "39536075676"
 }
