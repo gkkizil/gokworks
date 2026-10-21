@@ -1,7 +1,7 @@
 {
-  "request_id": "20261021-current-main-single-exe-082147",
-  "requested_at": "2026-10-21T08:21:47+00:00",
-  "source_commit": "c306c76604fd2cdc8d58127bedb41c48bbb9791b",
-  "reason": "Build the user's requested current main as a standalone GOKWORKS.exe, including verified contour-fill seeding and the compact torque K guide. Retain native Windows regression gates and frozen onefile checks at all DPI scales. Publish the direct EXE download and its actual source commit only on main; do not update release or touch the backup repository.",
-  "diagnose_run": "39552732206"
+  "request_id": "20261021-current-main-native-batches-0836",
+  "requested_at": "2026-10-21T08:36:00+00:00",
+  "source_commit": "0265efa3859a737a365f71eb520b6c3bf00e87bb",
+  "reason": "Complete the requested current-main single EXE. Run the native transfer-column gate first with full geometry diagnostics, then all collected regressions in bounded fresh native processes with merged failure reports; do not skip tests or publish after a failed check. Retain three-scale frozen onefile smoke checks. Leave release and the backup repository untouched.",
+  "diagnose_run": "39568731029"
 }
