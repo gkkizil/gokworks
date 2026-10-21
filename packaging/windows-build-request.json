@@ -1,7 +1,7 @@
 {
-  "request_id": "20261021-bb9ce87-onefile",
-  "requested_at": "2026-10-21T03:15:36+00:00",
-  "source_commit": "bb9ce87",
-  "reason": "Rebuild the requested standalone EXE with a responsive plate-tab toolbar. Run PDF text and plate-scroll regressions first on the native Windows platform used by the distributed EXE, then retain the full Windows suite and frozen onefile DPI checks. Do not change the backup repository.",
-  "diagnose_run": "39536075676"
+  "request_id": "20261021-native-resize-onefile",
+  "requested_at": "2026-10-21T03:31:44+00:00",
+  "source_commit": "9aa56b55cff642a7b2e74d1996d0798409ebb374",
+  "reason": "Produce the requested single EXE after fixing native Windows resize timing and compact cost details. Run every nesting UI/PDF regression as a fast gate, retain the full native Windows suite, then validate the frozen single-file app at all DPI scales. Keep the backup repository untouched.",
+  "diagnose_run": "39537606321"
 }
