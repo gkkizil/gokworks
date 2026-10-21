@@ -36,6 +36,12 @@ bitmeden ana pencere kapanmaz. Ana pencereden bağımsız çıkış izleyicisi k
 geçici kaynaklarıyla çalışarak ana pencerenin kapanışından sonra da kayıt yazabilir.
 Bu kontrol gerçek SolidWorks oturumuna bağlanmaz. Paket kod imzası taşımaz.
 
+Windows test çalıştırıcısı, pytest'in topladığı bütün test kimliklerini en
+fazla 32 test içeren ayrı süreçlerde çalıştırır. Böylece yüzlerce tam uygulama
+penceresinin yerel Qt durumu tek bir süreçte birikmez. Bütün JUnit raporları
+birleştirilir; başarısız veya yerel hatayla kapanan süreçler başarısız kontrol
+olarak kalır. Test atlanmaz; yerel Qt hata mesajları derleme günlüğünde korunur.
+
 Nesting modülü için Shapely/GEOS kitaplıkları `--collect-all shapely` ile
 toplanır. Paket kontrolünde gerçek delikli DXF okunur, NFP yerleşimi yapılır,
 49,0625 kg referansı denetlenir ve DXF/Excel/PDF oluşturulur. Bu yeni kontroller

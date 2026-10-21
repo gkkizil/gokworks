@@ -134,26 +134,29 @@ def test_transfer_columns_keep_sources_left_results_right_and_commands_visible(w
         window.resize(width,height);qtbot.wait(30)
         workspace=page.splitter
         left,right=workspace.widget(0),workspace.widget(1)
+        geometry=(mode,(width,height),window.size().toTuple(),workspace.size().toTuple(),
+                  workspace.sizes(),left.geometry().getRect(),right.geometry().getRect(),
+                  page.source_scroll.geometry().getRect(),page.scan_button.geometry().getRect())
         assert workspace.orientation()==Qt.Horizontal
-        assert 220<=left.width()<=400
-        assert right.width()>=320
+        assert 220<=left.width()<=400,geometry
+        assert right.width()>=320,geometry
         assert left.geometry().right()<right.geometry().left()
         assert abs(left.height()-right.height())<2
         assert page.source_scroll.horizontalScrollBar().maximum()==0
-        assert page.source_scroll.geometry().bottom()<page.scan_button.mapTo(left,QPoint()).y()
-        assert page.scan_button.width()>left.width()-8
+        assert page.source_scroll.geometry().bottom()<page.scan_button.mapTo(left,QPoint()).y(),geometry
+        assert page.scan_button.width()>left.width()-8,geometry
         if width==1440:
-            assert left.width()==330 and right.width()>left.width()*2
+            assert left.width()==330 and right.width()>left.width()*2,geometry
         for number in range(page.actions.count()):
             control=page.actions.itemAt(number).widget()
             if control.isVisible():
                 assert left.rect().contains(control.mapTo(left,control.rect().bottomRight()))
     workspace.moveSplitter(385,1)
-    assert workspace.sizes()[0]==385
+    assert workspace.sizes()[0]==385,(mode,window.size().toTuple(),workspace.sizes())
     window.resize(820,560);qtbot.wait(30)
     assert workspace.sizes()[1]>=320
     window.resize(1440,900);qtbot.wait(30)
-    assert workspace.sizes()[0]==385
+    assert workspace.sizes()[0]==385,(mode,window.size().toTuple(),workspace.sizes())
 
 
 @pytest.mark.parametrize('mode',('pdf','dxf_dwg'))

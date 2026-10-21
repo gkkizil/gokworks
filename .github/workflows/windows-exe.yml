@@ -52,6 +52,15 @@ jobs:
         env:
           BUILD_STATUS: building
         run: python packaging/publish_status.py
+      - name: Validate native Windows transfer columns
+        timeout-minutes: 3
+        env:
+          QT_QPA_PLATFORM: windows
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install -r requirements-dev.txt *> windows-test-setup.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
+          python packaging/run_windows_tests.py tests/test_compact_workspaces_gui.py::test_transfer_columns_keep_sources_left_results_right_and_commands_visible
       - name: Validate native Windows nesting tabs and PDF text
         timeout-minutes: 3
         env:
