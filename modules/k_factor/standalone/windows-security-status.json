@@ -1,54 +1,42 @@
 {
-  "status": "no_detection",
-  "started_at": "2026-10-16T12:34:41.7606849Z",
-  "finished_at": "2026-10-16T12:35:05.0546231Z",
+  "status": "unavailable",
+  "started_at": "2026-10-21T06:00:09.9017708Z",
+  "finished_at": "2026-10-21T06:00:20.4473377Z",
   "artifact_id": 12045127794,
   "source_commit": "8a2d8990a7ea808d3b5f155b2f6ad36769134ec6",
   "files": {
     "GOKWORKS-KR-Deneme.exe": {
-      "authenticode_status": "NotSigned",
-      "sha256": "3df34390b3e298d2564b7afff81859987c3afcf2460073e20b4b094d50e6322c",
       "bytes": 24444419,
-      "signer": null
+      "signer": null,
+      "authenticode_status": "NotSigned",
+      "sha256": "3df34390b3e298d2564b7afff81859987c3afcf2460073e20b4b094d50e6322c"
     },
     "GOKWORKS.KR.Native.exe": {
-      "authenticode_status": "NotSigned",
-      "sha256": "080938909e92c8242036f20a16aa345a5b172527b4f316d77f087e2a36c4c94a",
       "bytes": 67547781,
-      "signer": null
+      "signer": null,
+      "authenticode_status": "NotSigned",
+      "sha256": "080938909e92c8242036f20a16aa345a5b172527b4f316d77f087e2a36c4c94a"
     }
   },
   "defender": {
-    "engine_version": "1.1.26090.9",
-    "custom_scan_preferences": {
-      "DisableScriptScanning": false,
-      "PUAProtection": 1,
-      "DisableArchiveScanning": false,
-      "ScanAvgCPULoadFactor": 50
-    },
+    "antivirus_enabled": true,
+    "signature_version": "1.459.601.0",
+    "signature_update_error": "Virus and spyware definitions update was completed with errors.",
+    "signature_updated_at": "2026-10-07T08:47:31.0000000Z",
     "running_mode": "Normal",
-    "scanner": "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\4.18.26090.9-0\\MpCmdRun.exe",
-    "signature_updated_at": "2026-10-16T07:18:40.0000000Z",
-    "original_extension_exclusions": [
-      null
-    ],
-    "signature_version": "1.461.55.0",
-    "service_enabled": true,
-    "original_path_exclusions": [
-      "C:\\",
-      "D:\\"
-    ],
-    "antivirus_enabled": true
+    "engine_version": "1.1.26090.9",
+    "service_enabled": true
   },
-  "excluded_paths_temporarily_removed": [
-    "D:\\"
-  ],
-  "scan_exit_code": 0,
+  "excluded_paths_temporarily_removed": [],
+  "scan_exit_code": null,
   "detections": [],
-  "error": null,
+  "error": "Defender signatures are older than seven days.",
   "limitations": "A local Defender scan is not a Chrome Safe Browsing verdict or proof of safety.",
+  "verified_file_count": 2,
+  "manifest_sha256": "b9c86e2b42276d7461355d1d28ee2b7bf154fb9eb9567ecfb0e6611b04d977d0",
+  "job_log_tail": "",
   "request_id": "57c2ecfe-ba7e-47fc-8505-78ec9b189bf1",
-  "audit_commit": "8c2d135d19458fe5c7e3696b690f97962f378bad",
-  "job_status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/38901461066"
+  "audit_commit": "55c67652804a64d81766376764eb04b9082b80bf",
+  "job_status": "failure",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39552732194"
 }
