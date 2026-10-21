@@ -116,7 +116,8 @@ class NestingPage(BasePage):
         close.rejected.connect(self.settings_dialog.reject); settings_layout.addWidget(close)
         preview, layout = card(); preview.setMinimumWidth(220)
         layout.setContentsMargins(10,10,10,10); layout.setSpacing(8)
-        toolbar = QHBoxLayout(); self.sheet_tabs = QTabBar()
+        toolbar = QBoxLayout(QBoxLayout.LeftToRight); self.plate_toolbar = toolbar
+        self.sheet_tabs = QTabBar()
         self.sheet_tabs.setObjectName('nestingPlates')
         self.sheet_tabs.setDocumentMode(True); self.sheet_tabs.setDrawBase(False)
         self.sheet_tabs.setExpanding(False); self.sheet_tabs.setUsesScrollButtons(True)
@@ -126,12 +127,15 @@ class NestingPage(BasePage):
         self.sheet_tabs.currentChanged.connect(self.render_sheet); toolbar.addWidget(self.sheet_tabs,1)
         self.canvas = NestingCanvas()
         self.canvas.partActivated.connect(self.select_canvas_part)
-        self.fit_button = button('Sığdır', self.canvas.fit); toolbar.addWidget(self.fit_button)
+        tools = QWidget(); tool_layout = QHBoxLayout(tools)
+        tool_layout.setContentsMargins(0,0,0,0); tool_layout.setSpacing(8)
+        self.fit_button = button('Sığdır', self.canvas.fit); tool_layout.addWidget(self.fit_button)
         self.labels_toggle = QCheckBox('Adlar'); self.labels_toggle.setChecked(True)
         self.labels_toggle.setAccessibleName('Yerleşimde parça adlarını göster')
         self.labels_toggle.toggled.connect(self.canvas.set_labels_visible)
         self.labels_toggle.setToolTip('Uzun veya çok sayıdaki parça adlarını gizleyebilirsiniz. Ayrıntılar parça üzerinde bekleyince görünür.')
-        toolbar.addWidget(self.labels_toggle); layout.addLayout(toolbar)
+        tool_layout.addWidget(self.labels_toggle)
+        toolbar.addWidget(tools,0,Qt.AlignRight); layout.addLayout(toolbar)
         self.current_note = label('DXF ekleyin, sacı tanımlayın ve Yerleştir düğmesine basın.', 'muted')
         self.current_note.setToolTip('Tekerlek: yakınlaştır · Sürükle: kaydır · Parçaya tıkla: listede seç')
         layout.addWidget(self.current_note); layout.addWidget(self.canvas,1)
@@ -139,7 +143,8 @@ class NestingPage(BasePage):
         self.cost_summary = label('', 'section'); layout.addWidget(self.cost_summary)
         # The viewport itself resizes: an outer scroll area clips the sheet and
         # puts the summary below the fold, even when fitInView succeeds.
-        self.preview_scroll = preview; self.workspace.addWidget(preview)
+        self.preview_scroll = preview; preview.installEventFilter(self)
+        self.workspace.addWidget(preview)
         self.workspace.setStretchFactor(0,0); self.workspace.setStretchFactor(1,1)
         self.workspace.setSizes([330,750]); self.parts_width = 330
         self.workspace.splitterMoved.connect(lambda *_:self.update_result_text())
@@ -178,6 +183,11 @@ class NestingPage(BasePage):
     def eventFilter(self, watched, event):
         if watched is getattr(self,'settings_dialog',None) and event.type() == QEvent.Resize:
             self.stock_layout.setDirection(QBoxLayout.LeftToRight if watched.width() >= 1040 else QBoxLayout.TopToBottom)
+        elif watched is getattr(self,'preview_scroll',None) and event.type() == QEvent.Resize:
+            # Native Windows fonts can make one plate label wider than the
+            # space left beside the tools. Give tabs the full preview width
+            # on small windows; Qt can then scroll the selected plate into view.
+            self.plate_toolbar.setDirection(QBoxLayout.LeftToRight if watched.width() >= 490 else QBoxLayout.TopToBottom)
         return super().eventFilter(watched,event)
 
     def show_settings(self, *, error=''):

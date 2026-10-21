@@ -229,10 +229,13 @@ def test_three_plates_are_numbered_and_browsable(window,qtbot):
     qtbot.keyClick(page.sheet_tabs,Qt.Key_Left); assert page.sheet_tabs.currentIndex() == 1
 
 
-def test_many_document_tabs_scroll_to_last_physical_plate_in_small_window(window,qtbot):
+@pytest.mark.parametrize('large_labels',[False,True])
+def test_many_document_tabs_scroll_to_last_physical_plate_in_small_window(window,qtbot,large_labels):
     from nesting.models import Part
     from shapely.geometry import box
     page=window.pages['nesting']; window.resize(820,620)
+    if large_labels:
+        page.sheet_tabs.setStyleSheet(page.sheet_tabs.styleSheet()+'QTabBar#nestingPlates { font-size: 18px; }')
     page.project.parts=[Part.create('P',box(0,0,35,35),quantity=20)]
     sheet=page.project.sheets[0]; sheet.width=sheet.height=60
     page.form.set_value('quality','Hızlı'); page.start_nest()

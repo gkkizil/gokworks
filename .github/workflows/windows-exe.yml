@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         id: checkout
@@ -52,10 +52,19 @@ jobs:
         env:
           BUILD_STATUS: building
         run: python packaging/publish_status.py
-      - name: Validate regression suite on Windows
-        timeout-minutes: 12
+      - name: Validate native Windows nesting tabs and PDF text
+        timeout-minutes: 3
         env:
-          QT_QPA_PLATFORM: offscreen
+          QT_QPA_PLATFORM: windows
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install -r requirements-dev.txt *> windows-test-setup.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
+          python packaging/run_windows_tests.py tests/test_nesting_gui.py::test_many_document_tabs_scroll_to_last_physical_plate_in_small_window tests/test_nesting_pdf_report.py
+      - name: Validate regression suite on Windows
+        timeout-minutes: 15
+        env:
+          QT_QPA_PLATFORM: windows
           PYTHONUTF8: '1'
         run: |
           python -m pip install -r requirements-dev.txt *> windows-test-setup.log
