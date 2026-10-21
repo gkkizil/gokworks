@@ -58,3 +58,13 @@ def test_collection_error_replaces_previous_success_report(tmp_path):
     (tmp_path/'windows-tests.xml').write_text('<testsuites/>')
     assert runner.run_tests(tmp_path,['missing_test.py']) == 1
     assert len(list(ET.parse(tmp_path/'windows-tests.xml').getroot().iter('failure'))) == 1
+
+
+def test_display_selection_requires_real_wide_desktop_and_avoids_extreme_modes():
+    spec = importlib.util.spec_from_file_location('native_display',
+        Path(__file__).resolve().parents[1]/'packaging/configure_windows_display.py')
+    display = importlib.util.module_from_spec(spec);spec.loader.exec_module(display)
+    assert display.select_mode([(1024,768,32,60),(1280,1024,32,60)]) is None
+    assert display.select_mode([(1024,768,32,60),(1920,1080,32,60),
+        (3840,2160,32,60),(16384,8192,32,60)]) == (3840,2160,32,60)
+    assert display.select_mode([(1920,1080,16,60)]) is None

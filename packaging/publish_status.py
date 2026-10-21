@@ -81,6 +81,9 @@ def main():
               'artifact_url': os.environ.get('ARTIFACT_URL', '')}
     report['setup_steps'] = {name: os.environ[key] for name,key in (
         ('checkout','CHECKOUT_OUTCOME'),('python','PYTHON_SETUP_OUTCOME'),('dependencies','DEPENDENCIES_OUTCOME')) if os.environ.get(key)}
+    display = Path('windows-display.json')
+    if display.exists():
+        report['display'] = json.loads(display.read_text(encoding='utf-8'))
     for filename,key in (('windows-previous-failure.log','previous_failure_log_tail'),
                          ('windows-setup.log','setup_log_tail'),('windows-test-setup.log','test_setup_log_tail')):
         path = Path(filename)

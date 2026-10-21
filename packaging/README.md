@@ -40,7 +40,13 @@ Windows test çalıştırıcısı, pytest'in topladığı bütün test kimlikler
 fazla 32 test içeren ayrı süreçlerde çalıştırır. Böylece yüzlerce tam uygulama
 penceresinin yerel Qt durumu tek bir süreçte birikmez. Bütün JUnit raporları
 birleştirilir; başarısız veya yerel hatayla kapanan süreçler başarısız kontrol
-olarak kalır. Test atlanmaz; yerel Qt hata mesajları derleme günlüğünde korunur.
+olarak kalır. Gruplama için test çıkarılmaz; yerel Qt hata mesajları derleme
+günlüğünde korunur.
+
+CI makinesinin geçici Windows ekranı, geniş pencere testlerinden önce en az
+1920×1080 yapılır. Bu ayar kullanıcı uygulamasına eklenmez ve kayıt defterine
+yazılmaz. İstenen ve gerçekleşen ekran boyutları `windows-display.json` ile
+kaydedilir; küçük ekranın geniş pencereyi sessizce küçültmesi test sonucu sayılmaz.
 
 Nesting modülü için Shapely/GEOS kitaplıkları `--collect-all shapely` ile
 toplanır. Paket kontrolünde gerçek delikli DXF okunur, NFP yerleşimi yapılır,

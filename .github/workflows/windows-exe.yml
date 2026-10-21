@@ -43,6 +43,8 @@ jobs:
             gh run view $request.diagnose_run --repo $env:GITHUB_REPOSITORY --log-failed *> windows-previous-failure.log
           }
           exit 0
+      - name: Configure native desktop for wide layout checks
+        run: python packaging/configure_windows_display.py
       - name: Install build dependencies
         id: dependencies
         run: |
@@ -119,6 +121,7 @@ jobs:
             dist/OKU.txt
             windows-tests.xml
             windows-tests.log
+            windows-display.json
           if-no-files-found: ignore
       - name: Record downloadable build status
         if: always()
