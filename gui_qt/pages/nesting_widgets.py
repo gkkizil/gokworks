@@ -1,6 +1,6 @@
 """Small Qt-only editors and a vector, zoomable sheet preview."""
 
-from PySide6.QtCore import Qt, QRectF, QTimer, Signal
+from PySide6.QtCore import Qt, QRectF, Signal
 from PySide6.QtGui import QPainter, QPen, QColor
 from PySide6.QtWidgets import (QApplication, QDialog, QVBoxLayout, QDialogButtonBox, QGraphicsView, QGraphicsScene, QSizePolicy)
 
@@ -82,8 +82,6 @@ class NestingCanvas(QGraphicsView):
         self._click_position = None; self._click_part_id = ''; self._dragged = False
         self.setAccessibleName('Sac üzerinde parça yerleşimi')
         self.setToolTip('Parçaya tıkla: listede seç · Tekerlek: yakınlaştır · Sürükle: kaydır · Sığdır: bütün plakayı göster')
-        self.resize_timer = QTimer(self); self.resize_timer.setSingleShot(True); self.resize_timer.setInterval(40)
-        self.resize_timer.timeout.connect(lambda:self.fit() if self.auto_fit else None)
         self.empty_label = label('DXF dosyalarını ekleyin, ardından Yerleştir düğmesine basın.', 'muted')
         self.empty_label.setParent(self.viewport()); self.empty_label.setAlignment(Qt.AlignCenter)
         self.empty_label.setAttribute(Qt.WA_TransparentForMouseEvents)
@@ -166,7 +164,11 @@ class NestingCanvas(QGraphicsView):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if hasattr(self,'empty_label'): self.empty_label.setGeometry(self.viewport().rect().adjusted(24,24,-24,-24))
-        if hasattr(self,'resize_timer'): self.resize_timer.start()
+        # Only update the transform, not the scene. A deferred fit can still
+        # describe the previous native Windows viewport after a second resize.
+        # Both scrollbars are permanently off, so fitting cannot toggle their
+        # visibility and recursively resize the viewport.
+        if getattr(self,'auto_fit',False): self.fit()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

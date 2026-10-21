@@ -264,6 +264,7 @@ class NestingPage(BasePage):
         self.clear_sheet_tabs()
         self.render_sheet()
         self.summary.setText('Yerleşim bekleniyor.'); self.summary.setToolTip(''); self.cost_summary.setText('')
+        self.cost_summary.setToolTip(''); self.cost_summary.setAccessibleDescription('')
         self.current_note.setText('Parça ve sac bilgilerini tamamlayıp Yerleştir düğmesine basın.')
         self.update_buttons()
         if had_result: self.set_status('Parça, sac veya ayarlar değişti. Güncel sonuç için yeniden otomatik yerleşim yapın.')
@@ -670,8 +671,6 @@ class NestingPage(BasePage):
         if selected >= 0: self.sheet_tabs.setCurrentIndex(selected)
         self.sheet_tabs.blockSignals(False); self.preferred_sheet = None
         self.update_result_text()
-        self.cost_summary.setToolTip('Girilen sac, kesim, hazırlık, sabit gider, kâr ve KDV toplamı. '
-                                     'Sıfır bırakılan fiyat ve giderler hesaba eklenmez.')
         self.render_sheet(); self.update_buttons()
         if result.unplaced:
             codes = sorted({self.project.part(key).code for key in result.unplaced})
@@ -693,6 +692,11 @@ class NestingPage(BasePage):
         self.cost_summary.setText(f"{prefix} {fmt(totals['total'],2)} TL"
                                   + (f" · Malzeme {fmt(totals['material_cost'],2)} TL" if not compact else '')
                                   + (' · Sac fiyatı eksik' if unpriced else ''))
+        breakdown = f"{prefix} {fmt(totals['total'],2)} TL\nMalzeme {fmt(totals['material_cost'],2)} TL"
+        if unpriced: breakdown += '\nSac fiyatı eksik'
+        self.cost_summary.setAccessibleDescription(breakdown)
+        self.cost_summary.setToolTip(breakdown+'\n\nGirilen sac, kesim, hazırlık, sabit gider, kâr ve KDV toplamı. '
+                                     'Sıfır bırakılan fiyat ve giderler hesaba eklenmez.')
 
     def render_sheet(self):
         self.canvas.render(self.project,self.result,self.selected_sheet_key())

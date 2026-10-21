@@ -43,6 +43,7 @@ def test_real_import_nest_invalidate_and_source_preserved(window,qtbot,tmp_path)
     assert page.canvas.scene().items(); assert (tmp_path/'real.dxf').read_bytes() == data
     page.form.set_value('gap','7')
     assert page.result is None and not page.excel_button.isEnabled()
+    assert not page.cost_summary.toolTip() and not page.cost_summary.accessibleDescription()
     assert 'yeniden' in page.status_text
 
 
@@ -114,7 +115,11 @@ def test_cost_only_changes_reprice_same_coordinates_in_background(window,qtbot,t
     from nesting.accounting import calculate
     assert calculate(page.project,page.result)['setup'] == 25
     assert 'Toplam 25,00 TL' in page.cost_summary.text()
-    assert 'Malzeme 0,00 TL' in page.cost_summary.text() and 'Sac fiyatı eksik' in page.cost_summary.text()
+    # Native Windows can clamp a 1440px request to its smaller desktop. Cost
+    # details must remain available when the visible label switches to compact.
+    assert 'Malzeme 0,00 TL' in page.cost_summary.toolTip()
+    assert 'Malzeme 0,00 TL' in page.cost_summary.accessibleDescription()
+    assert 'Sac fiyatı eksik' in page.cost_summary.text()
 
 
 def test_project_open_save_and_reports_use_jobs(window,qtbot,tmp_path,monkeypatch):
@@ -245,6 +250,20 @@ def test_many_document_tabs_scroll_to_last_physical_plate_in_small_window(window
     assert page.sheet_tabs.rect().contains(page.sheet_tabs.tabRect(19).center())
     assert page.canvas.key==(sheet.id,20) and '20/20 plaka' in page.current_note.text()
     assert page.sheet_tabs.width()<page.width()
+
+
+def test_canvas_fits_immediately_after_each_resize_and_preserves_manual_zoom(qtbot,qapp):
+    from gui_qt.pages.nesting_widgets import NestingCanvas
+    from PySide6.QtCore import QRectF
+    canvas=NestingCanvas(); qtbot.addWidget(canvas)
+    canvas.scene().setSceneRect(QRectF(-10,-2510,1270,2520))
+    canvas.show(); canvas.fit(); qapp.processEvents()
+    for width,height in ((640,640),(291,151),(270,90),(740,380),(190,60)):
+        canvas.resize(width,height); qapp.processEvents()
+        assert canvas.viewport().rect().contains(canvas.mapFromScene(canvas.sceneRect()).boundingRect())
+    canvas.auto_fit=False; canvas.scale(1.2,1.2); manual=canvas.transform()
+    canvas.resize(400,300); qapp.processEvents()
+    assert canvas.transform()==manual
 
 
 def test_document_tabs_keep_distinct_sheet_keys_for_different_materials_and_thicknesses(window,qtbot):
