@@ -1,0 +1,39 @@
+{
+  "checked_at": "2026-10-21T09:37:56+03:00",
+  "platform": "Linux / Qt offscreen",
+  "engine": "GOKWORKS NFP 1.2",
+  "full_suite": {
+    "passed": 921,
+    "subtests_passed": 878,
+    "skipped": 7,
+    "failed": 0,
+    "duration_seconds": 506.31
+  },
+  "final_nesting_regression": {
+    "passed": 90,
+    "failed": 0,
+    "duration_seconds": 60.696
+  },
+  "initial_targeted_nesting_and_torque": {
+    "passed": 135,
+    "failed": 0
+  },
+  "application_self_check": {
+    "status": "passed",
+    "modules": 12,
+    "themes": 2,
+    "resolutions": 4
+  },
+  "documentation": {
+    "relative_file_links": "passed",
+    "release_automation_markers": "preserved"
+  },
+  "user_dxf_files_tested": false,
+  "solidworks_live_tested": false,
+  "windows_live_tested": false,
+  "notes": [
+    "Full application regression plus module-specific validation after the final NFP refinement.",
+    "The six-part example uses synthetic detailed contours, not the DXF files in the user screenshot.",
+    "Seven OS/live-CAD-dependent checks were skipped, not reported as passing."
+  ]
+}

@@ -133,6 +133,7 @@ class Result:
     iterations: int
     timestamp: str
     stopped: bool = False
+    timed_out: bool = False
 
 
 @dataclass

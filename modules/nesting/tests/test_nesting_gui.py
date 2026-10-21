@@ -331,6 +331,24 @@ def test_incomplete_nest_disables_all_exports_before_opening_file_dialog(window,
     assert not page.result.unplaced and page.export_button.isEnabled()
 
 
+def test_partial_result_explains_timeout_cancellation_and_stock_limits(window):
+    from dataclasses import replace
+    from modules.nesting.models import Part
+    from modules.nesting.engine import nest
+    from shapely.geometry import box
+    page=window.pages['nesting']
+    page.project.parts=[Part.create('Too large',box(0,0,1500,3000))]
+    result=nest(page.project)
+    assert result.unplaced
+    page.show_result(result)
+    assert 'Sac ölçüsü/stoku' in page.status_text
+    page.show_result(replace(result,timed_out=True))
+    assert 'Hesaplama süresi doldu' in page.status_text
+    page.show_result(replace(result,stopped=True,timed_out=False))
+    assert 'İşlem durduruldu' in page.status_text
+    assert not page.export_button.isEnabled()
+
+
 def test_multiple_selected_rows_remove_correct_parts_and_failed_sources_through_sort_filter(window,qtbot):
     from modules.nesting.models import Part
     from shapely.geometry import box

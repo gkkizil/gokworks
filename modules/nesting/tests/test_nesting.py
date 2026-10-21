@@ -245,6 +245,75 @@ def test_true_shape_packs_inside_concavity_not_rectangles():
     assert a.intersection(b).area == 0
 
 
+@pytest.mark.parametrize('quantity,expected',[(6,{1:6}),(9,{1:6,2:3})])
+def test_detailed_contours_get_a_complete_baseline_before_expensive_nfp(monkeypatch,quantity,expected):
+    from modules.nesting import engine
+    # Tiny edge details make decomposition expensive, but these original
+    # contours visibly fit as rows. Never replace their geometry with boxes.
+    contour=Polygon([(0,0),(1800,0),(1800,600)]
+                    +[(1800-i*9,600-(i%2)*.4) for i in range(1,200)]+[(0,600)])
+    parts=[Part.create(f'Detailed {i}',contour) for i in range(quantity)]
+    p=project(parts,width=2000,height=4000)
+    p.sheets[0].stock=len(expected)
+    def expensive_nfp(*args,**kwargs):
+        raise engine.SearchEnded()
+    monkeypatch.setattr(engine,'convex_parts',expensive_nfp)
+    r=nest(p)
+    assert not r.unplaced and len(r.placements)==quantity
+    assert Counter(x.sheet_number for x in r.placements)==expected
+    assert all(p.part(x.part_id).polygon.equals(contour) for x in r.placements)
+    assert validate_result(p,r)
+
+
+def concave_project():
+    p=project([Part.create('C',Polygon([(0,0),(100,0),(100,20),(20,20),
+                                      (20,80),(100,80),(100,100),(0,100)])),
+               Part.create('Inside',box(0,0,50,40))],width=100,height=100)
+    p.options.margin=p.options.gap=p.options.kerf=0
+    p.options.rotation=False;p.sheets[0].stock=2
+    return p
+
+
+def test_timeout_during_nfp_optimization_preserves_the_completed_baseline(monkeypatch):
+    from types import SimpleNamespace
+    from modules.nesting import engine
+    p=concave_project();clock=[0.]
+    monkeypatch.setattr(engine,'time',SimpleNamespace(monotonic=lambda:clock[0]))
+    def expensive_nfp(geometry,checkpoint):
+        clock[0]=p.options.seconds+1
+        checkpoint()
+    monkeypatch.setattr(engine,'convex_parts',expensive_nfp)
+    r=nest(p)
+    assert len(r.placements)==2 and not r.unplaced
+    assert {x.sheet_number for x in r.placements}=={1,2}
+    assert r.timed_out and not r.stopped
+    assert validate_result(p,r)
+
+
+def test_nfp_still_improves_the_baseline_using_a_real_concavity():
+    p=concave_project();r=nest(p)
+    assert not r.unplaced and {x.sheet_number for x in r.placements}=={1}
+    assert validate_result(p,r)
+
+
+def test_old_saved_results_without_a_timeout_flag_remain_readable(tmp_path):
+    p=project();r=nest(p);path=tmp_path/'old.goknest.json'
+    save_project(p,path,r)
+    data=json.loads(path.read_text());data['result'].pop('timed_out')
+    path.write_text(json.dumps(data))
+    loaded,result=load_project(path)
+    assert not result.timed_out and validate_result(loaded,result)
+
+
+@pytest.mark.parametrize('field',('stopped','timed_out'))
+def test_saved_result_rejects_non_boolean_search_status(tmp_path,field):
+    p=project();path=tmp_path/'bad-status.goknest.json'
+    save_project(p,path,nest(p))
+    data=json.loads(path.read_text());data['result'][field]='false'
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError,match='süre bilgisi'):load_project(path)
+
+
 def test_minkowski_matches_bruteforce_convex_sum():
     a = Polygon([(0,0),(10,0),(12,7),(4,12)])
     b = Polygon([(-3,0),(1,-5),(8,0),(3,4)])

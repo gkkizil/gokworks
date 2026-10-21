@@ -60,7 +60,15 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 
 ## Hesap ve algoritma
 
-Motor adı **GOKWORKS NFP 1.1**. Gerçek kontur çarpışma alanı,
+Motor adı **GOKWORKS NFP 1.2**. Önce hızlı ve doğrulanmış bir başlangıç
+yerleşimi oluşturulur; kalan sürede NFP aramasıyla iyileştirilir. Ayrıntılı
+konturun hesabı süreyi tüketirse önceki en iyi yerleşim korunur. Kenar ve
+köşe adayları gerçek konturlar, aralıklar ve kenar paylarıyla denetlenir;
+parça geometrisi sınır dikdörtgeniyle değiştirilmez.
+
+[Boş levhaya rağmen eksik yerleşim düzeltmesi ve tekrar üretim](../../docs/nesting-contour-fill/README.md).
+
+Gerçek kontur çarpışma alanı,
 `A ⊕ (−B)` Minkowski toplamıdır. İçbükey poligonlar kısıtlı Delaunay
 üçgenlemesine ayrılır; yalnız dışbükey kalan birleşimler birleştirilir.
 Dışbükey parçaların Minkowski toplamları birleştirilerek No-Fit Polygon
@@ -73,8 +81,8 @@ izinli dönüşler ve farklı levha boyutu seçimleri denenir.
 Her fiziksel plaka, kalan uygun parçalarla doldurulduktan sonra sonraki
 plaka açılır. Ekrandaki ve rapordaki numaralar 1 → 2 → 3 olarak ilerler.
 Skor sırasıyla yerleşmeyen adet, kullanılan levha adedi, satın alınan alan
-ve yerleşimin yüksekliğidir. Hızlı/Dengeli/Yüksek en fazla 3/12/40 yerleşim
-denemesidir; zaman sınırı daha erken durdurabilir. Genetik algoritma
+ve yerleşimin yüksekliğidir. Başlangıç yerleşimine ek olarak Hızlı/Dengeli/Yüksek
+en fazla 3/12/40 iyileştirme denemesi yapar; zaman sınırı daha erken durdurabilir. Genetik algoritma
 veya kanıtlanmış matematiksel optimum olduğu iddia edilmez.
 
 Bağımsız doğrulayıcı, NFP önbelleğini kullanmadan gerçek dönüşümler,

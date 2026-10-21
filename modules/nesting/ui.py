@@ -674,7 +674,10 @@ class NestingPage(BasePage):
         self.render_sheet(); self.update_buttons()
         if result.unplaced:
             codes = sorted({self.project.part(key).code for key in result.unplaced})
-            self.set_status(f'{len(result.unplaced)} parça yerleşmedi: '+', '.join(codes)+'. Sac ölçüsü/stokunu ve süreyi kontrol edin. Üretim çıktısı kapalı.',True)
+            reason = ('İşlem durduruldu; yeniden yerleşim başlatabilirsiniz.' if result.stopped else
+                      'Hesaplama süresi doldu; süreyi artırıp yeniden deneyin.' if result.timed_out else
+                      'Sac ölçüsü/stoku, dönüş açıları ve yerleşim paylarını kontrol edin.')
+            self.set_status(f'{len(result.unplaced)} parça yerleşmedi: '+', '.join(codes)+'. '+reason+' Üretim çıktısı kapalı.',True)
         else: self.set_status(f'Yerleşim doğrulandı · {totals["part_count"]} parça · {totals["sheet_count"]} levha · {result.elapsed:.1f} sn')
 
     def update_result_text(self):

@@ -1,0 +1,22 @@
+{
+  "sample": "Six synthetic 204-vertex contours, not user DXF files",
+  "sheet_mm": [
+    2000,
+    4000
+  ],
+  "stock": 1,
+  "budget_seconds": 0.6,
+  "before": {
+    "placed": 1,
+    "unplaced": 5,
+    "elapsed_seconds": 0.74
+  },
+  "after": {
+    "placed": 6,
+    "unplaced": 0,
+    "elapsed_seconds": 0.6036585900001228,
+    "timed_out": true,
+    "verified": true
+  },
+  "platform": "Linux / Qt offscreen"
+}

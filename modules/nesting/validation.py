@@ -13,6 +13,8 @@ EPS = 1e-6
 
 def validate_result(project, result, *, complete=True, stop=None):
     project.validate()
+    if any(type(getattr(result,key)) is not bool for key in ('stopped','timed_out')):
+        raise ValueError('Yerleşim durdurma ve süre bilgisi doğru/yanlış olmalı.')
     if result.digest != project.fingerprint():
         raise ValueError('Ayarlar veya parçalar değişti. Yeniden otomatik yerleşim yapın.')
     if complete and result.unplaced:
