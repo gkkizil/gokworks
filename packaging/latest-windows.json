@@ -1,17 +1,112 @@
 {
-  "commit": "10d9a75b66122733e9d082ce691bcf10663ea60c",
+  "commit": "3c6da57cb7b970482c6d066b2a073aa0c353a25b",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39539109051",
-  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39539109051-1/GOKWORKS.exe",
-  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/39539109051/artifacts/12319631336",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39571289780",
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39571289780-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/39571289780/artifacts/12331883682",
   "setup_steps": {
     "checkout": "success",
     "python": "success",
     "dependencies": "success"
   },
-  "previous_failure_log_tail": "build\tValidate regression suite on Windows\t﻿2026-10-21T03:17:18.5517763Z ##[group]Run python -m pip install -r requirements-dev.txt *> windows-test-setup.log\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5518602Z ^[[36;1mpython -m pip install -r requirements-dev.txt *> windows-test-setup.log^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5519246Z ^[[36;1mif ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5519999Z ^[[36;1mpython packaging/run_windows_tests.py tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5520690Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5521539Z ^[[36;1mpython packaging/run_windows_tests.py tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5522404Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5522805Z ^[[36;1mpython packaging/run_windows_tests.py^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5587485Z shell: C:\\Program Files\\PowerShell\\7\\pwsh.EXE -command \". '{0}'\"\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5588051Z env:\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5588354Z   PYTHONUTF8: 1\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5588739Z   pythonLocation: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5589310Z   PKG_CONFIG_PATH: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64/lib/pkgconfig\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5589859Z   Python_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5590693Z   Python2_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5591211Z   Python3_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5591723Z   QT_QPA_PLATFORM: windows\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:18.5592064Z ##[endgroup]\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:22.2978017Z Windows pytest exit code: 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-21T03:17:36.4847001Z Windows pytest exit code: 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-21T03:27:46.1153638Z Windows pytest exit code: 1 (0x00000001)\nbuild\tValidate regression suite on Windows\t2026-10-21T03:27:46.1745554Z ##[error]Process completed with exit code 1.\n",
-  "bytes": 86164106,
-  "sha256": "f8eb384ea45cfd774913258159ad83050ec31263c7e77855e3ddf9bf596a5adc",
+  "display": {
+    "before": [
+      1024,
+      768
+    ],
+    "requested": [
+      1920,
+      1080
+    ],
+    "actual": [
+      1920,
+      1080
+    ],
+    "change_result": 0,
+    "available": [
+      [
+        640,
+        480,
+        32,
+        64
+      ],
+      [
+        800,
+        600,
+        32,
+        64
+      ],
+      [
+        1024,
+        768,
+        32,
+        64
+      ],
+      [
+        1152,
+        864,
+        32,
+        64
+      ],
+      [
+        1280,
+        720,
+        32,
+        64
+      ],
+      [
+        1280,
+        800,
+        32,
+        64
+      ],
+      [
+        1280,
+        1024,
+        32,
+        64
+      ],
+      [
+        1366,
+        768,
+        32,
+        64
+      ],
+      [
+        1440,
+        900,
+        32,
+        64
+      ],
+      [
+        1600,
+        900,
+        32,
+        64
+      ],
+      [
+        1600,
+        1200,
+        32,
+        64
+      ],
+      [
+        1680,
+        1050,
+        32,
+        64
+      ],
+      [
+        1920,
+        1080,
+        32,
+        64
+      ]
+    ]
+  },
+  "previous_failure_log_tail": "build\tValidate native Windows transfer columns\t﻿2026-10-21T08:37:37.3081956Z ##[group]Run python -m pip install -r requirements-dev.txt *> windows-test-setup.log\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3082750Z ^[[36;1mpython -m pip install -r requirements-dev.txt *> windows-test-setup.log^[[0m\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3083455Z ^[[36;1mif ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }^[[0m\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3084976Z ^[[36;1mpython packaging/run_windows_tests.py tests/test_compact_workspaces_gui.py::test_transfer_columns_keep_sources_left_results_right_and_commands_visible^[[0m\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3156493Z shell: C:\\Program Files\\PowerShell\\7\\pwsh.EXE -command \". '{0}'\"\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3156904Z env:\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3157110Z   PYTHONUTF8: 1\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3157430Z   pythonLocation: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3157967Z   PKG_CONFIG_PATH: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64/lib/pkgconfig\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3158501Z   Python_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3158984Z   Python2_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3159495Z   Python3_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3159876Z   QT_QPA_PLATFORM: windows\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:37.3160123Z ##[endgroup]\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:37:49.3076753Z Collected 4 tests; at most 32 per native process.\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:38:00.9762196Z Windows batch 1: 4 tests, exit 1 (0x00000001)\nbuild\tValidate native Windows transfer columns\t2026-10-21T08:38:01.0301553Z ##[error]Process completed with exit code 1.\n",
+  "bytes": 86174287,
+  "sha256": "98b450f58dd70f690f689f939406e95344c40c88f1357f5364f8b37fa2c4d8ea",
   "smoke": {
     "status": "passed",
     "framework": "PySide6 / Qt Widgets",
@@ -60,13 +155,13 @@
         1440
       ]
     ],
-    "startup_ms": 379.65,
-    "navigation_median_ms": 12.37,
-    "navigation_max_ms": 73.72,
-    "resize_median_ms": 11.9,
-    "resize_max_ms": 90.04,
-    "table_50000_load_ms": 60.94,
-    "table_50000_filter_ms": 85.31,
+    "startup_ms": 400.71,
+    "navigation_median_ms": 14.54,
+    "navigation_max_ms": 90.37,
+    "resize_median_ms": 20.5,
+    "resize_max_ms": 155.67,
+    "table_50000_load_ms": 63.2,
+    "table_50000_filter_ms": 91.33,
     "tk_imports": [],
     "kr_assignment_engine": "embedded Python SheetMetal parameters",
     "pdf_export_engine": "isolated COM process",
@@ -143,13 +238,13 @@
           1440
         ]
       ],
-      "startup_ms": 376.87,
-      "navigation_median_ms": 14.38,
-      "navigation_max_ms": 68.08,
-      "resize_median_ms": 11.71,
-      "resize_max_ms": 38.9,
-      "table_50000_load_ms": 60.86,
-      "table_50000_filter_ms": 89.25,
+      "startup_ms": 416.75,
+      "navigation_median_ms": 16.36,
+      "navigation_max_ms": 77.27,
+      "resize_median_ms": 17.86,
+      "resize_max_ms": 74.32,
+      "table_50000_load_ms": 64.24,
+      "table_50000_filter_ms": 90.87,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
@@ -224,13 +319,13 @@
           1440
         ]
       ],
-      "startup_ms": 406.98,
-      "navigation_median_ms": 18.22,
-      "navigation_max_ms": 54.56,
-      "resize_median_ms": 15.23,
-      "resize_max_ms": 41.14,
-      "table_50000_load_ms": 37.55,
-      "table_50000_filter_ms": 92.05,
+      "startup_ms": 420.63,
+      "navigation_median_ms": 16.38,
+      "navigation_max_ms": 119.54,
+      "resize_median_ms": 20.4,
+      "resize_max_ms": 72.82,
+      "table_50000_load_ms": 37.47,
+      "table_50000_filter_ms": 93.24,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
@@ -305,13 +400,13 @@
           1440
         ]
       ],
-      "startup_ms": 379.65,
-      "navigation_median_ms": 12.37,
-      "navigation_max_ms": 73.72,
-      "resize_median_ms": 11.9,
-      "resize_max_ms": 90.04,
-      "table_50000_load_ms": 60.94,
-      "table_50000_filter_ms": 85.31,
+      "startup_ms": 400.71,
+      "navigation_median_ms": 14.54,
+      "navigation_max_ms": 90.37,
+      "resize_median_ms": 20.5,
+      "resize_max_ms": 155.67,
+      "table_50000_load_ms": 63.2,
+      "table_50000_filter_ms": 91.33,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
@@ -344,37 +439,327 @@
       "name": "pytest",
       "errors": "0",
       "failures": "0",
-      "skipped": "6",
-      "tests": "1784",
-      "time": "410.915",
-      "timestamp": "2026-10-21T03:34:41.339712+00:00",
+      "skipped": "0",
+      "tests": "32",
+      "time": "49.253",
+      "timestamp": "2026-10-21T08:44:45.800132+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "32",
+      "time": "76.119",
+      "timestamp": "2026-10-21T08:45:35.756649+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "56.945",
+      "timestamp": "2026-10-21T08:46:52.560432+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "51.882",
+      "timestamp": "2026-10-21T08:47:50.257120+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "60.512",
+      "timestamp": "2026-10-21T08:48:42.784873+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "37",
+      "time": "36.110",
+      "timestamp": "2026-10-21T08:49:43.914517+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "121",
+      "time": "2.162",
+      "timestamp": "2026-10-21T08:50:20.953383+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.078",
+      "timestamp": "2026-10-21T08:50:23.643281+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.119",
+      "timestamp": "2026-10-21T08:50:24.020222+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "43",
+      "time": "27.945",
+      "timestamp": "2026-10-21T08:50:24.443212+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "44",
+      "time": "0.526",
+      "timestamp": "2026-10-21T08:50:52.921634+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "60",
+      "time": "0.446",
+      "timestamp": "2026-10-21T08:50:53.852572+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "141",
+      "time": "0.489",
+      "timestamp": "2026-10-21T08:50:54.670873+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "395",
+      "time": "0.927",
+      "timestamp": "2026-10-21T08:50:55.560037+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "100",
+      "time": "0.386",
+      "timestamp": "2026-10-21T08:50:56.878821+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "43",
+      "time": "16.592",
+      "timestamp": "2026-10-21T08:50:57.630753+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "59",
+      "time": "0.426",
+      "timestamp": "2026-10-21T08:51:14.878498+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "44",
+      "time": "0.408",
+      "timestamp": "2026-10-21T08:51:15.783728+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "75",
+      "time": "0.513",
+      "timestamp": "2026-10-21T08:51:16.682578+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "39",
+      "time": "0.615",
+      "timestamp": "2026-10-21T08:51:17.694376+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "37",
+      "time": "0.722",
+      "timestamp": "2026-10-21T08:51:18.887523+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "8.795",
+      "timestamp": "2026-10-21T08:51:20.202277+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "33.481",
+      "timestamp": "2026-10-21T08:51:29.419858+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "36",
+      "time": "21.648",
+      "timestamp": "2026-10-21T08:52:03.573518+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "40",
+      "time": "1.158",
+      "timestamp": "2026-10-21T08:52:25.905471+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.331",
+      "timestamp": "2026-10-21T08:52:27.435137+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "48.988",
+      "timestamp": "2026-10-21T08:52:28.144711+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "2",
+      "tests": "32",
+      "time": "11.372",
+      "timestamp": "2026-10-21T08:53:17.604342+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "97",
+      "time": "0.733",
+      "timestamp": "2026-10-21T08:53:29.659312+00:00",
+      "hostname": "runnervm0xl3a"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "16",
+      "time": "0.045",
+      "timestamp": "2026-10-21T08:53:30.847729+00:00",
       "hostname": "runnervm0xl3a"
     }
   ],
   "test_failures": [],
   "test_skips": [
     {
-      "name": "tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
-      "reason": "Unix hard-link publication path"
-    },
-    {
-      "name": "tests.test_naming_native.test_windows_powershell_compiles_real_typed_host_without_starting_solidworks",
-      "reason": "Windows PowerShell ve doğrulanmış test interop DLL’si seçilmedi."
-    },
-    {
-      "name": "tests.test_naming_native_live.test_live_typed_pack_reads_dependencies_without_saving_or_renaming_sources",
-      "reason": "Gerçek Windows/SolidWorks ve açıkça seçilmiş Pack and Go montajı yok."
-    },
-    {
       "name": "tests.test_process_watch.test_observer_cli_bypasses_gui_and_cad_on_unsupported_platform",
       "reason": "The unsupported-platform case is specific to non-Windows."
     },
     {
-      "name": "tests.test_tolerance_stack_live.test_live_read_all_sheets_is_readonly_and_revision_matches",
+      "name": "modules.dxf_dwg.tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
+      "reason": "Unix hard-link publication path"
+    },
+    {
+      "name": "modules.naming.tests.test_naming_native.test_windows_powershell_compiles_real_typed_host_without_starting_solidworks",
+      "reason": "Windows PowerShell ve doğrulanmış test interop DLL’si seçilmedi."
+    },
+    {
+      "name": "modules.naming.tests.test_naming_native_live.test_live_typed_pack_reads_dependencies_without_saving_or_renaming_sources",
+      "reason": "Gerçek Windows/SolidWorks ve açıkça seçilmiş Pack and Go montajı yok."
+    },
+    {
+      "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_read_all_sheets_is_readonly_and_revision_matches",
       "reason": "Gerçek SolidWorks/Windows ve GOKWORKS_TEST_SLDDRW seçimi yok; canlı CAD testi çalıştırılmadı."
     },
     {
-      "name": "tests.test_tolerance_stack_live.test_live_native_analysis_copy_preserves_original_and_model_references",
+      "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_native_analysis_copy_preserves_original_and_model_references",
       "reason": "Ayrı analizli kopya kaydı için açık opt-in yok."
     }
   ]
