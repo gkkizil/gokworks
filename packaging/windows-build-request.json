@@ -1,7 +1,7 @@
 {
-  "request_id": "20261021-current-main-native-batches-0836",
-  "requested_at": "2026-10-21T08:36:00+00:00",
-  "source_commit": "0265efa3859a737a365f71eb520b6c3bf00e87bb",
-  "reason": "Complete the requested current-main single EXE. Run the native transfer-column gate first with full geometry diagnostics, then all collected regressions in bounded fresh native processes with merged failure reports; do not skip tests or publish after a failed check. Retain three-scale frozen onefile smoke checks. Leave release and the backup repository untouched.",
-  "diagnose_run": "39568731029"
+  "request_id": "20261021-current-main-wide-desktop-084153",
+  "requested_at": "2026-10-21T08:41:53+00:00",
+  "source_commit": "02f008b8278c8288cf3f5d6a7dc3e88f57d64fb4",
+  "reason": "Produce the requested current-main standalone EXE. The transfer checks proved the Hyper-V desktop clamps requested 1440x900 windows to 1028x749; configure a real wide native desktop, retain the unchanged layout assertions, and run every collected regression in bounded processes. Publish only after native tests and three-scale frozen onefile checks pass. Do not update release or the backup repository.",
+  "diagnose_run": "39570576678"
 }
