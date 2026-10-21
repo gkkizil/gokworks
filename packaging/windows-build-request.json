@@ -1,7 +1,7 @@
 {
-  "request_id": "20261021-native-resize-onefile",
-  "requested_at": "2026-10-21T03:31:44+00:00",
-  "source_commit": "9aa56b55cff642a7b2e74d1996d0798409ebb374",
-  "reason": "Produce the requested single EXE after fixing native Windows resize timing and compact cost details. Run every nesting UI/PDF regression as a fast gate, retain the full native Windows suite, then validate the frozen single-file app at all DPI scales. Keep the backup repository untouched.",
-  "diagnose_run": "39537606321"
+  "request_id": "20261021-current-main-single-exe-082147",
+  "requested_at": "2026-10-21T08:21:47+00:00",
+  "source_commit": "c306c76604fd2cdc8d58127bedb41c48bbb9791b",
+  "reason": "Build the user's requested current main as a standalone GOKWORKS.exe, including verified contour-fill seeding and the compact torque K guide. Retain native Windows regression gates and frozen onefile checks at all DPI scales. Publish the direct EXE download and its actual source commit only on main; do not update release or touch the backup repository.",
+  "diagnose_run": "39552732206"
 }
