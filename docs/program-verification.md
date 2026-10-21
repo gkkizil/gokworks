@@ -99,7 +99,7 @@ Sanal ekranda CustomTkinter'ın kullanıcı font dizinine yazamaması nedeniyle 
 
 Linux ortamında SolidWorks/pywin32 COM çalıştırılamıyor. COM testlerindeki PDF/DXF/DWG çıktıları sentetiktir. Dört ek DXF örneği gerçek DXF biçiminde ezdxf ile yazılmıştır; SolidWorks açınımından üretilmemiştir. Windows dosya yayımlama kolu test nesneleriyle sınandı; gerçek Windows dosya sistemi çalıştırması değildir. DWG için yalnızca dosya boyutu/başlığı doğrulanır; tam DWG ayrıştırması ve açınım geometrisi doğrulanmış değildir.
 
-Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT` için açınım ölçüleri, kontur/büküm çizgileri, yön, kalınlık ve dosya adındaki montaj adedi Windows/SolidWorks'te kontrol edilmelidir. [Kullanım kılavuzu](../README.md#akşam-yapılacak-solidworks-kontrolü) bu kontrolleri açıklar.
+Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT` için açınım ölçüleri, kontur/büküm çizgileri, yön, kalınlık ve dosya adındaki montaj adedi Windows/SolidWorks'te kontrol edilmelidir. [Kullanım kılavuzu](local-solidworks-check.md) bu kontrolleri açıklar.
 
 ## GUI baştan sona yeniden kontrolü
 

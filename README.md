@@ -1,6 +1,24 @@
 # GOKWORKS
 
-Güncel uygulama kodunun tek çalışma dalı **[main](https://github.com/gkkizil/gokworks/tree/main)** dalıdır.
+**SolidWorks aktarımı, sac üretimi hazırlığı ve günlük mühendislik hesapları için masaüstü araçları.**
+
+GOKWORKS; teknik resimleri PDF’e aktarmayı, sac açınımlarını dışa almayı,
+montajların ürün ağacını çıkarmayı ve dosyaları yeni adlarla paketlemeyi tek
+arayüzde bir araya getirir. Tolerans, cıvata, tork ve ağırlık hesapları ile
+DXF parçalarının sac levhalara yerleştirilmesi için de araçlar sunar.
+
+Uygulama Türkçe arayüz, açık/koyu tema ve yerel dosyalarla çalışma düzenine
+sahiptir. CAD işlemleri Windows’ta açık SolidWorks oturumuyla çalışır;
+bağımsız hesaplar ve nesting için SolidWorks gerekmez.
+
+[İndirme ve kurulum](#indirme-ve-kurulum) · [Modüller](#modüller) ·
+[Kullanım](#nasıl-kullanılır) · [Kaynak kod](#kaynak-koddan-çalıştırma)
+
+![GOKWORKS PDF aktarımı ekranı](docs/transfer-columns/pdf-dark-1440.png)
+
+*Örnek verilerle PDF aktarımı: kaynak ve ayarlar solda, işlem sonuçları sağda.*
+
+## İndirme ve kurulum
 
 <!-- windows-release:start -->
 **Güncel Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39539109051-1/GOKWORKS.exe)
@@ -10,22 +28,149 @@ Güncel uygulama kodunun tek çalışma dalı **[main](https://github.com/gkkizi
 Uygulama kodu: `10d9a75` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/39539109051) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 <!-- windows-release:end -->
 
-SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; montajdaki sac parçalara kullanıcı tarafından kalınlıklarına göre girilen K faktörü/iç yarıçap değerlerini uygular. ISO delik/mil geçmelerini bağımsız bir hesap ekranında gösterir; geometrik toleransları ASME GD&T rehberiyle açıklar.
+1. Yukarıdaki bağlantıdan `GOKWORKS.exe` dosyasını indirin.
+2. Dosyayı bilgisayarınızda bir klasöre kaydedip çalıştırın.
+3. Sol menüden kullanacağınız aracı seçin. CAD işlemi yapacaksanız SolidWorks’ü
+   açın ve ilgili montajı, parçayı veya teknik resmi etkinleştirin.
 
-[14 Ekim Astra incelemesi](docs/astra-review.md): K/R kayıt sırası, açık belge koruması ve isimlendirme önizlemesi düzeltmeleri; depo temizliği ve doğrulama kapsamı.
+Hazır paketin sürüm bilgisi yukarıdaki derleme kaydındadır. `main` dalındaki
+kaynak kod, son EXE yayınından daha yeni değişiklikler içerebilir.
 
-## Proje klasörleri
+### Gereksinimler
 
-Tüm özellikler **[modules/](modules/README.md)** altında ayrı klasörlerdedir.
-Her modülün hesaplama/CAD kodu, **`ui.py` arayüzü**, **`tests/` testleri**,
-kullanım rehberi ve varsa örnekleri kendi klasöründe bulunur.
-Ortak Qt altyapısı `gui_qt/`, SolidWorks bağlantısı `solidworks/`, ayar
-yardımcıları `shared/`, logolar `assets/` altındadır.
-[Klasör ağacı ve geliştirme rehberi](docs/repository-structure.md).
+| Kullanım | Gereksinim |
+| --- | --- |
+| Hazır EXE ile çalışma | Windows 10/11, 64 bit. Python kurulumu gerekmez. |
+| CAD aktarımı ve montaj işlemleri | Kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks. |
+| Mühendislik hesapları ve DXF nesting | SolidWorks bağlantısı gerekmez. |
+| Kaynak koddan çalışma | Python 3.13 ve `requirements.txt` bağımlılıkları. |
 
-## Windows'ta çalıştırma
+Excel raporları için Microsoft Excel, DXF nesting için AutoCAD kurulumu
+gerekmez. CAD entegrasyonu mevcut SolidWorks kurulumunuzu kullanır.
 
-Python 3.13, kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks gerekir. Proje klasöründe:
+## Modüller
+
+### Aktarım ve montaj
+
+| Modül | Ne yapar? |
+| --- | --- |
+| [PDF aktarımı](modules/pdf/README.md) | Klasördeki `.SLDDRW` dosyalarını tarar; her teknik resmin tüm sayfalarını tek bir PDF’e aktarır. |
+| [DXF / DWG](modules/dxf_dwg/README.md) | Sac parçalarının açınımlarını dışa aktarır; kalınlık ve aktif montajdaki adet bilgisiyle dosyaları düzenler. |
+| [BOM · Ürün ağacı](modules/bom/README.md) | Aktif montajın parça listesini, alt montaj hiyerarşisini, adetlerini ve okunabilen ağırlıklarını çıkarır; Excel’e kaydeder. |
+| [İsimlendirme aracı](modules/naming/README.md) | Montaj, parça ve teknik resim referanslarını koruyarak yeni adlarla ayrı bir Pack and Go paketi oluşturur. |
+
+Bu dört modül için SolidWorks bağlantısı gerekir.
+
+### Mühendislik hesapları
+
+| Modül | Ne yapar? |
+| --- | --- |
+| [K faktörü / yarıçap](modules/k_factor/README.md) | Girilen kalınlık–K–R satırlarını montajdaki sac parçalarla eşleştirip SheetMetal parametrelerini günceller. Ayrı hesap yardımında BA/BD ve takım kesiti bulunur. |
+| [ISO geçme toleransları](modules/iso_fits/README.md) | Delik/mil limitlerini ve boşluk–sıkılık durumunu hesaplar. Standart sınıflar ve manuel tolerans girişi desteklenir. |
+| [Geometrik toleranslar](modules/geometric_tolerances/README.md) | GD&T özelliklerini, datum ilişkilerini ve tolerans bölgelerini açıklamalar ve şemalarla gösterir. |
+| [Tolerans yığılması](modules/tolerance_stack/README.md) | Kullanıcının kurduğu 1D ölçü zincirini Worst-Case, RSS ve Monte Carlo yöntemleriyle analiz eder. |
+| [Cıvata hesabı](modules/bolt/README.md) | Çekme, kesme ve birleşik yükler için statik dayanım, emniyet ve gerekli cıvata adedini hesaplar. |
+| [Hızlı tork hesabı](modules/bolt_torque/README.md) | M3–M36 metrik cıvatalar için kalite sınıfı, diş adımı, K katsayısı ve hedef ön yüke göre tahmini sıkma torku verir. |
+| [Ağırlık hesabı](modules/weight/README.md) | Malzeme, kesit, ölçü, boy ve adede göre ağırlık hesaplar. Malzemelerin tanımlı yoğunlukları otomatik kullanılır. |
+| [Nesting · Sac maliyeti](modules/nesting/README.md) | DXF konturlarını birden fazla levhaya yerleştirir; alan verimini, net/brüt/fire ağırlıklarını ve maliyetleri hesaplar. |
+
+K/R değerlerini CAD dosyalarına yazmak ve tolerans yığılmasında teknik resim
+okumak veya anotasyon eklemek SolidWorks gerektirir. Bu araçların bağımsız
+hesapları ve manuel tolerans analizi SolidWorks olmadan kullanılabilir.
+
+## Nasıl kullanılır?
+
+Sol menüden bir modül seçin, kaynak dosyaları veya hesap değerlerini girin ve
+ilgili işlemi başlatın. Aktarım ekranlarında kaynak/ayarlar solda, sonuçlar ve
+günlük sağdadır. Sütun genişliğini aradaki ayırıcıyı sürükleyerek değiştirebilirsiniz.
+
+Dosya sonuçları aranabilir ve durumlarına göre filtrelenebilir. Bir satıra
+çift tıklayarak ayrıntılarını açabilirsiniz. **Temizle**, listeyi, sonuçları,
+günlüğü ve filtreleri sıfırlar. **Durdur**, devam eden CAD kaydı tamamlandıktan
+sonra sonraki dosyaya geçilmesini engeller.
+
+### Teknik resimleri PDF’e aktarma
+
+1. **PDF aktarımı** ekranında kaynak klasörü ve çıktı klasörünü seçin.
+2. Alt klasörlerin taranmasını ve mevcut çıktıların üzerine yazılmasını ayarlayın.
+3. **Klasörü tara** ile bulunan teknik resimleri kontrol edin.
+4. **Aktarımı başlat** düğmesine basın; dosya durumlarını ve günlüğü izleyin.
+
+Her teknik resim için ayrı PDF oluşturulur; resmin bütün sayfaları aynı PDF’te
+yer alır. Üzerine yazma kapalıyken mevcut çıktılar atlanır.
+
+### Sac metal açınımı
+
+1. SolidWorks’te adetlerin alınacağı ana montajı ve doğru konfigürasyonu etkinleştirin.
+2. **DXF / DWG** ekranında sac parçalarının kaynak klasörünü ve çıktı klasörünü seçin.
+3. Çıktı türünü belirleyin; gerekirse büküm çizgilerini ve kalınlığa göre klasörlemeyi açın.
+4. **Klasörü tara** ile dosyaları kontrol edip **Aktarımı başlat** düğmesine basın.
+
+Örnek çıktı düzeni:
+
+```text
+Çıktı/
+├── 1,5 mm/
+│   └── BRAKET - 1.5 mm - 12 adet.dxf
+└── 2 mm/
+    └── KAPAK - 2 mm - 3 adet.dxf
+```
+
+Aktarım, parçaların aktif konfigürasyonunu kullanır; bütün konfigürasyonları
+otomatik dolaşmaz. Tek gövdeli sac parçalar desteklenir. Kaynak montajdaki
+konfigürasyon, adet ve açınım gereksinimleri için [modül kılavuzuna](docs/dxf-dwg-verification.md) bakın.
+
+### Montaj dosyalarını yeniden isimlendirme
+
+**İsimlendirme aracı** ekranında montajın bulunduğu klasörü ve yeni paketin
+kaydedileceği boş/yeni hedef klasörü seçin. **Montajları bul** ile kaynak montajı
+belirleyip **Dosyaları oku** düğmesine basın. Ön/son ek, numaralandırma veya
+bul–değiştir kurallarını girin; önizlemeyi kontrol edip **Paketi oluştur** ile
+kaydedin. Çıktı, dosya referansları kontrol edilen ayrı bir pakettir.
+
+### Sac parçalarına K/R atama
+
+**K faktörü / yarıçap → Manuel K / R** bölümünde her kalınlığın yanına K faktörünü
+ve iç yarıçapı yazın. **Montajı tara** değişiklik yapmadan eşleşmeleri gösterir.
+Sonuçları kontrol edip **Montaja K/R uygula** düğmesine basın. Sac olmayan ve
+girilen kalınlıklarla eşleşmeyen parçalar atlanır; mevcut sac kalınlığı korunur.
+Dosyaları kaydetme seçeneği başlangıçta kapalıdır. [Ayrıntılı kullanım](docs/manual-k-radius.md).
+
+### Tolerans zinciri oluşturma
+
+Teknik resim ölçülerini okuyun veya manuel ölçü girin. Sonuca eklenecek ölçüleri
+**+ Topla**, çıkarılacakları **− Çıkar** ile zincire alın. Ölçülerin aynı doğrultu
+ve ortak referansa ait olduğunu kontrol edin, kabul sınırlarını girip hesaplayın.
+Sonuçları PDF/Excel olarak alabilir veya teknik resme ayrı analiz notları
+ekleyebilirsiniz. Üretim ölçüleri otomatik değiştirilmez.
+
+### DXF parçalarını saclara yerleştirme
+
+**Nesting · Sac maliyeti** ekranında DXF dosyalarını topluca ekleyin; parça
+adetlerini, malzemelerini ve kalınlıklarını belirtin. **Sac ve ayarlar** içinde
+levha boyutunu, stok adedini, fiyatı ve yerleşim paylarını tanımlayın.
+**Yerleştir** ile hesabı başlatın. Motor, uygun parçalarla ilk plakayı doldurup
+gerektikçe sonraki plakaya geçer. **1. plaka / 2. plaka / …** sekmeleriyle
+yerleşimleri inceleyin; tamamlanan yerleşimi **Dışa aktar** menüsünden kaydedin.
+
+## Kayıtlar ve çalışma kapsamı
+
+Klasör seçimleri ve arayüz tercihleri kullanıcı profilinde saklanır.
+Tolerans ve nesting projeleri ayrıca kaydedilip yeniden açılabilir.
+Aktarım sonuçları, raporlar ve hata günlükleri bilgisayarda tutulur.
+Windows günlük klasörü: `%LOCALAPPDATA%\GOKWORKS\logs`.
+
+K/R uygulaması model parametrelerini değiştirir; kaynak teknik resme analiz
+kaydı ise ayrı bir onay gerektirir. Bu işlemlerde kayıt seçimini kontrol edin.
+Hesap sonuçları belirtilen malzeme, tolerans, yük ve dağılım varsayımlarına
+bağlıdır. Tork ve statik cıvata sonuçları ön değerlendirmedir; kritik bağlantılarda
+üretici şartnamesi esas alınır. Nesting sonucu en iyi yerleşim garantisi veya
+doğrudan makine programı değildir; kerf telafisi CAM tarafında yapılır.
+RSS/Monte Carlo sonuçları ölçülmüş üretim prosesi kabiliyeti olarak yorumlanmamalıdır.
+
+## Kaynak koddan çalıştırma
+
+Python 3.13 kurulu bir Windows bilgisayarında, proje klasöründe:
 
 ```powershell
 py -3.13 -m venv .venv
@@ -33,303 +178,33 @@ py -3.13 -m venv .venv
 .venv\Scripts\python.exe main.py
 ```
 
-Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz `PySide6==6.10.3` ve Qt Widgets kullanır. Hesaplama ve CAD motorları Python olarak korunur. Güncel Qt sürümü `main` dalındadır; önceki sürümler Git geçmişinde korunur.
+Arayüz **PySide6 / Qt Widgets** kullanır. SolidWorks bağlantısı `pywin32`
+üzerinden kurulur; Excel çıktıları `openpyxl`, DXF işlemleri `ezdxf`, yerleşim
+geometrisi `Shapely/GEOS` ile hazırlanır. Temel hesaplar yerel Python kodudur.
 
-## Nesting ve sac maliyeti
+Her özellik `modules/<modül>/` altında kendi hesap/CAD kodu, `ui.py` arayüzü,
+testleri ve rehberiyle bulunur. [Modül dizini](modules/README.md) ·
+[Depo yapısı](docs/repository-structure.md) · [Windows paketleme](packaging/README.md).
 
-**Mühendislik Hesapları → Nesting · Sac maliyeti** gerçek DXF konturlarını
-NFP tabanlı aramayla birden fazla levhaya yerleştirir. Parça adedi, malzeme,
-kalınlık, sac stoku/fiyatı, dönüş açıları ve kesim payları tanımlanabilir.
-Net/brüt/fire ağırlıkları, alan verimi ve dağıtılmış malzeme/operasyon
-maliyetleri hesaplanır. Doğrulanmış yerleşim DXF, çizimli Excel/PDF ve
-taşınabilir proje olarak kaydedilir. SolidWorks gerekmez.
-[Kullanım ve sınırlar](modules/nesting/README.md) · [Algoritma, lisanslar ve doğrulama](docs/nesting.md).
-[Toplu DXF yükleme ve 1→2→3 plaka yerleşimi düzeltmesi](docs/nesting-bulk/README.md).
-
-## BOM - Ürün ağacı
-
-**BOM - Ürün ağacı → Montajı tara**, SolidWorks'teki aktif ana montajın aktif
-konfigürasyonunu ve alt montajlarını okur. CAD dosyalarını kaydetmez veya
-parametrelerini değiştirmez. **Excel’e aktar**, Excel kurulu olmadan `.xlsx`
-oluşturur; bağımlılıklar için `pip install -r requirements.txt` çalıştırın.
-
-- **Parça listesi**: Parça adı, fiziksel toplam adet, konfigürasyon ve dosya
-  yolu. Adlar Türkçe harflerle ve doğal sayı sırasıyla sıralanır (Parça 2,
-  Parça 10). Aynı dosyanın farklı konfigürasyonları ve aynı adlı farklı
-  dosyalar ayrı satırlardır.
-- **Ürün ağacı**: Her alt montajın altında kendi parçaları bulunur.
-  `ÖRNEK-M001 → Parça A / Parça B` ilişkisi korunur; iç içe montajlar Excel'de
-  girintili ve açılır/kapanır satır gruplarıyla gösterilir. Bu sayfa fiziksel
-  örnekleri ayrı satırlarda listeler; her örneğin adedi 1'dir. Aynı alt montaj
-  iki kez kullanılmışsa iki dal da alınır, toplam parça adetleri birleşir.
-- Bastırılmış dallar hariçtir; gizli bileşenler sayılır. BOM dışı işaretli
-  dallar varsayılan olarak atlanır; **BOM dışı bileşenleri de dahil et**
-  seçeneğiyle alınabilir. Tarama yeniden yapıldığında yeni seçim uygulanır.
-- Arama yalnız ekrandaki toplu parça listesini süzer; Excel tam tarama
-  sonucunu içerir. Eksik/çözümlenmemiş bileşen, SpeedPak veya API hatasında
-  kısmi sonuç dışa aktarılmaz. Durdurma mevcut Excel dosyasını korur.
-
-Bu çıktı uygulamanın bileşen ağacıdır; SolidWorks'te eklenmiş bir BOM
-tablosunu kopyalamaz. Özel BOM miktar/birim özellikleri, satın alınmış montaj
-kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
-Örnek Excel, kaynaklar ve Windows kabul adımları [BOM kılavuzunda](docs/bom.md).
-
-## İsimlendirme aracı
-
-**Aktarım ve montaj → İsimlendirme aracı** bölümünde montajın bulunduğu **Kaynak klasörü** ve yeni montajın kaydedileceği **Hedef klasörü** seçin. Tek montaj otomatik seçilir; birden çok montaj varsa ekrandaki listeden ana montajı belirleyin. **Montajı oku** ile adları önizleyin; ön/son ek, bul–değiştir, numaralı veya dosya başına elle adlandırma kullanın. **Yeni montajı kaydet**, montajı, parçaları ve bulunan teknik resimleri seçtiğiniz boş/yeni hedef klasöre kaydeder. Kaynak proje korunur; yeni dosyaların kayıtlı referansları doğrulanmadan işlem başarılı gösterilmez. [Kullanım, kaynaklar ve sınırlar](modules/naming/README.md).
-
-## Cıvata hesabı
-
-**Mühendislik hesapları → Cıvata hesabı** altında metrik ölçü, kalite sınıfı ve yükü seçin. **Kaba diş / İnce diş** ve çapa uygun diş adımı seçilebilir. Alanlar, kapasiteler ve yaklaşık kılavuz deliği seçili adıma göre güncellenir. Çekme, kesme ve birleşik yük için cıvatanın statik dayanımı, emniyet katsayısı ve güvenli/güvensiz sonucu gösterilir. Eşit yük paylaşımına göre gerekli en az cıvata adedi ve seçili emniyet hedefine göre yük marjı hesaplanır. Birleşik yükte diğer kuvvet sabitken toplam yük sınırları da verilir. Cıvata adedi, tek/çift kesme ve dişli/dişsiz kesit desteklenir. SolidWorks bağlantısı gerekmez.
-
-Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. **kg yük / Newton (N) / kN** seçimi hem girdiyi hem gösterilen kapasiteyi dönüştürür. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md). [İncelenen GitHub projeleri](modules/bolt/README.md). [Windows EXE indirme ve derleme](packaging/README.md).
-
-## Ağırlık hesabı
-
-**Mühendislik hesapları → Ağırlık hesabı** bölümünde kesiti, malzemeyi,
-ölçüleri, boyu ve adedi seçin. Görseldeki 19 kesit türü ve 39 malzeme kaydı
-desteklenir. S235/S275/S355, DC01–DC04 DKP, galvanizli sac, C45/42CrMo4 ve
-304/316/316L dahil kaliteler gruplara ayrılır. **Kalıp Çelikleri** grubunda
-1.2311, 1.2312, 1.2344 ve 1.2379 kendilerine ait sabit yoğunluklarla sunulur.
-Yoğunluk her malzemenin yanında
-gösterilir, otomatik kullanılır ve kullanıcı tarafından değiştirilemez.
-mm/cm/m dönüşümü, adet başına kg, kg/m, toplam ağırlık, sade 2D kesit çizimi
-ve pano raporu vardır. SolidWorks gerekmez.
-
-Hadde/kutu profil gibi kesitlerin ölçülerden hesabı köşe yarıçaplarını ve
-eğimleri içermez. **Katalog alanından** seçeneğinde üretici kesit alanını
-cm² olarak girerek hesaplayabilirsiniz. [Kullanım, kaynaklar ve örnekler](modules/weight/README.md).
-
-## Arayüz ve temalar
-
-Yan menü Aktarım ve montaj ile Mühendislik hesapları olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi tüm ekranları ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
-
-- Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
-- **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** dosya listesini, sonuçları, günlüğü ve filtreleri sıfırlar; işlem sürerken kapalıdır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
-- Filtreler aktarılacak dosyaları, toplam sayaçları veya CSV raporunu değiştirmez. PDF ve DXF/DWG ekranları kendi arama/filtre durumunu korur.
-- Dosyaya çift tıklayarak veya seçili dosyada **Enter** ile tam kaynak/çıktı yollarını ve açıklamayı açın. **Ayrıntıları kopyala** bilgileri panoya kopyalar. **Escape** ayrıntı penceresini kapatır.
-- Küçük pencerede ayar alanı kaydırılabilir; sonuç listesi görünür kalır. İkonlar ve tablo yazıları ekran ölçeklemesine uyum sağlar. %125 widget ölçeklemesi test edildi; tüm Windows monitör/DPI kombinasyonları bu bulut testinin kapsamında değildir.
-
-[Güncel ekran galerisi](docs/ui-preview/README.md), [açık tema](docs/ui-preview/screenshots/iso-fits-light.png), [siyah tema](docs/ui-preview/screenshots/dxf-dwg-dark.png), [GUI tasarım/doğrulama notları](docs/gui-design.md) ve [menü akıcılığı ölçümleri](docs/menu-responsiveness.md).
-
-## Tolerans yığılması
-
-**Mühendislik Hesapları → Tolerans yığılması** altında aktif veya seçilen birden
-fazla `.SLDDRW` teknik resmindeki ölçüleri okuyun; fonksiyonel zincire +/− yönüyle
-ekleyip datum/eksen ilişkisini doğrulayın. SolidWorks olmadan manuel ölçü ve ISO
-286 delik/mil aktarımı çalışır. Worst-Case, RSS ve seed destekli Monte Carlo;
-normal/uniform/üçgensel dağılım, katkı grafiği ve varsayımsal Cp/Cpk desteklenir.
-
-Analiz JSON, PDF ve Excel olarak kaydedilir. Teknik resme yalnız ayrı analiz
-notları/analiz sayfaları eklenir. Kaynak dosyaya kayıt varsayılan değildir;
-analizli kopya ve açık onayla doğrulanmış yedekli kaynak kaydı ayrı seçeneklerdir.
-Gerçek SolidWorks kabul testleri bu Linux ortamında çalıştırılmadı.
-[Kullanım, matematik, API ve lisanslar](docs/tolerance-stack.md) ·
-[Güncel ekranlar](docs/tolerance-stack/screenshots) ·
-[Örnek analiz / PDF / Excel](modules/tolerance_stack/examples).
-
-## ISO GEÇMELERİ
-
-Nominal çapı yazın; delik/mil sınıfı veya yaygın eşleşme seçin. **1–400 mm**, 11 delik ve 18 mil sınıfı için ölçü/sapma limitleri, boşluk/sıkılık, şematik kesit ve doğrusal tolerans bölgeleri gösterilir. Üç örnek ölçü, mm/µm, arama, CSV ve pano desteklenir. **Manuel kontrol** menüsünde kendi delik/mil alt ve üst sapmalarınızı girin: boşluk/sıkılık ve ISO tablosunda tam/en yakın eşleşme hesaplanır. **Montaj hedefi** menüsü bütün limitlerde kayar, ara veya sıkı geçmeye uygunluğu açıklar; en yakın ISO çift ve yaygın geçme ayrıca gösterilir. SolidWorks bağlantısı gerektirmez.
-
-Ø50 H8/f7: **0,025–0,089 mm boşluk**. H7/h6 minimum sıfır boşlukla boşluklu; H7/k6 ara; H7/p6 sıkı geçmedir. Tür çapa göre hesaplanır. ISO 286-1/-2:2010 standart temeli, GitHub tablolarının karşılaştırması, resmî metne erişim sınırı ve elle kontrol [ISO kılavuzundadır](docs/iso-fits.md). [Açık](docs/reports/fit-compatibility/screenshots/iso-light.png) / [koyu](docs/reports/fit-compatibility/screenshots/iso-dark.png) gerçek ekranlar. [Manuel tolerans ekranı](docs/reports/fit-compatibility/screenshots/iso-manual-dark.png).
-
-## Hızlı Cıvata Tork Hesabı
-
-**Mühendislik Hesapları → Hızlı tork hesabı**: M3–M36 normal/ince diş, 4.8–12.9 sınıfları, kuru/yağlı koşul, elle değiştirilen K ve varsayılan %70 ön yük oranıyla hızlı tahmin. **Tahmini Sıkma Torku** N·m, ön yük kN gösterilir; sonuç tek tuşla kopyalanır. K=0,20/0,15 yaklaşık varsayımlardır; kritik bağlantılarda üretici şartnamesi esas alınır. [Hesap, ISO dayanım temeli ve kullanım](docs/bolt-torque.md).
-
-## K faktörü / yarıçap
-
-K/R ataması GOKWORKS içindeki **K faktörü / yarıçap → Manuel K / R** menüsünde
-çalışır. Ana uygulama kendi parametre düzenleyicisini kullanır; ayrı bir K/R
-programı, C# yardımcı EXE veya .NET kurulumu gerekmez.
-
-K/R ekranı **Manuel K / R** sekmesiyle açılır; ayrıca **Hesap yardımı** ve **Montaj sonuçları** sekmeleri bulunur. Form ve sonuç listesi çalışma alanının tamamını kullanır; tarama, hesap ve dosya kayıt seçeneği kaydırma dışında kalır. Tarama veya uygulama başlayınca sonuç sekmesi açılır.
-
-**Manuel K / R** sekmesinde her sac kalınlığının yanına K ve R değerlerini girin; **Satır ekle** ile başka kalınlıklar tanımlayın. Örneğin `1,5 mm → K=0,274, R=1,5 mm` ve `2 mm → K=0,30, R=2 mm` aynı işlemde uygulanır. Aktif montaj ve alt montajlardaki gerçek sac kalınlığı okunarak ilgili satır seçilir; **Sac-Levha → Büküm yarıçapı** ve **Büküm izni → K-Faktörü** güncellenir. Sac olmayan ve girilen kalınlıklara uymayan parçalar atlanır. Katıdan dönüştürülen saclar da etkin dönüşüm ve sac unsurlarından bulunur. [Manuel atama kılavuzu](docs/manual-k-radius.md).
-
-**Hesap yardımı**, malzeme ve takım verileriyle BA/BD hesabı veya üretim ölçümleriyle K kalibrasyonu için kullanılır. Bu hesapların sonucu SolidWorks atamasına gönderilmez; tarama ve uygulama her zaman manuel alanlara girilmiş K/R değerlerini kullanır.
-
-Hesap yardımındaki [canlı abkant takım kesiti](docs/kr-tooling/README.md), düz / kaz boynu üst bıçak ve tek / çift V kalıp seçimlerini gösterir. Uç R, V açıklığı, takım açıları, sac kalınlığı ve büküm açısı çizim üzerinde güncellenir. Sacın iç R'si uç R'den ayrı gösterilir; gövdeler şematik ve ölçeksizdir. Geniş pencerede form ile çizim yan yana, dar pencerede tek sütunda kalır.
-
-**Montajı tara** değişiklik yapmadan önizleme üretir. **Montaja K/R uygula**, aktif montajın alt montajları dahil her dosya/referans konfigürasyonuna bir kez uygular. Girdiğiniz K ve R aynen yazılır, mevcut kalınlık korunur. Varsayılan bellekte değişikliktir; dosya kaydı ayrıca seçilir.
-
-Tarama sürerken sıraya alınan K/R uygulaması, kontroldeki montajı, ana konfigürasyonu ve dosya/konfigürasyon adetlerini yeniden karşılaştırır. Bunlar değişmişse hiçbir parçaya yazmadan durur ve yeniden tarama ister.
-
-Hesap yardımındaki genel tablo ve yaklaşık R hesabı havada büküm önerisidir. Manuel atama bu tahminleri ve `GetUseGaugeTable` sorgusunu kullanmaz. K, `GetCustomBendAllowance / SetCustomBendAllowance`; R, doğrudan `ISheetMetalFeatureData.BendRadius` ile yazılır. Alt büküm ayarları korunur. Başarı için yeniden oluşturma sonrası ana K/R geri okuması gerekir. [Algoritma, elle hesap örnekleri ve SolidWorks sınırları](docs/k-factor-radius.md).
-
-## Geometrik toleranslar / GD&T
-
-**GEOMETRİK TOL.** sekmesinde 12 güncel ASME özelliği ve iki kaldırılmış sembol için eğitim kartları; vektör semboller ve bölge şemaları, datum ilişkisi, ölçüm yöntemi ve üretim notları gösterilir. Türkçe/İngilizce arama, açık/koyu tema, örnek datum sırası, CSV/pano ve ASME Y14.5-2018 okuma rehberi vardır. Tasarımcı **toplam t** değerini girer; boyut veya f/m/c/v sınıfından geometrik değer üretilmez.
-
-Silindiriklik **t=0,3 mm**, iki eş eksenli silindir arasındaki toplam radyal mesafedir; ±0,3 mm değildir. Konum **Ø0,3 mm** için radyal pay 0,15 mm'dir. İsteğe bağlı ölçülmüş toplam hata, hata ≤ t aritmetiğiyle karşılaştırılır; tek çap ölçüsü, CMM analizi veya belirsizlikli kalite kabulü veya tam ASME model/resim kontrolü değildir. Normal yüzey formunda ilgili boyut toleransı girilirse t < boyut toleransı koşulu kontrol edilir (8.4). CAD modeline tolerans yazılmaz.
-
-[Kullanım, ASME belge bölümleri ve FreeCAD-GDT karşılaştırması](docs/geometric-tolerances.md). Gerçek ekranlar: [koyu](docs/reports/black-theme/screenshots/geometric_tolerances-black.png), [açık](docs/reports/geometric-tolerances/screenshots/gdt-light.png), [konum / A-B-C](docs/reports/geometric-tolerances/screenshots/gdt-position-dark.png).
-
-## Sac metal açınımı
-
-1. SolidWorks'te adetlerin hesaplanacağı **ana montajı aktif yapın** ve doğru montaj konfigürasyonunu seçin. Kullanacağınız parçanın sac metal/açınım unsurlarını kontrol edin.
-2. Uygulamada **DXF / DWG** ekranına geçin.
-3. Kaynak klasörü yazın veya **Gözat** ile bu klasördeki bir `.SLDPRT` dosyasını seçin. Seçim, klasörü belirler; aktarım klasördeki tüm parçalara uygulanır.
-4. Çıktı klasörünü seçin. **Sac kalınlığına göre klasörle** seçeneği başlangıçta açıktır:
-   çıktılar `1,5 mm`, `2 mm` gibi alt klasörlere ayrılır. **Alt klasörleri tara**
-   açıksa kaynak alt klasör yapısı, kalınlık klasörünün içinde korunur. Kalınlığa
-   göre klasörlemeyi kapatırsanız dosyalar doğrudan seçilen çıktı yapısına yazılır.
-5. **DXF** veya **DWG** seçin; yalnız seçtiğiniz biçim kaydedilir. Eski **DXF + DWG** tercihi DXF'e dönüştürülür. Varsayılan çıktı DXF'tir; büküm çizgileri varsayılan olarak kapalıdır. İstenirse **Büküm çizgilerini ekle** seçeneğini açın.
-6. **Klasörü tara** ile listeyi kontrol edin ve **Açınım aktarımını başlat** düğmesine basın.
-7. Dosya bazındaki sonuçları ve **Günlük** sekmesini inceleyin. **Rapor kaydet**, Türkçe karakterleri destekleyen CSV raporu üretir.
-
-Sol menüdeki **PDF** ve **DXF / DWG** sekmeleri bağımsızdır. Uygulama açıkken sekmeler arasında geçiş yaptığınızda dosya listesi, aktarım sonuçları, günlük ve rapor durumu korunur. Klasörler ve aktarım seçenekleri her ekran için ayrı kaydedilir.
-
-PDF aktarımı ayrı bir yardımcı süreçte çalışır. Aktarım süreci beklenmedik şekilde
-kapanırsa ana pencere açık kalır; tamamlanan PDF'ler ve mevcut dosyalar korunur.
-**Durdur**, devam eden SolidWorks kaydını tamamlayıp sonraki çizime geçmeden durur.
-Hata aşaması ve tanılama kaydı yolu **Günlük** sekmesinde gösterilir. Windows
-kayıtları `%LOCALAPPDATA%\GOKWORKS\logs` klasöründedir.
-[PDF aktarımı ve çökme tanılaması](modules/pdf/README.md).
-
-Çıktı adı **PARÇAADI - Sac kalınlığı - Montajdaki toplam adet** biçimindedir. Örneğin `BRAKET - 2 mm - 12 adet.dxf` veya `BRAKET - 1.25 mm - 12 adet.dwg`. Kalınlık, aktif sac metal unsurundan okunur ve SolidWorks'ün metre biriminden milimetreye çevrilir; dosya adına tam sayı veya gerekli ondalık basamaklarla yazılır.
-
-Kalınlığa göre klasörleme örneği: `Çıktı/1,5 mm/BRAKET - 1.5 mm - 12 adet.dxf`.
-Ayar kaydedilir; DXF ve DWG için geçerlidir. Sonuç listesi ve CSV raporu gerçek
-alt klasör yolunu gösterir. [Klasörleme ayrıntıları](modules/dxf_dwg/README.md).
-
-Adetler aktarım başlamadan önce **aktif montajın aktif konfigürasyonundan, alt montajlar dahil** hesaplanır. Aynı alt montaj birden fazla kullanılmışsa her kullanımındaki parçalar sayılır. Aynı dosya ve referans konfigürasyonu birlikte değerlendirilir; farklı geometrilere ait konfigürasyonlar birleştirilmez. Bastırılmış bileşenler sayılmaz; gizli veya malzeme listesinden (BOM) çıkarılmış bileşenler fiziksel adet hesabına dahildir. Kaynak klasördeki montaj dışı parçalar atlanır.
-
-Hafif bileşenler adet hesabı öncesinde çözümlenir. Çözümlenmemiş/yüklenmemiş bileşen, SpeedPak ana montaj veya SpeedPak alt montaj varsa eksik adetle dosya oluşturulmaz; açık hata gösterilir. Kalınlık veya uygun konfigürasyon adedi okunamazsa tahmini değer kullanılmaz.
-
-Sayaçlar parçaları sayar. Sonuç ve CSV çıktı yolunda yalnız kaydedilmiş veya mevcut olduğu için atlanmış dosyalar gösterilir. Dosya doğrulanıp kaydedildikten sonraki geçici dosya/COM bağlantısı temizleme sorunları uyarı olarak gösterilir; başarılı aktarımı hata sonucuna dönüştürmez. SolidWorks aktarım hatası ve geçersiz çıktı dosyası hata olarak kalır.
-
-Mevcut çıktılar varsayılan olarak atlanır. **Mevcut çıktıların üzerine yaz** seçilirse yalnızca yeni çıktı doğrulandıktan sonra eski dosya değiştirilir. ASCII ve ikili DXF, `ezdxf==1.4.3` ile okunup denetlenir: dosya sonu eksik, okunamayan, yapısal hata/onarım gerektiren veya model alanı boş dosyalar reddedilir. DXF doğrulaması için `requirements.txt` bağımlılıklarının güncel kurulması gerekir. DWG'de boyut ve dosya başlığı kontrol edilir; tam DWG içeriği ayrıştırılmaz. Bu kontroller açınım ölçülerinin veya yönünün doğru olduğunu kanıtlamaz.
-
-DXF/DWG sonuç satırları, okunabilen sac kalınlığı ve montaj adedini açıklamanın başında gösterir. Boş liste, klasör seçme ve tarama adımlarını gösterir; tarama sonrasında bu yönlendirme gizlenir. Hedef dosya yolu bir klasörse aktarım hata olarak raporlanır.
-
-Bir parça montajda birden fazla konfigürasyonla kullanılıyorsa, etkin konfigürasyon dışındakiler adları ve adetleriyle sonuç açıklamasında ve CSV raporunda belirtilir. Bitiş özetinde de uyarı gösterilir. Bu uyarı diğer konfigürasyonların otomatik aktarıldığı anlamına gelmez. Farklı konfigürasyonları ayrı çıktı klasörlerine aktarın; aynı kalınlık ve adette dosya adları aynı olabilir.
-
-**Durdur**, işlenen parça ve seçili çıktı biçimi tamamlandıktan sonra sonraki parçaya geçişi engeller. SolidWorks'ün devam eden COM çağrısı zorla kesilmez. Çalışma sırasında ekran ve seçenek değişiklikleri kilitlenir.
-
-### Desteklenen parçalar ve sınırlar
-
-- Yalnızca `.SLDPRT` dosyalarının **aktif konfigürasyonu** aktarılır. Açık parçada mevcut oturumun konfigürasyonu ve bellekteki hali; kapalı parçada SolidWorks'ün dosyayı açtığında etkinleştirdiği konfigürasyon kullanılır. Bu konfigürasyon aktif montajda referans alınmıyorsa parça hata olarak raporlanır; montajdaki konfigürasyonu parçada aktif yapıp ana montaja dönün ve yeniden aktarın. Konfigürasyon adı sonuç açıklamasına yazılır. Tüm konfigürasyonları dolaşmaz.
-- Aktif konfigürasyonda **bir katı gövde** olmalı ve bu gövde sac metal olmalıdır. Çok gövdeli veya sac metal olmayan parçalar açık hata ile raporlanır. Çok gövdeli parçalar için gövdeleri ayrı `.SLDPRT` dosyalarına ayırın. Montajdan parça çıkarma kapsam dışındadır.
-- Kaynak parçalarda kaydetme, konfigürasyon değiştirme veya unsur bastırma işlemi çağrılmaz. Uygulamanın açtığı belgeler kapatılır; önceden açık belgeler açık tutulur. Önceki aktif belgeye dönülür. SolidWorks'ün kendi açma/aktarma işlemleri belge durumunu etkileyebileceğinden ilk denemeyi bir kopyada yapın.
-- SolidWorks `IPartDoc.ExportToDWG2` sac metal aktarımı kullanılır. Varsayılan yönlendirme ve oturumun çıktı ayarları kullanılır; koordinat yönü, sürüm ve ölçü birimleri için ilk örneği hedef CAD/CAM yazılımında doğrulayın.
-- Teknik resimler PDF ekranında `.SLDDRW` olarak işlenir. DXF/DWG ekranı teknik resim sayfalarını aktarmak için değildir.
-
-## Akşam yapılacak SolidWorks kontrolü
-
-Linux'taki otomatik testler gerçek SolidWorks üretimini doğrulayamaz. Windows'ta:
-
-1. Bilinen ölçülerde, tek gövdeli bir sac parçanın kopyasını montaja ekleyin ve ana montajı aktif yapın. Önce DXF, ardından DWG seçerek ayrı çalıştırmalarda üretin; her çalıştırmada yalnız seçilen uzantının oluştuğunu kontrol edin. Çıktıları CAD/CAM programında açıp açınım ölçülerini ve yönünü SolidWorks açınımıyla karşılaştırın.
-2. Büküm çizgileri kapalı ve açık iki ayrı klasöre aktarın. İkinci çıktıda çizgilerin eklendiğini doğrulayın.
-3. Aynı hedefe tekrar aktarın: mevcut dosyalar atlanmalı. Üzerine yaz seçeneğiyle yeniden aktarımı ayrıca kontrol edin.
-4. Alt klasörlerde aynı isimli iki parça kullanın; ayrı çıktı yolları oluşmalı.
-5. Sac olmayan/çok gövdeli bir parça ile hatanın raporda göründüğünü ve diğer parçaların işlenmeye devam ettiğini kontrol edin.
-6. Önceden açık bir parçanın işlem sonunda açık kaldığını; uygulamanın açtığı parçanın kapandığını kontrol edin.
-7. Birden fazla parçayla **Durdur** düğmesini deneyin ve CSV raporunu açın. PDF ekranının çalışmasını da kontrol edin.
-8. Ana montajda parçayı bir kez ve iki kez kullanılan alt montajda ikişer kez yerleştirin: dosya adında toplam **5 adet** bulunmalı. Bir alt montajı bastırınca toplam **3 adet** olmalı. Farklı sac kalınlıklarını (örneğin 1.25 mm ve 2 mm) ve farklı referans konfigürasyonlarının ayrı sayıldığını kontrol edin.
-9. PDF ekranında en az iki sayfalı bir `.SLDDRW` kullanın. PDF'in sayfa sayısını ve her sayfanın çizim içeriğini kontrol edin. Çizim açık fakat aktif değilken de aktarımı deneyin; işlem sonunda önceki belge aktif olmalı. Önceden açık çizim açık kalmalı, uygulamanın açtığı çizim kapanmalı.
-
-## Otomatik testler
-
-[Klasör düzenlemesi sonrası tam regresyon](docs/repository-structure.md#doğrulama):
-911 test ve 878 alt senaryo geçti; Windows/canlı SolidWorks gerektiren 7 test
-atlandı. `python -m pytest`, ortak `tests/` ile bütün `modules/*/tests/`
-klasörlerini birlikte çalıştırır.
-
-[20 Ekim 2026 genel uygulama testi](docs/validation-2026-10-20/README.md):
-güncel PySide6 ekranları, hesap motorları, dosya işlemleri, DPI/kararlılık
-kontrolleri, PDF hata kurtarma denemeleri ve açık bulgular. Gerçek Windows /
-SolidWorks işlemleri ayrıca belirtilir.
-
-Test bağımlılıklarını kurup Qt ve motor regresyonlarını birlikte çalıştırın:
+Geliştirme testleri:
 
 ```powershell
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe -m pytest
 ```
 
-Linux bulut ortamındaki sanal ekranla:
+Linux’ta hesap ve arayüz testleri ekran olmadan `QT_QPA_PLATFORM=offscreen`
+ile çalıştırılabilir. SolidWorks COM entegrasyonu Windows ortamı gerektirir.
+[Test ve geliştirme kayıtları](docs/development-history.md) ayrı tutulur;
+gerçek SolidWorks gerektiren kontrollerin kapsamı ilgili raporlarda belirtilir.
 
-```bash
-DISPLAY=:99 APPDATA=/workspace/.cloud-setup/user XDG_CACHE_HOME=/workspace/.cache \
-  python -m pytest -q
-```
+## Belgeler ve kaynaklar
 
-Qt migrasyonunda Linux üzerinde **520 test ve 878 alt senaryo geçti**: 410
-mevcut motor/ayar regresyonu ve 110 Qt arayüz senaryosu. Dosya koruma,
-konfigürasyon, geri alma, iptal, menü geçişleri, gerçek Qt modelleri, 50 bin
-satır, birim dönüşümleri ve teknik şemalar kontrol edilir. SolidWorks sınırı
-test nesneleriyle sınanır; gerçek SolidWorks doğrulaması olarak sunulmaz.
-Linux’ta Qt testleri `QT_QPA_PLATFORM=offscreen` ile ekran olmadan çalışır.
+- [Modüllerin kullanım rehberleri](modules/README.md)
+- [Tolerans yığılması: yöntemler ve kullanım](docs/tolerance-stack.md)
+- [Nesting: hesaplar ve sınırlar](docs/nesting.md)
+- [Kaynak ve telif envanteri](sources/README.md)
+- [Üçüncü taraf lisans bildirimleri](docs/THIRD_PARTY_NOTICES.md)
 
-[Güncel migrasyon raporu](docs/QT_MIGRATION_REPORT.md),
-[test envanteri ve sonuçlar](docs/qt-migration/validation.json). Önceki Tk
-testleri `tests/legacy_tk` altında değişmeden saklanır; Qt sonucu olarak sayılmaz.
-
-## Önceki Tk sürümlerinin GUI ve Word raporları (tarihsel)
-
-K/R öncesi GUI denetiminde 140 testin tamamı geçti; 34'ü gerçek Tk GUI testidir. Ek kabul testleri gerçek düğme komutlarını, Ctrl+F/çift tıklama/Enter/Escape olaylarını, diyalog iptallerini, filtreli CSV raporunu ve 12 yerleşim alt senaryosunu kapsar. İlk yerleşim açıkça zamanlanarak açılışın Configure olayına bağımlılığı giderildi.
-
-[Word raporu](docs/reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx), [test kanıtları](docs/reports/README.md) ve [test bazlı JSON](docs/reports/gui-verification-results.json). Gerçek Windows/SolidWorks üretimi bu Linux denetiminin kapsamı dışındadır.
-
-K/R eklenmesi sonrası üç ekranın açık/koyu görüntüleri ve elle hesap kontrolünü içeren [174 testlik sürümün Word raporu](docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx). Önceki 140 testlik GUI raporu tarihsel kayıt olarak korunur.
-
-Manuel K/R eklenmesi sonrası [manuel eklemedeki 189 testlik kontrol](docs/reports/manual-k-radius/README.md) ve [manuel sekmenin görüntüsü](docs/screenshots/gui-manual-k-radius-light.png).
-
-ISO eklemesi öncesindeki GitHub kaynak karşılaştırması, 112 yerleşim senaryosu, 144 menü seçimi ve güncel sekiz ekran görüntüsü: [199 testlik son kontrol](docs/reports/final-audit/README.md). [199 testlik Word raporu](docs/reports/final-audit/GOKWORKS_Son_Kontrol_2026-10-09.docx).
-
-ISO eklemesinden sonra **216 test / 58 GUI testi** geçti; 3217 sayısal kaynak karşılaştırması yapıldı. [ISO doğrulama raporu](docs/reports/iso-fits/README.md) ve [güncel Word raporu](docs/reports/iso-fits/GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx).
-
-Manuel ISO eklemesinden sonra **230 test / 64 GUI testi** geçti. Delik 50 +0,02/0 ve mil 50 0/−0,02 için 0–0,04 mm boşluk; kayar geçme adayı/sınırda temas sonucu verir. [Güncel manuel ISO raporu](docs/reports/manual-iso/README.md).
-
-Montaj uyumu eklemesinden sonra **240 test / 68 GUI testi** geçti. Mil 50 ±0,1; delik 50 +0/−0,05 mm örneği −0,15…+0,10 mm ara geçme verir. [Güncel uyumluluk ekranı](docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [Word/test raporu](docs/reports/fit-compatibility/README.md).
-
-Geometrik tolerans eklemesinden sonra **261 test / 79 GUI testi** geçti. [Son Word raporu ve yedi gerçek ekran](docs/reports/geometric-tolerances/README.md). Önceki raporlar tarihsel kayıt olarak korunur.
-
-GD&T ölçü denetiminden sonra **270 test / 84 GUI testi** geçti. Açısallık 45° yönü, normal tolerans oku, konum çap oku, normal profil ofsetleri, ASME mm çerçeve yazımı ve uzun sayı görünümü düzeltildi. Özelliğe göre ölçüm açıklaması ve merkezlenmiş profil ±t/2 payı eklendi. [Word raporu ve gerçek ekranlar](docs/reports/gdt-dimension-audit/README.md).
-
-## K/R, ISO ve çalışma alanları — 10.10.2026
-
-PDF, DXF/DWG ve K/R formları solda; sonuçlar sağda tam yüksekliği kullanır. ISO ve GD&T bağımsız hesap/şema alanlarını korur. ISO örneklerinde **Tümü / Delik esaslı / Mil esaslı** filtresi vardır; H6/k6, H8/k6 ve JS7/h6, K7/h6, N7/h6, P7/h6 gibi farklı delik örnekleri seçilebilir. Geçme türü seçilen çaptaki limitlerden hesaplanır. Manuel girişte tam sınıf, yakın referans ve eşit uzaklıklar ayrılır.
-
-K/R COM nesnesi okuma ve aktif büküm payı alanına yazma düzeltildi; hata metinleri artık aşama ve API üyesini içerir. [Güncel ekranlar, Word raporu ve test kanıtları](docs/reports/kr-workspace-fix/README.md). Gerçek SolidWorks 2025 kabul kontrolü [yerel kılavuzdadır](docs/local-solidworks-check.md); bu Linux ortamında gerçek CAD ataması çalıştırılmadı.
-
-## Linux bulut ortamında Qt
-
-Python 3.13/PySide6 ortamı `/workspace/.cloud-setup/qt-venv` konumundadır.
-Başsız açılış kontrolü:
-
-```bash
-cd /workspace/gokworks
-QT_QPA_PLATFORM=offscreen XDG_CACHE_HOME=/workspace/.cloud-setup/cache \
-/workspace/.cloud-setup/qt-venv/bin/python main.py --self-check /tmp/qt-smoke.json
-```
-
-Ekran görüntüleri için Xvfb çalışırken `DISPLAY=:99` kullanın ve
-`QT_QPA_PLATFORM` seçeneğini kaldırın. Kayıtlı bulut kurulum/başlangıç talimatları
-Qt ortamına güncellendi. Yayımlama işlemi çalışan Xvfb süreçlerini taşımaz.
-
-## Qt uygulaması
-
-On iki çalışma alanı tek Qt ana penceresinde korunur. Menü geçişleri ekranları
-yeniden oluşturmaz. Uzun CAD ve dosya işlemleri QThread üzerinde çalışır;
-işlem sırasında diğer menüler kullanılabilir. Aynı anda bir CAD/dosya işi çalışır.
-
-- Başlatma: `python main.py` veya `python -m gui_qt`
-- Bağımlılıklar: `python -m pip install -r requirements-dev.txt`
-- Regresyonlar: `python -m pytest -q` (Linux başsız: `QT_QPA_PLATFORM=offscreen`)
-- Paket açılış kontrolü: `python main.py --self-check qt-smoke.json`
-- Windows derleme: `python packaging/build_windows.py` (Windows/Python 3.13 x64)
-
-Güncel tek dosya dağıtımında yalnız **GOKWORKS.exe** taşınır ve çalıştırılır.
-Yanında `_internal` veya Python kurulumu gerekmez. Kaynaklar açılışta geçici
-klasöre açılır; ayarlar kullanıcı profilinde korunur. Lisanslar uygulamadaki
-**Lisanslar** düğmesinden okunabilir ve kaydedilebilir.
-
-Eski JSON ayarları yerinde korunur; Qt pencere ayarları aynı konumda ayrı
-`settings.qt.ini` dosyasında tutulur. K/R kayıt seçimi her açılışta kapalıdır.
-
-[Migrasyon raporu](docs/QT_MIGRATION_REPORT.md) ·
-[Lisanslar](docs/THIRD_PARTY_NOTICES.md) ·
-[Test envanteri](docs/qt-migration/inventory.json)
+Kullanılan kütüphanelerin lisans metinleri uygulamadaki **Lisanslar** bölümünden
+görüntülenebilir ve kaydedilebilir.
