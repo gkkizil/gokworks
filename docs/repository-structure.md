@@ -1,8 +1,10 @@
 # Depo düzeni
 
-Güncel kaynak için tek ana dal `main` kullanılır. Yedek depo bu düzenlemenin
-parçası değildir. Klasör taşıma dosya geçmişini korur; hesaplama ve CAD
-algoritmaları yeniden yazılmaz.
+Güncel kaynak geliştirmesi `main` dalında yapılır. Paylaşım için `release`
+dalı kullanılır; `main` güncellemeleri yalnız açık yayın isteğiyle bu dala
+aktarılır. [Yayın düzeni](releases.md). Yedek depo bu düzenlemenin parçası
+değildir. Klasör taşıma dosya geçmişini korur; hesaplama ve CAD algoritmaları
+yeniden yazılmaz.
 
 ```text
 gokworks/

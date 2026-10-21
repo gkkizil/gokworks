@@ -9,13 +9,21 @@ EXE yalnız kullanıcı istediğinde, **Run workflow** ile ilgili kaynak dalda o
 API erişimi olmayan ortamlarda `packaging/windows-build-request.json` dosyasına
 benzersiz bir istek kimliği yazılıp çalışma dalına gönderilebilir. İş akışı yalnız
 bu istek dosyasının değişiminde çalışır; normal kod güncellemeleri EXE oluşturmaz.
-İstek dosyası ayrıca bir dal açmayı gerektirmez.
+İstek dosyası ayrıca bir dal açmayı gerektirmez. Bu yol `main` ve `release`
+dallarında desteklenir.
+
+Geliştirme dalı `main`, paylaşım dalı `release` olarak ayrılmıştır.
+`release` yalnız kullanıcının açık yayın isteğiyle güncellenir; otomatik
+birleştirme veya senkronizasyon yoktur. `main` üzerinde alınan bir EXE,
+`release` dalındaki kodu veya indirme bağlantısını değiştirmez.
+[Yayın ve güncelleme adımları](../docs/releases.md).
 
 [Windows derlemeleri](https://github.com/gkkizil/gokworks/actions/workflows/windows-exe.yml)
 sayfasında başarılı çalışmanın **Artifacts → GOKWORKS-Tek-EXE-Windows-x64-…**
 paketi yalnız `GOKWORKS.exe` içerir. Ayrıca GitHub ön sürümünde doğrudan `.exe`
 indirme bağlantısı yayımlanır. EXE tek başına başka klasöre/PC'ye taşınabilir.
-GitHub oturumu gerekebilir; paket 30 gün tutulur.
+Actions paketi için GitHub oturumu gerekebilir ve paket 30 gün tutulur.
+Herkese açık depodaki Releases EXE bağlantısı oturum açmadan indirilebilir.
 
 Her paket gerçek Windows ortamında açılır: mevcut çalışma alanları, kg/Newton
 dönüşümü, örnek cıvata hesabı, DXF/XLSX yazma ve pywin32 importları kontrol edilir.
@@ -40,8 +48,9 @@ Testler, belgeler, ekran görüntüleri ve geçmiş raporlar EXE'ye eklenmez.
 Son başarılı paketin bağlantısı ana [README](../README.md) dosyasında bulunur.
 [Paket bilgisi](latest-windows.json) ve [son derleme durumu](windows-build-status.json)
 aynı kaynak dalda tutulur. Başarısız bir derleme, önceki başarılı indirme
-bağlantısını değiştirmez. Büyük EXE dosyaları Actions paketinde kalır.
-Yeni derleme için ayrıca dal oluşturulmaz; yedek depoya işlem yapılmaz.
+bağlantısını değiştirmez. Büyük EXE dosyaları Git geçmişine eklenmez;
+Releases ve Actions çıktıları olarak saklanır. Yeni derleme için ayrıca dal
+oluşturulmaz; yedek depoya işlem yapılmaz.
 
 Yerel Windows derlemesi, depo kökünden:
 

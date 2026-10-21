@@ -24,7 +24,7 @@ def release_block(report):
                     'ZIP dosyasının tamamını çıkartıp **GOKWORKS/GOKWORKS.exe** dosyasını açın. '
                     '`_internal` klasörü EXE yanında kalmalıdır. ')
     return (f'{RELEASE_START}\n'
-            f'**Güncel Windows EXE:** [GOKWORKS{(".exe" if single else " paketini")} indir]({report["download_url"]})\n\n'
+            f'**Son başarılı Windows EXE:** [GOKWORKS{(".exe" if single else " paketini")} indir]({report["download_url"]})\n\n'
             +instructions+'Windows 10/11 x64; Python kurulumu gerekmez.\n\n'+
             f'Uygulama kodu: `{report.get("source_commit", report["commit"])[:7]}` · '
             f'[Derleme kaydı]({report["run_url"]}) · '

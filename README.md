@@ -20,8 +20,12 @@ bağımsız hesaplar ve nesting için SolidWorks gerekmez.
 
 ## İndirme ve kurulum
 
+**Paylaşım sayfası:** [release dalı](https://github.com/gkkizil/gokworks/tree/release).
+Hazır uygulamayı indirmek için aşağıdaki doğrudan EXE bağlantısını kullanın;
+**Code → Download ZIP** kaynak kodu indirir.
+
 <!-- windows-release:start -->
-**Güncel Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39539109051-1/GOKWORKS.exe)
+**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39539109051-1/GOKWORKS.exe)
 
 **GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
@@ -33,8 +37,9 @@ Uygulama kodu: `10d9a75` · [Derleme kaydı](https://github.com/gkkizil/gokworks
 3. Sol menüden kullanacağınız aracı seçin. CAD işlemi yapacaksanız SolidWorks’ü
    açın ve ilgili montajı, parçayı veya teknik resmi etkinleştirin.
 
-Hazır paketin sürüm bilgisi yukarıdaki derleme kaydındadır. `main` dalındaki
-kaynak kod, son EXE yayınından daha yeni değişiklikler içerebilir.
+Hazır paketin sürüm bilgisi yukarıdaki derleme kaydındadır. Bu daldaki kaynak
+kod, son EXE yayınından daha yeni değişiklikler içerebilir. EXE'nin içerdiği
+sürüm, indirme bağlantısının yanındaki **Uygulama kodu** ile belirtilir.
 
 ### Gereksinimler
 
@@ -169,6 +174,11 @@ doğrudan makine programı değildir; kerf telafisi CAM tarafında yapılır.
 RSS/Monte Carlo sonuçları ölçülmüş üretim prosesi kabiliyeti olarak yorumlanmamalıdır.
 
 ## Kaynak koddan çalıştırma
+
+Yazılım geliştirmesi **`main`** dalında yapılır. **`release`**, paylaşım için
+ayrılan yayın dalıdır; yalnız yayın sorumlusunun açık isteğiyle güncellenir.
+`main` değişiklikleri bu dala otomatik aktarılmaz.
+[Yayın ve güncelleme düzeni](docs/releases.md).
 
 Python 3.13 kurulu bir Windows bilgisayarında, proje klasöründe:
 
