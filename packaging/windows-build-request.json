@@ -1,6 +1,6 @@
 {
-  "request_id": "7b66ba73-d557-4a20-a3a0-c75f8e9eb22d",
-  "requested_at": "2026-10-20T12:17:29.022717+00:00",
-  "source_commit": "7c03c2efc399ce582daacd6f68772984aea9e2c9",
-  "reason": "Produce the requested standalone GOKWORKS.exe. Native Windows Nesting minimum-window check now passes; use minimum input widths and form row wrapping for the torque screen. Preserve the targeted layout gate, full regression suite and frozen onefile DPI checks."
+  "request_id": "20261021-c3d9efa-onefile",
+  "requested_at": "2026-10-21T02:59:19+00:00",
+  "source_commit": "c3d9efa4a839c7b8d6fe7078ce283e7afb62783a",
+  "reason": "User requested a fresh standalone GOKWORKS.exe after the full application validation. Package the latest compact interfaces and combined nesting workspace from this source branch. Preserve Windows regressions, frozen onefile launch/DPI checks, embedded licenses and direct EXE release. No backup repository changes."
 }
