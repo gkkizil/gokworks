@@ -183,7 +183,7 @@ def test_source_inventory_selection_filters_and_clear_share_the_export_model(win
 
 
 def test_bom_source_selection_shows_part_or_assembly_results_and_clear(window):
-    from bom.exporter import Part,Node,Result
+    from modules.bom.exporter import Part,Node,Result
     page=window.pages['bom'];window.navigate('bom')
     page.load_result(Result('C:/Ana.SLDASM','Default',
         (Part('Kapak','C:/Kapak.SLDPRT','Default',2,1.5,3.),),

@@ -28,7 +28,7 @@ def main():
     when = datetime.fromisoformat(data['finished_utc']).astimezone(ZoneInfo('Europe/Istanbul'))
     gui = [r for r in data['tests'] if r['id'].split('.')[0] in ('test_export_window','test_gui_audit')
            or '.KGuiTests.' in r['id']]
-    kr = [r for r in data['tests'] if r['id'].startswith('test_k_factor.')]
+    kr = [r for r in data['tests'] if r['id'].startswith('modules.k_factor.tests.test_k_factor.')]
     doc = Document()
     section = doc.sections[0]
     section.page_width, section.page_height = Cm(21), Cm(29.7)

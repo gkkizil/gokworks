@@ -59,7 +59,7 @@ def test_event_query_closes_all_handles_even_after_early_match():
 
 
 def test_observer_failure_cannot_prevent_export_or_leak_paths(tmp_path, monkeypatch):
-    log = tmp_path/'gui.log'
+    log = tmp_path/'shared.log'
     calls, closed = [], []
     api = SimpleNamespace(OpenProcess=lambda *args: calls.append(args) or 2468,
                           CloseHandle=closed.append)

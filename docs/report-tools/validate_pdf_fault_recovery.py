@@ -18,7 +18,7 @@ sys.path.insert(0, str(ROOT))
 from PySide6.QtCore import QCoreApplication, QEvent, QThread, QTimer, Qt
 from PySide6.QtTest import QTest
 from gui_qt.app import create_application, MainWindow
-from pdf import process as pdf
+from modules.pdf import process as pdf
 
 
 def validate(destination, cycles):

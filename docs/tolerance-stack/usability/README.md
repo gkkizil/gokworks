@@ -40,7 +40,7 @@ QT_QPA_PLATFORM=offscreen python docs/report-tools/capture_stack_usability.py do
 Matematik, COM, kayıt/rapor, arayüz ve anotasyon kontrolleri:
 
 ```bash
-QT_QPA_PLATFORM=offscreen python -m pytest tests/test_tolerance_stack_math.py tests/test_tolerance_stack_com.py tests/test_tolerance_stack_storage_report.py tests/test_tolerance_stack_gui.py tests/test_tolerance_stack_drawing_writer.py
+QT_QPA_PLATFORM=offscreen python -m pytest modules/tolerance_stack/tests/test_tolerance_stack_math.py modules/tolerance_stack/tests/test_tolerance_stack_com.py modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py modules/tolerance_stack/tests/test_tolerance_stack_gui.py modules/tolerance_stack/tests/test_tolerance_stack_drawing_writer.py
 ```
 
 [Ayrıntılı kullanım ve mühendislik sınırları](../../tolerance-stack.md)

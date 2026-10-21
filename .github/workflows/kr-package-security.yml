@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - k_factor/standalone/windows-security-request.json
+      - modules/k_factor/standalone/windows-security-request.json
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ jobs:
         id: request
         shell: pwsh
         run: |
-          $request = Get-Content k_factor/standalone/windows-security-request.json -Raw | ConvertFrom-Json
+          $request = Get-Content modules/k_factor/standalone/windows-security-request.json -Raw | ConvertFrom-Json
           "artifact_id=$($request.artifact_id)" >> $env:GITHUB_OUTPUT
           "run_id=$($request.run_id)" >> $env:GITHUB_OUTPUT
       - name: Download original bytes without executing the package
@@ -35,7 +35,7 @@ jobs:
       - name: Check signatures and scan the exact artifact
         shell: pwsh
         run: |
-          ./k_factor/standalone/security/scan-package.ps1 -PackagePath build/original-kr-package -RequestPath k_factor/standalone/windows-security-request.json -ReportPath kr-security.json *> kr-security-job.log
+          ./modules/k_factor/standalone/security/scan-package.ps1 -PackagePath build/original-kr-package -RequestPath modules/k_factor/standalone/windows-security-request.json -ReportPath kr-security.json *> kr-security-job.log
       - name: Preserve audit evidence
         if: always()
         uses: actions/upload-artifact@v4

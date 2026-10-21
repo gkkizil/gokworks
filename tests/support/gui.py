@@ -7,8 +7,8 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from pdf.settings import save_settings
-from pdf.window import GokworksPdfApp
+from shared.settings import save_settings
+from modules.pdf.window import GokworksPdfApp
 
 
 @unittest.skipUnless(os.name == 'nt' or os.environ.get('DISPLAY'),

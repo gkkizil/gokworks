@@ -23,12 +23,12 @@ from gui_qt.app import MainWindow, MODULES, create_application
 from gui_qt.models import Column, TableModel, TreeModel, FilterProxy
 from gui_qt.settings import SettingsStore
 from gui_qt.components import PathPicker
-from bom.exporter import Part, Node, Result, export_excel
-from naming.exporter import Snapshot, Document, path_key
-from bolt import rules as bolt
-from weight import rules as weight
-from iso_fits import rules as iso
-from geometric_tolerances.catalog import CATALOG
+from modules.bom.exporter import Part, Node, Result, export_excel
+from modules.naming.exporter import Snapshot, Document, path_key
+from modules.bolt import rules as bolt
+from modules.weight import rules as weight
+from modules.iso_fits import rules as iso
+from modules.geometric_tolerances.catalog import CATALOG
 
 
 @pytest.fixture
@@ -179,7 +179,7 @@ def test_folder_scan_worker_and_dwg_options(window, qtbot, tmp_path, mode, exten
         def export(*args, **kwargs):
             calls.append((args, kwargs, QThread.currentThread()))
             args[4].put(('done', dict(state='completed', total=1, succeeded=1)))
-        with patch('gui_qt.pages.export.export_parts', side_effect=export):
+        with patch('gui_qt.export.export_parts', side_effect=export):
             page.start_button.click()
             qtbot.waitUntil(lambda: not window.jobs.busy)
         assert calls[0][1]['formats'] == ('dwg',)
@@ -227,7 +227,7 @@ def test_worker_error_releases_controls_and_keeps_full_message(window, qtbot):
 
 
 def test_pdf_native_worker_exit_keeps_gui_responsive_and_releases_controls(window, qtbot, tmp_path, monkeypatch):
-    from pdf import process as pdf
+    from modules.pdf import process as pdf
     monkeypatch.setenv('LOCALAPPDATA', str(tmp_path/'local'))
     helper = Path(__file__).parent/'support/pdf_worker.py'
     monkeypatch.setattr(pdf, '_command', lambda request:
@@ -477,12 +477,12 @@ def test_naming_plan_filesystem_checks_are_off_gui_thread(window, qtbot, tmp_pat
     page.destination.setText(str(tmp_path/'new'))
     release = threading.Event()
     calls = []
-    from naming.exporter import validate_destination
+    from modules.naming.exporter import validate_destination
     def delayed(*args):
         calls.append(QThread.currentThread())
         release.wait(2)
         return validate_destination(*args)
-    with patch('gui_qt.pages.naming.engine.validate_destination',side_effect=delayed):
+    with patch('modules.naming.ui.engine.validate_destination',side_effect=delayed):
         page.load_snapshot(snapshot)
         qtbot.waitUntil(lambda: bool(calls))
         window.navigate('bolt')
@@ -507,7 +507,7 @@ def test_kr_exact_inputs_preview_labels_and_queued_scope(window, qtbot, outcome)
             release.wait(2)
             sink.put(('result',dict(source='sheet [Default]',status='success',preview=True,detail='ready')))
         sink.put(('done',dict(state=outcome if kwargs['preview'] else 'completed',scope=('assembly','Default','signature'),succeeded=1)))
-    with patch('gui_qt.pages.kr.engine.update_assembly',side_effect=update):
+    with patch('modules.k_factor.ui.engine.update_assembly',side_effect=update):
         page.scan_button.click()
         qtbot.waitUntil(lambda: bool(calls))
         assert page.tabs.currentIndex() == 2
@@ -541,7 +541,7 @@ def test_kr_stop_discards_queued_apply_and_helper_never_overwrites(window, qtbot
         calls.append(kwargs)
         stop.wait(2)
         sink.put(('done',dict(state='cancelled')))
-    with patch('gui_qt.pages.kr.engine.update_assembly',side_effect=update):
+    with patch('modules.k_factor.ui.engine.update_assembly',side_effect=update):
         page.scan()
         page.apply()
         page.stop_button.click()
@@ -559,7 +559,7 @@ def test_close_at_preview_completion_does_not_start_queued_cad_write(window, qtb
         release.wait(2)
         sink.put(('done',dict(state='completed',scope=('assembly','Default','signature'))))
     window.jobs.finished.connect(window.close)
-    with patch('gui_qt.pages.kr.engine.update_assembly',side_effect=update):
+    with patch('modules.k_factor.ui.engine.update_assembly',side_effect=update):
         page.scan()
         page.apply()
         release.set()

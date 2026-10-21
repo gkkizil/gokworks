@@ -11,9 +11,9 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from bom.exporter import Node, Part, Result
-from gui.text import BOM_TREE_TAB
-from pdf.window import GokworksPdfApp
+from modules.bom.exporter import Node, Part, Result
+from shared.text import BOM_TREE_TAB
+from modules.pdf.window import GokworksPdfApp
 
 
 def main():

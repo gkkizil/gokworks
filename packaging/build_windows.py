@@ -45,7 +45,7 @@ def main():
     mode = 'onedir' if options.onedir else 'onefile'
     collect_licenses()
     args = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--'+mode, '--windowed', '--noupx',
-            '--name', 'GOKWORKS', '--icon', str(ROOT/'gui/assets/GOK_app_windows.ico'),
+            '--name', 'GOKWORKS', '--icon', str(ROOT/'assets/GOK_app_windows.ico'),
             '--distpath', str(ROOT/'dist'), '--workpath', str(ROOT/'build/pyinstaller'),
             '--specpath', str(ROOT/'build'), '--paths', str(ROOT),
             '--runtime-hook', str(ROOT/'packaging/runtime_hook.py'),
@@ -53,17 +53,17 @@ def main():
             '--collect-all', 'shapely',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
-            '--exclude-module', 'k_factor.standalone',
+            '--exclude-module', 'modules.k_factor.standalone',
             '--exclude-module', 'tkinter', '--exclude-module', '_tkinter',
             '--exclude-module', 'customtkinter', '--exclude-module', 'PySide6.QtQml',
             '--exclude-module', 'PySide6.QtQuick', '--exclude-module', 'PySide6.QtWebEngineCore',
             '--add-data', f'{ROOT / "packaging/licenses"};licenses',
             '--add-data', f'{ROOT / "docs/THIRD_PARTY_NOTICES.md"};licenses',
-            '--add-data', f'{ROOT / "gui/assets/GOK_logo_light_UI_1024.png"};gui/assets',
-            '--add-data', f'{ROOT / "gui/assets/GOK_logo_dark_UI_1024.png"};gui/assets',
-            '--add-data', f'{ROOT / "gui/assets/GOK_app_windows.ico"};gui/assets',
-            '--add-data', f'{ROOT / "iso_fits/tables.json"};iso_fits',
-            '--add-data', f'{ROOT / "naming/interop/PackAndGoHost.cs"};naming/interop', str(ROOT/'main.py')]
+            '--add-data', f'{ROOT / "assets/GOK_logo_light_UI_1024.png"};assets',
+            '--add-data', f'{ROOT / "assets/GOK_logo_dark_UI_1024.png"};assets',
+            '--add-data', f'{ROOT / "assets/GOK_app_windows.ico"};assets',
+            '--add-data', f'{ROOT / "modules/iso_fits/tables.json"};modules/iso_fits',
+            '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)
     exe = ROOT/('dist/GOKWORKS/GOKWORKS.exe' if options.onedir else 'dist/GOKWORKS.exe')
     if exe.read_bytes()[:2] != b'MZ':

@@ -11,7 +11,7 @@ import time
 ROOT = Path(__file__).resolve().parents[2]; sys.path.insert(0,str(ROOT))
 import ezdxf
 from gui_qt.app import create_application,MainWindow
-from nesting.validation import validate_result
+from modules.nesting.validation import validate_result
 
 
 def main():

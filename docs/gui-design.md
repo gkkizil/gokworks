@@ -70,12 +70,12 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 | Dosya | Görevi |
 | --- | --- |
-| `gui/theme.py` | Ortak açık/koyu renk çiftleri ve platform yazı tipleri. |
-| `gui/icons.py` | Pillow ile çizilen özgün ikonlar; tema ve ölçek için iki görüntülü CTkImage nesneleri. |
+| `shared/theme.py` | Ortak açık/koyu renk çiftleri ve platform yazı tipleri. |
+| `shared/icons.py` | Pillow ile çizilen özgün ikonlar; tema ve ölçek için iki görüntülü CTkImage nesneleri. |
 | `gui/layout.py` | Yan menü, başlık, ayarlar, sayaçlar, sonuç tablosu ve tablo teması. |
 | `iso_fits/window.py`, `diagram.py`, `rules.py`, `tables.json` | ISO delik/mil hesabı, kesit/bölge grafiği, çap aralıkları ve sayısal veri. |
 | `geometric_tolerances/` | ASME 12 güncel/2 eski özellik kataloğu, açık tolerans/hata kontrolü, vektör sembol/şema ve rehber ekranı. |
-| `pdf/window.py` | Ekran durumu, iş parçacığı olayları, filtreleme, tema tercihi, ayrıntılar ve rapor akışı. |
+| `modules/pdf/window.py` | Ekran durumu, iş parçacığı olayları, filtreleme, tema tercihi, ayrıntılar ve rapor akışı. |
 
 `Pillow==12.1.0` kuruldu ve `requirements.txt` içine eklendi. Mevcut `customtkinter==6.0.0` kullanılıyor. İkonlar uygulama tarafından çiziliyor; çevrimiçi ikon servisine veya ayrı ikon yazı tipine bağımlılık yok. Bulut kurulum scripti ve başlangıç talimatları yeni bağımlılıkla güncellendi.
 

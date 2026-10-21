@@ -6,9 +6,9 @@ on:
     branches: [main, codex/pyside6-migration]
     paths:
       - solidworks/connection.py
-      - naming/native.py
-      - naming/interop/**
-      - tests/test_naming_native.py
+      - modules/naming/native.py
+      - modules/naming/interop/**
+      - modules/naming/tests/test_naming_native.py
       - tests/test_settings_and_connection.py
       - .github/workflows/solidworks-bindings.yml
       - packaging/publish_binding_status.py
@@ -49,7 +49,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
           PYTHONUTF8: '1'
-        run: python -m pytest -q tests/test_naming_native.py tests/test_settings_and_connection.py -k "native or raw_connection" --junitxml=binding-tests.xml *> binding-tests.log
+        run: python -m pytest -q modules/naming/tests/test_naming_native.py tests/test_settings_and_connection.py -k "native or raw_connection" --junitxml=binding-tests.xml *> binding-tests.log
       - name: Preserve check evidence
         if: always()
         uses: actions/upload-artifact@v4

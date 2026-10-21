@@ -8,7 +8,7 @@ from PySide6.QtCore import QCoreApplication, QEvent, Qt
 from PySide6.QtWidgets import QApplication, QGraphicsTextItem
 
 from gui_qt.app import MainWindow, create_application
-from weight import rules as weight
+from modules.weight import rules as weight
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ from types import ModuleType
 import unittest
 from unittest.mock import Mock, patch
 
-from pdf.settings import load_settings, save_settings
+from shared.settings import load_settings, save_settings
 from solidworks.connection import connect_to_solidworks
 
 
@@ -38,7 +38,7 @@ class SettingsTests(unittest.TestCase):
 
     def test_failed_publish_preserves_previous_settings(self):
         save_settings({'old': 'keep'}, self.path)
-        with patch('pdf.settings.os.replace', side_effect=OSError('blocked')):
+        with patch('shared.settings.os.replace', side_effect=OSError('blocked')):
             with self.assertRaises(OSError):
                 save_settings({'new': 'value'}, self.path)
         self.assertEqual(load_settings(self.path), {'old': 'keep'})

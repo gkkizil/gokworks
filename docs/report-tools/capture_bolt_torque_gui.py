@@ -13,7 +13,7 @@ from gui_qt.app import create_application,MainWindow
 
 def main():
     app=create_application([])
-    output=ROOT/'bolt_torque/examples';output.mkdir(exist_ok=True)
+    output=ROOT/'modules/bolt_torque/examples';output.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='gokworks-torque-capture-') as folder:
         w=MainWindow(Path(folder)/'settings.json');w.show();w.navigate('bolt_torque')
         page=w.pages['bolt_torque'];records=[]

@@ -35,7 +35,7 @@ def main():
     assert sources['active_characteristics'] == 12 and len(primary['section_anchor_checks']) >= 8
     if args.dimension_audit:
         drawing = json.loads((folder/'drawing-before-after.json').read_text())
-        assert drawing['current_diagram_sha256'] == results['sha256']['geometric_tolerances/diagram.py']
+        assert drawing['current_diagram_sha256'] == results['sha256']['modules/geometric_tolerances/diagram.py']
         assert drawing['native_tk_measurement'] and drawing['after']['long_value_fits_with_5px_padding']
     gui = [r for r in results['tests'] if r['id'].startswith(('test_export_window.', 'test_gui_audit.', 'test_final_gui.'))
            or any(f'.{name}.' in r['id'] for name in ('KGuiTests', 'ManualGuiTests', 'IsoGuiTests', 'ManualIsoGuiTests', 'GeometricGuiTests'))]

@@ -27,7 +27,7 @@ dağıtım koşullarını listeler; ticari ürüne koşulsuz hukuki uygunluk gar
 
 - `nesting/`: veri modelleri, DXF okuyucu, geometri/NFP motoru, bağımsız
   doğrulama, ağırlık/maliyet, taşınabilir JSON, DXF/Excel/PDF, ortak çizim.
-- `gui_qt/pages/nesting.py`, `nesting_widgets.py`: mevcut tasarım sistemi,
+- `modules/nesting/ui.py`, `nesting_widgets.py`: mevcut tasarım sistemi,
   iş yöneticisi, tablolar, koyu/açık tema ve dar/geniş pencere düzeni.
 - `gui_qt/app.py`, `icons.py`: kalıcı yeni sayfa ve yerel vektör simgesi.
 - `requirements.txt`, `packaging/build_windows.py`, `gui_qt/package_check.py`:
@@ -35,7 +35,7 @@ dağıtım koşullarını listeler; ticari ürüne koşulsuz hukuki uygunluk gar
 - `solidworks/runtime.py`: isteğe bağlı Shapely/GEOS değiştirme yolu;
   mevcut Qt yolu ve normal varsayılan çalışma korunur.
 - `packaging/licenses/nesting/`, `docs/THIRD_PARTY_NOTICES.md`: lisanslar.
-- `tests/test_nesting.py`, `test_nesting_gui.py`, single-file lisans kontrolü.
+- `modules/nesting/tests/test_nesting.py`, `test_nesting_gui.py`, single-file lisans kontrolü.
 
 ## Doğrulama kapsamı
 
@@ -57,7 +57,7 @@ kontrolleri kapsanır. Gerçek Windows EXE veya kesim tezgâhı bu Linux
 ortamında çalıştırılmadı; SolidWorks API bu modül için gerekli değildir.
 
 Kullanım, formüller, dosya formatı ve açık sınırlamalar:
-[nesting/README.md](../nesting/README.md).
+[modules/nesting/README.md](../modules/nesting/README.md).
 
 Gerçek DXF girişleri, taşınabilir proje, levha DXF'i, çizimli raporlar ve
 ekran görüntüleri: [uçtan uca örnek](nesting-example/README.md).

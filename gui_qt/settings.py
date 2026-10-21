@@ -6,7 +6,7 @@ import shutil
 from datetime import datetime
 
 from PySide6.QtCore import QObject, QSettings, QTimer
-from pdf.settings import SETTINGS_PATH, load_settings, save_settings
+from shared.settings import SETTINGS_PATH, load_settings, save_settings
 
 
 class SettingsStore(QObject):

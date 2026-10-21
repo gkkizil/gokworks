@@ -17,7 +17,7 @@ import ezdxf
 from PySide6.QtTest import QTest
 from PySide6.QtCore import Qt
 from gui_qt.app import create_application,MainWindow
-from nesting.validation import validate_result
+from modules.nesting.validation import validate_result
 
 
 def main():

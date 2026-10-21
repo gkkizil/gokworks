@@ -42,12 +42,12 @@ Fiyat güncellemesi seçili fiziksel plakayı ve yerleşim koordinatlarını kor
   Bir bozuk dosya görünür kaldı, yeniden okundu; sonuç **4 + 4 + 2** parça ile
   üç fiziksel plakaya yerleşti. Sonuç bağımsız geometri doğrulamasından geçti.
   [Yakalama kaydı](capture.json), [tekrar üretme betiği](../report-tools/capture_nesting_usability.py).
-- `tests/test_nesting_gui.py`: **24 test başarılı**. İki tema, minimum boyut,
+- `modules/nesting/tests/test_nesting_gui.py`: **24 test başarılı**. İki tema, minimum boyut,
   listeyi gizle/göster, ayarları aç/kapat, seçim eşleme, sürükleme, manuel zoom,
   20 plaka, çoklu yükleme/kaldırma, iptal, kısmi sonuçta çıktı kilidi ve maliyet
   güncellemeleri denendi. Taslak düzenleme penceresi açıkken maliyet
   güncellemesi bekler ve pencere kapatılınca devam eder.
-- `tests/test_nesting.py tests/test_qt_workflows.py`: **191 test başarılı**.
+- `modules/nesting/tests/test_nesting.py tests/test_qt_workflows.py`: **191 test başarılı**.
   PDF'nin üç yeni testi de geçti; toplam **218 ayrı test** doğrulandı.
   [Kaynak uygulama açılış kontrolü](selfcheck.json): 12 modül, iki tema ve dört
   çözünürlük geçti. Bu makinede ölçülen geçiş ortancası 15,47 ms, yeniden

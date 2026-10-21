@@ -11,7 +11,7 @@ import time
 import tkinter as tk
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from pdf.window import GokworksPdfApp
+from modules.pdf.window import GokworksPdfApp
 
 
 def measure():

@@ -14,7 +14,7 @@ parser.add_argument('output')
 parser.add_argument('--runs', type=int, default=3)
 args = parser.parse_args()
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from pdf.window import GokworksPdfApp
+from modules.pdf.window import GokworksPdfApp
 
 MODES = GokworksPdfApp._MODES[1:]
 cold = {mode: [] for mode in MODES}

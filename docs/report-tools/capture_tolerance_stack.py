@@ -8,15 +8,15 @@ from tempfile import TemporaryDirectory
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from gui_qt.app import MainWindow,create_application
-from tolerance_stack.calculator import calculate
-from tolerance_stack.report import export_excel,export_pdf
-from tolerance_stack.storage import save_project
+from modules.tolerance_stack.calculator import calculate
+from modules.tolerance_stack.report import export_excel,export_pdf
+from modules.tolerance_stack.storage import save_project
 
 
 def capture(destination):
     destination.mkdir(parents=True,exist_ok=True)
     screenshots=destination/'screenshots';screenshots.mkdir(exist_ok=True)
-    examples=Path(__file__).resolve().parents[2]/'tolerance_stack/examples';examples.mkdir(exist_ok=True)
+    examples=Path(__file__).resolve().parents[2]/'modules/tolerance_stack/examples';examples.mkdir(exist_ok=True)
     app=create_application([])
     with TemporaryDirectory() as folder:
         window=MainWindow(Path(folder)/'settings.json');window.resize(1440,1000);window.show()

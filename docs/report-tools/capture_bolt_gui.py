@@ -10,7 +10,7 @@ from PIL import ImageGrab
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from pdf.window import GokworksPdfApp
+from modules.pdf.window import GokworksPdfApp
 
 
 def main():

@@ -10,7 +10,7 @@ from publish_status import git
 
 
 def main():
-    path = Path("k_factor/standalone/windows-security-request.json")
+    path = Path("modules/k_factor/standalone/windows-security-request.json")
     request = json.loads(path.read_text(encoding="utf-8"))
     result = Path("kr-security.json")
     report = json.loads(result.read_text(encoding="utf-8-sig")) if result.exists() else {
@@ -30,7 +30,7 @@ def main():
             parent = git("rev-parse", "FETCH_HEAD")
             git("read-tree", parent, env=env)
             blob = git("hash-object", "-w", "--stdin", data=payload)
-            git("update-index", "--add", "--cacheinfo", "100644", blob, "k_factor/standalone/windows-security-status.json", env=env)
+            git("update-index", "--add", "--cacheinfo", "100644", blob, "modules/k_factor/standalone/windows-security-status.json", env=env)
             tree = git("write-tree", env=env)
             commit = git("-c", "user.name=github-actions[bot]", "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com",
                          "commit-tree", tree, "-p", parent, "-m", f'Check original K/R package: {report["status"]}')

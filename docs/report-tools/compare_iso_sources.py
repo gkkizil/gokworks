@@ -17,7 +17,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from iso_fits.rules import classes, limits
+from modules.iso_fits.rules import classes, limits
 
 SOURCES = {
     'isofits': ('parkergreene/isofits', 'd3083a941e8071bb12114a28a25274bf99c30ac0', 'src/data.py'),
@@ -38,7 +38,7 @@ def main():
     parser.add_argument('--sources', type=Path, required=True)
     parser.add_argument('--output', type=Path, default=ROOT/'docs/reports/iso-fits/source-comparison.json')
     args = parser.parse_args()
-    evidence = {'sources': {}, 'table_sha256': hashlib.sha256((ROOT/'iso_fits/tables.json').read_bytes()).hexdigest()}
+    evidence = {'sources': {}, 'table_sha256': hashlib.sha256((ROOT/'modules/iso_fits/tables.json').read_bytes()).hexdigest()}
     for name, (repo, expected, relative) in SOURCES.items():
         folder = args.sources/name
         commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=folder, text=True).strip()
@@ -53,7 +53,7 @@ def main():
     spec.loader.exec_module(reference)
     records = json.loads((args.sources/'passungsrechner/src/data/tolerances.json').read_text())
     count, mismatches = Counter(), []
-    bounds = json.loads((ROOT/'iso_fits/tables.json').read_text())['bounds_mm']
+    bounds = json.loads((ROOT/'modules/iso_fits/tables.json').read_text())['bounds_mm']
     for feature in ('hole', 'shaft'):
         reference_data = reference.hole_data if feature == 'hole' else reference.shaft_data
         for code in classes(feature):

@@ -23,7 +23,7 @@ def main():
         assert hashlib.sha256((ROOT/item['file']).read_bytes()).hexdigest() == item['sha256']
     source = json.loads((FOLDER/'iso-source-comparison.json').read_text())
     assert source['unexpected_differences'] == 0
-    assert source['table_sha256'] == data['sha256']['iso_fits/tables.json']
+    assert source['table_sha256'] == data['sha256']['modules/iso_fits/tables.json']
     coverage = json.loads((FOLDER/'coverage.json').read_text())['totals']
     doc = Document()
     section = doc.sections[0]

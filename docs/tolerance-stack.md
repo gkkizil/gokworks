@@ -103,7 +103,7 @@ Korelasyon varsa bu sürümde yalnız Worst-Case kullanılabilir.
 
 ISO 286 aktarımı mevcut `iso_fits.rules.limits` ve doğrulanmış tabloları kullanır.
 50 H7/h6, 38 H7/k6 ve 25 H7/p6 test edilir. Yeni/rastgele ISO tablosu eklenmedi.
-3D STEP/GD&T hesaplanmaz. `tolerance_stack/extensions.py` gelecekte doğrulanmış
+3D STEP/GD&T hesaplanmaz. `modules/tolerance_stack/extensions.py` gelecekte doğrulanmış
 yüzey/projeksiyon adaptörleri için ayrı protokol tanımlar; doğrulanmamış
 konum, profil, diklik, paralellik, MMR/MMC/LMC formülleri kullanılmaz.
 
@@ -195,7 +195,7 @@ Bu kontroller gerçek SolidWorks oturumunun yerini tutmaz; kullanıcının
 
 `tolerance_stack/`: modeller, zincir doğrulaması, hesap/RSS/Monte Carlo,
 COM sözleşmeleri, teknik resim okuyucu/yazıcı, atomik kayıt ve PDF/Excel raporu.
-`gui_qt/pages/tolerance_stack.py` mevcut Qt model/view, QThread iş yöneticisi,
+`modules/tolerance_stack/ui.py` mevcut Qt model/view, QThread iş yöneticisi,
 tema, vektör sahne ve durum altyapılarını kullanır. `stack_dialogs.py` yalnız
 analiz verisini düzenler. Navigasyon sayfayı yeniden oluşturmaz veya COM çağırmaz.
 
@@ -234,9 +234,9 @@ teknik resim üzerinde çalıştırılmalıdır:
 
 ```powershell
 $env:GOKWORKS_TEST_SLDDRW='C:\test\deneme.SLDDRW'
-python -m pytest tests/test_tolerance_stack_live.py -v
+python -m pytest modules/tolerance_stack/tests/test_tolerance_stack_live.py -v
 $env:GOKWORKS_TEST_WRITE_COPY='1'
-python -m pytest tests/test_tolerance_stack_live.py -v
+python -m pytest modules/tolerance_stack/tests/test_tolerance_stack_live.py -v
 ```
 
 İkinci seçenek yalnız ayrı analizli kopya üretir; kaynak üzerine kayıt testi
@@ -249,8 +249,8 @@ ortamda çalıştırılmadı. Son test ve görsel kanıtlar `docs/tolerance-stac
 
 Yeni iş paketi: `tolerance_stack/{models,chain,calculator,monte_carlo,com,
 solidworks_reader,drawing_writer,storage,report,diagram,extensions}.py` ve
-`__init__.py`. GUI dosyaları `gui_qt/pages/tolerance_stack.py` ve
-`gui_qt/pages/stack_dialogs.py` içindedir. Altı `tests/test_tolerance_stack_*.py`
+`__init__.py`. GUI dosyaları `modules/tolerance_stack/ui.py` ve
+`modules/tolerance_stack/ui_dialogs.py` içindedir. Altı `tests/test_tolerance_stack_*.py`
 dosyası saf matematik, rapor/kayıt, COM, CAD yazma ve Qt akışlarını kapsar;
 `live` dosyası yalnız gerçek SolidWorks ortamında opt-in çalışır.
 

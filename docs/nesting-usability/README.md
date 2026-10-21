@@ -78,10 +78,10 @@ Bu güncelleme için EXE üretilmedi.
 
 - [Test kaydı](checks.json) · [Gerçek yakalama kaydı](capture.json)
 - [Yakalama betiği](../report-tools/capture_nesting_usability.py)
-- [Kullanım ve hesap ayrıntıları](../../nesting/README.md)
+- [Kullanım ve hesap ayrıntıları](../../modules/nesting/README.md)
 
 ```bash
-QT_QPA_PLATFORM=offscreen python -m pytest tests/test_nesting.py tests/test_nesting_gui.py -q
+QT_QPA_PLATFORM=offscreen python -m pytest modules/nesting/tests/test_nesting.py modules/nesting/tests/test_nesting_gui.py -q
 QT_QPA_PLATFORM=offscreen python docs/report-tools/capture_nesting_usability.py
 QT_QPA_PLATFORM=offscreen python main.py --self-check /tmp/nesting-source-check.json
 ```

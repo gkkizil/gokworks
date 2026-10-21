@@ -15,13 +15,13 @@ sys.path.insert(0,str(ROOT))
 
 import ezdxf
 from gui_qt.app import create_application, MainWindow
-from nesting.materials import new_project
-from nesting.dxf_import import read_dxf
-from nesting.engine import nest
-from nesting.accounting import calculate
-from nesting.storage import save_project
-from nesting.report import export_excel, export_pdf
-from nesting.dxf_export import export_dxf
+from modules.nesting.materials import new_project
+from modules.nesting.dxf_import import read_dxf
+from modules.nesting.engine import nest
+from modules.nesting.accounting import calculate
+from modules.nesting.storage import save_project
+from modules.nesting.report import export_excel, export_pdf
+from modules.nesting.dxf_export import export_dxf
 
 
 def main():

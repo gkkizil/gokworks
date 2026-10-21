@@ -60,7 +60,7 @@ jobs:
         run: |
           python -m pip install -r requirements-dev.txt *> windows-test-setup.log
           if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
-          python packaging/run_windows_tests.py tests/test_nesting_gui.py tests/test_nesting_pdf_report.py
+          python packaging/run_windows_tests.py modules/nesting/tests/test_nesting_gui.py modules/nesting/tests/test_nesting_pdf_report.py
       - name: Validate regression suite on Windows
         timeout-minutes: 15
         env:
@@ -69,9 +69,9 @@ jobs:
         run: |
           python -m pip install -r requirements-dev.txt *> windows-test-setup.log
           if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
-          python packaging/run_windows_tests.py tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis
+          python packaging/run_windows_tests.py modules/tolerance_stack/tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python packaging/run_windows_tests.py tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes
+          python packaging/run_windows_tests.py modules/bolt_torque/tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible modules/nesting/tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python packaging/run_windows_tests.py
       - name: Build and open the packaged EXE

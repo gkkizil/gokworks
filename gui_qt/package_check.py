@@ -81,20 +81,20 @@ def check(output):
             assert item.toPlainText() == expected
             assert kr.tool_diagram.sceneRect().contains(item.sceneBoundingRect())
         kr.tabs.setCurrentIndex(0)
-        from tolerance_stack.calculator import calculate
-        from tolerance_stack.report import export_excel as stack_excel, export_pdf as stack_pdf
+        from modules.tolerance_stack.calculator import calculate
+        from modules.tolerance_stack.report import export_excel as stack_excel, export_pdf as stack_pdf
         stack=w.pages['tolerance_stack'];stack.load_example();stack.project.confirm()
         stack_result=calculate(stack.project)
         assert tuple(map(str,(stack_result.nominal,stack_result.minimum,stack_result.maximum))) == ('0.20','0.02','0.38')
         stack.show_result(stack_result)
         stack_excel(stack.project,stack_result,Path(folder)/'ToleranceStack.xlsx')
         stack_pdf(stack.project,stack_result,Path(folder)/'ToleranceStack.pdf')
-        from nesting.materials import new_project
-        from nesting.dxf_import import read_dxf
-        from nesting.engine import nest
-        from nesting.accounting import calculate as nesting_cost, mass as nesting_mass
-        from nesting.dxf_export import export_dxf as nesting_dxf
-        from nesting.report import export_excel as nesting_excel, export_pdf as nesting_pdf
+        from modules.nesting.materials import new_project
+        from modules.nesting.dxf_import import read_dxf
+        from modules.nesting.engine import nest
+        from modules.nesting.accounting import calculate as nesting_cost, mass as nesting_mass
+        from modules.nesting.dxf_export import export_dxf as nesting_dxf
+        from modules.nesting.report import export_excel as nesting_excel, export_pdf as nesting_pdf
         import ezdxf
         sample = Path(folder)/'Nesting-input.dxf'
         doc = ezdxf.new(); doc.units = 4
@@ -133,7 +133,7 @@ def check(output):
         forbidden = [name for name in sys.modules if name in ('tkinter','_tkinter','customtkinter')]
         assert not forbidden, forbidden
         # Use a real file from each non-COM exporter dependency inside the bundle.
-        from bom.exporter import Result, Part, export_excel
+        from modules.bom.exporter import Result, Part, export_excel
         result = Result('main.sldasm','Default',(Part('Parça','p.sldprt','Default',2,1.,2.),),(),0,0,False)
         xlsx = Path(folder)/'BOM.xlsx'
         export_excel(result,xlsx)
@@ -142,11 +142,11 @@ def check(output):
         dxf = Path(folder)/'test.dxf'
         ezdxf.new().saveas(dxf)
         assert dxf.stat().st_size > 100
-        from naming.native import HOST_SOURCE
+        from modules.naming.native import HOST_SOURCE
         assert HOST_SOURCE.is_file(), 'Gömülü Pack and Go interop kaynağı eksik.'
         # Launch the actual bundled EXE in worker mode. An empty folder tests
         # frozen imports and IPC without touching an open SolidWorks session.
-        from pdf.process import export_drawings
+        from modules.pdf.process import export_drawings
         pdf_source = Path(folder)/'empty-pdf-source'
         pdf_source.mkdir()
         pdf_events = Queue()

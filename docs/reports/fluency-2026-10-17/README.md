@@ -34,7 +34,7 @@ incelemesi uygulamanın dört adımlık kullanım akışını kapsar.
 
    ![Büyütülen pencere](after/04-expanded.png)
 
-Önceki görüntüler [before](before/) klasöründedir. Her iki yakalama betiği,
+Önceki görüntüler [before](before) klasöründedir. Her iki yakalama betiği,
 pencere başlığını ve ekran üzerindeki sınırlarını kaydederek gerçek uygulama
 penceresini PIL ImageGrab ile aldı; kaydedilmiş sekiz görüntü tek tek açılıp
 incelendi. Ekran görüntüleri hareketin veya Windows kare hızının ölçümü değildir.

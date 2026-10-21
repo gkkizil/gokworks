@@ -14,6 +14,15 @@ SolidWorks teknik resimlerini PDF'e, sac açınımlarını DXF/DWG'ye aktarır; 
 
 [14 Ekim Astra incelemesi](docs/astra-review.md): K/R kayıt sırası, açık belge koruması ve isimlendirme önizlemesi düzeltmeleri; depo temizliği ve doğrulama kapsamı.
 
+## Proje klasörleri
+
+Tüm özellikler **[modules/](modules/README.md)** altında ayrı klasörlerdedir.
+Her modülün hesaplama/CAD kodu, **`ui.py` arayüzü**, **`tests/` testleri**,
+kullanım rehberi ve varsa örnekleri kendi klasöründe bulunur.
+Ortak Qt altyapısı `gui_qt/`, SolidWorks bağlantısı `solidworks/`, ayar
+yardımcıları `shared/`, logolar `assets/` altındadır.
+[Klasör ağacı ve geliştirme rehberi](docs/repository-structure.md).
+
 ## Windows'ta çalıştırma
 
 Python 3.13, kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks gerekir. Proje klasöründe:
@@ -24,7 +33,7 @@ py -3.13 -m venv .venv
 .venv\Scripts\python.exe main.py
 ```
 
-Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz `PySide6==6.10.3` ve Qt Widgets kullanır. Hesaplama ve CAD motorları Python olarak korunur. Qt sürümü `codex/pyside6-migration` geliştirme dalındadır; önceki sürüm Git geçmişinde korunur.
+Mevcut kurulumu güncellerken de `pip install -r requirements.txt` komutunu çalıştırın. Arayüz `PySide6==6.10.3` ve Qt Widgets kullanır. Hesaplama ve CAD motorları Python olarak korunur. Güncel Qt sürümü `main` dalındadır; önceki sürümler Git geçmişinde korunur.
 
 ## Nesting ve sac maliyeti
 
@@ -34,7 +43,7 @@ kalınlık, sac stoku/fiyatı, dönüş açıları ve kesim payları tanımlanab
 Net/brüt/fire ağırlıkları, alan verimi ve dağıtılmış malzeme/operasyon
 maliyetleri hesaplanır. Doğrulanmış yerleşim DXF, çizimli Excel/PDF ve
 taşınabilir proje olarak kaydedilir. SolidWorks gerekmez.
-[Kullanım ve sınırlar](nesting/README.md) · [Algoritma, lisanslar ve doğrulama](docs/nesting.md).
+[Kullanım ve sınırlar](modules/nesting/README.md) · [Algoritma, lisanslar ve doğrulama](docs/nesting.md).
 [Toplu DXF yükleme ve 1→2→3 plaka yerleşimi düzeltmesi](docs/nesting-bulk/README.md).
 
 ## BOM - Ürün ağacı
@@ -67,13 +76,13 @@ kuralları ve Hide/Promote gösterim tercihleri fiziksel sayımı değiştirmez.
 
 ## İsimlendirme aracı
 
-**Aktarım ve montaj → İsimlendirme aracı** bölümünde montajın bulunduğu **Kaynak klasörü** ve yeni montajın kaydedileceği **Hedef klasörü** seçin. Tek montaj otomatik seçilir; birden çok montaj varsa ekrandaki listeden ana montajı belirleyin. **Montajı oku** ile adları önizleyin; ön/son ek, bul–değiştir, numaralı veya dosya başına elle adlandırma kullanın. **Yeni montajı kaydet**, montajı, parçaları ve bulunan teknik resimleri seçtiğiniz boş/yeni hedef klasöre kaydeder. Kaynak proje korunur; yeni dosyaların kayıtlı referansları doğrulanmadan işlem başarılı gösterilmez. [Kullanım, kaynaklar ve sınırlar](naming/README.md).
+**Aktarım ve montaj → İsimlendirme aracı** bölümünde montajın bulunduğu **Kaynak klasörü** ve yeni montajın kaydedileceği **Hedef klasörü** seçin. Tek montaj otomatik seçilir; birden çok montaj varsa ekrandaki listeden ana montajı belirleyin. **Montajı oku** ile adları önizleyin; ön/son ek, bul–değiştir, numaralı veya dosya başına elle adlandırma kullanın. **Yeni montajı kaydet**, montajı, parçaları ve bulunan teknik resimleri seçtiğiniz boş/yeni hedef klasöre kaydeder. Kaynak proje korunur; yeni dosyaların kayıtlı referansları doğrulanmadan işlem başarılı gösterilmez. [Kullanım, kaynaklar ve sınırlar](modules/naming/README.md).
 
 ## Cıvata hesabı
 
 **Mühendislik hesapları → Cıvata hesabı** altında metrik ölçü, kalite sınıfı ve yükü seçin. **Kaba diş / İnce diş** ve çapa uygun diş adımı seçilebilir. Alanlar, kapasiteler ve yaklaşık kılavuz deliği seçili adıma göre güncellenir. Çekme, kesme ve birleşik yük için cıvatanın statik dayanımı, emniyet katsayısı ve güvenli/güvensiz sonucu gösterilir. Eşit yük paylaşımına göre gerekli en az cıvata adedi ve seçili emniyet hedefine göre yük marjı hesaplanır. Birleşik yükte diğer kuvvet sabitken toplam yük sınırları da verilir. Cıvata adedi, tek/çift kesme ve dişli/dişsiz kesit desteklenir. SolidWorks bağlantısı gerekmez.
 
-Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. **kg yük / Newton (N) / kN** seçimi hem girdiyi hem gösterilen kapasiteyi dönüştürür. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md). [İncelenen GitHub projeleri](bolt/README.md). [Windows EXE indirme ve derleme](packaging/README.md).
+Sonuç cıvata gövdesinin ön kontrolüdür; ön sıkma ve bağlantının diğer hasar türleri ayrıca değerlendirilir. **kg yük / Newton (N) / kN** seçimi hem girdiyi hem gösterilen kapasiteyi dönüştürür. [Hesap yöntemi, kapsam ve ekran görüntüleri](docs/bolt-calculator.md). [İncelenen GitHub projeleri](modules/bolt/README.md). [Windows EXE indirme ve derleme](packaging/README.md).
 
 ## Ağırlık hesabı
 
@@ -89,14 +98,14 @@ ve pano raporu vardır. SolidWorks gerekmez.
 
 Hadde/kutu profil gibi kesitlerin ölçülerden hesabı köşe yarıçaplarını ve
 eğimleri içermez. **Katalog alanından** seçeneğinde üretici kesit alanını
-cm² olarak girerek hesaplayabilirsiniz. [Kullanım, kaynaklar ve örnekler](weight/README.md).
+cm² olarak girerek hesaplayabilirsiniz. [Kullanım, kaynaklar ve örnekler](modules/weight/README.md).
 
 ## Arayüz ve temalar
 
 Yan menü Aktarım ve montaj ile Mühendislik hesapları olarak gruplandı. Sade ayar kartları, daha büyük sonuç sekmeleri ve bağımsız çalışma alanları kullanılır. ISO geçme sonucu kesitin üstündedir; manuel K/R değerleri özet bandında görünür. Yan menüdeki **Açık / Koyu** seçimi tüm ekranları ve ayrıntı penceresini değiştirir. Seçim `appearance` ayarıyla kaydedilir; yeniden açılışta geri gelir. İlk açılış açık temadır.
 
 - Sonuç listesinde **Ara** alanıyla dosya adı veya açıklamaya göre arayın. **Ctrl+F** dosya sekmesini açıp aramaya odaklanır.
-- **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** yalnızca liste filtrelerini kaldırır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
+- **Tüm durumlar** menüsüyle bekleyen, işlenen, başarılı, atlanan veya hatalı dosyaları gösterin. **Temizle** dosya listesini, sonuçları, günlüğü ve filtreleri sıfırlar; işlem sürerken kapalıdır. Tarama/aktarım yeniden başlatıldığında filtreler sıfırlanır.
 - Filtreler aktarılacak dosyaları, toplam sayaçları veya CSV raporunu değiştirmez. PDF ve DXF/DWG ekranları kendi arama/filtre durumunu korur.
 - Dosyaya çift tıklayarak veya seçili dosyada **Enter** ile tam kaynak/çıktı yollarını ve açıklamayı açın. **Ayrıntıları kopyala** bilgileri panoya kopyalar. **Escape** ayrıntı penceresini kapatır.
 - Küçük pencerede ayar alanı kaydırılabilir; sonuç listesi görünür kalır. İkonlar ve tablo yazıları ekran ölçeklemesine uyum sağlar. %125 widget ölçeklemesi test edildi; tüm Windows monitör/DPI kombinasyonları bu bulut testinin kapsamında değildir.
@@ -117,7 +126,7 @@ analizli kopya ve açık onayla doğrulanmış yedekli kaynak kaydı ayrı seçe
 Gerçek SolidWorks kabul testleri bu Linux ortamında çalıştırılmadı.
 [Kullanım, matematik, API ve lisanslar](docs/tolerance-stack.md) ·
 [Güncel ekranlar](docs/tolerance-stack/screenshots) ·
-[Örnek analiz / PDF / Excel](tolerance_stack/examples).
+[Örnek analiz / PDF / Excel](modules/tolerance_stack/examples).
 
 ## ISO GEÇMELERİ
 
@@ -177,13 +186,13 @@ kapanırsa ana pencere açık kalır; tamamlanan PDF'ler ve mevcut dosyalar koru
 **Durdur**, devam eden SolidWorks kaydını tamamlayıp sonraki çizime geçmeden durur.
 Hata aşaması ve tanılama kaydı yolu **Günlük** sekmesinde gösterilir. Windows
 kayıtları `%LOCALAPPDATA%\GOKWORKS\logs` klasöründedir.
-[PDF aktarımı ve çökme tanılaması](pdf/README.md).
+[PDF aktarımı ve çökme tanılaması](modules/pdf/README.md).
 
 Çıktı adı **PARÇAADI - Sac kalınlığı - Montajdaki toplam adet** biçimindedir. Örneğin `BRAKET - 2 mm - 12 adet.dxf` veya `BRAKET - 1.25 mm - 12 adet.dwg`. Kalınlık, aktif sac metal unsurundan okunur ve SolidWorks'ün metre biriminden milimetreye çevrilir; dosya adına tam sayı veya gerekli ondalık basamaklarla yazılır.
 
 Kalınlığa göre klasörleme örneği: `Çıktı/1,5 mm/BRAKET - 1.5 mm - 12 adet.dxf`.
 Ayar kaydedilir; DXF ve DWG için geçerlidir. Sonuç listesi ve CSV raporu gerçek
-alt klasör yolunu gösterir. [Klasörleme ayrıntıları](dxf_dwg/README.md).
+alt klasör yolunu gösterir. [Klasörleme ayrıntıları](modules/dxf_dwg/README.md).
 
 Adetler aktarım başlamadan önce **aktif montajın aktif konfigürasyonundan, alt montajlar dahil** hesaplanır. Aynı alt montaj birden fazla kullanılmışsa her kullanımındaki parçalar sayılır. Aynı dosya ve referans konfigürasyonu birlikte değerlendirilir; farklı geometrilere ait konfigürasyonlar birleştirilmez. Bastırılmış bileşenler sayılmaz; gizli veya malzeme listesinden (BOM) çıkarılmış bileşenler fiziksel adet hesabına dahildir. Kaynak klasördeki montaj dışı parçalar atlanır.
 
@@ -222,6 +231,11 @@ Linux'taki otomatik testler gerçek SolidWorks üretimini doğrulayamaz. Windows
 9. PDF ekranında en az iki sayfalı bir `.SLDDRW` kullanın. PDF'in sayfa sayısını ve her sayfanın çizim içeriğini kontrol edin. Çizim açık fakat aktif değilken de aktarımı deneyin; işlem sonunda önceki belge aktif olmalı. Önceden açık çizim açık kalmalı, uygulamanın açtığı çizim kapanmalı.
 
 ## Otomatik testler
+
+[Klasör düzenlemesi sonrası tam regresyon](docs/repository-structure.md#doğrulama):
+911 test ve 878 alt senaryo geçti; Windows/canlı SolidWorks gerektiren 7 test
+atlandı. `python -m pytest`, ortak `tests/` ile bütün `modules/*/tests/`
+klasörlerini birlikte çalıştırır.
 
 [20 Ekim 2026 genel uygulama testi](docs/validation-2026-10-20/README.md):
 güncel PySide6 ekranları, hesap motorları, dosya işlemleri, DPI/kararlılık
@@ -296,9 +310,9 @@ Ekran görüntüleri için Xvfb çalışırken `DISPLAY=:99` kullanın ve
 `QT_QPA_PLATFORM` seçeneğini kaldırın. Kayıtlı bulut kurulum/başlangıç talimatları
 Qt ortamına güncellendi. Yayımlama işlemi çalışan Xvfb süreçlerini taşımaz.
 
-## Qt geliştirme sürümü
+## Qt uygulaması
 
-On çalışma alanı tek Qt ana penceresinde korunur. Menü geçişleri ekranları
+On iki çalışma alanı tek Qt ana penceresinde korunur. Menü geçişleri ekranları
 yeniden oluşturmaz. Uzun CAD ve dosya işlemleri QThread üzerinde çalışır;
 işlem sırasında diğer menüler kullanılabilir. Aynı anda bir CAD/dosya işi çalışır.
 

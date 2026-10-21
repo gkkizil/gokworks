@@ -124,7 +124,7 @@ Burada şu işlemler doğrulanmadı:
 6. Son Windows EXE'sinin açılışı, tek dosya dağıtımı, SmartScreen ve gerçek ekran ölçeklemesi.
 
 Canlı testler için örnek, gözden çıkarılabilir CAD kopyalarıyla Windows üzerinde
-`tests/test_naming_native_live.py` ve `tests/test_tolerance_stack_live.py`
+`modules/naming/tests/test_naming_native_live.py` ve `modules/tolerance_stack/tests/test_tolerance_stack_live.py`
 çalıştırılabilir. Gerekli ortam değişkenleri bu dosyaların başında açıklanır.
 Kopyaya yazma testi ayrıca açık seçime bağlıdır; kaynak üzerine yazılmaz.
 Bu test çalışması için yeni EXE üretilmedi.

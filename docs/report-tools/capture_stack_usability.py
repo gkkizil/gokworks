@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from PySide6.QtCore import QEventLoop,QTimer
 from gui_qt.app import MainWindow,create_application
-from tolerance_stack.calculator import calculate
+from modules.tolerance_stack.calculator import calculate
 
 
 def capture(destination):

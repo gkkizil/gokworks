@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QPainterPath
 from PySide6.QtWidgets import QWidget
 
-ASSETS = Path(__file__).resolve().parents[1] / 'gui/assets'
+ASSETS = Path(__file__).resolve().parents[1] / 'assets'
 
 
 def set_application_identity():

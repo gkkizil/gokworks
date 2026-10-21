@@ -1,5 +1,10 @@
 # GOKWORKS — Qt migrasyon raporu
 
+21 Ekim 2026 güncellemesi: güncel Qt kaynakları artık `main` dalında;
+12 modül kod, arayüz ve testleriyle `modules/` altında toplanmıştır.
+[Güncel depo düzeni](repository-structure.md). Aşağıdaki ilk migrasyon dalı
+ve test sayıları o çalışmanın tarihsel kaydıdır.
+
 20 Ekim 2026 eklemesi: mevcut Qt mimarisine **Nesting · Sac maliyeti**
 sayfası eklendi; toplam 11 kalıcı modül vardır. Gerçek kontur NFP motoru,
 DXF/Excel/PDF, hesaplar ve ayrı Qt/regresyon testleri için
@@ -57,7 +62,7 @@ geometri arayüzüdür; Tk/Tcl nesnesi veya bitmap ekran kopyası kullanılmaz.
 [Tam değişiklik listesi](qt-migration/changed-files.txt) Git başlangıç commit’ine
 göre tutulur. Yeni uygulama `gui_qt/` içindedir: ana pencere, ayarlar, worker,
 tema/ikonlar, modeller, ortak bileşenler, vektör sahnesi ve dokuz sayfa.
-`main.py`, `pdf/window.py`, `gui/package_check.py` başlatma/kontrol yolları Qt’ye
+`main.py`, `modules/pdf/window.py`, `shared/package_check.py` başlatma/kontrol yolları Qt’ye
 yönlendirildi. Kullanılmayan eski yedi `window.py` mixin’i ve beş Tk GUI yardımcısı
 kaldırıldı; asılları `5f01e53` geçmişinde korunur.
 

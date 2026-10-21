@@ -132,7 +132,7 @@ H8/f7 elle kontrol: `EI=0`, `ES=+39 µm`, `es=−25 µm`, `ei=−50 µm`. Dolay�
 
 | Kaynak | Sabit commit | Kullanım |
 | --- | --- | --- |
-| [parkergreene/isofits](https://github.com/parkergreene/isofits/tree/d3083a941e8071bb12114a28a25274bf99c30ac0) | `d3083a9` | Delik/mil tablosu; `isotol` Python fonksiyonu gerçekten yürütülerek D>3 mm karşılaştırıldı. MIT bildirimi [saklandı](../iso_fits/ISOFITS-LICENSE.txt). |
+| [parkergreene/isofits](https://github.com/parkergreene/isofits/tree/d3083a941e8071bb12114a28a25274bf99c30ac0) | `d3083a9` | Delik/mil tablosu; `isotol` Python fonksiyonu gerçekten yürütülerek D>3 mm karşılaştırıldı. MIT bildirimi [saklandı](../modules/iso_fits/ISOFITS-LICENSE.txt). |
 | [lachr/Passungsrechner](https://github.com/lachr/Passungsrechner/tree/0289439b1883db363d92e38f1ab352817b4d5a47) | `0289439` | İkinci delik/mil sınır sapma tablosu, 1–400 mm. JavaScript arayüzü çalıştırılmadı; JSON sayıları karşılaştırıldı. |
 | [bell-jamie/iso-286](https://github.com/bell-jamie/iso-286/tree/6580fbecaf167249024c60e35c4b8fbbddb540f4) | `6580fbe` | IT, temel sapma ve delta tablolarından seçili sayısal veriler çıkarıldı. Rust kodu bu ortamda çalıştırılmadı. |
 | [saucecode/ISO286](https://github.com/saucecode/ISO286/tree/f455cecdfc6659f35002bc112e3667f4316eb086) | `f455cec` | Bağımsız IT genişlikleri ve C–H temel sapmaları; eksik sınıf uygulama kodu referans alınmadı. |

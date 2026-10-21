@@ -12,8 +12,8 @@ from PIL import ImageGrab
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from pdf.window import GokworksPdfApp
-from k_factor.window import MANUAL_TAB, AUTOMATIC_TAB
+from modules.pdf.window import GokworksPdfApp
+from modules.k_factor.window import MANUAL_TAB, AUTOMATIC_TAB
 
 
 def main():

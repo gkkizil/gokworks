@@ -11,8 +11,8 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from PIL import ImageGrab
-from pdf.settings import save_settings
-from pdf.window import GokworksPdfApp
+from shared.settings import save_settings
+from modules.pdf.window import GokworksPdfApp
 
 
 def audit(destination):

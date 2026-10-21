@@ -28,8 +28,8 @@ def summary(state='completed', total=1, processed=1, succeeded=1):
 
 if mode in ('com_export', 'com_failure'):
     from types import SimpleNamespace
-    from pdf import exporter
-    from pdf.process import run_worker
+    from modules.pdf import exporter
+    from modules.pdf.process import run_worker
     from tests.support.solidworks import FakeDrawing, FakePdfApp
 
     def variant(kind, value):

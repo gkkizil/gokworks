@@ -17,7 +17,7 @@ from PySide6.QtCore import QCoreApplication,QEvent,QTimer
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 from gui_qt.app import create_application,MainWindow
-from nesting.storage import load_project
+from modules.nesting.storage import load_project
 
 
 def validate(destination,cycles=10):

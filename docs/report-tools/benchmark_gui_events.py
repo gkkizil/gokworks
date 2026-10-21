@@ -13,7 +13,7 @@ parser.add_argument('repo', help='Checkout to measure (e.g. .)')
 parser.add_argument('output', help='Output JSON path')
 args = parser.parse_args()
 sys.path.insert(0, str(Path(args.repo).resolve()))
-from pdf.window import GokworksPdfApp
+from modules.pdf.window import GokworksPdfApp
 
 with TemporaryDirectory() as temporary:
     startup_begin = time.perf_counter()

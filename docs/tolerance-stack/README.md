@@ -1,7 +1,7 @@
 # Tolerans yığılması · geliştirme kanıtları
 
 [Kullanım, mimari, matematik ve CAD güvenliği](../tolerance-stack.md) ·
-[Örnek JSON / PDF / Excel](../../tolerance_stack/examples)
+[Örnek JSON / PDF / Excel](../../modules/tolerance_stack/examples)
 
 **Güncel arayüz:** [Sadeleştirilmiş kullanım akışı ve ekran görüntüleri](usability/README.md).
 Alt kısımdaki eski ekranlar önceki arayüzün geliştirme kayıtlarıdır.

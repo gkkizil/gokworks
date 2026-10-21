@@ -24,7 +24,7 @@ uzun GitHub/kaynak URL dökümü kaldırıldı. Dört sayfada bağlantı açıkl
 ve Excel'in **Malzemeler** sayfasında kalır; üçüncü taraf lisans bildirimleri
 [mevcut lisans belgesinde](../THIRD_PARTY_NOTICES.md) korunur.
 
-Kalıcı testler [test_nesting_pdf_report.py](../../tests/test_nesting_pdf_report.py)
+Kalıcı testler [test_nesting_pdf_report.py](../../modules/nesting/tests/test_nesting_pdf_report.py)
 ile gerçek PDF açar ve görüntüler: açık/koyu palet eşitliği, koyu glifler,
 beyaz kenarlar, uzun kod/açıklama/malzeme adı/SHA256, 90 örneğin eksiksizliği,
 tekrarlanan tablo başlıkları, sayfa sınırları, bağlantı yokluğu ve iptal sırasında
@@ -33,7 +33,7 @@ test okuyucusu PySide6 ile gelen QtPdf'dir. Renk ve yazı büyüklükleri ayrıc
 üretilmiş PDF üzerinden PyMuPDF ile okundu.
 
 Çalıştırma: `QT_QPA_PLATFORM=offscreen python -m pytest
-tests/test_nesting_pdf_report.py tests/test_nesting.py -q`.
+modules/nesting/tests/test_nesting_pdf_report.py modules/nesting/tests/test_nesting.py -q`.
 Son doğrulamada **56 test geçti**; mevcut ezdxf/pyparsing kullanımından
 gelen kullanımdan kaldırma uyarıları dışında hata görülmedi.
 

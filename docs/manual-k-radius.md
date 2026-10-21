@@ -2,7 +2,7 @@
 
 ## Doğrudan Sac-Levha parametreleri — 18 Ekim 2026
 
-Manuel montaj ataması artık `k_factor/sheetmetal_parameters.py` içindeki
+Manuel montaj ataması artık `modules/k_factor/sheetmetal_parameters.py` içindeki
 bağımsız parametre düzenleyicisini kullanır. `GetUseGaugeTable` sorgusu,
 büküm tablosu hesabı, alt büküm eşitleme ve görünür yarıçap ölçüsü taraması
 bu akışta bulunmaz. Günlükte işlemi durduran tablo API kodu `2`, bu yolun

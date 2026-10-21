@@ -2,7 +2,7 @@
 
 import unittest
 
-from k_factor import apply as ap
+from modules.k_factor import apply as ap
 from support.solidworks import (
     FakeApp,
     FakeAssembly,

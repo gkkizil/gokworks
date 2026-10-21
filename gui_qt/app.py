@@ -15,17 +15,18 @@ from .icons import BrandLogo, ASSETS, icon, set_application_identity
 from .components import label, button, scroll, show_details, Disclosure, card
 from . import services
 from solidworks import diagnostics
-from .pages.export import ExportPage
-from .pages.bom import BomPage
-from .pages.naming import NamingPage
-from .pages.kr import KrPage
-from .pages.bolt import BoltPage
-from .pages.torque import TorquePage
-from .pages.weight import WeightPage
-from .pages.iso import IsoPage
-from .pages.gdt import GdtPage
-from .pages.tolerance_stack import ToleranceStackPage
-from .pages.nesting import NestingPage
+from modules.pdf.ui import PdfPage
+from modules.dxf_dwg.ui import DxfDwgPage
+from modules.bom.ui import BomPage
+from modules.naming.ui import NamingPage
+from modules.k_factor.ui import KrPage
+from modules.bolt.ui import BoltPage
+from modules.bolt_torque.ui import TorquePage
+from modules.weight.ui import WeightPage
+from modules.iso_fits.ui import IsoPage
+from modules.geometric_tolerances.ui import GdtPage
+from modules.tolerance_stack.ui import ToleranceStackPage
+from modules.nesting.ui import NestingPage
 
 
 MODULES = (
@@ -130,7 +131,7 @@ class MainWindow(QMainWindow):
         self.connection_button = button('SolidWorks · Bağlantıyı kontrol et', self.check_connection)
         self.statusBar().addPermanentWidget(self.connection_button)
         # Build once; navigation only changes the visible page. No rebuild/COM on activation.
-        factories = dict(pdf=lambda: ExportPage(self, 'pdf'), dxf_dwg=lambda: ExportPage(self, 'dxf_dwg'),
+        factories = dict(pdf=lambda: PdfPage(self), dxf_dwg=lambda: DxfDwgPage(self),
                          bom=lambda: BomPage(self), naming=lambda: NamingPage(self), k_factor=lambda: KrPage(self),
                          iso_fits=lambda: IsoPage(self), geometric_tolerances=lambda: GdtPage(self),
                          tolerance_stack=lambda: ToleranceStackPage(self),

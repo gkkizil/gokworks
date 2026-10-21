@@ -35,7 +35,7 @@ def main():
             parent = git('rev-parse', 'FETCH_HEAD')
             git('read-tree', parent, env=env)
             blob = git('hash-object', '-w', '--stdin', data=content)
-            git('update-index', '--add', '--cacheinfo', '100644', blob, 'naming/examples/windows-bindings.json', env=env)
+            git('update-index', '--add', '--cacheinfo', '100644', blob, 'modules/naming/examples/windows-bindings.json', env=env)
             tree = git('write-tree', env=env)
             commit = git('-c', 'user.name=github-actions[bot]', '-c',
                 'user.email=41898282+github-actions[bot]@users.noreply.github.com',

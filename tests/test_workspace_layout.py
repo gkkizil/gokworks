@@ -6,7 +6,7 @@ import time
 from unittest.mock import patch
 
 
-from gui.window_geometry import window_sizes
+from shared.window_geometry import window_sizes
 
 
 class WindowBoundsTests(unittest.TestCase):

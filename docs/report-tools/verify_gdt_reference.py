@@ -12,7 +12,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from geometric_tolerances.catalog import CATALOG, ACTIVE
+from modules.geometric_tolerances.catalog import CATALOG, ACTIVE
 
 COMMIT = '841518cdd74f6a7dad3321d29937c49dc7dc4b1f'
 

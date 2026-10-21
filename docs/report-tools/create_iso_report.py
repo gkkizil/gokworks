@@ -31,7 +31,7 @@ def main():
     for item in screenshots:
         assert hashlib.sha256((ROOT/item['file']).read_bytes()).hexdigest() == item['sha256']
     assert sources['unexpected_differences'] == 0
-    assert sources['table_sha256'] == results['sha256']['iso_fits/tables.json']
+    assert sources['table_sha256'] == results['sha256']['modules/iso_fits/tables.json']
     gui = [r for r in results['tests'] if r['id'].startswith(('test_export_window.', 'test_gui_audit.', 'test_final_gui.'))
            or any(f'.{name}.' in r['id'] for name in ('KGuiTests', 'ManualGuiTests', 'IsoGuiTests', 'ManualIsoGuiTests'))]
     when = datetime.fromisoformat(results['finished_utc']).astimezone(ZoneInfo('Europe/Istanbul'))

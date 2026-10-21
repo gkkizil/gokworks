@@ -11,9 +11,9 @@ from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from geometric_tolerances.diagram import draw
-from geometric_tolerances.rules import specify
-from pdf.window import GokworksPdfApp
+from modules.geometric_tolerances.diagram import draw
+from modules.geometric_tolerances.rules import specify
+from modules.pdf.window import GokworksPdfApp
 
 BASELINE = '870f96c840caf72262d43e41cf51dd8bd67f3efc'
 
@@ -22,7 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, required=True)
     folder = parser.parse_args().output_dir.resolve()
-    source = subprocess.check_output(['git', 'show', BASELINE+':geometric_tolerances/diagram.py'],
+    source = subprocess.check_output(['git', 'show', BASELINE+':modules/geometric_tolerances/diagram.py'],
                                      cwd=ROOT, text=True)
     namespace = {'__name__': 'baseline_gdt_diagram'}
     exec(compile(source, 'baseline_gdt_diagram.py', 'exec'), namespace)
@@ -65,7 +65,7 @@ def main():
             app._on_close()
     folder.mkdir(parents=True, exist_ok=True)
     records.update(baseline_commit=BASELINE, baseline_diagram_sha256=hashlib.sha256(source.encode()).hexdigest(),
-                   current_diagram_sha256=hashlib.sha256((ROOT/'geometric_tolerances/diagram.py').read_bytes()).hexdigest(),
+                   current_diagram_sha256=hashlib.sha256((ROOT/'modules/geometric_tolerances/diagram.py').read_bytes()).hexdigest(),
                    native_tk_measurement=True)
     (folder/'drawing-before-after.json').write_text(json.dumps(records, indent=2)+'\n')
     print(json.dumps({key: records[key] for key in ('before', 'after')}, indent=2))

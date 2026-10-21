@@ -113,12 +113,12 @@ olduğu için aynı kalite ve hedef yüzdeyle ön yük/tork artar.
 
 ## Kaynak, test ve paketleme
 
-- `bolt_torque/rules.py`: bağımsız hesap, doğrulama, dayanım ve sonuç modeli.
-- `gui_qt/pages/torque.py`: mevcut kartlar/formlar, tema, ayarlar ve tek tuşla pano.
-- `gui_qt/torque_diagram.py`: canlı cıvata–somun kesiti ve yük/tork gösterimi.
-- `tests/test_bolt_torque.py`: referans sonuçlar, bütün sunulan çap/adım/kalite
+- `modules/bolt_torque/rules.py`: bağımsız hesap, doğrulama, dayanım ve sonuç modeli.
+- `modules/bolt_torque/ui.py`: mevcut kartlar/formlar, tema, ayarlar ve tek tuşla pano.
+- `modules/bolt_torque/diagram.py`: canlı cıvata–somun kesiti ve yük/tork gösterimi.
+- `modules/bolt_torque/tests/test_bolt_torque.py`: referans sonuçlar, bütün sunulan çap/adım/kalite
   kombinasyonları, M16 sınırı, birimler, manuel K, yüzdeler ve geçersiz girdiler.
-- `tests/test_bolt_torque_gui.py`: gerçek Qt girişleri, normal/ince adım,
+- `modules/bolt_torque/tests/test_bolt_torque_gui.py`: gerçek Qt girişleri, normal/ince adım,
   ayarların yeniden açılması, kopyalama, hata düzeltme, iki tema ve pencere boyutları.
 - Mevcut EXE kontrolü 12 modülü ve yeni tork/ön yük/pano sonuçlarını da kapsar.
   Doğrudan Python importu PyInstaller tarafından izlenir; ek veri dosyası veya
@@ -126,7 +126,7 @@ olduğu için aynı kalite ve hedef yüzdeyle ön yük/tork artar.
 
 ```bash
 python main.py
-python -m pytest tests/test_bolt_torque.py tests/test_bolt_torque_gui.py tests/test_bolt.py
+python -m pytest modules/bolt_torque/tests/test_bolt_torque.py modules/bolt_torque/tests/test_bolt_torque_gui.py modules/bolt/tests/test_bolt.py
 ```
 
 Bağımsız kullanım:

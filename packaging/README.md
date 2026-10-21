@@ -34,7 +34,7 @@ toplanır. Paket kontrolünde gerçek delikli DXF okunur, NFP yerleşimi yapıl�
 bir sonraki istenen Windows derlemesinde de gerçek EXE üzerinde çalışacaktır.
 
 Uygulama paketi yalnız çalıştırılan Python modüllerini, bağımlılıklarını,
-`gui/assets/` kaynaklarını ve `iso_fits/tables.json` verisini içerir.
+`assets/` kaynaklarını ve `modules/iso_fits/tables.json` verisini içerir.
 Testler, belgeler, ekran görüntüleri ve geçmiş raporlar EXE'ye eklenmez.
 
 Son başarılı paketin bağlantısı ana [README](../README.md) dosyasında bulunur.

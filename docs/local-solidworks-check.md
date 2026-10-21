@@ -105,8 +105,8 @@ yazma yapılmaz. Bu ayarlar otomatik kapatılmaz. Büküm payı türü 5 için
 
 [API kaynak kaydı](reports/k-radius/api-contract.json), yeniden indirilen
 2026 belge aynasını ve sabit GitHub commitindeki ana klasör örneğini ayrı
-kaynaklar olarak belirtir. [Ana unsur testleri](../tests/test_parent_k_radius.py)
-ve [dispatch testleri](../tests/test_kr_dispatch.py) API sözleşmesini test
+kaynaklar olarak belirtir. [Ana unsur testleri](../modules/k_factor/tests/test_parent_k_radius.py)
+ve [dispatch testleri](../modules/k_factor/tests/test_kr_dispatch.py) API sözleşmesini test
 nesneleriyle doğrular. Bu kanıtlar Windows/SolidWorks 2025'te kullanıcının
 modelinin veya açınımının çalıştırıldığı anlamına gelmez; yukarıdaki yerel
 kabul kontrolü hâlâ gereklidir.

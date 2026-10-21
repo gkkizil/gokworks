@@ -10,10 +10,10 @@ from PySide6.QtTest import QTest
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 from gui_qt.app import create_application,MainWindow,MODULES
-from bom.exporter import Part,Node,Result
-from naming.exporter import Document,Snapshot
-from nesting.storage import load_project
-from tolerance_stack.calculator import calculate
+from modules.bom.exporter import Part,Node,Result
+from modules.naming.exporter import Document,Snapshot
+from modules.nesting.storage import load_project
+from modules.tolerance_stack.calculator import calculate
 
 
 def main(destination):

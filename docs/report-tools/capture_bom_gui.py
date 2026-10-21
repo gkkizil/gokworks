@@ -12,11 +12,11 @@ from PIL import ImageGrab
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
-from bom.exporter import collect
-from gui.text import BOM_TREE_TAB
-from pdf.window import GokworksPdfApp
+from modules.bom.exporter import collect
+from shared.text import BOM_TREE_TAB
+from modules.pdf.window import GokworksPdfApp
 from support.solidworks import FakeAssembly, FakeApp
-from test_bom import Component
+from modules.bom.tests.test_bom import Component
 
 
 def settle(app, seconds=.35):
