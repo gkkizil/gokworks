@@ -80,10 +80,13 @@ AP242 yayınlaması ayrıca uygun SolidWorks MBD lisansı gerektirir.
 | [Hızlı tork hesabı](modules/bolt_torque/README.md) | M3–M36 metrik cıvatalar için kalite sınıfı, diş adımı, K katsayısı ve hedef ön yüke göre tahmini sıkma torku verir. |
 | [Ağırlık hesabı](modules/weight/README.md) | Malzeme, kesit, ölçü, boy ve adede göre ağırlık hesaplar. Malzemelerin tanımlı yoğunlukları otomatik kullanılır. |
 | [Nesting · Sac maliyeti](modules/nesting/README.md) | DXF konturlarını birden fazla levhaya yerleştirir; alan verimini, net/brüt/fire ağırlıklarını ve maliyetleri hesaplar. |
+| [Profil kesim optimizasyonu](modules/profile_cutting/README.md) | SolidWorks Weldments Cut List verilerini tarar; incelenen profilleri manuel listeye ekler, stok boyu ve testere payıyla 1D kesim planı oluşturur. |
 
 K/R değerlerini CAD dosyalarına yazmak ve tolerans yığılmasında teknik resim
 okumak veya anotasyon eklemek SolidWorks gerektirir. Bu araçların bağımsız
 hesapları ve manuel tolerans analizi SolidWorks olmadan kullanılabilir.
+Profil kesim planı da çevrimdışı çalışır; otomatik Weldments taraması açık ve
+lisanslı yerel SolidWorks gerektirir. [Kullanım ve doğrulama sınırları](modules/profile_cutting/README.md).
 
 ## Nasıl kullanılır?
 

@@ -32,6 +32,10 @@ ve `ui_dialogs.py` dosyalarına ayrılır. PDF ve DXF/DWG ekranlarının ortak
 düzeni `gui_qt/export.py` içindedir; modüller kendi `ui.py` girişine sahiptir.
 Ortak hesap ekranı `gui_qt/calculations.py` içindedir.
 
+`modules/profile_cutting/` 1D stok planı ve Weldments taramasını içerir.
+`solidworks.py` COM adaptörü, `scanner.py` tarama servisi, `optimizer.py` saf
+hesap motorudur; mevcut sac nesting paketini değiştirmez.
+
 ```bash
 python main.py
 python -m pytest

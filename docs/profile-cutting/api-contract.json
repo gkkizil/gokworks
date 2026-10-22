@@ -1,0 +1,215 @@
+[
+  {
+    "interface": "IPartDoc",
+    "method": "IsWeldment",
+    "signature": "200002",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "ISurface",
+    "method": "get_CylinderParams",
+    "signature": "20001c",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "ISurface",
+    "method": "IsPlane",
+    "signature": "200002",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "ISurface",
+    "method": "IsCylinder",
+    "signature": "200002",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "ISurface",
+    "method": "get_ICylinderParams",
+    "signature": "20000d",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IFace2",
+    "method": "get_Normal",
+    "signature": "20001c",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IFace2",
+    "method": "GetClosestPointOn",
+    "signature": "20031c0d0d0d",
+    "parameters": [
+      "",
+      "X",
+      "Y",
+      "Z"
+    ]
+  },
+  {
+    "interface": "IFace2",
+    "method": "IGetClosestPointOn",
+    "signature": "20030d0d0d0d",
+    "parameters": [
+      "",
+      "X",
+      "Y",
+      "Z"
+    ]
+  },
+  {
+    "interface": "IModelDocExtension",
+    "method": "GetPersistReference3",
+    "signature": "20011c1c",
+    "parameters": [
+      "",
+      "DispObj"
+    ]
+  },
+  {
+    "interface": "IModelDocExtension",
+    "method": "IGetPersistReference3",
+    "signature": "2002051c08",
+    "parameters": [
+      "",
+      "DipsObj",
+      "Count"
+    ]
+  },
+  {
+    "interface": "ICustomPropertyManager",
+    "method": "GetNames",
+    "signature": "20001c",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "ICustomPropertyManager",
+    "method": "IGetNames",
+    "signature": "20010e08",
+    "parameters": [
+      "",
+      "Count"
+    ]
+  },
+  {
+    "interface": "ICustomPropertyManager",
+    "method": "Get6",
+    "signature": "2006080e02100e100e10021002",
+    "parameters": [
+      "",
+      "FieldName",
+      "UseCached",
+      "ValOut",
+      "ResolvedValOut",
+      "WasResolved",
+      "LinkToProperty"
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "GetBodyCount",
+    "signature": "200008",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "GetBodies",
+    "signature": "20001c",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "IGetBodies",
+    "signature": "200112863808",
+    "parameters": [
+      "",
+      "Count"
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "GetAutomaticCutList",
+    "signature": "200002",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "SetAutomaticCutList",
+    "signature": "20010202",
+    "parameters": [
+      "",
+      "CutList"
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "UpdateCutList",
+    "signature": "200002",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "GetCutListType",
+    "signature": "200008",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "GetAutomaticUpdate",
+    "signature": "200002",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "SetAutomaticUpdate",
+    "signature": "20010202",
+    "parameters": [
+      "",
+      "Update"
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "GetCutListSortOptions",
+    "signature": "20001c",
+    "parameters": [
+      ""
+    ]
+  },
+  {
+    "interface": "IBodyFolder",
+    "method": "SortCutList",
+    "signature": "2002021c02",
+    "parameters": [
+      "",
+      "CutListSortOptions",
+      "IgnoreInvalidFacesOrFeatures"
+    ]
+  }
+]

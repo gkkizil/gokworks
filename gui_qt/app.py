@@ -28,6 +28,7 @@ from modules.geometric_tolerances.ui import GdtPage
 from modules.tolerance_stack.ui import ToleranceStackPage
 from modules.nesting.ui import NestingPage
 from modules.cad_converter.ui import CadConverterPage
+from modules.profile_cutting.ui import ProfileCuttingPage
 
 
 MODULES = (
@@ -44,6 +45,7 @@ MODULES = (
     ('bolt_torque', 'Hızlı tork hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('weight', 'Ağırlık hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
+    ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
 )
 
 
@@ -139,7 +141,8 @@ class MainWindow(QMainWindow):
                          iso_fits=lambda: IsoPage(self), geometric_tolerances=lambda: GdtPage(self),
                          tolerance_stack=lambda: ToleranceStackPage(self),
                          bolt=lambda: BoltPage(self), bolt_torque=lambda: TorquePage(self),
-                         weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self))
+                         weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self),
+                         profile_cutting=lambda: ProfileCuttingPage(self))
         for mode, factory in factories.items():
             page = factory()
             page.statusChanged.connect(lambda text, error, page=page: self.page_status(page, text, error))

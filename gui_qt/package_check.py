@@ -80,6 +80,25 @@ def check(output):
         assert cad.files_model.rowCount() == 1
         cad.results.clear_button.click()
         assert not cad.sources and cad.files_model.rowCount() == 0
+        from modules.profile_cutting.models import Project, Demand, ScanResult, ScanRow, transfer
+        from modules.profile_cutting.optimizer import optimize as profile_optimize, validate_plan
+        from modules.profile_cutting.storage import save as profile_save, load as profile_load, export_report as profile_report
+        profiles = w.pages['profile_cutting']
+        profiles.project = Project([Demand('manual','50×30×2','S355JR','1200',2)])
+        fixture_scan = ScanResult('fixture.SLDPRT','Default',[
+            ScanRow('fixture','fixture.SLDPRT','Default','Cut-List-1','40×40×2','S235JR','1000',5,
+                    geometry_verified=True)], scanned_parts=1, weldments=1)
+        assert transfer(profiles.project,fixture_scan)['added'] == 1
+        assert transfer(profiles.project,fixture_scan)['duplicate'] == 1
+        profiles.refresh_demands()
+        profile_plan = profile_optimize(profiles.project)
+        validate_plan(profiles.project,profile_plan)
+        assert len(profile_plan.bars) == 2 and sum(len(b.cuts) for b in profile_plan.bars) == 7
+        profiles.handle_events([('profile_plan',profile_plan)])
+        assert profiles.diagram.vector.tagged['stock']
+        profile_save(profiles.project,fixture_scan,Path(folder)/'profiles.gokprofile')
+        assert profile_load(Path(folder)/'profiles.gokprofile')[0] == profiles.project
+        profile_report(profiles.project,fixture_scan,profile_plan,Path(folder)/'profiles.csv')
         kr = w.pages['k_factor']
         kr.tabs.setCurrentIndex(1)
         kr.helper.set_value('punch_type', 'Kaz boynu')
@@ -250,6 +269,7 @@ def check(output):
                       kr_assignment_engine='embedded Python SheetMetal parameters',
                       pdf_export_engine='isolated COM process',
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
+                        '1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM',
                         '3D CAD converter / eight formats / queue, options and clear / no live COM',
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'hole nesting / five parts on one plate / contour cut-order CSV',

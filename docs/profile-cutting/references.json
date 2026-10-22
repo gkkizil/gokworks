@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-22",
+  "references": [
+    {
+      "repository": "https://github.com/xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "license": "MIT",
+      "review": "Feature/BodyFolder traversal and Get6 evaluated/raw property contract reviewed. Python implementation written for GOKWORKS; existing MIT notice preserved.",
+      "license_url": "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/LICENSE.md",
+      "license_sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+      "notice": "packaging/licenses/tolerance-stack/CodeStack-MIT.txt"
+    },
+    {
+      "repository": "https://github.com/SimonRafferty/Solidworks_Macros",
+      "commit": "05abb6c72c5b9b787e828b95d905d47c20365600",
+      "license": "Unverified; no LICENSE file found",
+      "review": "Weldment Cut List README workflow reviewed. Binary SWP macro not run or copied."
+    },
+    {
+      "repository": "https://github.com/edgarev/SolidWorks-Macros",
+      "commit": "8c88d59144fe1567c36a7b47a08261fb178682ab",
+      "license": "GPL-3.0",
+      "review": "README/property workflows and license reviewed. No GPL code or binaries copied or added as runtime dependency."
+    }
+  ],
+  "official_docs_fetches": [
+    {
+      "name": "codestack-properties.vba",
+      "url": "https://raw.githubusercontent.com/xarial/codestack/master/solidworks-api/data-storage/custom-properties/read-all-properties/Macro.vba",
+      "bytes": 4458,
+      "excerpt": "Dim swApp As SldWorks.SldWorks\n\nSub main()\n\n    Set swApp = Application.SldWorks\n    \n    Dim swModel As SldWorks.ModelDoc2\n    Set swModel = swApp.ActiveDoc\n    \n    If Not swModel Is Nothing Then\n        PrintGeneralPr"
+    },
+    {
+      "name": "codestack-license",
+      "url": "https://raw.githubusercontent.com/xarial/codestack/master/LICENSE",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "name": "simon-license",
+      "url": "https://raw.githubusercontent.com/SimonRafferty/Solidworks_Macros/master/LICENSE",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "name": "edgarev-license",
+      "url": "https://raw.githubusercontent.com/edgarev/SolidWorks-Macros/master/LICENSE",
+      "bytes": 35149,
+      "excerpt": "                    GNU GENERAL PUBLIC LICENSE\n                       Version 3, 29 June 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim "
+    },
+    {
+      "name": "bodyfolder-update.html",
+      "url": "https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IBodyFolder~UpdateCutList.html",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "name": "get6.html",
+      "url": "https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICustomPropertyManager~Get6.html",
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    }
+  ],
+  "api_metadata": {
+    "assembly": "SolidWorks.Interop.sldworks 32.1.0 / 2024 SP1",
+    "source": "https://www.nuget.org/packages/SolidWorks.Interop.sldworks/32.1.0",
+    "sha256": "8f535bcd3310cfd878781d1581425a07a278c7d7fad0b73f96f57920c88b9df0",
+    "redistributed": false
+  }
+}

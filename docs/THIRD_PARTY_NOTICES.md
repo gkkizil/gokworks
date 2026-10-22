@@ -1,5 +1,16 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Weldments ve profil kesim · 22 Ekim 2026
+
+Xarial CodeStack (MIT), SimonRafferty/Solidworks_Macros (lisans doğrulanamadı)
+ve edgarev/SolidWorks-Macros (GPL-3.0) kaynakları incelendi. Python uygulaması
+GOKWORKS için yazıldı; GPL veya lisansı doğrulanmamış makro/binary kopyalanmadı.
+Mevcut CodeStack MIT bildirimi `packaging/licenses/tolerance-stack/` altında
+korunur. Yeni çalışma bağımlılığı yoktur. SolidWorks interop DLL metadata’sı
+yalnız API sözleşmesi araştırmasında okundu ve dağıtıma eklenmez.
+[Pinlenmiş araştırma kaydı](profile-cutting/references.json) ·
+[Kapsam ve testler](PROFILE_CUTTING_IMPLEMENTATION.md).
+
 ## 3D Dönüştürücü · 22 Ekim 2026
 
 CodeStack, xCAD, codestackdev/solidworks-api-examples ve

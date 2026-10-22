@@ -38,6 +38,7 @@ from modules.weight.rules import calculate as weight
 from modules.iso_fits.rules import calculate as fit
 from modules.tolerance_stack.calculator import calculate as stack
 from modules.nesting.accounting import mass
+from modules.profile_cutting.optimizer import optimize as profile_cutting
 assert not any(name in sys.modules for name in ('PySide6', 'tkinter', 'customtkinter', 'pythoncom'))
 '''
     subprocess.run([sys.executable,'-c',code],cwd=ROOT,check=True,timeout=20)

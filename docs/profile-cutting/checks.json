@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-22",
+  "platform": "Linux / Qt offscreen",
+  "source_base_commit": "4ed42e2c92fc6d93670153ee09100b5bf961c245",
+  "working_tree_tested": true,
+  "module": {
+    "command": "QT_QPA_PLATFORM=offscreen python -m pytest -q modules/profile_cutting/tests",
+    "tests": 65,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 64
+  },
+  "regressions": {
+    "command": "QT_QPA_PLATFORM=offscreen python packaging/run_windows_tests.py",
+    "tests": 2004,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 9,
+    "collected": 1126,
+    "ordinary_passed": 1117,
+    "subtests_passed": 878,
+    "process_batches": 36,
+    "note": "Full application regression pass; final scanner/transfer refinements also covered by the later full module rerun."
+  },
+  "selfcheck": "passed: 14 modules / two themes / four resolutions / local reports and profile quantities",
+  "independent_optimizer_oracle": "passed: 100 deterministic cases against subset DP; see test_optimizer_oracle.py",
+  "compileall": "passed",
+  "git_diff_check": "passed",
+  "windows_exe_built": false,
+  "solidworks_live_tested": false,
+  "live_test": "Prepared opt-in modules/profile_cutting/tests/test_live.py; skipped on Linux.",
+  "file_sha256": {
+    "modules/profile_cutting/__init__.py": "5c55da84002cf02696f2309adff610ca39182fd6118805d62601a95b2334dd09",
+    "modules/profile_cutting/dialogs.py": "0c0cbef29de035f1517a0e39154756c473fda931fc9e2f280a34af8b0403c8db",
+    "modules/profile_cutting/geometry.py": "89e46d4e7bd1fd2149cc18696ddbf699be5270a2848783db83ff1635e12a2e54",
+    "modules/profile_cutting/models.py": "3cb4d2a0796d1455c1b18337342ef15cbee6de8f808d93ded713e06f26298781",
+    "modules/profile_cutting/optimizer.py": "29fd6a503dc9e8f7181e3e65f485ca3393e1779a7cf7481b16b5a4ec5735c979",
+    "modules/profile_cutting/properties.py": "182e16a8cd492e6da16127681c580fc31ac30c2ce5e163a565e54454cbadaf21",
+    "modules/profile_cutting/scanner.py": "1ab7032c7598cdf1697e52fa14ade8abcb318877d752d864be631abe9ddb3f02",
+    "modules/profile_cutting/solidworks.py": "95d0d1137ae1164102e4718864695058aff03df8b451da904676eeb6ac15892f",
+    "modules/profile_cutting/storage.py": "c6ab8ee8132d39a638147db95518dedd21303bb7b89e279a5fe72894a0ebd8c9",
+    "modules/profile_cutting/ui.py": "7abb95f519fb6b3e598f0c4f3aebfe5811192bd828a3d7715276816ebc04cbee",
+    "gui_qt/app.py": "30e6e688ea88d6779784e5aae8793a58b8d71c5b73ab3c6cb9a81554e67af3a8",
+    "gui_qt/icons.py": "8db447da26fb4415c35541cb56eda498a8d661a04fbc3a81fb65491662909ed5",
+    "gui_qt/package_check.py": "068f5606c3b1aded117600dae085b2136231bb3ac3c3af9f76e59be76bf45dc3",
+    "packaging/build_windows.py": "0749db1a51a2d59741f3cb98d10a10daadca628089dd01454c9068e2beab9a32"
+  }
+}

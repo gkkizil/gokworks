@@ -19,6 +19,7 @@ varsa `examples/` örnekleri aynı klasördedir. Hesap motorları arayüzü baş
 | Hızlı tork hesabı | [bolt_torque](bolt_torque) | [ui.py](bolt_torque/ui.py) |
 | Ağırlık hesabı | [weight](weight) | [ui.py](weight/ui.py) |
 | Nesting · Sac maliyeti | [nesting](nesting) | [ui.py](nesting/ui.py) |
+| Profil kesim optimizasyonu / Weldments | [profile_cutting](profile_cutting) | [ui.py](profile_cutting/ui.py) |
 
 Örnek düzen:
 

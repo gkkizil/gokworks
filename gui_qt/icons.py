@@ -52,6 +52,12 @@ def icon(name, color='#80B6F5'):
         painter.drawRect(10, 11, 14, 12)
         painter.drawRect(28, 11, 10, 24)
         painter.drawRect(10, 27, 14, 8)
+    elif name == 'profile_cutting':
+        for y in (10, 24, 38):
+            painter.drawRect(5, y-4, 38, 8)
+        for x in (18, 31): painter.drawLine(x, 6, x, 14)
+        painter.drawLine(26, 20, 26, 28)
+        painter.drawLine(14, 34, 14, 42)
     elif name == 'weight':
         painter.drawRect(8, 15, 31, 26)
         painter.drawArc(16, 4, 15, 20, 0, 180 * 16)

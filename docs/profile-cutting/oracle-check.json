@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "cases": 100,
+  "seed": 20261022,
+  "max_pieces": 10,
+  "oracle": "Independent subset DP: minimum bin count, then current-bin load; integers including allowance, kerf and two-end trim.",
+  "tested": "Best-fit + bounded exact search",
+  "date": "2026-10-22",
+  "reproducer": "modules/profile_cutting/tests/test_optimizer_oracle.py"
+}
