@@ -1,10 +1,14 @@
 {
   "commit": "9e9bfbf93cb832d43c196f84283e4577deb08890",
-  "status": "building",
+  "status": "success",
   "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39745434934",
-  "download_url": "",
-  "artifact_url": "",
-  "setup_steps": {},
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39745434934-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/39745434934/artifacts/12411578814",
+  "setup_steps": {
+    "checkout": "success",
+    "python": "success",
+    "dependencies": "success"
+  },
   "display": {
     "before": [
       1024,
@@ -99,5 +103,719 @@
         64
       ]
     ]
-  }
+  },
+  "bytes": 86233880,
+  "sha256": "d8c86aa7f941c21c17386642d6a1f12c2f8c98b549c36245193b830160ccff55",
+  "smoke": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "distribution": "onefile",
+    "external_qt_verified": false,
+    "pdf_exit_observer": "passed",
+    "python": "3.13.16",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "qt_platform": "windows",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "cad_converter",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "nesting"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 542.14,
+    "navigation_median_ms": 17.05,
+    "navigation_max_ms": 63.91,
+    "resize_median_ms": 26.53,
+    "resize_max_ms": 86.8,
+    "table_50000_load_ms": 90.2,
+    "table_50000_filter_ms": 98.72,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "pdf_export_engine": "isolated COM process",
+    "solidworks_live_tested": false,
+    "checks": [
+      "13 modules",
+      "two themes",
+      "resolution matrix",
+      "3D CAD converter / eight formats / queue, options and clear / no live COM",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "hole nesting / five parts on one plate / contour cut-order CSV",
+      "nesting shared parts-and-layout workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "distribution": "onefile",
+  "smoke_scales": [
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.25,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "cad_converter",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "nesting"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 574.82,
+      "navigation_median_ms": 21.14,
+      "navigation_max_ms": 64.71,
+      "resize_median_ms": 22.96,
+      "resize_max_ms": 88.51,
+      "table_50000_load_ms": 94.04,
+      "table_50000_filter_ms": 92.99,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "13 modules",
+        "two themes",
+        "resolution matrix",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": true,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.5,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "cad_converter",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "nesting"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 508.81,
+      "navigation_median_ms": 22.11,
+      "navigation_max_ms": 56.65,
+      "resize_median_ms": 23.8,
+      "resize_max_ms": 65.33,
+      "table_50000_load_ms": 96.97,
+      "table_50000_filter_ms": 96.86,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "13 modules",
+        "two themes",
+        "resolution matrix",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.0,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "cad_converter",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "nesting"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 542.14,
+      "navigation_median_ms": 17.05,
+      "navigation_max_ms": 63.91,
+      "resize_median_ms": 26.53,
+      "resize_max_ms": 86.8,
+      "table_50000_load_ms": 90.2,
+      "table_50000_filter_ms": 98.72,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "13 modules",
+        "two themes",
+        "resolution matrix",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    }
+  ],
+  "regressions": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "57.221",
+      "timestamp": "2026-10-22T08:10:02.223013+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "32",
+      "time": "77.878",
+      "timestamp": "2026-10-22T08:11:00.008658+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "66.247",
+      "timestamp": "2026-10-22T08:12:18.382946+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "57.977",
+      "timestamp": "2026-10-22T08:13:25.195323+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "78.630",
+      "timestamp": "2026-10-22T08:14:23.706203+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "37",
+      "time": "47.331",
+      "timestamp": "2026-10-22T08:15:42.915594+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "117",
+      "time": "2.062",
+      "timestamp": "2026-10-22T08:16:31.044433+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "36",
+      "time": "0.078",
+      "timestamp": "2026-10-22T08:16:33.556193+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.076",
+      "timestamp": "2026-10-22T08:16:33.912529+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "38",
+      "time": "31.095",
+      "timestamp": "2026-10-22T08:16:34.265276+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "37",
+      "time": "1.121",
+      "timestamp": "2026-10-22T08:17:05.935793+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "32",
+      "time": "10.385",
+      "timestamp": "2026-10-22T08:17:07.527504+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "7.421",
+      "timestamp": "2026-10-22T08:17:18.407008+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "34",
+      "time": "0.624",
+      "timestamp": "2026-10-22T08:17:26.310493+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "62",
+      "time": "0.962",
+      "timestamp": "2026-10-22T08:17:27.587468+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "51",
+      "time": "0.705",
+      "timestamp": "2026-10-22T08:17:28.952623+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "289",
+      "time": "15.154",
+      "timestamp": "2026-10-22T08:17:30.022510+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "290",
+      "time": "0.514",
+      "timestamp": "2026-10-22T08:17:45.803471+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "50",
+      "time": "0.438",
+      "timestamp": "2026-10-22T08:17:46.821261+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "56",
+      "time": "20.440",
+      "timestamp": "2026-10-22T08:17:47.810428+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "52",
+      "time": "0.486",
+      "timestamp": "2026-10-22T08:18:08.949442+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "46",
+      "time": "0.487",
+      "timestamp": "2026-10-22T08:18:09.978939+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "70",
+      "time": "0.762",
+      "timestamp": "2026-10-22T08:18:11.048950+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "2",
+      "tests": "37",
+      "time": "0.654",
+      "timestamp": "2026-10-22T08:18:12.364931+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "2.502",
+      "timestamp": "2026-10-22T08:18:13.611742+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "7.867",
+      "timestamp": "2026-10-22T08:18:16.691876+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "35.434",
+      "timestamp": "2026-10-22T08:18:25.197450+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "36",
+      "time": "29.673",
+      "timestamp": "2026-10-22T08:19:01.447980+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "40",
+      "time": "1.545",
+      "timestamp": "2026-10-22T08:19:31.975134+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.329",
+      "timestamp": "2026-10-22T08:19:33.905969+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "55.850",
+      "timestamp": "2026-10-22T08:19:34.638445+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "2",
+      "tests": "32",
+      "time": "17.759",
+      "timestamp": "2026-10-22T08:20:31.218267+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "77",
+      "time": "0.778",
+      "timestamp": "2026-10-22T08:20:49.777259+00:00",
+      "hostname": "runnervmuzpk7"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "38",
+      "time": "0.057",
+      "timestamp": "2026-10-22T08:20:51.122740+00:00",
+      "hostname": "runnervmuzpk7"
+    }
+  ],
+  "test_failures": [],
+  "test_skips": [
+    {
+      "name": "tests.test_process_watch.test_observer_cli_bypasses_gui_and_cad_on_unsupported_platform",
+      "reason": "The unsupported-platform case is specific to non-Windows."
+    },
+    {
+      "name": "modules.cad_converter.tests.test_live.test_real_solidworks_export_from_explicit_test_copy",
+      "reason": "Requires Windows, open SolidWorks and explicit GOKWORKS_CAD_LIVE_SOURCE test copy"
+    },
+    {
+      "name": "modules.dxf_dwg.tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
+      "reason": "Unix hard-link publication path"
+    },
+    {
+      "name": "modules.naming.tests.test_naming_native.test_windows_powershell_compiles_real_typed_host_without_starting_solidworks",
+      "reason": "Windows PowerShell ve doğrulanmış test interop DLL’si seçilmedi."
+    },
+    {
+      "name": "modules.naming.tests.test_naming_native_live.test_live_typed_pack_reads_dependencies_without_saving_or_renaming_sources",
+      "reason": "Gerçek Windows/SolidWorks ve açıkça seçilmiş Pack and Go montajı yok."
+    },
+    {
+      "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_read_all_sheets_is_readonly_and_revision_matches",
+      "reason": "Gerçek SolidWorks/Windows ve GOKWORKS_TEST_SLDDRW seçimi yok; canlı CAD testi çalıştırılmadı."
+    },
+    {
+      "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_native_analysis_copy_preserves_original_and_model_references",
+      "reason": "Ayrı analizli kopya kaydı için açık opt-in yok."
+    }
+  ]
 }
