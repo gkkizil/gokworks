@@ -69,6 +69,17 @@ def check(output):
         assert weight.result.total_mass_kg == 157
         assert w.pages['iso_fits'].result is not None
         assert w.pages['geometric_tolerances'].result is not None
+        from modules.cad_converter.formats import FORMATS
+        from modules.cad_converter.models import Source
+        cad = w.pages['cad_converter']
+        cad.form.set_value('output', str(Path(folder)/'CAD-export'))
+        cad.handle_events([('cad_sources', [Source(str(Path(folder)/'Sample.SLDPRT'))])])
+        cad.format_checks['xt'].setChecked(True)
+        assert cad.options().formats == ('step214', 'xt')
+        assert len(FORMATS) == 8 and {f.protocol for f in FORMATS if f.protocol} == {203, 214, 242}
+        assert cad.files_model.rowCount() == 1
+        cad.results.clear_button.click()
+        assert not cad.sources and cad.files_model.rowCount() == 0
         kr = w.pages['k_factor']
         kr.tabs.setCurrentIndex(1)
         kr.helper.set_value('punch_type', 'Kaz boynu')
@@ -239,6 +250,7 @@ def check(output):
                       kr_assignment_engine='embedded Python SheetMetal parameters',
                       pdf_export_engine='isolated COM process',
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
+                        '3D CAD converter / eight formats / queue, options and clear / no live COM',
                       'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'hole nesting / five parts on one plate / contour cut-order CSV',
                       'nesting shared parts-and-layout workspace / document plate tabs',

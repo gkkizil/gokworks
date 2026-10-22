@@ -9,7 +9,7 @@ yeniden yazılmaz.
 ```text
 gokworks/
 ├── main.py          # Uygulama, PDF işçisi ve öz denetim girişleri
-├── modules/         # 12 özellik: kod + ui.py + tests + örnekler
+├── modules/         # Her özellik: kod + ui.py + tests + örnekler
 ├── gui_qt/          # Ortak Qt kabuğu, tema, bileşenler ve iş yönetimi
 ├── shared/          # JSON ayarları ve paylaşılan Python yardımcıları
 ├── solidworks/      # Ortak COM bağlantısı, tanılama ve süreç yönetimi

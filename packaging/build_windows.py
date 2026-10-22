@@ -106,6 +106,7 @@ def main():
         'Tolerans yığılması manuel analiz, Monte Carlo ve PDF/Excel raporları yerel çalışır.\n'
         'Teknik resim ölçü okuma/anotasyon işlemleri için açık SolidWorks oturumu gerekir.\n'
         'CAD aktarımı ve montaj işlemleri için SolidWorks kurulu ve açık olmalıdır.\n'
+        '3D Dönüştürücü; STEP AP203/AP214, Parasolid, IGES ve STL aktarır. AP242 için MBD lisansı gerekir.\n'
         'PDF aktarımı ayrı yardımcı süreçte çalışır; hata kayıtları %LOCALAPPDATA%\\GOKWORKS\\logs altındadır.\n'
         'Ayarlar %APPDATA%\\GOKWORKS altında saklanır.\n'
         'Bu deneme paketi kod imzası taşımaz.\n\n'

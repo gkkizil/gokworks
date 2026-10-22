@@ -61,10 +61,12 @@ gerekmez. CAD entegrasyonu mevcut SolidWorks kurulumunuzu kullanır.
 | --- | --- |
 | [PDF aktarımı](modules/pdf/README.md) | Klasördeki `.SLDDRW` dosyalarını tarar; her teknik resmin tüm sayfalarını tek bir PDF’e aktarır. |
 | [DXF / DWG](modules/dxf_dwg/README.md) | Sac parçalarının açınımlarını dışa aktarır; kalınlık ve aktif montajdaki adet bilgisiyle dosyaları düzenler. |
+| [3D Dönüştürücü](modules/cad_converter/README.md) | SLDPRT/SLDASM modellerini birden fazla STEP, Parasolid, IGES ve STL formatına toplu aktarır; konfigürasyon ve montaj bileşeni seçenekleri vardır. |
 | [BOM · Ürün ağacı](modules/bom/README.md) | Aktif montajın parça listesini, alt montaj hiyerarşisini, adetlerini ve okunabilen ağırlıklarını çıkarır; Excel’e kaydeder. |
 | [İsimlendirme aracı](modules/naming/README.md) | Montaj, parça ve teknik resim referanslarını koruyarak yeni adlarla ayrı bir Pack and Go paketi oluşturur. |
 
-Bu dört modül için SolidWorks bağlantısı gerekir.
+Bu aktarım modülleri için SolidWorks bağlantısı gerekir. 3D Dönüştürücüde
+AP242 yayınlaması ayrıca uygun SolidWorks MBD lisansı gerektirir.
 
 ### Mühendislik hesapları
 

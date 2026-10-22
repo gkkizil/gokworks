@@ -1,0 +1,92 @@
+[
+  {
+    "project": "xarial/codestack",
+    "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+    "path": "LICENSE.md",
+    "url": "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/LICENSE.md",
+    "sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+    "bytes": 1075,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "xarial/codestack",
+    "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+    "path": "solidworks-api/import-export/export-multi-formats/Macro.vba",
+    "url": "https://github.com/xarial/codestack/blob/0cde3849a184cdbbface61238ef431a6ebb9d530/solidworks-api/import-export/export-multi-formats/Macro.vba",
+    "sha256": "c87e9bca14a638062534446e3aad28c59584c9669f88f2dcb1b4195575caaa6d",
+    "bytes": 9658,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "xarial/xcad",
+    "commit": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+    "path": "LICENSE.md",
+    "url": "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/LICENSE.md",
+    "sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+    "bytes": 1075,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "xarial/xcad",
+    "commit": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+    "path": "src/SolidWorks/Documents/SwSaveOperation.cs",
+    "url": "https://github.com/xarial/xcad/blob/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/src/SolidWorks/Documents/SwSaveOperation.cs",
+    "sha256": "b329e3b65fffabf15834d8ff89f80a48bc4c7a31b6bbf08a8b31ffccfc04169d",
+    "bytes": 18865,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "codestackdev/solidworks-api-examples",
+    "commit": "c92924a5d5b69d47345fb30de79ee8ba11fbf697",
+    "path": "LICENSE",
+    "url": "https://github.com/codestackdev/solidworks-api-examples/blob/c92924a5d5b69d47345fb30de79ee8ba11fbf697/LICENSE",
+    "sha256": "d279b2b36bddaadd561d97a1750c5c45f3a8e13f9c5273f6c126d769a803d800",
+    "bytes": 1067,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "codestackdev/solidworks-api-examples",
+    "commit": "c92924a5d5b69d47345fb30de79ee8ba11fbf697",
+    "path": "swex/add-in/export-components/csharp/ComponentExtension.cs",
+    "url": "https://github.com/codestackdev/solidworks-api-examples/blob/c92924a5d5b69d47345fb30de79ee8ba11fbf697/swex/add-in/export-components/csharp/ComponentExtension.cs",
+    "sha256": "c1341ffe218092419e6752a0ead7a722f0c3079484f8b7c03a75ba1a1c9ab9ba",
+    "bytes": 719,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "DalessandroJ/PythonOCC-CAD-Converter",
+    "commit": "1b8d192bc3bb3430215173cba163e238e58d7f73",
+    "path": "LICENSE",
+    "url": "https://github.com/DalessandroJ/PythonOCC-CAD-Converter/blob/1b8d192bc3bb3430215173cba163e238e58d7f73/LICENSE",
+    "sha256": "ab7c91f16069ae26c14c9ece6546a9605a4a34072504a643d6fc24055a06696d",
+    "bytes": 1069,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "DalessandroJ/PythonOCC-CAD-Converter",
+    "commit": "1b8d192bc3bb3430215173cba163e238e58d7f73",
+    "path": "converter.py",
+    "url": "https://github.com/DalessandroJ/PythonOCC-CAD-Converter/blob/1b8d192bc3bb3430215173cba163e238e58d7f73/converter.py",
+    "sha256": "4b0e9405bf8421846f286d0b7d584de434622a782aceb717a85fa037d9141dc7",
+    "bytes": 4467,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  },
+  {
+    "project": "DalessandroJ/PythonOCC-CAD-Converter",
+    "commit": "1b8d192bc3bb3430215173cba163e238e58d7f73",
+    "path": "gui.py",
+    "url": "https://github.com/DalessandroJ/PythonOCC-CAD-Converter/blob/1b8d192bc3bb3430215173cba163e238e58d7f73/gui.py",
+    "sha256": "90c4955570d61ba7cb69e38ee6c7ebd1817f48c017561e60436075bf39612653",
+    "bytes": 10183,
+    "license": "MIT",
+    "use": "Workflow/contract research only; original Python implementation; no source copied"
+  }
+]

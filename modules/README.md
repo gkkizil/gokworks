@@ -8,6 +8,7 @@ varsa `examples/` örnekleri aynı klasördedir. Hesap motorları arayüzü baş
 | --- | --- | --- |
 | PDF aktarımı | [pdf](pdf) | [ui.py](pdf/ui.py) |
 | DXF / DWG | [dxf_dwg](dxf_dwg) | [ui.py](dxf_dwg/ui.py) |
+| 3D Dönüştürücü | [cad_converter](cad_converter) | [ui.py](cad_converter/ui.py) |
 | BOM · Ürün ağacı | [bom](bom) | [ui.py](bom/ui.py) |
 | İsimlendirme / Pack and Go | [naming](naming) | [ui.py](naming/ui.py) |
 | K faktörü / yarıçap | [k_factor](k_factor) | [ui.py](k_factor/ui.py) |

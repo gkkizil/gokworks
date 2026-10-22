@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QPainterPath
 from PySide6.QtWidgets import QWidget
 
@@ -27,6 +27,11 @@ def icon(name, color='#80B6F5'):
         painter.drawRoundedRect(QRectF(11, 5, 27, 36), 3, 3)
         for y in (18, 25, 32):
             painter.drawLine(17, y, 31, y)
+    elif name == 'cad_converter':
+        painter.drawPolygon([QPointF(10, 14), QPointF(24, 6), QPointF(38, 14), QPointF(24, 22)])
+        painter.drawLine(10, 14, 10, 32); painter.drawLine(10, 32, 24, 41)
+        painter.drawLine(24, 22, 24, 41); painter.drawLine(24, 41, 38, 32)
+        painter.drawLine(38, 14, 38, 32)
     elif name in ('bom', 'naming'):
         painter.drawRect(5, 6, 13, 11)
         painter.drawLine(12, 17, 12, 37)

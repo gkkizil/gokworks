@@ -1,5 +1,18 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## 3D Dönüştürücü · 22 Ekim 2026
+
+CodeStack, xCAD, codestackdev/solidworks-api-examples ve
+DalessandroJ/PythonOCC-CAD-Converter depolarının ilgili aktarım kodu ve MIT
+lisansları incelendi. Python uygulaması bu proje için yazıldı; bu depolardan
+kod veya ikili bileşen kopyalanmadı. Mevcut CodeStack MIT bildirimi korunur.
+PythonOCC, PyQt5, CAD+ veya ticari haricî eklenti çalışma bağımlılığı değildir.
+Mevcut PySide6/pywin32/openpyxl kullanılır. SolidWorks interop DLL'leri yalnız
+API sözleşmesi araştırmasında okundu; dağıtıma eklenmez. Çalışırken kurulu
+SolidWorks'ün COM kaydı ve swconst tür kitaplığı kullanılır.
+[Sabit commit/lisans ve SHA256 kayıtları](cad-converter/references.json) ·
+[Uygulama ve doğrulama sınırları](CAD_CONVERTER_IMPLEMENTATION.md).
+
 ## Nesting ve sac maliyeti · 20 Ekim 2026
 
 Yeni çalışma bağımlılığı **Shapely 2.1.2 (BSD-3-Clause)** ve tekerlekteki

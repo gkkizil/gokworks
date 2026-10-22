@@ -27,11 +27,13 @@ from modules.iso_fits.ui import IsoPage
 from modules.geometric_tolerances.ui import GdtPage
 from modules.tolerance_stack.ui import ToleranceStackPage
 from modules.nesting.ui import NestingPage
+from modules.cad_converter.ui import CadConverterPage
 
 
 MODULES = (
     ('pdf', 'PDF aktarımı', 'AKTARIM VE MONTAJ'),
     ('dxf_dwg', 'DXF / DWG', 'AKTARIM VE MONTAJ'),
+    ('cad_converter', '3D Dönüştürücü', 'AKTARIM VE MONTAJ'),
     ('bom', 'BOM · Ürün ağacı', 'AKTARIM VE MONTAJ'),
     ('naming', 'İsimlendirme aracı', 'AKTARIM VE MONTAJ'),
     ('k_factor', 'K faktörü / yarıçap', 'MÜHENDİSLİK HESAPLARI'),
@@ -132,6 +134,7 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.connection_button)
         # Build once; navigation only changes the visible page. No rebuild/COM on activation.
         factories = dict(pdf=lambda: PdfPage(self), dxf_dwg=lambda: DxfDwgPage(self),
+                         cad_converter=lambda: CadConverterPage(self),
                          bom=lambda: BomPage(self), naming=lambda: NamingPage(self), k_factor=lambda: KrPage(self),
                          iso_fits=lambda: IsoPage(self), geometric_tolerances=lambda: GdtPage(self),
                          tolerance_stack=lambda: ToleranceStackPage(self),

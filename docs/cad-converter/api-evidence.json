@@ -1,0 +1,77 @@
+{
+  "source": "NuGet SolidWorks.Interop.swconst 32.1.0 / sldworks 32.1.0 (2024 SP1), Dassault Systèmes interop metadata; inspected, NOT bundled",
+  "dll_sha256": "c3f66a359c70caf1e43794ebf0809f168c72bfa8f7d93a543df5fe080359be31",
+  "enum_values_observed": {
+    "swAcisOutputAsSolidAndSurface": 0,
+    "swComponentFullyResolved": 2,
+    "swComponentInternalIdMismatch": 5,
+    "swComponentSuppressed": 0,
+    "swDocASSEMBLY": 2,
+    "swDocPART": 1,
+    "swDontRebuildActiveDoc": 1,
+    "swExportStlUnits": 211,
+    "swFileLoadWarning_AlreadyOpen": 128,
+    "swIGESComponentsIntoOneFile": 109,
+    "swIGESExportSolidAndSurface": 184,
+    "swINCHES": 3,
+    "swMM": 0,
+    "swOpenDocOptions_OverrideDefaultLoadLightweight": 64,
+    "swOpenDocOptions_ReadOnly": 2,
+    "swOpenDocOptions_Silent": 1,
+    "swPublishStep242_MBDLicenseNotAvailable": 4,
+    "swPublishStep242_Success": 0,
+    "swSTLAngleTolerance": 3,
+    "swSTLBinaryFormat": 69,
+    "swSTLComponentsIntoOneFile": 72,
+    "swSTLDeviation": 2,
+    "swSTLDontTranslateToPositive": 71,
+    "swSTLPreview": 191,
+    "swSTLQuality": 78,
+    "swSTLQuality_Coarse": 1,
+    "swSTLQuality_Custom": 3,
+    "swSTLQuality_Fine": 2,
+    "swSTLShowInfoOnSave": 70,
+    "swSaveAsCurrentVersion": 0,
+    "swSaveAsOptions_Copy": 2,
+    "swSaveAsOptions_Silent": 1,
+    "swStepAP": 75,
+    "swStepExportConfigurationData": 403,
+    "swStepExportPreference": 142,
+    "swIGESExportAsWireframe": 186,
+    "swIGESRepresentation": 83,
+    "swIGES_BREP": 3
+  },
+  "runtime": "No numerical fallback. Preference/option constants are read from the installed SolidWorks swconst TLB.",
+  "official_2025_docs_access": "Attempted official help.solidworks.com API URLs; proxy returned HTTP 403. Do not treat the 2024 metadata as a completed 2025 live validation.",
+  "signatures": {
+    "IModelDocExtension.SaveAs3": "bool(string Name, int Version, int Options, object ExportData, object AdvancedSaveAsOptions, out int Errors, out int Warnings)",
+    "IModelDocExtension.SaveAs": "bool(string Name, int Version, int Options, object ExportData, out int Errors, out int Warnings)",
+    "IModelDocExtension.PublishSTEP242File": "int(string Path)",
+    "ISldWorks.OpenDoc6": "ModelDoc2(string FileName, int Type, int Options, string Configuration, out int Errors, out int Warnings)",
+    "ISldWorks.ActivateDoc3": "object(string Name, bool UseUserPreferences, int Option, out int Errors)"
+  },
+  "length_internal_unit": "metre",
+  "angle_internal_unit": "radian",
+  "official_2025_references": [
+    {
+      "url": "https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISldWorks~OpenDoc6.html",
+      "access_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISldWorks~ActivateDoc3.html",
+      "access_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~PublishSTEP242File.html",
+      "access_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://help.solidworks.com/2025/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDocExtension~SaveAs3.html",
+      "access_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://help.solidworks.com/2025/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swUserPreferenceIntegerValue_e.html",
+      "access_error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    }
+  ]
+}
