@@ -1,7 +1,6 @@
 {
-  "request_id": "20261021-current-main-wide-desktop-084153",
-  "requested_at": "2026-10-21T08:41:53+00:00",
-  "source_commit": "02f008b8278c8288cf3f5d6a7dc3e88f57d64fb4",
-  "reason": "Produce the requested current-main standalone EXE. The transfer checks proved the Hyper-V desktop clamps requested 1440x900 windows to 1028x749; configure a real wide native desktop, retain the unchanged layout assertions, and run every collected regression in bounded processes. Publish only after native tests and three-scale frozen onefile checks pass. Do not update release or the backup repository.",
-  "diagnose_run": "39570576678"
+  "request_id": "20261022-current-main-cad-converter-onefile-060003",
+  "requested_at": "2026-10-22T06:00:03.838156+00:00",
+  "source_commit": "fff3cd86a1525eeb2415e3ae2e40eee11792beef",
+  "reason": "User requested a current standalone GOKWORKS.exe. Include the integrated 3D CAD converter (eight formats, configuration/component export, reports) and automatic nesting in holes. Run all native Windows regressions and frozen onefile checks at three DPI scales before publishing the direct EXE. Keep release and the backup repository unchanged."
 }
