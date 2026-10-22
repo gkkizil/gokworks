@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTreeView, QTabWi
 from modules.iso_fits import rules as r
 from modules.iso_fits import manual as m
 from modules.iso_fits.diagram import draw
-from modules.iso_fits.selection_diagram import draw_selection
 from gui_qt.calculations import CalculationPage
 from gui_qt.components import Disclosure, card, label, scroll, configure_view, show_details
 from gui_qt.models import TreeModel, FilterProxy, Column
@@ -81,7 +80,7 @@ class IsoPage(CalculationPage):
         self.extra_layout.addWidget(self.preset_section)
         self.search.textChanged.connect(self.preset_proxy.set_query)
         self.presets.clicked.connect(self.select_preset)
-        # The manual section includes result labels through y=290. Keep them
+        # The shared section includes result labels through y=290. Keep them
         # inside the scene and reserve matching space above the sample tabs.
         self.add_diagram('fit', 'Montaj ve tolerans şeması', height=320)
         self.diagram_tabs.setMaximumHeight(340)
@@ -285,8 +284,5 @@ class IsoPage(CalculationPage):
         rows += [('Şema açıklaması', self.section_help.text()), ('Kapsam', HELP)]
         self.present(rows)
         diagram = self.diagrams['fit']
-        if not manual and f.value('view') == 'Montaj kesiti':
-            diagram.render_geometry(lambda scene: draw_selection(scene, fit, self.appearance, 1, sample))
-        else:
-            diagram.render_geometry(lambda scene: draw(scene, fit, f.value('view'), sample, self.appearance, 1))
+        diagram.render_geometry(lambda scene: draw(scene, fit, f.value('view'), sample, self.appearance, 1))
         self.set_status('Ölçü sınırları güncel. ' + m.usage_hint(fit))

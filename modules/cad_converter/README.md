@@ -6,10 +6,14 @@ iş parçacığında yapılır; arayüze yalnız basit veri/sinyaller gönderili
 
 ## Kullanım
 
-1. **Dosya ekle**, **Klasör ekle** veya sürükle/bırak ile SLDPRT/SLDASM ekleyin.
+1. Sol üstteki **Kaynak dosyaları → Dosyaları seç…** ile çoklu dosya seçin
+   veya **Kaynak klasörü seç…** ile klasör ekleyin. Bu düğmeler ayarlar
+   kaydırılsa da görünür kalır. Sürükle/bırak da desteklenir.
    Alt klasör taraması varsayılan açıktır. Aynı fiziksel dosya tek kez eklenir;
    SLDDRW dosyaları bu araca alınmaz.
-2. Çıktı klasörünü ve bir veya birden fazla formatı seçin. Her format kendi
+2. Altındaki **Çıktı ve formatlar** bölümünde çıktı klasörünü ve bir veya
+   birden fazla formatı seçin. Kaynak seçimi çıktı klasörünü değiştirmez;
+   son seçilen kaynak klasörü ayrı hatırlanır. Her format kendi
    klasöründedir: STEP_AP203, STEP_AP214, STEP_AP242, PARASOLID_XT,
    PARASOLID_XB, IGES, STL_BINARY, STL_ASCII. Yalnız seçilenler oluşturulur.
 3. Aktif/bütün/seçilen konfigürasyonları seçin. **Konfigürasyonları oku** ile

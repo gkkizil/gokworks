@@ -1,4 +1,4 @@
-"""Tk üzerinde şematik montaj kesiti ve gerçek sapma ölçeğiyle bölge grafiği."""
+"""ISO ve manuel kontrol için ortak vektör kesiti ve sapma bölgesi grafiği."""
 
 from shared.theme import (INPUT, PANEL, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
                        SUCCESS, AMBER, RED, UI_FONT, PRIMARY_TEXT)

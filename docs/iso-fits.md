@@ -1,6 +1,17 @@
 # ISO geçme toleransları
 
-## ISO seçiminde sade görünüm — 16 Ekim 2026
+## ISO ve manuel kontrolde ortak kesit — 22 Ekim 2026
+
+Her iki hesap yöntemi de aynı vektör montaj kesitini kullanır. D/d çap okları,
+tek taraflı g oku, mavi mil, taralı delik gövdesi, kırmızı boyutsal çakışma ve
+seçilen örneğin sonuç yazıları aynı düzendedir. ISO seçiminde sınıf adları,
+manuel kontrolde **Manuel** etiketi gösterilir; değerler kendi girdilerinden
+hesaplanır. **Montaj kesiti / Tolerans bölgeleri** ve üç örnek seçimi korunur.
+Hesap tabloları ve manuel kontrolün açıklama/karşılaştırma sekmeleri korunur.
+
+[Gerçek Qt ekranları ve test kaydı](ui-source-and-fit/README.md).
+
+## Önceki sade ISO görünümü — 16 Ekim 2026
 
 **Montaj kesiti / Tolerans bölgeleri** ve **En az boşluk / Orta değer / En çok
 boşluk** seçimleri korunur. ISO seçiminde kesit üste alınır, daha az çizgi ve
@@ -27,7 +38,7 @@ Delik/mil alt ve üst ölçüleri, EI/ES ve ei/es sapmaları, boşluk veya sık�
 
 **Montaj kesiti** ölçeksizdir; sıfırdan farklı boşluk ve çakışmalar görünür çizilir. Küçük farkların çizgi kalınlığında kaybolmaması için çizimde görünürlük alt sınırı vardır; kesitteki piksel genişliğinden ölçü alınmaz. **Tolerans bölgeleri** gerçek sapma değerlerine göre doğrusal eksen kullanır. *Orta değer* yalnızca limitlerin ortasıdır; üretimin olasılık dağılımını temsil etmez. Arama ve Ctrl+F yaygın eşleşmeleri bulur. Küçük pencerede iki liste kaydırılabilir.
 
-Kesitte taralı gövde **deliği**, yeşil parça **mili** gösterir. **D** oku delik çapını, **d** oku mil çapını tam olarak boyutlandırır. Yeşil boşluk alanları `D > d`, kırmızı çakışma alanları `d > D` durumudur. Kırmızı alan, deformasyon öncesi boyutsal çakışmadır; montaj sonrası elastik şekli göstermez. `D = d` olduğunda **Sınırda temas** yazılır; boşluk veya çakışma alanı çizilmez.
+Kesitte taralı gövde **deliği**, mavi parça **mili** gösterir. **D** oku delik çapını, **d** oku mil çapını tam olarak boyutlandırır. Mil ile delik arasındaki boşluk alanları `D > d`, kırmızı çakışma alanları `d > D` durumudur. Kırmızı alan, deformasyon öncesi boyutsal çakışmadır; montaj sonrası elastik şekli göstermez. `D = d` olduğunda **Sınırda temas** yazılır; boşluk veya çakışma alanı çizilmez.
 
 **Çapsal boşluk** `D − d`, **çapsal sıkılık** `d − D` olarak hesaplanır. **g** oku üstte tek tarafı gösterir: eş merkezli kesitte boşluğun veya çakışmanın radyal büyüklüğü `|D − d| / 2`'dir. Bu, montaj kuvveti hesabı değildir. Çapsal ve tek taraflı değerler ayrı yazılır; raporlanan sayılar çizim büyütmesinden etkilenmez. Örneğin Ø50 H8/f7 orta değerinde D=50,019500 mm ve d=49,962500 mm: çapsal boşluk **0,057000 mm**, tek tarafta **0,028500 mm**.
 

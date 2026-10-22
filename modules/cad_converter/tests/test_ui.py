@@ -37,6 +37,37 @@ def test_multiple_files_folder_duplicates_filter_remove_and_clear_use_same_queue
     p.type_filter.setCurrentIndex(0); assert p.files_proxy.rowCount() == 0
 
 
+def test_source_file_button_opens_multiselect_and_does_not_change_output_folder(page, qtbot, tmp_path, monkeypatch):
+    p, w = page
+    sources = [tmp_path/'First.SLDPRT', tmp_path/'Second.SLDASM']
+    for path in sources: path.write_text('source fixture')
+    output = str(tmp_path/'CAD_EXPORT'); p.form.set_value('output', output)
+    dialogs = []
+    def choose(*args):
+        dialogs.append(args)
+        return [str(path) for path in sources], 'SolidWorks 3D'
+    monkeypatch.setattr('modules.cad_converter.ui.QFileDialog.getOpenFileNames', choose)
+    qtbot.mouseClick(p.scan_button, Qt.LeftButton)
+    qtbot.waitUntil(lambda: not w.jobs.busy, timeout=6000)
+    assert dialogs and 'Kaynak' in dialogs[0][1]
+    assert [source.path for source in p.sources] == [str(path) for path in sources]
+    assert p.form.value('output') == output
+    assert not p.empty_hint.isVisible()
+
+
+def test_source_folder_button_scans_folder_and_remembers_it_separately_from_output(page, qtbot, tmp_path, monkeypatch):
+    p, w = page
+    source = tmp_path/'Models'; source.mkdir()
+    (source/'Part.SLDPRT').write_text('source fixture')
+    output = str(tmp_path/'CAD_EXPORT'); p.form.set_value('output', output)
+    monkeypatch.setattr('modules.cad_converter.ui.QFileDialog.getExistingDirectory', lambda *args: str(source))
+    qtbot.mouseClick(p.folder_button, Qt.LeftButton)
+    qtbot.waitUntil(lambda: not w.jobs.busy, timeout=6000)
+    assert len(p.sources) == 1 and Path(p.sources[0].path).parent == source
+    assert p.settings.get('cad_converter_source_folder') == str(source)
+    assert p.form.value('output') == output
+
+
 def test_multiple_formats_persist_and_advanced_values_are_used_without_hidden_validation_error(page, tmp_path):
     p, _ = page
     p.form.set_value('output', str(tmp_path/'out'))
@@ -91,6 +122,19 @@ def test_left_source_right_results_and_actions_fit_small_and_large_windows(page,
         assert p.splitter.sizes()[0] >= 220 and p.splitter.sizes()[1] >= 320
         assert p.source_scroll.horizontalScrollBar().maximum() == 0
         assert p.rect().contains(p.start_button.mapTo(p, p.start_button.rect().bottomRight()))
+        # Source selection is the first step and stays fixed above the long
+        # options form, even when that form is scrolled to the bottom.
+        p.source_scroll.verticalScrollBar().setValue(0)
+        first = p.scan_button.mapTo(p, p.scan_button.rect().topLeft())
+        assert p.scan_button.isVisible() and p.folder_button.isVisible()
+        for control in (p.scan_button, p.folder_button):
+            assert p.rect().contains(control.mapTo(p, control.rect().bottomRight()))
+            assert control.mapTo(p, control.rect().bottomRight()).y() < p.source_scroll.mapTo(p, p.source_scroll.rect().topLeft()).y()
+        output = p.form.fields['output']
+        assert first.y() < output.mapTo(p, output.rect().topLeft()).y()
+        p.source_scroll.verticalScrollBar().setValue(p.source_scroll.verticalScrollBar().maximum())
+        qtbot.wait(10)
+        assert p.scan_button.mapTo(p, p.scan_button.rect().topLeft()) == first
         assert not w.grab().isNull()
 
 

@@ -6,11 +6,16 @@
 
 ## Kullanıcı akışı
 
-**Dosya ekle / Klasör ekle / sürükle-bırak → çıktı klasörü → formatlar →
+**Kaynak dosyaları → Dosyaları seç… / Kaynak klasörü seç… / sürükle-bırak → çıktı klasörü → formatlar →
 konfigürasyon ve montaj modu → Aktarımı başlat**. Seçilen her format kendi
 klasörüne yazılır. Aynı uzantıyı kullanan STEP protokolleri ve STL kodlamaları
 birbirini ezmez. Sağdaki **Dosyalar / İşlem sonuçları / Günlük** sekmeleri,
 bir kaynak için birden fazla konfigürasyon/format sonucunu ayrı saklar.
+
+Kaynak seçimi 22 Ekim arayüz düzeltmesinde sol üstte sabitlendi. **Çıktı ve
+formatlar** ayrı bir kaydırma alanındadır. Güncel ekranlar ve bu düzeltmenin
+test kaydı [buradadır](ui-source-and-fit/README.md). Aşağıdaki ekranlar ilk
+modül entegrasyonunu belgeler.
 
 ![Koyu tema](cad-converter/dark.png)
 

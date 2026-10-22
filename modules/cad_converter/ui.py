@@ -57,20 +57,27 @@ class CadConverterPage(BasePage):
     def __init__(self, context):
         super().__init__(context, '3D Dönüştürücü', 'Parça ve montajları birden fazla CAD formatına toplu aktarın.')
         self.sources = []
-        self.scan_button = self.action('Dosya ekle', self.add_files)
+        # Source selection stays above the settings scroll area. It is the
+        # first action in the workflow and must not live beside the run button.
+        self.source_panel, source_body = card('Kaynak dosyaları')
+        self.scan_button = button('Dosyaları seç…', self.add_files, primary=True)
+        self.folder_button = button('Kaynak klasörü seç…', self.add_folder)
+        source_body.addWidget(self.scan_button)
+        source_body.addWidget(self.folder_button)
+        self.source_form = ValueForm(self.settings, 'cad_converter_')
+        self.source_form.check('recursive', 'Alt klasörleri tara', True)
+        source_body.addWidget(self.source_form)
+        self.source_count = label('SLDPRT / SLDASM · Dosya seçilmedi.', 'muted')
+        source_body.addWidget(self.source_count)
         self.start_button = self.action('Aktarımı başlat', self.start_export, primary=True)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
-        panel, body = card('Kaynak ve çıktı')
+        panel, body = card('Çıktı ve formatlar')
         self.form = ValueForm(self.settings, 'cad_converter_')
         self.form.path('output', 'Çıktı klasörü')
-        self.form.check('recursive', 'Alt klasörleri tara', True)
+        self.form.fields.update(self.source_form.fields)
         body.addWidget(self.form); self.form.stack_fields()
-        self.folder_button = button('Klasör ekle', self.add_folder)
         self.remove_button = button('Seçileni kaldır', self.remove_selected)
-        body.addWidget(self.folder_button)
-        self.source_count = label('Dosya ekleyin veya pencereye sürükleyin.', 'muted')
-        body.addWidget(self.source_count)
         formats_widget = QWidget(); grid = QGridLayout(formats_widget)
         grid.setContentsMargins(0, 0, 0, 0); grid.setSpacing(5)
         self.format_checks = {}
@@ -117,7 +124,7 @@ class CadConverterPage(BasePage):
         body.addWidget(label('Kaynak CAD dosyaları kaydedilmez. AP242, MBD yayınlamasıdır; PMI içeriğinin eksiksizliği ayrıca kontrol edilir.', 'muted'))
         body.addWidget(button('Çıktı klasörünü aç', lambda: open_folder(self.form.value('output')) if self.form.value('output') else None))
         body.addStretch()
-        self.controls.extend((panel, self.folder_button, self.remove_button, self.config_button))
+        self.controls.extend((self.source_panel, self.scan_button, panel, self.folder_button, self.remove_button, self.config_button))
 
         self.results = CadResults(self)
         self.files_model = TableModel((Column('Kaynak dosya', 'source'), Column('Tür', 'type'),
@@ -134,7 +141,10 @@ class CadConverterPage(BasePage):
         self.type_filter = QComboBox(); self.type_filter.addItems(('Bütün modeller', 'Yalnız parçalar', 'Yalnız montajlar'))
         self.type_filter.currentIndexChanged.connect(self.refresh_sources)
         inventory_tools.addWidget(self.type_filter); inventory_tools.addStretch(); inventory_tools.addWidget(self.remove_button)
-        inventory_layout.addLayout(inventory_tools); inventory_layout.addWidget(self.files_view)
+        inventory_layout.addLayout(inventory_tools)
+        self.empty_hint = label('Başlamak için soldaki Dosyaları seç veya Kaynak klasörü seç düğmesini kullanın.', 'muted')
+        inventory_layout.addWidget(self.empty_hint)
+        inventory_layout.addWidget(self.files_view)
         inventory_layout.addWidget(label('Çoklu seçim: Ctrl / Shift · Dosya veya klasörleri pencereye bırakabilirsiniz.', 'muted'))
         self.results.tabs.insertTab(0, inventory, 'Dosyalar')
         self.results.tabs.setCurrentIndex(0)
@@ -145,10 +155,11 @@ class CadConverterPage(BasePage):
         self.counts = label('0 başarılı · 0 uyarılı · 0 atlanan · 0 hatalı', 'muted')
         self.results.layout.addWidget(self.counts)
         self.splitter = TransferWorkspace(self, panel, self.results)
+        self.splitter.source_column.layout().insertWidget(0, self.source_panel)
         self.source_scroll = self.splitter.source_scroll
         self.layout.addWidget(self.splitter, 1)
         self.controls.append(self.type_filter)
-        for form in (self.form, self.model_form, self.naming_form, self.stl_form):
+        for form in (self.source_form, self.form, self.model_form, self.naming_form, self.stl_form):
             form.changed.connect(self.update_choices)
         self.setAcceptDrops(True)
         self.update_choices()
@@ -177,7 +188,9 @@ class CadConverterPage(BasePage):
         self.files_model.replace([dict(source=s.path, type=Path(s.path).suffix.upper().lstrip('.'),
             configuration=configuration, format=formats, status='pending')
             for s in self.sources if suffix is None or Path(s.path).suffix.casefold() == suffix])
-        self.source_count.setText(f'{len(self.sources)} kaynak model · {self.files_model.rowCount()} görünür')
+        self.source_count.setText(f'{len(self.sources)} kaynak model · {self.files_model.rowCount()} görünür' if self.sources else 'SLDPRT / SLDASM · Dosya seçilmedi.')
+        self.source_count.setToolTip('\n'.join(s.path for s in self.sources))
+        self.empty_hint.setVisible(not self.sources)
         self.results.tabs.setTabText(0, f'Dosyalar · {len(self.sources)}')
 
     def clear_sources(self):
@@ -194,13 +207,16 @@ class CadConverterPage(BasePage):
 
     def add_files(self):
         if not self.can_start(): return
-        paths, _ = QFileDialog.getOpenFileNames(self, 'SolidWorks modellerini seç', '', 'SolidWorks 3D (*.sldprt *.SLDPRT *.sldasm *.SLDASM)')
+        paths, _ = QFileDialog.getOpenFileNames(self, 'Kaynak SolidWorks modellerini seç',
+            self.settings.get('cad_converter_source_folder', ''), 'SolidWorks 3D (*.sldprt *.SLDPRT *.sldasm *.SLDASM)')
         if paths: self.add_paths(paths)
 
     def add_folder(self):
         if not self.can_start(): return
-        path = QFileDialog.getExistingDirectory(self, 'Kaynak klasörü ekle')
-        if path: self.add_paths([path])
+        path = QFileDialog.getExistingDirectory(self, 'Kaynak model klasörünü seç', self.settings.get('cad_converter_source_folder', ''))
+        if path:
+            self.settings.set('cad_converter_source_folder', path)
+            self.add_paths([path])
 
     def add_paths(self, paths):
         if not self.can_start(): return
