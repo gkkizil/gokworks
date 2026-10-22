@@ -1,6 +1,6 @@
 {
-  "request_id": "20261022-current-main-cad-converter-onefile-060003",
-  "requested_at": "2026-10-22T06:00:03.838156+00:00",
-  "source_commit": "fff3cd86a1525eeb2415e3ae2e40eee11792beef",
-  "reason": "User requested a current standalone GOKWORKS.exe. Include the integrated 3D CAD converter (eight formats, configuration/component export, reports) and automatic nesting in holes. Run all native Windows regressions and frozen onefile checks at three DPI scales before publishing the direct EXE. Keep release and the backup repository unchanged."
+  "request_id": "20261022-source-picker-shared-iso-onefile-080734",
+  "requested_at": "2026-10-22T08:07:34.606577+00:00",
+  "source_commit": "968d0c42cc66fee5108ab9192b482b2f9c3add2d",
+  "reason": "User requested a single current GOKWORKS.exe. Include the pinned top-left 3D converter source file/folder controls and the shared ISO/manual fit section with diameter and radial arrows and live result labels. Run the native Windows regression suite and frozen onefile checks before publishing the direct EXE. Keep release and the backup repository unchanged."
 }
