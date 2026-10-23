@@ -5,6 +5,101 @@
   "download_url": "",
   "artifact_url": "",
   "setup_steps": {},
+  "display": {
+    "before": [
+      1024,
+      768
+    ],
+    "requested": [
+      1920,
+      1080
+    ],
+    "actual": [
+      1920,
+      1080
+    ],
+    "change_result": 0,
+    "available": [
+      [
+        640,
+        480,
+        32,
+        64
+      ],
+      [
+        800,
+        600,
+        32,
+        64
+      ],
+      [
+        1024,
+        768,
+        32,
+        64
+      ],
+      [
+        1152,
+        864,
+        32,
+        64
+      ],
+      [
+        1280,
+        720,
+        32,
+        64
+      ],
+      [
+        1280,
+        800,
+        32,
+        64
+      ],
+      [
+        1280,
+        1024,
+        32,
+        64
+      ],
+      [
+        1366,
+        768,
+        32,
+        64
+      ],
+      [
+        1440,
+        900,
+        32,
+        64
+      ],
+      [
+        1600,
+        900,
+        32,
+        64
+      ],
+      [
+        1600,
+        1200,
+        32,
+        64
+      ],
+      [
+        1680,
+        1050,
+        32,
+        64
+      ],
+      [
+        1920,
+        1080,
+        32,
+        64
+      ]
+    ]
+  },
   "previous_failure_log_tail": "build\tValidate regression suite on Windows\t﻿2026-10-23T13:13:16.9780265Z ##[group]Run python -m pip install -r requirements-dev.txt *> windows-test-setup.log\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9780868Z ^[[36;1mpython -m pip install -r requirements-dev.txt *> windows-test-setup.log^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9781338Z ^[[36;1mif ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9782056Z ^[[36;1mpython packaging/run_windows_tests.py modules/tolerance_stack/tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9782684Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9783530Z ^[[36;1mpython packaging/run_windows_tests.py modules/bolt_torque/tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible modules/nesting/tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9784359Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9784677Z ^[[36;1mpython packaging/run_windows_tests.py^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843169Z shell: C:\\Program Files\\PowerShell\\7\\pwsh.EXE -command \". '{0}'\"\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843462Z env:\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843622Z   PYTHONUTF8: 1\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843853Z   pythonLocation: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9844220Z   PKG_CONFIG_PATH: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64/lib/pkgconfig\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9844569Z   Python_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9844899Z   Python2_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9845222Z   Python3_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9845476Z   QT_QPA_PLATFORM: windows\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9845655Z ##[endgroup]\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:19.9284385Z Collected 1 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:22.0686852Z Windows batch 1: 1 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:23.3021954Z Collected 3 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:39.8927327Z Windows batch 1: 3 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:42.8216487Z Collected 1161 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-23T13:14:53.7329592Z Windows batch 1: 32 tests, exit 1 (0x00000001)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:16:03.2634562Z Windows batch 2: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:17:50.1299843Z Windows batch 3: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:18:31.6542967Z Windows batch 4: 32 tests, exit 3221226505 (0xC0000409)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:20:07.6856759Z Windows batch 5: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:24.8220549Z Windows batch 6: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:28.7292077Z Windows batch 7: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:29.2002711Z Windows batch 8: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:29.6570631Z Windows batch 9: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:11.1750100Z Windows batch 10: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:12.9878176Z Windows batch 11: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:14.4633680Z Windows batch 12: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:41.2581650Z Windows batch 13: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:42.7617382Z Windows batch 14: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:44.0067861Z Windows batch 15: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:45.2684661Z Windows batch 16: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:05.7427934Z Windows batch 17: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:07.7217275Z Windows batch 18: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:08.8277299Z Windows batch 19: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:35.7001265Z Windows batch 20: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:36.8742257Z Windows batch 21: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:38.0006925Z Windows batch 22: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:39.2398898Z Windows batch 23: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:40.6336085Z Windows batch 24: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:43.0536305Z Windows batch 25: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:46.1202766Z Windows batch 26: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:55.2265490Z Windows batch 27: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:06.5878473Z Windows batch 28: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:13.2675252Z Windows batch 29: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:15.2033391Z Windows batch 30: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:16.0237207Z Windows batch 31: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:25.8535946Z Windows batch 32: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:45.0375083Z Windows batch 33: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:26:49.3498940Z Windows batch 34: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:15.5804760Z Windows batch 35: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:16.9533952Z Windows batch 36: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:17.3693383Z Windows batch 37: 9 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:17.4273682Z ##[error]Process completed with exit code 1.\n",
   "previous_native_failure_context": "build\tValidate regression suite on Windows\t﻿2026-10-23T13:13:16.9780265Z ##[group]Run python -m pip install -r requirements-dev.txt *> windows-test-setup.log\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9780868Z ^[[36;1mpython -m pip install -r requirements-dev.txt *> windows-test-setup.log^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9781338Z ^[[36;1mif ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9782056Z ^[[36;1mpython packaging/run_windows_tests.py modules/tolerance_stack/tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9782684Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9783530Z ^[[36;1mpython packaging/run_windows_tests.py modules/bolt_torque/tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible modules/nesting/tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9784359Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9784677Z ^[[36;1mpython packaging/run_windows_tests.py^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843169Z shell: C:\\Program Files\\PowerShell\\7\\pwsh.EXE -command \". '{0}'\"\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843462Z env:\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843622Z   PYTHONUTF8: 1\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9843853Z   pythonLocation: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9844220Z   PKG_CONFIG_PATH: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64/lib/pkgconfig\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9844569Z   Python_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9844899Z   Python2_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9845222Z   Python3_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9845476Z   QT_QPA_PLATFORM: windows\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:16.9845655Z ##[endgroup]\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:19.9284385Z Collected 1 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:22.0686852Z Windows batch 1: 1 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:23.3021954Z Collected 3 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:39.8927327Z Windows batch 1: 3 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:13:42.8216487Z Collected 1161 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-23T13:14:53.7329592Z Windows batch 1: 32 tests, exit 1 (0x00000001)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:16:03.2634562Z Windows batch 2: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:17:50.1299843Z Windows batch 3: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:18:31.6542967Z Windows batch 4: 32 tests, exit 3221226505 (0xC0000409)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:20:07.6856759Z Windows batch 5: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:24.8220549Z Windows batch 6: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:28.7292077Z Windows batch 7: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:29.2002711Z Windows batch 8: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:21:29.6570631Z Windows batch 9: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:11.1750100Z Windows batch 10: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:12.9878176Z Windows batch 11: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:14.4633680Z Windows batch 12: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:41.2581650Z Windows batch 13: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:42.7617382Z Windows batch 14: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:44.0067861Z Windows batch 15: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:22:45.2684661Z Windows batch 16: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:05.7427934Z Windows batch 17: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:07.7217275Z Windows batch 18: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:08.8277299Z Windows batch 19: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:35.7001265Z Windows batch 20: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:36.8742257Z Windows batch 21: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:38.0006925Z Windows batch 22: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:39.2398898Z Windows batch 23: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:40.6336085Z Windows batch 24: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:43.0536305Z Windows batch 25: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:46.1202766Z Windows batch 26: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:23:55.2265490Z Windows batch 27: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:06.5878473Z Windows batch 28: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:13.2675252Z Windows batch 29: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:15.2033391Z Windows batch 30: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:16.0237207Z Windows batch 31: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:25.8535946Z Windows batch 32: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:25:45.0375083Z Windows batch 33: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:26:49.3498940Z Windows batch 34: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:15.5804760Z Windows batch 35: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:16.9533952Z Windows batch 36: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:17.3693383Z Windows batch 37: 9 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-23T13:27:17.4273682Z ##[error]Process completed with exit code 1."
 }
