@@ -89,6 +89,14 @@ def main():
         path = Path(filename)
         if path.is_file() and (filename == 'windows-previous-failure.log' or report['status'] == 'failure'):
             report[key] = path.read_text(encoding='utf-8',errors='replace')[-16000:]
+    previous_log = Path('windows-previous-failure.log')
+    if previous_log.exists():
+        lines = previous_log.read_text(encoding='utf-8', errors='replace').splitlines()
+        contexts = []
+        for i, line in enumerate(lines):
+            if re.search(r'Windows fatal exception|Fatal Python error|QThread:|0xC0000409|PYTEST_PROCESS_EXIT_CODE=3221226505',line,re.I):
+                contexts.append('\n'.join(lines[max(0,i-65):i+90]))
+        report['previous_native_failure_context'] = '\n\n'.join(contexts)[-30000:]
     exe = Path('dist/GOKWORKS.exe')
     if not exe.exists():exe = Path('dist/GOKWORKS/GOKWORKS.exe')
     if exe.exists():
@@ -111,7 +119,7 @@ def main():
         suites = ElementTree.parse(tests).getroot()
         report['regressions'] = [dict(suite.attrib) for suite in suites.iter('testsuite')]
         report['test_failures'] = [dict(name=case.get('classname','')+'.'+case.get('name',''),
-                                       message=failure.get('message','')[:600])
+                                       message=failure.get('message','')[:600], detail=(failure.text or '')[-16000:])
                                   for case in suites.iter('testcase') for failure in case.findall('failure')]
         report['test_skips'] = [dict(name=case.get('classname','')+'.'+case.get('name',''),reason=skip.get('message',''))
                                for case in suites.iter('testcase') for skip in case.findall('skipped')]
