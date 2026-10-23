@@ -1,7 +1,6 @@
 {
-  "request_id": "20261023-native-trace-onefile-133308",
-  "requested_at": "2026-10-23T13:33:08.224190+00:00",
-  "source_commit": "d0c64380867b70c262fd6dfa3c09acc7cea154fb",
-  "reason": "Build the requested audited onefile EXE after fixing the Windows concurrent settings publication failure. Retrieve the preceding native Qt crash diagnostics, run every regression without suppressing failures, and retain the onefile DPI smoke gates. Keep release and the backup unchanged.",
-  "diagnose_run": 39959024647
+  "request_id": "20261023-verified-isolated-onefile-133642",
+  "requested_at": "2026-10-23T13:36:42.203844+00:00",
+  "source_commit": "6b9072ab51f07851a2fd0c7b86f199c356750ed6",
+  "reason": "Deliver the requested current onefile EXE with audited features, Windows settings publication serialization/sharing retries and bounded native GUI test process lifetimes. Execute every collected regression exactly once, retain native failures, then run frozen DPI checks and publish the direct EXE. Keep release and the backup unchanged."
 }
