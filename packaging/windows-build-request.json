@@ -1,7 +1,7 @@
 {
-  "request_id": "20261023-windows-settings-onefile-133116",
-  "requested_at": "2026-10-23T13:31:16.181225+00:00",
-  "source_commit": "d626377a74b38bdc0ef58ecd8a3b92f434812f5a",
+  "request_id": "20261023-native-trace-onefile-133308",
+  "requested_at": "2026-10-23T13:33:08.224190+00:00",
+  "source_commit": "d0c64380867b70c262fd6dfa3c09acc7cea154fb",
   "reason": "Build the requested audited onefile EXE after fixing the Windows concurrent settings publication failure. Retrieve the preceding native Qt crash diagnostics, run every regression without suppressing failures, and retain the onefile DPI smoke gates. Keep release and the backup unchanged.",
   "diagnose_run": 39959024647
 }
