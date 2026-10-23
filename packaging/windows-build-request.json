@@ -1,6 +1,7 @@
 {
-  "request_id": "20261023-audited-profile-cutting-onefile-131021",
-  "requested_at": "2026-10-23T13:10:21.494265+00:00",
-  "source_commit": "a438081701763cbfc4370c5bb32ef65792d81dc6",
-  "reason": "User requested the current standalone GOKWORKS.exe. Include the integrated Weldments/profile cutting module and audited fixes: source revision invalidation, numeric input checks, atomic settings, CSV safety and Pillow 13.0.0. Run native Windows regressions and packaged onefile smoke checks before publishing the direct EXE. Keep release and the backup repository unchanged."
+  "request_id": "20261023-windows-settings-onefile-133116",
+  "requested_at": "2026-10-23T13:31:16.181225+00:00",
+  "source_commit": "d626377a74b38bdc0ef58ecd8a3b92f434812f5a",
+  "reason": "Build the requested audited onefile EXE after fixing the Windows concurrent settings publication failure. Retrieve the preceding native Qt crash diagnostics, run every regression without suppressing failures, and retain the onefile DPI smoke gates. Keep release and the backup unchanged.",
+  "diagnose_run": 39959024647
 }
