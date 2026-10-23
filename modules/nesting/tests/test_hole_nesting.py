@@ -35,6 +35,17 @@ def manual_result(p,positions):
         for i,x,y,angle in positions],[],'test','1.3',0,1,'2026-10-21')
 
 
+@pytest.mark.parametrize('code', ['=HYPERLINK("https://example.invalid")', '+1+2', '-1+2', '@SUM(1)', '  =1+2'])
+def test_cut_order_csv_treats_imported_part_codes_as_text(tmp_path, code):
+    p=setup([Part.create(code,box(0,0,20,20))])
+    r=manual_result(p,[(0,5,5,0)])
+    export_dxf(p,r,tmp_path/'cut')
+    with (tmp_path/'cut/KESIM-SIRASI.csv').open(encoding='utf-8-sig') as stream:
+        rows=list(csv.DictReader(stream,delimiter=';'))
+    assert rows[0]['Parça']=="'"+code
+    assert p.parts[0].code==code
+
+
 def test_multiple_inserts_use_one_hole_and_reduce_sheets_without_double_counting_area():
     p=setup([Part.create('Frame',frame()),Part.create('Insert',box(0,0,25,25),quantity=4)])
     r=nest(p);assert validate_result(p,r)

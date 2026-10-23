@@ -142,6 +142,7 @@ sonucu ve sabit yoğunluk gösterimi gerçek ekranlarda doğrulandı.
 [Delrin mil, açık tema](examples/weight-delrin-light.png) ·
 [1.2379 kalıp çeliği](examples/weight-2379-dark.png) ·
 [1.2344 kalıp çeliği](examples/weight-2344-dark.png).
-Gerçek Tk görüntülerini yeniden almak için `modules/weight/examples/capture.py` kullanılır.
+Güncel PySide6 ekran görüntülerini yeniden almak için `modules/weight/examples/capture.py` kullanılır.
+Başka klasöre kaydetmek için `--output-dir <klasör>` verilebilir; kullanıcı tercihleri değiştirilmez.
 Yalnız kalıp çeliği ekranları için dosya adlarını uzantısız verin:
 `python modules/weight/examples/capture.py weight-2379-dark weight-2344-dark`.

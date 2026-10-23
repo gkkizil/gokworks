@@ -1,0 +1,32 @@
+WARNING: The directory '/home/agent/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Defaulting to user installation because normal site-packages is not writeable
+Ignoring pywin32: markers 'sys_platform == "win32"' don't match your environment
+Collecting pywin32==312
+  Downloading pywin32-312-cp313-cp313-win_amd64.whl.metadata (11 kB)
+Collecting PySide6==6.10.3 (from -r requirements.txt (line 1))
+  Downloading pyside6-6.10.3-cp39-abi3-win_amd64.whl.metadata (5.5 kB)
+Collecting Pillow==13.0.0 (from -r requirements.txt (line 2))
+  Downloading pillow-13.0.0-cp313-cp313-win_amd64.whl.metadata (9.3 kB)
+Collecting ezdxf==1.4.3 (from -r requirements.txt (line 4))
+  Downloading ezdxf-1.4.3-cp313-cp313-win_amd64.whl.metadata (10 kB)
+Collecting openpyxl==3.1.5 (from -r requirements.txt (line 5))
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting shapely==2.1.2 (from -r requirements.txt (line 6))
+  Downloading shapely-2.1.2-cp313-cp313-win_amd64.whl.metadata (7.1 kB)
+Collecting shiboken6==6.10.3 (from PySide6==6.10.3->-r requirements.txt (line 1))
+  Downloading shiboken6-6.10.3-cp39-abi3-win_amd64.whl.metadata (2.6 kB)
+Collecting PySide6_Essentials==6.10.3 (from PySide6==6.10.3->-r requirements.txt (line 1))
+  Downloading pyside6_essentials-6.10.3-cp39-abi3-win_amd64.whl.metadata (3.9 kB)
+Collecting PySide6_Addons==6.10.3 (from PySide6==6.10.3->-r requirements.txt (line 1))
+  Downloading pyside6_addons-6.10.3-cp39-abi3-win_amd64.whl.metadata (4.2 kB)
+Collecting pyparsing>=2.0.1 (from ezdxf==1.4.3->-r requirements.txt (line 4))
+  Downloading pyparsing-3.3.3-py3-none-any.whl.metadata (5.9 kB)
+Collecting typing_extensions>=4.6.0 (from ezdxf==1.4.3->-r requirements.txt (line 4))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting numpy (from ezdxf==1.4.3->-r requirements.txt (line 4))
+  Downloading numpy-2.5.4-cp313-cp313-win_amd64.whl.metadata (6.6 kB)
+Collecting fonttools (from ezdxf==1.4.3->-r requirements.txt (line 4))
+  Downloading fonttools-4.67.0-cp313-cp313-win_amd64.whl.metadata (139 kB)
+Collecting et-xmlfile (from openpyxl==3.1.5->-r requirements.txt (line 5))
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Would install PySide6-6.10.3 PySide6_Addons-6.10.3 PySide6_Essentials-6.10.3 et_xmlfile-2.0.0 ezdxf-1.4.3 fonttools-4.67.0 numpy-2.5.4 openpyxl-3.1.5 pillow-13.0.0 pyparsing-3.3.3 pywin32-312 shapely-2.1.2 shiboken6-6.10.3 typing_extensions-4.16.0

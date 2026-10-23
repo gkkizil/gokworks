@@ -1,0 +1,121 @@
+{
+  "platform": "win_amd64",
+  "python": "3.13",
+  "resolution_only": true,
+  "actually_installed_on_windows": false,
+  "marker_note": "pywin32 explicitly requested: cross-platform pip markers still reflect the Linux host.",
+  "packages": [
+    {
+      "name": "pywin32",
+      "version": "312",
+      "wheel": "pywin32-312-cp313-cp313-win_amd64.whl",
+      "hashes": {
+        "sha256": "c53e878d15a1c44788082bfe712a905433473aa38f86375b7cf8b45e3acbaaf9"
+      }
+    },
+    {
+      "name": "PySide6",
+      "version": "6.10.3",
+      "wheel": "pyside6-6.10.3-cp39-abi3-win_amd64.whl",
+      "hashes": {
+        "sha256": "c7847e4ae7b1aef1aad822ca7f175c2100c4f9f3af679125cbbdf2b364b32007"
+      }
+    },
+    {
+      "name": "pillow",
+      "version": "13.0.0",
+      "wheel": "pillow-13.0.0-cp313-cp313-win_amd64.whl",
+      "hashes": {
+        "sha256": "9dda0788a9932776a75d8bcc020076edc308ce2508b51f6739a45e3158b3fc42"
+      }
+    },
+    {
+      "name": "ezdxf",
+      "version": "1.4.3",
+      "wheel": "ezdxf-1.4.3-cp313-cp313-win_amd64.whl",
+      "hashes": {
+        "sha256": "d95cd8dcc6e6051ff9adf6eaed0d055ac464abea23c2a71aaba701dcfe7f49de"
+      }
+    },
+    {
+      "name": "openpyxl",
+      "version": "3.1.5",
+      "wheel": "openpyxl-3.1.5-py2.py3-none-any.whl",
+      "hashes": {
+        "sha256": "5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2"
+      }
+    },
+    {
+      "name": "shapely",
+      "version": "2.1.2",
+      "wheel": "shapely-2.1.2-cp313-cp313-win_amd64.whl",
+      "hashes": {
+        "sha256": "ca2591bff6645c216695bdf1614fca9c82ea1144d4a7591a466fef64f28f0715"
+      }
+    },
+    {
+      "name": "PySide6_Addons",
+      "version": "6.10.3",
+      "wheel": "pyside6_addons-6.10.3-cp39-abi3-win_amd64.whl",
+      "hashes": {
+        "sha256": "b465b38d1ec3476a9197441fe6a62a1fac97c45a8094f11c2d7e318aee1e3fb3"
+      }
+    },
+    {
+      "name": "PySide6_Essentials",
+      "version": "6.10.3",
+      "wheel": "pyside6_essentials-6.10.3-cp39-abi3-win_amd64.whl",
+      "hashes": {
+        "sha256": "051a70e2df79cf1c012a208ad82a98e8de23ca7fe3b0f3344d07152d15705b59"
+      }
+    },
+    {
+      "name": "shiboken6",
+      "version": "6.10.3",
+      "wheel": "shiboken6-6.10.3-cp39-abi3-win_amd64.whl",
+      "hashes": {
+        "sha256": "38261c88e87a1c32d1302b642b755470d2369c78af3c7d7d9e95d631f79b556c"
+      }
+    },
+    {
+      "name": "numpy",
+      "version": "2.5.4",
+      "wheel": "numpy-2.5.4-cp313-cp313-win_amd64.whl",
+      "hashes": {
+        "sha256": "8b4d2fd2d34e5f8c9235ee787de5631a37a28402b15cb80814df973d2be54129"
+      }
+    },
+    {
+      "name": "pyparsing",
+      "version": "3.3.3",
+      "wheel": "pyparsing-3.3.3-py3-none-any.whl",
+      "hashes": {
+        "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
+      }
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "wheel": "typing_extensions-4.16.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+      }
+    },
+    {
+      "name": "et_xmlfile",
+      "version": "2.0.0",
+      "wheel": "et_xmlfile-2.0.0-py3-none-any.whl",
+      "hashes": {
+        "sha256": "7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa"
+      }
+    },
+    {
+      "name": "fonttools",
+      "version": "4.67.0",
+      "wheel": "fonttools-4.67.0-cp313-cp313-win_amd64.whl",
+      "hashes": {
+        "sha256": "7343cd0ef70edf8be7f4913cb9b55b992fb4e04055b47dcfecddcc2eb045a9d2"
+      }
+    }
+  ]
+}

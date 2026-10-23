@@ -29,6 +29,10 @@ taraması Windows, pywin32 ve açık/lisanslı SolidWorks oturumu gerektirir.
    SolidWorks’ten yenilenmelidir.
    Klasör adları değişse veya gövdeler başka Cut List gruplarına taşınsa da
    kaynak kapsamı ve gövde kimlikleriyle ikinci aktarım engellenir.
+   Yeni taramada aktarılmış satırın değerleri değişmişse veya satır artık yoksa
+   eski kesim planı geçersiz olur. Eski değerler inceleme için saklanır fakat
+   bu satırlar düzeltilene kadar yeni üretim planı/plan raporu oluşturulmaz.
+   İnceleme bekleyen proje kaydedilip yeniden açılabilir.
 6. **Kesim listesi** sekmesinde stok boyu, testere payı ve bir uç için düzeltme
    girin. Varsayılanlar 6000 / 3 / 0 mm’dir. **Kesim planını hesapla** ile
    stokları görün. Stok satırı seçilince şeması değişir.

@@ -1,6 +1,7 @@
 """Fixed-length, independent stock pools; exact Decimal conservation checks."""
 
 from dataclasses import dataclass, field
+from bisect import bisect_left, insort
 from decimal import Decimal, ROUND_CEILING
 import time
 
@@ -37,7 +38,7 @@ class Plan:
 
 
 def optimize(project, *, seconds=2, stop=None):
-    project.validate()
+    project.validate(require_current=True)
     if not project.demands: raise ValueError('Önce kesim listesine profil ekleyin.')
     if not 0 < float(seconds) <= 30: raise ValueError('Çözüm süresi 0–30 saniye arasında olmalı.')
     stock, kerf, trim = (number(project.stock_length), number(project.kerf), number(project.trim))
@@ -56,13 +57,19 @@ def optimize(project, *, seconds=2, stop=None):
     for group, pieces in groups.items():
         checkpoint(stop)
         pieces.sort(key=lambda entry: entry[0], reverse=True)
-        bins, remaining = [], []
+        bins, free = [], []
         for size, row in pieces:
             checkpoint(stop)
-            possible = [i for i, space in enumerate(remaining) if space >= size]
-            target = min(possible, key=lambda i: remaining[i]-size) if possible else len(bins)
-            if target == len(bins): bins.append([]); remaining.append(capacity)
-            bins[target].append((size, row)); remaining[target] -= size
+            # Preserve best-fit and index tie-breaking without a Python scan of
+            # every opened stock for every piece. Decimal ordering stays exact.
+            position = bisect_left(free, (size, -1))
+            if position == len(free):
+                target, space = len(bins), capacity
+                bins.append([])
+            else:
+                space, target = free.pop(position)
+            bins[target].append((size, row))
+            insort(free, (space-size, target))
         lower = int((sum((p[0] for p in pieces), Decimal(0))/capacity).to_integral_value(rounding=ROUND_CEILING))
         proven = len(bins) == lower
         if not proven and len(pieces) <= 22:
@@ -100,6 +107,7 @@ def optimize(project, *, seconds=2, stop=None):
 
 def validate_plan(project, plan):
     """Reject omitted, extra, cross-material, altered-length or overfull cuts."""
+    project.validate(require_current=True)
     rows = {row.id: row for row in project.demands}
     actual = {key: 0 for key in rows}
     stock, kerf, trim = (number(plan.stock_length), number(plan.kerf), number(plan.trim))

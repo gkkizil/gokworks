@@ -11,7 +11,7 @@ from gui_qt.components import BasePage, ValueForm, Disclosure, label, button, co
 from gui_qt.models import TableModel, FilterProxy, Column
 from gui_qt.diagrams import EngineeringDiagram
 from gui_qt.services import check_connection
-from .models import Project, quantity, number, transfer, checkpoint
+from .models import Project, quantity, number, transfer, reconcile, checkpoint
 from .properties import DEFAULT_MAPPING, validate_mapping
 from .scanner import scan, Options, Cancelled
 from .optimizer import optimize
@@ -156,8 +156,11 @@ class ProfileCuttingPage(BasePage):
         setattr(self.project, key, self.form.value(key)); self.invalidate()
 
     def refresh_demands(self):
-        self.demand_model.replace([asdict(row) for row in self.project.demands])
-        self.demand_summary.setText(f'{len(self.project.demands)} satır · {sum(row.count for row in self.project.demands)} profil')
+        self.demand_model.replace([dict(asdict(row), source=(row.source_changed+' '+row.source if row.source_changed else row.source),
+                                       status='error' if row.source_changed else '') for row in self.project.demands])
+        stale = sum(bool(row.source_changed) for row in self.project.demands)
+        self.demand_summary.setText(f'{len(self.project.demands)} satır · {sum(row.count for row in self.project.demands)} profil'
+            + (f' · {stale} değişmiş kaynak: güncel satırları yeniden aktarın.' if stale else ''))
 
     def add_manual(self):
         dialog = RowDialog(self)
@@ -242,7 +245,7 @@ class ProfileCuttingPage(BasePage):
         if not self.scan_current:
             self.set_status('Bu tarama kaydedilmiş projeden geldi. Yeni aktarım için Verileri yenile düğmesini kullanın.', True); return
         stats = transfer(self.project, self.scan_result)
-        if stats['added']: self.invalidate(); self.refresh_demands(); self.tabs.setCurrentIndex(0)
+        if stats['added'] or stats['changed']: self.invalidate(); self.refresh_demands(); self.tabs.setCurrentIndex(0)
         self.set_status(f'{stats["added"]} satır eklendi · {stats["duplicate"]} tekrar aktarılmadı · '
             f'{stats["changed"]} değişmiş kaynak · {stats["blocked"]} inceleme/hariç. '
             + ('Değişmiş kaynağın önceki aktarımı korundu; yenisi için ilgili eski satırı seçip kaldırın.' if stats['changed'] else 'Manuel kayıtlar korundu.'),
@@ -251,7 +254,7 @@ class ProfileCuttingPage(BasePage):
     def calculate(self):
         if not self.can_start(): return
         snapshot = deepcopy(self.project)
-        try: snapshot.validate()
+        try: snapshot.validate(require_current=True)
         except ValueError as error: self.set_status(str(error), True); return
         def operation(events, stop):
             try: events.put(('profile_plan', optimize(snapshot, stop=stop)))
@@ -266,6 +269,7 @@ class ProfileCuttingPage(BasePage):
                 self.set_status('SolidWorks bağlantısı hazır · ' + value.get('revision','') if value['connected'] else value['error'], not value['connected'])
             elif kind == 'weldment_scan':
                 self.scan_result = value; self.scan_current = True
+                if reconcile(self.project, value): self.invalidate(); self.refresh_demands()
                 self.refresh_scan_table(); self.tabs.setCurrentIndex(1)
                 self.source_label.setText(f'{value.source} [{value.configuration}]')
                 self.set_status('Tarama tamamlandı. Hazır satırları aktarın; diğerlerini inceleyin.', bool(value.unscanned))

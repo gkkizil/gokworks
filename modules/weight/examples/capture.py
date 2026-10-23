@@ -4,13 +4,12 @@ import argparse
 from pathlib import Path
 import sys
 from tempfile import TemporaryDirectory
-import time
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
-from PIL import ImageGrab
-from modules.pdf.window import GokworksPdfApp
+from gui_qt.app import MainWindow, create_application
+from modules.weight.rules import MATERIAL_GROUPS
 
 
 def main():
@@ -27,42 +26,43 @@ def main():
             method='Katalog alanından', area_cm2='10', unit='mm', length='1000', count='1')),
     )
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-dir', type=Path, default=Path(__file__).parent)
     parser.add_argument('screens', nargs='*', help='Capture only these screen names.')
-    selected = parser.parse_args().screens
+    arguments = parser.parse_args()
+    selected = arguments.screens
     unknown = set(selected) - {name for _, name, _ in screens}
     if unknown:
         parser.error('Unknown screens: ' + ', '.join(sorted(unknown)))
-    errors = []
+    arguments.output_dir.mkdir(parents=True, exist_ok=True)
+    application = create_application([])
     with TemporaryDirectory() as folder:
-        app = GokworksPdfApp(settings_path=Path(folder)/'settings.json')
-        app.report_callback_exception = lambda *args: errors.append(str(args))
+        window = MainWindow(settings_path=Path(folder)/'settings.json')
         try:
-            if app._preload_id is not None:
-                app.after_cancel(app._preload_id)
-                app._preload_id = None
-            app._switch_mode('weight')
-            app.geometry('1240x860+20+20')
+            window.navigate('weight')
+            window.resize(1240, 860); window.show()
+            page = window.pages['weight']
             for theme, name, values in screens:
                 if selected and name not in selected:
                     continue
-                app._change_theme(theme)
+                window.set_theme('dark' if theme == 'Koyu' else 'light')
+                group = next(key for key, items in MATERIAL_GROUPS.items() if values['material'] in items)
+                page.form.set_value('material_group', group)
                 for key, value in values.items():
-                    app.weight_state[key].set(value)
-                app.weight_widgets['form']._parent_canvas.yview_moveto(0)
-                app.weight_widgets['details']._parent_canvas.yview_moveto(0)
-                end = time.monotonic()+.35
-                while time.monotonic() < end:
-                    app.update()
-                    time.sleep(.01)
-                assert app.weight_result is not None
-                assert app.weight_result.material == values['material']
-                x, y = app.winfo_rootx(), app.winfo_rooty()
-                ImageGrab.grab(bbox=(x, y, x+app.winfo_width(), y+app.winfo_height())).save(
-                    Path(__file__).with_name(name+'.png'))
-                print(name, app.weight_result.total_mass_kg, 'kg')
+                    if key == 'material':
+                        choices = page.form.fields['material']
+                        choices.setCurrentIndex(choices.findData(value))
+                    else:
+                        page.form.set_value(key, value)
+                page.update_timer.stop()
+                page.update_result()
+                application.processEvents()
+                assert page.result is not None
+                assert page.result.material == values['material']
+                if not window.grab().save(str(arguments.output_dir/(name+'.png'))):
+                    raise OSError('Ekran görüntüsü kaydedilemedi: '+name)
+                print(name, page.result.total_mass_kg, 'kg')
         finally:
-            app._on_close()
-    assert not errors, errors
+            window.close(); window.deleteLater(); application.processEvents()
 
 
 if __name__ == '__main__':

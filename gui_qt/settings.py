@@ -50,6 +50,6 @@ class SettingsStore(QObject):
             self.dirty = False
             self.last_error = ''
             return True
-        except OSError as error:
+        except (OSError, ValueError, TypeError) as error:
             self.last_error = str(error)
             return False

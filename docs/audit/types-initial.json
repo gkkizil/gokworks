@@ -1,0 +1,3101 @@
+{
+    "version": "1.1.414",
+    "time": "1792732531576",
+    "generalDiagnostics": [
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"thread\" for class \"JobManager*\"\n  Type \"None\" is not assignable to type \"() -> QThread\"",
+            "range": {
+                "start": {
+                    "line": 59,
+                    "character": 22
+                },
+                "end": {
+                    "line": 59,
+                    "character": 26
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"thread\" for class \"JobManager*\"\n  Type \"QThread\" is not assignable to type \"() -> QThread\"",
+            "range": {
+                "start": {
+                    "line": 80,
+                    "character": 22
+                },
+                "end": {
+                    "line": 80,
+                    "character": 35
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> QThread\" cannot be assigned to parameter \"thread\" of type \"QThread\" in function \"moveToThread\"\n  \"MethodType\" is not assignable to \"QThread\"",
+            "range": {
+                "start": {
+                    "line": 82,
+                    "character": 33
+                },
+                "end": {
+                    "line": 82,
+                    "character": 44
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"started\" for class \"MethodType\"\n  Attribute \"started\" is unknown",
+            "range": {
+                "start": {
+                    "line": 83,
+                    "character": 20
+                },
+                "end": {
+                    "line": 83,
+                    "character": 27
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"QueuedConnection\" for class \"type[Qt]\"\n  Attribute \"QueuedConnection\" is unknown",
+            "range": {
+                "start": {
+                    "line": 84,
+                    "character": 58
+                },
+                "end": {
+                    "line": 84,
+                    "character": 74
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"quit\" for class \"MethodType\"\n  Attribute \"quit\" is unknown",
+            "range": {
+                "start": {
+                    "line": 86,
+                    "character": 50
+                },
+                "end": {
+                    "line": 86,
+                    "character": 54
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"finished\" for class \"MethodType\"\n  Attribute \"finished\" is unknown",
+            "range": {
+                "start": {
+                    "line": 87,
+                    "character": 20
+                },
+                "end": {
+                    "line": 87,
+                    "character": 28
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"start\" for class \"MethodType\"\n  Attribute \"start\" is unknown",
+            "range": {
+                "start": {
+                    "line": 90,
+                    "character": 20
+                },
+                "end": {
+                    "line": 90,
+                    "character": 25
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"wait\" for class \"MethodType\"\n  Attribute \"wait\" is unknown",
+            "range": {
+                "start": {
+                    "line": 109,
+                    "character": 22
+                },
+                "end": {
+                    "line": 109,
+                    "character": 26
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"thread\" for class \"JobManager*\"\n  Expression of type \"None\" cannot be assigned to attribute \"thread\" of class \"JobManager\"\n    Type \"None\" is not assignable to type \"() -> QThread\"",
+            "range": {
+                "start": {
+                    "line": 119,
+                    "character": 13
+                },
+                "end": {
+                    "line": 119,
+                    "character": 19
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/gui_qt/workers.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"deleteLater\" for class \"MethodType\"\n  Attribute \"deleteLater\" is unknown",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 15
+                },
+                "end": {
+                    "line": 120,
+                    "character": 26
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/diagram.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"NoWrap\" for class \"type[QTextOption]\"\n  Attribute \"NoWrap\" is unknown",
+            "range": {
+                "start": {
+                    "line": 29,
+                    "character": 43
+                },
+                "end": {
+                    "line": 29,
+                    "character": 49
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/tests/test_bolt_torque.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal['35']\" cannot be assigned to parameter \"preload_percent\" of type \"int\" in function \"calculate\"\n  \"Literal['35']\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 53,
+                    "character": 37
+                },
+                "end": {
+                    "line": 53,
+                    "character": 41
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/tests/test_bolt_torque.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal['62,5']\" cannot be assigned to parameter \"preload_percent\" of type \"int\" in function \"calculate\"\n  \"Literal['62,5']\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 95,
+                    "character": 49
+                },
+                "end": {
+                    "line": 95,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/tests/test_bolt_torque_gui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"DeferredDelete\" for class \"type[QEvent]\"\n  Attribute \"DeferredDelete\" is unknown",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 50
+                },
+                "end": {
+                    "line": 20,
+                    "character": 64
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addWidget\" for class \"MethodType\"\n  Attribute \"addWidget\" is unknown",
+            "range": {
+                "start": {
+                    "line": 30,
+                    "character": 84
+                },
+                "end": {
+                    "line": 30,
+                    "character": 93
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"LeftToRight\" for class \"type[QBoxLayout]\"\n  Attribute \"LeftToRight\" is unknown",
+            "range": {
+                "start": {
+                    "line": 34,
+                    "character": 45
+                },
+                "end": {
+                    "line": 34,
+                    "character": 56
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 44
+                },
+                "end": {
+                    "line": 47,
+                    "character": 77
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"WrapLongRows\" for class \"type[QFormLayout]\"\n  Attribute \"WrapLongRows\" is unknown",
+            "range": {
+                "start": {
+                    "line": 62,
+                    "character": 43
+                },
+                "end": {
+                    "line": 62,
+                    "character": 55
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"TextSelectableByMouse\" for class \"type[Qt]\"\n  Attribute \"TextSelectableByMouse\" is unknown",
+            "range": {
+                "start": {
+                    "line": 66,
+                    "character": 83
+                },
+                "end": {
+                    "line": 66,
+                    "character": 104
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"TextSelectableByMouse\" for class \"type[Qt]\"\n  Attribute \"TextSelectableByMouse\" is unknown",
+            "range": {
+                "start": {
+                    "line": 84,
+                    "character": 46
+                },
+                "end": {
+                    "line": 84,
+                    "character": 67
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"TextSelectableByMouse\" for class \"type[Qt]\"\n  Attribute \"TextSelectableByMouse\" is unknown",
+            "range": {
+                "start": {
+                    "line": 94,
+                    "character": 46
+                },
+                "end": {
+                    "line": 94,
+                    "character": 67
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"AlignTop\" for class \"type[Qt]\"\n  Attribute \"AlignTop\" is unknown",
+            "range": {
+                "start": {
+                    "line": 101,
+                    "character": 37
+                },
+                "end": {
+                    "line": 101,
+                    "character": 45
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addWidget\" for class \"MethodType\"\n  Attribute \"addWidget\" is unknown",
+            "range": {
+                "start": {
+                    "line": 102,
+                    "character": 20
+                },
+                "end": {
+                    "line": 102,
+                    "character": 29
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"TopToBottom\" for class \"type[QBoxLayout]\"\n  Attribute \"TopToBottom\" is unknown",
+            "range": {
+                "start": {
+                    "line": 119,
+                    "character": 49
+                },
+                "end": {
+                    "line": 119,
+                    "character": 60
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"LeftToRight\" for class \"type[QBoxLayout]\"\n  Attribute \"LeftToRight\" is unknown",
+            "range": {
+                "start": {
+                    "line": 119,
+                    "character": 88
+                },
+                "end": {
+                    "line": 119,
+                    "character": 99
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"thread_series\" of type \"str\" in function \"pitch_choices\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 124,
+                    "character": 42
+                },
+                "end": {
+                    "line": 124,
+                    "character": 48
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "No overloads for \"get\" match the provided arguments",
+            "range": {
+                "start": {
+                    "line": 136,
+                    "character": 47
+                },
+                "end": {
+                    "line": 136,
+                    "character": 84
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"get\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 136,
+                    "character": 73
+                },
+                "end": {
+                    "line": 136,
+                    "character": 79
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 142,
+                    "character": 57
+                },
+                "end": {
+                    "line": 142,
+                    "character": 72
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 155,
+                    "character": 45
+                },
+                "end": {
+                    "line": 155,
+                    "character": 86
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 161,
+                    "character": 37
+                },
+                "end": {
+                    "line": 161,
+                    "character": 78
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"metric\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 167,
+                    "character": 49
+                },
+                "end": {
+                    "line": 167,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"thread_series\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 167,
+                    "character": 49
+                },
+                "end": {
+                    "line": 167,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"grade\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 167,
+                    "character": 49
+                },
+                "end": {
+                    "line": 167,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"condition\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 167,
+                    "character": 49
+                },
+                "end": {
+                    "line": 167,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/bolt_torque/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"preload_percent\" of type \"int\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"int\"\n    \"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 167,
+                    "character": 49
+                },
+                "end": {
+                    "line": 167,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/k_factor/rules.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"angle\" of type \"int\" in function \"k_from_bend_allowance\"\n  \"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 270,
+                    "character": 63
+                },
+                "end": {
+                    "line": 270,
+                    "character": 79
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/k_factor/rules.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"angle\" of type \"int\" in function \"bend_allowance\"\n  \"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 277,
+                    "character": 68
+                },
+                "end": {
+                    "line": 277,
+                    "character": 84
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/k_factor/rules.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"angle\" of type \"int\" in function \"bend_deduction\"\n  \"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 278,
+                    "character": 47
+                },
+                "end": {
+                    "line": 278,
+                    "character": 63
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Ok\" for class \"type[QDialogButtonBox]\"\n  Attribute \"Ok\" is unknown",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 52
+                },
+                "end": {
+                    "line": 27,
+                    "character": 54
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Cancel\" for class \"type[QDialogButtonBox]\"\n  Attribute \"Cancel\" is unknown",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 74
+                },
+                "end": {
+                    "line": 27,
+                    "character": 80
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"RestoreDefaults\" for class \"type[QDialogButtonBox]\"\n  Attribute \"RestoreDefaults\" is unknown",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 100
+                },
+                "end": {
+                    "line": 27,
+                    "character": 115
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"RestoreDefaults\" for class \"type[QDialogButtonBox]\"\n  Attribute \"RestoreDefaults\" is unknown",
+            "range": {
+                "start": {
+                    "line": 30,
+                    "character": 40
+                },
+                "end": {
+                    "line": 30,
+                    "character": 55
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"split\" for class \"bool\"\n  Attribute \"split\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 91
+                },
+                "end": {
+                    "line": 39,
+                    "character": 96
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Ok\" for class \"type[QDialogButtonBox]\"\n  Attribute \"Ok\" is unknown",
+            "range": {
+                "start": {
+                    "line": 71,
+                    "character": 52
+                },
+                "end": {
+                    "line": 71,
+                    "character": 54
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Cancel\" for class \"type[QDialogButtonBox]\"\n  Attribute \"Cancel\" is unknown",
+            "range": {
+                "start": {
+                    "line": 71,
+                    "character": 74
+                },
+                "end": {
+                    "line": 71,
+                    "character": 80
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"strip\" for class \"bool\"\n  Attribute \"strip\" is unknown",
+            "range": {
+                "start": {
+                    "line": 83,
+                    "character": 37
+                },
+                "end": {
+                    "line": 83,
+                    "character": 42
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"strip\" for class \"bool\"\n  Attribute \"strip\" is unknown",
+            "range": {
+                "start": {
+                    "line": 83,
+                    "character": 71
+                },
+                "end": {
+                    "line": 83,
+                    "character": 76
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"strip\" for class \"bool\"\n  Attribute \"strip\" is unknown",
+            "range": {
+                "start": {
+                    "line": 85,
+                    "character": 43
+                },
+                "end": {
+                    "line": 85,
+                    "character": 48
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"profile\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"material\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"length\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"count\" of type \"int\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"int\"\n    \"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"thickness\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"standard\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"stock_code\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"allowance\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"source\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"import_id\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"import_revision\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"angle1\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"angle2\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"import_scope\" of type \"str\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"body_refs\" of type \"list[str]\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"list[str]\"\n    \"bool\" is not assignable to \"list[str]\"",
+            "range": {
+                "start": {
+                    "line": 91,
+                    "character": 51
+                },
+                "end": {
+                    "line": 91,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/models.py",
+            "severity": "error",
+            "message": "Operator \"<\" not supported for types \"int | Literal['n', 'N', 'F']\" and \"Literal[-9]\"\n  Operator \"<\" not supported for types \"Literal['n']\" and \"Literal[-9]\"\n  Operator \"<\" not supported for types \"Literal['N']\" and \"Literal[-9]\"\n  Operator \"<\" not supported for types \"Literal['F']\" and \"Literal[-9]\"",
+            "range": {
+                "start": {
+                    "line": 25,
+                    "character": 40
+                },
+                "end": {
+                    "line": 25,
+                    "character": 71
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/scanner.py",
+            "severity": "error",
+            "message": "Argument of type \"Generator[BaseException, None, None]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[Exception]\" in function \"extend\"\n  \"Generator[BaseException, None, None]\" is not assignable to \"Iterable[Exception]\"\n    Type parameter \"_T_co@Iterable\" is covariant, but \"BaseException\" is not a subtype of \"Exception\"\n      \"BaseException\" is not assignable to \"Exception\"",
+            "range": {
+                "start": {
+                    "line": 238,
+                    "character": 35
+                },
+                "end": {
+                    "line": 238,
+                    "character": 102
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/solidworks.py",
+            "severity": "error",
+            "message": "Argument of type \"tuple[float, ...]\" cannot be assigned to parameter \"direction\" of type \"tuple[float, float, float]\" in function \"__init__\"\n  \"tuple[float, ...]\" is not assignable to \"tuple[float, float, float]\"\n    Tuple size mismatch; expected 3 but received indeterminate",
+            "range": {
+                "start": {
+                    "line": 157,
+                    "character": 48
+                },
+                "end": {
+                    "line": 157,
+                    "character": 54
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/solidworks.py",
+            "severity": "error",
+            "message": "Argument of type \"tuple[float, ...]\" cannot be assigned to parameter \"point\" of type \"tuple[float, float, float]\" in function \"__init__\"\n  \"tuple[float, ...]\" is not assignable to \"tuple[float, float, float]\"\n    Tuple size mismatch; expected 3 but received indeterminate",
+            "range": {
+                "start": {
+                    "line": 157,
+                    "character": 56
+                },
+                "end": {
+                    "line": 157,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/solidworks.py",
+            "severity": "error",
+            "message": "Argument of type \"tuple[float, ...]\" cannot be assigned to parameter \"direction\" of type \"tuple[float, float, float]\" in function \"__init__\"\n  \"tuple[float, ...]\" is not assignable to \"tuple[float, float, float]\"\n    Tuple size mismatch; expected 3 but received indeterminate",
+            "range": {
+                "start": {
+                    "line": 161,
+                    "character": 51
+                },
+                "end": {
+                    "line": 161,
+                    "character": 91
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"CoInitialize\" for class \"ModuleType\"\n  Attribute \"CoInitialize\" is unknown",
+            "range": {
+                "start": {
+                    "line": 15,
+                    "character": 8
+                },
+                "end": {
+                    "line": 15,
+                    "character": 20
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"CoUninitialize\" for class \"ModuleType\"\n  Attribute \"CoUninitialize\" is unknown",
+            "range": {
+                "start": {
+                    "line": 16,
+                    "character": 8
+                },
+                "end": {
+                    "line": 16,
+                    "character": 22
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"CoInitialize\" for class \"ModuleType\"\n  Attribute \"CoInitialize\" is unknown",
+            "range": {
+                "start": {
+                    "line": 31,
+                    "character": 8
+                },
+                "end": {
+                    "line": 31,
+                    "character": 20
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"CoUninitialize\" for class \"ModuleType\"\n  Attribute \"CoUninitialize\" is unknown",
+            "range": {
+                "start": {
+                    "line": 31,
+                    "character": 53
+                },
+                "end": {
+                    "line": 31,
+                    "character": 67
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"GetTypeName2\" for class \"Folder\"\n  Type \"() -> Literal['Cut']\" is not assignable to type \"() -> Literal['CutListFolder']\"\n    Function return type \"Literal['Cut']\" is incompatible with type \"Literal['CutListFolder']\"\n      \"Literal['Cut']\" is not assignable to type \"Literal['CutListFolder']\"",
+            "range": {
+                "start": {
+                    "line": 42,
+                    "character": 48
+                },
+                "end": {
+                    "line": 42,
+                    "character": 60
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> FakeSession\" cannot be assigned to parameter \"session_factory\" of type \"type[Session]\" in function \"scan\"\n  Type \"() -> FakeSession\" is not assignable to type \"type[Session]\"",
+            "range": {
+                "start": {
+                    "line": 45,
+                    "character": 32
+                },
+                "end": {
+                    "line": 45,
+                    "character": 36
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 46,
+                    "character": 37
+                },
+                "end": {
+                    "line": 46,
+                    "character": 41
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 46,
+                    "character": 70
+                },
+                "end": {
+                    "line": 46,
+                    "character": 74
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> FakeSession\" cannot be assigned to parameter \"session_factory\" of type \"type[Session]\" in function \"scan\"\n  Type \"() -> FakeSession\" is not assignable to type \"type[Session]\"",
+            "range": {
+                "start": {
+                    "line": 56,
+                    "character": 58
+                },
+                "end": {
+                    "line": 56,
+                    "character": 62
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_api.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> FakeSession\" cannot be assigned to parameter \"session_factory\" of type \"type[Session]\" in function \"scan\"\n  Type \"() -> FakeSession\" is not assignable to type \"type[Session]\"",
+            "range": {
+                "start": {
+                    "line": 92,
+                    "character": 78
+                },
+                "end": {
+                    "line": 92,
+                    "character": 82
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_geometry.py",
+            "severity": "error",
+            "message": "Argument of type \"tuple[float, ...]\" cannot be assigned to parameter \"direction\" of type \"tuple[float, float, float]\" in function \"__init__\"\n  \"tuple[float, ...]\" is not assignable to \"tuple[float, float, float]\"\n    Tuple size mismatch; expected 3 but received indeterminate",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 35
+                },
+                "end": {
+                    "line": 26,
+                    "character": 39
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_geometry.py",
+            "severity": "error",
+            "message": "Argument of type \"tuple[float, ...]\" cannot be assigned to parameter \"direction\" of type \"tuple[float, float, float]\" in function \"__init__\"\n  \"tuple[float, ...]\" is not assignable to \"tuple[float, float, float]\"\n    Tuple size mismatch; expected 3 but received indeterminate",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 54
+                },
+                "end": {
+                    "line": 26,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_geometry.py",
+            "severity": "error",
+            "message": "Argument of type \"tuple[float, ...]\" cannot be assigned to parameter \"point\" of type \"tuple[float, float, float]\" in function \"__init__\"\n  \"tuple[float, ...]\" is not assignable to \"tuple[float, float, float]\"\n    Tuple size mismatch; expected 3 but received indeterminate",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 59
+                },
+                "end": {
+                    "line": 26,
+                    "character": 63
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_live.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 18
+                },
+                "end": {
+                    "line": 22,
+                    "character": 22
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_live.py",
+            "severity": "error",
+            "message": "\"unscanned\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 34
+                },
+                "end": {
+                    "line": 22,
+                    "character": 43
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_live.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 60
+                },
+                "end": {
+                    "line": 23,
+                    "character": 64
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_live.py",
+            "severity": "error",
+            "message": "\"summary\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 25,
+                    "character": 30
+                },
+                "end": {
+                    "line": 25,
+                    "character": 37
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_optimizer_oracle.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"seconds\" of type \"int\" in function \"optimize\"\n  \"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 40
+                },
+                "end": {
+                    "line": 26,
+                    "character": 42
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> FakeSession\" cannot be assigned to parameter \"session_factory\" of type \"type[Session]\" in function \"scan\"\n  Type \"() -> FakeSession\" is not assignable to type \"type[Session]\"",
+            "range": {
+                "start": {
+                    "line": 16,
+                    "character": 62
+                },
+                "end": {
+                    "line": 16,
+                    "character": 66
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 24,
+                    "character": 15
+                },
+                "end": {
+                    "line": 24,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"summary\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 28,
+                    "character": 36
+                },
+                "end": {
+                    "line": 28,
+                    "character": 43
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 36,
+                    "character": 36
+                },
+                "end": {
+                    "line": 36,
+                    "character": 40
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 18
+                },
+                "end": {
+                    "line": 47,
+                    "character": 22
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 51
+                },
+                "end": {
+                    "line": 47,
+                    "character": 55
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"scanned_parts\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 48,
+                    "character": 18
+                },
+                "end": {
+                    "line": 48,
+                    "character": 31
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"weldments\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 48,
+                    "character": 46
+                },
+                "end": {
+                    "line": 48,
+                    "character": 55
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"summary\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 50,
+                    "character": 18
+                },
+                "end": {
+                    "line": 50,
+                    "character": 25
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 60,
+                    "character": 18
+                },
+                "end": {
+                    "line": 60,
+                    "character": 22
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"unscanned\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 60,
+                    "character": 46
+                },
+                "end": {
+                    "line": 60,
+                    "character": 55
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"diagnostics\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 61,
+                    "character": 59
+                },
+                "end": {
+                    "line": 61,
+                    "character": 70
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"diagnostics\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 62,
+                    "character": 60
+                },
+                "end": {
+                    "line": 62,
+                    "character": 71
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 69,
+                    "character": 55
+                },
+                "end": {
+                    "line": 69,
+                    "character": 59
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 22
+                },
+                "end": {
+                    "line": 76,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 84,
+                    "character": 22
+                },
+                "end": {
+                    "line": 84,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 84,
+                    "character": 47
+                },
+                "end": {
+                    "line": 84,
+                    "character": 51
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 86,
+                    "character": 18
+                },
+                "end": {
+                    "line": 86,
+                    "character": 22
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 86,
+                    "character": 43
+                },
+                "end": {
+                    "line": 86,
+                    "character": 47
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 87,
+                    "character": 34
+                },
+                "end": {
+                    "line": 87,
+                    "character": 38
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 93,
+                    "character": 43
+                },
+                "end": {
+                    "line": 93,
+                    "character": 47
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 94,
+                    "character": 39
+                },
+                "end": {
+                    "line": 94,
+                    "character": 43
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 101,
+                    "character": 22
+                },
+                "end": {
+                    "line": 101,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 103,
+                    "character": 18
+                },
+                "end": {
+                    "line": 103,
+                    "character": 22
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 106,
+                    "character": 22
+                },
+                "end": {
+                    "line": 106,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 112,
+                    "character": 18
+                },
+                "end": {
+                    "line": 112,
+                    "character": 22
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 112,
+                    "character": 47
+                },
+                "end": {
+                    "line": 112,
+                    "character": 51
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 123,
+                    "character": 10
+                },
+                "end": {
+                    "line": 123,
+                    "character": 14
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 131,
+                    "character": 15
+                },
+                "end": {
+                    "line": 131,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"unscanned\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 147,
+                    "character": 18
+                },
+                "end": {
+                    "line": 147,
+                    "character": 27
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 147,
+                    "character": 42
+                },
+                "end": {
+                    "line": 147,
+                    "character": 46
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"diagnostics\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 148,
+                    "character": 62
+                },
+                "end": {
+                    "line": 148,
+                    "character": 73
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"diagnostics\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 149,
+                    "character": 68
+                },
+                "end": {
+                    "line": 149,
+                    "character": 79
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> FakeSession\" cannot be assigned to parameter \"session_factory\" of type \"type[Session]\" in function \"scan\"\n  Type \"() -> FakeSession\" is not assignable to type \"type[Session]\"",
+            "range": {
+                "start": {
+                    "line": 155,
+                    "character": 56
+                },
+                "end": {
+                    "line": 155,
+                    "character": 60
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 164,
+                    "character": 17
+                },
+                "end": {
+                    "line": 164,
+                    "character": 21
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 164,
+                    "character": 35
+                },
+                "end": {
+                    "line": 164,
+                    "character": 39
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"DeferredDelete\" for class \"type[QEvent]\"\n  Attribute \"DeferredDelete\" is unknown",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 76
+                },
+                "end": {
+                    "line": 22,
+                    "character": 90
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Argument of type \"() -> FakeSession\" cannot be assigned to parameter \"session_factory\" of type \"type[Session]\" in function \"scan\"\n  Type \"() -> FakeSession\" is not assignable to type \"type[Session]\"",
+            "range": {
+                "start": {
+                    "line": 31,
+                    "character": 97
+                },
+                "end": {
+                    "line": 31,
+                    "character": 101
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"EditRole\" for class \"type[Qt]\"\n  Attribute \"EditRole\" is unknown",
+            "range": {
+                "start": {
+                    "line": 65,
+                    "character": 65
+                },
+                "end": {
+                    "line": 65,
+                    "character": 73
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"EditRole\" for class \"type[Qt]\"\n  Attribute \"EditRole\" is unknown",
+            "range": {
+                "start": {
+                    "line": 67,
+                    "character": 65
+                },
+                "end": {
+                    "line": 67,
+                    "character": 73
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Accepted\" for class \"type[QDialog]\"\n  Attribute \"Accepted\" is unknown",
+            "range": {
+                "start": {
+                    "line": 73,
+                    "character": 51
+                },
+                "end": {
+                    "line": 73,
+                    "character": 59
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "\"ready\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 73,
+                    "character": 77
+                },
+                "end": {
+                    "line": 73,
+                    "character": 82
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"ready\" for class \"Demand\"\n  Attribute \"ready\" is unknown",
+            "range": {
+                "start": {
+                    "line": 73,
+                    "character": 77
+                },
+                "end": {
+                    "line": 73,
+                    "character": 82
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+            "severity": "error",
+            "message": "Object of type \"None\" is not subscriptable",
+            "range": {
+                "start": {
+                    "line": 85,
+                    "character": 11
+                },
+                "end": {
+                    "line": 85,
+                    "character": 25
+                }
+            },
+            "rule": "reportOptionalSubscript"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"DisplayRole\" for class \"type[Qt]\"\n  Attribute \"DisplayRole\" is unknown",
+            "range": {
+                "start": {
+                    "line": 25,
+                    "character": 32
+                },
+                "end": {
+                    "line": 25,
+                    "character": 43
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"TextAlignmentRole\" for class \"type[Qt]\"\n  Attribute \"TextAlignmentRole\" is unknown",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 22
+                },
+                "end": {
+                    "line": 26,
+                    "character": 39
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"AlignRight\" for class \"type[Qt]\"\n  Attribute \"AlignRight\" is unknown",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 22
+                },
+                "end": {
+                    "line": 27,
+                    "character": 32
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"AlignVCenter\" for class \"type[Qt]\"\n  Attribute \"AlignVCenter\" is unknown",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 38
+                },
+                "end": {
+                    "line": 27,
+                    "character": 50
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addWidget\" for class \"MethodType\"\n  Attribute \"addWidget\" is unknown",
+            "range": {
+                "start": {
+                    "line": 42,
+                    "character": 46
+                },
+                "end": {
+                    "line": 42,
+                    "character": 55
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"ExtendedSelection\" for class \"type[QAbstractItemView]\"\n  Attribute \"ExtendedSelection\" is unknown",
+            "range": {
+                "start": {
+                    "line": 62,
+                    "character": 56
+                },
+                "end": {
+                    "line": 62,
+                    "character": 73
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"ScrollBarAlwaysOff\" for class \"type[Qt]\"\n  Attribute \"ScrollBarAlwaysOff\" is unknown",
+            "range": {
+                "start": {
+                    "line": 116,
+                    "character": 50
+                },
+                "end": {
+                    "line": 116,
+                    "character": 68
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Accepted\" for class \"type[QDialog]\"\n  Attribute \"Accepted\" is unknown",
+            "range": {
+                "start": {
+                    "line": 163,
+                    "character": 36
+                },
+                "end": {
+                    "line": 163,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | Demand | None\" cannot be assigned to parameter \"object\" of type \"Demand\" in function \"append\"\n  Type \"Unknown | Demand | None\" is not assignable to type \"Demand\"\n    \"None\" is not assignable to \"Demand\"",
+            "range": {
+                "start": {
+                    "line": 164,
+                    "character": 40
+                },
+                "end": {
+                    "line": 164,
+                    "character": 52
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Method \"connect\" overrides class \"QObject\" in an incompatible manner\n  Base method is declared as a staticmethod but override is not\n  Positional parameter count mismatch; base method has 5, but override has 1\n  Parameter 5 mismatch: base parameter \"type\" is keyword parameter, override parameter is position-only\n  Return type mismatch: base method returns type \"Connection\", override returns type \"None\"\n    \"None\" is not assignable to \"Connection\"",
+            "range": {
+                "start": {
+                    "line": 180,
+                    "character": 8
+                },
+                "end": {
+                    "line": 180,
+                    "character": 15
+                }
+            },
+            "rule": "reportIncompatibleMethodOverride"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"update_cut_list\" of type \"bool\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"bool\"\n    \"str\" is not assignable to \"bool\"",
+            "range": {
+                "start": {
+                    "line": 195,
+                    "character": 26
+                },
+                "end": {
+                    "line": 195,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"geometry_length\" of type \"bool\" in function \"__init__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"bool\"\n    \"str\" is not assignable to \"bool\"",
+            "range": {
+                "start": {
+                    "line": 195,
+                    "character": 70
+                },
+                "end": {
+                    "line": 195,
+                    "character": 112
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "\"rows\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 210,
+                    "character": 31
+                },
+                "end": {
+                    "line": 210,
+                    "character": 35
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Accepted\" for class \"type[QDialog]\"\n  Attribute \"Accepted\" is unknown",
+            "range": {
+                "start": {
+                    "line": 229,
+                    "character": 36
+                },
+                "end": {
+                    "line": 229,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Accepted\" for class \"type[QDialog]\"\n  Attribute \"Accepted\" is unknown",
+            "range": {
+                "start": {
+                    "line": 234,
+                    "character": 36
+                },
+                "end": {
+                    "line": 234,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/profile_cutting/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"Yes\" for class \"type[QMessageBox]\"\n  Attribute \"Yes\" is unknown",
+            "range": {
+                "start": {
+                    "line": 340,
+                    "character": 162
+                },
+                "end": {
+                    "line": 340,
+                    "character": 165
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/diagram.py",
+            "severity": "error",
+            "message": "Operator \"*\" not supported for types \"float\" and \"float | list[tuple[float, float]]\"\n  Operator \"*\" not supported for types \"float\" and \"list[tuple[float, float]]\" when expected type is \"float\"",
+            "range": {
+                "start": {
+                    "line": 228,
+                    "character": 38
+                },
+                "end": {
+                    "line": 228,
+                    "character": 54
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"report_callback_exception\" for class \"MainWindow\"\n  Attribute \"report_callback_exception\" is unknown",
+            "range": {
+                "start": {
+                    "line": 37,
+                    "character": 12
+                },
+                "end": {
+                    "line": 37,
+                    "character": 37
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"_preload_id\" for class \"MainWindow\"\n  Attribute \"_preload_id\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 19
+                },
+                "end": {
+                    "line": 39,
+                    "character": 30
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"after_cancel\" for class \"MainWindow\"\n  Attribute \"after_cancel\" is unknown",
+            "range": {
+                "start": {
+                    "line": 40,
+                    "character": 20
+                },
+                "end": {
+                    "line": 40,
+                    "character": 32
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"_preload_id\" for class \"MainWindow\"\n  Attribute \"_preload_id\" is unknown",
+            "range": {
+                "start": {
+                    "line": 40,
+                    "character": 37
+                },
+                "end": {
+                    "line": 40,
+                    "character": 48
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"_preload_id\" for class \"MainWindow\"\n  Attribute \"_preload_id\" is unknown",
+            "range": {
+                "start": {
+                    "line": 41,
+                    "character": 20
+                },
+                "end": {
+                    "line": 41,
+                    "character": 31
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"_switch_mode\" for class \"MainWindow\"\n  Attribute \"_switch_mode\" is unknown",
+            "range": {
+                "start": {
+                    "line": 42,
+                    "character": 16
+                },
+                "end": {
+                    "line": 42,
+                    "character": 28
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Expected 0 positional arguments",
+            "range": {
+                "start": {
+                    "line": 43,
+                    "character": 25
+                },
+                "end": {
+                    "line": 43,
+                    "character": 41
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"_change_theme\" for class \"MainWindow\"\n  Attribute \"_change_theme\" is unknown",
+            "range": {
+                "start": {
+                    "line": 47,
+                    "character": 20
+                },
+                "end": {
+                    "line": 47,
+                    "character": 33
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"weight_state\" for class \"MainWindow\"\n  Attribute \"weight_state\" is unknown",
+            "range": {
+                "start": {
+                    "line": 49,
+                    "character": 24
+                },
+                "end": {
+                    "line": 49,
+                    "character": 36
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"weight_widgets\" for class \"MainWindow\"\n  Attribute \"weight_widgets\" is unknown",
+            "range": {
+                "start": {
+                    "line": 50,
+                    "character": 20
+                },
+                "end": {
+                    "line": 50,
+                    "character": 34
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"weight_widgets\" for class \"MainWindow\"\n  Attribute \"weight_widgets\" is unknown",
+            "range": {
+                "start": {
+                    "line": 51,
+                    "character": 20
+                },
+                "end": {
+                    "line": 51,
+                    "character": 34
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"weight_result\" for class \"MainWindow\"\n  Attribute \"weight_result\" is unknown",
+            "range": {
+                "start": {
+                    "line": 56,
+                    "character": 27
+                },
+                "end": {
+                    "line": 56,
+                    "character": 40
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"weight_result\" for class \"MainWindow\"\n  Attribute \"weight_result\" is unknown",
+            "range": {
+                "start": {
+                    "line": 57,
+                    "character": 27
+                },
+                "end": {
+                    "line": 57,
+                    "character": 40
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"winfo_rootx\" for class \"MainWindow\"\n  Attribute \"winfo_rootx\" is unknown",
+            "range": {
+                "start": {
+                    "line": 58,
+                    "character": 27
+                },
+                "end": {
+                    "line": 58,
+                    "character": 38
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"winfo_rooty\" for class \"MainWindow\"\n  Attribute \"winfo_rooty\" is unknown",
+            "range": {
+                "start": {
+                    "line": 58,
+                    "character": 46
+                },
+                "end": {
+                    "line": 58,
+                    "character": 57
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"winfo_width\" for class \"MainWindow\"\n  Attribute \"winfo_width\" is unknown",
+            "range": {
+                "start": {
+                    "line": 59,
+                    "character": 49
+                },
+                "end": {
+                    "line": 59,
+                    "character": 60
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"winfo_height\" for class \"MainWindow\"\n  Attribute \"winfo_height\" is unknown",
+            "range": {
+                "start": {
+                    "line": 59,
+                    "character": 70
+                },
+                "end": {
+                    "line": 59,
+                    "character": 82
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"weight_result\" for class \"MainWindow\"\n  Attribute \"weight_result\" is unknown",
+            "range": {
+                "start": {
+                    "line": 61,
+                    "character": 32
+                },
+                "end": {
+                    "line": 61,
+                    "character": 45
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/examples/capture.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"_on_close\" for class \"MainWindow\"\n  Attribute \"_on_close\" is unknown",
+            "range": {
+                "start": {
+                    "line": 63,
+                    "character": 16
+                },
+                "end": {
+                    "line": 63,
+                    "character": 25
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[2000]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[2000]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 10,
+                    "character": 71
+                },
+                "end": {
+                    "line": 10,
+                    "character": 75
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[3]\" cannot be assigned to parameter \"count\" of type \"str\" in function \"calculate\"\n  \"Literal[3]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 10,
+                    "character": 83
+                },
+                "end": {
+                    "line": 10,
+                    "character": 84
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[1000]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[1000]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 54
+                },
+                "end": {
+                    "line": 22,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[100]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[100]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 54
+                },
+                "end": {
+                    "line": 23,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[1]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[1]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 24,
+                    "character": 56
+                },
+                "end": {
+                    "line": 24,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[2]\" cannot be assigned to parameter \"count\" of type \"str\" in function \"calculate\"\n  \"Literal[2]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 48,
+                    "character": 79
+                },
+                "end": {
+                    "line": 48,
+                    "character": 80
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[2000]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[2000]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 81,
+                    "character": 81
+                },
+                "end": {
+                    "line": 81,
+                    "character": 85
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[2000]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[2000]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 85,
+                    "character": 95
+                },
+                "end": {
+                    "line": 85,
+                    "character": 99
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[2]\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"Literal[2]\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 40
+                },
+                "end": {
+                    "line": 89,
+                    "character": 41
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"int\" cannot be assigned to parameter \"material\" of type \"str\" in function \"calculate\"\n  \"int\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 45
+                },
+                "end": {
+                    "line": 120,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"int\" cannot be assigned to parameter \"unit\" of type \"str\" in function \"calculate\"\n  \"int\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 45
+                },
+                "end": {
+                    "line": 120,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"int\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  \"int\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 45
+                },
+                "end": {
+                    "line": 120,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"int\" cannot be assigned to parameter \"count\" of type \"str\" in function \"calculate\"\n  \"int\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 45
+                },
+                "end": {
+                    "line": 120,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/tests/test_weight.py",
+            "severity": "error",
+            "message": "Argument of type \"int\" cannot be assigned to parameter \"method\" of type \"str\" in function \"calculate\"\n  \"int\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 45
+                },
+                "end": {
+                    "line": 120,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 41,
+                    "character": 18
+                },
+                "end": {
+                    "line": 41,
+                    "character": 42
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 66,
+                    "character": 76
+                },
+                "end": {
+                    "line": 66,
+                    "character": 98
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 66,
+                    "character": 101
+                },
+                "end": {
+                    "line": 66,
+                    "character": 113
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__getitem__\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 81,
+                    "character": 78
+                },
+                "end": {
+                    "line": 81,
+                    "character": 102
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"setText\" for class \"QWidget\"\n  Attribute \"setText\" is unknown",
+            "range": {
+                "start": {
+                    "line": 85,
+                    "character": 64
+                },
+                "end": {
+                    "line": 85,
+                    "character": 71
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"kind\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 49
+                },
+                "end": {
+                    "line": 89,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"material\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 49
+                },
+                "end": {
+                    "line": 89,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"unit\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 49
+                },
+                "end": {
+                    "line": 89,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"length\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 49
+                },
+                "end": {
+                    "line": 89,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"count\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 49
+                },
+                "end": {
+                    "line": 89,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/workspace/gokworks/modules/weight/ui.py",
+            "severity": "error",
+            "message": "Argument of type \"bool | str | Unknown\" cannot be assigned to parameter \"method\" of type \"str\" in function \"calculate\"\n  Type \"bool | str | Unknown\" is not assignable to type \"str\"\n    \"bool\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 89,
+                    "character": 49
+                },
+                "end": {
+                    "line": 89,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 37,
+        "errorCount": 193,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 3.423
+    }
+}

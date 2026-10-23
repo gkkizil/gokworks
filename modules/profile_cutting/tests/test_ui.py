@@ -86,6 +86,18 @@ def test_mapping_dialog_does_not_apply_cancelled_changes(page,qtbot):
     assert dialog.mapping['length']==['MY-LENGTH']
 
 
+def test_refresh_with_changed_source_invalidates_plan_before_import_button(page,qtbot,tmp_path,monkeypatch):
+    p,w=page;setup_scan(monkeypatch,tmp_path)
+    p.start_scan(None);qtbot.waitUntil(lambda:not w.jobs.busy,timeout=6000)
+    p.import_scan();p.calculate();qtbot.waitUntil(lambda:not w.jobs.busy,timeout=6000)
+    assert p.plan
+    p.scan_result.rows[0].length='1200'
+    p.handle_events([('weldment_scan',p.scan_result)])
+    assert p.plan is None and p.project.demands[0].source_changed
+    assert 'değişmiş kaynak' in p.demand_summary.text()
+    p.calculate();assert not w.jobs.busy and 'kaynak verisi' in p.status_text
+
+
 def test_review_filter_and_failed_refresh_do_not_allow_stale_import(page,qtbot,tmp_path,monkeypatch):
     p,w=page;setup_scan(monkeypatch,tmp_path)
     p.start_scan(None);qtbot.waitUntil(lambda:not w.jobs.busy,timeout=6000)

@@ -30,7 +30,8 @@ def load(path):
     path = Path(path)
     if path.stat().st_size > 20*1024*1024: raise ValueError('Proje 20 MB sınırını aşıyor.')
     try:
-        data = json.loads(path.read_text(encoding='utf-8'))
+        def invalid(_): raise ValueError('Proje sonlu olmayan JSON sayısı içeriyor.')
+        data = json.loads(path.read_text(encoding='utf-8'), parse_constant=invalid)
         if data.get('format') != 'GOKWORKS-PROFILE-CUTTING' or type(data.get('version')) is not int or data['version'] != 1 or data.get('unit') != 'mm':
             raise ValueError('Profil kesim proje biçimi/sürümü desteklenmiyor.')
         raw = dict(data['project'])
@@ -45,9 +46,40 @@ def load(path):
                 row['properties'] = {name: Property(**prop) for name, prop in row['properties'].items()}
                 rows.append(ScanRow(**row))
             raw['rows'] = rows; scan = ScanResult(**raw)
+            validate_scan(scan)
         return project, scan
-    except (TypeError, KeyError, AttributeError) as error:
+    except (TypeError, KeyError, AttributeError, RecursionError) as error:
         raise ValueError('Profil kesim proje içeriği geçersiz.') from error
+
+
+def validate_scan(scan):
+    """Untrusted saved snapshots must be plain typed data before entering Qt."""
+    if not isinstance(scan.source, str) or not isinstance(scan.configuration, str):
+        raise ValueError('Tarama kaynağı/konfigürasyonu geçersiz.')
+    if not isinstance(scan.rows, list) or len(scan.rows) > 20000:
+        raise ValueError('Tarama satır sınırı aşıldı.')
+    if not isinstance(scan.diagnostics, list) or not all(isinstance(d, dict) for d in scan.diagnostics):
+        raise ValueError('Tarama raporu geçersiz.')
+    for key in ('scanned_parts', 'weldments', 'unscanned'):
+        if type(getattr(scan, key)) is not int or not 0 <= getattr(scan, key) <= 10000000:
+            raise ValueError('Tarama sayıları geçersiz.')
+    for row in scan.rows:
+        for key in ('id', 'source', 'configuration', 'folder', 'profile', 'material', 'length',
+                    'angle1', 'angle2', 'thickness', 'standard', 'stock_code', 'length_source',
+                    'freshness', 'allowance', 'review_note', 'display_unit'):
+            if not isinstance(getattr(row, key), str): raise ValueError('Tarama metin alanı geçersiz.')
+        for key in ('excluded', 'geometry_verified', 'reviewed'):
+            if type(getattr(row, key)) is not bool: raise ValueError('Tarama doğrulama alanı geçersiz.')
+        if type(row.count) is not int or not 0 <= row.count <= 100000:
+            raise ValueError('Tarama gövde adedi geçersiz.')
+        for key in ('body_refs', 'occurrences', 'issues', 'property_errors'):
+            values = getattr(row, key)
+            if not isinstance(values, list) or not all(isinstance(v, str) for v in values):
+                raise ValueError('Tarama kaynak/uyarı listesi geçersiz.')
+        for prop in row.properties.values():
+            if (not all(isinstance(getattr(prop, k), str) for k in ('name', 'raw', 'evaluated', 'status'))
+                    or type(prop.resolved) is not bool or type(prop.linked) is not bool):
+                raise ValueError('Kayıtlı Cut List property içeriği geçersiz.')
 
 
 def export_report(project, scan, plan, path, *, stop=None):

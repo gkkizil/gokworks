@@ -1,0 +1,5 @@
+weight-steel-dark 89.49 kg
+weight-delrin-light 5.576326960121883 kg
+weight-2379-dark 18.479999999999997 kg
+weight-2344-dark 18.72 kg
+weight-catalogue-dark 7.8500000000000005 kg

@@ -110,7 +110,10 @@ def export_dxf(project, result, directory, *, separate=True, stop=None):
         with (tmp/'KESIM-SIRASI.csv').open('w',encoding='utf-8-sig',newline='') as stream:
             writer=csv.writer(stream,delimiter=';')
             writer.writerow(('Plaka','Kontur sırası','Parça','Örnek','Kontur türü','DXF katmanı'))
-            writer.writerows(cut_rows)
+            # A part label may originate in a filename or imported project.
+            # Quoting CSV alone does not stop spreadsheet formula execution.
+            writer.writerows([["'"+v if isinstance(v, str) and v.lstrip().startswith(('=', '+', '-', '@')) else v
+                               for v in row] for row in cut_rows])
         (tmp/'KESIM-NOTLARI.txt').write_text(
             'GOKWORKS · NOMİNAL BİTMİŞ PARÇA KONTURLARI · birim mm\n'
             'PART_OUTER/PART_INNER kesim geometrisidir. Diğer katmanlar operatör bilgisidir.\n'

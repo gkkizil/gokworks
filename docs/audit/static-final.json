@@ -1,0 +1,2970 @@
+[
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 5
+    },
+    "filename": "/workspace/gokworks/gui_qt/app.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 5
+          }
+        }
+      ],
+      "message": "Remove unused import: `pathlib.Path`"
+    },
+    "location": {
+      "column": 21,
+      "row": 5
+    },
+    "message": "`pathlib.Path` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 5,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 60,
+      "row": 15
+    },
+    "filename": "/workspace/gokworks/gui_qt/app.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from .components import label, button, scroll, Disclosure, card",
+          "end_location": {
+            "column": 78,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 15
+          }
+        }
+      ],
+      "message": "Remove unused import: `.components.show_details`"
+    },
+    "location": {
+      "column": 48,
+      "row": 15
+    },
+    "message": "`.components.show_details` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 15,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 101,
+      "row": 7
+    },
+    "filename": "/workspace/gokworks/gui_qt/calculations.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from gui_qt.components import BasePage, ValueForm, card, label, scroll, configure_view",
+          "end_location": {
+            "column": 101,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `gui_qt.components.show_details`"
+    },
+    "location": {
+      "column": 89,
+      "row": 7
+    },
+    "message": "`gui_qt.components.show_details` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 7,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 37,
+      "row": 7
+    },
+    "filename": "/workspace/gokworks/gui_qt/diagrams.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from math import atan2, cos, sin",
+          "end_location": {
+            "column": 37,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `math.pi`"
+    },
+    "location": {
+      "column": 35,
+      "row": 7
+    },
+    "message": "`math.pi` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 7,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 55,
+      "row": 8
+    },
+    "filename": "/workspace/gokworks/gui_qt/diagrams.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from PySide6.QtCore import Qt, QRectF, QPointF",
+          "end_location": {
+            "column": 55,
+            "row": 8
+          },
+          "location": {
+            "column": 1,
+            "row": 8
+          }
+        }
+      ],
+      "message": "Remove unused import: `PySide6.QtCore.QTimer`"
+    },
+    "location": {
+      "column": 49,
+      "row": 8
+    },
+    "message": "`PySide6.QtCore.QTimer` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 8,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 50,
+      "row": 15
+    },
+    "filename": "/workspace/gokworks/gui_qt/package_check.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from PySide6.QtCore import qVersion",
+          "end_location": {
+            "column": 50,
+            "row": 15
+          },
+          "location": {
+            "column": 1,
+            "row": 15
+          }
+        }
+      ],
+      "message": "Remove unused import: `PySide6.QtCore.QLibraryInfo`"
+    },
+    "location": {
+      "column": 38,
+      "row": 15
+    },
+    "message": "`PySide6.QtCore.QLibraryInfo` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 15,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 46,
+      "row": 249
+    },
+    "filename": "/workspace/gokworks/gui_qt/package_check.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "import pythoncom",
+          "end_location": {
+            "column": 46,
+            "row": 249
+          },
+          "location": {
+            "column": 13,
+            "row": 249
+          }
+        }
+      ],
+      "message": "Remove unused import: `win32com.client`"
+    },
+    "location": {
+      "column": 31,
+      "row": 249
+    },
+    "message": "`win32com.client` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 249,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/gui_qt/services.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `pathlib.Path`"
+    },
+    "location": {
+      "column": 21,
+      "row": 3
+    },
+    "message": "`pathlib.Path` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 31,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/api.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `.models.checkpoint`"
+    },
+    "location": {
+      "column": 21,
+      "row": 11
+    },
+    "message": "`.models.checkpoint` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 38,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/fakes.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `contextlib.contextmanager`"
+    },
+    "location": {
+      "column": 24,
+      "row": 3
+    },
+    "message": "`contextlib.contextmanager` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 51,
+      "row": 10
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 10
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.cad_converter.exporter.convert`"
+    },
+    "location": {
+      "column": 44,
+      "row": 10
+    },
+    "message": "`modules.cad_converter.exporter.convert` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 10,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 48,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.cad_converter.models.Source`"
+    },
+    "location": {
+      "column": 42,
+      "row": 11
+    },
+    "message": "`modules.cad_converter.models.Source` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 34,
+      "row": 12
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from .test_converter import run",
+          "end_location": {
+            "column": 39,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import: `.test_converter.setup`"
+    },
+    "location": {
+      "column": 29,
+      "row": 12
+    },
+    "message": "`.test_converter.setup` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 12,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 79,
+      "row": 47
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 74,
+      "row": 47
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 47,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 92,
+      "row": 65
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 87,
+      "row": 65
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 65,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 74,
+      "row": 79
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 69,
+      "row": 79
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 79,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 78,
+      "row": 92
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 73,
+      "row": 92
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 92,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 92,
+      "row": 98
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 87,
+      "row": 98
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 98,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 88,
+      "row": 104
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 83,
+      "row": 104
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 104,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F811",
+    "end_location": {
+      "column": 76,
+      "row": 113
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_api_contract.py",
+    "fix": null,
+    "location": {
+      "column": 71,
+      "row": 113
+    },
+    "message": "Redefinition of unused `setup` from line 12: `setup` redefined here",
+    "name": "redefined-while-unused",
+    "noqa_row": 113,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/redefined-while-unused"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 67,
+      "row": 18
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_converter.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from .fakes import App, FakeSession, Events, C, Component",
+          "end_location": {
+            "column": 67,
+            "row": 18
+          },
+          "location": {
+            "column": 1,
+            "row": 18
+          }
+        }
+      ],
+      "message": "Remove unused import: `.fakes.content`"
+    },
+    "location": {
+      "column": 60,
+      "row": 18
+    },
+    "message": "`.fakes.content` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 18,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 48,
+      "row": 9
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_ui.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 10
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        }
+      ],
+      "message": "Remove unused import: `PySide6.QtWidgets.QAbstractItemView`"
+    },
+    "location": {
+      "column": 31,
+      "row": 9
+    },
+    "message": "`PySide6.QtWidgets.QAbstractItemView` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 9,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/tests/test_validation.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import: `pathlib.Path`"
+    },
+    "location": {
+      "column": 21,
+      "row": 4
+    },
+    "message": "`pathlib.Path` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 27,
+      "row": 14
+    },
+    "filename": "/workspace/gokworks/modules/cad_converter/ui.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from .models import Options, Cancelled",
+          "end_location": {
+            "column": 47,
+            "row": 14
+          },
+          "location": {
+            "column": 1,
+            "row": 14
+          }
+        }
+      ],
+      "message": "Remove unused import: `.models.Source`"
+    },
+    "location": {
+      "column": 21,
+      "row": 14
+    },
+    "message": "`.models.Source` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 14,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 11,
+      "row": 1
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Remove unused import: `csv`"
+    },
+    "location": {
+      "column": 8,
+      "row": 1
+    },
+    "message": "`csv` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 23,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 18,
+      "row": 4
+    },
+    "message": "`math.atan2` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 28,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 25,
+      "row": 4
+    },
+    "message": "`math.cos` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 37,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 30,
+      "row": 4
+    },
+    "message": "`math.degrees` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 44,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 39,
+      "row": 4
+    },
+    "message": "`math.hypot` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 53,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 46,
+      "row": 4
+    },
+    "message": "`math.radians` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 5
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 5
+          }
+        }
+      ],
+      "message": "Remove unused import: `unittest.mock.patch`"
+    },
+    "location": {
+      "column": 27,
+      "row": 5
+    },
+    "message": "`unittest.mock.patch` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 5,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 31,
+      "row": 16
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 17
+          },
+          "location": {
+            "column": 1,
+            "row": 16
+          }
+        }
+      ],
+      "message": "Remove unused import: `shared.theme.INPUT`"
+    },
+    "location": {
+      "column": 26,
+      "row": 16
+    },
+    "message": "`shared.theme.INPUT` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 16,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 42,
+      "row": 17
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 18
+          },
+          "location": {
+            "column": 1,
+            "row": 17
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 29,
+      "row": 17
+    },
+    "message": "`shared.settings.load_settings` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 17,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 57,
+      "row": 17
+    },
+    "filename": "/workspace/gokworks/modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 18
+          },
+          "location": {
+            "column": 1,
+            "row": 17
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 44,
+      "row": 17
+    },
+    "message": "`shared.settings.save_settings` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 17,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 11,
+      "row": 1
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_fits.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Remove unused import: `csv`"
+    },
+    "location": {
+      "column": 8,
+      "row": 1
+    },
+    "message": "`csv` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 6
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_fits.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 6
+          }
+        }
+      ],
+      "message": "Remove unused import: `unittest.mock.patch`"
+    },
+    "location": {
+      "column": 27,
+      "row": 6
+    },
+    "message": "`unittest.mock.patch` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 6,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 31,
+      "row": 9
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_fits.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 10
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        }
+      ],
+      "message": "Remove unused import: `shared.theme.INPUT`"
+    },
+    "location": {
+      "column": 26,
+      "row": 9
+    },
+    "message": "`shared.theme.INPUT` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 9,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 47,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_fits.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.iso_fits.ui import SAMPLES",
+          "end_location": {
+            "column": 61,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 42,
+      "row": 11
+    },
+    "message": "`modules.iso_fits.ui.VIEWS` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 61,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_fits.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.iso_fits.ui import SAMPLES",
+          "end_location": {
+            "column": 61,
+            "row": 11
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 49,
+      "row": 11
+    },
+    "message": "`modules.iso_fits.ui.SECTION_HELP` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 43,
+      "row": 12
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_matching.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 13
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.iso_fits.rules.PRESETS`"
+    },
+    "location": {
+      "column": 36,
+      "row": 12
+    },
+    "message": "`modules.iso_fits.rules.PRESETS` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 12,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 38,
+      "row": 13
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_matching.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 14
+          },
+          "location": {
+            "column": 1,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.iso_fits.ui.BASES`"
+    },
+    "location": {
+      "column": 33,
+      "row": 13
+    },
+    "message": "`modules.iso_fits.ui.BASES` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 13,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 11,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_tolerance_audit.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `csv`"
+    },
+    "location": {
+      "column": 8,
+      "row": 3
+    },
+    "message": "`csv` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 9
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_iso_tolerance_audit.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 10
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        }
+      ],
+      "message": "Remove unused import: `unittest.mock.patch`"
+    },
+    "location": {
+      "column": 27,
+      "row": 9
+    },
+    "message": "`unittest.mock.patch` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 9,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 11,
+      "row": 1
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_manual_iso.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Remove unused import: `csv`"
+    },
+    "location": {
+      "column": 8,
+      "row": 1
+    },
+    "message": "`csv` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_manual_iso.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import: `unittest.mock.patch`"
+    },
+    "location": {
+      "column": 27,
+      "row": 4
+    },
+    "message": "`unittest.mock.patch` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 8
+    },
+    "filename": "/workspace/gokworks/modules/iso_fits/tests/test_manual_iso.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.iso_fits.manual import (\n    calculate_manual,\n    closest_pair,\n    closest_preset,\n    compare_classes,\n    compatibility,\n    deviation_nm,\n    usage_hint,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.iso_fits.manual.TARGETS`"
+    },
+    "location": {
+      "column": 5,
+      "row": 8
+    },
+    "message": "`modules.iso_fits.manual.TARGETS` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 8,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 13
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_k_factor.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import (\n    FakeComponent,\n    FakeFeature,\n    FakeMultiPartApp,\n    SheetPart,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 20
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 5,
+      "row": 13
+    },
+    "message": "`support.solidworks.FakeApp` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 13,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 17,
+      "row": 14
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_k_factor.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import (\n    FakeComponent,\n    FakeFeature,\n    FakeMultiPartApp,\n    SheetPart,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 20
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 5,
+      "row": 14
+    },
+    "message": "`support.solidworks.FakeAssembly` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 14,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 23,
+      "row": 19
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_k_factor.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import (\n    FakeComponent,\n    FakeFeature,\n    FakeMultiPartApp,\n    SheetPart,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 20
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 5,
+      "row": 19
+    },
+    "message": "`support.solidworks.solidworks_session` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 19,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 42,
+      "row": 33
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_k_factor.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 34
+          },
+          "location": {
+            "column": 1,
+            "row": 33
+          }
+        }
+      ],
+      "message": "Remove unused import: `shared.settings.load_settings`"
+    },
+    "location": {
+      "column": 29,
+      "row": 33
+    },
+    "message": "`shared.settings.load_settings` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 33,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 11,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_manual_k_radius.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `csv`"
+    },
+    "location": {
+      "column": 8,
+      "row": 3
+    },
+    "message": "`csv` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 17,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_manual_k_radius.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import (\n    FakeComponent,\n    FakeMultiPartApp,\n    SheetPart,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 10
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 5,
+      "row": 11
+    },
+    "message": "`support.solidworks.FakeAssembly` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 23,
+      "row": 15
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_manual_k_radius.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import (\n    FakeComponent,\n    FakeMultiPartApp,\n    SheetPart,\n)",
+          "end_location": {
+            "column": 2,
+            "row": 16
+          },
+          "location": {
+            "column": 1,
+            "row": 10
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 5,
+      "row": 15
+    },
+    "message": "`support.solidworks.solidworks_session` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 15,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 42,
+      "row": 20
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_manual_k_radius.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 21
+          },
+          "location": {
+            "column": 1,
+            "row": 20
+          }
+        }
+      ],
+      "message": "Remove unused import: `shared.settings.load_settings`"
+    },
+    "location": {
+      "column": 29,
+      "row": 20
+    },
+    "message": "`shared.settings.load_settings` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 20,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 42,
+      "row": 12
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_sheetmetal_parameters.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import FakeFeature, Variant",
+          "end_location": {
+            "column": 78,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 32,
+      "row": 12
+    },
+    "message": "`support.solidworks.Definition` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 12,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 69,
+      "row": 12
+    },
+    "filename": "/workspace/gokworks/modules/k_factor/tests/test_sheetmetal_parameters.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from support.solidworks import FakeFeature, Variant",
+          "end_location": {
+            "column": 78,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 57,
+      "row": 12
+    },
+    "message": "`support.solidworks.SheetFeature` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 12,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 12,
+      "row": 5
+    },
+    "filename": "/workspace/gokworks/modules/nesting/dxf_export.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 5
+          }
+        }
+      ],
+      "message": "Remove unused import: `json`"
+    },
+    "location": {
+      "column": 8,
+      "row": 5
+    },
+    "message": "`json` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 5,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 63,
+      "row": 13
+    },
+    "filename": "/workspace/gokworks/modules/nesting/dxf_import.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from shapely.geometry import LineString, Polygon",
+          "end_location": {
+            "column": 63,
+            "row": 13
+          },
+          "location": {
+            "column": 1,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Remove unused import: `shapely.geometry.MultiPolygon`"
+    },
+    "location": {
+      "column": 51,
+      "row": 13
+    },
+    "message": "`shapely.geometry.MultiPolygon` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 13,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 51,
+      "row": 46
+    },
+    "filename": "/workspace/gokworks/modules/nesting/render.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from PySide6.QtCore import QBuffer, QIODevice, QRectF",
+          "end_location": {
+            "column": 70,
+            "row": 46
+          },
+          "location": {
+            "column": 5,
+            "row": 46
+          }
+        }
+      ],
+      "message": "Remove unused import: `PySide6.QtCore.QByteArray`"
+    },
+    "location": {
+      "column": 41,
+      "row": 46
+    },
+    "message": "`PySide6.QtCore.QByteArray` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 46,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 55,
+      "row": 19
+    },
+    "filename": "/workspace/gokworks/modules/nesting/tests/test_nesting.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.nesting.geometry import placed, minkowski",
+          "end_location": {
+            "column": 66,
+            "row": 19
+          },
+          "location": {
+            "column": 1,
+            "row": 19
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.nesting.geometry.footprint`"
+    },
+    "location": {
+      "column": 46,
+      "row": 19
+    },
+    "message": "`modules.nesting.geometry.footprint` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 19,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 47,
+      "row": 21
+    },
+    "filename": "/workspace/gokworks/modules/nesting/tests/test_nesting.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.nesting.models import Part, Material, number",
+          "end_location": {
+            "column": 76,
+            "row": 21
+          },
+          "location": {
+            "column": 1,
+            "row": 21
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 42,
+      "row": 21
+    },
+    "message": "`modules.nesting.models.Sheet` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 21,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 68,
+      "row": 21
+    },
+    "filename": "/workspace/gokworks/modules/nesting/tests/test_nesting.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.nesting.models import Part, Material, number",
+          "end_location": {
+            "column": 76,
+            "row": 21
+          },
+          "location": {
+            "column": 1,
+            "row": 21
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 59,
+      "row": 21
+    },
+    "message": "`modules.nesting.models.Placement` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 21,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 52,
+      "row": 2
+    },
+    "filename": "/workspace/gokworks/modules/pdf/window.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from gui_qt.app import main",
+          "end_location": {
+            "column": 58,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 2
+          }
+        }
+      ],
+      "message": "Remove unused import: `gui_qt.app.MainWindow`"
+    },
+    "location": {
+      "column": 38,
+      "row": 2
+    },
+    "message": "`gui_qt.app.MainWindow` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 2,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 26,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/dialogs.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `copy.deepcopy`"
+    },
+    "location": {
+      "column": 18,
+      "row": 3
+    },
+    "message": "`copy.deepcopy` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 38,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/fakes.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `contextlib.contextmanager`"
+    },
+    "location": {
+      "column": 24,
+      "row": 3
+    },
+    "message": "`contextlib.contextmanager` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 51,
+      "row": 8
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/fakes.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 9
+          },
+          "location": {
+            "column": 1,
+            "row": 8
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.cad_converter.api.RestoreError`"
+    },
+    "location": {
+      "column": 39,
+      "row": 8
+    },
+    "message": "`modules.cad_converter.api.RestoreError` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 8,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 14,
+      "row": 1
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/test_geometry.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Remove unused import: `pytest`"
+    },
+    "location": {
+      "column": 8,
+      "row": 1
+    },
+    "message": "`pytest` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 26,
+      "row": 1
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 2
+          },
+          "location": {
+            "column": 1,
+            "row": 1
+          }
+        }
+      ],
+      "message": "Remove unused import: `copy.deepcopy`"
+    },
+    "location": {
+      "column": 18,
+      "row": 1
+    },
+    "message": "`copy.deepcopy` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 1,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 2
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 3
+          },
+          "location": {
+            "column": 1,
+            "row": 2
+          }
+        }
+      ],
+      "message": "Remove unused import: `dataclasses.replace`"
+    },
+    "location": {
+      "column": 25,
+      "row": 2
+    },
+    "message": "`dataclasses.replace` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 2,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 51,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/test_scanner.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.cad_converter.api.RestoreError`"
+    },
+    "location": {
+      "column": 39,
+      "row": 11
+    },
+    "message": "`modules.cad_converter.api.RestoreError` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 58,
+      "row": 9
+    },
+    "filename": "/workspace/gokworks/modules/profile_cutting/tests/test_ui.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.profile_cutting.models import Demand",
+          "end_location": {
+            "column": 58,
+            "row": 9
+          },
+          "location": {
+            "column": 1,
+            "row": 9
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.profile_cutting.models.Project`"
+    },
+    "location": {
+      "column": 51,
+      "row": 9
+    },
+    "message": "`modules.profile_cutting.models.Project` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 9,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 10,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/drawing_writer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `os`"
+    },
+    "location": {
+      "column": 8,
+      "row": 11
+    },
+    "message": "`os` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/report.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import: `pathlib.Path`"
+    },
+    "location": {
+      "column": 21,
+      "row": 4
+    },
+    "message": "`pathlib.Path` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 61,
+      "row": 7
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/report.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.tolerance_stack.models import fmt",
+          "end_location": {
+            "column": 61,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.tolerance_stack.models.serializable`"
+    },
+    "location": {
+      "column": 49,
+      "row": 7
+    },
+    "message": "`modules.tolerance_stack.models.serializable` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 7,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 11
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/solidworks_reader.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 11
+          }
+        }
+      ],
+      "message": "Remove unused import: `pathlib.Path`"
+    },
+    "location": {
+      "column": 21,
+      "row": 11
+    },
+    "message": "`pathlib.Path` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 11,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 31,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/storage.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `dataclasses.asdict`"
+    },
+    "location": {
+      "column": 25,
+      "row": 3
+    },
+    "message": "`dataclasses.asdict` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 26,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/tests/test_tolerance_stack_drawing_writer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `copy.deepcopy`"
+    },
+    "location": {
+      "column": 18,
+      "row": 3
+    },
+    "message": "`copy.deepcopy` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 4
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/tests/test_tolerance_stack_drawing_writer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 5
+          },
+          "location": {
+            "column": 1,
+            "row": 4
+          }
+        }
+      ],
+      "message": "Remove unused import: `dataclasses.replace`"
+    },
+    "location": {
+      "column": 25,
+      "row": 4
+    },
+    "message": "`dataclasses.replace` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 4,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 88,
+      "row": 12
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/tests/test_tolerance_stack_drawing_writer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.tolerance_stack.tests.test_tolerance_stack_com import Drawing,View,Sheet,Annotation",
+          "end_location": {
+            "column": 105,
+            "row": 12
+          },
+          "location": {
+            "column": 1,
+            "row": 12
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.tolerance_stack.tests.test_tolerance_stack_com.Display`"
+    },
+    "location": {
+      "column": 81,
+      "row": 12
+    },
+    "message": "`modules.tolerance_stack.tests.test_tolerance_stack_com.Display` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 12,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 48,
+      "row": 13
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/tests/test_tolerance_stack_drawing_writer.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.tolerance_stack import com,solidworks_reader as reader,drawing_writer as writer",
+          "end_location": {
+            "column": 101,
+            "row": 13
+          },
+          "location": {
+            "column": 1,
+            "row": 13
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.tolerance_stack.storage`"
+    },
+    "location": {
+      "column": 41,
+      "row": 13
+    },
+    "message": "`modules.tolerance_stack.storage` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 13,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 25,
+      "row": 2
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 3
+          },
+          "location": {
+            "column": 1,
+            "row": 2
+          }
+        }
+      ],
+      "message": "Remove unused import: `pathlib.Path`"
+    },
+    "location": {
+      "column": 21,
+      "row": 2
+    },
+    "message": "`pathlib.Path` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 2,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 79,
+      "row": 7
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/ui_dialogs.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.tolerance_stack.models import manual_dimension,iso_dimension,UNITS,length,number",
+          "end_location": {
+            "column": 99,
+            "row": 7
+          },
+          "location": {
+            "column": 1,
+            "row": 7
+          }
+        }
+      ],
+      "message": "Remove unused import: `modules.tolerance_stack.models.Term`"
+    },
+    "location": {
+      "column": 75,
+      "row": 7
+    },
+    "message": "`modules.tolerance_stack.models.Term` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 7,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 30,
+      "row": 3
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/ui_widgets.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from PySide6.QtCore import QTimer",
+          "end_location": {
+            "column": 37,
+            "row": 3
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `PySide6.QtCore.Qt`"
+    },
+    "location": {
+      "column": 28,
+      "row": 3
+    },
+    "message": "`PySide6.QtCore.Qt` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 3,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 41,
+      "row": 5
+    },
+    "filename": "/workspace/gokworks/modules/tolerance_stack/ui_widgets.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 5
+          }
+        }
+      ],
+      "message": "Remove unused import: `gui_qt.components.Disclosure`"
+    },
+    "location": {
+      "column": 31,
+      "row": 5
+    },
+    "message": "`gui_qt.components.Disclosure` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 5,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 82,
+      "row": 6
+    },
+    "filename": "/workspace/gokworks/modules/weight/rules.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.weight.materials import MATERIALS, MATERIAL_ALIASES",
+          "end_location": {
+            "column": 116,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 6
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 67,
+      "row": 6
+    },
+    "message": "`modules.weight.materials.MATERIAL_GROUPS` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 6,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 98,
+      "row": 6
+    },
+    "filename": "/workspace/gokworks/modules/weight/rules.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.weight.materials import MATERIALS, MATERIAL_ALIASES",
+          "end_location": {
+            "column": 116,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 6
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 84,
+      "row": 6
+    },
+    "message": "`modules.weight.materials.MATERIAL_NOTES` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 6,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 116,
+      "row": 6
+    },
+    "filename": "/workspace/gokworks/modules/weight/rules.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "from modules.weight.materials import MATERIALS, MATERIAL_ALIASES",
+          "end_location": {
+            "column": 116,
+            "row": 6
+          },
+          "location": {
+            "column": 1,
+            "row": 6
+          }
+        }
+      ],
+      "message": "Remove unused import"
+    },
+    "location": {
+      "column": 100,
+      "row": 6
+    },
+    "message": "`modules.weight.materials.MATERIAL_SOURCES` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 6,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 37,
+      "row": 2
+    },
+    "filename": "/workspace/gokworks/shared/package_check.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 3
+          },
+          "location": {
+            "column": 1,
+            "row": 2
+          }
+        }
+      ],
+      "message": "Remove unused import: `gui_qt.package_check.run`"
+    },
+    "location": {
+      "column": 34,
+      "row": 2
+    },
+    "message": "`gui_qt.package_check.run` imported but unused",
+    "name": "unused-import",
+    "noqa_row": 2,
+    "severity": "error",
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  }
+]

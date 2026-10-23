@@ -147,7 +147,7 @@ def export_pdf(project, result, path, *, overwrite=False, stop=None):
                 draw_sheet(painter, QRectF(0,150,writer.width(),writer.height()-190), project, result, (s['id'],s['number']))
                 footer(index)
         finally: painter.end()
-        del writer
+        writer = None  # Release the PDF device before inspecting its completed file.
         content = temporary.read_bytes()
         if not content.startswith(b'%PDF-') or b'%%EOF' not in content[-1024:]: raise ValueError('PDF doğrulanamadı.')
     return atomic_write(path, write, overwrite=overwrite, stop=stop)

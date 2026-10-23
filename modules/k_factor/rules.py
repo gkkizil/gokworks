@@ -48,7 +48,10 @@ def _geometry(thickness, radius, angle):
     a = number(angle, "Büküm açısı")
     if a >= 180:
         raise ValueError("Büküm açısı 0°'den büyük, 180°'den küçük olmalıdır. Tam katlama (180°) desteklenmez.")
-    return t, r, math.radians(a)
+    radians = math.radians(a)
+    if radians == 0:
+        raise ValueError('Büküm açısı hesaplanamayacak kadar küçük.')
+    return t, r, radians
 
 
 def bend_allowance(thickness, radius, k_factor, angle=90):
@@ -56,7 +59,13 @@ def bend_allowance(thickness, radius, k_factor, angle=90):
     k = number(k_factor, "K faktörü", zero=True)
     if k > 1:
         raise ValueError("ANSI K faktörü 0–1 aralığında olmalı.")
-    return a * (r + k * t)
+    return _finite(a * (r + k * t))
+
+
+def _finite(value):
+    if not math.isfinite(value):
+        raise ValueError('Büküm hesabı sayısal sınırları aşıyor; ölçüleri ve açıyı kontrol edin.')
+    return value
 
 
 def k_from_bend_allowance(thickness, radius, measured_ba, angle=90):
@@ -70,7 +79,7 @@ def k_from_bend_allowance(thickness, radius, measured_ba, angle=90):
 
 def bend_deduction(thickness, radius, k_factor, angle=90):
     t, r, a = _geometry(thickness, radius, angle)
-    return 2 * (r + t) * math.tan(a / 2) - bend_allowance(t, r, k_factor, angle)
+    return _finite(2 * (r + t) * math.tan(a / 2) - bend_allowance(t, r, k_factor, angle))
 
 
 def ba_from_outside_dimensions(thickness, radius, outside_a, outside_b,
@@ -79,7 +88,7 @@ def ba_from_outside_dimensions(thickness, radius, outside_a, outside_b,
     t, r, a = _geometry(thickness, radius, angle)
     outside_a, outside_b = number(outside_a, "Dış A"), number(outside_b, "Dış B")
     flat_length = number(flat_length, "Düz boy")
-    setback = (r + t) * math.tan(a / 2)
+    setback = _finite((r + t) * math.tan(a / 2))
     if min(outside_a, outside_b) <= setback:
         raise ValueError("Dış ölçüler büküm geri çekilmesinden büyük olmalı.")
     ba = flat_length - outside_a - outside_b + 2 * setback

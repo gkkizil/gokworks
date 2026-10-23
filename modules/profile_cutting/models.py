@@ -162,6 +162,8 @@ class Demand:
     angle2: str = ''
     import_scope: str = ''
     body_refs: list[str] = field(default_factory=list)
+    import_root: str = ''
+    source_changed: str = ''
 
     @property
     def group(self):
@@ -171,6 +173,13 @@ class Demand:
                                      (self.material, self.standard, self.stock_code)))
 
     def validate(self):
+        for key in ('id', 'profile', 'material', 'thickness', 'standard', 'stock_code',
+                    'source', 'import_id', 'import_revision', 'note', 'angle1', 'angle2',
+                    'import_scope', 'import_root', 'source_changed'):
+            if not isinstance(getattr(self, key), str):
+                raise ValueError('Profil kaydının metin alanları geçersiz.')
+        if not self.id or not isinstance(self.body_refs, list) or not all(isinstance(v, str) for v in self.body_refs):
+            raise ValueError('Profil kaydının kaynak kimlikleri geçersiz.')
         if not self.profile.strip() or not self.material.strip():
             raise ValueError('Profil kesiti ve malzeme kalitesi girin.')
         number(self.length, 'Boy', positive=True)
@@ -186,18 +195,48 @@ class Project:
     kerf: str = '3'
     trim: str = '0'
 
-    def validate(self):
+    def validate(self, *, require_current=False):
         length = number(self.stock_length, 'Stok boyu', positive=True)
         if 2*number(self.trim, 'Uç düzeltme') >= length:
             raise ValueError('İki uç düzeltmesi stok boyundan küçük olmalı.')
         number(self.kerf, 'Testere kesim payı')
-        for demand in self.demands: demand.validate()
+        for demand in self.demands:
+            demand.validate()
+            if require_current and demand.source_changed:
+                raise ValueError(f'{demand.profile}: kaynak verisi değişti veya taramada bulunamadı. '
+                                 'Eski aktarım satırını kaldırıp güncel, doğrulanmış satırı aktarın.')
         if len({row.id for row in self.demands}) != len(self.demands):
             raise ValueError('Kesim listesinde yinelenen kayıt kimliği var.')
 
 
+def reconcile(project, result):
+    """Invalidate known imports after a refresh without changing cut values.
+
+    Legacy v1 rows without import_root acquire it when their ID/scope matches.
+    Imports of another assembly/configuration and manual entries stay intact.
+    """
+    root = digest([result.source.casefold(), result.configuration])
+    current = {digest([result.source.casefold(), result.configuration, row.id]): row for row in result.rows}
+    scopes = {digest([result.source.casefold(), result.configuration, row.source.casefold(), row.configuration])
+              for row in result.rows}
+    changed = 0
+    for demand in project.demands:
+        if not demand.import_id:
+            continue
+        if demand.import_root != root and demand.import_id not in current and demand.import_scope not in scopes:
+            continue
+        demand.import_root = root
+        row = current.get(demand.import_id)
+        message = ('Kaynak satırı değişti.' if row else 'Kaynak satırı son taramada bulunamadı.')
+        state = '' if row and row.revision == demand.import_revision else message
+        changed += state != demand.source_changed
+        demand.source_changed = state
+    return changed
+
+
 def transfer(project, result):
     """Append only. Repeat scans never overwrite manual or imported rows."""
+    reconcile(project, result)
     existing = {row.import_id: row for row in project.demands if row.import_id}
     stats = dict(added=0, duplicate=0, changed=0, blocked=0)
     for row in result.rows:
@@ -217,7 +256,8 @@ def transfer(project, result):
                         row.standard, row.stock_code, row.allowance,
                         f'{row.source} [{row.configuration}] / {row.folder}', key, row.revision,
                         row.review_note or 'Doğrusal geometri ve kare uçlar doğrulandı.', row.angle1, row.angle2,
-                        import_scope=scope, body_refs=list(row.body_refs))
+                        import_scope=scope, body_refs=list(row.body_refs),
+                        import_root=digest([result.source.casefold(), result.configuration]))
         demand.validate()
         project.demands.append(demand)
         existing[key] = demand
