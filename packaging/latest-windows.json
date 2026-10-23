@@ -1,9 +1,9 @@
 {
-  "commit": "9e9bfbf93cb832d43c196f84283e4577deb08890",
+  "commit": "8817e112975d48855d6b319a613328804e52ff13",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39745434934",
-  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39745434934-1/GOKWORKS.exe",
-  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/39745434934/artifacts/12411578814",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/39962657837",
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-39962657837-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/39962657837/artifacts/12506473754",
   "setup_steps": {
     "checkout": "success",
     "python": "success",
@@ -104,8 +104,8 @@
       ]
     ]
   },
-  "bytes": 86233880,
-  "sha256": "d8c86aa7f941c21c17386642d6a1f12c2f8c98b549c36245193b830160ccff55",
+  "bytes": 86402927,
+  "sha256": "f453c677cd6697d87d601dfc5eb2718be0252e901439148e269a6296a773d0ef",
   "smoke": {
     "status": "passed",
     "framework": "PySide6 / Qt Widgets",
@@ -131,7 +131,8 @@
       "bolt",
       "bolt_torque",
       "weight",
-      "nesting"
+      "nesting",
+      "profile_cutting"
     ],
     "themes": [
       "dark",
@@ -155,21 +156,22 @@
         1440
       ]
     ],
-    "startup_ms": 542.14,
-    "navigation_median_ms": 17.05,
-    "navigation_max_ms": 63.91,
-    "resize_median_ms": 26.53,
-    "resize_max_ms": 86.8,
-    "table_50000_load_ms": 90.2,
-    "table_50000_filter_ms": 98.72,
+    "startup_ms": 881.83,
+    "navigation_median_ms": 25.49,
+    "navigation_max_ms": 82.86,
+    "resize_median_ms": 36.48,
+    "resize_max_ms": 122.29,
+    "table_50000_load_ms": 101.46,
+    "table_50000_filter_ms": 164.38,
     "tk_imports": [],
     "kr_assignment_engine": "embedded Python SheetMetal parameters",
     "pdf_export_engine": "isolated COM process",
     "solidworks_live_tested": false,
     "checks": [
-      "13 modules",
+      "14 modules",
       "two themes",
       "resolution matrix",
+      "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
       "3D CAD converter / eight formats / queue, options and clear / no live COM",
       "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
       "hole nesting / five parts on one plate / contour cut-order CSV",
@@ -217,7 +219,8 @@
         "bolt",
         "bolt_torque",
         "weight",
-        "nesting"
+        "nesting",
+        "profile_cutting"
       ],
       "themes": [
         "dark",
@@ -241,21 +244,22 @@
           1440
         ]
       ],
-      "startup_ms": 574.82,
-      "navigation_median_ms": 21.14,
-      "navigation_max_ms": 64.71,
-      "resize_median_ms": 22.96,
-      "resize_max_ms": 88.51,
-      "table_50000_load_ms": 94.04,
-      "table_50000_filter_ms": 92.99,
+      "startup_ms": 887.21,
+      "navigation_median_ms": 28.92,
+      "navigation_max_ms": 87.24,
+      "resize_median_ms": 30.57,
+      "resize_max_ms": 128.0,
+      "table_50000_load_ms": 98.2,
+      "table_50000_filter_ms": 161.03,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
       "solidworks_live_tested": false,
       "checks": [
-        "13 modules",
+        "14 modules",
         "two themes",
         "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
         "3D CAD converter / eight formats / queue, options and clear / no live COM",
         "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
         "hole nesting / five parts on one plate / contour cut-order CSV",
@@ -301,7 +305,8 @@
         "bolt",
         "bolt_torque",
         "weight",
-        "nesting"
+        "nesting",
+        "profile_cutting"
       ],
       "themes": [
         "dark",
@@ -325,21 +330,22 @@
           1440
         ]
       ],
-      "startup_ms": 508.81,
-      "navigation_median_ms": 22.11,
-      "navigation_max_ms": 56.65,
-      "resize_median_ms": 23.8,
-      "resize_max_ms": 65.33,
-      "table_50000_load_ms": 96.97,
-      "table_50000_filter_ms": 96.86,
+      "startup_ms": 893.59,
+      "navigation_median_ms": 30.49,
+      "navigation_max_ms": 89.81,
+      "resize_median_ms": 34.47,
+      "resize_max_ms": 123.58,
+      "table_50000_load_ms": 106.76,
+      "table_50000_filter_ms": 159.49,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
       "solidworks_live_tested": false,
       "checks": [
-        "13 modules",
+        "14 modules",
         "two themes",
         "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
         "3D CAD converter / eight formats / queue, options and clear / no live COM",
         "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
         "hole nesting / five parts on one plate / contour cut-order CSV",
@@ -385,7 +391,8 @@
         "bolt",
         "bolt_torque",
         "weight",
-        "nesting"
+        "nesting",
+        "profile_cutting"
       ],
       "themes": [
         "dark",
@@ -409,21 +416,22 @@
           1440
         ]
       ],
-      "startup_ms": 542.14,
-      "navigation_median_ms": 17.05,
-      "navigation_max_ms": 63.91,
-      "resize_median_ms": 26.53,
-      "resize_max_ms": 86.8,
-      "table_50000_load_ms": 90.2,
-      "table_50000_filter_ms": 98.72,
+      "startup_ms": 881.83,
+      "navigation_median_ms": 25.49,
+      "navigation_max_ms": 82.86,
+      "resize_median_ms": 36.48,
+      "resize_max_ms": 122.29,
+      "table_50000_load_ms": 101.46,
+      "table_50000_filter_ms": 164.38,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
       "solidworks_live_tested": false,
       "checks": [
-        "13 modules",
+        "14 modules",
         "two themes",
         "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
         "3D CAD converter / eight formats / queue, options and clear / no live COM",
         "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
         "hole nesting / five parts on one plate / contour cut-order CSV",
@@ -451,20 +459,260 @@
       "errors": "0",
       "failures": "0",
       "skipped": "0",
-      "tests": "32",
-      "time": "57.221",
-      "timestamp": "2026-10-22T08:10:02.223013+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "13",
+      "time": "0.436",
+      "timestamp": "2026-10-23T13:41:55.418443+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "33.794",
+      "timestamp": "2026-10-23T13:41:56.375552+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "35.507",
+      "timestamp": "2026-10-23T13:42:30.834368+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.913",
+      "timestamp": "2026-10-23T13:43:07.017671+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "1",
-      "tests": "32",
-      "time": "77.878",
-      "timestamp": "2026-10-22T08:11:00.008658+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "15",
+      "time": "6.403",
+      "timestamp": "2026-10-23T13:43:34.689082+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "32.714",
+      "timestamp": "2026-10-23T13:43:41.575982+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "47.967",
+      "timestamp": "2026-10-23T13:44:15.105158+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "46.985",
+      "timestamp": "2026-10-23T13:45:03.838990+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "44.304",
+      "timestamp": "2026-10-23T13:45:51.528500+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "24.307",
+      "timestamp": "2026-10-23T13:46:36.569732+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "25.667",
+      "timestamp": "2026-10-23T13:47:01.756287+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "35.848",
+      "timestamp": "2026-10-23T13:47:28.234010+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "28.441",
+      "timestamp": "2026-10-23T13:48:04.971095+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "27.191",
+      "timestamp": "2026-10-23T13:48:34.179281+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.275",
+      "timestamp": "2026-10-23T13:49:02.187016+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.656",
+      "timestamp": "2026-10-23T13:49:29.220555+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.701",
+      "timestamp": "2026-10-23T13:49:56.620217+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "36.095",
+      "timestamp": "2026-10-23T13:50:24.077189+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "25.775",
+      "timestamp": "2026-10-23T13:51:00.908008+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.084",
+      "timestamp": "2026-10-23T13:51:27.399559+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "27.058",
+      "timestamp": "2026-10-23T13:51:54.150417+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.192",
+      "timestamp": "2026-10-23T13:52:21.910291+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "29.679",
+      "timestamp": "2026-10-23T13:52:48.893915+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "1.905",
+      "timestamp": "2026-10-23T13:53:19.430448+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "99",
+      "time": "3.507",
+      "timestamp": "2026-10-23T13:53:22.070132+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "54",
+      "time": "0.155",
+      "timestamp": "2026-10-23T13:53:26.271701+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -472,9 +720,49 @@
       "failures": "0",
       "skipped": "0",
       "tests": "32",
-      "time": "66.247",
-      "timestamp": "2026-10-22T08:12:18.382946+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "0.138",
+      "timestamp": "2026-10-23T13:53:26.892804+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "5.783",
+      "timestamp": "2026-10-23T13:53:27.502694+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "37.340",
+      "timestamp": "2026-10-23T13:53:34.045097+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "11.167",
+      "timestamp": "2026-10-23T13:54:12.107610+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "43",
+      "time": "1.073",
+      "timestamp": "2026-10-23T13:54:24.019676+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -482,89 +770,29 @@
       "failures": "0",
       "skipped": "0",
       "tests": "32",
-      "time": "57.977",
-      "timestamp": "2026-10-22T08:13:25.195323+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "32",
-      "time": "78.630",
-      "timestamp": "2026-10-22T08:14:23.706203+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "37",
-      "time": "47.331",
-      "timestamp": "2026-10-22T08:15:42.915594+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "117",
-      "time": "2.062",
-      "timestamp": "2026-10-22T08:16:31.044433+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "36",
-      "time": "0.078",
-      "timestamp": "2026-10-22T08:16:33.556193+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "32",
-      "time": "0.076",
-      "timestamp": "2026-10-22T08:16:33.912529+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "38",
-      "time": "31.095",
-      "timestamp": "2026-10-22T08:16:34.265276+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "37",
-      "time": "1.121",
-      "timestamp": "2026-10-22T08:17:05.935793+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "1.372",
+      "timestamp": "2026-10-23T13:54:25.749664+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "1",
-      "tests": "32",
-      "time": "10.385",
-      "timestamp": "2026-10-22T08:17:07.527504+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "8",
+      "time": "5.441",
+      "timestamp": "2026-10-23T13:54:27.606799+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "28.046",
+      "timestamp": "2026-10-23T13:54:33.742114+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -572,19 +800,19 @@
       "failures": "0",
       "skipped": "0",
       "tests": "32",
-      "time": "7.421",
-      "timestamp": "2026-10-22T08:17:18.407008+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "0.246",
+      "timestamp": "2026-10-23T13:55:02.597245+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "0",
-      "tests": "34",
-      "time": "0.624",
-      "timestamp": "2026-10-22T08:17:26.310493+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "39",
+      "time": "1.016",
+      "timestamp": "2026-10-23T13:55:03.564800+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -592,69 +820,29 @@
       "failures": "0",
       "skipped": "0",
       "tests": "62",
-      "time": "0.962",
-      "timestamp": "2026-10-22T08:17:27.587468+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "0.842",
+      "timestamp": "2026-10-23T13:55:05.263368+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "1",
-      "tests": "51",
-      "time": "0.705",
-      "timestamp": "2026-10-22T08:17:28.952623+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "66",
+      "time": "0.791",
+      "timestamp": "2026-10-23T13:55:06.700633+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "0",
-      "tests": "289",
-      "time": "15.154",
-      "timestamp": "2026-10-22T08:17:30.022510+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "290",
-      "time": "0.514",
-      "timestamp": "2026-10-22T08:17:45.803471+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "50",
-      "time": "0.438",
-      "timestamp": "2026-10-22T08:17:46.821261+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "56",
-      "time": "20.440",
-      "timestamp": "2026-10-22T08:17:47.810428+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "52",
-      "time": "0.486",
-      "timestamp": "2026-10-22T08:18:08.949442+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "86",
+      "time": "0.158",
+      "timestamp": "2026-10-23T13:55:08.115431+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -662,19 +850,89 @@
       "failures": "0",
       "skipped": "0",
       "tests": "46",
-      "time": "0.487",
-      "timestamp": "2026-10-22T08:18:09.978939+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "26.025",
+      "timestamp": "2026-10-23T13:55:08.760206+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "0",
-      "tests": "70",
-      "time": "0.762",
-      "timestamp": "2026-10-22T08:18:11.048950+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "373",
+      "time": "1.936",
+      "timestamp": "2026-10-23T13:55:35.558809+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "84",
+      "time": "0.686",
+      "timestamp": "2026-10-23T13:55:38.205878+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "25",
+      "time": "0.674",
+      "timestamp": "2026-10-23T13:55:39.521903+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "15",
+      "time": "34.911",
+      "timestamp": "2026-10-23T13:55:40.776634+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "53",
+      "time": "0.714",
+      "timestamp": "2026-10-23T13:56:16.485945+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "50",
+      "time": "0.729",
+      "timestamp": "2026-10-23T13:56:17.829287+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "68",
+      "time": "0.847",
+      "timestamp": "2026-10-23T13:56:19.228679+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "46",
+      "time": "1.142",
+      "timestamp": "2026-10-23T13:56:20.745567+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -682,9 +940,9 @@
       "failures": "0",
       "skipped": "2",
       "tests": "37",
-      "time": "0.654",
-      "timestamp": "2026-10-22T08:18:12.364931+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "2.048",
+      "timestamp": "2026-10-23T13:56:22.564660+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -692,9 +950,9 @@
       "failures": "0",
       "skipped": "0",
       "tests": "32",
-      "time": "2.502",
-      "timestamp": "2026-10-22T08:18:13.611742+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "3.287",
+      "timestamp": "2026-10-23T13:56:25.331666+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -702,9 +960,69 @@
       "failures": "0",
       "skipped": "0",
       "tests": "32",
-      "time": "7.867",
-      "timestamp": "2026-10-22T08:18:16.691876+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "9.406",
+      "timestamp": "2026-10-23T13:56:29.327067+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "10",
+      "time": "1.279",
+      "timestamp": "2026-10-23T13:56:39.446055+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "35.632",
+      "timestamp": "2026-10-23T13:56:41.509613+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "24.310",
+      "timestamp": "2026-10-23T13:57:17.991065+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "27.341",
+      "timestamp": "2026-10-23T13:57:43.068836+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "10",
+      "time": "17.461",
+      "timestamp": "2026-10-23T13:58:11.157714+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "42",
+      "time": "0.353",
+      "timestamp": "2026-10-23T13:58:29.374515+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -712,49 +1030,99 @@
       "failures": "0",
       "skipped": "0",
       "tests": "32",
-      "time": "35.434",
-      "timestamp": "2026-10-22T08:18:25.197450+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "1.819",
+      "timestamp": "2026-10-23T13:58:30.249964+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
-      "skipped": "0",
-      "tests": "36",
-      "time": "29.673",
-      "timestamp": "2026-10-22T08:19:01.447980+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "40",
-      "time": "1.545",
-      "timestamp": "2026-10-22T08:19:31.975134+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
+      "skipped": "1",
       "tests": "32",
-      "time": "0.329",
-      "timestamp": "2026-10-22T08:19:33.905969+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "0.505",
+      "timestamp": "2026-10-23T13:58:32.619730+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "0",
-      "tests": "32",
-      "time": "55.850",
-      "timestamp": "2026-10-22T08:19:34.638445+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "22",
+      "time": "0.292",
+      "timestamp": "2026-10-23T13:58:33.656792+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "27.063",
+      "timestamp": "2026-10-23T13:58:34.461092+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "11.457",
+      "timestamp": "2026-10-23T13:59:02.302450+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "30",
+      "time": "0.507",
+      "timestamp": "2026-10-23T13:59:14.526730+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "27.204",
+      "timestamp": "2026-10-23T13:59:15.565075+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "27.424",
+      "timestamp": "2026-10-23T13:59:43.543323+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "40.928",
+      "timestamp": "2026-10-23T14:00:11.816439+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "31.465",
+      "timestamp": "2026-10-23T14:00:53.545923+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
@@ -762,29 +1130,19 @@
       "failures": "0",
       "skipped": "2",
       "tests": "32",
-      "time": "17.759",
-      "timestamp": "2026-10-22T08:20:31.218267+00:00",
-      "hostname": "runnervmuzpk7"
+      "time": "0.201",
+      "timestamp": "2026-10-23T14:01:25.861007+00:00",
+      "hostname": "runnervmdaln5"
     },
     {
       "name": "pytest",
       "errors": "0",
       "failures": "0",
       "skipped": "0",
-      "tests": "77",
-      "time": "0.778",
-      "timestamp": "2026-10-22T08:20:49.777259+00:00",
-      "hostname": "runnervmuzpk7"
-    },
-    {
-      "name": "pytest",
-      "errors": "0",
-      "failures": "0",
-      "skipped": "0",
-      "tests": "38",
-      "time": "0.057",
-      "timestamp": "2026-10-22T08:20:51.122740+00:00",
-      "hostname": "runnervmuzpk7"
+      "tests": "107",
+      "time": "1.207",
+      "timestamp": "2026-10-23T14:01:26.579641+00:00",
+      "hostname": "runnervmdaln5"
     }
   ],
   "test_failures": [],
@@ -808,6 +1166,10 @@
     {
       "name": "modules.naming.tests.test_naming_native_live.test_live_typed_pack_reads_dependencies_without_saving_or_renaming_sources",
       "reason": "Gerçek Windows/SolidWorks ve açıkça seçilmiş Pack and Go montajı yok."
+    },
+    {
+      "name": "modules.profile_cutting.tests.test_live.test_live_weldment_read_keeps_source_and_active_configuration",
+      "reason": "Windows, açık/lisanslı SolidWorks ve açıkça seçilmiş Weldment test kopyası gerekli."
     },
     {
       "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_read_all_sheets_is_readonly_and_revision_matches",
