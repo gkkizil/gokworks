@@ -17,6 +17,26 @@ from xml.etree import ElementTree as ET
 
 
 MAX_TESTS_PER_PROCESS = 32
+MAX_GUI_TESTS_PER_PROCESS = 8
+
+
+def test_batches(nodeids, batch_size):
+    """Keep all tests in order; bound repeated complete Qt window lifetimes.
+
+    Native Windows Qt can fast-fail during teardown after many full fourteen-
+    page windows in one QApplication. The product creates one main window per
+    process. Fresh, small GUI batches avoid accumulating that artificial state;
+    native exits still fail the gate and are never retried or ignored.
+    """
+    selected = []; gui = False
+    for nodeid in nodeids:
+        filename = nodeid.split('::', 1)[0].rsplit('/', 1)[-1]
+        heavy = any(token in filename for token in ('gui', '_ui', '_qt', 'compact', 'repository_structure'))
+        limit = min(batch_size, MAX_GUI_TESTS_PER_PROCESS) if gui or heavy else batch_size
+        if selected and len(selected) >= limit:
+            yield selected; selected = []; gui = False
+        selected.append(nodeid); gui |= heavy
+    if selected: yield selected
 
 
 def pytest_command(targets, report):
@@ -86,8 +106,7 @@ def run_tests(root, targets, batch_size=MAX_TESTS_PER_PROCESS):
             nodeids = json.loads(inventory.read_text(encoding='utf-8'))
             print(f'Collected {len(nodeids)} tests; at most {batch_size} per native process.', flush=True)
             batches = []
-            for start in range(0, len(nodeids), batch_size):
-                selected = nodeids[start:start+batch_size]
+            for selected in test_batches(nodeids, batch_size):
                 report = temporary/f'batch-{len(batches)+1}.xml'
                 log.write(f'\nNATIVE_BATCH={len(batches)+1} TARGETS={json.dumps(selected)}\n')
                 log.flush()
