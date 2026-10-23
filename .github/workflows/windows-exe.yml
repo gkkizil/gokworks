@@ -41,6 +41,7 @@ jobs:
           $request = Get-Content packaging/windows-build-request.json -Raw | ConvertFrom-Json
           if ($request.diagnose_run) {
             gh run view $request.diagnose_run --repo $env:GITHUB_REPOSITORY --log-failed *> windows-previous-failure.log
+            gh run download $request.diagnose_run --repo $env:GITHUB_REPOSITORY --pattern 'Windows-build-log-*' --dir previous-windows *>> windows-previous-failure.log
             if ($LASTEXITCODE -eq 0) {
               $env:BUILD_STATUS = 'building'
               python packaging/publish_status.py

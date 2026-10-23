@@ -92,6 +92,8 @@ def main():
     previous_log = Path('windows-previous-failure.log')
     if previous_log.exists():
         lines = previous_log.read_text(encoding='utf-8', errors='replace').splitlines()
+        for saved_log in Path('previous-windows').glob('**/windows-tests.log'):
+            lines += saved_log.read_text(encoding='utf-8', errors='replace').splitlines()
         contexts = []
         for i, line in enumerate(lines):
             if re.search(r'Windows fatal exception|Fatal Python error|QThread:|0xC0000409|PYTEST_PROCESS_EXIT_CODE=3221226505',line,re.I):
