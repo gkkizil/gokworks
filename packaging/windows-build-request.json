@@ -1,6 +1,6 @@
 {
-  "request_id": "20261022-source-picker-shared-iso-onefile-080734",
-  "requested_at": "2026-10-22T08:07:34.606577+00:00",
-  "source_commit": "968d0c42cc66fee5108ab9192b482b2f9c3add2d",
-  "reason": "User requested a single current GOKWORKS.exe. Include the pinned top-left 3D converter source file/folder controls and the shared ISO/manual fit section with diameter and radial arrows and live result labels. Run the native Windows regression suite and frozen onefile checks before publishing the direct EXE. Keep release and the backup repository unchanged."
+  "request_id": "20261023-audited-profile-cutting-onefile-131021",
+  "requested_at": "2026-10-23T13:10:21.494265+00:00",
+  "source_commit": "a438081701763cbfc4370c5bb32ef65792d81dc6",
+  "reason": "User requested the current standalone GOKWORKS.exe. Include the integrated Weldments/profile cutting module and audited fixes: source revision invalidation, numeric input checks, atomic settings, CSV safety and Pillow 13.0.0. Run native Windows regressions and packaged onefile smoke checks before publishing the direct EXE. Keep release and the backup repository unchanged."
 }
