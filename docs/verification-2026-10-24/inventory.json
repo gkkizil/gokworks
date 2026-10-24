@@ -1,0 +1,5698 @@
+{
+  "files": [
+    {
+      "path": "docs/nesting-hole-placement/reproduce.py",
+      "sha256": "4a46485a84da1582f3216d64206ec393072feaa235e1d9102f6d524ed8830458",
+      "lines": 70,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.accounting",
+        "modules.nesting.dxf_import",
+        "modules.nesting.engine",
+        "modules.nesting.materials",
+        "modules.nesting.storage"
+      ]
+    },
+    {
+      "path": "docs/report-tools/audit_fluency.py",
+      "sha256": "bcb84838c591908ef33bf310a138e1e15842956cdfc42661bdf83eeb3adcb097",
+      "lines": 79,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window",
+        "shared.settings"
+      ]
+    },
+    {
+      "path": "docs/report-tools/audit_qt.py",
+      "sha256": "477e7a9171999fe2983051d78fad0ad4c1f0859d3a525b5b6276e2dc28862bbe",
+      "lines": 69,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "gui_qt.package_check"
+      ]
+    },
+    {
+      "path": "docs/report-tools/benchmark_bom_navigation.py",
+      "sha256": "e9cbd17c0748dcb02fd957ba53953659074f468302dedccea698db7904b520f9",
+      "lines": 85,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.bom.exporter",
+        "modules.pdf.window",
+        "shared.text"
+      ]
+    },
+    {
+      "path": "docs/report-tools/benchmark_gui_events.py",
+      "sha256": "f2f1b863245c1a1019d0466f644a2aa45668afd2f840a79b851f99126eed784b",
+      "lines": 138,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/benchmark_menu_opening.py",
+      "sha256": "77c92b088021f02944260cc9a1245d49901c4be7530247578c8e3bd1ce5bd352",
+      "lines": 105,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/benchmark_navigation_ready.py",
+      "sha256": "6a0f9a1a00017a4f7bff2da3ed332d6a94e3c4462e93ae249bca8830f1b61a1e",
+      "lines": 82,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/benchmark_window_resize.py",
+      "sha256": "6654b374741e098e2485b6c911087f2c8090a22b7f940fd8ebb88c2f6bef7695",
+      "lines": 67,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_bolt_gui.py",
+      "sha256": "7831163e6950a371eb8b1e9be3e6894fc0f304744fdb643bdd9b8c43ab40f99e",
+      "lines": 48,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_bolt_torque_gui.py",
+      "sha256": "461dc4a5b0d340cefa4e8fe3d13f829c13fb569d4999e71222fe3f5430657ff8",
+      "lines": 38,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_bom_gui.py",
+      "sha256": "39c520992b8d81a2ca049d08740e8aee70e7e038d1f492e405b0d0dd01c8ab36",
+      "lines": 91,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.bom.exporter",
+        "modules.bom.tests.test_bom",
+        "modules.pdf.window",
+        "shared.text"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_compact_product.py",
+      "sha256": "c556e992ea40105feb2e09ff18deab3312951fe76cea73ed05f57083318d4384",
+      "lines": 83,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.bom.exporter",
+        "modules.naming.exporter",
+        "modules.nesting.storage",
+        "modules.tolerance_stack.calculator"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_fusion_workbench.py",
+      "sha256": "f8b47bddf3a9e7cb675da06f0dfca83d7b849368de4753803fe292daa1d02183",
+      "lines": 176,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.bom.exporter",
+        "modules.cad_converter.models",
+        "modules.naming.exporter",
+        "modules.nesting.storage",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer",
+        "modules.tolerance_stack.calculator"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_gdt_gui.py",
+      "sha256": "01b03e186b0890e7d45edc342c5a06988d4b31933e4fe7fab26a1804b8ce0421",
+      "lines": 79,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.geometric_tolerances.catalog",
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_iso_gui.py",
+      "sha256": "18a87bdae2c60acce5e29ff70acc214ecd15883bb7294b59dfb3d7962f2f61e0",
+      "lines": 96,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_kr_tooling.py",
+      "sha256": "e5a0f6b1e180f53cd28f02bb3487cafe50947e9e2fb3a729cb714cb2bd3361bd",
+      "lines": 52,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_nesting.py",
+      "sha256": "219cf34bf5281c3f754054913d818e0a9367725ef408006da41099a766a7ea61",
+      "lines": 72,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.accounting",
+        "modules.nesting.dxf_export",
+        "modules.nesting.dxf_import",
+        "modules.nesting.engine",
+        "modules.nesting.materials",
+        "modules.nesting.report",
+        "modules.nesting.storage"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_nesting_bulk.py",
+      "sha256": "d1b0357d99b8cf5187640764cbdf7751c0b059e5d03d4fed9fb893957ac503fd",
+      "lines": 59,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_nesting_usability.py",
+      "sha256": "2e6fe4ba6d09329e213013973ba2c9777af981329964094da9114072d7df6355",
+      "lines": 88,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_stack_usability.py",
+      "sha256": "251197b9aed40e62c8eba8583e3e59b357606a8d3d424b84826bf14b02dedd8f",
+      "lines": 49,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.tolerance_stack.calculator"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_tolerance_stack.py",
+      "sha256": "5905228012010345c1376986cf142e33e901407e68baf352cb19516137eb8c18",
+      "lines": 51,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.report",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "docs/report-tools/capture_workspaces.py",
+      "sha256": "142f45947b7bc68789298bd3a08b41ca647f29c79c3dedfcb0ff4460134af793",
+      "lines": 89,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.k_factor",
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/compare_iso_sources.py",
+      "sha256": "41e2a46c38be82b467cf5f960fd6296d8aac64b003df1af515c76b16aa3c2102",
+      "lines": 119,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.iso_fits.rules"
+      ]
+    },
+    {
+      "path": "docs/report-tools/create_final_audit_report.py",
+      "sha256": "2e2d88eb3fee0907a982118e84a492a22dcb535cd4be65413e39fe2f52e1c562",
+      "lines": 97,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/create_geometric_report.py",
+      "sha256": "4f425b0537348b6284d1623f0c0957fda66b1b6b4cb64559601f3ae39beb2101",
+      "lines": 132,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/create_iso_report.py",
+      "sha256": "737d7525a534b1ae07235061a9465370e6c8fa373bc7fe7daff620f2e28c03e0",
+      "lines": 99,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/create_k_radius_report.py",
+      "sha256": "46b41942c481927805c41b0f5249849099b9e31a58b9594a1000319183c8a576",
+      "lines": 96,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "sha256": "8d9f5379f0e24e6b628f3e3216495346cdeb2b1e9908baa06590575ec8ae28ce",
+      "lines": 331,
+      "functions": 8,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/create_workspace_report.py",
+      "sha256": "385d1bf4c8e5ead3ab2242e5b48f4e1b18566c3f36993e3e9bfc6a5eb12ab3c7",
+      "lines": 96,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/measure_audit_ui.py",
+      "sha256": "84e2f8379aa50a46394c9f354b177932590193020c4f73a38bfc289879ff839c",
+      "lines": 55,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app"
+      ]
+    },
+    {
+      "path": "docs/report-tools/run_verification.py",
+      "sha256": "3b8435386040250f2ce805d31c4953ab3418c961e7a9ddb0aafdef6b426f493d",
+      "lines": 100,
+      "functions": 10,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "docs/report-tools/validate_application_stability.py",
+      "sha256": "52954199f81395d042113a4bcdb4d06b5305732ba464463865346e12ea8cc2e7",
+      "lines": 109,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.storage"
+      ]
+    },
+    {
+      "path": "docs/report-tools/validate_pdf_fault_recovery.py",
+      "sha256": "37e6e235b85db06ece34abef1459a8172804502778805922216355013d57c263",
+      "lines": 114,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.pdf.process"
+      ]
+    },
+    {
+      "path": "docs/report-tools/verify_gdt_drawing_audit.py",
+      "sha256": "fe9fa697b35accc9000123881cae47b71f820750f1b76d7bde82792a24d26c5c",
+      "lines": 75,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.geometric_tolerances.diagram",
+        "modules.geometric_tolerances.rules",
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "docs/report-tools/verify_gdt_reference.py",
+      "sha256": "42e338439dbab228d17a866f26882463a47dc686ba535ac6d7ff37511603c357",
+      "lines": 86,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.geometric_tolerances.catalog"
+      ]
+    },
+    {
+      "path": "gui_qt/__init__.py",
+      "sha256": "ff3d4b35a56f4fd5b4bfc0836d95e7d8bc2acddf8ee58a2440eb2d79b3cdf231",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "gui_qt/__main__.py",
+      "sha256": "a67c172046323b0efcafe92cb83abc266d5dd4bc931d9312cde1b7bed50643db",
+      "lines": 3,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app"
+      ]
+    },
+    {
+      "path": "gui_qt/app.py",
+      "sha256": "79cdc7580baac46de6bc7ade3b8bd432008932c7940e6f620d5f19b0fb82ecfa",
+      "lines": 422,
+      "functions": 30,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.icons",
+        "gui_qt.services",
+        "gui_qt.settings",
+        "gui_qt.theme",
+        "gui_qt.workers",
+        "gui_qt.workspace",
+        "modules.bolt.ui",
+        "modules.bolt_torque.ui",
+        "modules.bom.ui",
+        "modules.cad_converter.ui",
+        "modules.dxf_dwg.ui",
+        "modules.geometric_tolerances.ui",
+        "modules.iso_fits.ui",
+        "modules.k_factor.ui",
+        "modules.naming.ui",
+        "modules.nesting.ui",
+        "modules.pdf.ui",
+        "modules.profile_cutting.ui",
+        "modules.tolerance_stack.ui",
+        "modules.weight.ui",
+        "solidworks.diagnostics"
+      ]
+    },
+    {
+      "path": "gui_qt/calculations.py",
+      "sha256": "eb266f40b1a4aeb514bbeeaae66c314c222d62c6c17e479b69dbedbbbc7c2a54",
+      "lines": 181,
+      "functions": 14,
+      "classes": 2,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.diagrams",
+        "gui_qt.models"
+      ]
+    },
+    {
+      "path": "gui_qt/components.py",
+      "sha256": "8cef1f7f020f04b56c1c04cf67062b5680d04bdfdcfe4ee8895e85ae6784ba4c",
+      "lines": 604,
+      "functions": 60,
+      "classes": 9,
+      "eager_local_imports": [
+        "gui_qt.models"
+      ]
+    },
+    {
+      "path": "gui_qt/diagnostics.py",
+      "sha256": "2b04c2dae1a99e0668b53a9f15168a1f165c3a915e69fe5fde0ea5da05b40d0f",
+      "lines": 57,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "solidworks.diagnostics"
+      ]
+    },
+    {
+      "path": "gui_qt/diagrams.py",
+      "sha256": "a9851080b8d916a0447577b3da80305d6a0f76e7e2276ac8dbf78ac074d86330",
+      "lines": 187,
+      "functions": 21,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "gui_qt/export.py",
+      "sha256": "6af1dd207e549a7b327987acdf8aa72753ff70c9bdc034d7226d52caed63ee04",
+      "lines": 142,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.services",
+        "modules.dxf_dwg.exporter",
+        "modules.pdf.process",
+        "solidworks.diagnostics"
+      ]
+    },
+    {
+      "path": "gui_qt/icons.py",
+      "sha256": "00f32c7829e4111f0995c017c9597d04bf6e7a178bb28653dbd645eed7f6f0f8",
+      "lines": 129,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "gui_qt/licenses.py",
+      "sha256": "11a9e624301487bbdd8705b1374829084e7f37d088543c948069e2d2d7affd0e",
+      "lines": 62,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components"
+      ]
+    },
+    {
+      "path": "gui_qt/models.py",
+      "sha256": "df7465d8b56181b44b039d273b18cfedea4bcb30da4c9ec807a90632a922c406",
+      "lines": 222,
+      "functions": 24,
+      "classes": 5,
+      "eager_local_imports": []
+    },
+    {
+      "path": "gui_qt/package_check.py",
+      "sha256": "068f5606c3b1aded117600dae085b2136231bb3ac3c3af9f76e59be76bf45dc3",
+      "lines": 296,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "gui_qt/services.py",
+      "sha256": "cbee1929c66872cb548bb1349f339c68327bb64c9ad366bcd1a4ebe29fc4d9ef",
+      "lines": 54,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.dxf_dwg.exporter",
+        "modules.pdf.exporter",
+        "solidworks.diagnostics"
+      ]
+    },
+    {
+      "path": "gui_qt/settings.py",
+      "sha256": "3e4ae7657595340abde99240c0690501c463ffe33f06ae021bf21b42ec56561b",
+      "lines": 55,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": [
+        "shared.settings"
+      ]
+    },
+    {
+      "path": "gui_qt/theme.py",
+      "sha256": "0333997c67ba54dfeab145798c243d0136fa025d86dcc25dfd04107dcb9d253a",
+      "lines": 107,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "gui_qt/workers.py",
+      "sha256": "60cc6734fb14099a54582e14086deb6c01d36a4d576da467a4660c7d59fb3739",
+      "lines": 128,
+      "functions": 10,
+      "classes": 3,
+      "eager_local_imports": [
+        "solidworks.diagnostics"
+      ]
+    },
+    {
+      "path": "gui_qt/workspace.py",
+      "sha256": "3e59dc69c61a4d78cb8e069c4e58aeb4f7848097a1c53b10c2c73cbd1e36d86a",
+      "lines": 121,
+      "functions": 7,
+      "classes": 2,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.icons",
+        "gui_qt.models"
+      ]
+    },
+    {
+      "path": "main.py",
+      "sha256": "9588f8e44320abe427f81570fb1b8868141b9fa21b2bfaffdf692fcf97b55454",
+      "lines": 25,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.package_check",
+        "modules.pdf.process",
+        "solidworks.process_watch",
+        "solidworks.runtime"
+      ]
+    },
+    {
+      "path": "modules/__init__.py",
+      "sha256": "bd60915d41887cef23b277fc7a442615a8327eb51ddca2f74898bab6e51b6cf4",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bolt/__init__.py",
+      "sha256": "d743a256a5337e543fec1e54ce0f8156f611ebd822eb3ce119219ad1efe07066",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bolt/diagram.py",
+      "sha256": "f062428709b93d0bed0c8019e4a44954fc1f2988418257c5a22fcc1ac3c7f10e",
+      "lines": 172,
+      "functions": 11,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.bolt.dimensions",
+        "modules.bolt.rules",
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/bolt/dimensions.py",
+      "sha256": "61d8aa6f59726cfe07ddc65d05efc6950e381521a5bda4fd8b64c1d554c031cd",
+      "lines": 35,
+      "functions": 1,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.bolt.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt/rules.py",
+      "sha256": "631d26dd6d49018ca73895af80b586927c3852b454901f56a7e88b5322ca8e46",
+      "lines": 187,
+      "functions": 15,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bolt/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bolt/tests/test_bolt.py",
+      "sha256": "bcdcbd0760e53c64ac42ae7287c5c95f95b1cebbfc904cb8cf1ca9fc05939d4c",
+      "lines": 181,
+      "functions": 15,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.bolt.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt/tests/test_bolt_dimensions.py",
+      "sha256": "b47cef988dd6e709c185251a708e8d543e95e2281dfe768387dcc6165ef10ce7",
+      "lines": 34,
+      "functions": 3,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.bolt.dimensions",
+        "modules.bolt.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt/ui.py",
+      "sha256": "f940369dba6a579afd876efd2cad82405aadf9ed745fe31f964444dbf0d31633",
+      "lines": 214,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.calculations",
+        "gui_qt.components",
+        "gui_qt.theme",
+        "modules.bolt.diagram",
+        "modules.bolt.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt_torque/__init__.py",
+      "sha256": "936dcf17ba182b51d07a6a673177203a733f73f6ad2dfc4d1455f86d8494c3cd",
+      "lines": 5,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.bolt_torque.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt_torque/diagram.py",
+      "sha256": "384dee971aec3ffa41ea841f30375bbe0fe6ced39518dc67f233ad6c17f56545",
+      "lines": 126,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.theme"
+      ]
+    },
+    {
+      "path": "modules/bolt_torque/rules.py",
+      "sha256": "cc6961a032122e710d8fd86ebcc17555ebdcea0e6dc14b7b81208a691e752326",
+      "lines": 146,
+      "functions": 8,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.bolt.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt_torque/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bolt_torque/tests/test_bolt_torque.py",
+      "sha256": "a265cf0679a81a7bcaf30020784907e87055e26b0613960aea5797f4b7eb7c49",
+      "lines": 105,
+      "functions": 10,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.bolt_torque.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt_torque/tests/test_bolt_torque_gui.py",
+      "sha256": "81964f398c22c4634ea463b41d8040a0c7b5a5f5f964b217e982aef715f73826",
+      "lines": 176,
+      "functions": 11,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.bolt_torque.rules"
+      ]
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "sha256": "7713f073d7f044b23a1fd9c4a642099ae3bfac4dfe1940e9016b1f68283206d7",
+      "lines": 227,
+      "functions": 10,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.diagrams",
+        "modules.bolt.rules",
+        "modules.bolt_torque.diagram",
+        "modules.bolt_torque.rules"
+      ]
+    },
+    {
+      "path": "modules/bom/__init__.py",
+      "sha256": "269780d3c46dd644ba8bab546950349ada4134338b54849d566570898877702d",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bom/exporter.py",
+      "sha256": "2fe1a311c6b4bf4d943f6d1d6288e3445c3c2282ecbee81bc1bbe9873d7058fe",
+      "lines": 390,
+      "functions": 16,
+      "classes": 5,
+      "eager_local_imports": [
+        "modules.dxf_dwg.exporter",
+        "solidworks.connection"
+      ]
+    },
+    {
+      "path": "modules/bom/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/bom/tests/test_bom.py",
+      "sha256": "5c87e9ebb4e652557c5419fa98826c0537d7660951fb5fe76d601afb92adfb9e",
+      "lines": 402,
+      "functions": 35,
+      "classes": 5,
+      "eager_local_imports": [
+        "modules.bom.exporter"
+      ]
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "sha256": "397b7ff11795fbb0af923db7116829200ffba47cec0ba4918de06b11246681ff",
+      "lines": 252,
+      "functions": 17,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.models",
+        "gui_qt.services",
+        "modules.bom.exporter"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/__init__.py",
+      "sha256": "20013933271dd844dadcd37838f8a736bb9907775290f2422870875c5d0b5a1a",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/cad_converter/api.py",
+      "sha256": "e6ed054d61d37132d0be129a3669be62b9aae73df0b78c3eba2bf22efe34b973",
+      "lines": 365,
+      "functions": 26,
+      "classes": 3,
+      "eager_local_imports": [
+        "modules.cad_converter.models",
+        "modules.cad_converter.scanner"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/exporter.py",
+      "sha256": "f00c237293061f4859572c058953dfd207510a9680f715e3e80c33342617a4a2",
+      "lines": 185,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.cad_converter.formats",
+        "modules.cad_converter.models",
+        "modules.cad_converter.naming",
+        "modules.cad_converter.scanner",
+        "modules.cad_converter.validation"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/formats.py",
+      "sha256": "b046fedbedcbc04b5ec8cebc49bb3f20971260bd3a67a4feb2b0825b2fcb5798",
+      "lines": 25,
+      "functions": 0,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/cad_converter/models.py",
+      "sha256": "e19d9ee7c65211565e6ba6f37d46c6bdfc1a9e138f7b3ac83d09ac7c9d6b1906",
+      "lines": 77,
+      "functions": 3,
+      "classes": 4,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/cad_converter/naming.py",
+      "sha256": "5e2fe2df624b98096f99775c2e6d4d17cdbd0ba5c9ca11534d732ce3740a5a58",
+      "lines": 64,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.cad_converter.scanner"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/report.py",
+      "sha256": "bc9e0a3649ece8701b79feca3d23a9c293b5785234f8c38848a3b12819649094",
+      "lines": 59,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/cad_converter/scanner.py",
+      "sha256": "37daaf2cf5ae8dd55659812a471fbf32aa024ef1aa954c9c590420f4fdb5e9f1",
+      "lines": 57,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.cad_converter.models"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/tests/__init__.py",
+      "sha256": "ff8e5d24c1ec0fb8684b92a0d71927d04c0cd8d5b514c1a45eed982498ffb84f",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/cad_converter/tests/fakes.py",
+      "sha256": "668f35af2f919c6de0e9ae6ec8e03536ee09c563940c036413884939b3de5ee6",
+      "lines": 146,
+      "functions": 36,
+      "classes": 7,
+      "eager_local_imports": [
+        "modules.cad_converter.api"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "sha256": "10fbd8dafe5fd2437a19e70bcbafac95431f38aa7020e8ed46c165544f9c921d",
+      "lines": 116,
+      "functions": 19,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.cad_converter.exporter",
+        "modules.cad_converter.models",
+        "modules.cad_converter.tests.fakes",
+        "modules.cad_converter.tests.test_converter"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "sha256": "172f48fb1731c763dd7467fdd48e598179e4068af54b0e5db53e9e002365e6f9",
+      "lines": 268,
+      "functions": 26,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.cad_converter.exporter",
+        "modules.cad_converter.formats",
+        "modules.cad_converter.models",
+        "modules.cad_converter.naming",
+        "modules.cad_converter.scanner",
+        "modules.cad_converter.tests.fakes",
+        "modules.cad_converter.validation"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/tests/test_live.py",
+      "sha256": "2c6353ba7fb3d8726796ecf946778bd82847c8ff67eab1a1ed216c86cadddb6b",
+      "lines": 26,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/cad_converter/tests/test_ui.py",
+      "sha256": "c084352ce938717725e91f0c2e425657bd539e9858896eca824c1e23ce9e5d9f",
+      "lines": 148,
+      "functions": 11,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.cad_converter.models"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/tests/test_validation.py",
+      "sha256": "ab9d55285fb05a791c3a11ad7ce3e46538f08c38fe3e24b43fc92a5f26d2d916",
+      "lines": 76,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.cad_converter.formats",
+        "modules.cad_converter.models",
+        "modules.cad_converter.naming",
+        "modules.cad_converter.report",
+        "modules.cad_converter.tests.fakes",
+        "modules.cad_converter.validation"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/ui.py",
+      "sha256": "edea34d7256c3ffd2a8e5f7a66fec5618dfd536c473b69236072aa3e6b952a97",
+      "lines": 325,
+      "functions": 24,
+      "classes": 2,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.models",
+        "modules.cad_converter.exporter",
+        "modules.cad_converter.formats",
+        "modules.cad_converter.models",
+        "modules.cad_converter.report",
+        "modules.cad_converter.scanner"
+      ]
+    },
+    {
+      "path": "modules/cad_converter/validation.py",
+      "sha256": "0a8884eea6f0ef6afd8441102c929371903f8134315e348200a59fd0a345d947",
+      "lines": 146,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.cad_converter.models"
+      ]
+    },
+    {
+      "path": "modules/dxf_dwg/__init__.py",
+      "sha256": "bb9d726644a16f909ac570b4a6529c10a4c5536757b75d3a3e8a0d98cdc3f62d",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/dxf_dwg/examples/capture.py",
+      "sha256": "2b021041d7cd002c0a337d4af1e269333881a8c3fbc0ca5a2e1b5a05b0cb56f4",
+      "lines": 51,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "sha256": "449108bc216aaf54f7b4ee1cc45ea3cfe3db2439246a9f3370f3468b34c815f2",
+      "lines": 561,
+      "functions": 20,
+      "classes": 1,
+      "eager_local_imports": [
+        "solidworks.connection"
+      ]
+    },
+    {
+      "path": "modules/dxf_dwg/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "sha256": "6d5f594be9e5e0265241b0c9366ab0f9c943fe674dea27c2acce117e32972680",
+      "lines": 835,
+      "functions": 88,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.dxf_dwg.exporter"
+      ]
+    },
+    {
+      "path": "modules/dxf_dwg/ui.py",
+      "sha256": "999fc3707f41e85ae139150e7c486c26b81d368721bd7be5a6a44cbfb55c8583",
+      "lines": 8,
+      "functions": 1,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.export"
+      ]
+    },
+    {
+      "path": "modules/geometric_tolerances/__init__.py",
+      "sha256": "49be4421dc5d66f58582332b890254496e794c6332ecd97ca821f6e819d4c97a",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/geometric_tolerances/catalog.py",
+      "sha256": "c2b5427622775e03c620f04e1fb08e49e164ef80c1ea94739f000177c2dd7bb1",
+      "lines": 167,
+      "functions": 0,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/geometric_tolerances/diagram.py",
+      "sha256": "bfffe4e0338ebc3f9e9c0982ff54ad1f209b0d6a7ba60eb9bebd0ef15d6dbe61",
+      "lines": 186,
+      "functions": 10,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.geometric_tolerances.rules",
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/geometric_tolerances/rules.py",
+      "sha256": "5e557d40e485d4c20e35ebf93d85500cc17deb47fb72f82441871e1fe89ad73a",
+      "lines": 75,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.geometric_tolerances.catalog"
+      ]
+    },
+    {
+      "path": "modules/geometric_tolerances/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+      "sha256": "58876faadcd5e6702e60540464a35f65553d36afa2e3c2a76aa457cc7275ff21",
+      "lines": 191,
+      "functions": 14,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.geometric_tolerances.catalog",
+        "modules.geometric_tolerances.rules",
+        "shared.settings",
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/geometric_tolerances/ui.py",
+      "sha256": "7277bb3ec74ea1a2eea7c4e6821bcb32e11e848fd22492cb331399810af82f01",
+      "lines": 164,
+      "functions": 6,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.calculations",
+        "gui_qt.components",
+        "gui_qt.models",
+        "modules.geometric_tolerances.catalog",
+        "modules.geometric_tolerances.diagram",
+        "modules.geometric_tolerances.rules"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/__init__.py",
+      "sha256": "9ab306f4913f52ee79e73dc7835300dabe0f4d76c923c02f6929de4601e0a7ae",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/iso_fits/diagram.py",
+      "sha256": "446aaae3310cc40a7b9a78e222f63a7c1d4aa64619a09a3798f2734224faf5e2",
+      "lines": 122,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.iso_fits.rules",
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/manual.py",
+      "sha256": "43354f6973e1dd4ce28de1e7e71f4b11a222f44c0d17ed412334e71f86a4780a",
+      "lines": 175,
+      "functions": 14,
+      "classes": 3,
+      "eager_local_imports": [
+        "modules.iso_fits.rules"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/rules.py",
+      "sha256": "4faf15be2221fd448294c39080bc6c602fa0d459daad327ebb8f4916ca266982",
+      "lines": 195,
+      "functions": 20,
+      "classes": 3,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/iso_fits/selection_diagram.py",
+      "sha256": "bb7d1de4499976684bc4c137c5b835f8a79ef2b282612f2c07e9ec8db2870447",
+      "lines": 133,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.iso_fits.rules",
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/iso_fits/tests/test_diagram_ui.py",
+      "sha256": "ba22ea4fa539c95eff629ea3d17dd61be974b4157dec98d273578db342bbb6a7",
+      "lines": 114,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.iso_fits.rules",
+        "modules.iso_fits.ui"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/tests/test_iso_fits.py",
+      "sha256": "97efb33c4fef99146eb5b73fc42e097bb30cda5b66058afe7ae5430a1390e094",
+      "lines": 98,
+      "functions": 8,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.iso_fits.rules",
+        "modules.iso_fits.ui",
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/tests/test_iso_matching.py",
+      "sha256": "51249d539c87a3d063bf541013a069db56960f6bea523102b9c2a690ade04692",
+      "lines": 51,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.iso_fits.manual",
+        "modules.iso_fits.rules",
+        "modules.iso_fits.ui"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/tests/test_iso_tolerance_audit.py",
+      "sha256": "a9a3661aeb9d5ebf0cda720d4fb1709c8e9bf3997edf36b11a32e331e8d0be34",
+      "lines": 57,
+      "functions": 2,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.iso_fits.manual",
+        "modules.iso_fits.rules",
+        "modules.iso_fits.ui"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/tests/test_manual_iso.py",
+      "sha256": "b2fb2438442aaa1cdae6c886df14a8d36b8e369dfe051ee420e31e2351ae5a8e",
+      "lines": 159,
+      "functions": 14,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.iso_fits.manual",
+        "modules.iso_fits.rules"
+      ]
+    },
+    {
+      "path": "modules/iso_fits/ui.py",
+      "sha256": "068f9a551ec2dbb93a123ad89d2b7e83c3917195c2af7d544d94fbaa6d42b25d",
+      "lines": 288,
+      "functions": 8,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.calculations",
+        "gui_qt.components",
+        "gui_qt.models",
+        "modules.iso_fits.diagram",
+        "modules.iso_fits.manual",
+        "modules.iso_fits.rules"
+      ]
+    },
+    {
+      "path": "modules/k_factor/__init__.py",
+      "sha256": "46fface833feb0cfde3ee5cd71589be667affb9978b87cf779dd656049d8ebcd",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "sha256": "9e63a023b6d9a84f08ba5c8e4c0f6cea9b3b0ad38a92750a0590c1d9e0d193c9",
+      "lines": 1169,
+      "functions": 42,
+      "classes": 3,
+      "eager_local_imports": [
+        "modules.dxf_dwg.exporter",
+        "modules.k_factor.rules",
+        "modules.k_factor.sheetmetal_parameters",
+        "solidworks.connection"
+      ]
+    },
+    {
+      "path": "modules/k_factor/examples/capture.py",
+      "sha256": "c741087b8d06d6ba6c9bd7bc54d05555143d71c5f2142e193c4d977d20ca64db",
+      "lines": 43,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "modules/k_factor/rules.py",
+      "sha256": "f427c0e3248161a7d5b4bb9046ac9a78a88232aed798a17462d2ec21ee1b8181",
+      "lines": 289,
+      "functions": 14,
+      "classes": 7,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/sheetmetal_parameters.py",
+      "sha256": "046f1d0220e1df6b2535337d0d9211c11e592146911afe97abea5ea4961afd6e",
+      "lines": 355,
+      "functions": 23,
+      "classes": 3,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/standalone/__init__.py",
+      "sha256": "62ffad79c2e738a167582e28b62428152520ba359bfd6cb2440a7c32d0492867",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/standalone/compare_reports.py",
+      "sha256": "6878ee0b62742954079b3e57778faf0a4a88217e2aed3c74593a3779b67356f8",
+      "lines": 126,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop.py",
+      "sha256": "04ab46c335f99a47d06b71f920ac7ac73f5918d84bc2fb7c73442d7fffa7905a",
+      "lines": 239,
+      "functions": 9,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.desktop_controller",
+        "modules.k_factor.standalone.python.probe",
+        "shared.icons",
+        "shared.theme",
+        "shared.typography"
+      ]
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop_controller.py",
+      "sha256": "2853f8a614317bd8bfd27107173e87567af8126699ed9ff03bb418bcce3a1e3b",
+      "lines": 107,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.compare_reports",
+        "modules.k_factor.standalone.python.probe"
+      ]
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop_entry.py",
+      "sha256": "f6816da2f4693afc9083cfd7ae73a56e397e9d8cb64cb4332397f35a59bd5dd1",
+      "lines": 4,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.desktop"
+      ]
+    },
+    {
+      "path": "modules/k_factor/standalone/python/__init__.py",
+      "sha256": "bf70474c949ef40aefdd7d1ccf4dad9599be41241df39dd4ebad4b724d5629d5",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/standalone/python/__main__.py",
+      "sha256": "eb05189b950dc9d59e641e85532319f8809fd86ed3bbc4e803cc31dba9b01a1a",
+      "lines": 4,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.python.probe"
+      ]
+    },
+    {
+      "path": "modules/k_factor/standalone/python/probe.py",
+      "sha256": "fc3eeabe36f3c5b78d1ff901e1033374651fd623adc45ca032419e674ed0f00f",
+      "lines": 656,
+      "functions": 33,
+      "classes": 4,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/standalone/python/test_probe.py",
+      "sha256": "edbab192489fc9ce617f6b10b77e0afa82d1942230416a7765af316ecb3e702e",
+      "lines": 451,
+      "functions": 63,
+      "classes": 8,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.python.probe"
+      ]
+    },
+    {
+      "path": "modules/k_factor/standalone/runtime.py",
+      "sha256": "13d1e84316b1d5a7462ba9e74f87787afe0a50c0d99de1fcf2fa6e199cd51234",
+      "lines": 35,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/standalone/test_compare_reports.py",
+      "sha256": "316b384988a4dcad88d1ff1f99cd171947301b18a53ca108013ae79d06909749",
+      "lines": 66,
+      "functions": 8,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.compare_reports"
+      ]
+    },
+    {
+      "path": "modules/k_factor/standalone/test_desktop.py",
+      "sha256": "92f3088a18ef6ca045add59a873281612c80259cb04a9951bfa501fbeef45b14",
+      "lines": 294,
+      "functions": 29,
+      "classes": 5,
+      "eager_local_imports": [
+        "modules.k_factor.standalone.desktop_controller",
+        "modules.k_factor.standalone.runtime"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/k_factor/tests/test_converted_k_radius.py",
+      "sha256": "357fc04d4c811e8f1e4fbcc6a2ab4f8bd7b217b3081e86baf75cf18bd63a721e",
+      "lines": 235,
+      "functions": 17,
+      "classes": 4,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_k_factor.py",
+      "sha256": "bc790aa36f6c775fef69cf378360cebd53af4ccee719801f575b345f223dc87c",
+      "lines": 462,
+      "functions": 43,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "shared.settings"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_kr_dispatch.py",
+      "sha256": "395a9a902ddc98f63457686a39f3183e29793b7d8db945756b6448a8b1e01f18",
+      "lines": 384,
+      "functions": 54,
+      "classes": 16,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_kr_dispatch_arguments.py",
+      "sha256": "090cfc125ec6b56561df12372831656ea8771bb58d5833a54db8680f2e25c923",
+      "lines": 106,
+      "functions": 12,
+      "classes": 3,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "modules.k_factor.tests.test_converted_k_radius",
+        "modules.k_factor.tests.test_power_sm_k_radius"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_kr_tooling_gui.py",
+      "sha256": "c3f7ad32b1289616f0be0e8b8b600c853a9cacb1867790f212e2fba296e7edb5",
+      "lines": 137,
+      "functions": 9,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.k_factor.tooling_diagram"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_manual_k_radius.py",
+      "sha256": "f17b8e51585380a5890af2041237a2cbf3601f1e23249104476433353c046b02",
+      "lines": 133,
+      "functions": 13,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "shared.settings"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_numeric_limits.py",
+      "sha256": "8feb1e79f017c3284d165059f73cc115e08adf3d2ce9de0c8e6354d16bc2a74d",
+      "lines": 19,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.k_factor.rules"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_parent_k_radius.py",
+      "sha256": "e99b4d857ae38ba9f5a325919e46c577d6b6165055595be0a5c2e1362cd69467",
+      "lines": 683,
+      "functions": 68,
+      "classes": 7,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "modules.k_factor.tests.test_converted_k_radius"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_power_sm_k_radius.py",
+      "sha256": "15c7fe1fc986a8b9b7aaf6814a4262ca7d27fdd9567129136bd82cd0ce9fef20",
+      "lines": 374,
+      "functions": 46,
+      "classes": 8,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "modules.k_factor.tests.test_parent_k_radius"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_sheetmetal_parameters.py",
+      "sha256": "56f010c4102ac0ce96e56b41581ba474f26da047e0be4ef4190bd10374ecb885",
+      "lines": 265,
+      "functions": 28,
+      "classes": 7,
+      "eager_local_imports": [
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "modules.k_factor.sheetmetal_parameters",
+        "modules.k_factor.tests.test_parent_k_radius",
+        "modules.k_factor.tests.test_power_sm_k_radius"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tests/test_thickness_assignment.py",
+      "sha256": "b8eec1b4990705513ab4a43a7480e2c69921f8e3157e70168557b4c4acc2860c",
+      "lines": 71,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.k_factor.rules"
+      ]
+    },
+    {
+      "path": "modules/k_factor/tooling_diagram.py",
+      "sha256": "27e25533e5479d7103ca35c94b94275c54ae8e79a905f7dfdf4432b03b290201",
+      "lines": 157,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.theme"
+      ]
+    },
+    {
+      "path": "modules/k_factor/ui.py",
+      "sha256": "5af54c233dc4b2487b8c674fb204382e3ddbdb0976ca02c61a3d22924a3683e4",
+      "lines": 320,
+      "functions": 18,
+      "classes": 2,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.diagrams",
+        "gui_qt.models",
+        "modules.k_factor.apply",
+        "modules.k_factor.rules",
+        "modules.k_factor.tooling_diagram"
+      ]
+    },
+    {
+      "path": "modules/naming/__init__.py",
+      "sha256": "bd8f4b713269d57949d33c7cfa53f7a0f38ad52af2a46cef1b41f22a109cf63c",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/naming/examples/capture.py",
+      "sha256": "e876ec97359a7c004ec9b41861914d90f0417a14fffa0ac4f7cd5cad35387a54",
+      "lines": 60,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.naming.exporter",
+        "modules.pdf.window"
+      ]
+    },
+    {
+      "path": "modules/naming/exporter.py",
+      "sha256": "74f5843f8286f93dd118374fccb6bcfeb64bbdc35decf53e40865410f1a9a686",
+      "lines": 701,
+      "functions": 28,
+      "classes": 6,
+      "eager_local_imports": [
+        "modules.dxf_dwg.exporter",
+        "modules.naming.native",
+        "solidworks.connection"
+      ]
+    },
+    {
+      "path": "modules/naming/hierarchy.py",
+      "sha256": "83d53395fef956e7c8d4889fee8a75109c399662a5e70a61ca6c7f5a540f8f6b",
+      "lines": 73,
+      "functions": 2,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.bom.exporter",
+        "modules.naming.exporter"
+      ]
+    },
+    {
+      "path": "modules/naming/native.py",
+      "sha256": "a9e4059e4db865c49368feb243b7fb09b1c22ca3b5a5ee97caf1ddff31ede519",
+      "lines": 213,
+      "functions": 18,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/naming/source.py",
+      "sha256": "804ad3deb2d9ed105889435ba192921cdceb38677d8363aec31b105c2dd9fe2e",
+      "lines": 78,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.naming.exporter"
+      ]
+    },
+    {
+      "path": "modules/naming/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/naming/tests/test_naming.py",
+      "sha256": "fff38165c690e9cc680d636d12964f2a266de3318c7dde4e6ca1ce797935517b",
+      "lines": 313,
+      "functions": 35,
+      "classes": 5,
+      "eager_local_imports": [
+        "modules.naming.exporter",
+        "tests.support.solidworks"
+      ]
+    },
+    {
+      "path": "modules/naming/tests/test_naming_folder_discovery.py",
+      "sha256": "9b4388ccb7bebd129f2459c19b76fa40fb52b1ca1ed526f189d51e1a4b28720f",
+      "lines": 86,
+      "functions": 9,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.naming.exporter",
+        "modules.naming.source"
+      ]
+    },
+    {
+      "path": "modules/naming/tests/test_naming_hierarchy.py",
+      "sha256": "a5b184785bbd11f553b50601f7b4978f6dbf99062d23c8b44f9132c5c35244fa",
+      "lines": 38,
+      "functions": 2,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.naming.exporter",
+        "modules.naming.hierarchy"
+      ]
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native.py",
+      "sha256": "5b0fca31e856a2da97136e1031fc472a927f10d9721045ad1fb8188ecb7ea2d0",
+      "lines": 204,
+      "functions": 16,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.naming.exporter",
+        "modules.naming.native",
+        "modules.naming.tests.test_naming",
+        "tests.support.solidworks"
+      ]
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native_live.py",
+      "sha256": "4742d65e123fcf76796967873d3f76210b2fe7cbe278b60c67ee80cc81be627e",
+      "lines": 34,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/naming/tests/test_naming_source.py",
+      "sha256": "23e162a1ebfdba6ec8e7e80d8a516fd2d3667774a9fd3a79565dc6bfde2d6d9e",
+      "lines": 451,
+      "functions": 39,
+      "classes": 7,
+      "eager_local_imports": [
+        "modules.naming.exporter",
+        "modules.naming.tests.test_naming",
+        "tests.support.solidworks"
+      ]
+    },
+    {
+      "path": "modules/naming/ui.py",
+      "sha256": "444ac2c36704eb1f0fff8a941475275892c200495fef30f5253ea8e44f70ae13",
+      "lines": 338,
+      "functions": 16,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.models",
+        "gui_qt.services",
+        "modules.naming.exporter",
+        "modules.naming.hierarchy"
+      ]
+    },
+    {
+      "path": "modules/nesting/__init__.py",
+      "sha256": "07d2bc1048801a54b20eb52ccb4f1ff4d0072133411f9a45171b9fe6a50960ed",
+      "lines": 4,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/nesting/accounting.py",
+      "sha256": "aa83dcb511b0fc75c172f2878fc0e8e1695c47aea53125c57bbf3a695f9d97e8",
+      "lines": 88,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.geometry",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "modules/nesting/batch_import.py",
+      "sha256": "be1bc773901c8a331740878b3c93188923965523a14eb9402cf99cd398319ce7",
+      "lines": 43,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.dxf_import"
+      ]
+    },
+    {
+      "path": "modules/nesting/cutting.py",
+      "sha256": "3b469791d615002a512be1063506de0503ed7f0b52aeafbd29940a02ef081b6d",
+      "lines": 37,
+      "functions": 1,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.nesting.geometry"
+      ]
+    },
+    {
+      "path": "modules/nesting/dxf_export.py",
+      "sha256": "77a977b7accead610c05239219daf5051a48622d04cdab835e3327eae8153f7d",
+      "lines": 131,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.cutting",
+        "modules.nesting.dxf_import",
+        "modules.nesting.geometry",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "modules/nesting/dxf_import.py",
+      "sha256": "7dd808ed7fc1c38c0cf7e649010442a8a788a9dae0d3743f5215b042147940c1",
+      "lines": 207,
+      "functions": 6,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.nesting.models"
+      ]
+    },
+    {
+      "path": "modules/nesting/engine.py",
+      "sha256": "78296788931a3c2781a7b3a6eefa8fa10e2a49ff2215b380845418b35ad9d59d",
+      "lines": 259,
+      "functions": 6,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.nesting",
+        "modules.nesting.geometry",
+        "modules.nesting.models",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "modules/nesting/geometry.py",
+      "sha256": "eb272a08a0d71a330a5099b1c7554c9cfbdb28943c8b7b1829d87355635d394a",
+      "lines": 95,
+      "functions": 9,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/nesting/inspector.py",
+      "sha256": "0a2ec1a20ba327fca20f3cacacb8ae33d82ac9020354511e6ffcfcfb2efab1e2",
+      "lines": 121,
+      "functions": 11,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components"
+      ]
+    },
+    {
+      "path": "modules/nesting/materials.py",
+      "sha256": "b20dd264a8907d84c058444c09b4be20711d925569a9019557d7a81dedcb1d7a",
+      "lines": 20,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.models",
+        "modules.weight.materials"
+      ]
+    },
+    {
+      "path": "modules/nesting/models.py",
+      "sha256": "55a7089a07353169bdc79cd797ffbdd7952f56fb03ab1da26e252bb195755d22",
+      "lines": 221,
+      "functions": 13,
+      "classes": 8,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/nesting/pdf_report.py",
+      "sha256": "cba6e31d51ce3a7c8231943e851bb5eabb3a14a24fcefe6213645104d15ba330",
+      "lines": 114,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/nesting/render.py",
+      "sha256": "5f31aec9e0d82d9988169ce3f5535e9d5cdfeb369f5ff6772c5e668269501310",
+      "lines": 55,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.geometry"
+      ]
+    },
+    {
+      "path": "modules/nesting/report.py",
+      "sha256": "6c345bff7a60fbacc199aa3db2831bf59762ecd007fa9235de605da76674bf48",
+      "lines": 153,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.accounting",
+        "modules.nesting.dxf_import",
+        "modules.nesting.render",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/nesting/storage.py",
+      "sha256": "345968225b22a16e0e1f6e21ac429f060ab4212e9156e6ba6e991205026710fe",
+      "lines": 73,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.models",
+        "modules.nesting.validation",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/nesting/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/nesting/tests/test_hole_nesting.py",
+      "sha256": "4a771acd9a8b8b9020407743b1e54cfb894452fbcaf0a977254d1a184759d7b2",
+      "lines": 209,
+      "functions": 16,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.accounting",
+        "modules.nesting.cutting",
+        "modules.nesting.dxf_export",
+        "modules.nesting.dxf_import",
+        "modules.nesting.engine",
+        "modules.nesting.geometry",
+        "modules.nesting.materials",
+        "modules.nesting.models",
+        "modules.nesting.storage",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "sha256": "24dca95b3b15d0b779fa7e44552cf6cad1f00db9440bfdb4de0c7e02a5f23997",
+      "lines": 450,
+      "functions": 53,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.nesting.accounting",
+        "modules.nesting.batch_import",
+        "modules.nesting.dxf_export",
+        "modules.nesting.dxf_import",
+        "modules.nesting.engine",
+        "modules.nesting.geometry",
+        "modules.nesting.materials",
+        "modules.nesting.models",
+        "modules.nesting.storage",
+        "modules.nesting.validation"
+      ]
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_gui.py",
+      "sha256": "26a275b1df852e5993d114916a6225cfba8be9e9e51cbd75bc95602bbd6ee97c",
+      "lines": 529,
+      "functions": 36,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.ui_widgets"
+      ]
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_pdf_report.py",
+      "sha256": "9e50679fd2aca9b30172508c3ecac19ec7673d1dac2ce3e91d831b6a371fc46d",
+      "lines": 145,
+      "functions": 6,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.dxf_import",
+        "modules.nesting.materials",
+        "modules.nesting.models",
+        "modules.nesting.report"
+      ]
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "sha256": "26d5a74381f35682f07e7bbbc1fdf4f7cc44518b92302c7c0714cf30cfd4ef20",
+      "lines": 831,
+      "functions": 71,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.models",
+        "gui_qt.theme",
+        "modules.nesting.accounting",
+        "modules.nesting.geometry",
+        "modules.nesting.materials",
+        "modules.nesting.models",
+        "modules.nesting.ui_widgets"
+      ]
+    },
+    {
+      "path": "modules/nesting/ui_widgets.py",
+      "sha256": "3909d1af3e435880f90242ca6f16438048fb509b1f15e2edf722f773a550df0b",
+      "lines": 204,
+      "functions": 17,
+      "classes": 4,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.models",
+        "gui_qt.theme",
+        "modules.nesting.geometry",
+        "modules.nesting.render"
+      ]
+    },
+    {
+      "path": "modules/nesting/validation.py",
+      "sha256": "e75754095e9bc0bb9dcf1885f231c96d4520840163a165d4139efe2ca35f55a8",
+      "lines": 71,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.nesting.geometry"
+      ]
+    },
+    {
+      "path": "modules/pdf/__init__.py",
+      "sha256": "57749b3a37e8d041288a279c13f0aa7d48d4dfd804eae33e975fefe4672693a4",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/pdf/exporter.py",
+      "sha256": "d7a5f79b619eb3508d3ef08ec0f1c253ff1f5d254d5e1e8c1b1535c148861cfb",
+      "lines": 302,
+      "functions": 13,
+      "classes": 0,
+      "eager_local_imports": [
+        "solidworks.connection"
+      ]
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "sha256": "1665b3df50ef1c64426e1c53dc898002d327de18ce7f65ffff03ae40a46ea623",
+      "lines": 257,
+      "functions": 11,
+      "classes": 2,
+      "eager_local_imports": [
+        "solidworks.diagnostics",
+        "solidworks.process_watch"
+      ]
+    },
+    {
+      "path": "modules/pdf/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_exporter.py",
+      "sha256": "867c0ad26064d6d13afe554e30179744bc2d1cb0bc26e3df27b3b8faefd1bde9",
+      "lines": 364,
+      "functions": 46,
+      "classes": 4,
+      "eager_local_imports": [
+        "modules.pdf.exporter"
+      ]
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "sha256": "2fe6caf812ebbabfd547be707eb2935b26fb81f5c35a5d445e263eccbcd354d2",
+      "lines": 173,
+      "functions": 19,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.pdf.process"
+      ]
+    },
+    {
+      "path": "modules/pdf/ui.py",
+      "sha256": "aefbca4be4be48d34796fd1218c42df062ac05668c88e99484ab365f739d86ff",
+      "lines": 8,
+      "functions": 1,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.export"
+      ]
+    },
+    {
+      "path": "modules/pdf/window.py",
+      "sha256": "fe5c1d2bbb5107e897d59af2db2a947bd0a4be53dff2fed2bbaf79a756622d0e",
+      "lines": 5,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/__init__.py",
+      "sha256": "5c55da84002cf02696f2309adff610ca39182fd6118805d62601a95b2334dd09",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/profile_cutting/dialogs.py",
+      "sha256": "0c0cbef29de035f1517a0e39154756c473fda931fc9e2f280a34af8b0403c8db",
+      "lines": 94,
+      "functions": 5,
+      "classes": 2,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.properties"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/geometry.py",
+      "sha256": "89e46d4e7bd1fd2149cc18696ddbf699be5270a2848783db83ff1635e12a2e54",
+      "lines": 69,
+      "functions": 3,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/profile_cutting/models.py",
+      "sha256": "6830a705815c1c8fa7a5be9c27693ddb817707022c67eb9c292dea638a9dbe49",
+      "lines": 265,
+      "functions": 15,
+      "classes": 6,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/profile_cutting/optimizer.py",
+      "sha256": "3a0eed375e6ccf99fbcffd55393bd2633911157b0cd6724ec73ff5eb2ef15253",
+      "lines": 131,
+      "functions": 4,
+      "classes": 3,
+      "eager_local_imports": [
+        "modules.profile_cutting.models"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/properties.py",
+      "sha256": "182e16a8cd492e6da16127681c580fc31ac30c2ce5e163a565e54454cbadaf21",
+      "lines": 87,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.profile_cutting.models"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/scanner.py",
+      "sha256": "1ab7032c7598cdf1697e52fa14ade8abcb318877d752d864be631abe9ddb3f02",
+      "lines": 252,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.profile_cutting.geometry",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.properties",
+        "modules.profile_cutting.solidworks"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/solidworks.py",
+      "sha256": "95d0d1137ae1164102e4718864695058aff03df8b451da904676eeb6ac15892f",
+      "lines": 214,
+      "functions": 14,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.profile_cutting.geometry",
+        "modules.profile_cutting.models",
+        "modules.tolerance_stack.com"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/storage.py",
+      "sha256": "a251fa3c7484c611edd94d4d8c677504b3a4290072ff911735e6eefd524ae63c",
+      "lines": 120,
+      "functions": 8,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer",
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines": 0,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/profile_cutting/tests/fakes.py",
+      "sha256": "93e504f51f4651da042863023c4c4c149dba94a4fb129c173567f7b56aa2c2c9",
+      "lines": 113,
+      "functions": 38,
+      "classes": 5,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.profile_cutting.solidworks"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_api.py",
+      "sha256": "4c07a6c253aa17e15204ae5d7570cf391da9449b83bdeed80c1cd1059e53d5ba",
+      "lines": 93,
+      "functions": 11,
+      "classes": 3,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.scanner",
+        "modules.profile_cutting.solidworks",
+        "modules.profile_cutting.tests.fakes"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_engine.py",
+      "sha256": "da72d7c83fefa6e2b34c6af51247aa494842a7ff72fd35069b787d2b35aa2b4c",
+      "lines": 117,
+      "functions": 12,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer",
+        "modules.profile_cutting.properties",
+        "modules.profile_cutting.scanner",
+        "modules.profile_cutting.storage",
+        "modules.profile_cutting.tests.fakes",
+        "modules.profile_cutting.tests.test_scanner"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_geometry.py",
+      "sha256": "18fc2569b392f45acc1357b10471300ccd8ce16dbb9a48876c3343af42e5568b",
+      "lines": 40,
+      "functions": 6,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.profile_cutting.geometry"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_live.py",
+      "sha256": "8be7d9321f18fcfb94824085ac57c7391aadd67afbf4b9fe39c144a754c29ba1",
+      "lines": 31,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.profile_cutting.scanner",
+        "modules.profile_cutting.solidworks"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_optimizer_oracle.py",
+      "sha256": "5ebd9398c02c54ab05585ca5101a2898e81f5020072e1e0b70d37c4398ad47e9",
+      "lines": 28,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "sha256": "84a33854270a83774c322a04e8ae3c8483b88a69619450f8f84ac2bc53caac94",
+      "lines": 81,
+      "functions": 6,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer",
+        "modules.profile_cutting.storage",
+        "modules.profile_cutting.tests.fakes",
+        "modules.profile_cutting.tests.test_scanner"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_scanner.py",
+      "sha256": "17e9d8d47f5c62483672e14905b30181a87bb0ce57164f8ec3cdec5838ff77c8",
+      "lines": 178,
+      "functions": 17,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.cad_converter.api",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer",
+        "modules.profile_cutting.scanner",
+        "modules.profile_cutting.tests.fakes"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_ui.py",
+      "sha256": "f9347b3fbc77ed3c5bb44366d0ac41de56d44656c4fbad3c400b3f232196cc6a",
+      "lines": 152,
+      "functions": 14,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.profile_cutting.dialogs",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.scanner",
+        "modules.profile_cutting.tests.fakes"
+      ]
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "sha256": "4bd508cf003c26377fea016177504017b2e3c24ea1d6b5f9b31ffff92c731f38",
+      "lines": 363,
+      "functions": 33,
+      "classes": 2,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.diagrams",
+        "gui_qt.models",
+        "gui_qt.services",
+        "modules.profile_cutting.dialogs",
+        "modules.profile_cutting.models",
+        "modules.profile_cutting.optimizer",
+        "modules.profile_cutting.properties",
+        "modules.profile_cutting.scanner",
+        "modules.profile_cutting.storage"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/__init__.py",
+      "sha256": "2a7937f05fd3622012a931045438690273e2970b8e18611b2841faf057dd4d06",
+      "lines": 3,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/tolerance_stack/calculator.py",
+      "sha256": "f17c3d980fd34feab3ab30537ba731754c6449ff56bf621fc216cf27e825b5f8",
+      "lines": 118,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.tolerance_stack.chain",
+        "modules.tolerance_stack.models"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/chain.py",
+      "sha256": "1f7326d2474e0f48f9945d5043453722cbdd36d7da0c0386174f336e9fd2b47b",
+      "lines": 135,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.tolerance_stack.models"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/com.py",
+      "sha256": "62333fc4e6696f12734b499a3e187d279c540cd55cc230b249b8a741c832d832",
+      "lines": 171,
+      "functions": 21,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/tolerance_stack/diagram.py",
+      "sha256": "90355f3afc6276a797c48e7d596c1980aeba41cacaeff5173645fd3edef89d18",
+      "lines": 70,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.models"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "sha256": "9388f8d869c6babfccb360eafb6dea82a2781d03d2d77c7612d0f8bd9126c27f",
+      "lines": 211,
+      "functions": 8,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.com",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.report",
+        "modules.tolerance_stack.solidworks_reader",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/extensions.py",
+      "sha256": "dfa60cd8be00670e7e42d6696243caca250e9ddf90ec665823866d3065c83a6f",
+      "lines": 21,
+      "functions": 1,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/tolerance_stack/models.py",
+      "sha256": "a641daff0325b92a85bece70f43b9ee84bc5bc894463cf642a89cd879059409e",
+      "lines": 209,
+      "functions": 16,
+      "classes": 6,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/tolerance_stack/monte_carlo.py",
+      "sha256": "762dfc46ebf5d74b53efe0dd4936d2341ada520416a0a90b3d301996d7c93b71",
+      "lines": 78,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.chain"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/report.py",
+      "sha256": "638142475151b9e2eed6f969d178943077b8fec913963e8ecd8c534145edc92a",
+      "lines": 132,
+      "functions": 8,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/solidworks_reader.py",
+      "sha256": "908167e9f7e437c211545099704d0a036905db99086fddb283fcba41240dab08",
+      "lines": 227,
+      "functions": 8,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.com",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/storage.py",
+      "sha256": "eaaa12979f39a8c2a517ea4e9eaecf4fc92968bc7c4ce6a9094475b182cddb4b",
+      "lines": 118,
+      "functions": 6,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.chain",
+        "modules.tolerance_stack.models"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_com.py",
+      "sha256": "f54c24ff8f032880989bb2d926c5f7c2883d88f9292101e317b064f4a0e76714",
+      "lines": 309,
+      "functions": 69,
+      "classes": 14,
+      "eager_local_imports": [
+        "modules.tolerance_stack.com",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.solidworks_reader",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_drawing_writer.py",
+      "sha256": "1515db58963a2e95146de01124fdc24da18ce0910772b399919e96df11e89656",
+      "lines": 181,
+      "functions": 38,
+      "classes": 5,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.com",
+        "modules.tolerance_stack.drawing_writer",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.solidworks_reader",
+        "modules.tolerance_stack.storage",
+        "modules.tolerance_stack.tests.test_tolerance_stack_com"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "sha256": "0e368095f61c1d6b9d82e56cec1ddb68a5c8fd18d51355feb9607a09a0a5f631",
+      "lines": 347,
+      "functions": 28,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.solidworks_reader",
+        "modules.tolerance_stack.tests.test_tolerance_stack_com",
+        "modules.tolerance_stack.ui_dialogs"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_live.py",
+      "sha256": "6eaf8f29b25d76d0fa2c7f34d5f05e3d91e04e24521b1d186642eac11451c0f6",
+      "lines": 55,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.com",
+        "modules.tolerance_stack.drawing_writer",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.solidworks_reader",
+        "modules.tolerance_stack.storage"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "sha256": "77abe0076db398395cf939832e3f0a8b56c53e66bbe14a8ef90a873fda6868cc",
+      "lines": 164,
+      "functions": 15,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.models"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "sha256": "7f64c04c8815422336aa69ab8e7e06fe59944254eb10ba8944f7559f7a9aa9e2",
+      "lines": 108,
+      "functions": 10,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.report",
+        "modules.tolerance_stack.storage",
+        "modules.tolerance_stack.tests.test_tolerance_stack_math"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "sha256": "a610a857c5157073fb5e00b4f2b1a9fc1a0c570600e6f654b813f8e7d8b50ac5",
+      "lines": 896,
+      "functions": 70,
+      "classes": 3,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.models",
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.chain",
+        "modules.tolerance_stack.diagram",
+        "modules.tolerance_stack.drawing_writer",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.report",
+        "modules.tolerance_stack.solidworks_reader",
+        "modules.tolerance_stack.storage",
+        "modules.tolerance_stack.ui_dialogs",
+        "modules.tolerance_stack.ui_widgets"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/ui_dialogs.py",
+      "sha256": "24aad7cd384052c1a0f2d19943439867e87ca2c6f6fe4b48ff937c4c0ccf8e2b",
+      "lines": 181,
+      "functions": 13,
+      "classes": 5,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "modules.tolerance_stack.models",
+        "modules.tolerance_stack.ui_widgets"
+      ]
+    },
+    {
+      "path": "modules/tolerance_stack/ui_widgets.py",
+      "sha256": "60c7f6f08ef2e88a1f49c347e74a24843611be8980ca93534c37447e7cfb3aa1",
+      "lines": 48,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.components",
+        "gui_qt.diagrams"
+      ]
+    },
+    {
+      "path": "modules/weight/__init__.py",
+      "sha256": "a36b6eacb133236b599495895e38d077ea427c1e381bba8bd3f8899ee97a2cbb",
+      "lines": 5,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "modules/weight/diagram.py",
+      "sha256": "b68c73a0f90db98c1b6659eb4b31b1fc0d7f024af5e101a9621dbe8b0d966ad2",
+      "lines": 235,
+      "functions": 13,
+      "classes": 0,
+      "eager_local_imports": [
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "modules/weight/examples/capture.py",
+      "sha256": "d057f3ef53ac2268d3ef6ec02d88f09182e4fccd940aaea8a55595009295406e",
+      "lines": 69,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "modules/weight/materials.py",
+      "sha256": "dcb4f21536da1424a20252c16fbb34c17158cff53f267c615a9679bf3e31eb99",
+      "lines": 131,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/weight/rules.py",
+      "sha256": "2b9e0a84a8ce28b13431ea09bcbbfee0641acfcae54cda1815d8c324c7afe295",
+      "lines": 185,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.weight.materials"
+      ]
+    },
+    {
+      "path": "modules/weight/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "modules/weight/tests/test_weight.py",
+      "sha256": "c5aad67223a04d59891fea5e3e38eab20b374ea341f9eec9b66a18977402dc7a",
+      "lines": 145,
+      "functions": 13,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "modules/weight/ui.py",
+      "sha256": "6ec98464f7951e656d1354326f3ebe62180d31fae8db46c3eb7d7790179ad8a7",
+      "lines": 114,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.calculations",
+        "gui_qt.components",
+        "modules.weight.diagram",
+        "modules.weight.materials",
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "packaging/audit_project.py",
+      "sha256": "206bb4b26c5c732a957c9dd296d968041f10575a4a0f41713cf67450851e3b17",
+      "lines": 118,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "sha256": "42d818e0c1f732728291f778a7c964fa9b2b1e75ddea17d133603594baaf27a7",
+      "lines": 128,
+      "functions": 2,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/configure_windows_display.py",
+      "sha256": "5dce3cf5d0fb4399dc64a766ef91bd0308a76f043a60e9750f93e2dbd99d4f74",
+      "lines": 97,
+      "functions": 3,
+      "classes": 5,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/publish_binding_status.py",
+      "sha256": "9b3a357527205ad25c35f91576f83d7d737cc8be8744a7ce11ca0281bc6b4828",
+      "lines": 51,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/publish_kr_security.py",
+      "sha256": "4c0731e2f89448504fc3e253165484c9f64ffbec511e05db9446aed222f9058b",
+      "lines": 47,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/publish_status.py",
+      "sha256": "d0bf94fa31c85d491cb5de59ead6e0f1c5c884a1dd62f1336bdffb9ddb0a07cf",
+      "lines": 135,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/run_windows_tests.py",
+      "sha256": "e6842c43b5990d02708d424d7c0858bc71dd8900d89add9bbf4242dc758efd32",
+      "lines": 133,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "packaging/runtime_hook.py",
+      "sha256": "42f2a0927fdff689d171d26bfb5f7841a13c615d1817aec78812869a0511f822",
+      "lines": 4,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "solidworks.runtime"
+      ]
+    },
+    {
+      "path": "shared/__init__.py",
+      "sha256": "ed3a5b1cebbbc1f2c8ea7d180a4313fa5dfe0ccfa4b922d8ba4247d2cebaa54a",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "shared/icons.py",
+      "sha256": "5e58ba2bc08688cc6b4d9dcb093b4654c6bc4bcd58c8bcf06aeba126584a7c82",
+      "lines": 154,
+      "functions": 9,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "shared/package_check.py",
+      "sha256": "0df5837b532b21a9bf358399c91746987e0febf650a4ab8c4df1e08ce41ebec7",
+      "lines": 2,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.package_check"
+      ]
+    },
+    {
+      "path": "shared/settings.py",
+      "sha256": "d14543cc2110f97b182ec25b7e6f4801d8652ea7c302e4e4f7ed411af879298e",
+      "lines": 51,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "shared/text.py",
+      "sha256": "c24d13bb862564df00d9ec2ab44605c7da830f72f27a22e9f16d63cd082e3807",
+      "lines": 10,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "shared/theme.py",
+      "sha256": "4dc3a1e61004f833612617d02adaa7d80ce1379121875decafcd23be29cb06af",
+      "lines": 38,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "shared/typography.py",
+      "sha256": "a4157cfa64e42080a74d13c5eb093a26cf176a159eef2925b12d3decb21b76ee",
+      "lines": 15,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": [
+        "shared.theme"
+      ]
+    },
+    {
+      "path": "shared/window_geometry.py",
+      "sha256": "230dc392983f50dc15f930efe93a108bce2a65c1071b13db5a5ffe5026809765",
+      "lines": 35,
+      "functions": 2,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "solidworks/__init__.py",
+      "sha256": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "solidworks/connection.py",
+      "sha256": "b1ca50b4c2f9102fe4a6950686d38b3d80dd1642755153ff5e845e72f40ff619",
+      "lines": 29,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "solidworks/diagnostics.py",
+      "sha256": "c8571e19d8c9b7e1fd97fcb6b74b7bf8eeb8c6b127f1637c3fbfb61172d7596a",
+      "lines": 112,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "solidworks/process_watch.py",
+      "sha256": "72276530b01add74bac75392fca026a45a37bf5fce86433c274eb92eebf5fa3b",
+      "lines": 177,
+      "functions": 7,
+      "classes": 0,
+      "eager_local_imports": [
+        "solidworks.diagnostics"
+      ]
+    },
+    {
+      "path": "solidworks/runtime.py",
+      "sha256": "3416226960ff5f90b8f792e605c94863c549aa5f96b90e69590637553079cfac",
+      "lines": 40,
+      "functions": 1,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_bolt_window.py",
+      "sha256": "a900fb70807e7bda49791df30df59642f76b8081f366c45961ee40c61df8218b",
+      "lines": 302,
+      "functions": 10,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_bom_window.py",
+      "sha256": "903936edd135e11629f08a061120a05f67522d2e69d6527f10b2269b54924116",
+      "lines": 300,
+      "functions": 16,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_export_window.py",
+      "sha256": "a10092cf7993c1f896e2b764d319c32a83d639b78219a8cead28d1514aab61aa",
+      "lines": 511,
+      "functions": 26,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_file_list_rendering.py",
+      "sha256": "4eaf4bb6069d9f0dd22916d0523e84eee297acc393188a97de4df41a1d07ee57",
+      "lines": 111,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_final_gui.py",
+      "sha256": "112e844afa36e888657235143a78b6fa59bc5d4d05d5ce9f6470630546325ed2",
+      "lines": 139,
+      "functions": 6,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_geometric_tolerances.py",
+      "sha256": "9be24811fe9df6a8952223ab762f3a127fce90099112c783e4f02480685c0b82",
+      "lines": 524,
+      "functions": 31,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_gui_audit.py",
+      "sha256": "a23f135a83e5e8bd545a3bc938a77289757cd1ea1c7e2969cf55801c531069c2",
+      "lines": 280,
+      "functions": 17,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_gui_flow.py",
+      "sha256": "221abb94c8f618815ffaef7f0a85ad213fff8c3163d43d7b17f02a5261e07aca",
+      "lines": 274,
+      "functions": 16,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_fits.py",
+      "sha256": "725ccb932b29f01b6af873ea4df40299c14c74fa7bf8ea32e1f40a10b47e4177",
+      "lines": 280,
+      "functions": 20,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_matching.py",
+      "sha256": "deaea4ed27b298a2cddb74b067f06540f0372fe754e795f13f8800ef00553a57",
+      "lines": 173,
+      "functions": 12,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_section.py",
+      "sha256": "a6991708fa130b7bed9df9a8f1e1364fc7f58ab8cd7cc18fde52821c6c093d9c",
+      "lines": 139,
+      "functions": 8,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_tolerance_audit.py",
+      "sha256": "fafbd1551aa56e9d71b061bf89117b701e1feae65c79274bc3cb076631750b33",
+      "lines": 143,
+      "functions": 9,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_k_factor.py",
+      "sha256": "8775eca714818ec49c4dd29a984d74d00509389f35e1ca2db5d2c759fd0701d4",
+      "lines": 614,
+      "functions": 51,
+      "classes": 3,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_kr_assignment_window.py",
+      "sha256": "76e7a06b59112b09a7890a632ca768dcbf9e797bce1adc7724c9b71a9157d6d9",
+      "lines": 74,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_manual_iso.py",
+      "sha256": "6969eadecf5fd41b82244e1bbe5e062f3522ff3bcfb257f5312bf97dd6d6a23f",
+      "lines": 312,
+      "functions": 25,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_manual_k_radius.py",
+      "sha256": "2f8b5431dc50dd25ff80b40456d266a98130c2c2555c30a4e12311c6bd89b345",
+      "lines": 349,
+      "functions": 24,
+      "classes": 3,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_menu_rendering.py",
+      "sha256": "4830b4517555a54f6576d4c1ddd885fe7d3aa163e5dd9503dde0a28e44763e66",
+      "lines": 418,
+      "functions": 26,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_naming_window.py",
+      "sha256": "14c6fcc2862fdfb67e0b602405811cf05f3cab40bcf594a4db0a85dfe3290ee6",
+      "lines": 340,
+      "functions": 18,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_rendering_events.py",
+      "sha256": "c56b5fba146de18bb4e406c854f46591b64f5fd61f27e20ac592e7164bd75256",
+      "lines": 49,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_tab_rendering.py",
+      "sha256": "f507e9f592bed87701f1852db5894362ddedb2fd27bc662785f84bcfca40436b",
+      "lines": 81,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_ui_language.py",
+      "sha256": "4aebe05cee34e1534b57c49c5afa483c4b555f7a13f7a6c9f537de40fb043466",
+      "lines": 38,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_weight_window.py",
+      "sha256": "955470a049c247f4a32d0ba0dd071bce046fc1b91224ecb86bb047ac4961e7fb",
+      "lines": 217,
+      "functions": 7,
+      "classes": 1,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/legacy_tk/test_workspace_layout.py",
+      "sha256": "ddeaedf09cd8f845e1d62a57e3d5c158718239bcd4e522d54c3704d0a6d1cf57",
+      "lines": 156,
+      "functions": 6,
+      "classes": 2,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/support/__init__.py",
+      "sha256": "1fe1647a6c49dac9932fad2f73505fbfbe425c3c86b00b7d9bd752b923bb97b5",
+      "lines": 1,
+      "functions": 0,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/support/fixtures.py",
+      "sha256": "9d020e3848bc94be167dc3373bfcb532d63656248d0eb7476ab66dd7b9f20b55",
+      "lines": 20,
+      "functions": 1,
+      "classes": 1,
+      "eager_local_imports": [
+        "modules.k_factor.apply"
+      ]
+    },
+    {
+      "path": "tests/support/gui.py",
+      "sha256": "05a726938ffe62680c453f9331cd0ae41b4e8f74c4471d37c2927f511b8ef990",
+      "lines": 78,
+      "functions": 9,
+      "classes": 2,
+      "eager_local_imports": [
+        "modules.pdf.window",
+        "shared.settings"
+      ]
+    },
+    {
+      "path": "tests/support/pdf_worker.py",
+      "sha256": "201100f8692cb6d5e020451813b32569bd64486ccb439c3c3d5721b7d9d9779e",
+      "lines": 104,
+      "functions": 3,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.pdf.exporter",
+        "modules.pdf.process",
+        "solidworks.diagnostics",
+        "tests.support.solidworks"
+      ]
+    },
+    {
+      "path": "tests/support/solidworks.py",
+      "sha256": "82f495b483f8420dbefb2bace7d6e575f5fc65c31755aeeca3ae9a8b144b1390",
+      "lines": 359,
+      "functions": 60,
+      "classes": 14,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/test_audit_engineering_oracles.py",
+      "sha256": "ee9abdc0a1af517e24fbd8d35f9e3e9c80099de269ec77b627cdadc777a0f65a",
+      "lines": 51,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "modules.bolt_torque.rules",
+        "modules.iso_fits.rules",
+        "modules.k_factor.rules",
+        "modules.nesting.accounting",
+        "modules.tolerance_stack.calculator",
+        "modules.tolerance_stack.models",
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "sha256": "201d8c709535117ef9f2ce7fab89476ecc8e10872eff48238e1642c259f8c551",
+      "lines": 73,
+      "functions": 10,
+      "classes": 0,
+      "eager_local_imports": [
+        "shared.settings"
+      ]
+    },
+    {
+      "path": "tests/test_compact_calculators_gui.py",
+      "sha256": "3a0c3220d4455e4af5a182ae9eef98d4790537cc98532cad5e395abe821eaf49",
+      "lines": 134,
+      "functions": 5,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "tests/test_compact_workspaces_gui.py",
+      "sha256": "998a2dacfcf8162197066825dc1b4b0fea33f425585fc5d4b31b307f183bd78e",
+      "lines": 206,
+      "functions": 14,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "gui_qt.components"
+      ]
+    },
+    {
+      "path": "tests/test_fusion_workbench.py",
+      "sha256": "619fc3b027574572cbc640942f6c1cffe254c48680c78af08932178798c5d76a",
+      "lines": 151,
+      "functions": 13,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "modules.nesting.storage"
+      ]
+    },
+    {
+      "path": "tests/test_process_watch.py",
+      "sha256": "df82313b08f7881062b9d2ae37bf34cdf959186ca7ca25ef6b6993d396f265b3",
+      "lines": 137,
+      "functions": 11,
+      "classes": 1,
+      "eager_local_imports": [
+        "solidworks.process_watch"
+      ]
+    },
+    {
+      "path": "tests/test_qt_diagnostics.py",
+      "sha256": "e37d945731e899f6a011b9008e2a87623c201a5b842c41d056eca114e74ccbde",
+      "lines": 83,
+      "functions": 4,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.services"
+      ]
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "sha256": "30c9ba3824cf8d9b31cccb0442128ecee3ac82ba1c1b3275b62dbd179c7d3dbf",
+      "lines": 875,
+      "functions": 49,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "gui_qt.components",
+        "gui_qt.models",
+        "gui_qt.settings",
+        "modules.bolt.rules",
+        "modules.bom.exporter",
+        "modules.geometric_tolerances.catalog",
+        "modules.iso_fits.rules",
+        "modules.naming.exporter",
+        "modules.weight.rules"
+      ]
+    },
+    {
+      "path": "tests/test_repository_structure.py",
+      "sha256": "677d8ff5be507c443323b970b84f435db382bdd96c90a0a35a748dba3bf05e12",
+      "lines": 77,
+      "functions": 5,
+      "classes": 1,
+      "eager_local_imports": [
+        "gui_qt.app",
+        "gui_qt.icons",
+        "modules.naming.native",
+        "modules.pdf.process"
+      ]
+    },
+    {
+      "path": "tests/test_settings_and_connection.py",
+      "sha256": "2df386ff90f762227d1e5a76957b38035078832124c6a4a1861da0e7d80af5e0",
+      "lines": 120,
+      "functions": 15,
+      "classes": 4,
+      "eager_local_imports": [
+        "shared.settings",
+        "solidworks.connection"
+      ]
+    },
+    {
+      "path": "tests/test_single_file_distribution.py",
+      "sha256": "e3848eb9521164e47e67f5e39faef51ae68d30ccf6b3af58d0af1864bfca1a88",
+      "lines": 58,
+      "functions": 4,
+      "classes": 0,
+      "eager_local_imports": [
+        "gui_qt.licenses",
+        "solidworks.runtime"
+      ]
+    },
+    {
+      "path": "tests/test_windows_test_runner.py",
+      "sha256": "a8856fc4ed700d48ed6b498ff4c0ff78bdee76b37e277fec616ff15499a4ae9b",
+      "lines": 83,
+      "functions": 6,
+      "classes": 0,
+      "eager_local_imports": []
+    },
+    {
+      "path": "tests/test_workspace_layout.py",
+      "sha256": "ab46d17191c631aabad12252af3168abccc92238bb149fb06a704329edb00b31",
+      "lines": 27,
+      "functions": 1,
+      "classes": 1,
+      "eager_local_imports": [
+        "shared.window_geometry"
+      ]
+    }
+  ],
+  "python_files": 304,
+  "lines": 46337,
+  "syntax_errors": [],
+  "by_directory": {
+    "docs": 35,
+    "gui_qt": 17,
+    "main.py": 1,
+    "modules": 189,
+    "packaging": 8,
+    "shared": 8,
+    "solidworks": 5,
+    "tests": 41
+  },
+  "eager_import_cycles": [],
+  "identical_large_bodies": [
+    [
+      "modules/geometric_tolerances/tests/test_geometric_tolerances.py:64 test_asme_2018_has_twelve_active_and_two_deleted_characteristics",
+      "tests/legacy_tk/test_geometric_tolerances.py:66 test_asme_2018_has_twelve_active_and_two_deleted_characteristics"
+    ],
+    [
+      "modules/geometric_tolerances/tests/test_geometric_tolerances.py:85 test_default_rfs_rmb_has_no_material_modifiers_and_position_example_requires_datum",
+      "tests/legacy_tk/test_geometric_tolerances.py:87 test_default_rfs_rmb_has_no_material_modifiers_and_position_example_requires_datum"
+    ],
+    [
+      "modules/geometric_tolerances/tests/test_geometric_tolerances.py:95 test_total_width_is_not_plus_minus_or_a_general_grade",
+      "tests/legacy_tk/test_geometric_tolerances.py:97 test_total_width_is_not_plus_minus_or_a_general_grade"
+    ],
+    [
+      "modules/geometric_tolerances/tests/test_geometric_tolerances.py:105 test_cylindrical_position_region_is_diameter_not_radius",
+      "tests/legacy_tk/test_geometric_tolerances.py:107 test_cylindrical_position_region_is_diameter_not_radius"
+    ],
+    [
+      "modules/geometric_tolerances/tests/test_geometric_tolerances.py:160 test_limits_and_decimal_display_have_no_implicit_rounding",
+      "tests/legacy_tk/test_geometric_tolerances.py:162 test_limits_and_decimal_display_have_no_implicit_rounding"
+    ],
+    [
+      "modules/geometric_tolerances/tests/test_geometric_tolerances.py:170 test_catalog_distinguishes_form_runout_and_theoretical_dimensions",
+      "tests/legacy_tk/test_geometric_tolerances.py:172 test_catalog_distinguishes_form_runout_and_theoretical_dimensions"
+    ],
+    [
+      "modules/iso_fits/tests/test_iso_fits.py:15 test_known_h8_f7_limits_and_clearances",
+      "tests/legacy_tk/test_iso_fits.py:17 test_known_h8_f7_limits_and_clearances"
+    ],
+    [
+      "modules/iso_fits/tests/test_iso_fits.py:55 test_half_micron_and_independent_table_values",
+      "tests/legacy_tk/test_iso_fits.py:57 test_half_micron_and_independent_table_values"
+    ],
+    [
+      "modules/iso_fits/tests/test_iso_fits.py:63 test_dataset_consistency_and_standard_it_widths",
+      "tests/legacy_tk/test_iso_fits.py:65 test_dataset_consistency_and_standard_it_widths"
+    ],
+    [
+      "modules/iso_fits/tests/test_iso_fits.py:92 test_formats_keep_precision_and_units",
+      "tests/legacy_tk/test_iso_fits.py:94 test_formats_keep_precision_and_units"
+    ],
+    [
+      "modules/iso_fits/tests/test_iso_matching.py:39 test_manual_band_has_no_reference_class_and_rejects_wrong_feature",
+      "tests/legacy_tk/test_iso_matching.py:40 test_manual_band_has_no_reference_class_and_rejects_wrong_feature"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:21 test_corrected_point_zero_five_example_and_targets",
+      "tests/legacy_tk/test_manual_iso.py:22 test_corrected_point_zero_five_example_and_targets"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:34 test_target_boundary_and_contact_cases_are_not_guarantees",
+      "tests/legacy_tk/test_manual_iso.py:35 test_target_boundary_and_contact_cases_are_not_guarantees"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:50 test_joint_iso_pair_and_common_preset_are_distinct",
+      "tests/legacy_tk/test_manual_iso.py:51 test_joint_iso_pair_and_common_preset_are_distinct"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:58 test_reference_type_does_not_replace_actual_transition",
+      "tests/legacy_tk/test_manual_iso.py:59 test_reference_type_does_not_replace_actual_transition"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:69 test_large_distance_to_iso_is_explicitly_flagged",
+      "tests/legacy_tk/test_manual_iso.py:70 test_large_distance_to_iso_is_explicitly_flagged"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:86 test_user_unilateral_example_and_actual_dimensions",
+      "tests/legacy_tk/test_manual_iso.py:87 test_user_unilateral_example_and_actual_dimensions"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:93 test_bilateral_and_measured_point_have_different_results",
+      "tests/legacy_tk/test_manual_iso.py:94 test_bilateral_and_measured_point_have_different_results"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:129 test_nearest_class_is_distinct_from_exact_equality",
+      "tests/legacy_tk/test_manual_iso.py:130 test_nearest_class_is_distinct_from_exact_equality"
+    ],
+    [
+      "modules/iso_fits/tests/test_manual_iso.py:152 test_half_micron_and_extreme_samples_are_preserved",
+      "tests/legacy_tk/test_manual_iso.py:153 test_half_micron_and_extreme_samples_are_preserved"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:90 test_measured_ba_calibration_and_table_difference",
+      "tests/legacy_tk/test_k_factor.py:93 test_measured_ba_calibration_and_table_difference"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:100 test_invalid_and_out_of_model_inputs_are_rejected",
+      "tests/legacy_tk/test_k_factor.py:103 test_invalid_and_out_of_model_inputs_are_rejected"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:127 test_preview_does_not_modify_or_save",
+      "tests/legacy_tk/test_k_factor.py:130 test_preview_does_not_modify_or_save"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:136 test_apply_writes_metres_and_k_type_without_saving",
+      "tests/legacy_tk/test_k_factor.py:139 test_apply_writes_metres_and_k_type_without_saving"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:145 test_explicit_save_and_existing_dirty_document_protection",
+      "tests/legacy_tk/test_k_factor.py:148 test_explicit_save_and_existing_dirty_document_protection"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:153 test_multiple_configurations_restore_active_and_preserve_other",
+      "tests/legacy_tk/test_k_factor.py:156 test_multiple_configurations_restore_active_and_preserve_other"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:163 test_cross_configuration_propagation_rolls_back",
+      "tests/legacy_tk/test_k_factor.py:166 test_cross_configuration_propagation_rolls_back"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:207 test_non_sheet_and_multi_body_parts",
+      "tests/legacy_tk/test_k_factor.py:210 test_non_sheet_and_multi_body_parts"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:216 test_batch_deduplicates_instances_and_restores_assembly",
+      "tests/legacy_tk/test_k_factor.py:219 test_batch_deduplicates_instances_and_restores_assembly"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:234 test_batch_nested_assembly_and_suppression",
+      "tests/legacy_tk/test_k_factor.py:237 test_batch_nested_assembly_and_suppression"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:244 test_saved_batch_handles_two_configurations_without_self_created_dirty_edits",
+      "tests/legacy_tk/test_k_factor.py:247 test_saved_batch_handles_two_configurations_without_self_created_dirty_edits"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:279 test_queued_scope_rejects_changed_assembly_configuration_and_references",
+      "tests/legacy_tk/test_k_factor.py:282 test_queued_scope_rejects_changed_assembly_configuration_and_references"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:306 test_queued_scope_accepts_same_references_in_different_tree_order",
+      "tests/legacy_tk/test_k_factor.py:309 test_queued_scope_accepts_same_references_in_different_tree_order"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:319 test_newly_opened_preview_closes_but_unsaved_apply_stays_open",
+      "tests/legacy_tk/test_k_factor.py:322 test_newly_opened_preview_closes_but_unsaved_apply_stays_open"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:332 test_loaded_assembly_part_is_reused_without_reopening_or_closing",
+      "tests/legacy_tk/test_k_factor.py:335 test_loaded_assembly_part_is_reused_without_reopening_or_closing"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:373 test_cancel_after_current_part_keeps_next_part_unchanged",
+      "tests/legacy_tk/test_k_factor.py:376 test_cancel_after_current_part_keeps_next_part_unchanged"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:390 test_failed_rollback_is_explicit_and_never_saved",
+      "tests/legacy_tk/test_k_factor.py:393 test_failed_rollback_is_explicit_and_never_saved"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:403 test_wrong_activation_and_unknown_configuration_do_not_write",
+      "tests/legacy_tk/test_k_factor.py:406 test_wrong_activation_and_unknown_configuration_do_not_write"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:412 test_missing_sheet_feature_and_inaccessible_suppression_fail",
+      "tests/legacy_tk/test_k_factor.py:415 test_missing_sheet_feature_and_inaccessible_suppression_fail"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:420 test_calibration_skips_wrong_thickness_and_continues_batch",
+      "tests/legacy_tk/test_k_factor.py:423 test_calibration_skips_wrong_thickness_and_continues_batch"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:436 test_com_cleanup_error_still_sends_done",
+      "tests/legacy_tk/test_k_factor.py:439 test_com_cleanup_error_still_sends_done"
+    ],
+    [
+      "modules/k_factor/tests/test_k_factor.py:443 test_missing_platform_cancel_and_invalid_assembly_always_finish",
+      "tests/legacy_tk/test_k_factor.py:446 test_missing_platform_cancel_and_invalid_assembly_always_finish"
+    ],
+    [
+      "modules/k_factor/tests/test_manual_k_radius.py:54 test_exact_values_and_metres_written_without_changing_thickness",
+      "tests/legacy_tk/test_manual_k_radius.py:56 test_exact_values_and_metres_written_without_changing_thickness"
+    ],
+    [
+      "modules/k_factor/tests/test_manual_k_radius.py:70 test_mismatched_thickness_skips_even_gauge_override_without_save",
+      "tests/legacy_tk/test_manual_k_radius.py:72 test_mismatched_thickness_skips_even_gauge_override_without_save"
+    ],
+    [
+      "modules/k_factor/tests/test_manual_k_radius.py:82 test_preview_does_not_modify",
+      "tests/legacy_tk/test_manual_k_radius.py:84 test_preview_does_not_modify"
+    ],
+    [
+      "modules/k_factor/tests/test_manual_k_radius.py:91 test_manual_failure_uses_existing_verified_rollback",
+      "tests/legacy_tk/test_manual_k_radius.py:93 test_manual_failure_uses_existing_verified_rollback"
+    ],
+    [
+      "modules/k_factor/tests/test_manual_k_radius.py:100 test_only_matching_referenced_configuration_is_updated",
+      "tests/legacy_tk/test_manual_k_radius.py:102 test_only_matching_referenced_configuration_is_updated"
+    ],
+    [
+      "modules/k_factor/tests/test_manual_k_radius.py:111 test_nested_batch_updates_and_saves_matching_parts_once",
+      "tests/legacy_tk/test_manual_k_radius.py:113 test_nested_batch_updates_and_saves_matching_parts_once"
+    ]
+  ],
+  "sensitive_calls": [
+    {
+      "path": "docs/report-tools/audit_qt.py",
+      "line": 63,
+      "call": "run"
+    },
+    {
+      "path": "docs/report-tools/capture_nesting.py",
+      "line": 54,
+      "call": "old.unlink"
+    },
+    {
+      "path": "docs/report-tools/capture_stack_usability.py",
+      "line": 22,
+      "call": "loop.exec"
+    },
+    {
+      "path": "docs/report-tools/capture_stack_usability.py",
+      "line": 33,
+      "call": "replace"
+    },
+    {
+      "path": "docs/report-tools/capture_stack_usability.py",
+      "line": 36,
+      "call": "replace"
+    },
+    {
+      "path": "docs/report-tools/capture_workspaces.py",
+      "line": 69,
+      "call": "mode.replace"
+    },
+    {
+      "path": "docs/report-tools/compare_iso_sources.py",
+      "line": 54,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/compare_iso_sources.py",
+      "line": 56,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_final_audit_report.py",
+      "line": 20,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_final_audit_report.py",
+      "line": 24,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_final_audit_report.py",
+      "line": 27,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_final_audit_report.py",
+      "line": 28,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_geometric_report.py",
+      "line": 24,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_geometric_report.py",
+      "line": 25,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_geometric_report.py",
+      "line": 26,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_geometric_report.py",
+      "line": 27,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_geometric_report.py",
+      "line": 37,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_iso_report.py",
+      "line": 24,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_iso_report.py",
+      "line": 25,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_iso_report.py",
+      "line": 26,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_iso_report.py",
+      "line": 27,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_k_radius_report.py",
+      "line": 20,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_k_radius_report.py",
+      "line": 25,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_k_radius_report.py",
+      "line": 24,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 145,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 187,
+      "call": "when.replace"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 188,
+      "call": "when.replace"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 146,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 309,
+      "call": "f\"Son sayım: {data['lines']['application']:,} uygulama + {data['lines']['tests']:,} test = {sum(data['lines'].values()):,} Python satırı.\".replace"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 203,
+      "call": "f\"%{coverage['percent_statements_covered']:.1f}\".replace"
+    },
+    {
+      "path": "docs/report-tools/create_word_report.py",
+      "line": 204,
+      "call": "f\"%{coverage['percent_covered']:.1f}\".replace"
+    },
+    {
+      "path": "docs/report-tools/create_workspace_report.py",
+      "line": 17,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_workspace_report.py",
+      "line": 21,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_workspace_report.py",
+      "line": 24,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/create_workspace_report.py",
+      "line": 27,
+      "call": "json.loads"
+    },
+    {
+      "path": "docs/report-tools/run_verification.py",
+      "line": 74,
+      "call": "unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult).run"
+    },
+    {
+      "path": "docs/report-tools/validate_pdf_fault_recovery.py",
+      "line": 70,
+      "call": "loop.exec"
+    },
+    {
+      "path": "docs/report-tools/verify_gdt_drawing_audit.py",
+      "line": 28,
+      "call": "exec"
+    },
+    {
+      "path": "gui_qt/app.py",
+      "line": 420,
+      "call": "app.exec"
+    },
+    {
+      "path": "gui_qt/app.py",
+      "line": 355,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "gui_qt/app.py",
+      "line": 361,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "gui_qt/calculations.py",
+      "line": 147,
+      "call": "self.metric_model.replace"
+    },
+    {
+      "path": "gui_qt/calculations.py",
+      "line": 156,
+      "call": "self.metric_model.replace"
+    },
+    {
+      "path": "gui_qt/components.py",
+      "line": 600,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "gui_qt/components.py",
+      "line": 517,
+      "call": "self.model.replace"
+    },
+    {
+      "path": "gui_qt/components.py",
+      "line": 541,
+      "call": "self.model.replace"
+    },
+    {
+      "path": "gui_qt/components.py",
+      "line": 164,
+      "call": "str(default).replace"
+    },
+    {
+      "path": "gui_qt/licenses.py",
+      "line": 29,
+      "call": "os.replace"
+    },
+    {
+      "path": "gui_qt/models.py",
+      "line": 11,
+      "call": "str(value).casefold().replace"
+    },
+    {
+      "path": "gui_qt/package_check.py",
+      "line": 167,
+      "call": "model.replace"
+    },
+    {
+      "path": "gui_qt/settings.py",
+      "line": 41,
+      "call": "json.loads"
+    },
+    {
+      "path": "gui_qt/workspace.py",
+      "line": 25,
+      "call": "title.replace"
+    },
+    {
+      "path": "main.py",
+      "line": 11,
+      "call": "run"
+    },
+    {
+      "path": "main.py",
+      "line": 24,
+      "call": "run"
+    },
+    {
+      "path": "modules/bolt/rules.py",
+      "line": 176,
+      "call": "f'{value:,.{digits}f}'.replace(',', '_').replace('.', ',').replace"
+    },
+    {
+      "path": "modules/bolt/rules.py",
+      "line": 39,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/bolt/rules.py",
+      "line": 176,
+      "call": "f'{value:,.{digits}f}'.replace(',', '_').replace"
+    },
+    {
+      "path": "modules/bolt/rules.py",
+      "line": 176,
+      "call": "f'{value:,.{digits}f}'.replace"
+    },
+    {
+      "path": "modules/bolt/tests/test_bolt.py",
+      "line": 64,
+      "call": "pitch.replace"
+    },
+    {
+      "path": "modules/bolt/ui.py",
+      "line": 163,
+      "call": "f'{value:.12g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/diagram.py",
+      "line": 114,
+      "call": "f'{result.pitch_mm:g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/diagram.py",
+      "line": 123,
+      "call": "f'{result.diameter_mm:g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/rules.py",
+      "line": 65,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/bolt_torque/tests/test_bolt_torque.py",
+      "line": 105,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 18,
+      "call": "f'{value:.{(digits if abs(value) >= 1 or not value else 4)}f}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 17,
+      "call": "f'{value:.4g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 187,
+      "call": "f'{result.pitch_mm:g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 48,
+      "call": "str(r.DEFAULT_K[f.value('condition')]).replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 145,
+      "call": "f'Standart normal adım: {THREADS[metric][1]:g} mm'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 164,
+      "call": "str(r.DEFAULT_K[self.form.value('condition')]).replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 189,
+      "call": "f'Çekme alanı As: {fmt(result.tensile_area_mm2)} mm²\\nAkma dayanımı: {result.yield_strength_mpa:g} N/mm²\\nK = {result.k:g} · Ön yük = %{result.preload_percent:g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 129,
+      "call": "str(self.pitch).replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 194,
+      "call": "f'{result.condition} varsayımı: {r.DEFAULT_K[result.condition]:g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 140,
+      "call": "f'{value:g}'.replace"
+    },
+    {
+      "path": "modules/bolt_torque/ui.py",
+      "line": 158,
+      "call": "str(r.DEFAULT_K[self.form.value('condition')]).replace"
+    },
+    {
+      "path": "modules/bom/exporter.py",
+      "line": 362,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/bom/exporter.py",
+      "line": 29,
+      "call": "str(value).replace('I', 'ı').replace"
+    },
+    {
+      "path": "modules/bom/exporter.py",
+      "line": 161,
+      "call": "replace"
+    },
+    {
+      "path": "modules/bom/exporter.py",
+      "line": 366,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/bom/exporter.py",
+      "line": 29,
+      "call": "str(value).replace"
+    },
+    {
+      "path": "modules/bom/tests/test_bom.py",
+      "line": 327,
+      "call": "replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 18,
+      "call": "f'{value:,.6f}'.replace(',', '_').replace('.', ',').replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 138,
+      "call": "self.parts_model.replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 139,
+      "call": "self.tree_model.replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 161,
+      "call": "self.parts_model.replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 162,
+      "call": "self.tree_model.replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 18,
+      "call": "f'{value:,.6f}'.replace(',', '_').replace"
+    },
+    {
+      "path": "modules/bom/ui.py",
+      "line": 18,
+      "call": "f'{value:,.6f}'.replace"
+    },
+    {
+      "path": "modules/cad_converter/exporter.py",
+      "line": 91,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/cad_converter/naming.py",
+      "line": 59,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/cad_converter/naming.py",
+      "line": 61,
+      "call": "os.rename"
+    },
+    {
+      "path": "modules/cad_converter/naming.py",
+      "line": 64,
+      "call": "Path(temporary).unlink"
+    },
+    {
+      "path": "modules/cad_converter/report.py",
+      "line": 57,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/cad_converter/report.py",
+      "line": 59,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/cad_converter/tests/fakes.py",
+      "line": 11,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 75,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 94,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 100,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 75,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 88,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 109,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_api_contract.py",
+      "line": 88,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 40,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 53,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 78,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 87,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 97,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 106,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 114,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 123,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 126,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 137,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 149,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 159,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 165,
+      "call": "Path(model.path).unlink"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 166,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 170,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 176,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 177,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 179,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 185,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 187,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 196,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 208,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 217,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 225,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 242,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 255,
+      "call": "run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 268,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 40,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 53,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 97,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 106,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 126,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 137,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 149,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 170,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 179,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 187,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 196,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 208,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 225,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 242,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_converter.py",
+      "line": 255,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/tests/test_validation.py",
+      "line": 46,
+      "call": "replace"
+    },
+    {
+      "path": "modules/cad_converter/ui.py",
+      "line": 188,
+      "call": "self.files_model.replace"
+    },
+    {
+      "path": "modules/cad_converter/ui.py",
+      "line": 85,
+      "call": "fmt.label.replace"
+    },
+    {
+      "path": "modules/cad_converter/ui.py",
+      "line": 243,
+      "call": "str(value).replace"
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "line": 74,
+      "call": "os.path.normpath(str(path).replace('\\\\', '/')).replace"
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "line": 283,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "line": 285,
+      "call": "os.rename"
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "line": 74,
+      "call": "str(path).replace"
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "line": 209,
+      "call": "thickness.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/exporter.py",
+      "line": 430,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 472,
+      "call": "self.part.unlink"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 376,
+      "call": "DXF.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 377,
+      "call": "DXF.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 378,
+      "call": "DXF.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 385,
+      "call": "DXF.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 423,
+      "call": "DXF.replace"
+    },
+    {
+      "path": "modules/dxf_dwg/tests/test_dxf_dwg.py",
+      "line": 704,
+      "call": "label.replace"
+    },
+    {
+      "path": "modules/geometric_tolerances/catalog.py",
+      "line": 123,
+      "call": "replace"
+    },
+    {
+      "path": "modules/geometric_tolerances/rules.py",
+      "line": 13,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/geometric_tolerances/rules.py",
+      "line": 30,
+      "call": "fmt_mm(value).replace"
+    },
+    {
+      "path": "modules/geometric_tolerances/ui.py",
+      "line": 45,
+      "call": "self.catalog_model.replace"
+    },
+    {
+      "path": "modules/iso_fits/manual.py",
+      "line": 17,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/iso_fits/manual.py",
+      "line": 20,
+      "call": "text.replace"
+    },
+    {
+      "path": "modules/iso_fits/rules.py",
+      "line": 21,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/iso_fits/rules.py",
+      "line": 59,
+      "call": "text.replace"
+    },
+    {
+      "path": "modules/iso_fits/rules.py",
+      "line": 69,
+      "call": "format(value, f'+.{places}f').replace"
+    },
+    {
+      "path": "modules/iso_fits/rules.py",
+      "line": 39,
+      "call": "text.replace"
+    },
+    {
+      "path": "modules/iso_fits/selection_diagram.py",
+      "line": 17,
+      "call": "result.replace"
+    },
+    {
+      "path": "modules/iso_fits/tests/test_iso_fits.py",
+      "line": 64,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/iso_fits/tests/test_iso_tolerance_audit.py",
+      "line": 19,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/iso_fits/ui.py",
+      "line": 150,
+      "call": "self.preset_model.replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 759,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 777,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 762,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 779,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 790,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 932,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 951,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 623,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/apply.py",
+      "line": 630,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/rules.py",
+      "line": 38,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/k_factor/sheetmetal_parameters.py",
+      "line": 246,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/standalone/compare_reports.py",
+      "line": 111,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop.py",
+      "line": 206,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop.py",
+      "line": 208,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop.py",
+      "line": 112,
+      "call": "value.get().strip().replace"
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop.py",
+      "line": 169,
+      "call": "f\"{state['thickness_mm']:.6f}\".rstrip('0').rstrip('.').replace"
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop_controller.py",
+      "line": 50,
+      "call": "csharp_file.unlink"
+    },
+    {
+      "path": "modules/k_factor/standalone/desktop_controller.py",
+      "line": 57,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/k_factor/standalone/python/probe.py",
+      "line": 626,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/k_factor/standalone/python/probe.py",
+      "line": 604,
+      "call": "Probe(app, binding, report).run"
+    },
+    {
+      "path": "modules/k_factor/standalone/test_desktop.py",
+      "line": 224,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/k_factor/tests/test_k_factor.py",
+      "line": 97,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/tests/test_k_factor.py",
+      "line": 97,
+      "call": "replace"
+    },
+    {
+      "path": "modules/k_factor/tests/test_kr_tooling_gui.py",
+      "line": 56,
+      "call": "page.rows_model.replace"
+    },
+    {
+      "path": "modules/k_factor/tooling_diagram.py",
+      "line": 17,
+      "call": "f'{value:.6g}'.replace"
+    },
+    {
+      "path": "modules/k_factor/ui.py",
+      "line": 76,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/k_factor/ui.py",
+      "line": 175,
+      "call": "self.rows_model.replace"
+    },
+    {
+      "path": "modules/naming/exporter.py",
+      "line": 542,
+      "call": "file.stem.replace"
+    },
+    {
+      "path": "modules/naming/exporter.py",
+      "line": 552,
+      "call": "file.stem.replace"
+    },
+    {
+      "path": "modules/naming/exporter.py",
+      "line": 663,
+      "call": "Path(path).unlink"
+    },
+    {
+      "path": "modules/naming/native.py",
+      "line": 79,
+      "call": "subprocess.Popen"
+    },
+    {
+      "path": "modules/naming/native.py",
+      "line": 101,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming.py",
+      "line": 90,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming.py",
+      "line": 97,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming.py",
+      "line": 137,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming.py",
+      "line": 138,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming.py",
+      "line": 274,
+      "call": "replace"
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native.py",
+      "line": 198,
+      "call": "native.LOADER.replace"
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native.py",
+      "line": 199,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native.py",
+      "line": 155,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native.py",
+      "line": 90,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/tests/test_naming_native.py",
+      "line": 89,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/naming/ui.py",
+      "line": 164,
+      "call": "self.model.replace"
+    },
+    {
+      "path": "modules/naming/ui.py",
+      "line": 308,
+      "call": "self.model.replace"
+    },
+    {
+      "path": "modules/nesting/dxf_export.py",
+      "line": 130,
+      "call": "os.rename"
+    },
+    {
+      "path": "modules/nesting/models.py",
+      "line": 18,
+      "call": "str(value).replace"
+    },
+    {
+      "path": "modules/nesting/pdf_report.py",
+      "line": 12,
+      "call": "escape(value).replace"
+    },
+    {
+      "path": "modules/nesting/storage.py",
+      "line": 57,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/nesting/tests/test_hole_nesting.py",
+      "line": 158,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 302,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 312,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 387,
+      "call": "source.unlink"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 440,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 229,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 336,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "line": 336,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_gui.py",
+      "line": 162,
+      "call": "(tmp_path / 'real.dxf').unlink"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_gui.py",
+      "line": 299,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_gui.py",
+      "line": 370,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_gui.py",
+      "line": 372,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_pdf_report.py",
+      "line": 38,
+      "call": "document.load"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 26,
+      "call": "f'{v:,.{digits}f}'.replace(',', '_').replace('.', ',').replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 367,
+      "call": "self.material_model.replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 463,
+      "call": "self.part_model.replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 464,
+      "call": "self.sheet_model.replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 26,
+      "call": "f'{v:,.{digits}f}'.replace(',', '_').replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 373,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 467,
+      "call": "self.material_model.replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 494,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 520,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 562,
+      "call": "replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 497,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 527,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 566,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 609,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 26,
+      "call": "f'{v:,.{digits}f}'.replace"
+    },
+    {
+      "path": "modules/nesting/ui.py",
+      "line": 428,
+      "call": "v.strip().replace"
+    },
+    {
+      "path": "modules/nesting/ui_widgets.py",
+      "line": 36,
+      "call": "f\"Net ağırlık: {row['weight']:.3f} kg/adet\".replace"
+    },
+    {
+      "path": "modules/pdf/exporter.py",
+      "line": 202,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/pdf/exporter.py",
+      "line": 43,
+      "call": "os.path.abspath(str(path)).replace"
+    },
+    {
+      "path": "modules/pdf/exporter.py",
+      "line": 187,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/pdf/exporter.py",
+      "line": 190,
+      "call": "os.rename"
+    },
+    {
+      "path": "modules/pdf/exporter.py",
+      "line": 193,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "line": 62,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "line": 100,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "line": 136,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "line": 80,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "line": 197,
+      "call": "subprocess.Popen"
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "line": 112,
+      "call": "path.unlink"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_exporter.py",
+      "line": 297,
+      "call": "self.drawing.unlink"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_exporter.py",
+      "line": 198,
+      "call": "self.target.unlink"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 72,
+      "call": "(paths[0] / 'ikinci.SLDDRW').unlink"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 73,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 81,
+      "call": "(paths[0] / 'ikinci.SLDDRW').unlink"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 82,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 92,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 106,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 119,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 126,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 133,
+      "call": "run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 167,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 47,
+      "call": "path.unlink"
+    },
+    {
+      "path": "modules/pdf/tests/test_pdf_process.py",
+      "line": 66,
+      "call": "run"
+    },
+    {
+      "path": "modules/profile_cutting/dialogs.py",
+      "line": 90,
+      "call": "replace"
+    },
+    {
+      "path": "modules/profile_cutting/models.py",
+      "line": 43,
+      "call": "re.sub('\\\\s+', ' ', str(value).strip()).upper().replace"
+    },
+    {
+      "path": "modules/profile_cutting/models.py",
+      "line": 170,
+      "call": "re.sub('\\\\s*X\\\\s*', 'X', canonical(self.profile)).replace"
+    },
+    {
+      "path": "modules/profile_cutting/models.py",
+      "line": 21,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/profile_cutting/properties.py",
+      "line": 23,
+      "call": "str(value).strip().casefold().replace('̇', '').replace"
+    },
+    {
+      "path": "modules/profile_cutting/properties.py",
+      "line": 81,
+      "call": "str(text).upper().replace"
+    },
+    {
+      "path": "modules/profile_cutting/properties.py",
+      "line": 23,
+      "call": "str(value).strip().casefold().replace"
+    },
+    {
+      "path": "modules/profile_cutting/properties.py",
+      "line": 71,
+      "call": "re.sub('\\\\s+', '', str(text)).replace"
+    },
+    {
+      "path": "modules/profile_cutting/scanner.py",
+      "line": 177,
+      "call": "source.replace"
+    },
+    {
+      "path": "modules/profile_cutting/storage.py",
+      "line": 34,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_engine.py",
+      "line": 102,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_engine.py",
+      "line": 30,
+      "call": "replace"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_engine.py",
+      "line": 30,
+      "call": "replace"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_engine.py",
+      "line": 31,
+      "call": "replace"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_engine.py",
+      "line": 31,
+      "call": "replace"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 52,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 56,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 67,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 75,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 69,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 77,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 81,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/tests/test_revision_safety.py",
+      "line": 36,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 22,
+      "call": "str(value).replace"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 152,
+      "call": "self.plan_model.replace"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 159,
+      "call": "self.demand_model.replace"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 205,
+      "call": "self.scan_model.replace"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 167,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 233,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 238,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 348,
+      "call": "load"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 278,
+      "call": "self.plan_model.replace"
+    },
+    {
+      "path": "modules/profile_cutting/ui.py",
+      "line": 291,
+      "call": "self.scan_model.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/com.py",
+      "line": 86,
+      "call": "str(path).replace"
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "line": 65,
+      "call": "str(com.call(note, 'GetText')).replace"
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "line": 175,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "line": 58,
+      "call": "str(row).replace('$', '＄').replace('<', '‹').replace('>', '›').replace"
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "line": 58,
+      "call": "str(row).replace('$', '＄').replace('<', '‹').replace"
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "line": 58,
+      "call": "str(row).replace('$', '＄').replace"
+    },
+    {
+      "path": "modules/tolerance_stack/drawing_writer.py",
+      "line": 58,
+      "call": "str(row).replace"
+    },
+    {
+      "path": "modules/tolerance_stack/models.py",
+      "line": 37,
+      "call": "f'{value:.{digits}f}'.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/models.py",
+      "line": 43,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/tolerance_stack/models.py",
+      "line": 54,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/models.py",
+      "line": 20,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/tolerance_stack/report.py",
+      "line": 112,
+      "call": "escape(f'Nominal {row[6]} / alt {row[7]} / üst {row[8]} mm\\n{row[18]} · {row[19]} · {row[20]} · {row[22]}\\n{row[13]} · {row[14]} · {row[25]}\\nDoğrultu kontrolü: {row[26]}').replace"
+    },
+    {
+      "path": "modules/tolerance_stack/solidworks_reader.py",
+      "line": 147,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/solidworks_reader.py",
+      "line": 189,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/storage.py",
+      "line": 82,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/tolerance_stack/storage.py",
+      "line": 36,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "modules/tolerance_stack/storage.py",
+      "line": 30,
+      "call": "os.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_com.py",
+      "line": 220,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_com.py",
+      "line": 75,
+      "call": "self.path.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 111,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 126,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 139,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 168,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 267,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 279,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 280,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 291,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 297,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 298,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 324,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_gui.py",
+      "line": 156,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 37,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 42,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 84,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 86,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 87,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 147,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 150,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 152,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 155,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 157,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 158,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 163,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 70,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 101,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 71,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 72,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 73,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 74,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 75,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 77,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+      "line": 78,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 18,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 28,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 39,
+      "call": "source.unlink"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 64,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 69,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 96,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py",
+      "line": 101,
+      "call": "json.loads"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 456,
+      "call": "self.metric_model.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 462,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 510,
+      "call": "self.library_model.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 513,
+      "call": "self.chain_model.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 630,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 768,
+      "call": "self.metric_model.replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 549,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 566,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 607,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 623,
+      "call": "dialog.exec"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 639,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 667,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui.py",
+      "line": 373,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui_dialogs.py",
+      "line": 160,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui_dialogs.py",
+      "line": 99,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui_dialogs.py",
+      "line": 102,
+      "call": "replace"
+    },
+    {
+      "path": "modules/tolerance_stack/ui_widgets.py",
+      "line": 44,
+      "call": "text.replace"
+    },
+    {
+      "path": "modules/weight/diagram.py",
+      "line": 51,
+      "call": "text.replace(',', '\\x00').replace('.', ',').replace"
+    },
+    {
+      "path": "modules/weight/diagram.py",
+      "line": 49,
+      "call": "f'{value:.3g}'.replace"
+    },
+    {
+      "path": "modules/weight/diagram.py",
+      "line": 51,
+      "call": "text.replace(',', '\\x00').replace"
+    },
+    {
+      "path": "modules/weight/diagram.py",
+      "line": 51,
+      "call": "text.replace"
+    },
+    {
+      "path": "modules/weight/rules.py",
+      "line": 73,
+      "call": "('0' if result == '-0' else result).replace"
+    },
+    {
+      "path": "modules/weight/rules.py",
+      "line": 48,
+      "call": "str(value).strip().replace"
+    },
+    {
+      "path": "modules/weight/ui.py",
+      "line": 68,
+      "call": "f'{value:.12g}'.replace"
+    },
+    {
+      "path": "packaging/audit_project.py",
+      "line": 28,
+      "call": "p.removesuffix('.py').replace"
+    },
+    {
+      "path": "packaging/audit_project.py",
+      "line": 22,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/audit_project.py",
+      "line": 25,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "line": 69,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "line": 91,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "line": 92,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "line": 31,
+      "call": "str(file).replace('/', '_').replace"
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "line": 31,
+      "call": "str(file).replace"
+    },
+    {
+      "path": "packaging/publish_binding_status.py",
+      "line": 43,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/publish_kr_security.py",
+      "line": 14,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/publish_kr_security.py",
+      "line": 16,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/publish_kr_security.py",
+      "line": 37,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/publish_status.py",
+      "line": 86,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/publish_status.py",
+      "line": 108,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/publish_status.py",
+      "line": 65,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/publish_status.py",
+      "line": 110,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/run_windows_tests.py",
+      "line": 93,
+      "call": "final_report.unlink"
+    },
+    {
+      "path": "packaging/run_windows_tests.py",
+      "line": 98,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "packaging/run_windows_tests.py",
+      "line": 106,
+      "call": "json.loads"
+    },
+    {
+      "path": "packaging/run_windows_tests.py",
+      "line": 113,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "shared/settings.py",
+      "line": 31,
+      "call": "json.loads"
+    },
+    {
+      "path": "shared/settings.py",
+      "line": 51,
+      "call": "temporary.unlink"
+    },
+    {
+      "path": "shared/settings.py",
+      "line": 21,
+      "call": "os.replace"
+    },
+    {
+      "path": "solidworks/diagnostics.py",
+      "line": 33,
+      "call": "old.unlink"
+    },
+    {
+      "path": "solidworks/process_watch.py",
+      "line": 72,
+      "call": "subprocess.Popen"
+    },
+    {
+      "path": "tests/legacy_tk/test_bom_window.py",
+      "line": 212,
+      "call": "replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_bom_window.py",
+      "line": 226,
+      "call": "replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_bom_window.py",
+      "line": 243,
+      "call": "replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_fits.py",
+      "line": 66,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_matching.py",
+      "line": 67,
+      "call": "report['EI (µm)'].replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_matching.py",
+      "line": 68,
+      "call": "report['ES (µm)'].replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_iso_tolerance_audit.py",
+      "line": 20,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/legacy_tk/test_k_factor.py",
+      "line": 100,
+      "call": "replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_k_factor.py",
+      "line": 100,
+      "call": "replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_kr_assignment_window.py",
+      "line": 35,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/legacy_tk/test_naming_window.py",
+      "line": 107,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/legacy_tk/test_naming_window.py",
+      "line": 127,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/legacy_tk/test_weight_window.py",
+      "line": 105,
+      "call": "state['h'].get().replace"
+    },
+    {
+      "path": "tests/legacy_tk/test_weight_window.py",
+      "line": 106,
+      "call": "state['length'].get().replace"
+    },
+    {
+      "path": "tests/support/pdf_worker.py",
+      "line": 13,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 19,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 29,
+      "call": "replace"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 40,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 52,
+      "call": "replace"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 73,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 56,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_audit_settings.py",
+      "line": 66,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_compact_calculators_gui.py",
+      "line": 45,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_compact_calculators_gui.py",
+      "line": 49,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_process_watch.py",
+      "line": 91,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "tests/test_process_watch.py",
+      "line": 111,
+      "call": "subprocess.Popen"
+    },
+    {
+      "path": "tests/test_qt_diagnostics.py",
+      "line": 28,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "tests/test_qt_diagnostics.py",
+      "line": 59,
+      "call": "subprocess.run"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 106,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 498,
+      "call": "page.rows_model.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 534,
+      "call": "page.rows_model.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 554,
+      "call": "page.rows_model.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 811,
+      "call": "table.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 812,
+      "call": "tree.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 821,
+      "call": "runtime_table.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 822,
+      "call": "runtime_tree.replace"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 123,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_qt_workflows.py",
+      "line": 643,
+      "call": "json.loads"
+    },
+    {
+      "path": "tests/test_repository_structure.py",
+      "line": 44,
+      "call": "subprocess.run"
+    }
+  ]
+}

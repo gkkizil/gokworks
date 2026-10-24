@@ -261,6 +261,8 @@ class MainWindow(QMainWindow):
     def set_theme(self, appearance):
         if appearance not in COLORS:
             return
+        if appearance == self.appearance and getattr(self,'_theme_applied',False):
+            return
         self.appearance = appearance
         if hasattr(self,'theme_picker'):
             blocked = self.theme_picker.blockSignals(True)
@@ -276,6 +278,7 @@ class MainWindow(QMainWindow):
             page.refresh_command_icons()
             page.theme_changed()
         self.settings.set('appearance', appearance)
+        self._theme_applied=True
 
     def page_status(self, page, text, error):
         if page is self.jobs.owner or self.stack.currentWidget() is page:

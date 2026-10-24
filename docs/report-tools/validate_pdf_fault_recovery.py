@@ -15,8 +15,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from PySide6.QtCore import QCoreApplication, QEvent, QThread, QTimer, Qt
-from PySide6.QtTest import QTest
+from PySide6.QtCore import QCoreApplication, QEvent, QEventLoop, QThread, QTimer, Qt
 from gui_qt.app import create_application, MainWindow
 from modules.pdf import process as pdf
 
@@ -58,9 +57,20 @@ def validate(destination, cycles):
                     page.start_button.click()
                     assert window.jobs.busy
                     window.navigate(modes[(index % (len(modes) - 1)) + 1])
-                    while window.jobs.busy:
-                        assert time.perf_counter() - start < 10, 'Worker recovery did not complete'
-                        QTest.qWait(5)
+                    # Exercise the same native event dispatcher as app.exec().
+                    # Bound each job with a Qt timer rather than repeatedly
+                    # entering synthetic QTest polling waits.
+                    loop=QEventLoop();deadline=QTimer()
+                    deadline.setSingleShot(True);deadline.timeout.connect(loop.quit)
+                    def completed(busy):
+                        if not busy:loop.quit()
+                    window.jobs.busyChanged.connect(completed)
+                    try:
+                        deadline.start(10000)
+                        if window.jobs.busy:loop.exec()
+                    finally:
+                        deadline.stop();window.jobs.busyChanged.disconnect(completed)
+                    assert not window.jobs.busy, 'Worker recovery did not complete'
                     assert len(heartbeat) > before
                     assert window.isVisible() and page.start_button.isEnabled()
                     assert not page.stop_button.isEnabled()

@@ -1,0 +1,16 @@
+{
+  "tests": 2055,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 9,
+  "primary_tests": 1177,
+  "passed_primary": 1168,
+  "subtests": 878,
+  "process_batches": 71,
+  "platform": "Linux / Qt offscreen",
+  "tested_at": "2026-10-24T13:46:35.864686+00:00",
+  "native_windows_tested": false,
+  "live_solidworks_tested": false,
+  "windows_exe_built": false,
+  "skipped_reasons_file": "skipped-tests.json"
+}

@@ -232,6 +232,7 @@ gerçek SolidWorks gerektiren kontrollerin kapsamı ilgili raporlarda belirtilir
 - [Modüllerin kullanım rehberleri](modules/README.md)
 - [Tolerans yığılması: yöntemler ve kullanım](docs/tolerance-stack.md)
 - [Nesting: hesaplar ve sınırlar](docs/nesting.md)
+- [24 Ekim 2026: uygulama testleri, stres koşuları ve sınırlar](docs/verification-2026-10-24/README.md)
 - [Kaynak ve telif envanteri](sources/README.md)
 - [Üçüncü taraf lisans bildirimleri](docs/THIRD_PARTY_NOTICES.md)
 

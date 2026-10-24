@@ -1,0 +1,8 @@
+{
+  "platform": "Linux / Qt offscreen",
+  "case": "Reselect already active theme; committed baseline function vs guarded function on the same live window",
+  "baseline_commit": "2b9661c400989649226102084b68be1ff86b3771",
+  "before_ms": 1223.7644490087405,
+  "after_ms": 0.003264984115958214,
+  "actual_theme_switch_still_repolishes_widgets": true
+}

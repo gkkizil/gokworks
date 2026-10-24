@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "2b9661c400989649226102084b68be1ff86b3771",
+  "changed_files": {
+    "gui_qt/app.py": "79cdc7580baac46de6bc7ade3b8bd432008932c7940e6f620d5f19b0fb82ecfa",
+    "tests/test_fusion_workbench.py": "619fc3b027574572cbc640942f6c1cffe254c48680c78af08932178798c5d76a",
+    "docs/report-tools/validate_pdf_fault_recovery.py": "37e6e235b85db06ece34abef1459a8172804502778805922216355013d57c263"
+  },
+  "runtime_change": "Skip refresh when the requested theme is already applied.",
+  "test_tool_change": "QEventLoop and bounded QTimer replace repeated QTest.qWait polling; expected result assertions and watchdog retained.",
+  "engineering_or_com_engine_changed": false
+}

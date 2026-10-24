@@ -1,0 +1,32 @@
+Seconds 1.2365674379980192
+         73374 function calls (73372 primitive calls) in 1.236 seconds
+
+   Ordered by: cumulative time
+   List reduced from 438 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    1.210    1.210 /workspace/gokworks/gui_qt/app.py:261(set_theme)
+        1    0.000    0.000    1.183    1.183 /workspace/gokworks/gui_qt/theme.py:20(apply_theme)
+        1    1.121    1.121    1.183    1.183 {method 'setStyleSheet' of 'PySide6.QtWidgets.QApplication' objects}
+    11313    0.041    0.000    0.041    0.000 /workspace/gokworks/gui_qt/models.py:42(headerData)
+        1    0.026    0.026    0.026    0.026 {built-in method processEvents}
+       11    0.000    0.000    0.019    0.002 /workspace/gokworks/gui_qt/diagrams.py:175(render_geometry)
+        4    0.000    0.000    0.015    0.004 /workspace/gokworks/gui_qt/calculations.py:180(theme_changed)
+       61    0.002    0.000    0.008    0.000 /workspace/gokworks/gui_qt/diagrams.py:129(create_text)
+    12719    0.004    0.000    0.007    0.000 /usr/lib/python3.13/enum.py:695(__call__)
+        1    0.000    0.000    0.007    0.007 /workspace/gokworks/modules/bolt/ui.py:171(update_result)
+        1    0.000    0.000    0.005    0.005 /workspace/gokworks/modules/iso_fits/ui.py:202(update_result)
+     1340    0.004    0.000    0.004    0.000 /workspace/gokworks/gui_qt/models.py:165(headerData)
+      219    0.001    0.000    0.004    0.000 /workspace/gokworks/gui_qt/diagrams.py:84(create_line)
+        1    0.000    0.000    0.004    0.004 /workspace/gokworks/modules/bolt_torque/ui.py:226(theme_changed)
+        1    0.000    0.000    0.004    0.004 /workspace/gokworks/modules/bolt_torque/ui.py:166(update_result)
+     1989    0.002    0.000    0.004    0.000 /workspace/gokworks/gui_qt/models.py:151(index)
+        1    0.000    0.000    0.004    0.004 /workspace/gokworks/modules/k_factor/ui.py:224(theme_changed)
+        1    0.000    0.000    0.004    0.004 /workspace/gokworks/modules/k_factor/ui.py:185(calculate_helper)
+        1    0.000    0.000    0.004    0.004 /workspace/gokworks/modules/bolt_torque/ui.py:200(refresh_section)
+        1    0.000    0.000    0.003    0.003 /workspace/gokworks/modules/bolt_torque/ui.py:202(<lambda>)
+        1    0.000    0.000    0.003    0.003 /workspace/gokworks/modules/bolt_torque/diagram.py:13(draw_section)
+        1    0.000    0.000    0.003    0.003 /workspace/gokworks/modules/k_factor/ui.py:208(<lambda>)
+        1    0.000    0.000    0.003    0.003 /workspace/gokworks/modules/k_factor/tooling_diagram.py:20(draw_tooling)
+        1    0.000    0.000    0.003    0.003 /workspace/gokworks/modules/bolt/ui.py:213(<lambda>)
+        1    0.000    0.000    0.003    0.003 /workspace/gokworks/modules/bolt/diagram.py:81(draw)

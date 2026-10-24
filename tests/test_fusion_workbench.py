@@ -107,6 +107,15 @@ def test_status_preserves_full_details_and_accessible_error_feedback(window):
     assert window.global_status.text()=='Hazır' and window.global_status.property('role')=='muted'
 
 
+def test_reselecting_current_theme_preserves_existing_views_without_rebuilding(window,monkeypatch):
+    calls=[]
+    monkeypatch.setattr(window.pages['weight'],'theme_changed',lambda:calls.append('changed'))
+    window.set_theme(window.appearance)
+    assert not calls
+    window.set_theme('light' if window.appearance=='dark' else 'dark')
+    assert calls==['changed']
+
+
 @pytest.mark.parametrize('theme',['dark','light'])
 def test_docked_narrow_and_floating_properties_preserve_the_viewport(window,qtbot,theme):
     window.set_theme(theme);p=example(window);qtbot.wait(30)

@@ -1,0 +1,54 @@
+{
+  "python": "3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "active_source_overlay": ".cache/runtime-updated",
+  "declared_requirements": {
+    "PySide6": {
+      "required": "==6.10.3",
+      "actual": "6.10.3",
+      "matches": true
+    },
+    "Pillow": {
+      "required": "==13.0.0",
+      "actual": "13.0.0",
+      "matches": true
+    },
+    "ezdxf": {
+      "required": "==1.4.3",
+      "actual": "1.4.3",
+      "matches": true
+    },
+    "openpyxl": {
+      "required": "==3.1.5",
+      "actual": "3.1.5",
+      "matches": true
+    },
+    "shapely": {
+      "required": "==2.1.2",
+      "actual": "2.1.2",
+      "matches": true
+    }
+  },
+  "runtime_dependency_versions": {
+    "shapely": "2.1.2",
+    "numpy": "2.5.4",
+    "openpyxl": "3.1.5",
+    "et-xmlfile": "2.0.0",
+    "ezdxf": "1.4.3",
+    "fonttools": "4.67.0",
+    "typing-extensions": "4.16.0",
+    "pyparsing": "3.3.3",
+    "pillow": "13.0.0",
+    "pyside6": "6.10.3",
+    "pyside6-addons": "6.10.3",
+    "pyside6-essentials": "6.10.3",
+    "shiboken6": "6.10.3"
+  },
+  "additional_windows_pins": {
+    "pywin32": "312",
+    "pyinstaller": "6.16.0"
+  },
+  "windows_pins_installed_or_executed": false,
+  "tested_source_commit": "2b9661c400989649226102084b68be1ff86b3771",
+  "working_tree_fix": "Skip redundant active-theme refresh"
+}
