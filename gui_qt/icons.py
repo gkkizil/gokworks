@@ -1,6 +1,7 @@
 """Local Qt vector icons and stable Windows application identity."""
 
 import os
+from functools import lru_cache
 from pathlib import Path
 from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QPainterPath
@@ -15,6 +16,7 @@ def set_application_identity():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('GOKWORKS.Desktop')
 
 
+@lru_cache(maxsize=128)
 def icon(name, color='#80B6F5'):
     pixmap = QPixmap(48, 48)
     pixmap.fill(Qt.transparent)
@@ -80,6 +82,24 @@ def icon(name, color='#80B6F5'):
         painter.drawLine(20, 13, 20, 35)
         painter.drawEllipse(10, 20, 7, 7)
         painter.drawLine(27, 19, 35, 29)
+    elif name == 'search':
+        painter.drawEllipse(8,7,24,24); painter.drawLine(29,28,41,41)
+    elif name == 'copy':
+        painter.drawRect(16,15,22,27);painter.drawLine(10,33,7,33);painter.drawLine(7,33,7,6);painter.drawLine(7,6,29,6)
+    elif name == 'play':
+        painter.drawPolygon([QPointF(16,8),QPointF(39,24),QPointF(16,40)])
+    elif name == 'stop':
+        painter.drawRect(11,11,26,26)
+    elif name == 'folder':
+        painter.drawPolyline([QPointF(5,38),QPointF(5,12),QPointF(19,12),QPointF(23,17),QPointF(42,17),QPointF(42,38),QPointF(5,38)])
+    elif name == 'export':
+        painter.drawPolyline([QPointF(8,29),QPointF(8,41),QPointF(40,41),QPointF(40,29)])
+        painter.drawLine(24,6,24,30);painter.drawLine(24,6,16,14);painter.drawLine(24,6,32,14)
+    elif name == 'info':
+        painter.drawEllipse(5,5,38,38);painter.drawLine(24,22,24,34);painter.drawPoint(24,13)
+    elif name == 'inspector':
+        painter.drawRect(5,7,38,34);painter.drawLine(29,7,29,41)
+        painter.drawLine(34,16,39,16);painter.drawLine(34,23,39,23)
     else:
         painter.drawLine(8, 37, 8, 12)
         painter.drawLine(8, 37, 39, 37)

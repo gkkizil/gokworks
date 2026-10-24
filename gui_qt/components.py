@@ -3,13 +3,13 @@
 import csv
 from pathlib import Path, PureWindowsPath
 
-from PySide6.QtCore import Qt, QTimer, Signal, QUrl
+from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize
 from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
     QFileDialog, QTableView, QTreeView, QHeaderView, QAbstractItemView,
     QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication,
-    QToolButton, QBoxLayout, QMenu, QSplitter, QSizePolicy, QListView)
+    QToolButton, QToolBar, QBoxLayout, QMenu, QSplitter, QSizePolicy, QListView)
 
 from .models import Column, TableModel, FilterProxy, LABELS
 
@@ -35,8 +35,8 @@ def card(title=None):
     widget = QFrame()
     widget.setProperty('card', True)
     layout = QVBoxLayout(widget)
-    layout.setContentsMargins(12, 10, 12, 10)
-    layout.setSpacing(8)
+    layout.setContentsMargins(10, 8, 10, 8)
+    layout.setSpacing(6)
     if title:
         layout.addWidget(label(title, 'section'))
     return widget, layout
@@ -92,7 +92,7 @@ def configure_view(view):
     header.setDefaultSectionSize(180)
     header.setMinimumSectionSize(60)
     if isinstance(view, QTableView):
-        view.verticalHeader().setDefaultSectionSize(32)
+        view.verticalHeader().setDefaultSectionSize(28)
     view.setMinimumWidth(0)
     return view
 
@@ -106,10 +106,12 @@ class PathPicker(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         self.entry = QLineEdit(str(text))
+        self.entry.setAccessibleName(title)
         self.entry.setPlaceholderText(title)
         self.entry.setClearButtonEnabled(True)
         self.choose = button('Klasör seç' if folder else 'Dosya seç', self.browse)
         self.choose.setAccessibleName(title)
+        self.choose.setToolTip(title)
         layout.addWidget(self.entry, 1)
         layout.addWidget(self.choose)
         self.entry.textChanged.connect(self.changed)
@@ -158,6 +160,10 @@ class ValueForm(QWidget):
 
     def text(self, key, title, default=''):
         widget = QLineEdit(str(self.settings.get(self.prefix + key, default)))
+        try:
+            float(str(default).replace(',','.'))
+            widget.setAlignment(Qt.AlignRight)
+        except (ValueError,TypeError): pass
         widget.setClearButtonEnabled(True)
         self.form.addRow(label(title), widget)
         return self._bind(key, widget, default, widget.textChanged)
@@ -234,11 +240,8 @@ class TransferWorkspace(QSplitter):
         self.source_scroll = scroll(source)
         self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body.addWidget(self.source_scroll,1)
-        # Reuse the actual command widgets and their busy/stop connections.
-        page.heading.removeItem(page.actions); page.actions.setParent(None)
-        page.actions.setDirection(QBoxLayout.TopToBottom)
-        page.actions.setAlignment(Qt.AlignmentFlag(0))
-        body.addLayout(page.actions)
+        # Commands stay in the contextual strip at the top, independent of
+        # source scrolling and consistent across all transfer workbenches.
         results.setMinimumWidth(0)
         self.addWidget(self.source_column); self.addWidget(results)
         self.setStretchFactor(0,0); self.setStretchFactor(1,1)
@@ -336,23 +339,30 @@ class BasePage(QWidget):
         self.context, self.settings, self.jobs = context, context.settings, context.jobs
         self.busy = False
         self.controls = []
+        self.command_controls = []
         self.status_text = ''
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(16, 12, 16, 10)
-        self.layout.setSpacing(10)
+        self.layout.setContentsMargins(10, 8, 10, 6)
+        self.layout.setSpacing(6)
         heading = QBoxLayout(QBoxLayout.LeftToRight)
         self.heading = heading
         captions = QVBoxLayout()
         captions.setSpacing(3)
         self.title_label = label(title, 'title'); self.description_label = label(description, 'subtitle')
+        self.title_label.setToolTip(description)
         captions.addWidget(self.title_label); captions.addWidget(self.description_label)
         heading.addLayout(captions, 1)
         self.actions = QHBoxLayout()
-        self.actions.setSpacing(6)
+        self.actions.setContentsMargins(0,0,0,0); self.actions.setSpacing(4)
         self.actions.setAlignment(Qt.AlignRight)
-        heading.addLayout(self.actions)
+        self.command_bar = QToolBar(); self.command_bar.setObjectName('moduleCommands')
+        self.command_bar.setMovable(False); self.command_bar.setFloatable(False)
+        self.command_bar.setAccessibleName(title+' komutları')
+        self.action_host = QWidget(); self.action_host.setLayout(self.actions)
+        self.command_bar.addWidget(self.action_host)
+        heading.addWidget(self.command_bar)
         self.layout.addLayout(heading)
-        self.status = label('Hazır', 'muted')
+        self.status = label('Hazır', 'muted'); self.status.hide()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -365,11 +375,27 @@ class BasePage(QWidget):
 
     def action(self, title, callback, *, primary=False, locked=True):
         widget = button(title, callback, primary=primary)
+        key=title.casefold()
+        name=('stop' if 'durdur' in key else 'copy' if 'kopyala' in key else
+              'search' if 'tara' in key or 'oku' in key else
+              'play' if primary else 'export' if 'rapor' in key or 'kaydet' in key else
+              'info' if 'yardım' in key else 'folder' if 'proje' in key else '')
+        widget.setProperty('commandIcon',name);widget.setIconSize(QSize(16,16))
+        self.command_controls.append(widget)
+        self.refresh_command_icons()
         if title == 'Durdur': widget.hide()
         self.actions.addWidget(widget)
         if locked:
             self.controls.append(widget)
         return widget
+
+    def refresh_command_icons(self):
+        from .icons import icon
+        from .theme import COLORS
+        colors=COLORS[self.context.appearance]
+        for widget in self.command_controls:
+            name=widget.property('commandIcon')
+            if name:widget.setIcon(icon(name,colors['sidebar' if widget.property('primary') else 'muted']))
 
     def finish_layout(self):
         row = QHBoxLayout()
@@ -383,6 +409,7 @@ class BasePage(QWidget):
     def set_status(self, text, error=False):
         self.status_text = str(text)
         self.status.setText(self.status_text)
+        self.status.setVisible(bool(error))
         self.status.setToolTip(self.status_text)
         if hasattr(self, 'status_details'):
             self.status_details.setVisible(error)

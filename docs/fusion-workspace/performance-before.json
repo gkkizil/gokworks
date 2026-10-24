@@ -1,0 +1,15 @@
+{
+  "platform": "linux",
+  "backend": "source / Qt offscreen",
+  "startup_including_imports_ms": 909.5832150196657,
+  "navigation_events": 140,
+  "navigation_median_ms": 5.1718560280278325,
+  "navigation_max_ms": 40.011961944401264,
+  "timer_max_gap_ms": 39.90117507055402,
+  "widget_count_before": 2352,
+  "widget_count_after": 2351,
+  "peak_rss_kib": 183988,
+  "cpu_seconds": 2.2141808889999997,
+  "solidworks_live": false,
+  "limitations": "Linux source measurement, not Windows EXE/native CAD performance or a heap leak proof."
+}

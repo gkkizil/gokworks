@@ -3,13 +3,14 @@
 import os
 import sys
 from pathlib import Path
-from PySide6.QtCore import Qt, QTimer, QSize
+from PySide6.QtCore import Qt, QTimer, QSize, QEvent
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QGuiApplication
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
     QVBoxLayout, QFrame, QStackedWidget, QProgressBar, QComboBox, QMessageBox,
-    QDialog, QDialogButtonBox, QToolButton, QCheckBox)
+    QDialog, QDialogButtonBox, QToolButton, QCheckBox, QToolBar, QDockWidget, QMenu, QSizePolicy)
 from .settings import SettingsStore
 from .workers import JobManager
+from .workspace import ModuleBrowser, WORKSPACES
 from .theme import apply_theme, COLORS
 from .icons import BrandLogo, ASSETS, icon, set_application_identity
 from .components import label, button, scroll, show_details, Disclosure, card
@@ -69,61 +70,20 @@ class MainWindow(QMainWindow):
         outer = QHBoxLayout(container)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
-        self.sidebar = QFrame()
-        self.sidebar.setObjectName('sidebar')
-        self.sidebar.setFixedWidth(232)
-        self.sidebar_collapsed = False
-        self.section_labels = []
-        side = QVBoxLayout(self.sidebar)
-        side.setContentsMargins(10, 8, 10, 10); side.setSpacing(6)
-        brand = QHBoxLayout(); brand.setSpacing(6)
-        self.logo = BrandLogo()
-        self.logo.setFixedSize(124,42)
-        brand.addWidget(self.logo); brand.addStretch()
-        self.menu_toggle = QToolButton(); self.menu_toggle.setText('‹')
-        self.menu_toggle.setFixedSize(30,30); self.menu_toggle.clicked.connect(self.toggle_sidebar)
-        brand.addWidget(self.menu_toggle); side.addLayout(brand)
-        self.brand_label = label('GOKWORKS','section'); side.addWidget(self.brand_label)
-        menu = QWidget()
-        menu_layout = QVBoxLayout(menu)
-        menu_layout.setContentsMargins(0, 0, 0, 0)
-        menu_layout.setSpacing(2)
-        group = None
-        for mode, title, section in MODULES:
-            if section != group:
-                caption = label(section, 'muted')
-                caption.setStyleSheet('font-size:10px; padding-top:8px; padding-bottom:4px;')
-                menu_layout.addWidget(caption)
-                self.section_labels.append(caption)
-                group = section
-            nav = button(title, lambda checked=False, key=mode: self.navigate(key))
-            nav.setProperty('nav', True)
-            nav.setCheckable(True)
-            nav.setIconSize(QSize(21, 21))
-            nav.setAccessibleName(title)
-            nav.setToolTip(title)
-            self.navigation[mode] = nav
-            menu_layout.addWidget(nav)
-        menu_layout.addStretch()
-        menu_scroll = scroll(menu)
-        menu_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        side.addWidget(menu_scroll, 1)
-        tools = QHBoxLayout()
-        tools.setSpacing(6)
-        self.settings_button = button('Ayarlar', self.show_settings)
-        self.licenses_button = button('Lisanslar', self.show_licenses)
-        tools.addWidget(self.settings_button); tools.addWidget(self.licenses_button)
-        side.addLayout(tools)
-        self.theme_picker = QComboBox()
-        self.theme_picker.addItem('Koyu tema', 'dark')
-        self.theme_picker.addItem('Açık tema', 'light')
-        self.theme_picker.setCurrentIndex(0 if self.appearance == 'dark' else 1)
-        self.theme_picker.currentIndexChanged.connect(lambda: self.set_theme(self.theme_picker.currentData()))
-        side.addWidget(self.theme_picker)
+        self.browser = ModuleBrowser(MODULES,self.settings,self.navigate,self.toggle_sidebar,
+                                     self.show_settings,self.show_licenses,self.set_theme)
+        self.sidebar = self.browser; self.sidebar_collapsed = False
+        self.navigation = self.browser.buttons
+        self.logo = self.browser.logo; self.brand_label = self.browser.caption
+        self.menu_toggle = self.browser.menu_toggle
+        self.section_labels = [group.toggle for group in self.browser.groups.values()]
+        self.settings_button = self.browser.settings_button; self.licenses_button = self.browser.licenses_button
+        self.theme_picker = self.browser.theme_picker
         self.stack = QStackedWidget()
         outer.addWidget(self.sidebar)
         outer.addWidget(self.stack, 1)
         self.setCentralWidget(container)
+        self.create_workbench_chrome()
         self.global_status = label('Hazır', 'muted', wrap=False)
         self.global_status.setMaximumWidth(600)
         self.statusBar().addWidget(self.global_status, 1)
@@ -158,24 +118,108 @@ class MainWindow(QMainWindow):
         self.set_sidebar_collapsed(self.settings.get('sidebar_collapsed',False) is True)
         QShortcut(QKeySequence('Ctrl+,'), self, activated=self.show_settings)
         QShortcut(QKeySequence('Ctrl+B'),self,activated=self.toggle_sidebar)
+        QShortcut(QKeySequence('Ctrl+K'),self,activated=self.focus_module_search)
 
     def toggle_sidebar(self):
         self.set_sidebar_collapsed(not self.sidebar_collapsed)
 
     def set_sidebar_collapsed(self, collapsed):
         self.sidebar_collapsed = bool(collapsed)
-        self.sidebar.setFixedWidth(64 if collapsed else 232)
-        self.logo.setVisible(not collapsed); self.brand_label.setVisible(not collapsed)
-        for caption in self.section_labels: caption.setVisible(not collapsed)
-        for key,title,_ in MODULES:
-            nav = self.navigation[key]; nav.setText('' if collapsed else title)
-            nav.setStyleSheet('text-align: center; padding: 8px 0;' if collapsed else '')
-        self.menu_toggle.setText('›' if collapsed else '‹')
-        self.menu_toggle.setToolTip('Menüyü genişlet · Ctrl+B' if collapsed else 'Menüyü daralt · Ctrl+B')
-        self.menu_toggle.setAccessibleName('Menüyü genişlet' if collapsed else 'Menüyü daralt')
-        self.settings_button.setVisible(not collapsed); self.licenses_button.setVisible(not collapsed)
-        self.theme_picker.setVisible(not collapsed)
+        self.browser.set_collapsed(self.sidebar_collapsed)
         self.settings.set('sidebar_collapsed',self.sidebar_collapsed)
+
+    def create_workbench_chrome(self):
+        self.workbench_bar = QToolBar('Çalışma alanı',self)
+        self.workbench_bar.setObjectName('applicationTools'); self.workbench_bar.setMovable(False)
+        self.workbench_bar.setFloatable(False); self.workbench_bar.setIconSize(QSize(16,16))
+        self.addToolBar(Qt.TopToolBarArea,self.workbench_bar)
+        self.workbench_bar.addWidget(label('ÇALIŞMA ALANI','muted'))
+        self.workspace_picker = QComboBox(); self.workspace_picker.setMinimumWidth(138)
+        self.workspace_picker.setAccessibleName('Mühendislik çalışma alanı')
+        for title,_ in WORKSPACES:self.workspace_picker.addItem(title,title)
+        self.last_workspaces = {}
+        self.workspace_picker.currentIndexChanged.connect(self.change_workspace)
+        self.workbench_bar.addWidget(self.workspace_picker)
+        self.workbench_bar.addSeparator()
+        self.workspace_context = label('','muted',wrap=False)
+        self.workbench_bar.addWidget(self.workspace_context)
+        space=QWidget();space.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Preferred)
+        self.workbench_bar.addWidget(space)
+        self.inspectors = {}; self._syncing_dock = False
+        self.inspector_requested = self.settings.get('inspector_visible',True) is not False
+        self.property_dock = QDockWidget('ÖZELLİKLER',self)
+        self.property_dock.setObjectName('propertiesDock');self.property_dock.setMinimumWidth(248)
+        self.property_dock.installEventFilter(self)
+        self.property_dock.setAllowedAreas(Qt.LeftDockWidgetArea|Qt.RightDockWidgetArea)
+        self.inspector_stack = QStackedWidget();self.inspector_stack.setMinimumWidth(0)
+        self.property_dock.setWidget(self.inspector_stack)
+        self.addDockWidget(Qt.RightDockWidgetArea,self.property_dock)
+        self.property_dock.hide()
+        self.property_dock.visibilityChanged.connect(self.inspector_visibility_changed)
+        self.inspector_button = button('Özellikler',self.toggle_inspector)
+        self.inspector_button.setCheckable(True);self.inspector_button.setToolTip('Bağlamsal özellikler panelini göster / gizle')
+        self.inspector_action=self.workbench_bar.addWidget(self.inspector_button)
+        view = QToolButton();view.setText('Görünüm');view.setPopupMode(QToolButton.InstantPopup)
+        view_menu=QMenu(view)
+        view_menu.addAction('Sol gezgini daralt / genişlet · Ctrl+B',self.toggle_sidebar)
+        view_menu.addAction('Araç bul · Ctrl+K',self.focus_module_search)
+        view_menu.addSeparator()
+        view_menu.addAction('Koyu tema',lambda:self.set_theme('dark'))
+        view_menu.addAction('Açık tema',lambda:self.set_theme('light'))
+        view_menu.addSeparator();view_menu.addAction('Uygulama ayarları…',self.show_settings)
+        view.setMenu(view_menu);self.workbench_bar.addWidget(view)
+        self.workbench_bar.addAction('Lisanslar',self.show_licenses)
+
+    def change_workspace(self):
+        group=self.workspace_picker.currentData()
+        modes=dict(WORKSPACES).get(group,())
+        if modes:self.navigate(self.last_workspaces.get(group,modes[0]))
+
+    def focus_module_search(self):
+        if self.sidebar_collapsed:self.set_sidebar_collapsed(False)
+        self.browser.search.setFocus();self.browser.search.selectAll()
+
+    def register_inspector(self,mode,widget):
+        self.inspectors[mode]=widget;self.inspector_stack.addWidget(widget)
+        self.jobs.busyChanged.connect(lambda busy:widget.setEnabled(not busy))
+
+    def inspector_visibility_changed(self,visible):
+        self.inspector_button.setChecked(visible)
+        if not self._syncing_dock and not self.closing and self.isVisible() and getattr(self,'mode',None) in self.inspectors:
+            self.inspector_requested=visible;self.settings.set('inspector_visible',visible)
+
+    def update_inspector(self):
+        if self._syncing_dock:return
+        self._syncing_dock=True
+        try:
+            widget=self.inspectors.get(getattr(self,'mode',None))
+            self.inspector_button.setEnabled(widget is not None)
+            self.inspector_action.setVisible(widget is not None)
+            if widget is not None:self.inspector_stack.setCurrentWidget(widget)
+            show=widget is not None and self.inspector_requested and (self.width()>=1320 or self.property_dock.isFloating())
+            was_visible=self.property_dock.isVisible()
+            self.property_dock.setVisible(show);self.inspector_button.setChecked(show)
+            if show and not was_visible and not self.property_dock.isFloating():
+                width=self.settings.get('inspector_width',286)
+                if not isinstance(width,int) or isinstance(width,bool):width=286
+                self.resizeDocks([self.property_dock],[max(248,min(width,self.width()//3))],Qt.Horizontal)
+        finally:self._syncing_dock=False
+
+    def eventFilter(self,watched,event):
+        if watched is getattr(self,'property_dock',None) and event.type()==QEvent.Resize:
+            if not self._syncing_dock and watched.isVisible() and not watched.isFloating():
+                self.settings.set('inspector_width',watched.width())
+        return super().eventFilter(watched,event)
+
+    def toggle_inspector(self):
+        if getattr(self,'mode',None) not in self.inspectors:return
+        self.inspector_requested=not self.property_dock.isVisible()
+        if self.inspector_requested and self.width()<1320:self.property_dock.setFloating(True)
+        self.settings.set('inspector_visible',self.inspector_requested);self.update_inspector()
+
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        if hasattr(self,'property_dock'):self.update_inspector()
 
     def restore_window(self):
         geometry = self.settings.qt.value('window/geometry')
@@ -201,10 +245,18 @@ class MainWindow(QMainWindow):
         for key, nav in self.navigation.items():
             nav.setChecked(key == mode)
         self.settings.set('mode', mode)
+        group=self.browser.group_for_mode[mode];self.last_workspaces[group]=mode
+        blocked=self.workspace_picker.blockSignals(True)
+        self.workspace_picker.setCurrentIndex(self.workspace_picker.findData(group))
+        self.workspace_picker.blockSignals(blocked)
+        self.workspace_context.setText(group+' / '+dict((key,title) for key,title,_ in MODULES)[mode])
+        if self.browser.buttons[mode].isHidden() and self.browser.search.text():self.browser.search.clear()
+        self.browser.activate(mode)
+        for key,nav in self.navigation.items():nav.setIcon(icon(key,COLORS[self.appearance]['accent' if key==mode else 'muted']))
+        self.update_inspector()
         owner = self.jobs.owner
         page = owner if owner in self.pages.values() else self.pages[mode]
-        self.global_status.setText(page.status_text or 'Hazır')
-        self.global_status.setToolTip(page.status_text)
+        self.show_status(page.status_text,page.status.property('role')=='error')
 
     def set_theme(self, appearance):
         if appearance not in COLORS:
@@ -215,17 +267,29 @@ class MainWindow(QMainWindow):
             self.theme_picker.setCurrentIndex(0 if appearance == 'dark' else 1)
             self.theme_picker.blockSignals(blocked)
         apply_theme(QApplication.instance(), appearance)
+        self.inspector_button.setIcon(icon('inspector',COLORS[appearance]['muted']))
+        self.inspector_button.setIconSize(QSize(16,16))
         self.logo.set_appearance(appearance)
         for mode, nav in self.navigation.items():
-            nav.setIcon(icon(mode, COLORS[appearance]['accent']))
+            nav.setIcon(icon(mode, COLORS[appearance]['accent' if nav.isChecked() else 'muted']))
         for page in self.pages.values():
+            page.refresh_command_icons()
             page.theme_changed()
         self.settings.set('appearance', appearance)
 
     def page_status(self, page, text, error):
         if page is self.jobs.owner or self.stack.currentWidget() is page:
-            self.global_status.setText(text.splitlines()[0][:130])
-            self.global_status.setToolTip(text)
+            self.show_status(text,error)
+
+    def show_status(self,text,error=False):
+        text=str(text)
+        self.global_status.setText((text.splitlines() or ['Hazır'])[0][:130])
+        self.global_status.setToolTip(text)
+        role='error' if error else 'muted'
+        if self.global_status.property('role')!=role:
+            self.global_status.setProperty('role',role)
+            self.global_status.style().unpolish(self.global_status)
+            self.global_status.style().polish(self.global_status)
 
     def set_progress(self, current, total):
         self.progress.setRange(0, total)
@@ -244,8 +308,7 @@ class MainWindow(QMainWindow):
         self.busy = busy
 
     def set_status(self, text, error=False):
-        self.global_status.setText(text.splitlines()[0][:130])
-        self.global_status.setToolTip(text)
+        self.show_status(text,error)
 
     def handle_events(self, events):
         for kind, result in events:

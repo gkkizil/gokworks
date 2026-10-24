@@ -119,6 +119,8 @@ class TorquePage(BasePage):
             self.compact = compact
             self.columns.setDirection(QBoxLayout.TopToBottom if compact else QBoxLayout.LeftToRight)
             self.compact_result.setVisible(compact)
+        if hasattr(self,'input_card'):
+            self.input_card.setMaximumWidth(16777215 if compact else 390)
 
     def sync_pitch(self):
         metric, series = self.form.value('metric'), self.form.value('thread_series')

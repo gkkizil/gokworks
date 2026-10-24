@@ -15,11 +15,12 @@ def test_gui_isolation_preserves_every_node_once_in_original_order():
     nodes=[f'tests/test_pure.py::test_{i}' for i in range(20)]
     nodes += [f'tests/test_qt_workflows.py::test_{i}' for i in range(35)]
     nodes += [f'modules/iso_fits/tests/test_diagram_ui.py::test_{i}' for i in range(11)]
+    nodes += [f'tests/test_fusion_workbench.py::test_{i}' for i in range(15)]
     nodes += [f'tests/test_engine.py::test_{i}' for i in range(50)]
     batches=list(runner.test_batches(nodes,32))
     assert [node for batch in batches for node in batch]==nodes
     assert all(len(batch)<=32 for batch in batches)
-    assert all(len(batch)<=8 for batch in batches if any('_qt' in n or '_ui' in n for n in batch))
+    assert all(len(batch)<=8 for batch in batches if any('_qt' in n or '_ui' in n or 'workbench' in n for n in batch))
     assert list(runner.test_batches(nodes,1))==[[node] for node in nodes]
 
 

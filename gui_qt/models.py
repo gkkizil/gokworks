@@ -1,6 +1,7 @@
 """Virtualized Qt tables/trees; no per-row widgets and no CAD/COM objects."""
 
 from dataclasses import dataclass, field
+from decimal import Decimal
 from PySide6.QtCore import (QAbstractTableModel, QAbstractItemModel, QModelIndex,
                            QSortFilterProxyModel, Qt, Signal, QLocale, QCollator)
 from PySide6.QtGui import QColor, QBrush
@@ -48,6 +49,8 @@ class TableModel(QAbstractTableModel):
             return None
         row, column = self.rows[index.row()], self.columns[index.column()]
         value = row.get(column.key, '')
+        if role == Qt.TextAlignmentRole and isinstance(value,(int,float,Decimal)) and not isinstance(value,bool):
+            return Qt.AlignRight | Qt.AlignVCenter
         if role == Qt.UserRole:
             return row
         if role == Qt.UserRole + 1:

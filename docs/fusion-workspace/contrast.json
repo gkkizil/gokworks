@@ -1,0 +1,32 @@
+{
+  "dark": {
+    "text/bg": 13.05,
+    "text/panel": 11.88,
+    "text/input": 10.41,
+    "text/sidebar": 12.21,
+    "text/selected": 8.21,
+    "muted/bg": 7.86,
+    "muted/panel": 7.15,
+    "muted/input": 6.27,
+    "muted/sidebar": 7.35,
+    "muted/selected": 4.94,
+    "sidebar/accent": 6.53,
+    "accent/bg": 6.98,
+    "danger/bg": 7.58
+  },
+  "light": {
+    "text/bg": 12.16,
+    "text/panel": 13.66,
+    "text/input": 14.25,
+    "text/sidebar": 11.61,
+    "text/selected": 11.78,
+    "muted/bg": 5.35,
+    "muted/panel": 6.01,
+    "muted/input": 6.27,
+    "muted/sidebar": 5.1,
+    "muted/selected": 5.18,
+    "sidebar/accent": 4.66,
+    "accent/bg": 4.89,
+    "danger/bg": 5.31
+  }
+}

@@ -62,6 +62,8 @@ def main():
             '--add-data', f'{ROOT / "assets/GOK_logo_light_UI_1024.png"};assets',
             '--add-data', f'{ROOT / "assets/GOK_logo_dark_UI_1024.png"};assets',
             '--add-data', f'{ROOT / "assets/GOK_app_windows.ico"};assets',
+            '--add-data', f'{ROOT / "assets/qt/chevron-dark.png"};assets/qt',
+            '--add-data', f'{ROOT / "assets/qt/chevron-light.png"};assets/qt',
             '--add-data', f'{ROOT / "modules/iso_fits/tables.json"};modules/iso_fits',
             '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)

@@ -143,14 +143,16 @@ def test_transfer_columns_keep_sources_left_results_right_and_commands_visible(w
         assert left.geometry().right()<right.geometry().left()
         assert abs(left.height()-right.height())<2
         assert page.source_scroll.horizontalScrollBar().maximum()==0
-        assert page.source_scroll.geometry().bottom()<page.scan_button.mapTo(left,QPoint()).y(),geometry
-        assert page.scan_button.width()>left.width()-8,geometry
+        assert page.command_bar.isVisible()
+        assert page.scan_button.mapTo(page,QPoint()).y()+page.scan_button.height()<workspace.mapTo(page,QPoint()).y(),geometry
+        assert abs(page.source_scroll.height()-left.height())<2,geometry
         if width==1440:
             assert left.width()==330 and right.width()>left.width()*2,geometry
         for number in range(page.actions.count()):
             control=page.actions.itemAt(number).widget()
             if control.isVisible():
-                assert left.rect().contains(control.mapTo(left,control.rect().bottomRight()))
+                assert page.command_bar.isAncestorOf(control)
+                assert page.rect().contains(control.mapTo(page,control.rect().bottomRight()))
     workspace.moveSplitter(385,1)
     assert workspace.sizes()[0]==385,(mode,window.size().toTuple(),workspace.sizes())
     window.resize(820,560);qtbot.wait(30)

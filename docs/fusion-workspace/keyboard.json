@@ -1,0 +1,6 @@
+{
+  "platform": "Qt offscreen / Linux",
+  "Ctrl+K": "passed: focuses module search and expands collapsed browser",
+  "Ctrl+B": "passed: collapses browser",
+  "method": "actual QTest keyClick, not direct callback invocation"
+}

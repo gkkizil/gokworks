@@ -14,9 +14,12 @@ bağımsız hesaplar ve nesting için SolidWorks gerekmez.
 [İndirme ve kurulum](#indirme-ve-kurulum) · [Modüller](#modüller) ·
 [Kullanım](#nasıl-kullanılır) · [Kaynak kod](#kaynak-koddan-çalıştırma)
 
-![GOKWORKS PDF aktarımı ekranı](docs/transfer-columns/pdf-dark-1440.png)
+![GOKWORKS çalışma alanı](docs/fusion-workspace/after/nesting-dark.png)
 
-*Örnek verilerle PDF aktarımı: kaynak ve ayarlar solda, işlem sonuçları sağda.*
+*Güncel kaynak arayüz: parça listesi, sac yerleşimi ve bağlamsal özellikler paneli.*
+
+[Yeni çalışma alanının kullanımı ve ekran görüntüleri](docs/fusion-workspace/README.md).
+Bu arayüz kaynak kodda bulunur; aşağıdaki son başarılı EXE bağlantısının sürümü ayrıca belirtilmiştir.
 
 ## İndirme ve kurulum
 
@@ -93,6 +96,13 @@ lisanslı yerel SolidWorks gerektirir. [Kullanım ve doğrulama sınırları](mo
 Sol menüden bir modül seçin, kaynak dosyaları veya hesap değerlerini girin ve
 ilgili işlemi başlatın. Aktarım ekranlarında kaynak/ayarlar solda, sonuçlar ve
 günlük sağdadır. Sütun genişliğini aradaki ayırıcıyı sürükleyerek değiştirebilirsiniz.
+
+Üstteki **Çalışma alanı** listesinden Aktarım, Montaj, Üretim veya Hesaplar
+grubuna geçebilirsiniz. **Ctrl+K** araç aramasını açar; **Ctrl+B** sol gezgini
+simgelere daraltır. Ana işlem komutları ekranın üstünde kalır. Nesting'de
+**Özellikler** seçili parçayı, sacı ve yerleşim ayarlarını gösterir; panel
+dar pencerelerde çizim alanını korumak için gizlenir ve düğmeyle ayrı pencere
+olarak açılabilir. **Görünüm** menüsünden açık/koyu tema seçilir.
 
 Dosya sonuçları aranabilir ve durumlarına göre filtrelenebilir. Bir satıra
 çift tıklayarak ayrıntılarını açabilirsiniz. **Temizle**, listeyi, sonuçları,

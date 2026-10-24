@@ -89,6 +89,7 @@ class NamingPage(BasePage):
         body.addWidget(self.rules_options)
         self.safety_note = label('Hedef klasör yeni veya boş olmalı. Teknik resimler, bastırılmış parçalar ve Toolbox bileşenleri dahil edilir.', 'muted')
         body.addWidget(self.safety_note)
+        body.addStretch()
         preview, layout = card('İsimlendirme önizlemesi')
         toolbar = QHBoxLayout()
         self.edit_button = button('Adı düzenle', self.edit_selected)

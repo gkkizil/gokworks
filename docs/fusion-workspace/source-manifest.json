@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "3339ad65ee07f21853bcf3597a955a76fdbd5eb9",
+  "source_files": {
+    "gui_qt/app.py": "410b76f31918cdccebdb2384e7278d7533aeee8aff098027d73d5b3ecc37988e",
+    "gui_qt/components.py": "8cef1f7f020f04b56c1c04cf67062b5680d04bdfdcfe4ee8895e85ae6784ba4c",
+    "gui_qt/diagrams.py": "a9851080b8d916a0447577b3da80305d6a0f76e7e2276ac8dbf78ac074d86330",
+    "gui_qt/icons.py": "00f32c7829e4111f0995c017c9597d04bf6e7a178bb28653dbd645eed7f6f0f8",
+    "gui_qt/models.py": "df7465d8b56181b44b039d273b18cfedea4bcb30da4c9ec807a90632a922c406",
+    "gui_qt/theme.py": "0333997c67ba54dfeab145798c243d0136fa025d86dcc25dfd04107dcb9d253a",
+    "modules/bolt_torque/ui.py": "7713f073d7f044b23a1fd9c4a642099ae3bfac4dfe1940e9016b1f68283206d7",
+    "modules/naming/ui.py": "444ac2c36704eb1f0fff8a941475275892c200495fef30f5253ea8e44f70ae13",
+    "modules/nesting/ui.py": "26d5a74381f35682f07e7bbbc1fdf4f7cc44518b92302c7c0714cf30cfd4ef20",
+    "packaging/build_windows.py": "42d818e0c1f732728291f778a7c964fa9b2b1e75ddea17d133603594baaf27a7",
+    "packaging/run_windows_tests.py": "e6842c43b5990d02708d424d7c0858bc71dd8900d89add9bbf4242dc758efd32",
+    "tests/test_compact_workspaces_gui.py": "998a2dacfcf8162197066825dc1b4b0fea33f425585fc5d4b31b307f183bd78e",
+    "tests/test_windows_test_runner.py": "a8856fc4ed700d48ed6b498ff4c0ff78bdee76b37e277fec616ff15499a4ae9b",
+    "gui_qt/workspace.py": "3e59dc69c61a4d78cb8e069c4e58aeb4f7848097a1c53b10c2c73cbd1e36d86a",
+    "modules/nesting/inspector.py": "0a2ec1a20ba327fca20f3cacacb8ae33d82ac9020354511e6ffcfcfb2efab1e2",
+    "tests/test_fusion_workbench.py": "0b550084bd2583604cf16a3c199c8cb85dd3ed788d18b4761d20dd7bc0cc4f34",
+    "assets/qt/chevron-dark.png": "a27ed3d43af609befb46871daad49e493e893ecdf5d5f9750ddc1a675129bc58",
+    "assets/qt/chevron-light.png": "f5331991b028ec088dfb2a00ca53880f7082af5b8fa03477fc64e666014b1679"
+  },
+  "engineering_engine_changes": [],
+  "gui_framework": "PySide6 / Qt Widgets",
+  "new_runtime_dependencies": []
+}

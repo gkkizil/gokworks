@@ -1,0 +1,12 @@
+{
+  "tests": 2054,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 9,
+  "collected": 1176,
+  "passed_primary": 1167,
+  "subtests": 878,
+  "platform": "Linux / source / Qt offscreen",
+  "live_solidworks": false,
+  "windows_exe_built": false
+}

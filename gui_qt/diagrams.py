@@ -27,6 +27,13 @@ class VectorScene(QGraphicsScene):
     def configure(self, **options):
         if 'background' in options:
             self.background = options['background']
+            # Older drawing renderers still name their original paper colors.
+            # Normalize only the paper, preserving technical fills and labels.
+            from .theme import COLORS
+            if self.background.lower() in ('#1c2431','#1c2533','#242831','#262a33'):
+                self.background = COLORS['dark']['canvas']
+            elif self.background.lower() in ('#f4f7fc','#eff4fa','#f7faff'):
+                self.background = COLORS['light']['canvas']
             self.setBackgroundBrush(QBrush(QColor(self.background)))
 
     def cget(self, name):

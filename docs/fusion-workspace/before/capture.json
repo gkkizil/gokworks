@@ -1,0 +1,29 @@
+{
+  "platform": "offscreen",
+  "framework": "PySide6",
+  "modules": 14,
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "sizes": [
+    [
+      1440,
+      900
+    ],
+    [
+      820,
+      560
+    ]
+  ],
+  "example_math": [
+    "0.20",
+    "0.02",
+    "0.38"
+  ],
+  "nesting": "Existing real DXF example loaded with validated placements",
+  "cad_boundary": "BOM/PDF/DXF/naming CAD records illustrative; no live SolidWorks",
+  "windows_exe_built": false,
+  "source_commit": "3339ad65ee07f21853bcf3597a955a76fdbd5eb9",
+  "overview_note": "Per-module native screenshots are the evidence; rejected cropped contact sheets removed."
+}

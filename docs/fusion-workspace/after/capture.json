@@ -1,0 +1,542 @@
+{
+  "platform": "offscreen",
+  "framework": "PySide6 / Qt Widgets",
+  "modules": 14,
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "sizes": [
+    [
+      1440,
+      900
+    ],
+    [
+      820,
+      560
+    ]
+  ],
+  "screenshots": [
+    {
+      "file": "pdf-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "pdf"
+    },
+    {
+      "file": "dxf_dwg-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "dxf_dwg"
+    },
+    {
+      "file": "cad_converter-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "cad_converter"
+    },
+    {
+      "file": "bom-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "bom"
+    },
+    {
+      "file": "naming-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "naming"
+    },
+    {
+      "file": "k_factor-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "k_factor"
+    },
+    {
+      "file": "iso_fits-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "iso_fits"
+    },
+    {
+      "file": "geometric_tolerances-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "geometric_tolerances"
+    },
+    {
+      "file": "tolerance_stack-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "tolerance_stack"
+    },
+    {
+      "file": "bolt-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "bolt"
+    },
+    {
+      "file": "bolt_torque-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "bolt_torque"
+    },
+    {
+      "file": "weight-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "weight"
+    },
+    {
+      "file": "nesting-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "profile_cutting-dark.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "profile_cutting"
+    },
+    {
+      "file": "pdf-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "pdf"
+    },
+    {
+      "file": "dxf_dwg-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "dxf_dwg"
+    },
+    {
+      "file": "cad_converter-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "cad_converter"
+    },
+    {
+      "file": "bom-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "bom"
+    },
+    {
+      "file": "naming-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "naming"
+    },
+    {
+      "file": "k_factor-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "k_factor"
+    },
+    {
+      "file": "iso_fits-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "iso_fits"
+    },
+    {
+      "file": "geometric_tolerances-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "geometric_tolerances"
+    },
+    {
+      "file": "tolerance_stack-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "tolerance_stack"
+    },
+    {
+      "file": "bolt-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "bolt"
+    },
+    {
+      "file": "bolt_torque-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "bolt_torque"
+    },
+    {
+      "file": "weight-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "weight"
+    },
+    {
+      "file": "nesting-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "profile_cutting-dark-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "profile_cutting"
+    },
+    {
+      "file": "pdf-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "pdf"
+    },
+    {
+      "file": "dxf_dwg-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "dxf_dwg"
+    },
+    {
+      "file": "cad_converter-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "cad_converter"
+    },
+    {
+      "file": "bom-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "bom"
+    },
+    {
+      "file": "naming-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "naming"
+    },
+    {
+      "file": "k_factor-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "k_factor"
+    },
+    {
+      "file": "iso_fits-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "iso_fits"
+    },
+    {
+      "file": "geometric_tolerances-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "geometric_tolerances"
+    },
+    {
+      "file": "tolerance_stack-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "tolerance_stack"
+    },
+    {
+      "file": "bolt-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "bolt"
+    },
+    {
+      "file": "bolt_torque-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "bolt_torque"
+    },
+    {
+      "file": "weight-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "weight"
+    },
+    {
+      "file": "nesting-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "profile_cutting-light.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "profile_cutting"
+    },
+    {
+      "file": "pdf-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "pdf"
+    },
+    {
+      "file": "dxf_dwg-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "dxf_dwg"
+    },
+    {
+      "file": "cad_converter-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "cad_converter"
+    },
+    {
+      "file": "bom-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "bom"
+    },
+    {
+      "file": "naming-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "naming"
+    },
+    {
+      "file": "k_factor-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "k_factor"
+    },
+    {
+      "file": "iso_fits-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "iso_fits"
+    },
+    {
+      "file": "geometric_tolerances-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "geometric_tolerances"
+    },
+    {
+      "file": "tolerance_stack-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "tolerance_stack"
+    },
+    {
+      "file": "bolt-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "bolt"
+    },
+    {
+      "file": "bolt_torque-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "bolt_torque"
+    },
+    {
+      "file": "weight-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "weight"
+    },
+    {
+      "file": "nesting-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "profile_cutting-light-minimum.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "profile_cutting"
+    },
+    {
+      "file": "nesting-floating-workspace.png",
+      "size": [
+        820,
+        560
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "nesting-floating-properties.png",
+      "size": [
+        286,
+        828
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "collapsed-navigation.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "module-search.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "nesting"
+    },
+    {
+      "file": "kr-tooling-helper.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "k_factor"
+    },
+    {
+      "file": "stack-results.png",
+      "size": [
+        1440,
+        900
+      ],
+      "mode": "tolerance_stack"
+    },
+    {
+      "file": "stack-measurement-picker.png",
+      "size": [
+        200,
+        48
+      ],
+      "mode": "tolerance_stack"
+    },
+    {
+      "file": "application-settings.png",
+      "size": [
+        480,
+        300
+      ],
+      "mode": "tolerance_stack"
+    }
+  ],
+  "example_math": [
+    "0.20",
+    "0.02",
+    "0.38"
+  ],
+  "nesting": "Existing real DXF example, previously validated placements loaded locally",
+  "profile": "Local 1D optimizer executed on explicitly manual example inputs",
+  "cad_boundary": "BOM/PDF/DXF/converter/naming lists illustrative; no live SolidWorks or CAD conversion",
+  "windows_exe_built": false
+}

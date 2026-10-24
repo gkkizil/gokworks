@@ -1,0 +1,32 @@
+.....................                                                    [100%]
+=============================== warnings summary ===============================
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:50
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:50: PyparsingDeprecationWarning: 'addParseAction' deprecated - use 'add_parse_action'
+    number.addParseAction(lambda t: float(t[0]))  # convert to float
+
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:51
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:51: PyparsingDeprecationWarning: 'addParseAction' deprecated - use 'add_parse_action'
+    string_ = quotedString.addParseAction(lambda t: t[0][1:-1])  # remove quotes
+
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:57
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:57: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    Relation = oneOf(["==", "!=", "<", "<=", ">", ">=", "?", "!?"])
+
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:63
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:63: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    ).setResultsName("EntityQuery")
+
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:65
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:65: PyparsingDeprecationWarning: 'infixNotation' deprecated - use 'infix_notation'
+    InfixBoolQuery = infixNotation(
+
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:72
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:72: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    ).setResultsName("AttribQuery")
+
+../.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:74
+  /workspace/.cloud-setup/qt-venv/lib/python3.13/site-packages/ezdxf/queryparser.py:74: PyparsingDeprecationWarning: 'setResultsName' deprecated - use 'set_results_name'
+    AttribQueryOptions = Literal("i").setResultsName("AttribQueryOptions")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+21 passed, 7 warnings in 30.56s

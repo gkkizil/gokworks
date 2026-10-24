@@ -31,7 +31,7 @@ def test_batches(nodeids, batch_size):
     selected = []; gui = False
     for nodeid in nodeids:
         filename = nodeid.split('::', 1)[0].rsplit('/', 1)[-1]
-        heavy = any(token in filename for token in ('gui', '_ui', '_qt', 'compact', 'repository_structure'))
+        heavy = any(token in filename for token in ('gui', '_ui', '_qt', 'compact', 'workbench', 'repository_structure'))
         limit = min(batch_size, MAX_GUI_TESTS_PER_PROCESS) if gui or heavy else batch_size
         if selected and len(selected) >= limit:
             yield selected; selected = []; gui = False

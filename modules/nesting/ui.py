@@ -48,7 +48,6 @@ class NestingPage(BasePage):
         # A compact project header; the working surface has no wizard tabs.
         heading = self.layout.itemAt(0).layout(); captions = heading.itemAt(0).layout()
         captions.itemAt(0).widget().setText('Nesting')
-        captions.itemAt(0).widget().setStyleSheet('font-size: 21px; font-weight: 650;')
         captions.itemAt(1).widget().hide(); heading.setStretch(0,0)
         self.name = QLineEdit(self.project.name); self.name.textEdited.connect(self.name_changed)
         self.name.setMinimumWidth(0); self.name.setAccessibleName('Nesting proje adı')
@@ -65,7 +64,7 @@ class NestingPage(BasePage):
         self.nest_button.setToolTip('Birinci plakadan başlayarak, stok adedi kadar plakayı sırayla doldur')
         self.controls.append(self.nest_button); self.layout.addLayout(commands)
         self.workspace = QSplitter(Qt.Horizontal); self.workspace.setChildrenCollapsible(False)
-        self.workspace.setHandleWidth(8); self.workspace.setAccessibleName('Parçalar ve sac yerleşimi')
+        self.workspace.setHandleWidth(5); self.workspace.setAccessibleName('Parçalar ve sac yerleşimi')
         self.layout.addWidget(self.workspace,1)
         left, left_layout = card()
         self.parts_panel = left; left.setMinimumWidth(216)
@@ -146,7 +145,7 @@ class NestingPage(BasePage):
         self.preview_scroll = preview; preview.installEventFilter(self)
         self.workspace.addWidget(preview)
         self.workspace.setStretchFactor(0,0); self.workspace.setStretchFactor(1,1)
-        self.workspace.setSizes([330,750]); self.parts_width = 330
+        self.workspace.setSizes([260,820]); self.parts_width = 260
         self.workspace.splitterMoved.connect(lambda *_:self.update_result_text())
         self.controls.extend([self.stock_widget, self.parameters])
         footer = QHBoxLayout(); footer.setSpacing(8)
@@ -164,10 +163,11 @@ class NestingPage(BasePage):
         self.result_controls = [self.verify_button,self.detail_button,self.dxf_button,self.excel_button,self.pdf_button]
         self.controls.extend(self.result_controls)
         self.finish_layout(); self.refresh()
-        # Local density only: other GOKWORKS modules retain their current style.
-        self.setStyleSheet('QPushButton { padding: 5px 10px; } QLineEdit { padding: 5px 7px; } '
-                           'QHeaderView::section { padding: 7px 4px; }')
-        self.layout.setContentsMargins(16,12,16,10); self.layout.setSpacing(8)
+        self.layout.setContentsMargins(10,8,10,6); self.layout.setSpacing(6)
+        from .inspector import NestingInspector
+        self.inspector = NestingInspector(self)
+        self.controls.append(self.inspector)
+        context.register_inspector('nesting',self.inspector)
         self.style_sheet_tabs()
         self.set_status('DXF ekleyin · Sac ve ayarlardan stok tanımlayın · Yerleştir')
 
