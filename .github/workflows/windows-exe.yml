@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         id: checkout
@@ -84,13 +84,15 @@ jobs:
           PYTHONUTF8: '1'
         run: python packaging/run_windows_tests.py modules/shaft_generator/tests/test_ui.py
       - name: Validate regression suite on Windows
-        timeout-minutes: 22
+        timeout-minutes: 32
         env:
           QT_QPA_PLATFORM: windows
           PYTHONUTF8: '1'
         run: |
           python -m pip install -r requirements-dev.txt *> windows-test-setup.log
           if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
+          python packaging/run_windows_tests.py tests/test_qt_workflows.py::test_close_at_preview_completion_does_not_start_queued_cad_write
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python packaging/run_windows_tests.py modules/tolerance_stack/tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python packaging/run_windows_tests.py modules/bolt_torque/tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible modules/nesting/tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes

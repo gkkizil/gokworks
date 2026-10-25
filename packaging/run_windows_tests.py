@@ -1,7 +1,7 @@
 """Run every collected test in bounded processes and preserve native failures.
 
 The desktop normally creates one QApplication and one main window. A single
-pytest process instead constructs hundreds of complete twelve-page windows;
+pytest process instead constructs hundreds of complete application windows;
 native Qt state from earlier tests can then abort the process before pytest
 writes its failure report. Collect once, run all node IDs in small fresh
 processes, and combine their JUnit reports without losing failed/crashed batches.
@@ -23,14 +23,21 @@ MAX_GUI_TESTS_PER_PROCESS = 8
 def test_batches(nodeids, batch_size):
     """Keep all tests in order; bound repeated complete Qt window lifetimes.
 
-    Native Windows Qt can fast-fail during teardown after many full fourteen-
-    page windows in one QApplication. The product creates one main window per
-    process. Fresh, small GUI batches avoid accumulating that artificial state;
+    Native Windows Qt can fast-fail during teardown after repeated complete
+    application windows in one QApplication. Full-app workflow cases therefore
+    get their own process; other GUI cases remain in bounded small batches.
+    The product creates one main window per process. Fresh processes avoid
+    accumulating state from unrelated full-app workflow cases;
     native exits still fail the gate and are never retried or ignored.
     """
     selected = []; gui = False
     for nodeid in nodeids:
         filename = nodeid.split('::', 1)[0].rsplit('/', 1)[-1]
+        if filename == 'test_qt_workflows.py':
+            if selected:
+                yield selected; selected = []; gui = False
+            yield [nodeid]
+            continue
         heavy = any(token in filename for token in ('gui', '_ui', '_qt', 'compact', 'workbench', 'repository_structure'))
         limit = min(batch_size, MAX_GUI_TESTS_PER_PROCESS) if gui or heavy else batch_size
         if selected and len(selected) >= limit:
