@@ -135,6 +135,9 @@ def main():
             if re.search(r'Windows fatal exception|Fatal Python error|QThread:|0xC0000409|PYTEST_PROCESS_EXIT_CODE=3221226505', line, re.I):
                 contexts.append('\n'.join(lines[max(0,i-65):i+90]))
         report['native_failure_context'] = '\n\n'.join(contexts)[-30000:]
+    native_log = Path('windows-qt-native.log')
+    if report['status'] == 'failure' and native_log.exists():
+        report['qt_native_log_tail'] = native_log.read_text(encoding='utf-8', errors='replace')[-20000:]
     publish(report)
 
 
