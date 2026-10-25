@@ -477,9 +477,12 @@ def test_naming_plan_filesystem_checks_are_off_gui_thread(window, qtbot, tmp_pat
     page.destination.setText(str(tmp_path/'new'))
     release = threading.Event()
     calls = []
+    gui_thread_id = threading.get_ident()
     from modules.naming.exporter import validate_destination
     def delayed(*args):
-        calls.append(QThread.currentThread())
+        # Record a scalar identity, without retaining a QThread wrapper after
+        # JobManager has joined and scheduled deletion of its native object.
+        calls.append(threading.get_ident())
         release.wait(2)
         return validate_destination(*args)
     with patch('modules.naming.ui.engine.validate_destination',side_effect=delayed):
@@ -487,7 +490,7 @@ def test_naming_plan_filesystem_checks_are_off_gui_thread(window, qtbot, tmp_pat
         qtbot.waitUntil(lambda: bool(calls))
         window.navigate('bolt')
         assert window.stack.currentWidget() is window.pages['bolt']
-        assert calls[0] is not QApplication.instance().thread()
+        assert calls[0] != gui_thread_id
         release.set()
         qtbot.waitUntil(lambda: page.valid_plan and not window.jobs.busy)
 

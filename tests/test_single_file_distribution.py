@@ -56,3 +56,25 @@ def test_optional_shapely_geos_replacement_and_embedded_license(tmp_path,monkeyp
     monkeypatch.setattr(sys,'path',list(sys.path)); configure_libraries()
     assert sys.path[0] == str(tmp_path.resolve())
     assert 'nesting/Shapely-LICENSE_GEOS' in license_files()
+
+
+def test_native_failure_status_keeps_crash_context_even_when_tail_has_moved_on(tmp_path, monkeypatch):
+    spec = importlib.util.spec_from_file_location('gokworks_failure_publish',
+        Path(__file__).resolve().parents[1]/'packaging/publish_status.py')
+    publisher = importlib.util.module_from_spec(spec);spec.loader.exec_module(publisher)
+    monkeypatch.chdir(tmp_path)
+    for key, value in dict(GITHUB_SHA='a'*40, BUILD_STATUS='failure',
+                           GITHUB_REPOSITORY='gkkizil/gokworks', GITHUB_RUN_ID='123').items():
+        monkeypatch.setenv(key, value)
+    (tmp_path/'windows-tests.log').write_text(
+        'NATIVE_BATCH=7 TARGETS=["test_background_preview"]\n'
+        'test_background_preview PASSED\n'
+        'PYTEST_PROCESS_EXIT_CODE=3221226505 (0xC0000409)\n' +
+        'later successful batch\n'*1500, encoding='utf-8')
+    reports = []
+    monkeypatch.setattr(publisher, 'publish', reports.append)
+    publisher.main()
+    assert len(reports) == 1
+    assert 'test_background_preview' in reports[0]['native_failure_context']
+    assert '0xC0000409' in reports[0]['native_failure_context']
+    assert 'test_background_preview' not in reports[0]['test_log_tail']

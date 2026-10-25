@@ -127,7 +127,14 @@ def main():
                                for case in suites.iter('testcase') for skip in case.findall('skipped')]
     tests_log = Path('windows-tests.log')
     if report['status'] == 'failure' and tests_log.exists():
-        report['test_log_tail'] = tests_log.read_text(encoding='utf-8', errors='replace')[-22000:]
+        text = tests_log.read_text(encoding='utf-8', errors='replace')
+        report['test_log_tail'] = text[-22000:]
+        lines = text.splitlines()
+        contexts = []
+        for i, line in enumerate(lines):
+            if re.search(r'Windows fatal exception|Fatal Python error|QThread:|0xC0000409|PYTEST_PROCESS_EXIT_CODE=3221226505', line, re.I):
+                contexts.append('\n'.join(lines[max(0,i-65):i+90]))
+        report['native_failure_context'] = '\n\n'.join(contexts)[-30000:]
     publish(report)
 
 
