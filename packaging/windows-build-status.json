@@ -1,10 +1,14 @@
 {
   "commit": "5bb30116e58a0c0f3858782ce9802467361ff92c",
-  "status": "building",
+  "status": "failure",
   "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40201902124",
   "download_url": "",
   "artifact_url": "",
-  "setup_steps": {},
+  "setup_steps": {
+    "checkout": "success",
+    "python": "success",
+    "dependencies": "success"
+  },
   "display": {
     "before": [
       1024,
@@ -101,5 +105,878 @@
     ]
   },
   "previous_failure_log_tail": "build\tValidate regression suite on Windows\t﻿2026-10-25T13:52:29.1899404Z ##[group]Run python -m pip install -r requirements-dev.txt *> windows-test-setup.log\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1900436Z ^[[36;1mpython -m pip install -r requirements-dev.txt *> windows-test-setup.log^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1901074Z ^[[36;1mif ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1902083Z ^[[36;1mpython packaging/run_windows_tests.py modules/tolerance_stack/tests/test_tolerance_stack_gui.py::test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1903107Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1904221Z ^[[36;1mpython packaging/run_windows_tests.py modules/bolt_torque/tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible modules/nesting/tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1905338Z ^[[36;1mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1905802Z ^[[36;1mpython packaging/run_windows_tests.py^[[0m\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1975056Z shell: C:\\Program Files\\PowerShell\\7\\pwsh.EXE -command \". '{0}'\"\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1975486Z env:\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1975744Z   PYTHONUTF8: 1\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1976087Z   pythonLocation: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1976644Z   PKG_CONFIG_PATH: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64/lib/pkgconfig\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1977166Z   Python_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1977634Z   Python2_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1978390Z   Python3_ROOT_DIR: C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1978764Z   QT_QPA_PLATFORM: windows\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:29.1979032Z ##[endgroup]\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:32.3468447Z Collected 1 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:34.7618532Z Windows batch 1: 1 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:36.1152461Z Collected 3 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:52.9169935Z Windows batch 1: 3 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:56.1306300Z Collected 1326 tests; at most 32 per native process.\nbuild\tValidate regression suite on Windows\t2026-10-25T13:52:56.9993816Z Windows batch 1: 13 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:53:25.8356138Z Windows batch 2: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:54:01.2397793Z Windows batch 3: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:54:27.5858612Z Windows batch 4: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:54:56.4020825Z Windows batch 5: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:55:10.8347652Z Windows batch 6: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:55:17.6283341Z Windows batch 7: 10 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:55:40.8198863Z Windows batch 8: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:56:09.2910194Z Windows batch 9: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:56:51.7410474Z Windows batch 10: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:57:37.8707158Z Windows batch 11: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:58:11.0242843Z Windows batch 12: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:58:27.4934224Z Windows batch 13: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:58:58.7497332Z Windows batch 14: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:59:28.4840803Z Windows batch 15: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T13:59:55.0990094Z Windows batch 16: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:00:20.9599234Z Windows batch 17: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:00:46.6148456Z Windows batch 18: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:01:12.4442320Z Windows batch 19: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:01:47.2172911Z Windows batch 20: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:02:12.7834548Z Windows batch 21: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:02:38.3843456Z Windows batch 22: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:03:04.1144701Z Windows batch 23: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:03:30.5472735Z Windows batch 24: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:03:58.6186107Z Windows batch 25: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:04:08.0797063Z Windows batch 26: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:04:12.0168719Z Windows batch 27: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:04:12.6513291Z Windows batch 28: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:04:13.2325190Z Windows batch 29: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:04:13.8353993Z Windows batch 30: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:04:43.1100258Z Windows batch 31: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:04.8754264Z Windows batch 32: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:06.5214541Z Windows batch 33: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:08.1588802Z Windows batch 34: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:08.9886097Z Windows batch 35: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:28.1991655Z Windows batch 36: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:40.6364794Z Windows batch 37: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:41.3477763Z Windows batch 38: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:42.9654532Z Windows batch 39: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:44.3120587Z Windows batch 40: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:05:45.6386731Z Windows batch 41: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:06.0136847Z Windows batch 42: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:08.2813959Z Windows batch 43: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:09.5163868Z Windows batch 44: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:10.7257047Z Windows batch 45: 25 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:42.7577641Z Windows batch 46: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:43.9869237Z Windows batch 47: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:45.2152900Z Windows batch 48: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:46.5536284Z Windows batch 49: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:48.1455457Z Windows batch 50: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:49.5269596Z Windows batch 51: 25 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:55.3537194Z Windows batch 52: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:06:58.7557868Z Windows batch 53: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:07:02.0355012Z Windows batch 54: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:07:11.5473792Z Windows batch 55: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:07:13.3101953Z Windows batch 56: 10 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:07:45.1926087Z Windows batch 57: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:09.2786817Z Windows batch 58: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:36.6638476Z Windows batch 59: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:54.7459212Z Windows batch 60: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:55.5966714Z Windows batch 61: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:57.9332372Z Windows batch 62: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:58.7299026Z Windows batch 63: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:08:59.7334851Z Windows batch 64: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:00.4834047Z Windows batch 65: 12 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:27.5940831Z Windows batch 66: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:43.8572171Z Windows batch 67: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:44.5118772Z Windows batch 68: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:45.7607879Z Windows batch 69: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:47.8988320Z Windows batch 70: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:09:53.8255808Z Windows batch 71: 8 tests, exit 1 (0x00000001)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:10:06.8223904Z Windows batch 72: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:10:07.7831097Z Windows batch 73: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:10:34.1050421Z Windows batch 74: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:11:00.9836445Z Windows batch 75: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:11:34.2634530Z Windows batch 76: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:12:02.5578260Z Windows batch 77: 8 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:12:03.2012271Z Windows batch 78: 32 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:12:04.7678885Z Windows batch 79: 31 tests, exit 0 (0x00000000)\nbuild\tValidate regression suite on Windows\t2026-10-25T14:12:04.8469302Z ##[error]Process completed with exit code 1.\n",
-  "previous_native_failure_context": ""
+  "setup_log_tail": "Collecting PySide6==6.10.3 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached pyside6-6.10.3-cp39-abi3-win_amd64.whl.metadata (5.5 kB)\nCollecting Pillow==13.0.0 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 2))\n  Using cached pillow-13.0.0-cp313-cp313-win_amd64.whl.metadata (9.3 kB)\nCollecting pywin32==312 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 3))\n  Using cached pywin32-312-cp313-cp313-win_amd64.whl.metadata (11 kB)\nCollecting ezdxf==1.4.3 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached ezdxf-1.4.3-cp313-cp313-win_amd64.whl.metadata (10 kB)\nCollecting openpyxl==3.1.5 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 5))\n  Using cached openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)\nCollecting shapely==2.1.2 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 6))\n  Using cached shapely-2.1.2-cp313-cp313-win_amd64.whl.metadata (7.1 kB)\nCollecting pyinstaller==6.16.0 (from -r packaging/windows-requirements.txt (line 2))\n  Using cached pyinstaller-6.16.0-py3-none-win_amd64.whl.metadata (8.5 kB)\nCollecting shiboken6==6.10.3 (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached shiboken6-6.10.3-cp39-abi3-win_amd64.whl.metadata (2.6 kB)\nCollecting PySide6_Essentials==6.10.3 (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached pyside6_essentials-6.10.3-cp39-abi3-win_amd64.whl.metadata (3.9 kB)\nCollecting PySide6_Addons==6.10.3 (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached pyside6_addons-6.10.3-cp39-abi3-win_amd64.whl.metadata (4.2 kB)\nCollecting pyparsing>=2.0.1 (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached pyparsing-3.3.3-py3-none-any.whl.metadata (5.9 kB)\nCollecting typing_extensions>=4.6.0 (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)\nCollecting numpy (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached numpy-2.5.4-cp313-cp313-win_amd64.whl.metadata (6.6 kB)\nCollecting fonttools (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached fonttools-4.67.0-cp313-cp313-win_amd64.whl.metadata (139 kB)\nCollecting et-xmlfile (from openpyxl==3.1.5->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 5))\n  Using cached et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)\nCollecting altgraph (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached altgraph-0.17.5-py2.py3-none-any.whl.metadata (7.5 kB)\nCollecting packaging>=22.0 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)\nCollecting pefile!=2024.8.26,>=2022.5.30 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached pefile-2023.2.7-py3-none-any.whl.metadata (1.4 kB)\nCollecting pyinstaller-hooks-contrib>=2025.8 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached pyinstaller_hooks_contrib-2026.9-py3-none-any.whl.metadata (16 kB)\nCollecting pywin32-ctypes>=0.2.1 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached pywin32_ctypes-0.2.3-py3-none-any.whl.metadata (3.9 kB)\nCollecting setuptools>=42.0.0 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached setuptools-84.2.1-py3-none-any.whl.metadata (6.6 kB)\nUsing cached pyside6-6.10.3-cp39-abi3-win_amd64.whl (569 kB)\nUsing cached pillow-13.0.0-cp313-cp313-win_amd64.whl (7.3 MB)\nUsing cached pywin32-312-cp313-cp313-win_amd64.whl (6.9 MB)\nUsing cached ezdxf-1.4.3-cp313-cp313-win_amd64.whl (2.9 MB)\nUsing cached openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)\nUsing cached shapely-2.1.2-cp313-cp313-win_amd64.whl (1.7 MB)\nUsing cached pyinstaller-6.16.0-py3-none-win_amd64.whl (1.4 MB)\nUsing cached pyside6_addons-6.10.3-cp39-abi3-win_amd64.whl (164.7 MB)\nUsing cached pyside6_essentials-6.10.3-cp39-abi3-win_amd64.whl (74.6 MB)\nUsing cached shiboken6-6.10.3-cp39-abi3-win_amd64.whl (1.2 MB)\nUsing cached numpy-2.5.4-cp313-cp313-win_amd64.whl (12.6 MB)\nUsing cached packaging-26.3-py3-none-any.whl (129 kB)\nUsing cached pefile-2023.2.7-py3-none-any.whl (71 kB)\nUsing cached pyinstaller_hooks_contrib-2026.9-py3-none-any.whl (462 kB)\nUsing cached pyparsing-3.3.3-py3-none-any.whl (126 kB)\nUsing cached pywin32_ctypes-0.2.3-py3-none-any.whl (30 kB)\nUsing cached setuptools-84.2.1-py3-none-any.whl (876 kB)\nUsing cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)\nUsing cached altgraph-0.17.5-py2.py3-none-any.whl (21 kB)\nUsing cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)\nUsing cached fonttools-4.67.0-cp313-cp313-win_amd64.whl (2.5 MB)\nInstalling collected packages: altgraph, typing_extensions, shiboken6, setuptools, pywin32-ctypes, pywin32, pyparsing, Pillow, pefile, packaging, numpy, fonttools, et-xmlfile, shapely, PySide6_Essentials, pyinstaller-hooks-contrib, openpyxl, ezdxf, PySide6_Addons, pyinstaller, PySide6\n\nSuccessfully installed Pillow-13.0.0 PySide6-6.10.3 PySide6_Addons-6.10.3 PySide6_Essentials-6.10.3 altgraph-0.17.5 et-xmlfile-2.0.0 ezdxf-1.4.3 fonttools-4.67.0 numpy-2.5.4 openpyxl-3.1.5 packaging-26.3 pefile-2023.2.7 pyinstaller-6.16.0 pyinstaller-hooks-contrib-2026.9 pyparsing-3.3.3 pywin32-312 pywin32-ctypes-0.2.3 setuptools-84.2.1 shapely-2.1.2 shiboken6-6.10.3 typing_extensions-4.16.0\n",
+  "test_setup_log_tail": "Requirement already satisfied: PySide6==6.10.3 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1)) (6.10.3)\nRequirement already satisfied: Pillow==13.0.0 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 2)) (13.0.0)\nRequirement already satisfied: pywin32==312 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 3)) (312)\nRequirement already satisfied: ezdxf==1.4.3 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4)) (1.4.3)\nRequirement already satisfied: openpyxl==3.1.5 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 5)) (3.1.5)\nRequirement already satisfied: shapely==2.1.2 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 6)) (2.1.2)\nRequirement already satisfied: pytest==9.0.2 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r requirements-dev.txt (line 2)) (9.0.2)\nRequirement already satisfied: pytest-qt==4.5.0 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r requirements-dev.txt (line 3)) (4.5.0)\nRequirement already satisfied: pytest-timeout==2.4.0 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from -r requirements-dev.txt (line 4)) (2.4.0)\nRequirement already satisfied: shiboken6==6.10.3 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1)) (6.10.3)\nRequirement already satisfied: PySide6_Essentials==6.10.3 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1)) (6.10.3)\nRequirement already satisfied: PySide6_Addons==6.10.3 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1)) (6.10.3)\nRequirement already satisfied: pyparsing>=2.0.1 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4)) (3.3.3)\nRequirement already satisfied: typing_extensions>=4.6.0 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4)) (4.16.0)\nRequirement already satisfied: numpy in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4)) (2.5.4)\nRequirement already satisfied: fonttools in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4)) (4.67.0)\nRequirement already satisfied: et-xmlfile in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from openpyxl==3.1.5->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 5)) (2.0.0)\nRequirement already satisfied: colorama>=0.4 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from pytest==9.0.2->-r requirements-dev.txt (line 2)) (0.4.6)\nRequirement already satisfied: iniconfig>=1.0.1 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from pytest==9.0.2->-r requirements-dev.txt (line 2)) (2.3.1)\nRequirement already satisfied: packaging>=22 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from pytest==9.0.2->-r requirements-dev.txt (line 2)) (26.3)\nRequirement already satisfied: pluggy<2,>=1.5 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from pytest==9.0.2->-r requirements-dev.txt (line 2)) (1.7.0)\nRequirement already satisfied: pygments>=2.7.2 in C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\Lib\\site-packages (from pytest==9.0.2->-r requirements-dev.txt (line 2)) (2.21.0)\n",
+  "previous_native_failure_context": "",
+  "regressions": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "0.333",
+      "timestamp": "2026-10-25T14:26:00.146868+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "22.408",
+      "timestamp": "2026-10-25T14:26:00.859691+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "32.011",
+      "timestamp": "2026-10-25T14:26:24.202935+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.925",
+      "timestamp": "2026-10-25T14:26:56.728018+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "22.332",
+      "timestamp": "2026-10-25T14:27:18.164994+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "10.956",
+      "timestamp": "2026-10-25T14:27:41.019153+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "10",
+      "time": "6.269",
+      "timestamp": "2026-10-25T14:27:52.481155+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "15.271",
+      "timestamp": "2026-10-25T14:27:59.097554+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "21.677",
+      "timestamp": "2026-10-25T14:28:14.897886+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "31.700",
+      "timestamp": "2026-10-25T14:28:37.103318+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "35.756",
+      "timestamp": "2026-10-25T14:29:09.321746+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "24.424",
+      "timestamp": "2026-10-25T14:29:45.595907+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "12.176",
+      "timestamp": "2026-10-25T14:30:10.598917+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "21.367",
+      "timestamp": "2026-10-25T14:30:23.333808+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "23.840",
+      "timestamp": "2026-10-25T14:30:45.285052+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "native-batch-16",
+      "tests": "1",
+      "failures": "1",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.512",
+      "timestamp": "2026-10-25T14:31:16.442601+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.742",
+      "timestamp": "2026-10-25T14:31:43.588619+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "19.922",
+      "timestamp": "2026-10-25T14:32:04.856924+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "26.836",
+      "timestamp": "2026-10-25T14:32:25.297651+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.412",
+      "timestamp": "2026-10-25T14:32:52.671665+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "19.398",
+      "timestamp": "2026-10-25T14:33:13.616460+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "19.338",
+      "timestamp": "2026-10-25T14:33:33.533525+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.680",
+      "timestamp": "2026-10-25T14:33:53.390511+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "21.848",
+      "timestamp": "2026-10-25T14:34:14.595532+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "7.055",
+      "timestamp": "2026-10-25T14:34:37.106099+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "98",
+      "time": "2.565",
+      "timestamp": "2026-10-25T14:34:44.749106+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "60",
+      "time": "0.196",
+      "timestamp": "2026-10-25T14:34:47.814340+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.100",
+      "timestamp": "2026-10-25T14:34:48.354231+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "0.113",
+      "timestamp": "2026-10-25T14:34:48.790928+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "21.897",
+      "timestamp": "2026-10-25T14:34:49.241481+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "16.103",
+      "timestamp": "2026-10-25T14:35:11.652083+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "43",
+      "time": "0.797",
+      "timestamp": "2026-10-25T14:35:28.350624+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.909",
+      "timestamp": "2026-10-25T14:35:29.639688+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.280",
+      "timestamp": "2026-10-25T14:35:30.907073+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "8",
+      "time": "15.204",
+      "timestamp": "2026-10-25T14:35:31.550929+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "8.940",
+      "timestamp": "2026-10-25T14:35:47.283689+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.168",
+      "timestamp": "2026-10-25T14:35:56.903020+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "39",
+      "time": "0.725",
+      "timestamp": "2026-10-25T14:35:57.443177+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "65",
+      "time": "0.603",
+      "timestamp": "2026-10-25T14:35:58.651931+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "114",
+      "time": "0.575",
+      "timestamp": "2026-10-25T14:35:59.686896+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "35",
+      "time": "15.236",
+      "timestamp": "2026-10-25T14:36:00.692392+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "393",
+      "time": "1.287",
+      "timestamp": "2026-10-25T14:36:16.456053+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "97",
+      "time": "0.506",
+      "timestamp": "2026-10-25T14:36:18.227518+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "34",
+      "time": "0.482",
+      "timestamp": "2026-10-25T14:36:19.175850+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "15",
+      "time": "24.477",
+      "timestamp": "2026-10-25T14:36:20.098595+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "53",
+      "time": "0.503",
+      "timestamp": "2026-10-25T14:36:45.128788+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "50",
+      "time": "0.506",
+      "timestamp": "2026-10-25T14:36:46.086332+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "68",
+      "time": "0.774",
+      "timestamp": "2026-10-25T14:36:47.029213+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "46",
+      "time": "1.234",
+      "timestamp": "2026-10-25T14:36:48.283083+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "2",
+      "tests": "30",
+      "time": "0.725",
+      "timestamp": "2026-10-25T14:36:50.137717+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "4.043",
+      "timestamp": "2026-10-25T14:36:51.301310+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "2.284",
+      "timestamp": "2026-10-25T14:36:55.850399+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "2.090",
+      "timestamp": "2026-10-25T14:36:58.665539+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "8.331",
+      "timestamp": "2026-10-25T14:37:01.209378+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "10",
+      "time": "0.876",
+      "timestamp": "2026-10-25T14:37:10.006589+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "25.299",
+      "timestamp": "2026-10-25T14:37:11.377748+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "18.338",
+      "timestamp": "2026-10-25T14:37:37.269800+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "21.049",
+      "timestamp": "2026-10-25T14:37:56.146092+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "10",
+      "time": "13.024",
+      "timestamp": "2026-10-25T14:38:17.727156+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "42",
+      "time": "0.242",
+      "timestamp": "2026-10-25T14:38:31.295647+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "1.377",
+      "timestamp": "2026-10-25T14:38:31.896830+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.328",
+      "timestamp": "2026-10-25T14:38:33.651303+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "1",
+      "tests": "32",
+      "time": "0.600",
+      "timestamp": "2026-10-25T14:38:34.348125+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "12",
+      "time": "0.201",
+      "timestamp": "2026-10-25T14:38:35.309328+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.001",
+      "timestamp": "2026-10-25T14:38:35.894072+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "12.434",
+      "timestamp": "2026-10-25T14:38:56.424511+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "10",
+      "tests": "32",
+      "time": "0.154",
+      "timestamp": "2026-10-25T14:39:09.404792+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.602",
+      "timestamp": "2026-10-25T14:39:09.920801+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "1.158",
+      "timestamp": "2026-10-25T14:39:10.880857+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "4.025",
+      "timestamp": "2026-10-25T14:39:12.561782+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "9.842",
+      "timestamp": "2026-10-25T14:39:17.130864+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "32",
+      "time": "0.357",
+      "timestamp": "2026-10-25T14:39:27.516242+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.037",
+      "timestamp": "2026-10-25T14:39:28.243402+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "20.476",
+      "timestamp": "2026-10-25T14:39:48.838524+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "25.441",
+      "timestamp": "2026-10-25T14:40:09.896077+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "8",
+      "time": "22.048",
+      "timestamp": "2026-10-25T14:40:35.891814+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "2",
+      "tests": "32",
+      "time": "0.133",
+      "timestamp": "2026-10-25T14:40:58.484443+00:00",
+      "hostname": "runnervmdaln5"
+    },
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "107",
+      "time": "0.800",
+      "timestamp": "2026-10-25T14:40:58.974469+00:00",
+      "hostname": "runnervmdaln5"
+    }
+  ],
+  "test_failures": [
+    {
+      "name": "windows_test_process.batch_16",
+      "message": "pytest exit 3221226505 (0xC0000409); complete report: False",
+      "detail": "tests/test_qt_workflows.py::test_naming_folder_source_exact_destination_hierarchy_and_collision\ntests/test_qt_workflows.py::test_naming_plan_filesystem_checks_are_off_gui_thread\ntests/test_qt_workflows.py::test_kr_exact_inputs_preview_labels_and_queued_scope[completed]\ntests/test_qt_workflows.py::test_kr_exact_inputs_preview_labels_and_queued_scope[error]\ntests/test_qt_workflows.py::test_kr_exact_inputs_preview_labels_and_queued_scope[cancelled]\ntests/test_qt_workflows.py::test_kr_stop_discards_queued_apply_and_helper_never_overwrites\ntests/test_qt_workflows.py::test_close_at_preview_completion_does_not_start_queued_cad_write\ntests/test_qt_workflows.py::test_bolt_unit_conversion_and_all_load_modes[\\xc7ekme-kg]"
+    }
+  ],
+  "test_skips": [
+    {
+      "name": "tests.test_process_watch.test_observer_cli_bypasses_gui_and_cad_on_unsupported_platform",
+      "reason": "The unsupported-platform case is specific to non-Windows."
+    },
+    {
+      "name": "modules.cad_converter.tests.test_live.test_real_solidworks_export_from_explicit_test_copy",
+      "reason": "Requires Windows, open SolidWorks and explicit GOKWORKS_CAD_LIVE_SOURCE test copy"
+    },
+    {
+      "name": "modules.dxf_dwg.tests.test_dxf_dwg.ExportTests.test_published_output_remains_success_when_temporary_cleanup_fails",
+      "reason": "Unix hard-link publication path"
+    },
+    {
+      "name": "modules.naming.tests.test_naming_native.test_windows_powershell_compiles_real_typed_host_without_starting_solidworks",
+      "reason": "Windows PowerShell ve doğrulanmış test interop DLL’si seçilmedi."
+    },
+    {
+      "name": "modules.naming.tests.test_naming_native_live.test_live_typed_pack_reads_dependencies_without_saving_or_renaming_sources",
+      "reason": "Gerçek Windows/SolidWorks ve açıkça seçilmiş Pack and Go montajı yok."
+    },
+    {
+      "name": "modules.profile_cutting.tests.test_live.test_live_weldment_read_keeps_source_and_active_configuration",
+      "reason": "Windows, açık/lisanslı SolidWorks ve açıkça seçilmiş Weldment test kopyası gerekli."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[single]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[stages]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[equal]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[groove]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[zero_groove]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[keyway]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[zero_keyway]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[chamfer]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[fillet]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.shaft_generator.tests.test_live.test_native_driving_dimensions_features_rebuild_save_and_reopen[operations]",
+      "reason": "Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz."
+    },
+    {
+      "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_read_all_sheets_is_readonly_and_revision_matches",
+      "reason": "Gerçek SolidWorks/Windows ve GOKWORKS_TEST_SLDDRW seçimi yok; canlı CAD testi çalıştırılmadı."
+    },
+    {
+      "name": "modules.tolerance_stack.tests.test_tolerance_stack_live.test_live_native_analysis_copy_preserves_original_and_model_references",
+      "reason": "Ayrı analizli kopya kaydı için açık opt-in yok."
+    }
+  ],
+  "test_log_tail": "stent_chain_is_blocked[missing] PASSED [ 56%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[duplicate] PASSED [ 59%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[direction] PASSED [ 62%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[datum] PASSED [ 65%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[axis] PASSED [ 68%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[discontinuous] PASSED [ 71%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[missing_dimension] PASSED [ 75%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[angle] PASSED [ 78%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[basic] PASSED [ 81%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[diameter] PASSED [ 84%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_incomplete_or_inconsistent_chain_is_blocked[unknown_unit] PASSED [ 87%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_edit_requires_new_confirmation_and_physical_duplicates_from_other_views_block PASSED [ 90%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_iso_reuses_verified_limits_and_requires_functional_diameter_relation[50-H7-h6] PASSED [ 93%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_iso_reuses_verified_limits_and_requires_functional_diameter_relation[38-H7-k6] PASSED [ 96%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_iso_reuses_verified_limits_and_requires_functional_diameter_relation[25-H7-p6] PASSED [100%]\n\n- generated xml file: C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gokworks-pytest-0m_c738z\\batch-78.xml -\n======================== 30 passed, 2 skipped in 0.16s ========================\n\nPYTEST_PROCESS_EXIT_CODE=0 (0x00000000)\n\nNATIVE_BATCH=79 TARGETS=[\"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_seeded_simulation_matches_rss_moments_and_bounds[normal]\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_seeded_simulation_matches_rss_moments_and_bounds[uniform]\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_seeded_simulation_matches_rss_moments_and_bounds[triangular]\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_truncated_normal_moments_and_samples_are_not_clipped\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_correlated_statistics_blocked_but_worst_case_remains_available\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_no_acceptance_means_no_yield_or_capability_and_cancel_does_not_publish\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_explicit_cad_alignment_is_auditable_and_does_not_replace_other_engineering_checks\", \"modules/tolerance_stack/tests/test_tolerance_stack_math.py::test_alignment_confirmation_must_be_a_boolean\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_project_roundtrip_preserves_sources_distribution_and_incomplete_work_but_invalidates_result\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_revision_check_hashes_content_and_deleted_sources\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_atomic_writes_keep_existing_file_on_cancel_failure_or_race\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>0]\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>1]\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>2]\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>3]\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_excel_contains_all_terms_assumptions_and_never_evaluates_cad_labels_as_formulas\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_real_unicode_pdf_is_complete_and_cancel_does_not_leave_a_report\", \"modules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_alignment_confirmation_roundtrips_and_old_projects_remain_readable\", \"modules/weight/tests/test_weight.py::WeightTests::test_catalog_area_is_cm2_and_ignores_all_geometry_fields\", \"modules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material\", \"modules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area\", \"modules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result\", \"modules/weight/tests/test_weight.py::WeightTests::test_material_groups_and_sources_cover_each_selectable_material_once\", \"modules/weight/tests/test_weight.py::WeightTests::test_material_preset_density_changes_mass_without_changing_geometry\", \"modules/weight/tests/test_weight.py::WeightTests::test_mm_cm_and_m_produce_the_same_physical_piece\", \"modules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights\", \"modules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected\", \"modules/weight/tests/test_weight.py::WeightTests::test_numeric_overflow_is_a_validation_error\", \"modules/weight/tests/test_weight.py::WeightTests::test_only_active_dimension_fields_are_parsed\", \"modules/weight/tests/test_weight.py::WeightTests::test_sheet_one_piece_and_total_are_distinct\", \"modules/weight/tests/test_weight.py::WeightTests::test_turkish_decimal_comma_and_whitespace\"]\n============================= test session starts =============================\nplatform win32 -- Python 3.13.16, pytest-9.0.2, pluggy-1.7.0 -- C:\\hostedtoolcache\\windows\\Python\\3.13.16\\x64\\python.exe\ncachedir: .pytest_cache\nPySide6 6.10.3 -- Qt runtime 6.10.3 -- Qt compiled 6.10.3\nrootdir: D:\\a\\gokworks\\gokworks\nconfigfile: pytest.ini\nplugins: qt-4.5.0, timeout-2.4.0\ntimeout: 60.0s\ntimeout method: thread\ntimeout func_only: False\ncollecting ... collected 31 items\n\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_seeded_simulation_matches_rss_moments_and_bounds[normal] PASSED [  3%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_seeded_simulation_matches_rss_moments_and_bounds[uniform] PASSED [  6%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_seeded_simulation_matches_rss_moments_and_bounds[triangular] PASSED [  9%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_truncated_normal_moments_and_samples_are_not_clipped PASSED [ 12%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_correlated_statistics_blocked_but_worst_case_remains_available PASSED [ 16%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_no_acceptance_means_no_yield_or_capability_and_cancel_does_not_publish PASSED [ 19%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_explicit_cad_alignment_is_auditable_and_does_not_replace_other_engineering_checks PASSED [ 22%]\nmodules/tolerance_stack/tests/test_tolerance_stack_math.py::test_alignment_confirmation_must_be_a_boolean PASSED [ 25%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_project_roundtrip_preserves_sources_distribution_and_incomplete_work_but_invalidates_result PASSED [ 29%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_revision_check_hashes_content_and_deleted_sources PASSED [ 32%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_atomic_writes_keep_existing_file_on_cancel_failure_or_race PASSED [ 35%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>0] PASSED [ 38%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>1] PASSED [ 41%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>2] PASSED [ 45%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_invalid_or_future_project_data_is_rejected[<lambda>3] PASSED [ 48%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_excel_contains_all_terms_assumptions_and_never_evaluates_cad_labels_as_formulas PASSED [ 51%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_real_unicode_pdf_is_complete_and_cancel_does_not_leave_a_report PASSED [ 54%]\nmodules/tolerance_stack/tests/test_tolerance_stack_storage_report.py::test_alignment_confirmation_roundtrips_and_old_projects_remain_readable PASSED [ 58%]\nmodules/weight/tests/test_weight.py::WeightTests::test_catalog_area_is_cm2_and_ignores_all_geometry_fields PASSED [ 61%]\nmodules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material SUBPASSED(material='Demir / Çelik', value=7000) [ 64%]\nmodules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material SUBPASSED(material='Alüminyum', value=7850) [ 64%]\nmodules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material SUBPASSED(material='PP', value=910) [ 64%]\nmodules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material SUBPASSED(material='304', value=7900) [ 64%]\nmodules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material SUBPASSED(material='Demir / Çelik', value='7850,1') [ 64%]\nmodules/weight/tests/test_weight.py::WeightTests::test_density_cannot_override_selected_material PASSED [ 64%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Kutu profil') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Sac levha') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Boru') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Köşebent') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Kare demir') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='T profil') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='U profil') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='HEA') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='HP') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='HD') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='HL') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='IPN') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='UPE') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='HE') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='IPE') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='UPN') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Altıköşe') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Mil') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area SUBPASSED(kind='Silme lama') [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_every_shape_matches_an_independent_hand_area PASSED [ 67%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'kind': 'Bilinmeyen'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'material': 'Bilinmeyen'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'unit': 'inch'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'method': 'Bilinmeyen'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'density': 0}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'density': 30001}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'density': inf}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'count': 1.5}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'count': 1000001}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'count': True}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'length': 0}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'length': nan}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'b': -1}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'t': None}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'b': '1.000,5'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'method': 'Katalog alanından'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result SUBPASSED(values={'area_cm2': 0, 'method': 'Katalog alanından'}) [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_invalid_and_nonfinite_inputs_do_not_produce_a_result PASSED [ 70%]\nmodules/weight/tests/test_weight.py::WeightTests::test_material_groups_and_sources_cover_each_selectable_material_once PASSED [ 74%]\nmodules/weight/tests/test_weight.py::WeightTests::test_material_preset_density_changes_mass_without_changing_geometry SUBPASSED(material='Demir / Çelik') [ 77%]\nmodules/weight/tests/test_weight.py::WeightTests::test_material_preset_density_changes_mass_without_changing_geometry SUBPASSED(material='Alüminyum') [ 77%]\nmodules/weight/tests/test_weight.py::WeightTests::test_material_preset_density_changes_mass_without_changing_geometry SUBPASSED(material='Delrin (POM-H)') [ 77%]\nmodules/weight/tests/test_weight.py::WeightTests::test_material_preset_density_changes_mass_without_changing_geometry SUBPASSED(material='Kestamit (PA6G)') [ 77%]\nmodules/weight/tests/test_weight.py::WeightTests::test_material_preset_density_changes_mass_without_changing_geometry PASSED [ 77%]\nmodules/weight/tests/test_weight.py::WeightTests::test_mm_cm_and_m_produce_the_same_physical_piece PASSED [ 80%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='S235JR') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='S275JR') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='S355JR') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='S355J2') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='DC01 (DKP)') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='DC02 (DKP)') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='DC03 (DKP)') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='DC04 (DKP)') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='DX51D+Z') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='DX52D+Z') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='S355MC') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='P265GH') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='C45') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='C45E (CK45)') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='42CrMo4') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='16MnCr5') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='34CrNiMo6') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='304') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='316') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights SUBPASSED(material='316L') [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nominal_steel_and_stainless_plate_weights PASSED [ 83%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='Kutu profil', dimensions={'b': 10, 'h': 20, 't': 5}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='Boru', dimensions={'d': 10, 't': 5}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='Köşebent', dimensions={'b': 10, 'h': 20, 't': 10}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='T profil', dimensions={'b': 20, 'h': 10, 'tf': 10, 'tw': 5}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='T profil', dimensions={'b': 20, 'h': 30, 'tf': 5, 'tw': 20}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='IPE', dimensions={'b': 20, 'h': 10, 'tf': 5, 'tw': 3}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected SUBPASSED(kind='U profil', dimensions={'b': 10, 'h': 20, 'tf': 2, 'tw': 10}) [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_nonphysical_walls_and_overlapping_flanges_are_rejected PASSED [ 87%]\nmodules/weight/tests/test_weight.py::WeightTests::test_numeric_overflow_is_a_validation_error SUBPASSED(values={'b': '1e308', 't': '1e308'}) [ 90%]\nmodules/weight/tests/test_weight.py::WeightTests::test_numeric_overflow_is_a_validation_error SUBPASSED(values={'b': '1e308', 'kind': 'Kare demir'}) [ 90%]\nmodules/weight/tests/test_weight.py::WeightTests::test_numeric_overflow_is_a_validation_error SUBPASSED(values={'area_cm2': '1e308', 'method': 'Katalog alanından'}) [ 90%]\nmodules/weight/tests/test_weight.py::WeightTests::test_numeric_overflow_is_a_validation_error SUBPASSED(values={'length': '1e308', 'unit': 'm'}) [ 90%]\nmodules/weight/tests/test_weight.py::WeightTests::test_numeric_overflow_is_a_validation_error PASSED [ 90%]\nmodules/weight/tests/test_weight.py::WeightTests::test_only_active_dimension_fields_are_parsed PASSED [ 93%]\nmodules/weight/tests/test_weight.py::WeightTests::test_sheet_one_piece_and_total_are_distinct PASSED [ 96%]\nmodules/weight/tests/test_weight.py::WeightTests::test_turkish_decimal_comma_and_whitespace PASSED [100%]\n\n- generated xml file: C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gokworks-pytest-0m_c738z\\batch-79.xml -\n=================== 31 passed, 76 subtests passed in 0.82s ====================\n\nPYTEST_PROCESS_EXIT_CODE=0 (0x00000000)\n"
 }
