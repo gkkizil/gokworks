@@ -1,7 +1,7 @@
 {
-  "request_id": "20261025-combined-onefile-windows-layout-142132",
-  "requested_at": "2026-10-25T14:21:32+00:00",
-  "source_commit": "4a4d951e9123175ec52150b3d1b1d2641c5d1eea",
-  "diagnose_run": 40199355040,
-  "reason": "Build the combined Windows x64 EXE with both agents' shaft and Pack and Go/CAD converter fixes. PR #2 fixes the single native Windows regression from run 40199355040: the 550x450 shaft page was forced to 550x469 by native minimum layout metrics. Preserve both 170 px previews and unchanged test expectations; validate the shaft UI early, then run the full Windows regression suite and onefile 100/125/150 percent smoke checks before publication. Keep release and the backup unchanged. Actual licensed SOLIDWORKS live acceptance remains separate."
+  "request_id": "20261025-combined-onefile-isolated-workflows-145446",
+  "requested_at": "2026-10-25T14:54:30+00:00",
+  "source_commit": "43097f81eafc9ad7e5171b76bb99acc606362961",
+  "diagnose_run": 40201902124,
+  "reason": "Build a combined Windows x64 single EXE containing the shaft module, the other agent's Pack and Go/CAD converter fixes, and the verified native shaft layout fix. PR #3 isolates each full-app workflow test in a fresh Qt process after the native 0xC0000409 exit in run 40201902124; retain every test ID, assertion, and crash report. Diagnose the prior native stack, run the early lifecycle check and full Windows regression suite, then build and smoke-test the EXE at 100/125/150 percent before publication. Keep release and the backup unchanged. Licensed SOLIDWORKS live acceptance remains separate."
 }
