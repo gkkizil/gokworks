@@ -1,6 +1,7 @@
 {
-  "request_id": "20261025-shaft-and-cad-fixes-onefile-134758",
-  "requested_at": "2026-10-25T13:47:58+00:00",
-  "source_commit": "17a683b49d8a30aed14a4c5de6ad64c9962b5aa7",
-  "reason": "Deliver one Windows x64 GOKWORKS.exe containing both agents' changes: the parametric shaft module merged in PR #1 (17a683b) and Pack and Go/CAD converter repairs (2b3cfbf), together with the existing Weldments fixes. Run the existing native Windows regression suite and frozen onefile smoke checks at 100%, 125%, and 150% before publishing. Preserve release and the backup repository. Actual licensed SOLIDWORKS live acceptance remains separate."
+  "request_id": "20261025-combined-onefile-windows-layout-142132",
+  "requested_at": "2026-10-25T14:21:32+00:00",
+  "source_commit": "4a4d951e9123175ec52150b3d1b1d2641c5d1eea",
+  "diagnose_run": 40199355040,
+  "reason": "Build the combined Windows x64 EXE with both agents' shaft and Pack and Go/CAD converter fixes. PR #2 fixes the single native Windows regression from run 40199355040: the 550x450 shaft page was forced to 550x469 by native minimum layout metrics. Preserve both 170 px previews and unchanged test expectations; validate the shaft UI early, then run the full Windows regression suite and onefile 100/125/150 percent smoke checks before publication. Keep release and the backup unchanged. Actual licensed SOLIDWORKS live acceptance remains separate."
 }
