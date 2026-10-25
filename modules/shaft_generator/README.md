@@ -168,5 +168,17 @@ kontrolü de gerçek Windows monitör/DPI kabulü olarak raporlanmamalıdır.
   yapıldığından entegrasyon sırasında birleşik sürüm ayrıca sınanır.
 - **Gerçek FeatureManager, tam tanımlı eskiz, CAD içinde ölçü düzenleme/rebuild,
   SLDPRT kaydet/aç kabulü henüz yapılmadı.** Canlı testler ve yukarıdaki manuel
-  liste bu son doğrulama içindir. Sonraki aşama Windows/SOLIDWORKS kabulü;
-  ardından yetkili ana ajanla dar kapsamlı entegrasyon ve birleşik regresyondur.
+  liste bu son doğrulama içindir. Windows/SOLIDWORKS kabulü ayrıca tamamlanmalıdır.
+
+## Ana dal ile birleşik doğrulama
+
+`2b3cfbf3c627b121e9bfae5d64e34e0d33ec47b0` ana dalı geliştirme dalına
+çakışmasız alındı. Pack and Go/dönüştürücü düzeltmeleri aynen korundu.
+Birleşik kaynakta mil, isimlendirme, CAD dönüştürücü, Qt iş akışları,
+navigasyon, bağlantı, süreç yaşam döngüsü ve paketleme için **508 pytest
+öğesi** çalıştırıldı: alt kontroller dahil **536 JUnit kontrolü, 0 başarısızlık,
+0 hata, 16 ortam/canlı test atlaması**. Ana dalın yeni 35 regresyonu da geçti.
+Uygulama öz denetimi 15 modül, iki tema ve çözünürlük matrisiyle tekrar geçti.
+
+Bu kaynak entegrasyonu mevcut Windows EXE'sini yeniden üretmez. Gerçek
+SOLIDWORKS özellik ağacı, eskiz çözücüsü ve Windows CAD kabulü hâlâ beklemektedir.
