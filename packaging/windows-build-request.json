@@ -1,7 +1,7 @@
 {
-  "request_id": "20261025-combined-onefile-isolated-workflows-145446",
-  "requested_at": "2026-10-25T14:54:30+00:00",
-  "source_commit": "43097f81eafc9ad7e5171b76bb99acc606362961",
-  "diagnose_run": 40201902124,
-  "reason": "Build a combined Windows x64 single EXE containing the shaft module, the other agent's Pack and Go/CAD converter fixes, and the verified native shaft layout fix. PR #3 isolates each full-app workflow test in a fresh Qt process after the native 0xC0000409 exit in run 40201902124; retain every test ID, assertion, and crash report. Diagnose the prior native stack, run the early lifecycle check and full Windows regression suite, then build and smoke-test the EXE at 100/125/150 percent before publication. Keep release and the backup unchanged. Licensed SOLIDWORKS live acceptance remains separate."
+  "request_id": "20261025-combined-exe-preview-thread-identity",
+  "requested_at": "2026-10-25T15:24:53+00:00",
+  "source_commit": "eb832e1ba275b601b9eeb27fbcdf32801bf63701",
+  "diagnose_run": 40204440402,
+  "reason": "Produce the requested combined Windows x64 single EXE with the shaft module and the other agent's Pack and Go/CAD converter changes. Run 40204440402 localized the native exit to one background-preview test even in isolation. PR #4 records scalar Python thread identities instead of retaining a worker QThread wrapper; preserve the off-GUI-thread assertion and all regression tests. Run the scenario five times in an early native gate, stopping on any failure; publish current crash context immediately, then run the full suite and 100/125/150 percent packaged EXE smoke checks before release. Keep release and backup unchanged. Licensed SOLIDWORKS live acceptance remains separate."
 }
