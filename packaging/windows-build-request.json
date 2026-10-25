@@ -1,7 +1,7 @@
 {
-  "request_id": "20261025-combined-exe-preview-thread-identity",
-  "requested_at": "2026-10-25T15:24:53+00:00",
-  "source_commit": "eb832e1ba275b601b9eeb27fbcdf32801bf63701",
-  "diagnose_run": 40204440402,
-  "reason": "Produce the requested combined Windows x64 single EXE with the shaft module and the other agent's Pack and Go/CAD converter changes. Run 40204440402 localized the native exit to one background-preview test even in isolation. PR #4 records scalar Python thread identities instead of retaining a worker QThread wrapper; preserve the off-GUI-thread assertion and all regression tests. Run the scenario five times in an early native gate, stopping on any failure; publish current crash context immediately, then run the full suite and 100/125/150 percent packaged EXE smoke checks before release. Keep release and backup unchanged. Licensed SOLIDWORKS live acceptance remains separate."
+  "request_id": "20261025-combined-exe-python312-native-trace",
+  "requested_at": "2026-10-25T15:30:25+00:00",
+  "source_commit": "366fad2f3eb0b98255932dffca58a1b5d13499f5",
+  "diagnose_run": 40206826582,
+  "reason": "Build the combined shaft and Pack and Go/CAD converter Windows x64 single EXE. Run 40206826582 confirms the preview assertion passes before native teardown fails on Python 3.13.16/Qt 6.10.3. PR #5 uses Python 3.12 (the locally validated runtime), adds native Qt/window-close/deferred-delete/GC checkpoints, and preserves all test assertions and all suite cases. Require all five early preview lifecycle checks, the full Windows suite, and packaged EXE smoke checks at 100/125/150 percent before publishing. On failure include the current Qt native trace immediately. Keep release and backup unchanged; licensed SOLIDWORKS live checks remain separate."
 }
