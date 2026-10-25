@@ -29,6 +29,21 @@ def test_single_weldment_keeps_resolved_and_raw_properties_without_saving(tmp_pa
     assert row.body_refs and result.summary['profiles']==1
 
 
+def test_integer_fully_rebuilt_status_does_not_block_a_valid_weldment(tmp_path):
+    model=Model(tmp_path/'Şase.SLDPRT',[Folder()])
+    model.Extension.NeedsRebuild2=0  # Actual IModelDocExtension return: Int32 enum, not bool.
+    result,_=read(model)
+    assert result.rows[0].ready and not result.rows[0].issues
+
+
+def test_integer_fully_rebuilt_assembly_does_not_invalidate_its_weldment_instances(tmp_path):
+    part=Model(tmp_path/'Şase.SLDPRT',[Folder()]);part.Extension.NeedsRebuild2=0
+    root=Model(tmp_path/'Montaj.SLDASM',children=[component('Şase-1',part.path)])
+    root.Extension.NeedsRebuild2=0
+    result,_=read(root,[part])
+    assert result.rows[0].ready and result.unscanned==0
+
+
 def test_multi_body_and_different_sections_and_lengths_are_not_combined(tmp_path):
     folders=[Folder('A',[Body('a'),Body('b')]),
              Folder('B',[Body('c',500)],{'LENGTH':'500'}),

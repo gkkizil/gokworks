@@ -10,7 +10,10 @@ from modules.cad_converter.api import RestoreError
 CONSTANTS = dict(swDocPART=1, swDocASSEMBLY=2, swWeldmentCutlist=3,
                  swSheetmetalCutlist=2, swSolidBodyCutList=1, swMM=0,
                  swCustomInfoGetResult_ResolvedValue=2, swComponentSuppressed=0,
-                 swComponentLightweight=1, swComponentFullyResolved=2)
+                 swComponentLightweight=1, swComponentFullyResolved=2,
+                 swModelRebuildStatus_FullyRebuilt=0,
+                 swModelRebuildStatus_NonFrozenFeatureNeedsRebuild=1,
+                 swModelRebuildStatus_FrozenFeatureNeedsRebuild=2)
 
 
 class Properties:
@@ -71,7 +74,7 @@ class Model:
         self.path = str(path); self.children = children
         self.configs = configs or {'Default': list(folders)}
         self.ConfigurationManager = NS(ActiveConfiguration=NS(Name=next(iter(self.configs))))
-        self.Extension = NS(NeedsRebuild2=False, GetPersistReference3=lambda obj: obj.Name.encode())
+        self.Extension = NS(NeedsRebuild2=0, GetPersistReference3=lambda obj: obj.Name.encode())
         self.switches = []
     def GetPathName(self): return self.path
     def GetTitle(self): return Path(self.path).name

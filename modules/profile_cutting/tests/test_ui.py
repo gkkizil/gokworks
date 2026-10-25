@@ -6,7 +6,7 @@ from PySide6.QtCore import QCoreApplication,QEvent,Qt
 from PySide6.QtWidgets import QDialog
 
 from gui_qt.app import MainWindow,create_application
-from modules.profile_cutting.models import Demand,Project
+from modules.profile_cutting.models import Demand,Project,ScanResult
 from modules.profile_cutting.scanner import scan as real_scan
 from modules.profile_cutting.dialogs import RowDialog,MappingDialog
 from .fakes import Model,Folder,factory
@@ -129,6 +129,24 @@ def test_navigation_remains_responsive_while_scan_is_running(page,qtbot,monkeypa
     w.navigate('weight');assert w.pages['weight'].isVisible()
     w.jobs.cancel();qtbot.waitUntil(lambda:not w.jobs.busy,timeout=6000)
     assert p.scan_button.isEnabled()
+
+
+def test_failed_scan_shows_the_actual_cause_and_plain_details(page,monkeypatch):
+    p,_=page;message='FeatureManager ağacında yinelenen/döngüsel unsur bulundu.'
+    result=ScanResult('Şase.SLDPRT','Default<As Machined>',
+        diagnostics=[dict(source='Şase.SLDPRT',configuration='Default<As Machined>',detail=message)],unscanned=1)
+    p.handle_events([('weldment_scan',result)])
+    assert message in p.status_text and '1 belge okunamadı' in p.status_text
+    assert p.status.property('role')=='error' and p.scan_model.rowCount()==0
+    shown=[]
+    monkeypatch.setattr('modules.profile_cutting.ui.show_details',lambda *args:shown.append(args[-1]))
+    p.scan_details()
+    assert shown==[f'Şase.SLDPRT [Default<As Machined>]\n{message}']
+
+
+def test_empty_cutlist_does_not_display_a_success_message(page):
+    p,_=page;p.handle_events([('weldment_scan',ScanResult('Şase.SLDPRT','Default',scanned_parts=1))])
+    assert 'Cut List bulunamadı' in p.status_text and p.status.property('role')=='error'
 
 
 @pytest.mark.parametrize('theme',['dark','light'])

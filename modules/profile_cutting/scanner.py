@@ -23,12 +23,10 @@ class Options:
 def read_part(session, model, path, configuration, options, mapping, stop):
     rows = []
     unit = session.display_unit(model)
-    extension = folder = body = feature = bodies = None
+    folder = body = feature = bodies = None
     seen_bodies = set()
     try:
-        extension = get(model, 'Extension')
-        needs_rebuild = optional(extension, 'NeedsRebuild2', prop=True)
-        extension = None
+        needs_rebuild = session.rebuild_pending(model)
         for feature, kind in session.cut_folders(model,stop):
             checkpoint(stop)
             folder = call(feature, 'GetSpecificFeature2')
@@ -151,7 +149,7 @@ def read_part(session, model, path, configuration, options, mapping, stop):
             rows.append(row)
             bodies = body = folder = feature = None
         return rows
-    finally: model = extension = folder = feature = bodies = body = None
+    finally: model = folder = feature = bodies = body = None
 
 
 def scan(path=None, options=Options(), mapping=None, events=None, stop=None, *, session_factory=Session):

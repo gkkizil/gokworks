@@ -1,9 +1,11 @@
 # Profil kesim optimizasyonu ve SolidWorks Weldments
 
-GOKWORKS → **Mühendislik Hesapları → Profil kesim**.
+GOKWORKS → **Üretim → Profil kesim**.
 Mevcut PySide6 teması, kalıcı sayfalar, tablo modelleri ve `JobManager` kullanılır.
 Yeni bağımlılık yoktur. Manuel kesim planı tamamen çevrimdışıdır; Weldments
 taraması Windows, pywin32 ve açık/lisanslı SolidWorks oturumu gerektirir.
+
+[25 Ekim 2026: FeatureManager tekrarları ve rebuild durum kodu düzeltmesi](../../docs/profile-cutting/feature-graph-fix-2026-10-25/README.md).
 
 ## Kullanım
 

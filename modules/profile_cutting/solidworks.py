@@ -11,6 +11,8 @@ from modules.tolerance_stack.com import variant
 from .models import Property, checkpoint
 from .geometry import Face
 
+MAX_FEATURE_STATES = 20000
+
 
 def values(value):
     if value is None: return ()
@@ -134,6 +136,23 @@ class Session(CadSession):
         except Exception: pass
         return ''
 
+    def rebuild_pending(self, model):
+        """NeedsRebuild2 returns swModelRebuildStatus_e (Int32), not VARIANT_BOOL."""
+        extension = None
+        try:
+            extension = get(model, 'Extension')
+            status = optional(extension, 'NeedsRebuild2', prop=True)
+            if type(status) is bool: return status  # Legacy dispatch/doubles.
+            if type(status) is int:
+                if status == self.constants.get('swModelRebuildStatus_FullyRebuilt'):
+                    return False
+                pending = [self.constants[name] for name in (
+                    'swModelRebuildStatus_NonFrozenFeatureNeedsRebuild',
+                    'swModelRebuildStatus_FrozenFeatureNeedsRebuild') if name in self.constants]
+                if status in pending: return True
+            return None
+        finally: model = extension = None
+
     def persistent_ref(self, model, obj):
         extension = None
         try:
@@ -166,24 +185,47 @@ class Session(CadSession):
         finally: body = faces = face = surface = None
 
     def cut_folders(self, model, stop=None):
-        """Walk top-level and subfeatures, keeping each actual folder once."""
-        seen = set()
-        def walk(feature, sub=False):
-            siblings = set()
-            while feature is not None:
+        """Follow the two feature links independently; emit each folder once.
+
+        A Weldment can expose the same feature through the body folder and the
+        top-level list, including links back to an already visited feature.
+        Repeated API exposure is not evidence that the part cannot be read.
+        """
+        visited, yielded = set(), set()
+        pending = []
+        feature = child = next_feature = None
+        try:
+            pending.append((call(model, 'FirstFeature'), False, False))
+            while pending:
                 checkpoint(stop)
-                token = self.persistent_ref(model, feature) or str(get(feature, 'Name'))
-                if token in siblings: raise ApiError('FeatureManager ağacında yinelenen/döngüsel unsur bulundu.')
-                siblings.add(token)
-                if token not in seen:
-                    seen.add(token)
-                    kind = call(feature, 'GetTypeName2')
-                    if kind in ('CutListFolder', 'SolidBodyFolder'):
-                        yield feature, kind
-                    child = call(feature, 'GetFirstSubFeature')
-                    if child is not None: yield from walk(child, True)
-                feature = call(feature, 'GetNextSubFeature' if sub else 'GetNextFeature')
-        yield from walk(call(model, 'FirstFeature'))
+                feature, sub, resume = pending.pop()
+                if feature is None: continue
+                if resume:
+                    next_feature = call(feature, 'GetNextSubFeature' if sub else 'GetNextFeature')
+                    pending.append((next_feature, sub, False))
+                    continue
+                name, kind = str(get(feature, 'Name')), call(feature, 'GetTypeName2')
+                # A persistent token alone is not a feature-tree identity:
+                # generic folders can share it or have no supported reference.
+                token = (name, kind, self.persistent_ref(model, feature))
+                state = (token, sub)
+                if state in visited: continue
+                visited.add(state)
+                if len(visited) > MAX_FEATURE_STATES:
+                    raise ApiError('FeatureManager ağacı güvenli tarama sınırını aştı; '
+                                   f'tarama tamamlanamadı ({name}, {kind}).')
+                pending.append((feature, sub, True))
+                if kind in ('CutListFolder', 'SolidBodyFolder') and token not in yielded:
+                    yielded.add(token)
+                    yield feature, kind
+                # Consumers may explicitly UpdateCutList while the generator
+                # is suspended. Read children after that update, and siblings
+                # only after the child branch finishes.
+                child = call(feature, 'GetFirstSubFeature')
+                pending.append((child, True, False))
+        finally:
+            pending.clear()
+            model = feature = child = next_feature = None
 
     def assembly_cautions(self, model, stop=None):
         """A part-document cut list cannot prove instance-specific assembly cuts."""
@@ -193,11 +235,10 @@ class Session(CadSession):
                 'ProfileFeature','3DProfileFeature','FtrFolder','MateReference','ExplodedView',
                 'LocalLPattern','LocalCirPattern','MirrorComponent','DerivedComponentPattern',
                 'CompCurvePattern','SketchDrivenPattern'}
-        feature = extension = None
+        feature = None
         warnings = []
         try:
-            extension = get(model, 'Extension')
-            if optional(extension, 'NeedsRebuild2', prop=True) is not False:
+            if self.rebuild_pending(model) is not False:
                 warnings.append('Montaj rebuild bekliyor veya güncelliği okunamadı.')
             feature = call(model, 'FirstFeature')
             seen = set()
@@ -211,4 +252,4 @@ class Session(CadSession):
                     warnings.append(f'Montaj unsuru {name} ({kind}): örneğe özel kesim/cope etkisi parça Cut List’iyle doğrulanamadı.')
                 feature = call(feature, 'GetNextFeature')
             return warnings
-        finally: model = feature = extension = None
+        finally: model = feature = None

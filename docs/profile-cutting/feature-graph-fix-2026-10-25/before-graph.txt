@@ -1,0 +1,122 @@
+FFF.F.FF..                                                               [100%]
+=================================== FAILURES ===================================
+_ test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies[top] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_repeated_cutlist_exposure0')
+repeated_chain = 'top'
+
+    @pytest.mark.parametrize('repeated_chain',['top','sub','both'])
+    def test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies(tmp_path,repeated_chain):
+        root=TreeFeature('Katı Gövdeler')
+        first,second=Folder('Kesim-Listesi-1'),Folder('Kesim-Listesi-2')
+        root.child=first;root.top=first
+        link(first,top=second,sub=second)
+        link(second,top=first if repeated_chain in ('top','both') else None,
+             sub=first if repeated_chain in ('sub','both') else None)
+        model=graph_model(tmp_path,root);session,make=factory([model],model)
+        result=scan(session_factory=make)
+>       assert session.closed and result.unscanned==0
+E       AssertionError: assert (True and 1 == 0)
+E        +  where True = <modules.profile_cutting.tests.fakes.FakeSession object at 0x7fb76c3f7770>.closed
+E        +  and   1 = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_repeated_cutlist_exposure0/hareketli_kasa_şase_.SLDPRT', configu...>', 'detail': 'FeatureManager ağacında yinelenen/döngüsel unsur bulundu.'}], scanned_parts=0, weldments=0, unscanned=1).unscanned
+
+modules/profile_cutting/tests/test_feature_graph.py:46: AssertionError
+_ test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies[sub] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_repeated_cutlist_exposure1')
+repeated_chain = 'sub'
+
+    @pytest.mark.parametrize('repeated_chain',['top','sub','both'])
+    def test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies(tmp_path,repeated_chain):
+        root=TreeFeature('Katı Gövdeler')
+        first,second=Folder('Kesim-Listesi-1'),Folder('Kesim-Listesi-2')
+        root.child=first;root.top=first
+        link(first,top=second,sub=second)
+        link(second,top=first if repeated_chain in ('top','both') else None,
+             sub=first if repeated_chain in ('sub','both') else None)
+        model=graph_model(tmp_path,root);session,make=factory([model],model)
+        result=scan(session_factory=make)
+>       assert session.closed and result.unscanned==0
+E       AssertionError: assert (True and 1 == 0)
+E        +  where True = <modules.profile_cutting.tests.fakes.FakeSession object at 0x7fb76bb7c050>.closed
+E        +  and   1 = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_repeated_cutlist_exposure1/hareketli_kasa_şase_.SLDPRT', configu...>', 'detail': 'FeatureManager ağacında yinelenen/döngüsel unsur bulundu.'}], scanned_parts=0, weldments=0, unscanned=1).unscanned
+
+modules/profile_cutting/tests/test_feature_graph.py:46: AssertionError
+_ test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies[both] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_repeated_cutlist_exposure2')
+repeated_chain = 'both'
+
+    @pytest.mark.parametrize('repeated_chain',['top','sub','both'])
+    def test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies(tmp_path,repeated_chain):
+        root=TreeFeature('Katı Gövdeler')
+        first,second=Folder('Kesim-Listesi-1'),Folder('Kesim-Listesi-2')
+        root.child=first;root.top=first
+        link(first,top=second,sub=second)
+        link(second,top=first if repeated_chain in ('top','both') else None,
+             sub=first if repeated_chain in ('sub','both') else None)
+        model=graph_model(tmp_path,root);session,make=factory([model],model)
+        result=scan(session_factory=make)
+>       assert session.closed and result.unscanned==0
+E       AssertionError: assert (True and 1 == 0)
+E        +  where True = <modules.profile_cutting.tests.fakes.FakeSession object at 0x7fb76bb7ca50>.closed
+E        +  and   1 = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_repeated_cutlist_exposure2/hareketli_kasa_şase_.SLDPRT', configu...>', 'detail': 'FeatureManager ağacında yinelenen/döngüsel unsur bulundu.'}], scanned_parts=0, weldments=0, unscanned=1).unscanned
+
+modules/profile_cutting/tests/test_feature_graph.py:46: AssertionError
+_ test_feature_reference_collision_is_not_enough_to_discard_distinct_named_folders[collision] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_feature_reference_collisi0')
+reference = 'collision'
+
+    @pytest.mark.parametrize('reference',['collision','unavailable'])
+    def test_feature_reference_collision_is_not_enough_to_discard_distinct_named_folders(tmp_path,reference):
+        root=TreeFeature('Gövdeler');first,second=Folder('A'),Folder('B')
+        root.child=first;link(first,sub=second)
+        model=graph_model(tmp_path,root)
+        def persist(obj):
+            if reference=='unavailable':raise RuntimeError('This feature has no persistent reference')
+            return b'generic-folder-reference'
+        model.Extension.GetPersistReference3=persist
+        result=scan(session_factory=factory([model],model)[1])
+>       assert result.unscanned==0 and {r.folder for r in result.rows}=={'A','B'}
+E       AssertionError: assert (1 == 0)
+E        +  where 1 = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_feature_reference_collisi0/hareketli_kasa_şase_.SLDPRT', configu...>', 'detail': 'FeatureManager ağacında yinelenen/döngüsel unsur bulundu.'}], scanned_parts=0, weldments=0, unscanned=1).unscanned
+
+modules/profile_cutting/tests/test_feature_graph.py:73: AssertionError
+_____ test_feature_name_shared_by_different_kinds_does_not_hide_a_cutlist ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_feature_name_shared_by_di0')
+
+    def test_feature_name_shared_by_different_kinds_does_not_hide_a_cutlist(tmp_path):
+        root=TreeFeature('A','HistoryFolder');root.child=Folder('A')
+        result=scan(session_factory=factory([model:=graph_model(tmp_path,root)],model)[1])
+>       assert result.unscanned==0 and len(result.rows)==1 and result.rows[0].ready
+E       AssertionError: assert (0 == 0 and 0 == 1)
+E        +  where 0 = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_feature_name_shared_by_di0/hareketli_kasa_şase_.SLDPRT', configu...'Cut List bulunamadı. Weldments kesim listesini SolidWorks’te oluşturun.'}], scanned_parts=1, weldments=0, unscanned=0).unscanned
+E        +  and   0 = len([])
+E        +    where [] = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_feature_name_shared_by_di0/hareketli_kasa_şase_.SLDPRT', configu...'Cut List bulunamadı. Weldments kesim listesini SolidWorks’te oluşturun.'}], scanned_parts=1, weldments=0, unscanned=0).rows
+
+modules/profile_cutting/tests/test_feature_graph.py:79: AssertionError
+____ test_deep_feature_structure_does_not_depend_on_python_recursion_limit _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_deep_feature_structure_do0')
+
+    def test_deep_feature_structure_does_not_depend_on_python_recursion_limit(tmp_path):
+        root=node=TreeFeature('Folder-0')
+        for i in range(1,1200):
+            node.child=TreeFeature(f'Folder-{i}');node=node.child
+        node.child=Folder()
+        result=scan(session_factory=factory([model:=graph_model(tmp_path,root)],model)[1])
+>       assert result.unscanned==0 and len(result.rows)==1 and result.rows[0].ready
+E       AssertionError: assert (1 == 0)
+E        +  where 1 = ScanResult(source='/tmp/pytest-of-agent/pytest-0/test_deep_feature_structure_do0/hareketli_kasa_şase_.SLDPRT', configu...on': 'Default<As Machined>', 'detail': 'maximum recursion depth exceeded'}], scanned_parts=0, weldments=0, unscanned=1).unscanned
+
+modules/profile_cutting/tests/test_feature_graph.py:88: AssertionError
+=========================== short test summary info ============================
+FAILED modules/profile_cutting/tests/test_feature_graph.py::test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies[top]
+FAILED modules/profile_cutting/tests/test_feature_graph.py::test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies[sub]
+FAILED modules/profile_cutting/tests/test_feature_graph.py::test_repeated_cutlist_exposures_do_not_drop_the_weldment_or_multiply_bodies[both]
+FAILED modules/profile_cutting/tests/test_feature_graph.py::test_feature_reference_collision_is_not_enough_to_discard_distinct_named_folders[collision]
+FAILED modules/profile_cutting/tests/test_feature_graph.py::test_feature_name_shared_by_different_kinds_does_not_hide_a_cutlist
+FAILED modules/profile_cutting/tests/test_feature_graph.py::test_deep_feature_structure_does_not_depend_on_python_recursion_limit
+6 failed, 4 passed in 0.14s

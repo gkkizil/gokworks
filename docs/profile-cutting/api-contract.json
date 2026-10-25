@@ -211,5 +211,13 @@
       "CutListSortOptions",
       "IgnoreInvalidFacesOrFeatures"
     ]
+  },
+  {
+    "interface": "IModelDocExtension",
+    "method": "get_NeedsRebuild2",
+    "signature": "200008",
+    "parameters": [
+      ""
+    ]
   }
 ]

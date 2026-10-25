@@ -74,6 +74,12 @@ def test_raw_get6_invoke_has_explicit_byref_outputs_and_accepts_tuple_result():
     assert props['LENGTH'].raw=='SW-LENGTH@source' and calls==[(1,1),(2,1)]
 
 
+@pytest.mark.parametrize('status,expected',[(0,False),(1,True),(2,True),(False,False),(True,True),(None,None),(99,None)])
+def test_needs_rebuild_uses_published_integer_enum_and_preserves_unknown_status(status,expected):
+    session=Session();session.constants=CONSTANTS
+    assert session.rebuild_pending(NS(Extension=NS(NeedsRebuild2=status))) is expected
+
+
 def test_failed_read_drops_exception_owned_pointers_before_sta_exit(tmp_path):
     import weakref
     pointers=[]
@@ -91,3 +97,31 @@ def test_failed_read_drops_exception_owned_pointers_before_sta_exit(tmp_path):
             super().__exit__(*args)
     session.__class__=Guarded
     with pytest.raises(RuntimeError,match='Read failed'):scan(session_factory=make)
+
+
+def test_raw_feature_graph_deduplicates_new_dispatch_wrappers_and_follows_both_links():
+    members={name:i for i,name in enumerate(('Name','GetTypeName2','GetFirstSubFeature',
+        'GetNextFeature','GetNextSubFeature','Extension','GetPersistReference3'))}
+    names={i:name for name,i in members.items()};calls=[]
+    nodes={'root':('Gövdeler','FtrFolder','a','a',None),
+           'a':('Kesim-1','CutListFolder',None,'b','b'),
+           'b':('Kesim-2','CutListFolder',None,'a','a')}
+    def wrap(key):return NS(_oleobj_=Dispatch(key)) if key is not None else None
+    class Dispatch:
+        def __init__(self,key):self.key=key
+        def GetIDsOfNames(self,lcid,name):return members[name]
+        def Invoke(self,member,lcid,flags,result,*args):
+            name=names[member];calls.append((self.key,name,flags))
+            assert flags==(2 if name in ('Name','Extension') else 1)
+            if name=='Extension':return wrap('extension')
+            if name=='FirstFeature':return wrap('root')
+            if name=='GetPersistReference3':return args[0]._oleobj_.key.encode()
+            node=nodes[self.key]
+            if name=='Name':return node[0]
+            if name=='GetTypeName2':return node[1]
+            return wrap(node[{'GetFirstSubFeature':2,'GetNextFeature':3,'GetNextSubFeature':4}[name]])
+    members['FirstFeature']=len(members);names[members['FirstFeature']]='FirstFeature'
+    folders=list(Session().cut_folders(wrap('model')))
+    assert [(f._oleobj_.key,kind) for f,kind in folders]==[('a','CutListFolder'),('b','CutListFolder')]
+    assert ('a','GetNextFeature',1) in calls and ('a','GetNextSubFeature',1) in calls
+    assert len(calls)<100

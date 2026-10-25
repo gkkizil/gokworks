@@ -272,7 +272,15 @@ class ProfileCuttingPage(BasePage):
                 if reconcile(self.project, value): self.invalidate(); self.refresh_demands()
                 self.refresh_scan_table(); self.tabs.setCurrentIndex(1)
                 self.source_label.setText(f'{value.source} [{value.configuration}]')
-                self.set_status('Tarama tamamlandı. Hazır satırları aktarın; diğerlerini inceleyin.', bool(value.unscanned))
+                if value.unscanned:
+                    failures=[d for d in value.diagnostics if d.get('configuration')]
+                    detail=next((d.get('detail','') for d in failures or value.diagnostics),'Tarama ayrıntılarını açın.')
+                    self.set_status(f'{value.unscanned} belge okunamadı. {detail}', True)
+                elif not value.rows:
+                    self.set_status('Bu konfigürasyonda Cut List bulunamadı. SolidWorks’te kesim listesini '
+                                    'oluşturup/güncelleyip tekrar tarayın.', True)
+                else:
+                    self.set_status('Tarama tamamlandı. Hazır satırları aktarın; diğerlerini inceleyin.')
             elif kind == 'profile_plan':
                 self.plan = value
                 self.plan_model.replace([dict(bar=i+1, group=' / '.join(v for v in bar.group if v),
@@ -322,7 +330,8 @@ class ProfileCuttingPage(BasePage):
                  '\n'.join(row.issues+row.errors()) + f'\nBoy kaynağı: {row.length_source} · {row.freshness}\nKaynak gösterim birimi: {row.display_unit or "okunamadı"} · Hesap: mm\n' +
                  '\n'.join(f'{p.name}: ham={p.raw} | çözümlenmiş={p.evaluated} | {p.status}' for p in row.properties.values())
                  for row in self.scan_result.rows]
-        lines += [str(value) for value in self.scan_result.diagnostics]
+        lines += [f'{value.get("source", "Kaynak")} [{value.get("configuration", "—")}]\n'
+                  + str(value.get('detail') or '') for value in self.scan_result.diagnostics]
         show_details(self, 'Weldments · Tarama ayrıntıları', '\n\n'.join(lines) or 'Cut List bulunamadı.')
 
     def save_project(self):

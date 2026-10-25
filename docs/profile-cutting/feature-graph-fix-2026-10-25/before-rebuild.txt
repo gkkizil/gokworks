@@ -1,0 +1,33 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_integer_fully_rebuilt_status_does_not_block_a_valid_weldment _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-5/test_integer_fully_rebuilt_sta0')
+
+    def test_integer_fully_rebuilt_status_does_not_block_a_valid_weldment(tmp_path):
+        model=Model(tmp_path/'Şase.SLDPRT',[Folder()])
+        model.Extension.NeedsRebuild2=0  # Actual IModelDocExtension return: Int32 enum, not bool.
+        result,_=read(model)
+>       assert result.rows[0].ready and not result.rows[0].issues
+E       AssertionError: assert (False)
+E        +  where False = ScanRow(id='c0cb42f45c51fac26aa16a0d27bf6b2e17ce857e4a3debf0825f7d25752add00', source='/tmp/pytest-of-agent/pytest-5/t...shness='Güncellik doğrulanamadı', allowance='0', reviewed=False, review_note='', property_errors=[], display_unit='mm').ready
+
+modules/profile_cutting/tests/test_scanner.py:36: AssertionError
+_ test_integer_fully_rebuilt_assembly_does_not_invalidate_its_weldment_instances _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-5/test_integer_fully_rebuilt_ass0')
+
+    def test_integer_fully_rebuilt_assembly_does_not_invalidate_its_weldment_instances(tmp_path):
+        part=Model(tmp_path/'Şase.SLDPRT',[Folder()]);part.Extension.NeedsRebuild2=0
+        root=Model(tmp_path/'Montaj.SLDASM',children=[component('Şase-1',part.path)])
+        root.Extension.NeedsRebuild2=0
+        result,_=read(root,[part])
+>       assert result.rows[0].ready and result.unscanned==0
+E       AssertionError: assert (False)
+E        +  where False = ScanRow(id='e9dc66233fb57b5f61bf7c2eaffa5e21f172b83b129c8435e1a69eb37fe82ea6', source='/tmp/pytest-of-agent/pytest-5/t...shness='Güncellik doğrulanamadı', allowance='0', reviewed=False, review_note='', property_errors=[], display_unit='mm').ready
+
+modules/profile_cutting/tests/test_scanner.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED modules/profile_cutting/tests/test_scanner.py::test_integer_fully_rebuilt_status_does_not_block_a_valid_weldment
+FAILED modules/profile_cutting/tests/test_scanner.py::test_integer_fully_rebuilt_assembly_does_not_invalidate_its_weldment_instances
+2 failed in 0.08s
