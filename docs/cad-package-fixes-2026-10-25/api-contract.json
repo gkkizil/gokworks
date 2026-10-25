@@ -1,0 +1,124 @@
+{
+  "source": "2023/SolidWorks.Interop.sldworks.dll",
+  "sha256": "7a6bf74d2a9f60563959d738c3c85f825f257c9def2a3bec464511aaebfc88e4",
+  "signatures": {
+    "ISldWorks.SetUserPreferenceToggle": {
+      "signature_hex": "2002010802",
+      "parameters": [
+        "UserPreferenceValue",
+        "OnFlag"
+      ]
+    },
+    "ISldWorks.SetUserPreferenceDoubleValue": {
+      "signature_hex": "200202080d",
+      "parameters": [
+        "",
+        "UserPreferenceValue",
+        "Value"
+      ]
+    },
+    "ISldWorks.SetUserPreferenceIntegerValue": {
+      "signature_hex": "2002020808",
+      "parameters": [
+        "",
+        "UserPreferenceValue",
+        "Value"
+      ]
+    },
+    "ISldWorks.GetDocumentDependencies2": {
+      "signature_hex": "20041c0e020202",
+      "parameters": [
+        "",
+        "Document",
+        "Traverseflag",
+        "Searchflag",
+        "AddReadOnlyInfo"
+      ]
+    },
+    "IPartDoc.GetBodies2": {
+      "signature_hex": "20021c0802",
+      "parameters": [
+        "",
+        "BodyType",
+        "BVisibleOnly"
+      ]
+    },
+    "IBody2.GetFaceCount": {
+      "signature_hex": "200008",
+      "parameters": [
+        ""
+      ]
+    },
+    "IBody2.GetType": {
+      "signature_hex": "200008",
+      "parameters": [
+        ""
+      ]
+    },
+    "IModelDocExtension.GetPackAndGo": {
+      "signature_hex": "2000129020",
+      "parameters": [
+        ""
+      ]
+    },
+    "IModelDocExtension.SavePackAndGo": {
+      "signature_hex": "20011c129020",
+      "parameters": [
+        "",
+        "PackAndGo"
+      ]
+    },
+    "IPackAndGo.GetDocumentSaveToNames": {
+      "signature_hex": "200202101c101c",
+      "parameters": [
+        "",
+        "PathNameList",
+        "DocumentStatusList"
+      ]
+    },
+    "IPackAndGo.SetDocumentSaveToNames": {
+      "signature_hex": "2001021c",
+      "parameters": [
+        "",
+        "PathNameList"
+      ]
+    },
+    "IPackAndGo.SetSaveToName": {
+      "signature_hex": "200202020e",
+      "parameters": [
+        "",
+        "Override",
+        "SaveToName"
+      ]
+    },
+    "IPackAndGo.GetDocumentNames": {
+      "signature_hex": "200102101c",
+      "parameters": [
+        "",
+        "DocumentNames"
+      ]
+    },
+    "IPackAndGo.GetDocumentNamesCount": {
+      "signature_hex": "200008",
+      "parameters": [
+        ""
+      ]
+    }
+  },
+  "scope": "Metadata inspection only; not a live SolidWorks test. Interop DLL is not redistributed.",
+  "return_shapes": {
+    "ISldWorks.SetUserPreferenceToggle": "void(int UserPreferenceValue, bool OnFlag)",
+    "ISldWorks.SetUserPreferenceIntegerValue": "bool(int UserPreferenceValue, int Value)",
+    "ISldWorks.SetUserPreferenceDoubleValue": "bool(int UserPreferenceValue, double Value)",
+    "IPartDoc.GetBodies2": "object(int BodyType, bool VisibleOnly)",
+    "IBody2.GetType": "int()",
+    "IBody2.GetFaceCount": "int()",
+    "IModelDocExtension.GetPackAndGo": "PackAndGo()",
+    "IPackAndGo.GetDocumentNames": "bool(out object DocumentNames)",
+    "IPackAndGo.GetDocumentSaveToNames": "bool(out object PathNameList, out object DocumentStatusList)",
+    "IPackAndGo.GetDocumentNamesCount": "int()",
+    "IPackAndGo.SetDocumentSaveToNames": "bool(object PathNameList)",
+    "IPackAndGo.SetSaveToName": "bool(bool Override, string SaveToName)",
+    "IModelDocExtension.SavePackAndGo": "object(PackAndGo PackAndGo)"
+  }
+}

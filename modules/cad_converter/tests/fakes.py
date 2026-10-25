@@ -124,7 +124,7 @@ class App:
     GetUserPreferenceToggle = GetUserPreferenceIntegerValue
     GetUserPreferenceDoubleValue = GetUserPreferenceIntegerValue
     def SetUserPreferenceIntegerValue(self, key, value): self.preferences[key] = value; return True
-    SetUserPreferenceToggle = SetUserPreferenceIntegerValue
+    def SetUserPreferenceToggle(self, key, value): self.preferences[key] = value
     SetUserPreferenceDoubleValue = SetUserPreferenceIntegerValue
 
 

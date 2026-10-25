@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-25",
+  "execution": "Linux; real PySide6 offscreen; COM mocked; no live SolidWorks",
+  "related_pytest_items": 342,
+  "related_junit": {
+    "tests": 365,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3
+  },
+  "final_new_regressions": {
+    "tests": 35,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "profile_reader_regressions": {
+    "tests": 49,
+    "failures": 0,
+    "errors": 0
+  },
+  "self_check": {
+    "status": "passed",
+    "python": "3.13.5",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "cad_converter",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "nesting",
+      "profile_cutting"
+    ],
+    "checks": [
+      "14 modules",
+      "two themes",
+      "resolution matrix",
+      "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+      "3D CAD converter / eight formats / queue, options and clear / no live COM",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "hole nesting / five parts on one plate / contour cut-order CSV",
+      "nesting shared parts-and-layout workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ],
+    "solidworks_live_tested": false
+  },
+  "no_new_runtime_dependencies": true,
+  "new_exe_requested": false
+}

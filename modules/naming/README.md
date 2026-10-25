@@ -1,5 +1,12 @@
 # İsimlendirme aracı
 
+**25 Ekim 2026 — Qt önizleme düzeltmesi:** Hedef klasör dolu, seçilmemiş veya
+geçersiz olduğunda okunan montaj/parça listesi artık kaybolmaz. Ön/son ek ve
+**Adı düzenle** ile adları hazırlayabilirsiniz. **Paketi oluştur**, adlar
+geçerliyken ve boş/yeni bir hedef klasör seçildiğinde açılır. Yeni tarama
+başarısızsa önceki montajın paketi kaydedilebilir durumda bırakılmaz.
+[API incelemesi ve doğrulama kaydı](../../docs/cad-package-fixes-2026-10-25/README.md).
+
 **19 Ekim 2026:** `GetPackAndGo` parametre bağlama hatası için uygulamaya gömülü
 [güçlü türlenmiş .NET interop yolu](interop/README.md) eklendi. Güncel Qt
 arayüzü, kaynak sahipliği ve dosya referansı doğrulamaları korunur. Aşağıdaki
@@ -9,12 +16,12 @@ SolidWorks dosyalarını yeni adlarla **ayrı bir Pack and Go paketine** aktarı
 
 ## Kullanım
 
-1. **Aktarım ve montaj → İsimlendirme aracı** ekranında **1 · Kaynak klasör** ile montajın bulunduğu klasörü seçin. Bir montaj bulunursa otomatik seçilir; birden çok montaj varsa **Ana montaj** listesinden seçin. Klasör seçiminin ardından ayrı bir dosya penceresi açılmaz. Önce seçilen klasörün içindeki montajlar aranır; doğrudan montaj yoksa alt klasörler de taranır.
-2. **2 · Hedef klasör** ile yeni montajın kaydedileceği boş veya yeni klasörü seçin. Çıktı doğrudan bu klasöre yazılır; ayrıca paket klasörü adı girilmez. Dolu klasörlere veya kaynak dosyaların bulunduğu konuma kayıt engellenir.
-3. **Montajı oku** düğmesine basın. Kaynak montaj önceden açık olmak zorunda değildir; SolidWorks oturumu açık olmalıdır. Seçilen ana montajın Pack and Go referansları alınır. Kaynağı değiştirmek eski önizlemeyi temizler.
+1. **Montaj → İsimlendirme aracı** ekranında **Montaj klasörü** ile kaynak klasörü seçin. Bir montaj bulunursa otomatik seçilir; birden çok montaj varsa **Kaynak montaj** listesinden seçin. **Montajları bul** ile listeyi yenileyebilirsiniz. Önce seçilen klasörün içindeki montajlar aranır; doğrudan montaj yoksa alt klasörler de taranır. **Dosya / aktif montaj** bölümünden doğrudan dosya veya açık montaj da kullanılabilir.
+2. **Yeni paket klasörü** ile boş veya yeni bir hedef seçin. Çıktı doğrudan bu klasöre yazılır. Dolu klasörlere veya kaynak dosyaların bulunduğu konuma kayıt engellenir; bu uyarı okunan dosya listesini gizlemez.
+3. **Dosyaları oku** düğmesine basın. Kaynak montaj önceden açık olmak zorunda değildir; SolidWorks oturumu açık olmalıdır. Seçilen ana montajın Pack and Go referansları alınır. Kaynağı değiştirmek eski önizlemeyi temizler.
 4. Ön/son ek, bul–değiştir veya numaralı isimlendirme seçin. Numaralı modda başlangıç ve basamak sayısı ayarlanır. Dosya uzantıları korunur.
-5. Eski–yeni adları kontrol edin. Tek bir dosya için satırı seçip **Seçili adı düzenle** kullanın. Aynı klasördeki aynı adlı model/teknik resim çifti, modelin yeni adını paylaşır; bağlantılar ayrıca dosya yolu üzerinden eşlenir.
-6. **Yeni montajı kaydet** seçin. Başarıda bütün dosya referansları kontrol edilmiş olur. Hedefteki `GOKWORKS-isimlendirme.json` eski/yeni yolları ve yeni kök dosyayı gösterir.
+5. Eski–yeni adları kontrol edin. Tek bir dosya için satırı seçip **Adı düzenle** kullanın. Aynı klasördeki aynı adlı model/teknik resim çifti, modelin yeni adını paylaşır; bağlantılar ayrıca dosya yolu üzerinden eşlenir.
+6. **Paketi oluştur** seçin. Başarıda bütün dosya referansları kontrol edilmiş olur. Hedefteki `GOKWORKS-isimlendirme.json` eski/yeni yolları ve yeni kök dosyayı gösterir.
 
 Önizleme montaj ağacı olarak gösterilir: parçalar ve alt montajlar bağlı oldukları montajın altında, teknik resimler ilgili modelin altında görünür. Dalları oklarla açıp kapatabilirsiniz. Birden fazla yerde kullanılan dosya **Ortak dosya** olarak işaretlenir; içeriği ilk dalda açılır ve adını herhangi bir satırdan değiştirmek bütün tekrarları günceller. Parçaya bağlı türetilmiş dosyalar **Referans** olarak gösterilir. Bu ağaç dosya bağlantılarını gösterir; bileşen adetleri veya konfigürasyon bazlı BOM değildir. Numaralar farklı dosyalara verilmeye devam eder ve Pack and Go belge sırası korunur. Adları düzenlerken kapalı dallar, seçili satır ve kaydırma konumu korunur.
 

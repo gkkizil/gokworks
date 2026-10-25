@@ -63,6 +63,21 @@ atlanan olarak raporlanır. Sanal parçalar bağımsız aktarım için önce
 SolidWorks'te haricî dosyaya kaydedilmelidir. Eksik dosya, geçersiz referans
 konfigürasyonu ve kimlik uyuşmazlıkları dosya bazında hatadır.
 
+İçe aktarılmış bir **SLDPRT** dosyasının eski STEP/IGES/Parasolid/ACIS kaynağı
+taşınmışsa, parçada gerçekten katı/yüzey gövdesi bulunması `IPartDoc.GetBodies2`
+ve gövde türü/yüz sayısı ile kontrol edilir. Doğrulanırsa mevcut geometri
+**uyarılı** sonuç olarak aktarılır; dış kaynağın güncelliğinin doğrulanmadığı
+yazılır. Boş veya yalnız mesh/grafik içeren parçalarda bu yol kullanılmaz.
+Eksik SLDPRT/SLDASM referansları ve tek dosya montaj aktarımı bu istisnaya
+girmez. Kaynak bağlantısı koparılmaz veya kaynak CAD dosyası kaydedilmez.
+
+`ISldWorks.SetUserPreferenceToggle` boş dönüşlü bir API çağrısıdır; başarı
+olarak `True` döndürmesi beklenmez. Uygulama ve geri yükleme, ayar geri
+okunarak doğrulanır. Böylece başarılı STEP/IGES/STL tercihlerinin 403 numaralı
+ayar gibi sahte geri yükleme hataları üretmesi giderilmiştir. Gerçek geri
+yükleme uyuşmazlığı hâlâ kuyruğu durdurur.
+[25 Ekim doğrulaması](../../docs/cad-package-fixes-2026-10-25/README.md).
+
 ## Kod ve testler
 
 - `formats.py`, `models.py`, `scanner.py`, `naming.py`: saf veri/dosya katmanı.

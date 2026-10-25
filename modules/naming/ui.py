@@ -200,6 +200,18 @@ class NamingPage(BasePage):
         if source and PureWindowsPath(source).suffix.lower() not in engine.CAD_TYPES:
             return self.set_status('Geçerli bir SolidWorks montaj, parça veya teknik resim dosyası seçin.', True)
         active = self.use_active
+        # A failed re-scan (especially a different active assembly) cannot leave
+        # a previous package enabled and looking like the newly requested model.
+        self.preview_timer.stop()
+        self.preview_pending = False
+        self.snapshot = None
+        self.entries = ()
+        self.overrides.clear()
+        self.plan_signature = None
+        self.valid_plan = False
+        self.last_error = ''
+        self.model.replace([])
+        self.plan_message.setText('Montaj dosyaları ve teknik resim referansları okunuyor…')
         self.jobs.start(self, lambda sink, stop: engine.worker(sink, stop, operation='scan',
                         source_path=source, require_assembly=active))
         self.set_status('Montaj dosyaları ve teknik resim referansları okunuyor…')
@@ -226,34 +238,41 @@ class NamingPage(BasePage):
     @staticmethod
     def prepare_plan(snapshot, values, overrides, signature, sink, stop):
         """Filesystem validation and potentially large plans never run on GUI thread."""
+        rows, entries = [], ()
         try:
-            destination = engine.validate_destination(values['destination'], snapshot)
-            rules = engine.Rules(prefix=values['prefix'], suffix=values['suffix'], find=values['find'],
-                replacement=values['replacement'], numbered=values['mode'] == 'Numaralı',
-                start=int(values['start']), digits=int(values['digits']))
-            entries = engine.plan_names(snapshot, destination, rules, overrides, allow_collisions=True)
-            targets = [engine.path_key(item.destination) for item in entries]
-            duplicates = {key for key, count in Counter(targets).items() if count > 1}
-            rows = []
+            # A bad output folder must not hide a successfully scanned assembly.
+            # Preserve the source hierarchy even if rules cannot yet produce names.
             for row in document_rows(snapshot):
                 if stop.is_set():
                     return
                 doc = snapshot.documents[row.index]
-                entry = entries[row.index]
                 rows.append(dict(id=row.iid, parent=row.parent, source=doc.path, index=row.index,
                     name=PureWindowsPath(doc.path).name + (' · ortak parça' if row.shared else ''),
-                    new_name=PureWindowsPath(entry.destination).name, kind=doc.kind,
-                    status='error' if engine.path_key(entry.destination) in duplicates else 'pending'))
+                    new_name=PureWindowsPath(doc.path).name, kind=doc.kind, status='pending'))
+            rules = engine.Rules(prefix=values['prefix'], suffix=values['suffix'], find=values['find'],
+                replacement=values['replacement'], numbered=values['mode'] == 'Numaralı',
+                start=int(values['start']), digits=int(values['digits']))
+            entries = engine.plan_names(snapshot, values['destination'], rules, overrides, allow_collisions=True)
+            targets = [engine.path_key(item.destination) for item in entries]
+            duplicates = {key for key, count in Counter(targets).items() if count > 1}
+            for row in rows:
+                if stop.is_set():
+                    return
+                entry = entries[row['index']]
+                row.update(new_name=PureWindowsPath(entry.destination).name,
+                           status='error' if engine.path_key(entry.destination) in duplicates else 'pending')
             if duplicates:
                 sink.put(('naming_plan', dict(rows=rows,entries=entries,signature=signature,
                     error='Yeni dosya adları çakışıyor. Seçili adları düzenleyin veya numaralı isimlendirme kullanın.')))
                 return
             # Full validation also protects the reserved report filename.
-            engine.plan_names(snapshot, destination, rules, overrides)
+            engine.plan_names(snapshot, values['destination'], rules, overrides)
+            destination = engine.validate_destination(values['destination'], snapshot)
             if not stop.is_set():
                 sink.put(('naming_plan', dict(rows=rows,entries=entries,signature=signature,destination=str(destination))))
         except (ValueError, OSError) as error:
-            sink.put(('naming_plan', dict(error=str(error),signature=signature)))
+            if not stop.is_set():
+                sink.put(('naming_plan', dict(rows=rows, entries=entries, error=str(error),signature=signature)))
 
     def schedule_preview(self):
         if self.preview_pending and not self.context.closing:
@@ -308,6 +327,7 @@ class NamingPage(BasePage):
                     self.model.replace(value['rows'])
                     self.tree.expandToDepth(1)
                 self.plan_message.setText(self.last_error or f"{len(self.entries)} dosya · Hedef: {value['destination']}")
+                self.set_status(self.last_error or f'{len(self.entries)} dosya okundu; yeni adları kontrol edip paketi oluşturun.', bool(self.last_error))
             elif kind == 'assemblies':
                 self.assemblies.clear()
                 for path in value:
@@ -330,9 +350,11 @@ class NamingPage(BasePage):
                     self.last_report = value.get('report')
                     self.set_status('Paket oluşturuldu; yeni dosyaların referansları doğrulandı. Rapor: ' + str(self.last_report or self.destination.text()))
                 elif value['state'] == 'cancelled':
+                    self.plan_message.setText('İşlem durduruldu. Dosyaları yeniden okuyabilirsiniz.')
                     self.set_status('İşlem durduruldu.')
                 else:
                     self.last_error = value.get('error', 'İsimlendirme tamamlanamadı.')
+                    self.plan_message.setText(self.last_error)
                     self.set_status(self.last_error, True)
             elif kind == 'job_error':
                 self.set_status(value['error'], True)
