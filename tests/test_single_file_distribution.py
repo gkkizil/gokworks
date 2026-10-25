@@ -71,6 +71,7 @@ def test_native_failure_status_keeps_crash_context_even_when_tail_has_moved_on(t
         'test_background_preview PASSED\n'
         'PYTEST_PROCESS_EXIT_CODE=3221226505 (0xC0000409)\n' +
         'later successful batch\n'*1500, encoding='utf-8')
+    (tmp_path/'windows-qt-native.log').write_text('native_test_gc_begin\n', encoding='utf-8')
     reports = []
     monkeypatch.setattr(publisher, 'publish', reports.append)
     publisher.main()
@@ -78,3 +79,4 @@ def test_native_failure_status_keeps_crash_context_even_when_tail_has_moved_on(t
     assert 'test_background_preview' in reports[0]['native_failure_context']
     assert '0xC0000409' in reports[0]['native_failure_context']
     assert 'test_background_preview' not in reports[0]['test_log_tail']
+    assert reports[0]['qt_native_log_tail'] == 'native_test_gc_begin\n'

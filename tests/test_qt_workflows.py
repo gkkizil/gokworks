@@ -10,6 +10,7 @@ import json
 import sys
 import threading
 import gc
+import os
 from pathlib import Path
 from time import perf_counter
 from unittest.mock import patch
@@ -29,26 +30,40 @@ from modules.bolt import rules as bolt
 from modules.weight import rules as weight
 from modules.iso_fits import rules as iso
 from modules.geometric_tolerances.catalog import CATALOG
+from solidworks import diagnostics
 
 
 @pytest.fixture
 def window(qtbot, tmp_path):
+    if os.environ.get('GOKWORKS_NATIVE_TEST_LOG'):
+        from gui_qt.diagnostics import install
+        diagnostics.enable('native-test', path=Path(os.environ['GOKWORKS_NATIVE_TEST_LOG']))
+        install()
+    diagnostics.record('native_test_window_construct_begin')
     app = create_application([])
     w = MainWindow(tmp_path / 'settings.json')
     w.resize(1360, 900)
     qtbot.addWidget(w)
     w.show()
+    diagnostics.record('native_test_window_ready')
     yield w
+    diagnostics.record('native_test_window_teardown_begin')
     if w.jobs.busy:
         if hasattr(w.jobs.owner, 'pending_apply'):
             w.jobs.owner.pending_apply = None
         w.jobs.cancel()
         qtbot.waitUntil(lambda: not w.jobs.busy, timeout=8000)
+    diagnostics.record('native_test_window_idle')
     w.settings.flush()
     w.close()
+    diagnostics.record('native_test_window_closed')
     w.deleteLater()
+    diagnostics.record('native_test_deferred_delete_begin')
     QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+    diagnostics.record('native_test_deferred_delete_end')
+    diagnostics.record('native_test_gc_begin')
     gc.collect()
+    diagnostics.record('native_test_gc_end')
 
 
 @pytest.mark.parametrize('mode', [mode for mode, _, _ in MODULES])

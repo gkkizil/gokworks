@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
         id: python
         with:
-          python-version: '3.13'
+          python-version: '3.12'
           architecture: x64
           cache: pip
           cache-dependency-path: |
@@ -147,6 +147,7 @@ jobs:
             dist/OKU.txt
             windows-tests.xml
             windows-tests.log
+            windows-qt-native.log
             windows-display.json
           if-no-files-found: ignore
       - name: Record downloadable build status
