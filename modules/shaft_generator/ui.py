@@ -24,6 +24,9 @@ FIELD_TITLES = {'offset':'Başlangıç · mm','width':'Genişlik · mm','length'
 class ShaftPage(BasePage):
     def __init__(self,context):
         super().__init__(context,'Parametrik mil','Kademeleri ve operasyonları düzenleyin; iki görünüş aynı ölçüleri kullanır.')
+        # Reserve native Windows font/frame overhead at 550×450 without
+        # reducing either technical view's 170 px minimum or clipping commands.
+        self.layout.setContentsMargins(10,2,10,2);self.layout.setSpacing(2)
         self.project=Project(); self.selected_stage=self.project.stages[0].id
         self.selected_operation=''; self.project_path=None; self.dirty=False
         self.plan=[]; self.last_result=None
@@ -92,7 +95,7 @@ class ShaftPage(BasePage):
         self.source_scroll=scroll(self.editor);self.source_scroll.setMinimumWidth(290)
         self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.source_scroll.setMaximumWidth(490);self.splitter.addWidget(self.source_scroll)
-        views=QWidget();view_box=QVBoxLayout(views);view_box.setContentsMargins(0,0,0,0);view_box.setSpacing(6)
+        views=QWidget();view_box=QVBoxLayout(views);view_box.setContentsMargins(0,0,0,0);view_box.setSpacing(2)
         self.top_view=ShaftPreview();self.section_view=ShaftPreview(section=True)
         for view in (self.top_view,self.section_view):
             view.stageSelected.connect(self.select_stage);view.operationSelected.connect(self.select_operation)
