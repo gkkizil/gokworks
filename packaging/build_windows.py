@@ -65,7 +65,8 @@ def main():
             '--add-data', f'{ROOT / "assets/qt/chevron-dark.png"};assets/qt',
             '--add-data', f'{ROOT / "assets/qt/chevron-light.png"};assets/qt',
             '--add-data', f'{ROOT / "modules/iso_fits/tables.json"};modules/iso_fits',
-            '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop', str(ROOT/'main.py')]
+            '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop',
+            '--add-data', f'{ROOT / "modules/shaft_generator/interop/ShaftHost.cs"};modules/shaft_generator/interop', str(ROOT/'main.py')]
     subprocess.run(args, cwd=ROOT, check=True)
     exe = ROOT/('dist/GOKWORKS/GOKWORKS.exe' if options.onedir else 'dist/GOKWORKS.exe')
     if exe.read_bytes()[:2] != b'MZ':
