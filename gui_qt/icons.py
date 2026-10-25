@@ -60,6 +60,11 @@ def icon(name, color='#80B6F5'):
         for x in (18, 31): painter.drawLine(x, 6, x, 14)
         painter.drawLine(26, 20, 26, 28)
         painter.drawLine(14, 34, 14, 42)
+    elif name == 'shaft_generator':
+        painter.drawPolyline([QPointF(5,18),QPointF(14,18),QPointF(14,11),QPointF(31,11),
+                              QPointF(31,16),QPointF(42,16),QPointF(42,32),QPointF(31,32),
+                              QPointF(31,37),QPointF(14,37),QPointF(14,30),QPointF(5,30),QPointF(5,18)])
+        painter.drawLine(3,24,45,24)
     elif name == 'weight':
         painter.drawRect(8, 15, 31, 26)
         painter.drawArc(16, 4, 15, 20, 0, 180 * 16)

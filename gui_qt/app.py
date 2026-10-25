@@ -30,6 +30,7 @@ from modules.tolerance_stack.ui import ToleranceStackPage
 from modules.nesting.ui import NestingPage
 from modules.cad_converter.ui import CadConverterPage
 from modules.profile_cutting.ui import ProfileCuttingPage
+from modules.shaft_generator.ui import ShaftPage
 
 
 MODULES = (
@@ -47,6 +48,7 @@ MODULES = (
     ('weight', 'Ağırlık hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
     ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
+    ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
 )
 
 
@@ -102,7 +104,8 @@ class MainWindow(QMainWindow):
                          tolerance_stack=lambda: ToleranceStackPage(self),
                          bolt=lambda: BoltPage(self), bolt_torque=lambda: TorquePage(self),
                          weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self),
-                         profile_cutting=lambda: ProfileCuttingPage(self))
+                         profile_cutting=lambda: ProfileCuttingPage(self),
+                         shaft_generator=lambda: ShaftPage(self))
         for mode, factory in factories.items():
             page = factory()
             page.statusChanged.connect(lambda text, error, page=page: self.page_status(page, text, error))
@@ -376,6 +379,11 @@ class MainWindow(QMainWindow):
                 if hasattr(owner, 'pending_apply'):
                     owner.pending_apply = None
                 self.jobs.cancel()
+            return
+        shaft = self.pages.get('shaft_generator')
+        if shaft is not None and not shaft.confirm_close():
+            self.closing = False
+            event.ignore()
             return
         self.settings.qt.setValue('window/geometry', self.saveGeometry())
         self.settings.qt.sync()
