@@ -1,6 +1,6 @@
 {
-  "request_id": "20261024-current-qt-workbench-onefile-200633",
-  "requested_at": "2026-10-24T20:06:33.723588+00:00",
-  "source_commit": "f849bcf15bf5edcd21c3310eb6eb9f273486e65c",
-  "reason": "Deliver the user-requested current single-file Windows EXE: professional Qt workbenches, contextual nesting inspector and active-theme refresh fix. Run native Windows regressions, then frozen checks at 100/125/150 percent DPI and publish the direct GOKWORKS.exe download. Work only on main; do not change release or the backup repository."
+  "request_id": "20261025-weldment-feature-graph-onefile-114524",
+  "requested_at": "2026-10-25T11:45:24.389723+00:00",
+  "source_commit": "bf125aee79858d77980807087174deba6cdecdc9",
+  "reason": "Deliver the Weldments reading fix for the user: tolerate repeated feature-graph exposure without duplicating Cut Lists, interpret NeedsRebuild2 as the published integer enum, and show actual scan errors. Run all native Windows regressions and frozen onefile DPI checks before publication. Keep release and the backup unchanged."
 }
