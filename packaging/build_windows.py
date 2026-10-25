@@ -1,4 +1,4 @@
-"""Build a standalone Windows executable; run on Windows with Python 3.12 x64."""
+"""Build a standalone Windows executable; run on Windows with Python 3.13 x64."""
 
 import hashlib
 import json

@@ -486,6 +486,34 @@ def test_naming_folder_source_exact_destination_hierarchy_and_collision(window, 
     assert page.snapshot is None
 
 
+def test_naming_immediate_preview_consumes_pending_debounce(window, qtbot, tmp_path):
+    page = window.pages['naming']
+    starts = []
+    window.jobs.busyChanged.connect(lambda busy: starts.append(True) if busy else None)
+    page.destination.setText(str(tmp_path/'new'))
+    page.load_snapshot(naming_snapshot(tmp_path))
+    qtbot.waitUntil(lambda: page.valid_plan and not window.jobs.busy)
+    qtbot.wait(200)
+    assert starts == [True]
+    assert page.valid_plan and not window.jobs.busy
+
+
+def test_naming_closed_window_cannot_start_deferred_preview(window, qtbot, tmp_path):
+    page = window.pages['naming']
+    page.destination.setText(str(tmp_path/'new'))
+    page.load_snapshot(naming_snapshot(tmp_path))
+    qtbot.waitUntil(lambda: page.valid_plan and not window.jobs.busy)
+    starts = []
+    window.jobs.busyChanged.connect(lambda busy: starts.append(True) if busy else None)
+    assert window.close() and window.closing
+    # Deliver a preview callback already queued when the window closed.
+    page.preview_pending = True
+    page.preview_timer.start(0)
+    qtbot.wait(50)
+    assert not starts and not window.jobs.busy
+    assert not page.preview_pending
+
+
 def test_naming_plan_filesystem_checks_are_off_gui_thread(window, qtbot, tmp_path):
     page = window.pages['naming']
     snapshot = naming_snapshot(tmp_path)

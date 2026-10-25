@@ -51,7 +51,7 @@ sürüm, indirme bağlantısının yanındaki **Uygulama kodu** ile belirtilir.
 | Hazır EXE ile çalışma | Windows 10/11, 64 bit. Python kurulumu gerekmez. |
 | CAD aktarımı ve montaj işlemleri | Kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks. |
 | Mühendislik hesapları ve DXF nesting | SolidWorks bağlantısı gerekmez. |
-| Kaynak koddan çalışma | Python 3.12 ve `requirements.txt` bağımlılıkları. |
+| Kaynak koddan çalışma | Python 3.13 ve `requirements.txt` bağımlılıkları. |
 
 Excel raporları için Microsoft Excel, DXF nesting için AutoCAD kurulumu
 gerekmez. CAD entegrasyonu mevcut SolidWorks kurulumunuzu kullanır.
@@ -199,10 +199,10 @@ ayrılan yayın dalıdır; yalnız yayın sorumlusunun açık isteğiyle güncel
 `main` değişiklikleri bu dala otomatik aktarılmaz.
 [Yayın ve güncelleme düzeni](docs/releases.md).
 
-Python 3.12 kurulu bir Windows bilgisayarında, proje klasöründe:
+Python 3.13 kurulu bir Windows bilgisayarında, proje klasöründe:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.13 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe main.py
 ```

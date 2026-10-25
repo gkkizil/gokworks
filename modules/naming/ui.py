@@ -222,6 +222,10 @@ class NamingPage(BasePage):
         self.update_preview()
 
     def update_preview(self):
+        self.preview_timer.stop()
+        if self.context.closing:
+            self.preview_pending = False
+            return
         self.valid_plan = False
         if self.snapshot is None:
             self.save_button.setEnabled(False)
