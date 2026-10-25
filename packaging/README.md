@@ -67,7 +67,7 @@ oluşturulmaz; yedek depoya işlem yapılmaz.
 Yerel Windows derlemesi, depo kökünden:
 
 ```powershell
-py -3.12 -m venv .build-venv
+py -3.13 -m venv .build-venv
 .build-venv\Scripts\python -m pip install -r packaging/windows-requirements.txt
 .build-venv\Scripts\python packaging/build_windows.py
 ```
@@ -78,13 +78,13 @@ derleme kayıtlarında tutulur; kullanıcı EXE yanında bunları taşımak zoru
 Lisans metinleri EXE içindedir: **Lisanslar → Lisansları kaydet** ile tam bildirim
 arşivi kaydedilebilir. Uyumlu değiştirilmiş LGPL kitaplıklarını kullanmak için
 `GOKWORKS_LIBRARY_DIR`, `PySide6` ve `shiboken6` paketlerini içeren klasöre
-ayarlanabilir. Python 3.12 x64 / Qt-PySide ABI uyumu gerekir. Bu yol özel runtime
+ayarlanabilir. Python 3.13 x64 / Qt-PySide ABI uyumu gerekir. Bu yol özel runtime
 hook ile Qt yüklenmeden önce uygulanır; üçüncü DPI kontrolü dış paketlerden
 yüklenen PySide/Shiboken ve gerçek Qt6Core DLL konumunu da doğrular. Normal
 kullanımda bu değişken veya dış kitaplık gerekmez.
 
 Shapely/GEOS için ayrı `GOKWORKS_GEOMETRY_DIR` yolu kullanılabilir. Bu dizin
-uyumlu CPython 3.12 x64 `shapely/` ve wheel'in `shapely.libs/` klasörlerini
+uyumlu CPython 3.13 x64 `shapely/` ve wheel'in `shapely.libs/` klasörlerini
 içermelidir. GEOS LGPL-2.1 ve Shapely BSD lisansları EXE lisans arşivindedir;
 bu seçenek kitaplık değiştirmek isteyen alıcılar içindir, normal kullanımda
 ek dosya/klasör gerektirmez.
