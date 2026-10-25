@@ -1,6 +1,6 @@
 {
-  "request_id": "20261025-weldment-feature-graph-onefile-114524",
-  "requested_at": "2026-10-25T11:45:24.389723+00:00",
-  "source_commit": "bf125aee79858d77980807087174deba6cdecdc9",
-  "reason": "Deliver the Weldments reading fix for the user: tolerate repeated feature-graph exposure without duplicating Cut Lists, interpret NeedsRebuild2 as the published integer enum, and show actual scan errors. Run all native Windows regressions and frozen onefile DPI checks before publication. Keep release and the backup unchanged."
+  "request_id": "20261025-shaft-and-cad-fixes-onefile-134758",
+  "requested_at": "2026-10-25T13:47:58+00:00",
+  "source_commit": "17a683b49d8a30aed14a4c5de6ad64c9962b5aa7",
+  "reason": "Deliver one Windows x64 GOKWORKS.exe containing both agents' changes: the parametric shaft module merged in PR #1 (17a683b) and Pack and Go/CAD converter repairs (2b3cfbf), together with the existing Weldments fixes. Run the existing native Windows regression suite and frozen onefile smoke checks at 100%, 125%, and 150% before publishing. Preserve release and the backup repository. Actual licensed SOLIDWORKS live acceptance remains separate."
 }
