@@ -95,7 +95,8 @@ def merge_reports(batches, destination):
 def run_tests(root, targets, batch_size=MAX_TESTS_PER_PROCESS):
     if batch_size < 1:
         raise ValueError('Test batch size must be positive.')
-    env = {**os.environ, 'PYTHONUTF8': '1', 'PYTHONFAULTHANDLER': '1'}
+    env = {**os.environ, 'PYTHONUTF8': '1', 'PYTHONFAULTHANDLER': '1',
+           'PYTHONUNBUFFERED': '1'}
     final_report = root/'windows-tests.xml'
     final_report.unlink(missing_ok=True)
     with (root/'windows-tests.log').open('w', encoding='utf-8') as log:
