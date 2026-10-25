@@ -40,7 +40,7 @@ def convert(sources, options, events, stop=None, *, session_factory=Session):
             emit(Outcome(source.path, configuration, fmt.label, status, detail,
                          errors=getattr(error, 'errors', 0), warnings=getattr(error, 'warnings', 0), protocol=fmt.protocol))
 
-    def export_one(session, model, source, configuration, key):
+    def export_one(session, model, source, configuration, key, dependency_notes=()):
         checkpoint(stop)
         unique = (identity(source.path), configuration, key)
         if unique in seen: return
@@ -77,7 +77,8 @@ def convert(sources, options, events, stop=None, *, session_factory=Session):
             if fmt.protocol == 242: detail += ' MBD yayınlama API’si başarılı; PMI içeriğinin eksiksizliği ayrıca doğrulanmalıdır.'
             if warnings: detail += f' SolidWorks kaydetme uyarısı: {warnings}.'
             if open_warnings: detail += f' SolidWorks açma uyarısı: {open_warnings}.'
-            emit(Outcome(source.path, configuration, fmt.label, 'partial' if warnings or open_warnings else 'success', detail,
+            if dependency_notes: detail += ' ' + ' '.join(dependency_notes)
+            emit(Outcome(source.path, configuration, fmt.label, 'partial' if warnings or open_warnings or dependency_notes else 'success', detail,
                          str(target), size, time.monotonic() - start, errors, warnings, fmt.protocol, open_warnings))
         except (Cancelled, RestoreError):
             raise
@@ -135,8 +136,8 @@ def convert(sources, options, events, stop=None, *, session_factory=Session):
                         # assembly. Referenced configurations override the root policy.
                         targets = components(session, model, source)
                     else:
-                        session.dependencies(model)
-                        for key in options.formats: export_one(session, model, source, configuration, key)
+                        notes = session.dependencies(model) or ()
+                        for key in options.formats: export_one(session, model, source, configuration, key, notes)
                         targets = []
                 for child, child_configuration in targets:
                     if all((identity(child.path), child_configuration, key) in seen for key in options.formats): continue

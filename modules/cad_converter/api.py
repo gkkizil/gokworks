@@ -13,6 +13,10 @@ from .scanner import path_key
 
 MODEL_IID = '{B90793FB-EF3D-4B80-A5C4-99959CDB6CEB}'
 ASSEMBLY_IID = '{83A33D35-27C5-11CE-BFD4-00400513BB57}'
+PART_IID = '{83A33D32-27C5-11CE-BFD4-00400513BB57}'
+# A native part may retain usable B-Rep after its imported source is moved.
+# Native CAD references and unrecognised dependencies remain mandatory.
+IMPORTED_SOURCES = frozenset(('.stp', '.step', '.igs', '.iges', '.x_t', '.x_b', '.sat'))
 
 
 def raw(obj):
@@ -242,12 +246,40 @@ class Session:
     def is_assembly(self, model):
         return call(model, 'GetType') == self.c('swDocASSEMBLY')
 
+    def has_saved_brep(self, model):
+        """Check real solid/surface bodies, never a bounding box or graphics mesh."""
+        part = body = None
+        bodies = ()
+        try:
+            part = interface(model, PART_IID)
+            for kind in ('swSolidBody', 'swSheetBody'):
+                body_type = self.c(kind)
+                bodies = call(part, 'GetBodies2', body_type, False) or ()
+                for body in bodies:
+                    if call(body, 'GetType') == body_type and call(body, 'GetFaceCount') > 0:
+                        return True
+            return False
+        except Exception as error:
+            raise ApiError('İçe aktarılan parçanın kayıtlı katı/yüzey geometrisi doğrulanamadı; aktarılmadı.') from error
+        finally:
+            model = part = body = None
+            bodies = ()
+
     def dependencies(self, model):
         dependencies = call(self.app, 'GetDocumentDependencies2', call(model, 'GetPathName'), True, True, False) or ()
         if len(dependencies) % 2: raise ApiError('Model referansları okunamadı; eksiksiz aktarım doğrulanamıyor.')
         missing = [str(p) for p in dependencies[1::2] if not p or not Path(str(p)).is_file()]
-        if missing: raise ApiError('Eksik/çözümlenemeyen model referansları: ' + ', '.join(Path(p).name or '(boş)' for p in missing))
-        if self.is_assembly(model):
+        assembly = self.is_assembly(model)
+        notes = ()
+        if missing:
+            names = ', '.join(Path(p).name or '(boş)' for p in missing)
+            if assembly or any(Path(p).suffix.casefold() not in IMPORTED_SOURCES for p in missing):
+                raise ApiError('Eksik/çözümlenemeyen model referansları: ' + names)
+            if not self.has_saved_brep(model):
+                raise ApiError('İçe aktarma kaynağı eksik ve parçada kayıtlı katı/yüzey geometrisi yok: ' + names)
+            notes = ('İçe aktarma kaynağı bulunamadı: ' + names +
+                     '. SLDPRT içindeki mevcut geometri aktarıldı; dış kaynağın güncelliği doğrulanmadı.',)
+        if assembly:
             for component in self.components(model):
                 name, path, _, state = self.component(component)
                 if state == 'suppressed': continue
@@ -255,6 +287,7 @@ class Session:
                     raise ApiError(name + ': montaj referansı eksik veya tutarsız.')
                 if call(component, 'GetModelDoc2') is None:
                     raise ApiError(name + ': bileşen tam çözümlenmemiş. Montajı SolidWorks’te tam çözümlenmiş açın.')
+        return notes
 
     @contextmanager
     def preferences(self, fmt, options):
@@ -294,7 +327,10 @@ class Session:
         try:
             for kind, key, value in settings:
                 changed = True
-                if not call(self.app, 'SetUserPreference' + kind, key, value):
+                result = call(self.app, 'SetUserPreference' + kind, key, value)
+                # Toggle's published Automation return is void (None in pywin32).
+                # Numeric setters return bool. All kinds are read back below.
+                if kind != 'Toggle' and not result:
                     raise ApiError('SolidWorks dışa aktarma ayarını kabul etmedi; aktarım yapılmadı.')
                 actual = call(self.app, 'GetUserPreference' + kind, key)
                 if not math.isclose(actual, value, rel_tol=1e-9, abs_tol=1e-12):
@@ -305,7 +341,8 @@ class Session:
             # Restore mode/quality first, then dependent numeric settings.
             for kind, key, value in originals if changed else ():
                 try:
-                    if not call(self.app, 'SetUserPreference' + kind, key, value): raise RestoreError()
+                    result = call(self.app, 'SetUserPreference' + kind, key, value)
+                    if kind != 'Toggle' and not result: raise RestoreError()
                 except Exception: failures.append(str(key))
             for kind, key, value in originals if changed else ():
                 try:

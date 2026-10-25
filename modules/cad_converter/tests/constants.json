@@ -36,5 +36,7 @@
   "swSaveAsOptions_Silent": 1,
   "swStepAP": 75,
   "swStepExportConfigurationData": 403,
-  "swStepExportPreference": 142
+  "swStepExportPreference": 142,
+  "swSolidBody": 0,
+  "swSheetBody": 1
 }
