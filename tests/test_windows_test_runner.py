@@ -24,6 +24,16 @@ def test_gui_isolation_preserves_every_node_once_in_original_order():
     assert list(runner.test_batches(nodes,1))==[[node] for node in nodes]
 
 
+def test_full_application_workflows_each_get_a_fresh_process():
+    before = 'tests/test_engine.py::test_before'
+    workflows = [f'tests/test_qt_workflows.py::test_window[{i}]' for i in range(12)]
+    after = 'modules/shaft_generator/tests/test_ui.py::test_after'
+    nodes = [before, *workflows, after]
+    batches = list(runner.test_batches(nodes, 32))
+    assert [node for batch in batches for node in batch] == nodes
+    assert batches == [[before], *[[node] for node in workflows], [after]]
+
+
 def test_reports_retain_passes_failures_and_missing_native_batch(tmp_path):
     passed = tmp_path/'pass.xml'
     passed.write_text('<testsuites><testsuite tests="1" failures="0">'
