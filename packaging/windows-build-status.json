@@ -1,14 +1,10 @@
 {
-  "commit": "4dfc589b308820e583f290252a00ece73b90dd64",
-  "status": "cancelled",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40300590908",
+  "commit": "58dc0f4cf9f52f9472b058faece6ccc2a3525fde",
+  "status": "building",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40300981539",
   "download_url": "",
   "artifact_url": "",
-  "setup_steps": {
-    "checkout": "success",
-    "python": "success",
-    "dependencies": "success"
-  },
+  "setup_steps": {},
   "display": {
     "before": [
       1024,
