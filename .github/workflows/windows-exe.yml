@@ -34,6 +34,11 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             packaging/windows-requirements.txt
+      - name: Verify requested source validation
+        id: validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python packaging/verify_build_request.py
       - name: Read requested previous failure diagnostics
         env:
           GH_TOKEN: ${{ github.token }}
@@ -60,6 +65,7 @@ jobs:
           BUILD_STATUS: building
         run: python packaging/publish_status.py
       - name: Validate native Windows shaft bridge
+        if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 3
         env:
           PYTHONUTF8: '1'
@@ -74,6 +80,7 @@ jobs:
           python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py *> windows-shaft-bridge.log
           if ($LASTEXITCODE -ne 0) { Get-Content windows-shaft-bridge.log; exit $LASTEXITCODE }
       - name: Validate native Windows background preview lifecycle
+        if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 3
         env:
           QT_QPA_PLATFORM: windows
@@ -87,6 +94,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - name: Validate native Windows transfer columns
+        if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 3
         env:
           QT_QPA_PLATFORM: windows
@@ -96,6 +104,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
           python packaging/run_windows_tests.py tests/test_compact_workspaces_gui.py::test_transfer_columns_keep_sources_left_results_right_and_commands_visible
       - name: Validate native Windows nesting tabs and PDF text
+        if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 3
         env:
           QT_QPA_PLATFORM: windows
@@ -105,12 +114,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
           python packaging/run_windows_tests.py modules/nesting/tests/test_nesting_gui.py modules/nesting/tests/test_nesting_pdf_report.py
       - name: Validate native Windows shaft layout
+        if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 3
         env:
           QT_QPA_PLATFORM: windows
           PYTHONUTF8: '1'
         run: python packaging/run_windows_tests.py modules/shaft_generator/tests/test_ui.py
       - name: Validate regression suite on Windows
+        if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 32
         env:
           QT_QPA_PLATFORM: windows
@@ -125,6 +136,15 @@ jobs:
           python packaging/run_windows_tests.py modules/bolt_torque/tests/test_bolt_torque_gui.py::test_compact_wide_layout_and_copy_remain_accessible modules/nesting/tests/test_nesting_gui.py::test_steps_and_result_stay_accessible_without_clipping_after_resize_and_themes
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python packaging/run_windows_tests.py
+      - name: Validate focused packaging and raw COM boundaries
+        if: steps.validation.outputs.reuse == 'true'
+        timeout-minutes: 5
+        env:
+          QT_QPA_PLATFORM: windows
+        run: |
+          python -m pip install -r requirements-dev.txt *> windows-test-setup.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
+          python packaging/run_windows_tests.py modules/dxf_dwg/tests/test_dxf_dwg.py modules/dxf_dwg/tests/test_preview_source.py tests/test_build_request_validation.py tests/test_single_file_distribution.py
       - name: Build and open the packaged EXE
         run: python packaging/build_windows.py *> windows-build.log
       - name: Upload single executable
@@ -164,6 +184,7 @@ jobs:
             windows-tests.log
             windows-qt-native.log
             windows-display.json
+            windows-reused-validation.json
           if-no-files-found: ignore
       - name: Record downloadable build status
         if: always()

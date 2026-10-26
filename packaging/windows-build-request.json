@@ -1,6 +1,12 @@
 {
-  "request_id": "20261026-dxf-preview-sw-standard-views",
-  "requested_at": "2026-10-26T10:02:50.548791+00:00",
-  "source_commit": "522cb83adba13bbbce2d80e30d995625e84171ee",
-  "reason": "Build the final user-requested onefile Windows EXE from current main. DXF preview reads exact native source/configuration/body tessellation, displays native flat geometry/properties, restores session state and gives export priority. Camera presets now match SOLIDWORKS front XY/top XZ/right YZ and mathematically verified equal-axis isometric projection. Native Qt receiver, GL resource lifetime, plain thread-ID observations and closing guards are in place. Run all native Windows regressions, mesh-hole renderer test, existing shaft bridge/layout checks and 100/125/150 percent frozen smoke checks. Preserve shaft source and protected shared files; do not update release or backup. Real licensed SOLIDWORKS acceptance is opt-in and must not be claimed by mocks."
+  "request_id": "20261026-current-bom-images-fast-onefile",
+  "requested_at": "2026-10-26T12:58:37.998471+00:00",
+  "source_commit": "2b6c2d21e255f5251915f8edeebcf0f18cdff341",
+  "validation_profile": "verified-source",
+  "verified_source_commit": "fad71085597ac59df2cfeb34048a014265af3f44",
+  "validation_runs": [
+    40323751594,
+    40323751585
+  ],
+  "reason": "User requested the latest single EXE quickly. Reuse successful native Windows BOM/UI and shaft bridge checks only after verifying exact unchanged application source. Run focused DXF/raw COM and packaging checks, then existing onefile build and 100/125/150 percent frozen EXE smoke. No release branch or backup changes; no licensed SOLIDWORKS acceptance is claimed."
 }

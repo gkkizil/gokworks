@@ -81,6 +81,14 @@ def main():
               'artifact_url': os.environ.get('ARTIFACT_URL', '')}
     report['setup_steps'] = {name: os.environ[key] for name,key in (
         ('checkout','CHECKOUT_OUTCOME'),('python','PYTHON_SETUP_OUTCOME'),('dependencies','DEPENDENCIES_OUTCOME')) if os.environ.get(key)}
+    request_path = Path('packaging/windows-build-request.json')
+    if request_path.is_file():
+        request = json.loads(request_path.read_text(encoding='utf-8'))
+        report['source_commit'] = request.get('source_commit', report['commit'])
+        report['validation_profile'] = request.get('validation_profile', 'full')
+    reused = Path('windows-reused-validation.json')
+    if reused.is_file():
+        report['reused_validation'] = json.loads(reused.read_text(encoding='utf-8'))
     display = Path('windows-display.json')
     if display.exists():
         report['display'] = json.loads(display.read_text(encoding='utf-8'))
