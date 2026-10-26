@@ -37,8 +37,8 @@ foreach($sample in @(@(30,3),@(30,4),@(10,1),@(100,5),@(35,4))) {
 }
 $keep=New-Object Gokworks.ShaftChannelTest.Probe
 $preserve=[Gokworks.ShaftInterop.Host].GetMethod('PreserveFailedPart',$flags)
-$title=$preserve.Invoke($null,[object[]]@($keep.Model))
-$empty=$preserve.Invoke($null,[object[]]@($null))
+$title=$keep.Preserve($preserve)
+$empty=$keep.PreserveEmpty($preserve)
 [Console]::WriteLine((@{
  event='channel_selection'; accepted=$accepted; events=$valid.Events;
  refused=$refusedResult; extra=$extraResult; floors=$floors;

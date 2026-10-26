@@ -92,5 +92,13 @@ namespace Gokworks.ShaftChannelTest
                 Events.Add("rejected:" + error.InnerException.Message); return false;
             }
         }
+
+        // Keep COM proxies inside C#. PowerShell's adapter calls GetType while
+        // marshalling a proxy property, colliding with IModelDoc2.GetType().
+        public string Preserve(MethodInfo method)
+        { return (string)method.Invoke(null, new object[] { Model }); }
+
+        public string PreserveEmpty(MethodInfo method)
+        { return (string)method.Invoke(null, new object[] { null }); }
     }
 }
