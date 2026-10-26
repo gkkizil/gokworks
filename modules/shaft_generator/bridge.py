@@ -22,7 +22,10 @@ try {
     $constants = [IO.Path]::Combine([IO.Path]::GetDirectoryName($interop), 'SolidWorks.Interop.swconst.dll')
     [Reflection.Assembly]::LoadFrom($interop) | Out-Null
     [Reflection.Assembly]::LoadFrom($constants) | Out-Null
-    Add-Type -TypeDefinition ([IO.File]::ReadAllText($env:GOKWORKS_SHAFT_HOST)) -ReferencedAssemblies @($interop, $constants, 'System.Web.Extensions.dll') -ErrorAction Stop
+    $references = @($interop, $constants, 'System.dll', 'System.Core.dll', 'System.Web.Extensions.dll')
+    $facade = [IO.Path]::Combine([Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory(), 'Facades\netstandard.dll')
+    if ([IO.File]::Exists($facade)) { $references += $facade }
+    Add-Type -TypeDefinition ([IO.File]::ReadAllText($env:GOKWORKS_SHAFT_HOST)) -ReferencedAssemblies $references -ErrorAction Stop
     [Console]::WriteLine('{"event":"shaft_ready","protocol":1}')
     [Gokworks.ShaftInterop.Host]::Run()
 } catch {
@@ -121,19 +124,24 @@ def execute(payload, *, stop=None, on_status=None):
     pythoncom.CoInitialize()
     app=None
     try:
+        if on_status:on_status('Açık SOLIDWORKS oturumuna bağlanılıyor…')
         app=connect_to_solidworks()
+        if on_status:on_status('SOLIDWORKS işlem kimliği ve API dosyaları doğrulanıyor…')
         value=app.GetProcessID
         process_id=value() if callable(value) else value
         if type(process_id) is not int or process_id<=0:
             raise RuntimeError('SOLIDWORKS işlem kimliği okunamadı.')
         library=_installed_interop(process_id)
     finally:
+        value=None
         app=None
         pythoncom.CoUninitialize()
     if not HOST_SOURCE.is_file():raise RuntimeError('ShaftHost.cs uygulama paketinde bulunamadı.')
     if not library.with_name('SolidWorks.Interop.swconst.dll').is_file():
         raise RuntimeError('Kurulu SOLIDWORKS API sabitleri bulunamadı: SolidWorks.Interop.swconst.dll')
     powershell=Path(os.environ.get('SystemRoot',r'C:\Windows'))/'System32/WindowsPowerShell/v1.0/powershell.exe'
+    if not powershell.is_file():raise RuntimeError('Windows PowerShell 5.1 bulunamadı.')
+    if on_status:on_status('SOLIDWORKS çizim yardımcısı hazırlanıyor…')
     command=[str(powershell),'-NoLogo','-NoProfile','-NonInteractive','-STA','-Command',LOADER]
     with subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
                            encoding='utf-8',errors='strict',creationflags=subprocess.CREATE_NO_WINDOW,

@@ -59,6 +59,20 @@ jobs:
         env:
           BUILD_STATUS: building
         run: python packaging/publish_status.py
+      - name: Validate native Windows shaft bridge
+        timeout-minutes: 3
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install -r requirements-dev.txt *> windows-test-setup.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-test-setup.log; exit $LASTEXITCODE }
+          $directory=Join-Path $env:RUNNER_TEMP 'gokworks-shaft-interop'
+          python packaging/prepare_shaft_test_refs.py $directory
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:GOKWORKS_SHAFT_TEST_INTEROP=Join-Path $directory 'SolidWorks.Interop.sldworks.dll'
+          "GOKWORKS_SHAFT_TEST_INTEROP=$env:GOKWORKS_SHAFT_TEST_INTEROP" >> $env:GITHUB_ENV
+          python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py *> windows-shaft-bridge.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-shaft-bridge.log; exit $LASTEXITCODE }
       - name: Validate native Windows background preview lifecycle
         timeout-minutes: 3
         env:
@@ -140,6 +154,7 @@ jobs:
             windows-release.log
             windows-setup.log
             windows-test-setup.log
+            windows-shaft-bridge.log
             windows-previous-failure.log
             dist/windows-smoke*.json
             dist/windows-smoke*.png
