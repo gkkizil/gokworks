@@ -322,6 +322,7 @@ namespace Gokworks.ShaftInterop
         { equations.Add(Q(name) + " = " + MM(value)); }
         private void ApplyEquations()
         {
+            if (equations.Count==0) return;
             IEquationMgr manager = (IEquationMgr)model.GetEquationMgr();
             foreach (string equation in equations)
                 Host.Need(manager.Add2(-1, equation, false) >= 0, "Equation failed: " + equation);
