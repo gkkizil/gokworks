@@ -77,10 +77,15 @@ RADYUS_01             (Fillet)
 
 Bu ağaç canlı ortamda doğrulanana kadar hedef davranıştır.
 Çaplar `CAP_01@MIL_PROFIL_01` adlı construction circle driving ölçüleridir;
-profil yarıçapı bu çapa /2 denklemiyle bağlanır. Boylar
+çember merkezi kademenin sol alt köşesine, profilin sol üst köşesi çembere
+geometrik olarak bağlanır. Profil yüksekliği doğrudan çapı izler; kırılgan
+`YARICAP = CAP/2` denklemi gerekmez. Boylar
 `BOY_01@MIL_PROFIL_01`; sonraki başlangıçlar önceki boylara bağlıdır.
 Yalnız referans datum noktaları sabittir; profil topluca sabitlenmez.
 Eksik tam tanımlılıkta host başarı bildirmez.
+Eskiz kapatılıp yeniden oluşturulduktan sonra kalan denklemler çözülmeden
+eklenir ve tamamı bir kez değerlendirilir; yeniden adlandırılmış ölçüler
+kaydedilmeden tek tek denklem çözdürülmez.
 
 Segman eskizleri kendi tam tanımlı construction eksenini taşır; ilk kademe
 eskizinin tüketilmiş çizgisine bağımlı değildir. Her yeni özellik seçilmeden
@@ -141,6 +146,11 @@ benzersiz, test amaçlı bir ProgID/ROT nesnesi üzerinden uygulama sınıfı
 çözümlemesini sınar. Test kaydı sonunda silinir; SOLIDWORKS başlatılmaz ve CAD
 belgesi açılmaz. `GOKWORKS_SHAFT_TEST_INTEROP` yalnız bu test referansını seçer;
 referans DLL'leri EXE'ye eklenmez. Bu test canlı geometri kabulünün yerine geçmez.
+Kesme API testi, gerçek interop arayüzündeki çağrı argümanlarını yakalar;
+bir CAD özelliği veya katı model üretmiş gibi sahte başarı döndürmez. Aynı test
+analitik talaş hacmini ve sıfır/ters/aşırı kesme reddini çalışan C# koduyla doğrular.
+Canlı kabul listesinde tek kademede segman/kama ile birinci ve ikinci kademede
+ardışık iki segman, ayrıca bu ikisinin üçüncü kademede kama ile birleşimi bulunur.
 
 Windows kabul sırası:
 

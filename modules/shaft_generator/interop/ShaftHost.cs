@@ -324,7 +324,7 @@ namespace Gokworks.ShaftInterop
         {
             IEquationMgr manager = (IEquationMgr)model.GetEquationMgr();
             foreach (string equation in equations)
-                Host.Need(manager.Add2(-1, equation, true) >= 0, "Equation failed: " + equation);
+                Host.Need(manager.Add2(-1, equation, false) >= 0, "Equation failed: " + equation);
             manager.EvaluateAll();
             // Official EvaluateAll returns -1 on BOTH success and failure.
             // Read each equation and its Status instead of trusting that code.
@@ -360,6 +360,8 @@ namespace Gokworks.ShaftInterop
             Host.Need(sketch.GetConstrainedStatus() == (int)swConstrainedStatus_e.swFullyConstrained,
                 "Sketch is not fully constrained: " + activeSketchName);
             model.SketchManager.InsertSketch(true);
+            // Register renamed sketch dimensions before adding equations.
+            Rebuild();
             ApplyEquations(); Rebuild();
         }
         private void Coincident(ISketchPoint a, ISketchPoint b)
@@ -447,7 +449,7 @@ namespace Gokworks.ShaftInterop
             }
             Coincident(StartPoint(lines[0]),anchor);
             Dimension(lines[0],widthName,width,x+width/2,y-5,false);
-            Dimension(lines[1],heightName,height,x+width+5,y+height/2,false);
+            if (heightName!=null) Dimension(lines[1],heightName,height,x+width+5,y+height/2,false);
             if (heightExpression != null) Equation(heightName+"@"+sketch,heightExpression);
             return lines;
         }
@@ -507,13 +509,19 @@ namespace Gokworks.ShaftInterop
             Stage stage=project.stages[i]; string sketch="MIL_PROFIL_"+(i+1).ToString("00");
             ISketch drawing=BeginSketch(sketch); ISketchPoint origin=Origin();
             model.SketchManager.AddToDB=true;
-            ISketchSegment circle=(ISketchSegment)model.SketchManager.CreateCircleByRadius(0,0,0,M(stage.diameter/2));
+            ISketchSegment circle=(ISketchSegment)model.SketchManager.CreateCircleByRadius(M(Start(i)),0,0,M(stage.diameter/2));
             Host.Need(circle!=null,"Diameter construction circle failed."); circle.ConstructionGeometry=true;
             model.SketchManager.AddToDB=false;
-            Coincident((ISketchPoint)((ISketchArc)circle).GetCenterPoint2(),origin);
             Dimension(circle,"CAP_"+(i+1).ToString("00"),stage.diameter,-8,stage.diameter/2,true);
             ISketchSegment[] rectangle=Rectangle(sketch,origin,Start(i),0,stage.length,stage.diameter/2,
-                "BOY_"+(i+1).ToString("00"),"YARICAP",StartExpression(i),null,Q(diameterNames[i])+" / 2");
+                "BOY_"+(i+1).ToString("00"),null,StartExpression(i),null,null);
+            Coincident((ISketchPoint)((ISketchArc)circle).GetCenterPoint2(),StartPoint(rectangle[0]));
+            // The vertical side meets the diameter-driving circle directly.
+            // Do not depend on an immediately solved CAP/2 dimension equation.
+            model.ClearSelection2(true);
+            Host.Need(StartPoint(rectangle[3]).Select4(false,null) && circle.Select4(true,null),
+                "Diameter/profile constraint selection failed.");
+            model.SketchAddConstraints("sgCOINCIDENT");
             string axis=rectangle[0].GetName()+"@"+sketch;
             EndSketch(drawing); SelectRevolve(sketch,axis);
             IFeature feature=(IFeature)model.FeatureManager.FeatureRevolve2(true,true,false,false,false,false,
