@@ -1,0 +1,14 @@
+{
+  "execution": "Linux / Qt offscreen; COM mocked",
+  "collected_items": 1462,
+  "junit": {
+    "tests": 2340,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 31
+  },
+  "extra_shutdown_regression": "3 targeted cases passed; includes one test added after full-run collection",
+  "solidworks_live_tested": false,
+  "native_opengl_tested": false,
+  "protected_files_changed": false
+}

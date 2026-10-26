@@ -13,8 +13,10 @@ from PySide6.QtGui import QImage, QPainter, QColor
 from PySide6.QtWidgets import QWidget, QStackedLayout, QApplication
 
 
-VIEWS = {'İzometrik': (-45, 60), 'Ön': (0, 90), 'Arka': (180, 90),
-         'Sağ': (90, 90), 'Sol': (-90, 90), 'Üst': (0, 0), 'Alt': (0, 180)}
+# SolidWorks: front XY (+Z), top XZ (+Y), right YZ (+X); Y is up.
+VIEWS = {'İzometrik': (-45, math.degrees(math.asin(1/math.sqrt(3)))),
+         'Ön': (0, 0), 'Arka': (180, 0), 'Sağ': (-90, 0),
+         'Sol': (90, 0), 'Üst': (0, 90), 'Alt': (0, -90)}
 
 
 class Camera:
@@ -34,11 +36,11 @@ class Camera:
 def matrices(state, aspect):
     yaw, pitch, zoom, x, y, perspective, _ = state
     a, b = math.radians(yaw), math.radians(pitch)
-    rz = np.array([[math.cos(a), -math.sin(a), 0, 0], [math.sin(a), math.cos(a), 0, 0],
-                   [0, 0, 1, 0], [0, 0, 0, 1]], dtype=float)
+    ry = np.array([[math.cos(a), 0, math.sin(a), 0], [0, 1, 0, 0],
+                   [-math.sin(a), 0, math.cos(a), 0], [0, 0, 0, 1]], dtype=float)
     rx = np.array([[1, 0, 0, 0], [0, math.cos(b), -math.sin(b), 0],
                    [0, math.sin(b), math.cos(b), 0], [0, 0, 0, 1]], dtype=float)
-    view = rx @ rz
+    view = rx @ ry
     view[0, 3], view[1, 3], view[2, 3] = x, y, -6
     if perspective:
         f = 1 / math.tan(math.radians(35) / 2) * zoom

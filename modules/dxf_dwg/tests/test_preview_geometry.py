@@ -1,6 +1,7 @@
 """Local mesh/depth/flat tests use synthetic geometry, never claim CAD acceptance."""
 
 import threading
+import math
 
 import ezdxf
 import numpy as np
@@ -43,7 +44,7 @@ def test_triangle_diagonal_is_not_shown_as_a_cad_edge():
 
 
 def test_depth_render_keeps_actual_hole_open_and_is_not_a_bounding_box(qapp):
-    mesh = ring_mesh(); camera = Camera(); camera.yaw, camera.pitch = VIEWS['Üst']; camera.edges = False
+    mesh = ring_mesh(); camera = Camera(); camera.yaw, camera.pitch = VIEWS['Ön']; camera.edges = False
     image = raster(mesh, 200, 200, camera.state(), threading.Event())
     assert image.pixelColor(100, 100).red() == 248  # through hole, not filled
     assert image.pixelColor(60, 100).red() < 200  # actual ring material
@@ -56,6 +57,20 @@ def test_all_camera_views_and_both_projections_are_finite(name, perspective):
     camera = Camera(); camera.yaw, camera.pitch = VIEWS[name]; camera.perspective = perspective
     view, mvp = matrices(camera.state(), 1.5)
     assert np.isfinite(view).all() and np.isfinite(mvp).all() and np.linalg.det(mvp) != 0
+
+
+@pytest.mark.parametrize('name,normal', [('Ön',(0,0,1)),('Arka',(0,0,-1)),('Üst',(0,1,0)),
+                                      ('Alt',(0,-1,0)),('Sağ',(1,0,0)),('Sol',(-1,0,0))])
+def test_standard_view_directions_match_solidworks_planes(name, normal):
+    camera = Camera(); camera.yaw, camera.pitch = VIEWS[name]
+    view, _ = matrices(camera.state(), 1.)
+    assert view[2,:3] == pytest.approx(normal, abs=1e-12)
+
+
+def test_isometric_axes_have_equal_orthographic_foreshortening():
+    view, _ = matrices(Camera().state(), 1.)
+    lengths = np.linalg.norm(view[:2,:3], axis=0)
+    assert lengths == pytest.approx([math.sqrt(2/3)]*3)
 
 
 def test_render_and_mesh_cancellation(qapp):

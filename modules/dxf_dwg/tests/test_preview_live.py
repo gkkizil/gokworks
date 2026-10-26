@@ -40,7 +40,7 @@ def test_native_windows_renderer_shows_real_mesh_and_open_hole(qtbot):
         pytest.skip('Native Qt Windows platform not selected.')
     widget = MeshView(); qtbot.addWidget(widget); widget.resize(600, 400)
     frames = []; widget.frameReady.connect(lambda: frames.append(True))
-    widget.set_mesh(ring_mesh()); widget.view('Üst'); widget.show()
+    widget.set_mesh(ring_mesh()); widget.view('Ön'); widget.show()
     qtbot.waitUntil(lambda: bool(frames), timeout=10000)
     image = widget.grab().toImage()
     assert image.pixelColor(image.width()//2, image.height()//2).red() > 230

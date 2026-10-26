@@ -80,6 +80,9 @@ zaten Shapely/ezdxf bağımlılık ağacındadır; yeni paket eklenmedi. Donanı
 olmasa da arayüz thread'inde raster yapılmaz. Ortografik/perspektif, 7 standart
 görünüş, döndürme, kaydırma, tekerlek, ekrana sığdırma ve crease/boundary
 kenarları desteklenir. Üçgen iç köşegenleri CAD kenarı gibi gösterilmez.
+Kamera yönleri SolidWorks ön XY (+Z), üst XZ (+Y), sağ YZ (+X) düzenindedir;
+izometrikte üç eksenin ortografik kısalması eşittir. Altı yön ve bu eşitlik
+ayrı matematiksel testlerle doğrulanır.
 
 - En fazla 120.000 üçgen; mesh LRU en fazla 8 kayıt / 32 MiB.
 - DXF en fazla 50 MiB, 200.000 örnek nokta, BLOCK derinliği 16.
@@ -126,6 +129,12 @@ ile geçti: [kayıt](final-targeted-tests.xml). Son küçük durum mesajı/geri
 yükleme koruması için 3 hedefli test tekrar geçti. Örtüşen sayılar toplanmaz.
 Windows tam regresyonu ve EXE açılışı ayrı derleme kaydında raporlanır;
 gerçek SolidWorks testi, ortam seçilmedikçe atlanır.
+Son standart görünüş/kapanış kontrolleri dahil modül koşusu **150 item /
+194 JUnit kontrolü, 0 hata, 2 platform/canlı CAD atlaması** ile geçti:
+[kayıt](standard-view-tests.xml). Son Linux tam koşusu **2.340 kontrol,
+0 hata, 31 atlama**: [JUnit](final-full-tests.xml), [özet](final-linux-checks.json).
+Tam koşu envanterinden sonra eklenen kapanış ve görünüş testleri ayrıca
+yukarıdaki modül koşusunda yer alır; sayılar örtüştüğü için toplanmaz.
 
 ```bash
 python -m pytest modules/dxf_dwg/tests

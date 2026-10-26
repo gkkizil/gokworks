@@ -4,7 +4,7 @@
   "modules/dxf_dwg/preview/panel.py": "5739f6f18526e2eb8e5fa07c9e6b62cf8a66bde8102df5ca9407685f0b1b6929",
   "modules/dxf_dwg/preview/opengl.py": "dc082618e9ff2b6c727522778ccb00c627e88d2b0a78050d6415b58add34e57b",
   "modules/dxf_dwg/preview/models.py": "c6c2a11ee34cfe2cb9d340792835d375a3dc7029c992fd84b174978034a98405",
-  "modules/dxf_dwg/preview/viewer.py": "572d2486f70ad3c4073ecc22f0724dc4dc5ac7bbc2c8f91645ea6b85cf4dd834",
+  "modules/dxf_dwg/preview/viewer.py": "b1a248c1760cb50e352f8514161e03ddce518ea6d7897af486f8fbaed947b2e1",
   "modules/dxf_dwg/preview/flat.py": "208e05568d8da4856f0007621a23edda5e5539dc68412ce263c4c606dddc502e",
   "modules/dxf_dwg/preview/geometry.py": "df8749da37fc7ad7f698f35ecaef0671fc6e369d334931d3d02b9e021bd37dca",
   "modules/dxf_dwg/preview/__init__.py": "c43cef2d1faa023b675fd8bb64f0065fc2712f16bb6972f688193739abf5b709",
