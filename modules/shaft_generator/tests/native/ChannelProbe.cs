@@ -62,11 +62,24 @@ namespace Gokworks.ShaftChannelTest
         public override IMessage Invoke(IMessage message)
         {
             IMethodCallMessage call = (IMethodCallMessage)message;
-            try { return new ReturnMessage(respond(call), null, 0, call.LogicalCallContext, call); }
+            try
+            {
+                object value=respond(call);
+                Reply reply=value as Reply;
+                return reply==null ? new ReturnMessage(value,null,0,call.LogicalCallContext,call)
+                    : new ReturnMessage(reply.Value,reply.Arguments,reply.Arguments.Length,call.LogicalCallContext,call);
+            }
             catch (Exception error) { return new ReturnMessage(error, call); }
         }
         internal static object Make(Type contract, Func<IMethodCallMessage, object> handler)
         { return new Proxy(contract, handler).GetTransparentProxy(); }
+    }
+
+    internal sealed class Reply
+    {
+        internal readonly object Value;
+        internal readonly object[] Arguments;
+        internal Reply(object value,object[] arguments) { Value=value; Arguments=arguments; }
     }
 
     public sealed class Probe
@@ -76,7 +89,11 @@ namespace Gokworks.ShaftChannelTest
         public readonly IFeature Sketch;
         public readonly ISketchSegment Axis;
         public bool RefuseAxis;
+        public bool RefuseSketch;
         public bool ExtraSelection;
+        public int ProfileStatus;
+        public int OpenContours;
+        public int ClosedContours=1;
         private readonly List<int> marks = new List<int>();
         private int axisMark;
 
@@ -113,9 +130,18 @@ namespace Gokworks.ShaftChannelTest
                 // A save/close/rebuild would fail the probe instead of silently succeeding.
                 throw new InvalidOperationException("Unexpected document call: " + call.MethodName);
             });
+            object drawing=Proxy.Make(typeof(ISketch),delegate(IMethodCallMessage call) {
+                if(call.MethodName!="CheckFeatureUse") throw new InvalidOperationException(call.MethodName);
+                Events.Add("profile:"+call.Args[0]);
+                object[] arguments=(object[])call.Args.Clone();
+                arguments[1]=OpenContours; arguments[2]=ClosedContours;
+                return new Reply(ProfileStatus,arguments);
+            });
             Sketch = (IFeature)Proxy.Make(typeof(IFeature), delegate(IMethodCallMessage call) {
+                if(call.MethodName=="GetSpecificFeature2") return drawing;
                 if (call.MethodName != "Select2") throw new InvalidOperationException(call.MethodName);
                 Events.Add("sketch:" + call.Args[0] + ":" + call.Args[1]);
+                if(RefuseSketch) return false;
                 if (!(bool)call.Args[0]) marks.Clear();
                 marks.Add((int)call.Args[1]); return true;
             });
@@ -136,6 +162,16 @@ namespace Gokworks.ShaftChannelTest
             {
                 if (!(error.InnerException is InvalidOperationException)) throw;
                 Events.Add("rejected:" + error.InnerException.Message); return false;
+            }
+        }
+
+        public bool SelectKeyway(MethodInfo method)
+        {
+            try { method.Invoke(null,new object[]{Model,Sketch}); return true; }
+            catch(TargetInvocationException error)
+            {
+                if(!(error.InnerException is InvalidOperationException)) throw;
+                Events.Add("rejected:"+error.InnerException.Message); return false;
             }
         }
 

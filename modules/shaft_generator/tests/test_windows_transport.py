@@ -143,10 +143,10 @@ namespace Gokworks.ShaftCutTest {
    // Deliberately return no feature: this is not a simulated CAD success.
    return new ReturnMessage(null,null,0,call.LogicalCallContext,call);
   }
-  public static Manager Capture(MethodInfo method, double depth, bool keyway, bool reverse) {
+  public static Manager Capture(MethodInfo method, double depth, bool keyway, double alignment) {
    Manager capture=new Manager(typeof(IFeatureManager));
    object proxy=capture.GetTransparentProxy();
-   method.Invoke(null,keyway ? new object[]{proxy,depth,reverse} : new object[]{proxy});
+   method.Invoke(null,keyway ? new object[]{proxy,depth,alignment} : new object[]{proxy});
    return capture;
   }
   public static Manager CaptureSlot(MethodInfo method, double sign) {
@@ -177,9 +177,9 @@ namespace Gokworks.ShaftCutTest {
 '@
 $type=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.ChannelCuts',$true)
 $flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
-$groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false,$false)
-$keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.004,$true,$true)
-$opposite=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.004,$true,$false)
+$groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false,0)
+$keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.004,$true,-1)
+$opposite=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.004,$true,1)
 $slot=[Gokworks.ShaftCutTest.Manager]::CaptureSlot($type.GetMethod('KeywaySlot',$flags),1)
 $mirrored=[Gokworks.ShaftCutTest.Manager]::CaptureSlot($type.GetMethod('KeywaySlot',$flags),-1)
 $volumeMethod=$type.GetMethod('ExpectedVolume',$flags)
@@ -222,7 +222,7 @@ function Check-Removal([double]$after) {
     assert keyway['Sd'] and keyway['Dir'] and not data['opposite']['Dir']
     assert keyway['T0']==0 and keyway['StartOffset']==0
     assert not keyway['Flip'] and not keyway['NormalCut'] and not keyway['OptimizeGeometry']
-    assert not keyway['UseFeatScope'] and keyway['UseAutoSelect']
+    assert keyway['UseFeatScope'] and keyway['UseAutoSelect']
     assert data['groove_volume']==pytest.approx(2*math.pi*(2*15*1-1)*1e-9)
     assert data['slot_method']=='CreateSketchSlot'
     slot=data['slot']

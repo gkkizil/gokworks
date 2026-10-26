@@ -137,7 +137,7 @@ SEGMAN_KANALI_01       (Cut-Revolve)
   SEGMAN_KANALI_01_ESKIZI
 KAMA_KANALI_01         (Cut-Extrude)
   KAMA_KANALI_01_ESKIZI
-KAMA_KANALI_01_TABAN_DUZLEMI (native, gizli yardımcı düzlem; kesmeden önce oluşturulur)
+KAMA_KANALI_01_KESME_DUZLEMI (native, milin 1 mm dışında gizli yardımcı düzlem)
 ```
 
 Bu ağaç canlı ortamda doğrulanana kadar hedef davranıştır.
@@ -184,14 +184,19 @@ bulunur. Taban düzlemi `CAP/2-DERINLIK` konumuna taşınır. Bu düzlemde nativ
 `CreateSketchSlot` iki teğet doğru ve iki yarım daire oluşturur. API'ye verilen
 noktalar uç yaylarının merkezleridir; toplam boydan genişlik çıkarılır.
 Yalnız konum datumu sabittir; slotun konumu, eksen yönü, merkez mesafesi ve uç
-çapı sürücü ölçü/ilişkilerle tam tanımlanır. Cut-Extrude tabandan dışarı doğru
-`DERINLIK+1mm` kör kesme yapar; yön eskiz normalinden hesaplanır. Taban düzlemi
-ve kesme boyu denklemleri çap/derinlik düzenlenince güncellenir. Sac parça
+çapı sürücü ölçü/ilişkilerle tam tanımlanır. Eskiz, mil yüzeyinin 1 mm dışındaki
+`CAP/2+1mm` yardımcı düzleminde açılır. Cut-Extrude milin içine doğru
+`DERINLIK+1mm` kör kesmeyle tam `CAP/2-DERINLIK` tabanına ulaşır. API'nin
+varsayılan kesme yönü eskiz normalinin tersidir; iki düzlem yönelimi de bu
+kurala göre hesaplanır. Düzlem ve kesme boyu denklemleri çap/derinlik
+düzenlenince güncellenir. Önce `CheckFeatureUse(CUTEXTRUDE)` ile tek kapalı,
+sıfır açık kontur denetlenir; gerçek eskiz nesnesi tek başına 0 işaretiyle
+seçilir. Tek katı gövde üzerinde kesme kapsamı ve otomatik seçim açıktır. Sac parça
 `NormalCut` / `OptimizeGeometry` seçenekleri kapalıdır.
-Kama tabanının konumu `MathPoint/MathTransform` sınırına **metre** olarak
-verilir. Önceki kod `(çap/2 - derinlik)` mm değerini doğrudan verdiği için
-orijin/düzlem kontrolünde 1000 kat konum hatası oluşturuyordu (Ø30 / 3 mm:
-12 yerine 0,012 m). JSON ve arayüz birimleri mm olarak korunur.
+Kama kesme düzleminin konumu `MathPoint/MathTransform` sınırına **metre**
+olarak verilir. JSON ve arayüz birimleri mm olarak korunur. Eski tabandan
+dışarı kesme yolu kullanılmaz; null API dönüşünde ters yöne kör deneme
+yapılmaz. Hata metni kesme API'sini ve kullanılan ölçüleri içerir.
 
 Her segman/kama kesmesinden sonra gerçek SI hacim farkı beklenen
 talaş hacmiyle karşılaştırılır. Segman analitiktir; kama için kapsül ayak izi
@@ -212,7 +217,7 @@ Kama global değişkenleri `KAMA_KANALI_01_KONUM`, `..._DERINLIK`, `..._BOY`
 `GENISLIK` uç yayının çapıdır, `MERKEZLER_ARASI = BOY-GENISLIK`,
 `BASLANGIC = önceki boylar + KONUM + GENISLIK/2 + 1mm`.
 Sonuncusu ilk yay merkezine (-1,0) mm datumundan olan mesafedir; ters yerel
-X yönünde datum (+1,0) mm olur. `TABAN_Y@..._TABAN_DUZLEMI` ve
+X yönünde datum (+1,0) mm olur. `KESME_Y@..._KESME_DUZLEMI` ve
 `KESME_BOYU@KAMA_KANALI_01` yardımcı sürücü ölçülerdir.
 
 ## API kaynakları ve derleme
@@ -222,6 +227,7 @@ X yönünde datum (+1,0) mm olur. `TABAN_Y@..._TABAN_DUZLEMI` ve
 - [GetLastFeatureAdded](https://help.solidworks.com/2023/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IModelDocExtension~GetLastFeatureAdded.html)
 - [IPartDoc.FeatureByName](https://help.solidworks.com/2025/English/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IPartDoc~FeatureByName.html)
 - [FeatureCut4](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurecut4.html)
+- [CheckFeatureUse](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISketch~CheckFeatureUse.html): kesmeden önce kapalı profil denetimi.
 - [Slot boy ölçüsünün anlamı](https://help.solidworks.com/2021/english/SolidWorks/sldworks/hidd_dve_sketch_slot.htm)
 - [Referans düzlem dönüşümü](https://help.solidworks.com/2022/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IRefPlane~Transform.html)
 - [InsertFeatureChamfer](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~InsertFeatureChamfer.html)
@@ -266,6 +272,10 @@ sıfır/ters/aşırı kesme reddini çalışan C# koduyla doğrular.
 Canlı kabul listesinde tek kademede segman/kama ile birinci ve ikinci kademede
 ardışık iki segman, ayrıca bu ikisinin üçüncü kademede kama ile birleşimi bulunur.
 Geniş/kısa kapsül ve farklı kademelerde iki kama senaryoları da bulunur.
+Son hata ekranındaki Ø30×80, Ø45×65, Ø35×50, Ø25×35 mil; birinci kademede
+segman ve ikinci kademede başlangıç 5, toplam boy 60, genişlik 14, derinlik
+5,5 mm kama `reported_groove_keyway` canlı kabul senaryosudur. Boy sessizce
+kısaltılmaz; bu gerçek CAD testi bu ortamda çalıştırılmamıştır.
 Bu ortamda canlı SOLIDWORKS geometri kabulü çalıştırılmamıştır.
 
 Windows kabul sırası:

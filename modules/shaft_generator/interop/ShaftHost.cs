@@ -226,8 +226,35 @@ namespace Gokworks.ShaftInterop
     {
         // Keep this native construction order aligned with geometry.operation_plan.
         internal static readonly string[] OperationOrder = { "chamfer", "fillet", "groove", "keyway" };
-        internal static double KeywayFloorMetres(double diameterMm, double depthMm)
-        { return (diameterMm / 2 - depthMm) * .001; }
+        internal static double KeywayStartMetres(double diameterMm)
+        { return (diameterMm / 2 + 1) * .001; }
+
+        internal static bool KeywayReverseDirection(double normalAlignment)
+        {
+            Host.Need(!Double.IsNaN(normalAlignment) && !Double.IsInfinity(normalAlignment)
+                && Math.Abs(Math.Abs(normalAlignment)-1)<1e-8, "Kama kesme yönü radyal değil.");
+            // A cut's default direction is OPPOSITE its sketch normal. Start
+            // outside the cylinder and cut inward, irrespective of plane handedness.
+            return normalAlignment<0;
+        }
+
+        internal static void SelectKeyway(IModelDoc2 model, IFeature feature)
+        {
+            Host.Need(feature!=null, "Kama kesme eskizi bulunamadı.");
+            ISketch sketch=feature.GetSpecificFeature2() as ISketch;
+            Host.Need(sketch!=null, "Kama kesme seçimi bir eskiz değil.");
+            int open=0, closed=0;
+            int status=sketch.CheckFeatureUse((int)swSketchCheckFeatureProfileUsage_e.swSketchCheckFeature_CUTEXTRUDE,
+                ref open,ref closed);
+            Host.Need(status==(int)swSketchCheckFeatureStatus_e.swSketchCheckFeatureStatus_OK && open==0 && closed==1,
+                "Kama profili katı kesmeye uygun tek kapalı kontur değil. API durum="+status
+                +", açık="+open+", kapalı="+closed+". Kesme uygulanmadı.");
+            ISelectionMgr selection=(ISelectionMgr)model.SelectionManager;
+            selection.EnableContourSelection=false;
+            model.ClearSelection2(true);
+            Host.Need(feature.Select2(false,0) && selection.GetSelectedObjectCount2(-1)==1
+                && selection.GetSelectedObjectCount2(0)==1, "Kama kesme eskizi tek başına seçilemedi.");
+        }
 
         internal static void SelectGroove(IModelDoc2 model, IFeature sketch, ISketchSegment axis)
         {
@@ -290,16 +317,16 @@ namespace Gokworks.ShaftInterop
                 axialSign*(startMetres+lengthMetres/2),widthMetres/2,0,1,false);
         }
 
-        internal static IFeature Keyway(IFeatureManager manager, double depthMetres, bool reverseDirection)
+        internal static IFeature Keyway(IFeatureManager manager, double depthMetres, double normalAlignment)
         {
             return (IFeature)manager.FeatureCut4(
-                Sd:true, Flip:false, Dir:reverseDirection,
+                Sd:true, Flip:false, Dir:KeywayReverseDirection(normalAlignment),
                 T1:(int)swEndConditions_e.swEndCondBlind, T2:0,
                 D1:depthMetres, D2:0, Dchk1:false, Dchk2:false,
                 Ddir1:false, Ddir2:false, Dang1:0, Dang2:0,
                 OffsetReverse1:false, OffsetReverse2:false,
                 TranslateSurface1:false, TranslateSurface2:false, NormalCut:false,
-                UseFeatScope:false, UseAutoSelect:true, AssemblyFeatureScope:false,
+                UseFeatScope:true, UseAutoSelect:true, AssemblyFeatureScope:false,
                 AutoSelectComponents:false, PropagateFeatureToParts:false,
                 T0:(int)swStartConditions_e.swStartSketchPlane, StartOffset:0,
                 FlipStartOffset:false, OptimizeGeometry:false);
@@ -651,14 +678,14 @@ namespace Gokworks.ShaftInterop
             int i=stageIndices[op.stage_id]; Stage stage=project.stages[i];
             string sketch=name+"_ESKIZI", offset=name+"_KONUM", depth=name+"_DERINLIK", length=name+"_BOY";
             Global(offset,op.offset); Global(depth,op.depth); Global(length,op.length);
-            IFeature floor=KeywayFloor(name,stage.diameter/2-op.depth,i,depth);
-            ISketch drawing=BeginSketch(sketch,floor);
+            IFeature startPlane=KeywayStartPlane(name,stage.diameter/2+1,i);
+            ISketch drawing=BeginSketch(sketch,startPlane);
             IMathTransform toSketch=drawing.ModelToSketchTransform;
             // MathPoint/MathTransform consume SI metres, unlike our mm model.
-            double[] floorOrigin=Point(0,ChannelCuts.KeywayFloorMetres(stage.diameter,op.depth),0,profileToModel);
-            double[] localOrigin=Point(floorOrigin,toSketch);
+            double[] startOrigin=Point(0,ChannelCuts.KeywayStartMetres(stage.diameter),0,profileToModel);
+            double[] localOrigin=Point(startOrigin,toSketch);
             Host.Need(Math.Abs(localOrigin[0])+Math.Abs(localOrigin[1])+Math.Abs(localOrigin[2])<1e-8,
-                "Kama eskiz orijini taban düzlemiyle uyuşmuyor.");
+                "Kama eskiz orijini dış kesme düzlemiyle uyuşmuyor.");
             double[] localAxis=Vector(Vector(1,0,0,profileToModel),toSketch);
             Host.Need(Math.Abs(Math.Abs(localAxis[0])-1)<1e-8,"Kama düzleminin X ekseni mil eksenine paralel değil.");
             double sign=localAxis[0]>0 ? 1 : -1;
@@ -693,15 +720,24 @@ namespace Gokworks.ShaftInterop
             Dimension(rail,"BASLANGIC",center+1,sign*center/2,-op.width-5,false);
             Equation("BASLANGIC@"+sketch,StartExpression(i)+" + "+Q(offset)+" + "+Q("GENISLIK@"+sketch)+" / 2 + 1mm");
             double alignment=Dot(Vector(0,0,1,toSketch.IInverse()),Vector(0,1,0,profileToModel));
-            Host.Need(Math.Abs(Math.Abs(alignment)-1)<1e-8,"Kama kesme yönü radyal değil.");
-            EndSketch(drawing); SelectSketch(sketch);
-            // Start on the pocket floor and cut OUTWARD, never through the shaft centre.
-            IFeature cut=ChannelCuts.Keyway(model.FeatureManager,M(op.depth+1),alignment>0);
+            EndSketch(drawing);
+            Host.Report(name+": mil dışından tabana kör kesme uygulanıyor (derinlik="
+                +op.depth.ToString("G8",CultureInfo.InvariantCulture)+" mm)");
+            ChannelCuts.SelectKeyway(model,Find(sketch));
+            // The sketch lies 1 mm outside the cylinder; depth + 1 mm ends
+            // exactly on R-depth. Never flip to an unverified opposite cut.
+            IFeature cut=ChannelCuts.Keyway(model.FeatureManager,M(op.depth+1),alignment);
+            Host.Need(cut!=null,"Kama kesimi oluşturulamadı (FeatureCut4). Kapalı eskiz seçildi; mil dışından tabana kesme tamamlanmadı."
+                +" Çap="+stage.diameter.ToString("G8",CultureInfo.InvariantCulture)
+                +" mm; boy="+op.length.ToString("G8",CultureInfo.InvariantCulture)
+                +" mm; genişlik="+op.width.ToString("G8",CultureInfo.InvariantCulture)
+                +" mm; derinlik="+op.depth.ToString("G8",CultureInfo.InvariantCulture)
+                +" mm; normal="+alignment.ToString("G8",CultureInfo.InvariantCulture)+".");
             Named(cut,name);
             RenameOnlyDimension(cut,"KESME_BOYU",op.depth+1);
             Equation("KESME_BOYU@"+name,Q(depth)+" + 1mm");
             ApplyEquations(); Rebuild();
-            model.ClearSelection2(true); floor.Select2(false,0); model.BlankRefGeom();
+            model.ClearSelection2(true); startPlane.Select2(false,0); model.BlankRefGeom();
             ChannelCuts.VerifyRemoval(name,before,Volume(),ChannelCuts.ExpectedVolume(project.stages[stageIndices[op.stage_id]],op));
         }
 
@@ -733,7 +769,7 @@ namespace Gokworks.ShaftInterop
                 && Math.Abs(dimension.SystemValue-M(value))<1e-8,"Geçersiz sürücü ölçü: "+feature.Name);
             dimension.Name=name;
         }
-        private IFeature KeywayFloor(string name,double height,int stage,string depth)
+        private IFeature KeywayStartPlane(string name,double height,int stage)
         {
             double[] radial=Vector(0,1,0,profileToModel), axial=Vector(1,0,0,profileToModel);
             double[] origin=Point(0,0,0,profileToModel);
@@ -753,17 +789,17 @@ namespace Gokworks.ShaftInterop
             model.ClearSelection2(true); Host.Need(support.Select2(false,0),"Kama referans düzlemi seçilemedi.");
             int constraint=(int)swRefPlaneReferenceConstraints_e.swRefPlaneReferenceConstraint_Distance;
             if (direction<0) constraint|=(int)swRefPlaneReferenceConstraints_e.swRefPlaneReferenceConstraint_OptionFlip;
-            Host.Need(model.FeatureManager.InsertRefPlane(constraint,M(height),0,0,0,0)!=null,"Kama taban düzlemi oluşturulamadı.");
-            IFeature floor=(IFeature)model.Extension.GetLastFeatureAdded();
-            Host.Need(floor!=null && floor.GetSpecificFeature2() is IRefPlane,"Kama taban düzlemi bulunamadı.");
-            Named(floor,name+"_TABAN_DUZLEMI");
-            RenameOnlyDimension(floor,"TABAN_Y",height);
-            Equation("TABAN_Y@"+floor.Name,Q(diameterNames[stage])+" / 2 - "+Q(depth));
+            Host.Need(model.FeatureManager.InsertRefPlane(constraint,M(height),0,0,0,0)!=null,"Kama dış kesme düzlemi oluşturulamadı.");
+            IFeature startPlane=(IFeature)model.Extension.GetLastFeatureAdded();
+            Host.Need(startPlane!=null && startPlane.GetSpecificFeature2() is IRefPlane,"Kama dış kesme düzlemi bulunamadı.");
+            Named(startPlane,name+"_KESME_DUZLEMI");
+            RenameOnlyDimension(startPlane,"KESME_Y",height);
+            Equation("KESME_Y@"+startPlane.Name,Q(diameterNames[stage])+" / 2 + 1mm");
             ApplyEquations(); Rebuild();
-            double[] actual=Point(0,0,0,((IRefPlane)floor.GetSpecificFeature2()).Transform);
+            double[] actual=Point(0,0,0,((IRefPlane)startPlane.GetSpecificFeature2()).Transform);
             Host.Need(Math.Abs(Dot(new double[]{actual[0]-origin[0],actual[1]-origin[1],actual[2]-origin[2]},radial)-M(height))<1e-8,
-                "Kama taban düzlemi milin yanlış tarafında.");
-            return floor;
+                "Kama dış kesme düzlemi milin yanlış tarafında.");
+            return startPlane;
         }
         private IEdge SelectCircularEdge(Operation op,int mark)
         {

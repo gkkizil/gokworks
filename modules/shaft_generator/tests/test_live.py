@@ -14,7 +14,8 @@ from modules.shaft_generator.bridge import execute
 @pytest.mark.parametrize('case',['single','stages','equal','groove','zero_groove','keyway','zero_keyway',
                                'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway',
                                'chamfer','two_chamfers','fillet','operations',
-                               'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends'])
+                               'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends',
+                               'reported_groove_keyway'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -38,6 +39,11 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case=='operations':
         p.operations=[Groove(p.stages[1].id,offset=8),Keyway(p.stages[2].id,offset=10,length=25,width=8,depth=3),
                       Chamfer(p.stages[0].id),Fillet(p.stages[-1].id)]
+    if case=='reported_groove_keyway':
+        # Exact dimensions in the user's failure screenshot; overall keyway
+        # ends at the Ø45 / Ø35 shoulder. Do not silently shorten the slot.
+        p.stages=[Stage(30,80),Stage(45,65),Stage(35,50),Stage(25,35)]
+        p.operations=[Groove(p.stages[0].id),Keyway(p.stages[1].id,offset=5,length=60,width=14,depth=5.5)]
     combined = case in ('keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends')
     if combined:
         p.stages=[Stage(30,80)]
@@ -70,7 +76,8 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
                 expected-=math.pi*(15*f*f*(2-math.pi/2)+f**3*(math.pi/2-5/3))
         assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if case in ('single','equal','stages','groove','zero_groove','keyway','zero_keyway',
-                'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway'):
+                'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway',
+                'reported_groove_keyway'):
         # Independent slice integration, not a mock return value.
         volume=sum(math.pi*(s.diameter/2)**2*s.length for s in p.stages)
         for op in p.operations:

@@ -8,12 +8,14 @@ on:
       - 'modules/bom/**'
       - 'modules/shaft_generator/ui.py'
       - 'modules/shaft_generator/tests/test_ui.py'
+      - 'modules/shaft_generator/interop/**'
       - '.github/workflows/windows-bom.yml'
   pull_request:
     paths:
       - 'modules/bom/**'
       - 'modules/shaft_generator/ui.py'
       - 'modules/shaft_generator/tests/test_ui.py'
+      - 'modules/shaft_generator/interop/**'
       - '.github/workflows/windows-bom.yml'
 
 permissions:
