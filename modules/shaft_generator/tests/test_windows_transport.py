@@ -112,3 +112,105 @@ try {
         env={**os.environ,'GOKWORKS_SHAFT_INTEROP':str(library),'GOKWORKS_SHAFT_HOST':str(HOST_SOURCE)})
     assert result.returncode==0,result.stdout+result.stderr
     assert 'GOKWORKS_SHAFT_REGISTERED_CLASS_OK' in result.stdout,result.stdout+result.stderr
+
+
+@pytest.mark.skipif(sys.platform!='win32' or not os.environ.get('GOKWORKS_SHAFT_TEST_INTEROP'),
+                   reason='Windows and explicitly staged interop compile references required.')
+def test_shipping_cut_api_arguments_and_real_volume_checks():
+    """Intercept API arguments, without pretending to run a CAD geometry kernel."""
+    library=Path(os.environ['GOKWORKS_SHAFT_TEST_INTEROP']).resolve()
+    probe=r'''
+Add-Type -ReferencedAssemblies $references -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.Remoting.Messaging;
+using System.Runtime.Remoting.Proxies;
+using SolidWorks.Interop.sldworks;
+namespace Gokworks.ShaftCutTest {
+ public class Manager : RealProxy {
+  public string Method;
+  public Dictionary<string,object> Arguments;
+  public Manager() : base(typeof(IFeatureManager)) {}
+  public override IMessage Invoke(IMessage message) {
+   IMethodCallMessage call=(IMethodCallMessage)message;
+   Method=call.MethodName; Arguments=new Dictionary<string,object>();
+   MethodBase method=call.MethodBase ?? typeof(IFeatureManager).GetMethod(call.MethodName);
+   if(method==null) throw new MissingMethodException("Unexpected proxy call: "+call.MethodName);
+   ParameterInfo[] parameters=method.GetParameters();
+   for(int i=0;i<parameters.Length;i++) Arguments.Add(parameters[i].Name,call.Args[i]);
+   // Deliberately return no feature: this is not a simulated CAD success.
+   return new ReturnMessage(null,null,0,call.LogicalCallContext,call);
+  }
+  public static Manager Capture(MethodInfo method, double width, bool keyway) {
+   Manager capture=new Manager();
+   object proxy=capture.GetTransparentProxy();
+   method.Invoke(null,keyway ? new object[]{proxy,width} : new object[]{proxy});
+   return capture;
+  }
+  public static bool CheckRemoval(MethodInfo method, double after, double expected) {
+   try { method.Invoke(null,new object[]{"TEST_CUT",0.0001,after,expected}); return true; }
+   catch(TargetInvocationException error) {
+    if(!(error.InnerException is InvalidOperationException)) throw;
+    return false;
+   }
+  }
+  public static double Expected(MethodInfo method, bool keyway) {
+   Type stageType=method.GetParameters()[0].ParameterType;
+   Type operationType=method.GetParameters()[1].ParameterType;
+   object stage=Activator.CreateInstance(stageType), operation=Activator.CreateInstance(operationType);
+   stageType.GetField("diameter").SetValue(stage,30.0);
+   operationType.GetField("kind").SetValue(operation,keyway ? "keyway" : "groove");
+   operationType.GetField("width").SetValue(operation,keyway ? 8.0 : 2.0);
+   operationType.GetField("depth").SetValue(operation,keyway ? 3.0 : 1.0);
+   operationType.GetField("length").SetValue(operation,20.0);
+   return (double)method.Invoke(null,new object[]{stage,operation});
+  }
+ }
+}
+'@
+$type=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.ChannelCuts',$true)
+$flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
+$groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false)
+$keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.008,$true)
+$volumeMethod=$type.GetMethod('ExpectedVolume',$flags)
+$expected=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$false)
+$keyVolume=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$true)
+$verify=$type.GetMethod('VerifyRemoval',$flags)
+function Check-Removal([double]$after) {
+ return [Gokworks.ShaftCutTest.Manager]::CheckRemoval($verify,$after,$expected)
+}
+[Console]::WriteLine((@{
+ event='cut_contract'; groove_method=$groove.Method; groove=$groove.Arguments;
+ keyway_method=$keyway.Method; keyway=$keyway.Arguments;
+ groove_volume=$expected; keyway_volume=$keyVolume;
+ valid=(Check-Removal (0.0001-$expected)); unchanged=(Check-Removal 0.0001);
+ added=(Check-Removal (0.0001+$expected)); overcut=(Check-Removal (0.0001-5*$expected))
+} | ConvertTo-Json -Depth 5 -Compress))
+'''
+    powershell=Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
+    result=subprocess.run([str(powershell),'-NoLogo','-NoProfile','-NonInteractive','-STA',
+                           '-Command',LOADER.replace('[Gokworks.ShaftInterop.Host]::Run()',probe)],
+        input='',encoding='utf-8',capture_output=True,timeout=40,
+        creationflags=subprocess.CREATE_NO_WINDOW,
+        env={**os.environ,'GOKWORKS_SHAFT_INTEROP':str(library),'GOKWORKS_SHAFT_HOST':str(HOST_SOURCE)})
+    assert result.returncode==0,result.stdout+result.stderr
+    data=next(json.loads(line) for line in result.stdout.splitlines() if 'cut_contract' in line)
+    import math
+    assert data['groove_method']=='FeatureRevolve2'
+    groove=data['groove']
+    assert groove['IsCut'] and groove['IsSolid'] and not groove['IsThin']
+    assert groove['Dir1Angle']==pytest.approx(math.tau)
+    assert not groove['Merge'] and not groove['UseFeatScope'] and groove['UseAutoSelect']
+    assert data['keyway_method']=='FeatureCut4'
+    keyway=data['keyway']
+    assert keyway['T1']==6 and keyway['D1']==pytest.approx(.008)  # Mid-plane, full slot width.
+    assert not keyway['Flip'] and not keyway['NormalCut'] and not keyway['OptimizeGeometry']
+    assert not keyway['UseFeatScope'] and keyway['UseAutoSelect']
+    assert data['groove_volume']==pytest.approx(2*math.pi*(2*15*1-1)*1e-9)
+    # Independent numerical integration of the circular surface above the floor.
+    count=10000;step=8/count
+    heights=[math.sqrt(15**2-(-4+i*step)**2)-12 for i in range(count+1)]
+    expected=20*step*(sum(heights)-.5*(heights[0]+heights[-1]))*1e-9
+    assert data['keyway_volume']==pytest.approx(expected,rel=1e-7)
+    assert data['valid'] and not any(data[k] for k in ('unchanged','added','overcut'))
