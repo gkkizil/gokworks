@@ -1,0 +1,61 @@
+{
+  "baseline": "8fbd8649c6ae2f45f96a703aee8e9fae56b8291b",
+  "files": [
+    {
+      "path": "gui_qt/app.py",
+      "sha256": "1cbbe117d13b4ee73b752f14041384079a290d3fcbdf679a101b74f8a469f207",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workspace.py",
+      "sha256": "2361eb40cb7e55e67d3706d786a9e90ba179cf54d96dca1ad9fafd26b563d061",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/icons.py",
+      "sha256": "79ec2abb1c88932081548c33b711fd820c0b9abc358ad232ecd3ef4c35270ad1",
+      "unchanged": true
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "sha256": "b31b8b2f0e68f3ecd530229654bef9b2d5c8062510bdebe086b37113b32808ae",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/connection.py",
+      "sha256": "b1ca50b4c2f9102fe4a6950686d38b3d80dd1642755153ff5e845e72f40ff619",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workers.py",
+      "sha256": "60cc6734fb14099a54582e14086deb6c01d36a4d576da467a4660c7d59fb3739",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/components.py",
+      "sha256": "8cef1f7f020f04b56c1c04cf67062b5680d04bdfdcfe4ee8895e85ae6784ba4c",
+      "unchanged": true
+    },
+    {
+      "path": "modules/naming/native.py",
+      "sha256": "a9e4059e4db865c49368feb243b7fb09b1c22ca3b5a5ee97caf1ddff31ede519",
+      "unchanged": true
+    },
+    {
+      "path": "modules/naming/interop/PackAndGoHost.cs",
+      "sha256": "a3a4b5a22dd3b5a147d8cbbb4d44729dec1d6522aa98a538e7b70466d7158536",
+      "unchanged": true
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "sha256": "1665b3df50ef1c64426e1c53dc898002d327de18ce7f65ffff03ae40a46ea623",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/process_watch.py",
+      "sha256": "72276530b01add74bac75392fca026a45a37bf5fce86433c274eb92eebf5fa3b",
+      "unchanged": true
+    }
+  ],
+  "note": "Existing remote main was fast-forwarded, including already merged shaft work. No protected file was edited for this feature."
+}

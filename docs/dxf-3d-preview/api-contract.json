@@ -1,0 +1,89 @@
+{
+  "source": "SOLIDWORKS 2023 reference interop metadata; not a live CAD test",
+  "sha256": "7a6bf74d2a9f60563959d738c3c85f825f257c9def2a3bec464511aaebfc88e4",
+  "signatures": {
+    "ITessellation.set_NeedVertexNormal": {
+      "hex": "20010102",
+      "parameters": [
+        "Option"
+      ]
+    },
+    "ITessellation.Tessellate": {
+      "hex": "200002",
+      "parameters": [
+        ""
+      ]
+    },
+    "ITessellation.GetFacetCount": {
+      "hex": "200008",
+      "parameters": [
+        ""
+      ]
+    },
+    "ITessellation.GetFacetFins": {
+      "hex": "20011c08",
+      "parameters": [
+        "",
+        "FacetId"
+      ]
+    },
+    "ITessellation.GetFinVertices": {
+      "hex": "20011c08",
+      "parameters": [
+        "",
+        "FinId"
+      ]
+    },
+    "ITessellation.GetVertexPoint": {
+      "hex": "20011c08",
+      "parameters": [
+        "",
+        "VertexId"
+      ]
+    },
+    "ITessellation.set_ImprovedQuality": {
+      "hex": "20010102",
+      "parameters": [
+        "Quality"
+      ]
+    },
+    "IBody2.GetTessellation": {
+      "hex": "20011c1c",
+      "parameters": [
+        "",
+        "FaceList"
+      ]
+    },
+    "IBody2.GetFaces": {
+      "hex": "20001c",
+      "parameters": [
+        ""
+      ]
+    },
+    "IBody2.IsSheetMetal": {
+      "hex": "200002",
+      "parameters": [
+        ""
+      ]
+    },
+    "IFace2.GetTessTriangles": {
+      "hex": "20011c02",
+      "parameters": [
+        "",
+        "NoConversion"
+      ]
+    },
+    "IModelDoc2.GetUpdateStamp": {
+      "hex": "200008",
+      "parameters": [
+        ""
+      ]
+    },
+    "IModelDoc2.GetBendState": {
+      "hex": "200008",
+      "parameters": [
+        ""
+      ]
+    }
+  }
+}

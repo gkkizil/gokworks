@@ -1,0 +1,11 @@
+{
+  "modules/dxf_dwg/ui.py": "01af9cda0c846c8f9cf48763b73c7ee77f17a00d132d2a56609294afe464d481",
+  "modules/dxf_dwg/exporter.py": "2b099aebc241e8bf3673538433eda2615df54b173e1bdc1a4659f0df71f5830e",
+  "modules/dxf_dwg/preview/panel.py": "5739f6f18526e2eb8e5fa07c9e6b62cf8a66bde8102df5ca9407685f0b1b6929",
+  "modules/dxf_dwg/preview/models.py": "c6c2a11ee34cfe2cb9d340792835d375a3dc7029c992fd84b174978034a98405",
+  "modules/dxf_dwg/preview/viewer.py": "81a7e678c299cc2499eb0709e94127eaada28278ed39e7ebf9bfa070ce236041",
+  "modules/dxf_dwg/preview/flat.py": "208e05568d8da4856f0007621a23edda5e5539dc68412ce263c4c606dddc502e",
+  "modules/dxf_dwg/preview/geometry.py": "df8749da37fc7ad7f698f35ecaef0671fc6e369d334931d3d02b9e021bd37dca",
+  "modules/dxf_dwg/preview/__init__.py": "c43cef2d1faa023b675fd8bb64f0065fc2712f16bb6972f688193739abf5b709",
+  "modules/dxf_dwg/preview/solidworks.py": "0447983ac7b9d142be38c8129e5bb1ae9b9bc744deb173cb83cff5bf193458ef"
+}

@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-26",
+  "references": [
+    {
+      "repository": "https://github.com/xarial/xcad",
+      "commit": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+      "license": "MIT",
+      "readme_sha256": "7e19a850575701a13262087b6649e37c07077bacf6808f0504c6531f6d198448",
+      "runtime_bundled": false,
+      "code_copied": false,
+      "license_sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93"
+    },
+    {
+      "repository": "https://github.com/xarial/xcad-examples",
+      "commit": "6955659619237b86579b7dd610b3a8b10dbd0583",
+      "license": "Not independently verified; no code reused",
+      "readme_sha256": "cef1a84310a86384152169e09bc106b7ae10b43fda8d51c17c6a808bb249345b",
+      "runtime_bundled": false,
+      "code_copied": false
+    },
+    {
+      "repository": "https://github.com/xarial/codestack",
+      "commit": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "license": "MIT",
+      "readme_sha256": "9d4b3bc4b1dc06c3fa33c4bb0e85a670447bede275b11213b6b0901c91bdb4d3",
+      "runtime_bundled": false,
+      "code_copied": false
+    },
+    {
+      "repository": "https://github.com/mrdoob/three.js",
+      "commit": "a94d557d6fbc022685b6c9a155b3aa980b6aa566",
+      "license": "MIT",
+      "readme_sha256": "d553d824625a07d7690de93af6f8daf13d6aaed42700929d7ce4e725fa5ef10d",
+      "runtime_bundled": false,
+      "code_copied": false,
+      "license_sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+    },
+    {
+      "repository": "https://github.com/bernhard-42/three-cad-viewer",
+      "commit": "060536e89805db13abb863120e93cff1ec4da15e",
+      "license": "MIT",
+      "readme_sha256": "66041b59a52a8e76e36b4ac2adab78bfcb0e233b7b9b964852ecf3b6637bdde8",
+      "runtime_bundled": false,
+      "code_copied": false,
+      "license_sha256": "e7190fae6b24af7aa02f082eaa426cae3083aa5ecb1c02bf66a894e713b44f78"
+    }
+  ],
+  "decision": "Existing native PySide6 Qt Widgets/OpenGL; direct SW tessellation. No browser/server or external code bundled."
+}

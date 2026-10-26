@@ -1,6 +1,7 @@
 """Aktif konfigürasyondaki tek gövdeli sac parçaları DXF/DWG açınımına aktarır."""
 
 import os
+import base64
 from collections import Counter
 import math
 from pathlib import Path
@@ -304,8 +305,31 @@ def _pending_targets(targets, overwrite):
     return pending
 
 
+def preview_identity(model, body):
+    """Optional read-only provenance for the preview; never gates an export."""
+    identity = {}
+    try:
+        path = _value(model, 'GetPathName')
+        stamp = Path(path).stat()
+        identity['source_stamp'] = (stamp.st_size, stamp.st_mtime_ns)
+    except Exception:
+        pass
+    try:
+        stamp = _value(model, 'GetUpdateStamp')
+        if type(stamp) is int: identity['update_stamp'] = stamp
+    except Exception:
+        pass
+    try:
+        data = model.Extension.GetPersistReference3(body)
+        if data:
+            identity['body_ref'] = 'persist:' + base64.b64encode(bytes(int(v) & 255 for v in data)).decode('ascii')
+    except Exception:
+        pass
+    return identity
+
+
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
-                    target_builder=None, output_paths=None, output_results=None):
+                    target_builder=None, output_paths=None, output_results=None, output_identity=None):
     """Kaynağı kaydetmeden açınımı aktar; yalnızca bu çağrının açtığı belgeyi kapat.
 
     Çok gövdeli parçalar eksik/üst üste geometri üretmek yerine hata döndürür.
@@ -365,6 +389,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         if _part_key(model_path, "") != _part_key(os.path.abspath(str(part)), ""):
             raise RuntimeError("SolidWorks istenen kaynak yerine farklı bir parça döndürdü; aktarım yapılmadı.")
         config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
+        if output_identity is not None:
+            output_identity.update(preview_identity(model, bodies[0]))
+            output_identity['bend_lines'] = bool(bend_lines)
         notes.append(f"Konfigürasyon: {config}")
         if target_builder is not None:
             targets = [Path(target) for target in target_builder(model, config)]
@@ -525,7 +552,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             else:
                 status, detail = export_one_part(app, part, targets, overwrite_existing, bend_lines,
                                                 target_builder=build_targets, output_paths=targets,
-                                                output_results=outputs)
+                                                output_results=outputs, output_identity=metadata)
             others = metadata.get('unexported_configurations', ())
             if others:
                 summary['unexported_configurations'] += len(others)

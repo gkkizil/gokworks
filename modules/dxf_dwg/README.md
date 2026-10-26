@@ -1,5 +1,45 @@
 # DXF / DWG — Sac kalınlığına göre klasörleme
 
+## SolidWorks 3D / açınım önizlemesi
+
+Listeden bir kaynak veya sonuç satırı seçildiğinde sağda üç bölüm açılır:
+gerçek bükülmüş SolidWorks gövdesi, açınım ve parça bilgileri. Dar pencerede
+**Önizleme** sekmesi/üst düğmesi kullanılır; panelin içi kaydırılabilir.
+
+- Sol fare: döndür; sağ/orta fare: kaydır; tekerlek: yakınlaştır.
+- İzometrik, ön/arka/sağ/sol/üst/alt, **Sığdır**, perspektif/ortografik ve
+  kenar çizgileri desteklenir. **Yenile** güncel kaynak verisini tekrar okur.
+- 3D, DXF'ten türetilmez: seçilen SLDPRT, konfigürasyon ve sac gövdesinin
+  `IFace2.GetTessTriangles` verisidir. Gerektiğinde `IBody2.GetTessellation`
+  ile özel bir bellek tessellation nesnesi oluşturulur. Kullanıcı görüntü
+  kalitesi ayarı değiştirilmez. Metre koordinatları mm'ye çevrilir.
+- Açınım normalde üretilmiş DXF'ten okunur. DWG için DWG dosyası çözülmez:
+  aynı kaynak/konfigürasyondan mevcut SolidWorks aktarım API'siyle geçici
+  DXF üretilir. Aktarım öncesi önizleme de bu yöntemi kullanır. Bu fark
+  panelde açıkça yazılır; geçici dosya silinir, üretim çıktısı değiştirilmez.
+- Parça kodu/açıklama/malzeme/büküm sayısı çözümlenmiş property'lerden,
+  kalınlık aktif SheetMetal verisinden, adet mevcut aktarım sonucundan gelir.
+  Okunamayan bilgi uydurulmaz. Dosya adından alınan kod ayrıca belirtilir.
+- Kaynak değişirse çıktı eski olarak işaretlenir; eski seçimin geciken
+  sonucu yeni parçayı boyamaz. Önbellek dosya, konfigürasyon, gövde ve canlı
+  güncelleme kimliğiyle doğrulanır; en fazla 8 mesh / 32 MiB tutar.
+
+Mevcut tek gövdeli aktarım sınırı korunur. Çok gövdeli kaynağın yalnız açık
+kalıcı gövde kimliğiyle eşleşen önizlemesi kabul edilir; eşleşme yoksa hata
+gösterilir. Açınım konfigürasyonundan yalnız gerçek türetilmiş-üst ilişkisi
+izlenir; bükülmüş konfigürasyon adı tahmin edilmez veya FlatPattern bastırılmaz.
+Geçici konfigürasyon ve önceki aktif belge geri alınır; kaynak kaydedilmez.
+
+Görüntüleme yerel Qt/OpenGL'dir; uygun sürücü yoksa GUI dışındaki bir thread'de
+derinlik tamponlu CPU çizimi kullanılır. WebEngine, sunucu, CDN veya yeni bir
+SolidWorks oturumu yoktur. Büyük mesh'lerde CPU yedeği daha yavaş olabilir.
+Mesh 120.000 üçgenle sınırlıdır. Önizleme ve yaklaşık DXF çizgi toplamı,
+imalat ölçümü veya geometri eşdeğerliği sertifikası değildir.
+
+[Mimari, kaynak incelemesi, testler ve canlı Windows kontrolü](../../docs/dxf-3d-preview/README.md).
+
+## Çıktı klasörleri
+
 **DXF / DWG → Sac kalınlığına göre klasörle** seçeneği
 açıkken uygulama, sacın SolidWorks'ten okunan gerçek kalınlığına göre çıktı
 klasörleri oluşturur. Başlangıçta açıktır; tercih kaydedilir.
