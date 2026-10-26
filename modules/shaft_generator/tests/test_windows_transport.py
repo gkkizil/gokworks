@@ -155,6 +155,17 @@ namespace Gokworks.ShaftCutTest {
     return false;
    }
   }
+  public static double Expected(MethodInfo method, bool keyway) {
+   Type stageType=method.GetParameters()[0].ParameterType;
+   Type operationType=method.GetParameters()[1].ParameterType;
+   object stage=Activator.CreateInstance(stageType), operation=Activator.CreateInstance(operationType);
+   stageType.GetField("diameter").SetValue(stage,30.0);
+   operationType.GetField("kind").SetValue(operation,keyway ? "keyway" : "groove");
+   operationType.GetField("width").SetValue(operation,keyway ? 8.0 : 2.0);
+   operationType.GetField("depth").SetValue(operation,keyway ? 3.0 : 1.0);
+   operationType.GetField("length").SetValue(operation,20.0);
+   return (double)method.Invoke(null,new object[]{stage,operation});
+  }
  }
 }
 '@
@@ -162,12 +173,9 @@ $type=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.Chann
 $flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
 $groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false)
 $keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.008,$true)
-$stage=New-Object Gokworks.ShaftInterop.Stage; $stage.diameter=30
-$op=New-Object Gokworks.ShaftInterop.Operation
-$op.kind='groove'; $op.width=2; $op.depth=1
-$expected=$type.GetMethod('ExpectedVolume',$flags).Invoke($null,@($stage,$op))
-$op.kind='keyway'; $op.width=8; $op.depth=3; $op.length=20
-$keyVolume=$type.GetMethod('ExpectedVolume',$flags).Invoke($null,@($stage,$op))
+$volumeMethod=$type.GetMethod('ExpectedVolume',$flags)
+$expected=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$false)
+$keyVolume=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$true)
 $verify=$type.GetMethod('VerifyRemoval',$flags)
 function Check-Removal([double]$after) {
  return [Gokworks.ShaftCutTest.Manager]::CheckRemoval($verify,$after,$expected)
