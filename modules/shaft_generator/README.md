@@ -7,9 +7,10 @@ kalıcı navigasyon ve tek CAD işi çalıştıran `JobManager` kullanılır.
 
 - Kademe tablosunda çap/boy hücrelerini düzenleyin; birim mm'dir. Kademe
   ekleme, kopyalama, silme ve sıra değiştirme aynı model üzerinde çalışır.
-- İki görünüş aynı ölçüleri kullanır; tablo/görünüş kademe seçimi senkrondur.
-  Kesitte operasyon seçilebilir. Pah/radyüs profili ve kanallar gösterilir.
-- Segman kanalı, **0° dikdörtgen uçlu kama kanalı**, **45° eş mesafeli pah**
+- Üst görünüş ve boyuna kesit aynı ölçeği kullanır; tablo/görünüş kademe seçimi
+  senkrondur. Her iki görünüşte operasyon seçilebilir. Üst görünüş kama kanalının
+  gerçek genişliğini ve yarım daire uçlarını, kesit düz tabanını gösterir.
+- Segman kanalı, **0° iki ucu yuvarlak kama kanalı**, **45° eş mesafeli pah**
   ve sabit radyüs desteklenen operasyonlardır. Diğer açı/uç tipleri, diş,
   merkez deliği, freze düzlüğü ve omuz boşaltması henüz desteklenmez.
 - **Proje kaydet/aç** `.gokshaft.json` parametre dosyası içindir. Yeni dosya
@@ -34,6 +35,14 @@ JSON: `schema="gokworks.shaft"`, `version=1`, `units="mm"`, `name`, `stages`,
 açılar derece; API sınırında metre/radyan kullanılır. 100 kademe, 200 operasyon
 üst sınırı vardır. Sonlu pozitif ölçü, et kalınlığı, kademe sınırları ve
 muhafazakâr operasyon çakışması doğrulanır; bu kontrol CAD kernelinin yerini tutmaz.
+
+Kama için `length` uçtan uca toplam boy, `width` freze çapı/kanal genişliği,
+`depth` silindirin tepesinden düz tabana radyal derinliktir. Her iki uçta
+`R=width/2`; merkezler arası mesafe `length-width` olur. Toplam boy genişlikten
+en az 0,00001 mm büyük olmalıdır; daireye dönüşen sıfır düz boy desteklenmez.
+Yeni alan eklenmedi: eski v1 JSON dosyalarındaki kama artık bu yuvarlak profil
+ile yeniden üretilir. Daha kısa/eski geçersiz ölçüler açık hata verir.
+Mevcut SLDPRT dosyaları bu değişiklikle kendiliğinden dönüştürülmez.
 
 `controller.request()` → `{operation:"create_shaft", project, plan,
 output_path, verify_edit}`. Köprü doğrulanmış `process_id` ekler.
@@ -71,6 +80,7 @@ SEGMAN_KANALI_01       (Cut-Revolve)
   SEGMAN_KANALI_01_ESKIZI
 KAMA_KANALI_01         (Cut-Extrude)
   KAMA_KANALI_01_ESKIZI
+KAMA_KANALI_01_TABAN_DUZLEMI (native, gizli yardımcı düzlem; kesmeden önce oluşturulur)
 PAH_01                (Chamfer)
 RADYUS_01             (Fillet)
 ```
@@ -90,21 +100,40 @@ kaydedilmeden tek tek denklem çözdürülmez.
 Segman eskizleri kendi tam tanımlı construction eksenini taşır; ilk kademe
 eskizinin tüketilmiş çizgisine bağımlı değildir. Her yeni özellik seçilmeden
 önce kontur seçim modu kapatılır. Kanal kesmeleri tek katı gövdeyi doğrular ve
-önceki özelliğin gövde kapsamını devralmadan çalışır. Kama kesmesi orta düzlem
-genişliğini kullanır; sac parça `NormalCut` / `OptimizeGeometry` seçenekleri kapalıdır.
+önceki özelliğin gövde kapsamını devralmadan çalışır.
 
-Her segman/kama kesmesinden sonra gerçek SI hacim farkı bağımsız analitik
-talaş hacmiyle karşılaştırılır. Yalnız eskiz oluşması, sıfır talaş veya yanlış
+Kama eskizi boyuna profil düzleminde değildir. Mil eksenini içeren, normali
+radyal yönde olan referans düzlemi yerelleştirilmiş adlara bakmadan dönüşümünden
+bulunur. Taban düzlemi `CAP/2-DERINLIK` konumuna taşınır. Bu düzlemde native
+`CreateSketchSlot` iki teğet doğru ve iki yarım daire oluşturur. API'ye verilen
+noktalar uç yaylarının merkezleridir; toplam boydan genişlik çıkarılır.
+Yalnız konum datumu sabittir; slotun konumu, eksen yönü, merkez mesafesi ve uç
+çapı sürücü ölçü/ilişkilerle tam tanımlanır. Cut-Extrude tabandan dışarı doğru
+`DERINLIK+1mm` kör kesme yapar; yön eskiz normalinden hesaplanır. Taban düzlemi
+ve kesme boyu denklemleri çap/derinlik düzenlenince güncellenir. Sac parça
+`NormalCut` / `OptimizeGeometry` seçenekleri kapalıdır.
+
+Her segman/kama kesmesinden sonra gerçek SI hacim farkı beklenen
+talaş hacmiyle karşılaştırılır. Segman analitiktir; kama için kapsül ayak izi
+ile silindir yüzeyi arasındaki hacim sayısal entegre edilir. Test referansı
+ayrı eksende dilim entegrasyonu kullanır. Yalnız eskiz oluşması, sıfır talaş veya yanlış
 tarafın kesilmesi başarı olarak raporlanmaz. Bu kontrol canlı SOLIDWORKS'te
 çalışır; Windows API argüman testleri CAD çekirdeği doğrulaması olarak sunulmaz.
 
-Kanal başlangıç ve derinliği `SEGMAN_KANALI_01_KONUM`,
+Segman başlangıç ve derinliği `SEGMAN_KANALI_01_KONUM`,
 `SEGMAN_KANALI_01_DERINLIK` gibi global değişkenlerdir. Kanal datumunun
 (-1,-1) mm konumu sayesinde `offset=0` için de konum ölçüsü pozitiftir:
 `BASLANGIC = önceki boylar + KONUM + 1mm`; `KONUM_Y = CAP/2 - DERINLIK + 1mm`.
 Bu yardımcı ölçüler datum payını içerir; kullanıcı gerçek ofseti global
-`*_KONUM` değişkeninden düzenler. Segman genişliği `GENISLIK@..._ESKIZI`;
-kama genişliği native Cut-Extrude derinliğidir.
+`*_KONUM` değişkeninden düzenler. Segman genişliği `GENISLIK@..._ESKIZI`.
+
+Kama global değişkenleri `KAMA_KANALI_01_KONUM`, `..._DERINLIK`, `..._BOY`
+(toplam boy); eskiz sürücü ölçüleri `GENISLIK`, `MERKEZLER_ARASI`, `BASLANGIC`.
+`GENISLIK` uç yayının çapıdır, `MERKEZLER_ARASI = BOY-GENISLIK`,
+`BASLANGIC = önceki boylar + KONUM + GENISLIK/2 + 1mm`.
+Sonuncusu ilk yay merkezine (-1,0) mm datumundan olan mesafedir; ters yerel
+X yönünde datum (+1,0) mm olur. `TABAN_Y@..._TABAN_DUZLEMI` ve
+`KESME_BOYU@KAMA_KANALI_01` yardımcı sürücü ölçülerdir.
 
 ## API kaynakları ve derleme
 
@@ -112,6 +141,8 @@ kama genişliği native Cut-Extrude derinliğidir.
 - [GetLastFeatureAdded](https://help.solidworks.com/2023/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IModelDocExtension~GetLastFeatureAdded.html)
 - [IPartDoc.FeatureByName](https://help.solidworks.com/2025/English/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IPartDoc~FeatureByName.html)
 - [FeatureCut4](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurecut4.html)
+- [Slot boy ölçüsünün anlamı](https://help.solidworks.com/2021/english/SolidWorks/sldworks/hidd_dve_sketch_slot.htm)
+- [Referans düzlem dönüşümü](https://help.solidworks.com/2022/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IRefPlane~Transform.html)
 - [InsertFeatureChamfer](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~InsertFeatureChamfer.html)
 - [FeatureFillet3](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurefillet3.html)
 - [EquationMgr.EvaluateAll](https://help.solidworks.com/2022/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IEquationMgr~EvaluateAll.html): dönüş değeri başarıda ve hatada -1; kod başarı kararı için denklemleri `Value`/`Status` üzerinden ayrıca okur.
@@ -148,9 +179,12 @@ belgesi açılmaz. `GOKWORKS_SHAFT_TEST_INTEROP` yalnız bu test referansını s
 referans DLL'leri EXE'ye eklenmez. Bu test canlı geometri kabulünün yerine geçmez.
 Kesme API testi, gerçek interop arayüzündeki çağrı argümanlarını yakalar;
 bir CAD özelliği veya katı model üretmiş gibi sahte başarı döndürmez. Aynı test
-analitik talaş hacmini ve sıfır/ters/aşırı kesme reddini çalışan C# koduyla doğrular.
+slot merkezlerini/genişliğini, iki radyal kesme yönünü, beklenen talaş hacmini ve
+sıfır/ters/aşırı kesme reddini çalışan C# koduyla doğrular.
 Canlı kabul listesinde tek kademede segman/kama ile birinci ve ikinci kademede
 ardışık iki segman, ayrıca bu ikisinin üçüncü kademede kama ile birleşimi bulunur.
+Geniş/kısa kapsül ve farklı kademelerde iki kama senaryoları da bulunur.
+Bu ortamda canlı SOLIDWORKS geometri kabulü çalıştırılmamıştır.
 
 Windows kabul sırası:
 

@@ -50,6 +50,20 @@ def test_overlap_boundary_contact_and_stale_stage_checks():
     p.operations.append(Groove('missing'));assert 'bulunamadı' in '\n'.join(validate(p))
 
 
+@pytest.mark.parametrize('length',[4,8,8.000001])
+def test_rounded_keyway_rejects_degenerate_or_short_overall_length(length):
+    p=Project();p.operations=[Keyway(p.stages[0].id,length=length,width=8)]
+    assert 'toplam boyu genişliğinden' in '\n'.join(validate(p))
+
+
+def test_rounded_keyway_keeps_v1_fields_and_overall_bounds():
+    p=Project();p.operations=[Keyway(p.stages[0].id,offset=20,length=20,width=8)]
+    assert not validate(p)
+    assert Project.from_dict(p.to_dict())==p
+    p.operations[0].offset+=.1
+    assert 'sınır' in '\n'.join(validate(p))
+
+
 def test_equal_diameter_shoulder_has_no_edge_and_ends_cannot_overlap():
     p=Project(stages=[Stage(30,10),Stage(30,10)])
     p.operations=[Fillet(p.stages[0].id)];assert validate(p)
