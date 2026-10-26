@@ -1,6 +1,6 @@
 {
-  "request_id": "20261026-shaft-running-class-binding-fix",
-  "requested_at": "2026-10-26T04:33:59+00:00",
-  "source_commit": "048989ec778bc4f794207753c9bdc7c8ee8efe8e",
-  "reason": "Build an updated Windows x64 single EXE for the reported shaft drawing failure. PR #7 fixes GetActiveObject using the interop interface IID instead of the registered SldWorks.Application CLSID, and fixes a buffered phase overwriting the actual startup error in the UI. Preserve the shaft geometry/data contracts and both agents' other modules. Require the new real Windows PowerShell/C# compilation/temporary COM ROT identity checks, the full Windows regression suite, and 100/125/150 percent packaged smoke checks before publishing. Temporary interop test references must never enter the EXE. Keep release and backup unchanged. Licensed SOLIDWORKS geometry verification still requires the target workstation."
+  "request_id": "20261026-dxf-native-mesh-preview",
+  "requested_at": "2026-10-26T09:34:18.223952+00:00",
+  "source_commit": "68e2445997c509c638b6cb66c08276c38f815de2",
+  "reason": "Build the user-requested single-file Windows EXE from current main including source-matched DXF/DWG 3D preview. Preserve already merged parametric shaft work and all protected shared files. Run the full native Windows regression suite, native mesh renderer/hole test (OpenGL or CPU fallback), existing shaft bridge checks, and 100/125/150 percent frozen smoke tests before publication. Do not update release or the backup. Real licensed SolidWorks mesh/flat acceptance remains opt-in and must not be claimed by mocks."
 }
