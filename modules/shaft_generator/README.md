@@ -82,6 +82,17 @@ profil yarıçapı bu çapa /2 denklemiyle bağlanır. Boylar
 Yalnız referans datum noktaları sabittir; profil topluca sabitlenmez.
 Eksik tam tanımlılıkta host başarı bildirmez.
 
+Segman eskizleri kendi tam tanımlı construction eksenini taşır; ilk kademe
+eskizinin tüketilmiş çizgisine bağımlı değildir. Her yeni özellik seçilmeden
+önce kontur seçim modu kapatılır. Kanal kesmeleri tek katı gövdeyi doğrular ve
+önceki özelliğin gövde kapsamını devralmadan çalışır. Kama kesmesi orta düzlem
+genişliğini kullanır; sac parça `NormalCut` / `OptimizeGeometry` seçenekleri kapalıdır.
+
+Her segman/kama kesmesinden sonra gerçek SI hacim farkı bağımsız analitik
+talaş hacmiyle karşılaştırılır. Yalnız eskiz oluşması, sıfır talaş veya yanlış
+tarafın kesilmesi başarı olarak raporlanmaz. Bu kontrol canlı SOLIDWORKS'te
+çalışır; Windows API argüman testleri CAD çekirdeği doğrulaması olarak sunulmaz.
+
 Kanal başlangıç ve derinliği `SEGMAN_KANALI_01_KONUM`,
 `SEGMAN_KANALI_01_DERINLIK` gibi global değişkenlerdir. Kanal datumunun
 (-1,-1) mm konumu sayesinde `offset=0` için de konum ölçüsü pozitiftir:

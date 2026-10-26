@@ -207,6 +207,56 @@ namespace Gokworks.ShaftInterop
         }
     }
 
+    internal static class ChannelCuts
+    {
+        internal static IFeature Groove(IFeatureManager manager)
+        {
+            return (IFeature)manager.FeatureRevolve2(
+                SingleDir:true, IsSolid:true, IsThin:false, IsCut:true,
+                ReverseDir:false, BothDirectionUpToSameEntity:false,
+                Dir1Type:(int)swEndConditions_e.swEndCondBlind, Dir2Type:0,
+                Dir1Angle:Math.PI*2, Dir2Angle:0, OffsetReverse1:false,
+                OffsetReverse2:false, OffsetDistance1:0, OffsetDistance2:0,
+                ThinType:0, ThinThickness1:0, ThinThickness2:0,
+                Merge:false, UseFeatScope:false, UseAutoSelect:true);
+        }
+
+        internal static IFeature Keyway(IFeatureManager manager, double widthMetres)
+        {
+            return (IFeature)manager.FeatureCut4(
+                Sd:true, Flip:false, Dir:false,
+                T1:(int)swEndConditions_e.swEndCondMidPlane, T2:0,
+                D1:widthMetres, D2:0, Dchk1:false, Dchk2:false,
+                Ddir1:false, Ddir2:false, Dang1:0, Dang2:0,
+                OffsetReverse1:false, OffsetReverse2:false,
+                TranslateSurface1:false, TranslateSurface2:false, NormalCut:false,
+                UseFeatScope:false, UseAutoSelect:true, AssemblyFeatureScope:false,
+                AutoSelectComponents:false, PropagateFeatureToParts:false,
+                T0:(int)swStartConditions_e.swStartSketchPlane, StartOffset:0,
+                FlipStartOffset:false, OptimizeGeometry:false);
+        }
+
+        internal static double ExpectedVolume(Stage stage, Operation operation)
+        {
+            double radius=stage.diameter/2;
+            if (operation.kind=="groove")
+                return Math.PI*(radius*radius-Math.Pow(radius-operation.depth,2))*operation.width*1e-9;
+            double half=operation.width/2;
+            double area=half*Math.Sqrt(radius*radius-half*half)+radius*radius*Math.Asin(half/radius)
+                -2*half*(radius-operation.depth);
+            return area*operation.length*1e-9;
+        }
+
+        internal static void VerifyRemoval(string name, double before, double after, double expected)
+        {
+            double removed=before-after;
+            Host.Need(expected>0 && !Double.IsNaN(removed) && !Double.IsInfinity(removed)
+                && removed>0 && Math.Abs(removed-expected)<=Math.Max(1e-15,expected*1e-5),
+                name+": Kesme hacmi doğrulanamadı. Beklenen talaş "+(expected*1e9).ToString("G8",CultureInfo.InvariantCulture)
+                +" mm3; ölçülen "+(removed*1e9).ToString("G8",CultureInfo.InvariantCulture)+" mm3.");
+        }
+    }
+
     internal sealed class Builder
     {
         private readonly IModelDoc2 model;
@@ -218,7 +268,6 @@ namespace Gokworks.ShaftInterop
         private readonly Dictionary<string, int> stageIndices = new Dictionary<string, int>();
         private IFeature plane;
         private string activeSketchName;
-        private string axisName;
         private string firstGrooveWidth;
         internal readonly List<string> ExpectedNames = new List<string>();
         internal bool ZeroOffsetVerified;
@@ -402,12 +451,18 @@ namespace Gokworks.ShaftInterop
             if (heightExpression != null) Equation(heightName+"@"+sketch,heightExpression);
             return lines;
         }
-        private void SelectRevolve(string sketch, string axis)
+        private void SelectSketch(string sketch)
         {
             model.ClearSelection2(true);
-            Host.Need(model.Extension.SelectByID2(sketch,"SKETCH",0,0,0,false,0,null,0), "Revolve sketch selection failed.");
+            // Do not inherit contour-picking mode from the preceding feature.
+            ((ISelectionMgr)model.SelectionManager).EnableContourSelection=false;
+            Host.Need(model.Extension.SelectByID2(sketch,"SKETCH",0,0,0,false,0,null,0), "Sketch selection failed: "+sketch);
+        }
+        private void SelectRevolve(string sketch, string axis, int axisMark = 16)
+        {
+            SelectSketch(sketch);
             // Official FeatureRevolve2: sketch mark 0; axis mark 4 OR 16.
-            Host.Need(model.Extension.SelectByID2(axis,"EXTSKETCHSEGMENT",0,0,0,true,16,null,0), "Revolve axis selection failed.");
+            Host.Need(model.Extension.SelectByID2(axis,"EXTSKETCHSEGMENT",0,0,0,true,axisMark,null,0), "Revolve axis selection failed.");
         }
         private void Named(IFeature feature, string name)
         {
@@ -460,38 +515,55 @@ namespace Gokworks.ShaftInterop
             ISketchSegment[] rectangle=Rectangle(sketch,origin,Start(i),0,stage.length,stage.diameter/2,
                 "BOY_"+(i+1).ToString("00"),"YARICAP",StartExpression(i),null,Q(diameterNames[i])+" / 2");
             string axis=rectangle[0].GetName()+"@"+sketch;
-            if (i==0) axisName=axis;
             EndSketch(drawing); SelectRevolve(sketch,axis);
             IFeature feature=(IFeature)model.FeatureManager.FeatureRevolve2(true,true,false,false,false,false,
                 0,0,Math.PI*2,0,false,false,0,0,0,0,0,true,true,true);
             Named(feature,"MIL_ANA_GEOMETRI_"+(i+1).ToString("00"));
         }
-        private void BuildChannel(Operation op, string name, bool keyway)
+        private string BuildChannel(Operation op, string name, bool keyway)
         {
             int i=stageIndices[op.stage_id]; Stage stage=project.stages[i]; string sketch=name+"_ESKIZI";
             string offset=name+"_KONUM"; string depth=name+"_DERINLIK";
             Global(offset,op.offset); Global(depth,op.depth);
             ISketch drawing=BeginSketch(sketch); ISketchPoint origin=Origin();
+            string axis=null;
+            if (!keyway)
+            {
+                // Each groove owns its axis; never refer to an absorbed line
+                // in the first boss sketch after preceding cuts have rebuilt.
+                ISketchSegment centerline=Line(0,0,1,0,true);
+                Coincident(StartPoint(centerline),origin);
+                Dimension(centerline,"EKSEN_BOYU",1,.5,-2,false);
+                axis=centerline.GetName()+"@"+sketch;
+            }
             // +1 mm clearance lies outside the cylinder and follows CAP on rebuild.
             Rectangle(sketch,origin,Start(i)+op.offset,stage.diameter/2-op.depth,
                 keyway ? op.length : op.width,op.depth+1,
                 keyway ? "KANAL_BOYU" : "GENISLIK","KESICI_YUKSEKLIK",
                 StartExpression(i)+" + "+Q(offset), Q(diameterNames[i])+" / 2 - "+Q(depth), Q(depth)+" + 1mm",true);
             EndSketch(drawing);
+            return axis;
+        }
+        private void RequireSingleCutBody()
+        {
+            object[] bodies=(object[])((IPartDoc)model).GetBodies2((int)swBodyType_e.swSolidBody,false);
+            Host.Need(bodies!=null && bodies.Length==1,"Kanal kesmeden önce mil tek katı gövde olmalı.");
         }
         private void BuildGroove(Operation op,string name)
         {
-            BuildChannel(op,name,false); SelectRevolve(name+"_ESKIZI",axisName);
-            Named((IFeature)model.FeatureManager.FeatureRevolve2(true,true,false,true,false,false,
-                0,0,Math.PI*2,0,false,false,0,0,0,0,0,true,true,true),name);
+            RequireSingleCutBody(); double before=Volume();
+            string axis=BuildChannel(op,name,false);
+            SelectRevolve(name+"_ESKIZI",axis,4);
+            Named(ChannelCuts.Groove(model.FeatureManager),name);
+            ChannelCuts.VerifyRemoval(name,before,Volume(),ChannelCuts.ExpectedVolume(project.stages[stageIndices[op.stage_id]],op));
         }
         private void BuildKeyway(Operation op,string name)
         {
-            BuildChannel(op,name,true); model.ClearSelection2(true);
-            Host.Need(model.Extension.SelectByID2(name+"_ESKIZI","SKETCH",0,0,0,false,0,null,0),"Keyway sketch selection failed.");
+            RequireSingleCutBody(); double before=Volume();
+            BuildChannel(op,name,true); SelectSketch(name+"_ESKIZI");
             // Mid-plane cut, total width D1, normal to the sketch (+/-Z).
-            Named((IFeature)model.FeatureManager.FeatureCut4(true,false,false,(int)swEndConditions_e.swEndCondMidPlane,0,
-                M(op.width),0,false,false,false,false,0,0,false,false,false,false,false,true,true,false,false,false,0,0,false,true),name);
+            Named(ChannelCuts.Keyway(model.FeatureManager,M(op.width)),name);
+            ChannelCuts.VerifyRemoval(name,before,Volume(),ChannelCuts.ExpectedVolume(project.stages[stageIndices[op.stage_id]],op));
         }
         private void SelectCircularEdge(Operation op,int mark)
         {
@@ -574,6 +646,7 @@ namespace Gokworks.ShaftInterop
             model.ClearSelection2(true);
             IMassProperty mass=(IMassProperty)model.Extension.CreateMassProperty();
             Host.Need(mass!=null,"Mass properties unavailable.");
+            mass.UseSystemUnits=true;
             return mass.Volume;
         }
         private void EditProbe(string name)

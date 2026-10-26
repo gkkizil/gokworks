@@ -11,7 +11,8 @@ from modules.shaft_generator.bridge import execute
 
 @pytest.mark.skipif(os.name!='nt' or os.environ.get('GOKWORKS_SHAFT_LIVE')!='1',
                    reason='Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz.')
-@pytest.mark.parametrize('case',['single','stages','equal','groove','zero_groove','keyway','zero_keyway','chamfer','fillet','operations'])
+@pytest.mark.parametrize('case',['single','stages','equal','groove','zero_groove','keyway','zero_keyway',
+                               'two_grooves','two_grooves_keyway','chamfer','fillet','operations'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -20,6 +21,9 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case in ('keyway','zero_keyway'):p.operations=[Keyway(p.stages[0].id,offset=0 if case=='zero_keyway' else 5)]
     if case=='chamfer':p.operations=[Chamfer(p.stages[0].id)]
     if case=='fillet':p.operations=[Fillet(p.stages[-1].id)]
+    if case in ('two_grooves','two_grooves_keyway'):
+        p.operations=[Groove(p.stages[0].id,offset=5),Groove(p.stages[1].id,offset=5)]
+        if case=='two_grooves_keyway':p.operations.append(Keyway(p.stages[2].id,offset=5))
     if case=='operations':
         p.operations=[Groove(p.stages[1].id,offset=8),Keyway(p.stages[2].id,offset=10,length=25,width=8,depth=3),
                       Chamfer(p.stages[0].id),Fillet(p.stages[-1].id)]
@@ -30,7 +34,7 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     assert result['feature_count']==len(p.stages)+len(p.operations)
     assert result['volume_m3']>0
     if case.startswith('zero_'):assert result['zero_offset_verified']
-    if case in ('single','equal','stages','groove','zero_groove','keyway','zero_keyway'):
+    if case in ('single','equal','stages','groove','zero_groove','keyway','zero_keyway','two_grooves','two_grooves_keyway'):
         # Independent analytic volume, not a mock return value.
         volume=sum(math.pi*(s.diameter/2)**2*s.length for s in p.stages)
         for op in p.operations:

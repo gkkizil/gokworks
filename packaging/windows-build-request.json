@@ -1,7 +1,6 @@
 {
-  "request_id": "20261025-combined-exe-stop-deferred-preview-after-close",
-  "requested_at": "2026-10-25T15:37:13+00:00",
-  "source_commit": "225e9c587cf4e5c329d18a7c981efab7706b29e4",
-  "diagnose_run": 40206826582,
-  "reason": "Produce the combined shaft and Pack and Go/CAD converter Windows x64 onefile EXE. PR #6 fixes a real reproduced closure race: an old naming-preview debounce timer started a second job after MainWindow.closing became true. Consume pending debounce when preview runs and reject deferred work after close; verify both behaviors plus the original worker-thread test in each of five early native checks. Keep established Python 3.13 packaging ABI, all regression tests, native cleanup traces, and 100/125/150 percent EXE smoke requirements. This build supersedes the runtime-comparison run 40207270508. Keep release and backup unchanged; live licensed SOLIDWORKS acceptance remains separate."
+  "request_id": "20261026-shaft-running-class-binding-fix",
+  "requested_at": "2026-10-26T04:33:59+00:00",
+  "source_commit": "048989ec778bc4f794207753c9bdc7c8ee8efe8e",
+  "reason": "Build an updated Windows x64 single EXE for the reported shaft drawing failure. PR #7 fixes GetActiveObject using the interop interface IID instead of the registered SldWorks.Application CLSID, and fixes a buffered phase overwriting the actual startup error in the UI. Preserve the shaft geometry/data contracts and both agents' other modules. Require the new real Windows PowerShell/C# compilation/temporary COM ROT identity checks, the full Windows regression suite, and 100/125/150 percent packaged smoke checks before publishing. Temporary interop test references must never enter the EXE. Keep release and backup unchanged. Licensed SOLIDWORKS geometry verification still requires the target workstation."
 }
