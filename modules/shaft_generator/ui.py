@@ -246,6 +246,7 @@ class ShaftPage(BasePage):
                 self.set_status(f'Bu kademenin {side} kenarında zaten pah/radyüs var. Diğer kenarı seçin veya listeden mevcut operasyonu düzenleyin.',True)
                 return
         self.project.operations.append(operation)
+        self.selected_stage=operation.stage_id
         # Keep end-treatment forms in add mode. Otherwise changing Sol -> Sağ
         # silently moves the previous chamfer before Ekle copies it, producing
         # two right-edge operations. List/preview selection still opens editing.

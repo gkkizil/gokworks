@@ -98,6 +98,21 @@ def test_add_same_end_treatment_does_not_create_an_invalid_duplicate(page):
     assert 'zaten pah/radyüs var' in page.status_text and page.create_button.isEnabled()
 
 
+@pytest.mark.parametrize('kind',['chamfer','fillet'])
+def test_opposite_end_draft_keeps_the_explicitly_chosen_target_stage(page,kind):
+    chosen=page.project.stages[2].id
+    target=page.operation_targets[kind]
+    edge=page.operation_fields[kind]['edge']
+    target.setCurrentIndex(target.findData(chosen))
+    edge.setCurrentIndex(edge.findData('left'))
+    page.add_operation(kind)
+    assert page.selected_stage==chosen and target.currentData()==chosen
+    edge.setCurrentIndex(edge.findData('right'))
+    page.add_operation(kind)
+    assert [(op.stage_id,op.edge) for op in page.project.operations]==[(chosen,'left'),(chosen,'right')]
+    assert page.create_button.isEnabled()
+
+
 def test_keyway_plan_has_round_ends_true_width_and_selects_operation(page,qtbot):
     from PySide6.QtGui import QColor
     page.add_operation('keyway');qtbot.wait(20)

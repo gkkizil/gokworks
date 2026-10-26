@@ -7,8 +7,7 @@ from PySide6.QtCore import Qt, QTimer, QPersistentModelIndex
 from PySide6.QtWidgets import (QVBoxLayout, QWidget, QLineEdit, QTabWidget,
     QTableView, QTreeView, QFileDialog, QApplication, QToolButton, QMenu, QHeaderView)
 
-from modules.bom.exporter import scan_worker
-from gui_qt import services
+from modules.bom.exporter import scan_worker, export_worker
 from gui_qt.models import Column, TableModel, TreeModel, FilterProxy
 from gui_qt.components import (BasePage, ValueForm, Disclosure, label, button, configure_view,
                            show_details, card, TransferWorkspace, SearchToolbar)
@@ -230,8 +229,8 @@ class BomPage(BasePage):
             PureWindowsPath(self.result.assembly).stem + '_BOM.xlsx', 'Excel (*.xlsx)')
         if path:
             result = self.result
-            self.jobs.start(self, lambda sink, stop: services.write_bom(result, path, sink, stop))
-            self.set_status('Excel dosyası hazırlanıyor…')
+            self.jobs.start(self, lambda sink, stop: export_worker(result, path, sink, stop))
+            self.set_status('Parçaların izometrik görselleri ve Excel dosyası hazırlanıyor…')
 
     def handle_events(self, events):
         for kind, value in events:
@@ -243,7 +242,11 @@ class BomPage(BasePage):
                     self.load_result(value['result'])
                     self.set_status('Montaj ve ağırlık bilgileri okundu. Excel’e aktarabilirsiniz.')
                 elif state == 'exported':
-                    self.set_status('Excel kaydedildi: ' + value['path'])
+                    missing = value.get('missing_images', 0)
+                    note = f" · {value['images']} izometrik görsel" if 'images' in value else ''
+                    if missing:
+                        note += f' · {missing} parçanın görseli alınamadı; nedeni Excel satırında yazıyor.'
+                    self.set_status('Excel kaydedildi: ' + value['path']+note, bool(missing))
                 elif state == 'cancelled':
                     self.set_status('İşlem durduruldu; mevcut sonuçlar korundu.')
                 else:

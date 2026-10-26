@@ -274,7 +274,7 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
     return Result(assembly_name, configuration, parts, _roll_up_mass(tree), suppressed, excluded, include_excluded)
 
 
-def export_excel(result, destination, stop_event=None):
+def export_excel(result, destination, stop_event=None, *, previews=None):
     """Write literal strings and numeric quantities; replace only after success."""
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -318,21 +318,23 @@ def export_excel(result, destination, stop_event=None):
         return ws
     temporary = None
     try:
+        image_headers = ['Kaynak parça · izometrik'] if previews is not None else []
+        image_widths = (28,) if previews is not None else ()
         part_sheet = sheet('Parça listesi', ['Sıra', 'Parça adı', 'Adet', 'Konfigürasyon', 'Dosya adı', 'Dosya yolu',
-                          'Birim ağırlık (kg)', 'Toplam ağırlık (kg)', 'Ağırlık durumu'],
+                          'Birim ağırlık (kg)', 'Toplam ağırlık (kg)', 'Ağırlık durumu']+image_headers,
               ([i, p.name, p.quantity, p.configuration, PureWindowsPath(p.path).name, p.path,
                 p.mass_kg if p.mass_kg is not None else 'Değişken' if p.total_mass_kg is not None else 'Okunamadı',
                 p.total_mass_kg if p.total_mass_kg is not None else 'Okunamadı',
                 p.mass_note or ('Okunamadı' if p.total_mass_kg is None else 'Okundu')]
-               for i, p in enumerate(result.parts, 1)), (8, 34, 10, 28, 40, 80, 22, 22, 65))
+               for i, p in enumerate(result.parts, 1)), (8, 34, 10, 28, 40, 80, 22, 22, 65)+image_widths)
         tree_sheet = sheet('Ürün ağacı', ['Pozisyon', 'Üst pozisyon', 'Seviye', 'Parça / montaj adı',
                             'Bileşen örneği', 'Tür', 'Adet', 'Konfigürasyon', 'Dosya yolu',
-                            'Ağırlık (kg)', 'Ağırlık durumu'],
+                            'Ağırlık (kg)', 'Ağırlık durumu']+image_headers,
               ([n.number, n.parent, n.level, n.name, n.instance, n.kind, 1, n.configuration, n.path,
                 n.mass_kg if n.mass_kg is not None else 'Okunamadı',
                 n.mass_note or ('Okunamadı' if n.mass_kg is None else
                                'Listelenen alt parçaların toplamı' if n.kind == 'Montaj' else 'Okundu')]
-               for n in result.tree), (16, 16, 10, 34, 40, 12, 10, 28, 80, 22, 65))
+               for n in result.tree), (16, 16, 10, 34, 40, 12, 10, 28, 80, 22, 65)+image_widths)
         for ws, columns in ((part_sheet, (7, 8)), (tree_sheet, (10,))):
             for row in ws.iter_rows(min_row=5):
                 _check_cancel(stop_event)
@@ -354,6 +356,36 @@ def export_excel(result, destination, stop_event=None):
                 for cell in tree_sheet[row]:
                     cell.font = Font(bold=True, color='177C65')
                     cell.fill = PatternFill('solid', fgColor='E7F4EE')
+        if previews is not None:
+            from io import BytesIO
+            from openpyxl.drawing.image import Image
+            from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor, AnchorMarker
+            from openpyxl.drawing.xdr import XDRPositiveSize2D
+            from openpyxl.utils.units import pixels_to_EMU
+            for ws, records, column in ((part_sheet, result.parts, 10), (tree_sheet, result.tree, 12)):
+                ws.cell(2, column, 'Dosya ve konfigürasyona göre izometrik görünüş')
+                ws.cell(3, column, 'Kaynak parça geometrisi; montaj bağlamındaki kesimler dahil değildir.')
+                ws.cell(3, column).alignment = Alignment(wrap_text=True, vertical='top')
+                for row, item in enumerate(records, 5):
+                    _check_cancel(stop_event)
+                    cell = ws.cell(row, column)
+                    if getattr(item, 'kind', 'Parça') != 'Parça':
+                        cell.value = 'Alt montaj'
+                        continue
+                    preview = previews.get(sw._part_key(item.path, item.configuration))
+                    if preview is None or not preview.png:
+                        cell.value = preview.note if preview is not None else 'Görsel alınamadı'
+                        cell.data_type = 's'
+                        cell.alignment = Alignment(wrap_text=True, vertical='center')
+                    else:
+                        image = Image(BytesIO(preview.png))
+                        image.width, image.height = 160, 121
+                        image.anchor = OneCellAnchor(
+                            _from=AnchorMarker(col=column-1, row=row-1,
+                                               colOff=pixels_to_EMU(8), rowOff=pixels_to_EMU(8)),
+                            ext=XDRPositiveSize2D(pixels_to_EMU(160), pixels_to_EMU(121)))
+                        ws.add_image(image)
+                    ws.row_dimensions[row].height = 108
         _check_cancel(stop_event)
         with NamedTemporaryFile(dir=destination.parent, prefix='.gokworks-bom-', suffix='.xlsx', delete=False) as stream:
             temporary = Path(stream.name)
@@ -364,6 +396,26 @@ def export_excel(result, destination, stop_event=None):
         book.close()
         if temporary is not None:
             temporary.unlink(missing_ok=True)
+
+
+def export_worker(result, destination, events, stop_event):
+    """Capture CAD images and write the complete BOM in the existing worker."""
+    from .images import collect_previews
+    try:
+        _check_cancel(stop_event)
+        previews = collect_previews(result, stop_event,
+                                    progress=lambda text: events.put(('bom_phase', text)))
+        events.put(('bom_phase', 'İzometrik görseller Excel dosyasına yerleştiriliyor…'))
+        export_excel(result, destination, stop_event, previews=previews)
+        images = sum(bool(previews.get(sw._part_key(part.path, part.configuration))
+                          and previews[sw._part_key(part.path, part.configuration)].png) for part in result.parts)
+        outcome = dict(state='exported', path=str(destination), images=images,
+                       missing_images=len(result.parts)-images)
+    except Cancelled:
+        outcome = dict(state='cancelled')
+    except Exception as error:
+        outcome = dict(state='error', error=str(error))
+    events.put(('bom_done', outcome))
 
 
 def scan_worker(events, stop_event, *, include_excluded=False):
