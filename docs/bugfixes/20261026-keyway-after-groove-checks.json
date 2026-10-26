@@ -1,0 +1,31 @@
+{
+  "source_commit": "105a4f0766ae372764885a316b423f390fda6512",
+  "branch": "main",
+  "checked_at": "2026-10-26T16:29:42.064951+00:00",
+  "linux": {
+    "tests": 169,
+    "passed": 142,
+    "skipped": 27,
+    "failures": 0,
+    "errors": 0
+  },
+  "csharp_compile": "passed: shipping host and test probe; C#5 warnings-as-errors, real interop references",
+  "windows_bridge": {
+    "run_id": 40359344689,
+    "job_id": 121700252128,
+    "status": "success",
+    "licensed_cad": false
+  },
+  "windows_ui": {
+    "run_id": 40359344767,
+    "job_id": 121700257519,
+    "status": "success",
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "licensed_cad": false
+  },
+  "live_solidworks": "not run; exact reported geometry added to opt-in acceptance",
+  "protected_files_unchanged": 11
+}
