@@ -231,3 +231,15 @@ def test_stop_cancels_preview_without_restart_and_reports_cancelled_state(page, 
     p.stop_button.click(); qtbot.waitUntil(lambda: not w.jobs.busy, timeout=6000)
     assert not p._export_after_preview and p.preview_pending is None
     assert 'durduruldu' in p.preview.message.text()
+
+
+def test_deferred_export_never_starts_a_worker_after_window_closing(page, monkeypatch):
+    p, w, files = page; started = []
+    p.source.setText(str(files[0].parent)); p.output.setText(str(files[0].parent/'out'))
+    monkeypatch.setattr(w.jobs, 'start', lambda *args: started.append(True))
+    w.closing = True
+    try:
+        p.start_export()  # entry point of the already-queued Qt callback
+        assert not started
+    finally:
+        w.closing = False

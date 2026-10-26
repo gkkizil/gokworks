@@ -1,5 +1,5 @@
 {
-  "modules/dxf_dwg/ui.py": "01af9cda0c846c8f9cf48763b73c7ee77f17a00d132d2a56609294afe464d481",
+  "modules/dxf_dwg/ui.py": "43bb586bbd2efe0ffff7e2307c66609e19d7fd98d666c34c9b2006a2ca907bdb",
   "modules/dxf_dwg/exporter.py": "2b099aebc241e8bf3673538433eda2615df54b173e1bdc1a4659f0df71f5830e",
   "modules/dxf_dwg/preview/panel.py": "5739f6f18526e2eb8e5fa07c9e6b62cf8a66bde8102df5ca9407685f0b1b6929",
   "modules/dxf_dwg/preview/opengl.py": "dc082618e9ff2b6c727522778ccb00c627e88d2b0a78050d6415b58add34e57b",

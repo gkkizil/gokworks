@@ -162,6 +162,8 @@ class DxfDwgPage(ExportPage):
             self.preview_timer.start()
 
     def start_export(self):
+        if self.context.closing:
+            return
         if self.preview_running and self.jobs.owner is self and self.jobs.busy:
             self._export_after_preview = True
             self.preview_pending = None; self.preview_timer.stop()
