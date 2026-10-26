@@ -153,3 +153,24 @@ python -m pytest modules/dxf_dwg/tests/test_preview_live.py -v -s
 Canlı test hash, etkin belge/konfigürasyon, gerçek mesh ve native açınımı
 kontrol eder. Ayrı Windows renderer testi SolidWorks gerektirmez; OpenGL
 veya CPU yedeğinin gerçek masaüstünde delikli mesh'i gösterdiğini denetler.
+
+## Teslim edilen Windows EXE
+
+Son kaynak `522cb83`, derleme isteği `e3322de`:
+[Windows çalışması](https://github.com/gkkizil/gokworks/actions/runs/40304312494)
+başarıyla tamamlandı. Windows regresyonunda **2.348 JUnit kaydı, 0 hata,
+26 atlama** var. Gerçek masaüstü renderer testi geçti; lisanslı SolidWorks
+gerektiren kaynak/model kabul testi çalıştırılmadı.
+
+Tek dosyalık paket 15 modül, iki tema ve %100 / %125 / %150 ölçeklerde
+açılış kontrollerini geçti. Kullanıcıya ayrıca `_internal` klasörü verilmez.
+[GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40304312494-1/GOKWORKS.exe)
+(88.807.813 bayt). İndirilen dosyanın PE başlığı, boyutu ve SHA256 değeri
+derleme kaydıyla ayrıca karşılaştırıldı:
+
+```text
+2a802f049fcc1dfe2d79b2a0f76d5e27517a8e33099a83b54575d3d4d6522f0d
+```
+
+[Doğrulama özeti](windows-verification.json). Bu doğrulama, gerçek
+SolidWorks oturumunda parça/konfigürasyon eşleşmesi kabulünün yerini almaz.
