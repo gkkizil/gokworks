@@ -42,6 +42,13 @@ Windows PowerShell 5.1 `-STA` süreci, çalışan SOLIDWORKS kurulumundan buluna
 DLL'ler uygulamayla dağıtılmaz. Mevcut `_installed_interop(process_id)` ve
 bağlantı yordamları değiştirilmeden kullanılır.
 
+Çalışan COM nesnesi `SldWorks.Application` ProgID'sinin Windows'ta kayıtlı
+uygulama CLSID'siyle alınır. `typeof(SldWorks).GUID` kullanılmaz: bu tür bir
+interop arayüzüdür ve GUID'si uygulama sınıfı yerine arayüz IID'sidir.
+İşlem kimliği doğrulaması yine yapılır; farklı bir oturumda parça oluşturulmaz.
+Bir olay grubunda hem ilerleme hem hata varsa arayüz hatayı gösterir;
+eski hazırlık yazısı hata ayrıntısını örtemez.
+
 Host önce `{event:"shaft_ready", protocol:1}` gönderir. CAD isteği ancak bu
 mesajdan sonra gönderilir. Başlangıç 60 saniyede tamamlanmazsa yalnız komut
 almamış yardımcı süreç sonlandırılır. CAD başladıktan sonra 180 saniye eşiği
@@ -107,6 +114,8 @@ kabulünün yerine geçmez. API sürüm uyumluluğu hedef Windows ortamında ayr
 
 ```powershell
 python -m pytest modules/shaft_generator/tests -q
+# Windows PowerShell taşıması: SOLIDWORKS gerekmez, gerçek STA/pipes kullanılır.
+python -m pytest modules/shaft_generator/tests/test_windows_transport.py -v
 # Yalnız Windows, açık/lisanslı SOLIDWORKS ve geçerli varsayılan Part şablonuyla:
 $env:GOKWORKS_SHAFT_LIVE = '1'
 python -m pytest modules/shaft_generator/tests/test_live.py -v
@@ -115,6 +124,12 @@ python -m pytest modules/shaft_generator/tests/test_live.py -v
 Canlı testler açıkça etkinleştirilmeden atlanır. Testler yeni parçalar üretir;
 oluşan test parçaları başarıda açık bırakılır. Çalışma kopyası/parametre
 projesi yerine gerçek kullanıcı parçasında düzenleme yapılmaz.
+
+Windows CI ayrıca gerçek C# hostunu geçici interop referanslarıyla derler ve
+benzersiz, test amaçlı bir ProgID/ROT nesnesi üzerinden uygulama sınıfı
+çözümlemesini sınar. Test kaydı sonunda silinir; SOLIDWORKS başlatılmaz ve CAD
+belgesi açılmaz. `GOKWORKS_SHAFT_TEST_INTEROP` yalnız bu test referansını seçer;
+referans DLL'leri EXE'ye eklenmez. Bu test canlı geometri kabulünün yerine geçmez.
 
 Windows kabul sırası:
 

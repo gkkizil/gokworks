@@ -38,6 +38,16 @@ namespace Gokworks.ShaftInterop
 
         private static readonly JavaScriptSerializer Json = new JavaScriptSerializer
             { MaxJsonLength = 2000000, RecursionLimit = 32 };
+        public static object ConnectRunningApplication(string progId)
+        {
+            // SldWorks is an interop interface with a CoClass attribute. Its
+            // GUID is an IID, not the registered application's CLSID.
+            Type server = Type.GetTypeFromProgID(progId, true);
+            Guid clsid = server.GUID;
+            object active;
+            GetActiveObject(ref clsid, IntPtr.Zero, out active);
+            return active;
+        }
         internal static void Need(bool condition, string message)
         {
             if (!condition) throw new InvalidOperationException(message);
@@ -102,13 +112,15 @@ namespace Gokworks.ShaftInterop
                 string line = Console.ReadLine();
                 if (line == null) return;
                 Request request = Json.Deserialize<Request>(line); Validate(request);
-                Guid clsid = typeof(SldWorks).GUID; object active;
-                GetActiveObject(ref clsid, IntPtr.Zero, out active); app = (ISldWorks)active;
+                Report("Açık SOLIDWORKS oturumu doğrulanıyor");
+                app = (ISldWorks)ConnectRunningApplication("SldWorks.Application");
                 Need(app.GetProcessID() == request.process_id, "SOLIDWORKS session changed; no document was created.");
                 IModelDoc2 old = (IModelDoc2)app.ActiveDoc;
                 if (old != null) previous = old.GetTitle();
+                Report("Yeni parça şablonu doğrulanıyor");
                 string template = app.GetUserPreferenceStringValue((int)swUserPreferenceStringValue_e.swDefaultTemplatePart);
-                Need(!String.IsNullOrWhiteSpace(template) && File.Exists(template), "Set a default Part template in SOLIDWORKS first.");
+                Need(!String.IsNullOrWhiteSpace(template) && File.Exists(template),
+                    "SOLIDWORKS varsayılan parça şablonu bulunamadı. Araçlar > Seçenekler > Varsayılan Şablonlar bölümünde geçerli bir .prtdot dosyası seçin.");
                 inputPreference = app.GetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate);
                 preferenceCaptured = true;
                 app.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate, false);

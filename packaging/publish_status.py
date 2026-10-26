@@ -85,6 +85,7 @@ def main():
     if display.exists():
         report['display'] = json.loads(display.read_text(encoding='utf-8'))
     for filename,key in (('windows-previous-failure.log','previous_failure_log_tail'),
+                         ('windows-shaft-bridge.log','shaft_bridge_log_tail'),
                          ('windows-setup.log','setup_log_tail'),('windows-test-setup.log','test_setup_log_tail')):
         path = Path(filename)
         if path.is_file() and (filename == 'windows-previous-failure.log' or report['status'] == 'failure'):

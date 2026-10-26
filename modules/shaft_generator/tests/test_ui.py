@@ -93,6 +93,26 @@ def test_background_job_uses_snapshot_keeps_gui_responsive_and_locks_mutation(pa
     assert page.create_button.isEnabled() and 'Rebuild' in page.status_text
 
 
+@pytest.mark.parametrize('error_first',[False,True])
+def test_startup_error_is_not_hidden_by_an_older_phase_in_the_same_batch(page,error_first):
+    error=('job_error',dict(error='SOLIDWORKS şablonu bulunamadı.'))
+    phase=('shaft_phase','SOLIDWORKS bağlantısı ve yerel özellikler hazırlanıyor…')
+    page.handle_events([error,phase] if error_first else [phase,error])
+    assert page.status_text==error[1]['error']
+    assert page.status.property('role')=='error' and page.status.isVisible()
+
+
+def test_failed_create_returns_to_idle_with_the_actual_error_visible(page,qtbot,monkeypatch):
+    def fail(*args,**kwargs):
+        raise RuntimeError('ShaftHost başlangıç hatası: test ayrıntısı')
+    monkeypatch.setattr('modules.shaft_generator.bridge.execute',fail)
+    page.create_model()
+    qtbot.waitUntil(lambda:not page.jobs.busy,timeout=8000)
+    assert page.create_button.isEnabled()
+    assert page.status_text=='ShaftHost başlangıç hatası: test ayrıntısı'
+    assert page.status.property('role')=='error' and page.status.isVisible()
+
+
 @pytest.mark.parametrize('size',[(550,450),(790,560),(1120,780)])
 def test_narrow_page_scrolls_forms_and_keeps_both_views_and_bottom_command_reachable(page,qtbot,size):
     page.resize(*size);qtbot.wait(30)

@@ -303,13 +303,15 @@ class ShaftPage(BasePage):
         self.jobs.start(self,lambda events,stop:controller.create(snapshot,events,stop,output_path=output_path))
 
     def handle_events(self,events):
-        super().handle_events(events)
         for kind,value in events:
             if kind=='shaft_phase':self.set_status(value)
             elif kind=='shaft_cancelled':self.set_status('İşlem başlamadan durduruldu.')
             elif kind=='shaft_created':
                 self.last_result=value
                 self.set_status(f"{value['document']} oluşturuldu · {value['feature_count']} yerel özellik · Rebuild başarılı")
+        # Worker batches can contain both the initial phase and job_error.
+        # Errors must win over an older phase, including when startup fails.
+        super().handle_events(events)
 
     def set_busy(self,busy):
         super().set_busy(busy);self.refresh()
