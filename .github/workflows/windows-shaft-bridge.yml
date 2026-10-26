@@ -33,4 +33,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
       - name: Exercise real PowerShell loader and pipes without SOLIDWORKS
-        run: python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py
+        run: |
+          python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py --junitxml windows-shaft-tests.xml
+          $testExit=$LASTEXITCODE
+          if ($testExit -ne 0) {
+          @'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          path=Path('windows-shaft-tests.xml')
+          if path.exists():
+              for case in ET.parse(path).iter('testcase'):
+                  for failure in list(case.findall('failure'))+list(case.findall('error')):
+                      text=case.get('name','')+': '+(failure.text or failure.get('message',''))[-10000:]
+                      text=text.replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+                      print('::error::'+text)
+          '@ | python -
+          }
+          exit $testExit
