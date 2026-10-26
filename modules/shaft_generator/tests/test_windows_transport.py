@@ -135,20 +135,33 @@ namespace Gokworks.ShaftCutTest {
   public override IMessage Invoke(IMessage message) {
    IMethodCallMessage call=(IMethodCallMessage)message;
    Method=call.MethodName; Arguments=new Dictionary<string,object>();
-   ParameterInfo[] parameters=call.MethodBase.GetParameters();
+   MethodBase method=call.MethodBase ?? typeof(IFeatureManager).GetMethod(call.MethodName);
+   if(method==null) throw new MissingMethodException("Unexpected proxy call: "+call.MethodName);
+   ParameterInfo[] parameters=method.GetParameters();
    for(int i=0;i<parameters.Length;i++) Arguments.Add(parameters[i].Name,call.Args[i]);
    // Deliberately return no feature: this is not a simulated CAD success.
    return new ReturnMessage(null,null,0,call.LogicalCallContext,call);
+  }
+  public static Manager Capture(MethodInfo method, double width, bool keyway) {
+   Manager capture=new Manager();
+   object proxy=capture.GetTransparentProxy();
+   method.Invoke(null,keyway ? new object[]{proxy,width} : new object[]{proxy});
+   return capture;
+  }
+  public static bool CheckRemoval(MethodInfo method, double after, double expected) {
+   try { method.Invoke(null,new object[]{"TEST_CUT",0.0001,after,expected}); return true; }
+   catch(TargetInvocationException error) {
+    if(!(error.InnerException is InvalidOperationException)) throw;
+    return false;
+   }
   }
  }
 }
 '@
 $type=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.ChannelCuts',$true)
 $flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
-$groove=New-Object Gokworks.ShaftCutTest.Manager
-$null=$type.GetMethod('Groove',$flags).Invoke($null,@($groove.GetTransparentProxy()))
-$keyway=New-Object Gokworks.ShaftCutTest.Manager
-$null=$type.GetMethod('Keyway',$flags).Invoke($null,@($keyway.GetTransparentProxy(),[double]0.008))
+$groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false)
+$keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.008,$true)
 $stage=New-Object Gokworks.ShaftInterop.Stage; $stage.diameter=30
 $op=New-Object Gokworks.ShaftInterop.Operation
 $op.kind='groove'; $op.width=2; $op.depth=1
@@ -157,13 +170,7 @@ $op.kind='keyway'; $op.width=8; $op.depth=3; $op.length=20
 $keyVolume=$type.GetMethod('ExpectedVolume',$flags).Invoke($null,@($stage,$op))
 $verify=$type.GetMethod('VerifyRemoval',$flags)
 function Check-Removal([double]$after) {
- try {
-  $null=$verify.Invoke($null,@('TEST_CUT',[double]0.0001,$after,[double]$expected))
-  return $true
- } catch [Reflection.TargetInvocationException] {
-  if ($_.Exception.InnerException -isnot [InvalidOperationException]) { throw }
-  return $false
- }
+ return [Gokworks.ShaftCutTest.Manager]::CheckRemoval($verify,$after,$expected)
 }
 [Console]::WriteLine((@{
  event='cut_contract'; groove_method=$groove.Method; groove=$groove.Arguments;
