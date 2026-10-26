@@ -74,8 +74,9 @@ def test_selection_change_immediately_clears_previous_mesh_flat_and_information(
 def test_late_previous_selection_is_discarded_and_capture_runs_off_gui_thread(page, qtbot):
     p, w, files = page
     started, release = threading.Event(), threading.Event(); observed = []
+    gui_thread_id = threading.get_ident()
     def delayed(request, cache, stop):
-        observed.append((request.source, QThread.currentThread()))
+        observed.append((request.source, threading.get_ident()))
         if request.source == str(files[0]): started.set(); release.wait(4)
         return payload(request.source)
     p._capture = delayed; p.results.table.selectRow(0)
@@ -88,7 +89,7 @@ def test_late_previous_selection_is_discarded_and_capture_runs_off_gui_thread(pa
     release.set()
     qtbot.waitUntil(lambda: p.preview_payload is not None and not w.jobs.busy, timeout=6000)
     assert p.preview_payload.source == str(files[1])
-    assert all(thread is not QApplication.instance().thread() for _, thread in observed)
+    assert all(thread_id != gui_thread_id for _, thread_id in observed)
 
 
 def test_preview_defers_to_existing_export_job_instead_of_starting_parallel_com(page, qtbot):
@@ -185,10 +186,10 @@ def test_preview_callbacks_are_delivered_on_the_gui_thread(page, qtbot):
     p, _, _ = page; threads = []
     original = p.preview.show_payload
     def display(value):
-        threads.append(QThread.currentThread()); original(value)
+        threads.append(QThread.currentThread() is QApplication.instance().thread()); original(value)
     p.preview.show_payload = display
     select(p, qtbot)
-    assert threads == [QApplication.instance().thread()]
+    assert threads == [True]
 
 
 @pytest.mark.parametrize('fatal', [False, True])
