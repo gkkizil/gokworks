@@ -3,7 +3,7 @@ name: Windows shaft bridge
 on:
   workflow_dispatch:
   push:
-    branches: ['codex/**']
+    branches: [main, 'codex/**']
     paths: ['modules/shaft_generator/**', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
   pull_request:
     paths: ['modules/shaft_generator/**', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
@@ -33,4 +33,4 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
       - name: Exercise real PowerShell loader and pipes without SOLIDWORKS
-        run: python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py
+        run: python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py

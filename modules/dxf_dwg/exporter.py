@@ -34,6 +34,18 @@ class CountCancelled(Exception):
     pass
 
 
+def _late_bound(app):
+    # Preview sessions intentionally return raw PyIDispatch. It has Invoke /
+    # GetIDsOfNames, but no _oleobj_ and no Python attribute named ActiveDoc.
+    # DumbDispatch accepts either the raw pointer or a generated wrapper and
+    # preserves late-bound BYREF handling in the legacy export path.
+    if hasattr(app, "_oleobj_") or (
+        callable(getattr(app, "Invoke", None)) and callable(getattr(app, "GetIDsOfNames", None))
+    ):
+        return win32com.client.dynamic.DumbDispatch(app)
+    return app
+
+
 def _value(obj, name):
     value = getattr(obj, name)
     # pywin32 CDispatch objects are callable too: calling ActiveDoc would
@@ -359,8 +371,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     try:
         # GetActiveObject can return a cached makepy wrapper. Explicit BYREF
         # VARIANT outputs below require late-bound calls (pywin32 variant docs).
-        if hasattr(app, "_oleobj_"):
-            app = win32com.client.dynamic.DumbDispatch(app)
+        app = _late_bound(app)
         previous = _value(app, "ActiveDoc")
         if previous is not None:
             previous_name = _document_name(previous)
@@ -516,8 +527,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
         pythoncom.CoInitialize()
         initialized = True
         app = connect_to_solidworks()
-        if hasattr(app, "_oleobj_"):
-            app = win32com.client.dynamic.DumbDispatch(app)
+        app = _late_bound(app)
         events.put(("phase", "Aktif montajdaki toplam adetler hesaplanıyor…"))
         references = {}
         quantities, assembly_name, assembly_config = assembly_quantities(app, stop_event, references=references)

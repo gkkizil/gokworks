@@ -82,6 +82,8 @@ class ShaftPage(BasePage):
                 controls[key]=control
             self.operation_fields[kind]=controls;box.addLayout(form)
             if kind=='keyway':box.addWidget(label('İki uç yarım daire: R = genişlik / 2. Boy, uçtan uca toplamdır. Açı 0°.','muted'))
+            if kind in ('chamfer','fillet'):
+                box.addWidget(label('Ekle sonrası diğer kenarı seçip yeni operasyon ekleyin. Düzenlemek için listeden seçin.','muted'))
             if kind=='chamfer':box.addWidget(label('Bu sürümde 45° eş mesafeli pah.','muted'))
             actions=QHBoxLayout();actions.addWidget(button('Ekle',lambda checked=False,k=kind:self.add_operation(k)))
             actions.addWidget(button('Seçileni güncelle',lambda checked=False,k=kind:self.update_operation(k)))
@@ -145,7 +147,12 @@ class ShaftPage(BasePage):
             self.operations.clear()
             for op in self.project.operations:
                 index=next(i for i,s in enumerate(self.project.stages,1) if s.id==op.stage_id)
-                item=QListWidgetItem(f'{TITLES[op.kind]} · {index}. kademe');item.setData(Qt.UserRole,op.id)
+                detail=''
+                if isinstance(op,(Chamfer,Fillet)):
+                    side='Sol' if op.edge=='left' else 'Sağ'
+                    size=op.distance if isinstance(op,Chamfer) else op.radius
+                    detail=f' · {side} · {size:g} mm'
+                item=QListWidgetItem(f'{TITLES[op.kind]} · {index}. kademe{detail}');item.setData(Qt.UserRole,op.id)
                 self.operations.addItem(item)
         self.select_stage(self.selected_stage)
         if self.selected_operation:self.select_operation(self.selected_operation)
@@ -230,7 +237,19 @@ class ShaftPage(BasePage):
     def add_operation(self,kind):
         constructor={'groove':Groove,'keyway':Keyway,'chamfer':Chamfer,'fillet':Fillet}[kind]
         operation=constructor(**self.operation_values(kind))
-        self.project.operations.append(operation);self.selected_operation=operation.id
+        if isinstance(operation,(Chamfer,Fillet)):
+            duplicate=next((op for op in self.project.operations
+                            if isinstance(op,(Chamfer,Fillet)) and op.stage_id==operation.stage_id
+                            and op.edge==operation.edge),None)
+            if duplicate is not None:
+                side='sol' if operation.edge=='left' else 'sağ'
+                self.set_status(f'Bu kademenin {side} kenarında zaten pah/radyüs var. Diğer kenarı seçin veya listeden mevcut operasyonu düzenleyin.',True)
+                return
+        self.project.operations.append(operation)
+        # Keep end-treatment forms in add mode. Otherwise changing Sol -> Sağ
+        # silently moves the previous chamfer before Ekle copies it, producing
+        # two right-edge operations. List/preview selection still opens editing.
+        self.selected_operation='' if isinstance(operation,(Chamfer,Fillet)) else operation.id
         self.populate();self.refresh(changed=True)
 
     def update_operation(self,kind):

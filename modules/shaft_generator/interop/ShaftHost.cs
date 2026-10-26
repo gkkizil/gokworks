@@ -52,6 +52,14 @@ namespace Gokworks.ShaftInterop
         {
             if (!condition) throw new InvalidOperationException(message);
         }
+        internal static string PreserveFailedPart(IModelDoc2 model)
+        {
+            // This is our NEW document. Keep its last successful features and
+            // failing sketch available for inspection; never save or close it.
+            if (model == null) return "";
+            model.SketchManager.AddToDB = false;
+            return model.GetTitle();
+        }
         private static string lastPhase = "Başlangıç";
         internal static void Report(string phase)
         {
@@ -172,22 +180,29 @@ namespace Gokworks.ShaftInterop
             catch (Exception error)
             {
                 string cleanup = "";
+                string partialDocument = "";
                 if (model != null && app != null)
                 {
-                    try { app.CloseDoc(model.GetTitle()); }
-                    catch (Exception failure) { cleanup = " Own document cleanup failed: " + failure.Message; }
+                    try
+                    {
+                        partialDocument = PreserveFailedPart(model);
+                        cleanup = " Oluşturulan parça inceleme için açık bırakıldı: " + partialDocument
+                            + ". İşlem tamamlanmadı; parça otomatik kaydedilmedi.";
+                    }
+                    catch (Exception failure) { cleanup = " Parça kapatılmadı; inceleme bilgisi alınamadı: " + failure.Message; }
                 }
                 if (temporary != null)
                 {
                     try { if (File.Exists(temporary)) File.Delete(temporary); }
                     catch (Exception failure) { cleanup += " Temporary file cleanup failed: " + failure.Message; }
                 }
-                if (app != null && previous != null)
+                if (model == null && app != null && previous != null)
                 {
                     try { int code = 0; app.ActivateDoc3(previous, false, (int)swRebuildOnActivation_e.swDontRebuildActiveDoc, ref code); }
                     catch { }
                 }
-                Console.WriteLine(Json.Serialize(new { success = false, errors = new string[] { lastPhase + ": " + error.Message + cleanup } }));
+                Console.WriteLine(Json.Serialize(new { success = false, partial_document = partialDocument,
+                    errors = new string[] { lastPhase + ": " + error.Message + cleanup } }));
             }
             finally
             {
@@ -209,6 +224,28 @@ namespace Gokworks.ShaftInterop
 
     internal static class ChannelCuts
     {
+        internal static double KeywayFloorMetres(double diameterMm, double depthMm)
+        { return (diameterMm / 2 - depthMm) * .001; }
+
+        internal static void SelectGroove(IModelDoc2 model, IFeature sketch, ISketchSegment axis)
+        {
+            // Use the actual segment created in this sketch, not a display name
+            // resolved through SelectByID2. Mark 16 is shared with boss revolves.
+            ISelectionMgr selection = (ISelectionMgr)model.SelectionManager;
+            selection.EnableContourSelection = false;
+            model.ClearSelection2(true);
+            Host.Need(sketch != null && axis != null && axis.ConstructionGeometry,
+                "Segman kesme eskizi veya construction ekseni bulunamadı.");
+            SelectData data = (SelectData)selection.CreateSelectData();
+            data.Mark = 16;
+            Host.Need(sketch.Select2(false, 0) && axis.Select4(true, data),
+                "Segman kesme eskizi/ekseni seçilemedi (eskiz=0, eksen=16).");
+            Host.Need(selection.GetSelectedObjectCount2(-1) == 2
+                && selection.GetSelectedObjectCount2(0) == 1
+                && selection.GetSelectedObjectCount2(16) == 1,
+                "Segman kesme seçimleri doğrulanamadı; yanlış konturla kesme yapılmadı.");
+        }
+
         internal static IFeature Groove(IFeatureManager manager)
         {
             return (IFeature)manager.FeatureRevolve2(
@@ -555,7 +592,7 @@ namespace Gokworks.ShaftInterop
                 0,0,Math.PI*2,0,false,false,0,0,0,0,0,true,true,true);
             Named(feature,"MIL_ANA_GEOMETRI_"+(i+1).ToString("00"));
         }
-        private string BuildChannel(Operation op, string name)
+        private ISketchSegment BuildChannel(Operation op, string name)
         {
             int i=stageIndices[op.stage_id]; Stage stage=project.stages[i]; string sketch=name+"_ESKIZI";
             string offset=name+"_KONUM"; string depth=name+"_DERINLIK";
@@ -565,13 +602,12 @@ namespace Gokworks.ShaftInterop
             ISketchSegment centerline=Line(0,0,1,0,true);
             Coincident(StartPoint(centerline),origin);
             Dimension(centerline,"EKSEN_BOYU",1,.5,-2,false);
-            string axis=centerline.GetName()+"@"+sketch;
             // +1 mm clearance lies outside the cylinder and follows CAP on rebuild.
             Rectangle(sketch,origin,Start(i)+op.offset,stage.diameter/2-op.depth,
                 op.width,op.depth+1,"GENISLIK","KESICI_YUKSEKLIK",
                 StartExpression(i)+" + "+Q(offset), Q(diameterNames[i])+" / 2 - "+Q(depth), Q(depth)+" + 1mm",true);
             EndSketch(drawing);
-            return axis;
+            return centerline;
         }
         private void RequireSingleCutBody()
         {
@@ -581,9 +617,12 @@ namespace Gokworks.ShaftInterop
         private void BuildGroove(Operation op,string name)
         {
             RequireSingleCutBody(); double before=Volume();
-            string axis=BuildChannel(op,name);
-            SelectRevolve(name+"_ESKIZI",axis,4);
-            Named(ChannelCuts.Groove(model.FeatureManager),name);
+            ISketchSegment axis=BuildChannel(op,name);
+            Host.Report(name+": 360° döndürerek kesme uygulanıyor");
+            ChannelCuts.SelectGroove(model,Find(name+"_ESKIZI"),axis);
+            IFeature cut=ChannelCuts.Groove(model.FeatureManager);
+            Host.Need(cut!=null,"Segman kesimi oluşturulamadı (FeatureRevolve2). Eskiz ve construction ekseni seçildi; kesme tamamlanmadı.");
+            Named(cut,name);
             ChannelCuts.VerifyRemoval(name,before,Volume(),ChannelCuts.ExpectedVolume(project.stages[stageIndices[op.stage_id]],op));
         }
         private void BuildKeyway(Operation op,string name)
@@ -595,7 +634,8 @@ namespace Gokworks.ShaftInterop
             IFeature floor=KeywayFloor(name,stage.diameter/2-op.depth,i,depth);
             ISketch drawing=BeginSketch(sketch,floor);
             IMathTransform toSketch=drawing.ModelToSketchTransform;
-            double[] floorOrigin=Point(0,stage.diameter/2-op.depth,0,profileToModel);
+            // MathPoint/MathTransform consume SI metres, unlike our mm model.
+            double[] floorOrigin=Point(0,ChannelCuts.KeywayFloorMetres(stage.diameter,op.depth),0,profileToModel);
             double[] localOrigin=Point(floorOrigin,toSketch);
             Host.Need(Math.Abs(localOrigin[0])+Math.Abs(localOrigin[1])+Math.Abs(localOrigin[2])<1e-8,
                 "Kama eskiz orijini taban düzlemiyle uyuşmuyor.");

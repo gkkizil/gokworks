@@ -67,6 +67,37 @@ def test_operation_form_edits_update_preview_and_selection_immediately(page,qtbo
     page.select_operation(op.id);page.delete_operation();assert not page.project.operations
 
 
+@pytest.mark.parametrize('kind',['chamfer','fillet'])
+def test_adding_opposite_end_treatments_keeps_first_edge_and_labels_both(page,kind):
+    from modules.shaft_generator.validation import validate
+    edge=page.operation_fields[kind]['edge']
+    edge.setCurrentIndex(edge.findData('left'))
+    page.add_operation(kind)
+    first=page.project.operations[0]
+    assert first.edge=='left' and not page.selected_operation
+    edge.setCurrentIndex(edge.findData('right'))
+    assert first.edge=='left'  # Preparing a second feature must not move the first.
+    page.add_operation(kind)
+    assert [(op.stage_id,op.edge) for op in page.project.operations]==[
+        (first.stage_id,'left'),(first.stage_id,'right')]
+    assert not validate(page.project) and page.create_button.isEnabled()
+    assert 'Sol' in page.operations.item(0).text() and 'Sağ' in page.operations.item(1).text()
+    assert len([row for row in page.plan if row['kind']==kind])==2
+    # Explicit list selection continues to edit the existing operation live.
+    page.select_operation(first.id)
+    control=page.operation_fields[kind]['distance' if kind=='chamfer' else 'radius']
+    control.setValue(1.25)
+    assert getattr(first,'distance' if kind=='chamfer' else 'radius')==1.25
+    assert len(page.project.operations)==2 and page.project.operations[1].edge=='right'
+
+
+def test_add_same_end_treatment_does_not_create_an_invalid_duplicate(page):
+    page.add_operation('chamfer');before=page.project.to_dict()
+    page.add_operation('chamfer')
+    assert page.project.to_dict()==before and len(page.project.operations)==1
+    assert 'zaten pah/radyüs var' in page.status_text and page.create_button.isEnabled()
+
+
 def test_keyway_plan_has_round_ends_true_width_and_selects_operation(page,qtbot):
     from PySide6.QtGui import QColor
     page.add_operation('keyway');qtbot.wait(20)

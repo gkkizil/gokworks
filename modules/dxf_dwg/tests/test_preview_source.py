@@ -141,6 +141,51 @@ def test_native_dwg_preview_uses_disposable_dxf_and_keeps_original_outputs(sourc
     assert dwg.read_bytes() == b'original DWG' and app.ActiveDoc is previous
 
 
+@pytest.mark.parametrize('output_kind', ['', 'dwg'])
+def test_raw_com_session_reaches_real_export_path_for_flat_preview(source, monkeypatch, tmp_path, output_kind):
+    """Do not mock export_one_part: cross its raw-to-late-bound COM boundary."""
+    from support.solidworks import com_stubs
+    app, model, previous, _, request, session_type = source
+    model.Visible = False
+    exported = []
+    def export_to_dwg(path, *args):
+        exported.append(Path(path))
+        flat_file(path)
+        return True
+    model.ExportToDWG2 = export_to_dwg
+    class RawDispatch:
+        # A raw PyIDispatch exposes these methods, not ActiveDoc as an attribute.
+        def GetIDsOfNames(self, lcid, name): return name
+        def Invoke(self, name, lcid, flags, want_result, *args):
+            value = getattr(app, name)
+            return value(*args) if flags == 1 else value
+    raw = RawDispatch()
+    wrapped = []
+    com, client = com_stubs('dxf')
+    def dumb_dispatch(value):
+        assert value is raw
+        wrapped.append(value)
+        return app
+    client.dynamic = NS(DumbDispatch=dumb_dispatch)
+    monkeypatch.setattr(sw.exporter, 'pythoncom', com)
+    monkeypatch.setattr(sw.exporter, 'win32com', NS(client=client))
+    class RawSession(session_type):
+        def __enter__(self):
+            super().__enter__()
+            self.app = raw
+            return self
+    original = tmp_path/'original.dwg'
+    original.write_bytes(b'Existing production drawing')
+    request = replace(request, output=str(original) if output_kind else '')
+    result = sw.capture(request, MeshCache(), session_factory=RawSession)
+    assert result.flat and result.flat.strokes and result.mesh.triangles == 1
+    assert not any('okunamadı:' in warning for warning in result.warnings)
+    assert wrapped == [raw] and exported and all(not path.exists() for path in exported)
+    assert original.read_bytes() == b'Existing production drawing'
+    assert app.ActiveDoc is previous and not app.closed and not app.saves
+    assert model.active == 'Bent' and model.Visible is False
+
+
 def test_broken_flat_does_not_hide_valid_3d_and_is_reported(source, tmp_path):
     output = tmp_path/'broken.dxf'; output.write_text('not a DXF')
     result = capture(source, replace(source[4], output=str(output)))

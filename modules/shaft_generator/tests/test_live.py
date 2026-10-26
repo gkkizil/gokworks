@@ -13,7 +13,7 @@ from modules.shaft_generator.bridge import execute
                    reason='Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz.')
 @pytest.mark.parametrize('case',['single','stages','equal','groove','zero_groove','keyway','zero_keyway',
                                'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway',
-                               'chamfer','fillet','operations'])
+                               'chamfer','two_chamfers','fillet','operations'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -27,6 +27,9 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case=='short_keyway':p.operations=[Keyway(p.stages[0].id,offset=5,length=8.1,width=8,depth=3)]
     if case=='two_keyways':p.operations=[Keyway(p.stages[0].id,offset=0),Keyway(p.stages[2].id,offset=5,width=10,depth=4)]
     if case=='chamfer':p.operations=[Chamfer(p.stages[0].id)]
+    if case=='two_chamfers':
+        p.stages=[Stage(30,40)]
+        p.operations=[Chamfer(p.stages[0].id,edge='left'),Chamfer(p.stages[0].id,edge='right')]
     if case=='fillet':p.operations=[Fillet(p.stages[-1].id)]
     if case in ('two_grooves','two_grooves_keyway'):
         p.operations=[Groove(p.stages[0].id,offset=5),Groove(p.stages[1].id,offset=5)]
@@ -41,6 +44,10 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     assert result['feature_count']==len(p.stages)+len(p.operations)
     assert result['volume_m3']>0
     if case.startswith('zero_'):assert result['zero_offset_verified']
+    if case=='two_chamfers':
+        # Two equal 45-degree wedges removed from opposite ends of a cylinder.
+        expected=math.pi*15**2*40-2*math.pi*(15-1/3)
+        assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if case in ('single','equal','stages','groove','zero_groove','keyway','zero_keyway',
                 'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway'):
         # Independent slice integration, not a mock return value.

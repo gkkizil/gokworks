@@ -347,6 +347,22 @@ class ExportTests(unittest.TestCase):
             self.assertEqual(self.run_one()[0], 'success')
         late_bound.assert_called_once_with(self.app)
 
+    def test_raw_preview_dispatch_is_wrapped_before_active_document_access(self):
+        # Like pythoncom.PyIDispatch: methods only; no ActiveDoc / _oleobj_.
+        raw = SimpleNamespace(Invoke=Mock(), GetIDsOfNames=Mock())
+        late_bound = Mock(return_value=self.app)
+        self.activate_assembly()
+        with patch.object(ex.win32com.client, 'dynamic', create=True,
+                          new=SimpleNamespace(DumbDispatch=late_bound)):
+            status, detail = ex.export_one_part(raw, str(self.part), self.targets)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.targets[0].read_bytes(), DXF)
+        self.assertEqual(self.targets[1].read_bytes(), DWG)
+        self.assertIs(self.app.ActiveDoc, self.assembly)
+        late_bound.assert_called_once_with(raw)
+        raw.Invoke.assert_not_called()
+        self.assertFalse(self.app.closed)
+
     def test_open_failure_closes_owned_document(self):
         self.app = FakeApp(self.model, existing=False)
         self.app.open_error = 2

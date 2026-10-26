@@ -1,0 +1,48 @@
+{
+  "files": [
+    {
+      "path": "gui_qt/app.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workspace.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/icons.py",
+      "unchanged": true
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/connection.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workers.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/components.py",
+      "unchanged": true
+    },
+    {
+      "path": "modules/naming/native.py",
+      "unchanged": true
+    },
+    {
+      "path": "modules/naming/interop/PackAndGoHost.cs",
+      "unchanged": true
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/process_watch.py",
+      "unchanged": true
+    }
+  ]
+}

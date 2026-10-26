@@ -174,3 +174,17 @@ derleme kaydıyla ayrıca karşılaştırıldı:
 
 [Doğrulama özeti](windows-verification.json). Bu doğrulama, gerçek
 SolidWorks oturumunda parça/konfigürasyon eşleşmesi kabulünün yerini almaz.
+
+## EXE sonrası bildirilen açınım düzeltmesi
+
+`PyIDispatch object has no attribute ActiveDoc` hatası, önizlemenin ham COM
+nesnesini mevcut açınım exporter'ına iletmesiyle oluşuyordu. Exporter yalnız
+`_oleobj_` taşıyan makepy/dynamic sarmalayıcılarını tanıyordu. `_late_bound`
+artık ham `Invoke` / `GetIDsOfNames` nesnesini de `DumbDispatch` ile sarar;
+BYREF, kaynak dosya, konfigürasyon ve belge geri yükleme kuralları korunur.
+
+Yeni testler `export_one_part` yordamını mock'lamadan geçer: henüz çıktısı
+olmayan parça ve DWG seçimi için geçici DXF gerçekten yazılır/okunur, temizlenir;
+üretim çıktısı ve önceki aktif belge korunur. COM sunucusu test çiftidir;
+lisanslı SolidWorks kabulü değildir. Yukarıdaki EXE bu sonraki kaynak
+düzeltmesini içermez; yeni EXE istenirse yeniden derlenmelidir.

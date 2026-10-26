@@ -21,6 +21,10 @@ kalıcı navigasyon ve tek CAD işi çalıştıran `JobManager` kullanılır.
   **SLDPRT oluştur ve kaydet** ayrıca yeni bir `.SLDPRT` yazar; mevcut CAD
   dosyası üzerine yazılmaz. JSON ve SLDPRT farklı dosyalardır.
 - Kaydedilmemiş parametrelerle uygulama kapatılırken Kaydet/At/İptal sorulur.
+- Pah/radyüs **Ekle** işleminden sonra form yeni kayıt modunda kalır. Sol
+  kenarı ekleyip Sağ seçerek ikinci operasyonu ekleyebilirsiniz; ilk kayıt
+  taşınmaz. Listede kenar ve ölçü görünür. Mevcut kaydı düzenlemek için onu
+  listeden/önizlemeden seçin. Aynı kenara ikinci pah/radyüs eklenmez.
 
 ## Standart ölçü seçimi
 
@@ -113,6 +117,10 @@ CAD kilidi güvenli sonuç gelene kadar tutulur. `shaft_phase` mesajlarından
 sonra tek sonuç JSON'u gelir. Sonuç `success`, `process_id`, `document`,
 `features`, `feature_count`, `fully_defined`, `single_body`, `rebuild_success`,
 `volume_m3`, `edit_verified`, `errors` alanlarını içerir.
+Başarısız sonuçta `partial_document` isteğe bağlı ek alandır. Yeni parçada
+bir eskiz/kesme başarısız olduğunda belge otomatik kapatılmaz veya kaydedilmez;
+son başarılı özellikler ve hatalı eskiz inceleme için açık kalır. Sonuç yine
+başarısızdır; eksik parça tamamlanmış olarak raporlanmaz.
 
 ## Yerel FeatureManager hedefi
 
@@ -148,6 +156,10 @@ Segman eskizleri kendi tam tanımlı construction eksenini taşır; ilk kademe
 eskizinin tüketilmiş çizgisine bağımlı değildir. Her yeni özellik seçilmeden
 önce kontur seçim modu kapatılır. Kanal kesmeleri tek katı gövdeyi doğrular ve
 önceki özelliğin gövde kapsamını devralmadan çalışır.
+Segman için eskiz `IFeature.Select2` ile işaret 0, oluşturulan gerçek eksen
+`ISketchSegment.Select4` ile işaret 16 kullanılarak seçilir. İki işaretin
+seçim adetleri kesme çağrısından önce doğrulanır; eksen adı çözümlemesine veya
+bir önceki seçime güvenilmez.
 
 Kama eskizi boyuna profil düzleminde değildir. Mil eksenini içeren, normali
 radyal yönde olan referans düzlemi yerelleştirilmiş adlara bakmadan dönüşümünden
@@ -159,6 +171,10 @@ Yalnız konum datumu sabittir; slotun konumu, eksen yönü, merkez mesafesi ve u
 `DERINLIK+1mm` kör kesme yapar; yön eskiz normalinden hesaplanır. Taban düzlemi
 ve kesme boyu denklemleri çap/derinlik düzenlenince güncellenir. Sac parça
 `NormalCut` / `OptimizeGeometry` seçenekleri kapalıdır.
+Kama tabanının konumu `MathPoint/MathTransform` sınırına **metre** olarak
+verilir. Önceki kod `(çap/2 - derinlik)` mm değerini doğrudan verdiği için
+orijin/düzlem kontrolünde 1000 kat konum hatası oluşturuyordu (Ø30 / 3 mm:
+12 yerine 0,012 m). JSON ve arayüz birimleri mm olarak korunur.
 
 Her segman/kama kesmesinden sonra gerçek SI hacim farkı beklenen
 talaş hacmiyle karşılaştırılır. Segman analitiktir; kama için kapsül ayak izi
@@ -245,7 +261,8 @@ Windows kabul sırası:
    globalini değiştirin; rebuild ve gerçek geometrik konumu kontrol edin.
 6. Yeni SLDPRT kaydedin ve yeniden açın; ölçüleri tekrar düzenleyin.
 7. Önceden açık kullanıcı belgelerinin açık kaldığını, değişiklik/kayıt
-   durumlarının korunmasını ve hatada yalnız yeni parçanın temizlendiğini kontrol edin.
+   durumlarının korunmasını ve hatada yeni parçanın inceleme için açık
+   bırakıldığını, mevcut CAD dosyalarının kaydedilmediğini kontrol edin.
 8. 100%, 125%, 150% Windows ölçeklerinde 820×560 ve geniş pencereyi deneyin.
 
 Gerçek SOLIDWORKS testi bu Linux ortamında yapılamaz. Qt offscreen ölçek
