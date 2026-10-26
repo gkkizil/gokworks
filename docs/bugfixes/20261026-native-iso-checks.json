@@ -1,0 +1,113 @@
+{
+  "source_commit": "2d15abea8635af04fa8bd15c7ba88c359c199402",
+  "branch": "main",
+  "checked_at": "2026-10-26T13:54:44.884949+00:00",
+  "linux": {
+    "tests": 426,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 29
+  },
+  "windows": [
+    {
+      "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40333962663",
+      "status": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -r requirements-dev.txt",
+          "conclusion": "success"
+        },
+        {
+          "name": "Configure native Windows display",
+          "conclusion": "success"
+        },
+        {
+          "name": "Test BOM images, XLSX and shaft UI without licensed CAD",
+          "conclusion": "success"
+        },
+        {
+          "name": "Upload test evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40333962808",
+      "status": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install pytest==9.0.2",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify offline DIN catalogue and nominal data contract",
+          "conclusion": "success"
+        },
+        {
+          "name": "Stage temporary compile references (never packaged)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Exercise real PowerShell loader and pipes without SOLIDWORKS",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "windows_bom_ui": {
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "licensed_solidworks_tested": false,
+  "protected_files_unchanged": 11
+}

@@ -1,12 +1,12 @@
 {
-  "request_id": "20261026-current-bom-images-fast-onefile",
-  "requested_at": "2026-10-26T12:58:37.998471+00:00",
-  "source_commit": "2b6c2d21e255f5251915f8edeebcf0f18cdff341",
+  "request_id": "20261026-native-iso-cut-fix-onefile",
+  "requested_at": "2026-10-26T13:54:44.885257+00:00",
+  "source_commit": "2d15abea8635af04fa8bd15c7ba88c359c199402",
   "validation_profile": "verified-source",
-  "verified_source_commit": "fad71085597ac59df2cfeb34048a014265af3f44",
+  "verified_source_commit": "2d15abea8635af04fa8bd15c7ba88c359c199402",
   "validation_runs": [
-    40323751594,
-    40323751585
+    40333962663,
+    40333962808
   ],
-  "reason": "User requested the latest single EXE quickly. Reuse successful native Windows BOM/UI and shaft bridge checks only after verifying exact unchanged application source. Run focused DXF/raw COM and packaging checks, then existing onefile build and 100/125/150 percent frozen EXE smoke. No release branch or backup changes; no licensed SOLIDWORKS acceptance is claimed."
+  "reason": "Corrected executable for reported delivered-binary failures: BOM uses model-to-pixel Transform after redraw, native groove uses dedicated FeatureRevolveCut2 full 360, end treatments precede channel cuts and constant radius uses current native fillet definition. Reuse passing exact-source Windows checks; run focused packaging checks and existing onefile frozen smoke. No licensed SOLIDWORKS geometry acceptance is claimed. Release branch and backup remain untouched."
 }
