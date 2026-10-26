@@ -13,7 +13,8 @@ from modules.shaft_generator.bridge import execute
                    reason='Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; Linux CAD çalıştırmaz.')
 @pytest.mark.parametrize('case',['single','stages','equal','groove','zero_groove','keyway','zero_keyway',
                                'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway',
-                               'chamfer','two_chamfers','fillet','operations'])
+                               'chamfer','two_chamfers','fillet','operations',
+                               'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -37,6 +38,14 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case=='operations':
         p.operations=[Groove(p.stages[1].id,offset=8),Keyway(p.stages[2].id,offset=10,length=25,width=8,depth=3),
                       Chamfer(p.stages[0].id),Fillet(p.stages[-1].id)]
+    combined = case in ('keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends')
+    if combined:
+        p.stages=[Stage(30,80)]
+        sid=p.stages[0].id
+        p.operations=[Keyway(sid,offset=10)]
+        if case!='keyway_fillet': p.operations.append(Chamfer(sid,edge='left'))
+        if case!='keyway_chamfer': p.operations.append(Fillet(sid,edge='right'))
+        if case=='groove_keyway_both_ends': p.operations.append(Groove(sid,offset=40))
     output=tmp_path/f'{case}.SLDPRT'
     result=execute(request(p,output_path=output,verify_edit=True))
     assert result['edit_verified'] and result['fully_defined'] and result['single_body'] and result['rebuild_success']
@@ -47,6 +56,18 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case=='two_chamfers':
         # Two equal 45-degree wedges removed from opposite ends of a cylinder.
         expected=math.pi*15**2*40-2*math.pi*(15-1/3)
+        assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
+    if combined:
+        from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume
+        expected=math.pi*15**2*80
+        for op in p.operations:
+            if isinstance(op,Keyway): expected-=rounded_keyway_volume(30,op.length,op.width,op.depth)
+            elif isinstance(op,Groove): expected-=math.pi*(15**2-(15-op.depth)**2)*op.width
+            elif isinstance(op,Chamfer): expected-=math.pi*(15*op.distance**2-op.distance**3/3)
+            else:
+                # Revolved circular quarter-fillet at the outer cylinder end.
+                f=op.radius
+                expected-=math.pi*(15*f*f*(2-math.pi/2)+f**3*(math.pi/2-5/3))
         assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if case in ('single','equal','stages','groove','zero_groove','keyway','zero_keyway',
                 'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway'):

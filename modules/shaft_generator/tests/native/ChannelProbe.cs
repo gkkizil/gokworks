@@ -8,6 +8,52 @@ using SolidWorks.Interop.sldworks;
 
 namespace Gokworks.ShaftChannelTest
 {
+    public sealed class FilletProbe
+    {
+        public readonly Dictionary<string, object> Values = new Dictionary<string, object>();
+        public bool CreateCalled;
+        public bool CorrectDefinition;
+        public int EdgeCount;
+        public bool Rejected;
+        public static FilletProbe Capture(MethodInfo method, bool refuseInitialize)
+        {
+            FilletProbe probe=new FilletProbe();
+            object definition=Proxy.Make(typeof(ISimpleFilletFeatureData2), delegate(IMethodCallMessage call) {
+                if(call.MethodName=="Initialize")
+                { probe.Values["Initialize"]=(int)call.Args[0]; return !refuseInitialize; }
+                if(call.MethodName.StartsWith("set_"))
+                {
+                    string key=call.MethodName.Substring(4);
+                    if(key=="Edges") probe.EdgeCount=((object[])call.Args[0]).Length;
+                    else probe.Values[key]=call.Args[0];
+                    return null;
+                }
+                throw new InvalidOperationException("Unexpected fillet data call: "+call.MethodName);
+            });
+            object manager=Proxy.Make(typeof(IFeatureManager), delegate(IMethodCallMessage call) {
+                if(call.MethodName=="CreateDefinition")
+                { probe.Values["Definition"]=(int)call.Args[0]; return definition; }
+                if(call.MethodName=="CreateFeature")
+                {
+                    probe.CreateCalled=true;
+                    probe.CorrectDefinition=Object.ReferenceEquals(call.Args[0],definition);
+                    return null; // No geometry kernel, no fabricated successful feature.
+                }
+                throw new InvalidOperationException("Unexpected fillet manager call: "+call.MethodName);
+            });
+            object edge=Proxy.Make(typeof(IEdge), delegate(IMethodCallMessage call) {
+                throw new InvalidOperationException("Unexpected edge call: "+call.MethodName);
+            });
+            try { method.Invoke(null,new object[]{manager,edge,.001}); }
+            catch(TargetInvocationException error)
+            {
+                if(!(error.InnerException is InvalidOperationException)) throw;
+                probe.Rejected=true;
+            }
+            return probe;
+        }
+    }
+
     internal sealed class Proxy : RealProxy
     {
         private readonly Func<IMethodCallMessage, object> respond;

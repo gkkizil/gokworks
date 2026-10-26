@@ -31,7 +31,11 @@ de yazılıdır. Ağırlık hesabı montaj örneklerini kullanmaya devam eder.
 Mevcut STA bağlantısı yeniden kullanılır; yeni SolidWorks sunucusu
 başlatılmaz. `ShowNamedView2(swIsometricView)` sonrası perspektif kaldırılır;
 üç dünya ekseninin ekrandaki kısalmalarının eşit olduğu `MathUtility` ile
-doğrulanır. `SaveBMP` yalnız geçici görüntü dosyası üretir; kaynak CAD kaydı,
+doğrulanır. Bu kontrol yeniden çizimden sonra **`IModelView.Transform`**
+(modelden ekran pikseline dönüşüm) üzerinden, zoom'dan bağımsız oranlarla
+yapılır. `Orientation3` yalnız önceki görünümü geri yüklemek içindir; onu
+ekran dönüşümü gibi kullanmak geçerli izometrik görünüşleri reddediyordu.
+`SaveBMP` yalnız geçici görüntü dosyası üretir; kaynak CAD kaydı,
 yeniden oluşturma veya üretim parametresi değişikliği yapılmaz. Önceki
 konfigürasyon, görünüm matrisi, kaydırma, ölçek, perspektif, kamera, seçim,
 pencere görünürlüğü ve aktif belge geri yüklenir. Araç tarafından açılan

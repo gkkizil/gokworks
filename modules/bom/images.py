@@ -44,14 +44,19 @@ def _same(left, right):
 def _isometric(view, utility):
     orientation = vector = transformed = None
     try:
-        orientation = get(view, 'Orientation3')
+        # Orientation3 is camera/orientation state, not the documented
+        # model-space-to-pixel mapping. The two matrices need not coincide.
+        orientation = get(view, 'Transform')
         lengths = []
         for axis in ((1., 0., 0.), (0., 1., 0.), (0., 0., 1.)):
             vector = call(utility, 'CreateVector', variant(0x2005, axis))  # SAFEARRAY(double)
             transformed = call(vector, 'MultiplyTransform', orientation)
             x, y, _ = _array(transformed, 3)
-            lengths.append(x*x+y*y)
-        return lengths[0] > 1e-12 and all(math.isclose(lengths[0], n, rel_tol=1e-6) for n in lengths[1:])
+            lengths.append(math.hypot(x, y))
+        largest = max(lengths)
+        # Pixel mapping includes zoom. Compare ratios, never an absolute
+        # world-unit threshold, and allow display-matrix rounding (0.01%).
+        return math.isfinite(largest) and largest > 0 and all(abs(n/largest-1) <= 1e-4 for n in lengths)
     finally:
         view = utility = orientation = vector = transformed = None
 
@@ -155,10 +160,11 @@ class Session(ReadSession):
                 view = get(model, 'ActiveView')
                 if call(view, 'HasPerspective'):
                     call(view, 'RemovePerspective')
-                if call(view, 'HasPerspective') or not _isometric(view, call(self.app, 'GetMathUtility')):
-                    raise ApiError('Parçanın izometrik görünüşü doğrulanamadı; farklı bir görünüş eklenmedi.')
                 call(model, 'ViewZoomtofit2')
                 call(model, 'GraphicsRedraw2')
+                view = get(model, 'ActiveView')
+                if call(view, 'HasPerspective') or not _isometric(view, call(self.app, 'GetMathUtility')):
+                    raise ApiError('Parçanın izometrik görünüşü doğrulanamadı; farklı bir görünüş eklenmedi.')
                 with TemporaryDirectory(prefix='gokworks-bom-image-') as folder:
                     bitmap = Path(folder)/'isometric.bmp'
                     if not call(model, 'SaveBMP', str(bitmap), 512, 384) or not bitmap.is_file():

@@ -28,7 +28,31 @@ class Vector:
     def __init__(self, values): self.ArrayData = tuple(values)
     def MultiplyTransform(self, transform):
         a = transform.ArrayData
-        return Vector(tuple(sum(self.ArrayData[i]*a[3*i+j] for i in range(3)) for j in range(3)))
+        return Vector(tuple(a[12]*sum(self.ArrayData[i]*a[3*i+j] for i in range(3)) for j in range(3)))
+
+
+def transpose_rotation(values):
+    return tuple(values[3*j+i] for i in range(3) for j in range(3))+tuple(values[9:])
+
+
+class View:
+    """Orientation/camera state differs from the documented model-to-pixel map."""
+    def __init__(self):
+        self.Orientation3 = NS(ArrayData=IDENTITY)
+        self.Translation3 = Vector((.1, -.2, 0))
+        self.Scale2, self.perspective, self.Camera = 1.7, True, None
+
+    @property
+    def Transform(self):
+        values = list(transpose_rotation(self.Orientation3.ArrayData))
+        # Pixel Y points down; the view scale is part of the full mapping.
+        for i in range(3): values[3*i+1] *= -1
+        values[12] = self.Scale2
+        return NS(ArrayData=tuple(values))
+
+    def HasPerspective(self): return self.perspective
+    def RemovePerspective(self): self.perspective = False
+    def AddPerspective(self): self.perspective = True
 
 
 @pytest.fixture
@@ -37,11 +61,7 @@ def native(tmp_path, monkeypatch):
     model = app.add(tmp_path/'Parça.SLDPRT', ('Original', 'Thin', 'Thick'), opened=True)
     previous = app.add(tmp_path/'Assembly.SLDASM', opened=True)
     app.ActiveDoc = previous
-    view = NS(Orientation3=NS(ArrayData=IDENTITY), Translation3=Vector((.1, -.2, 0)),
-              Scale2=1.7, perspective=True, Camera=None)
-    view.HasPerspective = lambda: view.perspective
-    view.RemovePerspective = lambda: setattr(view, 'perspective', False)
-    view.AddPerspective = lambda: setattr(view, 'perspective', True)
+    view = View()
     def doubles(values):
         assert values.varianttype == 0x2005  # native MathUtility requires SAFEARRAY(double)
         return tuple(values.value)
@@ -54,7 +74,7 @@ def native(tmp_path, monkeypatch):
     captures = []
     def show_view(name, enum):
         assert name == '' and enum == 7 and app.ActiveDoc is model and model.Visible
-        view.Orientation3 = NS(ArrayData=ISO)
+        view.Orientation3 = NS(ArrayData=transpose_rotation(ISO))
     model.ShowNamedView2 = show_view
     def zoom():
         view.Scale2 = 3.
@@ -86,6 +106,31 @@ def native(tmp_path, monkeypatch):
             self.pythoncom = NS(CoUninitialize=lambda: None)
             return self
     return app, model, previous, view, captures, Session
+
+
+@pytest.mark.parametrize('scale', [1e-12, 1., 1e12])
+def test_isometric_validation_uses_model_to_pixel_transform_at_any_zoom(native, scale):
+    view = native[3]
+    view.Orientation3 = NS(ArrayData=transpose_rotation(ISO))
+    view.Scale2 = scale
+    assert images._isometric(view, native[0].GetMathUtility())
+
+
+def test_isometric_validation_does_not_accept_an_isometric_orientation_if_pixel_view_is_front(native):
+    view = NS(Orientation3=NS(ArrayData=ISO), Transform=NS(ArrayData=IDENTITY))
+    assert not images._isometric(view, native[0].GetMathUtility())
+
+
+def test_native_view_is_redrawn_before_projection_is_validated(native):
+    model, view = native[1], native[3]
+    pending = []
+    model.ShowNamedView2 = lambda *args: pending.append(transpose_rotation(ISO))
+    def redraw():
+        if pending: view.Orientation3 = NS(ArrayData=pending.pop())
+    model.GraphicsRedraw2 = redraw
+    report = images.collect_previews(result_for(native), session_factory=native[-1])
+    assert all(p.png for p in report.values())
+    assert_restored(native)
 
 
 def result_for(native):

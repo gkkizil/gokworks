@@ -224,38 +224,58 @@ namespace Gokworks.ShaftInterop
 
     internal static class ChannelCuts
     {
+        // Keep this native construction order aligned with geometry.operation_plan.
+        internal static readonly string[] OperationOrder = { "chamfer", "fillet", "groove", "keyway" };
         internal static double KeywayFloorMetres(double diameterMm, double depthMm)
         { return (diameterMm / 2 - depthMm) * .001; }
 
         internal static void SelectGroove(IModelDoc2 model, IFeature sketch, ISketchSegment axis)
         {
             // Use the actual segment created in this sketch, not a display name
-            // resolved through SelectByID2. Mark 16 is shared with boss revolves.
+            // resolved through SelectByID2. Mark 4 is the cut-revolve axis.
             ISelectionMgr selection = (ISelectionMgr)model.SelectionManager;
             selection.EnableContourSelection = false;
             model.ClearSelection2(true);
             Host.Need(sketch != null && axis != null && axis.ConstructionGeometry,
                 "Segman kesme eskizi veya construction ekseni bulunamadı.");
             SelectData data = (SelectData)selection.CreateSelectData();
-            data.Mark = 16;
+            data.Mark = 4;
             Host.Need(sketch.Select2(false, 0) && axis.Select4(true, data),
-                "Segman kesme eskizi/ekseni seçilemedi (eskiz=0, eksen=16).");
+                "Segman kesme eskizi/ekseni seçilemedi (eskiz=0, eksen=4).");
             Host.Need(selection.GetSelectedObjectCount2(-1) == 2
                 && selection.GetSelectedObjectCount2(0) == 1
-                && selection.GetSelectedObjectCount2(16) == 1,
+                && selection.GetSelectedObjectCount2(4) == 1,
                 "Segman kesme seçimleri doğrulanamadı; yanlış konturla kesme yapılmadı.");
         }
 
         internal static IFeature Groove(IFeatureManager manager)
         {
-            return (IFeature)manager.FeatureRevolve2(
-                SingleDir:true, IsSolid:true, IsThin:false, IsCut:true,
-                ReverseDir:false, BothDirectionUpToSameEntity:false,
-                Dir1Type:(int)swEndConditions_e.swEndCondBlind, Dir2Type:0,
-                Dir1Angle:Math.PI*2, Dir2Angle:0, OffsetReverse1:false,
-                OffsetReverse2:false, OffsetDistance1:0, OffsetDistance2:0,
-                ThinType:0, ThinThickness1:0, ThinThickness2:0,
-                Merge:false, UseFeatScope:false, UseAutoSelect:true);
+            // Dedicated native cut contract: avoids the boss/solid/thin flags
+            // of FeatureRevolve2, which returned null in the reported SW session.
+            // Still exposed by the installed interop; no mesh/boolean substitute.
+            return (IFeature)manager.FeatureRevolveCut2(
+                Angle:Math.PI*2, ReverseDir:false, Angle2:0,
+                RevType:(int)swRevolveType_e.swRevolveTypeOneDirection360Degrees,
+                Options:(int)swRevolveOptions_e.swAutoCloseSketch,
+                UseFeatScope:true, UseAutoSelect:true, AssemblyFeatureScope:false,
+                AutoSelectComponents:false, PropagateFeatureToParts:false);
+        }
+
+        internal static IFeature Fillet(IFeatureManager manager, IEdge edge, double radiusMetres)
+        {
+            // FeatureFillet3 is obsolete for constant-radius fillets since SW
+            // 2020. Initialize the current native definition explicitly.
+            ISimpleFilletFeatureData2 data=(ISimpleFilletFeatureData2)manager.CreateDefinition((int)swFeatureNameID_e.swFmFillet);
+            Host.Need(data!=null && data.Initialize((int)swSimpleFilletType_e.swConstRadiusFillet),
+                "Sabit radyüs tanımı oluşturulamadı.");
+            data.CurvatureContinuous=false;
+            data.ConicTypeForCrossSectionProfile=(int)swFeatureFilletProfileType_e.swFeatureFilletCircular;
+            data.IsMultipleRadius=false;
+            data.AsymmetricFillet=false;
+            data.DefaultRadius=radiusMetres;
+            data.PropagateToTangentFaces=false;
+            data.Edges=new object[]{edge};
+            return (IFeature)manager.CreateFeature(data);
         }
 
         internal static ISketchSlot KeywaySlot(ISketchManager manager, double startMetres,
@@ -345,7 +365,7 @@ namespace Gokworks.ShaftInterop
                 diameterNames.Add("CAP_" + (i+1).ToString("00") + "@" + sketch);
                 ExpectedNames.Add("MIL_ANA_GEOMETRI_" + (i+1).ToString("00"));
             }
-            foreach (string kind in new string[] { "groove", "keyway", "chamfer", "fillet" })
+            foreach (string kind in ChannelCuts.OperationOrder)
             {
                 int index=0;
                 foreach (Operation op in project.operations)
@@ -551,7 +571,7 @@ namespace Gokworks.ShaftInterop
                 Host.Report("Kademe " + (i+1) + "/" + project.stages.Length + " oluşturuluyor");
                 BuildStage(i);
             }
-            foreach (string kind in new string[] { "groove", "keyway", "chamfer", "fillet" })
+            foreach (string kind in ChannelCuts.OperationOrder)
             {
                 int count=0;
                 foreach (Operation op in project.operations)
@@ -621,7 +641,7 @@ namespace Gokworks.ShaftInterop
             Host.Report(name+": 360° döndürerek kesme uygulanıyor");
             ChannelCuts.SelectGroove(model,Find(name+"_ESKIZI"),axis);
             IFeature cut=ChannelCuts.Groove(model.FeatureManager);
-            Host.Need(cut!=null,"Segman kesimi oluşturulamadı (FeatureRevolve2). Eskiz ve construction ekseni seçildi; kesme tamamlanmadı.");
+            Host.Need(cut!=null,"Segman kesimi oluşturulamadı (FeatureRevolveCut2). Eskiz ve eksen seçildi; kesme tamamlanmadı.");
             Named(cut,name);
             ChannelCuts.VerifyRemoval(name,before,Volume(),ChannelCuts.ExpectedVolume(project.stages[stageIndices[op.stage_id]],op));
         }
@@ -745,10 +765,11 @@ namespace Gokworks.ShaftInterop
                 "Kama taban düzlemi milin yanlış tarafında.");
             return floor;
         }
-        private void SelectCircularEdge(Operation op,int mark)
+        private IEdge SelectCircularEdge(Operation op,int mark)
         {
             int index=stageIndices[op.stage_id]; Stage stage=project.stages[index];
             double x=M(Start(index)+(op.edge=="right"?stage.length:0)); double radius=M(stage.diameter/2);
+            double[] centre=Point(x,0,0,profileToModel), direction=Vector(1,0,0,profileToModel);
             var matches=new List<IEdge>();
             object[] bodies=(object[])((IPartDoc)model).GetBodies2((int)swBodyType_e.swSolidBody,false);
             Host.Need(bodies!=null && bodies.Length==1,"A single solid body is required.");
@@ -757,13 +778,16 @@ namespace Gokworks.ShaftInterop
                 IEdge edge=(IEdge)raw; ICurve curve=(ICurve)edge.GetCurve();
                 if (!curve.IsCircle()) continue;
                 double[] p=(double[])curve.CircleParams;
-                if (Math.Abs(p[0]-x)<1e-8 && Math.Abs(p[1])<1e-8 && Math.Abs(p[2])<1e-8 && Math.Abs(p[6]-radius)<1e-8)
+                if (Math.Abs(p[0]-centre[0])<1e-8 && Math.Abs(p[1]-centre[1])<1e-8 && Math.Abs(p[2]-centre[2])<1e-8
+                    && Math.Abs(Math.Abs(Dot(new double[]{p[3],p[4],p[5]},direction))-1)<1e-8 && Math.Abs(p[6]-radius)<1e-8)
                     matches.Add(edge);
             }
             Host.Need(matches.Count==1,"Requested circular edge is missing or ambiguous. Operations may intersect.");
             model.ClearSelection2(true);
+            ((ISelectionMgr)model.SelectionManager).EnableContourSelection=false;
             SelectData data=(SelectData)((ISelectionMgr)model.SelectionManager).CreateSelectData(); data.Mark=mark;
             Host.Need(((IEntity)matches[0]).Select4(false,data),"Circular edge selection failed.");
+            return matches[0];
         }
         private void BuildChamfer(Operation op,string name)
         {
@@ -773,9 +797,8 @@ namespace Gokworks.ShaftInterop
         }
         private void BuildFillet(Operation op,string name)
         {
-            SelectCircularEdge(op,1);
-            Named((IFeature)model.FeatureManager.FeatureFillet3((int)swFeatureFilletOptions_e.swFeatureFilletUniformRadius,
-                M(op.radius),0,0,(int)swFeatureFilletType_e.swFeatureFilletType_Simple,0,0,null,null,null,null,null,null,null),name);
+            IEdge edge=SelectCircularEdge(op,1);
+            Named(ChannelCuts.Fillet(model.FeatureManager,edge,M(op.radius)),name);
         }
 
         private IFeature Find(string name)

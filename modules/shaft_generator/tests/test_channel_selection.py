@@ -20,6 +20,9 @@ Add-Type -ReferencedAssemblies $references -TypeDefinition ([IO.File]::ReadAllTe
 $assembly=[Gokworks.ShaftInterop.Host].Assembly
 $flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
 $type=$assembly.GetType('Gokworks.ShaftInterop.ChannelCuts',$true)
+$order=$type.GetField('OperationOrder',$flags).GetValue($null)
+$fillet=[Gokworks.ShaftChannelTest.FilletProbe]::Capture($type.GetMethod('Fillet',$flags),$false)
+$badFillet=[Gokworks.ShaftChannelTest.FilletProbe]::Capture($type.GetMethod('Fillet',$flags),$true)
 $select=$type.GetMethod('SelectGroove',$flags)
 $valid=New-Object Gokworks.ShaftChannelTest.Probe
 $accepted=$valid.Select($select)
@@ -40,9 +43,12 @@ $preserve=[Gokworks.ShaftInterop.Host].GetMethod('PreserveFailedPart',$flags)
 $title=$keep.Preserve($preserve)
 $empty=$keep.PreserveEmpty($preserve)
 [Console]::WriteLine((@{
- event='channel_selection'; accepted=$accepted; events=$valid.Events;
+ event='channel_selection'; accepted=$accepted; events=$valid.Events; order=$order;
  refused=$refusedResult; extra=$extraResult; floors=$floors;
  retained_title=$title; retained_events=$keep.Events; no_document=$empty
+ fillet=$fillet.Values; fillet_create_called=$fillet.CreateCalled;
+ fillet_definition=$fillet.CorrectDefinition; fillet_edges=$fillet.EdgeCount;
+ fillet_bad_init_rejected=$badFillet.Rejected; fillet_bad_create_called=$badFillet.CreateCalled
 } | ConvertTo-Json -Depth 5 -Compress))
 '''
     powershell = Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
@@ -57,8 +63,15 @@ $empty=$keep.PreserveEmpty($preserve)
     assert result.returncode == 0, result.stdout + result.stderr
     data = next(json.loads(line) for line in result.stdout.splitlines() if 'channel_selection' in line)
     assert data['accepted'] and data['events'] == [
-        'contours:False', 'clear:True', 'sketch:False:0', 'axis:True:16']
+        'contours:False', 'clear:True', 'sketch:False:0', 'axis:True:4']
     assert not data['refused'] and not data['extra']
+    assert data['order'] == ['chamfer', 'fillet', 'groove', 'keyway']
+    fillet=data['fillet']
+    assert fillet['Definition']==1 and fillet['Initialize']==0  # native constant-radius definition
+    assert fillet['DefaultRadius']==pytest.approx(.001) and fillet['ConicTypeForCrossSectionProfile']==0
+    assert not any(fillet[k] for k in ('CurvatureContinuous','IsMultipleRadius','AsymmetricFillet','PropagateToTangentFaces'))
+    assert data['fillet_create_called'] and data['fillet_definition'] and data['fillet_edges']==1
+    assert data['fillet_bad_init_rejected'] and not data['fillet_bad_create_called']
     for sample in data['floors']:
         # Independent millimetre-to-metre reference, especially the reported Ø30 case.
         assert sample['metres'] * 1000 == pytest.approx(sample['diameter']/2 - sample['depth'])

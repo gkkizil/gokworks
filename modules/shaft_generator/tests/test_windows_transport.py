@@ -210,11 +210,12 @@ function Check-Removal([double]$after) {
     assert result.returncode==0,result.stdout+result.stderr
     data=next(json.loads(line) for line in result.stdout.splitlines() if 'cut_contract' in line)
     import math
-    assert data['groove_method']=='FeatureRevolve2'
+    assert data['groove_method']=='FeatureRevolveCut2'
     groove=data['groove']
-    assert groove['IsCut'] and groove['IsSolid'] and not groove['IsThin']
-    assert groove['Dir1Angle']==pytest.approx(math.tau)
-    assert not groove['Merge'] and not groove['UseFeatScope'] and groove['UseAutoSelect']
+    assert groove['Angle']==pytest.approx(math.tau) and groove['Angle2']==0
+    assert groove['RevType']==3 and groove['Options']==1  # full 360°, auto-close sketch
+    assert not groove['ReverseDir'] and groove['UseFeatScope'] and groove['UseAutoSelect']
+    assert not any(groove[k] for k in ('AssemblyFeatureScope','AutoSelectComponents','PropagateFeatureToParts'))
     assert data['keyway_method']=='FeatureCut4'
     keyway=data['keyway']
     assert keyway['T1']==0 and keyway['D1']==pytest.approx(.004)  # Blind radial cut, depth + clearance.

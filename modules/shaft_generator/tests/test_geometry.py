@@ -1,6 +1,6 @@
 import math
 import pytest
-from modules.shaft_generator.models import Project,Stage,Groove,Chamfer,Fillet
+from modules.shaft_generator.models import Project,Stage,Groove,Keyway,Chamfer,Fillet
 from modules.shaft_generator.geometry import profile,treated_profile,check_profile,metres,radians,operation_plan
 
 
@@ -40,6 +40,17 @@ def test_plan_keeps_stage_ids_and_names_and_recomputes_offsets():
     p.stages[0].length=50
     assert operation_plan(p)[1]['start_m']==.05
     assert plan[1]['start_m']==.04  # Previous job payload is immutable data.
+
+
+def test_combined_plan_treats_end_edges_before_channel_cuts_without_changing_operation_ids():
+    p=Project(stages=[Stage(30,80)])
+    sid=p.stages[0].id
+    p.operations=[Keyway(sid,offset=10),Fillet(sid,edge='right'),
+                  Groove(sid,offset=40),Chamfer(sid,edge='left')]
+    plan=operation_plan(p)
+    assert [row['kind'] for row in plan]==['revolve','chamfer','fillet','groove','keyway']
+    assert [row['name'] for row in plan[1:]]==['PAH_01','RADYUS_01','SEGMAN_KANALI_01','KAMA_KANALI_01']
+    assert {row['operation_id'] for row in plan[1:]}=={op.id for op in p.operations}
 
 
 @pytest.mark.parametrize('constructor',[Chamfer,Fillet])

@@ -131,13 +131,13 @@ MIL_ANA_GEOMETRI_01
   MIL_PROFIL_01
 MIL_ANA_GEOMETRI_02
   MIL_PROFIL_02
+PAH_01                (Chamfer)
+RADYUS_01             (native simple constant-radius Fillet)
 SEGMAN_KANALI_01       (Cut-Revolve)
   SEGMAN_KANALI_01_ESKIZI
 KAMA_KANALI_01         (Cut-Extrude)
   KAMA_KANALI_01_ESKIZI
 KAMA_KANALI_01_TABAN_DUZLEMI (native, gizli yardımcı düzlem; kesmeden önce oluşturulur)
-PAH_01                (Chamfer)
-RADYUS_01             (Fillet)
 ```
 
 Bu ağaç canlı ortamda doğrulanana kadar hedef davranıştır.
@@ -157,9 +157,26 @@ eskizinin tüketilmiş çizgisine bağımlı değildir. Her yeni özellik seçil
 önce kontur seçim modu kapatılır. Kanal kesmeleri tek katı gövdeyi doğrular ve
 önceki özelliğin gövde kapsamını devralmadan çalışır.
 Segman için eskiz `IFeature.Select2` ile işaret 0, oluşturulan gerçek eksen
-`ISketchSegment.Select4` ile işaret 16 kullanılarak seçilir. İki işaretin
+`ISketchSegment.Select4` ile işaret 4 kullanılarak seçilir. İki işaretin
 seçim adetleri kesme çağrısından önce doğrulanır; eksen adı çözümlemesine veya
 bir önceki seçime güvenilmez.
+
+Kullanıcı oturumunda `FeatureRevolve2` doğru seçimden sonra yine null
+döndürdüğü için segman, kurulu interop'ta bulunan doğrudan
+`FeatureRevolveCut2` ile oluşturulur. Tam 360° tek yön, eskizi otomatik
+kapatma ve tek gövdeyi otomatik kapsam seçimi açıkça ayarlanır. Bu API
+eski/uyumluluk arayüzüdür; ASLA mesh/ithal gövde veya üretim dışı görsel kesme
+üretmez. Native `RevCut`, tam tanımlı eskiz ve talaş hacmi denetimi korunur.
+
+Yapım sırası kademeler → pah → radyüs → segman → kama şeklindedir. Böylece
+uç kenarları, kanal kesimlerinin topolojiyi değiştirmesinden önce işlenir.
+Python planı ile C# sırası aynıdır; v1 proje alanları ve operasyon kimlikleri
+değişmez. Mevcut geometrik çakışma denetimi korunur. Kenar merkezi ve normali
+profil düzleminden model koordinatlarına çevrilir; global X varsayılmaz.
+Sabit radyüs, SW 2020'den beri bu işlem için eski sayılan `FeatureFillet3`
+yerine `CreateDefinition(swFmFillet)` / `ISimpleFilletFeatureData2.Initialize`
+/ `CreateFeature` ile oluşturulur. Yalnız seçilen kenara simetrik dairesel
+sabit yarıçap atanır; komşu teğet kenarlara otomatik yayılmaz.
 
 Kama eskizi boyuna profil düzleminde değildir. Mil eksenini içeren, normali
 radyal yönde olan referans düzlemi yerelleştirilmiş adlara bakmadan dönüşümünden
@@ -200,7 +217,8 @@ X yönünde datum (+1,0) mm olur. `TABAN_Y@..._TABAN_DUZLEMI` ve
 
 ## API kaynakları ve derleme
 
-- [FeatureRevolve2 / seçim işaretleri](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurerevolve2.html): eskiz 0, eksen 4 veya 16; kod 16 kullanır.
+- [FeatureRevolve2 / seçim işaretleri](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurerevolve2.html): eskiz 0, eksen 4 veya 16; ana boss için 16, segman kesmesi için 4 kullanılır.
+- [FeatureRevolveCut2](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~FeatureRevolveCut2.html): uyumluluk kesme sözleşmesi; tam 360° ve `swAutoCloseSketch`.
 - [GetLastFeatureAdded](https://help.solidworks.com/2023/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IModelDocExtension~GetLastFeatureAdded.html)
 - [IPartDoc.FeatureByName](https://help.solidworks.com/2025/English/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IPartDoc~FeatureByName.html)
 - [FeatureCut4](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurecut4.html)
@@ -208,6 +226,7 @@ X yönünde datum (+1,0) mm olur. `TABAN_Y@..._TABAN_DUZLEMI` ve
 - [Referans düzlem dönüşümü](https://help.solidworks.com/2022/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IRefPlane~Transform.html)
 - [InsertFeatureChamfer](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~InsertFeatureChamfer.html)
 - [FeatureFillet3](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurefillet3.html)
+- [ISimpleFilletFeatureData2](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISimpleFilletFeatureData2.html): güncel sabit radyüs tanımı.
 - [EquationMgr.EvaluateAll](https://help.solidworks.com/2022/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IEquationMgr~EvaluateAll.html): dönüş değeri başarıda ve hatada -1; kod başarı kararı için denklemleri `Value`/`Status` üzerinden ayrıca okur.
 
 `interop/check_compile.py` mevcut .NET SDK, .NET Framework 4.8 referans

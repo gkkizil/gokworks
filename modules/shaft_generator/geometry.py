@@ -87,7 +87,9 @@ def operation_plan(project):
                  diameter_m=metres(stage.diameter), length_m=metres(stage.length))
             for i,stage in enumerate(project.stages,1)]
     counts = {}
-    for kind in (Groove, Keyway, Chamfer, Fillet):
+    # Preserve the original circular end edges while making edge treatments.
+    # Validation keeps their axial footprints separate from channel cuts.
+    for kind in (Chamfer, Fillet, Groove, Keyway):
         for op in project.operations:
             if not isinstance(op, kind):
                 continue
