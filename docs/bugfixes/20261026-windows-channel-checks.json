@@ -1,0 +1,56 @@
+{
+  "source_commit": "4a74a28",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40319360525",
+  "job_url": "https://github.com/gkkizil/gokworks/actions/runs/40319360525/job/121560017079",
+  "status": "success",
+  "checked_at": "2026-10-26T12:03:52.813641+00:00",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python -m pip install pytest==9.0.2",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify offline DIN catalogue and nominal data contract",
+      "conclusion": "success"
+    },
+    {
+      "name": "Stage temporary compile references (never packaged)",
+      "conclusion": "success"
+    },
+    {
+      "name": "Exercise real PowerShell loader and pipes without SOLIDWORKS",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "licensed_solidworks_tested": false,
+  "scope": "Real Windows PowerShell/STA and compiled interop proxy tests. No CAD geometry kernel or source part acceptance.",
+  "previous_test_helper_failures": [
+    "40318857293",
+    "40319132665"
+  ],
+  "exe_rebuilt": false
+}

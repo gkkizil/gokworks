@@ -48,6 +48,15 @@ testini içerir; bu iş akışı EXE derlemez/yayınlamaz.
   etiketlerini, yinelenen kenarın reddini ve mevcut kayıt düzenlemesini kapsar.
 - Ruff F821/F822/F823 ve `git diff --check` geçti. Ortak 11 dosyanın içerikleri
   [aynen korunmuştur](20261026-protected-check.json).
+- Windows PowerShell 5.1 / STA kontrolü de
+  [`4a74a28` kaynak sürümünde geçti](https://github.com/gkkizil/gokworks/actions/runs/40319360525):
+  gerçek host derlemesi, kayıtlı sınıf/ROT bağlantı testi, kesme API argüman ve
+  hacim denetimleri, yeni eksen/eskiz seçimleri, metre dönüşümü ve kısmi
+  belgeyi koruma testi. Bu testler SolidWorks uygulamasını çalıştırmaz.
+  [Windows kontrol kaydı](20261026-windows-channel-checks.json).
+  İlk iki Windows denemesinde yeni test yardımcısı PowerShell'in `GetType`
+  adaptörüne takıldı; test proxy'leri C# içinde tutularak düzeltildi. Son
+  başarılı koşu önceki başarısız denemelerin yerine geçen doğrulamadır.
 
 ## Gerçek CAD kabulü ve sınırlar
 
