@@ -1,33 +1,33 @@
 {
-  "commit": "81497f957120fb9f73b4a83b69d05c9952cfc3fe",
+  "commit": "fa195bbd433ea3d6eefd3686e757f0c9326f5420",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40326754555",
-  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40326754555-1/GOKWORKS.exe",
-  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/40326754555/artifacts/12651727220",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40334777450",
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40334777450-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/40334777450/artifacts/12657091576",
   "setup_steps": {
     "checkout": "success",
     "python": "success",
     "dependencies": "success"
   },
-  "source_commit": "2b6c2d21e255f5251915f8edeebcf0f18cdff341",
+  "source_commit": "2d15abea8635af04fa8bd15c7ba88c359c199402",
   "validation_profile": "verified-source",
   "reused_validation": {
     "profile": "verified-source",
-    "verified_source_commit": "fad71085597ac59df2cfeb34048a014265af3f44",
+    "verified_source_commit": "2d15abea8635af04fa8bd15c7ba88c359c199402",
     "runs": [
       {
-        "id": 40323751594,
+        "id": 40333962663,
         "name": "Windows BOM and shaft UI",
-        "head_sha": "fad71085597ac59df2cfeb34048a014265af3f44",
+        "head_sha": "2d15abea8635af04fa8bd15c7ba88c359c199402",
         "conclusion": "success",
-        "html_url": "https://github.com/gkkizil/gokworks/actions/runs/40323751594"
+        "html_url": "https://github.com/gkkizil/gokworks/actions/runs/40333962663"
       },
       {
-        "id": 40323751585,
+        "id": 40333962808,
         "name": "Windows shaft bridge",
-        "head_sha": "fad71085597ac59df2cfeb34048a014265af3f44",
+        "head_sha": "2d15abea8635af04fa8bd15c7ba88c359c199402",
         "conclusion": "success",
-        "html_url": "https://github.com/gkkizil/gokworks/actions/runs/40323751585"
+        "html_url": "https://github.com/gkkizil/gokworks/actions/runs/40333962808"
       }
     ],
     "note": "Unchanged application source; focused packaging/DXF tests and frozen EXE smoke run again."
@@ -127,8 +127,8 @@
       ]
     ]
   },
-  "bytes": 88820987,
-  "sha256": "bd4e72b6e6630cd6dd36044f65601440dc82a4a81e4ac7bbe16b6adc6b04a36f",
+  "bytes": 88821183,
+  "sha256": "a41b0ebe94e510e18f9e80f05f37b22757ed481537aa92dc78200c36e982672c",
   "smoke": {
     "status": "passed",
     "framework": "PySide6 / Qt Widgets",
@@ -180,13 +180,13 @@
         1440
       ]
     ],
-    "startup_ms": 1693.25,
-    "navigation_median_ms": 41.47,
-    "navigation_max_ms": 131.4,
-    "resize_median_ms": 80.7,
-    "resize_max_ms": 141.76,
-    "table_50000_load_ms": 114.69,
-    "table_50000_filter_ms": 163.96,
+    "startup_ms": 1488.43,
+    "navigation_median_ms": 41.14,
+    "navigation_max_ms": 112.58,
+    "resize_median_ms": 75.73,
+    "resize_max_ms": 151.36,
+    "table_50000_load_ms": 94.34,
+    "table_50000_filter_ms": 158.87,
     "tk_imports": [],
     "kr_assignment_engine": "embedded Python SheetMetal parameters",
     "pdf_export_engine": "isolated COM process",
@@ -269,13 +269,13 @@
           1440
         ]
       ],
-      "startup_ms": 1388.06,
-      "navigation_median_ms": 50.21,
-      "navigation_max_ms": 124.48,
-      "resize_median_ms": 54.43,
-      "resize_max_ms": 149.84,
-      "table_50000_load_ms": 107.45,
-      "table_50000_filter_ms": 162.68,
+      "startup_ms": 1275.33,
+      "navigation_median_ms": 49.19,
+      "navigation_max_ms": 115.58,
+      "resize_median_ms": 52.03,
+      "resize_max_ms": 172.64,
+      "table_50000_load_ms": 100.45,
+      "table_50000_filter_ms": 160.73,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
@@ -356,13 +356,13 @@
           1440
         ]
       ],
-      "startup_ms": 1132.05,
-      "navigation_median_ms": 55.91,
-      "navigation_max_ms": 129.03,
-      "resize_median_ms": 61.94,
-      "resize_max_ms": 167.94,
-      "table_50000_load_ms": 111.81,
-      "table_50000_filter_ms": 163.34,
+      "startup_ms": 1037.56,
+      "navigation_median_ms": 54.04,
+      "navigation_max_ms": 121.3,
+      "resize_median_ms": 59.4,
+      "resize_max_ms": 156.21,
+      "table_50000_load_ms": 100.41,
+      "table_50000_filter_ms": 159.35,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
@@ -443,13 +443,13 @@
           1440
         ]
       ],
-      "startup_ms": 1693.25,
-      "navigation_median_ms": 41.47,
-      "navigation_max_ms": 131.4,
-      "resize_median_ms": 80.7,
-      "resize_max_ms": 141.76,
-      "table_50000_load_ms": 114.69,
-      "table_50000_filter_ms": 163.96,
+      "startup_ms": 1488.43,
+      "navigation_median_ms": 41.14,
+      "navigation_max_ms": 112.58,
+      "resize_median_ms": 75.73,
+      "resize_max_ms": 151.36,
+      "table_50000_load_ms": 94.34,
+      "table_50000_filter_ms": 158.87,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
@@ -487,8 +487,8 @@
       "failures": "0",
       "skipped": "0",
       "tests": "46",
-      "time": "0.938",
-      "timestamp": "2026-10-26T13:00:27.782433+00:00",
+      "time": "0.894",
+      "timestamp": "2026-10-26T13:56:01.650300+00:00",
       "hostname": "runnervmdaln5"
     },
     {
@@ -497,8 +497,8 @@
       "failures": "0",
       "skipped": "0",
       "tests": "58",
-      "time": "0.792",
-      "timestamp": "2026-10-26T13:00:29.330160+00:00",
+      "time": "0.793",
+      "timestamp": "2026-10-26T13:56:03.179498+00:00",
       "hostname": "runnervmdaln5"
     },
     {
@@ -507,8 +507,8 @@
       "failures": "0",
       "skipped": "1",
       "tests": "36",
-      "time": "1.267",
-      "timestamp": "2026-10-26T13:00:30.684548+00:00",
+      "time": "1.263",
+      "timestamp": "2026-10-26T13:56:04.504529+00:00",
       "hostname": "runnervmdaln5"
     },
     {
@@ -517,8 +517,8 @@
       "failures": "0",
       "skipped": "0",
       "tests": "24",
-      "time": "2.267",
-      "timestamp": "2026-10-26T13:00:32.575050+00:00",
+      "time": "1.033",
+      "timestamp": "2026-10-26T13:56:06.346457+00:00",
       "hostname": "runnervmdaln5"
     }
   ],
