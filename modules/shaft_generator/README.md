@@ -22,6 +22,53 @@ kalıcı navigasyon ve tek CAD işi çalıştıran `JobManager` kullanılır.
   dosyası üzerine yazılmaz. JSON ve SLDPRT farklı dosyalardır.
 - Kaydedilmemiş parametrelerle uygulama kapatılırken Kaydet/At/İptal sorulur.
 
+## Standart ölçü seçimi
+
+Segman/kama sekmesinde hedef kademeyi seçin; hemen altındaki **Standart yuva**
+veya **Standart kesit** listesinden DIN önerisini seçin. Genişlik ve milde
+açılacak radyal derinlik birlikte doldurulur. Kama için **Boy önerisi** kalan
+kademe boyuna (`kademe.length-offset`) sığan katalog boylarını listeler;
+ilk seçim mevcut boya en yakın uygun öneriyi kullanır. Boy, uçtan uca toplamdır.
+Elle girilen ölçüler korunur; farklı bir ölçü yazıldığında seçim **Özel ölçü**
+olarak görünür. Aynı öneriyi yeniden seçmek ölçüleri tekrar uygular.
+
+| Kanal | Kapsam | Doldurulan ölçüler |
+| --- | --- | --- |
+| DIN 471, normal tip dış segman | Ø3–100 mm içinde 76 yayımlanmış nominal çap | Yuva genişliği `m`, radyal derinlik `(d1-d2)/2` |
+| DIN 6885-1, Form A kama | Ø6–500 mm, 26 çap aralığı | Genişlik `b`, **mil** kanal derinliği `t1`; uygun katalog boyu varsa toplam boy |
+
+Örnek Ø30 mm: segman yuvası `m=1,6`, `d2=28,6`, radyal derinlik `0,7` mm;
+kama kesiti `8×7`, mil kanal derinliği `4` mm. Segman kalınlığı `1,5` mm yuva
+genişliği değildir; kama yüksekliği `7` mm de kesme derinliği değildir.
+Arayüz, segman için katalogdaki en az kenar payını da gösterir; ofseti otomatik
+değiştirmez. Kenar payı, yük/hız hesabı ve üretim toleransları bu nominal ölçü
+yardımcısının dışında ayrıca değerlendirilir.
+
+Çap değişikliği veya operasyon seçimi mevcut kanalı otomatik yeniden
+ölçülendirmez. Öneri güncellenir; uygulamak için kullanıcı seçer. DIN 471'de
+yuvarlama/enterpolasyon yoktur: örneğin Ø30,2 için Ø30 segmanı önerilmez.
+Katalog dışı çaplarda özel ölçü kullanılabilir. Kama boy listesi yayımlanan
+nominal serinin bir alt kümesidir; çap aralığına ait min/max boy ve kalan
+kademe boyuyla filtrelenir. Büyük kesitlerde kaynakta boy aralığı verilmemişse
+boy önerisi uydurulmaz; elle girilir. Liste tedarikçi stok garantisi değildir.
+
+Ölçüler `standards.py` içinde çevrimdışı tutulur; uygulama açılırken ağ isteği
+yapılmaz. `standard_picker.py` yalnız açık kullanıcı seçiminde ölçü sinyali
+gönderir; `ui.py` ilgili alanları tek işlem olarak uygular. Yeni operasyon
+eklenene kadar yalnız form değişir; seçili aynı türde operasyon varsa o
+operasyon güncellenir. JSON/COM sözleşmesine standart, kama yüksekliği veya
+segman kalınlığı alanı eklenmez. v1 dosyası tekrar açıldığında listede görülen
+standart, saklanmış bir uygunluk sertifikası değil, nominal ölçü eşleşmesidir.
+
+Kaynaklar (kontrol: 26 Ekim 2026):
+
+- [BENERI DIN 471 teknik tablosu](https://www.beneri.com/en/prodotto/din-471): `d1`, `S`, `d2`, `m`, `n`. Yalnız normal tipin Ø3–100 mm alt kümesi alınır.
+- [SOMP kama tablosu](https://www.somp.com.lb/engineering/Keyways.shtml): çap aralıkları, `b`, `h`, **mil** `t1`, göbek `t2` ve yayımlanmış boy sınırları.
+- [Elesa+Ganter DIN 6885/1](https://www.elesa-ganter.com/static/technicaldata/files/DIN6885_Keyways_EN.pdf): Ø6–50 mm kesit/derinlik ve ilk aralığın Ø6'yı kapsaması için çapraz kontrol.
+- [Böllhoff Form A kataloğu](https://eshop.boellhoff.de/out/media/pdf/DIN_6885_Stahl___en.pdf): yayımlanan nominal boy serisi; SOMP tablosundaki 6 mm alt sınırı da eklenir.
+- [DIN 6885-1:2021-11](https://www.dinmedia.de/en/standard/din-6885-1/346315269): güncel standardın kimliği. Tablolar açık tedarikçi/üretici kaynaklarından alınan nominal ölçülerdir; standardın tüm tolerans/uygunluk kuralları uygulanmış sayılmaz.
+- [ISO/R 773:1969 durumu](https://www.iso.org/standard/5056.html): ISO tarafından geri çekilmiştir; güncel bir ISO seçeneği olarak sunulmaz veya DIN ile koşulsuz eşdeğer gösterilmez.
+
 LinkedIn referansının video kareleri bu ortamda görüntülenemedi. Yerleşim
 kullanıcının sol parametre paneli / sağ çift görünüş / alt komut tarifinden
 alındı. Videoya birebir sadakat veya karşılaştırma tamamlandı iddiası yoktur.

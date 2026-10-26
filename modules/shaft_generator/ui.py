@@ -13,6 +13,7 @@ from . import controller, storage
 from .geometry import operation_plan
 from .models import Project, Groove, Keyway, Chamfer, Fillet
 from .preview import ShaftPreview
+from .standard_picker import ChannelStandardPicker
 from .validation import validate
 
 
@@ -53,12 +54,16 @@ class ShaftPage(BasePage):
             control.setAccessibleName({'+':'Kademe ekle','↑':'Kademeyi yukarı taşı','↓':'Kademeyi aşağı taşı'}.get(text,'Kademe '+text.lower()))
             commands.addWidget(control)
         stages.addLayout(commands); self.tabs.addTab(stage_page,'Kademeler')
-        self.operation_fields={}; self.operation_targets={}; self.loading_operation=False
+        self.operation_fields={}; self.operation_targets={}; self.standard_pickers={}; self.loading_operation=False
         for kind,constructor in (('groove',Groove),('keyway',Keyway),('chamfer',Chamfer),('fillet',Fillet)):
             page=QWidget(); box=QVBoxLayout(page); box.setContentsMargins(6,6,6,6)
             form=QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapLongRows)
             target=QComboBox(); target.setAccessibleName(TITLES[kind]+' hedef kademesi')
             self.operation_targets[kind]=target; form.addRow('Hedef kademe',target)
+            if kind in ('groove','keyway'):
+                picker=ChannelStandardPicker(kind,context.appearance)
+                picker.valuesSelected.connect(lambda values,k=kind:self.apply_standard(k,values))
+                self.standard_pickers[kind]=picker;form.addRow(picker)
             prototype=constructor(self.selected_stage); controls={}
             for field in fields(prototype):
                 key=field.name
@@ -157,6 +162,21 @@ class ShaftPage(BasePage):
         self.validation_label.setToolTip('\n'.join(errors));self.validation_label.setProperty('role','error' if errors else 'muted')
         self.validation_label.style().unpolish(self.validation_label);self.validation_label.style().polish(self.validation_label)
         for view in (self.top_view,self.section_view):view.set_project(self.project,self.selected_stage,self.selected_operation)
+        self.refresh_standards()
+
+    def refresh_standards(self):
+        for kind,picker in self.standard_pickers.items():
+            values=self.operation_values(kind)
+            stage=next((s for s in self.project.stages if s.id==values['stage_id']),None)
+            if stage is not None:picker.set_context(stage.diameter,stage.length,values)
+
+    def apply_standard(self,kind,values):
+        # Apply the related dimensions as one edit, never transient half-presets.
+        for key,value in values.items():
+            control=self.operation_fields[kind][key]
+            with QSignalBlocker(control):control.setValue(value)
+        self.operation_form_changed(kind)
+        self.refresh_standards()
 
     def name_changed(self,value):self.project.name=value;self.refresh(changed=True)
     def wall_changed(self,value):self.project.minimum_wall=value;self.refresh(changed=True)
@@ -222,7 +242,8 @@ class ShaftPage(BasePage):
     def operation_form_changed(self,kind):
         if self.loading_operation:return
         op=next((o for o in self.project.operations if o.id==self.selected_operation),None)
-        if op is None or op.kind!=kind:return
+        if op is None or op.kind!=kind:
+            self.refresh_standards();return
         for key,value in self.operation_values(kind).items():setattr(op,key,value)
         self.selected_stage=op.stage_id
         self.populate();self.refresh(changed=True)
@@ -318,4 +339,5 @@ class ShaftPage(BasePage):
         super().set_busy(busy);self.refresh()
 
     def theme_changed(self):
+        for picker in self.standard_pickers.values():picker.set_appearance(self.context.appearance)
         for view in (self.top_view,self.section_view):view.appearance=self.context.appearance;view.update()

@@ -90,6 +90,79 @@ def test_keyway_plan_has_round_ends_true_width_and_selects_operation(page,qtbot)
     assert not page.create_button.isEnabled() and 'toplam boyu' in page.validation_label.text()
 
 
+def activate(combo,index):
+    combo.setCurrentIndex(index)
+    combo.activated.emit(index)
+
+
+def test_groove_standard_fills_a_draft_then_edits_only_the_selected_operation(page):
+    picker=page.standard_pickers['groove']
+    assert picker.preset.count()==2 and picker.preset.currentIndex()==0
+    activate(picker.preset,1)
+    assert page.operation_fields['groove']['width'].value()==1.6
+    assert page.operation_fields['groove']['depth'].value()==.7
+    assert not page.project.operations and not page.dirty
+    page.add_operation('groove');op=page.project.operations[0];op_id=op.id
+    assert (op.width,op.depth)==(1.6,.7) and page.create_button.isEnabled()
+    page.operation_fields['groove']['width'].setValue(2.3)
+    assert picker.preset.currentIndex()==0 and op.width==2.3
+    activate(picker.preset,1)
+    assert op.id==op_id and (op.width,op.depth)==(1.6,.7) and len(page.project.operations)==1
+
+
+def test_keyway_standard_selects_shaft_depth_and_fitting_catalogue_length(page):
+    page.select_stage(page.project.stages[1].id)  # Ø45, L65, 5 mm offset.
+    picker=page.standard_pickers['keyway']
+    activate(picker.preset,1)
+    values=page.operation_values('keyway')
+    assert (values['width'],values['depth'],values['length'])==(14,5.5,36)
+    assert max(picker.lengths)==60
+    activate(picker.length,picker.length.findData(50))
+    page.add_operation('keyway');op=page.project.operations[0]
+    assert (op.width,op.depth,op.length)==(14,5.5,50)
+    assert op.stage_id==page.project.stages[1].id and page.create_button.isEnabled()
+    assert picker.preset.currentIndex()==1 and picker.length.currentData()==50
+
+
+def test_diameter_changes_refresh_suggestions_without_recutting_existing_operations(page):
+    picker=page.standard_pickers['groove'];activate(picker.preset,1)
+    page.add_operation('groove');op=page.project.operations[0]
+    page.table.item(0,1).setText('32')
+    assert (op.width,op.depth)==(1.6,.7) and picker.preset.currentIndex()==0
+    assert picker.size.diameter==32 and picker.size.depth==pytest.approx(.85)
+    activate(picker.preset,1)
+    assert (op.width,op.depth)==(1.6,.85)
+    page.table.item(0,1).setText('30,2')
+    assert picker.preset.count()==1 and picker.size is None
+    assert (op.width,op.depth)==(1.6,.85) and 'ölçüsü yok' in picker.details.text()
+    page.table.item(0,1).setText('NaN')
+    assert picker.preset.count()==1 and not page.create_button.isEnabled()
+
+
+def test_target_changes_and_short_stages_do_not_apply_a_stale_standard(page):
+    picker=page.standard_pickers['keyway'];activate(picker.preset,1)
+    before=page.operation_values('keyway')
+    page.operation_targets['keyway'].setCurrentIndex(2)  # Ø35: width10/depth5, not Ø30: width8/depth4.
+    assert picker.size.width==10 and picker.preset.currentIndex()==0
+    assert page.operation_values('keyway')['width']==before['width']
+    activate(picker.preset,1)
+    assert page.operation_values('keyway')['depth']==5
+    page.operation_fields['keyway']['offset'].setValue(49)
+    assert not picker.lengths and not picker.length.isEnabled()
+    assert 'sığan katalog boyu yok' in picker.details.text()
+
+
+def test_standard_dimensions_survive_save_load_without_new_json_fields(page,tmp_path):
+    from modules.shaft_generator import storage
+    picker=page.standard_pickers['keyway'];activate(picker.preset,1)
+    page.add_operation('keyway');op=page.project.operations[0]
+    path=tmp_path/'standard.gokshaft.json';storage.save(page.project,path)
+    page.project=storage.load(path)
+    page.selected_stage=op.stage_id;page.selected_operation=op.id;page.populate();page.refresh()
+    assert page.standard_pickers['keyway'].preset.currentIndex()==1
+    assert (page.project.operations[0].width,page.project.operations[0].depth)==(8,4)
+
+
 def test_existing_project_and_error_during_load_keep_current_data(page,tmp_path,monkeypatch):
     from PySide6.QtWidgets import QFileDialog
     path=tmp_path/'mil.gokshaft.json'
