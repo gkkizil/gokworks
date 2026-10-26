@@ -1,6 +1,6 @@
 {
-  "request_id": "20261026-dxf-native-mesh-preview",
-  "requested_at": "2026-10-26T09:34:18.223952+00:00",
-  "source_commit": "68e2445997c509c638b6cb66c08276c38f815de2",
-  "reason": "Build the user-requested single-file Windows EXE from current main including source-matched DXF/DWG 3D preview. Preserve already merged parametric shaft work and all protected shared files. Run the full native Windows regression suite, native mesh renderer/hole test (OpenGL or CPU fallback), existing shaft bridge checks, and 100/125/150 percent frozen smoke tests before publication. Do not update release or the backup. Real licensed SolidWorks mesh/flat acceptance remains opt-in and must not be claimed by mocks."
+  "request_id": "20261026-dxf-native-mesh-preview-2",
+  "requested_at": "2026-10-26T09:37:23.726595+00:00",
+  "source_commit": "c85d92ac430f3d05b02052d38e69f25e2bcd5ae3",
+  "reason": "Build the user-requested single-file Windows EXE from current main including source-matched DXF/DWG 3D preview. Preserve already merged parametric shaft work and all protected shared files. Run the full native Windows regression suite, native mesh renderer/hole test (OpenGL or CPU fallback), existing shaft bridge checks, and 100/125/150 percent frozen smoke tests before publication. Do not update release or the backup. Real licensed SolidWorks mesh/flat acceptance remains opt-in and must not be claimed by mocks. Final regression observation uses plain thread IDs instead of keeping native worker QThread wrappers alive, matching the existing main teardown safeguards. Runtime preview code is unchanged."
 }
