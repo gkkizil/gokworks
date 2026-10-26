@@ -55,6 +55,8 @@ def validate(project):
             if radius - op.depth < project.minimum_wall:
                 errors.append(prefix + f'Ø{stage.diameter:g} mm üzerinde {op.depth:g} mm radyal derinlik, {project.minimum_wall:g} mm et bırakmıyor.')
             if isinstance(op, Keyway):
+                if op.length - op.width < 1e-5:
+                    errors.append(prefix + 'yuvarlak uçlu kama kanalının toplam boyu genişliğinden en az 0,00001 mm büyük olmalı.')
                 if op.angle != 0:
                     errors.append(prefix + 'bu sürümde kama açısı yalnız 0° desteklenir.')
                 # Slot floor must meet the cylinder over its entire width.

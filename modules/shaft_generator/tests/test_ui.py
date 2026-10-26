@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QTableWidgetItem,QMessageBox
 from gui_qt.app import create_application,MainWindow
 from gui_qt.settings import SettingsStore
 from gui_qt.workers import JobManager
+from gui_qt.theme import COLORS
 from modules.shaft_generator.ui import ShaftPage
 from modules.shaft_generator.models import Groove
 
@@ -64,6 +65,29 @@ def test_operation_form_edits_update_preview_and_selection_immediately(page,qtbo
     page.select_stage(page.project.stages[1].id)
     assert page.selected_operation==''
     page.select_operation(op.id);page.delete_operation();assert not page.project.operations
+
+
+def test_keyway_plan_has_round_ends_true_width_and_selects_operation(page,qtbot):
+    from PySide6.QtGui import QColor
+    page.add_operation('keyway');qtbot.wait(20)
+    op=page.project.operations[0]
+    top=page.top_view;section=page.section_view
+    rect=top.operation_regions[0][2].adjusted(3,4,-3,-4)
+    section_rect=section.operation_regions[0][2].adjusted(3,4,-3,-4)
+    assert rect.width()/rect.height()==pytest.approx(op.length/op.width)
+    assert section_rect.width()/section_rect.height()==pytest.approx(op.length/op.depth)
+    image=top.grab().toImage()
+    background=QColor(COLORS[top.appearance]['canvas'])
+    assert image.pixelColor(rect.center().toPoint())==background
+    # A rectangular pocket would also erase this corner; a semicircular end doesn't.
+    radius=rect.height()/2
+    corner=rect.topLeft();corner.setX(corner.x()+radius*.15);corner.setY(corner.y()+radius*.15)
+    assert image.pixelColor(corner.toPoint())!=background
+    page.select_stage(page.project.stages[2].id)
+    qtbot.mouseClick(top,Qt.LeftButton,pos=rect.center().toPoint())
+    assert page.selected_operation==op.id and page.selected_stage==op.stage_id
+    page.operation_fields['keyway']['length'].setValue(op.width)
+    assert not page.create_button.isEnabled() and 'toplam boyu' in page.validation_label.text()
 
 
 def test_existing_project_and_error_during_load_keep_current_data(page,tmp_path,monkeypatch):

@@ -131,21 +131,27 @@ namespace Gokworks.ShaftCutTest {
  public class Manager : RealProxy {
   public string Method;
   public Dictionary<string,object> Arguments;
-  public Manager() : base(typeof(IFeatureManager)) {}
+  private readonly Type contract;
+  public Manager(Type type) : base(type) { contract=type; }
   public override IMessage Invoke(IMessage message) {
    IMethodCallMessage call=(IMethodCallMessage)message;
    Method=call.MethodName; Arguments=new Dictionary<string,object>();
-   MethodBase method=call.MethodBase ?? typeof(IFeatureManager).GetMethod(call.MethodName);
+   MethodBase method=call.MethodBase ?? contract.GetMethod(call.MethodName);
    if(method==null) throw new MissingMethodException("Unexpected proxy call: "+call.MethodName);
    ParameterInfo[] parameters=method.GetParameters();
    for(int i=0;i<parameters.Length;i++) Arguments.Add(parameters[i].Name,call.Args[i]);
    // Deliberately return no feature: this is not a simulated CAD success.
    return new ReturnMessage(null,null,0,call.LogicalCallContext,call);
   }
-  public static Manager Capture(MethodInfo method, double width, bool keyway) {
-   Manager capture=new Manager();
+  public static Manager Capture(MethodInfo method, double depth, bool keyway, bool reverse) {
+   Manager capture=new Manager(typeof(IFeatureManager));
    object proxy=capture.GetTransparentProxy();
-   method.Invoke(null,keyway ? new object[]{proxy,width} : new object[]{proxy});
+   method.Invoke(null,keyway ? new object[]{proxy,depth,reverse} : new object[]{proxy});
+   return capture;
+  }
+  public static Manager CaptureSlot(MethodInfo method, double sign) {
+   Manager capture=new Manager(typeof(ISketchManager));
+   method.Invoke(null,new object[]{capture.GetTransparentProxy(),0.005,0.020,0.008,sign});
    return capture;
   }
   public static bool CheckRemoval(MethodInfo method, double after, double expected) {
@@ -155,15 +161,15 @@ namespace Gokworks.ShaftCutTest {
     return false;
    }
   }
-  public static double Expected(MethodInfo method, bool keyway) {
+  public static double Expected(MethodInfo method, bool keyway, double diameter, double length, double width, double depth) {
    Type stageType=method.GetParameters()[0].ParameterType;
    Type operationType=method.GetParameters()[1].ParameterType;
    object stage=Activator.CreateInstance(stageType), operation=Activator.CreateInstance(operationType);
-   stageType.GetField("diameter").SetValue(stage,30.0);
+   stageType.GetField("diameter").SetValue(stage,diameter);
    operationType.GetField("kind").SetValue(operation,keyway ? "keyway" : "groove");
-   operationType.GetField("width").SetValue(operation,keyway ? 8.0 : 2.0);
-   operationType.GetField("depth").SetValue(operation,keyway ? 3.0 : 1.0);
-   operationType.GetField("length").SetValue(operation,20.0);
+   operationType.GetField("width").SetValue(operation,width);
+   operationType.GetField("depth").SetValue(operation,depth);
+   operationType.GetField("length").SetValue(operation,length);
    return (double)method.Invoke(null,new object[]{stage,operation});
   }
  }
@@ -171,11 +177,17 @@ namespace Gokworks.ShaftCutTest {
 '@
 $type=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.ChannelCuts',$true)
 $flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
-$groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false)
-$keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.008,$true)
+$groove=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Groove',$flags),0,$false,$false)
+$keyway=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.004,$true,$true)
+$opposite=[Gokworks.ShaftCutTest.Manager]::Capture($type.GetMethod('Keyway',$flags),0.004,$true,$false)
+$slot=[Gokworks.ShaftCutTest.Manager]::CaptureSlot($type.GetMethod('KeywaySlot',$flags),1)
+$mirrored=[Gokworks.ShaftCutTest.Manager]::CaptureSlot($type.GetMethod('KeywaySlot',$flags),-1)
 $volumeMethod=$type.GetMethod('ExpectedVolume',$flags)
-$expected=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$false)
-$keyVolume=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$true)
+$expected=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$false,30,20,2,1)
+$volumes=@()
+foreach($sample in @(@(30,20,8,3),@(35,25,10,4),@(30,8.1,8,3),@(100,50,2,1),@(30,20.1,20,14))) {
+ $volumes+=@{ parameters=$sample; volume=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$true,$sample[0],$sample[1],$sample[2],$sample[3]) }
+}
 $verify=$type.GetMethod('VerifyRemoval',$flags)
 function Check-Removal([double]$after) {
  return [Gokworks.ShaftCutTest.Manager]::CheckRemoval($verify,$after,$expected)
@@ -183,7 +195,8 @@ function Check-Removal([double]$after) {
 [Console]::WriteLine((@{
  event='cut_contract'; groove_method=$groove.Method; groove=$groove.Arguments;
  keyway_method=$keyway.Method; keyway=$keyway.Arguments;
- groove_volume=$expected; keyway_volume=$keyVolume;
+ groove_volume=$expected; keyway_volumes=$volumes;
+ opposite=$opposite.Arguments; slot_method=$slot.Method; slot=$slot.Arguments; mirrored=$mirrored.Arguments;
  valid=(Check-Removal (0.0001-$expected)); unchanged=(Check-Removal 0.0001);
  added=(Check-Removal (0.0001+$expected)); overcut=(Check-Removal (0.0001-5*$expected))
 } | ConvertTo-Json -Depth 5 -Compress))
@@ -204,13 +217,24 @@ function Check-Removal([double]$after) {
     assert not groove['Merge'] and not groove['UseFeatScope'] and groove['UseAutoSelect']
     assert data['keyway_method']=='FeatureCut4'
     keyway=data['keyway']
-    assert keyway['T1']==6 and keyway['D1']==pytest.approx(.008)  # Mid-plane, full slot width.
+    assert keyway['T1']==0 and keyway['D1']==pytest.approx(.004)  # Blind radial cut, depth + clearance.
+    assert keyway['Sd'] and keyway['Dir'] and not data['opposite']['Dir']
+    assert keyway['T0']==0 and keyway['StartOffset']==0
     assert not keyway['Flip'] and not keyway['NormalCut'] and not keyway['OptimizeGeometry']
     assert not keyway['UseFeatScope'] and keyway['UseAutoSelect']
     assert data['groove_volume']==pytest.approx(2*math.pi*(2*15*1-1)*1e-9)
-    # Independent numerical integration of the circular surface above the floor.
-    count=10000;step=8/count
-    heights=[math.sqrt(15**2-(-4+i*step)**2)-12 for i in range(count+1)]
-    expected=20*step*(sum(heights)-.5*(heights[0]+heights[-1]))*1e-9
-    assert data['keyway_volume']==pytest.approx(expected,rel=1e-7)
+    assert data['slot_method']=='CreateSketchSlot'
+    slot=data['slot']
+    assert slot['SlotCreationType']==0 and slot['SlotLengthType']==0
+    assert slot['Width']==pytest.approx(.008) and not slot['AddDimension']
+    # Arc centres produce overall [5,25] mm, with 4 mm end radii.
+    assert slot['X1']==pytest.approx(.009) and slot['X2']==pytest.approx(.021)
+    assert slot['Y1']==slot['Y2']==slot['Z1']==slot['Z2']==slot['Z3']==0
+    assert slot['Y3']==pytest.approx(.004)
+    assert data['mirrored']['X1']==pytest.approx(-.009)
+    assert data['mirrored']['X2']==pytest.approx(-.021)
+    from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume
+    for sample in data['keyway_volumes']:
+        expected=rounded_keyway_volume(*sample['parameters'])*1e-9
+        assert sample['volume']==pytest.approx(expected,rel=1e-7)
     assert data['valid'] and not any(data[k] for k in ('unchanged','added','overcut'))

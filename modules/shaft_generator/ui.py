@@ -68,14 +68,15 @@ class ShaftPage(BasePage):
                     form.addRow('Hedef kenar',control)
                 else:
                     control=QDoubleSpinBox();control.setDecimals(4);control.setRange(0,1_000_000)
-                    control.setValue(getattr(prototype,key));form.addRow(FIELD_TITLES[key],control)
+                    title='Toplam boy · mm' if kind=='keyway' and key=='length' else FIELD_TITLES[key]
+                    control.setValue(getattr(prototype,key));form.addRow(title,control)
                     if key=='angle':
                         # Unsupported orientations/angles cannot masquerade as working CAD.
                         control.setEnabled(False)
                 control.setAccessibleName(TITLES[kind]+' '+FIELD_TITLES.get(key,'Hedef kenar'))
                 controls[key]=control
             self.operation_fields[kind]=controls;box.addLayout(form)
-            if kind=='keyway':box.addWidget(label('Dikdörtgen uçlu kama kanalı; bu sürümde açı 0°.','muted'))
+            if kind=='keyway':box.addWidget(label('İki uç yarım daire: R = genişlik / 2. Boy, uçtan uca toplamdır. Açı 0°.','muted'))
             if kind=='chamfer':box.addWidget(label('Bu sürümde 45° eş mesafeli pah.','muted'))
             actions=QHBoxLayout();actions.addWidget(button('Ekle',lambda checked=False,k=kind:self.add_operation(k)))
             actions.addWidget(button('Seçileni güncelle',lambda checked=False,k=kind:self.update_operation(k)))

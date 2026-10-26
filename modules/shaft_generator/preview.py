@@ -23,8 +23,8 @@ class ShaftPreview(QWidget):
         self.operation_regions = []
         self.setMinimumSize(180, 170)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.setAccessibleName('Mil teknik kesiti' if section else 'Mil dış görünüşü')
-        self.setToolTip('Kademeyi seçmek için çizime tıklayın. Kesitte operasyona tıklayabilirsiniz.')
+        self.setAccessibleName('Mil teknik kesiti' if section else 'Mil üst görünüşü')
+        self.setToolTip('Kademe veya operasyon seçmek için çizime tıklayın.')
 
     def set_project(self, project, stage_id='', operation_id=''):
         self.project = project
@@ -42,7 +42,7 @@ class ShaftPreview(QWidget):
         painter.fillRect(self.rect(), background)
         painter.setPen(muted)
         painter.drawText(QRectF(12, 8, self.width()-24, 22), Qt.AlignLeft|Qt.AlignVCenter,
-                         'BOYUNA KESİT · A–A' if self.section else 'DIŞ GÖRÜNÜŞ · mm')
+                         'BOYUNA KESİT · A–A' if self.section else 'ÜST GÖRÜNÜŞ · mm')
         self.stage_regions, self.operation_regions = [], []
         if self.project is None or validate(self.project):
             painter.drawText(self.rect().adjusted(18,35,-18,-10), Qt.AlignCenter|Qt.TextWordWrap,
@@ -102,13 +102,20 @@ class ShaftPreview(QWidget):
             if isinstance(op,(Groove,Keyway)):
                 x=project.start(stage.id)+op.offset
                 length=op.width if isinstance(op,Groove) else op.length
-                # 0° rectangular keyway is on the +Y side in both projections.
+                # The section through the slot axis has a flat rectangular floor;
+                # its plan view shows the semicircular ends and actual width.
                 top=stage.diameter/2
                 rect=QRectF(point(x,top),point(x+length,top-op.depth)).normalized()
                 if isinstance(op,Keyway):
+                    if not self.section:
+                        rect=QRectF(point(x,op.width/2),point(x+length,-op.width/2)).normalized()
                     painter.setPen(QPen(accent if op.id==self.selected_operation else ink,1.3))
                     painter.setBrush(background)
-                    painter.drawRect(rect)
+                    if self.section:
+                        painter.drawRect(rect)
+                    else:
+                        radius=op.width*scale/2
+                        painter.drawRoundedRect(rect,radius,radius)
                 hit=rect.adjusted(-3,-4,3,4)
             else:
                 x=project.end(stage.id) if op.edge=='right' else project.start(stage.id)
@@ -124,11 +131,10 @@ class ShaftPreview(QWidget):
 
     def mousePressEvent(self,event):
         if event.button()==Qt.LeftButton:
-            if self.section:
-                for op_id,stage_id,rect in reversed(self.operation_regions):
-                    if rect.contains(event.position()):
-                        self.stageSelected.emit(stage_id); self.operationSelected.emit(op_id)
-                        return
+            for op_id,stage_id,rect in reversed(self.operation_regions):
+                if rect.contains(event.position()):
+                    self.stageSelected.emit(stage_id); self.operationSelected.emit(op_id)
+                    return
             for stage_id,rect in self.stage_regions:
                 if rect.contains(event.position()):
                     self.stageSelected.emit(stage_id)

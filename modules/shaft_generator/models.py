@@ -28,6 +28,7 @@ class Groove:
 
 @dataclass
 class Keyway:
+    """Closed obround pocket: overall length, end radius width/2, flat floor."""
     stage_id: str
     offset: float = 5
     length: float = 20
