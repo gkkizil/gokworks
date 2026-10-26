@@ -1,6 +1,6 @@
 {
-  "request_id": "20261026-dxf-native-mesh-preview-final",
-  "requested_at": "2026-10-26T09:40:43.017996+00:00",
-  "source_commit": "d9ea783b01b62323c7fa6292efb6ceba054af1e8",
-  "reason": "Build the user-requested single-file Windows EXE from current main including source-matched DXF/DWG 3D preview. Preserve already merged parametric shaft work and all protected shared files. Run the full native Windows regression suite, native mesh renderer/hole test (OpenGL or CPU fallback), existing shaft bridge checks, and 100/125/150 percent frozen smoke tests before publication. Do not update release or the backup. Real licensed SolidWorks mesh/flat acceptance remains opt-in and must not be claimed by mocks. Final regression observation uses plain thread IDs instead of keeping native worker QThread wrappers alive, matching the existing main teardown safeguards. Runtime preview code is unchanged. The final runtime also checks application closing at deferred export entry, preventing a new worker after shutdown; dedicated preview preemption/restore/shutdown tests pass."
+  "request_id": "20261026-dxf-preview-sw-standard-views",
+  "requested_at": "2026-10-26T10:02:50.548791+00:00",
+  "source_commit": "522cb83adba13bbbce2d80e30d995625e84171ee",
+  "reason": "Build the final user-requested onefile Windows EXE from current main. DXF preview reads exact native source/configuration/body tessellation, displays native flat geometry/properties, restores session state and gives export priority. Camera presets now match SOLIDWORKS front XY/top XZ/right YZ and mathematically verified equal-axis isometric projection. Native Qt receiver, GL resource lifetime, plain thread-ID observations and closing guards are in place. Run all native Windows regressions, mesh-hole renderer test, existing shaft bridge/layout checks and 100/125/150 percent frozen smoke checks. Preserve shaft source and protected shared files; do not update release or backup. Real licensed SOLIDWORKS acceptance is opt-in and must not be claimed by mocks."
 }
