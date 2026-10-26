@@ -1,0 +1,28 @@
+name: Windows shaft bridge
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/**']
+    paths: ['modules/shaft_generator/**', '.github/workflows/windows-shaft-bridge.yml']
+  pull_request:
+    paths: ['modules/shaft_generator/**', '.github/workflows/windows-shaft-bridge.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  native-transport:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+      - run: python -m pip install pytest==9.0.2
+      - name: Exercise real PowerShell loader and pipes without SOLIDWORKS
+        run: python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py
