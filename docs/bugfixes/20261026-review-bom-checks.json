@@ -1,0 +1,168 @@
+{
+  "source_commit": "fad71085597ac59df2cfeb34048a014265af3f44",
+  "branch": "main",
+  "verified_at": "2026-10-26T12:40:47.350020+00:00",
+  "linux": {
+    "tests": 416,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 25
+  },
+  "windows": [
+    {
+      "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40323751585",
+      "job_url": "https://github.com/gkkizil/gokworks/actions/runs/40323751585/job/121575002099",
+      "status": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install pytest==9.0.2",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify offline DIN catalogue and nominal data contract",
+          "conclusion": "success"
+        },
+        {
+          "name": "Stage temporary compile references (never packaged)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Exercise real PowerShell loader and pipes without SOLIDWORKS",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "annotations": []
+    },
+    {
+      "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40323751594",
+      "job_url": "https://github.com/gkkizil/gokworks/actions/runs/40323751594/job/121575001702",
+      "status": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -r requirements-dev.txt",
+          "conclusion": "success"
+        },
+        {
+          "name": "Configure native Windows display",
+          "conclusion": "success"
+        },
+        {
+          "name": "Test BOM images, XLSX and shaft UI without licensed CAD",
+          "conclusion": "success"
+        },
+        {
+          "name": "Upload test evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "annotations": [
+        "Test BOM images, XLSX and shaft UI without licensed CAD Windows BOM/UI verification: {'tests': 89, 'failures': 0, 'errors': 0, 'skipped': 1}; licensed SOLIDWORKS was not run. Show more Show less"
+      ]
+    }
+  ],
+  "windows_bom_ui_tests": {
+    "tests": 89,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 1
+  },
+  "protected_files": [
+    {
+      "path": "gui_qt/app.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workspace.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/icons.py",
+      "unchanged": true
+    },
+    {
+      "path": "packaging/build_windows.py",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/connection.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workers.py",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/components.py",
+      "unchanged": true
+    },
+    {
+      "path": "modules/naming/native.py",
+      "unchanged": true
+    },
+    {
+      "path": "modules/naming/interop/PackAndGoHost.cs",
+      "unchanged": true
+    },
+    {
+      "path": "modules/pdf/process.py",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/process_watch.py",
+      "unchanged": true
+    }
+  ],
+  "licensed_solidworks_tested": false,
+  "microsoft_excel_ui_tested": false,
+  "exe_rebuilt": false,
+  "release_branch_updated": false,
+  "backup_repository_touched": false
+}
