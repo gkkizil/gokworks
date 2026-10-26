@@ -57,6 +57,7 @@ class Session(ReadSession):
 
     def body(self, model, reference):
         part = bodies = body = None
+        matches = ()
         try:
             part = interface(model, PART_IID)
             bodies = values(call(part, 'GetBodies2', self.c('swSolidBody'), False))
@@ -74,6 +75,7 @@ class Session(ReadSession):
             return body, len(bodies)
         finally:
             model = part = bodies = body = None
+            matches = ()
 
     def triangles(self, body, stop):
         faces = face = None
