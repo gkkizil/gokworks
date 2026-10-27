@@ -9,45 +9,67 @@ taraması Windows, pywin32 ve açık/lisanslı SolidWorks oturumu gerektirir.
 
 ## Kullanım
 
-1. **SolidWorks taraması** sekmesinde **SolidWorks’e bağlan** ile oturumu
-   kontrol edin. **Açık modeli tara** veya **SolidWorks dosyası seç** ile
-   kaydedilmiş SLDPRT/SLDASM okuyun. Dosya seçimi native dosyayı Python ile
-   çözmez; kurulu SolidWorks üzerinden salt okunur açar.
-2. **Property eşleştirmesi** ile özel isimleri tanımlayın. Her alanın alternatif
-   property adlarını noktalı virgülle ayırın. Yeni eşleştirme için **Verileri
-   yenile** kullanın. Ham property ifadesi, çözümlenmiş değer yerine kullanılmaz.
-3. Durum filtresinden **İnceleme Gerekli** veya **Hariç** seçerek bu kayıtları
-   ayrı listeleyin. Kaynak dosya, konfigürasyon ve Cut List aynı satırda,
-   ham/çözümlenmiş özellikler **Tarama ayrıntıları** içindedir. Sayısal hücreler
-   ve profil/malzeme düzenlenebilir; kaynak CAD parametreleri değiştirilmez.
-4. Gerekli satırı seçip **Seçili satırı incele** ile kesiti, miktarı, boyu,
-   et kalınlığını, standardı, stok kodunu ve ek ham boyu düzeltin. Doğrulama
-   kutusu ve açıklama notu zorunludur. Sac/levha/diğer katı grupları bu yoldan
-   profil gibi onaylanamaz; kapsam dışında kalır.
-5. **Kesim optimizasyonuna aktar** yalnız hazır satırları mevcut listeye ekler.
+1. **Parçalar ve stok → Parça ekle:** profil kesitini, malzemeyi, tek parçanın
+   boyunu ve kaç adet kesileceğini girin. Örnek: `40×40×2`, `S235JR`, `1200 mm`,
+   `4 adet`. İlk girişte üretim ölçüsü/kalitesi kendiliğinden doldurulmaz.
+   Et kalınlığı, standart, stok kodu, ilave boy ve not **Diğer bilgiler** içindedir.
+   `40×40×2` veya `Ø42,4×2` gibi açık mm kesitinde et boşsa kesitten okunur;
+   açık et bilgisi kesitle çelişirse düzeltmeniz istenir.
+2. Sağdaki **Ham profil ve kesim payı:** satın aldığınız tek çubuğun boyunu
+   girin. **6 metre = 6000 mm**. Testere payı her parçada kaybolan boydur;
+   varsayılan `3 mm`'dir. İsteğe bağlı **Uç düzeltme** değeri, her iki uçtan
+   ayrı düşülür. Farklı kesit ve kaliteler aynı çubuğa karıştırılmaz.
+3. **Kesim planını hesapla:** gereken çubuk ve parça adedi, kullanım oranı,
+   artan profil, testere ve uç düzeltme kaybı ayrı görünür. Soldan çubuk seçin;
+   sağda ölçekli yerleşimi ve gerçek kesim sırasını okuyun. Sıra tablosu
+   sıralanamaz; üretim sırası görünüm sıralamasıyla değiştirilmez.
+4. İlk kez kullanıyorsanız **Örnekle dene**: `1200 mm × 4` ve `800 mm × 6`,
+   `6000 mm` çubuk, `3 mm` testere payı. Sonuç: **2 çubuk, 2370 mm artan,
+   30 mm testere kaybı**. Dolu listeyi örnekle değiştirmeden önce onay istenir.
+5. Bir parçayı seçip **Düzenle** veya çift tık ile açın. F2 ile hücre
+   düzenleme, Ctrl/Shift ile çoklu seçip kaldırma kullanılabilir. **Görünüm**
+   menüsünden kaynak/ilave boy sütunlarını açın; sıfır olmayan ilave boy
+   zaten görünür. Değerler değişince eski plan ve çizim temizlenir.
+6. **Proje** menüsünden açın/kaydedin veya CSV alın. Sürümlü `.gokprofile`
+   JSON biçimi korunur; açılan projenin planı yeniden hesaplanır. Sonuç
+   ekranındaki **Kesim planını CSV kaydet** mevcut doğrulanmış planı kaydeder.
+
+## SolidWorks’ten liste alma
+
+**SolidWorks’ten al**, elle girişe alternatif bir yoldur; manuel hesap için
+SolidWorks gerekmez.
+
+1. **Açık modeli oku** veya **Dosya seç…** ile kayıtlı SLDPRT/SLDASM okuyun.
+   Yerel, kurulu ve lisanslı SolidWorks gerekir; native dosyalar Python ile
+   doğrudan çözülmez. Bağlantı kontrolü, özel alan adları ve ileri okuma
+   tercihleri **SolidWorks seçenekleri** içinde bulunur.
+2. **Hazır** satırlar eklenebilir. **Kontrol gerekiyor** filtresiyle eksikleri
+   bulun; çift tık veya **Satırı kontrol et** ile boy/malzeme/adedi düzeltip
+   zorunlu kontrol kutusunu ve açıklama notunu tamamlayın. Hariç tutulan sac,
+   levha ve diğer gövdeler profil gibi onaylanamaz.
+3. Alttaki **… hazır satırı listeye ekle** düğmesi yalnız uygun satırları ekler.
    Manuel kayıtlar silinmez. Aynı tarama tekrar eklenmez. Kaynak değişmişse
    önceki aktarım korunur ve uyarılır; yenisini almak için ilgili eski satırı
    kullanıcı seçip kaldırır. Kaydedilmiş tarama yeniden aktarılmadan önce
-   SolidWorks’ten yenilenmelidir.
+   **Verileri yenile** ile SolidWorks’ten tekrar okunmalıdır.
    Klasör adları değişse veya gövdeler başka Cut List gruplarına taşınsa da
    kaynak kapsamı ve gövde kimlikleriyle ikinci aktarım engellenir.
    Yeni taramada aktarılmış satırın değerleri değişmişse veya satır artık yoksa
    eski kesim planı geçersiz olur. Eski değerler inceleme için saklanır fakat
    bu satırlar düzeltilene kadar yeni üretim planı/plan raporu oluşturulmaz.
    İnceleme bekleyen proje kaydedilip yeniden açılabilir.
-6. **Kesim listesi** sekmesinde stok boyu, testere payı ve bir uç için düzeltme
-   girin. Varsayılanlar 6000 / 3 / 0 mm’dir. **Kesim planını hesapla** ile
-   stokları görün. Stok satırı seçilince şeması değişir.
-7. **Kaydet / Proje aç** sürümlü `.gokprofile` JSON dosyası kullanır. Planlar
-   yeniden hesaplanır. **CSV raporu** taramayı, ham property ifadelerini,
-   kaynakları, doğrulama notlarını ve kesim sırasını yerel dosyaya yazar.
+4. Kaynak/konfigürasyonun tam yolu satır ipucundadır. Ham/çözümlenmiş alanlar
+   **Ayrıntılar → Okuma ayrıntıları**, CSV ise aynı menüdedir. Açı sütunları
+   ileri seçeneklerden açılır; kaynak açıları testere ayarına çevrilmez.
+   Özel alan adlarını noktalı virgülle eşleştirin, ardından tekrar okuyun.
 
-![Weldments ekranı](../../docs/profile-cutting/scan-dark.png)
+![Parçalar ve stok](../../docs/bugfixes/20261027-profile-cutting-ux/after/03-parts-dark.png)
 
-[Açık tema](../../docs/profile-cutting/scan-light.png) ·
-[Kesim planı](../../docs/profile-cutting/plan-dark.png) ·
-[Küçük pencere](../../docs/profile-cutting/small.png).
-Görseller açıkça örnek veriyle alınmıştır; gerçek CAD entegrasyon testi değildir.
+[Kesim planı](../../docs/bugfixes/20261027-profile-cutting-ux/after/04-plan-dark.png) ·
+[SolidWorks ekranı](../../docs/bugfixes/20261027-profile-cutting-ux/after/05-source-dark.png) ·
+[İnceleme, önce/sonra ve test raporu](../../docs/bugfixes/20261027-profile-cutting-ux/README.md).
+Görseller gerçek Qt uygulamasındandır. Manuel örnek gerçek optimizasyon motoruyla
+hesaplanır; CAD satırları açıkça test verisidir, canlı SolidWorks testi değildir.
 
 ## API ve tarama davranışı
 
@@ -69,7 +91,7 @@ Görseller açıkça örnek veriyle alınmıştır; gerçek CAD entegrasyon test
   konfigürasyon geri alınır; geri alma başarısızsa tarama yayımlanmaz.
   Yalnız aracın açtığı dosyalar kapatılır; `Save` çağrılmaz.
 - Bekleyen rebuild veya güncelliği bilinmeyen Cut List inceleme gerektirir.
-  **Tarama seçenekleri → Cut List’i güncelle** kullanıcı tercihidir;
+  **SolidWorks seçenekleri → Okumadan önce kesim listesini güncelle** kullanıcı tercihidir;
   `UpdateCutList()` uygulanır, kaynak kaydedilmez. Otomatik güncelleme
   seçenekleri kalıcı değiştirilmez. Rebuild gerekiyorsa kullanıcı bunu
   SolidWorks’te yapıp yeniden taramalıdır.
@@ -136,7 +158,7 @@ Tek planda 20000 profil; proje dosyasında 20 MB sınırı vardır.
 
 `models.py`: saf veri/aktarım; `properties.py`: mapping/birim; `geometry.py`:
 doğrusal doğrulama; `solidworks.py`: raw COM; `scanner.py`: montaj/tarama;
-`optimizer.py`: 1D motor; `storage.py`: atomik JSON/CSV; `ui.py`/`dialogs.py`:
+`optimizer.py`: 1D motor; `storage.py`: atomik JSON/CSV; `ui.py`/`widgets.py`/`dialogs.py`:
 mevcut Qt mimarisine entegrasyon. `tests/` matematik, COM doubles, gerçek Qt
 ve isteğe bağlı canlı Windows testini içerir.
 

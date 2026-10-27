@@ -1,0 +1,88 @@
+{
+  "framework": "PySide6 / Qt Widgets",
+  "platform": "offscreen",
+  "screenshots": [
+    {
+      "file": "01-empty-dark.png",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "02-add-part-dark.png",
+      "size": [
+        520,
+        320
+      ]
+    },
+    {
+      "file": "03-parts-dark.png",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "04-plan-dark.png",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "05-source-dark.png",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "06-parts-light.png",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "07-plan-light.png",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "08-parts-small-light.png",
+      "size": [
+        1024,
+        700
+      ]
+    },
+    {
+      "file": "09-plan-small-light.png",
+      "size": [
+        1024,
+        700
+      ]
+    },
+    {
+      "file": "10-parts-minimum-dark.png",
+      "size": [
+        820,
+        560
+      ]
+    },
+    {
+      "file": "11-plan-minimum-dark.png",
+      "size": [
+        820,
+        560
+      ]
+    }
+  ],
+  "source_data": "Explicit manual example",
+  "optimizer": "Actual existing Decimal optimizer, 2 bars / 10 parts / 2370 mm remaining / 30 mm kerf",
+  "cad_boundary": "Source tab rows are labelled synthetic; no live SolidWorks scan.",
+  "live_solidworks_tested": false,
+  "windows_exe_built": false
+}

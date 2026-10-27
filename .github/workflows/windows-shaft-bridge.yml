@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main, 'codex/**']
-    paths: ['modules/shaft_generator/**', 'modules/dxf_dwg/**', 'tests/support/solidworks.py', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
+    paths: ['modules/shaft_generator/**', 'modules/dxf_dwg/**', 'modules/profile_cutting/**', 'tests/support/solidworks.py', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
   pull_request:
-    paths: ['modules/shaft_generator/**', 'modules/dxf_dwg/**', 'tests/support/solidworks.py', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
+    paths: ['modules/shaft_generator/**', 'modules/dxf_dwg/**', 'modules/profile_cutting/**', 'tests/support/solidworks.py', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
 
 permissions:
   contents: read
