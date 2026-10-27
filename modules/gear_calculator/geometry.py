@@ -9,6 +9,7 @@ from functools import lru_cache
 from math import acos, atan, ceil, cos, hypot, pi, radians, sin, sqrt, tan
 from .calculation import calculate_gear, calculate_pair
 from .validation import require_manufacturable
+from .models import GearSpecification
 
 Point = tuple[float, float]
 
@@ -64,7 +65,7 @@ class Segment:
 
 @dataclass(frozen=True)
 class GearProfile:
-    specification: object
+    specification: GearSpecification
     segments: tuple[Segment, ...]
     curve_tolerance_mm: float
 

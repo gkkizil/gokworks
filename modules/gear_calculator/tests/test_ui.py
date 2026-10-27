@@ -71,6 +71,19 @@ def test_real_async_validation_motion_and_stop_reset(page,qtbot):
     assert p.canvas.gears[1].rotation()==pytest.approx(180-180/40)
 
 
+def test_compact_to_wide_roundtrip_restores_all_three_panels(page,qtbot):
+    p,w=page
+    original=(p.input_scroll,p.viewer_panel,p.results_scroll)
+    for size in ((820,560),(1600,950),(820,560),(1920,1080)):
+        w.resize(*size);qtbot.wait(40)
+        if p.compact_mode:
+            p.compact_tabs.setCurrentIndex(2)
+            assert p.results_scroll.isVisible()
+        else:
+            assert all(panel.isVisible() and panel.width()>0 for panel in original)
+            assert p.canvas.isVisible() and p.step_button.isVisible()
+
+
 def test_real_worker_export_uses_latest_fields_and_3d_is_from_the_same_brep(page,qtbot,tmp_path):
     p,w=page;p.fields['module_mm'].setValue(3)
     assert p.start_export('step',tmp_path/'takım.step','pair')

@@ -43,6 +43,10 @@ def check(output):
                     app.processEvents()
                     resize_times.append((time.perf_counter()-before)*1000)
                     assert w.pages[mode].width() >= 550
+                    if mode=='gear_calculator' and not w.pages[mode].compact_mode:
+                        gear_page=w.pages[mode]
+                        assert all(panel.isVisible() for panel in
+                            (gear_page.input_scroll,gear_page.viewer_panel,gear_page.results_scroll))
         bolt = w.pages['bolt']
         bolt.form.set_value('unit','kg')
         bolt.form.set_value('mode','Çekme')

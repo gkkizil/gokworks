@@ -1,13 +1,13 @@
 """Standard, zero-shift, full-depth external spur gears. Pure SI/mm functions."""
 
 from math import cos, pi, radians, sin, sqrt, tan
-from .models import GearResult, GearPairResult, Issue
+from .models import GearSpecification, GearPairSpecification, GearResult, GearPairResult, Issue
 from .validation import gear_issues, pair_issues, require_valid
 
 TORQUE_POWER_FACTOR = 60000 / (2*pi)  # exact conversion, not rounded 9550
 
 
-def calculate_gear(spec):
+def calculate_gear(spec: GearSpecification) -> GearResult:
     require_valid(gear_issues(spec))
     m,z,alpha=spec.module_mm,spec.teeth,radians(spec.pressure_angle_deg)
     d=m*z
@@ -16,7 +16,7 @@ def calculate_gear(spec):
         pi*m*cos(alpha),2/sin(alpha)**2)
 
 
-def calculate_pair(spec):
+def calculate_pair(spec: GearPairSpecification) -> GearPairResult:
     issues=pair_issues(spec);require_valid(issues)
     g1,g2=calculate_gear(spec.pinion),calculate_gear(spec.wheel)
     alpha=radians(spec.pinion.pressure_angle_deg)

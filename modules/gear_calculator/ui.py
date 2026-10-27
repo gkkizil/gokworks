@@ -270,7 +270,11 @@ class GearPage(BasePage):
             self.compact_tabs.setCurrentIndex(1);self.body.setCurrentWidget(self.compact_tabs)
         else:
             while self.compact_tabs.count():self.compact_tabs.removeTab(0)
-            for panel in panels:self.splitter.addWidget(panel)
+            for panel in panels:
+                self.splitter.addWidget(panel)
+                # QTabWidget hides inactive pages. Reparenting into QSplitter
+                # preserves that explicit hidden state unless it is cleared.
+                panel.show()
             self.body.setCurrentWidget(self.splitter);self.splitter.setSizes([290,self.width()-600,310])
 
     def theme_changed(self):
