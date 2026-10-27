@@ -202,6 +202,7 @@ class GearPage(BasePage):
     def toggle_animation(self):
         if self.canvas.timer.isActive():self.canvas.pause();return
         if self.result is None or not self.can_start():return
+        self.views.setCurrentIndex(0)
         self.run_job('check','pair',None)
 
     def build_preview(self):

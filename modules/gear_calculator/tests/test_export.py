@@ -82,6 +82,7 @@ def test_failed_export_and_default_no_clobber_preserve_existing_destination(tmp_
     with pytest.raises(ValueError):export_cad(bad,path,overwrite=True)
     assert path.read_text()=='user data'
     assert not list(tmp_path.glob('.gokworks-gear-*'))
+    with pytest.raises(ValueError):cad.build_gear(bad.pinion)
 
 
 def test_actual_headless_worker_export_mesh_and_cancel_timeout(tmp_path):

@@ -8,7 +8,7 @@ from math import isfinite
 from threading import RLock
 from .geometry import gear_profile, pair_angles
 from .calculation import calculate_pair
-from .validation import require_manufacturable
+from .validation import require_manufacturable, gear_issues, require_valid, SpecificationError
 
 _kernel_lock = RLock()
 
@@ -34,6 +34,11 @@ def _edge(segment):
 
 
 def build_gear(spec):
+    issues=gear_issues(spec)
+    require_valid(issues)
+    undercut=[issue for issue in issues if issue.code=='undercut']
+    if undercut:
+        raise SpecificationError(undercut)
     from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeFace, BRepBuilderAPI_MakeEdge
     from OCP.BRepPrimAPI import BRepPrimAPI_MakePrism
     from OCP.gp import gp_Vec, gp_Pnt, gp_Ax2, gp_Dir, gp_Circ

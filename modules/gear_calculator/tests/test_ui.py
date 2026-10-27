@@ -61,8 +61,9 @@ def test_small_wide_layouts_and_both_themes_keep_input_view_and_exports_accessib
 
 
 def test_real_async_validation_motion_and_stop_reset(page,qtbot):
-    p,w=page;p.toggle_animation()
+    p,w=page;p.views.setCurrentIndex(1);p.toggle_animation()
     qtbot.waitUntil(lambda:p.canvas.timer.isActive() and not w.jobs.busy,timeout=10000)
+    assert p.views.currentIndex()==0
     qtbot.waitUntil(lambda:p.canvas.input_angle!=0,timeout=1000)
     a=p.canvas.input_angle
     assert p.canvas.gears[0].rotation()==pytest.approx(a*180/3.141592653589793)
