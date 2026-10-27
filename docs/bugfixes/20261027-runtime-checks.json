@@ -1,0 +1,49 @@
+{
+  "source_commit": "50611d6efd5b287faf5fd05db25f98f3c01ca007",
+  "branch": "main",
+  "checked_at": "2026-10-27T05:40:23.105605+00:00",
+  "source_audit": {
+    "python_files": 352,
+    "lines": 53428,
+    "syntax_errors": [],
+    "eager_import_cycles": []
+  },
+  "full_regression": {
+    "pytest_items": 1584,
+    "junit_records": 2462,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 45,
+    "note": "Broad regression baseline; final cleanup/source-validation delta was checked separately in the complete DXF suite."
+  },
+  "final_dxf": {
+    "junit_records": 226,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3
+  },
+  "source_smoke": {
+    "status": "passed",
+    "distribution": "source",
+    "modules": 15,
+    "themes": 2,
+    "resolutions": 4,
+    "live_solidworks": false
+  },
+  "windows": {
+    "ui_run": 40456185382,
+    "bridge_run": 40456185374,
+    "status": "success",
+    "ui_tests": 321,
+    "ui_failures": 0,
+    "ui_errors": 0,
+    "ui_skipped": 3,
+    "bridge_status": "success"
+  },
+  "exe": {
+    "cancelled": true,
+    "new_build_requested": false,
+    "note": "Earlier running EXE run finished before cancellation reached it. Follow-up workflow now reads cancelled=true and skips the build job."
+  },
+  "solidworks_geometry": "not run; no licensed SOLIDWORKS in this environment"
+}
