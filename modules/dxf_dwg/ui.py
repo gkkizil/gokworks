@@ -1,5 +1,7 @@
 """Sheet-metal exports and source-matched preview; shared export flow is intact."""
 
+from pathlib import Path
+
 from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject
 from PySide6.QtWidgets import QSplitter
 from gui_qt.export import ExportPage
@@ -8,7 +10,7 @@ from modules.cad_converter.models import Cancelled
 from modules.cad_converter.api import RestoreError
 from .preview.models import Request, MeshCache
 from .preview.panel import PreviewPanel
-from .preview.solidworks import capture
+from .preview.solidworks import capture, file_stamp
 from .preview.solidworks import capture_geometry
 from .preview.cancellation import cancellable_read
 
@@ -31,6 +33,12 @@ class _PageEvents(QObject):
 class DxfDwgPage(ExportPage):
     def __init__(self, context):
         super().__init__(context, 'dxf_dwg')
+        self.preview_before_export = self.options_form.check(
+            'preview_before_export', 'Kaydetmeden önce önizle', True)
+        self.preview_before_export.setToolTip(
+            'Önce seçili parçanın açınımını gösterir. Listeden parçaları kontrol edin; '
+            'kaydetmek için Aktarımı başlat düğmesine tekrar basın.')
+        self.form.fields['preview_before_export'] = self.preview_before_export
         self.options_form.form.addRow(label('Aktarımda değiştirilmiş SolidWorks belgeleri otomatik kaydedilir.', 'muted'))
         self.start_button.setToolTip('DXF/DWG aktarır; açık değiştirilmiş SolidWorks belgelerine sessiz Tümünü Kaydet uygular.')
         self._events = _PageEvents(self)
@@ -46,6 +54,8 @@ class DxfDwgPage(ExportPage):
         self._capture_geometry = None
         self.preview_force = False
         self._export_after_preview = False
+        self._preview_after_scan = False
+        self._awaiting_flat_review = False
         self.preview_payload = None
         self.preview_timer = QTimer(self); self.preview_timer.setSingleShot(True); self.preview_timer.setInterval(180)
         self.preview_timer.timeout.connect(self.start_preview)
@@ -72,7 +82,7 @@ class DxfDwgPage(ExportPage):
         self.jobs.finished.connect(self.resume_preview)
         self.watcher = QFileSystemWatcher(self)
         self.watcher.fileChanged.connect(self.source_changed)
-        self.form.changed.connect(lambda key: self.clear_preview() if key == 'source' else None)
+        self.form.changed.connect(self.preview_option_changed)
         self._capture = capture  # injectable boundary; no COM import or connection during construction
         QTimer.singleShot(0, self.layout_preview)
 
@@ -102,14 +112,92 @@ class DxfDwgPage(ExportPage):
         finally:
             self._moving_preview = False
 
-    def show_preview(self):
+    def _reveal_preview(self):
         self.layout_preview()
         self.results.tabs.setCurrentWidget(self.preview if self.preview_compact else self.preview_splitter)
+
+    def show_preview(self):
+        """Reveal and populate the existing panel, even before any output exists."""
+        if self.context.closing:
+            return False
+        self._reveal_preview()
+        self._preview_cancelled = False  # An explicit Preview command resumes a stopped read.
+        if self.preview_request and not self._source_in_scope(self.preview_request.source):
+            self.clear_preview()
+        self._awaiting_flat_review = True
+        if self.preview_request:
+            if self._flat_ready_for_export():
+                self.preview.focus_flat()
+            elif not self.preview_running and self.preview_pending is None:
+                self.refresh_preview()
+            return True
+        if any(self._source_in_scope(row['source']) for row in self.results.model.rows):
+            return self._select_preview_row()
+        if not self.can_start():
+            return False
+        self._preview_after_scan = True
+        self.scan()  # Folder discovery only: no CAD Save3 or production export.
+        if not self.jobs.busy or self.jobs.owner is not self:
+            self._preview_after_scan = False
+            return False
+        return True
+
+    def _source_in_scope(self, source):
+        root = self.form.value('source')
+        if not root:
+            return True
+        path, folder = Path(source).resolve(), Path(root).resolve()
+        return path.is_relative_to(folder) if self.form.value('recursive') else path.parent == folder
+
+    def _select_preview_row(self):
+        if self.context.closing or self._preview_cancelled:
+            return False
+        self._reveal_preview()
+        index = self.results.table.currentIndex()
+        if not index.isValid() or not self._source_in_scope(index.data(Qt.UserRole)['source']):
+            index = next((candidate for row in range(self.results.proxy.rowCount())
+                          if (candidate := self.results.proxy.index(row, 0)).isValid()
+                          and self._source_in_scope(candidate.data(Qt.UserRole)['source'])),
+                         self.results.proxy.index(-1, 0))
+        if not index.isValid():
+            self.set_status('Önizleme için görünür bir SLDPRT parçası seçin.', True)
+            return False
+        self.results.table.setCurrentIndex(index)
+        self.request_preview(index.data(Qt.UserRole))
+        return True
+
+    def scan(self):
+        if not self.jobs.busy and not self.context.closing:
+            self._preview_cancelled = False
+        super().scan()
+        if not self.jobs.busy or self.jobs.owner is not self:
+            self._preview_after_scan = False
+
+    def preview_option_changed(self, key):
+        if key in ('source', 'recursive'):
+            self.clear_preview()
+        elif key == 'bend_lines' and self.preview_request:
+            self.refresh_preview()
+
+    def _flat_ready_for_export(self):
+        payload = self.preview_payload
+        if (self.preview_running or self.preview_pending is not None or self._preview_cancelled
+                or not payload or not payload.flat or not payload.flat.strokes or not self.preview_request):
+            return False
+        if self.preview_request.bend_lines != self.form.value('bend_lines'):
+            return False
+        if not self._source_in_scope(self.preview_request.source):
+            return False
+        try:
+            return payload.revision[1] == file_stamp(self.preview_request.source)
+        except (RuntimeError, IndexError):
+            return False
 
     def clear_preview(self, *args):
         self.preview_generation += 1
         self.preview_timer.stop()
         self.preview_request = self.preview_pending = self.preview_payload = None
+        self._awaiting_flat_review = False
         self.preview.clear()
         if self.watcher.files(): self.watcher.removePaths(self.watcher.files())
         if self.preview_running and self.jobs.owner is self: self.jobs.cancel()
@@ -129,13 +217,15 @@ class DxfDwgPage(ExportPage):
             if row: self.request_preview(row)
 
     def request_preview(self, row, force=False):
-        outputs = [o for o in row.get('outputs', ()) if o.get('status') in ('success', 'skipped')]
+        bend_lines = self.form.value('bend_lines')
+        outputs = [o for o in row.get('outputs', ()) if o.get('status') in ('success', 'skipped')
+                   and row.get('bend_lines', bend_lines) == bend_lines]
         output = next((o for o in outputs if o.get('format', '').upper() == 'DXF'), outputs[0] if outputs else {})
         quantity = row.get('quantity')
         request = Request(str(row['source']), str(row.get('configuration', '')), str(row.get('body_ref', '')),
                           str(output.get('path', '')), str(output.get('status', '')), tuple(row.get('source_stamp') or ()),
                           row.get('update_stamp'), quantity if type(quantity) is int and quantity > 0 else None,
-                          bool(row.get('bend_lines', self.form.value('bend_lines'))))
+                          bool(bend_lines))
         if not force and request == self.preview_request:
             return
         self.preview_generation += 1
@@ -145,7 +235,6 @@ class DxfDwgPage(ExportPage):
         self.preview_payload = None
         self.preview_force |= force
         self.preview.clear('SolidWorks kaynak ve bükülmüş geometri kontrol ediliyor…')
-        from pathlib import Path
         self.preview.source_label.setText(Path(request.source).name)
         self.preview.source_label.setToolTip(request.source)
         if self.watcher.files(): self.watcher.removePaths(self.watcher.files())
@@ -176,6 +265,11 @@ class DxfDwgPage(ExportPage):
                 self.preview.message.setText('Önizleme durduruldu. Yenile ile tekrar okuyabilirsiniz.')
             self._stop_message_pending = False
             return
+        if self._preview_after_scan:
+            self._preview_after_scan = False
+            self._awaiting_flat_review = True
+            QTimer.singleShot(0, self._select_preview_row)
+            return
         export = self._export_after_preview
         self._export_after_preview = False
         if export and not self.context.closing:
@@ -190,6 +284,15 @@ class DxfDwgPage(ExportPage):
         if self._preview_restore_failed and not self.preview_running:
             self.set_status('Kaynak durumu geri alınamadığı için otomatik kayıt başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.', True)
             return
+        if self.preview_before_export.isChecked() and (not self._flat_ready_for_export()
+                                                       or not self.preview.flat_view.isVisible()):
+            if self.jobs.busy and not (self.preview_running and self.jobs.owner is self):
+                self.can_start()
+                return
+            self._preview_cancelled = False
+            if self.show_preview():
+                self.set_status('Önce açınımı kontrol edin. Önizleme tamamlanmadan dosyalar kaydedilmez; hazır olunca Aktarımı başlat düğmesine tekrar basın.')
+            return
         if self.preview_running and self.jobs.owner is self and self.jobs.busy:
             self._export_after_preview = True
             self.preview_pending = None; self.preview_timer.stop()
@@ -199,10 +302,14 @@ class DxfDwgPage(ExportPage):
             return
         self._preview_cancelled = False
         self._stop_message_pending = False
+        self._preview_after_scan = False
+        self._awaiting_flat_review = False
         super().start_export()
 
     def cancel_pending_preview(self):
         self._export_after_preview = False
+        self._preview_after_scan = False
+        self._awaiting_flat_review = False
         self.preview_pending = None; self.preview_timer.stop()
         self._preview_cancelled = True
         self._stop_message_pending = True
@@ -243,13 +350,15 @@ class DxfDwgPage(ExportPage):
         super().set_busy(busy)
         if hasattr(self, 'preview'):
             self.preview.refresh_button.setEnabled(not busy)
-            # Export remains available to preempt our own background capture.
-            # The live COM call finishes and state restores before export starts.
+            # With review enabled, Start reveals the flat without cancelling it.
+            # Direct export can preempt capture only after native state restores.
             if busy and self.preview_running: self.start_button.setEnabled(True)
 
     def process_events(self, events):
         ordinary = []
         for kind, value in events:
+            if kind == 'done' and value.get('state') == 'preview' and not self._preview_cancelled:
+                self._preview_after_scan |= self.preview_before_export.isChecked()
             if kind == 'done' and value.get('native_restore_failed'):
                 self._preview_restore_failed = True
                 self._export_after_preview = False
@@ -275,7 +384,15 @@ class DxfDwgPage(ExportPage):
                     if kind == 'dxf_preview_geometry':
                         self.preview.flat_label.setText('Açınım · okunuyor…')
                         self.set_status('3D önizleme hazır; açınım okunuyor…')
+                    elif result.flat:
+                        self.set_status('Açınım hazır · listeden parçaları kontrol edin. Kaydetmek için Aktarımı başlat düğmesine basın.')
+                        if self._awaiting_flat_review:
+                            self._reveal_preview()
+                            self.preview.focus_flat()
+                    else:
+                        self.set_status('Açınım önizlemesi okunamadı. Ayrıntıyı kontrol edip Yenile ile tekrar deneyin.', True)
                 else:
+                    self.preview_payload = None
                     self.preview.clear(result)
                     self.set_status('Önizleme: ' + result, kind == 'dxf_preview_error')
             else:

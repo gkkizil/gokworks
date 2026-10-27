@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication
 from gui_qt.app import MainWindow, create_application
 from modules.dxf_dwg.preview.models import Payload, Flat, Stroke
 from modules.dxf_dwg.preview.viewer import VIEWS
+from modules.dxf_dwg.preview.solidworks import file_stamp
 from .test_preview_geometry import ring_mesh
 
 
@@ -20,7 +21,7 @@ def payload(path, configuration='Bent'):
                 (0, 0, 10, 10), 'Synthetic DXF test fixture', 34.14)
     return Payload(str(path), configuration, ring_mesh(), flat,
                    (('Dosya', Path(path).name), ('Malzeme', 'S235JR'), ('Sac kalınlığı', '2 mm')),
-                   (str(path), configuration, 1))
+                   (str(path), file_stamp(path), configuration, 'synthetic-body', 1))
 
 
 @pytest.fixture
@@ -238,6 +239,7 @@ def test_export_preempts_capture_after_safe_cleanup_and_stops_on_restore_error(p
     from modules.cad_converter.models import Cancelled
     from modules.cad_converter.api import RestoreError
     p, w, files = page; started = threading.Event(); calls = []
+    p.preview_before_export.setChecked(False)  # Explicit opt-out retains the direct-export path.
     def capture(request, cache, stop):
         started.set()
         assert stop.wait(5)

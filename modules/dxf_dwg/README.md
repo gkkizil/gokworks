@@ -30,6 +30,27 @@ Gerçek SolidWorks sunucusunun iptal davranışı ayrıca canlı test gerektirir
 
 ## SolidWorks 3D / açınım önizlemesi
 
+**Kaydetmeden önce önizle** ayarı varsayılan açıktır ve tercihlerde
+saklanır. **Klasörü tara** sonrasında ilk parça otomatik seçilir. **Önizleme**
+düğmesi de seçim yoksa ilk görünür parçayı okur; liste boşsa önce klasörü tarar.
+Çıktı klasörü seçilmeden de kontrol yapılabilir.
+
+**Aktarımı başlat**, seçili parçanın güncel açınımı henüz gösterilmemişse önce
+3D görüntünün altındaki açınım bölümünü açar. Bu aşamada üretim DXF/DWG'si
+veya kaynak CAD dosyası kaydedilmez. Listeden diğer parçaları seçerek aynı
+alanda inceleyin; hazır olunca **Aktarımı başlat** düğmesine tekrar basarak
+mevcut toplu kaydı başlatın. Okuma bitince kayıt kendiliğinden başlamaz.
+Açınım okunamadığında 3D görüntü tek başına bu kontrolü geçmez. Bu ayar,
+seçili parça için görsel kontrol akışıdır; tüm parçaların tek tek onaylandığını
+veya imalat geometrisinin doğrulandığını iddia etmez.
+
+Önizleme sürerken Aktarımı başlat'a basmak okumayı iptal etmez. Dar pencerede
+gizli Önizleme sekmesi de kayıttan önce görünür hale gelir. Büküm çizgileri
+tercihi değişirse açınım güncel ayarla yeniden okunur, eski DXF kullanılmaz.
+Ayar kapatıldığında doğrudan toplu aktarım davranışı korunur.
+
+[Kayıt öncesi akış, test sonuçları ve ekran görüntüleri](../../docs/dxf-3d-preview/preview-before-save.md).
+
 Listeden bir kaynak veya sonuç satırı seçildiğinde sağda üç bölüm açılır:
 gerçek bükülmüş SolidWorks gövdesi, açınım ve parça bilgileri. Dar pencerede
 **Önizleme** sekmesi/üst düğmesi kullanılır; panelin içi kaydırılabilir.

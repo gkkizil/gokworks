@@ -17,9 +17,16 @@ class FlatView(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setAccessibleName('Seçili parçanın DXF açınımı')
+        self.empty_message = QLabel('Açınımı görmek için listeden bir sac parçası seçin.', self.viewport())
+        self.empty_message.setWordWrap(True)
+        self.empty_message.setAlignment(Qt.AlignCenter)
+        self.empty_message.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.empty_message.setStyleSheet('color: #596575; background: transparent; padding: 12px;')
 
-    def show_flat(self, flat):
+    def show_flat(self, flat, empty_text='Açınımı görmek için listeden bir sac parçası seçin.'):
         self.scene().clear()
+        self.empty_message.setText(empty_text)
+        self.empty_message.setVisible(flat is None)
         if flat is not None:
             paths = {}
             for stroke in flat.strokes:
@@ -38,6 +45,7 @@ class FlatView(QGraphicsView):
 
     def resizeEvent(self, event):
         super().resizeEvent(event); self.fit()
+        self.empty_message.setGeometry(self.viewport().rect())
 
     def wheelEvent(self, event):
         factor = 1.15 ** (event.angleDelta().y()/120)
@@ -79,7 +87,7 @@ class PreviewPanel(QWidget):
         self.message = QLabel('Gerçek SolidWorks geometrisi · görsel inceleme içindir')
         self.message.setWordWrap(True); layout.addWidget(self.message)
         self.splitter.addWidget(upper)
-        middle = QWidget(); layout = QVBoxLayout(middle); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(3)
+        middle = self.flat_section = QWidget(); layout = QVBoxLayout(middle); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(3)
         middle.setMinimumHeight(125)
         row = QHBoxLayout(); self.flat_label = QLabel('Açınım · henüz okunmadı'); self.flat_label.setWordWrap(True)
         self.flat_fit = QPushButton('Sığdır'); row.addWidget(self.flat_label, 1); row.addWidget(self.flat_fit)
@@ -109,17 +117,22 @@ class PreviewPanel(QWidget):
         else: self.mesh_view.changed()
 
     def clear(self, message='Listeden bir sac parçası seçin.'):
-        self.mesh_view.set_mesh(None); self.flat_view.show_flat(None)
+        self.mesh_view.set_mesh(None); self.flat_view.show_flat(None, message)
         self.info.setRowCount(0); self.source_label.setText('Önizleme')
         self.message.setText(message); self.message.setToolTip(message)
         self.flat_label.setText('Açınım · henüz okunmadı')
+
+    def focus_flat(self):
+        self.scroll.ensureWidgetVisible(self.flat_section, 0, 8)
+        self.flat_view.fit()
 
     def show_payload(self, payload):
         from pathlib import Path
         self.source_label.setText(f'{Path(payload.source).name} · {payload.configuration}')
         self.source_label.setToolTip(payload.source)
         self.mesh_view.set_mesh(payload.mesh)
-        self.flat_view.show_flat(payload.flat)
+        flat_error = next((w for w in payload.warnings if w.startswith('Açınım önizlemesi okunamadı:')), '')
+        self.flat_view.show_flat(payload.flat, flat_error or 'Açınım okunuyor…')
         self.flat_label.setText(payload.flat.description if payload.flat else 'Açınım · okunamadı')
         self.info.setRowCount(len(payload.info))
         for row, (name, value) in enumerate(payload.info):
