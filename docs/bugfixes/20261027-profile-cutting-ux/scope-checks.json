@@ -1,5 +1,5 @@
 {
-  "baseline": "98912be7ff48f76094a6669eb16d6f063b2febfc",
+  "baseline": "2232129c52881b0fdc705b3a1429a2b4242dd32a",
   "protected": [
     {
       "path": "gui_qt/app.py",
@@ -97,5 +97,7 @@
       "path": "modules/profile_cutting/geometry.py",
       "unchanged": true
     }
-  ]
+  ],
+  "full_regression_commit": "d37089fe7d47c5bf55c1ec2d9da69dbc5bd4ea7f",
+  "final_workflow_commit": "4b8736a5ed33b7ac71128426a6c162d99a3ec97c"
 }

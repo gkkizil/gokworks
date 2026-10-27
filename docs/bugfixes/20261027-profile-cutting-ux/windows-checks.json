@@ -1,0 +1,42 @@
+{
+  "tested_commit": "4b8736a5ed33b7ac71128426a6c162d99a3ec97c",
+  "recorded_at": "2026-10-27T11:42:06.260149+00:00",
+  "runs": [
+    {
+      "id": "40497597010",
+      "name": "Windows shaft bridge",
+      "state": {
+        "status": "WORKFLOW_RUN_STATUS_COMPLETED",
+        "conclusion": "WORKFLOW_RUN_CONCLUSION_SUCCESS"
+      },
+      "timing": {
+        "kind": "WORKFLOW_RUN_TIMING_KIND_DURATION",
+        "text": "41s"
+      },
+      "runUrl": "https://github.com/gkkizil/gokworks/actions/runs/40497597010",
+      "source_commit_verified": true,
+      "jobs": [
+        "122166879138"
+      ]
+    },
+    {
+      "id": "40497596926",
+      "name": "Windows BOM and shaft UI",
+      "state": {
+        "status": "WORKFLOW_RUN_STATUS_COMPLETED",
+        "conclusion": "WORKFLOW_RUN_CONCLUSION_SUCCESS"
+      },
+      "timing": {
+        "kind": "WORKFLOW_RUN_TIMING_KIND_DURATION",
+        "text": "3m 49s"
+      },
+      "runUrl": "https://github.com/gkkizil/gokworks/actions/runs/40497596926",
+      "source_commit_verified": true,
+      "jobs": [
+        "122166878659"
+      ]
+    }
+  ],
+  "solidworks_live_tested": false,
+  "windows_exe_built": false
+}

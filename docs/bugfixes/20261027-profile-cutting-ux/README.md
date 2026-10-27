@@ -47,6 +47,8 @@ Geçersiz uç düzeltme ilgili alanı açar; parça stoktan uzunsa kullanıcı
 boş sonuç ekranında bırakılmadan giriş sayfasına yönlendirilir.
 Kesit/et çelişkisi hücre düzenlemesinde de reddedilir; ilgili iki değerin
 birlikte değiştirilebildiği **Düzenle** penceresine yönlendirilir.
+Örnekte de kesitteki et bilgisi açık tutulur; yalnız düzenleme penceresini
+açıp onaylamak örneği farklı bir stok grubuna ayırmaz.
 
 ## Kapsam ve sözleşmeler
 
@@ -91,11 +93,14 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
 - **125 test kaydı: 124 başarılı, 0 hata, 1 atlanan.** Sekiz sınırlı test
   süreci çıkış kodu 0. [JUnit](tests.xml), [çalıştırıcı çıktısı](tests.log).
   Çalıştırıcının adı `run_windows_tests.py` olsa da bu sonuç **Linux**'ta alındı.
+  Uzak güncelleme alındıktan sonraki kaynak: `d37089f`.
 - **12 yeni Qt akışı:** gerçek optimizasyonla örnek plan, dört alanla manuel
   giriş, kaynak kimliği korunan düzenleme, geçersiz grafiğin resize sonrası
   dönmemesi, örneğin dolu listeyi onaysız silmemesi, ayrı kayıplar,
   mock-COM tarama/filtre/ekleme, gerçek CSV worker, hatalı uç düzeltme,
   stoktan uzun parça, minimumu ispatlanmamış plan, kesit/et tutarlılığı.
+  Son örnek-grubu düzeltmesinden sonra 12 akışın tamamı yeniden başarılı:
+  [son Qt akış sonuçları](final-workflows.xml), kaynak `4b8736a`.
 - **Uygulama self-check başarılı:** 15 modül, iki tema ve dört çözünürlük
   (1024×700, 1366×768, 1920×1080, 2560×1440).
   [Makine raporu](source-smoke.json). Bu başlangıç ve örnek iş akışı
@@ -105,20 +110,40 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
   [yeniden üretim aracı](../../report-tools/capture_profile_workflow.py).
 - Ruff `F821,F822,F823` ve `git diff --check` başarılı.
 
+## Windows doğrulaması
+
+Son uygulama kaynağı `4b8736a` için iki GitHub Actions çalışması başarılı:
+
+- [Windows profil/DXF/BOM/mil arayüz regresyonu](https://github.com/gkkizil/gokworks/actions/runs/40497596926),
+  job `122166878659`.
+- [Windows yerel API köprüsü](https://github.com/gkkizil/gokworks/actions/runs/40497597010),
+  job `122166879138`.
+
+Her çalışmanın sayfasında aynı tam kaynak commit'i doğrulandı.
+[Makine kaydı](windows-checks.json). Bu kontroller SolidWorks test doubles
+ve geçici derleme referansları kullanır; kurulu/lisanslı SolidWorks'le
+gerçek CAD okumasının yerine geçmez. Son rapor/görsel commit'i uygulama
+kaynağını değiştirmez.
+
 ## Doğrulanamayanlar ve yayımlama durumu
 
 - Atlanan tek test, kurulu/lisanslı SolidWorks ve açıkça seçilmiş gerçek
   Weldment dosyası gerektiren canlı testtir. Burada çalıştırılmadı.
-- Windows yerel ekranı, Windows DPI ölçekleri, gerçek SolidWorks okuma ve
-  yeni arayüzün donmuş EXE çalışması bu Linux sonuçlarından çıkarılamaz.
+- Gerçek SolidWorks okuma, tüm Windows DPI ölçekleri ve yeni arayüzün
+  donmuş EXE çalışması doğrulanmadı. Windows Qt regresyonu yukarıda ayrıca
+  çalıştırılıp kaydedildi.
 - Bu görev için yeni EXE oluşturulmadı. Önceden verilen EXE bu arayüz
   değişikliğini içermez.
-- GitHub oturumunun `GH_TOKEN` doğrulaması başarısız oldu. Bu rapor
-  hazırlanırken `main` gönderimi ve yeni Windows CI çalışması bekliyordu;
-  bu nedenle uzak depo güncellendi veya Windows geçti denmiyor.
+- İlk GitHub kimlik doğrulaması başarısız oldu; sonraki bağlantı başarılı
+  olduğunda uzak `main`'deki `2232129` güncellemesi alındı ve üzerine rebase
+  uygulandı. Bu güncellemenin mil özellikleri korundu. Arayüz commit'i
+  `d37089fe7d47c5bf55c1ec2d9da69dbc5bd4ea7f` ile `main`'e gönderildi.
+  Örneğin düzenlenince aynı stok grubunda kalmasını sağlayan ek kontrol
+  `4b8736a` ile gönderildi.
+  Birleşmiş kaynak üzerinde yerel kontroller tekrar çalıştırıldı.
+  Son uygulama kaynağının Windows kontrolleri de başarılı tamamlandı.
 - Klavye/hücre düzenleme ve yerel bileşenler korunmuştur. Görsel inceleme
   tek başına ekran okuyucu veya tam erişilebilirlik uygunluğu kanıtı değildir.
 
-Sonraki doğrulama: GitHub bağlantısı yenilendiğinde `main`'e gönderim,
-aynı commit için Windows testleri ve kullanıcıya ait bir Weldment test
-kopyasıyla okuma → kontrol → listeye ekleme → plan/CSV akışı.
+Sonraki canlı doğrulama: kullanıcıya ait bir Weldment test kopyasıyla
+okuma → kontrol → listeye ekleme → plan/CSV akışı.
