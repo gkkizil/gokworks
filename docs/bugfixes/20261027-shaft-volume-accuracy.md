@@ -68,6 +68,13 @@ Fixture gerçek dönüş imzasına düzeltildi; uygulama kodu için bir geri dö
 veya doğrulama gevşetmesi eklenmedi. Native fixture değişikliklerinin aynı
 kaynakta GUI doğrulamasını da tetiklemesi sağlandı.
 
+Son kaynak `88da7be872899594a5d0e885cf5c521d6660d5ab` için
+[Windows native köprü/API](https://github.com/gkkizil/gokworks/actions/runs/40486007164)
+ve [Windows GUI](https://github.com/gkkizil/gokworks/actions/runs/40486007253)
+kontrolleri başarılıdır. 10 modlu yüksek doğruluk fixture'ı ve küçük eksik/fazla
+kesimi reddeden kontroller Windows'ta geçti. GUI: **335 kayıt, 0 hata/başarısızlık,
+3 atlama**. [Makine özeti](20261027-shaft-volume-checks.json).
+
 Bu Linux ortamında lisanslı SolidWorks yoktur. Gerçek kullanıcının dosyasıyla
 yüksek doğrulukta yeniden hesaplamanın sonucu henüz doğrulanamadı. Native
 Windows testleri de lisanslı CAD geometrisi üretmez; API/protokol testleridir.

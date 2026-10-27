@@ -1,0 +1,27 @@
+{
+  "source_commit": "88da7be872899594a5d0e885cf5c521d6660d5ab",
+  "licensed_solidworks_tested": false,
+  "windows_ui": {
+    "run_id": 40486007253,
+    "tests": 335,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "status": "success"
+  },
+  "windows_bridge": {
+    "run_id": 40486007164,
+    "status": "success",
+    "mass_property_fixture_modes": 10
+  },
+  "local_shaft": {
+    "tests": 207,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 35
+  },
+  "local_host_compilation": {
+    "errors": 0,
+    "warnings": 0
+  }
+}

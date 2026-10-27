@@ -1,13 +1,13 @@
 {
-  "request_id": "20261027-dxf-flat-preview-exe",
-  "requested_at": "2026-10-27T06:58:49.343692+00:00",
-  "source_commit": "5d7158a19ed32b3ff19bf3704c01572ff0af7ac9",
+  "request_id": "20261027-shaft-accurate-volume-exe",
+  "requested_at": "2026-10-27T10:11:42.653705+00:00",
+  "source_commit": "88da7be872899594a5d0e885cf5c521d6660d5ab",
   "validation_profile": "verified-source",
-  "verified_source_commit": "5d7158a19ed32b3ff19bf3704c01572ff0af7ac9",
+  "verified_source_commit": "88da7be872899594a5d0e885cf5c521d6660d5ab",
   "validation_runs": [
-    40459447721,
-    40459448232
+    40486007253,
+    40486007164
   ],
-  "reason": "User requested the current Windows EXE. Application source matches the successful native Windows UI and STA bridge checks. Subsequent changes are test reports and packaging request validation metadata only; rerun focused packaging/COM checks and frozen EXE smoke.",
+  "reason": "Continue the reported keyway-volume fix and provide the corrected Windows EXE. High-accuracy MassProperty2 recalculation and strict cut rejection passed same-source native Windows bridge and GUI tests; rerun focused packaging checks and frozen executable smoke.",
   "cancelled": false
 }
