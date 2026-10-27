@@ -263,6 +263,9 @@ class DxfDwgPage(ExportPage):
             if self._stop_message_pending and not self._preview_restore_failed:
                 self.set_status('Durduruldu.')
                 self.preview.message.setText('Önizleme durduruldu. Yenile ile tekrar okuyabilirsiniz.')
+                if self.preview_payload is None or self.preview_payload.flat is None:
+                    self.preview.flat_label.setText('Açınım · durduruldu')
+                    self.preview.flat_view.show_flat(None, self.preview.message.text())
             self._stop_message_pending = False
             return
         if self._preview_after_scan:

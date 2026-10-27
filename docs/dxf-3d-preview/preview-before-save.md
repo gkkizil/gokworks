@@ -29,7 +29,8 @@ Kaynak/konfigürasyon CAD tarafında değiştirilirse tekrar Yenile kullanılmal
   mevcut native aktarım adaptörüyle oluşturulur, okunur ve silinir. DWG
   çözümleyici eklendiği veya DWG'den 3D üretildiği iddia edilmez.
 - Önizleme sürerken Başlat, okumayı iptal etmez ve sonrasına otomatik kayıt
-  kuyruğa koymaz. Durdur bu akışı ve bekleyen tarama seçimini de iptal eder.
+  kuyruğa koymaz. Durdur bu akışı ve bekleyen tarama seçimini de iptal eder;
+  henüz yüklenmeyen açınım alanında yanıltıcı "okunuyor" metni bırakılmaz.
 - Büküm çizgileri seçimi değiştiğinde eski biçime sahip üretim DXF'si
   kullanılmaz; önizleme yeni tercihle tekrar okunur.
 - Başlat anında dosyanın boyut/zaman kimliği kontrol edilir. Dosya değişmişse
@@ -59,8 +60,10 @@ sahnesi zincirini birlikte çalıştırır. Yalnız CAD sunucusu taklittir;
 üretim klasörünün oluşmadığı, geçici DXF'nin silindiği, native dosya baytları
 ve önceki aktif belgenin korunduğu kontrol edilir.
 Bu son iki zincir testi genel taramanın envanterinden sonra eklendi;
-son 14 testlik akış çalışması bunları da içerir. Son ayar başlığı da dar
-ekrana sığması için kısaltıldı. Ruff isim çözümleme ve git whitespace denetimi
+son akış çalışması bunları da içerir. Son durdurma etiketi düzeltmesinden
+sonra 14 yeni test ile mevcut 2 durdurma/3D testi tekrar çalıştı: **16 geçti**.
+Son ayar başlığı da dar ekrana sığması için kısaltıldı.
+Ruff isim çözümleme ve git whitespace denetimi
 geçti. Önceden korunan 11 ortak kaynak dosyasının hash'leri değişmedi.
 
 Lisanslı SolidWorks ve kullanıcının gerçek parçaları bu Linux ortamında yoktur.

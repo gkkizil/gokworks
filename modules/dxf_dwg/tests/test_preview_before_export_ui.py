@@ -149,6 +149,7 @@ def test_stop_during_review_never_saves_and_explicit_preview_can_resume(page, qt
     p.stop_button.click()
     qtbot.waitUntil(lambda: not w.jobs.busy, timeout=5000)
     assert not calls and p._preview_cancelled and not p._preview_after_scan
+    assert 'durduruldu' in p.preview.flat_view.empty_message.text().lower()
     p._capture = lambda request, cache, stop: payload(request.source)
     p.preview_button.click()
     qtbot.waitUntil(lambda: p.preview_payload is not None and not w.jobs.busy, timeout=6000)
