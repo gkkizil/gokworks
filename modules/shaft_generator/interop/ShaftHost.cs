@@ -947,10 +947,23 @@ namespace Gokworks.ShaftInterop
         internal double Volume()
         {
             model.ClearSelection2(true);
-            IMassProperty mass=(IMassProperty)model.Extension.CreateMassProperty();
-            Host.Need(mass!=null,"Mass properties unavailable.");
+            // Legacy CreateMassProperty inherits the document's integration
+            // accuracy. Subtracting two coarse totals can swamp the tolerance
+            // of a small pocket even when its evaluated floor is correct.
+            // AccuracyLevel belongs to this transient calculation object;
+            // never change or save the document's mass-property preferences.
+            IMassProperty2 mass=(IMassProperty2)model.Extension.CreateMassProperty2();
+            Host.Need(mass!=null,"Yüksek doğrulukta hacim hesabı oluşturulamadı.");
             mass.UseSystemUnits=true;
-            return mass.Volume;
+            mass.AccuracyLevel=(int)swMassPropertyAccuracyLevel_e.swMassPropertyAccuracyLevel_Higher;
+            Host.Need(mass.UseSystemUnits
+                && mass.AccuracyLevel==(int)swMassPropertyAccuracyLevel_e.swMassPropertyAccuracyLevel_Higher,
+                "Hacim hesabının SI birimi veya yüksek doğruluk düzeyi uygulanamadı.");
+            Host.Need(mass.Recalculate(),"Katı-model hacmi yüksek doğrulukta yeniden hesaplanamadı.");
+            double volume=mass.Volume;
+            Host.Need(!Double.IsNaN(volume) && !Double.IsInfinity(volume) && volume>0,
+                "Katı-model hacmi geçersiz; kesim doğrulanmadı.");
+            return volume;
         }
         private void EditProbe(string name, double factor = 1.01)
         {

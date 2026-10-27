@@ -13,6 +13,44 @@ from modules.shaft_generator.bridge import HOST_SOURCE, LOADER
 
 @pytest.mark.skipif(sys.platform != 'win32' or not os.environ.get('GOKWORKS_SHAFT_TEST_INTEROP'),
                    reason='Windows PowerShell and staged interop references required; no live CAD.')
+def test_volume_uses_high_accuracy_si_recalculation_and_rejects_invalid_results():
+    library=Path(os.environ['GOKWORKS_SHAFT_TEST_INTEROP']).resolve()
+    probe=r'''
+Add-Type -ReferencedAssemblies $references -TypeDefinition ([IO.File]::ReadAllText($env:GOKWORKS_SHAFT_CHANNEL_PROBE))
+$builder=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.Builder',$true)
+$samples=@()
+foreach($mode in @('valid','missing','units_refused','accuracy_refused','recalculate_failed','recalculate_throws','nan','infinity','zero','negative')) {
+ $samples+=@{ mode=$mode; result=[Gokworks.ShaftChannelTest.MassPropertyProbe]::Read($builder,$mode) }
+}
+[Console]::WriteLine((@{ event='accurate_volume'; samples=$samples } | ConvertTo-Json -Depth 5 -Compress))
+'''
+    powershell=Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
+    result=subprocess.run(
+        [str(powershell), '-NoLogo', '-NoProfile', '-NonInteractive', '-STA', '-Command',
+         LOADER.replace('[Gokworks.ShaftInterop.Host]::Run()', probe)],
+        input='', encoding='utf-8', capture_output=True, timeout=45,
+        creationflags=subprocess.CREATE_NO_WINDOW,
+        env={**os.environ, 'GOKWORKS_SHAFT_INTEROP': str(library),
+             'GOKWORKS_SHAFT_HOST': str(HOST_SOURCE),
+             'GOKWORKS_SHAFT_CHANNEL_PROBE': str(Path(__file__).with_name('native')/'ChannelProbe.cs')})
+    assert result.returncode == 0, result.stdout + result.stderr
+    data=next(json.loads(line) for line in result.stdout.splitlines() if 'accurate_volume' in line)
+    for sample in data['samples']:
+        checked=sample['result'];mode=sample['mode'];events=checked['Events']
+        assert checked['Accepted'] == (mode == 'valid'), sample
+        assert events[0] == 'clear:True' and events[1] == 'CreateMassProperty2'
+        if mode == 'valid':
+            assert checked['Volume'] == pytest.approx(.0001234567890123, rel=1e-12)
+            assert events.index('units:True') < events.index('recalculate') < events.index('volume')
+            assert events.index('accuracy:2') < events.index('recalculate')
+        else:
+            assert checked['Error'], sample
+            if mode in ('missing','units_refused','accuracy_refused','recalculate_failed','recalculate_throws'):
+                assert 'volume' not in events, sample
+
+
+@pytest.mark.skipif(sys.platform != 'win32' or not os.environ.get('GOKWORKS_SHAFT_TEST_INTEROP'),
+                   reason='Windows PowerShell and staged interop references required; no live CAD.')
 def test_shipping_channel_selection_units_and_failed_part_preservation():
     library = Path(os.environ['GOKWORKS_SHAFT_TEST_INTEROP']).resolve()
     probe = r'''

@@ -185,7 +185,7 @@ $mirrored=[Gokworks.ShaftCutTest.Manager]::CaptureSlot($type.GetMethod('KeywaySl
 $volumeMethod=$type.GetMethod('ExpectedVolume',$flags)
 $expected=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$false,30,20,2,1)
 $volumes=@()
-foreach($sample in @(@(30,20,8,3),@(35,25,10,4),@(30,8.1,8,3),@(100,50,2,1),@(30,20.1,20,14))) {
+foreach($sample in @(@(30,20,8,3),@(35,25,10,4),@(30,8.1,8,3),@(100,50,2,1),@(30,20.1,20,14),@(45,50,14,5.5))) {
  $volumes+=@{ parameters=$sample; volume=[Gokworks.ShaftCutTest.Manager]::Expected($volumeMethod,$true,$sample[0],$sample[1],$sample[2],$sample[3]) }
 }
 $verify=$type.GetMethod('VerifyRemoval',$flags)
@@ -199,6 +199,7 @@ function Check-Removal([double]$after) {
  opposite=$opposite.Arguments; slot_method=$slot.Method; slot=$slot.Arguments; mirrored=$mirrored.Arguments;
  valid=(Check-Removal (0.0001-$expected)); unchanged=(Check-Removal 0.0001);
  added=(Check-Removal (0.0001+$expected)); overcut=(Check-Removal (0.0001-5*$expected))
+ undercut=(Check-Removal (0.0001-$expected*0.999)); small_overcut=(Check-Removal (0.0001-$expected*1.001))
 } | ConvertTo-Json -Depth 5 -Compress))
 '''
     powershell=Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
@@ -238,4 +239,4 @@ function Check-Removal([double]$after) {
     for sample in data['keyway_volumes']:
         expected=rounded_keyway_volume(*sample['parameters'])*1e-9
         assert sample['volume']==pytest.approx(expected,rel=1e-7)
-    assert data['valid'] and not any(data[k] for k in ('unchanged','added','overcut'))
+    assert data['valid'] and not any(data[k] for k in ('unchanged','added','overcut','undercut','small_overcut'))

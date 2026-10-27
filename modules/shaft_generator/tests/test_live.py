@@ -16,7 +16,8 @@ from modules.shaft_generator.bridge import execute
                                'chamfer','two_chamfers','fillet','operations',
                                'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends',
                                'reported_groove_keyway','shared_shoulder_chamfers',
-                               'touching_shoulder_chamfers','reported_six_operations','reported_two_stages_driving'])
+                               'touching_shoulder_chamfers','reported_six_operations','reported_two_stages_driving',
+                               'reported_keyway_volume'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -58,6 +59,14 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
         a,b=p.stages
         p.operations=[Chamfer(a.id,edge='left',distance=4),Chamfer(a.id,edge='right',distance=4),
                       Groove(b.id,offset=20),Fillet(b.id,edge='right')]
+    if case=='reported_keyway_volume':
+        # Screenshot keyway dimensions. End-operation offsets are representative;
+        # the original project file was not supplied.
+        p.stages=[Stage(30,40),Stage(45,65),Stage(35,50),Stage(25,35)]
+        a,b,_,d=p.stages
+        p.operations=[Groove(a.id,offset=2),Groove(d.id,offset=32),
+                      Keyway(b.id,offset=7,length=50,width=14,depth=5.5),
+                      Chamfer(a.id,edge='left'),Chamfer(a.id,edge='right'),Chamfer(b.id,edge='right')]
     combined = case in ('keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends')
     if combined:
         p.stages=[Stage(30,80)]
@@ -82,6 +91,14 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
         expected+=math.pi*(20*4**2+4**3/3)-math.pi*(20*4**2-4**3/3)
         expected-=math.pi*(30**2-29**2)*2
         expected-=math.pi*(30*(2-math.pi/2)+math.pi/2-5/3)
+        assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
+    if case=='reported_keyway_volume':
+        from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume
+        expected=sum(math.pi*(s.diameter/2)**2*s.length for s in p.stages)
+        expected-=math.pi*((15**2-14**2)+(12.5**2-11.5**2))*2
+        expected-=math.pi*(15-1/3)+math.pi*(22.5-1/3)
+        expected+=math.pi*(15+1/3)
+        expected-=rounded_keyway_volume(45,50,14,5.5)
         assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if case in ('shared_shoulder_chamfers','touching_shoulder_chamfers','reported_six_operations'):
         from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume

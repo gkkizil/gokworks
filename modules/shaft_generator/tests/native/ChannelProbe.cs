@@ -8,6 +8,80 @@ using SolidWorks.Interop.sldworks;
 
 namespace Gokworks.ShaftChannelTest
 {
+    public sealed class MassPropertyProbe
+    {
+        public bool Accepted;
+        public double Volume;
+        public string Error;
+        public readonly List<string> Events=new List<string>();
+
+        public static MassPropertyProbe Read(Type builderType,string mode)
+        {
+            var probe=new MassPropertyProbe();
+            bool units=false, recalculated=false;
+            int accuracy=0;
+            object mass=Proxy.Make(typeof(IMassProperty2),delegate(IMethodCallMessage call) {
+                string name=call.MethodName;
+                if(name=="set_UseSystemUnits")
+                { probe.Events.Add("units:"+call.Args[0]); if(mode!="units_refused") units=(bool)call.Args[0]; return null; }
+                if(name=="get_UseSystemUnits") return units;
+                if(name=="set_AccuracyLevel")
+                { probe.Events.Add("accuracy:"+call.Args[0]); if(mode!="accuracy_refused") accuracy=(int)call.Args[0]; return null; }
+                if(name=="get_AccuracyLevel") return accuracy;
+                if(name=="Recalculate")
+                {
+                    probe.Events.Add("recalculate");
+                    if(mode=="recalculate_failed") return false;
+                    if(mode=="recalculate_throws") throw new InvalidOperationException("Fixture recalculation failure.");
+                    recalculated=true; return true;
+                }
+                if(name=="get_Volume")
+                {
+                    probe.Events.Add("volume");
+                    if(!recalculated || !units || accuracy!=2)
+                        throw new InvalidOperationException("Volume read before a high-accuracy SI recalculation.");
+                    if(mode=="nan") return Double.NaN;
+                    if(mode=="infinity") return Double.PositiveInfinity;
+                    if(mode=="zero") return 0.0;
+                    if(mode=="negative") return -1.0;
+                    return .0001234567890123; // Controlled fixture, not a CAD-kernel result.
+                }
+                throw new InvalidOperationException("Unexpected mass-property call: "+name);
+            });
+            object extension=Proxy.Make(typeof(IModelDocExtension),delegate(IMethodCallMessage call) {
+                probe.Events.Add(call.MethodName);
+                if(call.MethodName=="CreateMassProperty2") return mode=="missing" ? null : mass;
+                throw new InvalidOperationException("Uncontrolled/legacy volume calculation: "+call.MethodName);
+            });
+            object model=Proxy.Make(typeof(IModelDoc2),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="ClearSelection2")
+                { probe.Events.Add("clear:"+call.Args[0]); return null; }
+                if(call.MethodName=="get_Extension") return extension;
+                throw new InvalidOperationException("Unexpected model mutation: "+call.MethodName);
+            });
+            ConstructorInfo constructor=builderType.GetConstructors(BindingFlags.Instance|BindingFlags.NonPublic)[0];
+            Type projectType=constructor.GetParameters()[1].ParameterType;
+            object project=Activator.CreateInstance(projectType);
+            foreach(string name in new string[]{"stages","operations"})
+            {
+                FieldInfo field=projectType.GetField(name);
+                field.SetValue(project,Array.CreateInstance(field.FieldType.GetElementType(),0));
+            }
+            object builder=constructor.Invoke(new object[]{model,project,null});
+            try
+            {
+                probe.Volume=(double)builderType.GetMethod("Volume",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(builder,null);
+                probe.Accepted=true;
+            }
+            catch(TargetInvocationException error)
+            {
+                if(!(error.InnerException is InvalidOperationException)) throw;
+                probe.Error=error.InnerException.Message;
+            }
+            return probe;
+        }
+    }
+
     public sealed class DrivingDimensionProbe
     {
         public bool Accepted;
