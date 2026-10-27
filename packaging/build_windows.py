@@ -49,8 +49,10 @@ def main():
             '--distpath', str(ROOT/'dist'), '--workpath', str(ROOT/'build/pyinstaller'),
             '--specpath', str(ROOT/'build'), '--paths', str(ROOT),
             '--runtime-hook', str(ROOT/'packaging/runtime_hook.py'),
+            '--additional-hooks-dir', str(ROOT/'packaging/hooks'),
             '--collect-data', 'ezdxf',
             '--collect-all', 'shapely',
+            '--collect-all', 'OCP', '--collect-all', 'cadquery_ocp_proxy',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
             '--exclude-module', 'modules.k_factor.standalone',
@@ -84,17 +86,21 @@ def main():
             env.pop('PYTHONPATH', None)
             env.pop('PYTHONHOME', None)
             env.pop('GOKWORKS_LIBRARY_DIR', None)
+            env.pop('GOKWORKS_CAD_DIR', None)
             # Also prove compatible external Qt/PySide packages can replace
             # the bundled libraries without repacking the application.
             if scale == '1.5':
                 import PySide6
                 env['GOKWORKS_LIBRARY_DIR'] = str(Path(PySide6.__file__).resolve().parent.parent)
+                env['GOKWORKS_CAD_DIR'] = str(Path(PySide6.__file__).resolve().parent.parent)
             subprocess.run([str(runnable), '--self-check', str(scaled_report)], cwd=deploy, check=True, timeout=240, env=env)
             result = json.loads(scaled_report.read_text(encoding='utf-8'))
             if result.get('status') != 'passed' or result.get('distribution') != mode:
                 raise RuntimeError(f'Paket açılış kontrolü başarısız: {result}')
             if scale == '1.5' and not result.get('external_qt_verified'):
                 raise RuntimeError('Harici Qt kitaplıklarıyla çalıştırma kontrolü başarısız.')
+            if scale == '1.5' and not result.get('external_cad_verified'):
+                raise RuntimeError('Harici OCP/OCCT kitaplıklarıyla CAD kontrolü başarısız.')
             if not options.onedir and list(deploy.iterdir()) != [runnable]:
                 raise RuntimeError('Tek EXE dağıtımında yan dosya oluştu.')
             reports.append(result)

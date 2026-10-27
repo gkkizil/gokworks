@@ -1,0 +1,65 @@
+name: Windows gear engineering and CAD
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'modules/gear_calculator/**'
+      - 'gui_qt/app.py'
+      - 'gui_qt/workspace.py'
+      - 'gui_qt/package_check.py'
+      - 'main.py'
+      - 'requirements*.txt'
+      - 'solidworks/runtime.py'
+      - 'packaging/build_windows.py'
+      - 'packaging/licenses/gears/**'
+      - '.github/workflows/windows-gears.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'modules/gear_calculator/**'
+      - '.github/workflows/windows-gears.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  engineering-cad:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+      QT_QPA_PLATFORM: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+      - run: python -m pip install -r requirements-dev.txt -r packaging/windows-requirements.txt
+      - run: python packaging/configure_windows_display.py
+      - name: Engineering, involute, real OCCT B-Rep and UI tests
+        shell: pwsh
+        run: |
+          python packaging/run_windows_tests.py modules/gear_calculator/tests tests/test_fusion_workbench.py tests/test_single_file_distribution.py
+          $testExit=$LASTEXITCODE
+          if ($testExit -ne 0) { Get-Content windows-tests.log -Tail 180 }
+          exit $testExit
+      - name: Build real frozen program and exercise headless CAD worker at three DPI scales
+        shell: pwsh
+        run: |
+          python packaging/build_windows.py *> windows-gear-build.log
+          if ($LASTEXITCODE -ne 0) { Get-Content windows-gear-build.log -Tail 180; exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Windows-gear-engineering-evidence
+          path: |
+            windows-tests.xml
+            windows-tests.log
+            windows-gear-build.log
+            dist/windows-smoke*.json
+            dist/windows-smoke*.png
+            dist/SHA256.txt
+          if-no-files-found: warn

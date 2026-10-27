@@ -20,6 +20,7 @@ varsa `examples/` örnekleri aynı klasördedir. Hesap motorları arayüzü baş
 | Ağırlık hesabı | [weight](weight) | [ui.py](weight/ui.py) |
 | Nesting · Sac maliyeti | [nesting](nesting) | [ui.py](nesting/ui.py) |
 | Profil kesim optimizasyonu / Weldments | [profile_cutting](profile_cutting) | [ui.py](profile_cutting/ui.py) |
+| Dişli Hesaplama / dış düz evolvent çifti | [gear_calculator](gear_calculator) | [ui.py](gear_calculator/ui.py) |
 
 Örnek düzen:
 

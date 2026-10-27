@@ -84,6 +84,7 @@ AP242 yayınlaması ayrıca uygun SolidWorks MBD lisansı gerektirir.
 | [Ağırlık hesabı](modules/weight/README.md) | Malzeme, kesit, ölçü, boy ve adede göre ağırlık hesaplar. Malzemelerin tanımlı yoğunlukları otomatik kullanılır. |
 | [Nesting · Sac maliyeti](modules/nesting/README.md) | DXF konturlarını birden fazla levhaya yerleştirir; alan verimini, net/brüt/fire ağırlıklarını ve maliyetleri hesaplar. |
 | [Profil kesim optimizasyonu](modules/profile_cutting/README.md) | SolidWorks Weldments Cut List verilerini tarar; incelenen profilleri manuel listeye ekler, stok boyu ve testere payıyla 1D kesim planı oluşturur. |
+| [Dişli Hesaplama](modules/gear_calculator/README.md) | Dış düz evolvent dişli çifti; geometri/yük hesabı, 2D hareket, gerçek katıdan 3D önizleme, DXF ve OCCT B-Rep STEP aktarımı. |
 
 K/R değerlerini CAD dosyalarına yazmak ve tolerans yığılmasında teknik resim
 okumak veya anotasyon eklemek SolidWorks gerektirir. Bu araçların bağımsız

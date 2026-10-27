@@ -31,6 +31,7 @@ from modules.nesting.ui import NestingPage
 from modules.cad_converter.ui import CadConverterPage
 from modules.profile_cutting.ui import ProfileCuttingPage
 from modules.shaft_generator.ui import ShaftPage
+from modules.gear_calculator.ui import GearPage
 
 
 MODULES = (
@@ -49,6 +50,7 @@ MODULES = (
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
     ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
+    ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
 )
 
 
@@ -105,7 +107,8 @@ class MainWindow(QMainWindow):
                          bolt=lambda: BoltPage(self), bolt_torque=lambda: TorquePage(self),
                          weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self),
                          profile_cutting=lambda: ProfileCuttingPage(self),
-                         shaft_generator=lambda: ShaftPage(self))
+                         shaft_generator=lambda: ShaftPage(self),
+                         gear_calculator=lambda: GearPage(self))
         for mode, factory in factories.items():
             page = factory()
             page.statusChanged.connect(lambda text, error, page=page: self.page_status(page, text, error))

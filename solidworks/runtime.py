@@ -7,10 +7,22 @@ import sys
 _dll_handles = []
 _configured = None
 _geometry_configured = None
+_cad_configured = None
 
 
 def configure_libraries():
-    global _configured, _geometry_configured
+    global _configured, _geometry_configured, _cad_configured
+    cad = os.environ.get('GOKWORKS_CAD_DIR')
+    if cad:
+        cad_root = Path(cad).resolve()
+        if not (cad_root/'OCP/__init__.py').is_file() or not (cad_root/'cadquery_ocp_proxy/__init__.py').is_file():
+            raise RuntimeError('GOKWORKS_CAD_DIR, uyumlu OCP, cadquery_ocp_proxy ve OCCT dinamik kitaplıklarını içermeli.')
+        if str(cad_root) not in sys.path:
+            sys.path.insert(0,str(cad_root))
+        if os.name == 'nt' and _cad_configured != cad_root:
+            for folder in (cad_root/'OCP',cad_root/'cadquery_ocp_novtk.libs'):
+                if folder.is_dir(): _dll_handles.append(os.add_dll_directory(str(folder)))
+        _cad_configured = cad_root
     geometry = os.environ.get('GOKWORKS_GEOMETRY_DIR')
     if geometry:
         geometry_root = Path(geometry).resolve()
