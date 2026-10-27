@@ -238,6 +238,21 @@ namespace Gokworks.ShaftInterop
             return normalAlignment<0;
         }
 
+        internal static void DriveSketchDimension(IDimension dimension,string name,double metres)
+        {
+            Host.Need(dimension!=null, "Yeni eskiz ölçüsü bulunamadı: "+name);
+            // AddDimension2 can return a driven dimension. Explicitly request
+            // a driving dimension on OUR new sketch; never delete constraints
+            // or accept an uneditable reference as a model input.
+            dimension.Name=name;
+            if(dimension.DrivenState!=(int)swDimensionDrivenState_e.swDimensionDriving)
+                dimension.DrivenState=(int)swDimensionDrivenState_e.swDimensionDriving;
+            Host.Need(dimension.DrivenState==(int)swDimensionDrivenState_e.swDimensionDriving,
+                "Eskiz ölçüsü sürücü yapılamadı: "+name+". Konumu sabitleyen ilişkiler kontrol edilmeli.");
+            Host.Need(dimension.SetSystemValue3(metres,(int)swSetValueInConfiguration_e.swSetValue_InThisConfiguration,null)==0
+                && Math.Abs(dimension.SystemValue-metres)<1e-8, "Sürücü ölçü değeri uygulanamadı: "+name);
+        }
+
         internal static void BindKeywayDepth(IFeature feature, double travelMetres)
         {
             // A cut can expose several display dimensions (including sketch
@@ -493,6 +508,7 @@ namespace Gokworks.ShaftInterop
 
         private ISketch BeginSketch(string name, IFeature support = null)
         {
+            ((ISelectionMgr)model.SelectionManager).EnableContourSelection=false;
             model.ClearSelection2(true); Host.Need((support ?? plane).Select2(false,0), "Reference plane selection failed.");
             model.SketchManager.InsertSketch(true);
             ISketch sketch = (ISketch)model.SketchManager.ActiveSketch;
@@ -544,10 +560,7 @@ namespace Gokworks.ShaftInterop
             IDisplayDimension display = (IDisplayDimension)(diameter ? model.AddDiameterDimension2(M(x),M(y),0) : model.AddDimension2(M(x),M(y),0));
             Host.Need(display != null, "Driving dimension could not be created: " + name);
             IDimension dimension = (IDimension)display.GetDimension2(0);
-            dimension.Name = name;
-            Host.Need(dimension.DrivenState == (int)swDimensionDrivenState_e.swDimensionDriving, "Dimension is reference-only: " + name);
-            Host.Need(dimension.SetSystemValue3(M(value), (int)swSetValueInConfiguration_e.swSetValue_InThisConfiguration, null) == 0,
-                "Dimension value could not be set: " + name);
+            ChannelCuts.DriveSketchDimension(dimension,name,M(value));
             return dimension;
         }
 
@@ -563,11 +576,9 @@ namespace Gokworks.ShaftInterop
         private ISketchSegment[] Rectangle(string sketch, ISketchPoint origin, double x, double y, double width, double height,
             string widthName, string heightName, string xExpression, string yExpression, string heightExpression, bool movableX = false)
         {
-            ISketchSegment[] lines = new ISketchSegment[] {
-                Line(x,y,x+width,y,false), Line(x+width,y,x+width,y+height,false),
-                Line(x+width,y+height,x,y+height,false), Line(x,y+height,x,y,false)
-            };
-            for (int i=0;i<4;i++) Coincident(EndPoint(lines[i]),StartPoint(lines[(i+1)%4]));
+            // Dimension the position datum BEFORE creating the profile. Later
+            // profile coincidences must consume this position, not make its
+            // BASLANGIC dimension a redundant reference on a prior stage edge.
             ISketchPoint anchor=origin;
             if (movableX)
             {
@@ -601,6 +612,11 @@ namespace Gokworks.ShaftInterop
                 anchor=EndPoint(rail); Dimension(rail,"KONUM_Y",y,x-5,y/2,false);
                 if (yExpression != null) Equation("KONUM_Y@"+sketch,yExpression);
             }
+            ISketchSegment[] lines = new ISketchSegment[] {
+                Line(x,y,x+width,y,false), Line(x+width,y,x+width,y+height,false),
+                Line(x+width,y+height,x,y+height,false), Line(x,y+height,x,y,false)
+            };
+            for (int i=0;i<4;i++) Coincident(EndPoint(lines[i]),StartPoint(lines[(i+1)%4]));
             Coincident(StartPoint(lines[0]),anchor);
             Dimension(lines[0],widthName,width,x+width/2,y-5,false);
             if (heightName!=null) Dimension(lines[1],heightName,height,x+width+5,y+height/2,false);

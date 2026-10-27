@@ -156,6 +156,12 @@ geometrik olarak bağlanır. Profil yüksekliği doğrudan çapı izler; kırıl
 `BOY_01@MIL_PROFIL_01`; sonraki başlangıçlar önceki boylara bağlıdır.
 Yalnız referans datum noktaları sabittir; profil topluca sabitlenmez.
 Eksik tam tanımlılıkta host başarı bildirmez.
+Yeni ölçü `AddDimension2` tarafından referans verilirse `DrivenState`
+açıkça sürücü yapılır; atanan SI değerinin gerçekten uygulanması okunarak
+doğrulanır. SOLIDWORKS bu dönüşümü reddederse referans ölçüyle devam edilmez.
+Konum datumu `BASLANGIC`, dikdörtgen profilin ilişkilerinden önce ölçülür;
+profil bu sürücü datuma bağlanır. Her yeni eskizde önceki unsurun kontur seçim
+modu kapatılır. Kalıcı kullanıcı ayarları değiştirilmez, ilişkiler silinmez.
 Eskiz kapatılıp yeniden oluşturulduktan sonra kalan denklemler çözülmeden
 eklenir ve tamamı bir kez değerlendirilir; yeniden adlandırılmış ölçüler
 kaydedilmeden tek tek denklem çözdürülmez.
@@ -301,6 +307,10 @@ segman + kama + dört pah listesi ayrıca canlı kabul senaryolarıdır. Bunlar
 burada çalıştırılmamıştır. Mock yüzey testleri yanlış katı derinliğini, yanlış
 `D1` bağını, kayıp tabanı ve farklı yükseklikte taban yüzeylerini reddeder;
 ötelenmiş/döndürülmüş eksen ve bölünmüş eş düzlemli tabanları da kapsar.
+Ø40×100 + Ø60×50, ilk kademede iki adet 4 mm pah, ikinci kademede segman
+ve sağ uçta 1 mm radyüs, `reported_two_stages_driving` canlı senaryosudur.
+Referans ölçünün sürücü yapılması, reddedilen dönüşüm ve uygulanmayan değer
+Windows API fixture'larıyla sınanır; bu fixture CAD çözümleyicisi değildir.
 Bu ortamda canlı SOLIDWORKS geometri kabulü çalıştırılmamıştır.
 
 Windows kabul sırası:

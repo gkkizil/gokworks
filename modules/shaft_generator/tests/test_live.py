@@ -16,7 +16,7 @@ from modules.shaft_generator.bridge import execute
                                'chamfer','two_chamfers','fillet','operations',
                                'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends',
                                'reported_groove_keyway','shared_shoulder_chamfers',
-                               'touching_shoulder_chamfers','reported_six_operations'])
+                               'touching_shoulder_chamfers','reported_six_operations','reported_two_stages_driving'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -53,6 +53,11 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
             p.operations=[Groove(a.id),Chamfer(a.id,edge='left'),Chamfer(a.id,edge='right'),
                           Keyway(b.id,offset=10,length=25,width=14,depth=3),
                           Chamfer(b.id,edge='right'),Chamfer(b.id,edge='left')]
+    if case=='reported_two_stages_driving':
+        p.stages=[Stage(40,100),Stage(60,50)]
+        a,b=p.stages
+        p.operations=[Chamfer(a.id,edge='left',distance=4),Chamfer(a.id,edge='right',distance=4),
+                      Groove(b.id,offset=20),Fillet(b.id,edge='right')]
     combined = case in ('keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends')
     if combined:
         p.stages=[Stage(30,80)]
@@ -71,6 +76,12 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case=='two_chamfers':
         # Two equal 45-degree wedges removed from opposite ends of a cylinder.
         expected=math.pi*15**2*40-2*math.pi*(15-1/3)
+        assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
+    if case=='reported_two_stages_driving':
+        expected=math.pi*(20**2*100+30**2*50)
+        expected+=math.pi*(20*4**2+4**3/3)-math.pi*(20*4**2-4**3/3)
+        expected-=math.pi*(30**2-29**2)*2
+        expected-=math.pi*(30*(2-math.pi/2)+math.pi/2-5/3)
         assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if case in ('shared_shoulder_chamfers','touching_shoulder_chamfers','reported_six_operations'):
         from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume

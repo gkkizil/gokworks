@@ -8,6 +8,48 @@ using SolidWorks.Interop.sldworks;
 
 namespace Gokworks.ShaftChannelTest
 {
+    public sealed class DrivingDimensionProbe
+    {
+        public bool Accepted;
+        public int Promotions;
+        public int Writes;
+        public double Value=.04;
+        public string Name;
+        public string Error;
+        public static DrivingDimensionProbe Check(MethodInfo method,string mode)
+        {
+            DrivingDimensionProbe probe=new DrivingDimensionProbe();
+            int state=mode=="driving" ? 2 : 1;
+            object dimension=Proxy.Make(typeof(IDimension),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="set_Name") { probe.Name=(string)call.Args[0]; return null; }
+                if(call.MethodName=="get_DrivenState") return state;
+                if(call.MethodName=="set_DrivenState")
+                {
+                    probe.Promotions++;
+                    if(mode=="readonly") throw new InvalidOperationException("Driving promotion refused.");
+                    if(mode!="locked") state=(int)call.Args[0];
+                    return null;
+                }
+                if(call.MethodName=="get_SystemValue") return probe.Value;
+                if(call.MethodName=="SetSystemValue3")
+                {
+                    probe.Writes++;
+                    if(mode=="rejected_value") return 1;
+                    if(mode!="wrong_value") probe.Value=(double)call.Args[0];
+                    return 0;
+                }
+                throw new InvalidOperationException(call.MethodName);
+            });
+            try { method.Invoke(null,new object[]{dimension,"BASLANGIC",.100}); probe.Accepted=true; }
+            catch(TargetInvocationException error)
+            {
+                if(!(error.InnerException is InvalidOperationException)) throw;
+                probe.Error=error.InnerException.Message;
+            }
+            return probe;
+        }
+    }
+
     public sealed class KeywayDepthProbe
     {
         public bool Accepted;
