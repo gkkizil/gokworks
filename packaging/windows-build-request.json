@@ -1,12 +1,12 @@
 {
-  "request_id": "20261026-keyway-outside-in-onefile",
-  "requested_at": "2026-10-26T16:30:10.628469+00:00",
-  "source_commit": "105a4f0766ae372764885a316b423f390fda6512",
+  "request_id": "20261027-shoulder-depth-driving-onefile",
+  "requested_at": "2026-10-27T04:39:35.736564+00:00",
+  "source_commit": "70eac87a4ce47b5af9fa9556be3c0460d91cd3ca",
   "validation_profile": "verified-source",
-  "verified_source_commit": "105a4f0766ae372764885a316b423f390fda6512",
+  "verified_source_commit": "70eac87a4ce47b5af9fa9556be3c0460d91cd3ca",
   "validation_runs": [
-    40359344767,
-    40359344689
+    40450692022,
+    40450691945
   ],
-  "reason": "User confirmed groove cut now works but keyway remains a sketch. Revised native keyway to outside-in blind cut, closed-profile API preflight and verified actual sketch selection; exact reported dimensions added to opt-in live acceptance. Successful exact-source Windows STA/interop and BOM/UI checks; no licensed CAD geometry success claimed. Keep main workflow, release branch and backup unchanged."
+  "reason": "Three reported shaft failures: independent shared-shoulder radial edge clearances; native D1 binding and measured BREP floor depth; reference BASLANGIC promoted explicitly and position datum dimensioned before profile geometry. Final exact-source Windows API/STA and BOM/Qt checks passed. Reuse verified unchanged app source, rerun focused packaging checks and frozen onefile smoke. Licensed SOLIDWORKS geometry acceptance not run. No release branch promotion or backup repository changes."
 }

@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="29" skipped="0" tests="29" time="0.145" timestamp="2026-10-27T04:21:52.648517+00:00" hostname="45ac42e19b4c"><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_reported_six_operations_keep_their_edges_and_reach_the_native_plan" time="0.002"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=80, id='ede765a3037d45a8a38be0eea379a4de'), Stage(diameter=4...2f1effb', edge='left', distance=1, angle=45, id='00d93bbb2abb42d68f4cfa1ddf066343', kind='chamfer')], minimum_wall=0.5))">def test_reported_six_operations_keep_their_edges_and_reach_the_native_plan():
+        p = Project(stages=[Stage(30, 80), Stage(45, 65), Stage(35, 50), Stage(25, 35)])
+        a, b = p.stages[:2]
+        p.operations = [Groove(a.id), Chamfer(a.id, edge='left'), Chamfer(a.id, edge='right'),
+                        Keyway(b.id, offset=10, length=25, width=14, depth=5.5),
+                        Chamfer(b.id, edge='right'), Chamfer(b.id, edge='left')]
+        snapshot = p.to_dict()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=80, id='ede765a3037d45a8a38be0eea379a4de'), Stage(diameter=4...2f1effb', edge='left', distance=1, angle=45, id='00d93bbb2abb42d68f4cfa1ddf066343', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:21: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Chamfer-Chamfer-diameters0]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='6b6ab896af3045cb8ba3539c43f0631a'), Stage(diameter=4...134be17', edge='left', distance=1, angle=45, id='b8c1961d62a04a819388ac2c9658cbaf', kind='chamfer')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='6b6ab896af3045cb8ba3539c43f0631a'), Stage(diameter=4...134be17', edge='left', distance=1, angle=45, id='b8c1961d62a04a819388ac2c9658cbaf', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Chamfer-Chamfer-diameters1]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='07183d4fab2846718e79dd7c576b36d2'), Stage(diameter=3...d559d4e', edge='left', distance=1, angle=45, id='8e093203bfd8497bb9cbf08f191c2c45', kind='chamfer')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='07183d4fab2846718e79dd7c576b36d2'), Stage(diameter=3...d559d4e', edge='left', distance=1, angle=45, id='8e093203bfd8497bb9cbf08f191c2c45', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Chamfer-Fillet-diameters0]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='20295638676c4ddb9b12a8e061b48b80'), Stage(diameter=4...03afaae', edge='left', distance=1, angle=45, id='9a4d57555c604769aee2d4256b9d8aa9', kind='chamfer')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='20295638676c4ddb9b12a8e061b48b80'), Stage(diameter=4...03afaae', edge='left', distance=1, angle=45, id='9a4d57555c604769aee2d4256b9d8aa9', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Chamfer-Fillet-diameters1]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='d7c48870f3b44af5af1b6189b081a9a9'), Stage(diameter=3...49358b67f659bc336103', edge='left', radius=1, id='4a243a8d652c4b91bf318e1a140bbf49', kind='fillet')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='d7c48870f3b44af5af1b6189b081a9a9'), Stage(diameter=3...49358b67f659bc336103', edge='left', radius=1, id='4a243a8d652c4b91bf318e1a140bbf49', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Fillet-Chamfer-diameters0]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='81a3f2ccebf64f9694fee754270cb997'), Stage(diameter=4...41beabe9be76ba814c2e', edge='left', radius=1, id='5cab3a5d428447b1866a0708b3c44b19', kind='fillet')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='81a3f2ccebf64f9694fee754270cb997'), Stage(diameter=4...41beabe9be76ba814c2e', edge='left', radius=1, id='5cab3a5d428447b1866a0708b3c44b19', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Fillet-Chamfer-diameters1]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='880b73ccfb3d4681902aef787d9fb8f3'), Stage(diameter=3...4187036', edge='left', distance=1, angle=45, id='3062e6b8278b4da19ac823f01327a9ca', kind='chamfer')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='880b73ccfb3d4681902aef787d9fb8f3'), Stage(diameter=3...4187036', edge='left', distance=1, angle=45, id='3062e6b8278b4da19ac823f01327a9ca', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Fillet-Fillet-diameters0]" time="0.000"><failure message="AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']&#10; +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='6d8b0ab1064c40a6a8e7dd510b27b08a'), Stage(diameter=4...480e881d5dd601d7b867', edge='left', radius=1, id='6a24d95d1ddb4a26a1ff9f20f31a3fab', kind='fillet')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']
+E        +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='6d8b0ab1064c40a6a8e7dd510b27b08a'), Stage(diameter=4...480e881d5dd601d7b867', edge='left', radius=1, id='6a24d95d1ddb4a26a1ff9f20f31a3fab', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[False-Fillet-Fillet-diameters1]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']&#10; +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='4a18d4619da244e1a5924abae69f1d7e'), Stage(diameter=3...41daa43d46640a4e62ab', edge='left', radius=1, id='2cbde9c4580d4246b2dbd5c0ce48ec03', kind='fillet')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = False
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']
+E        +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='4a18d4619da244e1a5924abae69f1d7e'), Stage(diameter=3...41daa43d46640a4e62ab', edge='left', radius=1, id='2cbde9c4580d4246b2dbd5c0ce48ec03', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Chamfer-Chamfer-diameters0]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)']&#10; +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='55a8a047ebf04cfd9472020707482d30'), Stage(diameter=4...482d30', edge='right', distance=1, angle=45, id='54b80d9d2f334ba8877efb22565fe9f5', kind='chamfer')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)']
+E        +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='55a8a047ebf04cfd9472020707482d30'), Stage(diameter=4...482d30', edge='right', distance=1, angle=45, id='54b80d9d2f334ba8877efb22565fe9f5', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Chamfer-Chamfer-diameters1]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)']&#10; +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='e22d07b1f31446c4ba61fef38c904528'), Stage(diameter=3...904528', edge='right', distance=1, angle=45, id='e564c5ce8c2e4002ba318fb17b23d085', kind='chamfer')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)']
+E        +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='e22d07b1f31446c4ba61fef38c904528'), Stage(diameter=3...904528', edge='right', distance=1, angle=45, id='e564c5ce8c2e4002ba318fb17b23d085', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Chamfer-Fillet-diameters0]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)']&#10; +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='e2a80afa9ae848babca22b3fb09f26fb'), Stage(diameter=4...8babca22b3fb09f26fb', edge='right', radius=1, id='bc1b725082824819b6d7dd1eec5358b6', kind='fillet')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)']
+E        +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='e2a80afa9ae848babca22b3fb09f26fb'), Stage(diameter=4...8babca22b3fb09f26fb', edge='right', radius=1, id='bc1b725082824819b6d7dd1eec5358b6', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Chamfer-Fillet-diameters1]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)']&#10; +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='c8661fba2d76485ea5625fefb5ae649b'), Stage(diameter=3...ae649b', edge='right', distance=1, angle=45, id='ba95d055595f45d2b116f45f13537fa7', kind='chamfer')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)']
+E        +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='c8661fba2d76485ea5625fefb5ae649b'), Stage(diameter=3...ae649b', edge='right', distance=1, angle=45, id='ba95d055595f45d2b116f45f13537fa7', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Fillet-Chamfer-diameters0]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)']&#10; +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='622f428997fe48c3a69c4923161483a4'), Stage(diameter=4...1483a4', edge='right', distance=1, angle=45, id='caaa3a752b884e549256ec10bed4c084', kind='chamfer')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)']
+E        +  where ['1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (chamfer): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='622f428997fe48c3a69c4923161483a4'), Stage(diameter=4...1483a4', edge='right', distance=1, angle=45, id='caaa3a752b884e549256ec10bed4c084', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Fillet-Chamfer-diameters1]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)']&#10; +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='ed5fa6323e824c79919358cba265fdae'), Stage(diameter=3...c79919358cba265fdae', edge='right', radius=1, id='cc55edd7c993421a8839b6af97fe9cc6', kind='fillet')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)']
+E        +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='ed5fa6323e824c79919358cba265fdae'), Stage(diameter=3...c79919358cba265fdae', edge='right', radius=1, id='cc55edd7c993421a8839b6af97fe9cc6', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Fillet-Fillet-diameters0]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)']&#10; +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='263524e6168b43c489a11039cd6e88c9'), Stage(diameter=4...3c489a11039cd6e88c9', edge='right', radius=1, id='108c1a15dc9644e890cad2f6a914009a', kind='fillet')], minimum_wall=0.5))">diameters = (30, 45)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)']
+E        +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='263524e6168b43c489a11039cd6e88c9'), Stage(diameter=4...3c489a11039cd6e88c9', edge='right', radius=1, id='108c1a15dc9644e890cad2f6a914009a', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_both_radial_edges_of_one_shoulder_can_be_treated[True-Fillet-Fillet-diameters1]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)']&#10; +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='1553ddb8f6414f11b7285054e7b6cfbc'), Stage(diameter=3...f11b7285054e7b6cfbc', edge='right', radius=1, id='dbd4e921f3854da1ab95c010efd4e996', kind='fillet')], minimum_wall=0.5))">diameters = (45, 30)
+inner_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+outer_kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;, reverse = True
+
+    @pytest.mark.parametrize('diameters', [(30, 45), (45, 30)])
+    @pytest.mark.parametrize('inner_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('outer_kind', [Chamfer, Fillet])
+    @pytest.mark.parametrize('reverse', [False, True])
+    def test_both_radial_edges_of_one_shoulder_can_be_treated(diameters, inner_kind, outer_kind, reverse):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        kinds = (inner_kind, outer_kind) if diameters[0] &lt; diameters[1] else (outer_kind, inner_kind)
+        p.operations = [treatment(kinds[0], a, 'right'), treatment(kinds[1], b, 'left')]
+        if reverse:
+            p.operations.reverse()
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)']
+E        +  where ['1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)', '1. kademe (fillet): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=45, length=40, id='1553ddb8f6414f11b7285054e7b6cfbc'), Stage(diameter=3...f11b7285054e7b6cfbc', edge='right', radius=1, id='dbd4e921f3854da1ab95c010efd4e996', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:41: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_treatment_on_large_diameter_does_not_block_small_diameter_groove[Chamfer]" time="0.000"><failure message="AssertionError: assert not ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (chamfer)']&#10; +  where ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='d887d4db196241ee8ea590246568ea33'), Stage(diameter=4...a590246568ea33', offset=38, width=2, depth=1, id='3ef6c24bfc834a7686fbc64706047f49', kind='groove')], minimum_wall=0.5))">kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_treatment_on_large_diameter_does_not_block_small_diameter_groove(kind):
+        p = Project()
+        a, b = p.stages[:2]
+        p.operations = [treatment(kind, b, 'left'), Groove(a.id, offset=38, width=2)]
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (chamfer)']
+E        +  where ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='d887d4db196241ee8ea590246568ea33'), Stage(diameter=4...a590246568ea33', offset=38, width=2, depth=1, id='3ef6c24bfc834a7686fbc64706047f49', kind='groove')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:53: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_treatment_on_large_diameter_does_not_block_small_diameter_groove[Fillet]" time="0.001"><failure message="AssertionError: assert not ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (fillet)']&#10; +  where ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='390e6084e6bf4759915388cb1fe5e8bc'), Stage(diameter=4...5388cb1fe5e8bc', offset=38, width=2, depth=1, id='4aa434679ee14d14bc976c22aa802cc3', kind='groove')], minimum_wall=0.5))">kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_treatment_on_large_diameter_does_not_block_small_diameter_groove(kind):
+        p = Project()
+        a, b = p.stages[:2]
+        p.operations = [treatment(kind, b, 'left'), Groove(a.id, offset=38, width=2)]
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (fillet)']
+E        +  where ['1. kademe (groove): operasyonlar çakışıyor: 2. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='390e6084e6bf4759915388cb1fe5e8bc'), Stage(diameter=4...5388cb1fe5e8bc', offset=38, width=2, depth=1, id='4aa434679ee14d14bc976c22aa802cc3', kind='groove')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:53: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_shared_shoulder_checks_combined_radial_space[Chamfer-diameters0]" time="0.000"><failure message="AssertionError: assert ('omuz' in '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)\n2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)')">diameters = (30, 34), kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_shared_shoulder_checks_combined_radial_space(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right', 1.25), treatment(kind, b, 'left', 1.25)]
+        errors = '\n'.join(validate(p))
+&gt;       assert 'omuz' in errors and '2,5' in errors and '2 mm' in errors
+E       AssertionError: assert ('omuz' in '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)\n2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)')
+
+modules/shaft_generator/tests/test_operation_clearances.py:63: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_shared_shoulder_checks_combined_radial_space[Chamfer-diameters1]" time="0.000"><failure message="AssertionError: assert ('omuz' in '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)\n2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)')">diameters = (34, 30), kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_shared_shoulder_checks_combined_radial_space(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right', 1.25), treatment(kind, b, 'left', 1.25)]
+        errors = '\n'.join(validate(p))
+&gt;       assert 'omuz' in errors and '2,5' in errors and '2 mm' in errors
+E       AssertionError: assert ('omuz' in '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)\n2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)')
+
+modules/shaft_generator/tests/test_operation_clearances.py:63: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_shared_shoulder_checks_combined_radial_space[Fillet-diameters0]" time="0.000"><failure message="AssertionError: assert ('omuz' in '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)\n2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)')">diameters = (30, 34), kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_shared_shoulder_checks_combined_radial_space(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right', 1.25), treatment(kind, b, 'left', 1.25)]
+        errors = '\n'.join(validate(p))
+&gt;       assert 'omuz' in errors and '2,5' in errors and '2 mm' in errors
+E       AssertionError: assert ('omuz' in '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)\n2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)')
+
+modules/shaft_generator/tests/test_operation_clearances.py:63: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_shared_shoulder_checks_combined_radial_space[Fillet-diameters1]" time="0.001"><failure message="AssertionError: assert ('omuz' in '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)\n2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)')">diameters = (34, 30), kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_shared_shoulder_checks_combined_radial_space(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right', 1.25), treatment(kind, b, 'left', 1.25)]
+        errors = '\n'.join(validate(p))
+&gt;       assert 'omuz' in errors and '2,5' in errors and '2 mm' in errors
+E       AssertionError: assert ('omuz' in '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)\n2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)')
+
+modules/shaft_generator/tests/test_operation_clearances.py:63: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_two_treatments_can_meet_without_a_zero_length_preview_segment[Chamfer-diameters0]" time="0.000"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='9e5e19d71dbe4e25b7e9f54441303ec8'), Stage(diameter=3...38bb5fd', edge='left', distance=1, angle=45, id='18809484a4de436189d15951bad5f12d', kind='chamfer')], minimum_wall=0.5))">diameters = (30, 34), kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_two_treatments_can_meet_without_a_zero_length_preview_segment(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right'), treatment(kind, b, 'left')]
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='9e5e19d71dbe4e25b7e9f54441303ec8'), Stage(diameter=3...38bb5fd', edge='left', distance=1, angle=45, id='18809484a4de436189d15951bad5f12d', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:74: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_two_treatments_can_meet_without_a_zero_length_preview_segment[Chamfer-diameters1]" time="0.000"><failure message="AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']&#10; +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=34, length=40, id='c9b6259d8d3641cea70e511184dadfa6'), Stage(diameter=3...21c5a79', edge='left', distance=1, angle=45, id='1e930ddfcb654cfe84ee8b74fb63ee1b', kind='chamfer')], minimum_wall=0.5))">diameters = (34, 30), kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_two_treatments_can_meet_without_a_zero_length_preview_segment(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right'), treatment(kind, b, 'left')]
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)']
+E        +  where ['2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)', '2. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (chamfer)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=34, length=40, id='c9b6259d8d3641cea70e511184dadfa6'), Stage(diameter=3...21c5a79', edge='left', distance=1, angle=45, id='1e930ddfcb654cfe84ee8b74fb63ee1b', kind='chamfer')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:74: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_two_treatments_can_meet_without_a_zero_length_preview_segment[Fillet-diameters0]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']&#10; +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='3ed9ed46f1bd487cbbb2ab1a351c79fa'), Stage(diameter=3...4910af4b956bf649160b', edge='left', radius=1, id='10146d46c0c54acdbac2f17976d2bfcd', kind='fillet')], minimum_wall=0.5))">diameters = (30, 34), kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_two_treatments_can_meet_without_a_zero_length_preview_segment(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right'), treatment(kind, b, 'left')]
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']
+E        +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=30, length=40, id='3ed9ed46f1bd487cbbb2ab1a351c79fa'), Stage(diameter=3...4910af4b956bf649160b', edge='left', radius=1, id='10146d46c0c54acdbac2f17976d2bfcd', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:74: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_two_treatments_can_meet_without_a_zero_length_preview_segment[Fillet-diameters1]" time="0.001"><failure message="AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']&#10; +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=34, length=40, id='bfdd04e0d5654e5b9ec96bd4826c32d4'), Stage(diameter=3...40738681478a64b94c0c', edge='left', radius=1, id='99de0c90bc0b4791882bc34d94321035', kind='fillet')], minimum_wall=0.5))">diameters = (34, 30), kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+
+    @pytest.mark.parametrize('diameters', [(30, 34), (34, 30)])
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_two_treatments_can_meet_without_a_zero_length_preview_segment(diameters, kind):
+        p = Project(stages=[Stage(d, 40) for d in diameters])
+        a, b = p.stages
+        p.operations = [treatment(kind, a, 'right'), treatment(kind, b, 'left')]
+&gt;       assert not validate(p)
+E       AssertionError: assert not ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)']
+E        +  where ['2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)', '2. kademe (fillet): operasyonlar çakışıyor: 1. kademe (fillet)'] = validate(Project(name='MIL_001', stages=[Stage(diameter=34, length=40, id='bfdd04e0d5654e5b9ec96bd4826c32d4'), Stage(diameter=3...40738681478a64b94c0c', edge='left', radius=1, id='99de0c90bc0b4791882bc34d94321035', kind='fillet')], minimum_wall=0.5))
+
+modules/shaft_generator/tests/test_operation_clearances.py:74: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_true_channel_and_end_treatment_interference_stays_invalid[Chamfer]" time="0.000"><failure message="AssertionError: assert ('Segman kanalı' in '1. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (groove)')">kind = &lt;class 'modules.shaft_generator.models.Chamfer'&gt;
+
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_true_channel_and_end_treatment_interference_stays_invalid(kind):
+        p = Project(stages=[Stage(30, 80)])
+        s = p.stages[0]
+        p.operations = [Groove(s.id, offset=0, width=2), treatment(kind, s, 'left')]
+        error = '\n'.join(validate(p))
+        assert 'çakış' in error
+&gt;       assert 'Segman kanalı' in error and ('Pah' in error or 'Radyüs' in error)
+E       AssertionError: assert ('Segman kanalı' in '1. kademe (chamfer): operasyonlar çakışıyor: 1. kademe (groove)')
+
+modules/shaft_generator/tests/test_operation_clearances.py:87: AssertionError</failure></testcase><testcase classname="modules.shaft_generator.tests.test_operation_clearances" name="test_true_channel_and_end_treatment_interference_stays_invalid[Fillet]" time="0.000"><failure message="AssertionError: assert ('Segman kanalı' in '1. kademe (fillet): operasyonlar çakışıyor: 1. kademe (groove)')">kind = &lt;class 'modules.shaft_generator.models.Fillet'&gt;
+
+    @pytest.mark.parametrize('kind', [Chamfer, Fillet])
+    def test_true_channel_and_end_treatment_interference_stays_invalid(kind):
+        p = Project(stages=[Stage(30, 80)])
+        s = p.stages[0]
+        p.operations = [Groove(s.id, offset=0, width=2), treatment(kind, s, 'left')]
+        error = '\n'.join(validate(p))
+        assert 'çakış' in error
+&gt;       assert 'Segman kanalı' in error and ('Pah' in error or 'Radyüs' in error)
+E       AssertionError: assert ('Segman kanalı' in '1. kademe (fillet): operasyonlar çakışıyor: 1. kademe (groove)')
+
+modules/shaft_generator/tests/test_operation_clearances.py:87: AssertionError</failure></testcase></testsuite></testsuites>

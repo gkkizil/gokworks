@@ -1,0 +1,41 @@
+{
+  "source_commit": "70eac87a4ce47b5af9fa9556be3c0460d91cd3ca",
+  "branch": "main",
+  "checked_at": "2026-10-27T04:31:57.611445+00:00",
+  "linux": {
+    "tests": 205,
+    "passed": 172,
+    "skipped": 33,
+    "failures": 0,
+    "errors": 0
+  },
+  "before": {
+    "tests": 29,
+    "failures": 29
+  },
+  "windows_bridge": {
+    "run_id": 40450691945,
+    "job_id": 122012438700,
+    "status": "success",
+    "live_cad": false
+  },
+  "windows_ui": {
+    "run_id": 40450692022,
+    "job_id": 122012438874,
+    "status": "success",
+    "tests": 95,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "live_cad": false
+  },
+  "csharp_compile": "passed, real interop and net48, C#5 warnings as errors",
+  "protected_files_unchanged": 11,
+  "solidworks_geometry": "not run; live acceptance cases added",
+  "windows_bridge_previous": {
+    "run_id": 40450003097,
+    "job_id": 122010252429,
+    "status": "success",
+    "live_cad": false
+  }
+}
