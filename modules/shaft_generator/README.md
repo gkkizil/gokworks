@@ -11,8 +11,10 @@ kalıcı navigasyon ve tek CAD işi çalıştıran `JobManager` kullanılır.
   senkrondur. Her iki görünüşte operasyon seçilebilir. Üst görünüş kama kanalının
   gerçek genişliğini ve yarım daire uçlarını, kesit düz tabanını gösterir.
 - Segman kanalı, **0° iki ucu yuvarlak kama kanalı**, **45° eş mesafeli pah**
-  ve sabit radyüs desteklenen operasyonlardır. Diğer açı/uç tipleri, diş,
-  merkez deliği, freze düzlüğü ve omuz boşaltması henüz desteklenmez.
+  ve sabit radyüs desteklenen operasyonlardır. Ayrıca tek eksenli boydan boya
+  veya soldan/sağdan kör iç delik ve kademelere metrik **kozmetik diş** eklenebilir.
+  Gerçek helisel diş, iç diş, matkap uç konisi, merkez deliği, freze düzlüğü
+  ve omuz boşaltması henüz desteklenmez.
 - **Proje kaydet/aç** `.gokshaft.json` parametre dosyası içindir. Yeni dosya
   özel oluşturulur; mevcut JSON için açık üzerine yazma onayı istenir.
   Onaydan sonra içeriği değişmiş hedef reddedilir. Dış süreçlerle aynı dosyaya
@@ -81,8 +83,11 @@ alındı. Videoya birebir sadakat veya karşılaştırma tamamlandı iddiası yo
 
 `Stage(id, diameter, length)`; operasyonlar kalıcı `stage_id` kullanır.
 Silinen kademenin operasyonları da silinir; sıralama kimlikleri değiştirmez.
-JSON: `schema="gokworks.shaft"`, `version=1`, `units="mm"`, `name`, `stages`,
-`operations`, `minimum_wall`. Alanlar ve v1 dosyaları korunur. Ölçüler mm,
+JSON: `schema="gokworks.shaft"`, `units="mm"`, `name`, `stages`,
+`operations`, `minimum_wall`. Eski özelliklerle sınırlı projeler `version=1`
+biçimini aynen korur. İç delik veya kozmetik diş varsa `version=2` ve ayrıca
+`bore` (nesne veya null) yazılır. İki sürüm de okunur; v1'e yeni operasyon
+sıkıştırılmaz. Ölçüler mm,
 açılar derece; API sınırında metre/radyan kullanılır. 100 kademe, 200 operasyon
 üst sınırı vardır. Sonlu pozitif ölçü, et kalınlığı, kademe sınırları ve
 muhafazakâr operasyon çakışması doğrulanır; bu kontrol CAD kernelinin yerini tutmaz.
@@ -99,7 +104,7 @@ Kama için `length` uçtan uca toplam boy, `width` freze çapı/kanal genişliğ
 `depth` silindirin tepesinden düz tabana radyal derinliktir. Her iki uçta
 `R=width/2`; merkezler arası mesafe `length-width` olur. Toplam boy genişlikten
 en az 0,00001 mm büyük olmalıdır; daireye dönüşen sıfır düz boy desteklenmez.
-Yeni alan eklenmedi: eski v1 JSON dosyalarındaki kama artık bu yuvarlak profil
+Kama alanları değişmedi: eski v1 JSON dosyalarındaki kama artık bu yuvarlak profil
 ile yeniden üretilir. Daha kısa/eski geçersiz ölçüler açık hata verir.
 Mevcut SLDPRT dosyaları bu değişiklikle kendiliğinden dönüştürülmez.
 
@@ -139,6 +144,8 @@ MIL_ANA_GEOMETRI_01
   MIL_PROFIL_01
 MIL_ANA_GEOMETRI_02
   MIL_PROFIL_02
+IC_DELIK_01           (opsiyonel Cut-Revolve)
+  IC_DELIK_01_ESKIZI
 PAH_01                (Chamfer)
 RADYUS_01             (native simple constant-radius Fillet)
 SEGMAN_KANALI_01       (Cut-Revolve)
@@ -146,6 +153,7 @@ SEGMAN_KANALI_01       (Cut-Revolve)
 KAMA_KANALI_01         (Cut-Extrude)
   KAMA_KANALI_01_ESKIZI
 KAMA_KANALI_01_KESME_DUZLEMI (native, milin 1 mm dışında gizli yardımcı düzlem)
+KOZMETIK_DIS_01       (opsiyonel CosmeticThread; katı kesmez)
 ```
 
 Bu ağaç canlı ortamda doğrulanana kadar hedef davranıştır.
@@ -182,10 +190,11 @@ kapatma ve tek gövdeyi otomatik kapsam seçimi açıkça ayarlanır. Bu API
 eski/uyumluluk arayüzüdür; ASLA mesh/ithal gövde veya üretim dışı görsel kesme
 üretmez. Native `RevCut`, tam tanımlı eskiz ve talaş hacmi denetimi korunur.
 
-Yapım sırası kademeler → pah → radyüs → segman → kama şeklindedir. Böylece
+Yapım sırası kademeler → varsa iç delik → pah → radyüs → segman → kama →
+kozmetik diş şeklindedir. Böylece
 uç kenarları, kanal kesimlerinin topolojiyi değiştirmesinden önce işlenir.
-Python planı ile C# sırası aynıdır; v1 proje alanları ve operasyon kimlikleri
-değişmez. Mevcut geometrik çakışma denetimi korunur. Kenar merkezi ve normali
+Python planı ile C# sırası aynıdır; eski v1 proje alanları ve operasyon kimlikleri
+korunur. Mevcut geometrik çakışma denetimi korunur. Kenar merkezi ve normali
 profil düzleminden model koordinatlarına çevrilir; global X varsayılmaz.
 Sabit radyüs, SW 2020'den beri bu işlem için eski sayılan `FeatureFillet3`
 yerine `CreateDefinition(swFmFillet)` / `ISimpleFilletFeatureData2.Initialize`

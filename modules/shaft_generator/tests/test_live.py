@@ -4,7 +4,7 @@ import os
 import math
 from pathlib import Path
 import pytest
-from modules.shaft_generator.models import Project,Stage,Groove,Keyway,Chamfer,Fillet
+from modules.shaft_generator.models import Project,Stage,Groove,Keyway,Chamfer,Fillet,Bore,CosmeticThread
 from modules.shaft_generator.controller import request
 from modules.shaft_generator.bridge import execute
 
@@ -135,3 +135,35 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
                 from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume
                 volume-=rounded_keyway_volume(p.stage(op.stage_id).diameter,op.length,op.width,op.depth)
         assert result['volume_m3']==pytest.approx(volume*1e-9,rel=1e-6)
+
+
+@pytest.mark.skipif(os.name!='nt' or os.environ.get('GOKWORKS_SHAFT_LIVE')!='1',
+                   reason='Windows, açık SOLIDWORKS ve GOKWORKS_SHAFT_LIVE=1 gerekli; gerçek CAD kabulü.')
+@pytest.mark.parametrize('case',['through','blind_left','blind_right','hollow_channels',
+                               'cosmetic_left','cosmetic_right','hollow_cosmetic','chamfer_cosmetic'])
+def test_axial_hole_and_cosmetic_thread_rebuild_save_and_reopen(tmp_path,case):
+    p=Project(stages=[Stage(30,80),Stage(45,65),Stage(25,35)])
+    if case in ('through','hollow_channels','hollow_cosmetic','chamfer_cosmetic'):
+        p.bore=Bore(10)
+    if case.startswith('blind_'):p.bore=Bore(10,20,'blind',case.split('_')[1])
+    if case=='hollow_channels':
+        p.operations=[Groove(p.stages[0].id),Keyway(p.stages[1].id)]
+    if 'cosmetic' in case:
+        p.operations=[CosmeticThread(p.stages[0].id,edge='right' if case=='cosmetic_right' else 'left',length=20,pitch=1.5)]
+    if case=='chamfer_cosmetic':p.operations.insert(0,Chamfer(p.stages[0].id,edge='left',distance=2))
+    output=tmp_path/f'{case}.SLDPRT'
+    result=execute(request(p,output_path=output,verify_edit=True))
+    assert result['fully_defined'] and result['single_body'] and result['edit_verified'] and result['rebuild_success']
+    assert result['feature_count']==len(p.stages)+len(p.operations)+(p.bore is not None)
+    assert output.is_file()
+    volume=sum(math.pi*(s.diameter/2)**2*s.length for s in p.stages)
+    if p.bore:
+        a,b=p.bore.interval(p.total_length);volume-=math.pi*(p.bore.diameter/2)**2*(b-a)
+    from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume
+    for op in p.operations:
+        r=p.stage(op.stage_id).diameter/2
+        if isinstance(op,Groove):volume-=math.pi*(r*r-(r-op.depth)**2)*op.width
+        elif isinstance(op,Keyway):volume-=rounded_keyway_volume(2*r,op.length,op.width,op.depth)
+        elif isinstance(op,Chamfer):volume-=math.pi*(r*op.distance**2-op.distance**3/3)
+        # A cosmetic thread must not change the independently predicted volume.
+    assert result['volume_m3']==pytest.approx(volume*1e-9,rel=1e-6)

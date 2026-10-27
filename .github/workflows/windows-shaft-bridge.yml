@@ -25,7 +25,7 @@ jobs:
           architecture: x64
       - run: python -m pip install pytest==9.0.2
       - name: Verify offline DIN catalogue and nominal data contract
-        run: python -m pytest -q modules/shaft_generator/tests/test_standards.py
+        run: python -m pytest -q modules/shaft_generator/tests/test_standards.py modules/shaft_generator/tests/test_axial_features.py
       - name: Stage temporary compile references (never packaged)
         run: |
           $directory=Join-Path $env:RUNNER_TEMP 'gokworks-shaft-interop'
@@ -34,7 +34,7 @@ jobs:
           "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
       - name: Exercise real PowerShell loader and pipes without SOLIDWORKS
         run: |
-          python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py --junitxml windows-shaft-tests.xml
+          python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py modules/shaft_generator/tests/test_axial_transport.py --junitxml windows-shaft-tests.xml
           $testExit=$LASTEXITCODE
           if ($testExit -ne 0) {
           @'
