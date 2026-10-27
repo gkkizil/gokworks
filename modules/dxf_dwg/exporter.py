@@ -454,6 +454,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     save_failed = False
     original_config = None
     restore_failed = ''
+    source_validated = False
     notes, outcomes = [], []
     def checkpoint():
         if stop_event is not None and stop_event.is_set():
@@ -498,6 +499,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             raise RuntimeError("SolidWorks istenen kaynak yerine farklı bir parça döndürdü; aktarım yapılmadı.")
         config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
         original_config = config
+        source_validated = True
         if output_identity is not None:
             output_identity.update(preview_identity(model, bodies[0]))
             output_identity['bend_lines'] = bool(bend_lines)
@@ -593,7 +595,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 restore_failed = f'Açınım sonrası kaynak konfigürasyon geri getirilemedi; belge kaydedilmedi veya kapatılmadı: {error}'
                 save_failed = True
                 notes.append(restore_failed)
-        if save_modified and model is not None and not save_failed:
+        if save_modified and model is not None and source_validated and not save_failed:
             try:
                 saved, warnings = save_modified_documents(app, extra=(model,))
                 notes.extend(warnings)
@@ -732,6 +734,11 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                 "dışarıda kaldı; ayrıntılar sonuç listesinde.")
     except CountCancelled:
         summary["state"] = "cancelled"
+    except SourceRestoreError as error:
+        summary['state'] = 'error'
+        summary['error'] = str(error)
+        summary['native_restore_failed'] = True
+        events.put(('log', f'İşlem durdu: {error}'))
     except Exception as error:
         summary["state"] = "error"
         summary["error"] = str(error)

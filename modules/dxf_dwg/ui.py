@@ -187,6 +187,9 @@ class DxfDwgPage(ExportPage):
     def start_export(self):
         if self.context.closing:
             return
+        if self._preview_restore_failed and not self.preview_running:
+            self.set_status('Kaynak durumu geri alınamadığı için otomatik kayıt başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.', True)
+            return
         if self.preview_running and self.jobs.owner is self and self.jobs.busy:
             self._export_after_preview = True
             self.preview_pending = None; self.preview_timer.stop()
@@ -247,6 +250,10 @@ class DxfDwgPage(ExportPage):
     def process_events(self, events):
         ordinary = []
         for kind, value in events:
+            if kind == 'done' and value.get('native_restore_failed'):
+                self._preview_restore_failed = True
+                self._export_after_preview = False
+                self.preview_pending = None
             if kind == 'dxf_preview_restore_error':
                 self._preview_restore_failed = True
                 self._export_after_preview = False

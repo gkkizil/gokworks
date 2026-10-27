@@ -131,6 +131,18 @@ def test_3d_is_shown_before_flat_finishes_and_stop_does_not_restart_it(page, qtb
     assert p.preview_payload.source == str(files[1])
 
 
+def test_known_restore_failure_blocks_silent_save_until_a_verified_refresh(page, qtbot, monkeypatch):
+    p, w, _ = page
+    called = []
+    monkeypatch.setattr('gui_qt.export.export_parts', lambda *a, **k: called.append(True))
+    p.handle_events([('dxf_preview_restore_error', (p.preview_generation, 'source configuration not restored'))])
+    p.start_export()
+    assert not called and not w.jobs.busy
+    assert 'otomatik kayıt başlatılmadı' in p.status_text
+    select(p, qtbot)
+    assert not p._preview_restore_failed
+
+
 def test_connection_error_clears_stale_preview_and_refresh_can_recover(page, qtbot):
     p, w, _ = page
     select(p, qtbot)

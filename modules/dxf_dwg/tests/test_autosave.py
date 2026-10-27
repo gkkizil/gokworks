@@ -166,3 +166,23 @@ def test_failed_configuration_restore_never_saves_or_closes_source(case, tmp_pat
         ex.export_one_part(app, part.path, [tmp_path/'a.dxf'], save_modified=True)
     assert part.dirty and not calls and not app.closed
     assert not (tmp_path/'a.dxf').exists()
+
+
+@pytest.mark.parametrize('mode', ['load_error', 'invalid_bodies'])
+def test_newly_opened_unverified_model_is_not_saved_in_cleanup(case, tmp_path, mode):
+    app, part, _, calls = case
+    app.existing = False
+    opened = app.OpenDoc6
+    def open_dirty(*args):
+        model = opened(*args)
+        model.dirty = True  # Older-version/load side effect; not a verified model.
+        return model
+    app.OpenDoc6 = open_dirty
+    if mode == 'load_error':
+        app.open_error = 64
+    else:
+        part.bodies *= 2
+    original = Path(part.path).read_bytes()
+    status, detail = ex.export_one_part(app, part.path, [tmp_path/'a.dxf'], save_modified=True)
+    assert status == 'error', detail
+    assert not calls and Path(part.path).read_bytes() == original
