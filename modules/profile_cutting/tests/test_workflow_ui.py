@@ -24,6 +24,11 @@ def test_example_to_stock_selection_and_exact_cut_sequence(page, qtbot):
     p.load_example()
     assert p.run_button.isEnabled() and p.demand_model.rowCount() == 2
     assert '10 parça' in p.input_summary.text() and p.form.value('stock_length') == '6000'
+    # Opening and accepting the example must not split its stock group when
+    # the editor resolves the wall thickness already present in its section.
+    dialog = RowDialog(p, p.project.demands[0]); qtbot.addWidget(dialog)
+    dialog.check()
+    assert dialog.value.group == p.project.demands[0].group
     calculate(p, w, qtbot)
     validate_plan(p.project, p.plan)
     totals = plan_totals(p.plan)

@@ -352,8 +352,8 @@ class ProfileCuttingPage(BasePage):
                 'Mevcut liste örnek parçalarla değişecek. Kaydetmediğiniz değişiklikler kaybolur. Devam edilsin mi?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
             return
-        self.project = Project([Demand('example-1','40×40×2','S235JR','1200',4),
-                                Demand('example-2','40×40×2','S235JR','800',6)])
+        self.project = Project([Demand('example-1','40×40×2','S235JR','1200',4,thickness='2'),
+                                Demand('example-2','40×40×2','S235JR','800',6,thickness='2')])
         for key in ('stock_length','kerf','trim'): self.form.set_value(key,getattr(self.project,key))
         self.scan_result = None; self.scan_current = False; self._ready_rows = 0; self.last_path = None
         self.scan_model.replace([]); self.scan_summary.setText('Henüz tarama yapılmadı.')
