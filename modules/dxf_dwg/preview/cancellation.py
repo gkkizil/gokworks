@@ -9,6 +9,7 @@ from contextlib import contextmanager
 import os
 import threading
 import time
+import sys
 
 from modules.cad_converter.models import checkpoint, Cancelled
 from modules.cad_converter.api import ApiError, RestoreError
@@ -69,11 +70,27 @@ def cancellable_read(stop, *, timeout=60, api=None):
             raise ApiError('SolidWorks önizlemesi süre sınırını aştı; geciken sonuç gösterilmedi.')
         checkpoint(stop)
     finally:
+        active_error = sys.exc_info()[1]
         finished.set()
         if monitor is not None:
             monitor.join(.5)
+        cleanup_errors = []
         try:
             if enabled:
                 api.CoDisableCallCancellation()
+        except Exception as error:
+            cleanup_errors.append(str(error))
         finally:
-            api.CoUninitialize()
+            try:
+                api.CoUninitialize()
+            except Exception as error:
+                cleanup_errors.append(str(error))
+        if cleanup_errors:
+            message = 'Önizleme COM temizliği doğrulanamadı: ' + '; '.join(cleanup_errors)
+            if isinstance(active_error, RestoreError):
+                if hasattr(active_error, 'add_note'):
+                    active_error.add_note(message)
+                else:
+                    active_error.args = (str(active_error) + '; ' + message,)
+            else:
+                raise RestoreError(message) from active_error

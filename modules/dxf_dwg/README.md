@@ -22,7 +22,7 @@ Yeni seçim veya **Yenile** kullanıcı isteğiyle tekrar çalıştırır.
 3D önce ayrı okunur ve kaynak durumu geri getirildikten sonra gösterilir;
 geçici DXF açınımını beklemez. Windows önizleme STA'sında
 `CoEnableCallCancellation` / `CoGetCancelObject.Cancel` ile bekleyen okunur
-COM çağrısına iptal istenir; 60 saniyelik süre sınırı vardır. SolidWorks veya
+COM çağrısına iptal istenir; 60 saniyede de iptal isteği gönderilir. SolidWorks veya
 thread zorla sonlandırılmaz. Native sunucunun iptal edemediği işlemde oturum
 geri alınmadan CAD kilidi bırakılmaz; geri alma hatası iptal gibi gizlenmez.
 Gerçek SolidWorks sunucusunun iptal davranışı ayrıca canlı test gerektirir.

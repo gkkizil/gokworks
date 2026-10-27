@@ -71,6 +71,19 @@ def test_stop_before_start_makes_no_com_call():
     assert not api.calls
 
 
+def test_cancellation_cleanup_failure_is_fatal_and_does_not_hide_source_restore_failure():
+    api = CancelApi()
+    def failed(): raise RuntimeError('cancel registration cleanup failed')
+    api.CoDisableCallCancellation = failed
+    with pytest.raises(RestoreError, match='real source restore failed') as error:
+        with cancellable_read(threading.Event(), api=api):
+            raise RestoreError('real source restore failed')
+    assert any('COM' in note for note in error.value.__notes__)
+    with pytest.raises(RestoreError, match='COM temizliği'):
+        with cancellable_read(threading.Event(), api=api):
+            pass
+
+
 @pytest.mark.skipif(os.name != 'nt', reason='Windows COM runtime required; no SolidWorks used.')
 def test_native_windows_enables_and_disables_call_cancellation_without_cad():
     with cancellable_read(threading.Event(), timeout=2):
