@@ -1,13 +1,13 @@
 {
-  "request_id": "20261027-shaft-accurate-volume-exe",
-  "requested_at": "2026-10-27T10:11:42.653705+00:00",
-  "source_commit": "88da7be872899594a5d0e885cf5c521d6660d5ab",
+  "request_id": "20261027-latest-shaft-bore-cosmetic-profile-exe",
+  "requested_at": "2026-10-27T11:49:00+00:00",
+  "source_commit": "8ef7515991a7f32571b3b3030b755e27d678ecb0",
   "validation_profile": "verified-source",
-  "verified_source_commit": "88da7be872899594a5d0e885cf5c521d6660d5ab",
+  "verified_source_commit": "4b8736a5ed33b7ac71128426a6c162d99a3ec97c",
   "validation_runs": [
-    40486007253,
-    40486007164
+    40497596926,
+    40497597010
   ],
-  "reason": "Continue the reported keyway-volume fix and provide the corrected Windows EXE. High-accuracy MassProperty2 recalculation and strict cut rejection passed same-source native Windows bridge and GUI tests; rerun focused packaging checks and frozen executable smoke.",
+  "reason": "User explicitly requested the latest complete Windows EXE. Include merged axial bores and cosmetic shaft threads plus the latest profile-cutting workflow improvements. Application source matches the two successful main-branch Windows checks; rerun packaging checks and frozen executable smoke at all configured DPI scales.",
   "cancelled": false
 }
