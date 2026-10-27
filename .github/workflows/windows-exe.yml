@@ -19,7 +19,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  request:
+    name: Read EXE build request
+    runs-on: ubuntu-latest
+    outputs:
+      cancelled: ${{ steps.request.outputs.cancelled }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: request
+        shell: python
+        run: |
+          import json, os
+          request = json.load(open('packaging/windows-build-request.json', encoding='utf-8'))
+          cancelled = request.get('cancelled') is True
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write('cancelled=' + str(cancelled).lower() + '\n')
+          print('EXE build cancelled by user; no executable will be produced.' if cancelled else 'EXE build requested.')
   build:
+    needs: request
+    if: needs.request.outputs.cancelled != 'true'
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
