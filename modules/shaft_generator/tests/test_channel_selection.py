@@ -110,3 +110,57 @@ $empty=$keep.PreserveEmpty($preserve)
         assert end==pytest.approx(sample['diameter']/2-sample['depth'])
     assert data['retained_title'] == 'Mil_inceleme'
     assert data['retained_events'] == ['add-to-db:False'] and data['no_document'] == ''
+
+
+@pytest.mark.skipif(sys.platform != 'win32' or not os.environ.get('GOKWORKS_SHAFT_TEST_INTEROP'),
+                   reason='Windows PowerShell and staged interop references required; no live CAD.')
+def test_cut_depth_parameter_and_independent_evaluated_floor_inspection():
+    """Exercise shipping helpers against API fixtures, without creating a CAD cut."""
+    library=Path(os.environ['GOKWORKS_SHAFT_TEST_INTEROP']).resolve()
+    probe=r'''
+Add-Type -ReferencedAssemblies $references -TypeDefinition ([IO.File]::ReadAllText($env:GOKWORKS_SHAFT_CHANNEL_PROBE))
+$type=[Gokworks.ShaftInterop.Host].Assembly.GetType('Gokworks.ShaftInterop.ChannelCuts',$true)
+$flags=[Reflection.BindingFlags]::Static -bor [Reflection.BindingFlags]::NonPublic
+$bind=$type.GetMethod('BindKeywayDepth',$flags)
+$inspect=$type.GetMethod('VerifyKeywayFloor',$flags)
+$bindings=@()
+foreach($mode in @('valid','reference','wrong_dimension','not_blind','wrong_travel','missing')) {
+ $bindings+=@{ mode=$mode; result=[Gokworks.ShaftChannelTest.KeywayDepthProbe]::Bind($bind,$mode) }
+}
+$floors=@()
+foreach($rotated in @($false,$true)) {
+ foreach($depth in @(3.0,4.0,2.0)) {
+  $floors+=@{ expected=($depth -eq 3); result=[Gokworks.ShaftChannelTest.KeywayDepthProbe]::Inspect($inspect,$depth,$rotated,'valid') }
+ }
+}
+foreach($mode in @('missing','ambiguous')) {
+ $floors+=@{ expected=$false; result=[Gokworks.ShaftChannelTest.KeywayDepthProbe]::Inspect($inspect,3.0,$false,$mode) }
+}
+$floors+=@{ expected=$true; result=[Gokworks.ShaftChannelTest.KeywayDepthProbe]::Inspect($inspect,3.0,$true,'split') }
+[Console]::WriteLine((@{ event='keyway_depth'; bindings=$bindings; floors=$floors } | ConvertTo-Json -Depth 5 -Compress))
+'''
+    powershell=Path(os.environ['SystemRoot'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
+    result=subprocess.run(
+        [str(powershell),'-NoLogo','-NoProfile','-NonInteractive','-STA','-Command',
+         LOADER.replace('[Gokworks.ShaftInterop.Host]::Run()',probe)],
+        input='',encoding='utf-8',capture_output=True,timeout=45,
+        creationflags=subprocess.CREATE_NO_WINDOW,
+        env={**os.environ,'GOKWORKS_SHAFT_INTEROP':str(library),
+             'GOKWORKS_SHAFT_HOST':str(HOST_SOURCE),
+             'GOKWORKS_SHAFT_CHANNEL_PROBE':str(Path(__file__).with_name('native')/'ChannelProbe.cs')})
+    assert result.returncode==0,result.stdout+result.stderr
+    data=next(json.loads(line) for line in result.stdout.splitlines() if 'keyway_depth' in line)
+    for sample in data['bindings']:
+        checked=sample['result']
+        assert checked['Accepted']==(sample['mode']=='valid'),sample
+        if checked['Accepted']:
+            assert checked['Parameter']=='D1' and checked['Renamed']=='KESME_BOYU'
+        else:
+            assert checked['Error'] and not checked['Renamed']
+    for sample in data['floors']:
+        checked=sample['result']
+        assert checked['Accepted']==sample['expected'],sample
+        if sample['expected']:
+            assert checked['Measured']==pytest.approx(3)
+        else:
+            assert checked['Error']

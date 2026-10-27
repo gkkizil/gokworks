@@ -15,7 +15,8 @@ from modules.shaft_generator.bridge import execute
                                'single_groove','single_keyway','wide_keyway','short_keyway','two_keyways','two_grooves','two_grooves_keyway',
                                'chamfer','two_chamfers','fillet','operations',
                                'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends',
-                               'reported_groove_keyway'])
+                               'reported_groove_keyway','shared_shoulder_chamfers',
+                               'touching_shoulder_chamfers','reported_six_operations'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -44,6 +45,14 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
         # ends at the Ø45 / Ø35 shoulder. Do not silently shorten the slot.
         p.stages=[Stage(30,80),Stage(45,65),Stage(35,50),Stage(25,35)]
         p.operations=[Groove(p.stages[0].id),Keyway(p.stages[1].id,offset=5,length=60,width=14,depth=5.5)]
+    if case in ('shared_shoulder_chamfers','touching_shoulder_chamfers','reported_six_operations'):
+        if case=='touching_shoulder_chamfers':p.stages=[Stage(30,40),Stage(34,40)]
+        a,b=p.stages[:2]
+        p.operations=[Chamfer(a.id,edge='right'),Chamfer(b.id,edge='left')]
+        if case=='reported_six_operations':
+            p.operations=[Groove(a.id),Chamfer(a.id,edge='left'),Chamfer(a.id,edge='right'),
+                          Keyway(b.id,offset=10,length=25,width=14,depth=3),
+                          Chamfer(b.id,edge='right'),Chamfer(b.id,edge='left')]
     combined = case in ('keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends')
     if combined:
         p.stages=[Stage(30,80)]
@@ -62,6 +71,17 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     if case=='two_chamfers':
         # Two equal 45-degree wedges removed from opposite ends of a cylinder.
         expected=math.pi*15**2*40-2*math.pi*(15-1/3)
+        assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
+    if case in ('shared_shoulder_chamfers','touching_shoulder_chamfers','reported_six_operations'):
+        from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume
+        expected=sum(math.pi*(s.diameter/2)**2*s.length for s in p.stages)
+        # Independent wedges: the inner shoulder bevel ADDS material, whereas
+        # the outer bevel removes material. Both can coexist on the same face.
+        expected+=math.pi*(15+1/3)-math.pi*(p.stages[1].diameter/2-1/3)
+        if case=='reported_six_operations':
+            expected-=math.pi*(15-1/3)+math.pi*(22.5-1/3)
+            expected-=math.pi*(15**2-14**2)*2
+            expected-=rounded_keyway_volume(45,25,14,3)
         assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if combined:
         from modules.shaft_generator.tests.volume_reference import rounded_keyway_volume

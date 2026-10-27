@@ -58,25 +58,31 @@ def treated_profile(project):
             x = project.end(stage.id) if op.edge == 'right' else project.start(stage.id)
             treatments[(x, stage.diameter / 2)] = op
     result = [points[0]]
+    def append(point):
+        # Two treatments may exactly consume the annular shoulder. Their
+        # coincident endpoints form one vertex, never a zero-length edge.
+        if math.dist(result[-1], point) > 1e-10:
+            result.append(point)
     for i in range(1, len(points)-1):
         a, b, c = points[i-1:i+2]
         op = treatments.get(b)
         if op is None:
-            result.append(b)
+            append(b)
             continue
         size = op.distance if isinstance(op, Chamfer) else op.radius
         u = tuple((b[k]-a[k])/math.dist(a,b) for k in (0,1))
         v = tuple((c[k]-b[k])/math.dist(b,c) for k in (0,1))
         before = tuple(b[k]-u[k]*size for k in (0,1))
         after = tuple(b[k]+v[k]*size for k in (0,1))
-        result.append(before)
+        append(before)
         if isinstance(op, Fillet):
             center = tuple(before[k]+v[k]*size for k in (0,1))
             start = math.atan2(before[1]-center[1],before[0]-center[0])
             sweep = math.copysign(math.pi/2,u[0]*v[1]-u[1]*v[0])
-            result.extend((center[0]+size*math.cos(start+sweep*j/16),center[1]+size*math.sin(start+sweep*j/16)) for j in range(1,16))
-        result.append(after)
-    result.append(points[-1])
+            for j in range(1,16):
+                append((center[0]+size*math.cos(start+sweep*j/16),center[1]+size*math.sin(start+sweep*j/16)))
+        append(after)
+    append(points[-1])
     return result
 
 

@@ -98,6 +98,28 @@ def test_add_same_end_treatment_does_not_create_an_invalid_duplicate(page):
     assert 'zaten pah/radyüs var' in page.status_text and page.create_button.isEnabled()
 
 
+def test_reported_groove_keyway_and_four_chamfers_keep_create_enabled(page):
+    a,b=page.project.stages[:2]
+    page.add_operation('groove')
+    for edge in ('left','right'):
+        control=page.operation_fields['chamfer']['edge']
+        control.setCurrentIndex(control.findData(edge))
+        page.add_operation('chamfer')
+    page.select_stage(b.id)
+    page.add_operation('keyway')
+    for edge in ('right','left'):
+        control=page.operation_fields['chamfer']['edge']
+        control.setCurrentIndex(control.findData(edge))
+        page.add_operation('chamfer')
+    assert len(page.project.operations)==6
+    assert [(op.kind,op.stage_id,getattr(op,'edge',None)) for op in page.project.operations]==[
+        ('groove',a.id,None),('chamfer',a.id,'left'),('chamfer',a.id,'right'),
+        ('keyway',b.id,None),('chamfer',b.id,'right'),('chamfer',b.id,'left')]
+    assert page.create_button.isEnabled() and len(page.plan)==10
+    assert page.validation_label.property('role')!='error'
+    assert page.top_view.stage_regions and page.section_view.stage_regions
+
+
 @pytest.mark.parametrize('kind',['chamfer','fillet'])
 def test_opposite_end_draft_keeps_the_explicitly_chosen_target_stage(page,kind):
     chosen=page.project.stages[2].id

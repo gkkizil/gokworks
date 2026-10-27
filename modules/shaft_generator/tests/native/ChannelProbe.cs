@@ -8,6 +8,93 @@ using SolidWorks.Interop.sldworks;
 
 namespace Gokworks.ShaftChannelTest
 {
+    public sealed class KeywayDepthProbe
+    {
+        public bool Accepted;
+        public string Parameter;
+        public string Renamed;
+        public string Error;
+        public double Measured;
+
+        public static KeywayDepthProbe Bind(MethodInfo method, string mode)
+        {
+            KeywayDepthProbe probe=new KeywayDepthProbe();
+            object dimension=Proxy.Make(typeof(IDimension),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="get_DrivenState") return mode=="reference" ? 1 : 2;
+                if(call.MethodName=="get_SystemValue") return mode=="wrong_dimension" ? .003 : .004;
+                if(call.MethodName=="set_Name") { probe.Renamed=(string)call.Args[0]; return null; }
+                if(call.MethodName=="get_Name") return probe.Renamed;
+                throw new InvalidOperationException("Unexpected depth dimension call: "+call.MethodName);
+            });
+            object data=Proxy.Make(typeof(IExtrudeFeatureData2),delegate(IMethodCallMessage call) {
+                if(!(bool)call.Args[0]) throw new InvalidOperationException("Forward depth required.");
+                if(call.MethodName=="GetEndCondition") return mode=="not_blind" ? 1 : 0;
+                if(call.MethodName=="GetDepth") return mode=="wrong_travel" ? .005 : .004;
+                throw new InvalidOperationException("Unexpected cut definition call: "+call.MethodName);
+            });
+            object feature=Proxy.Make(typeof(IFeature),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="GetDefinition") return data;
+                if(call.MethodName=="Parameter")
+                { probe.Parameter=(string)call.Args[0]; return mode=="missing" ? null : dimension; }
+                // Fail if the shipping code assumes only one display dimension.
+                throw new InvalidOperationException("Unexpected cut feature call: "+call.MethodName);
+            });
+            try { method.Invoke(null,new object[]{feature,.004}); probe.Accepted=true; }
+            catch(TargetInvocationException error)
+            {
+                if(!(error.InnerException is InvalidOperationException)) throw;
+                probe.Error=error.InnerException.Message;
+            }
+            return probe;
+        }
+
+        private static object Face(bool planar,double[] parameters)
+        {
+            object surface=Proxy.Make(typeof(ISurface),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="IsPlane") return planar;
+                if(call.MethodName=="get_PlaneParams") return parameters;
+                throw new InvalidOperationException(call.MethodName);
+            });
+            return Proxy.Make(typeof(IFace2),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="GetSurface") return surface;
+                throw new InvalidOperationException(call.MethodName);
+            });
+        }
+
+        public static KeywayDepthProbe Inspect(MethodInfo method,double actualDepth,bool rotated,string mode)
+        {
+            KeywayDepthProbe probe=new KeywayDepthProbe();
+            double[] origin={.1,.2,.3}, radial=rotated ? new double[]{0,0,-1} : new double[]{0,1,0};
+            double height=(22.5-actualDepth)*.001;
+            // Plane normal may oppose the shaft radial axis; plane root may be
+            // translated along the floor. Neither changes measured radial depth.
+            double[] parameters={-radial[0],-radial[1],-radial[2],
+                origin[0]+.017,origin[1]+height*radial[1],origin[2]+height*radial[2]};
+            var faces=new List<object>();
+            faces.Add(Face(false,null));
+            faces.Add(Face(true,new double[]{1,0,0,.12,.22,.33})); // axial end, not pocket floor
+            if(mode!="missing") faces.Add(Face(true,parameters));
+            if(mode=="split") faces.Add(Face(true,parameters));
+            if(mode=="ambiguous")
+            {
+                double[] other=(double[])parameters.Clone();
+                for(int i=0;i<3;i++) other[i+3]+=.001*radial[i];
+                faces.Add(Face(true,other));
+            }
+            object feature=Proxy.Make(typeof(IFeature),delegate(IMethodCallMessage call) {
+                if(call.MethodName=="GetFaces") return faces.ToArray();
+                throw new InvalidOperationException(call.MethodName);
+            });
+            try { probe.Measured=(double)method.Invoke(null,new object[]{feature,45.0,3.0,origin,radial}); probe.Accepted=true; }
+            catch(TargetInvocationException error)
+            {
+                if(!(error.InnerException is InvalidOperationException)) throw;
+                probe.Error=error.InnerException.Message;
+            }
+            return probe;
+        }
+    }
+
     public sealed class FilletProbe
     {
         public readonly Dictionary<string, object> Values = new Dictionary<string, object>();

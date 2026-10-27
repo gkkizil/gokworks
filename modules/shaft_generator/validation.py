@@ -32,13 +32,18 @@ def validate(project):
         errors.append('Toplam boy 1.000.000 mm sınırını aşıyor.')
     intervals = []
     edges = set()
+    shoulders = []
     for op in project.operations:
         index = next((i for i, s in enumerate(project.stages) if s.id == op.stage_id), None)
         if index is None:
             errors.append('Operasyonun hedef kademesi bulunamadı.')
             continue
         stage = project.stages[index]
-        prefix = f'{index + 1}. kademe ({op.kind}): '
+        title = {'groove': 'Segman kanalı', 'keyway': 'Kama kanalı',
+                 'chamfer': 'Pah', 'fillet': 'Radyüs'}.get(op.kind, op.kind)
+        if isinstance(op, (Chamfer, Fillet)):
+            title += ' · ' + {'left': 'Sol', 'right': 'Sağ'}.get(op.edge, str(op.edge))
+        prefix = f'{index + 1}. kademe ({title}): '
         if type(op) not in OPERATION_TYPES.values():
             errors.append(prefix + 'desteklenmeyen operasyon.')
             continue
@@ -81,10 +86,19 @@ def validate(project):
             edges.add(edge_key)
             start = 0 if op.edge == 'left' else stage.length - size
             intervals.append((stage.id, start, start + size, prefix))
-            # A shoulder treatment also consumes axial room in the neighbor.
+            # Each circular corner consumes axial room on its OWN stage. A
+            # blanket neighbor interval falsely clashes the two radial edges
+            # of one annular shoulder, even when they are far apart.
             if neighbor:
-                other_start = neighbor.length - size if op.edge == 'left' else 0
-                intervals.append((neighbor.id, other_start, other_start + size, prefix))
+                shoulders.append((edge_key[0], radius, size, prefix))
+    for i, (position, radius, size, prefix) in enumerate(shoulders):
+        for other_position, other_radius, other_size, other_prefix in shoulders[:i]:
+            radial_gap = abs(radius - other_radius)
+            if position == other_position and radial_gap > 1e-8 and size + other_size > radial_gap + 1e-8:
+                total = f'{size + other_size:g}'.replace('.', ',')
+                gap = f'{radial_gap:g}'.replace('.', ',')
+                errors.append(prefix + other_prefix.rstrip(': ') + ' ile ortak omuzda yeterli yer yok. '
+                              + f'İki pah/radyüs toplamı {total} mm; omuz yüksekliği {gap} mm.')
     for i, (stage_id, start, end, prefix) in enumerate(intervals):
         for other_id, other_start, other_end, other_prefix in intervals[:i]:
             if stage_id == other_id and min(end, other_end) - max(start, other_start) > 1e-8:

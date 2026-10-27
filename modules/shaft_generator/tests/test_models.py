@@ -72,9 +72,9 @@ def test_equal_diameter_shoulder_has_no_edge_and_ends_cannot_overlap():
     assert 'çakış' in '\n'.join(validate(p))
 
 
-def test_shoulder_treatment_checks_neighbor_operations():
+def test_inner_shoulder_treatment_checks_operations_on_its_own_stage():
     p=Project();a,b=p.stages[:2]
-    p.operations=[Fillet(b.id,edge='left',radius=1),Groove(a.id,offset=38,width=2)]
+    p.operations=[Fillet(a.id,edge='right',radius=1),Groove(a.id,offset=38,width=2)]
     assert 'çakış' in '\n'.join(validate(p))
 
 

@@ -87,6 +87,14 @@ açılar derece; API sınırında metre/radyan kullanılır. 100 kademe, 200 ope
 üst sınırı vardır. Sonlu pozitif ölçü, et kalınlığı, kademe sınırları ve
 muhafazakâr operasyon çakışması doğrulanır; bu kontrol CAD kernelinin yerini tutmaz.
 
+Aynı kademede segman, kama ve iki uçta pah/radyüs birlikte kullanılabilir.
+Komşu kademelerin ortak omzunda iç ve dış çap kenarları ayrı değerlendirilir;
+her pah/radyüs kendi kademesindeki boyu kullanır. Komşu kademeyi bütünüyle
+işgal ettiği varsayılmaz. İki kenar işleminin toplam boyutu omuz yüksekliğini
+aşarsa, aynı fiziksel kenara ikinci işlem eklenirse veya kesim bölgeleri
+gerçekten çakışırsa ilgili işlemler anlaşılır adlarla belirtilir. Tam omuz
+yüksekliğinde buluşan işlemler önizlemede tek ortak nokta kullanır.
+
 Kama için `length` uçtan uca toplam boy, `width` freze çapı/kanal genişliği,
 `depth` silindirin tepesinden düz tabana radyal derinliktir. Her iki uçta
 `R=width/2`; merkezler arası mesafe `length-width` olur. Toplam boy genişlikten
@@ -180,7 +188,7 @@ sabit yarıçap atanır; komşu teğet kenarlara otomatik yayılmaz.
 
 Kama eskizi boyuna profil düzleminde değildir. Mil eksenini içeren, normali
 radyal yönde olan referans düzlemi yerelleştirilmiş adlara bakmadan dönüşümünden
-bulunur. Taban düzlemi `CAP/2-DERINLIK` konumuna taşınır. Bu düzlemde native
+bulunur. Dış kesme düzlemi `CAP/2+1mm` konumuna taşınır. Bu düzlemde native
 `CreateSketchSlot` iki teğet doğru ve iki yarım daire oluşturur. API'ye verilen
 noktalar uç yaylarının merkezleridir; toplam boydan genişlik çıkarılır.
 Yalnız konum datumu sabittir; slotun konumu, eksen yönü, merkez mesafesi ve uç
@@ -197,6 +205,16 @@ Kama kesme düzleminin konumu `MathPoint/MathTransform` sınırına **metre**
 olarak verilir. JSON ve arayüz birimleri mm olarak korunur. Eski tabandan
 dışarı kesme yolu kullanılmaz; null API dönüşünde ters yöne kör deneme
 yapılmaz. Hata metni kesme API'sini ve kullanılan ölçüleri içerir.
+
+Cut-Extrude birden fazla görüntüleme ölçüsü döndürebilir. Derinlik için ilk
+ölçü veya tek ölçü varsayımı kullanılmaz: native `D1` parametresi,
+`IExtrudeFeatureData2.GetDepth(true)` kör kesme boyuyla karşılaştırılır;
+sonra `KESME_BOYU` adıyla denkleme bağlanır. Bu yardımcı kesici hareketi
+1 mm hava payını da içerir: istenen 3 mm kanal için 4 mm harekettir.
+**Gerçek kanal derinliği** ayrıca oluşan BREP taban yüzeyinin düzleminden
+ölçülür. `ISurface.PlaneParams` normal ve kök noktası profil koordinatlarıyla
+karşılaştırılır; taban `CAP/2-DERINLIK` konumunda değilse işlem başarı sayılmaz.
+Yalnız ekranda yazan kesme ölçüsünün doğru olması yeterli değildir.
 
 Her segman/kama kesmesinden sonra gerçek SI hacim farkı beklenen
 talaş hacmiyle karşılaştırılır. Segman analitiktir; kama için kapsül ayak izi
@@ -228,6 +246,8 @@ X yönünde datum (+1,0) mm olur. `KESME_Y@..._KESME_DUZLEMI` ve
 - [IPartDoc.FeatureByName](https://help.solidworks.com/2025/English/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IPartDoc~FeatureByName.html)
 - [FeatureCut4](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.ifeaturemanager~featurecut4.html)
 - [CheckFeatureUse](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISketch~CheckFeatureUse.html): kesmeden önce kapalı profil denetimi.
+- [IFeature.Parameter](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature~Parameter.html): native `D1` derinlik parametresi.
+- [ISurface.PlaneParams](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISurface~PlaneParams.html): BREP düzlem normali ve metre cinsinden kök noktası.
 - [Slot boy ölçüsünün anlamı](https://help.solidworks.com/2021/english/SolidWorks/sldworks/hidd_dve_sketch_slot.htm)
 - [Referans düzlem dönüşümü](https://help.solidworks.com/2022/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IRefPlane~Transform.html)
 - [InsertFeatureChamfer](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeatureManager~InsertFeatureChamfer.html)
@@ -276,6 +296,11 @@ Son hata ekranındaki Ø30×80, Ø45×65, Ø35×50, Ø25×35 mil; birinci kademe
 segman ve ikinci kademede başlangıç 5, toplam boy 60, genişlik 14, derinlik
 5,5 mm kama `reported_groove_keyway` canlı kabul senaryosudur. Boy sessizce
 kısaltılmaz; bu gerçek CAD testi bu ortamda çalıştırılmamıştır.
+Aynı omzun iç/dış kenarlarında pah, omuzda tam buluşan pahlar ve kullanıcının
+segman + kama + dört pah listesi ayrıca canlı kabul senaryolarıdır. Bunlar
+burada çalıştırılmamıştır. Mock yüzey testleri yanlış katı derinliğini, yanlış
+`D1` bağını, kayıp tabanı ve farklı yükseklikte taban yüzeylerini reddeder;
+ötelenmiş/döndürülmüş eksen ve bölünmüş eş düzlemli tabanları da kapsar.
 Bu ortamda canlı SOLIDWORKS geometri kabulü çalıştırılmamıştır.
 
 Windows kabul sırası:

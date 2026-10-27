@@ -238,6 +238,50 @@ namespace Gokworks.ShaftInterop
             return normalAlignment<0;
         }
 
+        internal static void BindKeywayDepth(IFeature feature, double travelMetres)
+        {
+            // A cut can expose several display dimensions (including sketch
+            // dimensions). D1 is the native forward cut-depth parameter; never
+            // rename an arbitrary first display dimension or require only one.
+            IExtrudeFeatureData2 data=feature.GetDefinition() as IExtrudeFeatureData2;
+            Host.Need(data!=null && data.GetEndCondition(true)==(int)swEndConditions_e.swEndCondBlind
+                && Math.Abs(data.GetDepth(true)-travelMetres)<1e-8,
+                "Kama kör kesme boyu native unsur tanımıyla uyuşmuyor.");
+            IDimension dimension=feature.Parameter("D1") as IDimension;
+            Host.Need(dimension!=null && dimension.DrivenState==(int)swDimensionDrivenState_e.swDimensionDriving
+                && Math.Abs(dimension.SystemValue-travelMetres)<1e-8,
+                "Kama ileri kesme derinliği (D1) sürücü ölçüsü doğrulanamadı.");
+            dimension.Name="KESME_BOYU";
+            Host.Need(dimension.Name=="KESME_BOYU", "Kama kesme boyu ölçüsü adlandırılamadı.");
+        }
+
+        internal static double VerifyKeywayFloor(IFeature feature, double diameterMm, double depthMm,
+            double[] origin, double[] radial)
+        {
+            // Measure the evaluated BREP plane, independently of the dimension
+            // and its air-clearance allowance. PlaneParams: normal[3], point[3], SI.
+            object[] faces=feature.GetFaces() as object[];
+            var heights=new List<double>();
+            if (faces!=null) foreach(object raw in faces)
+            {
+                ISurface surface=(ISurface)((IFace2)raw).GetSurface();
+                if (surface==null || !surface.IsPlane()) continue;
+                double[] p=surface.PlaneParams as double[];
+                if(p==null || p.Length!=6) continue;
+                double alignment=p[0]*radial[0]+p[1]*radial[1]+p[2]*radial[2];
+                if(Math.Abs(Math.Abs(alignment)-1)>1e-8) continue;
+                heights.Add((p[3]-origin[0])*radial[0]+(p[4]-origin[1])*radial[1]+(p[5]-origin[2])*radial[2]);
+            }
+            Host.Need(heights.Count>0, "Kama tabanının düz katı-model yüzeyi bulunamadı.");
+            foreach(double height in heights)
+                Host.Need(Math.Abs(height-heights[0])<1e-8, "Kama tabanında farklı derinlikte yüzeyler bulundu.");
+            double actualMm=diameterMm/2-heights[0]*1000;
+            Host.Need(!Double.IsNaN(actualMm) && !Double.IsInfinity(actualMm) && Math.Abs(actualMm-depthMm)<1e-5,
+                "Kama katı-model derinliği yanlış. İstenen="+depthMm.ToString("G8",CultureInfo.InvariantCulture)
+                +" mm; ölçülen="+actualMm.ToString("G8",CultureInfo.InvariantCulture)+" mm.");
+            return actualMm;
+        }
+
         internal static void SelectKeyway(IModelDoc2 model, IFeature feature)
         {
             Host.Need(feature!=null, "Kama kesme eskizi bulunamadı.");
@@ -734,9 +778,13 @@ namespace Gokworks.ShaftInterop
                 +" mm; derinlik="+op.depth.ToString("G8",CultureInfo.InvariantCulture)
                 +" mm; normal="+alignment.ToString("G8",CultureInfo.InvariantCulture)+".");
             Named(cut,name);
-            RenameOnlyDimension(cut,"KESME_BOYU",op.depth+1);
+            ChannelCuts.BindKeywayDepth(cut,M(op.depth+1));
             Equation("KESME_BOYU@"+name,Q(depth)+" + 1mm");
             ApplyEquations(); Rebuild();
+            double actualDepth=ChannelCuts.VerifyKeywayFloor(cut,stage.diameter,op.depth,
+                Point(0,0,0,profileToModel),Vector(0,1,0,profileToModel));
+            Host.Report(name+": katı modelde kama derinliği doğrulandı ("
+                +actualDepth.ToString("G8",CultureInfo.InvariantCulture)+" mm)");
             model.ClearSelection2(true); startPlane.Select2(false,0); model.BlankRefGeom();
             ChannelCuts.VerifyRemoval(name,before,Volume(),ChannelCuts.ExpectedVolume(project.stages[stageIndices[op.stage_id]],op));
         }
