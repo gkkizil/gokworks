@@ -61,6 +61,13 @@ paketlenmez; çalışma anında kullanıcının kurulu SolidWorks DLL'leri kulla
   yerlerinin birebir kopyası olduğu iddia edilmez.
 - Ruff F821/F822/F823 ve whitespace denetimi geçti.
 
+İlk Windows native fixture çalışmasında `IModelDoc2.Extension` dönüşünün
+`ModelDocExtension` coclass arayüzü olduğu ortaya çıktı. Test proxy'si ilk
+olarak yalnız `IModelDocExtension` uyguladığından CLR dönüş türünü reddetti.
+Fixture gerçek dönüş imzasına düzeltildi; uygulama kodu için bir geri dönüş
+veya doğrulama gevşetmesi eklenmedi. Native fixture değişikliklerinin aynı
+kaynakta GUI doğrulamasını da tetiklemesi sağlandı.
+
 Bu Linux ortamında lisanslı SolidWorks yoktur. Gerçek kullanıcının dosyasıyla
 yüksek doğrulukta yeniden hesaplamanın sonucu henüz doğrulanamadı. Native
 Windows testleri de lisanslı CAD geometrisi üretmez; API/protokol testleridir.

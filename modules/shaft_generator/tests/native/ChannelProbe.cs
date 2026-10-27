@@ -48,7 +48,9 @@ namespace Gokworks.ShaftChannelTest
                 }
                 throw new InvalidOperationException("Unexpected mass-property call: "+name);
             });
-            object extension=Proxy.Make(typeof(IModelDocExtension),delegate(IMethodCallMessage call) {
+            // IModelDoc2.Extension returns the coclass interface, not merely
+            // IModelDocExtension. The transparent proxy must match that ABI.
+            object extension=Proxy.Make(typeof(ModelDocExtension),delegate(IMethodCallMessage call) {
                 probe.Events.Add(call.MethodName);
                 if(call.MethodName=="CreateMassProperty2") return mode=="missing" ? null : mass;
                 throw new InvalidOperationException("Uncontrolled/legacy volume calculation: "+call.MethodName);
