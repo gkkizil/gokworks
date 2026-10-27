@@ -1,0 +1,54 @@
+{
+  "run_id": 40459447721,
+  "job_id": 122040330062,
+  "url": "https://github.com/gkkizil/gokworks/actions/runs/40459447721/job/122040330062",
+  "licensed_solidworks_tested": false,
+  "source_commit": "5d7158a19ed32b3ff19bf3704c01572ff0af7ac9",
+  "conclusion": "success",
+  "tests": 335,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 3,
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python -m pip install -r requirements-dev.txt",
+      "conclusion": "success"
+    },
+    {
+      "name": "Configure native Windows display",
+      "conclusion": "success"
+    },
+    {
+      "name": "Test DXF save/preview/stop, BOM images and shaft UI without licensed CAD",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upload test evidence",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ]
+}

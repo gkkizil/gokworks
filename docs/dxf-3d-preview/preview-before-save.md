@@ -66,6 +66,12 @@ Son ayar başlığı da dar ekrana sığması için kısaltıldı.
 Ruff isim çözümleme ve git whitespace denetimi
 geçti. Önceden korunan 11 ortak kaynak dosyasının hash'leri değişmedi.
 
+Son uygulama kaynağı `5d7158a19ed32b3ff19bf3704c01572ff0af7ac9` için
+[Windows DXF/BOM/Qt kontrolü](https://github.com/gkkizil/gokworks/actions/runs/40459447721)
+başarılı: **335 kayıt, 0 hata/başarısızlık, 3 atlama**. Gerçek Windows Qt
+arayüzü, COM runtime ve mock CAD sınırı çalıştı; canlı SolidWorks kullanılmadı.
+[Makine özeti](before-save-windows-check.json).
+
 Lisanslı SolidWorks ve kullanıcının gerçek parçaları bu Linux ortamında yoktur.
 Bu testler gerçek SolidWorks açınım üretiminin canlı kabul testi değildir.
 
