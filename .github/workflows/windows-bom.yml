@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - 'modules/bom/**'
+      - 'modules/dxf_dwg/**'
+      - 'tests/support/solidworks.py'
       - 'modules/shaft_generator/ui.py'
       - 'modules/shaft_generator/tests/test_ui.py'
       - 'modules/shaft_generator/interop/**'
@@ -13,6 +15,8 @@ on:
   pull_request:
     paths:
       - 'modules/bom/**'
+      - 'modules/dxf_dwg/**'
+      - 'tests/support/solidworks.py'
       - 'modules/shaft_generator/ui.py'
       - 'modules/shaft_generator/tests/test_ui.py'
       - 'modules/shaft_generator/interop/**'
@@ -41,9 +45,9 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt
       - name: Configure native Windows display
         run: python packaging/configure_windows_display.py
-      - name: Test BOM images, XLSX and shaft UI without licensed CAD
+      - name: Test DXF save/preview/stop, BOM images and shaft UI without licensed CAD
         run: |
-          python packaging/run_windows_tests.py modules/bom/tests modules/shaft_generator/tests/test_ui.py tests/test_qt_workflows.py::test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel tests/test_qt_workflows.py::test_bom_clear_button_empties_both_views_and_pending_filters
+          python packaging/run_windows_tests.py modules/dxf_dwg/tests modules/bom/tests modules/shaft_generator/tests/test_ui.py tests/test_qt_workflows.py::test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel tests/test_qt_workflows.py::test_bom_clear_button_empties_both_views_and_pending_filters
           $testExit=$LASTEXITCODE
           @'
           from pathlib import Path

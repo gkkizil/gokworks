@@ -4,7 +4,7 @@ from contextlib import contextmanager, ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from modules.cad_converter.api import call, get, interface, invoke, PART_IID, ApiError
+from modules.cad_converter.api import call, get, interface, invoke, PART_IID, ApiError, RestoreError
 from modules.cad_converter.models import checkpoint
 from modules.profile_cutting.solidworks import Session as ReadSession, optional, values
 from modules.tolerance_stack.com import variant
@@ -251,8 +251,12 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
         # DXF->3D model, never save a native source or replace the user's output.
         with TemporaryDirectory(prefix='gokworks-flat-preview-') as folder:
             temporary = Path(folder) / 'preview.dxf'
-            status, detail = exporter.export_one_part(session.app, request.source, [temporary],
-                                                     bend_lines=request.bend_lines)
+            try:
+                status, detail = exporter.export_one_part(session.app, request.source, [temporary],
+                                                         bend_lines=request.bend_lines, stop_event=stop)
+            except exporter.SourceRestoreError as error:
+                raise RestoreError(str(error)) from error
+            checkpoint(stop)
             if status != 'success':
                 raise ApiError(detail)
             description = ('DWG kaynağından geçici DXF · DWG dosyası okunmadı' if output and output.suffix.casefold() == '.dwg'
@@ -262,7 +266,7 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
     return flat, warnings
 
 
-def capture(request, cache, stop=None, *, session_factory=Session):
+def capture(request, cache, stop=None, *, session_factory=Session, geometry_only=False):
     """Attach to the existing SW and publish only after state restoration."""
     if Path(request.source).suffix.casefold() != '.sldprt':
         raise ValueError('Önizleme için bir SLDPRT kaynağı seçin.')
@@ -279,18 +283,19 @@ def capture(request, cache, stop=None, *, session_factory=Session):
             # ShowConfiguration2 may itself advance SW's update counter.
             exported_configuration = request.configuration or session.active_configuration(model)
             flat = None
-            with session.configuration(model, exported_configuration):
-                body, body_count = session.body(model, request.body_ref)
-                body = None
-                try:
-                    flat, notes = flat_for_source(session, model, request, before,
-                                                  optional(model, 'GetUpdateStamp'), body_count, stop)
-                    warnings.extend(notes)
-                except Exception as error:
-                    from modules.cad_converter.models import Cancelled
-                    if isinstance(error, Cancelled):
-                        raise
-                    warnings.append('Açınım önizlemesi okunamadı: ' + str(error))
+            if not geometry_only:
+                with session.configuration(model, exported_configuration):
+                    body, body_count = session.body(model, request.body_ref)
+                    body = None
+                    try:
+                        flat, notes = flat_for_source(session, model, request, before,
+                                                      optional(model, 'GetUpdateStamp'), body_count, stop)
+                        warnings.extend(notes)
+                    except Exception as error:
+                        from modules.cad_converter.models import Cancelled
+                        if isinstance(error, (Cancelled, RestoreError)):
+                            raise
+                        warnings.append('Açınım önizlemesi okunamadı: ' + str(error))
             with session.folded(model, exported_configuration) as (configuration, _):
                 if session.rebuild_pending(model) is not False:
                     raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
@@ -325,3 +330,8 @@ def capture(request, cache, stop=None, *, session_factory=Session):
             # Drop all CAD pointers while still inside the owning STA.
             model = body = None
     return payload
+
+
+def capture_geometry(request, cache, stop=None, *, session_factory=Session):
+    """Publish a restored 3D snapshot without waiting for temporary DXF export."""
+    return capture(request, cache, stop, session_factory=session_factory, geometry_only=True)

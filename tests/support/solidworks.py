@@ -82,6 +82,12 @@ class FakeDocument:
     def GetPathName(self):
         return self.path
 
+    def GetSaveFlag(self):
+        return getattr(self, 'dirty', False)
+
+    def IsOpenedReadOnly(self):
+        return getattr(self, 'readonly', False)
+
 
 class FakePart(FakeDocument):
     def __init__(self, path, sheet=True, bodies=1):
@@ -144,6 +150,10 @@ class FakeApp:
 
     def GetOpenDocumentByName(self, path):
         return self.model if self.existing else None
+
+    def GetDocuments(self):
+        models = list(self.models.values()) if hasattr(self, 'models') else [self.model]
+        return [*models, *([self.previous] if self.previous is not None else [])]
 
     def OpenDoc6(self, path, kind, options, configuration, errors, warnings):
         assert (kind, options, configuration) == (1, 1, '')

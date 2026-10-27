@@ -102,6 +102,35 @@ def test_preview_defers_to_existing_export_job_instead_of_starting_parallel_com(
     assert calls == [str(files[0])]
 
 
+def test_3d_is_shown_before_flat_finishes_and_stop_does_not_restart_it(page, qtbot):
+    from dataclasses import replace
+    p, w, files = page
+    entered = threading.Event()
+    p._capture_geometry = lambda request, cache, stop: replace(payload(request.source), flat=None)
+    def slow_flat(request, cache, stop):
+        entered.set()
+        stop.wait(4)
+        return payload(request.source)
+    p._capture = slow_flat
+    p.results.table.selectRow(0)
+    qtbot.waitUntil(lambda: entered.is_set() and p.preview.mesh_view.mesh is not None, timeout=5000)
+    assert w.jobs.busy and 'okunuyor' in p.preview.flat_label.text()
+    generation = p.preview_generation
+    qtbot.mouseClick(p.stop_button, Qt.LeftButton)
+    assert not p.stop_button.isEnabled() and p.preview_generation > generation
+    qtbot.waitUntil(lambda: not w.jobs.busy, timeout=2500)
+    assert p.status_text == 'Durduruldu.' and p.preview_pending is None
+    before = p.preview_payload
+    p.handle_events([('dxf_preview', (generation, payload(files[0], 'stale')))])
+    assert p.preview_payload is before
+    # Ordinary result updates do not undo the user's Stop command.
+    p.selected_updated(); p.source_changed(str(files[0])); qtbot.wait(220)
+    assert not w.jobs.busy
+    p._capture = lambda request, cache, stop: payload(request.source)
+    select(p, qtbot, row=1)
+    assert p.preview_payload.source == str(files[1])
+
+
 def test_connection_error_clears_stale_preview_and_refresh_can_recover(page, qtbot):
     p, w, _ = page
     select(p, qtbot)

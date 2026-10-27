@@ -128,6 +128,24 @@ def test_cancel_restores_session_without_save(source):
     assert not source[0].saves and source[0].ActiveDoc is source[2]
 
 
+def test_geometry_snapshot_is_independent_of_native_flat_export(source, monkeypatch):
+    app, model, previous, _, request, session_type = source
+    def forbidden(*args):
+        raise AssertionError('3D must not wait for native DXF export')
+    monkeypatch.setattr(sw, 'flat_for_source', forbidden)
+    result = sw.capture_geometry(request, MeshCache(), session_factory=session_type)
+    assert result.mesh.triangles == 1 and result.flat is None
+    assert app.ActiveDoc is previous and not app.saves
+
+
+def test_flat_restore_error_is_fatal_not_a_usable_preview_warning(source, monkeypatch):
+    def broken(*args):
+        raise api.RestoreError('flat export could not restore original source')
+    monkeypatch.setattr(sw, 'flat_for_source', broken)
+    with pytest.raises(api.RestoreError):
+        capture(source)
+
+
 def test_native_dwg_preview_uses_disposable_dxf_and_keeps_original_outputs(source, monkeypatch, tmp_path):
     app, model, previous, _, request, _ = source
     dwg = tmp_path/'part.dwg'; dwg.write_bytes(b'original DWG'); temporary_paths = []

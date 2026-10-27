@@ -1,5 +1,33 @@
 # DXF / DWG — Sac kalınlığına göre klasörleme
 
+## Aktarımda otomatik kayıt ve durdurma
+
+**Aktarımı başlat**, kullanıcının istediği sessiz **Tümünü Kaydet** davranışını
+uygular: açık değiştirilmiş SLDPRT/SLDASM/SLDDRW belgeleri, mevcut kaydedilmemiş
+düzenlemeler dahil, kendi yollarına kaydedilir. API `GetSaveFlag` ve
+`Save3(Silent | SaveReferenced)` kullanır; ekran düğmesine tıklamaz. Kayıt,
+parça açılmadan, aktarım öncesinde ve kapatmadan önce kontrol edilir. Alt parça
+kaydının montajı değiştirilmiş işaretleyebildiği durumlar tekrar okunur.
+
+İsimsiz, salt okunur veya kaydı başarısız belgelerde Farklı Kaydet penceresi
+açılmaz; dosya adı uydurulmaz. Hata günlüğe yazılır, belge açık bırakılır ve
+sonraki parçalara geçilmez. Açınımın değiştirdiği konfigürasyon her biçimden
+sonra geri alınır; bu doğrulanmadan kaynak kaydedilmez/kapatılmaz.
+
+**Durdur**, yeni biçim/parça başlatılmasını ve geçici çıktının yayımlanmasını
+engeller. Önizlemenin bekleyen istekleri ve eski seçim sonuçları iptal edilir;
+dosya değişikliği/sonuç güncellemesi önizlemeyi kendiliğinden yeniden başlatmaz.
+Yeni seçim veya **Yenile** kullanıcı isteğiyle tekrar çalıştırır.
+
+3D önce ayrı okunur ve kaynak durumu geri getirildikten sonra gösterilir;
+geçici DXF açınımını beklemez. Windows önizleme STA'sında
+`CoEnableCallCancellation` / `CoGetCancelObject.Cancel` ile bekleyen okunur
+COM çağrısına iptal istenir; 60 saniyelik süre sınırı vardır. SolidWorks veya
+thread zorla sonlandırılmaz. Native sunucunun iptal edemediği işlemde oturum
+geri alınmadan CAD kilidi bırakılmaz; geri alma hatası iptal gibi gizlenmez.
+Gerçek SolidWorks sunucusunun iptal davranışı ayrıca canlı test gerektirir.
+Önizleme, aktarımın otomatik kayıt politikasını çağırmaz; kaynakları kaydetmez.
+
 ## SolidWorks 3D / açınım önizlemesi
 
 Listeden bir kaynak veya sonuç satırı seçildiğinde sağda üç bölüm açılır:

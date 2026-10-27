@@ -28,9 +28,18 @@ SHEET_METAL, FLAT_GEOMETRY, BEND_LINES = 1, 1, 4
 DONT_REBUILD = 1  # swRebuildOnActivation_e.swDontRebuildActiveDoc
 ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
 ASSEMBLY = 2
+SAVE_SILENT_REFERENCED = 1 | 4  # swSaveAsOptions_Silent | swSaveAsOptions_SaveReferenced
 
 
 class CountCancelled(Exception):
+    pass
+
+
+class SaveDocumentsError(RuntimeError):
+    pass
+
+
+class SourceRestoreError(RuntimeError):
     pass
 
 
@@ -67,6 +76,67 @@ def _success(value):
 
 def _out_integer():
     return win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
+
+
+def save_modified_documents(app, *, extra=()):
+    """User-authorized Save All, via silent native saves, never UI commands.
+
+    Parts can dirty their parent assemblies when saved. Re-read the flags
+    until all documents are clean; preflight all dirty files before writing.
+    Preview code never calls this function.
+    """
+    saved, notes = [], []
+    try:
+        if hasattr(app, '_FlagAsMethod'):
+            app._FlagAsMethod('GetDocuments')
+        for attempt in range(128):
+            documents = {}
+            for model in (*(_value(app, 'GetDocuments') or ()), *extra):
+                if model is None:
+                    continue
+                path = _value(model, 'GetPathName')
+                key = _part_key(path, '')[0] if path else ('unsaved', _value(model, 'GetTitle'))
+                documents.setdefault(key, model)
+            dirty = []
+            for model in documents.values():
+                if not _value(model, 'GetSaveFlag'):
+                    continue
+                path = _value(model, 'GetPathName')
+                title = path or _value(model, 'GetTitle')
+                if not path or Path(path).suffix.lower() not in ('.sldprt', '.sldasm', '.slddrw'):
+                    raise SaveDocumentsError(f'Otomatik kayıt yapılamadı: {title}. Belgeyi önce SolidWorks dosyası olarak kaydedin.')
+                if _value(model, 'IsOpenedReadOnly'):
+                    raise SaveDocumentsError(f'Otomatik kayıt yapılamadı; belge salt okunur: {title}')
+                dirty.append(model)
+            if not dirty:
+                return saved, notes
+            # SaveReferenced lets an assembly save its referenced parts too.
+            dirty.sort(key=lambda model: 0 if _value(model, 'GetType') == ASSEMBLY else 1)
+            for model in dirty:
+                if not _value(model, 'GetSaveFlag'):
+                    continue  # Already saved through an assembly's references.
+                path = _value(model, 'GetPathName')
+                errors, warnings = _out_integer(), _out_integer()
+                model = _late_bound(model)
+                if hasattr(model, '_FlagAsMethod'):
+                    model._FlagAsMethod('Save3')
+                result = model.Save3(SAVE_SILENT_REFERENCED, errors, warnings)
+                if isinstance(result, tuple) and len(result) == 3:
+                    ok, error_code, warning_code = result
+                else:
+                    ok, error_code, warning_code = _success(result), errors.value, warnings.value
+                if not ok or error_code:
+                    raise SaveDocumentsError(f'Otomatik kayıt başarısız: {path}. SolidWorks hata kodu: {error_code}')
+                if _value(model, 'GetSaveFlag'):
+                    raise SaveDocumentsError(f'Otomatik kayıt sonrasında belge hâlâ değiştirilmiş görünüyor: {path}')
+                saved.append(path)
+                if warning_code:
+                    notes.append(f'Kaydetme uyarısı: {path} · kod {warning_code}')
+        raise SaveDocumentsError('Belgeler kayıt sırasında tekrar değişiyor; otomatik kayıt tamamlanamadı.')
+    except SaveDocumentsError:
+        raise
+    except Exception as error:
+        raise SaveDocumentsError(f'SolidWorks otomatik kayıt API hatası: {error}') from error
 
 
 def _part_api(model):
@@ -317,6 +387,16 @@ def _pending_targets(targets, overwrite):
     return pending
 
 
+def _restore_export_configuration(model, configuration):
+    if model is None or configuration is None:
+        return
+    if _value(model.ConfigurationManager.ActiveConfiguration, 'Name') != configuration:
+        if not _success(model.ShowConfiguration2(configuration)):
+            raise SourceRestoreError('Önceki kaynak konfigürasyonu açılamadı.')
+        if _value(model.ConfigurationManager.ActiveConfiguration, 'Name') != configuration:
+            raise SourceRestoreError('Önceki kaynak konfigürasyonu doğrulanamadı.')
+
+
 def preview_identity(model, body):
     """Optional read-only provenance for the preview; never gates an export."""
     identity = {}
@@ -341,8 +421,12 @@ def preview_identity(model, body):
 
 
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
-                    target_builder=None, output_paths=None, output_results=None, output_identity=None):
-    """Kaynağı kaydetmeden açınımı aktar; yalnızca bu çağrının açtığı belgeyi kapat.
+                    target_builder=None, output_paths=None, output_results=None, output_identity=None,
+                    save_modified=False, stop_event=None):
+    """Açınımı aktar; yalnızca bu çağrının açtığı belgeyi kapat.
+
+    Normal toplu aktarım save_modified=True ile sessiz Tümünü Kaydet uygular.
+    Önizleme ve doğrudan çağrılar varsayılan olarak kaynakları kaydetmez.
 
     Çok gövdeli parçalar eksik/üst üste geometri üretmek yerine hata döndürür.
     Her biçimin sonucu ayrıdır. Hazır çıktı ile başarısız biçim birlikteyse
@@ -367,14 +451,27 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     previous_name = None
     activated_here = False
     visibility_changed = False
+    save_failed = False
+    original_config = None
+    restore_failed = ''
     notes, outcomes = [], []
+    def checkpoint():
+        if stop_event is not None and stop_event.is_set():
+            raise CountCancelled()
     try:
+        checkpoint()
         # GetActiveObject can return a cached makepy wrapper. Explicit BYREF
         # VARIANT outputs below require late-bound calls (pywin32 variant docs).
         app = _late_bound(app)
         previous = _value(app, "ActiveDoc")
         if previous is not None:
             previous_name = _document_name(previous)
+        if save_modified:
+            saved, warnings = save_modified_documents(app)
+            notes.extend(warnings)
+            if saved:
+                notes.append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
+        checkpoint()
         model = app.GetOpenDocumentByName(str(part))
         if model is None:
             errors, warnings = _out_integer(), _out_integer()
@@ -400,6 +497,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         if _part_key(model_path, "") != _part_key(os.path.abspath(str(part)), ""):
             raise RuntimeError("SolidWorks istenen kaynak yerine farklı bir parça döndürdü; aktarım yapılmadı.")
         config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
+        original_config = config
         if output_identity is not None:
             output_identity.update(preview_identity(model, bodies[0]))
             output_identity['bend_lines'] = bool(bend_lines)
@@ -430,10 +528,16 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             if active is None or _part_key(_value(active, "GetPathName"), "") != _part_key(model_path, ""):
                 raise RuntimeError("Aktif SolidWorks belgesi kaynak parça değil; aktarım yapılmadı.")
         options = FLAT_GEOMETRY | (BEND_LINES if bend_lines else 0)
-        # Default orientation; no selection, suppression, preferences or save.
+        if pending and save_modified:
+            saved, warnings = save_modified_documents(app, extra=(model,))
+            notes.extend(warnings)
+            if saved:
+                notes.append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
+        # Default orientation; no selection, suppression or preference changes.
         alignment = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
         views = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
         for target in targets:
+            checkpoint()
             kind = target.suffix[1:].upper()
             if target not in pending:
                 outcomes.append("skipped")
@@ -447,6 +551,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 target.parent.mkdir(parents=True, exist_ok=True)
                 exported = part_api.ExportToDWG2(str(temporary), model_path, SHEET_METAL,
                                                 True, alignment, False, False, options, views)
+                _restore_export_configuration(model, original_config)
+                checkpoint()
                 if not _success(exported):
                     raise RuntimeError("SolidWorks açınımı aktaramadı. Sac metal/açınım unsurunu kontrol edin.")
                 _validate_output(temporary)
@@ -459,6 +565,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     outcomes.append("skipped")
                     notes.append(f"{kind}: aktarım sırasında hedef oluştu, atlandı")
                     record(target, "skipped", "Aktarım sırasında hedef oluştu; üzerine yazılmadı.")
+            except (CountCancelled, SourceRestoreError):
+                raise
             except Exception as error:
                 outcomes.append("error")
                 notes.append(f"{kind}: {error}")
@@ -470,21 +578,48 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     notes.append(f"Geçici dosya temizlenemedi: {error}")
         status = ("partial" if "error" in outcomes and any(item in outcomes for item in ("success", "skipped"))
                   else "error" if "error" in outcomes else "success" if "success" in outcomes else "skipped")
+    except CountCancelled:
+        status = 'partial' if 'success' in outcomes else 'skipped'
+        notes.append('Durduruldu; devam eden geçici çıktı yayımlanmadı, sonraki biçimlere geçilmedi.')
     except Exception as error:
         status = "error"
         notes.append(str(error))
+        save_failed = isinstance(error, SaveDocumentsError)
     finally:
+        if model is not None and original_config is not None:
+            try:
+                _restore_export_configuration(model, original_config)
+            except Exception as error:
+                restore_failed = f'Açınım sonrası kaynak konfigürasyon geri getirilemedi; belge kaydedilmedi veya kapatılmadı: {error}'
+                save_failed = True
+                notes.append(restore_failed)
+        if save_modified and model is not None and not save_failed:
+            try:
+                saved, warnings = save_modified_documents(app, extra=(model,))
+                notes.extend(warnings)
+                if saved:
+                    notes.append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
+                if output_identity is not None:
+                    output_identity.update(preview_identity(model, bodies[0]) if 'bodies' in locals() and bodies else {})
+            except SaveDocumentsError as error:
+                save_failed = True
+                status = 'partial' if any(item == 'success' for item in outcomes) else 'error'
+                notes.append(str(error))
+        if save_failed:
+            if output_identity is not None:
+                output_identity['native_save_error'] = '; '.join(notes)
+            notes.append('Kayıt başarısız olduğu için açık belgeler kapatılmadı; aktarım durduruldu.')
         if visibility_changed and not opened_here and model is not None:
             try:
                 model.Visible = False
             except Exception as error:
                 notes.append(f"Önceki belge görünürlüğü geri yüklenemedi: {error}")
-        if opened_here and model is not None:
+        if opened_here and model is not None and not save_failed:
             try:
                 app.CloseDoc(_value(model, "GetTitle"))
             except Exception as error:
                 notes.append(f"Parça kapatılamadı: {error}")
-        if previous_name and (opened_here or activated_here):
+        if previous_name and (opened_here or activated_here) and not save_failed:
             try:
                 errors = _out_integer()
                 restored = app.ActivateDoc3(previous_name, False, DONT_REBUILD, errors)
@@ -492,6 +627,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     raise RuntimeError(f"SolidWorks hata kodu: {errors.value}")
             except Exception as error:
                 notes.append(f"Önceki belge etkinleştirilemedi: {error}")
+        if restore_failed:
+            raise SourceRestoreError(restore_failed)
     return status, "; ".join(notes)
 
 
@@ -528,6 +665,13 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
         initialized = True
         app = connect_to_solidworks()
         app = _late_bound(app)
+        active = _value(app, 'ActiveDoc')
+        if active is None or _value(active, 'GetType') != ASSEMBLY:
+            raise RuntimeError("Montajdaki toplam adet için SolidWorks'te ana montajı etkinleştirin.")
+        events.put(('phase', 'Değiştirilmiş SolidWorks belgeleri otomatik kaydediliyor…'))
+        saved, warnings = save_modified_documents(app)
+        events.put(('log', f'SolidWorks otomatik kayıt: {len(saved)} belge.'))
+        summary['warnings'].extend(warnings)
         events.put(("phase", "Aktif montajdaki toplam adetler hesaplanıyor…"))
         references = {}
         quantities, assembly_name, assembly_config = assembly_quantities(app, stop_event, references=references)
@@ -562,7 +706,8 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             else:
                 status, detail = export_one_part(app, part, targets, overwrite_existing, bend_lines,
                                                 target_builder=build_targets, output_paths=targets,
-                                                output_results=outputs, output_identity=metadata)
+                                                output_results=outputs, output_identity=metadata,
+                                                save_modified=True, stop_event=stop_event)
             others = metadata.get('unexported_configurations', ())
             if others:
                 summary['unexported_configurations'] += len(others)
@@ -576,6 +721,11 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                                     "status": status, "detail": detail, **metadata}))
             events.put(("counts", dict(summary)))
             events.put(("progress", (index, len(parts))))
+            if metadata.get('native_save_error'):
+                raise SaveDocumentsError(metadata['native_save_error'])
+            if stop_event is not None and stop_event.is_set():
+                summary['state'] = 'cancelled'
+                break
         if summary['unexported_configurations']:
             summary['warnings'].append(
                 f"Montajdaki {summary['unexported_configurations']} parça konfigürasyonu bu aktarımda "
