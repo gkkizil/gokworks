@@ -12,6 +12,9 @@ METADATA = {
     'packaging/windows-build-request.json', 'packaging/windows-build-status.json',
     'packaging/latest-windows.json', 'packaging/publish_status.py',
     'packaging/verify_build_request.py', 'tests/test_build_request_validation.py',
+    # Human-readable verification and its CI receipt; neither is bundled or loaded.
+    'docs/dxf-3d-preview/preview-before-save.md',
+    'docs/dxf-3d-preview/before-save-windows-check.json',
 }
 
 

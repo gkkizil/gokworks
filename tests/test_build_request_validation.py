@@ -22,8 +22,15 @@ def test_matching_successful_run_and_documentation_only_delta_are_reusable():
                                  'packaging/windows-build-request.json'])
 
 
+def test_dxf_preview_test_report_does_not_change_the_tested_application():
+    validation.validate_changes(['docs/dxf-3d-preview/preview-before-save.md',
+                                 'docs/dxf-3d-preview/before-save-windows-check.json'])
+
+
 @pytest.mark.parametrize('change', ['modules/bom/images.py', 'gui_qt/app.py', 'main.py',
-                                    'requirements.txt', 'packaging/build_windows.py', 'assets/logo.png'])
+                                    'requirements.txt', 'packaging/build_windows.py', 'assets/logo.png',
+                                    'docs/THIRD_PARTY_NOTICES.md', 'docs/report-tools/capture_dxf_preview.py',
+                                    'docs/dxf-3d-preview/capture.py'])
 def test_application_dependency_or_builder_changes_require_fresh_tests(change):
     with pytest.raises(RuntimeError, match='tam doğrulama'):
         validation.validate_changes([change])

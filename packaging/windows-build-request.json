@@ -1,13 +1,13 @@
 {
-  "request_id": "20261027-user-cancelled-exe",
-  "requested_at": "2026-10-27T04:44:33.641886+00:00",
-  "source_commit": "70eac87a4ce47b5af9fa9556be3c0460d91cd3ca",
+  "request_id": "20261027-dxf-flat-preview-exe",
+  "requested_at": "2026-10-27T06:58:49.343692+00:00",
+  "source_commit": "5d7158a19ed32b3ff19bf3704c01572ff0af7ac9",
   "validation_profile": "verified-source",
-  "verified_source_commit": "70eac87a4ce47b5af9fa9556be3c0460d91cd3ca",
+  "verified_source_commit": "5d7158a19ed32b3ff19bf3704c01572ff0af7ac9",
   "validation_runs": [
-    40450692022,
-    40450691945
+    40459447721,
+    40459448232
   ],
-  "reason": "User explicitly instructed: .exe olu\u015fturma. Cancel the running workflow through its existing main concurrency group; retain all tested application fixes on main and produce no new executable.",
-  "cancelled": true
+  "reason": "User requested the current Windows EXE. Application source matches the successful native Windows UI and STA bridge checks. Subsequent changes are test reports and packaging request validation metadata only; rerun focused packaging/COM checks and frozen EXE smoke.",
+  "cancelled": false
 }
