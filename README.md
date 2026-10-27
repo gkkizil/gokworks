@@ -28,11 +28,11 @@ Hazır uygulamayı indirmek için aşağıdaki doğrudan EXE bağlantısını ku
 **Code → Download ZIP** kaynak kodu indirir.
 
 <!-- windows-release:start -->
-**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40450947150-1/GOKWORKS.exe)
+**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40464338944-1/GOKWORKS.exe)
 
 **GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
-Uygulama kodu: `70eac87` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/40450947150) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+Uygulama kodu: `5d7158a` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/40464338944) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 <!-- windows-release:end -->
 
 1. Yukarıdaki bağlantıdan `GOKWORKS.exe` dosyasını indirin.
