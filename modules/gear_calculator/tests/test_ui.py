@@ -5,6 +5,7 @@ from math import radians
 import pytest
 from PySide6.QtCore import Qt,QCoreApplication,QEvent
 from gui_qt.app import MainWindow,create_application
+from modules.gear_calculator.ui import number
 
 
 @pytest.fixture
@@ -97,3 +98,31 @@ def test_real_worker_export_uses_latest_fields_and_3d_is_from_the_same_brep(page
     assert p._mesh_key==p.specification
     p.fields['bore1'].setValue(999);p.calculate()
     assert p.mesh_view.mesh is None and not p.step_button.isEnabled()
+
+
+@pytest.mark.parametrize('power,rpm',[(.0001,100000.),(1e7,.001)])
+def test_derived_torque_is_neither_clamped_to_input_bounds_nor_rounded_to_zero(page,power,rpm):
+    p,w=page;saved=p.fields['torque_nm'].value()
+    p.fields['power_kw'].setValue(power);p.fields['input_rpm'].setValue(rpm);p.calculate()
+    result=p.result.input_torque_nm
+    assert p.derived_load.text()==f'Hesaplanan T₁ = {number(result)} N·m'
+    assert p.fields['torque_nm'].value()==saved and not p.fields['torque_nm'].isVisible()
+    assert float(number(result).replace(' ','').replace(',','.'))==pytest.approx(result,rel=1e-7)
+    assert p.result_table.item(19,1).text()==number(result)
+
+
+def test_primary_inputs_are_preserved_and_each_mode_uses_its_own_value(page):
+    p,w=page
+    p.fields['power_kw'].setValue(7.5);p.load_mode.setCurrentIndex(1)
+    p.fields['torque_nm'].setValue(.0001);p.fields['input_rpm'].setValue(.001);p.calculate()
+    assert p.result.input_torque_nm==pytest.approx(.0001)
+    assert 'e-' in p.derived_load.text() and not p.fields['power_kw'].isVisible()
+    p.load_mode.setCurrentIndex(0);p.calculate()
+    assert p.result.power_kw==pytest.approx(7.5) and p.fields['torque_nm'].value()==pytest.approx(.0001)
+
+
+@pytest.mark.parametrize('value',[9.549296585513721e-6,-2.5e-8,9.54929658551372e13,0.,1500.])
+def test_numeric_presentation_preserves_small_nonzero_quantities(value):
+    rendered=number(value)
+    parsed=float(rendered.replace(' ','').replace(',','.'))
+    assert parsed==pytest.approx(value,rel=1e-7,abs=1e-20)
