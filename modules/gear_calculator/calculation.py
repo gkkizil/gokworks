@@ -29,6 +29,9 @@ def calculate_pair(spec: GearPairSpecification) -> GearPairResult:
         issues.append(Issue('interference','Temas yolu evolventin temel daire sınırını aşıyor; girişim riski var.',severity='warning'))
     if contact<1:
         issues.append(Issue('contact_ratio','Kavrama oranı 1’den küçük; sürekli kavraşma sağlanamıyor.',severity='warning'))
+    elif contact<1.2:
+        issues.append(Issue('low_contact_margin','Kavrama oranı 1,2’nin altında; ideal sürekli temas için yeterli olsa da '
+            'tolerans ve yük altında çalışma payı ayrıca doğrulanmalı.',severity='warning'))
     load=spec.load
     torque=TORQUE_POWER_FACTOR*load.power_kw/abs(load.input_rpm) if load.mode=='power' else load.torque_nm
     power=load.power_kw if load.mode=='power' else torque*abs(load.input_rpm)/TORQUE_POWER_FACTOR

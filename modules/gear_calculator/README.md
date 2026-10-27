@@ -47,6 +47,9 @@ sessizce ezilmez. GUI'nin kaydet diyaloğu dosya değiştirme onayını yönetir
   et bırakılır. Bu et kontrolü mukavemet onayı değildir.
 - Birincil yük güç veya torktur. İkisinin aynı anda verilmesi reddedilir.
   Giriş devri işaretli olabilir; sıfır kabul edilmez. Tork ve kuvvetler büyüklüktür.
+  Arayüz her iki birincil girişin son değerini ayrı saklar; yalnız seçili olan
+  hesaba girer. Hesaplanan ikincil değer salt okunur gösterilir; giriş kutusunun
+  sınırlarına kırpılmaz. Çok küçük/büyük sonuçlar bilimsel gösterim kullanır.
 - `K_A` ve tasarım ömrü veri modelinde saklanabilir; nominal kuvvetlere uygulanmaz.
   ISO/AGMA dayanım ve ömür sonucu gösterilmez. İleri normal düzlem, malzeme,
   kalite, helis, profil kaydırma ve diş boşluğu alanlarının etkin kullanımı reddedilir.
@@ -66,6 +69,8 @@ Güç dönüşümü yuvarlanmış 9550 yerine `60000/(2π)` kullanır. Dış dü
 
 Yaklaşma ve uzaklaşma uzunluklarının temel dairenin izin verdiği aktif evolvent
 sınırlarını aşması ayrıca uyarılır. εα<1 için sürekli kavraşma desteklenmez.
+1≤εα<1,2 için düşük temas payı uyarısı gösterilir; bu öneri CAD'yi kapatmaz.
+Bu kontrol imalat toleranslarının en kötü durum hesabı veya dayanım onayı değildir.
 
 Referans: m=2, z₁=20, z₂=40, α=20°, b=15, P=1,5 kW, n₁=1500:
 d₁/d₂=40/80; da₁/da₂=44/84; df₁/df₂=35/75 mm; a=60 mm; i=2;
@@ -133,6 +138,14 @@ katı hacmi, B-Rep eğrileri ve üçgenleme sınanır. SOLIDWORKS gerekmez.
 `windows-gears.yml` Python 3.13 üzerinde kaynak testlerini ve gerçek paketlenmiş
 programın üç DPI ölçeğinde açılışını/CAD alt süreç aktarımını çalıştırır.
 Eski Windows EXE yayınlama isteği bu modül eklenirken değiştirilmez.
+
+Matematik denetimi: 9.408 parametre kombinasyonu, üretim hesabını çağırmayan
+60 basamaklı Decimal referansı, üretici tablosu, temas/enerji/ölçek kontrolleri
+ve analitik hacimle karşılaştırılan gerçek STEP dosyalarıyla sınanır.
+Yöntem, kaynaklar, toleranslar ve bulunan düzeltmeler
+[matematik doğrulama raporundadır](research/math-validation.md).
+Parametriklik GOKWORKS verisi değiştiğinde hesap ve CAD'nin yeniden üretilmesidir;
+STEP aktarımı SOLIDWORKS'e yerel bir parametrik unsur geçmişi sağlamaz.
 
 ## Bağımlılıklar ve lisanslar
 

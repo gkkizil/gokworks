@@ -1,7 +1,7 @@
 """Central bounds and engineering scope checks; no ISO/AGMA strength claim."""
 
 from dataclasses import asdict
-from math import isfinite, radians, sin
+from math import isclose, isfinite, radians, sin
 from .models import GearSpecification, GearPairSpecification, FutureGearData, LoadSpecification, Issue
 
 MAX_TEETH = 300
@@ -16,7 +16,12 @@ class SpecificationError(ValueError):
 
 
 def finite(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(value)
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return False
+    try:
+        return isfinite(value)
+    except OverflowError:
+        return False
 
 
 def gear_issues(spec, prefix=''):
@@ -46,10 +51,16 @@ def gear_issues(spec, prefix=''):
         error('diameter_limit', 'Diş üstü çapı 6000 mm model sınırını aşıyor.', 'module_mm')
     # Leave at least a small positive web below the entire tooth root.
     root = spec.module_mm*(spec.teeth-2.5)
-    if spec.bore_mm > 0 and root-spec.bore_mm < max(.2, .1*spec.module_mm)*2:
+    required_web_diameter=max(.2, .1*spec.module_mm)*2
+    actual_web_diameter=root-spec.bore_mm
+    # 1e-9 mm only absorbs binary subtraction round-off; it is not an
+    # additional machining allowance or a relaxation of the specified wall.
+    if spec.bore_mm > 0 and actual_web_diameter < required_web_diameter and not isclose(
+            actual_web_diameter,required_web_diameter,rel_tol=0.,abs_tol=1e-9):
         error('bore', 'Delik, diş dibi altında en az max(0,2 mm; 0,1 m) radyal et bırakmalı.', 'bore_mm')
     critical = 2 / sin(radians(spec.pressure_angle_deg))**2
-    if spec.teeth < critical:
+    # At exactly 30 degrees, binary sin(pi/6) can yield 8.000000000000002.
+    if spec.teeth < critical and not isclose(spec.teeth,critical,rel_tol=1e-12,abs_tol=1e-12):
         issues.append(Issue('undercut', f'z = {spec.teeth}; alttan kesilme riski var (x=0 için sınır ≈ {critical:.2f}). '
             'Trokoidal dip modellenmediğinden CAD ve hareket bu değerlerde kapalıdır.', prefix+'teeth', 'warning'))
     if not any(abs(spec.pressure_angle_deg-a)<1e-9 for a in (14.5,20.,25.)):

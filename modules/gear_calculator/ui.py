@@ -13,6 +13,8 @@ from . import service
 
 
 def number(value):
+    if value and (abs(value)<.0001 or abs(value)>=1e9):
+        return f'{value:.8g}'.replace('.',',')
     return f'{value:,.4f}'.replace(',',' ').replace('.',',').rstrip('0').rstrip(',')
 
 
@@ -36,12 +38,15 @@ class GearPage(BasePage):
             self.add_number(self.form,key,title,value,low,high,integer)
         form_box.addLayout(self.form)
         form_box.addWidget(label('İŞLETME DEĞERLERİ','section'));load=QFormLayout();load.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        self.load_form=load
         self.load_mode=QComboBox();self.load_mode.addItem('Güç P → Tork hesaplanır','power');self.load_mode.addItem('Tork T₁ → Güç hesaplanır','torque')
         self.load_mode.setAccessibleName('Birincil yük girdisi');load.addRow('Birincil yük',self.load_mode)
         for key,title,value,low,high in (('input_rpm','Giriş devri n₁ · dev/dak',1500.,-100000.,100000.),
                                         ('power_kw','Giriş gücü P · kW',1.5,.0001,1e7),('torque_nm','Giriş torku T₁ · N·m',9.5493,.0001,1e7)):
             self.add_number(load,key,title,value,low,high)
         form_box.addLayout(load)
+        self.derived_load=label('','muted');self.derived_load.setAccessibleName('Hesaplanan ikincil yük değeri')
+        form_box.addWidget(self.derived_load)
         form_box.addWidget(label('Varsayımlar: x₁=x₂=0 · hₐ*=1 · h𝒻*=1,25 · β=0° · sıfır diş boşluğu · paralel miller.','muted'))
         form_box.addWidget(label('K_A ve tasarım ömrü veri modelinde ayrılmıştır; bu sürümde mukavemet hesabına uygulanmaz.','muted'))
         form_box.addStretch();self.input_scroll=scroll(self.input_panel);self.input_scroll.setMinimumWidth(250)
@@ -110,6 +115,13 @@ class GearPage(BasePage):
     def changed(self,*args):
         # Clear exports immediately: a debounce must never export the previous values.
         self.canvas.pause();self.result=None;self.enable_exports(False);self.update_timer.start()
+        self.sync_load_fields();self.derived_load.setText('Hesap güncelleniyor…')
+
+    def sync_load_fields(self):
+        power=self.load_mode.currentData()=='power'
+        self.fields['power_kw'].setEnabled(power);self.fields['torque_nm'].setEnabled(not power)
+        self.load_form.setRowVisible(self.fields['power_kw'],power)
+        self.load_form.setRowVisible(self.fields['torque_nm'],not power)
 
     def specification_from_fields(self):
         v={key:w.value() for key,w in self.fields.items()}
@@ -124,7 +136,7 @@ class GearPage(BasePage):
         if self.busy:return
         self.update_timer.stop();self.canvas.pause()
         power=self.load_mode.currentData()=='power'
-        self.fields['power_kw'].setEnabled(power);self.fields['torque_nm'].setEnabled(not power)
+        self.sync_load_fields()
         try:
             spec=self.specification_from_fields();result=calculate_pair(spec)
             key=(spec.pinion,spec.wheel)
@@ -134,8 +146,12 @@ class GearPage(BasePage):
                 self.preview_hint.setText('3D önizleme için güncel katıyı oluşturun.')
             else:self.canvas.specification=spec
             self.specification=spec;self.result=result
-            with QSignalBlocker(self.fields['torque_nm' if power else 'power_kw']):
-                self.fields['torque_nm' if power else 'power_kw'].setValue(result.input_torque_nm if power else result.power_kw)
+            # Derived values may lie outside the primary input's UI limits.
+            # Display the true result without clamping it or overwriting the
+            # user's saved alternative primary input.
+            self.derived_load.setText(
+                f'Hesaplanan T₁ = {number(result.input_torque_nm)} N·m' if power else
+                f'Hesaplanan P = {number(result.power_kw)} kW')
             self.show_results()
             self.warning_label.setText('\n'.join(i.message for i in result.warnings) or 'Geometrik temel kontroller uygun. Mukavemet doğrulaması yapılmadı.')
             self.enable_exports(True);self.set_status('Hesap ve evolvent geometri güncellendi.')
@@ -144,6 +160,7 @@ class GearPage(BasePage):
             self.canvas.set_specification(None);self.result_table.setRowCount(0);self.summary.setText('—')
             if self.mesh_view:self.mesh_view.set_mesh(None)
             self.preview_hint.setText('Geçerli parametrelerle yeniden hesaplayın.')
+            self.derived_load.setText('—')
             self.warning_label.setText(str(error));self.enable_exports(False);self.set_status(str(error),True)
         self.speed_changed()
 
