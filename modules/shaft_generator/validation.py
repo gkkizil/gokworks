@@ -1,7 +1,7 @@
 """Conservative manufacturing geometry checks, before any CAD connection."""
 
 import math
-from .models import Groove, Keyway, Chamfer, Fillet, OPERATION_TYPES
+from .models import Bore, CosmeticThread, Groove, Keyway, Chamfer, Fillet, OPERATION_TYPES
 
 
 def number(value, *, positive=True):
@@ -30,6 +30,21 @@ def validate(project):
         return errors
     if not number(project.total_length):
         errors.append('Toplam boy 1.000.000 mm sınırını aşıyor.')
+    bore_span = None
+    if project.bore is not None:
+        b = project.bore
+        if (type(b) is not Bore or not number(b.diameter) or not number(b.depth)
+                or b.entry not in ('left','right') or b.end_condition not in ('through_all','blind')):
+            return errors + ['İç delik: çap, derinlik, giriş veya sonlandırma geçersiz.']
+        if b.end_condition == 'blind' and b.depth >= project.total_length-1e-5:
+            return errors + ['İç delik: kör delik derinliği toplam mil boyundan kısa olmalı.']
+        bore_span = b.interval(project.total_length)
+        for i,s in enumerate(project.stages,1):
+            bottom=bore_span[1] if b.entry=='left' else bore_span[0]
+            touches_bottom=b.end_condition=='blind' and project.start(s.id)-1e-8 <= bottom <= project.end(s.id)+1e-8
+            if touches_bottom or min(project.end(s.id),bore_span[1])-max(project.start(s.id),bore_span[0]) > 1e-8:
+                if (s.diameter-b.diameter)/2 < project.minimum_wall:
+                    errors.append(f'{i}. kademe: iç delik en az radyal et kalınlığını bırakmıyor.')
     intervals = []
     edges = set()
     shoulders = []
@@ -68,6 +83,20 @@ def validate(project):
                 if op.width >= stage.diameter or (op.width / 2) ** 2 + (radius - op.depth) ** 2 >= radius ** 2:
                     errors.append(prefix + 'kama genişliği/derinliği silindirin tamamında geçerli bir taban oluşturmuyor.')
             intervals.append((op.stage_id, op.offset, op.offset + extent, prefix))
+        elif isinstance(op, CosmeticThread):
+            if op.edge not in ('left','right'):
+                errors.append(prefix + 'kenar sol veya sağ olmalı.');continue
+            if stage.diameter-1.226869*op.pitch <= 0:
+                errors.append(prefix + 'diş adımı mil çapı için fazla büyük.')
+            start,end = project.thread_interval(op)
+            # The thread occupies an uninterrupted cylindrical land; end
+            # treatments may touch its ends but may not consume its length.
+            if start < -1e-8 or end > stage.length+1e-8:
+                errors.append(prefix + 'diş boyu kademe sınırlarını aşıyor.')
+            neighbor_index = index-1 if op.edge=='left' else index+1
+            if 0 <= neighbor_index < len(project.stages) and project.stages[neighbor_index].diameter == stage.diameter:
+                errors.append(prefix + 'eş çap geçişinde kozmetik diş başlangıcı için dairesel kenar yok.')
+            intervals.append((stage.id,start,end,prefix))
         else:
             if op.edge not in ('left', 'right'):
                 errors.append(prefix + 'kenar sol veya sağ olmalı.')
@@ -91,6 +120,17 @@ def validate(project):
             # of one annular shoulder, even when they are far apart.
             if neighbor:
                 shoulders.append((edge_key[0], radius, size, prefix))
+        if bore_span is not None:
+            if isinstance(op,CosmeticThread):
+                start,end=project.thread_interval(op);extent=end-start;consumed=.6134345*op.pitch
+            else:
+                extent = op.width if isinstance(op,Groove) else op.length if isinstance(op,Keyway) else size
+                start = op.offset if isinstance(op,(Groove,Keyway)) else 0 if op.edge=='left' else stage.length-size
+                consumed = op.depth if isinstance(op,(Groove,Keyway)) else 0 if neighbor and neighbor.diameter>stage.diameter else size
+            a,b = project.start(stage.id)+start,project.start(stage.id)+start+extent
+            if min(b,bore_span[1])-max(a,bore_span[0]) > 1e-8:
+                if radius-consumed-project.bore.diameter/2 < project.minimum_wall:
+                    errors.append(prefix + 'iç delik ile operasyon arasında en az radyal et kalınlığı kalmıyor.')
     for i, (position, radius, size, prefix) in enumerate(shoulders):
         for other_position, other_radius, other_size, other_prefix in shoulders[:i]:
             radial_gap = abs(radius - other_radius)

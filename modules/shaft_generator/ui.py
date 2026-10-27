@@ -7,19 +7,19 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QSplitter,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QTabWidget,
-    QLineEdit,QComboBox,QDoubleSpinBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox)
+    QLineEdit,QComboBox,QDoubleSpinBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
 from gui_qt.components import BasePage, label, button, scroll
 from . import controller, storage
 from .geometry import operation_plan
-from .models import Project, Groove, Keyway, Chamfer, Fillet
+from .models import Project, Groove, Keyway, Chamfer, Fillet, Bore, CosmeticThread
 from .preview import ShaftPreview
 from .standard_picker import ChannelStandardPicker
 from .validation import validate
 
 
-TITLES = {'groove':'Segman kanalı','keyway':'Kama kanalı','chamfer':'Pah','fillet':'Radyüs'}
+TITLES = {'groove':'Segman kanalı','keyway':'Kama kanalı','chamfer':'Pah','fillet':'Radyüs','cosmetic_thread':'Kozmetik diş'}
 FIELD_TITLES = {'offset':'Başlangıç · mm','width':'Genişlik · mm','length':'Boy · mm','depth':'Radyal derinlik · mm',
-                'angle':'Açı · °','distance':'Mesafe · mm','radius':'Radyüs · mm'}
+                'angle':'Açı · °','distance':'Mesafe · mm','radius':'Radyüs · mm','pitch':'Diş adımı · mm'}
 
 
 class ShaftPage(BasePage):
@@ -55,7 +55,7 @@ class ShaftPage(BasePage):
             commands.addWidget(control)
         stages.addLayout(commands); self.tabs.addTab(stage_page,'Kademeler')
         self.operation_fields={}; self.operation_targets={}; self.standard_pickers={}; self.loading_operation=False
-        for kind,constructor in (('groove',Groove),('keyway',Keyway),('chamfer',Chamfer),('fillet',Fillet)):
+        for kind,constructor in (('groove',Groove),('keyway',Keyway),('chamfer',Chamfer),('fillet',Fillet),('cosmetic_thread',CosmeticThread)):
             page=QWidget(); box=QVBoxLayout(page); box.setContentsMargins(6,6,6,6)
             form=QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapLongRows)
             target=QComboBox(); target.setAccessibleName(TITLES[kind]+' hedef kademesi')
@@ -85,11 +85,29 @@ class ShaftPage(BasePage):
             if kind in ('chamfer','fillet'):
                 box.addWidget(label('Ekle sonrası diğer kenarı seçip yeni operasyon ekleyin. Düzenlemek için listeden seçin.','muted'))
             if kind=='chamfer':box.addWidget(label('Bu sürümde 45° eş mesafeli pah.','muted'))
+            if kind=='cosmetic_thread':
+                self.thread_caption=label('','muted');box.addWidget(self.thread_caption)
+                box.addWidget(label('Metrik sağ diş. Kozmetik gösterimdir; katı hacmi değişmez. Boy, pah/radyüs sonrası silindirik yüzeyden başlar.','muted'))
             actions=QHBoxLayout();actions.addWidget(button('Ekle',lambda checked=False,k=kind:self.add_operation(k)))
             actions.addWidget(button('Seçileni güncelle',lambda checked=False,k=kind:self.update_operation(k)))
             box.addLayout(actions);box.addStretch()
             self.tabs.addTab(scroll(page),TITLES[kind])
-        advanced=label('Merkez deliği, diş, freze düzlüğü, delik ve omuz boşaltması henüz desteklenmiyor.','muted')
+        bore_page=QWidget();bore_box=QVBoxLayout(bore_page)
+        self.bore_enabled=QCheckBox('Eksenel iç delik aç');self.bore_enabled.setAccessibleName('Mil iç deliğini etkinleştir')
+        bore_box.addWidget(self.bore_enabled);bore_form=QFormLayout();bore_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        self.bore_controls={};self.loading_bore=False
+        for key,title in (('diameter','İç çap · mm'),('end_condition','Sonlandırma'),('entry','Giriş'),('depth','Kör delik boyu · mm')):
+            if key in ('diameter','depth'):
+                control=QDoubleSpinBox();control.setDecimals(4);control.setRange(.0001,1_000_000);control.setValue(getattr(Bore(),key))
+            else:
+                control=QComboBox()
+                for text,value in ((('Boydan boya','through_all'),('Kör delik','blind')) if key=='end_condition' else (('Soldan','left'),('Sağdan','right'))):
+                    control.addItem(text,value)
+            control.setAccessibleName('İç delik '+title);self.bore_controls[key]=control;bore_form.addRow(title,control)
+        bore_box.addLayout(bore_form)
+        bore_box.addWidget(label('Tek eksenli silindirik delik. Kör delik tabanı düzdür. Et kalınlığı, segman ve kama derinlikleriyle birlikte kontrol edilir.','muted'))
+        bore_box.addStretch();self.tabs.addTab(scroll(bore_page),'İç delik')
+        advanced=label('Matkap uç konisi, iç diş, gerçek helisel diş, freze düzlüğü ve omuz boşaltması henüz desteklenmiyor.','muted')
         self.tabs.addTab(advanced,'İleri'); self.tabs.setTabEnabled(self.tabs.count()-1,False)
         edit.addWidget(self.tabs,2)
         edit.addWidget(label('OPERASYONLAR','section'))
@@ -121,6 +139,10 @@ class ShaftPage(BasePage):
         self.name.textChanged.connect(self.name_changed);self.minimum_wall.valueChanged.connect(self.wall_changed)
         self.table.cellChanged.connect(self.cell_changed);self.table.itemSelectionChanged.connect(self.table_selected)
         self.operations.currentItemChanged.connect(self.operation_selected)
+        self.bore_enabled.toggled.connect(self.bore_changed)
+        for control in self.bore_controls.values():
+            signal=control.currentIndexChanged if isinstance(control,QComboBox) else control.valueChanged
+            signal.connect(self.bore_changed)
         for kind,controls in self.operation_fields.items():
             for control in (self.operation_targets[kind],*controls.values()):
                 signal=control.currentIndexChanged if isinstance(control,QComboBox) else control.valueChanged
@@ -130,6 +152,15 @@ class ShaftPage(BasePage):
     def populate(self):
         with QSignalBlocker(self.name):self.name.setText(self.project.name)
         with QSignalBlocker(self.minimum_wall):self.minimum_wall.setValue(self.project.minimum_wall)
+        self.loading_bore=True
+        try:
+            self.bore_enabled.setChecked(self.project.bore is not None)
+            bore=self.project.bore or Bore()
+            for key,control in self.bore_controls.items():
+                value=getattr(bore,key)
+                control.setCurrentIndex(control.findData(value)) if isinstance(control,QComboBox) else control.setValue(value)
+        finally:self.loading_bore=False
+        self.update_bore_controls()
         with QSignalBlocker(self.table):
             self.table.setRowCount(len(self.project.stages))
             for row,stage in enumerate(self.project.stages):
@@ -152,6 +183,9 @@ class ShaftPage(BasePage):
                     side='Sol' if op.edge=='left' else 'Sağ'
                     size=op.distance if isinstance(op,Chamfer) else op.radius
                     detail=f' · {side} · {size:g} mm'
+                elif isinstance(op,CosmeticThread):
+                    side='Sol' if op.edge=='left' else 'Sağ'
+                    detail=f' · M{self.project.stage(op.stage_id).diameter:g}×{op.pitch:g} · {side} · {op.length:g} mm'
                 item=QListWidgetItem(f'{TITLES[op.kind]} · {index}. kademe{detail}');item.setData(Qt.UserRole,op.id)
                 self.operations.addItem(item)
         self.select_stage(self.selected_stage)
@@ -170,6 +204,23 @@ class ShaftPage(BasePage):
         self.validation_label.style().unpolish(self.validation_label);self.validation_label.style().polish(self.validation_label)
         for view in (self.top_view,self.section_view):view.set_project(self.project,self.selected_stage,self.selected_operation)
         self.refresh_standards()
+        self.refresh_thread_caption()
+
+    def update_bore_controls(self):
+        enabled=self.bore_enabled.isChecked()
+        blind=self.bore_controls['end_condition'].currentData()=='blind'
+        for key,control in self.bore_controls.items():control.setEnabled(enabled and (key not in ('depth','entry') or blind))
+
+    def bore_changed(self,*args):
+        if self.loading_bore:return
+        self.project.bore=Bore(**{key:control.currentData() if isinstance(control,QComboBox) else control.value()
+                                 for key,control in self.bore_controls.items()}) if self.bore_enabled.isChecked() else None
+        self.update_bore_controls();self.refresh(changed=True)
+
+    def refresh_thread_caption(self):
+        values=self.operation_values('cosmetic_thread')
+        stage=next((s for s in self.project.stages if s.id==values['stage_id']),None)
+        if stage is not None:self.thread_caption.setText(f"M{stage.diameter:g} × {values['pitch']:g} · Gösterim boyu {values['length']:g} mm")
 
     def refresh_standards(self):
         for kind,picker in self.standard_pickers.items():
@@ -235,7 +286,7 @@ class ShaftPage(BasePage):
             for key,control in self.operation_fields[kind].items()})
 
     def add_operation(self,kind):
-        constructor={'groove':Groove,'keyway':Keyway,'chamfer':Chamfer,'fillet':Fillet}[kind]
+        constructor={'groove':Groove,'keyway':Keyway,'chamfer':Chamfer,'fillet':Fillet,'cosmetic_thread':CosmeticThread}[kind]
         operation=constructor(**self.operation_values(kind))
         if isinstance(operation,(Chamfer,Fillet)):
             duplicate=next((op for op in self.project.operations
@@ -263,7 +314,7 @@ class ShaftPage(BasePage):
         if self.loading_operation:return
         op=next((o for o in self.project.operations if o.id==self.selected_operation),None)
         if op is None or op.kind!=kind:
-            self.refresh_standards();return
+            self.refresh_standards();self.refresh_thread_caption();return
         for key,value in self.operation_values(kind).items():setattr(op,key,value)
         self.selected_stage=op.stage_id
         self.populate();self.refresh(changed=True)

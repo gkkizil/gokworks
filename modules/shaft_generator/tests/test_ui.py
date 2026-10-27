@@ -13,6 +13,41 @@ from modules.shaft_generator.ui import ShaftPage
 from modules.shaft_generator.models import Groove
 
 
+def test_bore_controls_show_actual_empty_section_and_save_extended_schema(page,qtbot):
+    from PySide6.QtGui import QColor
+    page.bore_enabled.setChecked(True);qtbot.wait(20)
+    assert page.project.bore.diameter==10 and page.project.to_dict()['version']==2
+    assert not page.bore_controls['depth'].isEnabled()
+    view=page.section_view;rect=view.stage_regions[1][1]
+    image=view.grab().toImage();point=rect.center().toPoint();point.setY(point.y()-3)
+    assert image.pixelColor(point)==QColor(COLORS[view.appearance]['canvas'])
+    page.bore_controls['end_condition'].setCurrentIndex(1)
+    page.bore_controls['entry'].setCurrentIndex(1)
+    page.bore_controls['depth'].setValue(15)
+    assert page.project.bore.interval(page.project.total_length)==(175,190)
+    assert page.bore_controls['depth'].isEnabled()
+    page.bore_controls['diameter'].setValue(26)
+    assert not page.create_button.isEnabled() and 'et kalınlığı' in page.validation_label.text()
+    page.bore_enabled.setChecked(False)
+    assert page.project.bore is None and page.project.to_dict()['version']==1 and page.create_button.isEnabled()
+
+
+def test_cosmetic_thread_form_metadata_preview_and_atomic_edit(page,qtbot):
+    page.operation_fields['cosmetic_thread']['pitch'].setValue(3.5)
+    assert 'M30 × 3.5' in page.thread_caption.text()
+    page.add_operation('cosmetic_thread');qtbot.wait(20)
+    op=page.project.operations[0]
+    assert op.kind=='cosmetic_thread' and op.pitch==3.5 and page.project.to_dict()['version']==2
+    assert page.top_view.operation_regions[0][0]==op.id and page.create_button.isEnabled()
+    page.operation_fields['cosmetic_thread']['length'].setValue(18)
+    assert op.length==18
+    page.bore_enabled.setChecked(True)
+    assert page.project.bore is not None and page.create_button.isEnabled()
+    before=page.project.to_dict()
+    page.select_stage(page.project.stages[2].id);page.select_operation(op.id)
+    assert page.project.to_dict()==before
+
+
 @pytest.fixture
 def page(qtbot,tmp_path):
     create_application([])

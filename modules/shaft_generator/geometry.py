@@ -1,7 +1,7 @@
 """Shared true-scale geometry, unit conversion and native feature plan."""
 
 import math
-from .models import Groove, Keyway, Chamfer, Fillet
+from .models import Groove, Keyway, Chamfer, Fillet, CosmeticThread
 from .validation import require_valid
 
 
@@ -93,14 +93,18 @@ def operation_plan(project):
                  diameter_m=metres(stage.diameter), length_m=metres(stage.length))
             for i,stage in enumerate(project.stages,1)]
     counts = {}
+    if project.bore is not None:
+        a,b=project.bore.interval(project.total_length)
+        plan.append(dict(kind='bore',name='IC_DELIK_01',sketch='IC_DELIK_01_ESKIZI',
+                         start_m=metres(a),length_m=metres(b-a),diameter_m=metres(project.bore.diameter)))
     # Preserve the original circular end edges while making edge treatments.
     # Validation keeps their axial footprints separate from channel cuts.
-    for kind in (Chamfer, Fillet, Groove, Keyway):
+    for kind in (Chamfer, Fillet, Groove, Keyway, CosmeticThread):
         for op in project.operations:
             if not isinstance(op, kind):
                 continue
             key = op.kind
             counts[key] = counts.get(key,0)+1
-            name = {'groove':'SEGMAN_KANALI','keyway':'KAMA_KANALI','chamfer':'PAH','fillet':'RADYUS'}[key]
+            name = {'groove':'SEGMAN_KANALI','keyway':'KAMA_KANALI','chamfer':'PAH','fillet':'RADYUS','cosmetic_thread':'KOZMETIK_DIS'}[key]
             plan.append(dict(kind=key, name=f'{name}_{counts[key]:02}', operation_id=op.id))
     return plan

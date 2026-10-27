@@ -5,7 +5,7 @@ from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QPolygonF
 from PySide6.QtWidgets import QWidget, QSizePolicy
 from gui_qt.theme import COLORS
 from .geometry import treated_profile
-from .models import Groove, Keyway
+from .models import Groove, Keyway, CosmeticThread
 from .validation import validate
 
 
@@ -63,6 +63,10 @@ class ShaftPreview(QWidget):
         body = QPainterPath()
         body.addPolygon(QPolygonF([point(x,y) for x,y in boundary]))
         body.closeSubpath()
+        if self.section and project.bore is not None:
+            a,b=project.bore.interval(project.total_length)
+            cut=QPainterPath();cut.addRect(QRectF(point(a,project.bore.diameter/2),point(b,-project.bore.diameter/2)).normalized())
+            body=body.subtracted(cut)
         for op in project.operations:
             stage = project.stage(op.stage_id)
             if isinstance(op, Groove):
@@ -97,9 +101,26 @@ class ShaftPreview(QWidget):
                 painter.drawText(QRectF(rect.x(),rect.top()-22,rect.width(),20),Qt.AlignCenter,f'Ø{stage.diameter:g}')
         painter.setPen(QPen(muted,.8,Qt.DashDotLine))
         painter.drawLine(point(-5,0),point(project.total_length+5,0))
+        if not self.section and project.bore is not None:
+            a,b=project.bore.interval(project.total_length);r=project.bore.diameter/2
+            painter.setPen(QPen(muted,1,Qt.DashLine))
+            for sign in (-1,1):painter.drawLine(point(a,sign*r),point(b,sign*r))
+            if project.bore.end_condition=='blind':
+                end=b if project.bore.entry=='left' else a
+                painter.drawLine(point(end,r),point(end,-r))
         for op in project.operations:
             stage=project.stage(op.stage_id)
-            if isinstance(op,(Groove,Keyway)):
+            if isinstance(op,CosmeticThread):
+                a,b=project.thread_interval(op);a+=project.start(stage.id);b+=project.start(stage.id)
+                r=stage.diameter/2;minor=r-.6134345*op.pitch
+                painter.setPen(QPen(accent if op.id==self.selected_operation else muted,1))
+                for sign in (-1,1):
+                    painter.drawLine(point(a,sign*minor),point(b,sign*minor))
+                    painter.drawLine(point(b if op.edge=='left' else a,sign*r),point(b if op.edge=='left' else a,sign*minor))
+                hit=QRectF(point(a,r),point(b,minor)).normalized().adjusted(-3,-4,3,4)
+                if hit.width()>80:
+                    painter.drawText(QRectF(hit.left(),hit.bottom()+2,hit.width(),20),Qt.AlignLeft,f'M{stage.diameter:g}×{op.pitch:g}')
+            elif isinstance(op,(Groove,Keyway)):
                 x=project.start(stage.id)+op.offset
                 length=op.width if isinstance(op,Groove) else op.length
                 # The section through the slot axis has a flat rectangular floor;

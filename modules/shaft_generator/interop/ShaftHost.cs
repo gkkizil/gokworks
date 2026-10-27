@@ -17,12 +17,14 @@ namespace Gokworks.ShaftInterop
     {
         public string id; public string kind; public string stage_id; public string edge;
         public double offset; public double width; public double depth; public double length;
-        public double angle; public double distance; public double radius;
+        public double angle; public double distance; public double radius; public double pitch;
     }
+    public class Bore { public double diameter; public double depth; public string end_condition; public string entry; }
     public class Project
     {
         public string schema; public int version; public string units; public string name;
         public Stage[] stages; public Operation[] operations; public double minimum_wall;
+        public Bore bore;
     }
     public class Request
     {
@@ -73,7 +75,8 @@ namespace Gokworks.ShaftInterop
         {
             Need(request != null && request.operation == "create_shaft" && request.process_id > 0, "Invalid shaft request.");
             Project p = request.project;
-            Need(p != null && p.schema == "gokworks.shaft" && p.version == 1 && p.units == "mm", "Unsupported shaft schema.");
+            Need(p != null && p.schema == "gokworks.shaft" && (p.version == 1 || p.version == 2) && p.units == "mm", "Unsupported shaft schema.");
+            Need(p.version==2 || p.bore==null,"İç delik için proje sürümü 2 gerekli.");
             Need(!String.IsNullOrWhiteSpace(p.name) && p.name.Length <= 80 && p.name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0, "Invalid part name.");
             Need(p.stages != null && p.stages.Length >= 1 && p.stages.Length <= 100 && p.operations != null && p.operations.Length <= 200, "Invalid stage/operation count.");
             Need(Positive(p.minimum_wall), "Invalid minimum wall.");
@@ -99,9 +102,12 @@ namespace Gokworks.ShaftInterop
                 }
                 else if (op.kind == "chamfer") Need(op.angle == 45 && Positive(op.distance), "Only 45 degree chamfers are supported.");
                 else if (op.kind == "fillet") Need(Positive(op.radius), "Invalid fillet radius.");
+                else if (op.kind == "cosmetic_thread") Need(p.version==2 && Positive(op.length) && Positive(op.pitch)
+                    && (op.edge=="left" || op.edge=="right") && s.diameter-1.226869*op.pitch>0,"Geçersiz kozmetik diş.");
                 else throw new InvalidOperationException("Unsupported shaft operation.");
                 if (op.kind == "chamfer" || op.kind == "fillet") Need(op.edge == "left" || op.edge == "right", "Invalid edge.");
             }
+            AxialFeatures.Validate(p,total);
             if (!String.IsNullOrEmpty(request.output_path))
             {
                 string path = request.output_path;
@@ -421,6 +427,99 @@ namespace Gokworks.ShaftInterop
         }
     }
 
+    internal static class AxialFeatures
+    {
+        internal static double Setback(Project p, string stage, string edge)
+        {
+            double value=0;
+            foreach (Operation op in p.operations)
+                if (op.stage_id==stage && op.edge==edge && (op.kind=="chamfer" || op.kind=="fillet"))
+                    value=Math.Max(value,op.kind=="chamfer" ? op.distance : op.radius);
+            return value;
+        }
+        internal static double BoreVolume(double diameter, double length)
+        { return Math.PI*Math.Pow(diameter/2,2)*length*1e-9; }
+        internal static string Designation(double diameter,double pitch)
+        { return "M"+diameter.ToString("0.########",CultureInfo.InvariantCulture)+"x"+pitch.ToString("0.0#######",CultureInfo.InvariantCulture); }
+        internal static IFeature Cosmetic(IFeatureManager manager,double diameter,double pitch,double length)
+        {
+            return (IFeature)manager.InsertCosmeticThread3(
+                (int)swCosmeticStandardType_e.swStandardType_StandardISO,"Machine Threads",Designation(diameter,pitch),
+                (diameter-1.226869*pitch)*.001,(int)swCosmeticEndConditions_e.swEndConditionBlind,length*.001,"");
+        }
+        internal static void VerifyUnchanged(double before,double after)
+        { Host.Need(before>0 && after>0 && !Double.IsInfinity(before) && !Double.IsInfinity(after)
+            && Math.Abs(before-after)<=Math.Max(1e-15,Math.Abs(before)*1e-9),"Kozmetik diş katı hacmini değiştirdi."); }
+        internal static void VerifyCosmetic(ICosmeticThreadFeatureData data,double diameter,double pitch,double length)
+        {
+            Host.Need(data!=null,"Kozmetik diş verisi okunamadı.");
+            string got=(data.Size ?? "").Replace(" ","").Replace("×","x");
+            string expected=Designation(diameter,pitch);
+            // Size strings may differ only in the number of decimal zeroes.
+            string[] pieces=got.TrimStart('M','m').ToLowerInvariant().Split('x'); double d,p;
+            bool matches=got.Length>0 && (got[0]=='M' || got[0]=='m') && pieces.Length==2 && Double.TryParse(pieces[0],NumberStyles.Float,CultureInfo.InvariantCulture,out d)
+                && Double.TryParse(pieces[1],NumberStyles.Float,CultureInfo.InvariantCulture,out p)
+                && Math.Abs(d-diameter)<1e-7 && Math.Abs(p-pitch)<1e-7;
+            Host.Need(data.Standard==(int)swCosmeticStandardType_e.swStandardType_StandardISO && matches,
+                "ISO kozmetik diş ölçüsü doğrulanamadı: "+expected+"; okunan: "+got);
+            Host.Need(data.EndCondition==(int)swCosmeticEndConditions_e.swEndConditionBlind
+                && Math.Abs(data.BlindDepth-length*.001)<1e-8 && data.Diameter>0 && data.Diameter<diameter*.001,
+                "Kozmetik diş boyu veya gösterim çapı doğrulanamadı.");
+        }
+        internal static void Validate(Project p,double total)
+        {
+            Bore b=p.bore; double start=0,end=total;
+            if (b!=null)
+            {
+                Host.Need(!Double.IsNaN(b.diameter) && !Double.IsInfinity(b.diameter) && b.diameter>=.00001 && b.diameter<=1000000
+                    && !Double.IsNaN(b.depth) && !Double.IsInfinity(b.depth) && b.depth>=.00001 && b.depth<=1000000
+                    && (b.entry=="left" || b.entry=="right") && (b.end_condition=="through_all" || b.end_condition=="blind"),"Geçersiz iç delik.");
+                if (b.end_condition=="blind")
+                {
+                    Host.Need(b.depth<total-.00001,"Kör delik toplam boydan kısa olmalı.");
+                    start=b.entry=="left" ? 0 : total-b.depth; end=start+b.depth;
+                }
+            }
+            double x=0;
+            for (int i=0;i<p.stages.Length;i++)
+            {
+                Stage s=p.stages[i];
+                double bottom=b!=null && b.entry=="right" ? start : end;
+                bool touchesBottom=b!=null && b.end_condition=="blind" && bottom>=x-1e-8 && bottom<=x+s.length+1e-8;
+                if (b!=null && (touchesBottom || Math.Min(x+s.length,end)-Math.Max(x,start)>1e-8))
+                    Host.Need((s.diameter-b.diameter)/2>=p.minimum_wall,"İç delik et kalınlığı yetersiz.");
+                foreach (Operation op in p.operations)
+                {
+                    if (op.stage_id!=s.id) continue;
+                    if (op.kind=="cosmetic_thread")
+                    {
+                        double left=Setback(p,s.id,"left"),right=Setback(p,s.id,"right");
+                        Host.Need(op.length<=s.length-left-right+1e-8,"Diş boyu silindirik yüzeye sığmıyor.");
+                        int neighbor=op.edge=="left" ? i-1 : i+1;
+                        Host.Need(neighbor<0 || neighbor>=p.stages.Length || p.stages[neighbor].diameter!=s.diameter,
+                            "Eş çap geçişinde diş başlangıç kenarı yok.");
+                        double a=x+(op.edge=="left" ? left : s.length-right-op.length);
+                        if (b!=null && Math.Min(a+op.length,end)-Math.Max(a,start)>1e-8)
+                            Host.Need((s.diameter-1.226869*op.pitch-b.diameter)/2>=p.minimum_wall,
+                                "Dişin nominal dip çapı ile iç delik arasında yeterli et yok.");
+                    }
+                    else if (b!=null)
+                    {
+                        bool channel=op.kind=="groove" || op.kind=="keyway";
+                        double size=channel ? op.depth : op.kind=="chamfer" ? op.distance : op.radius;
+                        double length=op.kind=="groove" ? op.width : op.kind=="keyway" ? op.length : size;
+                        double a=x+(channel ? op.offset : op.edge=="left" ? 0 : s.length-size);
+                        int neighbor=op.edge=="left" ? i-1 : i+1;
+                        double consumed=!channel && neighbor>=0 && neighbor<p.stages.Length && p.stages[neighbor].diameter>s.diameter ? 0 : size;
+                        if (Math.Min(a+length,end)-Math.Max(a,start)>1e-8)
+                            Host.Need(s.diameter/2-consumed-b.diameter/2>=p.minimum_wall,"İç delik ile dış operasyon arasında yeterli et yok.");
+                    }
+                }
+                x+=s.length;
+            }
+        }
+    }
+
     internal sealed class Builder
     {
         private readonly IModelDoc2 model;
@@ -464,6 +563,9 @@ namespace Gokworks.ShaftInterop
                     if (kind == "keyway" && firstKeywayWidth == null) firstKeywayWidth = "GENISLIK@" + name + "_ESKIZI";
                 }
             }
+            if (project.bore!=null) { ExpectedNames.Insert(project.stages.Length,"IC_DELIK_01");sketchNames.Add("IC_DELIK_01_ESKIZI"); }
+            int threads=0;
+            foreach (Operation op in project.operations) if (op.kind=="cosmetic_thread") ExpectedNames.Add("KOZMETIK_DIS_"+(++threads).ToString("00"));
         }
 
         private static string OperationName(string kind, int i)
@@ -658,6 +760,7 @@ namespace Gokworks.ShaftInterop
                 Host.Report("Kademe " + (i+1) + "/" + project.stages.Length + " oluşturuluyor");
                 BuildStage(i);
             }
+            if (project.bore!=null) { Host.Report("Eksenel iç delik oluşturuluyor");BuildBore(); }
             foreach (string kind in ChannelCuts.OperationOrder)
             {
                 int count=0;
@@ -672,7 +775,53 @@ namespace Gokworks.ShaftInterop
                     else BuildFillet(op,name);
                 }
             }
+            int threads=0;
+            foreach (Operation op in project.operations)
+                if (op.kind=="cosmetic_thread") { Host.Report("Kozmetik diş ekleniyor");BuildCosmetic(op,"KOZMETIK_DIS_"+(++threads).ToString("00")); }
             Verify();
+        }
+        private void BuildBore()
+        {
+            RequireSingleCutBody();double before=Volume();Bore b=project.bore;
+            double total=Start(project.stages.Length),length=b.end_condition=="through_all" ? total : b.depth;
+            double x=b.end_condition=="blind" && b.entry=="right" ? total-length : 0;
+            string sketch="IC_DELIK_01_ESKIZI";ISketch drawing=BeginSketch(sketch);ISketchPoint origin=Origin();
+            Global("IC_DELIK_DERINLIK",b.depth);
+            model.SketchManager.AddToDB=true;
+            ISketchSegment circle=(ISketchSegment)model.SketchManager.CreateCircleByRadius(M(x),0,0,M(b.diameter/2));
+            Host.Need(circle!=null,"İç delik çap dairesi oluşturulamadı.");circle.ConstructionGeometry=true;
+            model.SketchManager.AddToDB=false;
+            Dimension(circle,"IC_CAP",b.diameter,x-8,b.diameter/2,true);
+            string lengthExpression=b.end_condition=="through_all" ? StartExpression(project.stages.Length) : Q("IC_DELIK_DERINLIK");
+            string xExpression=x>0 ? StartExpression(project.stages.Length)+" - "+Q("IC_DELIK_DERINLIK") : null;
+            ISketchSegment[] rectangle=Rectangle(sketch,origin,x,0,length,b.diameter/2,"DELIK_BOYU",null,xExpression,null,null);
+            Equation("DELIK_BOYU@"+sketch,lengthExpression);
+            Coincident((ISketchPoint)((ISketchArc)circle).GetCenterPoint2(),StartPoint(rectangle[0]));
+            model.ClearSelection2(true);
+            Host.Need(StartPoint(rectangle[3]).Select4(false,null) && circle.Select4(true,null),"İç delik çap ilişkisi kurulamadı.");
+            model.SketchAddConstraints("sgCOINCIDENT");
+            string axis=rectangle[0].GetName()+"@"+sketch;
+            EndSketch(drawing);SelectRevolve(sketch,axis,4);
+            Named(ChannelCuts.Groove(model.FeatureManager),"IC_DELIK_01");
+            ChannelCuts.VerifyRemoval("IC_DELIK_01",before,Volume(),AxialFeatures.BoreVolume(b.diameter,length));
+        }
+        private void BuildCosmetic(Operation op,string name)
+        {
+            int i=stageIndices[op.stage_id];Stage s=project.stages[i];
+            double inset=AxialFeatures.Setback(project,s.id,op.edge);
+            double position=Start(i)+(op.edge=="left" ? inset : s.length-inset);
+            double before=Volume();
+            // Volume() clears selections, so explicitly reselect the starting edge.
+            SelectCircularEdgeAt(position,s.diameter/2,0);
+            IFeature feature=AxialFeatures.Cosmetic(model.FeatureManager,s.diameter,op.pitch,op.length);
+            Named(feature,name);
+            AxialFeatures.VerifyCosmetic((ICosmeticThreadFeatureData)feature.GetDefinition(),s.diameter,op.pitch,op.length);
+            AxialFeatures.VerifyUnchanged(before,Volume());
+            // Document preferences apply only to this newly created owned Part.
+            Host.Need(model.Extension.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swDisplayCosmeticThreads,
+                (int)swUserPreferenceOption_e.swDetailingNoOptionSpecified,true)
+                && model.Extension.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swDisplayShadedCosmeticThreads,
+                (int)swUserPreferenceOption_e.swDetailingNoOptionSpecified,true),"Yeni parçada kozmetik diş görünümü etkinleştirilemedi.");
         }
         private void BuildStage(int i)
         {
@@ -869,6 +1018,11 @@ namespace Gokworks.ShaftInterop
         {
             int index=stageIndices[op.stage_id]; Stage stage=project.stages[index];
             double x=M(Start(index)+(op.edge=="right"?stage.length:0)); double radius=M(stage.diameter/2);
+            return SelectCircularEdgeAt(x/.001,radius/.001,mark);
+        }
+        private IEdge SelectCircularEdgeAt(double axialMm,double radiusMm,int mark)
+        {
+            double x=M(axialMm),radius=M(radiusMm);
             double[] centre=Point(x,0,0,profileToModel), direction=Vector(1,0,0,profileToModel);
             var matches=new List<IEdge>();
             object[] bodies=(object[])((IPartDoc)model).GetBodies2((int)swBodyType_e.swSolidBody,false);
@@ -903,7 +1057,20 @@ namespace Gokworks.ShaftInterop
 
         private IFeature Find(string name)
         {
-            return (IFeature)((IPartDoc)model).FeatureByName(name);
+            IFeature found=(IFeature)((IPartDoc)model).FeatureByName(name);
+            if (found!=null) return found;
+            // Cosmetic threads are often absorbed below their cylinder feature.
+            for (IFeature f=(IFeature)model.FirstFeature();f!=null;f=(IFeature)f.GetNextFeature())
+            { found=FindChild(f,name,0);if (found!=null) return found; }
+            return null;
+        }
+        private static IFeature FindChild(IFeature feature,string name,int depth)
+        {
+            if (feature.Name==name) return feature;
+            if (depth>=30) return null;
+            for (IFeature child=(IFeature)feature.GetFirstSubFeature();child!=null;child=(IFeature)child.GetNextSubFeature())
+            { IFeature found=FindChild(child,name,depth+1);if (found!=null) return found; }
+            return null;
         }
         internal void Verify()
         {
@@ -916,12 +1083,19 @@ namespace Gokworks.ShaftInterop
                 string type=feature.GetTypeName2();
                 if (type=="ICE") type=feature.GetTypeName();
                 bool accepted=name.StartsWith("MIL_ANA_GEOMETRI_") ? type=="Rev" || type=="Revolution" :
+                    name=="IC_DELIK_01" ? type=="RevCut" : name.StartsWith("KOZMETIK_DIS_") ? type=="CosmeticThread" :
                     name.StartsWith("SEGMAN_KANALI_") ? type=="RevCut" :
                     name.StartsWith("KAMA_KANALI_") ? type=="Cut" :
                     name.StartsWith("PAH_") ? type=="Chamfer" : type=="Fillet";
                 Host.Need(accepted,"Unexpected native feature type for "+name+": "+type);
                 bool warning; int code=feature.GetErrorCode2(out warning);
                 Host.Need(code==0,"Feature has a rebuild error or warning: "+name+" ("+code+")");
+            }
+            int threads=0;
+            foreach (Operation op in project.operations) if (op.kind=="cosmetic_thread")
+            {
+                IFeature f=Find("KOZMETIK_DIS_"+(++threads).ToString("00"));
+                AxialFeatures.VerifyCosmetic((ICosmeticThreadFeatureData)f.GetDefinition(),project.stages[stageIndices[op.stage_id]].diameter,op.pitch,op.length);
             }
             foreach (string name in sketchNames)
             {
@@ -987,6 +1161,7 @@ namespace Gokworks.ShaftInterop
             EditProbe(diameterNames[0]); EditProbe(lengthNames[0]);
             if (firstGrooveWidth!=null) EditProbe(firstGrooveWidth);
             if (firstKeywayWidth!=null) EditProbe(firstKeywayWidth,.99);
+            if (project.bore!=null) EditProbe("IC_CAP@IC_DELIK_01_ESKIZI",.99);
             foreach (string kind in new string[] { "groove", "keyway" })
             {
                 int count=0;
