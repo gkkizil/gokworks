@@ -1,5 +1,26 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Dişli Hesaplama · 27 Ekim 2026
+
+Yeni yerel CAD bağımlılığı `cadquery-ocp-novtk` / proxy 8.0.1.1.0'dır.
+OCP bağlayıcısı **Apache-2.0**, OCCT 8.0.1 çekirdeği **LGPL-2.1 ve OCCT
+istisnası** kapsamındadır. Open CASCADE Technology kullanılır; alıcılar LGPL
+kapsamındaki kaynak, kitaplık değiştirme ve hata ayıklama haklarını korur.
+Kaynaklar: https://github.com/CadQuery/OCP ve
+https://github.com/Open-Cascade-SAS/OCCT/tree/V8_0_1 .
+Değişmemiş dinamik kitaplıklar kullanılır. `GOKWORKS_CAD_DIR` uyumlu harici
+OCP/proxy/OCCT DLL paketini seçer; dağıtım koşulları bu hakkı engellememelidir.
+Tam lisans, istisna ve yerel kodek bildirimleri `packaging/licenses/gears/`
+altındadır ve Lisanslar ekranından dışa aktarılabilir. FreeImage FIPL,
+LibRaw LGPL, zstd BSD seçeneğiyle belgelenir; Apache etiketi bütün DLL'lere
+genellenmez. Microsoft runtime DLL'leri Microsoft koşullarına tabidir.
+
+py_gearworks (Apache-2.0), python-gearbox ve GEARpie (MIT), FreeCAD Gears
+(GPL-3.0) somut kaynakları incelendi; bu projelerin motor kodu uygulamaya
+kopyalanmadı veya bağlanmadı. GPL kodu MIT gibi değerlendirilmedi.
+[Sabit kaynaklar ve seçim gerekçesi](../modules/gear_calculator/research/README.md).
+Evolvent/hesap motoru GOKWORKS için yazıldı; mukavemet standardı uyumu iddia edilmez.
+
 ## Weldments ve profil kesim · 22 Ekim 2026
 
 Xarial CodeStack (MIT), SimonRafferty/Solidworks_Macros (lisans doğrulanamadı)

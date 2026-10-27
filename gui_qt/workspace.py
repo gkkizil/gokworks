@@ -14,6 +14,7 @@ WORKSPACES = (
     ('Montaj', ('bom', 'naming')),
     ('Üretim', ('nesting', 'profile_cutting', 'k_factor', 'shaft_generator')),
     ('Hesaplar', ('iso_fits', 'geometric_tolerances', 'tolerance_stack', 'bolt', 'bolt_torque', 'weight')),
+    ('Makine Elemanları', ('gear_calculator',)),
 )
 
 

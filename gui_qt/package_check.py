@@ -43,6 +43,10 @@ def check(output):
                     app.processEvents()
                     resize_times.append((time.perf_counter()-before)*1000)
                     assert w.pages[mode].width() >= 550
+                    if mode=='gear_calculator' and not w.pages[mode].compact_mode:
+                        gear_page=w.pages[mode]
+                        assert all(panel.isVisible() for panel in
+                            (gear_page.input_scroll,gear_page.viewer_panel,gear_page.results_scroll))
         bolt = w.pages['bolt']
         bolt.form.set_value('unit','kg')
         bolt.form.set_value('mode','Çekme')
@@ -69,6 +73,19 @@ def check(output):
         assert weight.result.total_mass_kg == 157
         assert w.pages['iso_fits'].result is not None
         assert w.pages['geometric_tolerances'].result is not None
+        # Exercise the real worker command in source and frozen distributions.
+        # This is local OCCT, not a mocked SOLIDWORKS or an STL-to-STEP conversion.
+        from modules.gear_calculator.service import execute as gear_execute
+        gears = w.pages['gear_calculator']
+        assert abs(gears.result.ratio-2)<1e-10
+        gear_step = gear_execute(gears.specification,'step',path=Path(folder)/'gear-pair.step')
+        gear_dxf = gear_execute(gears.specification,'dxf',path=Path(folder)/'gear-pair.dxf')
+        assert gear_step['solids']==2 and gear_step['volume_mm3']>0
+        assert gear_dxf['gears']==2
+        selected_cad = os.environ.get('GOKWORKS_CAD_DIR')
+        external_cad = bool(selected_cad and Path(gear_step['kernel_module_path']).resolve().is_relative_to(Path(selected_cad).resolve()))
+        if selected_cad:
+            assert external_cad, 'OCP/OCCT değiştirme yolu kullanılmadı.'
         from modules.cad_converter.formats import FORMATS
         from modules.cad_converter.models import Source
         cad = w.pages['cad_converter']
@@ -258,7 +275,7 @@ def check(output):
         distribution = ('onedir' if Path(sys._MEIPASS).resolve().is_relative_to(Path(sys.executable).resolve().parent)
                         else 'onefile') if frozen else 'source'
         report = dict(status='passed',framework='PySide6 / Qt Widgets',pyside=pyside_version,qt=qVersion(),
-                      distribution=distribution, external_qt_verified=external_qt,pdf_exit_observer=observer,
+                      distribution=distribution, external_qt_verified=external_qt,external_cad_verified=external_cad,pdf_exit_observer=observer,
                       python=platform.python_version(),platform=platform.platform(),qt_platform=app.platformName(),
                       dpi_scale=app.primaryScreen().devicePixelRatio(),pages=pages,themes=['dark','light'],
                       resolutions=[[1024,700],[1366,768],[1920,1080],[2560,1440]],
@@ -280,6 +297,7 @@ def check(output):
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',
+                      'external involute gear pair / native OCCT STEP readback / closed DXF',
                       'embedded licenses and export','no Tk runtime'])
         w.close()
         return report
