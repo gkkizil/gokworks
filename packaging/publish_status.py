@@ -86,6 +86,8 @@ def main():
         request = json.loads(request_path.read_text(encoding='utf-8'))
         report['source_commit'] = request.get('source_commit', report['commit'])
         report['validation_profile'] = request.get('validation_profile', 'full')
+        if report['validation_profile'] == 'package-only':
+            report['regression_suite'] = 'not-run-user-request'
     reused = Path('windows-reused-validation.json')
     if reused.is_file():
         report['reused_validation'] = json.loads(reused.read_text(encoding='utf-8'))

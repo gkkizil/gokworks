@@ -124,10 +124,15 @@ def main():
         'Gömülü lisanslar uygulamadaki Lisanslar düğmesinden okunabilir ve kaydedilebilir.\n'
         'Uyumlu Qt/PySide kitaplıkları GOKWORKS_LIBRARY_DIR ile değiştirilebilir.\n\n'
         f'Kaynak commit: {os.environ.get("GITHUB_SHA", "yerel derleme")}\n', encoding='utf-8')
+    request_path = ROOT/'packaging/windows-build-request.json'
+    request = json.loads(request_path.read_text(encoding='utf-8')) if request_path.exists() else {}
+    validation_note = ('Kullanıcı isteğiyle tam regresyon test paketi çalıştırılmadı. '
+                       'Paketlenmiş uygulamanın açılış ve CAD özdenetimleri yapıldı.\n\n'
+                       if request.get('validation_profile') == 'package-only' else '')
     (ROOT/'dist/release-notes.md').write_text(
         'Windows 10/11 x64 · Tek dosya GOKWORKS.exe. Yanında klasör veya Python kurulumu gerekmez.\n\n'
         'Lisanslar uygulamadaki Lisanslar ekranındadır. CAD işlemleri kurulu ve açık SolidWorks gerektirir.\n\n'
-        f'SHA256: `{digest}`\n\nKaynak: `{os.environ.get("GITHUB_SHA", "yerel derleme")}`\n', encoding='utf-8')
+        + validation_note + f'SHA256: `{digest}`\n\nKaynak: `{os.environ.get("GITHUB_SHA", "yerel derleme")}`\n', encoding='utf-8')
     print(json.dumps({'exe': str(exe), 'bytes': exe.stat().st_size, 'sha256': digest, 'smoke': reports}))
 
 

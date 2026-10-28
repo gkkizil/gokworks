@@ -1,4 +1,4 @@
-"""Reuse successful Windows checks only when their application source is unchanged."""
+"""Select full, verified-source or explicitly requested packaging-only validation."""
 
 import json
 import os
@@ -32,12 +32,19 @@ def validate_changes(paths):
         raise RuntimeError('Test edilen kaynak değişmiş; tam doğrulama gerekli: '+', '.join(changed[:8]))
 
 
+def validation_profile(request):
+    profile = request.get('validation_profile', 'full')
+    if profile not in ('full', 'verified-source', 'package-only'):
+        raise RuntimeError('Bilinmeyen Windows doğrulama profili.')
+    if profile == 'package-only' and request.get('skip_full_tests') is not True:
+        raise RuntimeError('Yalnız paketleme profili için açık test atlama isteği gerekli.')
+    return profile
+
+
 def main():
     root = Path(__file__).resolve().parents[1]
     request = json.loads((root/'packaging/windows-build-request.json').read_text(encoding='utf-8'))
-    profile = request.get('validation_profile', 'full')
-    if profile not in ('full', 'verified-source'):
-        raise RuntimeError('Bilinmeyen Windows doğrulama profili.')
+    profile = validation_profile(request)
     reuse = profile == 'verified-source'
     if reuse:
         source = request.get('verified_source_commit', '')
@@ -63,6 +70,9 @@ def main():
         print('Doğrulanmış uygulama kaynağı aynı; önceki Windows testleri yeniden kullanılacak.')
     with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
         output.write('reuse='+str(reuse).lower()+'\n')
+        output.write('full='+str(profile == 'full').lower()+'\n')
+    if profile == 'package-only':
+        print('Kullanıcı isteği: regresyon testleri çalıştırılmayacak; EXE paketleme ve açılış özdenetimleri yapılacak.')
 
 
 if __name__ == '__main__':

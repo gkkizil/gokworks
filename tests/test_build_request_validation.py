@@ -11,6 +11,16 @@ validation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validation)
 
 
+def test_default_profile_remains_full_and_package_only_requires_explicit_request():
+    assert validation.validation_profile({}) == 'full'
+    assert validation.validation_profile(dict(validation_profile='verified-source')) == 'verified-source'
+    assert validation.validation_profile(dict(validation_profile='package-only', skip_full_tests=True)) == 'package-only'
+    for request in ({'validation_profile': 'unknown'}, {'validation_profile': 'package-only'},
+                    {'validation_profile': 'package-only', 'skip_full_tests': 'true'}):
+        with pytest.raises(RuntimeError):
+            validation.validation_profile(request)
+
+
 def valid_run():
     return dict(head_sha='a'*40, head_branch='main', status='completed', conclusion='success',
                 repository=dict(full_name='gkkizil/gokworks'), name='Windows BOM and shaft UI')
