@@ -1,13 +1,8 @@
 {
-  "request_id": "20261027-latest-shaft-bore-cosmetic-profile-exe",
-  "requested_at": "2026-10-27T11:49:00+00:00",
-  "source_commit": "8ef7515991a7f32571b3b3030b755e27d678ecb0",
-  "validation_profile": "verified-source",
-  "verified_source_commit": "4b8736a5ed33b7ac71128426a6c162d99a3ec97c",
-  "validation_runs": [
-    40497596926,
-    40497597010
-  ],
-  "reason": "User explicitly requested the latest complete Windows EXE. Include merged axial bores and cosmetic shaft threads plus the latest profile-cutting workflow improvements. Application source matches the two successful main-branch Windows checks; rerun packaging checks and frozen executable smoke at all configured DPI scales.",
+  "request_id": "20261028-041045-latest-gears-six-families-exe",
+  "requested_at": "2026-10-28T07:10:45+03:00",
+  "source_commit": "714ebbe2fa051f3d2174db0dc5bc6a85966594ea",
+  "validation_profile": "full",
+  "reason": "User requested the latest Windows EXE. Build current main including shaft bore/cosmetic-thread changes, audited involute gear calculations and six additional gear CAD workflows from PRs 13–15. Run full native Windows regression checks and frozen-executable smoke/CAD checks before publishing the direct executable download. Advanced bevel/hypoid/worm types retain their explicit calculation-only limitations.",
   "cancelled": false
 }
