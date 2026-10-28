@@ -1,8 +1,9 @@
 {
-  "request_id": "20261028-093050-chain-sprocket-exe",
-  "requested_at": "2026-10-28T09:30:50+00:00",
-  "source_commit": "ed272f6f0fb375197e7c2cb11d5e226856beee3e",
-  "validation_profile": "full",
-  "reason": "User requested latest Windows single-file EXE including roller-chain sprockets. Move native DXF test cleanup to pytest-qt before_close_func because its widget close/delete hook precedes yield-fixture finalizers. Freeze new captures and frames, cancel jobs and drain the live renderer pool before close. All focused native guards, full Windows regression suite and frozen application/CAD checks at three DPI scales remain mandatory. Retain documented sprocket manufacturing and chain-motion limitations.",
+  "request_id": "20261028-151513-general-ui-exe",
+  "requested_at": "2026-10-28T15:15:13+03:00",
+  "source_commit": "013eb0d07ea99157f5b13a2a970b5bf997e88700",
+  "validation_profile": "package-only",
+  "skip_full_tests": true,
+  "reason": "User explicitly requested the updated Windows EXE without the complete test suite. Include shared UI improvements from main (43f1440), all gear families and roller-chain sprockets. Skip regression suites and focused test batches; keep the real onefile executable build, packaged application/CAD self-checks and download integrity verification. Record that full regression tests were not run for this package.",
   "cancelled": false
 }
