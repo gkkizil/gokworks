@@ -1,8 +1,8 @@
 {
-  "request_id": "20261028-041045-latest-gears-six-families-exe",
-  "requested_at": "2026-10-28T07:10:45+03:00",
-  "source_commit": "714ebbe2fa051f3d2174db0dc5bc6a85966594ea",
+  "request_id": "20261028-060743-unified-gear-workspace-exe",
+  "requested_at": "2026-10-28T09:07:43+03:00",
+  "source_commit": "8dfad1ba5951e943f885c10513112ea04092085c",
   "validation_profile": "full",
-  "reason": "User requested the latest Windows EXE. Build current main including shaft bore/cosmetic-thread changes, audited involute gear calculations and six additional gear CAD workflows from PRs 13–15. Run full native Windows regression checks and frozen-executable smoke/CAD checks before publishing the direct executable download. Advanced bevel/hypoid/worm types retain their explicit calculation-only limitations.",
+  "reason": "User requested a Windows EXE of the latest main. Include the shared three-column gear workspace across all eleven gear types, compact-screen tabs, type-specific parameter/result labels, helper geometry and part/CAD target selection. Preserve existing shaft changes and the six validated gear CAD workflows. Run full native Windows regressions and three-DPI frozen-executable smoke/CAD checks before publishing the direct download. Bevel, spiral bevel, hypoid and worm retain their documented calculation-only CAD limitations.",
   "cancelled": false
 }
