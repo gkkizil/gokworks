@@ -1,9 +1,9 @@
 {
-  "request_id": "20261028-091028-chain-sprocket-exe",
-  "requested_at": "2026-10-28T09:10:28+00:00",
-  "source_commit": "c44d33e1e6f58ff15fdeac30723437c2bbe1ce6e",
+  "request_id": "20261028-092132-chain-sprocket-exe",
+  "requested_at": "2026-10-28T09:21:32+00:00",
+  "source_commit": "af8cc182fcb8c3fbff71c106e88f5b4ba9377acb",
   "validation_profile": "full",
-  "reason": "User requested latest Windows single-file EXE including roller-chain sprockets. Includes ISO B-series catalogue, independent chain schema, analytic sprocket contours, mounting calculations, 2D/3D workspace and DXF/STEP exports. Fix DXF test teardown by freezing deferred preview callbacks and draining rendering before closing. Run focused native shutdown guard, full native Windows regression suite and frozen application/CAD checks at three DPI scales before publication. Retain documented manufacturing and chain-motion limitations.",
+  "reason": "User requested latest Windows single-file EXE including roller-chain sprockets. Drain DXF test teardown by freezing deferred CAD requests, clearing mesh input to prevent late native GL fallback rendering and waiting for the actual renderer thread pool to become idle. Keep focused native shutdown guard, full Windows regression suite and frozen application/CAD checks at three DPI scales. Retain all documented sprocket manufacturing and chain-motion limitations.",
   "cancelled": false,
-  "diagnose_run": 40656414020
+  "diagnose_run": 40662189737
 }
