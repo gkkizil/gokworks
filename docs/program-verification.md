@@ -66,7 +66,7 @@ Bu DXF incelemesinde GUI'nin önceki koyu yan menüsü ve bağımsız PDF/DXF-DW
 
 Görsel kontrolde Linux'ta bulunmayan Segoe UI'ın küçük sabit yazı tipine dönüştüğü görüldü. Linux için Helvetica/Courier kullanıldı; Windows'taki Segoe UI/Consolas seçimleri korundu. Ayarlar alanı, yeterli yükseklik varsa içeriğine göre büyüyor. Küçük pencere ve geniş pencerede tarama düğmesinin görünürlüğü sınanıyor. Son tasarımda arama, durum filtresi, ayrıntı penceresi, kalıcı açık/koyu tema ve %125 ölçekleme de sınandı; ayrıntılar [GUI raporunda](gui-design.md).
 
-Son uygulamadan **1240×860** boyutunda doğrudan alınan ekran görüntüleri: [DXF/DWG açık](screenshots/gui-dxf-dwg-light.png), [DXF/DWG koyu](screenshots/gui-dxf-dwg-dark.png), [PDF açık](screenshots/gui-pdf-light.png) ve [PDF koyu](screenshots/gui-pdf-dark.png). Görseller tasarım çizimi değildir; çalışan Tk penceresinden alınmıştır. Buluttaki yazı tipleri Windows'takilerden farklıdır.
+Son uygulamadan **1240×860** boyutunda doğrudan alınan ekran görüntüleri: [DXF/DWG açık](screenshots/gui-dxf-dwg.png), [DXF/DWG koyu](screenshots/gui-dxf-dwg-dark.png), [PDF açık](screenshots/gui-pdf.png) ve [PDF koyu](screenshots/gui-pdf-dark.png). Görseller tasarım çizimi değildir; çalışan Tk penceresinden alınmıştır. Buluttaki yazı tipleri Windows'takilerden farklıdır.
 
 ## Tekrarlama ve kapsam ölçümü
 

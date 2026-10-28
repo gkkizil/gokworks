@@ -98,7 +98,7 @@
     "real_solidworks_executed": false
   },
   {
-    "file": "docs/reports/kr-workspace-fix/screenshots/geometric-tolerances-light.png",
+    "file": "docs/reports/black-theme/screenshots/geometric-tolerances-light.png",
     "sha256": "a6e10d551b1438edc437806933741a9fe5e9c3fdce422b1794f2debe72076ef1",
     "mode": "geometric_tolerances",
     "theme": "Açık",
@@ -108,7 +108,7 @@
     "real_solidworks_executed": false
   },
   {
-    "file": "docs/reports/kr-workspace-fix/screenshots/geometric-tolerances-dark.png",
+    "file": "docs/reports/black-theme/screenshots/geometric_tolerances-black.png",
     "sha256": "afb30419894b63a2b39e8d0c55496c948c31ba1885e0f2372f341194f7dc6ed5",
     "mode": "geometric_tolerances",
     "theme": "Koyu",

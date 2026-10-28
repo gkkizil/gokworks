@@ -7,7 +7,7 @@ esas alınarak uygulandı. Tarayıcı prototipi veya yeni arayüz kütüphanesi 
 
 1. Çoklu DXF yükleme → listeyi kontrol etme → sac tanımı → yerleştirme →
    fiziksel plakalar arasında geçiş → çıktı. Başlangıç ekranı:
-   [önce](00-before.png).
+   [önce](../nesting-usability/01-parts-dark.png).
 2. **Yüksek öncelik:** liste ve çizim ayrı sekmelerdeydi; parçayı yerleşimle
    karşılaştırmak ekran değiştirmeyi gerektiriyordu. İkisi artık aynı alanda.
 3. **Orta öncelik:** büyük başlık, proje satırı, adım sekmeleri ve tekrar eden

@@ -92,7 +92,7 @@ kombinasyonları bu Linux testinden ayrı kontrol edilmelidir.
 | K/R manuel | [Görüntü](screenshots/k-factor-manual-light.png) | [Görüntü](screenshots/k-factor-manual-dark.png) |
 | ISO | [Görüntü](screenshots/iso-fits-light.png) | [Görüntü](screenshots/iso-fits-dark.png) |
 | ISO mil esaslı | [Görüntü](screenshots/iso-fits-shaft-basis-light.png) | [Görüntü](screenshots/iso-fits-shaft-basis-dark.png) |
-| GD&T | [Görüntü](screenshots/geometric-tolerances-light.png) | [Görüntü](screenshots/geometric-tolerances-dark.png) |
+| GD&T | [Görüntü](../black-theme/screenshots/geometric-tolerances-light.png) | [Görüntü](../black-theme/screenshots/geometric_tolerances-black.png) |
 
 [Manuel ISO H6 referansı](screenshots/iso-fits-manual-h6-dark.png) ·
 [Manuel ISO tam H8](screenshots/iso-fits-manual-h8-dark.png) ·

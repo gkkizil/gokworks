@@ -9,13 +9,13 @@ EXE yalnız kullanıcı istediğinde, **Run workflow** ile ilgili kaynak dalda o
 API erişimi olmayan ortamlarda `packaging/windows-build-request.json` dosyasına
 benzersiz bir istek kimliği yazılıp çalışma dalına gönderilebilir. İş akışı yalnız
 bu istek dosyasının değişiminde çalışır; normal kod güncellemeleri EXE oluşturmaz.
-İstek dosyası ayrıca bir dal açmayı gerektirmez. Bu yol `main` ve `release`
-dallarında desteklenir.
+İstek dosyası ayrıca bir dal açmayı gerektirmez. Bu yol `main` üzerinde desteklenir.
 
-Geliştirme dalı `main`, paylaşım dalı `release` olarak ayrılmıştır.
-`release` yalnız kullanıcının açık yayın isteğiyle güncellenir; otomatik
-birleştirme veya senkronizasyon yoktur. `main` üzerinde alınan bir EXE,
-`release` dalındaki kodu veya indirme bağlantısını değiştirmez.
+Geliştirme ve paylaşımın tek kalıcı dalı `main`dir. Kullanıcının dal birleştirme
+isteğiyle eski `release` ve tamamlanmış özellik dalları kaldırılmıştır.
+Eski EXE'ler GitHub Release etiketlerinde korunur. Kaynak kodun güncellenmesi
+tek başına yeni EXE üretildiği anlamına gelmez; indirme bloğu derlenen kaynak
+commit'ini ayrıca belirtir.
 [Yayın ve güncelleme adımları](../docs/releases.md).
 
 [Windows derlemeleri](https://github.com/gkkizil/gokworks/actions/workflows/windows-exe.yml)

@@ -52,11 +52,11 @@ FreeCAD, Qt Creator ve PrusaSlicer'ın ilgili kaynak yapılarından tasarım ör
 - Sayfalar gezinirken yeniden oluşturulmaz; COM veya hesap işleri gezinme
   sırasında başlatılmaz. Dar ekranda yeniden düzenlenen aynı widget'lar kullanılır.
 - **Ayarlar** artık tema ve menü görünümünü doğrudan değiştiren bir penceredir;
-  dosya/çalışma bilgileri ayrı açılabilir. [Görünüm](after/application-settings.png).
+  dosya/çalışma bilgileri ayrı açılabilir. [Görünüm](../fusion-workspace/before/application-settings.png).
 
 [Küçük pencere: tork](after/bolt_torque-minimum.png) ·
 [Küçük pencere: zincir](after/tolerance_stack-minimum.png) ·
-[Ölçü seçici](after/stack-measurement-picker.png) ·
+[Ölçü seçici](../fusion-workspace/before/stack-measurement-picker.png) ·
 [Daraltılmış menü](after/collapsed-navigation.png)
 
 ## Doğrulama ve sınırlar

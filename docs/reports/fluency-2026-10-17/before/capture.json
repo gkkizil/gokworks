@@ -1,7 +1,7 @@
 {
   "steps": [
     {
-      "screenshot": "01-pdf.png",
+      "screenshot": "../after/01-pdf.png",
       "description": "Normal açılış: PDF çalışma alanı",
       "mode": "pdf",
       "window_title": "GOKWORKS • SolidWorks otomasyonu",
@@ -13,7 +13,7 @@
       ]
     },
     {
-      "screenshot": "02-iso.png",
+      "screenshot": "../after/02-iso.png",
       "description": "Menüden ISO geçmeleri: seçim ve kesit",
       "mode": "iso_fits",
       "window_title": "GOKWORKS • SolidWorks otomasyonu",
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "screenshot": "03-compact.png",
+      "screenshot": "../after/03-compact.png",
       "description": "Ağırlık hesabı: küçük penceredeki içerik",
       "mode": "weight",
       "window_title": "GOKWORKS • SolidWorks otomasyonu",
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "screenshot": "04-expanded.png",
+      "screenshot": "../after/04-expanded.png",
       "description": "Ağırlık hesabı: yeniden büyütülen pencere",
       "mode": "weight",
       "window_title": "GOKWORKS • SolidWorks otomasyonu",

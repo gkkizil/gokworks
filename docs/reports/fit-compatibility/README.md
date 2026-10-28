@@ -21,8 +21,8 @@ Kart **en yakın ISO çift N7/h9** (toplam limit farkı 0,163 mm) ve **en yakın
 | Yeni uyumluluk kartı | [Koyu](screenshots/iso-compatibility-dark.png) |
 | Manuel tolerans girişi | [Açık](screenshots/iso-manual-light.png) / [Koyu](screenshots/iso-manual-dark.png) |
 | Sınıf karşılaştırması | [Görüntü](screenshots/iso-manual-comparison-dark.png) |
-| ISO sınıf seçimi | [Açık](screenshots/iso-light.png) / [Koyu](screenshots/iso-dark.png) |
-| Bölgeler / ara / sıkı | [Bölgeler](screenshots/iso-zones-dark.png) / [Ara](screenshots/iso-transition-dark.png) / [Sıkı](screenshots/iso-interference-dark.png) |
+| ISO sınıf seçimi | [Açık](../manual-iso/screenshots/iso-light.png) / [Koyu](../manual-iso/screenshots/iso-dark.png) |
+| Bölgeler / ara / sıkı | [Bölgeler](../manual-iso/screenshots/iso-zones-dark.png) / [Ara](../manual-iso/screenshots/iso-transition-dark.png) / [Sıkı](../manual-iso/screenshots/iso-interference-dark.png) |
 
 1240×860 gerçek Tk pencereleridir. Manuel kontroller küçük/büyük pencere, iki tema, %100/%125/%150 ölçek, kaydırarak yeni karta erişim ve bütün hedef menü komutlarıyla sınandı. Bilinen sayısal örnekler, temas sınırları, farklı referans/gerçek geçme türü ve dört çapta 14 yaygın eşleşmenin tam referansı doğrulandı. Geçersiz girişte yeni açıklamalar temizlenir; ISO seçiminde manuel uyumluluk kartı gizlenir.
 

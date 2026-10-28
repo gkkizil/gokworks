@@ -1,6 +1,6 @@
 [
   {
-    "file": "docs/reports/final-audit/screenshots/pdf-light.png",
+    "file": "docs/screenshots/gui-current-pdf-light.png",
     "sha256": "6ee896127585f725f8f45a98a1cf787a1db0b9f36f180313a440cc4b03ceb9ce",
     "width": 1240,
     "height": 860,
@@ -33,7 +33,7 @@
     "cad_results_present": false
   },
   {
-    "file": "docs/reports/final-audit/screenshots/manual-k-radius-light.png",
+    "file": "docs/screenshots/gui-manual-k-radius-light.png",
     "sha256": "d7655285c9aa67e7adae830c9b318c3c9416badf8c50c452e797f9f353824942",
     "width": 1240,
     "height": 860,
@@ -77,7 +77,7 @@
     "cad_results_present": false
   },
   {
-    "file": "docs/reports/final-audit/screenshots/manual-k-radius-dark.png",
+    "file": "docs/screenshots/gui-manual-k-radius-dark.png",
     "sha256": "f4501b3d6a49abc660c3ae2f5585500d1c9d8e8920f9b4d9896350888f6a480c",
     "width": 1240,
     "height": 860,

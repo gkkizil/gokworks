@@ -150,7 +150,7 @@ python -m pip install -r requirements.txt
 python main.py
 QT_QPA_PLATFORM=offscreen python docs/report-tools/capture_fusion_workbench.py docs/fusion-workspace/after
 QT_QPA_PLATFORM=offscreen python packaging/run_windows_tests.py
-QT_QPA_PLATFORM=offscreen python main.py --self-check docs/fusion-workspace/source-selfcheck.json
+QT_QPA_PLATFORM=offscreen python main.py --self-check docs/fusion-workspace/source-dpi-1.json
 ```
 
 Windows masaüstünde ilk iki komut normal Qt platformuyla kullanılabilir. `offscreen` yalnız

@@ -23,7 +23,7 @@ Bu arayüz kaynak kodda bulunur; aşağıdaki son başarılı EXE bağlantısın
 
 ## İndirme ve kurulum
 
-**Paylaşım sayfası:** [release dalı](https://github.com/gkkizil/gokworks/tree/release).
+**Kaynak ve paylaşım sayfası:** [main dalı](https://github.com/gkkizil/gokworks/tree/main).
 Hazır uygulamayı indirmek için aşağıdaki doğrudan EXE bağlantısını kullanın;
 **Code → Download ZIP** kaynak kodu indirir.
 
@@ -195,9 +195,9 @@ RSS/Monte Carlo sonuçları ölçülmüş üretim prosesi kabiliyeti olarak yoru
 
 ## Kaynak koddan çalıştırma
 
-Yazılım geliştirmesi **`main`** dalında yapılır. **`release`**, paylaşım için
-ayrılan yayın dalıdır; yalnız yayın sorumlusunun açık isteğiyle güncellenir.
-`main` değişiklikleri bu dala otomatik aktarılmaz.
+Kaynak kod ve paylaşım belgeleri tek kalıcı dal olan **`main`** üzerinde tutulur.
+Tamamlanmış özellik dalları doğrulandıktan sonra kaldırılır; eski sürümler Git
+geçmişi, birleştirilmiş PR'lar ve GitHub Release etiketleri üzerinden korunur.
 [Yayın ve güncelleme düzeni](docs/releases.md).
 
 Python 3.13 kurulu bir Windows bilgisayarında, proje klasöründe:

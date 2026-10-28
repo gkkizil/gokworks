@@ -47,10 +47,10 @@ Asgari çalışma alanı **1000×690 mantıksal piksel**. %125/%150 DPI bunu fiz
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| PDF | [Görüntü](screenshots/pdf-light.png) | [Görüntü](screenshots/pdf-dark.png) |
+| PDF | [Görüntü](../../screenshots/gui-current-pdf-light.png) | [Görüntü](screenshots/pdf-dark.png) |
 | DXF/DWG | [Görüntü](screenshots/dxf-dwg-light.png) | [Görüntü](screenshots/dxf-dwg-dark.png) |
 | Malzeme/Takım | [Görüntü](screenshots/k-radius-light.png) | [Görüntü](screenshots/k-radius-dark.png) |
-| Manuel K/R | [Görüntü](screenshots/manual-k-radius-light.png) | [Görüntü](screenshots/manual-k-radius-dark.png) |
+| Manuel K/R | [Görüntü](../../screenshots/gui-manual-k-radius-light.png) | [Görüntü](../../screenshots/gui-manual-k-radius-dark.png) |
 
 Görüntülerin hashleri [screenshots.json](screenshots.json) dosyasında. Bulut Linux fontları ve çizim yöntemi Windows'tan farklıdır.
 
