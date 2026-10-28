@@ -1,8 +1,8 @@
 {
-  "request_id": "20261028-060743-unified-gear-workspace-exe",
-  "requested_at": "2026-10-28T09:07:43+03:00",
-  "source_commit": "8dfad1ba5951e943f885c10513112ea04092085c",
+  "request_id": "20261028-082314-chain-sprocket-exe",
+  "requested_at": "2026-10-28T11:23:14+03:00",
+  "source_commit": "4a05346ddc4c6fcc38924635b9e5746f1fe61e2b",
   "validation_profile": "full",
-  "reason": "User requested a Windows EXE of the latest main. Include the shared three-column gear workspace across all eleven gear types, compact-screen tabs, type-specific parameter/result labels, helper geometry and part/CAD target selection. Preserve existing shaft changes and the six validated gear CAD workflows. Run full native Windows regressions and three-DPI frozen-executable smoke/CAD checks before publishing the direct download. Bevel, spiral bevel, hypoid and worm retain their documented calculation-only CAD limitations.",
+  "reason": "User requested the latest Windows EXE including the roller-chain sprocket module. Build current main with ISO B-series 08B-1, 10B-1, 12B-1 and 16B-1 catalogue, separate chain schema, circular roller-seat/flank geometry, mounting calculations, Qt 2D/3D and DXF/STEP. Preserve the unified gear workspace and shaft features. Run full native Windows regression tests and three-DPI frozen application/CAD checks before publishing the direct executable download. Nominal-profile, manufacturing and chain-motion limitations remain explicit.",
   "cancelled": false
 }
