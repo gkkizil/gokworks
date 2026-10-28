@@ -63,5 +63,16 @@
     "driver_hub_diameter_mm": 30,
     "driver_total_hub_length_mm": 20,
     "screenshot": "docs/screenshots/chain-sprocket-3d.png"
+  },
+  "windows_validation": {
+    "source_commit": "271aa4c416132be41bcc4ff76c2d3cf7217107a6",
+    "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40652708745",
+    "job_id": 122696318793,
+    "status": "success",
+    "collected_tests": 262,
+    "native_batches": 13,
+    "all_native_batches_exit_zero": true,
+    "frozen_build_and_three_dpi_checks": "success",
+    "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/40652708745/artifacts/12800294299"
   }
 }
