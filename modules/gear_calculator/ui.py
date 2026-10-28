@@ -2,13 +2,14 @@
 
 from PySide6.QtCore import Qt,QTimer,QSignalBlocker
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QComboBox,QDoubleSpinBox,
-    QSpinBox,QCheckBox,QSplitter,QTabWidget,QStackedWidget,QTableWidget,QTableWidgetItem,
+    QSpinBox,QCheckBox,QTabWidget,QStackedWidget,QTableWidget,QTableWidgetItem,
     QHeaderView,QFileDialog,QAbstractItemView)
 from gui_qt.components import BasePage,button,label,scroll
 from .models import GearSpecification,GearPairSpecification,LoadSpecification
 from .calculation import calculate_pair
 from .validation import require_manufacturable
 from .view import GearCanvas
+from .workspace import GearWorkspace
 from . import service
 
 
@@ -23,7 +24,7 @@ class GearPage(BasePage):
         super().__init__(context,'Dişli Hesaplama','Dişli türleri · Hesap, hareket ve CAD · türe göre doğrulama kapsamı')
         self.family_panel=None
         self.specification=None;self.result=None;self.selected=0;self.mesh_view=None;self.last_export=None
-        self._geometry_key=None;self._mesh_key=None;self._pending=None;self.compact_mode=False
+        self._geometry_key=None;self._mesh_key=None;self._pending=None
         self.update_button=self.action('Hesapla / Güncelle',self.calculate,primary=True)
         self.stop_button=self.action('Durdur',self.jobs.cancel,locked=False)
         self.input_panel=QWidget();form_box=QVBoxLayout(self.input_panel);form_box.setContentsMargins(6,6,6,6)
@@ -93,10 +94,8 @@ class GearPage(BasePage):
         results.addWidget(label('Dip: temel daire altında radyal düz geçiş; gerçek trokoid/azdırma dip radyüsü değildir. '
             'ISO 6336/AGMA mukavemet, verim ve yük altında deformasyon hesabı yapılmaz.','muted'))
         self.results_scroll=scroll(self.results_panel);self.results_scroll.setMinimumWidth(250)
-        self.splitter=QSplitter(Qt.Horizontal);self.splitter.setChildrenCollapsible(False)
-        for w in (self.input_scroll,self.viewer_panel,self.results_scroll):self.splitter.addWidget(w)
-        self.splitter.setStretchFactor(1,1);self.splitter.setSizes([290,600,310])
-        self.compact_tabs=QTabWidget();self.body=QStackedWidget();self.body.addWidget(self.splitter);self.body.addWidget(self.compact_tabs)
+        self.body=GearWorkspace(self.input_scroll,self.viewer_panel,self.results_scroll)
+        self.splitter=self.body.splitter;self.compact_tabs=self.body.compact_tabs
         self.family_stack=QStackedWidget();self.family_stack.addWidget(self.body)
         self.layout.addWidget(self.family_stack,1);self.finish_layout()
         self.type_picker.currentIndexChanged.connect(self.family_changed)
@@ -303,24 +302,9 @@ class GearPage(BasePage):
         if self.family_panel:self.family_panel.enable()
         if not busy:self.enable_exports(self.result is not None)
 
-    def resizeEvent(self,event):
-        super().resizeEvent(event)
-        if not hasattr(self,'body'):return
-        compact=self.width()<1120
-        if compact==self.compact_mode:return
-        self.compact_mode=compact
-        panels=(self.input_scroll,self.viewer_panel,self.results_scroll)
-        if compact:
-            for panel,title in zip(panels,('Parametreler','Görünüm','Sonuçlar / CAD')):self.compact_tabs.addTab(panel,title)
-            self.compact_tabs.setCurrentIndex(1);self.body.setCurrentWidget(self.compact_tabs)
-        else:
-            while self.compact_tabs.count():self.compact_tabs.removeTab(0)
-            for panel in panels:
-                self.splitter.addWidget(panel)
-                # QTabWidget hides inactive pages. Reparenting into QSplitter
-                # preserves that explicit hidden state unless it is cleared.
-                panel.show()
-            self.body.setCurrentWidget(self.splitter);self.splitter.setSizes([290,self.width()-600,310])
+    @property
+    def compact_mode(self):
+        return hasattr(self,'body') and self.body.compact_mode
 
     def theme_changed(self):
         super().theme_changed()

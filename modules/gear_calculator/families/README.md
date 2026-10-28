@@ -5,6 +5,28 @@ Eski `GearPairSpecification` / `gokworks.gear_pair` v1 aynen korunur.
 yüklemez; CAD mevcut yerel, iptal edilebilir 120 saniyelik alt süreçte çalışır.
 Yeni bağımlılık/backend eklenmedi. `models.py` tür yeteneklerinin tek kaynağıdır.
 
+## Ortak çalışma ekranı
+
+Düz dişli ve katalogdaki diğer on tür aynı `../workspace.py::GearWorkspace`
+yerleşimini kullanır. Solda türe özgü geometri ve birincil güç/tork girdileri,
+ortada hareket araçları ile 2D/gerçek katı 3D sekmeleri, sağda özet, sonuç tablosu
+ve CAD hedefi bulunur. 1100 pikselden dar çalışma alanında bu üç kolon
+`Parametreler`, `Görünüm`, `Sonuçlar / CAD` sekmelerine dönüşür; genişletilince
+girdiler ve sonuçlar korunarak kolonlar geri gelir.
+
+Bölüm/temel daireleri, kremayer bölüm hattı ve sikloid pim dairesi gerçek
+parametrelerden çizilir. Parça seçimi 2D vurgusunu ve CAD hedefini günceller;
+planetler tek tek dışa aktarılmadığından planet seçimi takım hedefini kullanır.
+DXF bölüm dairesi kutusu mevcut `construction` seçeneğine bağlanır ve yalnız
+bu aktarımı destekleyen helisel, çift helisel, iç ve planet türlerinde açılır. Tür
+değişiminde her türün parametreleri korunur. Hesap kapsamındaki türlerde aynı
+kolonlar görünür; hareket/3D/CAD kapalı ve gerekçesi görünürdür. Bu yerleşim
+değişikliği hesap denklemlerini, JSON şemalarını veya CAD geometrisini değiştirmez.
+
+[Geniş ekran](../../../docs/screenshots/gear-workspace.png) ·
+[Dar ekran](../../../docs/screenshots/gear-workspace-compact.png) ·
+[Görsel kontrol raporu](../../../design-qa.md)
+
 ## Gerçek durum
 
 | Tür | Hesap | 2D / rijit hareket | Gerçek katı 3D / STEP | DXF |
