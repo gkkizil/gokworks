@@ -2,6 +2,7 @@
 
 Ortak Qt arayüzündeki tema, başlık, boşluk, gezinme ve sonuç geri bildirimleri
 güncellendi. Hesaplama motorları ve CAD üretim kodu bu değişikliğin kapsamı dışındadır.
+Uygulamanın önceki nötr gri renk paleti korunur.
 
 - Araç aramasında `Ctrl+K` odağı açar, `Enter` ilk eşleşmeyi açar,
   `↓` ilk eşleşmeye odaklanır ve `Esc` aramayı temizler.
@@ -22,6 +23,7 @@ platformuyla alınmıştır:
 - [820 × 560 pencere](compact.png)
 - [Araç bulunamadı](search-empty.png)
 - [Filtreye uyan sonuç yok](filtered-results.png)
+- [Dişli ekranı · gri tema](gear-gray.png)
 
 İlgili testler: `tests/test_fusion_workbench.py` ve
 `tests/test_compact_workspaces_gui.py` için 29 test; `tests/test_shell_feedback.py`

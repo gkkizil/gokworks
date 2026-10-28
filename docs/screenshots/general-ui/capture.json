@@ -46,6 +46,15 @@
         1440,
         900
       ]
+    },
+    {
+      "file": "gear-gray.png",
+      "mode": "gear_calculator",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ]
     }
   ],
   "live_solidworks_tested": false,

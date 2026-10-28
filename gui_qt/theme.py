@@ -4,12 +4,12 @@ from pathlib import Path
 from PySide6.QtGui import QColor, QPalette
 
 COLORS = {
-    'dark': dict(bg='#1D232B', panel='#252D37', input='#2D3743', border='#465363',
-                 text='#EDF2F7', muted='#B3BFCE', accent='#82BDF5', selected='#304B67',
-                 danger='#F3A2A0', warning='#E4C38A', sidebar='#19212B', canvas='#1A2028'),
-    'light': dict(bg='#F0F3F7', panel='#FFFFFF', input='#F7F9FC', border='#C7D1DE',
-                  text='#223044', muted='#526278', accent='#1769AE', selected='#DCEBFA',
-                  danger='#AE3444', warning='#805B16', sidebar='#E7EDF5', canvas='#F7F9FC'),
+    'dark': dict(bg='#242629', panel='#2B2D30', input='#34363A', border='#474B51',
+                 text='#ECEEF1', muted='#B5BBC5', accent='#78B5F0', selected='#35475A',
+                 danger='#F3A2A0', warning='#E4C38A', sidebar='#292B2E', canvas='#202225'),
+    'light': dict(bg='#ECEDEF', panel='#FAFAFB', input='#FFFFFF', border='#CBCFD5',
+                  text='#262B32', muted='#59616C', accent='#1769AE', selected='#DFEBF7',
+                  danger='#AE3444', warning='#805B16', sidebar='#E6E8EB', canvas='#F5F6F7'),
 }
 
 # Shared logical pixel metrics; Qt applies the selected Windows DPI scale.

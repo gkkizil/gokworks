@@ -26,6 +26,7 @@ def capture(destination):
             ('compact', 'pdf', 'dark', (820, 560)),
             ('search-empty', 'pdf', 'dark', (1024, 700)),
             ('filtered-results', 'pdf', 'dark', (1440, 900)),
+            ('gear-gray', 'gear_calculator', 'dark', (1440, 900)),
         )
         for name, mode, theme, size in cases:
             window.browser.search.clear()
