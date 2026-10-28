@@ -6,6 +6,10 @@ from .calculation import calculate_pair
 
 
 def to_dict(spec):
+    from .sprockets.models import SprocketPairSpecification
+    if isinstance(spec,SprocketPairSpecification):
+        from .sprockets.serialization import to_dict as sprocket_to_dict
+        return sprocket_to_dict(spec)
     from .families.models import MechanismSpecification
     if isinstance(spec,MechanismSpecification):
         from .families.serialization import to_dict as mechanism_to_dict
@@ -21,6 +25,9 @@ def _construct(cls,value):
 
 
 def from_dict(value):
+    if isinstance(value,dict) and value.get('schema')=='gokworks.chain_sprocket':
+        from .sprockets.serialization import from_dict as sprocket_from_dict
+        return sprocket_from_dict(value)
     if isinstance(value,dict) and value.get('schema')=='gokworks.gear_mechanism':
         from .families.serialization import from_dict as mechanism_from_dict
         return mechanism_from_dict(value)

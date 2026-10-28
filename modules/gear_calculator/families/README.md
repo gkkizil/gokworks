@@ -37,6 +37,7 @@ değişikliği hesap denklemlerini, JSON şemalarını veya CAD geometrisini de�
 | İç dişli–pinyon | 20°, standart sıfır kaydırma | Var, aynı dönüş yönü | Halka ve pinyon ayrı | Halka dış/iç sınırları ayrı |
 | Planet | Sabit halka, güneş giriş, taşıyıcı çıkış | Var, tam Willis kinematiği | Güneş/halka/planetler ayrı; taşıyıcı yok | Tüm dişli konturları |
 | Sikloid pimli | N pim / N−1 lob, ideal kinematik | Analitik pim zarfı | Delikli disk ve N ayrı silindirik pim | Disk ve pimler |
+| Zincir dişlisi | ISO B tek sıra; p/dᵣ, yük ve yaklaşık L/C | Aynı yönlü ortalama kinematik; statik zincir referansı | İki ayrı dişli; opsiyonel göbek/delik; zincir yok | Tam daire yaylı kapalı kontur |
 | Düz konik ayna–mahruti | Bölüm konileri, dış/orta mesafe, nominal dış üst çap | **Yok** | **Yok** | **Yok** |
 | Spiral konik ayna–mahruti | Sıfır ofset bölüm konileri ve ideal kinematik | **Yok** | **Yok** | **Yok** |
 | Hipoid ayna–mahruti | Yalnız diş oranı ve ideal güç/tork kinematiği | **Yok** | **Yok** | **Yok** |
@@ -45,6 +46,11 @@ değişikliği hesap denklemlerini, JSON şemalarını veya CAD geometrisini de�
 Son dört tür **tamamlanmış tasarım/CAD modülleri değildir**. Arayüz bunları
 “hesap” etiketi ve ayrıntılı kapsam metniyle açar, CAD/hareket düğmelerini kapatır.
 Bir konik blank'ı veya düz dişliyi spiral/hipoid diye sunan yedek yol yoktur.
+
+Zincir dişlisi `CATALOG['chain_sprocket']` üzerinden aynı ekrana bağlanır, fakat
+eski `MechanismSpecification` alanlarını kullanmaz. Ayrı `SprocketSpecification` /
+`SprocketPairSpecification` ve `gokworks.chain_sprocket` v1 sözleşmesi vardır.
+Eski iki v1 şema değişmedi. [Zincir mimarisi, denklemler, profil ve testler](../sprockets/README.md).
 
 ## Birimler ve denklemler
 

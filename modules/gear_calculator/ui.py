@@ -22,7 +22,7 @@ def number(value):
 class GearPage(BasePage):
     def __init__(self,context):
         super().__init__(context,'Dişli Hesaplama','Dişli türleri · Hesap, hareket ve CAD · türe göre doğrulama kapsamı')
-        self.family_panel=None
+        self.family_panel=None;self.family_panels={}
         self.specification=None;self.result=None;self.selected=0;self.mesh_view=None;self.last_export=None
         self._geometry_key=None;self._mesh_key=None;self._pending=None
         self.update_button=self.action('Hesapla / Güncelle',self.calculate,primary=True)
@@ -112,13 +112,22 @@ class GearPage(BasePage):
 
     def family_changed(self):
         self.canvas.pause();self.update_timer.stop()
+        if self.family_panel:
+            self.family_panel.calculate();self.family_panel.canvas.pause();self.family_panel.timer.stop()
         kind=self.type_picker.currentData()
         if kind=='external_spur':
             if self.family_panel:self.family_panel.canvas.pause();self.family_panel.timer.stop()
             self.family_stack.setCurrentWidget(self.body);self.calculate();return
-        if self.family_panel is None:
-            from .families.ui import FamilyPanel
-            self.family_panel=FamilyPanel(self);self.family_stack.addWidget(self.family_panel);self.controls.append(self.family_panel)
+        key='chain_sprocket' if kind=='chain_sprocket' else 'mechanisms'
+        if key not in self.family_panels:
+            if key=='chain_sprocket':
+                from .sprockets.ui import SprocketPanel
+                panel=SprocketPanel(self)
+            else:
+                from .families.ui import FamilyPanel
+                panel=FamilyPanel(self)
+            self.family_panels[key]=panel;self.family_stack.addWidget(panel);self.controls.append(panel)
+        self.family_panel=self.family_panels[key]
         self.family_stack.setCurrentWidget(self.family_panel);self.family_panel.set_kind(kind)
 
     def family_active(self):
@@ -309,12 +318,12 @@ class GearPage(BasePage):
     def theme_changed(self):
         super().theme_changed()
         self.canvas.theme_changed(self.context.appearance)
-        if self.family_panel:self.family_panel.canvas.set_spec(self.family_panel.spec if self.family_panel.result and self.family_panel.result.cad_available else None)
+        for panel in self.family_panels.values():panel.canvas.set_spec(panel.spec if panel.result and panel.result.cad_available else None)
 
     def hideEvent(self,event):
         self.canvas.pause()
-        if self.family_panel:
-            self.family_panel.canvas.pause()
-            if self.family_panel.mesh_view:self.family_panel.mesh_view.cancel_render()
+        for panel in self.family_panels.values():
+            panel.canvas.pause()
+            if panel.mesh_view:panel.mesh_view.cancel_render()
         if self.mesh_view:self.mesh_view.cancel_render()
         super().hideEvent(event)

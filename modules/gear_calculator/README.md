@@ -12,6 +12,13 @@ Türlerin ayrı kapsamı ve kullanılan denklemler [families/README.md](families
 dosyasındadır. Türün menüde bulunması tüm mühendislik/CAD işlevlerinin tamamlandığı
 anlamına gelmez. Aşağıdaki ilk API ve varsayımlar dış düz v1 çifti içindir.
 
+**Zincir Dişlisi · Makaralı Zincir** aynı çalışma alanında ayrı zincir adımı/makara
+verisiyle çalışır; evolvent değildir. ISO B serisi 08B-1, 10B-1, 12B-1, 16B-1;
+yaklaşık bakla/eksen mesafesi, aynı yönlü ortalama kinematik, daire yaylı DXF,
+delik/göbek içeren gerçek STEP ve JSON projesi desteklenir. Zincirin kendisi STEP'e
+eklenmez; fiziksel zincir hareketi/imalat ve dayanım onayı verilmez.
+[Zincir modülü, kaynaklar, sözleşme ve sınırlar](sprockets/README.md).
+
 ## Mimari ve API
 
 | Dosya | Görev |

@@ -15,6 +15,12 @@ def run_worker(request_path):
         if set(request)!={'specification','mode','target','construction'}:
             raise ValueError('Dişli işlem sözleşmesi geçersiz.')
         spec=from_dict(request['specification']);mode=request['mode'];target=request['target']
+        from .sprockets.models import SprocketPairSpecification
+        if isinstance(spec,SprocketPairSpecification):
+            from .sprockets.worker import execute
+            result=execute(spec,mode,target,folder,request['construction'])
+            (folder/'result.json').write_text(json.dumps(dict(ok=True,result=result),ensure_ascii=False,allow_nan=False),encoding='utf-8')
+            return 0
         from .families.models import MechanismSpecification
         if isinstance(spec,MechanismSpecification):
             from .families.worker import execute

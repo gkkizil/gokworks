@@ -89,6 +89,12 @@ def check(output):
             gears.type_picker.setCurrentIndex(gears.type_picker.findData(kind))
             assert gears.family_panel.result is not None,kind
             assert gears.family_panel.step_button.isEnabled()==capability.geometry,kind
+        gears.type_picker.setCurrentIndex(gears.type_picker.findData('chain_sprocket'))
+        chain_spec=gears.family_panel.spec
+        chain_step=gear_execute(chain_spec,'step',path=Path(folder)/'chain-sprocket-pair.step')
+        chain_dxf=gear_execute(chain_spec,'dxf',target='pinion',path=Path(folder)/'chain-sprocket.dxf')
+        assert chain_step['solids']==2 and chain_step['volume_mm3']>0
+        assert chain_dxf['contours']==1 and not chain_step['chain_included']
         gears.type_picker.setCurrentIndex(gears.type_picker.findData('rack'))
         family_rack=gear_execute(gears.family_panel.spec,'step',path=Path(folder)/'rack-pair.step')
         assert family_rack['solids']==2
@@ -313,6 +319,7 @@ def check(output):
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',
                       'external involute gear pair / native OCCT STEP readback / closed DXF',
                       'mechanism catalogue capabilities / rack and helical frozen-worker STEP readback',
+                      'roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF',
                       'embedded licenses and export','no Tk runtime'])
         w.close()
         return report

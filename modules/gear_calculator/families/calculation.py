@@ -9,6 +9,7 @@ from ..calculation import calculate_pair, TORQUE_POWER_FACTOR
 def validate(s):
     if not isinstance(s, MechanismSpecification) or type(s.kind) is not str or s.kind not in CATALOG:
         raise ValueError('Bilinmeyen dişli mekanizması.')
+    if s.kind=='chain_sprocket':raise ValueError('Zincir için ayrı SprocketPairSpecification ve zincir şeması gerekli.')
     limits = {'module_mm':(.1,20), 'pressure_angle_deg':(14.5,30), 'width_mm':(.1,500),
         'bore1_mm':(0,5999), 'bore2_mm':(0,5999), 'helix_deg':(0,40),
         'rack_base_mm':(.1,1000), 'rim_mm':(.2,1000), 'shaft_angle_deg':(20,160),
@@ -49,6 +50,10 @@ def cylindrical(s, teeth, bore=0):
 
 
 def calculate(s):
+    from ..sprockets.models import SprocketPairSpecification
+    if isinstance(s,SprocketPairSpecification):
+        from ..sprockets.calculation import calculate as sprocket_calculate
+        return sprocket_calculate(s)
     validate(s);m=s.module_mm;z1=s.teeth1;z2=s.teeth2;alpha=radians(s.pressure_angle_deg)
     load=s.load;n=load.input_rpm
     torque=TORQUE_POWER_FACTOR*load.power_kw/abs(n) if load.mode=='power' else load.torque_nm

@@ -1,0 +1,67 @@
+{
+  "platform": "Linux / Qt offscreen",
+  "reference": {
+    "series": "08B-1",
+    "z1": 20,
+    "z2": 40,
+    "pitch_mm": 12.7,
+    "pitch1_mm": 81.1841559130457,
+    "pitch2_mm": 161.86778450841615,
+    "nominal_root1_mm": 72.6741559130457,
+    "profile_root1_mm": 72.5890559130457,
+    "input_center_mm": 300,
+    "selected_links": 78,
+    "corrected_center_mm": 302.09520805462125,
+    "chain_speed_m_s": 6.35,
+    "effective_force_n": 236.2204724409449
+  },
+  "geometry": {
+    "samples": 65,
+    "minimum_roller_clearance_mm": 0.042549999999997645,
+    "center_distance_mm": 302.09520805462125,
+    "profile_reference": "iso606_public_arcs_v1",
+    "manufacturing_approved": false,
+    "chain_motion_verified": false
+  },
+  "tests": {
+    "gear_and_integration": {
+      "tests": "267",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "269.282"
+    },
+    "final_calculation_and_ui": {
+      "tests": "69",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "21.219"
+    }
+  },
+  "limitations": [
+    "No manufacturing approval or full ISO conformity claim",
+    "Average wheel kinematics only, no discrete moving chain physics",
+    "No live SOLIDWORKS import test",
+    "Not the full application regression suite"
+  ],
+  "source_smoke": {
+    "status": "passed",
+    "modules": 16,
+    "checks": [
+      "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF"
+    ]
+  },
+  "rendered_3d": {
+    "status": "passed",
+    "triangles": 6360,
+    "renderer": "existing software fallback",
+    "frame_pixels": [
+      640,
+      394
+    ],
+    "driver_hub_diameter_mm": 30,
+    "driver_total_hub_length_mm": 20,
+    "screenshot": "docs/screenshots/chain-sprocket-3d.png"
+  }
+}

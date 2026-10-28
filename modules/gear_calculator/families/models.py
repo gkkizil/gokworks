@@ -21,6 +21,7 @@ CATALOG = {
     'hypoid': Capability('Ayna – mahruti · hipoid', False, 'Yalnız diş sayısı oranı/ideal güç kinematiği. Ofsetli eşlenik yüzey çözücüsü henüz yok.'),
     'worm': Capability('Sonsuz vida – çark', False, 'Eksenel modül; ağız sayısı, çap katsayısı ve nominal boyutlar. Zarflanmış çark yüzeyi henüz yok.'),
     'cycloidal': Capability('Sikloid pimli redüktör', True, 'N pim / N−1 loblu disk; analitik pim zarfı; taşıyıcı/çıkış pimleri bu modelde yok.'),
+    'chain_sprocket': Capability('Zincir Dişlisi · Makaralı Zincir', True, 'ISO B serisi tek sıra; ayrı zincir verisi, dairesel oturma/yanak yayları; yaklaşık açık zincir montajı.'),
 }
 
 

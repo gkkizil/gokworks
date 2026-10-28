@@ -79,7 +79,7 @@ def test_every_type_shares_three_columns_and_restores_them_after_compact_mode(pa
         assert f.table.item(0,1).text()==f.selection.currentText().split(' · ')[0]
         assert f.plot_stack.currentIndex()==(0 if cap.geometry else 1)
         assert f.views.isTabEnabled(1)==cap.geometry
-        assert f.construction.isEnabled()==(kind in ('helical','herringbone','internal','planetary'))
+        assert f.construction.isEnabled()==(kind in ('helical','herringbone','internal','planetary','chain_sprocket'))
         w.resize(820,560);qtbot.wait(20)
         assert f.compact_mode and f.compact_tabs.count()==3
         for i,panel in enumerate(panels):

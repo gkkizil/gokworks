@@ -137,13 +137,13 @@ class MechanismCanvas(QGraphicsView):
 
 
 class FamilyPanel(QWidget):
-    def __init__(self,owner):
+    def __init__(self,owner,definitions=None,canvas_class=MechanismCanvas):
         super().__init__();self.owner=owner;self.context=owner.context;self.spec=None;self.result=None;self.mesh_view=None;self.last_export=None
         self.kind='rack';self.saved={};self.fields={};layout=QVBoxLayout(self);layout.setContentsMargins(0,0,0,0)
         self.input_panel=QWidget();iv=QVBoxLayout(self.input_panel);iv.setContentsMargins(6,6,6,6)
         iv.addWidget(label('GEOMETRİ','section'));self.form=QFormLayout();self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.load_form=QFormLayout();self.load_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
-        definitions=[('module_mm','Modül m / mₙ / mₓ · mm',2,.1,20),('teeth1','Pinyon / güneş diş sayısı',20,6,300),
+        definitions=definitions if definitions is not None else [('module_mm','Modül m / mₙ / mₓ · mm',2,.1,20),('teeth1','Pinyon / güneş diş sayısı',20,6,300),
             ('teeth2','Çark / planet dişi / pim adedi',40,6,300),('pressure_angle_deg','Basınç açısı α / αₙ · °',20,14.5,30),
             ('width_mm','Genişlik b · mm',15,.1,500),('bore1_mm','İlk parça delik çapı · mm',8,0,5999),
             ('bore2_mm','İkinci parça delik çapı · mm',12,0,5999),('helix_deg','Helis açısı β · °',20,0,40),
@@ -154,7 +154,7 @@ class FamilyPanel(QWidget):
             ('eccentricity_mm','Eksantriklik e · mm',.5,.001,20),('roller_radius_mm','Pim yarıçapı · mm',1.5,.01,100),
             ('input_rpm','Giriş devri n₁ · dev/dak',1500,-100000,100000),('power_kw','Güç P · kW',1.5,.0001,1e7),
             ('torque_nm','Tork T₁ · N·m',10,.0001,1e7)]
-        integer={'teeth1','teeth2','rack_teeth','planets','worm_starts'}
+        integer={'teeth1','teeth2','rack_teeth','planets','worm_starts','link_count'}
         for key,title,value,low,high in definitions:
             w=QSpinBox() if key in integer else QDoubleSpinBox()
             if key not in integer:w.setDecimals(4)
@@ -176,7 +176,7 @@ class FamilyPanel(QWidget):
         self.pitch=QCheckBox('Bölüm daireleri');self.pitch.setChecked(True);self.base=QCheckBox('Temel daireler')
         self.base.setToolTip('Evolvent parçaların temel dairelerini gösterir.')
         self.selection=QComboBox();self.selection.setAccessibleName('Seçili mekanizma parçası')
-        self.canvas=MechanismCanvas(self)
+        self.canvas=canvas_class(self)
         self.reset_button=button('Sıfırla',self.canvas.reset);self.fit_button=button('Sığdır',self.fit_view)
         for w in (self.play_button,self.reset_button,self.fit_button):row.addWidget(w)
         row.addWidget(label('Hız','muted',wrap=False));row.addWidget(self.speed);row.addStretch();v.addLayout(row)
@@ -213,7 +213,8 @@ class FamilyPanel(QWidget):
         row=QHBoxLayout();self.step_button=button('STEP kaydet',lambda:self.dialog('step'));self.dxf_button=button('DXF kaydet',lambda:self.dialog('dxf'))
         self.dxf_button.setToolTip('Helisel türlerde yalnız alın kesiti dışa aktarılır.')
         row.addWidget(self.dxf_button);row.addWidget(self.step_button);rv.addLayout(row)
-        rv.addWidget(label('Nominal/ideal hesap. Kesici dibi, mukavemet ve üretim toleransları ayrıca doğrulanmalıdır.','muted'))
+        self.scope_note=label('Nominal/ideal hesap. Kesici dibi, mukavemet ve üretim toleransları ayrıca doğrulanmalıdır.','muted')
+        rv.addWidget(self.scope_note)
         self.results_scroll=scroll(self.results_panel);self.results_scroll.setMinimumWidth(250)
         self.body=GearWorkspace(self.input_scroll,self.viewer_panel,self.results_scroll)
         self.splitter=self.body.splitter;self.compact_tabs=self.body.compact_tabs;layout.addWidget(self.body,1)

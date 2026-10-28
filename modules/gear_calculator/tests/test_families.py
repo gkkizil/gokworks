@@ -9,6 +9,9 @@ from modules.gear_calculator.serialization import to_dict,from_dict
 
 
 def spec(kind):
+    if kind=='chain_sprocket':
+        from modules.gear_calculator.sprockets import SprocketPairSpecification
+        return SprocketPairSpecification()
     return MechanismSpecification(kind=kind,width_mm=10,teeth1=24 if kind=='internal' else 20,
         teeth2=72 if kind=='internal' else 12 if kind=='cycloidal' else 40)
 
