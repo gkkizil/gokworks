@@ -15,6 +15,13 @@ def run_worker(request_path):
         if set(request)!={'specification','mode','target','construction'}:
             raise ValueError('Dişli işlem sözleşmesi geçersiz.')
         spec=from_dict(request['specification']);mode=request['mode'];target=request['target']
+        from .families.models import MechanismSpecification
+        if isinstance(spec,MechanismSpecification):
+            from .families.worker import execute
+            result=execute(spec,mode,target,folder,request['construction'])
+            response=dict(ok=True,result=result)
+            (folder/'result.json').write_text(json.dumps(response,ensure_ascii=False,allow_nan=False),encoding='utf-8')
+            return 0
         if mode=='check':
             from dataclasses import asdict
             from .geometry import verify_mesh

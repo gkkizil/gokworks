@@ -1,8 +1,16 @@
 # Dişli Hesaplama · GOKWORKS
 
-Çevrimdışı dıştan kavraşan düz evolvent dişli çifti. Hesap → gerçek eğri tanımı
+Çevrimdışı dişli çalışma alanı. Varsayılan dış düz evolvent dişli çifti: hesap → gerçek eğri tanımı
 → 2D hareket / katıdan 3D önizleme → DXF / STEP aynı tip güvenli veriyi kullanır.
 Menü: **Makine Elemanları → Dişli Hesaplama**. SOLIDWORKS kurulumu gerekmez.
+
+Üstteki tür seçimi kremayer, helisel, çift helisel, iç dişli, planet ve pimli
+sikloid hesap/2D/3D/DXF/STEP çalışma alanlarını açar. Konik, spiral konik,
+hipoid ve sonsuz vida türleri henüz **yalnız sınırlı nominal hesap** sunar;
+eşlenik CAD yüzeyleri tamamlanmadığından CAD/hareketleri kapalıdır.
+Türlerin ayrı kapsamı ve kullanılan denklemler [families/README.md](families/README.md)
+dosyasındadır. Türün menüde bulunması tüm mühendislik/CAD işlevlerinin tamamlandığı
+anlamına gelmez. Aşağıdaki ilk API ve varsayımlar dış düz v1 çifti içindir.
 
 ## Mimari ve API
 

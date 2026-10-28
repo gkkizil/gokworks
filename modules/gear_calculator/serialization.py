@@ -6,6 +6,10 @@ from .calculation import calculate_pair
 
 
 def to_dict(spec):
+    from .families.models import MechanismSpecification
+    if isinstance(spec,MechanismSpecification):
+        from .families.serialization import to_dict as mechanism_to_dict
+        return mechanism_to_dict(spec)
     calculate_pair(spec)
     return dict(schema='gokworks.gear_pair',version=1,units='mm',**asdict(spec))
 
@@ -17,6 +21,9 @@ def _construct(cls,value):
 
 
 def from_dict(value):
+    if isinstance(value,dict) and value.get('schema')=='gokworks.gear_mechanism':
+        from .families.serialization import from_dict as mechanism_from_dict
+        return mechanism_from_dict(value)
     if not isinstance(value,dict) or set(value)!={'schema','version','units','pinion','wheel','load'}:
         raise ValueError('Dişli çifti veri alanları geçersiz.')
     if value['schema']!='gokworks.gear_pair' or type(value['version']) is not int or value['version']!=1 or value['units']!='mm':

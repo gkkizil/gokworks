@@ -82,6 +82,20 @@ def check(output):
         gear_dxf = gear_execute(gears.specification,'dxf',path=Path(folder)/'gear-pair.dxf')
         assert gear_step['solids']==2 and gear_step['volume_mm3']>0
         assert gear_dxf['gears']==2
+        # Exercise the actual frozen mechanism UI imports and worker schema,
+        # including the separate smooth helical loft path.
+        from modules.gear_calculator.families.models import CATALOG
+        for kind,capability in CATALOG.items():
+            gears.type_picker.setCurrentIndex(gears.type_picker.findData(kind))
+            assert gears.family_panel.result is not None,kind
+            assert gears.family_panel.step_button.isEnabled()==capability.geometry,kind
+        gears.type_picker.setCurrentIndex(gears.type_picker.findData('rack'))
+        family_rack=gear_execute(gears.family_panel.spec,'step',path=Path(folder)/'rack-pair.step')
+        assert family_rack['solids']==2
+        gears.type_picker.setCurrentIndex(gears.type_picker.findData('helical'))
+        family_helical=gear_execute(gears.family_panel.spec,'step',path=Path(folder)/'helical-pair.step')
+        assert family_helical['solids']==2 and family_helical['volume_mm3']>0
+        gears.type_picker.setCurrentIndex(0)
         selected_cad = os.environ.get('GOKWORKS_CAD_DIR')
         external_cad = bool(selected_cad and Path(gear_step['kernel_module_path']).resolve().is_relative_to(Path(selected_cad).resolve()))
         if selected_cad:
@@ -298,6 +312,7 @@ def check(output):
                       'vector diagrams','bolt kg/N','weight 157 kg','BOM XLSX','DXF dependency',
                       'Pack and Go interop source bundled','isolated PDF worker startup/IPC',
                       'external involute gear pair / native OCCT STEP readback / closed DXF',
+                      'mechanism catalogue capabilities / rack and helical frozen-worker STEP readback',
                       'embedded licenses and export','no Tk runtime'])
         w.close()
         return report

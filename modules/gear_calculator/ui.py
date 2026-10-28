@@ -20,7 +20,8 @@ def number(value):
 
 class GearPage(BasePage):
     def __init__(self,context):
-        super().__init__(context,'Dişli Hesaplama','Dıştan kavraşan düz evolvent dişli çifti · Hesap, hareket ve CAD')
+        super().__init__(context,'Dişli Hesaplama','Dişli türleri · Hesap, hareket ve CAD · türe göre doğrulama kapsamı')
+        self.family_panel=None
         self.specification=None;self.result=None;self.selected=0;self.mesh_view=None;self.last_export=None
         self._geometry_key=None;self._mesh_key=None;self._pending=None;self.compact_mode=False
         self.update_button=self.action('Hesapla / Güncelle',self.calculate,primary=True)
@@ -29,7 +30,9 @@ class GearPage(BasePage):
         form_box.addWidget(label('GEOMETRİ','section'));self.form=QFormLayout();self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.fields={}
         self.type_picker=QComboBox();self.type_picker.addItem('Dış düz · Evolvent','external_spur')
-        self.type_picker.setAccessibleName('Dişli tipi');self.form.addRow('Dişli tipi',self.type_picker)
+        from .families.models import CATALOG
+        for key,cap in CATALOG.items():self.type_picker.addItem(cap.title+(' · hesap' if not cap.geometry else ''),key)
+        self.type_picker.setAccessibleName('Dişli tipi');self.layout.addWidget(self.type_picker)
         for key,title,value,low,high,integer in (
             ('module_mm','Modül m · mm',2.,.1,20.,False),('z1','Pinyon diş sayısı z₁',20,6,300,True),
             ('z2','Çark diş sayısı z₂',40,6,300,True),('pressure_angle_deg','Basınç açısı α · °',20.,14.5,30.,False),
@@ -94,7 +97,9 @@ class GearPage(BasePage):
         for w in (self.input_scroll,self.viewer_panel,self.results_scroll):self.splitter.addWidget(w)
         self.splitter.setStretchFactor(1,1);self.splitter.setSizes([290,600,310])
         self.compact_tabs=QTabWidget();self.body=QStackedWidget();self.body.addWidget(self.splitter);self.body.addWidget(self.compact_tabs)
-        self.layout.addWidget(self.body,1);self.finish_layout()
+        self.family_stack=QStackedWidget();self.family_stack.addWidget(self.body)
+        self.layout.addWidget(self.family_stack,1);self.finish_layout()
+        self.type_picker.currentIndexChanged.connect(self.family_changed)
         self.controls.extend([self.input_panel,self.dxf_button,self.step_button,self.preview_button,self.play_button,self.export_target])
         self.update_timer=QTimer(self);self.update_timer.setSingleShot(True);self.update_timer.setInterval(180)
         self.update_timer.timeout.connect(self.calculate)
@@ -105,6 +110,20 @@ class GearPage(BasePage):
         self.canvas.gearSelected.connect(self.select_gear)
         self.canvas.runningChanged.connect(lambda running:self.play_button.setText('Duraklat' if running else 'Başlat'))
         self.calculate()
+
+    def family_changed(self):
+        self.canvas.pause();self.update_timer.stop()
+        kind=self.type_picker.currentData()
+        if kind=='external_spur':
+            if self.family_panel:self.family_panel.canvas.pause();self.family_panel.timer.stop()
+            self.family_stack.setCurrentWidget(self.body);self.calculate();return
+        if self.family_panel is None:
+            from .families.ui import FamilyPanel
+            self.family_panel=FamilyPanel(self);self.family_stack.addWidget(self.family_panel);self.controls.append(self.family_panel)
+        self.family_stack.setCurrentWidget(self.family_panel);self.family_panel.set_kind(kind)
+
+    def family_active(self):
+        return self.family_panel is not None and self.type_picker.currentData()!='external_spur'
 
     def add_number(self,form,key,title,value,low,high,integer=False):
         w=QSpinBox() if integer else QDoubleSpinBox()
@@ -133,6 +152,7 @@ class GearPage(BasePage):
                                      GearSpecification(teeth=v['z2'],bore_mm=v['bore2'],**common),load)
 
     def calculate(self):
+        if self.family_active():self.family_panel.calculate();return
         if self.busy:return
         self.update_timer.stop();self.canvas.pause()
         power=self.load_mode.currentData()=='power'
@@ -217,18 +237,21 @@ class GearPage(BasePage):
         elif self.mesh_view:self.mesh_view.fit()
 
     def toggle_animation(self):
+        if self.family_active():self.family_panel.toggle();return
         if self.canvas.timer.isActive():self.canvas.pause();return
         if self.result is None or not self.can_start():return
         self.views.setCurrentIndex(0)
         self.run_job('check','pair',None)
 
     def build_preview(self):
+        if self.family_active():return self.family_panel.run('mesh')
         if self.result is None or not self.can_start():return
         if self._mesh_key==self.specification and self.mesh_view:
             self.views.setCurrentIndex(1);return
         self.run_job('mesh','pair',None)
 
     def export_dialog(self,mode):
+        if self.family_active():self.family_panel.dialog(mode);return
         if self.result is None or not self.can_start():return
         target=self.export_target.currentData()
         path,_=QFileDialog.getSaveFileName(self,'Dişli CAD dosyasını kaydet',f'disli_{target}.{mode}',
@@ -236,6 +259,7 @@ class GearPage(BasePage):
         if path:self.start_export(mode,path,target)
 
     def start_export(self,mode,path,target=None):
+        if self.family_active():return self.family_panel.run(mode,path,target)
         # Public UI command also flushes a pending input debounce.
         self.calculate()
         if self.result is None or not self.can_start():return False
@@ -254,6 +278,7 @@ class GearPage(BasePage):
 
     def handle_events(self,events):
         super().handle_events(events)
+        if self.family_panel:self.family_panel.handle(events)
         for kind,value in events:
             if kind=='gear_cancelled':self.set_status(value)
             elif kind=='gear_result':
@@ -274,6 +299,8 @@ class GearPage(BasePage):
 
     def set_busy(self,busy):
         super().set_busy(busy)
+        self.type_picker.setEnabled(not busy)
+        if self.family_panel:self.family_panel.enable()
         if not busy:self.enable_exports(self.result is not None)
 
     def resizeEvent(self,event):
@@ -298,8 +325,12 @@ class GearPage(BasePage):
     def theme_changed(self):
         super().theme_changed()
         self.canvas.theme_changed(self.context.appearance)
+        if self.family_panel:self.family_panel.canvas.set_spec(self.family_panel.spec if self.family_panel.result and self.family_panel.result.cad_available else None)
 
     def hideEvent(self,event):
         self.canvas.pause()
+        if self.family_panel:
+            self.family_panel.canvas.pause()
+            if self.family_panel.mesh_view:self.family_panel.mesh_view.cancel_render()
         if self.mesh_view:self.mesh_view.cancel_render()
         super().hideEvent(event)
