@@ -4,12 +4,12 @@ from pathlib import Path
 from PySide6.QtGui import QColor, QPalette
 
 COLORS = {
-    'dark': dict(bg='#242629', panel='#2B2D30', input='#34363A', border='#474B51',
-                 text='#ECEEF1', muted='#B5BBC5', accent='#78B5F0', selected='#35475A',
-                 danger='#F3A2A0', warning='#E4C38A', sidebar='#292B2E', canvas='#202225'),
-    'light': dict(bg='#ECEDEF', panel='#FAFAFB', input='#FFFFFF', border='#CBCFD5',
-                  text='#262B32', muted='#59616C', accent='#1769AE', selected='#DFEBF7',
-                  danger='#AE3444', warning='#805B16', sidebar='#E6E8EB', canvas='#F5F6F7'),
+    'dark': dict(bg='#1D232B', panel='#252D37', input='#2D3743', border='#465363',
+                 text='#EDF2F7', muted='#B3BFCE', accent='#82BDF5', selected='#304B67',
+                 danger='#F3A2A0', warning='#E4C38A', sidebar='#19212B', canvas='#1A2028'),
+    'light': dict(bg='#F0F3F7', panel='#FFFFFF', input='#F7F9FC', border='#C7D1DE',
+                  text='#223044', muted='#526278', accent='#1769AE', selected='#DCEBFA',
+                  danger='#AE3444', warning='#805B16', sidebar='#E7EDF5', canvas='#F7F9FC'),
 }
 
 # Shared logical pixel metrics; Qt applies the selected Windows DPI scale.
@@ -35,33 +35,36 @@ def apply_theme(app, appearance):
         QMainWindow, QDialog { background: %(bg)s; }
         QFrame#sidebar { background: %(sidebar)s; border-right: 1px solid %(border)s; }
         QFrame[card="true"] { background: %(panel)s; border: 1px solid %(border)s; border-radius: 3px; }
-        QLabel[role="title"] { font-size: 17px; font-weight: 600; }
+        QLabel[role="title"] { font-size: 18px; font-weight: 600; }
         QLabel[role="subtitle"], QLabel[role="muted"] { color: %(muted)s; }
-        QLabel[role="subtitle"] { font-size: 11px; }
+        QLabel[role="subtitle"] { font-size: 12px; }
         QLabel[role="result"] { font-size: 24px; font-weight: 650; color: %(accent)s; }
         QLabel[role="error"] { color: %(danger)s; }
         QLabel[role="section"] { font-size: 12px; font-weight: 650; }
         QLabel[eyebrow="true"] { font-size: 10px; letter-spacing: 1px; padding: 5px 3px 2px 3px; }
         QPushButton, QToolButton { background: %(input)s; border: 1px solid %(border)s;
-            border-radius: 3px; padding: 3px 8px; min-height: 18px; }
+            border-radius: 4px; padding: 4px 9px; min-height: 18px; }
         QPushButton:hover, QToolButton:hover { background: %(selected)s; border-color: %(accent)s; }
         QPushButton:pressed { background: %(selected)s; }
         QPushButton:focus, QToolButton:focus { border-color: %(accent)s; }
         QPushButton:disabled, QToolButton:disabled { color: %(muted)s; }
         QPushButton[primary="true"] { background: %(accent)s; color: %(sidebar)s; font-weight: 700; border: 0; }
+        QPushButton[primary="true"]:hover { border:1px solid %(text)s; padding:3px 8px; }
         QPushButton[primary="true"]:disabled { background:%(input)s; color:%(muted)s; border:1px solid %(border)s; }
         QPushButton[nav="true"] { text-align: left; background: transparent; border: 0;
-            border-left: 2px solid transparent; border-radius: 0; padding: 4px 7px; }
+            border-left: 3px solid transparent; border-radius: 4px; padding: 5px 7px; }
         QPushButton[nav="true"]:hover { background: %(input)s; }
-        QPushButton[nav="true"]:checked { background: %(selected)s; color: %(text)s;
+        QPushButton[nav="true"]:checked { background: %(selected)s; color: %(accent)s;
             border-left-color: %(accent)s; font-weight: 600; }
+        QPushButton[nav="true"]:focus { border:1px solid %(accent)s; border-left:3px solid %(accent)s; padding:4px 6px; }
         QToolButton[navigationGroup="true"] { background: transparent; border:0; border-radius:0;
-            color: %(muted)s; font-size:10px; font-weight:600; padding:3px 2px; text-align:left; }
+            color: %(muted)s; font-size:10px; font-weight:600; padding:5px 2px; text-align:left; }
         QToolButton[disclosure="true"] { background: transparent; border: 0; padding: 3px 2px; min-height: 22px;
             color: %(accent)s; text-align: left; }
         QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox { background: %(input)s;
-            border: 1px solid %(border)s; border-radius: 2px; padding: 3px 6px; min-height: 18px; }
-        QLineEdit:focus, QComboBox:focus { border-color: %(accent)s; }
+            border: 1px solid %(border)s; border-radius: 4px; padding: 4px 6px; min-height: 18px; }
+        QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus { border-color: %(accent)s; }
+        QLineEdit:hover, QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover { border-color: %(muted)s; }
         QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled {
             background:%(panel)s; color:%(muted)s; }
         QComboBox::drop-down { border: 0; width: 22px; }
@@ -80,9 +83,13 @@ def apply_theme(app, appearance):
         QTabBar::tab { background: transparent; color: %(muted)s; padding: 6px 10px;
             border-bottom: 2px solid transparent; }
         QTabBar::tab:selected { color: %(accent)s; border-bottom: 2px solid %(accent)s; }
+        QTabBar::tab:hover { background:%(selected)s; color:%(text)s; }
         QScrollArea { border: 0; background: transparent; }
         QScrollBar:vertical { background: transparent; width: 10px; margin: 2px; }
         QScrollBar::handle:vertical { background: %(border)s; min-height: 26px; border-radius: 4px; }
+        QScrollBar:horizontal { background: transparent; height: 10px; margin: 2px; }
+        QScrollBar::handle:horizontal { background: %(border)s; min-width: 26px; border-radius: 4px; }
+        QScrollBar::handle:hover { background:%(muted)s; }
         QScrollBar::add-line, QScrollBar::sub-line { height: 0; width: 0; }
         QProgressBar { border: 0; background: %(input)s; border-radius: 3px; height: 6px; }
         QProgressBar::chunk { background: %(accent)s; border-radius: 3px; }
@@ -92,7 +99,7 @@ def apply_theme(app, appearance):
         QStatusBar QLabel { font-size:11px; }
         QStatusBar QPushButton { border:0; background:transparent; font-size:11px; padding:2px 6px; }
         QToolBar { background: %(panel)s; border:0; spacing:4px; padding:3px; }
-        QToolBar#applicationTools { border-bottom:1px solid %(border)s; padding:4px 8px; }
+        QToolBar#applicationTools { border-bottom:1px solid %(border)s; padding:6px 10px; spacing:6px; }
         QToolBar#moduleCommands { background:transparent; padding:0; }
         QToolBar::separator { background:%(border)s; width:1px; margin:3px 5px; }
         QToolBar QComboBox { min-height:18px; font-weight:600; }

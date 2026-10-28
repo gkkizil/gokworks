@@ -50,6 +50,7 @@ class CadResults(ResultsPanel):
         self.page.save_report()
 
     def refresh_count(self, *args):
+        super().refresh_count(*args)
         self.counter.setText(f'{self.proxy.rowCount()} / {self.model.rowCount()} işlem satırı · {len(self.results)} tamamlanan')
 
 

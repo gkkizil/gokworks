@@ -43,7 +43,7 @@ class ExportPage(BasePage):
         body.addWidget(self.options)
         body.addWidget(button('Çıktıyı aç', lambda: open_folder(self.output.text()) if self.output.text() else None))
         self.controls.extend((self.form, self.options_form))
-        self.results = ResultsPanel()
+        self.results = ResultsPanel(empty_hint='Kaynak klasörü seçin, ardından “Klasörü tara” veya aktarım komutunu kullanın.')
         self.results.cleared.connect(lambda:self.set_status('Dosya listesi ve işlem günlüğü temizlendi.'))
         self.source_files = SourceFiles(self.results)
         body.addWidget(self.source_files,1)

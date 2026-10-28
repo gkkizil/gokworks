@@ -3,8 +3,8 @@
 import csv
 from pathlib import Path, PureWindowsPath
 
-from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize
-from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut
+from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent
+from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
     QFileDialog, QTableView, QTreeView, QHeaderView, QAbstractItemView,
@@ -21,6 +21,53 @@ def label(text='', role=None, *, wrap=True):
     if role:
         widget.setProperty('role', role)
     return widget
+
+
+class ElidedLabel(QLabel):
+    """Single-line shell text that yields space to controls, retaining its full text."""
+    def __init__(self, text='', parent=None):
+        super().__init__(text, parent)
+        self.setMinimumWidth(0)
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setPen(self.palette().color(QPalette.WindowText))
+        painter.setFont(self.font())
+        painter.drawText(self.contentsRect(), self.alignment(),
+                         self.fontMetrics().elidedText(self.text(), Qt.ElideRight, self.contentsRect().width()))
+
+
+class ViewEmptyState(QWidget):
+    """One lightweight overlay; the underlying model/view remains intact."""
+    def __init__(self, view, reset, hint):
+        super().__init__(view.viewport())
+        self.view, self.hint = view, hint
+        layout = QVBoxLayout(self); layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(10); layout.addStretch()
+        self.title = label('', 'section'); self.detail = label('', 'muted')
+        for caption in (self.title, self.detail):
+            caption.setAlignment(Qt.AlignCenter)
+            caption.setTextFormat(Qt.PlainText)
+            layout.addWidget(caption)
+        self.reset = button('Filtreleri temizle', reset)
+        layout.addWidget(self.reset, alignment=Qt.AlignHCenter); layout.addStretch()
+        view.viewport().installEventFilter(self)
+        self.setGeometry(view.viewport().rect())
+
+    def eventFilter(self, watched, event):
+        if event.type() == QEvent.Resize:
+            self.setGeometry(self.view.viewport().rect())
+        return super().eventFilter(watched, event)
+
+    def show_state(self, *, empty, filtered, busy):
+        self.title.setText('Eşleşen dosya yok' if filtered else 'İşlem sürüyor…' if busy else 'Dosyalar burada görünecek')
+        self.detail.setText('Arama veya durum filtresini temizleyerek tüm dosyaları gösterin.' if filtered
+                            else 'Dosyalar hazırlanıyor. İşlem durumu alt çubukta gösterilir.' if busy
+                            else self.hint)
+        self.reset.setVisible(filtered)
+        self.setVisible(empty)
 
 
 def button(text, callback=None, *, primary=False):
@@ -342,8 +389,8 @@ class BasePage(QWidget):
         self.command_controls = []
         self.status_text = ''
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(10, 8, 10, 6)
-        self.layout.setSpacing(6)
+        self.layout.setContentsMargins(12, 10, 12, 8)
+        self.layout.setSpacing(10)
         heading = QBoxLayout(QBoxLayout.LeftToRight)
         self.heading = heading
         captions = QVBoxLayout()
@@ -447,7 +494,8 @@ class BasePage(QWidget):
 class ResultsPanel(QWidget):
     cleared = Signal()
 
-    def __init__(self, parent=None, *, success_label='Başarılı'):
+    def __init__(self, parent=None, *, success_label='Başarılı',
+                 empty_hint='Bu ekranın kaynak seçeneklerinden dosyaları ekleyin veya okuyun.'):
         super().__init__(parent)
         self.results = []
         self.busy = False
@@ -481,6 +529,8 @@ class ResultsPanel(QWidget):
         self.proxy = FilterProxy(self)
         self.proxy.setSourceModel(self.model)
         self.table.setModel(self.proxy)
+        self.empty_state = ViewEmptyState(self.table, self.clear_filters, empty_hint)
+        self.empty_state.show_state(empty=True, filtered=False, busy=False)
         self.table.horizontalHeader().setStretchLastSection(False)
         self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2,QHeaderView.Stretch)
@@ -491,7 +541,7 @@ class ResultsPanel(QWidget):
         self.tabs.addTab(self.table, 'Dosyalar')
         self.tabs.addTab(self.log, 'Günlük')
         self.layout.addWidget(self.tabs, 1)
-        self.counter = label('Henüz sonuç yok. Kaynağı seçip tarama veya aktarım başlatın.', 'muted')
+        self.counter = label('0 / 0 dosya · 0 sonuç', 'muted')
         self.layout.addWidget(self.counter)
         self.search_timer = QTimer(self)
         self.search_timer.setInterval(100)
@@ -503,7 +553,9 @@ class ResultsPanel(QWidget):
         self.proxy.modelReset.connect(self.refresh_count)
         self.proxy.rowsRemoved.connect(self.refresh_count)
         QShortcut(QKeySequence.Find, self, activated=self.search.setFocus)
-        QShortcut(QKeySequence('Return'), self.table, activated=lambda: self.show_details(self.table.currentIndex()))
+        details_shortcut = QShortcut(QKeySequence('Return'), self.table,
+                                    activated=lambda: self.show_details(self.table.currentIndex()))
+        details_shortcut.setContext(Qt.WidgetShortcut)
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
@@ -529,6 +581,7 @@ class ResultsPanel(QWidget):
     def set_busy(self, busy):
         self.busy = busy
         self.clear_button.setEnabled(not busy)
+        self.refresh_count()
 
     def clear_filters(self):
         self.search.clear()
@@ -555,6 +608,8 @@ class ResultsPanel(QWidget):
 
     def refresh_count(self, *args):
         self.counter.setText(f'{self.proxy.rowCount()} / {self.model.rowCount()} dosya · {len(self.results)} sonuç')
+        self.empty_state.show_state(empty=self.proxy.rowCount() == 0,
+                                    filtered=self.model.rowCount() > 0, busy=self.busy)
 
     def copy_log_text(self):
         QApplication.clipboard().setText(self.log.toPlainText())

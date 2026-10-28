@@ -1,6 +1,6 @@
 """Native CAD-style navigation and contextual workbench chrome."""
 
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtWidgets import (QFrame, QWidget, QVBoxLayout, QHBoxLayout,
     QToolButton, QLineEdit, QComboBox, QSizePolicy)
 
@@ -52,8 +52,10 @@ class ModuleBrowser(QFrame):
         self.menu_toggle.clicked.connect(toggle_sidebar); brand.addWidget(self.menu_toggle); body.addLayout(brand)
         self.caption = label('ÇALIŞMA ALANLARI','muted'); self.caption.setProperty('eyebrow',True)
         body.addWidget(self.caption)
-        self.search = QLineEdit(); self.search.setPlaceholderText('Araç bul…'); self.search.setClearButtonEnabled(True)
-        self.search.setAccessibleName('GOKWORKS araçlarında ara'); self.search.setToolTip('Araç bul · Ctrl+K')
+        self.search = QLineEdit(); self.search.setPlaceholderText('Araç bul…  Ctrl+K'); self.search.setClearButtonEnabled(True)
+        self.search.installEventFilter(self)
+        self.search.setAccessibleName('GOKWORKS araçlarında ara')
+        self.search.setToolTip('Ctrl+K: ara · Enter: ilk aracı aç · Esc: aramayı temizle')
         body.addWidget(self.search)
         menu = QWidget(); groups_layout = QVBoxLayout(menu)
         groups_layout.setContentsMargins(0,0,0,0); groups_layout.setSpacing(4)
@@ -63,6 +65,7 @@ class ModuleBrowser(QFrame):
         if not isinstance(preferences,dict): preferences = {}
         for title, keys in WORKSPACES:
             group = NavigationGroup(title); self.groups[title] = group
+            group.toggle.setText(group.toggle.text()+'  ·  '+str(len(keys)))
             for key in keys:
                 nav = button(titles[key],lambda checked=False,key=key:navigate(key))
                 nav.setProperty('nav',True); nav.setCheckable(True); nav.setIconSize(QSize(18,18))
@@ -71,6 +74,14 @@ class ModuleBrowser(QFrame):
             group.toggle.setChecked(preferences.get(title,True) is not False)
             group.toggle.toggled.connect(lambda checked,title=title:self.remember_group(title,checked))
             groups_layout.addWidget(group)
+        self.search_feedback = label('', 'muted')
+        self.search_feedback.setTextFormat(Qt.PlainText)
+        self.search_feedback.setAlignment(Qt.AlignCenter)
+        self.search_feedback.setContentsMargins(8, 18, 8, 8)
+        self.search_feedback.hide()
+        groups_layout.addWidget(self.search_feedback)
+        self.reset_search = button('Aramayı temizle', self.search.clear)
+        self.reset_search.hide(); groups_layout.addWidget(self.reset_search)
         groups_layout.addStretch()
         self.menu_scroll = scroll(menu); self.menu_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body.addWidget(self.menu_scroll,1)
@@ -96,6 +107,23 @@ class ModuleBrowser(QFrame):
             group = self.groups[self.group_for_mode[mode]]
             group.toggle.setChecked(True)
         for key,control in self.buttons.items(): control.setChecked(key==mode)
+        self.menu_scroll.ensureWidgetVisible(self.buttons[mode], 0, 12)
+
+    def eventFilter(self, watched, event):
+        if watched is self.search and event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Escape:
+                self.search.clear()
+                return True
+            if event.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Down):
+                matches = [b for b in self.buttons.values() if b.isVisible()]
+                if matches:
+                    if event.key() == Qt.Key_Down:
+                        matches[0].setFocus()
+                    else:
+                        matches[0].click()
+                        matches[0].setFocus()
+                return True
+        return super().eventFilter(watched, event)
 
     def filter(self, value):
         needle = search_text(value.strip())
@@ -107,6 +135,13 @@ class ModuleBrowser(QFrame):
             group = self.groups[title]; group.setVisible(visible)
             if needle or self.collapsed: group.content.setVisible(True)
             else: group.content.setVisible(group.toggle.isChecked())
+        empty = bool(needle) and not any(not b.isHidden() for b in self.buttons.values())
+        self.search_feedback.setText('Araç bulunamadı.\nFarklı bir ad veya çalışma alanı deneyin.')
+        self.search_feedback.setVisible(empty)
+        self.reset_search.setVisible(empty)
+        if not needle:
+            selected = next((b for b in self.buttons.values() if b.isChecked()), None)
+            if selected is not None: self.menu_scroll.ensureWidgetVisible(selected, 0, 12)
 
     def set_collapsed(self, collapsed):
         self.collapsed = collapsed; self.setFixedWidth(64 if collapsed else 232)

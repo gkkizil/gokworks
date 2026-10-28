@@ -13,7 +13,7 @@ from .workers import JobManager
 from .workspace import ModuleBrowser, WORKSPACES
 from .theme import apply_theme, COLORS
 from .icons import BrandLogo, ASSETS, icon, set_application_identity
-from .components import label, button, scroll, show_details, Disclosure, card
+from .components import label, button, scroll, show_details, Disclosure, card, ElidedLabel
 from . import services
 from solidworks import diagnostics
 from modules.pdf.ui import PdfPage
@@ -88,7 +88,8 @@ class MainWindow(QMainWindow):
         outer.addWidget(self.stack, 1)
         self.setCentralWidget(container)
         self.create_workbench_chrome()
-        self.global_status = label('Hazır', 'muted', wrap=False)
+        self.global_status = ElidedLabel('Hazır')
+        self.global_status.setProperty('role', 'muted')
         self.global_status.setMaximumWidth(600)
         self.statusBar().addWidget(self.global_status, 1)
         self.progress = QProgressBar()
@@ -139,7 +140,8 @@ class MainWindow(QMainWindow):
         self.workbench_bar.setObjectName('applicationTools'); self.workbench_bar.setMovable(False)
         self.workbench_bar.setFloatable(False); self.workbench_bar.setIconSize(QSize(16,16))
         self.addToolBar(Qt.TopToolBarArea,self.workbench_bar)
-        self.workbench_bar.addWidget(label('ÇALIŞMA ALANI','muted'))
+        self.workspace_caption = label('ÇALIŞMA ALANI','muted')
+        self.workspace_caption_action = self.workbench_bar.addWidget(self.workspace_caption)
         self.workspace_picker = QComboBox(); self.workspace_picker.setMinimumWidth(138)
         self.workspace_picker.setAccessibleName('Mühendislik çalışma alanı')
         for title,_ in WORKSPACES:self.workspace_picker.addItem(title,title)
@@ -147,10 +149,10 @@ class MainWindow(QMainWindow):
         self.workspace_picker.currentIndexChanged.connect(self.change_workspace)
         self.workbench_bar.addWidget(self.workspace_picker)
         self.workbench_bar.addSeparator()
-        self.workspace_context = label('','muted',wrap=False)
+        self.workspace_context = ElidedLabel()
+        self.workspace_context.setProperty('role', 'muted')
+        self.workspace_context.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.workbench_bar.addWidget(self.workspace_context)
-        space=QWidget();space.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Preferred)
-        self.workbench_bar.addWidget(space)
         self.inspectors = {}; self._syncing_dock = False
         self.inspector_requested = self.settings.get('inspector_visible',True) is not False
         self.property_dock = QDockWidget('ÖZELLİKLER',self)
@@ -225,6 +227,8 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
+        if hasattr(self, 'workspace_caption_action'):
+            self.workspace_caption_action.setVisible(self.width() >= 1100)
         if hasattr(self,'property_dock'):self.update_inspector()
 
     def restore_window(self):
@@ -256,6 +260,8 @@ class MainWindow(QMainWindow):
         self.workspace_picker.setCurrentIndex(self.workspace_picker.findData(group))
         self.workspace_picker.blockSignals(blocked)
         self.workspace_context.setText(group+' / '+dict((key,title) for key,title,_ in MODULES)[mode])
+        self.workspace_context.setToolTip(self.workspace_context.text())
+        self.workspace_context.setAccessibleName(self.workspace_context.text())
         if self.browser.buttons[mode].isHidden() and self.browser.search.text():self.browser.search.clear()
         self.browser.activate(mode)
         for key,nav in self.navigation.items():nav.setIcon(icon(key,COLORS[self.appearance]['accent' if key==mode else 'muted']))

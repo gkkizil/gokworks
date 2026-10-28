@@ -1,0 +1,54 @@
+{
+  "platform": "offscreen",
+  "framework": "PySide6 / Qt Widgets",
+  "screenshots": [
+    {
+      "file": "dark.png",
+      "mode": "pdf",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "light.png",
+      "mode": "weight",
+      "theme": "light",
+      "size": [
+        1440,
+        900
+      ]
+    },
+    {
+      "file": "compact.png",
+      "mode": "pdf",
+      "theme": "dark",
+      "size": [
+        820,
+        560
+      ]
+    },
+    {
+      "file": "search-empty.png",
+      "mode": "pdf",
+      "theme": "dark",
+      "size": [
+        1024,
+        700
+      ]
+    },
+    {
+      "file": "filtered-results.png",
+      "mode": "pdf",
+      "theme": "dark",
+      "size": [
+        1440,
+        900
+      ]
+    }
+  ],
+  "live_solidworks_tested": false,
+  "windows_exe_built": false,
+  "scope": "Shared navigation, theme, toolbar, empty and filtered results"
+}
