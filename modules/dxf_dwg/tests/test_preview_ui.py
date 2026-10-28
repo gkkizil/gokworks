@@ -27,29 +27,29 @@ def payload(path, configuration='Bent'):
 @pytest.fixture
 def page(qtbot, tmp_path):
     create_application([])
-    window = MainWindow(tmp_path/'settings.json'); qtbot.addWidget(window)
-    window.resize(1600, 1000); window.show(); window.navigate('dxf_dwg')
+    window = MainWindow(tmp_path/'settings.json')
     p = window.pages['dxf_dwg']
+
+    def before_close(w):
+        # pytest-qt closes/deletes registered widgets before yield-fixture
+        # finalizers. Drain native work here, while every QObject is still live.
+        w.closing = True
+        p.preview_timer.stop(); p.preview_pending = None
+        if w.jobs.busy:
+            w.jobs.cancel(); qtbot.waitUntil(lambda: not w.jobs.busy, timeout=8000)
+        view = p.preview.mesh_view
+        view.set_mesh(None)  # delayed GL fallback callbacks cannot start a frame
+        view.timer.stop(); view.pending = False; view.cancel_render()
+        qtbot.waitUntil(lambda: view.pool.activeThreadCount() == 0, timeout=8000)
+
+    qtbot.addWidget(window, before_close_func=before_close)
+    window.resize(1600, 1000); window.show(); window.navigate('dxf_dwg')
     p.preview.mesh_view.fallback()  # deterministic software path on every test OS
     files = [tmp_path/'A.SLDPRT', tmp_path/'B.SLDPRT']
     for file in files: file.write_text('source fixture')
     p.results.files([str(f) for f in files])
     p._capture = lambda request, cache, stop: payload(request.source)
     yield p, window, files
-    # Freeze queued selection/preview callbacks before cancelling the current
-    # job. Otherwise qtbot's later close can open the real busy-job question.
-    window.closing = True
-    p.preview_timer.stop(); p.preview_pending = None
-    if window.jobs.busy:
-        window.jobs.cancel(); qtbot.waitUntil(lambda: not window.jobs.busy, timeout=8000)
-    view = p.preview.mesh_view
-    # A delayed native GL fallback/show callback can otherwise enqueue another
-    # frame during teardown. Clear its input, then join the actual worker pool
-    # rather than waiting for a queued GUI completion callback on a closing view.
-    view.set_mesh(None)
-    view.timer.stop(); view.pending = False; view.cancel_render()
-    qtbot.waitUntil(lambda: view.pool.activeThreadCount() == 0, timeout=8000)
-    window.close(); window.deleteLater()
     QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete); gc.collect()
 
 
