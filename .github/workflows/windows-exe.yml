@@ -138,6 +138,14 @@ jobs:
           QT_QPA_PLATFORM: windows
           PYTHONUTF8: '1'
         run: python packaging/run_windows_tests.py modules/shaft_generator/tests/test_ui.py
+      - name: Validate native Windows DXF preview shutdown
+        # Check the native preview teardown before starting the long full suite.
+        if: steps.validation.outputs.reuse != 'true'
+        timeout-minutes: 3
+        env:
+          QT_QPA_PLATFORM: windows
+          PYTHONUTF8: '1'
+        run: python packaging/run_windows_tests.py modules/dxf_dwg/tests/test_preview_ui.py
       - name: Validate regression suite on Windows
         if: steps.validation.outputs.reuse != 'true'
         timeout-minutes: 32

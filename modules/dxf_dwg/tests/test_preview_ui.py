@@ -36,10 +36,15 @@ def page(qtbot, tmp_path):
     p.results.files([str(f) for f in files])
     p._capture = lambda request, cache, stop: payload(request.source)
     yield p, window, files
+    # Freeze queued selection/preview callbacks before cancelling the current
+    # job. Otherwise qtbot's later close can open the real busy-job question.
+    window.closing = True
     p.preview_timer.stop(); p.preview_pending = None
     if window.jobs.busy:
         window.jobs.cancel(); qtbot.waitUntil(lambda: not window.jobs.busy, timeout=8000)
-    p.preview.mesh_view.cancel_render()
+    view = p.preview.mesh_view
+    view.timer.stop(); view.pending = False; view.cancel_render()
+    qtbot.waitUntil(lambda: view.running is None, timeout=8000)
     window.close(); window.deleteLater()
     QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete); gc.collect()
 
