@@ -43,8 +43,12 @@ def page(qtbot, tmp_path):
     if window.jobs.busy:
         window.jobs.cancel(); qtbot.waitUntil(lambda: not window.jobs.busy, timeout=8000)
     view = p.preview.mesh_view
+    # A delayed native GL fallback/show callback can otherwise enqueue another
+    # frame during teardown. Clear its input, then join the actual worker pool
+    # rather than waiting for a queued GUI completion callback on a closing view.
+    view.set_mesh(None)
     view.timer.stop(); view.pending = False; view.cancel_render()
-    qtbot.waitUntil(lambda: view.running is None, timeout=8000)
+    qtbot.waitUntil(lambda: view.pool.activeThreadCount() == 0, timeout=8000)
     window.close(); window.deleteLater()
     QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete); gc.collect()
 
