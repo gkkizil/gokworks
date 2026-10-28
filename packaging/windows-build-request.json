@@ -1,8 +1,9 @@
 {
-  "request_id": "20261028-082314-chain-sprocket-exe",
-  "requested_at": "2026-10-28T11:23:14+03:00",
-  "source_commit": "4a05346ddc4c6fcc38924635b9e5746f1fe61e2b",
+  "request_id": "20261028-091028-chain-sprocket-exe",
+  "requested_at": "2026-10-28T09:10:28+00:00",
+  "source_commit": "c44d33e1e6f58ff15fdeac30723437c2bbe1ce6e",
   "validation_profile": "full",
-  "reason": "User requested the latest Windows EXE including the roller-chain sprocket module. Build current main with ISO B-series 08B-1, 10B-1, 12B-1 and 16B-1 catalogue, separate chain schema, circular roller-seat/flank geometry, mounting calculations, Qt 2D/3D and DXF/STEP. Preserve the unified gear workspace and shaft features. Run full native Windows regression tests and three-DPI frozen application/CAD checks before publishing the direct executable download. Nominal-profile, manufacturing and chain-motion limitations remain explicit.",
-  "cancelled": false
+  "reason": "User requested latest Windows single-file EXE including roller-chain sprockets. Includes ISO B-series catalogue, independent chain schema, analytic sprocket contours, mounting calculations, 2D/3D workspace and DXF/STEP exports. Fix DXF test teardown by freezing deferred preview callbacks and draining rendering before closing. Run focused native shutdown guard, full native Windows regression suite and frozen application/CAD checks at three DPI scales before publication. Retain documented manufacturing and chain-motion limitations.",
+  "cancelled": false,
+  "diagnose_run": 40656414020
 }
