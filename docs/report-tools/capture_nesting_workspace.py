@@ -34,6 +34,12 @@ def capture(destination):
                 app.processEvents();time.sleep(.005)
                 if time.monotonic()>end: raise TimeoutError('Actual Nesting operation timed out')
             QTest.qWait(60)
+        def resize(width,height):
+            if app.platformName()=='windows':
+                bounds=w.screen().availableGeometry();margins=w.windowHandle().frameMargins()
+                width=min(width,bounds.width()-margins.left()-margins.right())
+                height=min(height,bounds.height()-margins.top()-margins.bottom())
+            w.resize(width,height)
         shot('01-empty-dark')
         p.import_files([str(x) for x in sources],quantity=3);wait()
         assert len(p.project.parts)==3
@@ -59,11 +65,11 @@ def capture(destination):
         p.start_nest();wait();assert p.result is not None;validate_result(p.project,p.result)
         assert not p.result.unplaced
         shot('04-layout-dark')
-        w.resize(1920,1080);shot('05-layout-wide-dark')
-        w.resize(1366,768);w.set_theme('light');shot('06-layout-light')
+        resize(1920,1080);shot('05-layout-wide-dark')
+        resize(1366,768);w.set_theme('light');shot('06-layout-light')
         if p.sheet_tabs.count()>1:p.sheet_tabs.setCurrentIndex(1)
         p.results_action.setChecked(True);shot('07-results-light')
-        p.results_action.setChecked(False);w.set_theme('dark');w.resize(1024,700);shot('08-compact-dark')
+        p.results_action.setChecked(False);w.set_theme('dark');resize(1024,700);shot('08-compact-dark')
         p.parts_toggle.setChecked(False);shot('09-canvas-focus-dark')
         report=dict(source='Actual native Qt application and production NFP engine',
             source_inputs={x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in sources},

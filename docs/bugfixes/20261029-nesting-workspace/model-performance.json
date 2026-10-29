@@ -1,0 +1,7 @@
+{
+  "kind": "UI adapter-only benchmark; no placement results",
+  "rows": 5000,
+  "groups": 4,
+  "elapsed_ms": 142.05,
+  "geometry_or_engine_changed": false
+}

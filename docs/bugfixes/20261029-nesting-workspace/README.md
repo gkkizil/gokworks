@@ -154,6 +154,13 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
   kurulduktan sonra tekrar başarılı oldu. Requirements dosyası değiştirilmedi.
 - **1366×768 ve 1920×1080**, iki tema; ayrıca 1024×700 ve 820×560,
   sonuç tablosu açık/kapalı hâlleri ve panel gizleme doğrulanır.
+- Yerel Windows testinde masaüstü çözünürlüğü ile pencerenin istemci alanı
+  ayrılır. Başlık/kenarlık/görev çubuğu sonrası gerçekten kullanılabilir alan
+  hesaplanır; istenen ve test edilen boyutlar ile DPR JUnit'e kaydedilir.
+  İlk Windows çalışmasında 133 test başarılı, bir boyut varsayımı hatalıydı:
+  1920×1080 istenen istemci alanı Windows tarafından 1920×1061'e kısılmıştı.
+  Düzeltme test/yakalama araçlarına sınırlıdır; üretim arayüzü ve görünürlük
+  eşikleri değiştirilmedi.
 - Ruff `F821,F822,F823` ve `git diff --check` başarılı.
 
 Windows çalışmasının kesin commit'i, test ve DPI sonuçları tamamlandığında

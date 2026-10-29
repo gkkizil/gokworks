@@ -2,9 +2,10 @@
 
 from copy import deepcopy
 from pathlib import Path
+import json
 
 from PySide6.QtCore import Qt,QPointF
-from PySide6.QtWidgets import QTreeView,QFileDialog
+from PySide6.QtWidgets import QTreeView,QFileDialog,QApplication
 from shapely.geometry import Polygon,box
 
 from .test_nesting_gui import window,load_parts  # noqa: F401
@@ -142,14 +143,26 @@ def test_results_use_real_conservation_values_and_partial_rows_are_explicit(wind
     p.form.set_value('gap','4');assert not p.result_tabs.isVisible() and not p.sheet_tree_model.by_key
 
 
-def test_requested_resolutions_and_both_themes_keep_geometry_and_selected_ids(window,qtbot,tmp_path):
+def test_requested_resolutions_and_both_themes_keep_geometry_and_selected_ids(window,qtbot,tmp_path,record_property):
     p=load_parts(window,qtbot,tmp_path);plan(p,window,qtbot)
     selected=p.project.parts[0].id;p.part_tree.select_index(p.part_tree_model.index_for_id(selected))
     result=p.result
+    sizes=[]
     for theme in ('dark','light'):
         window.set_theme(theme)
         for width,height in ((1366,768),(1920,1080),(1024,700),(820,560)):
+            requested=(width,height)
+            if QApplication.platformName()=='windows':
+                # Native Windows adds the title bar, resize frame and taskbar
+                # outside the Qt client. Request a physically possible client
+                # instead of mistaking the monitor resolution for that client.
+                bounds=window.screen().availableGeometry();margins=window.windowHandle().frameMargins()
+                capacity=(bounds.width()-margins.left()-margins.right(),
+                          bounds.height()-margins.top()-margins.bottom())
+                assert capacity[0]>=window.minimumWidth() and capacity[1]>=window.minimumHeight()
+                width=min(width,capacity[0]);height=min(height,capacity[1])
             window.resize(width,height);qtbot.wait(50)
+            sizes.append(dict(theme=theme,requested=list(requested),client=[width,height],dpr=window.devicePixelRatio()))
             for expanded in (True,False):
                 p.results_action.setChecked(expanded);qtbot.wait(40)
                 assert window.size().toTuple()==(width,height)
@@ -157,3 +170,5 @@ def test_requested_resolutions_and_both_themes_keep_geometry_and_selected_ids(wi
                 assert p.canvas.selected_part_ids=={selected} and p.result is result
                 assert p.part_tree.horizontalScrollBar().maximum()==0
                 assert p.nesting_commands.rect().contains(p.nest_button.mapTo(p.nesting_commands,p.nest_button.rect().bottomRight()))
+    record_property('qt_platform',QApplication.platformName())
+    record_property('requested_and_actual_clients',json.dumps(sizes))
