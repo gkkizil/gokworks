@@ -398,19 +398,23 @@ def export_excel(result, destination, stop_event=None, *, previews=None):
             temporary.unlink(missing_ok=True)
 
 
-def export_worker(result, destination, events, stop_event):
-    """Capture CAD images and write the complete BOM in the existing worker."""
-    from .images import collect_previews
+def export_worker(result, destination, events, stop_event, *, include_images=True):
+    """Write the complete BOM, optionally capturing CAD images in this worker."""
     try:
         _check_cancel(stop_event)
-        previews = collect_previews(result, stop_event,
-                                    progress=lambda text: events.put(('bom_phase', text)))
-        events.put(('bom_phase', 'İzometrik görseller Excel dosyasına yerleştiriliyor…'))
+        previews = None
+        if include_images:
+            from .images import collect_previews
+            previews = collect_previews(result, stop_event,
+                                        progress=lambda text: events.put(('bom_phase', text)))
+        events.put(('bom_phase', 'İzometrik görseller Excel dosyasına yerleştiriliyor…'
+                    if include_images else 'Excel dosyası hazırlanıyor…'))
         export_excel(result, destination, stop_event, previews=previews)
-        images = sum(bool(previews.get(sw._part_key(part.path, part.configuration))
-                          and previews[sw._part_key(part.path, part.configuration)].png) for part in result.parts)
-        outcome = dict(state='exported', path=str(destination), images=images,
-                       missing_images=len(result.parts)-images)
+        outcome = dict(state='exported', path=str(destination))
+        if previews is not None:
+            images = sum(bool(previews.get(sw._part_key(part.path, part.configuration))
+                              and previews[sw._part_key(part.path, part.configuration)].png) for part in result.parts)
+            outcome.update(images=images, missing_images=len(result.parts)-images)
     except Cancelled:
         outcome = dict(state='cancelled')
     except Exception as error:

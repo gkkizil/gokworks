@@ -31,7 +31,15 @@ class BomPage(BasePage):
         self.options = Disclosure('Okuma seçenekleri', self.form, expanded=True)
         source, source_layout = card('Kaynak montaj')
         source_layout.addWidget(self.options)
+        self.export_form = ValueForm(self.settings, 'bom_')
+        self.include_images = self.export_form.check(
+            'include_images', 'Excel’e parça görsellerini ekle', True)
+        self.include_images.setToolTip(
+            'İzometrik görselleri her iki Excel sayfasına ekler. '
+            'Kapalıyken görseller alınmaz ve görsel sütunu eklenmez.')
+        source_layout.addWidget(self.export_form)
         self.controls.append(self.form)
+        self.controls.append(self.export_form)
         self.summary = label('SolidWorks’te ana montajı etkinleştirip Montajı oku düğmesine basın.', 'muted')
         source_layout.addWidget(self.summary)
         self.results_panel = QWidget(); result_layout = QVBoxLayout(self.results_panel)
@@ -229,8 +237,11 @@ class BomPage(BasePage):
             PureWindowsPath(self.result.assembly).stem + '_BOM.xlsx', 'Excel (*.xlsx)')
         if path:
             result = self.result
-            self.jobs.start(self, lambda sink, stop: export_worker(result, path, sink, stop))
-            self.set_status('Parçaların izometrik görselleri ve Excel dosyası hazırlanıyor…')
+            include_images = self.include_images.isChecked()
+            self.jobs.start(self, lambda sink, stop: export_worker(
+                result, path, sink, stop, include_images=include_images))
+            self.set_status('Parçaların izometrik görselleri ve Excel dosyası hazırlanıyor…'
+                            if include_images else 'Excel dosyası hazırlanıyor…')
 
     def handle_events(self, events):
         for kind, value in events:

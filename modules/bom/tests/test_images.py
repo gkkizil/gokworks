@@ -324,6 +324,33 @@ def test_worker_embeds_images_and_reports_partial_image_failures(native, tmp_pat
     assert path.is_file()
 
 
+def test_worker_without_images_skips_cad_and_writes_complete_compact_workbook(native, tmp_path, monkeypatch):
+    def unexpected_capture(*args, **kwargs):
+        pytest.fail('Image collection must not run when images are disabled')
+    monkeypatch.setattr(images, 'collect_previews', unexpected_capture)
+    result = result_for(native)
+    path = tmp_path/'BOM-without-images.xlsx'
+    events = Queue()
+    bom.export_worker(result, path, events, Event(), include_images=False)
+    assert list(events.queue)[-1] == ('bom_done', dict(state='exported', path=str(path)))
+    assert not native[4]
+    assert_restored(native)
+    book = load_workbook(path)
+    try:
+        flat, tree = book.worksheets
+        assert (flat.max_column, tree.max_column) == (9, 11)
+        assert (flat.max_row, tree.max_row) == (6, 7)
+        assert [flat.cell(row, 3).value for row in (5, 6)] == [2, 1]
+        assert [flat.cell(row, 8).value for row in (5, 6)] == [2., 3.]
+        assert [tree.cell(row, 10).value for row in (5, 6, 7)] == [1., 1., 3.]
+        assert all(not sheet._images and sheet['E1'].value == 5. for sheet in book)
+        assert all(sheet.row_dimensions[5].height is None for sheet in book)
+    finally:
+        book.close()
+    with zipfile.ZipFile(path) as archive:
+        assert not any(name.startswith(('xl/media/', 'xl/drawings/')) for name in archive.namelist())
+
+
 @pytest.mark.parametrize('failure', [bom.Cancelled(), api.RestoreError('Restore failed')])
 def test_worker_cancel_or_restore_failure_preserves_existing_workbook(native, tmp_path, monkeypatch, failure):
     def fail(*args, **kwargs): raise failure

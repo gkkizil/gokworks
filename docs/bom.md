@@ -14,6 +14,12 @@ seçili satırın ayrıntı panelinden görülebilir ve kopyalanabilir. Küçük
 panel gizlenir; **Ayrıntılar** düğmesi veya Enter aynı bilgileri açar.
 **BOM dışındakileri ekle** seçeneği sonraki taramada uygulanır.
 
+**Excel’e parça görsellerini ekle** seçeneği Excel kaydını kontrol eder.
+Başlangıçta açıktır; son tercihiniz hatırlanır. Tik kapalıyken izometrik
+görseller alınmaz ve iki Excel sayfasındaki görsel sütunu eklenmez.
+Okunmuş parça listesi, ürün ağacı, adetler ve ağırlıklar yine eksiksiz
+aktarılır; görselsiz kayıt SolidWorks'e yeniden bağlanmayı gerektirmez.
+
 Aktif montajın aktif konfigürasyonu `GetRootComponent3(True)` ile alınır.
 `GetChildren` her bileşen örneği için ayrı dolaşılır; alt montajın referans
 konfigürasyonuna ait çocuklar kullanılır. Başka konfigürasyona geçilmez ve

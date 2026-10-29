@@ -14,7 +14,14 @@ Test: `python -m pytest modules/bom/tests`.
 
 ## Excel içinde izometrik parça görselleri
 
-**Montajı oku → Excel kaydet** akışında parça görselleri otomatik alınır.
+**Montajı oku → Excel kaydet** akışında **Excel’e parça görsellerini ekle**
+seçeneği açıksa parça görselleri alınır. Seçenek başlangıçta açıktır ve
+tercihiniz sonraki açılışlar için hatırlanır. Tiki kapatırsanız görsel alma
+işlemi atlanır; her iki Excel sayfasına da görsel sütunu eklenmez.
+Okunmuş BOM verileri, adetler ve ağırlıklar aynen aktarılır; bu kayıt için
+SolidWorks bağlantısı gerekmez.
+
+Seçenek açıkken
 “Parça listesi” ve “Ürün ağacı” sayfalarının sonuna **Kaynak parça · izometrik**
 sütunu eklenir. PNG'ler XLSX içine gömülür; Excel'i alan kişinin yan resim
 klasörüne, SolidWorks'e veya internete ihtiyacı yoktur. Diğer sütunların sırası,
@@ -49,11 +56,15 @@ ilerleme ve iptal mevcut durum alanındadır.
 
 Saf `export_excel(result, destination, stop_event=None, *, previews=None)`
 çağrısı COM bağlantısı kurmaz; eski kullanım sözleşmesi korunur. Qt ekranı
-`export_worker` üzerinden görselleri toplayıp bu parametreyi verir. `Part`,
-`Node`, `Result` ve mevcut JSON/worker bağlantı sözleşmeleri değişmedi.
+`export_worker(..., include_images=True)` üzerinden görselleri toplayıp bu
+parametreyi verir. `include_images=False` görsel toplamadan saf Excel yolunu
+kullanır; tamamlanma olayına görsel/eksik görsel sayımları eklenmez. Tercih
+mevcut ayarlarda `bom_include_images` anahtarıyla saklanır. `Part`, `Node`,
+`Result` ve mevcut veri şemaları korunur.
 
 Testler BMP→PNG→XLSX gömmeyi, hücre bağlantılarını, konfigürasyon eşleşmesini,
-bilinmeyen görselleri, iptali ve eski görünümün geri yüklenmesini kapsar. CAD
+bilinmeyen görselleri, görsel tercihinin hatırlanmasını, tik kapalıyken CAD
+görsel alımının atlanmasını, iptali ve eski görünümün geri yüklenmesini kapsar. CAD
 sınırı bu testlerde mock'tur. Gerçek SolidWorks kabulü için açık bir **test
 kopyası** ile ayrıca:
 
