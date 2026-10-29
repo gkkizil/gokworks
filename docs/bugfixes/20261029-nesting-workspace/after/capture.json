@@ -1,0 +1,417 @@
+{
+  "source": "Actual native Qt application and production NFP engine",
+  "source_inputs": {
+    "GW-001.dxf": "173fe0fe9c8d21a901013b90125b43e41ce5f04a2a520c49abc57a3f56990b5d",
+    "GW-002.dxf": "f26f4649a4ff62b6013ac31a812f94c8df3ca95f44c5a7c478f988eee2fc1874",
+    "GW-003.dxf": "adc1b70c849eb539cd184e7e97c5b41b1becd430208cf13882b2d54a068d3aee"
+  },
+  "fabricated_results": false,
+  "parts": 9,
+  "sheets": 2,
+  "errors": "Production importer rejects a temporary open-contour DXF; invalid stock draft does not mutate the project.",
+  "unplaced": 0,
+  "totals": {
+    "sheets": [
+      {
+        "id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "number": 1,
+        "plate": 1,
+        "name": "300 × 240",
+        "material": "S235JR",
+        "width": 300.0,
+        "height": 240.0,
+        "thickness": 2.0,
+        "density": 7850,
+        "gross_area": 72000.0,
+        "net_area": 42004.65201225528,
+        "waste_area": 29995.347987744717,
+        "gross_weight": 1.1304,
+        "net_weight": 0.659473036592408,
+        "waste_weight": 0.4709269634075921,
+        "efficiency": 58.33979446146567,
+        "material_cost": 50.87,
+        "net_material_value": 29.677453442547588,
+        "waste_material_value": 21.192546557452413,
+        "pricing": "TL/kg",
+        "price": 45
+      },
+      {
+        "id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "number": 2,
+        "plate": 2,
+        "name": "300 × 240",
+        "material": "S235JR",
+        "width": 300.0,
+        "height": 240.0,
+        "thickness": 2.0,
+        "density": 7850,
+        "gross_area": 72000.0,
+        "net_area": 18989.302527975135,
+        "waste_area": 53010.69747202487,
+        "gross_weight": 1.1304,
+        "net_weight": 0.29813204968920964,
+        "waste_weight": 0.8322679503107904,
+        "efficiency": 26.374031288854354,
+        "material_cost": 50.87,
+        "net_material_value": 13.416469716640208,
+        "waste_material_value": 37.45353028335978,
+        "pricing": "TL/kg",
+        "price": 45
+      }
+    ],
+    "parts": [
+      {
+        "id": "16d677c533d847e8813bbe040ed87f57",
+        "code": "GW-001",
+        "description": "",
+        "instance": 1,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 15300.0,
+        "weight": 0.24021,
+        "sheet": "1. plaka · 300 × 240",
+        "plate": 1,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 1,
+        "allocation": 18.53,
+        "perimeter": 640.0,
+        "outer_perimeter": 640.0,
+        "inner_perimeter": 0,
+        "holes": 0,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-001.dxf",
+        "sha256": "173fe0fe9c8d21a901013b90125b43e41ce5f04a2a520c49abc57a3f56990b5d"
+      },
+      {
+        "id": "16d677c533d847e8813bbe040ed87f57",
+        "code": "GW-001",
+        "description": "",
+        "instance": 2,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 15300.0,
+        "weight": 0.24021,
+        "sheet": "1. plaka · 300 × 240",
+        "plate": 1,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 1,
+        "allocation": 18.53,
+        "perimeter": 640.0,
+        "outer_perimeter": 640.0,
+        "inner_perimeter": 0,
+        "holes": 0,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-001.dxf",
+        "sha256": "173fe0fe9c8d21a901013b90125b43e41ce5f04a2a520c49abc57a3f56990b5d"
+      },
+      {
+        "id": "fe20a9ee644d43ef849fd46ab15c4973",
+        "code": "GW-002",
+        "description": "",
+        "instance": 1,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 3186.6669160892393,
+        "weight": 0.05003067058260106,
+        "sheet": "1. plaka · 300 × 240",
+        "plate": 1,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 1,
+        "allocation": 3.86,
+        "perimeter": 302.79051952931337,
+        "outer_perimeter": 240.0,
+        "inner_perimeter": 62.790519529313364,
+        "holes": 1,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-002.dxf",
+        "sha256": "f26f4649a4ff62b6013ac31a812f94c8df3ca95f44c5a7c478f988eee2fc1874"
+      },
+      {
+        "id": "fe20a9ee644d43ef849fd46ab15c4973",
+        "code": "GW-002",
+        "description": "",
+        "instance": 2,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 3186.6669160892393,
+        "weight": 0.05003067058260106,
+        "sheet": "1. plaka · 300 × 240",
+        "plate": 1,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 1,
+        "allocation": 3.86,
+        "perimeter": 302.79051952931337,
+        "outer_perimeter": 240.0,
+        "inner_perimeter": 62.790519529313364,
+        "holes": 1,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-002.dxf",
+        "sha256": "f26f4649a4ff62b6013ac31a812f94c8df3ca95f44c5a7c478f988eee2fc1874"
+      },
+      {
+        "id": "fe20a9ee644d43ef849fd46ab15c4973",
+        "code": "GW-002",
+        "description": "",
+        "instance": 3,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 3186.6669160892393,
+        "weight": 0.05003067058260106,
+        "sheet": "1. plaka · 300 × 240",
+        "plate": 1,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 1,
+        "allocation": 3.86,
+        "perimeter": 302.79051952931337,
+        "outer_perimeter": 240.0,
+        "inner_perimeter": 62.790519529313364,
+        "holes": 1,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-002.dxf",
+        "sha256": "f26f4649a4ff62b6013ac31a812f94c8df3ca95f44c5a7c478f988eee2fc1874"
+      },
+      {
+        "id": "5e11c6c300e44e899a40496c050f233c",
+        "code": "GW-003",
+        "description": "",
+        "instance": 1,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 1844.651263987568,
+        "weight": 0.028961024844604815,
+        "sheet": "1. plaka · 300 × 240",
+        "plate": 1,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 1,
+        "allocation": 2.23,
+        "perimeter": 211.31134174440626,
+        "outer_perimeter": 179.93527435524933,
+        "inner_perimeter": 31.376067389156937,
+        "holes": 1,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-003.dxf",
+        "sha256": "adc1b70c849eb539cd184e7e97c5b41b1becd430208cf13882b2d54a068d3aee"
+      },
+      {
+        "id": "16d677c533d847e8813bbe040ed87f57",
+        "code": "GW-001",
+        "description": "",
+        "instance": 3,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 15300.0,
+        "weight": 0.24021,
+        "sheet": "2. plaka · 300 × 240",
+        "plate": 2,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 2,
+        "allocation": 40.99,
+        "perimeter": 640.0,
+        "outer_perimeter": 640.0,
+        "inner_perimeter": 0,
+        "holes": 0,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-001.dxf",
+        "sha256": "173fe0fe9c8d21a901013b90125b43e41ce5f04a2a520c49abc57a3f56990b5d"
+      },
+      {
+        "id": "5e11c6c300e44e899a40496c050f233c",
+        "code": "GW-003",
+        "description": "",
+        "instance": 2,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 1844.651263987568,
+        "weight": 0.028961024844604815,
+        "sheet": "2. plaka · 300 × 240",
+        "plate": 2,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 2,
+        "allocation": 4.94,
+        "perimeter": 211.31134174440626,
+        "outer_perimeter": 179.93527435524933,
+        "inner_perimeter": 31.376067389156937,
+        "holes": 1,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-003.dxf",
+        "sha256": "adc1b70c849eb539cd184e7e97c5b41b1becd430208cf13882b2d54a068d3aee"
+      },
+      {
+        "id": "5e11c6c300e44e899a40496c050f233c",
+        "code": "GW-003",
+        "description": "",
+        "instance": 3,
+        "material": "S235JR",
+        "density": 7850,
+        "thickness": 2,
+        "area": 1844.651263987568,
+        "weight": 0.028961024844604815,
+        "sheet": "2. plaka · 300 × 240",
+        "plate": 2,
+        "sheet_id": "5d62e5ec4b8d4d94a5edea78defc82d5",
+        "sheet_number": 2,
+        "allocation": 4.94,
+        "perimeter": 211.31134174440626,
+        "outer_perimeter": 179.93527435524933,
+        "inner_perimeter": 31.376067389156937,
+        "holes": 1,
+        "source": "/workspace/gokworks/docs/nesting-example/input/GW-003.dxf",
+        "sha256": "adc1b70c849eb539cd184e7e97c5b41b1becd430208cf13882b2d54a068d3aee"
+      }
+    ],
+    "part_summary": [
+      {
+        "id": "16d677c533d847e8813bbe040ed87f57",
+        "code": "GW-001",
+        "description": "",
+        "material": "S235JR",
+        "thickness": 2,
+        "quantity": 3,
+        "requested": 3,
+        "area": 15300.0,
+        "weight": 0.24021,
+        "total_weight": 0.72063,
+        "allocation": 78.05,
+        "width": 180.0,
+        "height": 140.0,
+        "sheets": "1. plaka · 300 × 240, 2. plaka · 300 × 240"
+      },
+      {
+        "id": "fe20a9ee644d43ef849fd46ab15c4973",
+        "code": "GW-002",
+        "description": "",
+        "material": "S235JR",
+        "thickness": 2,
+        "quantity": 3,
+        "requested": 3,
+        "area": 3186.6669160892393,
+        "weight": 0.05003067058260106,
+        "total_weight": 0.15009201174780318,
+        "allocation": 11.58,
+        "width": 70.0,
+        "height": 50.0,
+        "sheets": "1. plaka · 300 × 240"
+      },
+      {
+        "id": "5e11c6c300e44e899a40496c050f233c",
+        "code": "GW-003",
+        "description": "",
+        "material": "S235JR",
+        "thickness": 2,
+        "quantity": 3,
+        "requested": 3,
+        "area": 1844.651263987568,
+        "weight": 0.028961024844604815,
+        "total_weight": 0.08688307453381444,
+        "allocation": 12.11,
+        "width": 70.0,
+        "height": 34.98045473055891,
+        "sheets": "1. plaka · 300 × 240, 2. plaka · 300 × 240"
+      }
+    ],
+    "sheet_count": 2,
+    "part_count": 9,
+    "unplaced": 0,
+    "gross_area": 144000.0,
+    "net_area": 60993.95454023042,
+    "waste_area": 83006.04545976958,
+    "gross_weight": 2.2608,
+    "net_weight": 0.9576050862816177,
+    "waste_weight": 1.3031949137183825,
+    "efficiency": 42.35691287516001,
+    "material_cost": 101.74,
+    "net_material_value": 43.093923159187796,
+    "waste_material_value": 58.6460768408122,
+    "cut_length_m": 3.4623055838211596,
+    "piercing_count": 15,
+    "cut_cost": 0.0,
+    "piercing_cost": 0.0,
+    "setup": 0.0,
+    "fixed": 0.0,
+    "profit": 0.0,
+    "vat": 0.0,
+    "total": 101.74
+  },
+  "screenshots": [
+    {
+      "file": "01-empty-dark.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "02-part-preview-dark.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "02b-import-error-dark.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "03-stock-preview-dark.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "03b-stock-validation-dark.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "04-layout-dark.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "05-layout-wide-dark.png",
+      "size": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "file": "06-layout-light.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "07-results-light.png",
+      "size": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "08-compact-dark.png",
+      "size": [
+        1024,
+        700
+      ]
+    },
+    {
+      "file": "09-canvas-focus-dark.png",
+      "size": [
+        1024,
+        700
+      ]
+    }
+  ],
+  "qt_platform": "offscreen",
+  "windows_exe_built": false,
+  "solidworks_required": false
+}

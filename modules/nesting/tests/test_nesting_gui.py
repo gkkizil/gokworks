@@ -386,7 +386,8 @@ def test_multiple_selected_rows_remove_correct_parts_and_failed_sources_through_
     page.search.setText('Remove'); page.part_table.sortByColumn(0,Qt.DescendingOrder)
     assert page.part_proxy.rowCount()==3
     for row in range(3):
-        page.part_table.selectionModel().select(page.part_proxy.index(row,0),QItemSelectionModel.Select|QItemSelectionModel.Rows)
+        index = page.part_tree_model.mapFromSource(page.part_proxy.index(row,0))
+        page.part_table.selectionModel().select(index,QItemSelectionModel.Select|QItemSelectionModel.Rows)
     assert page.remove_part_button.isEnabled() and not page.edit_part_button.isEnabled()
     assert '(3)' in page.remove_part_button.text()
     page.remove_part_button.click()
@@ -456,7 +457,12 @@ def test_part_names_toggle_does_not_rebuild_geometry_or_lose_full_source_tooltip
     page.labels_toggle.setChecked(False)
     assert all(not item.isVisible() for item in page.canvas.part_labels)
     assert set(page.canvas.scene().items())==items
-    page.labels_toggle.setChecked(True); assert all(item.isVisible() for item in page.canvas.part_labels)
+    page.labels_toggle.setChecked(True)
+    # Labels keep a readable pixel size and only appear when actual material
+    # has room. Zooming in makes these small source rectangles large enough.
+    page.canvas.zoom(30)
+    assert all(item.isVisible() for item in page.canvas.part_labels)
+    assert set(page.canvas.scene().items())==items
 
 
 def test_canvas_and_filtered_sorted_parts_share_selection_without_rebuilding_geometry(window,qtbot):

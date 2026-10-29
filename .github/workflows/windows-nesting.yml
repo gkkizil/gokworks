@@ -1,0 +1,83 @@
+name: Windows Nesting workspace
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'modules/nesting/**'
+      - 'gui_qt/**'
+      - 'requirements*.txt'
+      - '.github/workflows/windows-nesting.yml'
+  pull_request:
+    paths:
+      - 'modules/nesting/**'
+      - 'gui_qt/**'
+      - 'requirements*.txt'
+      - '.github/workflows/windows-nesting.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+      QT_QPA_PLATFORM: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Configure a real Windows desktop
+        run: python packaging/configure_windows_display.py
+      - name: Check Nesting geometry, UI, reports and workbench integration
+        run: |
+          python packaging/run_windows_tests.py modules/nesting/tests tests/test_fusion_workbench.py
+          $testExit=$LASTEXITCODE
+          @'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          path=Path('windows-tests.xml')
+          if path.exists():
+              suites=list(ET.parse(path).iter('testsuite'))
+              counts={key:sum(int(s.get(key,0)) for s in suites) for key in ('tests','failures','errors','skipped')}
+              print('::notice::Windows Nesting verification: '+str(counts))
+              for case in ET.parse(path).iter('testcase'):
+                  for failure in list(case.findall('failure'))+list(case.findall('error')):
+                      text=case.get('name','')+': '+(failure.text or failure.get('message',''))[-10000:]
+                      print('::error::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
+          '@ | python -
+          exit $testExit
+      - name: Check 125 percent Qt scaling
+        env:
+          QT_SCALE_FACTOR: '1.25'
+        run: python -m pytest -q --timeout=60 modules/nesting/tests/test_workspace_gui.py::test_requested_resolutions_and_both_themes_keep_geometry_and_selected_ids --junitxml=windows-nesting-dpi-125.xml
+      - name: Check 150 percent Qt scaling
+        env:
+          QT_SCALE_FACTOR: '1.5'
+        run: python -m pytest -q --timeout=60 modules/nesting/tests/test_workspace_gui.py::test_requested_resolutions_and_both_themes_keep_geometry_and_selected_ids --junitxml=windows-nesting-dpi-150.xml
+      - name: Check complete application startup
+        run: python main.py --self-check windows-nesting-smoke.json
+      - name: Save native Nesting screenshots from actual DXFs
+        run: python docs/report-tools/capture_nesting_workspace.py windows-nesting-screenshots
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Nesting-workspace
+          path: |
+            windows-tests.xml
+            windows-tests.log
+            windows-display.json
+            windows-nesting-dpi-*.xml
+            windows-nesting-smoke.json
+            windows-nesting-screenshots

@@ -1,0 +1,221 @@
+{
+  "baseline": "5dc713a44f56fc58f7bbd2106269c39362324347",
+  "files": [
+    {
+      "path": "gui_qt/__init__.py",
+      "sha256": "ff3d4b35a56f4fd5b4bfc0836d95e7d8bc2acddf8ee58a2440eb2d79b3cdf231",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/__main__.py",
+      "sha256": "a67c172046323b0efcafe92cb83abc266d5dd4bc931d9312cde1b7bed50643db",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/app.py",
+      "sha256": "33accb806e8a6924ce2da6d4d3aedcd2d1d71131efd45fc62999e0b637aaf971",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/calculations.py",
+      "sha256": "eb266f40b1a4aeb514bbeeaae66c314c222d62c6c17e479b69dbedbbbc7c2a54",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/components.py",
+      "sha256": "d0108003dca51c622a1e170e67621f6cab9443e84e3b99cc351939e85ab3c6a2",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/diagnostics.py",
+      "sha256": "2b04c2dae1a99e0668b53a9f15168a1f165c3a915e69fe5fde0ea5da05b40d0f",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/diagrams.py",
+      "sha256": "a9851080b8d916a0447577b3da80305d6a0f76e7e2276ac8dbf78ac074d86330",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/export.py",
+      "sha256": "f9b123e7793aa4fece791e2f08cdfc332d0635a1b76b83f899bccf2acf676de3",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/icons.py",
+      "sha256": "79ec2abb1c88932081548c33b711fd820c0b9abc358ad232ecd3ef4c35270ad1",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/licenses.py",
+      "sha256": "11a9e624301487bbdd8705b1374829084e7f37d088543c948069e2d2d7affd0e",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/models.py",
+      "sha256": "df7465d8b56181b44b039d273b18cfedea4bcb30da4c9ec807a90632a922c406",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/package_check.py",
+      "sha256": "c2ac44289f16f6870beff8de263b86a1483f34e981096f62ef498492fc8af66e",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/services.py",
+      "sha256": "cbee1929c66872cb548bb1349f339c68327bb64c9ad366bcd1a4ebe29fc4d9ef",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/settings.py",
+      "sha256": "3e4ae7657595340abde99240c0690501c463ffe33f06ae021bf21b42ec56561b",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/theme.py",
+      "sha256": "632ba676d980cdd9398f98e0d6afa5a07e20e6e4b72059f8e8f1bd92dcd3d030",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workers.py",
+      "sha256": "60cc6734fb14099a54582e14086deb6c01d36a4d576da467a4660c7d59fb3739",
+      "unchanged": true
+    },
+    {
+      "path": "gui_qt/workspace.py",
+      "sha256": "4cc009dd9e8bb8209398fcf59d195f95b8a6d0cfb4c81d0b193bc09639bbe0ba",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/__init__.py",
+      "sha256": "07d2bc1048801a54b20eb52ccb4f1ff4d0072133411f9a45171b9fe6a50960ed",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/accounting.py",
+      "sha256": "aa83dcb511b0fc75c172f2878fc0e8e1695c47aea53125c57bbf3a695f9d97e8",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/batch_import.py",
+      "sha256": "be1bc773901c8a331740878b3c93188923965523a14eb9402cf99cd398319ce7",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/cutting.py",
+      "sha256": "3b469791d615002a512be1063506de0503ed7f0b52aeafbd29940a02ef081b6d",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/dxf_export.py",
+      "sha256": "77a977b7accead610c05239219daf5051a48622d04cdab835e3327eae8153f7d",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/dxf_import.py",
+      "sha256": "7dd808ed7fc1c38c0cf7e649010442a8a788a9dae0d3743f5215b042147940c1",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/engine.py",
+      "sha256": "78296788931a3c2781a7b3a6eefa8fa10e2a49ff2215b380845418b35ad9d59d",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/geometry.py",
+      "sha256": "eb272a08a0d71a330a5099b1c7554c9cfbdb28943c8b7b1829d87355635d394a",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/materials.py",
+      "sha256": "b20dd264a8907d84c058444c09b4be20711d925569a9019557d7a81dedcb1d7a",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/models.py",
+      "sha256": "55a7089a07353169bdc79cd797ffbdd7952f56fb03ab1da26e252bb195755d22",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/pdf_report.py",
+      "sha256": "cba6e31d51ce3a7c8231943e851bb5eabb3a14a24fcefe6213645104d15ba330",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/render.py",
+      "sha256": "5f31aec9e0d82d9988169ce3f5535e9d5cdfeb369f5ff6772c5e668269501310",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/report.py",
+      "sha256": "6c345bff7a60fbacc199aa3db2831bf59762ecd007fa9235de605da76674bf48",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/storage.py",
+      "sha256": "345968225b22a16e0e1f6e21ac429f060ab4212e9156e6ba6e991205026710fe",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/tests/__init__.py",
+      "sha256": "e2cebdc25a4f41fefa6417b409b373d4843be767a7af383dfb48840dd67db1e0",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/tests/test_hole_nesting.py",
+      "sha256": "4a771acd9a8b8b9020407743b1e54cfb894452fbcaf0a977254d1a184759d7b2",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting.py",
+      "sha256": "24dca95b3b15d0b779fa7e44552cf6cad1f00db9440bfdb4de0c7e02a5f23997",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/tests/test_nesting_pdf_report.py",
+      "sha256": "9e50679fd2aca9b30172508c3ecac19ec7673d1dac2ce3e91d831b6a371fc46d",
+      "unchanged": true
+    },
+    {
+      "path": "modules/nesting/validation.py",
+      "sha256": "e75754095e9bc0bb9dcf1885f231c96d4520840163a165d4139efe2ca35f55a8",
+      "unchanged": true
+    },
+    {
+      "path": "requirements-dev.txt",
+      "sha256": "19cd6cf1f6ec89eba078672148d7f0602d36eda2a39569f2f9900b684a63e317",
+      "unchanged": true
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "8614b52bf12bfc609cb5e948b55a7c7f3fa15c31304f170862cd1007eee1266f",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/__init__.py",
+      "sha256": "867d92b3081e5a280521e46374224ba2813e35662728003cd2e845afa3023d8a",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/connection.py",
+      "sha256": "b1ca50b4c2f9102fe4a6950686d38b3d80dd1642755153ff5e845e72f40ff619",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/diagnostics.py",
+      "sha256": "c8571e19d8c9b7e1fd97fcb6b74b7bf8eeb8c6b127f1637c3fbfb61172d7596a",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/process_watch.py",
+      "sha256": "72276530b01add74bac75392fca026a45a37bf5fce86433c274eb92eebf5fa3b",
+      "unchanged": true
+    },
+    {
+      "path": "solidworks/runtime.py",
+      "sha256": "aebf45cfee92cc3e2aef191ce9e834160796ab747fa25ea9b55cb6fe55a43f88",
+      "unchanged": true
+    }
+  ],
+  "note": "Nesting presentation and its tests/documentation only; no shared production or engine file edited."
+}

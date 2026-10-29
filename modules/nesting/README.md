@@ -1,55 +1,85 @@
 # Nesting & Sac Maliyet Analizi
 
-GOKWORKS → **Mühendislik Hesapları → Nesting · Sac maliyeti**.
+GOKWORKS → **Üretim → Nesting · Sac maliyeti**.
 Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı gerekmez.
 
-Parçalar solda, sac yerleşimi sağda **aynı çalışma alanındadır**. Panel
-kenarını sürükleyerek genişliği ayarlayın; **Parçalar** ile listeyi gizleyip
-çizimi büyütün. Proje adı üst çubuktan değiştirilebilir.
+**GOKWORKS / Nesting** çalışma alanında solda parça ağacı ve sac listesi,
+ortada geometri, sağda mevcut yerel **Özellikler** paneli bulunur.
+Üst komut grupları **DOSYA / DÜZENLE / YERLEŞİM / GÖRÜNÜM / RAPOR**'dur.
+Sol panel yaklaşık 240 px başlar; yatay/dikey ayırıcıları sürükleyin.
+Sağ panelin genişliği ve görünürlüğü uygulamanın mevcut dock altyapısında
+korunur. **GÖRÜNÜM** ile panelleri gizleyin veya genişliklerini sıfırlayın.
+Proje adı üst satırda düzenlenir. Diğer modüllerin tasarımı değiştirilmez.
 
 1. **DXF ekle**: birden fazla dosya seçin. Malzeme, kalınlık,
    adet ve eğri toleransını belirtin. `$INSUNITS` yoksa mm/cm/inch seçimini
    açıkça yapın. Yardımcı katmanları adlarıyla `;` kullanarak dışlayın.
    Seçilen her dosya hemen listede görünür; okunamayanlar hata açıklamasıyla
    kalır. Dosyaya çift tıklayıp ayarlarını düzeltip yeniden okuyabilirsiniz.
-2. Parçaya çift tıklayarak kod, açıklama, adet, kalınlık ve malzemeyi düzenleyin.
+2. Parçalar gerçek malzeme ve kalınlığa göre gruplanır; grup adedi, altındaki
+   kesilecek adetlerin toplamıdır. Yüklenemeyen/bekleyen dosyalar ayrı gruptadır.
+   İçe aktarma sırası korunur; başlığa tıklayıp sıralayabilir, arayabilirsiniz.
+   Parçaya çift tıklayarak kod, açıklama, adet, kalınlık ve malzemeyi düzenleyin.
    Alan, sınır ölçüleri ve dış/iç çevreler aynı pencerede gösterilir. Ctrl/Shift
    ile birden fazla satırı seçip birlikte kaldırabilirsiniz. Dosya yolu ve
    hata açıklaması satır üzerinde bekleyince, bütün okuma kayıtları
-   **… (DXF yükleme ayrıntıları)** içinde görünür. Dar listede parça, adet
-   ve kalınlık gösterilir; malzeme ve yükleme durumu satır ipucundadır.
-3. **Sac ve ayarlar** düğmesi: özel ölçü veya 1000×2000, 1250×2500,
+   **… (DXF yükleme ayrıntıları)** içinde görünür. Yerleşimden önce seçilen
+   parçanın gerçek konturu ve delikleri ortada gösterilir; bu görünüm açıkça
+   **yerleşim sonucu değildir** diye işaretlenir. Boyut, alan, net ağırlık ve
+   çevreler sağdaki **Seçili parça** bölümündedir.
+3. **Sac listesi** tanımlanmış stokları gösterir. **+** ile yeni sac ekleyin.
+   Sağdan malzeme, kalınlık, en/boy ve stok adedini düzenleyip **Uygula**'ya
+   basın. Taslak varken eski plan/çıktılar kapatılır. Geçersiz değer gerçek
+   proje verisine yazılmaz; **Geri al** mevcut sac değerlerini geri getirir.
+   Yerleştir veya Kaydet'e basmak geçerli taslağı önce uygular; geçersiz
+   taslakta hata gösterilir. Stok satırı yerleşimden önce sac sınırını açar.
+   **Sac ve fiyatlar…** düğmesinde özel ölçü veya 1000×2000, 1250×2500,
    1500×3000, 2000×4000 şablonunu seçin. Stok adedini ve TL/kg ya da
    TL/levha fiyatını sac satırına çift tıklayarak girin. **Malzeme kütüphanesi**
    penceresinde özel malzeme ve yoğunluk eklenebilir.
-4. Aynı pencerede kenar payı, parça aralığı, döndürme ve kaliteyi ayarlayın.
+4. Sağdaki **Yerleşim** bölümünde kenar payı, parça aralığı, döndürme ve
+   kaliteyi ayarlayın. Bu alanlar eski formun aynısını yönetir.
    Sığan küçük parçalar büyük parçaların deliklerine **otomatik** yerleştirilir;
    bunun için ayrı bir seçenek yoktur. Eski projeler de açılır; **Yerleştir**
    ile yeniden hesaplandığında delik içleri otomatik değerlendirilir.
    Kerf, açı/adım, hadde yönü, **Yerleşim hesaplama süresi** ve **Deneme sırası kodu**
-   (seed) **Gelişmiş ayarları göster** içinde. Süre, hesabın en uzun çalışma
+   (seed) sağdaki **Gelişmiş yerleşim** veya tam ayarlar penceresindeki
+   **Gelişmiş ayarları göster** içindedir. Süre, hesabın en uzun çalışma
    süresidir; daha erken bitebilir. Deneme sırası kodu varsayılan 42 olarak
    bırakılabilir; farklı yerleşimlerin denenme sırasını belirler.
    Operasyon giderleri, kâr ve KDV **Kesim ve ek maliyetler** içindedir.
    Bu bölümleri kapatmak girilen değerleri sıfırlamaz.
-   Değişiklikler hemen uygulanır; **Kapat** ile çalışma alanına dönün.
+   Tam ayarlar penceresindeki değişiklikler hemen uygulanır; **Kapat** ile dönün.
    Pencereyi kapatıp açmak değerleri, seçimi veya sonucu sıfırlamaz.
 5. **Yerleştir**: yerleşim hesabı arka planda çalışır; liste ve çizim aynı
    ekranda kalır. Eksik sac/stok veya geçersiz ayarda açıklama ile ayarlar açılır.
-   AutoCAD benzeri **1. plaka / 2. plaka / 3. plaka** sekmelerine tıklayın;
+   Sac listesindeki gerçek **1. plaka / 2. plaka / 3. plaka** alt satırlarına
+   veya ortadaki aynı plaka sekmelerine tıklayın;
    çok sayıda plaka varsa sekme çubuğunu kaydırın. Odak sekmedeyken
    klavyenin sol/sağ oklarıyla da geçilebilir.
-   tekerlekle yakınlaştırın, sürükleyerek kaydırın, **Sığdır** ile görünümü sıfırlayın.
+   Tekerlek veya **GÖRÜNÜM → Yakınlaştır / Uzaklaştır** ile zoom,
+   sürükleyerek pan, **Sığdır** ile tüm sac/parçayı gösterme kullanılabilir.
+   Çizim odaktayken `+`, `−`, `Home` da çalışır. Izgara gerçek mm uzayında
+   uyarlanır; koordinatlara yuvarlama veya yapışma uygulanmaz.
    **Durdur**, o ana kadar bulunan doğrulanmış sonucu korur.
    **Adlar** ile çizim üzerindeki adları açıp kapatın;
-   tam ad ve koordinatlar, parça üzerinde bekleyince görünür.
-   Listeden seçilen parçanın bütün örnekleri çizimde belirginleşir.
+   adlar okunabilir piksel boyutundadır ve yalnız gerçek malzeme içinde
+   yer varsa görünür; delikleri veya komşu parçaları kaplamaz.
+   Tam ad ve koordinatlar, parça üzerinde bekleyince görünür.
+   Ağaçtan seçilen parçanın görünür örnekleri belirginleşir. Başka bir
+   plakadaysa ilgili plaka açılır. Hiç yerleşmemişse kaynak önizlemesi açılır.
    Çizimde parçaya tıklayınca listede seçilir; sürüklemek seçimi değiştirmez.
    Yerleşim özeti görünümün altındadır. Küçük pencerede özet kısalır;
    brüt/net/fire bilgisi ipucunda ve **Ayrıntılar** içinde korunur.
-6. **Ayrıntılar**: maliyet dökümü ve yeniden doğrulama.
-   **Dışa aktar**: DXF / Excel / PDF; tüm parçalar yerleşmeden açılmaz.
-   **Proje**: kaydet, aç ve yeni proje. Kaydedilen analizler mevcut geometriyi kullanır.
+6. **RAPOR → Sonuç tablosunu göster** gerçek sac ve parça tablolarını açar:
+   brüt/net/fire, verim, yerleşen/istenen adetler. Yerleşmeyen parça 0 adet
+   ve **Yerleşmedi** olarak görünür. Küçük yükseklikte tekrarlanan özetler
+   gizlenir; çizim ve tablo öncelikli kalır. **Ayrıntılar** maliyet dökümünü,
+   **YERLEŞİM** yeniden doğrulamayı açar. **Dışa aktar / RAPOR**: DXF / Excel /
+   PDF; tüm parçalar yerleşmeden açılmaz. **DOSYA**: kaydet, aç ve yeni proje.
+   Kaydedilen analizler mevcut geometriyi kullanır. Şema değiştirilmedi.
+
+[29 Ekim 2026: gerçek ekranlar, önce/sonra, mimari ve doğrulama raporu](../../docs/bugfixes/20261029-nesting-workspace/README.md).
 
 Ekrandaki toplam, sac ve operasyon giderleri ile kâr/KDV'yi içerir.
 Malzeme bedeli ayrıca gösterilir; kullanılan bir sacın fiyatı sıfırsa
