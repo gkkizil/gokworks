@@ -196,7 +196,8 @@ class FakePdfData:
         self.ExportAs3D = True
 
     def SetSheets(self, scope, sheets):
-        assert scope == 3 and sheets.kind == 12
+        assert scope in (1, 3) and sheets.kind == 12
+        self.scope = scope
         self.sheets = sheets.value
         return self.ok
 
@@ -336,7 +337,7 @@ class SheetPart(FakePart):
 # Deliberately retain the different flag values used by the original tests.
 COM_FLAGS = {
     'dxf': dict(VT_BYREF=1, VT_I4=2, VT_EMPTY=0),
-    'pdf': dict(VT_BYREF=1, VT_I4=2, VT_ARRAY=4, VT_BSTR=8),
+    'pdf': dict(VT_BYREF=1, VT_I4=2, VT_ARRAY=4, VT_BSTR=8, VT_DISPATCH=9),
     'kr': dict(VT_BYREF=16, VT_I4=3, VT_BOOL=11, VT_BSTR=8, VT_EMPTY=0, VT_DISPATCH=9),
 }
 

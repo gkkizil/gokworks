@@ -142,12 +142,16 @@ def test_launch_failure_reports_done_without_raising_into_gui(paths):
     assert 'cannot launch helper' in list(events.queue)[-1][1]['error']
 
 
-def test_crash_cleanup_only_removes_owned_temporary_under_output(paths, tmp_path):
-    external = tmp_path/('.gokworks-'+'b'*32+'.pdf')
+@pytest.mark.parametrize('prefix',['gokworks-','.gokworks-'])
+def test_crash_cleanup_only_removes_owned_temporary_under_output(paths, tmp_path,prefix):
+    external = tmp_path/(prefix+'b'*32+'.pdf')
     external.write_bytes(b'keep outside output')
+    owned=paths[1]/(prefix+'c'*32+'.pdf');owned.write_bytes(b'partial owned PDF')
+    pdf._cleanup_temporary({'temporary':str(owned)}, paths[1])
     pdf._cleanup_temporary({'temporary': str(external)}, paths[1])
     pdf._cleanup_temporary({'temporary': str(paths[1]/'ikinci.pdf')}, paths[1])
     assert external.exists()
+    assert not owned.exists()
     assert (paths[1]/'ikinci.pdf').read_bytes() == b'original output'
 
 

@@ -1,0 +1,57 @@
+name: Windows PDF export
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'modules/pdf/**'
+      - 'tests/support/solidworks.py'
+      - 'tests/support/pdf_worker.py'
+      - 'tests/test_process_watch.py'
+      - '.github/workflows/windows-pdf.yml'
+  pull_request:
+    paths:
+      - 'modules/pdf/**'
+      - 'tests/support/solidworks.py'
+      - 'tests/support/pdf_worker.py'
+      - 'tests/test_process_watch.py'
+      - '.github/workflows/windows-pdf.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-windows:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    env:
+      PYTHONUTF8: '1'
+      QT_QPA_PLATFORM: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python packaging/configure_windows_display.py
+      - name: Check PDF API, cancellation, worker crashes and GUI recovery
+        run: >-
+          python packaging/run_windows_tests.py modules/pdf/tests tests/test_process_watch.py
+          tests/test_qt_workflows.py::test_pdf_native_worker_exit_keeps_gui_responsive_and_releases_controls
+          tests/test_qt_workflows.py::test_worker_is_responsive_navigable_and_cancellable
+          tests/test_qt_workflows.py::test_worker_error_releases_controls_and_keeps_full_message
+          tests/test_qt_workflows.py::test_close_cancel_waits_without_terminating_worker
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-PDF-export
+          path: |
+            windows-tests.xml
+            windows-tests.log
+            windows-qt-native.log
+            windows-display.json

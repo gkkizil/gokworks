@@ -52,12 +52,116 @@ class PdfTests(unittest.TestCase):
 
     def test_all_sheets_and_pdf_api_contract(self):
         self.assertEqual(self.run_one()[0], 'success')
+        self.assertEqual(self.app.data.scope, 1)
         self.assertEqual(self.app.data.sheets, ('Sheet1', 'Sayfa 2'))
         self.assertFalse(self.app.data.ViewPdfAfterSaving)
         self.assertFalse(self.app.data.ExportAs3D)
         self.assertEqual(self.target.read_bytes(), PDF)
         self.assertFalse(self.app.closed)
-        self.assertFalse(list(self.output.glob('.*')))
+        self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
+
+    def test_modern_api_uses_typed_null_advanced_options_and_all_sheets(self):
+        def modern(path, version, options, data, advanced, errors, warnings):
+            self.assertEqual((advanced.kind, advanced.value), (9, None))
+            self.assertEqual(data.scope, 1)
+            self.assertFalse(Path(path).name.startswith('.'))
+            return self.model.save_as(path, version, options, data, errors, warnings)
+        self.model.Extension.SaveAs3 = Mock(side_effect=modern)
+        self.model.Extension.SaveAs = Mock(side_effect=AssertionError('legacy should not run'))
+        self.assertEqual(self.run_one()[0], 'success')
+        self.model.Extension.SaveAs3.assert_called_once()
+        self.model.Extension.SaveAs.assert_not_called()
+        self.assertEqual(self.target.read_bytes(), PDF)
+
+    def test_generic_modern_error_retries_named_sheets_without_publishing_partial_pdf(self):
+        self.output.mkdir();self.target.write_bytes(b'original')
+        def modern(path, version, options, data, advanced, errors, warnings):
+            self.assertEqual(data.scope, 1)
+            Path(path).write_bytes(b'partial export')
+            errors.value = 1
+            return False
+        def before_legacy(path):
+            self.assertEqual(self.target.read_bytes(), b'original')
+            self.assertFalse(path.exists(), 'partial PDF must be removed before retry')
+            self.assertEqual(self.app.data.scope, 3)
+            self.assertEqual(self.app.data.sheets, ('Sheet1', 'Sayfa 2'))
+        self.model.Extension.SaveAs3 = Mock(side_effect=modern)
+        self.model.on_save = before_legacy
+        status,detail = self.run_one(overwrite=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('Uyumlu PDF', detail)
+        self.assertEqual(self.target.read_bytes(), PDF)
+        self.model.Extension.SaveAs3.assert_called_once()
+        self.assertEqual(len(self.model.calls), 1)
+        self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
+
+    def test_unsupported_modern_method_can_use_legacy_but_other_com_faults_are_reported(self):
+        class NativeError(RuntimeError):
+            def __init__(self, code):self.hresult=code;super().__init__('native COM failure')
+        for code,expected in ((-2147467263,'success'),(-2147418111,'error')):
+            with self.subTest(code=code):
+                self.target.unlink(missing_ok=True);self.model.calls.clear()
+                self.model.Extension.SaveAs3 = Mock(side_effect=NativeError(code))
+                status,detail = self.run_one()
+                self.assertEqual(status, expected, detail)
+                self.assertEqual(len(self.model.calls), int(expected=='success'))
+
+    def test_permission_lock_and_combined_errors_are_not_retried(self):
+        for code in (2,16,17,32,2048):
+            with self.subTest(code=code):
+                self.model.calls.clear();self.model.save_error=code
+                status,detail = self.run_one()
+                self.assertEqual(status, 'error')
+                self.assertIn(f'hata kodu: {code}', detail)
+                self.assertIn(str(self.output), detail)
+                self.assertEqual(len(self.model.calls), 1)
+                self.assertFalse(self.target.exists())
+                self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
+
+    def test_double_generic_failure_is_bounded_and_keeps_original(self):
+        self.output.mkdir();self.target.write_bytes(b'original')
+        self.model.save_error=1
+        status,detail = self.run_one(overwrite=True)
+        self.assertEqual(status, 'error')
+        self.assertEqual(len(self.model.calls), 2)
+        self.assertIn('swGenericSaveError', detail)
+        self.assertEqual(self.target.read_bytes(), b'original')
+        self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
+
+    def test_active_document_switch_before_retry_prevents_wrong_drawing_export(self):
+        other = FakeDrawing(self.root/'other.slddrw')
+        def modern(path, version, options, data, advanced, errors, warnings):
+            errors.value=1;self.app.ActiveDoc=other
+            Path(path).write_bytes(b'partial')
+            return False
+        self.model.Extension.SaveAs3 = modern
+        status,detail = self.run_one()
+        self.assertEqual(status, 'error')
+        self.assertIn('Aktif SolidWorks belgesi', detail)
+        self.assertFalse(self.model.calls)
+        self.assertIs(self.app.ActiveDoc, other)
+        self.assertFalse(self.target.exists())
+
+    def test_retry_success_with_corrupt_pdf_is_not_published(self):
+        self.output.mkdir();self.target.write_bytes(b'original')
+        def modern(path, version, options, data, advanced, errors, warnings):
+            errors.value=1;return False
+        self.model.Extension.SaveAs3 = modern
+        self.model.content=b'invalid PDF'
+        self.assertEqual(self.run_one(overwrite=True)[0], 'error')
+        self.assertEqual(self.target.read_bytes(), b'original')
+        self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
+
+    def test_stop_during_failed_save_skips_retry_and_next_drawing(self):
+        other=self.source/'second.slddrw';other.touch()
+        self.app=FakePdfApp([self.model,FakeDrawing(other)])
+        stop=Event();self.model.save_error=1
+        self.model.on_save=lambda path:stop.set()
+        result=self.run_batch(stop)[-1][1]
+        self.assertEqual(result['state'], 'cancelled')
+        self.assertEqual((result['processed'],result['failed']), (1,1))
+        self.assertEqual(len(self.model.calls), 1)
+        self.assertFalse(self.target.exists())
 
     def test_com_object_property_does_not_call_default_member(self):
         self.assertIs(ex.read_com_value(self.app, 'ActiveDoc'), self.model)
@@ -102,13 +206,25 @@ class PdfTests(unittest.TestCase):
         self.assertFalse(self.app.open_calls)
         self.assertEqual(self.target.read_bytes(), b'original')
 
+    def test_temporary_name_collision_does_not_delete_or_register_an_existing_file(self):
+        self.output.mkdir();existing=self.output/('gokworks-'+'a'*32+'.pdf')
+        existing.write_bytes(b'not owned by this export')
+        contexts=[]
+        with patch.object(ex,'uuid4',return_value=SimpleNamespace(hex='a'*32)):
+            status,detail=ex.export_one_drawing(self.app,str(self.drawing),self.target,False,
+                checkpoint=lambda phase,**values:contexts.append(values))
+        self.assertEqual(status, 'error')
+        self.assertEqual(existing.read_bytes(), b'not owned by this export')
+        self.assertFalse(self.model.calls)
+        self.assertTrue(all('temporary' not in values for values in contexts))
+
     def test_failed_overwrite_keeps_original_and_cleans_temp(self):
         self.output.mkdir()
         self.target.write_bytes(b'original')
         self.model.save_ok = False
         self.assertEqual(self.run_one(overwrite=True)[0], 'error')
         self.assertEqual(self.target.read_bytes(), b'original')
-        self.assertFalse(list(self.output.glob('.*')))
+        self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
 
     def test_successful_overwrite(self):
         self.output.mkdir()
@@ -120,7 +236,7 @@ class PdfTests(unittest.TestCase):
         self.model.on_save = lambda path: self.target.write_bytes(b'concurrent')
         self.assertEqual(self.run_one()[0], 'skipped')
         self.assertEqual(self.target.read_bytes(), b'concurrent')
-        self.assertFalse(list(self.output.glob('.*')))
+        self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
 
     def test_windows_publish_uses_rename_and_preserves_competing_target(self):
         self.model.on_save = lambda path: self.target.write_bytes(b'concurrent')
@@ -245,7 +361,7 @@ class PdfTests(unittest.TestCase):
                 self.model.content = content
                 self.assertEqual(self.run_one()[0], 'error')
                 self.assertFalse(self.target.exists())
-                self.assertFalse(list(self.output.glob('.*')))
+                self.assertFalse(list(self.output.glob('*gokworks-*.pdf')))
 
     def test_save_error_is_failure_even_if_api_returns_true(self):
         self.model.save_error = 1

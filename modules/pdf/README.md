@@ -17,6 +17,22 @@ sonu doğrulanınca çıktı yayımlanır. Üzerine yazma kapalıysa mevcut PDF 
 aktif belge geri getirilir. Kaynak CAD dosyası kaydedilmez. Alt COM nesneleri belge
 kapatılmadan, uygulama nesnesi de `CoUninitialize` çağrısından önce bırakılır.
 
+PDF kaydı, mevcutsa `IModelDocExtension.SaveAs3` ile yapılır. Gelişmiş kayıt
+seçenekleri açıkça null `IDispatch` olarak iletilir. Tüm sayfalar
+`swExportData_ExportAllSheets` ile seçilir; eski sürüm/yöntem uyumluluğunda
+`SaveAs` ve bütün sayfa adlarını içeren `swExportData_ExportSpecifiedSheets`
+kullanılır. Genel/ayrıntısız kayıt hatasında (kod 0/1) en fazla bir uyumluluk
+denemesi yapılır. Kilit, salt okunur, biçim ve yol hataları tekrar edilmez.
+Durdurma istenmişse ikinci kayıt başlatılmaz; yalnız aktif sayfayı kaydeden
+bir yedek yöntem kullanılmaz. Sayfa seçimi, API sonucu ve PDF bütünlük
+kontrolleri başarısızsa mevcut PDF korunur.
+
+Geçici çıktı, hedefle aynı klasörde normal ve kısa `gokworks-<kimlik>.pdf`
+adı kullanır. Çıktı klasörünün yazılabilirliği COM kaydından önce sınanır.
+API hatası; kullanılan yöntem, hata bitleri, uyarı kodu ve kayıt klasörüyle
+birlikte raporlanır. Kod 1 tek başına kök nedeni belirlemez; bu ortamda
+kullanıcının canlı SolidWorks belgesiyle hata yeniden üretilememiştir.
+
 ## Beklenmedik kapanma
 
 Eski akışta SolidWorks COM çağrıları arayüzle aynı süreçteydi. Yerel pywin32/COM
@@ -30,7 +46,7 @@ Yeni akış, yardımcı sürecin temiz çıkışını beklemeden aktarımı tama
 göstermez. Yalnız PDF yardımcısı çöktüğünde ana pencere kullanılabilir kalır;
 çıkış kodu ve son aşama
 günlüğe yazılır. Tamamlanan ve önceden mevcut çıktılara dokunulmaz. Yalnız bu
-aktarımın çıktı klasörü içindeki `.gokworks-<benzersiz kimlik>.pdf` geçici dosyası
+aktarımın çıktı klasörü içindeki `gokworks-<benzersiz kimlik>.pdf` geçici dosyası
 temizlenir. Çökme sırasında SolidWorks'ün açtığı bir belge açık kalabilir; başka
 bir süreçten belge kapatma denenmez.
 
@@ -120,3 +136,20 @@ normal ve `0xC0000409` çıkışlarının Python kapanış kancaları olmadan da
 kaydedildiğini kontrol eder. Linux'ta bunlar atlanır; bu ortamda yalnız olay
 ayrıştırma, gizlilik, hata yalıtımı ve CLI ayrımı doğrulanabilir. Gerçek
 SolidWorks kapanmasının düzeldiği bu testlere dayanarak söylenemez.
+
+`test_pdf_windows.py`, gerçek pywin32 `VARIANT` nesneleriyle Türkçe sayfa
+adlarını, BYREF hata/uyarılarını ve null `IDispatch` aktarımını Windows'ta
+doğrular. `Windows PDF export` iş akışı bu testleri, süreç testlerini ve ilgili
+Qt iptal/kapanış testlerini çalıştırır; SolidWorks kurulumu veya lisansı yoktur.
+
+Canlı entegrasyon testi için Windows'ta SolidWorks'te kaydedilmiş bir teknik
+resmi aktif bırakıp aşağıdaki komut çalıştırılabilir. Test, geçici PDF'nin
+sayfa sayısını gerçek çizimin sayfalarıyla karşılaştırır; kaynak dosyanın
+özetini, kaydedilmemiş değişiklik bayrağını ve aktif belgeyi kontrol eder.
+Kaynak teknik resmi kaydetmez veya kapatmaz. Bu test varsayılan olarak atlanır;
+çalıştırılmamış olması canlı CAD doğrulaması olarak raporlanamaz.
+
+```powershell
+$env:GOKWORKS_PDF_LIVE_TEST = '1'
+.venv\Scripts\python.exe -m pytest -q modules/pdf/tests/test_pdf_solidworks.py
+```

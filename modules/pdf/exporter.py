@@ -17,6 +17,7 @@ from solidworks.connection import connect_to_solidworks
 DRAWING = 3
 SILENT = 1
 PDF_DATA = 1
+ALL_SHEETS = 1
 SPECIFIED_SHEETS = 3
 DONT_REBUILD = 1
 ALREADY_OPEN = 128  # swFileLoadWarning_e.swFileLoadWarning_AlreadyOpen
@@ -89,6 +90,86 @@ def _out_integer():
     return win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
 
 
+def _save_error(errors, warnings):
+    # swFileSaveError_e is a bit mask, distinct from the file-load error enum.
+    meanings = {
+        1: 'genel kayıt hatası (swGenericSaveError)', 2: 'salt okunur kayıt',
+        4: 'boş dosya adı', 8: 'dosya adında @ işareti', 16: 'dosya kilitli',
+        32: 'kayıt biçimi kullanılamıyor', 64: 'yeniden oluşturma hatası',
+        128: 'üzerine yazmaya izin verilmedi', 256: 'geçersiz dosya uzantısı',
+        512: 'kayıt seçimi yok', 1024: 'uyumsuz eDrawings sürümü',
+        2048: 'dosya yolu çok uzun; çıktı yolunu kısaltın',
+        4096: 'bu belge için kayıt desteklenmiyor',
+        8192: 'önce model referanslarının kaydedilmesi gerekiyor',
+        16384: 'ayrılmış teknik resim kaydı desteklenmiyor',
+    }
+    descriptions = [text for bit, text in meanings.items() if errors & bit]
+    return f'hata kodu: {errors} ({", ".join(descriptions) or "nedeni bildirilmedi"}); uyarı kodu: {warnings}'
+
+
+def _save_pdf(app, model, drawing, temporary, names, mark, stop_event):
+    """Prefer SaveAs3; retry a generic failure once with explicit named sheets.
+
+    Both routes export every sheet. Never fall back to an unconfigured SaveAs4
+    or a current-sheet-only export. No native CAD save or global preference edit.
+    """
+    extension = data = save = None
+    try:
+        extension = _late_bound(read_com_value(model, 'Extension'))
+        modern = getattr(extension, 'SaveAs3', None)
+        attempts = [(modern, 'SaveAs3' if modern is not None else 'SaveAs', ALL_SHEETS),
+                    (None, 'SaveAs', SPECIFIED_SHEETS)]
+        failures = []
+        for index, (save, method, scope) in enumerate(attempts, 1):
+            if index > 1:
+                if stop_event is not None and stop_event.is_set():
+                    break
+                mark('retry_pdf', method=method, attempt=index)
+                temporary.unlink(missing_ok=True)  # Only our unpublished partial PDF.
+            mark('pdf_options', method=method, attempt=index)
+            data = _late_bound(app.GetExportFileData(PDF_DATA))
+            if data is None:
+                raise RuntimeError('PDF dışa aktarma ayarları alınamadı.')
+            sheets = win32com.client.VARIANT(pythoncom.VT_ARRAY | pythoncom.VT_BSTR, tuple(names))
+            if not _com_success(data.SetSheets(scope, sheets)):
+                failures.append(f'{method}: teknik resmin tüm sayfaları seçilemedi')
+                continue
+            data.ViewPdfAfterSaving = False
+            data.ExportAs3D = False
+            active = read_com_value(app, 'ActiveDoc')
+            active_path = read_com_value(active, 'GetPathName') if active is not None else ''
+            active = None
+            if _path_key(active_path) != _path_key(drawing):
+                raise RuntimeError('Aktif SolidWorks belgesi kaynak teknik resim değil; aktarım yapılmadı.')
+            errors, warnings = _out_integer(), _out_integer()
+            mark('save_pdf', method=method, attempt=index)
+            try:
+                if save is not None:
+                    advanced = win32com.client.VARIANT(pythoncom.VT_DISPATCH, None)
+                    saved = save(str(temporary), 0, SILENT, data, advanced, errors, warnings)
+                else:
+                    saved = extension.SaveAs(str(temporary), 0, SILENT, data, errors, warnings)
+            except Exception as error:
+                code = getattr(error, 'hresult', 0)
+                hresult = code & 0xffffffff if isinstance(code, int) else 0
+                if save is None or hresult not in (0x80004001, 0x80020003, 0x80020006):
+                    raise
+                failures.append(f'{method}: API bu sürümde kullanılamıyor (0x{hresult:08X})')
+                continue
+            if _com_success(saved) and not errors.value:
+                return warnings.value, index > 1
+            failures.append(f'{method}: {_save_error(errors.value, warnings.value)}')
+            # Permission/lock/format/path errors need their actual cause fixed.
+            # Repeating them cannot make a valid PDF and can delay cancellation.
+            if errors.value not in (0, 1):
+                break
+        raise RuntimeError('PDF kaydedilemedi. '+ '; '.join(failures)+f'. Kayıt yolu: {temporary.parent}')
+    finally:
+        # Bound methods also hold their owning COM extension alive.
+        extension = data = save = modern = model = app = None
+        attempts = []
+
+
 def _validate_pdf(path):
     if not path.is_file():
         raise RuntimeError("SolidWorks PDF dosyasını oluşturmadı.")
@@ -101,7 +182,7 @@ def _validate_pdf(path):
             raise RuntimeError("PDF dosyası eksik veya dosya sonu bulunamadı.")
 
 
-def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None):
+def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None, stop_event=None):
     """Tüm sayfaları geçici PDF dosyasına aktar; başarılı dosyayı hedefe taşı."""
     destination = Path(destination)
     if destination.exists():
@@ -109,7 +190,9 @@ def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None)
             return "error", "PDF çıktı yolu bir dosya değil."
         if not overwrite:
             return "skipped", "PDF zaten var."
-    temporary = destination.with_name(f".gokworks-{uuid4().hex}.pdf")
+    # Use an ordinary short PDF basename, including for native PDF translators.
+    temporary = destination.with_name(f"gokworks-{uuid4().hex}.pdf")
+    temporary_owned = False
     opened_here = False
     model = None
     previous_name = None
@@ -118,8 +201,14 @@ def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None)
     notes = []
     mark = checkpoint or (lambda *args, **kwargs: None)
     try:
-        mark('prepare_pdf', temporary=str(temporary), output=str(destination))
+        mark('prepare_pdf', output=str(destination))
         destination.parent.mkdir(parents=True, exist_ok=True)
+        # Diagnose filesystem failures before entering SolidWorks. Do not leave
+        # an empty file for the native exporter to treat as an existing output.
+        with temporary.open('xb'):
+            temporary_owned = True
+            mark('prepare_pdf', temporary=str(temporary), output=str(destination))
+        temporary.unlink()
         app = _late_bound(app)
         previous = read_com_value(app, "ActiveDoc")
         if previous is not None:
@@ -142,21 +231,12 @@ def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None)
         if _path_key(read_com_value(model, "GetPathName")) != _path_key(drawing):
             raise RuntimeError("SolidWorks istenen teknik resim yerine farklı belge döndürdü; aktarım yapılmadı.")
 
-        mark('pdf_options')
-        data = app.GetExportFileData(PDF_DATA)
-        if data is None:
-            raise RuntimeError("PDF dışa aktarma ayarları alınamadı.")
         drawing_api = _drawing_api(model)
         names = read_com_value(drawing_api, "GetSheetNames")
         if isinstance(names, str):
             names = (names,)
         if not names:
             raise RuntimeError("Çizimde PDF dosyasına aktarılacak sayfa bulunamadı.")
-        sheets = win32com.client.VARIANT(pythoncom.VT_ARRAY | pythoncom.VT_BSTR, tuple(names))
-        if not _com_success(data.SetSheets(SPECIFIED_SHEETS, sheets)):
-            raise RuntimeError("Teknik resmin tüm sayfaları seçilemedi.")
-        data.ViewPdfAfterSaving = False
-        data.ExportAs3D = False
         mark('activate_document')
         active = read_com_value(app, "ActiveDoc")
         model_name = _document_name(model)
@@ -171,16 +251,13 @@ def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None)
         active = read_com_value(app, "ActiveDoc")
         if active is None or _path_key(read_com_value(active, "GetPathName")) != _path_key(drawing):
             raise RuntimeError("Aktif SolidWorks belgesi kaynak teknik resim değil; aktarım yapılmadı.")
-        errors, warnings = _out_integer(), _out_integer()
-        extension = _late_bound(read_com_value(model, "Extension"))
-        mark('save_pdf')
-        saved = extension.SaveAs(str(temporary), 0, SILENT, data, errors, warnings)
-        if not _com_success(saved) or errors.value:
-            raise RuntimeError(f"PDF kaydedilemedi. SolidWorks hata kodu: {errors.value}")
+        save_warning, retried = _save_pdf(app, model, drawing, temporary, names, mark, stop_event)
         mark('validate_pdf')
         _validate_pdf(temporary)
-        if warnings.value:
-            notes.append(f"Kaydetme uyarısı: {warnings.value}")
+        if save_warning:
+            notes.append(f"Kaydetme uyarısı: {save_warning}")
+        if retried:
+            notes.append('Uyumlu PDF kayıt yöntemi kullanıldı.')
         try:
             mark('publish_pdf')
             if overwrite:
@@ -199,7 +276,8 @@ def export_one_drawing(app, drawing, destination, overwrite, *, checkpoint=None)
     finally:
         # Yalnızca bu çağrının ürettiği benzersiz geçici dosya temizlenir.
         try:
-            temporary.unlink(missing_ok=True)
+            if temporary_owned:
+                temporary.unlink(missing_ok=True)
         except OSError as error:
             notes.append(f"Geçici PDF temizlenemedi: {error}")
         if opened_here and model is not None:
@@ -271,10 +349,12 @@ def export_drawings(source_folder, output_folder, include_subfolders,
             target = pdf_destination(drawing, source, output)
             mark('drawing', index=index)
             events.put(("current", drawing))
-            if checkpoint is None:
-                status, detail = export_one_drawing(app, drawing, target, overwrite_existing)
-            else:
-                status, detail = export_one_drawing(app, drawing, target, overwrite_existing, checkpoint=checkpoint)
+            options = {}
+            if checkpoint is not None:
+                options['checkpoint'] = checkpoint
+            if stop_event is not None:
+                options['stop_event'] = stop_event
+            status, detail = export_one_drawing(app, drawing, target, overwrite_existing, **options)
             counter = {"success": "succeeded", "skipped": "skipped", "error": "failed"}[status]
             summary[counter] += 1
             summary["processed"] = index

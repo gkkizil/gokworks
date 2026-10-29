@@ -27,6 +27,7 @@ _PHASES = {
     'drawing': 'teknik resim aktarımı', 'prepare_pdf': 'PDF hazırlığı',
     'open_document': 'teknik resmi açma', 'pdf_options': 'PDF ayarları',
     'activate_document': 'teknik resmi etkinleştirme', 'save_pdf': 'PDF kaydı',
+    'retry_pdf': 'uyumlu PDF kayıt yöntemini deneme',
     'validate_pdf': 'PDF doğrulaması', 'publish_pdf': 'PDF çıktısını yerleştirme',
     'close_document': 'teknik resmi kapatma', 'restore_document': 'önceki belgeye dönüş',
     'release_application': 'SolidWorks nesnelerini bırakma',
@@ -74,6 +75,8 @@ def run_worker(request_path):
             context.clear()
         context.update(values, phase=phase)
         diagnostics.record(f'pdf_phase phase={phase} index={context.get("index", 0)}')
+        if phase in ('save_pdf', 'retry_pdf'):
+            diagnostics.record(f'pdf_save method={values.get("method", "")} attempt={values.get("attempt", 0)}')
         try:
             temporary = folder/'phase.tmp'
             temporary.write_text(json.dumps(context, ensure_ascii=False), encoding='utf-8')
@@ -107,7 +110,7 @@ def _cleanup_temporary(context, output):
     """Only remove this exporter's uniquely named, unpublished PDF."""
     try:
         path = Path(context.get('temporary', ''))
-        if re.fullmatch(r'\.gokworks-[0-9a-f]{32}\.pdf', path.name):
+        if re.fullmatch(r'\.?gokworks-[0-9a-f]{32}\.pdf', path.name):
             if path.resolve().is_relative_to(Path(output).resolve()):
                 path.unlink(missing_ok=True)
     except (OSError, ValueError, RuntimeError):
