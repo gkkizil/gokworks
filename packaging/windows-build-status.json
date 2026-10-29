@@ -1,10 +1,14 @@
 {
   "commit": "e333c8ba1bc3ad4523651ed97945a20eb04a69b9",
-  "status": "building",
+  "status": "success",
   "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40939155902",
-  "download_url": "",
-  "artifact_url": "",
-  "setup_steps": {},
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40939155902-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/40939155902/artifacts/12926751623",
+  "setup_steps": {
+    "checkout": "success",
+    "python": "success",
+    "dependencies": "success"
+  },
   "source_commit": "9c70035cece1135b1f1586e95fedeb3573c5940e",
   "validation_profile": "package-only",
   "regression_suite": "not-run-user-request",
@@ -102,5 +106,378 @@
         64
       ]
     ]
-  }
+  },
+  "bytes": 131818490,
+  "sha256": "7ea05051327ec6f91b03d33299e530352823d467a10d9fae07d5baaa2c2a17b3",
+  "smoke": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "distribution": "onefile",
+    "external_qt_verified": false,
+    "external_cad_verified": false,
+    "pdf_exit_observer": "passed",
+    "python": "3.13.16",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "qt_platform": "windows",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "cad_converter",
+      "bom",
+      "naming",
+      "k_factor",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "nesting",
+      "profile_cutting",
+      "shaft_generator",
+      "gear_calculator"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 2180.76,
+    "navigation_median_ms": 43.76,
+    "navigation_max_ms": 122.72,
+    "resize_median_ms": 85.59,
+    "resize_max_ms": 145.67,
+    "table_50000_load_ms": 113.86,
+    "table_50000_filter_ms": 163.11,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "pdf_export_engine": "isolated COM process",
+    "solidworks_live_tested": false,
+    "checks": [
+      "16 modules",
+      "two themes",
+      "resolution matrix",
+      "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+      "3D CAD converter / eight formats / queue, options and clear / no live COM",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "hole nesting / five parts on one plate / contour cut-order CSV",
+      "nesting shared parts-and-layout workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "external involute gear pair / native OCCT STEP readback / closed DXF",
+      "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+      "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "distribution": "onefile",
+  "smoke_scales": [
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "external_cad_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.25,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "cad_converter",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "nesting",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 1823.88,
+      "navigation_median_ms": 52.51,
+      "navigation_max_ms": 131.85,
+      "resize_median_ms": 59.85,
+      "resize_max_ms": 156.1,
+      "table_50000_load_ms": 112.42,
+      "table_50000_filter_ms": 166.21,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "16 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": true,
+      "external_cad_verified": true,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.5,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "cad_converter",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "nesting",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 1590.23,
+      "navigation_median_ms": 61.01,
+      "navigation_max_ms": 138.18,
+      "resize_median_ms": 66.11,
+      "resize_max_ms": 183.86,
+      "table_50000_load_ms": 114.02,
+      "table_50000_filter_ms": 162.76,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "16 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "external_cad_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.16",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.0,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "cad_converter",
+        "bom",
+        "naming",
+        "k_factor",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "nesting",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 2180.76,
+      "navigation_median_ms": 43.76,
+      "navigation_max_ms": 122.72,
+      "resize_median_ms": 85.59,
+      "resize_max_ms": 145.67,
+      "table_50000_load_ms": 113.86,
+      "table_50000_filter_ms": 163.11,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "16 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    }
+  ]
 }
