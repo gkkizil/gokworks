@@ -43,7 +43,7 @@ def main():
     project.sheets[0].price_kg = 45
     for code, quantity in [('GW-001',6),('GW-002',10),('GW-003',6)]:
         project.parts.extend(read_dxf(inputs/(code+'.dxf'),quantity=quantity))
-    project.options.quality = 'Dengeli'; project.options.seconds = 5
+    project.options.quality = 'Dengeli'
     result = nest(project); totals = calculate(project,result)
     save_project(project,target/'Ornek.goknest.json',result,overwrite=True)
     export_excel(project,result,target/'Nesting.xlsx',overwrite=True)

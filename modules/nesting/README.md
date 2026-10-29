@@ -45,10 +45,10 @@ Proje adı üst satırda düzenlenir. Diğer modüllerin tasarımı değiştiril
    Sığan küçük parçalar büyük parçaların deliklerine **otomatik** yerleştirilir;
    bunun için ayrı bir seçenek yoktur. Eski projeler de açılır; **Yerleştir**
    ile yeniden hesaplandığında delik içleri otomatik değerlendirilir.
-   Kerf, açı/adım, hadde yönü, **Yerleşim hesaplama süresi** ve **Deneme sırası kodu**
+   Kerf, açı/adım, hadde yönü ve **Deneme sırası kodu**
    (seed) sağdaki **Gelişmiş yerleşim** veya tam ayarlar penceresindeki
-   **Gelişmiş ayarları göster** içindedir. Süre, hesabın en uzun çalışma
-   süresidir; daha erken bitebilir. Deneme sırası kodu varsayılan 42 olarak
+   **Gelişmiş ayarları göster** içindedir. Hesaplama süresini uygulama
+   otomatik yönetir; saniye girmeniz gerekmez. Deneme sırası kodu varsayılan 42 olarak
    bırakılabilir; farklı yerleşimlerin denenme sırasını belirler.
    Operasyon giderleri, kâr ve KDV **Kesim ve ek maliyetler** içindedir.
    Bu bölümleri kapatmak girilen değerleri sıfırlamaz.
@@ -98,11 +98,39 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 
 ## Hesap ve algoritma
 
-Motor adı **GOKWORKS NFP 1.3**. Önce hızlı ve doğrulanmış bir başlangıç
+Motor adı **GOKWORKS NFP 1.4**. Önce hızlı ve doğrulanmış bir başlangıç
 yerleşimi oluşturulur; kalan sürede NFP aramasıyla iyileştirilir. Ayrıntılı
 konturun hesabı süreyi tüketirse önceki en iyi yerleşim korunur. Kenar ve
 köşe adayları gerçek konturlar, aralıklar ve kenar paylarıyla denetlenir;
 parça geometrisi sınır dikdörtgeniyle değiştirilmez.
+
+Süre bütçesi parça adedi, gerçek kontur köşe sayısı, izinli dönüş açıları ve
+kalite seviyesine göre başlatılır. Ölçülen deneme maliyeti sonraki aramaya
+ayrılan süreyi uyarlar; art arda anlamlı iyileşme gelmezse erken bitirilir.
+İlk bütçe tahmini başlangıç planı için yetersizse otomatik genişletilir.
+Yoğun açı listelerinde önce izinli açıların küçük bir alt kümesiyle tam plan
+aranır; parça sığmazsa diğer izinli açılar da denenir. Ayrıntılı denemelerde
+açı kapsamı kademeli büyür. Tam plan bulunduğunda, sonraki kısmi deneme onu
+silmez. Pahalı ayrıntı hesabı diğer parçaları bekletmez; geçerli hızlı adaya
+dönülür veya parça başka plaka/denemede değerlendirilir. Sonraki denemelerde
+aday aramasının bütçesi genişler. Eş alanlı stoklarda malzeme alanından çıkan plaka alt sınırına
+ulaşılmışsa gereksiz denemeler durdurulur; farklı stok alanlarında bu kısa
+yol uygulanmaz.
+
+Kontur dönüşümleri ve yerleşmiş geometriler yeniden kullanılır. Dışbükey
+ayrıştırmada yalnız ortak kenarlı komşular birleştirilir; her birleşimin
+gerçek geometriye eşit ve dışbükey olması gerekir. Delikler ve konturlar
+basitleştirilmez; son çakışma/mesafe/kenar doğrulaması aynen uygulanır.
+Kaliteye göre otomatik üst sınırlar Hızlı 15, Dengeli 45, Yüksek 90 saniyedir;
+bunlar bekleme hedefi değildir. Geometri işlemleri işbirlikli kontrol
+noktalarında durur; bağımsız sonuç doğrulaması ayrıca tamamlanır.
+Matematiksel optimum garantisi verilmez. Durdur düğmesi ve eksik sonuçta
+üretim çıktısı koruması geçerlidir.
+
+Eski projelerdeki sayısal `options.seconds` değerleri okunur. Arayüzde yeni
+yerleşim başlatıldığında otomatik yönetim (`seconds: null`) kullanılır.
+Doğrudan Python API çağrılarındaki sayısal bütçe desteği korunur; proje biçimi
+sürümü 1'dir. Kaydet/aç, eski sonuçlar ve kaynak geometri kayıtları korunur.
 
 [Boş levhaya rağmen eksik yerleşim düzeltmesi ve tekrar üretim](../../docs/nesting-contour-fill/README.md).
 

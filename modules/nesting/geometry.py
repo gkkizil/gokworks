@@ -3,6 +3,7 @@
 from shapely import affinity, union_all
 from shapely.geometry import Polygon
 from shapely.geometry.polygon import orient
+from collections import defaultdict,deque
 import math
 
 
@@ -39,24 +40,34 @@ def convex_parts(g, checkpoint=lambda: None):
         if p.equals(p.convex_hull):
             result.append(p)
         else:
-            pieces = list(constrained_delaunay_triangles(p).geoms)
-            # Merge adjacent triangles when the union is still convex. No hull
-            # replacement of a concavity is permitted.
-            changed = True
-            while changed:
-                checkpoint()
-                changed = False
-                for i in range(len(pieces)):
-                    checkpoint()
-                    for j in range(i+1, len(pieces)):
-                        if pieces[i].intersection(pieces[j]).length == 0:
-                            continue
-                        combined = pieces[i].union(pieces[j])
-                        if combined.geom_type == 'Polygon' and combined.equals(combined.convex_hull):
-                            pieces[i] = combined; pieces.pop(j); changed = True; break
-                    if changed:
-                        break
-            result.extend(pieces)
+            # Only shared-edge neighbors can merge. Indexing those edges avoids
+            # repeatedly intersecting every pair of triangles in a curved DXF.
+            active = {}; boundaries = {}; owners = defaultdict(set)
+            queue = deque(); scheduled = set(); serial = 0
+            def add(piece):
+                nonlocal serial
+                checkpoint(); key=serial;serial+=1;active[key]=piece
+                points=list(piece.exterior.coords)
+                edges={tuple(sorted((a,b))) for a,b in zip(points,points[1:])}
+                boundaries[key]=edges
+                for edge in sorted(edges):
+                    for neighbor in sorted(owners[edge]):
+                        pair=(neighbor,key)
+                        if pair not in scheduled:queue.append(pair);scheduled.add(pair)
+                    owners[edge].add(key)
+            def remove(key):
+                for edge in boundaries.pop(key):
+                    owners[edge].remove(key)
+                    if not owners[edge]:del owners[edge]
+                del active[key]
+            for triangle in constrained_delaunay_triangles(p).geoms:add(triangle)
+            while queue:
+                checkpoint();a,b=queue.popleft()
+                if a not in active or b not in active:continue
+                combined=active[a].union(active[b])
+                if combined.geom_type=='Polygon' and combined.equals(combined.convex_hull):
+                    remove(a);remove(b);add(combined)
+            result.extend(active.values())
     return result
 
 

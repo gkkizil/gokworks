@@ -35,7 +35,7 @@ def load_parts(window,qtbot,tmp_path):
 
 def test_real_import_nest_invalidate_and_source_preserved(window,qtbot,tmp_path):
     page = load_parts(window,qtbot,tmp_path); data = (tmp_path/'real.dxf').read_bytes()
-    page.form.set_value('seconds','2'); page.form.set_value('quality','Hızlı')
+    page.form.set_value('quality','Hızlı')
     page.start_nest(); assert window.jobs.owner is page; assert not page.import_button.isEnabled()
     qtbot.waitUntil(lambda:not window.jobs.busy,timeout=8000)
     assert page.result is not None and len(page.result.placements) == 3
@@ -85,7 +85,7 @@ def test_steps_and_result_stay_accessible_without_clipping_after_resize_and_them
 def test_background_job_keeps_navigation_alive_and_can_cancel(window,qtbot,tmp_path):
     page = load_parts(window,qtbot,tmp_path)
     page.project.parts[0].quantity = 300
-    page.form.set_value('seconds','20'); page.form.set_value('quality','Yüksek')
+    page.form.set_value('quality','Yüksek')
     ticks = []; timer = QTimer(); timer.setInterval(10); timer.timeout.connect(lambda:ticks.append(1)); timer.start()
     page.start_nest(); window.navigate('weight'); qtbot.waitUntil(lambda:len(ticks)>5,timeout=4000)
     assert window.stack.currentWidget() is window.pages['weight']
@@ -96,10 +96,10 @@ def test_background_job_keeps_navigation_alive_and_can_cancel(window,qtbot,tmp_p
 
 def test_invalid_parameters_cannot_start_job(window,qtbot,tmp_path):
     page = load_parts(window,qtbot,tmp_path)
-    page.form.set_value('seconds','0'); page.start_nest()
+    page.form.set_value('margin','-1'); page.start_nest()
     assert not window.jobs.busy and page.result is None
-    assert 'süresi' in page.status_text
-    assert page.settings_dialog.isVisible() and 'süresi' in page.settings_error.text()
+    assert 'Kenar payı' in page.status_text
+    assert page.settings_dialog.isVisible() and 'Kenar payı' in page.settings_error.text()
 
 
 def test_holes_are_automatic_without_a_setting_and_nested_parts_remain_selectable(window,qtbot):
@@ -368,7 +368,7 @@ def test_partial_result_explains_timeout_cancellation_and_stock_limits(window):
     page.show_result(result)
     assert 'Sac ölçüsü/stoku' in page.status_text
     page.show_result(replace(result,timed_out=True))
-    assert 'Hesaplama süresi doldu' in page.status_text
+    assert 'Otomatik hesaplama sınırına' in page.status_text and 'süreyi artır' not in page.status_text
     page.show_result(replace(result,stopped=True,timed_out=False))
     assert 'İşlem durduruldu' in page.status_text
     assert not page.export_button.isEnabled()

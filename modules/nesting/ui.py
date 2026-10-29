@@ -621,8 +621,9 @@ class NestingPage(BasePage):
         f.text('gap','Parça aralığı · mm',3); f.text('margin','Kenar payı · mm',10)
         f.check('rotation','Parçalar döndürülebilsin',True)
         quality = f.combo('quality','Yerleşim kalitesi',('Hızlı','Dengeli','Yüksek'),'Dengeli')
-        quality.setToolTip('Hızlı daha az, Yüksek daha fazla yerleşim denemesi yapar. Hesaplama süresi sınırı her durumda geçerlidir.')
+        quality.setToolTip('Hızlı daha az, Yüksek daha fazla iyileştirme dener. Hesaplama süresi otomatik yönetilir; sonuç iyileşmediğinde arama erken tamamlanır.')
         quality.setAccessibleName('Yerleşim kalitesi')
+        f.form.addRow(label('Hesaplama süresi otomatik yönetilir.','muted'))
         self.advanced_button = button('Gelişmiş ayarları göster')
         self.advanced_button.setCheckable(True)
         f.form.addRow(self.advanced_button)
@@ -630,9 +631,6 @@ class NestingPage(BasePage):
         f.text('angles','İzinli açılar · ; ile ayırın','0;90;180;270')
         f.text('angle_step','Serbest açı adımı · ° (boşsa yukarıdaki liste)','')
         f.check('grain_locked','Hadde yönünü koru · yalnız 0° / 180°',False)
-        seconds = f.text('seconds','Yerleşim hesaplama süresi · sn',15)
-        seconds.setToolTip('İzin verilen en uzun hesaplama süresi. Daha erken bitebilir; süre dolunca bulunan en iyi geçerli yerleşim gösterilir.')
-        seconds.setAccessibleName('Yerleşim hesaplama süresi, saniye')
         seed = f.text('seed','Deneme sırası kodu',42)
         seed.setAccessibleName('Deneme sırası kodu')
         self.seed_hint = label('Varsayılan 42; değiştirmeniz gerekmez. Bu kod, farklı yerleşimlerin hangi sırayla deneneceğini belirler.', 'muted')
@@ -641,7 +639,7 @@ class NestingPage(BasePage):
                                    'Yerleşim aralığı, parça aralığı ile kerf değerinin büyüğü ve kontur hata paylarıdır.', 'muted')
         f.form.addRow(self.advanced_note)
         def advanced(visible):
-            for key in ('kerf','angles','angle_step','grain_locked','seconds','seed'): f.show_field(key,visible)
+            for key in ('kerf','angles','angle_step','grain_locked','seed'): f.show_field(key,visible)
             self.seed_hint.setVisible(visible)
             self.advanced_note.setVisible(visible)
             self.advanced_button.setText('Gelişmiş ayarları gizle' if visible else 'Gelişmiş ayarları göster')
@@ -667,7 +665,7 @@ class NestingPage(BasePage):
         else:
             try: angles = [float(v.strip().replace(',','.')) for v in f.value('angles').split(';') if v.strip()]
             except ValueError: raise ValueError('Dönüş açılarını 0;90;180;270 biçiminde girin.') from None
-        titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği',seconds='Yerleşim hesaplama süresi')
+        titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği')
         o = Options(**{k:number(f.value(k),titles[k]) for k in titles},
                     rotation=f.value('rotation'), angles=angles, grain_locked=f.value('grain_locked'),
                     quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1))
@@ -683,7 +681,7 @@ class NestingPage(BasePage):
         try:
             self.name.setText(self.project.name)
             for k,v in asdict(self.project.options).items():
-                self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
+                if k != 'seconds': self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
             self.form.set_value('angle_step','')
             for k,v in asdict(self.project.operations).items(): self.cost_form.set_value(k,v)
             self.cost_toggle.setChecked(any(asdict(self.project.operations).values()))
@@ -958,7 +956,7 @@ class NestingPage(BasePage):
         if result.unplaced:
             codes = sorted({self.project.part(key).code for key in result.unplaced})
             reason = ('İşlem durduruldu; yeniden yerleşim başlatabilirsiniz.' if result.stopped else
-                      'Hesaplama süresi doldu; süreyi artırıp yeniden deneyin.' if result.timed_out else
+                      'Otomatik hesaplama sınırına ulaşıldı; bulunan en iyi doğrulanmış sonuç gösteriliyor. Sacı/stoku ve yerleşim koşullarını kontrol edin.' if result.timed_out else
                       'Sac ölçüsü/stoku, dönüş açıları ve yerleşim paylarını kontrol edin.')
             self.set_status(f'{len(result.unplaced)} parça yerleşmedi: '+', '.join(codes)+'. '+reason+' Üretim çıktısı kapalı.',True)
         else: self.set_status(f'Yerleşim doğrulandı · {totals["part_count"]} parça · {totals["sheet_count"]} levha · {result.elapsed:.1f} sn')
@@ -1052,7 +1050,7 @@ class NestingPage(BasePage):
     def can_export(self):
         if not self.can_start() or self.result is None: return False
         if self.result.unplaced:
-            self.set_status('Çıktı almak için tüm parçalar yerleşmeli. Sac stokunu/ölçüsünü veya yerleşim hesaplama süresini artırın.',True)
+            self.set_status('Çıktı almak için tüm parçalar yerleşmeli. Sac stokunu/ölçüsünü ve yerleşim koşullarını kontrol edin.',True)
             return False
         return True
 

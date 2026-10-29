@@ -96,7 +96,7 @@ class Options:
     rotation: bool = True
     angles: list[float] = field(default_factory=lambda: [0, 90, 180, 270])
     grain_locked: bool = False
-    seconds: float = 15
+    seconds: float | None = None  # Automatic; numeric limits remain readable in older projects.
     quality: str = 'Dengeli'
     seed: int = 42
 
@@ -211,9 +211,10 @@ class Project:
             raise ValueError('Döndürme ve hadde kilidi doğru/yanlış olmalı.')
         for key in ('gap', 'margin', 'kerf'):
             number(getattr(o, key), key)
-        number(o.seconds, 'Yerleşim hesaplama süresi', positive=True)
-        if o.seconds > 600 or o.quality not in ('Hızlı', 'Dengeli', 'Yüksek'):
-            raise ValueError('Yerleşim hesaplama süresi en fazla 600 saniye; yerleşim kalitesi Hızlı, Dengeli veya Yüksek olmalı.')
+        if o.seconds is not None and number(o.seconds, 'Yerleşim hesaplama süresi', positive=True) > 600:
+            raise ValueError('Yerleşim hesaplama süresi en fazla 600 saniye olmalı.')
+        if o.quality not in ('Hızlı', 'Dengeli', 'Yüksek'):
+            raise ValueError('Yerleşim kalitesi Hızlı, Dengeli veya Yüksek olmalı.')
         if not o.angles or len(o.angles) > 360 or any(not math.isfinite(a) for a in o.angles):
             raise ValueError('1–360 geçerli dönüş açısı tanımlayın.')
         integer(o.seed, 'Deneme sırası kodu', minimum=0, maximum=2**32-1)

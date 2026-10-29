@@ -47,7 +47,7 @@ def capture(destination):
         i=p.inspector
         for key,value in dict(width='300',height='240',stock='8').items(): i.sheet_form.set_value(key,value)
         assert i.apply_sheet()
-        p.form.set_value('quality','Hızlı');p.form.set_value('seconds','3')
+        p.form.set_value('quality','Hızlı')
         p.part_table.selectRow(0)
         assert p.result is None and p.canvas.mode=='part'
         shot('02-part-preview-dark')

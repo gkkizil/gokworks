@@ -18,7 +18,7 @@ def validate_result(project, result, *, complete=True, stop=None):
     if result.digest != project.fingerprint():
         raise ValueError('Ayarlar veya parçalar değişti. Yeniden otomatik yerleşim yapın.')
     if complete and result.unplaced:
-        raise ValueError(f'{len(result.unplaced)} parça yerleşmedi. Sac stokunu/ölçüsünü veya süreyi artırın.')
+        raise ValueError(f'{len(result.unplaced)} parça yerleşmedi. Sac stokunu/ölçüsünü ve yerleşim koşullarını kontrol edin.')
     from modules.nesting.dxf_import import check_cancel
     groups = defaultdict(list); counts = Counter(); instances = set(); stocks = defaultdict(set)
     for p in result.placements:

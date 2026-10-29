@@ -58,7 +58,7 @@ def main():
         page.import_files([paths[-1]],retry_id=failed['id']); wait()
         sheet=page.project.sheets[0]
         sheet.width=sheet.height=100; sheet.name='100 × 100'; sheet.price_kg=45
-        page.form.set_value('margin','5'); page.form.set_value('quality','Hızlı'); page.form.set_value('seconds','5')
+        page.form.set_value('margin','5'); page.form.set_value('quality','Hızlı')
         page.refresh(); page.show_settings(); QTest.qWait(80)
         assert page.settings_dialog.grab().save(str(output/'02-stock-dark.png'))
         page.settings_dialog.reject()

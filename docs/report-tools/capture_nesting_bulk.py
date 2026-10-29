@@ -44,7 +44,7 @@ def main():
         assert len(page.project.parts) == 10 and len(page.imports) == 10
         page.project.sheets[0].width = page.project.sheets[0].height = 100
         page.project.sheets[0].name = '100 × 100'; page.project.sheets[0].price_kg = 45
-        page.form.set_value('margin','5'); page.form.set_value('quality','Hızlı'); page.form.set_value('seconds','5')
+        page.form.set_value('margin','5'); page.form.set_value('quality','Hızlı')
         page.start_nest(); wait()
         assert validate_result(page.project,page.result) and page.sheet_tabs.count() == 3
         counts = Counter(p.sheet_number for p in page.result.placements)

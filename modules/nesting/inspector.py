@@ -75,10 +75,11 @@ class NestingInspector(QWidget):
         for key,title in [('gap','Parça aralığı · mm'),('margin','Kenar payı · mm'),
                           ('rotation','Döndürme'),('quality','Kalite')]:
             basic.addRow(label(title),self.mirror(key))
+        parameters.addWidget(label('Hesaplama süresi otomatik yönetilir.','muted'))
         advanced=QWidget();extra=QFormLayout(advanced);extra.setContentsMargins(0,0,0,0)
         extra.setRowWrapPolicy(QFormLayout.WrapLongRows)
         for key,title in [('kerf','Kesim genişliği · mm'),('angles','İzinli açılar · °'),('angle_step','Açı adımı · °'),
-                          ('grain_locked','Hadde yönü kilidi'),('seconds','Azami süre · sn'),('seed','Deneme sırası')]:
+                          ('grain_locked','Hadde yönü kilidi'),('seed','Deneme sırası')]:
             extra.addRow(label(title),self.mirror(key))
         parameters.addWidget(Disclosure('Gelişmiş yerleşim',advanced))
         selected=section('SEÇİLİ PARÇA')

@@ -23,7 +23,7 @@ def finish(w,qtbot):
 
 
 def plan(p,w,qtbot):
-    p.form.set_value('quality','Hızlı');p.form.set_value('seconds','2')
+    p.form.set_value('quality','Hızlı')
     p.nest_button.click();finish(w,qtbot)
     assert p.result is not None
     validate_result(p.project,p.result,complete=False)
@@ -37,6 +37,8 @@ def test_only_existing_commands_and_actual_stock_are_present_in_the_empty_workbe
     assert p.result is None and p.canvas.mode=='stock'
     assert p.result_sheet_model.rowCount()==0 and not p.result_tabs.isVisible()
     assert not p.excel_button.isEnabled() and p.unit_status.text()=='mm'
+    assert 'seconds' not in p.form.fields and 'seconds' not in p.inspector.fields
+    assert p.project.options.seconds is None
 
 
 def test_real_dxf_hole_is_visible_before_search_and_tree_click_highlights_exact_contour(window,qtbot):
@@ -163,6 +165,24 @@ def test_start_applies_valid_stock_draft_then_uses_unchanged_real_engine(window,
     assert not i.sheet_dirty and p.project.sheets[0].width==900
     assert p.result.digest==p.project.fingerprint() and p.totals['part_count']==3
     assert p.module_status.currentMessage()=='Tamamlandı'
+
+
+def test_opened_legacy_duration_is_replaced_by_automatic_scheduling_on_start(window,qtbot,tmp_path,monkeypatch):
+    from modules.nesting.storage import save_project
+    p=load_parts(window,qtbot,tmp_path);p.project.options.seconds=600
+    path=tmp_path/'legacy.goknest.json';save_project(p.project,path)
+    p.new_project()
+    monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),''))
+    p.open_project();finish(window,qtbot)
+    assert p.project.options.seconds==600
+    assert 'seconds' not in p.form.fields and 'seconds' not in p.inspector.fields
+    p.form.set_value('quality','Hızlı');p.start_nest();finish(window,qtbot)
+    assert p.project.options.seconds is None and p.totals['part_count']==3
+    target=tmp_path/'automatic.goknest.json'
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**k:(str(target),''))
+    p.save_project();finish(window,qtbot)
+    loaded,result=load_project(target)
+    assert loaded.options.seconds is None and validate_result(loaded,result)
 
 
 def test_save_applies_stock_draft_and_round_trips_existing_json_without_new_schema(window,qtbot,tmp_path,monkeypatch):
