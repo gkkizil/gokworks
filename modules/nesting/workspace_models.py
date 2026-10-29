@@ -8,7 +8,8 @@ from dataclasses import dataclass, field
 
 from PySide6.QtCore import QAbstractProxyModel, QModelIndex, Qt, Signal, QItemSelectionModel
 from PySide6.QtGui import QFont, QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import QTreeView, QAbstractItemView, QHeaderView
+from PySide6.QtWidgets import (QTreeView, QAbstractItemView, QHeaderView,
+                              QStyledItemDelegate, QSpinBox, QAbstractSpinBox)
 
 
 @dataclass
@@ -20,12 +21,14 @@ class Node:
     count: int = 0
     children: list = field(default_factory=list)
     identifier: str = ''
+    is_part: bool = False
 
 
 class PartTreeModel(QAbstractProxyModel):
     """Group filtered parts by actual material and thickness, without copying them."""
-    def __init__(self, source, parent=None):
+    def __init__(self, source, parent=None, *, quantity_editor=None):
         super().__init__(parent)
+        self.quantity_editor = quantity_editor
         self.groups = []; self.by_source_row = {}; self.by_id = {}
         self.setSourceModel(source)
         for signal in (source.modelReset, source.layoutChanged, source.rowsInserted,
@@ -45,7 +48,7 @@ class PartTreeModel(QAbstractProxyModel):
                 title = 'Dosya durumları' if imported else f"{key[0]} · {key[1]:g} mm"
                 groups[key] = Node(len(groups), title=title)
             group = groups[key]
-            leaf = Node(len(group.children), row, group, identifier=data['id'])
+            leaf = Node(len(group.children), row, group, identifier=data['id'],is_part=not imported)
             group.children.append(leaf); group.count += data.get('quantity') or 0
             self.by_source_row[row] = leaf; self.by_id[data['id']] = leaf
         self.groups = list(groups.values())
@@ -98,13 +101,37 @@ class PartTreeModel(QAbstractProxyModel):
 
     def flags(self, index):
         if not index.isValid(): return Qt.NoItemFlags
-        return Qt.ItemIsEnabled if index.internalPointer().source_row < 0 else Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        if index.internalPointer().source_row < 0: return Qt.ItemIsEnabled
+        flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        if (self.quantity_editor is not None and index.column() == 1
+                and index.internalPointer().is_part):
+            flags |= Qt.ItemIsEditable
+        return flags
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if role != Qt.EditRole or not self.flags(index) & Qt.ItemIsEditable:
+            return False
+        # The page validates and updates the actual project, then refreshes the
+        # source model. Never write a temporary string into a presentation row.
+        return self.quantity_editor(index.internalPointer().identifier, value)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         return self.sourceModel().headerData(section, orientation, role)
 
     def sort(self, column, order=Qt.AscendingOrder):
         self.sourceModel().sort(column, order)
+
+
+class PartQuantityDelegate(QStyledItemDelegate):
+    """A compact integer editor; domain validation remains in the page."""
+    def createEditor(self, parent, option, index):
+        editor = QSpinBox(parent)
+        editor.setRange(1, 10000)
+        editor.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        editor.setAlignment(Qt.AlignRight)
+        editor.setFrame(False)
+        editor.setAccessibleName('Parça adedi')
+        return editor
 
 
 class PartTree(QTreeView):

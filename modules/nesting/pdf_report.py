@@ -97,12 +97,6 @@ def report_html(project, result, totals):
                        [(m.name, _number(m.density)) for m in project.materials if m.id in used_materials]))
     text.append('<p>Yoğunluklar yaklaşık başlangıç değerleridir. Kaynak kayıtları proje dosyasında '
                 've Excel raporunun Malzemeler sayfasında korunur.</p>')
-    text.append('<h2>Geometri doğrulama bilgisi</h2>')
-    for p in project.parts:
-        text.append(f'<p><b>{_text(p.code)}</b>: eğri toleransı {p.curve_tolerance:g} mm; '
-                    f'uç toleransı {p.join_tolerance:g} mm; gerçek uç hareketi {p.endpoint_error:g} mm.<br>'
-                    f'Kaynak SHA256: {_text(p.source_sha256 or "Kaynak dosya yok")}</p>')
-
     text.append('<h2 class="page">Yerleşen örnekler</h2>')
     text.append('<p>Malzeme ve kalınlık parça özetindedir. Plaka numaraları çizim sayfalarıyla aynıdır. '
                 'Maliyet, levha malzeme bedelinin örneğe ayrılan payıdır.</p>')

@@ -3,15 +3,17 @@
 from copy import deepcopy
 from pathlib import Path
 import json
+from threading import Event
 
 from PySide6.QtCore import Qt,QPointF
-from PySide6.QtWidgets import QTreeView,QFileDialog,QApplication
+from PySide6.QtWidgets import QTreeView,QFileDialog,QApplication,QSpinBox,QAbstractItemView
 from shapely.geometry import Polygon,box
 
 from .test_nesting_gui import window,load_parts  # noqa: F401
 from modules.nesting.models import Part,Sheet,uid
 from modules.nesting.validation import validate_result
 from modules.nesting.storage import load_project
+from modules.nesting.ui_widgets import Editor
 
 ROOT=Path(__file__).resolve().parents[3]
 
@@ -52,6 +54,87 @@ def test_real_dxf_hole_is_visible_before_search_and_tree_click_highlights_exact_
     assert p.canvas.selected_part_ids=={part.id} and 'Yerleşim sonucu değildir' in p.current_note.text()
     assert 'Net alan' in p.inspector.part_info.text()
     assert part.geometry==geometry and path.read_bytes()==before
+
+
+def test_inline_quantity_commits_without_dialog_and_reaches_plan_and_saved_project(window,qtbot,tmp_path,monkeypatch):
+    p=load_parts(window,qtbot,tmp_path);plan(p,window,qtbot)
+    part_id=p.project.parts[0].id;source=tmp_path/'real.dxf';before=source.read_bytes()
+    original=p.result
+    monkeypatch.setattr(Editor,'exec',lambda *a: (_ for _ in ()).throw(AssertionError('Unexpected dialog')))
+
+    def editor():
+        index=p.part_tree_model.index_for_id(part_id).siblingAtColumn(1)
+        p.part_tree.setCurrentIndex(index)
+        qtbot.mouseClick(p.part_tree.viewport(),Qt.LeftButton,pos=p.part_tree.visualRect(index).center())
+        qtbot.mouseDClick(p.part_tree.viewport(),Qt.LeftButton,pos=p.part_tree.visualRect(index).center())
+        qtbot.waitUntil(lambda:any(e.isVisible() for e in p.part_tree.findChildren(QSpinBox)))
+        return next(e for e in p.part_tree.findChildren(QSpinBox) if e.isVisible())
+
+    field=editor();assert field.value()==3 and field.maximum()==10000
+    qtbot.keyClick(field,Qt.Key_Return)  # An unchanged value preserves the verified plan.
+    qtbot.waitUntil(lambda:not any(e.isVisible() for e in p.part_tree.findChildren(QSpinBox)))
+    assert p.result is original
+    field=editor();field.selectAll();qtbot.keyClicks(field,'9');qtbot.keyClick(field,Qt.Key_Escape)
+    qtbot.waitUntil(lambda:not any(e.isVisible() for e in p.part_tree.findChildren(QSpinBox)))
+    assert p.project.part(part_id).quantity==3 and p.result is original
+    field=editor();field.selectAll();qtbot.keyClicks(field,'7');qtbot.keyClick(field,Qt.Key_Return)
+    qtbot.waitUntil(lambda:not any(e.isVisible() for e in p.part_tree.findChildren(QSpinBox)))
+    assert p.project.part(part_id).quantity==7 and p.part_model.rows[0]['quantity']==7
+    assert p.part_tree_model.index(0,1).data()==7
+    assert p.selected_part_ids()=={part_id} and '7 adet' in p.inspector.part_info.text()
+    assert p.result is None and not any(b.isEnabled() for b in (p.pdf_button,p.excel_button,p.dxf_button))
+    assert p.canvas.mode=='part' and source.read_bytes()==before
+    field=editor();field.selectAll();qtbot.keyClicks(field,'8')
+    qtbot.mouseClick(p.search,Qt.LeftButton)
+    qtbot.waitUntil(lambda:not any(e.isVisible() for e in p.part_tree.findChildren(QSpinBox)))
+    assert p.project.part(part_id).quantity==8
+    plan(p,window,qtbot)
+    assert len(p.result.placements)==8 and p.totals['part_count']==8
+    target=tmp_path/'inline-quantity.goknest.json'
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**k:(str(target),''))
+    p.save_project();finish(window,qtbot)
+    project,result=load_project(target)
+    assert project.part(part_id).quantity==8 and len(result.placements)==8
+
+
+def test_inline_quantity_tracks_filtered_sorted_id_and_rejects_invalid_or_busy_edits(window,qtbot):
+    p=window.pages['nesting']
+    first=Part.create('Alpha',box(0,0,20,20),quantity=3)
+    second=Part.create('Zeta',box(0,0,20,20),quantity=2)
+    p.project.parts=[first,second];p.refresh()
+    p.part_tree.sortByColumn(0,Qt.DescendingOrder);p.search.setText('Zeta')
+    index=p.part_tree_model.index_for_id(second.id).siblingAtColumn(1)
+    assert index.flags()&Qt.ItemIsEditable
+    assert not p.part_tree_model.index(0,1).flags()&Qt.ItemIsEditable
+    assert not index.siblingAtColumn(0).flags()&Qt.ItemIsEditable
+    assert p.part_tree_model.setData(index,4)
+    assert p.project.part(second.id).quantity==4 and p.project.part(first.id).quantity==3
+    assert p.part_tree_model.index(0,1).data()==4
+    p.search.clear()
+    assert p.part_tree_model.index(0,1).data()==7
+    fingerprint=p.project.fingerprint()
+    for value in ('0','-1','1.5','nan','10001'):
+        index=p.part_tree_model.index_for_id(second.id).siblingAtColumn(1)
+        assert not p.part_tree_model.setData(index,value)
+        assert p.project.fingerprint()==fingerprint
+    # The per-part integer limit alone must not allow >10000 total instances.
+    assert p.set_part_quantity(first.id,9996)
+    fingerprint=p.project.fingerprint()
+    assert not p.set_part_quantity(second.id,5) and p.project.fingerprint()==fingerprint
+    assert '10000' in p.status_text
+    started=Event();release=Event()
+    def work(sink,stop):
+        started.set();release.wait(5)
+    p.jobs.start(p,work)
+    try:
+        qtbot.waitUntil(started.is_set)
+        assert p.part_tree.editTriggers()==QAbstractItemView.NoEditTriggers
+        index=p.part_tree_model.index_for_id(second.id).siblingAtColumn(1)
+        assert not p.part_tree_model.setData(index,2)
+        assert p.project.fingerprint()==fingerprint
+    finally:
+        release.set();finish(window,qtbot)
+    assert p.part_tree.editTriggers()&QAbstractItemView.DoubleClicked
 
 
 def test_sheet_draft_blocks_old_exports_and_invalid_values_never_mutate_domain(window,qtbot,tmp_path):

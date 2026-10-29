@@ -19,7 +19,10 @@ Proje adı üst satırda düzenlenir. Diğer modüllerin tasarımı değiştiril
 2. Parçalar gerçek malzeme ve kalınlığa göre gruplanır; grup adedi, altındaki
    kesilecek adetlerin toplamıdır. Yüklenemeyen/bekleyen dosyalar ayrı gruptadır.
    İçe aktarma sırası korunur; başlığa tıklayıp sıralayabilir, arayabilirsiniz.
-   Parçaya çift tıklayarak kod, açıklama, adet, kalınlık ve malzemeyi düzenleyin.
+   **Adet** hücresine çift tıklayıp sayıyı doğrudan yazın; **Enter** veya başka
+   hücreye geçiş uygular, **Esc** vazgeçer. Adetler ve grup toplamı hemen
+   güncellenir; eski yerleşim kapatılır. Yeni plan için **Yerleştir**'e basın.
+   Parça adına çift tıklayarak kod, açıklama, kalınlık ve malzemeyi düzenleyin.
    Alan, sınır ölçüleri ve dış/iç çevreler aynı pencerede gösterilir. Ctrl/Shift
    ile birden fazla satırı seçip birlikte kaldırabilirsiniz. Dosya yolu ve
    hata açıklaması satır üzerinde bekleyince, bütün okuma kayıtları
@@ -77,6 +80,8 @@ Proje adı üst satırda düzenlenir. Diğer modüllerin tasarımı değiştiril
    gizlenir; çizim ve tablo öncelikli kalır. **Ayrıntılar** maliyet dökümünü,
    **YERLEŞİM** yeniden doğrulamayı açar. **Dışa aktar / RAPOR**: DXF / Excel /
    PDF; tüm parçalar yerleşmeden açılmaz. **DOSYA**: kaydet, aç ve yeni proje.
+   PDF'de parça bazlı geometri toleransları, uç hareketleri ve kaynak SHA256
+   dökümü gösterilmez; bu bilgiler proje ve Excel kayıtlarında korunur.
    Kaydedilen analizler mevcut geometriyi kullanır. Şema değiştirilmedi.
 
 [29 Ekim 2026: gerçek ekranlar, önce/sonra, mimari ve doğrulama raporu](../../docs/bugfixes/20261029-nesting-workspace/README.md).

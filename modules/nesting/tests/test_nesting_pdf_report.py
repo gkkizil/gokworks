@@ -97,7 +97,11 @@ def test_pdf_wraps_long_fields_and_repeats_table_headers_without_losing_instance
     pages = [document.getAllText(page).text() for page in range(document.pageCount())]
     plain = re.sub(r'[\s\u200b]', '', ''.join(pages))
     assert description in plain
-    assert project.parts[0].source_sha256 in plain
+    # Internal import diagnostics stay in project/Excel, not the production PDF.
+    assert project.parts[0].source_sha256 not in plain
+    for detail in ('Geometridoğrulamabilgisi', 'KaynakSHA256', 'eğritoleransı',
+                   'uçtoleransı', 'gerçekuçhareketi'):
+        assert detail not in plain
     assert project.materials[0].name in plain
     instance_pages = []
     found = []

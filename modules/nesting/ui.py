@@ -18,7 +18,7 @@ from modules.nesting.materials import new_project, SIZES
 from modules.nesting.models import Material, Sheet, Options, Operations, uid, number, integer
 from modules.nesting.geometry import polygons
 from modules.nesting.accounting import mass, calculate
-from .workspace_models import PartTreeModel, PartTree, SheetTreeModel, configure_sheet_tree
+from .workspace_models import PartTreeModel, PartTree, PartQuantityDelegate, SheetTreeModel, configure_sheet_tree
 from .design import apply_design, PANEL_WIDTH, PROPERTIES_WIDTH, CONTROL_HEIGHT, SPACING
 
 IMPORT_LABELS = {'pending':'Sırada', 'running':'Okunuyor', 'success':'Hazır', 'error':'Okunamadı', 'cancelled':'Durduruldu'}
@@ -98,8 +98,12 @@ class NestingPage(BasePage):
             Column('t · mm','thickness',lambda v:fmt(v,2)),Column('Malzeme','material'),
             Column('Durum','status',lambda s:IMPORT_LABELS.get(s,s))])
         self.part_proxy = FilterProxy(self); self.part_proxy.setSourceModel(self.part_model)
-        self.part_tree_model = PartTreeModel(self.part_proxy,self)
+        self.part_tree_model = PartTreeModel(self.part_proxy,self,quantity_editor=self.set_part_quantity)
         self.part_table = configure_view(PartTree()); self.part_table.setModel(self.part_tree_model)
+        self.part_table.setItemDelegateForColumn(1,PartQuantityDelegate(self.part_table))
+        self.quantity_edit_triggers = (QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed
+                                       | QAbstractItemView.AnyKeyPressed)
+        self.part_table.setEditTriggers(self.quantity_edit_triggers)
         self.part_table.sortByColumn(-1,Qt.AscendingOrder)
         self.part_tree = self.part_table
         self.part_tree_model.modelReset.connect(self.part_table.expandAll)
@@ -111,8 +115,8 @@ class NestingPage(BasePage):
         # The compact list keeps its numeric columns visible. Full material,
         # import status and source remain in the row tooltip and properties.
         for column in (2,3,4): self.part_table.hideColumn(column)
-        self.part_table.setToolTip('Çift tık: adet, malzeme ve kalınlık. Ctrl / Shift: çoklu seçim. Satır üzerinde bekleyin: kaynak ve yükleme durumu.')
-        self.part_table.doubleClicked.connect(self.edit_part); self.search.textChanged.connect(self.part_proxy.set_query)
+        self.part_table.setToolTip('Adet hücresine çift tıklayıp yazın; Enter ile uygulayın. Parça adına çift tık: diğer özellikler. Ctrl / Shift: çoklu seçim.')
+        self.part_table.doubleClicked.connect(self.part_double_clicked); self.search.textChanged.connect(self.part_proxy.set_query)
         self.part_table.selectionModel().selectionChanged.connect(self.part_selection_changed)
         self.part_table.selectionRestored.connect(self.part_selection_changed)
         left_layout.addWidget(self.part_table,1)
@@ -551,6 +555,7 @@ class NestingPage(BasePage):
 
     def set_busy(self, busy):
         super().set_busy(busy); self.update_buttons()
+        self.part_table.setEditTriggers(QAbstractItemView.NoEditTriggers if busy else self.quantity_edit_triggers)
         if hasattr(self,'module_status'):
             self.module_status.showMessage('İşlem sürüyor' if busy else 'Kontrol gerekli' if self.status.property('role')=='error'
                 else 'Tamamlandı' if self.result else 'Hazır')
@@ -783,6 +788,27 @@ class NestingPage(BasePage):
         row = self.selected(self.sheet_table)
         if row:
             self.project.sheets = [s for s in self.project.sheets if s.id != row['id']]; self.invalidate(); self.refresh()
+
+    def part_double_clicked(self, index):
+        if index.column() == 1 and (index.data(Qt.UserRole) or {}).get('kind') == 'part':
+            return  # Native delegate edits the quantity in this cell.
+        self.edit_part()
+
+    def set_part_quantity(self, part_id, value):
+        if not self.can_start(): return False
+        try:
+            quantity = integer(value,'Adet')
+            item = self.project.part(part_id)
+            if quantity == item.quantity: return True
+            if sum(p.quantity for p in self.project.parts)-item.quantity+quantity > 10000:
+                raise ValueError('Bir projede en fazla 10000 parça örneği desteklenir.')
+        except (ValueError, StopIteration) as error:
+            self.set_status(str(error) or 'Parça artık listede yok.',True)
+            return False
+        self.project.parts[self.project.parts.index(item)] = replace(item,quantity=quantity)
+        self.invalidate(); self.refresh()
+        self.set_status(f'{item.code}: {quantity} adet. Güncel sonuç için Yerleştir düğmesine basın.')
+        return True
 
     def edit_part(self, *args):
         if not self.can_start(): return
