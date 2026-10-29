@@ -1,9 +1,9 @@
 {
-  "request_id": "20261029-181304-automatic-nesting-exe",
-  "requested_at": "2026-10-29T18:13:04+00:00",
-  "source_commit": "56c5441d042e4f1d8768d51b501f08bff8e28453",
+  "request_id": "20261029-192003-pdf-export-fix-exe",
+  "requested_at": "2026-10-29T19:20:03+00:00",
+  "source_commit": "9c70035cece1135b1f1586e95fedeb3573c5940e",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "User requested the current Windows EXE. Retain the previously requested fast packaging profile. Application source 56c5441 includes automatic Nesting time management and complete-plan preservation, optional BOM Excel images, inline Nesting quantities and repository cleanup. This exact source passed 169 local tests and 164 native Windows tests, with 125/150 percent scaling and complete application startup verified in https://github.com/gkkizil/gokworks/actions/runs/40899959091. Do not rerun the full regression suite during packaging; keep the real single-file build, packaged application/CAD self-checks at all three DPI scales and download integrity verification. Record that the full regression suite was not rerun for this package.",
+  "reason": "Update the requested Windows EXE after the reported PDF save error while manual SolidWorks export succeeds. Include the current SaveAs3/all-sheet PDF adapter, bounded legacy compatibility retry, non-hidden temporary filenames, ownership-safe cleanup and cancellation handling. Local PDF/IPC/GUI regression checks passed; the new Windows PDF export workflow checks native pywin32 variants and worker/UI behavior. Live SOLIDWORKS document export remains opt-in and was not run in CI. Retain the previously requested fast packaging profile; do not rerun the full regression suite during packaging. Keep the real onefile EXE build, all three DPI application/CAD self-checks and download integrity verification.",
   "cancelled": false
 }
