@@ -10,8 +10,8 @@ kaydırmanın arkasındaydı. Yerleşim alanının dışındaki scroll, sığdı
 plakayı ve maliyet özetini küçük pencerede kesiyordu. Malzeme kütüphanesi,
 stok ve gelişmiş ayarlar temel akışı kalabalıklaştırıyordu.
 
-![Önceki geniş görünüm: maliyet özeti kesiliyor](before-overview.png)
-![Önceki küçük pencere: plaka ve alt özet görünüm dışında](before-small.png)
+[Arşiv: Önceki geniş görünüm: maliyet özeti kesiliyor](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/before-overview.png)
+[Arşiv: Önceki küçük pencere: plaka ve alt özet görünüm dışında](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/before-small.png)
 
 Etkileşim/kod incelemesinde, eksik yerleşim için çıktı düğmelerinin açık
 kalması, kaldırmanın yalnız tek satırı işlemesi ve sonuç kartında operasyon,
@@ -26,14 +26,14 @@ kâr/KDV yerine yalnız malzeme bedeli gösterilmesi de tespit edildi.
    On gerçek DXF'in biri bilerek bozuldu: dokuzu yüklendi, hatalı dosya
    kaybolmadı ve yeniden denemeyle tamamlandı.
 
-   ![10 dosya: 9 hazır, 1 okunamadı](01-parts-dark.png)
+   [Arşiv: 10 dosya: 9 hazır, 1 okunamadı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/01-parts-dark.png)
 
 2. **Sac ve ayarlar — sadeleştirildi.** Stok ve temel yerleşim ayarları aynı
    adımda. Gelişmiş ayarlar ve ek maliyetler açılıp kapanır; kapatmak değerleri
    sıfırlamaz. Kaydedilmiş ek maliyetler projeyi açınca görünür. Malzeme
    kütüphanesi ayrı bir pencerededir; düzenleme işlevleri korunur.
 
-   ![Sac ve temel ayarlar](02-stock-dark.png)
+   [Arşiv: Sac ve temel ayarlar](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/02-stock-dark.png)
 
 3. **Yerleşim — düzeltildi.** AutoCAD benzeri belge sekmeleriyle her fiziksel
    plaka ayrı seçilir. Sekmeler tıklama ve klavye sol/sağ oklarıyla çalışır;
@@ -41,15 +41,15 @@ kâr/KDV yerine yalnız malzeme bedeli gösterilmesi de tespit edildi.
    olarak üç plakaya yerleştirildi. Malzeme/kalınlıkları farklı stokların kendi
    “1. plakaları” da birbirinden ayrı kimliklerle gösterilir.
 
-   ![Üç plaka sekmesi, ikinci plaka seçili](03-plates-dark.png)
+   [Arşiv: Üç plaka sekmesi, ikinci plaka seçili](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/03-plates-dark.png)
 
 4. **Küçük pencere ve tema — kontrol edildi.** Sekme sırası sabittir;
    önizleme, alt özet ve düğmeler birbirinin üstüne gelmez. Uzun parça adları
    kısaltılır; tam ad tooltip'tedir. Adlar konturları yeniden kurmadan
    açılıp kapatılır. 20 plakalı dar pencere senaryosunda son sekmeye ulaşılır.
 
-   ![1024 × 700 görünümü](05-plates-small.png)
-   ![Açık tema](04-plates-light.png)
+   [Arşiv: 1024 × 700 görünümü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/05-plates-small.png)
+   [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/04-plates-light.png)
 
 5. **Sonuç ve çıktı — düzeltildi.** Genel toplam operasyonlar, kâr ve KDV'yi
    içerir; malzeme bedeli ayrıca gösterilir. Sıfır sac fiyatı “Sac fiyatı eksik”,

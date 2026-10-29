@@ -41,7 +41,7 @@ alt unsurlar güncellemeden sonra okunur. Otomatik güncelleme tercihi değişti
 - Sayısal rebuild durumu için eski kodda iki ek test başarısız:
   [kayıt](before-rebuild.txt).
 - Düzeltme sonrası profil paketinin tamamı: **101 başarılı / 1 atlanan**.
-  [JUnit](tests.xml), [çıktı](tests.txt), [statik kontrol](static.txt).
+  [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/profile-cutting/feature-graph-fix-2026-10-25/tests.xml), [çıktı](tests.txt), [statik kontrol](static.txt).
 - Yeni regresyonlar; 1.200 derinlikli grafik, iptal, sınırsız grafik sınırı,
   güncellemeden sonra oluşan Cut List, ham `IDispatch` sarmalayıcılarının
   tekrar oluşturulması, beş montaj örneğinin doğru çarpılması, hata mesajı,

@@ -1,18 +1,22 @@
 # BOM - ürün ağacı: güncel arayüz ve Excel örneği
 
-[Örnek Excel’i indir](ORNEK_BOM_URUN_AGACI.xlsx). Bu dosya sentetik bir
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
+[Arşiv: Örnek Excel’i indir](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/ORNEK_BOM_URUN_AGACI.xlsx). Bu dosya sentetik bir
 ANA-MONTAJ içerir: iki ÖRNEK-M001 örneğinin her birinde P-002 ve bir iç
 ÖRNEK-M002 → P-010 dalı vardır. Toplu listede P-002 ve P-010 adetleri 2'şer,
 ağaçta iki ayrı ÖRNEK-M001 dalı görünür. Gerçek kullanıcı montajı okunmadı.
 
 | Görünüm | Açık tema | Koyu tema |
 | --- | --- | --- |
-| Toplu parça listesi | [Görsel](screenshots/bom-parts-light.png) | [Görsel](screenshots/bom-parts-dark.png) |
-| Alt montaj ürün ağacı | [Görsel](screenshots/bom-tree-light.png) | [Görsel](screenshots/bom-tree-dark.png) |
+| Toplu parça listesi | [Arşiv: Görsel](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-parts-light.png) | [Arşiv: Görsel](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-parts-dark.png) |
+| Alt montaj ürün ağacı | [Arşiv: Görsel](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-tree-light.png) | [Arşiv: Görsel](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-tree-dark.png) |
 
-[Küçük pencere (1000×690)](screenshots/bom-tree-dark-small.png) ·
-[%125 ölçek](screenshots/bom-tree-dark-125pct.png) ·
-[Tarama öncesi](screenshots/bom-parts-light-empty.png)
+[Arşiv: Küçük pencere (1000×690)](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-tree-dark-small.png) ·
+[Arşiv: %125 ölçek](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-tree-dark-125pct.png) ·
+[Arşiv: Tarama öncesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom/screenshots/bom-parts-light-empty.png)
 
 Yeni arayüz montaj/konfigürasyon kartı, üç adet özeti, belirgin sekmeler,
 arama çubuğu, yeşil alt montaj adları ve tüm dalları açma/kapatma kontrolleri

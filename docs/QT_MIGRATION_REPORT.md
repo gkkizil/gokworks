@@ -95,7 +95,7 @@ senaryosu); **878 alt senaryo geçti**, failure/error/skip yok. Süre 94,84 s.
 [Makine tarafından okunabilir sonuç](qt-migration/validation.json),
 [komut sonucu](qt-migration/final-test-summary.txt),
 [38 dosyanın SHA256 karşılaştırması](qt-migration/engine-integrity.json),
-[Qt ekranları](qt-migration/screenshots).
+[Arşiv: Qt ekranları](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/screenshots).
 
 | Linux/Xvfb ölçümü | Önceki Tk sürümü | Qt sürümü |
 |---|---:|---:|

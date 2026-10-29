@@ -11,9 +11,9 @@ teması korundu. Bu çalışma masaüstü Tk uygulamasında yapıldı; web proto
 
 Kaynak uygulama: `181e5bf`; başlangıç görüntüsü
 `/workspace/.cloud-setup/iso-minimal/iso-before.png`. Tam karşılaştırma:
-[önce/sonra](screenshots/iso-minimal-comparison.png); uygulama görüntüleri:
-[koyu](screenshots/iso-minimal-dark.png),
-[açık](screenshots/iso-minimal-light.png).
+[Arşiv: önce/sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-minimal-comparison.png); uygulama görüntüleri:
+[Arşiv: koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-minimal-dark.png),
+[Arşiv: açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-minimal-light.png).
 
 Görünüm 1440×900 piksel, ölçek 1; karşılaştırma 2880×900 pikselde iki eşit
 görünüm içerir. Durum: Ø50 H7/s6, Orta değer, montaj kesiti. Kullanıcı referansları

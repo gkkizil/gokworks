@@ -1,8 +1,12 @@
 # Montaj uyumu ve en yakın geçme kontrolü
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **240 test geçti; 0 başarısız, 0 atlanan. 68 gerçek Tk GUI testi.** Montaj uyumu için 6 hesap ve 4 GUI testi eklendi; önceki 230 testin tamamı tekrar çalıştırıldı. Gerçek Windows/SolidWorks üretimi bu Linux çalışmasının kapsamında değildir.
 
-[Word raporu](GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx), [test çıktısı](test-run.log), [test bazlı sonuçlar ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [kaynak karşılaştırması](source-comparison.json), [gerçek ekran hashleri](screenshots.json), [Word dosyası bütünlüğü](word-report-validation.json).
+[Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx), [Arşiv: test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/test-run.log), [test bazlı sonuçlar ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [kaynak karşılaştırması](source-comparison.json), [gerçek ekran hashleri](screenshots.json), [Word dosyası bütünlüğü](word-report-validation.json).
 
 Word raporunu GitHub dosya sayfasındaki **Download raw file** ile indirin. Dokuz gerçek pencere görüntüsü rapora gömüldü. ZIP CRC ve python-docx ile içerik geri okuması doğrulandı; yerel Microsoft Word sayfa görünümü çalıştırılmadı.
 
@@ -18,11 +22,11 @@ Kart **en yakın ISO çift N7/h9** (toplam limit farkı 0,163 mm) ve **en yakın
 
 | Görünüm | Görüntü |
 | --- | --- |
-| Yeni uyumluluk kartı | [Koyu](screenshots/iso-compatibility-dark.png) |
-| Manuel tolerans girişi | [Açık](screenshots/iso-manual-light.png) / [Koyu](screenshots/iso-manual-dark.png) |
-| Sınıf karşılaştırması | [Görüntü](screenshots/iso-manual-comparison-dark.png) |
-| ISO sınıf seçimi | [Açık](../manual-iso/screenshots/iso-light.png) / [Koyu](../manual-iso/screenshots/iso-dark.png) |
-| Bölgeler / ara / sıkı | [Bölgeler](../manual-iso/screenshots/iso-zones-dark.png) / [Ara](../manual-iso/screenshots/iso-transition-dark.png) / [Sıkı](../manual-iso/screenshots/iso-interference-dark.png) |
+| Yeni uyumluluk kartı | [Arşiv: Koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png) |
+| Manuel tolerans girişi | [Arşiv: Açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/screenshots/iso-manual-light.png) / [Arşiv: Koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/screenshots/iso-manual-dark.png) |
+| Sınıf karşılaştırması | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/screenshots/iso-manual-comparison-dark.png) |
+| ISO sınıf seçimi | [Arşiv: Açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-light.png) / [Arşiv: Koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-dark.png) |
+| Bölgeler / ara / sıkı | [Arşiv: Bölgeler](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-zones-dark.png) / [Arşiv: Ara](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-transition-dark.png) / [Arşiv: Sıkı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-interference-dark.png) |
 
 1240×860 gerçek Tk pencereleridir. Manuel kontroller küçük/büyük pencere, iki tema, %100/%125/%150 ölçek, kaydırarak yeni karta erişim ve bütün hedef menü komutlarıyla sınandı. Bilinen sayısal örnekler, temas sınırları, farklı referans/gerçek geçme türü ve dört çapta 14 yaygın eşleşmenin tam referansı doğrulandı. Geçersiz girişte yeni açıklamalar temizlenir; ISO seçiminde manuel uyumluluk kartı gizlenir.
 

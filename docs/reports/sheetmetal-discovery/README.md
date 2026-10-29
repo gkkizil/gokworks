@@ -45,12 +45,12 @@ Birden fazla ana aday, yanlış tür, okunamayan sac parametresi veya etkin
 
 Eski kod dört yeni senaryoda hata verdi: eksik keşif üyesi, API'nin boş
 dönmesi, sacın yalnız klasör listesinde bulunması ve geçmiş klasörünün
-bastırılma API'sinin sonuç vermemesi. [Önceki davranış kaydı](before.log).
+bastırılma API'sinin sonuç vermemesi. [Arşiv: Önceki davranış kaydı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/sheetmetal-discovery/before.log).
 
 Son kodda **31 hedefli kontrol geçti**: ana/gövde seçim yolları, eşleşmeyen
 kalınlık, özel ayarlar, değişikliğin başka konfigürasyona yayılması, geri
 okuma/geri alma ve gerçek Tk arayüzünden tarama–uygulama–CSV akışı.
-[Son kontrol çıktısı](checks.log).
+[Arşiv: Son kontrol çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/sheetmetal-discovery/checks.log).
 
 Bu ortamda gerçek Windows/SolidWorks oturumu ve kullanıcının montajı
 çalıştırılmadı; bu sonuçlar gerçek modelde atamanın doğrulandığı anlamına

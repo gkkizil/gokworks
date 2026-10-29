@@ -26,7 +26,7 @@ Mevcut BYREF/typed bridge yolu, Pack and Go belge sırası, kaynak sahipliği
 ve yeni dosya referanslarını geri okuma kontrolleri korunur. Bu hata için
 API listesini dosya sistemi tahminiyle değiştirmek gerekmemiştir.
 
-![Dolu hedefte de görünen gerçek Qt önizlemesi](preview-with-invalid-destination.png)
+[Arşiv: Dolu hedefte de görünen gerçek Qt önizlemesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/cad-package-fixes-2026-10-25/preview-with-invalid-destination.png)
 
 Görsel sentetik snapshot ile çalışan gerçek Qt ekranıdır; canlı CAD
 taramasının veya gerçek montaj paketinin doğrulaması değildir.
@@ -63,8 +63,8 @@ veya kaynak STEP ile geometrik eşdeğerlik sertifikası değildir.
   hesap/rapor kontrolleri geçti. Gerçek Qt önizlemesi görsel olarak incelendi.
 - Değişen Python kaynaklarında tanımsız isim kontrolü ve `git diff --check` geçti.
 
-[API metadata kaydı](api-contract.json), [yeni regresyonlar](regressions.xml),
-[toplu test kaydı](related-tests.xml), [özet](checks.json).
+[API metadata kaydı](api-contract.json), [Arşiv: yeni regresyonlar](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/cad-package-fixes-2026-10-25/regressions.xml),
+[Arşiv: toplu test kaydı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/cad-package-fixes-2026-10-25/related-tests.xml), [özet](checks.json).
 Interop DLL incelemesi referanstır; DLL uygulamaya eklenmedi ve yeni runtime
 bağımlılığı yoktur. Buradaki test koşuları Linux/PySide6 offscreen üzerindedir;
 betik adındaki `windows` yerel Windows veya SolidWorks çalıştırıldığı anlamına

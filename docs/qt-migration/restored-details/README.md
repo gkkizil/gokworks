@@ -26,19 +26,19 @@ görseller gerçek Qt/X11 ekranlarından alınmıştır.
 
 ## Görseller
 
-- [Cıvata güvenlik göstergesi](bolt-dark.png)
-- [Cıvata yük çizimi](bolt-load-dark.png)
-- [Kapasite aşımı](bolt-overload-dark.png)
-- [Birleşik yük](bolt-combined-dark.png)
-- [Küçük pencere](bolt-compact-dark.png)
-- [Açık tema](bolt-light.png)
-- [ISO açıklamaları ve sekmeler](iso_fits-dark.png)
-- [ISO açık tema](iso_fits-light.png)
-- [Manuel ISO montaj değerlendirmesi](iso-manual-compatibility.png)
-- [Manuel ISO ölçü sınırları](iso-manual-limits.png)
-- [Manuel ISO karşılaştırması](iso-manual-comparison.png)
-- [Geometrik tolerans açıklamaları](geometric_tolerances-dark.png)
-- [Geometrik tolerans ölçüm değerlendirmesi](gdt-assessment.png)
+- [Arşiv: Cıvata güvenlik göstergesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/bolt-dark.png)
+- [Arşiv: Cıvata yük çizimi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/bolt-load-dark.png)
+- [Arşiv: Kapasite aşımı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/bolt-overload-dark.png)
+- [Arşiv: Birleşik yük](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/bolt-combined-dark.png)
+- [Arşiv: Küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/bolt-compact-dark.png)
+- [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/bolt-light.png)
+- [Arşiv: ISO açıklamaları ve sekmeler](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/iso_fits-dark.png)
+- [Arşiv: ISO açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/iso_fits-light.png)
+- [Arşiv: Manuel ISO montaj değerlendirmesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/iso-manual-compatibility.png)
+- [Arşiv: Manuel ISO ölçü sınırları](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/iso-manual-limits.png)
+- [Arşiv: Manuel ISO karşılaştırması](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/iso-manual-comparison.png)
+- [Arşiv: Geometrik tolerans açıklamaları](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/geometric_tolerances-dark.png)
+- [Arşiv: Geometrik tolerans ölçüm değerlendirmesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/qt-migration/restored-details/gdt-assessment.png)
 
 ## Doğrulama
 

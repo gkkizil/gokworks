@@ -11,28 +11,28 @@ incelemesi uygulamanın dört adımlık kullanım akışını kapsar.
    Boş durum, kaynak klasör seçimini açıklar. Küçük açıklama metinlerinin
    okunabilirliği gerçek Windows ekranında ayrıca değerlendirilmelidir.
 
-   ![PDF başlangıcı](after/01-pdf.png)
+   [Arşiv: PDF başlangıcı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fluency-2026-10-17/after/01-pdf.png)
 
 2. **Menüden ISO geçmeleri — düzgün.** Seçim vurgusu, kesit ve sonuçlar hazır
    sayfa üzerinden açılır. Bu düzenleme hesaplama veya manuel tolerans
    ekranının içeriğini değiştirmez. Sabit bir görüntü, geçiş boyunca her
    karede siyah alan oluşmadığını kanıtlamaz.
 
-   ![ISO menü geçişi](after/02-iso.png)
+   [Arşiv: ISO menü geçişi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fluency-2026-10-17/after/02-iso.png)
 
 3. **Ağırlık hesabı, 1000 × 690 — kullanılabilir; kaydırma gerekli.** Formun
    aşağıdaki ölçüleri kaydırma alanında kalır. Toplam, kesit ve yan menü aynı
    anda görünür. Fare tekeri, kaydırma çubuğu ve açılır menü davranışları
    korunur; ekran okuyucu uyumluluğu bu görsel incelemeyle doğrulanmadı.
 
-   ![Küçük pencere](after/03-compact.png)
+   [Arşiv: Küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fluency-2026-10-17/after/03-compact.png)
 
 4. **Aynı pencereyi 1440 × 900 büyütme — yerleşim düzgün.** İçerik alanı
    genişler, ölçüler yeniden görünür ve hesap sonucu korunur. Bu koşuda
    hiçbir arka plan çalışma alanı yeniden boyutlandırılmadı. Boyutlandırma
    süresinde genel bir hızlanma gösterilemedi.
 
-   ![Büyütülen pencere](after/04-expanded.png)
+   [Arşiv: Büyütülen pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fluency-2026-10-17/after/04-expanded.png)
 
 Önceki görüntüler [before](before) klasöründedir. Her iki yakalama betiği,
 pencere başlığını ve ekran üzerindeki sınırlarını kaydederek gerçek uygulama

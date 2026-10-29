@@ -5,9 +5,9 @@
 FreeCAD, Qt Creator ve PrusaSlicer'ın ilgili kaynak yapılarından tasarım örnekleri araştırıldı.
 [Kaynaklar, incelenen satırlar ve lisanslar](references.md). Bu ürünlerin kodu veya görseli kopyalanmadı.
 
-![Tüm güncel ekranlar · koyu tema](after/overview-dark.png)
+[Arşiv: Tüm güncel ekranlar · koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/overview-dark.png)
 
-[Açık tema genel görünüm](after/overview-light.png) · [Başlangıç ekranları](before/contact-sheet.png)
+[Arşiv: Açık tema genel görünüm](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/overview-light.png) · [Arşiv: Başlangıç ekranları](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/contact-sheet.png)
 
 ## İncelenen akışlar
 
@@ -27,18 +27,18 @@ FreeCAD, Qt Creator ve PrusaSlicer'ın ilgili kaynak yapılarından tasarım ör
 
 | Ekran | Başlangıç sorunu → güncel düzen | Kanıt |
 | --- | --- | --- |
-| PDF aktarımı | Uzun seçenek kartı → kaynak/çıktı önde; aktarım kuralları açılır bölümde; liste daha büyük. | [Önce](before/pdf.png) / [Sonra](after/pdf-dark.png) |
-| DXF / DWG | Fazla sabit seçenek → çıktı türü görünür, büküm/kalınlık/üzerine yazma kuralları gerektiğinde açılır. | [Önce](before/dxf_dwg.png) / [Sonra](after/dxf_dwg-dark.png) |
-| BOM | Uzun araç çubuğu ve teknik sütunlar → ana adet/ağırlık sütunları önde; ağaç ve teknik sütunlar menüden erişilir; Excel tüm veriyi korur. | [Önce](before/bom.png) / [Sonra](after/bom-dark.png) |
-| İsimlendirme | Kalabalık seçim/kurallar alanı → montaj klasörü ve hedef önde; doğrudan dosya/aktif montaj ve isimlendirme kuralları ayrı açılır bölümlerde. | [Önce](before/naming.png) / [Sonra](after/naming-dark.png) |
-| K / R | Birkaç satır için büyüyen boş tablo → tablo yüksekliği satır sayısına göre sınırlı; üç işlem adımı görünür. Abkant kesiti korunur. | [Önce](before/k_factor.png) / [Sonra](after/k_factor-dark.png) |
-| ISO geçmeler | Aynı anda çok sayıda açıklama ve örnek → sonuç/kesit önde; hazır örnekler ve şema açıklaması açılabilir. Manuel kontrolün açıklamaları ve üç sonuç sekmesi korunur. | [Önce](before/iso_fits.png) / [Sonra](after/iso_fits-dark.png) |
-| Geometrik toleranslar | Üst üste dört uzun açıklama kartı → anlam/kontrol, ölçüm rehberi, üretim notu ve boyut ilişkisi sekmeleri. Çerçeve ve bölge çizimleri korunur. | [Önce](before/geometric_tolerances.png) / [Sonra](after/geometric_tolerances-dark.png) |
-| Tolerans yığılması | Yoğun başlık ve dar alanda taşan iki panel → daha kısa kaynak çubuğu; küçük pencerede ölçü listesi ayrı seçicide. Zincir, hata düzeltme ve hesap düğmesi okunur kalır. | [Önce](before/tolerance_stack.png) / [Sonra](after/tolerance_stack-dark.png) |
-| Cıvata | Sürekli görünen formül ve ayrıntı tablosu → teknik bilgi/rapor açılır; güvenlik çubuğu, kapasite sınırları ve iki çizim korunur. | [Önce](before/bolt.png) / [Sonra](after/bolt-dark.png) |
-| Hızlı tork | Tekrarlanan açıklamalar → K varsayımları açılır bölümde; tork, ön yük, kritik bağlantı notu ve bağlantı kesiti korunur. | [Önce](before/bolt_torque.png) / [Sonra](after/bolt_torque-dark.png) |
-| Ağırlık | Sonucun altında sürekli büyük tablo → rapor açılır, kesit ve ağırlık önde; katalog alanı seçilirse ne girileceği açıklanır. Yoğunluk malzemeden gelir. | [Önce](before/weight.png) / [Sonra](after/weight-dark.png) |
-| Nesting | Önceki birleşik alan korunarak ortak kompakt tasarıma uyum sağlandı. Parçalar/yerleşim aynı alanda, fiziksel plaka sekmeleri ve maliyet görünür. | [Önce](before/nesting.png) / [Sonra](after/nesting-dark.png) |
+| PDF aktarımı | Uzun seçenek kartı → kaynak/çıktı önde; aktarım kuralları açılır bölümde; liste daha büyük. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/pdf.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/pdf-dark.png) |
+| DXF / DWG | Fazla sabit seçenek → çıktı türü görünür, büküm/kalınlık/üzerine yazma kuralları gerektiğinde açılır. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/dxf_dwg.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/dxf_dwg-dark.png) |
+| BOM | Uzun araç çubuğu ve teknik sütunlar → ana adet/ağırlık sütunları önde; ağaç ve teknik sütunlar menüden erişilir; Excel tüm veriyi korur. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/bom.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/bom-dark.png) |
+| İsimlendirme | Kalabalık seçim/kurallar alanı → montaj klasörü ve hedef önde; doğrudan dosya/aktif montaj ve isimlendirme kuralları ayrı açılır bölümlerde. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/naming.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/naming-dark.png) |
+| K / R | Birkaç satır için büyüyen boş tablo → tablo yüksekliği satır sayısına göre sınırlı; üç işlem adımı görünür. Abkant kesiti korunur. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/k_factor.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/k_factor-dark.png) |
+| ISO geçmeler | Aynı anda çok sayıda açıklama ve örnek → sonuç/kesit önde; hazır örnekler ve şema açıklaması açılabilir. Manuel kontrolün açıklamaları ve üç sonuç sekmesi korunur. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/iso_fits.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/iso_fits-dark.png) |
+| Geometrik toleranslar | Üst üste dört uzun açıklama kartı → anlam/kontrol, ölçüm rehberi, üretim notu ve boyut ilişkisi sekmeleri. Çerçeve ve bölge çizimleri korunur. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/geometric_tolerances.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/geometric_tolerances-dark.png) |
+| Tolerans yığılması | Yoğun başlık ve dar alanda taşan iki panel → daha kısa kaynak çubuğu; küçük pencerede ölçü listesi ayrı seçicide. Zincir, hata düzeltme ve hesap düğmesi okunur kalır. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/tolerance_stack.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/tolerance_stack-dark.png) |
+| Cıvata | Sürekli görünen formül ve ayrıntı tablosu → teknik bilgi/rapor açılır; güvenlik çubuğu, kapasite sınırları ve iki çizim korunur. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/bolt.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/bolt-dark.png) |
+| Hızlı tork | Tekrarlanan açıklamalar → K varsayımları açılır bölümde; tork, ön yük, kritik bağlantı notu ve bağlantı kesiti korunur. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/bolt_torque.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/bolt_torque-dark.png) |
+| Ağırlık | Sonucun altında sürekli büyük tablo → rapor açılır, kesit ve ağırlık önde; katalog alanı seçilirse ne girileceği açıklanır. Yoğunluk malzemeden gelir. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/weight.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/weight-dark.png) |
+| Nesting | Önceki birleşik alan korunarak ortak kompakt tasarıma uyum sağlandı. Parçalar/yerleşim aynı alanda, fiziksel plaka sekmeleri ve maliyet görünür. | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/before/nesting.png) / [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/nesting-dark.png) |
 
 ## Ortak kullanım düzeni
 
@@ -52,12 +52,12 @@ FreeCAD, Qt Creator ve PrusaSlicer'ın ilgili kaynak yapılarından tasarım ör
 - Sayfalar gezinirken yeniden oluşturulmaz; COM veya hesap işleri gezinme
   sırasında başlatılmaz. Dar ekranda yeniden düzenlenen aynı widget'lar kullanılır.
 - **Ayarlar** artık tema ve menü görünümünü doğrudan değiştiren bir penceredir;
-  dosya/çalışma bilgileri ayrı açılabilir. [Görünüm](../fusion-workspace/before/application-settings.png).
+  dosya/çalışma bilgileri ayrı açılabilir. [Arşiv: Görünüm](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/application-settings.png).
 
-[Küçük pencere: tork](after/bolt_torque-minimum.png) ·
-[Küçük pencere: zincir](after/tolerance_stack-minimum.png) ·
-[Ölçü seçici](../fusion-workspace/before/stack-measurement-picker.png) ·
-[Daraltılmış menü](after/collapsed-navigation.png)
+[Arşiv: Küçük pencere: tork](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/bolt_torque-minimum.png) ·
+[Arşiv: Küçük pencere: zincir](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/tolerance_stack-minimum.png) ·
+[Arşiv: Ölçü seçici](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/stack-measurement-picker.png) ·
+[Arşiv: Daraltılmış menü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/product-design-compact/after/collapsed-navigation.png)
 
 ## Doğrulama ve sınırlar
 

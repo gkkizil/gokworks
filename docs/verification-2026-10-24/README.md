@@ -31,7 +31,7 @@ değerleri mevcut doğrulanmış motorlarla kontrol edildi.
 
 Son tam koşu: **1.168 test başarılı, 878 alt test başarılı, 9 atlanan; sıfır başarısızlık/hata**.
 Toplanan 1.177 bağımsız test 71 ayrı süreçte çalıştırıldı. JUnit'in alt testlerle toplamı 2.055'tir.
-[Sayısal sonuç](test-summary.json), [JUnit](final-full-tests.xml), [süreç çıkışları](final-full-run.txt),
+[Sayısal sonuç](test-summary.json), [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/verification-2026-10-24/final-full-tests.xml), [süreç çıkışları](final-full-run.txt),
 [9 atlama nedeni](skipped-tests.json). [Hedefli 11 arayüz testi](targeted-theme-tests.txt) de geçti;
 bu sayı tam koşuyla örtüşür, toplama eklenmez. `baseline-full-tests.xml` düzeltme öncesindeki
 başarılı ilk tam koşudur; iki tam koşunun sayıları da toplanmaz.

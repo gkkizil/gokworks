@@ -23,8 +23,8 @@ değişiminde her türün parametreleri korunur. Hesap kapsamındaki türlerde a
 kolonlar görünür; hareket/3D/CAD kapalı ve gerekçesi görünürdür. Bu yerleşim
 değişikliği hesap denklemlerini, JSON şemalarını veya CAD geometrisini değiştirmez.
 
-[Geniş ekran](../../../docs/screenshots/gear-workspace.png) ·
-[Dar ekran](../../../docs/screenshots/gear-workspace-compact.png) ·
+[Arşiv: Geniş ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gear-workspace.png) ·
+[Arşiv: Dar ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gear-workspace-compact.png) ·
 [Görsel kontrol raporu](../../../design-qa.md)
 
 ## Gerçek durum

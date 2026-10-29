@@ -21,9 +21,9 @@ karıştırmadan liste oluşturması ve hesaplanan planı okuyabilmesi.
 2370 mm artan profil ve 30 mm testere kaybı**. Dolu listeyi değiştirmeden
 önce onay istenir. Manuel kullanım için SolidWorks gerekmez.
 
-![Parçalar ve stok](after/03-parts-dark.png)
+[Arşiv: Parçalar ve stok](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/03-parts-dark.png)
 
-![Kesim planı](after/04-plan-dark.png)
+[Arşiv: Kesim planı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/04-plan-dark.png)
 
 ## Ekran kanıtına dayalı inceleme
 
@@ -35,11 +35,11 @@ Başlangıç kodu yukarıdaki commit'ten geçici bir dizine okunarak yeniden
 
 | Adım / önem | Önceki problem ve kullanıcı etkisi | Uygulanan düzenleme / kanıt |
 | --- | --- | --- |
-| 1. Listeye başlama · yüksek | Stok ve kayıp alanlarının tablonun üstünde aynı ağırlıkta durması, parça boyu ile ham boy ayrımını zorlaştırıyordu. [Önce](before/01-empty-dark.png). | Solda parça listesi, sağda ham çubuk ayarları; üç adımlı yönerge, boş durum ve açık örnek. **6 metre = 6000 mm** açıklaması sürekli görünür. [Sonra](after/01-empty-dark.png), [dolu liste](after/03-parts-dark.png). |
-| 2. Parça girme · yüksek | Dokuz alanın aynı anda açılması ve önceden yazılmış üretim değerleri, ilk girişte gereksiz yük oluşturuyordu. [Önce](before/02-add-part-dark.png). | Dört gerekli alan; üretim ölçüsü/kalitesi için yalnız örnek yer tutucular. Standart, stok kodu, et, ilave boy ve not açılır bölümde. Açık kesitle çelişen et değeri düzeltilmeden kabul edilmez. [Sonra](after/02-add-part-dark.png). |
-| 3. Planı okuma · yüksek | Sonuç tablosundaki sıkıştırılmış kesim ifadesi ve yöntem adı, atölyede kesim sırasını anlamayı zorlaştırıyordu. [Önce](before/04-plan-dark.png). | Çubuk/parça adediyle başlayan sonuç, ayrı artan/testere/uç kayıpları, ölçekli çizim ve sıralanamayan kesim sırası tablosu. Minimum iddiası yalnız motor bunu doğruladığında gösterilir. [Sonra](after/04-plan-dark.png). |
-| 4. CAD'den alma · orta | İki satıra yayılan altı geniş komut ve teknik alan adları, sıradaki işlemi belirsizleştiriyordu. [Önce](before/05-solidworks-dark.png). | Üç kompakt okuma komutu, isteğe bağlı ileri seçenekler, **Kontrol gerekiyor** filtresi ve hazır satır sayısını söyleyen ekleme düğmesi. Kaynak bilgisi araç ipucunda korunur. [Sonra](after/05-source-dark.png). |
-| 5. Dar ekran / tema · orta | Her bölümün aynı düzeni koruması sonuç çizimiyle tabloların alanını sınırlıyordu. [Önce](before/07-plan-small-light.png). | Girişte yeniden boyutlandırılabilir yatay paneller; dar sonuç ekranında dikey sıralama ve kaydırma. [1024 açık giriş](after/08-parts-small-light.png), [1024 açık sonuç](after/09-plan-small-light.png), [820 koyu giriş](after/10-parts-minimum-dark.png), [820 koyu sonuç](after/11-plan-minimum-dark.png). |
+| 1. Listeye başlama · yüksek | Stok ve kayıp alanlarının tablonun üstünde aynı ağırlıkta durması, parça boyu ile ham boy ayrımını zorlaştırıyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/before/01-empty-dark.png). | Solda parça listesi, sağda ham çubuk ayarları; üç adımlı yönerge, boş durum ve açık örnek. **6 metre = 6000 mm** açıklaması sürekli görünür. [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/01-empty-dark.png), [Arşiv: dolu liste](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/03-parts-dark.png). |
+| 2. Parça girme · yüksek | Dokuz alanın aynı anda açılması ve önceden yazılmış üretim değerleri, ilk girişte gereksiz yük oluşturuyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/before/02-add-part-dark.png). | Dört gerekli alan; üretim ölçüsü/kalitesi için yalnız örnek yer tutucular. Standart, stok kodu, et, ilave boy ve not açılır bölümde. Açık kesitle çelişen et değeri düzeltilmeden kabul edilmez. [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/02-add-part-dark.png). |
+| 3. Planı okuma · yüksek | Sonuç tablosundaki sıkıştırılmış kesim ifadesi ve yöntem adı, atölyede kesim sırasını anlamayı zorlaştırıyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/before/04-plan-dark.png). | Çubuk/parça adediyle başlayan sonuç, ayrı artan/testere/uç kayıpları, ölçekli çizim ve sıralanamayan kesim sırası tablosu. Minimum iddiası yalnız motor bunu doğruladığında gösterilir. [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/04-plan-dark.png). |
+| 4. CAD'den alma · orta | İki satıra yayılan altı geniş komut ve teknik alan adları, sıradaki işlemi belirsizleştiriyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/before/05-solidworks-dark.png). | Üç kompakt okuma komutu, isteğe bağlı ileri seçenekler, **Kontrol gerekiyor** filtresi ve hazır satır sayısını söyleyen ekleme düğmesi. Kaynak bilgisi araç ipucunda korunur. [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/05-source-dark.png). |
+| 5. Dar ekran / tema · orta | Her bölümün aynı düzeni koruması sonuç çizimiyle tabloların alanını sınırlıyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/before/07-plan-small-light.png). | Girişte yeniden boyutlandırılabilir yatay paneller; dar sonuç ekranında dikey sıralama ve kaydırma. [Arşiv: 1024 açık giriş](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/08-parts-small-light.png), [Arşiv: 1024 açık sonuç](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/09-plan-small-light.png), [Arşiv: 820 koyu giriş](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/10-parts-minimum-dark.png), [Arşiv: 820 koyu sonuç](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/11-plan-minimum-dark.png). |
 
 Ek işlevsel düzeltme: girdiler değiştiğinde eski planın grafik renderer'ı
 da temizlenir. Pencere yeniden boyutlandırılınca geçersiz çizim geri gelmez.
@@ -91,7 +91,7 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
 ```
 
 - **125 test kaydı: 124 başarılı, 0 hata, 1 atlanan.** Sekiz sınırlı test
-  süreci çıkış kodu 0. [JUnit](tests.xml), [çalıştırıcı çıktısı](tests.log).
+  süreci çıkış kodu 0. [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/tests.xml), [Arşiv: çalıştırıcı çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/tests.log).
   Çalıştırıcının adı `run_windows_tests.py` olsa da bu sonuç **Linux**'ta alındı.
   Uzak güncelleme alındıktan sonraki kaynak: `d37089f`.
 - **12 yeni Qt akışı:** gerçek optimizasyonla örnek plan, dört alanla manuel
@@ -100,7 +100,7 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
   mock-COM tarama/filtre/ekleme, gerçek CSV worker, hatalı uç düzeltme,
   stoktan uzun parça, minimumu ispatlanmamış plan, kesit/et tutarlılığı.
   Son örnek-grubu düzeltmesinden sonra 12 akışın tamamı yeniden başarılı:
-  [son Qt akış sonuçları](final-workflows.xml), kaynak `4b8736a`.
+  [Arşiv: son Qt akış sonuçları](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/final-workflows.xml), kaynak `4b8736a`.
 - **Uygulama self-check başarılı:** 15 modül, iki tema ve dört çözünürlük
   (1024×700, 1366×768, 1920×1080, 2560×1440).
   [Makine raporu](source-smoke.json). Bu başlangıç ve örnek iş akışı

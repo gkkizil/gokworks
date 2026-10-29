@@ -9,7 +9,7 @@ kontrolü ve test kanıtları ekler. Yedek depoya erişilmedi.
 
 Tam paket tekrar koşusunda **897 test başarılı, 7 test atlandı; 878 alt
 senaryo başarılı**. Süre: 449,11 saniye. Başarısız test veya hata yok.
-[Tam çıktı](full-repeat.log) · [JUnit XML](full-repeat.xml) ·
+[Arşiv: Tam çıktı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/validation-2026-10-20/full-repeat.log) · [Arşiv: JUnit XML](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/validation-2026-10-20/full-repeat.xml) ·
 [Makine tarafından okunabilir özet](summary.json).
 Saklanan konsol çıktılarında yalnızca satır sonu boşlukları temizlendi.
 
@@ -87,11 +87,11 @@ yükü altında ölçüldü; Windows akıcılığı için süre garantisi değil
 kesti. Yaklaşık beş dakika yeni test ilerlemesi olmadı. Test süreci, nerede
 beklediğini kaydetmek için bizim tarafımızdan `SIGABRT` ile sonlandırıldı;
 bu çıkış uygulamanın kendiliğinden çökmesi olarak raporlanmaz.
-[Tamamlanmayan ilk koşunun izi](initial-incomplete.log).
+[Arşiv: Tamamlanmayan ilk koşunun izi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/validation-2026-10-20/initial-incomplete.log).
 
 Bu durum başarı sayılmadı. Aynı test tek başına geçti ve arayüz regresyon
-paketinde yeniden çalıştırıldı: [tek test](pdf-isolated.log) ve
-[138 arayüz testi](qt-suite.log) hatasız tamamlandı.
+paketinde yeniden çalıştırıldı: [Arşiv: tek test](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/validation-2026-10-20/pdf-isolated.log) ve
+[Arşiv: 138 arayüz testi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/validation-2026-10-20/qt-suite.log) hatasız tamamlandı.
 Tam paketin 897 testlik tekrar koşusu da aynı PDF hata testini geçerek tamamlandı.
 İlk koşudaki sinyal tabanlı zaman aşımı C++
 çağrısını durduramadığı için tekrar koşusunda thread tabanlı süre sınırı ve

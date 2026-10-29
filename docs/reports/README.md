@@ -1,10 +1,14 @@
 # GUI yeniden denetim kanıtları
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 2026-10-09 06:14:08–06:14:28 UTC, Linux/Python 3.12.14, Xorg :99. **140 test geçti, 0 başarısız, 0 atlanan; 34 gerçek Tk GUI testi.** Testler değiştirilen çalışma kopyasında çalıştı; depo başlangıç commit'i `76ccd67`, ref `main`.
 
-- [Word raporu](GOKWORKS_GUI_Test_Raporu_2026-10-09.docx): sonuç, ortam, yöntem, işlev değerlendirmeleri, 34 GUI testinin tek tek listesi, dört gerçek ekran görüntüsü ve kapsam sınırları. Görüntüler DOCX içine gömülüdür; raporu açmak için ayrı görsel dosyaları gerekmez.
+- [Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx): sonuç, ortam, yöntem, işlev değerlendirmeleri, 34 GUI testinin tek tek listesi, dört gerçek ekran görüntüsü ve kapsam sınırları. Görüntüler DOCX içine gömülüdür; raporu açmak için ayrı görsel dosyaları gerekmez.
 - [Test bazlı JSON](gui-verification-results.json): sonuçlar, süreler, alt senaryolar, sürümler, kod SHA-256 özetleri ve satır sayımı.
-- [Tam konsol çıktısı](gui-test-run.log), [kapsam ölçümü](gui-coverage.json).
+- [Arşiv: Tam konsol çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gui-test-run.log), [kapsam ölçümü](gui-coverage.json).
 - [DOCX doğrulama kaydı](word-report-validation.json): ZIP/XML/görsel kontrolü ve rapor SHA-256 değeri.
 
 Önce 128 mevcut test tekrar çalıştırıldı. Ek 12 kabul testinin ilk denemesinde bir ilk yerleşim zamanlayıcısı erişimi hatası çıktı. İlk GUI boyutlandırması açıkça zamanlandı; sonrasında 12 ek test ve 140 testlik tam çalışma geçti. Bu durum kullanıcı açılışında gözlemlenmiş bir çökme olarak sunulmaz.

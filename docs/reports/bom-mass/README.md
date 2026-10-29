@@ -23,6 +23,6 @@ SolidWorks sınırı test nesneleriyle doğrulandı; canlı Windows/SolidWorks o
 
 ## Örnek çıktı
 
-[Örnek Excel](ornek-agirlikli-bom.xlsx): **8 cıvata × 0,025 kg**, **2 levha × 2,25 kg** ve **1 destek kolu × 0,875 kg**; iki ÖRNEK-M001 alt montajı, genel toplam **5,575 kg**. Bu veriler gösterim için hazırlanmıştır; gerçek SolidWorks ölçümü değildir.
+[Arşiv: Örnek Excel](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom-mass/ornek-agirlikli-bom.xlsx): **8 cıvata × 0,025 kg**, **2 levha × 2,25 kg** ve **1 destek kolu × 0,875 kg**; iki ÖRNEK-M001 alt montajı, genel toplam **5,575 kg**. Bu veriler gösterim için hazırlanmıştır; gerçek SolidWorks ölçümü değildir.
 
-[Açık tema](bom-weights-light.png) · [Koyu tema](bom-weights-dark.png)
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom-mass/bom-weights-light.png) · [Arşiv: Koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bom-mass/bom-weights-dark.png)

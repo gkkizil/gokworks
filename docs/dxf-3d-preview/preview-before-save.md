@@ -46,14 +46,14 @@ Kaynak/konfigürasyon CAD tarafında değiştirilirse tekrar Yenile kullanılmal
 DXF paketinin tamamı ve `tests/test_qt_workflows.py` **340 pytest öğesi /
 384 JUnit kaydıyla** çalıştı: **0 hata/başarısızlık, 3 atlama**. 156 sınırlı
 süreç grubunun tamamı exit 0 döndü.
-[Regresyon JUnit](before-save-regression-tests.xml).
+[Arşiv: Regresyon JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/before-save-regression-tests.xml).
 
 `modules/dxf_dwg/tests/test_preview_before_export_ui.py` gerçek Qt arayüzünü
 kullanır. **14 test geçti**: DXF/DWG için önce göster/sonra kaydet, seçimsiz
 Önizleme, çıktısız tarama, devam eden okumanın korunması, eksik açınımın kayda
 geçememesi, tercih kaydı, büküm çizgisi değişikliği, watcher öncesi dosya
 değişikliği, Durdur/Yenile, farklı klasör ve gizli dar sekmenin açılması.
-[Son akış JUnit](before-save-ui-tests.xml).
+[Arşiv: Son akış JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/before-save-ui-tests.xml).
 
 İki test UI → `capture` → `export_one_part` → gerçek `ezdxf` okuma → Qt
 sahnesi zincirini birlikte çalıştırır. Yalnız CAD sunucusu taklittir;
@@ -81,6 +81,6 @@ Gerçek Qt uygulamasından, açıkça etiketli **sentetik test verisiyle** alın
 Koyu/açık tema; 1920×1080 ve 820×560 kontrol edildi. Küçük pencerede yeni
 ayar metni taşmıyor; açınım 3D'nin altındaki kaydırılabilir bölümde görünüyor.
 
-![Koyu tema, kayıt öncesi açınım; sentetik veri](before-save-dark-wide.png)
+[Arşiv: Koyu tema, kayıt öncesi açınım; sentetik veri](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/before-save-dark-wide.png)
 
-![Dar pencere, açınım sekmesi; sentetik veri](before-save-light-small.png)
+[Arşiv: Dar pencere, açınım sekmesi; sentetik veri](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/before-save-light-small.png)

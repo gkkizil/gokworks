@@ -43,7 +43,7 @@ paketlenmez; çalışma anında kullanıcının kurulu SolidWorks DLL'leri kulla
 
 - Yerel mil paketi: **207 JUnit kaydı, 0 hata/başarısızlık, 35 atlama**;
   11 sınırlı süreç grubunun tamamı exit 0. Atlamalar canlı CAD/Windows içindir.
-  [JUnit](20261027-shaft-volume-tests.xml).
+  [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-shaft-volume-tests.xml).
 - Gerçek C# host, geçici 2023 interop referanslarına karşı yerel .NET SDK ile
   derlendi: **0 hata, 0 uyarı**. Bu bir SolidWorks çalıştırması değildir.
 - Yeni Windows native fixture testi gerçek `Builder.Volume()` metodunu

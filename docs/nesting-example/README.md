@@ -8,10 +8,12 @@ sonucu elle yazılmadı.
 - `input/`: içbükey L, delikli levha ve yaylı/delikli üç kaynak DXF.
 - `Ornek.goknest.json`: geometrileri gömülü 22 parçalık taşınabilir proje.
 - `DXF/`: doğrulanmış bir levha ve kesim/kerf notları.
-- `Nesting.xlsx`, `Nesting.pdf`: gerçek hesap tablosu ve levha çizimi.
-- `nesting-dark-1440.png`, `nesting-light-1440.png`, `nesting-dark-1024.png`:
-  entegre arayüzün iki tema/genişlik düzeni.
 - `checks.json`: çalıştırmanın sayısal özeti.
+
+Üretilen ekran görüntüleri ve PDF/Excel çıktıları güncel dalda tutulmaz.
+Gerektiğinde [örneği üreten Qt betiği](../report-tools/capture_nesting.py)
+ile yeniden oluşturulabilir. DXF girdileri ve gömülü proje, uygulama ve
+testlerin kullandığı gerçek örnekler olarak korunur.
 
 600×400×2 mm S235JR, 7850 kg/m³, 45 TL/kg:
 brüt **3,768 kg**, net yaklaşık **2,11533 kg**, fire **1,65267 kg**,

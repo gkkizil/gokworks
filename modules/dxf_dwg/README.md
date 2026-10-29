@@ -127,6 +127,6 @@ Aktarım kontrolleri SolidWorks COM davranışını temsil eden test nesneleriyl
 yapıldı; gerçek Windows/SolidWorks aktarımı bu bulut ortamında çalıştırılmadı.
 EXE oluşturulmadı.
 
-[Klasörleme seçeneğinin güncel ekran görüntüsü](examples/thickness-folders-dark.png).
+[Arşiv: Klasörleme seçeneğinin güncel ekran görüntüsü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/dxf_dwg/examples/thickness-folders-dark.png).
 Görüntü, kullanıcı tercihlerini değiştirmeden
 `python modules/dxf_dwg/examples/capture.py` ile gerçek Tk ekranından yeniden alınabilir.

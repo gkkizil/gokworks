@@ -59,7 +59,7 @@ kullanılır. [URL, commit, lisans ve SHA256 kayıtları](profile-cutting/refere
 
 ## Doğrulama ve gerçek ortam sınırı
 
-[Modül JUnit kaydı](profile-cutting/module-tests.xml) ve
+[Arşiv: Modül JUnit kaydı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/profile-cutting/module-tests.xml) ve
 [14 modüllü uygulama öz denetimi](profile-cutting/selfcheck.json) bu ortamda
 çalıştırıldı. Çalışma ortamı Linux/Qt offscreen’dır. Gerçek SolidWorks
 kurulumu bulunmadığı için canlı CAD testi atlandı; başarılı sayılmaz.
@@ -71,7 +71,7 @@ regresyonunda **1117 test ve 878 alt test geçti / 9 platform veya opt-in testi
 atlandı**; hata yoktur. Son tarayıcı/aktarım iyileştirmeleri ayrıca modülün
 tam test grubuyla yeniden kontrol edildi. Bağımsız subset-DP hesaplamasına
 karşı [100 deterministik optimizasyon örneği](profile-cutting/oracle-check.json)
-de uyuştu. [Ham regresyon JUnit kaydı](profile-cutting/regression-tests.xml).
+de uyuştu. [Arşiv: Ham regresyon JUnit kaydı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/profile-cutting/regression-tests.xml).
 
 UI gerçek Qt widget/worker/tablolarıyla test edilir; CAD sınırında doubles
 kullanılır. Senaryolar: tek/çok gövdeli Weldment, farklı boy/kesit, 5 montaj

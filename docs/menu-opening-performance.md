@@ -1,5 +1,9 @@
 # Menü ve sekme geçişleri — 15 Ekim 2026
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 16 Ekim'de pencere boyutlandırma akışı da düzenlendi: saklanan sayfalar artık son boyutlarında kalıyor, yalnız açık sayfa esniyor. Mimari ve önce/sonra ölçümü için [pencere boyutlandırma notu](window-resizing.md).
 
 ## Güncel mimari: gezinmeden önce hazırlık
@@ -10,7 +14,7 @@ Ziyaret edilmiş sayfaların native pencereleri artık kaldırılıp yeniden eş
 
 ## Normal açılış ve olay döngüsü ölçümü
 
-Aynı [ölçüm betiği](report-tools/benchmark_navigation_ready.py), önce `b79f585` kodunun temiz arşiv kopyasında, ardından yeni kodda birer tur çalıştırıldı. Python 3.13.5, Tk 8.6.16, CustomTkinter 6.0.0 ve Linux/Xvfb `:99` kullanıldı; iki tarafta da font dosyaları yüklenemediği için `circle_shapes` çizimi kullanıldı.
+Aynı [Arşiv: ölçüm betiği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/report-tools/benchmark_navigation_ready.py), önce `b79f585` kodunun temiz arşiv kopyasında, ardından yeni kodda birer tur çalıştırıldı. Python 3.13.5, Tk 8.6.16, CustomTkinter 6.0.0 ve Linux/Xvfb `:99` kullanıldı; iki tarafta da font dosyaları yüklenemediği için `circle_shapes` çizimi kullanıldı.
 
 Bu ölçüm normal açılış yolunu kullanır. Başlangıçtan sonra tam Tk olay döngüsüyle 950 ms beklenir, ardından sekiz menüye 100 ms aralıkla tıklanır. Eski sürümün arka plan hazırlığı açık bırakılır. Olay döngüsünün yanıt vermesini izlemek için her 16 ms'de bir kontrol çağrısı istenir; aşağıdaki aralık, bu çağrılar arasında gözlenen en uzun süredir ve kare hızı ölçümü değildir.
 

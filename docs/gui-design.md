@@ -1,5 +1,9 @@
 # GUI tasarımı ve doğrulama
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 Kullanıcının paylaştığı sade CRM ekranı örneği temel alındı: açık zemin, ince gri sınırlar, ikonlu yan menü, beyaz çalışma alanı ve belirgin başlıklar. Aynı düzenin koyu tema paleti de hazırlandı. PDF ve DXF/DWG aktarım ekranları vardır; DXF veya DWG tek başına seçilir. **K FAKTÖR - RADIUS** ekranında geniş Malzeme / Takım, Manuel K / R ve Montaj sonuçları sekmeleri vardır. **ISO GEÇMELERİ** bağımsız delik/mil hesap ekranıdır. **Geometrik tolerans**, ASME 2018 rehberidir: 12 güncel özellik ve iki eski eğitim kartı.
 
 ## Son görsel düzenleme
@@ -22,7 +26,7 @@ simgesini de devre dışı bırakır. Varlık yolları çalışma dizininden ba�
 
 Windows paket kontrolü, açılış ekranıyla tüm sayfaları hazırlar ve her iki
 tema logosunu derlenmiş paketten yükleyip gösterir. Önceki logoya ait
-[hedefli test çıktısı](test-results/logo-gui-tests.log) ve 332 testlik tam
+[Arşiv: hedefli test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/test-results/logo-gui-tests.log) ve 332 testlik tam
 tarama, eski sürümlerin kayıtlarıdır.
 
 ## K/R tarama ve atama ayrımı
@@ -52,7 +56,7 @@ korunuyor. İki durum mevcut regresyon testlerine eklenerek sınandı.
 uyarı maskesinde belgeyi kapatmama, taramada sıfır yazma, gerçek atama ve
 bekleyen isteğin durdurma/hata ile iptali kontrol edildi. Uygulama isteğine
 yalnız önizleme sonucu gelen bildirilen durum da yeniden üretildi; arayüz
-bunu uygulanmış saymıyor. [Tam çıktı](test-results/latest-tests.log).
+bunu uygulanmış saymıyor. [Arşiv: Tam çıktı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/test-results/latest-tests.log).
 SolidWorks COM sınırı test nesneleriyle temsil edildi; gerçek SolidWorks
 2025 kabulü yerelde yapılmalıdır.
 
@@ -83,21 +87,21 @@ Dosyaya çift tıklama veya seçili dosyada Enter, tam kaynak/çıktı yolların
 
 **335 test geçti; 133'ü gerçek Tk GUI testidir.** Yeni K/R ekranı için hesaplama, önizleme/uygulama işçisi, canlı formül güncellemesi, tercihler ve iki tema/ölçek/boyut matrisi eklendi. GUI testleri tarama/aktarım iş parçacığı akışları, CSV, tercih/sekme durumu, boş liste, Türkçe arama, canlı sonuçlarla filtre güncellemesi, filtrelenmiş satırlardan sonra tekrar tarama, ayrıntı/pano, tema tercihi ve yeniden yükleme, işlem sırasında tema değiştirme/kapanış ve küçük pencereyi kapsar. Son eklenen testler tek biçim üretimini, eski birleşik ayarın dönüşümünü, hızlı menü geçişlerini, tercih kaydı tekrarını, büyük listelerin olay sırasını ve çizim/ön yükleme önbelleğini kontrol eder. Windows'un tüm monitör/DPI kombinasyonları burada çalıştırılmadı.
 
-Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Son test çıktısı](test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
+Yeni liste filtrelerinde görünmeyen satırlar Tk tablosundan silinmez, ayrılır. Yeniden taramada bu satırlar da temizlenir; eski `file_n` kimlikleri yeni listeyle çakışmaz. Aktarımın mevcut testleri korunmuştur. [Arşiv: Son test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/test-results/latest-tests.log); önceki sürümün [tam program raporu](program-verification.md) tarihsel kayıttır.
 
 Çalışan uygulamadan 1240×860 boyutunda alınan gerçek ekran görüntüleri:
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| DXF/DWG | [Görüntü](ui-preview/screenshots/dxf-dwg-light.png) | [Görüntü](ui-preview/screenshots/dxf-dwg-dark.png) |
-| PDF | [Görüntü](ui-preview/screenshots/pdf-light.png) | [Görüntü](ui-preview/screenshots/pdf-dark.png) |
-| K/R Manuel | [Görüntü](ui-preview/screenshots/k-factor-manual-light.png) | [Görüntü](ui-preview/screenshots/k-factor-manual-dark.png) |
-| K/R Takım | [Görüntü](ui-preview/screenshots/k-factor-light.png) | [Görüntü](ui-preview/screenshots/k-factor-dark.png) |
-| ISO | [Görüntü](ui-preview/screenshots/iso-fits-light.png) | [Görüntü](ui-preview/screenshots/iso-fits-dark.png) |
-| ISO Mil esaslı | [Görüntü](ui-preview/screenshots/iso-fits-shaft-basis-light.png) | [Görüntü](ui-preview/screenshots/iso-fits-shaft-basis-dark.png) |
-| GD&T | [Görüntü](ui-preview/screenshots/geometric-tolerances-light.png) | [Görüntü](ui-preview/screenshots/geometric-tolerances-dark.png) |
+| DXF/DWG | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/dxf-dwg-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/dxf-dwg-dark.png) |
+| PDF | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/pdf-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/pdf-dark.png) |
+| K/R Manuel | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/k-factor-manual-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/k-factor-manual-dark.png) |
+| K/R Takım | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/k-factor-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/k-factor-dark.png) |
+| ISO | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-dark.png) |
+| ISO Mil esaslı | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-shaft-basis-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-shaft-basis-dark.png) |
+| GD&T | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/geometric-tolerances-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/geometric-tolerances-dark.png) |
 
-[Manuel ISO H6 referansı](ui-preview/screenshots/iso-fits-manual-h6-dark.png), [tam H8 eşleşmesi](ui-preview/screenshots/iso-fits-manual-h8-dark.png) ve [tablo kontrolü](ui-preview/screenshots/iso-fits-manual-comparison-dark.png).
+[Arşiv: Manuel ISO H6 referansı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-manual-h6-dark.png), [Arşiv: tam H8 eşleşmesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-manual-h8-dark.png) ve [Arşiv: tablo kontrolü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-preview/screenshots/iso-fits-manual-comparison-dark.png).
 
 ## Kod satırı sayısı
 
@@ -111,9 +115,9 @@ Fiziksel satırlar sayıldı; yorumlar ve boş satırlar toplam satıra dahildir
 
 Önceki sadeleştirmede GUI pencere kurulumu, kapanış denetimi, olay bekleme ve sınır kontrolleri; SolidWorks belge taklitleri ve COM bağlantı kurulumu `tests/support/` altında ortaklaştırıldı. Test dosyaları artık başka test dosyalarının kurulumlarına bağımlı değildir. O aşamadaki 327 test kimliği korundu; 302 test gövdesi aynı kaldı, diğerlerinde ortak yardımcılar kullanıldı. Yardımcı dosyalar da sayıldığında test kodu 5.299'dan 5.210 satıra indi (89 fiziksel, 96 boş olmayan satır azalma). Ortak temel sınıflarda test yöntemi bulunmadığı için kalıtım testleri çoğaltmaz.
 
-Son yeniden denetimde 12 ek GUI kabul testi eklendi. İlk yerleşim zamanlaması açıkça başlatıldı. Sonuçlar ve kapsam sınırları [Word raporunda](reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx); test bazlı kanıtlar [rapor dizininde](reports/README.md). Satır sayıları bu yeniden denetim sonrası güncellenmiştir; rapor üretim araçları uygulama/test sayımına dahil değildir.
+Son yeniden denetimde 12 ek GUI kabul testi eklendi. İlk yerleşim zamanlaması açıkça başlatıldı. Sonuçlar ve kapsam sınırları [Arşiv: Word raporunda](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx); test bazlı kanıtlar [rapor dizininde](reports/README.md). Satır sayıları bu yeniden denetim sonrası güncellenmiştir; rapor üretim araçları uygulama/test sayımına dahil değildir.
 
-K/R güncel ekranında Montajı tara, Hesapla ve dosya kayıt seçimi kaydırılan formun dışındadır. Seçilen malzeme tüm saclara varsayılır; parametreler değiştikçe numune hesabı yenilenir. [Yeni Word raporu](reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx); eski rapor K/R öncesi denetimin kaydıdır.
+K/R güncel ekranında Montajı tara, Hesapla ve dosya kayıt seçimi kaydırılan formun dışındadır. Seçilen malzeme tüm saclara varsayılır; parametreler değiştikçe numune hesabı yenilenir. [Arşiv: Yeni Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx); eski rapor K/R öncesi denetimin kaydıdır.
 
 Son manuel eklemede 15 test çalıştırıldı. Form alanları küçük pencerede kaydırılarak erişilebilir; tarama/uygulama ve sonuç listesi görünür kalır. [189 testlik kanıt](reports/manual-k-radius/README.md). Önceki Word raporları kendi sürümlerinin tarihsel kayıtlarıdır.
 
@@ -123,7 +127,7 @@ ISO eklemesinde 8 hesap ve 9 GUI testi eklendi. İki tema, 5 boyut/ölçek, 31 d
 
 ISO sol panelinde **ISO seçimi / Manuel kontrol** menüsü bulunur. Manuel girişte dört sapma alanı, canlı geçme sonucu, tam/en yakın ISO sınıfı ve farklar; mm/µm, örnek doldurma, CSV ve pano desteklenir. 14 ek test (8 hesap, 6 GUI) geçti. %100/%125/%150, iki tema, alanlara ve karşılaştırmaya kaydırarak erişim sınandı. [Güncel manuel rapor ve resimler](reports/manual-iso/README.md).
 
-Manuel kontrolde Montaj hedefi menüsü ve MONTAJ UYUMU / EN YAKIN GEÇME kartı eklendi. Yeni kart farklı referans/gerçek geçme türünü, sınırda teması ve büyük limit farklarını açıklar. 6 hesap + 4 GUI testi daha geçti; CSV/pano ve hedef tercihi desteklenir. [Güncel kart görüntüsü](reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [240 testlik güncel rapor](reports/fit-compatibility/README.md).
+Manuel kontrolde Montaj hedefi menüsü ve MONTAJ UYUMU / EN YAKIN GEÇME kartı eklendi. Yeni kart farklı referans/gerçek geçme türünü, sınırda teması ve büyük limit farklarını açıklar. 6 hesap + 4 GUI testi daha geçti; CSV/pano ve hedef tercihi desteklenir. [Arşiv: Güncel kart görüntüsü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [240 testlik güncel rapor](reports/fit-compatibility/README.md).
 
 GD&T eklemesinde 10 hesap/içerik ve 11 GUI testi geçti. 12 güncel türün iki temada çizimi, iki kaldırılmış kartın çıktı engeli ve Rule #1 boyut ilişkisi, datum menüleri, arama, CSV/pano, hatalı giriş, ölçüm temizliği, rehber ve %100/%125/%150 alan erişimi kontrol edildi. [261 testlik son rapor](reports/geometric-tolerances/README.md).
 
@@ -141,7 +145,7 @@ K/R için form ve tablo aynı anda dar sütunlara sıkıştırılmaz. 48 px sekm
 
 Yan menü vurgusu kısa renk geçişi kullanır; sayfa içeriği hemen açılır. Tercih yazımı 250 ms ertelenir; hızlı geçişte ayrılan sayfaların değerleri birleştirilir, işlem başlatılırken/kapanırken kaydedilir. Büyük dosya listeleri kısa gruplarla eklenir, işçi olayları sınırlı sürelerle tüketilir; Durdur ve diğer Tk olaylarına sıra verilir.
 
-Güncel gerçek ekranlar: [takım](screenshots/gui-current-kr-tools-dark.png), [manuel koyu](screenshots/gui-current-kr-manual-dark.png), [manuel açık](screenshots/gui-current-kr-manual-light.png), [küçük pencere](screenshots/gui-current-kr-manual-small.png), [montaj sonuçları](screenshots/gui-current-kr-results-dark.png), [tek biçim DXF/DWG](screenshots/gui-current-dxf-dwg-dark.png). Bu görüntüler çalışan Tk arayüzünden alındı; SolidWorks çıktısını kanıtlamaz. Önceki Word raporları kendi sürümlerinin kayıtlarıdır.
+Güncel gerçek ekranlar: [Arşiv: takım](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-kr-tools-dark.png), [Arşiv: manuel koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-kr-manual-dark.png), [Arşiv: manuel açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-kr-manual-light.png), [Arşiv: küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-kr-manual-small.png), [Arşiv: montaj sonuçları](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-kr-results-dark.png), [Arşiv: tek biçim DXF/DWG](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-dxf-dwg-dark.png). Bu görüntüler çalışan Tk arayüzünden alındı; SolidWorks çıktısını kanıtlamaz. Önceki Word raporları kendi sürümlerinin kayıtlarıdır.
 
 Menü akıcılığı için ISO/GD&T listeleri yalnız arama, filtre veya seçim değiştiğinde düzenlenir. Sayı ve örnek ölçü değişince sabit menü düğmeleri yeniden çizilmez. Grafik önbelleği veri, görünüm, tema, ölçek ve gerçek tuval boyutunu izler; hatalı girişte eski geçerli grafiği korumaz. Kullanılmamış sayfalar, son girişten en az 600 ms sonra ve işçi çalışmıyorken, 700 ms aralıklarla Tk iş parçacığında hazırlanır. Aktif sayfa ve tercihler korunur. Gizli sayfaların CTk 6 DPI değişiminde tekrar görünmesi engellendi.
 
@@ -177,10 +181,10 @@ Bu ölçüm gerçek Tk listesi ve örnek dosya adlarıyla yapıldı; CAD aktarı
 | Günlüğe ekleme çağrısı | 501 | 21 |
 | İlerleme çubuğu çizimi | 500 | 20 |
 
-Sayaç ölçümleri zaman ölçümünden ayrı çalıştırıldı. Poll beklemeleri ve SolidWorks süresi bu ölçüme dahil değildir; Windows kare hızı ölçülmedi. Hazır sayfalar arasında geçiş medyanı 3,08 ms'dir. [Ham ölçümler](test-results/gui-responsiveness.json) ve [tekrar çalıştırma aracı](report-tools/benchmark_gui_events.py): `python docs/report-tools/benchmark_gui_events.py . sonuc.json`. Dört yeni gerçek GUI testi toplu çizimde veri/sıra korunmasını, PDF/DXF/K-R son özetlerini, olay turunun sınırını ve günlük kaydırmasını sınar.
+Sayaç ölçümleri zaman ölçümünden ayrı çalıştırıldı. Poll beklemeleri ve SolidWorks süresi bu ölçüme dahil değildir; Windows kare hızı ölçülmedi. Hazır sayfalar arasında geçiş medyanı 3,08 ms'dir. [Ham ölçümler](test-results/gui-responsiveness.json) ve [Arşiv: tekrar çalıştırma aracı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/report-tools/benchmark_gui_events.py): `python docs/report-tools/benchmark_gui_events.py . sonuc.json`. Dört yeni gerçek GUI testi toplu çizimde veri/sıra korunmasını, PDF/DXF/K-R son özetlerini, olay turunun sınırını ve günlük kaydırmasını sınar.
 
 ISO montaj kesitinde delik ve mil tam çap oklarıyla (D/d), tek taraflı boşluk veya çakışma g oku ile gösterilir. Çapsal ve radyal değerler ayrı yazılır; seçilen örneğin durumu ile tolerans çiftinin genel türü ayrılır. Sıfır fark temas olarak gösterilir. Kesit ölçeksizdir; küçük boşluklar çizgi kalınlığında kaybolmaz. Kırmızı alanlar deformasyon öncesi boyutsal çakışmayı gösterir. Kesit 310 px, tolerans bölgeleri 220 px çizim alanı kullanır; sağ çalışma alanı kaydırılabilir. Altı gerçek GUI testi çap/radyal oklarını, ara geçme uçlarını, yarım mikrometreyi, sıfır temasını ve iki tema/üç ölçek görünümünü doğrular.
 
-Yeni gerçek ekranlar: [boşluklu koyu](screenshots/iso-section-clearance-dark.png), [boşluklu açık](screenshots/iso-section-clearance-light.png), [ara geçmenin sıkı örneği](screenshots/iso-section-transition-dark.png), [sıkı geçme](screenshots/iso-section-interference-dark.png), [temas](screenshots/iso-section-contact-dark.png), [1000×690 pencere](screenshots/iso-section-small-dark.png). [Kesiti okuma ve hesap açıklaması](iso-fits.md).
+Yeni gerçek ekranlar: [Arşiv: boşluklu koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-section-clearance-dark.png), [Arşiv: boşluklu açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-section-clearance-light.png), [Arşiv: ara geçmenin sıkı örneği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-section-transition-dark.png), [Arşiv: sıkı geçme](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-section-interference-dark.png), [Arşiv: temas](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-section-contact-dark.png), [Arşiv: 1000×690 pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-section-small-dark.png). [Kesiti okuma ve hesap açıklaması](iso-fits.md).
 
-Tolerans yeniden denetiminde 9.108 ISO çiftinin ve 225 manuel aralığın işaretleri bağımsız kesir hesabıyla kontrol edildi. Sayısal sınıflandırmada ters işaret bulunmadı. Nominalden ortak sapma büyüdüğünde 0,02 mm boşluğu 0,016 piksele düşüren çizim düzeltildi: boşluk/sıkılık alanı yalnız D−d ilişkisinden türetilir ve sıfır olmayan alan çizgi kalınlığında kaybolmaz. Kesit ölçeksizdir; sayısal değerler değişmez. İşaretli D−d kesitte, Cmin/Cmax tolerans kartında, seçili örneğin değerleri de CSV/panoda görünür. Girilen limitlerin sonucu, en yakın ISO referansının türünden önce açıkça yazılır. Pozitif 0,02 mm, negatif 0,02 mm, temas, ara geçme örnekleri ve veri çıkışları beş gerçek GUI testiyle sınandı. [0,02 mm boşluk görüntüsü](screenshots/iso-positive-twenty-microns-dark.png).
+Tolerans yeniden denetiminde 9.108 ISO çiftinin ve 225 manuel aralığın işaretleri bağımsız kesir hesabıyla kontrol edildi. Sayısal sınıflandırmada ters işaret bulunmadı. Nominalden ortak sapma büyüdüğünde 0,02 mm boşluğu 0,016 piksele düşüren çizim düzeltildi: boşluk/sıkılık alanı yalnız D−d ilişkisinden türetilir ve sıfır olmayan alan çizgi kalınlığında kaybolmaz. Kesit ölçeksizdir; sayısal değerler değişmez. İşaretli D−d kesitte, Cmin/Cmax tolerans kartında, seçili örneğin değerleri de CSV/panoda görünür. Girilen limitlerin sonucu, en yakın ISO referansının türünden önce açıkça yazılır. Pozitif 0,02 mm, negatif 0,02 mm, temas, ara geçme örnekleri ve veri çıkışları beş gerçek GUI testiyle sınandı. [Arşiv: 0,02 mm boşluk görüntüsü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-positive-twenty-microns-dark.png).

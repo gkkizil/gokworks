@@ -3,7 +3,7 @@
 **189 test geçti; 0 başarısız, 0 atlanan. 44 gerçek Tk GUI testi.** Yeni manuel
 özellik için 15 test: 4 sayısal/girdi, 6 COM uygulama, 5 gerçek GUI testi.
 
-- [Tam konsol kaydı](test-run.log)
+- [Arşiv: Tam konsol kaydı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-k-radius/test-run.log)
 - [Test özeti ve test edilen kaynakların SHA-256 değerleri](test-summary.json)
 - [Gerçek manuel GUI görüntülerinin boyut ve SHA-256 kayıtları](screenshots.json)
 - [Kullanım](../../manual-k-radius.md)

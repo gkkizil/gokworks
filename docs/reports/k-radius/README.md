@@ -1,12 +1,16 @@
 # K/R değişikliği sonrası doğrulama
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **174 test geçti; 0 başarısız, 0 atlanan. 39 gerçek Tk GUI testi.** Satır/dal birleşik kapsamı %94.4.
 
 Bu dizin yeni K/R sürümünün tüm test sonuçlarını içerir. Önceki GUI Word
 raporu ve `../gui-verification-results.json`, K/R eklenmeden önceki 140 testlik
 denetimin tarihsel kaydı olarak korunur.
 
-- [Güncel Word raporu](GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx): üç ekranın iki tema görüntüleri, BA hesabı, K/R test listesi ve kapsam sınırları.
+- [Arşiv: Güncel Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx): üç ekranın iki tema görüntüleri, BA hesabı, K/R test listesi ve kapsam sınırları.
 - `screenshots.json`: yedi gerçek pencere görüntüsünün SHA-256 ve boyutları.
 - `gui-verification-results.json`: test bazlı sonuçlar, süreler, alt senaryolar,
   bağımlılık sürümleri ve test edilen uygulama/test dosyalarının SHA-256 değerleri.

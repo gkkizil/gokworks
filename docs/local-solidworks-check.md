@@ -129,7 +129,7 @@ kabul kontrolü hâlâ gereklidir.
    kullanan bir dönüşüm kopyasında tekrar deneyin: işlem açık açıklamayla
    durmalı, dosya kaydedilmemelidir. Başka konfigürasyon değişmemelidir.
 
-Buluttaki [dönüşüm ve K/R testleri](test-results/convert-solid-kr-tests.log),
+Buluttaki [Arşiv: dönüşüm ve K/R testleri](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/test-results/convert-solid-kr-tests.log),
 API sözleşmesini ve hata/geri alma davranışını test nesneleriyle sınar;
 yukarıdaki gerçek SolidWorks geometri kontrolünün yerine geçmez.
 

@@ -63,10 +63,10 @@ SolidWorks gerekmez.
    ileri seçeneklerden açılır; kaynak açıları testere ayarına çevrilmez.
    Özel alan adlarını noktalı virgülle eşleştirin, ardından tekrar okuyun.
 
-![Parçalar ve stok](../../docs/bugfixes/20261027-profile-cutting-ux/after/03-parts-dark.png)
+[Arşiv: Parçalar ve stok](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/03-parts-dark.png)
 
-[Kesim planı](../../docs/bugfixes/20261027-profile-cutting-ux/after/04-plan-dark.png) ·
-[SolidWorks ekranı](../../docs/bugfixes/20261027-profile-cutting-ux/after/05-source-dark.png) ·
+[Arşiv: Kesim planı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/04-plan-dark.png) ·
+[Arşiv: SolidWorks ekranı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-profile-cutting-ux/after/05-source-dark.png) ·
 [İnceleme, önce/sonra ve test raporu](../../docs/bugfixes/20261027-profile-cutting-ux/README.md).
 Görseller gerçek Qt uygulamasındandır. Manuel örnek gerçek optimizasyon motoruyla
 hesaplanır; CAD satırları açıkça test verisidir, canlı SolidWorks testi değildir.

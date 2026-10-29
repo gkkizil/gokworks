@@ -7,7 +7,7 @@ esas alınarak uygulandı. Tarayıcı prototipi veya yeni arayüz kütüphanesi 
 
 1. Çoklu DXF yükleme → listeyi kontrol etme → sac tanımı → yerleştirme →
    fiziksel plakalar arasında geçiş → çıktı. Başlangıç ekranı:
-   [önce](../nesting-usability/01-parts-dark.png).
+   [Arşiv: önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-usability/01-parts-dark.png).
 2. **Yüksek öncelik:** liste ve çizim ayrı sekmelerdeydi; parçayı yerleşimle
    karşılaştırmak ekran değiştirmeyi gerektiriyordu. İkisi artık aynı alanda.
 3. **Orta öncelik:** büyük başlık, proje satırı, adım sekmeleri ve tekrar eden
@@ -21,14 +21,14 @@ esas alınarak uygulandı. Tarayıcı prototipi veya yeni arayüz kütüphanesi 
 
 ## Güncel ekranlar
 
-![Parçalar ve ikinci plaka aynı çalışma alanında](03-plates-dark.png)
+[Arşiv: Parçalar ve ikinci plaka aynı çalışma alanında](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/03-plates-dark.png)
 
-- [Açık tema](04-plates-light.png)
-- [1024 × 700](05-plates-small.png)
-- [820 × 560 minimum pencere](06-plates-minimum.png)
-- [Liste kapalı, çizim odakta](07-drawing-focus.png)
-- [Sac ve ayarlar penceresi](02-stock-dark.png)
-- [Başarısız DXF de listede kalır](01-parts-dark.png)
+- [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/04-plates-light.png)
+- [Arşiv: 1024 × 700](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/05-plates-small.png)
+- [Arşiv: 820 × 560 minimum pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/06-plates-minimum.png)
+- [Arşiv: Liste kapalı, çizim odakta](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/07-drawing-focus.png)
+- [Arşiv: Sac ve ayarlar penceresi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/02-stock-dark.png)
+- [Arşiv: Başarısız DXF de listede kalır](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-workspace/01-parts-dark.png)
 
 Üstte **Yerleştir**, solda yeniden boyutlandırılabilir parça listesi, sağda
 mevcut AutoCAD tarzı fiziksel plaka sekmeleri ve geniş çizim vardır.

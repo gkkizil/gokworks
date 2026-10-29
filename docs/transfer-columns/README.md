@@ -25,12 +25,12 @@ aktarımı veya gerçek bir CAD dosyası üzerinde test yapıldığını göster
 
 | Ekran | Geniş pencere | Küçük pencere |
 | --- | --- | --- |
-| PDF | [1440 × 900](pdf-dark-1440.png) | [820 × 560](pdf-dark-820.png) |
-| DXF/DWG | [1440 × 900](dxf_dwg-dark-1440.png) | Otomatik geometri testine dahil |
-| BOM | [1440 × 900](bom-dark-1440.png) | [820 × 560](bom-dark-820.png) |
-| İsimlendirme | [1440 × 900](naming-dark-1440.png) | [820 × 560](naming-dark-820.png) |
+| PDF | [Arşiv: 1440 × 900](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/pdf-dark-1440.png) | [Arşiv: 820 × 560](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/pdf-dark-820.png) |
+| DXF/DWG | [Arşiv: 1440 × 900](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/dxf_dwg-dark-1440.png) | Otomatik geometri testine dahil |
+| BOM | [Arşiv: 1440 × 900](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/bom-dark-1440.png) | [Arşiv: 820 × 560](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/bom-dark-820.png) |
+| İsimlendirme | [Arşiv: 1440 × 900](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/naming-dark-1440.png) | [Arşiv: 820 × 560](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/naming-dark-820.png) |
 
-[Açık tema PDF](pdf-light-1440.png) · [Görüntü ölçümleri](capture.json)
+[Arşiv: Açık tema PDF](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/transfer-columns/pdf-light-1440.png) · [Görüntü ölçümleri](capture.json)
 
 ## Doğrulama
 

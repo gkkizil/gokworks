@@ -14,11 +14,7 @@ bağımsız hesaplar ve nesting için SolidWorks gerekmez.
 [İndirme ve kurulum](#indirme-ve-kurulum) · [Modüller](#modüller) ·
 [Kullanım](#nasıl-kullanılır) · [Kaynak kod](#kaynak-koddan-çalıştırma)
 
-![GOKWORKS çalışma alanı](docs/fusion-workspace/after/nesting-dark.png)
-
-*Güncel kaynak arayüz: parça listesi, sac yerleşimi ve bağlamsal özellikler paneli.*
-
-[Yeni çalışma alanının kullanımı ve ekran görüntüleri](docs/fusion-workspace/README.md).
+[Çalışma alanının kullanımı](docs/fusion-workspace/README.md).
 Bu arayüz kaynak kodda bulunur; aşağıdaki son başarılı EXE bağlantısının sürümü ayrıca belirtilmiştir.
 
 ## İndirme ve kurulum

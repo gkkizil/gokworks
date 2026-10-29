@@ -1,5 +1,9 @@
 # Menü akıcılığı — 13 Ekim 2026
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 BOM araması, liste–ürün ağacı geçişi ve değişmeyen ekranların yeniden çizimi iyileştirildi. Parça adı, konfigürasyon ve dosya yolu arama için bir kez hazırlanıyor. Eşdeğer arama sorguları tabloyu yeniden kurmuyor; aynı boyut, seçim ve tema tekrar uygulanmıyor. Yeni taramada önbellek temizleniyor; tema ve ölçek değiştiğinde açık ve saklanan sayfalar güncelleniyor.
 
 ## Önce / sonra

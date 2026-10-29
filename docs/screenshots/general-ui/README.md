@@ -18,12 +18,12 @@ Uygulamanın önceki nötr gri renk paleti korunur.
 Görüntüler çalışan PySide6 uygulamasından, Linux üzerinde Qt `offscreen`
 platformuyla alınmıştır:
 
-- [Koyu tema](dark.png)
-- [Açık tema](light.png)
-- [820 × 560 pencere](compact.png)
-- [Araç bulunamadı](search-empty.png)
-- [Filtreye uyan sonuç yok](filtered-results.png)
-- [Dişli ekranı · gri tema](gear-gray.png)
+- [Arşiv: Koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/general-ui/dark.png)
+- [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/general-ui/light.png)
+- [Arşiv: 820 × 560 pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/general-ui/compact.png)
+- [Arşiv: Araç bulunamadı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/general-ui/search-empty.png)
+- [Arşiv: Filtreye uyan sonuç yok](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/general-ui/filtered-results.png)
+- [Arşiv: Dişli ekranı · gri tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/general-ui/gear-gray.png)
 
 İlgili testler: `tests/test_fusion_workbench.py` ve
 `tests/test_compact_workspaces_gui.py` için 29 test; `tests/test_shell_feedback.py`

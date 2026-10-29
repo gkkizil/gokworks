@@ -15,13 +15,27 @@ gokworks/
 ├── solidworks/      # Ortak COM bağlantısı, tanılama ve süreç yönetimi
 ├── assets/          # Gömülü logo ve uygulama ikonu
 ├── tests/           # Ortak altyapı, uygulama ve paketleme testleri
-├── docs/            # Kullanım, doğrulama raporları ve ekran görüntüleri
+├── docs/            # Kullanım rehberleri ve metin doğrulama kayıtları
 ├── packaging/       # Windows EXE üretimi ve lisans bildirimleri
 ├── sources/         # Kaynak/telif envanteri
 └── .github/         # GitHub Actions
 ```
 
 [Modül dizini ve tüm ekran girişleri](../modules/README.md).
+
+## Üretilen dosyalar
+
+Ekran görüntüleri, ham test günlükleri/JUnit XML kayıtları ve eski arayüz
+raporlarının üretilmiş Word/PDF/Excel kopyaları güncel kaynak dalında tutulmaz.
+Yeni kontrol çıktıları GitHub Actions artifact'larında veya yerel çıktı
+klasörlerinde saklanır; `.gitignore` bu dosyaların yeniden eklenmesini önler.
+Uygulamanın logo/ikon/tema varlıkları `assets/` altında sürümlenir.
+
+Kod, testler, CAD/hesap girdileri, örnek projeler, kaynak/telif kayıtları ve
+kullanım rehberleri korunur. Önceki raporlardaki **Arşiv** bağlantıları,
+[temizlik öncesi Git sürümündeki](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9)
+dosyalara gider. Eski Tk arayüzüne bağlı ekran/Word rapor betikleri de bu
+sürümden incelenebilir; güncel Qt yakalama ve CI araçları korunur.
 
 ## Bir modül üzerinde çalışma
 

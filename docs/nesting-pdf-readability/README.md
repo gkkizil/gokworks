@@ -4,11 +4,11 @@
 [22 parçalı taşınabilir projeden](../nesting-example/Ornek.goknest.json)
 yeniden dışa aktarıldı. Kaynak DXF dosyaları ve proje değiştirilmedi.
 
-- [Güncel PDF](Nesting.pdf): dört A4 sayfa; üretim/maliyet özeti,
+- [Arşiv: Güncel PDF](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-pdf-readability/Nesting.pdf): dört A4 sayfa; üretim/maliyet özeti,
   parça özeti ve hesap notları, 22 yerleşen örnek, gerçek plaka çizimi.
-- [Önce](before-01.png): Qt metin rengi `#eeeeee` olduğunda eski çıktı.
-- [Güncel özet](after-01.png), [parça ve hesap bilgisi](after-02.png),
-  [örnek tablosu](after-03.png), [plaka çizimi](after-04.png).
+- [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-pdf-readability/before-01.png): Qt metin rengi `#eeeeee` olduğunda eski çıktı.
+- [Arşiv: Güncel özet](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-pdf-readability/after-01.png), [Arşiv: parça ve hesap bilgisi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-pdf-readability/after-02.png),
+  [Arşiv: örnek tablosu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-pdf-readability/after-03.png), [Arşiv: plaka çizimi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-pdf-readability/after-04.png).
 - [Makine tarafından okunan kontrol sonuçları](checks.json).
 
 Rapor gövdesi **10,5 punto, `#17212b`**; kağıt ve kenar boşlukları açıkça

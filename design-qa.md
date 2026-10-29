@@ -13,7 +13,7 @@ Başlangıç kaynak commit'i `8e95713`; ortak yerleşim
 - Yerel kaynak görüntü: `/workspace/artifacts/gear-layout/reference-spur.png`.
   1920×1080, koyu tema, daraltılmış gezgin, 2D, duraklatılmış hareket;
   m=3, z₁/z₂=20/40, b=20, delikler 20/60, n₁=1602, P=5.
-- Son uygulama: [helisel ekran](docs/screenshots/gear-workspace.png),
+- Son uygulama: [Arşiv: helisel ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gear-workspace.png),
   1920×1080; aynı pencere/tema/gezgin, helisel türün varsayılanları
   mₙ=2, β=20°, b=15, delikler 8/12, n₁=1500, P=1,5.
   Türe ve girdilere bağlı ölçü farkları beklenir; sayısal eşitlik aranmadı.
@@ -24,7 +24,7 @@ Başlangıç kaynak commit'i `8e95713`; ortak yerleşim
   `/workspace/artifacts/gear-layout/comparison-results.png`, 700×920;
   giriş yakın incelemesi: `comparison-inputs.png`, 680×700, aynı klasörde.
   Bu kırpmalar kaynak ve uygulamayı yerel piksel yoğunluğunda birlikte gösterir.
-- Dar ekran: [görünüm ve sonuç/CAD](docs/screenshots/gear-workspace-compact.png),
+- Dar ekran: [Arşiv: görünüm ve sonuç/CAD](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gear-workspace-compact.png),
   iki ayrı 820×560 gerçek pencere görüntüsü yan yana, toplam 1640×560;
   açık tema, sonuçlar sekmesinde CAD düğmelerine kaydırılmış durum.
 - Diğer dokuz tür: `/workspace/artifacts/gear-layout/verified-<tür>.png`.

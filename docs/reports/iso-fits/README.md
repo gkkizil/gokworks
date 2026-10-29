@@ -1,8 +1,12 @@
 # ISO eklemesi ve son program kontrolü
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **216 test geçti, 0 başarısız, 0 atlanan; 58 gerçek Tk GUI testi.** ISO için 8 hesap + 9 GUI testi eklendi; önceki PDF, DXF/DWG, otomatik/manuel K/R, ayar ve bağlantı testlerinin tamamı yeniden çalıştırıldı. Windows/SolidWorks COM üretimi bu Linux çalışmasının kapsamı dışındadır. ISO ekranı SolidWorks gerektirmeyen bağımsız hesap ve çizim ekranıdır.
 
-[Word raporu](GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx), [tam test çıktısı](test-run.log), [test bazlı sonuç ve uygulama hashleri](gui-verification-results.json), [kapsam](coverage.json), [sayısal kaynak karşılaştırması](source-comparison.json), [resmî standart erişim sonuçları](standards-access.json), [görüntü hashleri](screenshots.json), [Word dosyası doğrulaması](word-report-validation.json).
+[Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx), [Arşiv: tam test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/test-run.log), [test bazlı sonuç ve uygulama hashleri](gui-verification-results.json), [kapsam](coverage.json), [sayısal kaynak karşılaştırması](source-comparison.json), [resmî standart erişim sonuçları](standards-access.json), [görüntü hashleri](screenshots.json), [Word dosyası doğrulaması](word-report-validation.json).
 
 Word dosyasını GitHub dosya sayfasındaki **Download raw file** düğmesiyle indirin. Raporda beş gerçek ekran görüntüsü gömülüdür; ZIP CRC ve python-docx ile içerik kontrol edildi. Yerel Microsoft Word sayfa görünümü çalıştırılmadı.
 
@@ -10,11 +14,11 @@ Word dosyasını GitHub dosya sayfasındaki **Download raw file** düğmesiyle i
 
 | Görünüm | Görüntü |
 | --- | --- |
-| Açık tema, H8/f7 | [Görüntü](screenshots/iso-light.png) |
-| Koyu tema, H8/f7 | [Görüntü](screenshots/iso-dark.png) |
-| Koyu tema, sapma bölgeleri | [Görüntü](screenshots/iso-zones-dark.png) |
-| Koyu tema, H7/k6 ara geçme | [Görüntü](screenshots/iso-transition-dark.png) |
-| Koyu tema, H7/p6 sıkı geçme | [Görüntü](screenshots/iso-interference-dark.png) |
+| Açık tema, H8/f7 | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/screenshots/iso-light.png) |
+| Koyu tema, H8/f7 | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/screenshots/iso-dark.png) |
+| Koyu tema, sapma bölgeleri | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/screenshots/iso-zones-dark.png) |
+| Koyu tema, H7/k6 ara geçme | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/screenshots/iso-transition-dark.png) |
+| Koyu tema, H7/p6 sıkı geçme | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/iso-fits/screenshots/iso-interference-dark.png) |
 
 1240×860 gerçek Tk penceresinden alındı; görsel taslak veya üretilmiş örnek resim değildir. Kesit şematiktir; sapmalar görünürlük için büyütülür. Sapma bölgeleri doğrusal sayısal ölçek kullanır.
 

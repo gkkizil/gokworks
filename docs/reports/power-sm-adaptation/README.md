@@ -44,13 +44,13 @@ Kalınlığı farklı ana/alt sac, malzeme/gauge bağı, özel dönüşüm overr
 
 Yeni regresyonlar, unsur tanımının R yazımını yok saymasını, özel büküm
 ayarlarını, kısmi hatalarda geri almayı, yanlış ölçü seçimini ve gerçek Tk
-tarama–uygulama akışını kapsar. [89 ilgili kontrol geçti](checks.log).
+tarama–uygulama akışını kapsar. [Arşiv: 89 ilgili kontrol geçti](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/power-sm-adaptation/checks.log).
 Son arayüz yerleşimi ayrıca 1000×690 ve 1240×860 pencerelerde, açık/koyu
 temalarda sınandı. Ek konfigürasyon regresyonunda yalnız büküm bayraklarının
 başka konfigürasyona sızması yakalandı ve iki konfigürasyonun eski ayarları
 geri yüklenip doğrulandı.
 
-Önceki `0aaabf2` koduyla [iki beklenen regresyon hatası](before.log) yeniden
+Önceki `0aaabf2` koduyla [Arşiv: iki beklenen regresyon hatası](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/power-sm-adaptation/before.log) yeniden
 üretildi: yok sayılan R tanımı ve özel alt sac K/R ayarının atamayı engellemesi.
 Kontroller COM test nesneleri kullanır;
 gerçek Windows/SolidWorks modeli bu bulutta doğrulanmadı.

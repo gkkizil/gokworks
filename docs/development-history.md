@@ -5,6 +5,10 @@ için hazırlanmıştır. Bu sayfa önceki geliştirme, arayüz geçişi ve test
 kayıtlarına erişim sağlar. Geçmiş raporlardaki ekranlar, dosya yolları ve test
 sayıları raporun ait olduğu sürümü anlatır.
 
+Eski ekran görüntüleri, ham günlükler ve üretilmiş rapor kopyaları güncel
+daldan temizlenmiştir. **Arşiv** bağlantıları dosyanın Git geçmişindeki
+sabit sürümüne gider; yeni ekran/test çıktıları CI artifact'larında tutulur.
+
 | Konu | Kayıt |
 | --- | --- |
 | İlk arayüz, K/R, ISO ve GD&T geliştirmeleri | [Rapor arşivi](reports/README.md) |

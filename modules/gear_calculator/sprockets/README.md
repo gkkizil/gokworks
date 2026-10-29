@@ -182,8 +182,8 @@ son yarıçap/arayüz düzenlemesinden sonra hesap/arayüz paketindeki 69 test v
 gerçek 3D kareyi bekleyen ek UI kontrolü başarılı. 16 modüllük kaynak açılış
 kontrolü geçti. Tüm uygulamanın test paketi çalıştırılmadı.
 [Sayısal kayıt](../../../docs/test-results/sprockets-validation.json) ·
-[2D ekran](../../../docs/screenshots/chain-sprocket.png) ·
-[Gerçek katı 3D ekran](../../../docs/screenshots/chain-sprocket-3d.png).
+[Arşiv: 2D ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/chain-sprocket.png) ·
+[Arşiv: Gerçek katı 3D ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/chain-sprocket-3d.png).
 3D örnekte tahrik göbeği Ø30 / toplam boy 20 mm; 2D örnekte göbek yoktur.
 
 ## Kaynaklar ve lisans

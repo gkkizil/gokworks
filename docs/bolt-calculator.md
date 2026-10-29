@@ -1,5 +1,9 @@
 # Cıvata hesabı
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **Mühendislik hesapları → Cıvata hesabı**. SolidWorks bağlantısı gerektirmez. Metrik ölçü, kalite sınıfı, yük türü ve kuvvet girildiğinde sonuç canlı güncellenir. Mavi **Güvenli**, kırmızı **Güvensiz** ve yük girilmediğinde **Yük yok** gösterilir. Hatalı girişte önceki sonuç kaldırılır.
 
 - M3–M39 arasındaki 18 metrik çap; **Kaba diş / İnce diş** ve çapa uygun **Diş adımı (mm)** seçimi. Kaba diş adımı sabittir. İnce dişte örneğin M10 için 1,25 / 1,00 / 0,75 mm sunulur. 4.6, 5.6, 8.8, 10.9 ve 12.9 çelik cıvata sınıfları.
@@ -13,7 +17,7 @@ Sol sütunda parametreler ve kısa teknik bilgi, sağda mavi yük sınırı kart
 
 **Ölçüler** görünümü metrik seçimine göre `d` (nominal çap), `k` (nominal baş yüksekliği), `s` (anahtar ağzı) ve yaklaşık kılavuz deliğini günceller. Baş tablosu ISO 4017 nominal ölçülerini esas alır; DIN 933 ölçüleriyle karıştırılmaz (örneğin ISO M10 anahtar ağzı 16 mm'dir). Cıvata boyu temsili, toleranslar kapsam dışıdır. Yaklaşık `d − P` bir kılavuz deliği ön bilgisidir; bağlantı boşluk deliği ya da kesin matkap seçimi değildir. GitHub geometri tablolarıyla yapılan karşılaştırma ve sürüm farkları [cıvata referans notunda](../modules/bolt/README.md) açıklanır; referans standardı [ISO 4017](https://www.iso.org/obp/ui/#iso:std:iso:4017:ed-5:v1:en).
 
-**Yük gösterimi** seçeneği önceki tek başlı cıvata, somun ve çekme/kesme oklarını korur. Güncel gerçek Tk ekranları: [Koyu](../modules/bolt/examples/bolt-dimensions-dark.png) · [Açık](../modules/bolt/examples/bolt-dimensions-light.png).
+**Yük gösterimi** seçeneği önceki tek başlı cıvata, somun ve çekme/kesme oklarını korur. Güncel gerçek Tk ekranları: [Arşiv: Koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/bolt/examples/bolt-dimensions-dark.png) · [Arşiv: Açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/bolt/examples/bolt-dimensions-light.png).
 
 İnce diş seçimi çekme/diş kökü alanını, kapasiteyi, marjı, gerekli adedi ve
 yaklaşık kılavuz deliğini yeniler. Dişsiz gövde kesme alanı nominal çapa bağlıdır.
@@ -96,10 +100,10 @@ Ekrandaki çekme/kesme kapasiteleri tek başına etkiyen kuvvetler içindir; bir
 
 M10 × 1,5 / 8.8 / 1 cıvata / s=2: As ≈ 57,99 mm², Sp=580 MPa, izin verilen gerilme=290 MPa. Yalnız 10 kN çekmede σ ≈ 172,44 MPa ve sonuç güvenlidir; yalnız çekme kapasitesi ≈ 16,82 kN'dir. Diş kökü alanı ≈ 52,29 mm²; tek kesmede 10 kN güvensiz, çift kesmede güvenlidir. 12 kN çekme ve 8 kN kesme ayrı ayrı güvenliyken birlikte σeş ≈ 336,21 MPa ile güvensizdir.
 
-14 hedefli kontrol: 8 hesap testi, 3 gerçek Tk arayüz testi ve 3 sayfa ön yükleme/tema/ölçek testi. Birim dönüşümü, sınırın iki tarafı, geçersiz/sıfır yükler, yeniden açılış, seçimlerin korunması, küçük pencere, tema ve %125 ölçek kapsandı. Linux/Python 3.13/Tk 8.6 kullanıldı; Windows/SolidWorks çalıştırılmadı. [Test çıktısı](reports/bolt/test-run.log).
+14 hedefli kontrol: 8 hesap testi, 3 gerçek Tk arayüz testi ve 3 sayfa ön yükleme/tema/ölçek testi. Birim dönüşümü, sınırın iki tarafı, geçersiz/sıfır yükler, yeniden açılış, seçimlerin korunması, küçük pencere, tema ve %125 ölçek kapsandı. Linux/Python 3.13/Tk 8.6 kullanıldı; Windows/SolidWorks çalıştırılmadı. [Arşiv: Test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bolt/test-run.log).
 
-[Açık tema](reports/bolt/screenshots/tension-light.png) · [Birleşik yük, koyu tema](reports/bolt/screenshots/combined-dark.png) · [1000×690, güvensiz sonuç](reports/bolt/screenshots/unsafe-dark-small.png)
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bolt/screenshots/tension-light.png) · [Arşiv: Birleşik yük, koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bolt/screenshots/combined-dark.png) · [Arşiv: 1000×690, güvensiz sonuç](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bolt/screenshots/unsafe-dark-small.png)
 
-![Cıvata hesabı, birleşik yük](reports/bolt/screenshots/combined-dark.png)
+[Arşiv: Cıvata hesabı, birleşik yük](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/bolt/screenshots/combined-dark.png)
 
 Görseller çalışan Tk uygulamasından `docs/report-tools/capture_bolt_gui.py` ile alınır; hesaplar örnek girdilerle çalışır. Ek bağımlılık kurulması gerekmez.

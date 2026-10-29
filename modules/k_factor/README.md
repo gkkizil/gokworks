@@ -8,7 +8,7 @@ GOKWORKS içindeki manuel K/R ataması ve bağımsız hesap yardımı.
 - [sheetmetal_parameters.py](sheetmetal_parameters.py): doğrudan SheetMetal parametre düzenleyicisi.
 - [tooling_diagram.py](tooling_diagram.py): abkant üst/alt takım çizimi.
 - [tests/](tests): atama, geri okuma, geri alma, COM sözleşmeleri ve Qt testleri.
-- [examples/](examples): örnek görseller ve geçmiş doğrulama kayıtları.
+- [Arşiv: examples/](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/k_factor/examples): örnek görseller ve geçmiş doğrulama kayıtları.
 - [standalone/](standalone): kullanımdan kaldırılmış denemenin referans arşivi;
   ana uygulamanın çalışması veya EXE paketi için kullanılmaz.
 

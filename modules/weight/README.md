@@ -138,10 +138,10 @@ Kalıp çeliği eklemesinde 13 mevcut hesap/katalog kontrolü geçti. Uygulama a
 200 × 300 × 40 mm levhada 1.2379 için **18,480 kg**, 1.2344 için **18,720 kg**
 sonucu ve sabit yoğunluk gösterimi gerçek ekranlarda doğrulandı.
 
-[Çelik kutu profil, koyu tema](examples/weight-steel-dark.png) ·
-[Delrin mil, açık tema](examples/weight-delrin-light.png) ·
-[1.2379 kalıp çeliği](examples/weight-2379-dark.png) ·
-[1.2344 kalıp çeliği](examples/weight-2344-dark.png).
+[Arşiv: Çelik kutu profil, koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-steel-dark.png) ·
+[Arşiv: Delrin mil, açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-delrin-light.png) ·
+[Arşiv: 1.2379 kalıp çeliği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-2379-dark.png) ·
+[Arşiv: 1.2344 kalıp çeliği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-2344-dark.png).
 Güncel PySide6 ekran görüntülerini yeniden almak için `modules/weight/examples/capture.py` kullanılır.
 Başka klasöre kaydetmek için `--output-dir <klasör>` verilebilir; kullanıcı tercihleri değiştirilmez.
 Yalnız kalıp çeliği ekranları için dosya adlarını uzantısız verin:

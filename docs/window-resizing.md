@@ -1,5 +1,9 @@
 # Pencere boyutlandırma — 16 Ekim 2026
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 Küçültme ve büyütme sırasında açık olmayan sekiz çalışma alanı da pencereyle beraber esniyor, bütün alt kontrolleri yeniden boyutlanıyordu. Menü geçişleri için saklanan sayfaların aynı zamanda yeniden boyutlandırılması, görünmeyen içerikte gereksiz çizim işi oluşturuyordu.
 
 Artık bütün sayfalar tek bir görünüm alanının gerçek alt pencereleri. Yalnız açık sayfa bu alanın genişlik ve yüksekliğini izliyor. Diğer sayfalar son boyutlarında, yerel pencereleri kaldırılmadan altta saklanıyor. Böylece hazır menü geçişi korunuyor; küçük pencerenin kenarlarından eski büyük sayfaların görünmesi de fiziksel üst pencerenin kırpmasıyla engelleniyor. Sayfa yeniden açıldığında mevcut pencere boyutuna uyarlanıyor, girilmiş değerler korunuyor.
@@ -10,7 +14,7 @@ Yerleşim istekleri 16 ms aralıklı tek bir bekleyen çağrıya birleştiriliyo
 
 ## Ölçüm
 
-Aynı [betik](report-tools/benchmark_window_resize.py), `f8e96a8` başlangıcında ve değişikliklerden sonra birer kez çalıştırıldı. Normal açılışta dokuz sayfa hazırlandı; PDF ve ağırlık ekranlarında 1000×690–1440×900 arasında 16 boyut değişimi, her adımda gerçek Tk `update()` çağrısıyla ölçüldü. Python 3.13, Tk 8.6 ve CustomTkinter 6.0 kullanıldı. Linux/Xvfb'de font yükleme kısıtı nedeniyle iki ölçümde de `circle_shapes` çizimi kullanıldı.
+Aynı [Arşiv: betik](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/report-tools/benchmark_window_resize.py), `f8e96a8` başlangıcında ve değişikliklerden sonra birer kez çalıştırıldı. Normal açılışta dokuz sayfa hazırlandı; PDF ve ağırlık ekranlarında 1000×690–1440×900 arasında 16 boyut değişimi, her adımda gerçek Tk `update()` çağrısıyla ölçüldü. Python 3.13, Tk 8.6 ve CustomTkinter 6.0 kullanıldı. Linux/Xvfb'de font yükleme kısıtı nedeniyle iki ölçümde de `circle_shapes` çizimi kullanıldı.
 
 | Ölçüm | Önce | Sonra |
 | --- | ---: | ---: |

@@ -1,5 +1,9 @@
 # K/R COM, ISO geçmeleri ve GUI çalışma alanları
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 10.10.2026 — **289 test geçti, 0 başarısız, 0 atlanan; 93 gerçek Tk GUI testi.**
 19 yeni regresyon testi eklendi. Gerçek Windows/SolidWorks 2025 çalıştırılmadı;
 K/R COM sınırı davranış test nesneleriyle temsil edildi.
@@ -57,12 +61,12 @@ tutarlıdır. Bu kaynaklar gerçek SolidWorks 2025 çalıştırmasının yerine 
 
 ## Kanıtlar ve tekrar çalıştırma
 
-- [Tam test çıktısı](test-run.log), [test bazlı sonuçlar / kaynak hashleri](gui-verification-results.json).
+- [Arşiv: Tam test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/test-run.log), [test bazlı sonuçlar / kaynak hashleri](gui-verification-results.json).
 - [Kapsam ölçümü](coverage.json); kapsam oranı gerçek CAD doğruluğu ölçüsü değildir.
 - [Eski COM hatasının yeniden üretimi](dispatch-reproduction.json).
 - [Eski H7 önerisi ve eşit uzaklık sunumunun yeniden üretimi](iso-matching-reproduction.json).
 - [19 gerçek ekran / dosya hashleri / tablo alan ölçüleri](screenshots.json).
-- [Word raporu](GOKWORKS_KR_ISO_GUI_Kontrol_2026-10-10.docx), [Word bütünlük kontrolü](word-report-validation.json).
+- [Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/GOKWORKS_KR_ISO_GUI_Kontrol_2026-10-10.docx), [Word bütünlük kontrolü](word-report-validation.json).
 
 Test kanıtı commit öncesi üretildi: `git_head` başlangıç commitini gösterir;
 test edilen uygulama, veri ve test dosyaları `sha256` alanıyla belirlenir.
@@ -86,19 +90,19 @@ kombinasyonları bu Linux testinden ayrı kontrol edilmelidir.
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| PDF | [Görüntü](screenshots/pdf-light.png) | [Görüntü](screenshots/pdf-dark.png) |
-| DXF/DWG | [Görüntü](screenshots/dxf-dwg-light.png) | [Görüntü](screenshots/dxf-dwg-dark.png) |
-| K/R takım | [Görüntü](screenshots/k-factor-light.png) | [Görüntü](screenshots/k-factor-dark.png) |
-| K/R manuel | [Görüntü](screenshots/k-factor-manual-light.png) | [Görüntü](screenshots/k-factor-manual-dark.png) |
-| ISO | [Görüntü](screenshots/iso-fits-light.png) | [Görüntü](screenshots/iso-fits-dark.png) |
-| ISO mil esaslı | [Görüntü](screenshots/iso-fits-shaft-basis-light.png) | [Görüntü](screenshots/iso-fits-shaft-basis-dark.png) |
-| GD&T | [Görüntü](../black-theme/screenshots/geometric-tolerances-light.png) | [Görüntü](../black-theme/screenshots/geometric_tolerances-black.png) |
+| PDF | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/pdf-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/pdf-dark.png) |
+| DXF/DWG | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/dxf-dwg-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/dxf-dwg-dark.png) |
+| K/R takım | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/k-factor-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/k-factor-dark.png) |
+| K/R manuel | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/k-factor-manual-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/k-factor-manual-dark.png) |
+| ISO | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-dark.png) |
+| ISO mil esaslı | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-dark.png) |
+| GD&T | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/black-theme/screenshots/geometric-tolerances-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/black-theme/screenshots/geometric_tolerances-black.png) |
 
-[Manuel ISO H6 referansı](screenshots/iso-fits-manual-h6-dark.png) ·
-[Manuel ISO tam H8](screenshots/iso-fits-manual-h8-dark.png) ·
-[Manuel ISO tablo kontrolü](screenshots/iso-fits-manual-comparison-dark.png) ·
-[K/R küçük pencere](screenshots/k-factor-manual-dark-small.png) ·
-[DXF küçük pencere](screenshots/dxf-dwg-dark-small.png).
+[Arşiv: Manuel ISO H6 referansı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-manual-h6-dark.png) ·
+[Arşiv: Manuel ISO tam H8](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-manual-h8-dark.png) ·
+[Arşiv: Manuel ISO tablo kontrolü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-manual-comparison-dark.png) ·
+[Arşiv: K/R küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/k-factor-manual-dark-small.png) ·
+[Arşiv: DXF küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/dxf-dwg-dark-small.png).
 
 Görseller çalışan Tk uygulamasından alındı; montaj verisi veya gerçek
 SolidWorks başarısı gösterilmez. Bulut fontları Windows'tan farklıdır.

@@ -235,8 +235,8 @@ gerçek COM çalıştırması değildir. Gerçek SolidWorks geometrisi, hedef s�
 ve üretim numunesi Windows/atölye ortamında ayrıca kontrol edilmelidir.
 
 [Son test sonuçları](reports/k-radius/README.md) ·
-[Açık GUI](screenshots/gui-k-radius-light.png) ·
-[Koyu GUI](screenshots/gui-k-radius-dark.png)
+[Arşiv: Açık GUI](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-k-radius-light.png) ·
+[Arşiv: Koyu GUI](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-k-radius-dark.png)
 
 ## COM okuma/yazma denetimi — 10.10.2026
 

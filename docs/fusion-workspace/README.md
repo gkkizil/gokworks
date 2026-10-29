@@ -4,10 +4,10 @@
 Autodesk Fusion için verilen tasarım brief'indeki çalışma alanı, Browser, bağlamsal komut ve
 Inspector yaklaşımı esas alındı. Autodesk'in kodu, markası veya görsel varlıkları kopyalanmadı.
 
-![Nesting çalışma alanı](after/nesting-dark.png)
+[Arşiv: Nesting çalışma alanı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/nesting-dark.png)
 
-[Açık tema](after/nesting-light.png) · [Küçük pencere](after/nesting-dark-minimum.png) ·
-[Önceki aynı ekran](before/nesting-dark.png) · [Yakalama kaydı](after/capture.json)
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/nesting-light.png) · [Arşiv: Küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/nesting-dark-minimum.png) ·
+[Arşiv: Önceki aynı ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/nesting-dark.png) · [Yakalama kaydı](after/capture.json)
 
 ## İnceleme ve uygulama kapsamı
 
@@ -53,20 +53,20 @@ bu fark yeni CAD okuma veya hesaplama yeteneği eklenmiş olduğu anlamına gelm
 
 | Modül | Korunan iş akışı ve yeni görsel düzen | Önce / sonra |
 | --- | --- | --- |
-| PDF aktarımı | Sol kaynak/çıktı, sağ dosya durumu/günlük, üst tarama/aktarım | [Önce](before/pdf-dark.png) · [Sonra](after/pdf-dark.png) |
-| DXF / DWG | Kaynak/çıktı ve açınım seçenekleri; sonuç listesi sağda | [Önce](before/dxf_dwg-dark.png) · [Sonra](after/dxf_dwg-dark.png) |
-| 3D Dönüştürücü | Kaynak dosya/klasör seçimi görünür, formatlar solda, kuyruk/ilerleme sağda | [Önce](before/cad_converter-dark.png) · [Sonra](after/cad_converter-dark.png) |
-| BOM | Kompakt kaynak ürün ağacı, parça/ürün ağacı sekmeleri ve dışa aktarma | [Önce](before/bom-dark.png) · [Sonra](after/bom-light.png) |
-| İsimlendirme | Kaynak montaj ve isim kuralları solda, önizleme sağda, paket komutu üstte | [Önce](before/naming-dark.png) · [Sonra](after/naming-dark.png) |
-| K faktörü / yarıçap | Manuel atama tablosu, bağımsız hesap yardımındaki canlı takım çizimi ve montaj sonuçları | [Önce](before/k_factor-dark.png) · [Sonra](after/k_factor-dark.png) |
-| ISO geçmeler | Solda ISO/manuel girdiler; sağda kesit, boşluk örnekleri ve teknik yorumlar | [Önce](before/iso_fits-light.png) · [Sonra](after/iso_fits-light.png) |
-| Geometrik toleranslar | Aranabilir teknik katalog, tolerans bölgesi/çerçeve ve ölçüm açıklamaları | [Önce](before/geometric_tolerances-dark.png) · [Sonra](after/geometric_tolerances-light.png) |
-| Tolerans yığılması | Ölçü kaynağı, zincir, ayarlar, sonuçlar ve teknik resim çıktısı korunur | [Önce](before/tolerance_stack-dark.png) · [Sonra](after/tolerance_stack-dark.png) |
-| Cıvata | Yük girdileri, mevcut emniyet grafiği, yük çizimleri ve tam rapor | [Önce](before/bolt-dark.png) · [Sonra](after/bolt-dark.png) |
-| Hızlı tork | Kompakt giriş paneli, ön yük/tork, bağlantı kesiti ve yaklaşık K rehberi | [Önce](before/bolt_torque-dark.png) · [Sonra](after/bolt_torque-dark.png) |
-| Ağırlık | Malzeme/kesit girdileri, kesit diyagramı, net sonuç ve açılır ayrıntılar | [Önce](before/weight-dark.png) · [Sonra](after/weight-dark.png) |
-| Nesting | Parça listesi + merkezi çizim + isteğe bağlı özellik paneli; levha sekmeleri ve sonuçlar | [Önce](before/nesting-dark.png) · [Sonra](after/nesting-dark.png) |
-| Profil kesim | Kesim listesi, SolidWorks taraması ve görsel kesim planı sekmeleri | [Önce](before/profile_cutting-dark.png) · [Sonra](after/profile_cutting-dark.png) |
+| PDF aktarımı | Sol kaynak/çıktı, sağ dosya durumu/günlük, üst tarama/aktarım | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/pdf-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/pdf-dark.png) |
+| DXF / DWG | Kaynak/çıktı ve açınım seçenekleri; sonuç listesi sağda | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/dxf_dwg-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/dxf_dwg-dark.png) |
+| 3D Dönüştürücü | Kaynak dosya/klasör seçimi görünür, formatlar solda, kuyruk/ilerleme sağda | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/cad_converter-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/cad_converter-dark.png) |
+| BOM | Kompakt kaynak ürün ağacı, parça/ürün ağacı sekmeleri ve dışa aktarma | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/bom-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/bom-light.png) |
+| İsimlendirme | Kaynak montaj ve isim kuralları solda, önizleme sağda, paket komutu üstte | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/naming-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/naming-dark.png) |
+| K faktörü / yarıçap | Manuel atama tablosu, bağımsız hesap yardımındaki canlı takım çizimi ve montaj sonuçları | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/k_factor-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/k_factor-dark.png) |
+| ISO geçmeler | Solda ISO/manuel girdiler; sağda kesit, boşluk örnekleri ve teknik yorumlar | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/iso_fits-light.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/iso_fits-light.png) |
+| Geometrik toleranslar | Aranabilir teknik katalog, tolerans bölgesi/çerçeve ve ölçüm açıklamaları | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/geometric_tolerances-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/geometric_tolerances-light.png) |
+| Tolerans yığılması | Ölçü kaynağı, zincir, ayarlar, sonuçlar ve teknik resim çıktısı korunur | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/tolerance_stack-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/tolerance_stack-dark.png) |
+| Cıvata | Yük girdileri, mevcut emniyet grafiği, yük çizimleri ve tam rapor | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/bolt-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/bolt-dark.png) |
+| Hızlı tork | Kompakt giriş paneli, ön yük/tork, bağlantı kesiti ve yaklaşık K rehberi | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/bolt_torque-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/bolt_torque-dark.png) |
+| Ağırlık | Malzeme/kesit girdileri, kesit diyagramı, net sonuç ve açılır ayrıntılar | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/weight-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/weight-dark.png) |
+| Nesting | Parça listesi + merkezi çizim + isteğe bağlı özellik paneli; levha sekmeleri ve sonuçlar | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/nesting-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/nesting-dark.png) |
+| Profil kesim | Kesim listesi, SolidWorks taraması ve görsel kesim planı sekmeleri | [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/before/profile_cutting-dark.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/profile_cutting-dark.png) |
 
 Bu değişiklik BOM'a yeni bir malzeme editörü eklemez; mevcut veri modeli ve okuma/raporlama
 işlevleri korunur. Teknik hesap açıklamaları, güvenlik uyarıları, kullanıcı onayları ve CAD
@@ -94,23 +94,23 @@ yazma sınırları kaldırılmadı. Hesaplama/optimizasyon/COM motorları deği�
 Yeni uygulama bağımlılığı, web arayüzü veya ticari eklenti eklenmedi. Mevcut PySide6 lisans
 bildirimleri ve paketleme düzeni korunur; eklenen ikonlar projeye ait çizimlerdir.
 
-Ek görünümler: [K/R takım kesiti](after/kr-tooling-helper.png),
-[tolerans yığılması sonuçları](after/stack-results.png),
-[dar pencerede ayrı özellikler penceresi](after/nesting-floating-properties.png),
-[araç araması](after/module-search.png).
+Ek görünümler: [Arşiv: K/R takım kesiti](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/kr-tooling-helper.png),
+[Arşiv: tolerans yığılması sonuçları](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/stack-results.png),
+[Arşiv: dar pencerede ayrı özellikler penceresi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/nesting-floating-properties.png),
+[Arşiv: araç araması](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/after/module-search.png).
 
 ## Doğrulama
 
 - Son tam regresyon: **1.167 test başarılı, 878 alt test başarılı, 9 atlanan; sıfır hata/başarısızlık**.
   Toplam 1.176 bağımsız test toplandı; 71 ayrı süreçte çalıştı. Alt testlerle JUnit toplamı 2.054'tür.
-  [Sayısal özet](test-summary.json), [JUnit](final-regression.xml), [süreç çıkışları](final-regression-summary.txt).
+  [Sayısal özet](test-summary.json), [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/final-regression.xml), [süreç çıkışları](final-regression-summary.txt).
 - Yeni çalışma alanı kontrolleri; grup geçişleri/arama, kayıtlı sayfa verileri, üst komutlar,
   Inspector alan eşlemesi, seçimle sonucun korunması, parametreyle geçersizleştirme,
   bölüm kapatma, mevcut editörler, panel genişliği, dar/yüzer panel, worker sırasında
   kilitleme, hata mesajı ve iki temayı kapsar: `tests/test_fusion_workbench.py`.
 - İlk tam turdaki iki paket kaynağı kontrolü başarısız oldu: klasör yerine dosya bekleyen
   paketleme sözleşmesi yeni ikonlar için sağlanmıyordu. İki PNG ayrı kaynak olarak eklenerek
-  düzeltildi. [İlk sonuç](initial-regression.xml), [düzeltme sonrası 21 hedefli test](targeted-fixes.txt)
+  düzeltildi. [Arşiv: İlk sonuç](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/initial-regression.xml), [düzeltme sonrası 21 hedefli test](targeted-fixes.txt)
   ve ardından yukarıdaki tam başarılı tur saklanır. Başarısızlıklar silinerek başarı raporlanmadı.
 - Son kaynak açılış/işlev kontrolü: **14 modül, iki tema, dört çözünürlük**.
   [Standart ölçek](source-dpi-1.json), [%125](source-dpi-1.25.json), [%150](source-dpi-1.5.json).
@@ -119,7 +119,7 @@ Ek görünümler: [K/R takım kesiti](after/kr-tooling-helper.png),
   K/R takım şeması ve izole PDF worker başlangıcı da bu kontrolde çalıştırıldı.
 - Görsel kayıt: **64 native görüntü**; her modül 1440×900 ve 820×560 boyutlarında
   açık/koyu temayla açıldı. [Dosya/boyut/modül kaydı](after/capture.json).
-  [Ara aşamalar](stages/) uygulamanın shell ve Inspector adımlarından sonra çalıştırıldığını gösterir.
+  [Arşiv: Ara aşamalar](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/fusion-workspace/stages) uygulamanın shell ve Inspector adımlarından sonra çalıştırıldığını gösterir.
 - Gerçek `QTest.keyClick` ile [Ctrl+K / Ctrl+B](keyboard.json) geçti. Ortak metin/yüzey,
   vurgu ve hata renkleri için ölçülen kontrastlar **en az 4,66:1**:
   [Renk çiftleri](contrast.json). Bu sonuç tüm erişilebilirlik kurallarını kapsamaz.

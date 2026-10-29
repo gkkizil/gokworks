@@ -50,10 +50,10 @@ Kaynak: `70eac87a4ce47b5af9fa9556be3c0460d91cd3ca`, dal `main`, dizin `/workspac
 
 - Yeni 29 regresyon senaryosu eski kodda başarısızdı: 27 geometri/akış
   senaryosu, 2 anlaşılır çakışma mesajı denetimi.
-  [Önceki sonuç](20261027-shoulder-before.xml).
+  [Arşiv: Önceki sonuç](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-shoulder-before.xml).
 - Mil paketinin yerel sonucu: **205 kayıt, 172 geçti, 33 atlandı, 0 hata**.
   Atlamalar 27 lisanslı CAD senaryosu ve 6 Windows testidir.
-  [JUnit](20261027-shoulder-depth-tests.xml).
+  [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-shoulder-depth-tests.xml).
 - Ortak kenarlar her iki çap sırası, işlem sırası, pah/radyüs kombinasyonu,
   fazla toplam boyut ve tam temas için sınandı. Kullanıcının altı işlemli
   listesinin gerçek Qt formu üzerinden eklenmesi, önizleme ve 10 satırlık

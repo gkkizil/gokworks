@@ -53,11 +53,11 @@ kaynak dosyanın hash'leri aynıdır. `release` veya yedek depo değiştirilmedi
 - Genel regresyon: **1.584 pytest öğesi / 2.462 JUnit kaydı; 0 hata/başarısızlık,
   45 atlama**. Subtest kayıtları ayrıca sayılır. Tüm hesap/üretim/aktarım
   modülleri ve mevcut iş başlatma, iptal, kapatma, hata sonrası toparlanma
-  senaryoları bu taramaya dahildir. [Genel JUnit](20261027-runtime-global-tests.xml).
+  senaryoları bu taramaya dahildir. [Arşiv: Genel JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-runtime-global-tests.xml).
 - Genel tarama sürerken eklenen son iptal-cleanup ve doğrulanmamış-yükleme
   korumaları ayrıca **son kaynakta tüm DXF paketiyle** sınandı:
   **226 kayıt, 0 hata/başarısızlık, 3 atlama**.
-  [Son DXF JUnit](20261027-runtime-dxf-tests.xml).
+  [Arşiv: Son DXF JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261027-runtime-dxf-tests.xml).
 - Gerçek Qt kaynak uygulaması `main.py --self-check` ile açıldı:
   **15 modül, koyu/açık tema, 1024×700, 1366×768, 1920×1080, 2560×1440**.
   Formül/dışa aktarma/clipboard ve kuyruk kontrolleri de geçti.

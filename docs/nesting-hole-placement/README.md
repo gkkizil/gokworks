@@ -9,7 +9,7 @@ Kullanıcıya bunu açıp kapatması için bir seçenek sunulmaz. Eski projeler 
 ayar/imza değişikliği gerektirmeden açılır; yeniden yerleşim yapıldığında bu
 alanlar otomatik değerlendirilir. Kaydedilmiş eski koordinatlar geçerli kalır.
 
-![Deliklere yerleşen küçük parçalar](after.png)
+[Arşiv: Deliklere yerleşen küçük parçalar](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-hole-placement/after.png)
 
 ## İncelenen GitHub kaynakları ve lisanslar
 
@@ -61,8 +61,8 @@ Bu, kullanıcının gerçek CAD dosyasının kopyası değildir. Tekrar üretile
 | Yerleşen parça | 14 | 14 |
 | Kullanılan levha | 2 | 1 |
 
-[Önce](before.png) · [Sonra](after.png) · [Açık tema](after-light.png) ·
-[Ayar](settings.png) · [Sayısal karşılaştırma](comparison.json) ·
+[Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-hole-placement/before.png) · [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-hole-placement/after.png) · [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-hole-placement/after-light.png) ·
+[Arşiv: Ayar](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-hole-placement/settings.png) · [Sayısal karşılaştırma](comparison.json) ·
 [Örnek DXF'ler](source-parts) · [Önceki proje](before.goknest.json) ·
 [Yeni proje](after.goknest.json).
 

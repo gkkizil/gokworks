@@ -31,7 +31,7 @@ testini içerir; bu iş akışı EXE derlemez/yayınlamaz.
 ## Doğrulama
 
 - İlgili iki modülün Linux koşusu: **358 JUnit kaydı, 0 hata, 24 atlama**.
-  [JUnit](20261026-channels-flat-tests.xml). Qt testleri offscreen, COM sınırı
+  [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261026-channels-flat-tests.xml). Qt testleri offscreen, COM sınırı
   test çiftiyle çalışır. Native Windows ve lisanslı CAD atlamaları başarı
   sayılmaz. Örtüşen hedefli koşuların sayıları bu toplama eklenmez.
 - Gerçek SOLIDWORKS 2023 interop / .NET Framework 4.8 referanslarıyla host ve

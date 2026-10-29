@@ -7,9 +7,9 @@ ilerlediği görüldü; mevcut ana dal `8fbd864` sürümüne fast-forward edildi
 Mil branch'i ayrıca birleştirilmedi, mil kaynakları düzenlenmedi. Önceki
 tabanla başlatılan tam test durduruldu; sonuçları güncel tam doğrulama sayılmaz.
 
-![Üçlü önizleme](dark-wide.png)
+[Arşiv: Üçlü önizleme](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/dark-wide.png)
 
-[Açık tema](light-wide.png) · [küçük pencere](light-small.png).
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/light-wide.png) · [Arşiv: küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/light-small.png).
 Görseller sentetik, delikli/bükülmüş bir mesh ve etiketlenmiş örnek açınımla
 gerçek Qt ekranından alındı. **Gerçek SolidWorks kabul testi değildir.**
 Normal uygulama başlangıcında örnek parça gösterilmez; gerçek kaynak gerekir.
@@ -117,22 +117,22 @@ tessellation, kaynak revizyonu/önbellek, iptal, eski seçim sonucu, GUI thread'
 mevcut aktarım önceliği, bağlantı hatası/yenileme, bütün kameralar, delikten
 arka planın görünmesi, katman/renk/büküm ve küçük ekran kaydırması.
 
-[İlk ilgili regresyon](related-tests.xml) önceki `2b3cfbf` tabanında çalıştı;
+[Arşiv: İlk ilgili regresyon](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/related-tests.xml) önceki `2b3cfbf` tabanında çalıştı;
 güncel ana dalın tam testinin yerine geçmez. Son tam koşu ve sayıları ayrı
 raporlanır. Bu dokümanın varlığı canlı SolidWorks testinin geçtiği anlamına gelmez.
 
 Güncel `8fbd864` tabanındaki ilk tam koşu **1.458 pytest item / 2.336 JUnit
 kontrolü, 0 hata, 31 platform/canlı API atlaması** ile geçti:
-[kayıt](baseline-full-tests.xml). Son aktarım önceliği ve GPU kaynak temizliği
+[Arşiv: kayıt](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/baseline-full-tests.xml). Son aktarım önceliği ve GPU kaynak temizliği
 kontrolleri ardından **142 ilgili item / 186 JUnit kontrolü, 0 hata, 2 atlama**
-ile geçti: [kayıt](final-targeted-tests.xml). Son küçük durum mesajı/geri
+ile geçti: [Arşiv: kayıt](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/final-targeted-tests.xml). Son küçük durum mesajı/geri
 yükleme koruması için 3 hedefli test tekrar geçti. Örtüşen sayılar toplanmaz.
 Windows tam regresyonu ve EXE açılışı ayrı derleme kaydında raporlanır;
 gerçek SolidWorks testi, ortam seçilmedikçe atlanır.
 Son standart görünüş/kapanış kontrolleri dahil modül koşusu **150 item /
 194 JUnit kontrolü, 0 hata, 2 platform/canlı CAD atlaması** ile geçti:
-[kayıt](standard-view-tests.xml). Son Linux tam koşusu **2.340 kontrol,
-0 hata, 31 atlama**: [JUnit](final-full-tests.xml), [özet](final-linux-checks.json).
+[Arşiv: kayıt](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/standard-view-tests.xml). Son Linux tam koşusu **2.340 kontrol,
+0 hata, 31 atlama**: [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/dxf-3d-preview/final-full-tests.xml), [özet](final-linux-checks.json).
 Tam koşu envanterinden sonra eklenen kapanış ve görünüş testleri ayrıca
 yukarıdaki modül koşusunda yer alır; sayılar örtüştüğü için toplanmaz.
 

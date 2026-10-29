@@ -1,8 +1,12 @@
 # GD&T ölçü ve şema denetimi — 09.10.2026
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **270 test başarılı; 0 başarısız, 0 atlanan. 84 gerçek Tk GUI testi.** GD&T kapsamında 14 hesap/içerik + 16 GUI testi vardır. Önceki 261 testlik rapor tarihsel kayıt olarak korunur.
 
-[Word raporu](GOKWORKS_GDT_Olcu_Denetimi_2026-10-09.docx), [tam test çıktısı](test-run.log), [test bazlı kanıt ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [ASME / GitHub eşleştirmesi](source-comparison.json), [eski–yeni gerçek Tk ölçümleri](drawing-before-after.json), [ekran kanıtları](screenshots.json), [Word paket doğrulaması](word-report-validation.json).
+[Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/GOKWORKS_GDT_Olcu_Denetimi_2026-10-09.docx), [Arşiv: tam test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/test-run.log), [test bazlı kanıt ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [ASME / GitHub eşleştirmesi](source-comparison.json), [eski–yeni gerçek Tk ölçümleri](drawing-before-after.json), [ekran kanıtları](screenshots.json), [Word paket doğrulaması](word-report-validation.json).
 
 ## Bulunan sorunlar ve düzeltmeler
 
@@ -30,7 +34,7 @@ Arayüze **önceden değerlendirilmiş geometrik hata** girilir; ham dx/dy, nokt
 
 ## Gerçek ekranlar
 
-[Koyu](screenshots/gdt-dark.png), [açık](screenshots/gdt-light.png), [konum](screenshots/gdt-position-dark.png), [profil](screenshots/gdt-profile-dark.png), [45° açısallık](screenshots/gdt-angularity-dark.png), [uzun çerçeve](screenshots/gdt-long-frame-dark.png), [toplam salgı](screenshots/gdt-total-runout-dark.png), [ölçüm karşılaştırması](screenshots/gdt-measurement-dark.png), [küçük pencere](screenshots/gdt-small-dark.png), [eski sembol engeli](screenshots/gdt-legacy-dark.png).
+[Arşiv: Koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-dark.png), [Arşiv: açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-light.png), [Arşiv: konum](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-position-dark.png), [Arşiv: profil](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-profile-dark.png), [Arşiv: 45° açısallık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-angularity-dark.png), [Arşiv: uzun çerçeve](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-long-frame-dark.png), [Arşiv: toplam salgı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-total-runout-dark.png), [Arşiv: ölçüm karşılaştırması](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-measurement-dark.png), [Arşiv: küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-small-dark.png), [Arşiv: eski sembol engeli](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/gdt-dimension-audit/screenshots/gdt-legacy-dark.png).
 
 İki tema × beş boyut/ölçek: 1000×690, 1240×860, 1366×768, 1400×900 (%125), 1920×1080 (%150). Bütün girişlere/düğmelere kaydırarak erişim sınandı. Uygulama 4.627, testler 4.050 fiziksel Python satırı; toplam 8.677. Rapor araçları/veri/bağımlılıklar dahil değildir.
 

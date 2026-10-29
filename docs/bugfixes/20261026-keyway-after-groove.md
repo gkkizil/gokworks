@@ -34,7 +34,7 @@ sonucunun bütün CAD/kernel sebeplerinin kesin olarak bulunduğu iddia edilmez.
 
 Yerel mil paketi: **169 kayıt, 142 geçti, 27 atlandı, 0 hata/başarısızlık**.
 Atlamalar 23 lisanslı CAD kabulü ve 4 Windows köprü testidir.
-[JUnit](20261026-keyway-after-groove-tests.xml).
+[Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261026-keyway-after-groove-tests.xml).
 
 Host C# 5 / warnings-as-errors ile gerçek 2023 interop ve .NET 4.8
 referanslarına karşı derlendi. Test probe'u da host ile birlikte derlendi.

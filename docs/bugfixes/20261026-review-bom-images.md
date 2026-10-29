@@ -64,7 +64,7 @@ değiştirilmez; başarılı çıktı atomik yayımlanır.
 
 - Linux / offscreen Qt: **416 JUnit kaydı, 0 başarısızlık/hata, 25 atlama**.
   Kapsam mil, DXF/DWG, BOM ve BOM'un gerçek Qt Excel/temizleme akışlarıdır.
-  [JUnit](20261026-review-bom-tests.xml).
+  [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261026-review-bom-tests.xml).
 - [Windows BOM/Qt kontrolü](https://github.com/gkkizil/gokworks/actions/runs/40323751594):
   **89 kayıt, 0 başarısızlık/hata, 1 canlı SolidWorks atlaması**. Gerçek Windows
   Qt, Pillow, pywin32 VARIANT ve XLSX okuma/yazma kullanılır; CAD sınırı mock'tur.

@@ -1,8 +1,12 @@
 # Geometrik toleranslar ve son program kontrolü
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **261 test geçti; 0 başarısız, 0 atlanan. 79 gerçek Tk GUI testi.** Yeni sekme için 10 hesap/içerik ve 11 gerçek GUI testi eklendi; önceki 240 test de tekrar yürütüldü. Sonuçlar Linux sanal ekrandan alınmıştır; gerçek Windows/SolidWorks üretimi bu çalışmaya dahil değildir.
 
-[Word raporu](GOKWORKS_Geometrik_Tolerans_Raporu_2026-10-09.docx), [test çıktısı](test-run.log), [test bazlı sonuçlar ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [referans karşılaştırması](source-comparison.json), [ekran hashleri](screenshots.json), [Word bütünlüğü](word-report-validation.json).
+[Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/GOKWORKS_Geometrik_Tolerans_Raporu_2026-10-09.docx), [Arşiv: test çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/test-run.log), [test bazlı sonuçlar ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [referans karşılaştırması](source-comparison.json), [ekran hashleri](screenshots.json), [Word bütünlüğü](word-report-validation.json).
 
 Word raporunu GitHub dosya sayfasında **Download raw file** ile indirin. Yedi gerçek pencere görüntüsü rapora gömüldü. ZIP CRC ve python-docx içerik geri okuması kontrol edildi; Microsoft Word sayfa görünümü çalıştırılmadı.
 
@@ -18,13 +22,13 @@ FreeCAD-GDT commit **841518cdd74f6a7dad3321d29937c49dc7dc4b1f** ile 14 eski öze
 
 | Ekran | Görüntü |
 | --- | --- |
-| Silindiriklik / koyu | [Görüntü](screenshots/gdt-dark.png) |
-| Silindiriklik / açık | [Görüntü](screenshots/gdt-light.png) |
-| Konum / A-B-C | [Görüntü](screenshots/gdt-position-dark.png) |
-| Toplam salgı | [Görüntü](screenshots/gdt-total-runout-dark.png) |
-| Ölçüm karşılaştırması | [Görüntü](screenshots/gdt-measurement-dark.png) |
-| Kaldırılmış sembol / eğitim | [Görüntü](screenshots/gdt-legacy-dark.png) |
-| Küçük pencere 1000×690 | [Görüntü](screenshots/gdt-small-dark.png) |
+| Silindiriklik / koyu | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-dark.png) |
+| Silindiriklik / açık | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-light.png) |
+| Konum / A-B-C | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-position-dark.png) |
+| Toplam salgı | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-total-runout-dark.png) |
+| Ölçüm karşılaştırması | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-measurement-dark.png) |
+| Kaldırılmış sembol / eğitim | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-legacy-dark.png) |
+| Küçük pencere 1000×690 | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/geometric-tolerances/screenshots/gdt-small-dark.png) |
 
 ## Tekrar çalıştırma
 

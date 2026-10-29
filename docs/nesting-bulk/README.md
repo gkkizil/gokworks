@@ -31,8 +31,8 @@ fiziksel plaka numaraları kullanılır. Boş çizim alanındaki yazı zoom ile 
 bozuk grup koduyla okutur, aynı dosyayı düzelterek yeniden yükler ve gerçek
 motorla üç plakaya yerleştirir. Yerleşim veya hata verisi elle doldurulmaz.
 
-- [Toplu seçim: 10 dosya, 9 hazır + 1 sorunlu](bulk-import-dark.png).
-- [Üç plaka: 4 + 4 + 2 parça](three-plates-dark.png).
+- [Arşiv: Toplu seçim: 10 dosya, 9 hazır + 1 sorunlu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-bulk/bulk-import-dark.png).
+- [Arşiv: Üç plaka: 4 + 4 + 2 parça](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-bulk/three-plates-dark.png).
 - [Sayısal kayıt](checks.json).
 
 İlgili testler gerçek DXF ayrıştırma hatası sonrası devam, çoklu dosya seçimi,

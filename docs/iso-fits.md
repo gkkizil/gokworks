@@ -26,9 +26,9 @@ açık ve koyu tema için önce/sonra ekran pikselleri aynı çıktı; kayıt
 üç örneğin gerçek ölçüleri değişmedi. Yeni kesit de ölçeksizdir ve montaj
 kuvveti/sıcaklık yöntemi önermez.
 
-[Koyu görünüm](screenshots/iso-minimal-dark.png) ·
-[Açık görünüm](screenshots/iso-minimal-light.png) ·
-[Önce/sonra](screenshots/iso-minimal-comparison.png)
+[Arşiv: Koyu görünüm](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-minimal-dark.png) ·
+[Arşiv: Açık görünüm](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-minimal-light.png) ·
+[Arşiv: Önce/sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/iso-minimal-comparison.png)
 
 ## Kullanım
 
@@ -55,7 +55,7 @@ Hazır liste artık **Tümü / Delik esaslı / Mil esaslı** filtresiyle 23 örn
 
 H6/k6 ve H8/k6 farklı delik toleranslı örneklerdir. Ø50'de mil esaslı JS7/h6: −0,0125…+0,0285 mm; K7/h6: −0,018…+0,023 mm; N7/h6: −0,033…+0,008 mm ara geçme verir. P7/h6: −0,042…−0,001 mm sıkı geçmedir. Bu gruplar metin etiketinden değil, seçilen çapın EI/ES/ei/es değerlerinden hesaplanır. P7/h6 Ø3'te −0,016…0 mm sıkılık/sınırda temastır; pozitif boşluk bulunmadığı için ara geçme değildir.
 
-[Mil esaslı gerçek ekran](reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-dark.png) · [Son test/Word raporu](reports/kr-workspace-fix/README.md).
+[Arşiv: Mil esaslı gerçek ekran](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/screenshots/iso-fits-shaft-basis-dark.png) · [Son test/Word raporu](reports/kr-workspace-fix/README.md).
 
 ## Manuel tolerans kontrolü
 
@@ -74,7 +74,7 @@ Sol panelde **Manuel kontrol** seçin. Nominal çap delik ve mil için ortaktır
 
 “Sıkı” ve “ara” sınıfları boyut limitlerinden hesaplanır. “Kayar”, “bol/serbest” ve “hareketli/yağlı çalışma adayı” pratik kullanım yorumlarıdır. Minimum boşluk sıfırsa kayar/sınırda temas adayı; pozitif boşlukta en yakın doğrulanmış boşluklu yaygın eşleşmenin kullanım ailesi gösterilir. H11/c11 ve H9/d9 bol/serbest; H8/e8, H8/f7 ve H7/g6 hareketli/yağlı çalışma adaylarıdır. **Yağlama ihtiyacı veya montaj kuvveti**, yalnız toleranslardan kesin belirlenmez; malzeme, yüzey, hız, yük ve sıcaklık gerekir.
 
-[Manuel menünün gerçek görüntüsü](reports/manual-iso/screenshots/iso-manual-dark.png), [ISO karşılaştırma alanı](reports/manual-iso/screenshots/iso-manual-comparison-dark.png) ve [güncel test/Word raporu](reports/manual-iso/README.md).
+[Arşiv: Manuel menünün gerçek görüntüsü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-manual-dark.png), [Arşiv: ISO karşılaştırma alanı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-manual-comparison-dark.png) ve [güncel test/Word raporu](reports/manual-iso/README.md).
 
 ## Montaj uyumu ve en yakın geçme
 
@@ -96,7 +96,7 @@ Referansın türü gerçek hesabın türünden farklıysa kartta açık not veri
 
 Bu örnekte en küçük toplam fark 0,163 mm'dir: delikte N7 ve P7 eşit uzaklıktadır; milde h9 en yakındır. N7/h9 gösterilen referanslardan biridir; tek bir ISO sınıfına atama yapılmaz. N7/h9 için alt/üst farkları delikte −17/+8 µm, milde −38/+100 µm; mutlak toplam 163 µm. Girilen ölçüler bu referanslara dönüştürülmez ve sonuç ara geçme olarak kalır.
 
-[Yeni uyumluluk ekranı](reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [güncel test/Word raporu](reports/fit-compatibility/README.md).
+[Arşiv: Yeni uyumluluk ekranı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/fit-compatibility/screenshots/iso-compatibility-dark.png) ve [güncel test/Word raporu](reports/fit-compatibility/README.md).
 
 ## Standart temeli ve kapsam
 

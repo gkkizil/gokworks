@@ -1,6 +1,6 @@
 # Tüm programın yeniden doğrulanması
 
-**289 test başarılı, 0 başarısız, 0 atlanan.** [Güncel K/R, ISO ve çalışma alanı raporu](reports/kr-workspace-fix/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Son test çalışmasının tam çıktısı](reports/kr-workspace-fix/test-run.log) kaydedildi.
+**289 test başarılı, 0 başarısız, 0 atlanan.** [Güncel K/R, ISO ve çalışma alanı raporu](reports/kr-workspace-fix/README.md); önceki denetimler tarihsel kayıt olarak korunur. Testler Linux/Python 3.12.14 ortamında gerçek Tk arayüzü, gerçek ezdxf okuyucusu ve SolidWorks COM davranışını temsil eden nesnelerle çalıştırıldı. `git diff --check` temiz. [Arşiv: Son test çalışmasının tam çıktısı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/kr-workspace-fix/test-run.log) kaydedildi.
 
 ## Kapsam
 
@@ -66,7 +66,7 @@ Bu DXF incelemesinde GUI'nin önceki koyu yan menüsü ve bağımsız PDF/DXF-DW
 
 Görsel kontrolde Linux'ta bulunmayan Segoe UI'ın küçük sabit yazı tipine dönüştüğü görüldü. Linux için Helvetica/Courier kullanıldı; Windows'taki Segoe UI/Consolas seçimleri korundu. Ayarlar alanı, yeterli yükseklik varsa içeriğine göre büyüyor. Küçük pencere ve geniş pencerede tarama düğmesinin görünürlüğü sınanıyor. Son tasarımda arama, durum filtresi, ayrıntı penceresi, kalıcı açık/koyu tema ve %125 ölçekleme de sınandı; ayrıntılar [GUI raporunda](gui-design.md).
 
-Son uygulamadan **1240×860** boyutunda doğrudan alınan ekran görüntüleri: [DXF/DWG açık](screenshots/gui-dxf-dwg.png), [DXF/DWG koyu](screenshots/gui-dxf-dwg-dark.png), [PDF açık](screenshots/gui-pdf.png) ve [PDF koyu](screenshots/gui-pdf-dark.png). Görseller tasarım çizimi değildir; çalışan Tk penceresinden alınmıştır. Buluttaki yazı tipleri Windows'takilerden farklıdır.
+Son uygulamadan **1240×860** boyutunda doğrudan alınan ekran görüntüleri: [Arşiv: DXF/DWG açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-dxf-dwg.png), [Arşiv: DXF/DWG koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-dxf-dwg-dark.png), [Arşiv: PDF açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-pdf.png) ve [Arşiv: PDF koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-pdf-dark.png). Görseller tasarım çizimi değildir; çalışan Tk penceresinden alınmıştır. Buluttaki yazı tipleri Windows'takilerden farklıdır.
 
 ## Tekrarlama ve kapsam ölçümü
 
@@ -103,11 +103,11 @@ Gerçek `.SLDDRW` için PDF sayfa sayısı ve çizim içeriği; gerçek `.SLDPRT
 
 ## GUI baştan sona yeniden kontrolü
 
-Önceki 128 test yeniden geçti. Gerçek düğme komutları ve Tk klavye/fare olaylarıyla 12 ek kabul testi çalıştırıldı. İlk boyutlandırma açıkça zamanlanarak ilk Configure olayına bağımlılık giderildi. Son tam çalıştırmada 140 test başarılı, 0 başarısız, 0 atlanan; GUI kapsamı 34 testtir. 12 boyut/tema/ekran alt senaryosu da geçti. [Word raporu](reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx), [kanıt dosyaları](reports/README.md).
+Önceki 128 test yeniden geçti. Gerçek düğme komutları ve Tk klavye/fare olaylarıyla 12 ek kabul testi çalıştırıldı. İlk boyutlandırma açıkça zamanlanarak ilk Configure olayına bağımlılık giderildi. Son tam çalıştırmada 140 test başarılı, 0 başarısız, 0 atlanan; GUI kapsamı 34 testtir. 12 boyut/tema/ekran alt senaryosu da geçti. [Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/GOKWORKS_GUI_Test_Raporu_2026-10-09.docx), [kanıt dosyaları](reports/README.md).
 
 ## K/R sürümü sonrası son kontrol
 
-174 test başarılı; 39 gerçek GUI testi. K/R kapsamında 34 yeni test (29 hesaplama/COM, 5 GUI) var. Kaydırma çubuğunun varsayılan 200 px minimumu yeni ayar alanını daraltmayı engelliyordu; 24 px olarak ayarlandı. Tarama/hesaplama/kayıt seçimi kaydırma alanı dışına alındı. İki tema, küçük/büyük pencere ve %125 ölçek sınandı. [Güncel kanıtlar](reports/k-radius/README.md) ve [Word raporu](reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx).
+174 test başarılı; 39 gerçek GUI testi. K/R kapsamında 34 yeni test (29 hesaplama/COM, 5 GUI) var. Kaydırma çubuğunun varsayılan 200 px minimumu yeni ayar alanını daraltmayı engelliyordu; 24 px olarak ayarlandı. Tarama/hesaplama/kayıt seçimi kaydırma alanı dışına alındı. İki tema, küçük/büyük pencere ve %125 ölçek sınandı. [Güncel kanıtlar](reports/k-radius/README.md) ve [Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/k-radius/GOKWORKS_K_RADIUS_GUI_Raporu_2026-10-09.docx).
 
 ## Kalınlığa göre manuel K/R
 

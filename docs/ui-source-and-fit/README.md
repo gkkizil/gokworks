@@ -10,9 +10,9 @@ format ayarları kaydırılırken sabit kalır. Kaynak klasörü ayrı hatırlan
 dosya/klasör eklemek çıktı yolunu değiştirmez. Boş listede başlangıç yönergesi
 gösterilir. Çalışan iş sırasında kaynak değiştirme kilidi korunur.
 
-![Kaynak seçimi](cad-source-dark.png)
+[Arşiv: Kaynak seçimi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/cad-source-dark.png)
 
-[Açık tema](cad-source-light.png) · [820×560 pencere](cad-source-small.png).
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/cad-source-light.png) · [Arşiv: 820×560 pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/cad-source-small.png).
 
 ## ISO ve manuel kontrolde aynı kesit
 
@@ -23,9 +23,9 @@ Tolerans bölgeleri ve üç örnek seçimi aynı sekmelerden kullanılır.
 
 | ISO seçimi · Ø50 H7/k6 | Manuel kontrol · aynı limitler |
 | --- | --- |
-| ![ISO kesiti](fit-iso-dark.png) | ![Manuel kesit](fit-manual-dark.png) |
+| [Arşiv: ISO kesiti](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/fit-iso-dark.png) | [Arşiv: Manuel kesit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/fit-manual-dark.png) |
 
-[Açık tema ISO](fit-iso-light.png) · [Açık tema manuel](fit-manual-light.png).
+[Arşiv: Açık tema ISO](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/fit-iso-light.png) · [Arşiv: Açık tema manuel](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/ui-source-and-fit/fit-manual-light.png).
 
 Kesit ölçeksizdir. Kırmızı alan montaj öncesi boyutsal çakışmadır; montaj
 kuvveti veya deformasyon hesabı değildir. Hesaplama motorları değiştirilmedi.

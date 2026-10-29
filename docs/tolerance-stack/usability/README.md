@@ -11,11 +11,11 @@ doğrulamış gibi sunulmaz. Eksik tolerans, farklı doğrultu/referans, özel k
 ve çap/radyüs ilişkisi kontrolleri korunur. Eksik bilgi varken hesap kapalıdır.
 Uyarı kartı ilgili satırı belirtir; düzeltme düğmesi doğru ölçüyü veya ayarı açar.
 
-- [Zincir · koyu tema](chain-dark.png)
-- [Zincir · açık tema](chain-light.png)
-- [Eksik tolerans ve düzeltme düğmesi](missing-tolerance.png)
-- [Küçük pencerede uyarı ve temel işlemler](missing-tolerance-compact.png)
-- [Sonuç kartları ve katkı grafiği](results-dark.png)
+- [Arşiv: Zincir · koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/usability/chain-dark.png)
+- [Arşiv: Zincir · açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/usability/chain-light.png)
+- [Arşiv: Eksik tolerans ve düzeltme düğmesi](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/usability/missing-tolerance.png)
+- [Arşiv: Küçük pencerede uyarı ve temel işlemler](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/usability/missing-tolerance-compact.png)
+- [Arşiv: Sonuç kartları ve katkı grafiği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/usability/results-dark.png)
 
 Ekranlar gerçek PySide6 arayüzünden, manuel A−B−C örneğiyle alınmıştır.
 **Gerçek SolidWorks bağlantısı bu Linux ortamında test edilmedi.**

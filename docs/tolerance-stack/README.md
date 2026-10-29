@@ -10,12 +10,12 @@ Bu klasör gerçek Qt ekranlarını ve çalıştırılmış kontrol sonuçların
 Ekranlardaki analiz **manuel A−B−C örneğidir**; gerçek SolidWorks çalıştırıldığı
 iddia edilmez.
 
-- [Zincir · koyu tema](screenshots/chain-dark.png)
-- [Sonuçlar · koyu tema](screenshots/results-dark.png)
-- [Monte Carlo](screenshots/monte-carlo-dark.png)
-- [Sonuçlar · açık tema](screenshots/results-light.png)
-- [Teknik resim çıktı seçenekleri](screenshots/drawing-output-dark.png)
-- [Küçük pencere](screenshots/chain-compact.png)
+- [Arşiv: Zincir · koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/screenshots/chain-dark.png)
+- [Arşiv: Sonuçlar · koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/screenshots/results-dark.png)
+- [Arşiv: Monte Carlo](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/screenshots/monte-carlo-dark.png)
+- [Arşiv: Sonuçlar · açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/screenshots/results-light.png)
+- [Arşiv: Teknik resim çıktı seçenekleri](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/screenshots/drawing-output-dark.png)
+- [Arşiv: Küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/tolerance-stack/screenshots/chain-compact.png)
 
 [validation.json](validation.json): 615 tam regresyon + 878 alt senaryo geçti;
 2 gerçek SolidWorks testi atlandı. Son opsiyonel ham COM bağlantısı için ayrıca

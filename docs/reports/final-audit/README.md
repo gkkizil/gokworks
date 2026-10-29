@@ -1,6 +1,10 @@
 # Son program ve GUI kontrolü — 9 Ekim 2026
 
-**199 test geçti; 0 başarısız, 0 atlanan. 49 gerçek Tk GUI testi.** [Word raporu](GOKWORKS_Son_Kontrol_2026-10-09.docx), [test bazlı sonuçlar](gui-verification-results.json), [tam günlük](test-run.log), [kapsam](coverage.json).
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
+**199 test geçti; 0 başarısız, 0 atlanan. 49 gerçek Tk GUI testi.** [Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/GOKWORKS_Son_Kontrol_2026-10-09.docx), [test bazlı sonuçlar](gui-verification-results.json), [Arşiv: tam günlük](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/test-run.log), [kapsam](coverage.json).
 
 Uygulamanın 17 Python dosyası incelendi. PDF, DXF/DWG, otomatik K/R, manuel K/R, bağlantı, ayarlar, ikonlar ve ortak GUI akışları kapsamda. Eski `backups/` dosyaları çalıştırılan uygulamanın parçası değildir. Tam program için aynı davranışları içeren tek bir dış proje yok; her modül ilgili API ve hesap örnekleriyle karşılaştırıldı.
 
@@ -28,7 +32,7 @@ Uygulamanın 17 Python dosyası incelendi. PDF, DXF/DWG, otomatik K/R, manuel K/
 - Dosyalar/Günlük seçimi yerleşimi yeniden hesaplatıyor.
 - İlk pencere boyutu ekranın mevcut ölçülerine ve pencere ölçeğine göre seçiliyor; desteklenen küçük ekranlarda 860 px yüksekliğe zorlanmıyor.
 
-5 yeni PDF testi ve 5 yeni GUI testi eklendi. [PDF düzeltme öncesi hata günlüğü](pdf-before-fix.log) korunur. GUI testinde ayrıca CustomTkinter'ın ölçek değişimindeki 1000 ms boyut kilidi beklendi ve istenen boyutun gerçekten gerçekleştiği doğrulandı; böylece yanlış çözünürlükte geçen bir test raporlanmıyor.
+5 yeni PDF testi ve 5 yeni GUI testi eklendi. [Arşiv: PDF düzeltme öncesi hata günlüğü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/pdf-before-fix.log) korunur. GUI testinde ayrıca CustomTkinter'ın ölçek değişimindeki 1000 ms boyut kilidi beklendi ve istenen boyutun gerçekten gerçekleştiği doğrulandı; böylece yanlış çözünürlükte geçen bir test raporlanmıyor.
 
 ## GUI matrisi
 
@@ -47,10 +51,10 @@ Asgari çalışma alanı **1000×690 mantıksal piksel**. %125/%150 DPI bunu fiz
 
 | Ekran | Açık | Koyu |
 | --- | --- | --- |
-| PDF | [Görüntü](../../screenshots/gui-current-pdf-light.png) | [Görüntü](screenshots/pdf-dark.png) |
-| DXF/DWG | [Görüntü](screenshots/dxf-dwg-light.png) | [Görüntü](screenshots/dxf-dwg-dark.png) |
-| Malzeme/Takım | [Görüntü](screenshots/k-radius-light.png) | [Görüntü](screenshots/k-radius-dark.png) |
-| Manuel K/R | [Görüntü](../../screenshots/gui-manual-k-radius-light.png) | [Görüntü](../../screenshots/gui-manual-k-radius-dark.png) |
+| PDF | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-current-pdf-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/screenshots/pdf-dark.png) |
+| DXF/DWG | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/screenshots/dxf-dwg-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/screenshots/dxf-dwg-dark.png) |
+| Malzeme/Takım | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/screenshots/k-radius-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/final-audit/screenshots/k-radius-dark.png) |
+| Manuel K/R | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-manual-k-radius-light.png) | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/screenshots/gui-manual-k-radius-dark.png) |
 
 Görüntülerin hashleri [screenshots.json](screenshots.json) dosyasında. Bulut Linux fontları ve çizim yöntemi Windows'tan farklıdır.
 

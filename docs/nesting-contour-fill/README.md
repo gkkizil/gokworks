@@ -26,7 +26,7 @@ Sentetik örnek: altı adet 204 köşeli, yaklaşık 1800 × 600 mm parça;
 | Yerleşmeyen parça | 5 | 0 |
 | Kullanılan levha | 1 | 1 |
 
-[Çalışan arayüz](after.png) · [Ölçüm kaydı](reproduction.json).
+[Arşiv: Çalışan arayüz](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/nesting-contour-fill/after.png) · [Ölçüm kaydı](reproduction.json).
 
 [Doğrulama özeti](checks.json): genel grupta 921 test ve 878 alt senaryo geçti;
 7 Windows/canlı CAD testi atlandı. Son NFP iyileştirmesinden sonra nesting'in

@@ -17,9 +17,9 @@ formatlar** ayrı bir kaydırma alanındadır. Güncel ekranlar ve bu düzeltmen
 test kaydı [buradadır](ui-source-and-fit/README.md). Aşağıdaki ekranlar ilk
 modül entegrasyonunu belgeler.
 
-![Koyu tema](cad-converter/dark.png)
+[Arşiv: Koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/cad-converter/dark.png)
 
-[Açık tema](cad-converter/light.png) · [Küçük pencere](cad-converter/small.png).
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/cad-converter/light.png) · [Arşiv: Küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/cad-converter/small.png).
 Görseller gerçek Qt ekranından alınmıştır; örnek dosya adları gerçek CAD
 aktarımı kanıtı olarak sunulmaz.
 

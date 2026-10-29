@@ -64,6 +64,23 @@ cover/
 *.log
 windows-tests.xml
 packaging/licenses/installed/
+# Generated UI captures and raw verification output belong in CI artifacts.
+# Runtime images in assets/ and technical input fixtures remain versioned.
+/docs/**/*.png
+/docs/**/*.jpg
+/docs/**/*.jpeg
+/docs/**/*.webp
+/docs/**/*.gif
+/docs/**/*.bmp
+/modules/*/examples/*.png
+/docs/**/*.log
+/docs/**/*.xml
+/docs/reports/**/*.docx
+/docs/reports/**/*.xlsx
+/docs/nesting-example/Nesting.pdf
+/docs/nesting-example/Nesting.xlsx
+/docs/nesting-pdf-readability/*.pdf
+/windows-*-screenshots/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal

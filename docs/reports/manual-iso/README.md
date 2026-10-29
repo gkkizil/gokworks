@@ -1,8 +1,12 @@
 # Manuel ISO tolerans kontrolü
 
+> Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
+> üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
+> [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.
+
 **230 test geçti; 0 başarısız, 0 atlanan. 64 gerçek Tk GUI testi.** Yeni manuel kontrol için 8 hesap ve 6 GUI testi eklendi; önceki 216 testin tamamı yeniden çalıştırıldı. Gerçek Windows/SolidWorks COM üretimi veya native Windows DPI bu Linux kontrolünün kapsamı dışındadır.
 
-[Word raporu](GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx), [test çalışması](test-run.log), [test bazlı sonuç ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [ISO kaynak karşılaştırması](source-comparison.json), [görüntü hashleri](screenshots.json), [Word bütünlük kontrolü](word-report-validation.json).
+[Arşiv: Word raporu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/GOKWORKS_ISO_Gecme_Raporu_2026-10-09.docx), [Arşiv: test çalışması](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/test-run.log), [test bazlı sonuç ve kaynak hashleri](gui-verification-results.json), [kapsam](coverage.json), [ISO kaynak karşılaştırması](source-comparison.json), [görüntü hashleri](screenshots.json), [Word bütünlük kontrolü](word-report-validation.json).
 
 GitHub Word dosyası sayfasındaki **Download raw file** düğmesiyle raporu indirin. Sekiz gerçek pencere görüntüsü rapora gömüldü; ZIP CRC ve python-docx geri okuması kontrol edildi. Microsoft Word'de yerel sayfa görüntüleme çalıştırılmadı.
 
@@ -18,11 +22,11 @@ Tam eşitlik ve yakın sınıf ayrıdır. Karşılaştırma mevcut 11 delik/18 m
 
 | Görünüm | Görüntü |
 | --- | --- |
-| Manuel, açık | [Görüntü](screenshots/iso-manual-light.png) |
-| Manuel, koyu | [Görüntü](screenshots/iso-manual-dark.png) |
-| Manuel, karşılaştırma alanı | [Görüntü](screenshots/iso-manual-comparison-dark.png) |
-| ISO sınıf seçimi, açık/koyu | [Açık](screenshots/iso-light.png) / [Koyu](screenshots/iso-dark.png) |
-| Bölgeler / ara / sıkı | [Bölgeler](screenshots/iso-zones-dark.png) / [Ara](screenshots/iso-transition-dark.png) / [Sıkı](screenshots/iso-interference-dark.png) |
+| Manuel, açık | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-manual-light.png) |
+| Manuel, koyu | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-manual-dark.png) |
+| Manuel, karşılaştırma alanı | [Arşiv: Görüntü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-manual-comparison-dark.png) |
+| ISO sınıf seçimi, açık/koyu | [Arşiv: Açık](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-light.png) / [Arşiv: Koyu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-dark.png) |
+| Bölgeler / ara / sıkı | [Arşiv: Bölgeler](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-zones-dark.png) / [Arşiv: Ara](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-transition-dark.png) / [Arşiv: Sıkı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/reports/manual-iso/screenshots/iso-interference-dark.png) |
 
 1240×860 gerçek Tk pencerelerinden alındı. Manuel testler ayrıca 1000×690/%100, 1400×900/%125 ve 1920×1080/%150 boyutlarında iki temayı ve kaydırarak karşılaştırmaya erişimi doğrular. Eski ISO modu beş boyut/ölçek matrisiyle tekrar sınandı. Girişlerin min/max sırası, 1 nm hassasiyet, simetrik/tek taraflı toleranslar, gerçekleşen ölçüler, negatif/minimum temas ve bütün sınıfların altı çaptaki tam eşleşmesi sınandı.
 

@@ -10,7 +10,7 @@ Değerler standarttan alınmış evrensel yüzey sabitleri olarak sunulmaz.
 Çinko/diğer kaplamalarda gerçek K, kaplama ve yağlayıcıya göre değişir;
 paslı/kirli bağlantıya tablodan K atanmaması açıklanır.
 
-[Koyu tema](dark.png) · [Açık tema](light.png) · [Küçük pencere](minimum.png).
+[Arşiv: Koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/torque-k-reference/dark.png) · [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/torque-k-reference/light.png) · [Arşiv: Küçük pencere](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/torque-k-reference/minimum.png).
 Görüntüler çalışan PySide6 arayüzünden Linux / Qt offscreen ortamında alınmıştır.
 Küçük pencerede form kaydırılabilir; tork/ön yük özeti üstte kalır.
 

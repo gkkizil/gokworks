@@ -31,9 +31,9 @@ geometri dönüşümleri, DXF içe/dışa aktarma, muhasebe ve rapor hesabı kor
    Eksik sonuçta üretim DXF/PDF/Excel'i kapalıdır; ayrıntı ve proje kaydı
    kullanılabilir. Alt durum satırı gerçek adet, aktif plaka ve mm'yi gösterir.
 
-![Yeni Nesting çalışma alanı](after/04-layout-dark.png)
+[Arşiv: Yeni Nesting çalışma alanı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/04-layout-dark.png)
 
-![Gerçek sonuç tablosu](after/07-results-light.png)
+[Arşiv: Gerçek sonuç tablosu](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/07-results-light.png)
 
 ## Önceki ekranın incelenmesi
 
@@ -55,11 +55,11 @@ verildi; reddedilen dosya yerleşim başlamadan listeden kaldırıldı.
 
 | Adım / önem | Önceki durum ve etkisi | Uygulanan düzenleme ve yeni durum |
 | --- | --- | --- |
-| 1. Başlama ve parça bulma · yüksek | Düz listede malzeme/kalınlık ilişkisi ipucuna bağlıydı; stoklar ana ekranda yoktu. [Önce](before/02-imported.png). | Yerel QTreeView, gerçek malzeme/kalınlık grupları ve adet toplamları; ayrıca sac/gerçek plaka ağacı. İlk içe aktarma sırası korunur. **Durum: düzeltildi.** [Sonra](after/02-part-preview-dark.png), [gerçek okuma hatası](after/02b-import-error-dark.png). |
-| 2. Kesimden önce kontrol · yüksek | Bir parça seçilse de merkez boş kalıyordu. [Önce](before/02-imported.png). | Gerçek parça konturu ve delikleri, kaynak/sonuç ayrımı, iki yönlü seçim ve teknik bilgiler. **Durum: düzeltildi.** [Sonra](after/02-part-preview-dark.png). |
-| 3. Sacı düzenleme · yüksek | Ölçüler için geniş ayrı pencereye geçiliyordu. [Önce](before/03-settings.png). | Mevcut sağ QDockWidget içinde kompakt ölçü çiftleri, açık birimler, Uygula/Geri al ve geçersiz taslak koruması. Tam stok/fiyat penceresi gerektiğinde korunur. **Durum: düzeltildi.** [Sonra](after/03-stock-preview-dark.png), [geçersiz taslak](after/03b-stock-validation-dark.png). |
-| 4. Yerleşimi okuma · yüksek | Bazı adlar komşu kontur/delik üzerine taşıyordu; yalnız üst sekmelerden plaka seçiliyordu. [Önce](before/04-result.png). | Sabit okunabilir piksel boyutu, yalnız gerçek malzeme içinde sığan etiket; stok altındaki fiziksel plaka seçimi, uyarlanır grid ve görünüm komutları. **Durum: düzeltildi.** [Sonra](after/04-layout-dark.png). |
-| 5. Sonuç ve dar ekran · orta | Sonuçlar birkaç metin satırı ve ayrıntı penceresiyle sınırlıydı. | Gerçek sac/parça tabloları; küçük yükseklikte yinelenen özetler yerine kontur ve tabloya alan ayrılır. **Durum: doğrulandı.** [Açık tema](after/07-results-light.png), [1024](after/08-compact-dark.png), [çizim odağı](after/09-canvas-focus-dark.png). |
+| 1. Başlama ve parça bulma · yüksek | Düz listede malzeme/kalınlık ilişkisi ipucuna bağlıydı; stoklar ana ekranda yoktu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/before/02-imported.png). | Yerel QTreeView, gerçek malzeme/kalınlık grupları ve adet toplamları; ayrıca sac/gerçek plaka ağacı. İlk içe aktarma sırası korunur. **Durum: düzeltildi.** [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/02-part-preview-dark.png), [Arşiv: gerçek okuma hatası](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/02b-import-error-dark.png). |
+| 2. Kesimden önce kontrol · yüksek | Bir parça seçilse de merkez boş kalıyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/before/02-imported.png). | Gerçek parça konturu ve delikleri, kaynak/sonuç ayrımı, iki yönlü seçim ve teknik bilgiler. **Durum: düzeltildi.** [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/02-part-preview-dark.png). |
+| 3. Sacı düzenleme · yüksek | Ölçüler için geniş ayrı pencereye geçiliyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/before/03-settings.png). | Mevcut sağ QDockWidget içinde kompakt ölçü çiftleri, açık birimler, Uygula/Geri al ve geçersiz taslak koruması. Tam stok/fiyat penceresi gerektiğinde korunur. **Durum: düzeltildi.** [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/03-stock-preview-dark.png), [Arşiv: geçersiz taslak](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/03b-stock-validation-dark.png). |
+| 4. Yerleşimi okuma · yüksek | Bazı adlar komşu kontur/delik üzerine taşıyordu; yalnız üst sekmelerden plaka seçiliyordu. [Arşiv: Önce](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/before/04-result.png). | Sabit okunabilir piksel boyutu, yalnız gerçek malzeme içinde sığan etiket; stok altındaki fiziksel plaka seçimi, uyarlanır grid ve görünüm komutları. **Durum: düzeltildi.** [Arşiv: Sonra](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/04-layout-dark.png). |
+| 5. Sonuç ve dar ekran · orta | Sonuçlar birkaç metin satırı ve ayrıntı penceresiyle sınırlıydı. | Gerçek sac/parça tabloları; küçük yükseklikte yinelenen özetler yerine kontur ve tabloya alan ayrılır. **Durum: doğrulandı.** [Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/07-results-light.png), [Arşiv: 1024](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/08-compact-dark.png), [Arşiv: çizim odağı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/after/09-canvas-focus-dark.png). |
 
 ## Yerleşim ve teknik kararlar
 
@@ -143,14 +143,14 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
 ```
 
 - **134 test: 0 hata, 0 başarısızlık, 0 atlanan.** On sınırlı süreç çıkış
-  kodu 0. [JUnit](tests.xml), [çalıştırıcı kaydı](tests.log).
+  kodu 0. [Arşiv: JUnit](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/tests.xml), [Arşiv: çalıştırıcı kaydı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/tests.log).
   Çalıştırıcının adı Windows olsa da bu kayıt Linux çalışmasıdır.
 - **11 yeni test**, mevcut motor ve gerçek DXF/Qt kontrolleriyle çalışır.
   `qtmodeltester` hiyerarşik modelin yerel Qt sözleşmesini de kontrol eder.
 - Son tablo genişlikleri/metin düzeninden sonra üç model/görünüm kontrolü
-  ayrıca başarılı: [son sunum kontrolleri](final-presentation.xml).
+  ayrıca başarılı: [Arşiv: son sunum kontrolleri](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/final-presentation.xml).
   Kaynak Qt ölçek matrisleri de %125 ve %150'de başarılı;
-  [125](source-dpi-125.xml), [150](source-dpi-150.xml). Her kayıtta iki tema,
+  [Arşiv: 125](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/source-dpi-125.xml), [Arşiv: 150](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/bugfixes/20261029-nesting-workspace/source-dpi-150.xml). Her kayıtta iki tema,
   dört istenen boyut, gerçek istemci boyutu/DPR ve sonuç tablosu açık/kapalı
   kontrolleri bulunur.
 - **16 modüllük açılış/self-check başarılı**; Nesting DXF/Excel/PDF örnekleri

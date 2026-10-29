@@ -172,9 +172,9 @@ Atlanan gerçek SW/Windows testleri geçmedi. Tam nedenler `docs/audit/test-summ
 
 | Denetim | Sonuç / kanıt |
 | --- | --- |
-| Tam regresyon | [final-regression.xml](docs/audit/final-regression.xml), [çalıştırma kaydı](docs/audit/final-regression-run.txt) |
-| Hedefli düzeltme testleri | 93 başarılı / 2 atlanan; 5 alt kontrol; [focused-tests.xml](docs/audit/focused-tests.xml) |
-| Delik yerleşimi + bağımsız mühendislik örnekleri | 27 başarılı; [geometry-oracles.xml](docs/audit/geometry-oracles.xml) |
+| Tam regresyon | [Arşiv: final-regression.xml](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/audit/final-regression.xml), [çalıştırma kaydı](docs/audit/final-regression-run.txt) |
+| Hedefli düzeltme testleri | 93 başarılı / 2 atlanan; 5 alt kontrol; [Arşiv: focused-tests.xml](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/audit/focused-tests.xml) |
+| Delik yerleşimi + bağımsız mühendislik örnekleri | 27 başarılı; [Arşiv: geometry-oracles.xml](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/docs/audit/geometry-oracles.xml) |
 | AST/compile / erken yerel import döngüsü | 0 syntax hatası, 0 döngü; [inventory.json](docs/audit/inventory.json) |
 | Ruff F821/F822/F823/E9, bütün ağaç | 0 bulgu; [static-all-critical.json](docs/audit/static-all-critical.json) |
 | Geniş Ruff F/E9, uygulama+test+paketleme | 81 F401, 7 F811 inceleme adayı kaldı; test fixture/uyumluluk dışa aktarımları dahil. Gizlenmedi; [static-final.json](docs/audit/static-final.json) |

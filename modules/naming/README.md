@@ -78,7 +78,7 @@ canlı SolidWorks'te montaj ilişkilerinin denendiği anlamına gelmez.
 
 İlgili doğrulama: 16 isimlendirme/kayıt, 9 COM/kaynak oturumu, 5 klasör keşfi, 12 isimlendirme arayüzü ve 27 menü/sekme/ayar kontrolü. Son iki isimlendirme arayüzü sorunu — küçük ekranda tablo yüksekliği ve ad çakışması giderildikten sonra kayıt düğmesinin açılması — düzeltildikten sonra ilgili kontroller yeniden geçti. Canlı SolidWorks oturumuna bağlanılmadı; bu güncellemede EXE üretilmedi.
 
-[Yeni klasör seçimi ekranı](examples/naming-folders-dark.png), [yeniden çekim betiği](examples/capture.py). Görsel, örnek dosya kayıtlarıyla çalışan gerçek Tk arayüzünden alındı; gerçek CAD dosyası okunduğu anlamına gelmez.
+[Arşiv: Yeni klasör seçimi ekranı](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/naming/examples/naming-folders-dark.png), [Arşiv: yeniden çekim betiği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/naming/examples/capture.py). Görsel, örnek dosya kayıtlarıyla çalışan gerçek Tk arayüzünden alındı; gerçek CAD dosyası okunduğu anlamına gelmez.
 
 ## Referans koruma
 
@@ -104,7 +104,7 @@ Bu kontrol kayıtlı **dosya yolu referanslarını** doğrular. Canlı SolidWork
 
 **20 ilgili kontrol geçti:** referans grafiği, türetilmiş parça ve resim yolları, ad kuralları, model/resim eşleştirmesi, çıktı çakışmaları, kaynak değişimi, kayıt/iptal/hata temizliği, pywin32 dizi ve byref dönüşleri, COM yaşam döngüsü, gerçek Tk tarama/önizleme/elle düzeltme/kaydetme, tema/DPI/küçük ekran, ön yükleme ve hızlı menü geçişleri. İlk kontrollerde bulunan Linux mutlak yol ayrımı ve küçük ekrandaki yerleşim sorunları giderildi; ilgili kontroller tekrar geçti. Tüm test paketi çalıştırılmadı. [Kontrol kaydı](examples/checks.json).
 
-[Açık tema](examples/naming-light.png) · [Koyu tema](examples/naming-dark.png). Ekranlar örnek dosya bilgileriyle çalışan Tk uygulamasından alındı. Testlerde SolidWorks sınırı test nesneleriyle temsil edildi; gerçek `.sldasm/.sldprt/.slddrw` dosyaları üzerinde native Windows kabul testi henüz yapılmadı.
+[Arşiv: Açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/naming/examples/naming-light.png) · [Arşiv: Koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/naming/examples/naming-dark.png). Ekranlar örnek dosya bilgileriyle çalışan Tk uygulamasından alındı. Testlerde SolidWorks sınırı test nesneleriyle temsil edildi; gerçek `.sldasm/.sldprt/.slddrw` dosyaları üzerinde native Windows kabul testi henüz yapılmadı.
 
 ## Kaynak seçimi ve dosya okuma düzeltmesi — 14 Ekim 2026
 

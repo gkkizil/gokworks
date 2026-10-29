@@ -19,9 +19,9 @@ atanmaz; bağlantı kapasitesi veya üretim resmi anlamına gelmez.
 
 Gerçek Qt ekranları:
 
-- [Koyu tema · M10×1,5 / 8.8 / %70](examples/torque-dark.png)
-- [Küçük pencere · 1024×700](examples/torque-small.png)
-- [Açık tema · ince diş / elle K](examples/torque-light.png)
+- [Arşiv: Koyu tema · M10×1,5 / 8.8 / %70](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/bolt_torque/examples/torque-dark.png)
+- [Arşiv: Küçük pencere · 1024×700](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/bolt_torque/examples/torque-small.png)
+- [Arşiv: Açık tema · ince diş / elle K](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/bolt_torque/examples/torque-light.png)
 
 Ekranlar `docs/report-tools/capture_bolt_torque_gui.py` ile alınır;
 [sayısal girdiler/sonuçlar](examples/captures.json) ayrıca saklanır.
