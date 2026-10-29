@@ -147,6 +147,12 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
   Çalıştırıcının adı Windows olsa da bu kayıt Linux çalışmasıdır.
 - **11 yeni test**, mevcut motor ve gerçek DXF/Qt kontrolleriyle çalışır.
   `qtmodeltester` hiyerarşik modelin yerel Qt sözleşmesini de kontrol eder.
+- Son tablo genişlikleri/metin düzeninden sonra üç model/görünüm kontrolü
+  ayrıca başarılı: [son sunum kontrolleri](final-presentation.xml).
+  Kaynak Qt ölçek matrisleri de %125 ve %150'de başarılı;
+  [125](source-dpi-125.xml), [150](source-dpi-150.xml). Her kayıtta iki tema,
+  dört istenen boyut, gerçek istemci boyutu/DPR ve sonuç tablosu açık/kapalı
+  kontrolleri bulunur.
 - **16 modüllük açılış/self-check başarılı**; Nesting DXF/Excel/PDF örnekleri
   ve mevcut modül bağlantıları çalıştırıldı. [Kaynak raporu](source-smoke.json).
   İlk deneme, çalışma ortamında mevcut dişli modülünün zaten requirements'a
@@ -162,10 +168,26 @@ QT_QPA_PLATFORM=offscreen PYTHONPATH=.cache/runtime-updated \
   Düzeltme test/yakalama araçlarına sınırlıdır; üretim arayüzü ve görünürlük
   eşikleri değiştirilmedi.
 - Ruff `F821,F822,F823` ve `git diff --check` başarılı.
+- 5000 satır / 4 grup için Qt sunum adaptörünün ilk kurulumu bu Linux
+  oturumunda 142,05 ms ölçüldü. Bu, geometri veya yerleşim motorunun hız
+  ölçümü değildir. [Ölçüm kapsamı](model-performance.json).
 
-Windows çalışmasının kesin commit'i, test ve DPI sonuçları tamamlandığında
-ayrı `windows-checks.json` kaydında gösterilir. Bekleyen çalışma başarılı
-olarak sayılmaz. Bu görev yeni EXE oluşturmaz.
+## Tamamlanan Windows kontrolü ve GitHub durumu
+
+- Uygulama düzenlemesi: `609d6ff42caff67ee5248a6f07caacc75a1c5cfb`.
+- Çerçeve/istemci alanı test düzeltmesi: `56b4927`; üretim arayüzü bu
+  düzeltmede değiştirilmedi. Her ikisi de **main** dalına gönderildi.
+- [Windows Nesting workspace — başarılı](https://github.com/gkkizil/gokworks/actions/runs/40865608530),
+  job `123419497120`. Test edilen tam commit sayfadan doğrulandı.
+- **134 test: 0 başarısızlık, 0 hata, 0 atlanan**. %125 ve %150 Qt ölçek
+  kontrolleri, tam uygulama açılış/self-check'i ve gerçek DXF/NFP ile yerel
+  Windows ekran yakalama adımı da ayrı ayrı başarılıdır.
+- [Commit, adım sonuçları ve sayım kanıtı](windows-checks.json).
+  Native ekranlar ve DPI JUnit kayıtları aynı çalışmanın
+  **Windows-Nesting-workspace** artifact'ındadır. Rapor/görsel son commit'i
+  uygulama kodunu değiştirmez.
+- Kullanıcının isteği doğrultusunda **EXE oluşturulmadı**, derleme isteği
+  veya release yayını yapılmadı.
 
 ## Erişilebilirlik ve kalan sınırlar
 

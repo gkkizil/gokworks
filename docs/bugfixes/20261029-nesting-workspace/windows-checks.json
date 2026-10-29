@@ -1,0 +1,78 @@
+{
+  "tested_commit": "56b492763b40b1c0fcf4de8e117716d15d9c5269",
+  "application_implementation_commit": "609d6ff42caff67ee5248a6f07caacc75a1c5cfb",
+  "run_id": "40865608530",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/40865608530",
+  "job_ids": [
+    "123419497120"
+  ],
+  "status": "success",
+  "head_verified": true,
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run python -m pip install -r requirements-dev.txt",
+      "conclusion": "success"
+    },
+    {
+      "name": "Configure a real Windows desktop",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check Nesting geometry, UI, reports and workbench integration",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check 125 percent Qt scaling",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check 150 percent Qt scaling",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check complete application startup",
+      "conclusion": "success"
+    },
+    {
+      "name": "Save native Nesting screenshots from actual DXFs",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upload verification evidence",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "recorded_at": "2026-10-29T11:35:29.282886+00:00",
+  "windows_exe_built": false,
+  "live_solidworks_required": false,
+  "native_suite_counts": {
+    "tests": 134,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}
