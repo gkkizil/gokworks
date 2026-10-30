@@ -12,8 +12,9 @@ def find_drawings(*args, **kwargs):
 def scan_files(mode, source, recursive, events, stop):
     # The PDF workbench must not import the DXF parser/NumPy at startup.
     if mode != 'pdf':
-        from modules.dxf_dwg.exporter import find_parts
-    finder = find_drawings if mode == 'pdf' else find_parts
+        from modules.dxf_dwg.sheetmetal import scan_sources
+        return scan_sources(source, recursive, events, stop)
+    finder = find_drawings
     files = finder(source, recursive, stop)
     events.put(('files', files))
     events.put(('done', dict(state='cancelled' if stop.is_set() else 'preview', total=len(files))))

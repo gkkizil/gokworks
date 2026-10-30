@@ -1,11 +1,12 @@
 """Sheet-metal exports and source-matched preview; shared export flow is intact."""
 
 from pathlib import Path
+import csv
 
-from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject
-from PySide6.QtWidgets import QSplitter
+from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject, QSignalBlocker
+from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QVBoxLayout, QCheckBox, QWidget
 from gui_qt.export import ExportPage
-from gui_qt.components import label
+from gui_qt.components import label, button, ValueForm, Disclosure
 from modules.cad_converter.models import Cancelled
 from modules.cad_converter.api import RestoreError
 from .preview.models import Request, MeshCache
@@ -13,6 +14,9 @@ from .preview.panel import PreviewPanel
 from .preview.solidworks import capture, file_stamp
 from .preview.solidworks import capture_geometry
 from .preview.cancellation import cancellable_read
+from .inventory import display_rows, selected_items
+from .table import SheetTableModel
+from gui_qt.models import LABELS
 
 
 class _PageEvents(QObject):
@@ -33,14 +37,66 @@ class _PageEvents(QObject):
 class DxfDwgPage(ExportPage):
     def __init__(self, context):
         super().__init__(context, 'dxf_dwg')
+        self.inventory = None
+        self.checked_instances = {}
+        self._legacy_save_csv=self.results.save_csv
+        self.results.save_csv=self.save_sheet_csv
+        self.scan_origin = ('folder', '')
+        self.active_scan_button = button('Aktif montajı tara', self.scan_active)
+        self.file_scan_button = button('Dosya seç…', self.scan_file)
+        self.file_scan_button.setToolTip('SLDPRT veya SLDASM seçerek sac gövdelerini tara')
+        self.controls.extend((self.active_scan_button,self.file_scan_button))
+        scan_actions = QWidget();scan_layout=QVBoxLayout(scan_actions);scan_layout.setContentsMargins(0,0,0,0)
+        scan_layout.addWidget(self.active_scan_button);scan_layout.addWidget(self.file_scan_button)
+        self.form.form.insertRow(1,scan_actions)
+        self.start_button.setText('Seçili parçaları dışa aktar')
+        self.start_button.setToolTip('İşaretli sac gövdelerini ayrı DXF/DWG dosyalarına aktarır; kaynak CAD dosyaları kaydedilmez.')
+        previous_model = self.results.model
+        self.results.model = SheetTableModel()
+        self.results.proxy.setSourceModel(self.results.model)
+        self.source_files.proxy.setSourceModel(self.results.model)
+        previous_model.deleteLater()
+        header = self.results.table.horizontalHeader()
+        for index, width in enumerate((36,190,90,95,90,50,115,200)):
+            header.setSectionResizeMode(index, QHeaderView.Interactive)
+            self.results.table.setColumnWidth(index,width)
+        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        self.results.table.setColumnHidden(7,True)  # Full detail remains in tooltip / Return / CSV.
+        self.results.filter.setItemText(self.results.filter.findData('pending'),'Hazır')
+        controls = QHBoxLayout()
+        self.select_all_button = button('Tümünü seç', lambda:self.select_sheets(True))
+        self.select_all_button.setToolTip('Tüm hazır sac parçaları seç')
+        self.select_all_button.setAccessibleName('Tüm sac parçaları seç')
+        self.select_none_button = button('Seçimi kaldır', lambda:self.select_sheets(False))
+        self.group_instances = QCheckBox('Grupla')
+        self.group_instances.setToolTip('Özdeş parçaları grupla; kapatınca montaj örneklerini ayrı göster')
+        self.group_instances.setAccessibleName('Özdeş parçaları grupla / ayrı göster')
+        self.group_instances.setChecked(self.settings.get('dxf_dwg_group_instances',True) is True)
+        self.group_instances.toggled.connect(self.render_inventory)
+        self.group_instances.toggled.connect(lambda value:self.settings.set('dxf_dwg_group_instances',value))
+        for widget in (self.select_all_button,self.select_none_button,self.group_instances):
+            controls.addWidget(widget);self.controls.append(widget)
+        controls.addStretch()
+        self.results.layout.insertLayout(1,controls)
+        self.results.model.selectionEdited.connect(self.sheet_selection_changed)
+        for signal in (self.results.model.modelReset,self.results.model.rowsInserted,self.results.model.rowsRemoved):
+            signal.connect(self.update_source_count)
+        self.results.cleared.connect(self.clear_inventory)
+        self.naming_form=ValueForm(self.settings,'dxf_dwg_')
+        for option, title in (('code','Parça kodunu kullan'),('body','Gövde adını ekle'),
+                              ('configuration','Konfigürasyon ekle'),('material','Malzeme ekle')):
+            control = self.naming_form.check('name_'+option,title,False)
+            self.form.fields['name_'+option] = control
+        self.naming_form.changed.connect(self.form.changed)
+        self.naming_options=Disclosure('Dosya adlandırma',self.naming_form,expanded=False)
+        self.options_form.form.addRow(self.naming_options)
         self.preview_before_export = self.options_form.check(
             'preview_before_export', 'Kaydetmeden önce önizle', True)
         self.preview_before_export.setToolTip(
             'Önce seçili parçanın açınımını gösterir. Listeden parçaları kontrol edin; '
             'kaydetmek için Aktarımı başlat düğmesine tekrar basın.')
         self.form.fields['preview_before_export'] = self.preview_before_export
-        self.options_form.form.addRow(label('Aktarımda değiştirilmiş SolidWorks belgeleri otomatik kaydedilir.', 'muted'))
-        self.start_button.setToolTip('DXF/DWG aktarır; açık değiştirilmiş SolidWorks belgelerine sessiz Tümünü Kaydet uygular.')
+        self.options_form.form.addRow(label('Her sac gövdesi ayrı aktarılır. Kalınlık ve adet dosya adına yazılır; gerekli gövde/konfigürasyon ayrımı otomatik eklenir.', 'muted'))
         self._events = _PageEvents(self)
         self.handle_events = self._events.accept
         self.preview = PreviewPanel()
@@ -67,7 +123,7 @@ class DxfDwgPage(ExportPage):
         self.results.tabs.removeTab(0)
         self.preview_splitter.addWidget(self.results.table)
         self.preview_splitter.addWidget(self.preview)
-        self.preview_splitter.setSizes([450, 380])
+        self.preview_splitter.setSizes([650, 380])
         self.results.tabs.insertTab(0, self.preview_splitter, 'Dosyalar')
         self.results.tabs.setCurrentIndex(0)
         self.results.table.show()
@@ -85,6 +141,88 @@ class DxfDwgPage(ExportPage):
         self.form.changed.connect(self.preview_option_changed)
         self._capture = capture  # injectable boundary; no COM import or connection during construction
         QTimer.singleShot(0, self.layout_preview)
+
+    def clear_inventory(self):
+        self.inventory = None; self.checked_instances.clear()
+
+    def save_sheet_csv(self,path):
+        if self.inventory is None:return self._legacy_save_csv(path)
+        with Path(path).open('w',newline='',encoding='utf-8-sig') as stream:
+            writer=csv.writer(stream,delimiter=';')
+            writer.writerow(('Kaynak','Konfigürasyon','Parça kodu','Gövde','Kalınlık mm','Malzeme',
+                             'Montaj adedi','Seçili adet','Durum','Çıktı','Açıklama'))
+            for row in self.inventory:
+                selected=len(set(row['instances']) & self.checked_instances.get(row['sheet_id'],set()))
+                writer.writerow((row['source'],row['configuration'],row.get('code',''),row['body_name'],
+                    row.get('thickness_mm',''),row.get('material',''),row['quantity'],selected,
+                    'Hazır' if row['status']=='pending' else LABELS.get(row['status'],row['status']),row.get('output',''),row.get('detail','')))
+
+    def update_source_count(self,*args):
+        self.source_files.counter.setText(f'Sac gövdeleri · {self.results.model.rowCount()}')
+        if not self.results.model.rowCount():
+            self.source_files.search.clear();self.source_files.timer.stop();self.source_files.proxy.set_query('')
+
+    def render_inventory(self,*args):
+        if self.inventory is None:
+            return
+        self.results.model.replace(display_rows(self.inventory,self.checked_instances,self.group_instances.isChecked()))
+        self.results.table.setColumnHidden(2,all(r.get('body_count',1)==1 for r in self.inventory))
+        self.results.refresh_count()
+
+    def sheet_selection_changed(self,row,checked):
+        if 'sheet_id' not in row:
+            return
+        selected = self.checked_instances.setdefault(row['sheet_id'],set())
+        if checked: selected.update(row['instances'])
+        else: selected.difference_update(row['instances'])
+
+    def select_sheets(self,checked):
+        if self.jobs.busy:
+            return
+        if self.inventory is None:
+            for row in self.results.model.rows: row['selected'] = checked
+            self.results.model.layoutChanged.emit()
+            return
+        for row in self.inventory:
+            self.checked_instances[row['sheet_id']] = set(row['instances']) if checked and row.get('exportable') else set()
+        self.render_inventory()
+
+    def export_arguments(self):
+        if self.inventory is None:
+            return {}  # Compatibility for integrations supplying legacy result rows.
+        return dict(items=selected_items(self.inventory,self.checked_instances),
+                    naming=tuple(k for k in ('code','body','configuration','material') if self.form.value('name_'+k)))
+
+    def prepare_export_results(self):
+        if self.inventory is None:
+            return super().prepare_export_results()
+        self.results.results.clear(); self.results.log.clear()
+        self.results.refresh_count()
+
+    def scan_active(self):
+        self.scan_origin = ('active','')
+        self.scan_inventory()
+
+    def scan_file(self):
+        if not self.can_start():
+            return
+        path,_ = QFileDialog.getOpenFileName(self,'SolidWorks sac parçası / montaj seç','','SolidWorks (*.SLDPRT *.SLDASM *.sldprt *.sldasm)')
+        if path:
+            self.source.setText(str(Path(path).parent))
+            self.scan_origin = ('file',path)
+            self.scan_inventory()
+
+    def scan_inventory(self):
+        if not self.can_start():
+            return
+        from .sheetmetal import scan_sources
+        mode,path = self.scan_origin
+        self._preview_cancelled = False
+        self.inventory = None; self.checked_instances.clear()
+        self.results.reset()
+        recursive = self.form.value('recursive')
+        self.jobs.start(self,lambda sink,stop:scan_sources(path,recursive,sink,stop,mode=mode))
+        self.set_status('Sac gövdeleri taranıyor…')
 
     def eventFilter(self, watched, event):
         if watched is self.results and event.type() == QEvent.Resize:
@@ -143,6 +281,8 @@ class DxfDwgPage(ExportPage):
         return True
 
     def _source_in_scope(self, source):
+        if self.inventory is not None:
+            return any(row['source']==source for row in self.inventory)
         root = self.form.value('source')
         if not root:
             return True
@@ -167,6 +307,8 @@ class DxfDwgPage(ExportPage):
         return True
 
     def scan(self):
+        self.scan_origin = ('folder',self.form.value('source'))
+        self.inventory = None; self.checked_instances.clear()
         if not self.jobs.busy and not self.context.closing:
             self._preview_cancelled = False
         super().scan()
@@ -175,7 +317,11 @@ class DxfDwgPage(ExportPage):
 
     def preview_option_changed(self, key):
         if key in ('source', 'recursive'):
+            had_inventory = self.inventory is not None
+            self.clear_inventory()
+            self.scan_origin = ('folder','')
             self.clear_preview()
+            if had_inventory:self.results.reset()
         elif key == 'bend_lines' and self.preview_request:
             self.refresh_preview()
 
@@ -213,10 +359,21 @@ class DxfDwgPage(ExportPage):
         if self._preview_cancelled:
             return
         if self.preview_request:
-            row = next((r for r in self.results.model.rows if r.get('source') == self.preview_request.source), None)
+            row = self.preview_row()
             if row: self.request_preview(row)
 
+    def preview_row(self):
+        request = self.preview_request
+        if request and self.inventory is None:
+            return next((r for r in self.results.model.rows if r.get('source')==request.source),None)
+        return next((r for r in self.results.model.rows if r.get('source')==request.source
+                     and str(r.get('configuration',''))==request.configuration
+                     and str(r.get('body_ref',''))==request.body_ref),None) if request else None
+
     def request_preview(self, row, force=False):
+        if row.get('sheet_id') and not Path(row['source']).is_file():
+            self.clear_preview(); self.preview.clear(row.get('detail','Kaynak dosya bulunamadı.'))
+            return
         bend_lines = self.form.value('bend_lines')
         outputs = [o for o in row.get('outputs', ()) if o.get('status') in ('success', 'skipped')
                    and row.get('bend_lines', bend_lines) == bend_lines]
@@ -225,7 +382,7 @@ class DxfDwgPage(ExportPage):
         request = Request(str(row['source']), str(row.get('configuration', '')), str(row.get('body_ref', '')),
                           str(output.get('path', '')), str(output.get('status', '')), tuple(row.get('source_stamp') or ()),
                           row.get('update_stamp'), quantity if type(quantity) is int and quantity > 0 else None,
-                          bool(bend_lines))
+                          bool(bend_lines),str(row.get('flat_ref','')),str(row.get('body_name','')),row.get('thickness_mm'))
         if not force and request == self.preview_request:
             return
         self.preview_generation += 1
@@ -235,7 +392,7 @@ class DxfDwgPage(ExportPage):
         self.preview_payload = None
         self.preview_force |= force
         self.preview.clear('SolidWorks kaynak ve bükülmüş geometri kontrol ediliyor…')
-        self.preview.source_label.setText(Path(request.source).name)
+        self.preview.source_label.setText(Path(request.source).name+(' · '+request.body_name if request.body_name else ''))
         self.preview.source_label.setToolTip(request.source)
         if self.watcher.files(): self.watcher.removePaths(self.watcher.files())
         self.watcher.addPath(request.source)
@@ -246,7 +403,7 @@ class DxfDwgPage(ExportPage):
         self.selected_updated()
         if self.preview_request:
             request = self.preview_request
-            row = next((r for r in self.results.model.rows if r.get('source') == request.source), None)
+            row = self.preview_row()
             if row: self.request_preview(row, force=True)
 
     def source_changed(self, path):
@@ -284,8 +441,34 @@ class DxfDwgPage(ExportPage):
     def start_export(self):
         if self.context.closing:
             return
+        if self.inventory is not None and not selected_items(self.inventory,self.checked_instances):
+            self.set_status('Aktarım için en az bir hazır sac gövdesini işaretleyin.',True)
+            return
+        if self.inventory is not None and self.preview_before_export.isChecked():
+            chosen={row['sheet_id'] for row in selected_items(self.inventory,self.checked_instances)}
+            current=self.preview_row()
+            if current is None or current.get('sheet_id') not in chosen:
+                for index in range(self.results.proxy.rowCount()):
+                    candidate=self.results.proxy.index(index,0)
+                    row=candidate.data(Qt.UserRole)
+                    if row and row.get('sheet_id') in chosen:
+                        self.results.table.setCurrentIndex(candidate);self.request_preview(row)
+                        break
+        if self.inventory is not None and not self.source.text():
+            first = self.inventory[0]['source'] if self.inventory else ''
+            # Naming root only; active-assembly rows outside it remain in scope.
+            if first:
+                with QSignalBlocker(self.source):
+                    self.source.setText(str(Path(first).parent))
+        if self.inventory is None and not self.results.model.rows:
+            if self.scan_origin[0] in ('active','file'):
+                self.scan_inventory()
+            else:
+                self.scan()
+            self.set_status('Önce sac listesini kontrol edin; sonra işaretli gövdeleri dışa aktarın.')
+            return
         if self._preview_restore_failed and not self.preview_running:
-            self.set_status('Kaynak durumu geri alınamadığı için otomatik kayıt başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.', True)
+            self.set_status('Kaynak durumu geri alınamadığı için aktarım başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.', True)
             return
         if self.preview_before_export.isChecked() and (not self._flat_ready_for_export()
                                                        or not self.preview.flat_view.isVisible()):
@@ -352,6 +535,7 @@ class DxfDwgPage(ExportPage):
     def set_busy(self, busy):
         super().set_busy(busy)
         if hasattr(self, 'preview'):
+            self.results.model.locked = busy
             self.preview.refresh_button.setEnabled(not busy)
             # With review enabled, Start reveals the flat without cancelling it.
             # Direct export can preempt capture only after native state restores.
@@ -360,6 +544,29 @@ class DxfDwgPage(ExportPage):
     def process_events(self, events):
         ordinary = []
         for kind, value in events:
+            if kind == 'sheet_inventory':
+                if self._preview_cancelled or self.context.closing:
+                    continue
+                self.inventory = value
+                self.checked_instances = {r['sheet_id']:set(r['instances']) if r.get('exportable') else set() for r in value}
+                self.render_inventory()
+                continue
+            if kind=='done' and value.get('state')=='preview' and self._preview_cancelled:
+                value=dict(value,state='cancelled')
+            if kind in ('sheet_current','sheet_result'):
+                identifier = value if kind=='sheet_current' else value['sheet_id']
+                changes = dict(status='running') if kind=='sheet_current' else {k:v for k,v in value.items()
+                    if k not in ('row_id','instances','quantity','selected')}
+                for row in list(self.results.model.rows):
+                    if row.get('sheet_id')==identifier:
+                        self.results.model.upsert(dict(row,**changes))
+                if kind=='sheet_result':
+                    for row in self.inventory or ():
+                        if row['sheet_id']==identifier: row.update(changes)
+                    self.results.results.append(value)
+                    self.results.append_log(f"{value['status']} · {value['source']} [{value['configuration']}] · {value['body_name']} · {value['detail']}")
+                    self.results.refresh_count()
+                continue
             if kind == 'done' and value.get('state') == 'preview' and not self._preview_cancelled:
                 self._preview_after_scan |= self.preview_before_export.isChecked()
             if kind == 'done' and value.get('native_restore_failed'):
@@ -400,4 +607,10 @@ class DxfDwgPage(ExportPage):
                     self.set_status('Önizleme: ' + result, kind == 'dxf_preview_error')
             else:
                 ordinary.append((kind, value))
-        if ordinary: super().handle_events(ordinary)
+        if ordinary:
+            super().handle_events(ordinary)
+            if any(kind=='done' and value.get('state')=='preview' for kind,value in ordinary) and self.inventory is not None:
+                summary=next(value for kind,value in ordinary if kind=='done' and value.get('state')=='preview')
+                warnings=len(summary.get('warnings',()))
+                self.set_status(f'Tarama tamamlandı. {len(self.inventory)} benzersiz sac gövdesi bulundu.'
+                                +(f' · {warnings} uyarı: Günlük bölümünü kontrol edin.' if warnings else ''))

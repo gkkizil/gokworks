@@ -7,6 +7,7 @@ can be released. A restoration failure must never be disguised as cancellation.
 
 from contextlib import contextmanager
 import os
+import math
 import threading
 import time
 import sys
@@ -33,7 +34,7 @@ def cancellable_read(stop, *, timeout=60, api=None):
         api.CoEnableCallCancellation()
         enabled = True
         thread_id = threading.get_native_id()
-        deadline = time.monotonic()+timeout
+        deadline = time.monotonic()+timeout if timeout is not None else math.inf
         def watch():
             api.CoInitialize()
             cancel = None

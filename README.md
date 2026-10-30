@@ -119,9 +119,11 @@ yer alır. Üzerine yazma kapalıyken mevcut çıktılar atlanır.
 ### Sac metal açınımı
 
 1. SolidWorks’te adetlerin alınacağı ana montajı ve doğru konfigürasyonu etkinleştirin.
-2. **DXF / DWG** ekranında sac parçalarının kaynak klasörünü ve çıktı klasörünü seçin.
+2. **DXF / DWG** ekranında **Aktif montajı tara** veya **Dosya seç…** ile SLDASM/SLDPRT okuyun.
+   **Klasörü tara**, klasör kapsamını korur; açık ana montaj varsa oradaki gerçek adetleri kullanır.
 3. Çıktı türünü belirleyin; gerekirse büküm çizgilerini ve kalınlığa göre klasörlemeyi açın.
-4. **Klasörü tara** ile dosyaları kontrol edip **Aktarımı başlat** düğmesine basın.
+4. Yalnız gerçek sac gövdeleri listelenir. İstediklerinizi işaretleyin; gerekirse **Grupla** seçimini kapatın.
+5. Çıktı klasörünü seçin. Açınım önizlemesini kontrol edip **Seçili parçaları dışa aktar** düğmesine basın.
 
 Örnek çıktı düzeni:
 
@@ -133,9 +135,10 @@ yer alır. Üzerine yazma kapalıyken mevcut çıktılar atlanır.
     └── KAPAK - 2 mm - 3 adet.dxf
 ```
 
-Aktarım, parçaların aktif konfigürasyonunu kullanır; bütün konfigürasyonları
-otomatik dolaşmaz. Tek gövdeli sac parçalar desteklenir. Kaynak montajdaki
-konfigürasyon, adet ve açınım gereksinimleri için [modül kılavuzuna](docs/dxf-dwg-verification.md) bakın.
+Montajdaki her referenced configuration ayrı okunur; tek dosyadaki sac gövdeleri
+ayrı Flat-Pattern unsurlarıyla aktarılır. Kaynak CAD dosyaları kaydedilmez;
+geçici konfigürasyon, seçim ve aktif belge durumu geri alınır.
+[Modül kılavuzu](modules/dxf_dwg/README.md) · [Çok gövdeli aktarım raporu](MULTIBODY_DXF_DWG_RAPORU.md).
 
 ### Montaj dosyalarını yeniden isimlendirme
 

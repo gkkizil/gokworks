@@ -177,10 +177,15 @@ def test_native_browse_accept_and_cancel(qapp, tmp_path, folder):
 
 
 @pytest.mark.parametrize('mode,extension', [('pdf', '.SLDDRW'), ('dxf_dwg', '.SLDPRT')])
-def test_folder_scan_worker_and_dwg_options(window, qtbot, tmp_path, mode, extension):
+def test_folder_scan_worker_and_dwg_options(window, qtbot, tmp_path, mode, extension, monkeypatch):
     page = window.pages[mode]
     if mode == 'dxf_dwg':
         page.preview_before_export.setChecked(False)  # This test covers direct export, not the CAD preview workflow.
+        def discovery(source,recursive,events,stop,**kwargs):
+            from modules.dxf_dwg.exporter import find_parts
+            files=find_parts(source,recursive,stop)
+            events.put(('files',files));events.put(('done',dict(state='preview',total=len(files))))
+        monkeypatch.setattr('modules.dxf_dwg.sheetmetal.scan_sources',discovery)
     (tmp_path/('part'+extension)).touch()
     (tmp_path/('~$temporary'+extension)).touch()
     page.source.setText(str(tmp_path))

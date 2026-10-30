@@ -1,132 +1,99 @@
-# DXF / DWG — Sac kalınlığına göre klasörleme
+# DXF / DWG — Sac gövdesi ve montaj bazında aktarım
 
-## Aktarımda otomatik kayıt ve durdurma
+Mevcut Qt Widgets ekranı, SolidWorks COM bağlantısı ve güvenli geçici dosya
+altyapısı genişletildi. Yerel, kurulu ve lisanslı SolidWorks gerekir. Python
+native SLDPRT/SLDASM dosyasını ayrıştırmaz; yeni CAD okuyucu veya bulut API yoktur.
 
-**Aktarımı başlat**, kullanıcının istediği sessiz **Tümünü Kaydet** davranışını
-uygular: açık değiştirilmiş SLDPRT/SLDASM/SLDDRW belgeleri, mevcut kaydedilmemiş
-düzenlemeler dahil, kendi yollarına kaydedilir. API `GetSaveFlag` ve
-`Save3(Silent | SaveReferenced)` kullanır; ekran düğmesine tıklamaz. Kayıt,
-parça açılmadan, aktarım öncesinde ve kapatmadan önce kontrol edilir. Alt parça
-kaydının montajı değiştirilmiş işaretleyebildiği durumlar tekrar okunur.
+## Kullanım
 
-İsimsiz, salt okunur veya kaydı başarısız belgelerde Farklı Kaydet penceresi
-açılmaz; dosya adı uydurulmaz. Hata günlüğe yazılır, belge açık bırakılır ve
-sonraki parçalara geçilmez. Açınımın değiştirdiği konfigürasyon her biçimden
-sonra geri alınır; bu doğrulanmadan kaynak kaydedilmez/kapatılmaz.
+1. **Aktif montajı tara**: SolidWorks'teki etkin SLDASM ve aktif konfigürasyonundan
+   başlar. Etkin SLDPRT de okunabilir.
+2. **Dosya seç…**: SLDPRT veya SLDASM seçilir. Araç belgeleri sessiz/salt okunur
+   açar; kullanıcının önceden açtığı belgeler korunur.
+3. **Klasörü tara**: klasör/alt klasör kapsamını korur. Etkin ana montaj varsa
+   yalnız kapsamdaki kullanılan sacları ve gerçek montaj adetlerini okur.
+   Etkin montaj yoksa her bağımsız parça dosyası bir örnek sayılır.
+4. Yalnız `IBody2.IsSheetMetal()` ile doğrulanan sac gövdeleri listelenir.
+   Mekanik bileşenler için başka liste/gizli sekme oluşturulmaz. Doğrulanamayan
+   kaynak/bileşenler **Günlük** bölümünde açıklanır.
+5. **Tümünü seç / Seçimi kaldır**, hazır sacların kutularını değiştirir.
+   **Grupla** kapatılırsa aynı dosya/konfigürasyon/gövdenin montaj örnekleri
+   ayrı görünür. Seçimler kaybolmaz. Kısmen seçili grubun kutusu ara durumdadır;
+   yalnız işaretli örneklerin adedi aktarılır.
+6. Çıktı klasörü/türü, büküm çizgileri ve kalınlık klasörlemesini belirleyin.
+   **Seçili parçaları dışa aktar** yalnız işaretli, doğrulanmış gövdeleri işler.
 
-**Durdur**, yeni biçim/parça başlatılmasını ve geçici çıktının yayımlanmasını
-engeller. Önizlemenin bekleyen istekleri ve eski seçim sonuçları iptal edilir;
-dosya değişikliği/sonuç güncellemesi önizlemeyi kendiliğinden yeniden başlatmaz.
-Yeni seçim veya **Yenile** kullanıcı isteğiyle tekrar çalıştırır.
+Sütunlar: seçim, parça/kod, gerektiğinde gövde, kalınlık (mm), malzeme, adet,
+açınım durumu, açıklama. Kaynak dosya, konfigürasyon ve Cut List klasörü satır
+ayrıntılarında/ipuçlarında korunur. Açınımı bozuk gerçek sac, hatalı satır olarak
+kalır; diğer hazır sacların aktarımını engellemez.
 
-3D önce ayrı okunur ve kaynak durumu geri getirildikten sonra gösterilir;
-geçici DXF açınımını beklemez. Windows önizleme STA'sında
-`CoEnableCallCancellation` / `CoGetCancelObject.Cancel` ile bekleyen okunur
-COM çağrısına iptal istenir; 60 saniyede de iptal isteği gönderilir. SolidWorks veya
-thread zorla sonlandırılmaz. Native sunucunun iptal edemediği işlemde oturum
-geri alınmadan CAD kilidi bırakılmaz; geri alma hatası iptal gibi gizlenmez.
-Gerçek SolidWorks sunucusunun iptal davranışı ayrıca canlı test gerektirir.
-Önizleme, aktarımın otomatik kayıt politikasını çağırmaz; kaynakları kaydetmez.
+## Kaynak güvenliği ve durdurma
 
-## SolidWorks 3D / açınım önizlemesi
+Yeni envanterden tarama, önizleme ve aktarım, kaynaklara `Save3`/`SaveAs`
+uygulamaz; kaydedilmemiş kullanıcı çalışması da otomatik kaydedilmez.
+Konfigürasyon, seçili nesneler, görünürlük ve aktif belge geri alınır.
+Geometri, suppression, otomatik Cut List ve layer ayarları değiştirilmez.
+Araç yalnız kendisinin açtığı belgeleri kapatır. Cut List yenilenmez, rebuild
+yapılmaz. Güncellik doğrulanamıyorsa SolidWorks'te rebuild yapıp yeniden tarayın.
 
-**Kaydetmeden önce önizle** ayarı varsayılan açıktır ve tercihlerde
-saklanır. **Klasörü tara** sonrasında ilk parça otomatik seçilir. **Önizleme**
-düğmesi de seçim yoksa ilk görünür parçayı okur; liste boşsa önce klasörü tarar.
-Çıktı klasörü seçilmeden de kontrol yapılabilir.
+**Durdur**, sonraki gövde/biçimi ve geçici çıktının yayımlanmasını engeller.
+Tarama STA'sında bekleyen okunur COM çağrısına iptal istenir; büyük montajın
+toplam tarama süresine sabit 60 saniye sınırı konmaz. Önizleme mevcut 60 saniye
+korumasını kullanır. SolidWorks sunucusu iptali reddedebilir; native export
+çağrısı zorla kesilmez. Durum geri alınmadan CAD işi bırakılmaz; geri alma
+hatası iptal/başarı gibi gizlenmez.
 
-**Aktarımı başlat**, seçili parçanın güncel açınımı henüz gösterilmemişse önce
-3D görüntünün altındaki açınım bölümünü açar. Bu aşamada üretim DXF/DWG'si
-veya kaynak CAD dosyası kaydedilmez. Listeden diğer parçaları seçerek aynı
-alanda inceleyin; hazır olunca **Aktarımı başlat** düğmesine tekrar basarak
-mevcut toplu kaydı başlatın. Okuma bitince kayıt kendiliğinden başlamaz.
-Açınım okunamadığında 3D görüntü tek başına bu kontrolü geçmez. Bu ayar,
-seçili parça için görsel kontrol akışıdır; tüm parçaların tek tek onaylandığını
-veya imalat geometrisinin doğrulandığını iddia etmez.
+Eski scriptlerin `export_parts(..., items=None)` ve `export_one_part` çağrı
+sözleşmeleri korunur. Eski script yolu tek etkin gövde sınırını ve daha önce
+istenmiş Save All politikasını taşır; normal yeni Qt akışı `items` gönderir
+ve kaynak kaydetmez. Kimlik verilmeden çok gövdeli aktarım yapılmaz.
 
-Önizleme sürerken Aktarımı başlat'a basmak okumayı iptal etmez. Dar pencerede
-gizli Önizleme sekmesi de kayıttan önce görünür hale gelir. Büküm çizgileri
-tercihi değişirse açınım güncel ayarla yeniden okunur, eski DXF kullanılmaz.
-Ayar kapatıldığında doğrudan toplu aktarım davranışı korunur.
+## Gövde eşleşmesi, adet ve performans
 
-[Kayıt öncesi akış, test sonuçları ve ekran görüntüleri](../../docs/dxf-3d-preview/preview-before-save.md).
+`GetBodies2(swSolidBody, False)` ile gövdeler okunur. Sac olmayan belgede
+özellik/metadata/mesh/açınım taraması yapılmaz. `FlatPattern` tanımındaki
+`FixedFace2.GetBody()` gövdeyi belirler. `CutListFolder` ve
+`GetSpecificFeature2().GetBodies()` aynı gövdenin Cut List özelliklerini verir.
+`Get6` ham/çözümlenmiş değerleri ayrı saklar. Kalınlık gövdenin SheetMetal
+unsurundan metre→mm çevrilir; belirsiz çoklu kalınlık tahmin edilmez.
 
-Listeden bir kaynak veya sonuç satırı seçildiğinde sağda üç bölüm açılır:
-gerçek bükülmüş SolidWorks gövdesi, açınım ve parça bilgileri. Dar pencerede
-**Önizleme** sekmesi/üst düğmesi kullanılır; panelin içi kaydırılabilir.
+Montaj her fiziksel örnek için dolaşılır; parça analizi dosya+referenced
+configuration başına önbelleklenir. Suppressed dal dışarıda kalır. Lightweight
+model gerekiyorsa ayrı salt okunur belgeden yüklenir; montaj suppression durumu
+değiştirilmez. Eksik alt montaj yüzünden eksik kalabilecek adetler doğrulanmış
+sayılmaz. Sanal saclar okunabildiğinde listelenir; üretim dosyası/önizleme için
+harici SLDPRT olarak kaydedilmeleri istenir. SpeedPak için tam montaj gerekir.
 
-- Sol fare: döndür; sağ/orta fare: kaydır; tekerlek: yakınlaştır.
-- İzometrik, ön/arka/sağ/sol/üst/alt, **Sığdır**, perspektif/ortografik ve
-  kenar çizgileri desteklenir. **Yenile** güncel kaynak verisini tekrar okur.
-- 3D, DXF'ten türetilmez: seçilen SLDPRT, konfigürasyon ve sac gövdesinin
-  `IFace2.GetTessTriangles` verisidir. Gerektiğinde `IBody2.GetTessellation`
-  ile özel bir bellek tessellation nesnesi oluşturulur. Kullanıcı görüntü
-  kalitesi ayarı değiştirilmez. Metre koordinatları mm'ye çevrilir.
-- Açınım normalde üretilmiş DXF'ten okunur. DWG için DWG dosyası çözülmez:
-  aynı kaynak/konfigürasyondan mevcut SolidWorks aktarım API'siyle geçici
-  DXF üretilir. Aktarım öncesi önizleme de bu yöntemi kullanır. Bu fark
-  panelde açıkça yazılır; geçici dosya silinir, üretim çıktısı değiştirilmez.
-- Parça kodu/açıklama/malzeme/büküm sayısı çözümlenmiş property'lerden,
-  kalınlık aktif SheetMetal verisinden, adet mevcut aktarım sonucundan gelir.
-  Okunamayan bilgi uydurulmaz. Dosya adından alınan kod ayrıca belirtilir.
-- Kaynak değişirse çıktı eski olarak işaretlenir; eski seçimin geciken
-  sonucu yeni parçayı boyamaz. Önbellek dosya, konfigürasyon, gövde ve canlı
-  güncelleme kimliğiyle doğrulanır; en fazla 8 mesh / 32 MiB tutar.
+Her biçimde kalıcı gövde ve Flat-Pattern kimlikleri tekrar çözülüp sahiplik
+kontrol edilir. `SuspendSelectionList` ile seçim saklanır; yalnız ilgili
+`FlatPattern.Select2(False,-1)` seçilip `ExportToDWG2` çağrılır. Sonunda
+`ResumeSelectionList2(False)` önceki seçimi geri getirir.
 
-Mevcut tek gövdeli aktarım sınırı korunur. Çok gövdeli kaynağın yalnız açık
-kalıcı gövde kimliğiyle eşleşen önizlemesi kabul edilir; eşleşme yoksa hata
-gösterilir. Açınım konfigürasyonundan yalnız gerçek türetilmiş-üst ilişkisi
-izlenir; bükülmüş konfigürasyon adı tahmin edilmez veya FlatPattern bastırılmaz.
-Geçici konfigürasyon ve önceki aktif belge geri alınır; kaynak kaydedilmez.
+## Adlandırma ve geometri kontrolü
 
-Görüntüleme yerel Qt/OpenGL'dir; uygun sürücü yoksa GUI dışındaki bir thread'de
-derinlik tamponlu CPU çizimi kullanılır. WebEngine, sunucu, CDN veya yeni bir
-SolidWorks oturumu yoktur. Büyük mesh'lerde CPU yedeği daha yavaş olabilir.
-Mesh 120.000 üçgenle sınırlıdır. Önizleme ve yaklaşık DXF çizgi toplamı,
-imalat ölçümü veya geometri eşdeğerliği sertifikası değildir.
+Tek gövdede eski ad korunur: `BRAKET - 1.5 mm - 12 adet.dxf`.
+Çok gövdede gövde adı ve sabit kimlik; birden fazla kullanılan konfigürasyonda
+konfigürasyon ayrımı eklenir. Kod/gövde/malzeme/konfigürasyon adlandırma seçenekleri
+vardır. `mm` ve `adet` alanları Nesting okuyucusuyla uyumludur. Kalınlık klasöründe
+virgül, dosya adında nokta kullanılır. Hedef çakışmaları kimlik ekiyle ayrılır.
+Mevcut dosya varsayılan atlanır; üzerine yazmada önce geçici çıktı doğrulanır.
 
-[Mimari, kaynak incelemesi, testler ve canlı Windows kontrolü](../../docs/dxf-3d-preview/README.md).
+DXF yapı/audit, geçerli geometri ve yaygın çizgi/yay/daire/polyline türlerinin
+aynı katmandaki kesin mükerrerleri denetlenir; layer'lar yeniden yazılmaz.
+DWG başlığı denetlenir; binary DWG geometri çözümleyicisi eklenmedi. Native
+sheet-metal API'si 1:1 üretim yolu olarak kullanılır; gerçek boyutlar ve
+katman eşdeğerliği lisanslı Windows kabul testi gerektirir.
 
-## Çıktı klasörleri
+## Önizleme ve doğrulama
 
-**DXF / DWG → Sac kalınlığına göre klasörle** seçeneği
-açıkken uygulama, sacın SolidWorks'ten okunan gerçek kalınlığına göre çıktı
-klasörleri oluşturur. Başlangıçta açıktır; tercih kaydedilir.
+Mevcut sağ 3D / açınım / bilgi paneli korunur. İstek/önbellek dosya,
+konfigürasyon, kalıcı gövde ve revizyonla ayrılır. Aynı dosyanın ikinci gövdesi
+birincinin görüntüsünü kullanmaz. Açınım seçilen Flat-Pattern üzerinden geçici
+DXF ile okunur; DWG dosyası okunmuş gibi sunulmaz. Önizleme üretim çıktısını
+ve kaynak CAD'ı kaydetmez. İlk tıklama görsel kontrolü açar, kayıt kendiliğinden
+başlamaz. Bu, bütün gövdeler için imalat geometri sertifikası değildir.
 
-```text
-Çıktı/
-  1,5 mm/
-    BRAKET - 1.5 mm - 12 adet.dxf
-  2 mm/
-    KAPAK - 2 mm - 3 adet.dxf
-    Alt montaj/
-      DESTEK - 2 mm - 6 adet.dxf
-```
-
-Klasör adında Türkçe ondalık virgül, mevcut dosya adlarında ondalık nokta
-kullanılır. DXF ve DWG aynı kurala uyar; seçtiğiniz biçim kaydedilir.
-Kaynak alt klasörler kalınlık klasörünün içinde korunur: farklı kaynak
-klasörlerindeki aynı adlı parçalar birbirinin üzerine yazılmaz.
-
-Seçenek kapalıysa önceki çıktı düzeni kullanılır: kaynak alt klasör yapısı,
-seçtiğiniz çıktı klasörünün altında korunur. PDF aktarımı bu seçenekten etkilenmez.
-
-Mevcut dosyaları atlama ve güvenli üzerine yazma kuralları seçilen hedef
-klasörde uygulanır. Sonuç listesi, dosya ayrıntıları ve CSV raporu gerçek
-çıktı yolunu gösterir. Kalınlık okunamazsa, geçersizse veya parçada birden
-fazla farklı kalınlık varsa tahmini bir klasöre aktarım yapılmaz; hata bildirilir.
-
-[Genel kullanım ve SolidWorks kontrol adımları](../../README.md#sac-metal-açınımı) ·
-[Aktarım yöntemi ve kaynak karşılaştırması](../../docs/dxf-dwg-verification.md).
-
-Bu eklemede **12 ilgili kontrol geçti**: 8 aktarım/yol kontrolü ve 4 gerçek
-Tk arayüz kontrolü. Karışık kalınlıklar, aynı adlı kaynak alt klasörleri,
-DXF/DWG çıktıları, geçersiz kalınlık, mevcut dosyaları atlama, güvenli üzerine
-yazma, CSV yolu, tercih kaydı, sayfa önbelleği ve PDF ayrımı doğrulandı.
-Aktarım kontrolleri SolidWorks COM davranışını temsil eden test nesneleriyle
-yapıldı; gerçek Windows/SolidWorks aktarımı bu bulut ortamında çalıştırılmadı.
-EXE oluşturulmadı.
-
-[Arşiv: Klasörleme seçeneğinin güncel ekran görüntüsü](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/dxf_dwg/examples/thickness-folders-dark.png).
-Görüntü, kullanıcı tercihlerini değiştirmeden
-`python modules/dxf_dwg/examples/capture.py` ile gerçek Tk ekranından yeniden alınabilir.
+Yeni testler: `tests/test_sheet_inventory*.py`, `test_flat_checks.py`.
+Gerçek SolidWorks kabulü: `tests/test_multibody_live.py`.
+[Ayrıntılı rapor, sınırlamalar ve test komutları](../../MULTIBODY_DXF_DWG_RAPORU.md).

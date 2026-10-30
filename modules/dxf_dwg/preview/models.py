@@ -15,6 +15,9 @@ class Request:
     update_stamp: int | None = None
     quantity: int | None = None
     bend_lines: bool = False
+    flat_ref: str = ''
+    body_name: str = ''
+    thickness_mm: float | None = None
 
 
 @dataclass(frozen=True)

@@ -25,10 +25,16 @@ def payload(path, configuration='Bent'):
 
 
 @pytest.fixture
-def page(qtbot, tmp_path):
+def page(qtbot, tmp_path, monkeypatch):
     create_application([])
     window = MainWindow(tmp_path/'settings.json')
     p = window.pages['dxf_dwg']
+    def discovery(source,recursive,events,stop,**kwargs):
+        # These are preview UI tests. Native classification has its own API
+        # doubles in test_sheet_inventory, not fake CAD reads on the GUI thread.
+        files=sorted(str(path) for path in Path(source).glob('*.SLDPRT'))
+        events.put(('files',files));events.put(('done',dict(state='preview',total=len(files))))
+    monkeypatch.setattr('modules.dxf_dwg.sheetmetal.scan_sources',discovery)
 
     def before_close(w):
         # pytest-qt closes/deletes registered widgets before yield-fixture
@@ -141,14 +147,14 @@ def test_3d_is_shown_before_flat_finishes_and_stop_does_not_restart_it(page, qtb
     assert p.preview_payload.source == str(files[1])
 
 
-def test_known_restore_failure_blocks_silent_save_until_a_verified_refresh(page, qtbot, monkeypatch):
+def test_known_restore_failure_blocks_export_until_a_verified_refresh(page, qtbot, monkeypatch):
     p, w, _ = page
     called = []
     monkeypatch.setattr('gui_qt.export.export_parts', lambda *a, **k: called.append(True))
     p.handle_events([('dxf_preview_restore_error', (p.preview_generation, 'source configuration not restored'))])
     p.start_export()
     assert not called and not w.jobs.busy
-    assert 'otomatik kayıt başlatılmadı' in p.status_text
+    assert 'aktarım başlatılmadı' in p.status_text
     select(p, qtbot)
     assert not p._preview_restore_failed
 

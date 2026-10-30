@@ -184,7 +184,7 @@ def test_source_inventory_selection_filters_and_clear_share_the_export_model(win
     page.set_busy(False);results.clear_button.click()
     assert inventory.proxy.rowCount()==results.model.rowCount()==0
     assert inventory.search.text()=='' and results.results==[]
-    assert inventory.counter.text()=='Kaynak dosyalar · 0'
+    assert inventory.counter.text()==('Sac gövdeleri · 0' if mode=='dxf_dwg' else 'Kaynak dosyalar · 0')
 
 
 def test_bom_source_selection_shows_part_or_assembly_results_and_clear(window):

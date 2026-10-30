@@ -128,7 +128,8 @@ class PreviewPanel(QWidget):
 
     def show_payload(self, payload):
         from pathlib import Path
-        self.source_label.setText(f'{Path(payload.source).name} · {payload.configuration}')
+        body = dict(payload.info).get('Gövde','')
+        self.source_label.setText(f'{Path(payload.source).name} · {payload.configuration}'+(' · '+body if body else ''))
         self.source_label.setToolTip(payload.source)
         self.mesh_view.set_mesh(payload.mesh)
         flat_error = next((w for w in payload.warnings if w.startswith('Açınım önizlemesi okunamadı:')), '')

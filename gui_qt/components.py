@@ -338,7 +338,7 @@ class SourceFileProxy(FilterProxy):
     def data(self,index,role=Qt.DisplayRole):
         if role==Qt.DisplayRole:
             row = super().data(index,Qt.UserRole)
-            if row: return PureWindowsPath(str(row.get('source',''))).name
+            if row: return row.get('source_label') or PureWindowsPath(str(row.get('source',''))).name
         return super().data(index,role)
 
 

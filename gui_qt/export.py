@@ -89,8 +89,9 @@ class ExportPage(BasePage):
         except ValueError as error:
             return self.set_status(error, True)
         self.settings.flush()
-        self.results.reset()
+        self.prepare_export_results()
         mode = self.mode
+        extra = self.export_arguments()
 
         def operation(sink, stop):
             target = Path(values['output'])
@@ -101,10 +102,16 @@ class ExportPage(BasePage):
                 export_drawings(*args)
             else:
                 export_parts(*args, formats=(values['format'].lower(),), bend_lines=values['bend_lines'],
-                             group_by_thickness=values['group_by_thickness'])
+                             group_by_thickness=values['group_by_thickness'], **extra)
 
         self.jobs.start(self, operation)
         self.set_status('Aktarım hazırlanıyor…')
+
+    def export_arguments(self):
+        return {}
+
+    def prepare_export_results(self):
+        self.results.reset()
 
     @Slot(object)
     def handle_events(self, events):

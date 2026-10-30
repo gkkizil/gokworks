@@ -6,7 +6,8 @@ from tempfile import TemporaryDirectory
 
 from modules.cad_converter.api import call, get, interface, invoke, PART_IID, ApiError, RestoreError
 from modules.cad_converter.models import checkpoint
-from modules.profile_cutting.solidworks import Session as ReadSession, optional, values
+from modules.profile_cutting.solidworks import optional, values
+from modules.dxf_dwg.sheetmetal import Session as ReadSession
 from modules.tolerance_stack.com import variant
 from modules.dxf_dwg import exporter
 from .flat import read_flat
@@ -144,6 +145,8 @@ class Session(ReadSession):
 
     def metadata(self, model, configuration, request, body_reference=''):
         properties = {}
+        body_name = request.body_name
+        cut_list_name = ''
         extension = manager = wrapper = part = None
         thicknesses = []
         try:
@@ -164,12 +167,13 @@ class Session(ReadSession):
             if body_reference:
                 folder = members = member = feature = None
                 try:
-                    for feature in self.cut_folders(model):
-                        if call(feature, 'GetTypeName2') != 'CutListFolder':
+                    for feature, kind in self.cut_folders(model):
+                        if kind != 'CutListFolder':
                             continue
                         folder = call(feature, 'GetSpecificFeature2')
                         members = values(call(folder, 'GetBodies'))
                         if any(self.persistent_ref(model, member) == body_reference for member in members):
+                            cut_list_name = str(get(feature,'Name'))
                             for key, prop in self.properties(feature).items():
                                 if prop.resolved and prop.evaluated:
                                     properties[key.casefold()] = prop.evaluated
@@ -219,9 +223,16 @@ class Session(ReadSession):
                 pending = []
             thickness = (f'{thicknesses[0]:g} mm' if thicknesses and all(abs(t-thicknesses[0]) < 1e-6 for t in thicknesses)
                          and thicknesses[0] > 0 else 'Okunamadı')
+            if body_reference and request.flat_ref:
+                try:
+                    selected, _ = self.body(model, body_reference)
+                    body_name = str(optional(selected,'Name',prop=True,default=body_name) or body_name)
+                    thickness = f'{self.thickness(model, selected, {k.upper():v for k,v in properties.items()}, list(self.features(model))):g} mm'
+                except Exception:
+                    thickness = 'Okunamadı'
             code = field(('PART NUMBER', 'PARTNO', 'KOD', 'PARÇA KODU'))
             if code == 'Okunamadı': code = Path(request.source).stem + ' (dosya adı)'
-            return [('Parça kodu', code),
+            return ([('Gövde',body_name)] if body_name else []) + ([('Cut List',cut_list_name)] if cut_list_name else []) + [('Parça kodu', code),
                     ('Açıklama', field(('DESCRIPTION', 'AÇIKLAMA', 'TANIM'))),
                     ('Dosya', Path(request.source).name), ('Konfigürasyon', configuration),
                     ('Malzeme', material), ('Sac kalınlığı', thickness),
@@ -244,7 +255,7 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
     else:
         if changed:
             warnings.append('Kaynak çıktıdan sonra değişmiş; çıktı yeniden alınmalı. Açınım güncel kaynaktan önizleniyor.')
-        if body_count != 1:
+        if body_count != 1 and not (request.body_ref and request.flat_ref):
             raise ApiError('Çok gövdeli kaynak için güvenilir açınım önizlemesi yok; gövdeye özel çıktı gerekli.')
         checkpoint(stop)
         # Same source/configuration and native export path. Never an inferred
@@ -253,7 +264,10 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
             temporary = Path(folder) / 'preview.dxf'
             try:
                 status, detail = exporter.export_one_part(session.app, request.source, [temporary],
-                                                         bend_lines=request.bend_lines, stop_event=stop)
+                    bend_lines=request.bend_lines, stop_event=stop,
+                    sheet=dict(configuration=request.configuration, body_ref=request.body_ref,
+                               flat_ref=request.flat_ref) if request.flat_ref else None,
+                    selection_session=session if request.flat_ref else None)
             except exporter.SourceRestoreError as error:
                 raise RestoreError(str(error)) from error
             checkpoint(stop)
@@ -299,7 +313,7 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
             with session.folded(model, exported_configuration) as (configuration, _):
                 if session.rebuild_pending(model) is not False:
                     raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
-                body, _ = session.body(model, request.body_ref if configuration == exported_configuration else '')
+                body, _ = session.body(model, request.body_ref)
                 reference = session.persistent_ref(model, body)
                 update = optional(model, 'GetUpdateStamp')
                 update = update if type(update) is int else None

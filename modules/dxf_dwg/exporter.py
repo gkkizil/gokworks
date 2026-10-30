@@ -1,4 +1,4 @@
-"""Aktif konfigürasyondaki tek gövdeli sac parçaları DXF/DWG açınımına aktarır."""
+"""Safe native flat export, including explicit body/configuration selections."""
 
 import os
 import base64
@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 import re
 from uuid import uuid4
+from contextlib import nullcontext
 
 try:
     import ezdxf
@@ -422,13 +423,13 @@ def preview_identity(model, body):
 
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     target_builder=None, output_paths=None, output_results=None, output_identity=None,
-                    save_modified=False, stop_event=None):
+                    save_modified=False, stop_event=None, sheet=None, selection_session=None):
     """Açınımı aktar; yalnızca bu çağrının açtığı belgeyi kapat.
 
     Normal toplu aktarım save_modified=True ile sessiz Tümünü Kaydet uygular.
     Önizleme ve doğrudan çağrılar varsayılan olarak kaynakları kaydetmez.
 
-    Çok gövdeli parçalar eksik/üst üste geometri üretmek yerine hata döndürür.
+    Çok gövdeli parça için taramadan gelen kesin sheet kimliği gerekir.
     Her biçimin sonucu ayrıdır. Hazır çıktı ile başarısız biçim birlikteyse
     parça kısmen tamamlandı olarak raporlanır; başarısız biçim saklanmaz.
     """
@@ -486,11 +487,30 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 notes.append(f"Açma uyarısı: {warnings.value}")
         if _value(model, "GetType") != PART:
             raise RuntimeError("Dosya bir parça değil.")
-        part_api = _part_api(model)
+        part_api = _late_bound(selection_session.part(model)) if selection_session is not None else _part_api(model)
+        original_config = _value(model.ConfigurationManager.ActiveConfiguration, 'Name')
+        requested_config = sheet.get('configuration', '') if sheet else ''
+        if requested_config and requested_config != original_config:
+            errors = _out_integer()
+            activated_here = True
+            activated = app.ActivateDoc3(_document_name(model), False, DONT_REBUILD, errors)
+            if activated is None or errors.value or not _success(model.ShowConfiguration2(requested_config)):
+                raise RuntimeError('İstenen kaynak konfigürasyonu açılamadı: '+requested_config)
+            if _value(model.ConfigurationManager.ActiveConfiguration, 'Name') != requested_config:
+                raise RuntimeError('İstenen kaynak konfigürasyonu doğrulanamadı.')
         bodies = part_api.GetBodies2(SOLID_BODY, False) or ()
-        if len(bodies) != 1:
+        if sheet:
+            if not sheet.get('body_ref') or not sheet.get('flat_ref') or selection_session is None:
+                raise RuntimeError('Gövde/Flat-Pattern kimliği eksik; yeniden tarayın.')
+            matches = [body for body in bodies if selection_session.persistent_ref(model, body) == sheet['body_ref']]
+            if len(matches) != 1:
+                raise RuntimeError('Seçilen sac gövdesi artık bulunamıyor; yeniden tarayın.')
+            selected_body = matches[0]
+        elif len(bodies) != 1:
             raise RuntimeError("Bu aktarım tek gövdeli sac parçalar içindir. Çok gövdeli parçayı gövde bazında ayrı .SLDPRT dosyalarına ayırın.")
-        if not _value(bodies[0], "IsSheetMetal"):
+        else:
+            selected_body = bodies[0]
+        if not _value(selected_body, "IsSheetMetal"):
             raise RuntimeError("Aktif konfigürasyondaki gövde sac metal değil.")
         model_path = _value(model, "GetPathName")
         if not model_path:
@@ -498,10 +518,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         if _part_key(model_path, "") != _part_key(os.path.abspath(str(part)), ""):
             raise RuntimeError("SolidWorks istenen kaynak yerine farklı bir parça döndürdü; aktarım yapılmadı.")
         config = _value(model.ConfigurationManager.ActiveConfiguration, "Name")
-        original_config = config
         source_validated = True
         if output_identity is not None:
-            output_identity.update(preview_identity(model, bodies[0]))
+            output_identity.update(preview_identity(model, selected_body))
             output_identity['bend_lines'] = bool(bend_lines)
         notes.append(f"Konfigürasyon: {config}")
         if target_builder is not None:
@@ -551,13 +570,30 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             temporary = target.with_name(f".gokworks-{uuid4().hex}{target.suffix}")
             try:
                 target.parent.mkdir(parents=True, exist_ok=True)
-                exported = part_api.ExportToDWG2(str(temporary), model_path, SHEET_METAL,
-                                                True, alignment, False, False, options, views)
-                _restore_export_configuration(model, original_config)
+                # Resolve the exact body and FlatPattern again for EACH format.
+                # ExportToDWG2 must see one selected FlatPattern, never all bodies.
+                guard = (selection_session.selected_flat(model, sheet['body_ref'], sheet['flat_ref'], stop_event,
+                                                         feature_name=sheet.get('flat_pattern',''))
+                         if sheet else nullcontext())
+                try:
+                    with guard:
+                        checkpoint()
+                        exported = part_api.ExportToDWG2(str(temporary), model_path, SHEET_METAL,
+                                                        True, alignment, False, False, options, views)
+                except Exception as error:
+                    from modules.cad_converter.api import RestoreError
+                    if isinstance(error, RestoreError):
+                        raise SourceRestoreError(str(error)) from error
+                    raise
+                _restore_export_configuration(model, config)
                 checkpoint()
                 if not _success(exported):
                     raise RuntimeError("SolidWorks açınımı aktaramadı. Sac metal/açınım unsurunu kontrol edin.")
                 _validate_output(temporary)
+                if sheet and target.suffix.lower()=='.dxf':
+                    from .geometry_check import validate_flat_geometry
+                    validate_flat_geometry(temporary,stop_event)
+                checkpoint()
                 try:
                     _publish(temporary, target, overwrite)
                     outcomes.append("success")
@@ -570,6 +606,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             except (CountCancelled, SourceRestoreError):
                 raise
             except Exception as error:
+                from modules.cad_converter.models import Cancelled
+                if isinstance(error,Cancelled):raise CountCancelled() from error
                 outcomes.append("error")
                 notes.append(f"{kind}: {error}")
                 record(target, "error", str(error))
@@ -586,7 +624,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     except Exception as error:
         status = "error"
         notes.append(str(error))
-        save_failed = isinstance(error, SaveDocumentsError)
+        save_failed = isinstance(error, (SaveDocumentsError, SourceRestoreError))
+        if isinstance(error, SourceRestoreError):
+            restore_failed = str(error)
     finally:
         if model is not None and original_config is not None:
             try:
@@ -629,6 +669,10 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     raise RuntimeError(f"SolidWorks hata kodu: {errors.value}")
             except Exception as error:
                 notes.append(f"Önceki belge etkinleştirilemedi: {error}")
+        # Release child dispatch wrappers before a fatal restoration exception
+        # can retain this frame past the owning STA's CoUninitialize.
+        model = part_api = previous = active = activated = restored = selected_body = app = None
+        bodies = matches = ()
         if restore_failed:
             raise SourceRestoreError(restore_failed)
     return status, "; ".join(notes)
@@ -636,8 +680,12 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
 
 def export_parts(source_folder, output_folder, include_subfolders, overwrite_existing,
                  events, stop_event=None, formats=("dxf",), bend_lines=False,
-                 group_by_thickness=False):
+                 group_by_thickness=False, *, items=None, naming=()):
     """Dosya bazında olaylar gönder; sayaçlar çıktı biçimlerini değil parçaları sayar."""
+    if items is not None:
+        return export_selection(items, source_folder, output_folder, formats, events, stop_event,
+                                overwrite=overwrite_existing, bend_lines=bend_lines,
+                                group_by_thickness=group_by_thickness, naming=naming)
     summary = {"state": "completed", "total": 0, "processed": 0,
                "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": [],
                "unexported_configurations": 0}
@@ -753,3 +801,75 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             events.put(("log", message))
         finally:
             events.put(("done", summary))
+
+
+def export_selection(items, source, output, formats, events, stop=None, *, overwrite=False,
+                     bend_lines=False, group_by_thickness=False, naming=(), session_factory=None):
+    """One worker STA, body-specific exports, no source saves or implicit rescans.
+
+    Preserve the old callable export_parts signature for script callers. The
+    DXF workbench passes its checked sheet inventory through `items` instead.
+    """
+    from .sheetmetal import Session
+    from .inventory import plan_destinations
+    from modules.cad_converter.api import RestoreError
+    from modules.cad_converter.models import checkpoint, Cancelled
+    summary = dict(state='completed', total=len(items), processed=0, succeeded=0,
+                   partial=0, skipped=0, failed=0, warnings=[], error='')
+    try:
+        checkpoint(stop)
+        if any(not item.get('exportable') or not item.get('body_ref') or not item.get('flat_ref') for item in items):
+            raise ValueError('Seçimde doğrulanmamış bir sac gövdesi var; yeniden tarayın.')
+        plans = plan_destinations(items, source, output, formats, group_by_thickness, naming)
+        events.put(('total', len(items)))
+        if not items:
+            summary['state'] = 'empty'
+            return
+        with (session_factory or Session)() as session:
+            verified = {}
+            for item in items:
+                checkpoint(stop)
+                model = None
+                outputs, metadata = [], {}
+                events.put(('sheet_current', item['sheet_id']))
+                try:
+                    # Open missing documents read-only, in the owning STA. The
+                    # legacy single-export primitive sees an already-open doc.
+                    model = session.document(item['source'])
+                    with session.configuration(model, item['configuration']):
+                        # Revalidate ownership/thickness against current CAD data.
+                        token = _part_key(item['source'],item['configuration'])
+                        if token not in verified:
+                            verified[token], _ = session.describe(model, item['source'], item['configuration'], stop)
+                        fresh = verified[token]
+                        match = [row for row in fresh if row['body_ref']==item['body_ref']]
+                        if len(match)!=1 or not match[0]['exportable'] or match[0]['flat_ref']!=item['flat_ref']:
+                            raise ValueError('Sac/Flat-Pattern eşleşmesi değişmiş; yeniden tarayın.')
+                        if not math.isclose(match[0]['thickness_mm'],item['thickness_mm'],abs_tol=1e-6,rel_tol=1e-9):
+                            raise ValueError('Sac kalınlığı taramadan sonra değişmiş; yeniden tarayın.')
+                        if match[0].get('material','')!=item.get('material',''):
+                            raise ValueError('Gövdenin malzemesi taramadan sonra değişmiş; yeniden tarayın.')
+                        status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
+                            overwrite, bend_lines, output_results=outputs, output_identity=metadata,
+                            stop_event=stop, sheet=item, selection_session=session)
+                except (Cancelled, RestoreError, SourceRestoreError):
+                    raise
+                except Exception as error:
+                    status, detail = 'error', str(error)
+                finally:
+                    model = None
+                summary['processed'] += 1
+                summary[dict(success='succeeded',partial='partial',skipped='skipped',error='failed')[status]] += 1
+                available = [r['path'] for r in outputs if r['status'] in ('success','skipped')]
+                events.put(('sheet_result', dict(item, **metadata, status=status, detail=detail,
+                           outputs=outputs, output=' | '.join(available))))
+                events.put(('progress',(summary['processed'],len(items))))
+                checkpoint(stop)
+    except Cancelled:
+        summary['state'] = 'cancelled'
+    except (RestoreError, SourceRestoreError) as error:
+        summary.update(state='error', error=str(error), native_restore_failed=True)
+    except Exception as error:
+        summary.update(state='error', error=str(error))
+    finally:
+        events.put(('done',summary))
