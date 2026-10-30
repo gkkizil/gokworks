@@ -303,7 +303,7 @@ Regresyonlar önce hatalı davranışla yeniden üretildi. Yeni testler:
 `modules/dxf_dwg/tests/test_review_regressions.py`,
 `modules/dxf_dwg/tests/test_multibody_preview.py`,
 `modules/dxf_dwg/tests/test_sheet_inventory_ui.py`.
-`tests/sheet_fakes.py` yeni isteğe bağlı `body_ref` sınırını iletir.
+`modules/dxf_dwg/tests/sheet_fakes.py` yeni isteğe bağlı `body_ref` sınırını iletir.
 Yerel sınırlı-process regresyon koşusu: DXF/DWG, PDF, kompakt çalışma alanları,
 lazy sayfalar, depo yapısı ve seçilmiş Qt aktarım/iptal/filtre/temizleme akışları.
 **361 test toplandı: 353 geçti, 8 atlandı; ayrıca 63 alt test geçti.**
@@ -312,3 +312,14 @@ Yeni malzeme testinin ilk koşusunda property-get test nesnesi düzeltilip koşu
 tam olarak tekrarlandı; yukarıdaki sayılar son başarılı koşuya aittir.
 `git diff --check` ve DXF/DWG için Ruff `F821/F822/F823` temizdir.
 Gerçek lisanslı SolidWorks kabulü bu incelemede de çalıştırılmış sayılmaz.
+
+Bu düzeltmelerin kaynak commit'i **`a5f12bf`**, GitHub `main` dalına gönderildi.
+Bu commit için Windows sonuçları:
+
+- [Windows BOM/UI 41052786136](https://github.com/gkkizil/gokworks/actions/runs/41052786136):
+  **543 JUnit kaydı, 537 başarılı, 6 atlanan, 0 failure/error**.
+  DXF/DWG, profil, BOM, mil UI paketi ve %125/%150 ölçek kontrolleri başarılı.
+- [Windows shaft bridge 41052785758](https://github.com/gkkizil/gokworks/actions/runs/41052785758):
+  offline katalog/veri sözleşmesi ve gerçek PowerShell loader/pipe kontrolleri başarılı.
+- Bu işlerde de lisanslı SolidWorks sunucusu çalıştırılmadı. EXE üretilmedi.
+  Sonraki rapor commit'i yalnız bu doğrulama kaydını günceller.
