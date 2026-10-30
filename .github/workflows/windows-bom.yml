@@ -62,7 +62,7 @@ jobs:
         env:
           QT_SCALE_FACTOR: '1.25'
         run: |
-          python -m pytest -q --timeout=60 modules/shaft_generator/tests/test_bulk_ui.py::test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_classes_unchanged modules/shaft_generator/tests/test_ui.py::test_narrow_page_scrolls_forms_and_keeps_both_views_and_bottom_command_reachable --junitxml=windows-shaft-dpi-125.xml
+          python -m pytest -q --timeout=60 modules/shaft_generator/tests/test_bulk_ui.py::test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_classes_unchanged modules/shaft_generator/tests/test_bulk_ui.py::test_dpi_editor_is_checked_inside_the_real_application_client_area --junitxml=windows-shaft-dpi-125.xml
           $testExit=$LASTEXITCODE
           @'
           from pathlib import Path
@@ -80,7 +80,7 @@ jobs:
         env:
           QT_SCALE_FACTOR: '1.5'
         run: |
-          python -m pytest -q --timeout=60 modules/shaft_generator/tests/test_bulk_ui.py::test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_classes_unchanged modules/shaft_generator/tests/test_ui.py::test_narrow_page_scrolls_forms_and_keeps_both_views_and_bottom_command_reachable --junitxml=windows-shaft-dpi-150.xml
+          python -m pytest -q --timeout=60 modules/shaft_generator/tests/test_bulk_ui.py::test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_classes_unchanged modules/shaft_generator/tests/test_bulk_ui.py::test_dpi_editor_is_checked_inside_the_real_application_client_area --junitxml=windows-shaft-dpi-150.xml
           $testExit=$LASTEXITCODE
           @'
           from pathlib import Path

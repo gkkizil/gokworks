@@ -140,3 +140,37 @@ def test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_
     page.section_picker.setCurrentIndex(2);qtbot.wait(30)
     action=page.add_operation_buttons['keyway']
     assert action.isVisible() and page.rect().contains(action.mapTo(page,action.rect().bottomRight()))
+
+
+def test_dpi_editor_is_checked_inside_the_real_application_client_area(qtbot,tmp_path):
+    """ShaftPage is a child workbench, not a resizable native top-level window.
+
+    Windows clamps top-level frames at fractional DPI and to monitor height;
+    requesting a 1120x780 *logical* native window on a 1080p/150% desktop is
+    impossible. Exercise the production host and assert its actual client area.
+    The original standalone narrow-page tests remain in the 100% regression.
+    """
+    from gui_qt.app import create_application,MainWindow
+    app=create_application([]);window=MainWindow(tmp_path/'shaft-dpi.json')
+    qtbot.addWidget(window);window.show();window.navigate('shaft_generator')
+    page=window.pages['shaft_generator']
+    for theme in ('dark','light'):
+        window.set_theme(theme)
+        for width,height in ((820,560),(1360,900)):
+            available=window.screen().availableGeometry()
+            window.resize(max(window.minimumWidth(),min(width,available.width()-32)),
+                          max(window.minimumHeight(),min(height,available.height()-48)))
+            qtbot.wait(40)
+            assert window.stack.isAncestorOf(page) and not page.isWindow()
+            assert page.rect().contains(page.create_button.mapTo(page,page.create_button.rect().bottomRight()))
+            for view in (page.top_view,page.section_view):
+                assert view.width()>=180 and view.height()>=170
+                assert page.rect().contains(view.mapTo(page,view.rect().bottomRight()))
+            page.show_bulk_treatments();page.source_scroll.ensureWidgetVisible(page.bulk_button);qtbot.wait(30)
+            viewport=page.source_scroll.viewport()
+            assert viewport.rect().contains(page.bulk_button.mapTo(viewport,page.bulk_button.rect().bottomRight()))
+            page.section_picker.setCurrentIndex(2);qtbot.wait(30)
+            action=page.add_operation_buttons['keyway'];page.source_scroll.ensureWidgetVisible(action)
+            qtbot.wait(20)
+            assert action.isVisible() and viewport.rect().contains(action.mapTo(viewport,action.rect().bottomRight()))
+    window.close();app.processEvents()
