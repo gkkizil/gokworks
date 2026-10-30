@@ -66,7 +66,7 @@ başlığını denetler. Nesting, profil kesim veya mil hesap motorları değiş
 | `IModelDocExtension.GetPersistReference3` | Gövde ve Flat-Pattern kimlikleri; ad eşitliği sahiplik kanıtı sayılmaz |
 | `IFeature.Select2(False,-1)` / `ExportToDWG2` | Her biçimde yalnız doğru Flat-Pattern seçilerek mevcut native sheet-metal export |
 | `SuspendSelectionList` / `ResumeSelectionList2(False)` | Kullanıcının seçiminin saklanması ve geri alınması |
-| `ShowConfiguration2`, `ActivateDoc3`, read-only `OpenDoc6` | Geçici konfigürasyon ve belge yönetimi; sonunda önceki durum |
+| `ShowConfiguration2`, `ActivateDoc3`, read-only `OpenDoc6` | Gizli belgede doğrudan konfigürasyon okuma; sadece aktarımda görünür belge aktivasyonu; sonunda önceki durum |
 
 Kalınlık için önce gövdeye bağlı SheetMetal verisi okunur; uygun çözümlenmiş
 Cut List kalınlığı ve belge birimi desteklenir. Belge geneli ancak bütün aktif
@@ -74,11 +74,12 @@ SheetMetal kalınlıkları aynıysa ortak kaynak olabilir. Farklı kalınlıklar
 arasından ilk değer seçilmez. Eksik Cut List tek başına doğru gövdeyi elemez;
 doğrudan gövde verisi yeterliyse uyarıyla devam edilir.
 
-Native export öncesi eşleşme ve güncel kalınlık yeniden doğrulanır. Gövde ve
+Native export öncesi eşleşme, güncel kalınlık ve malzeme yeniden doğrulanır. Gövde ve
 Flat-Pattern sahipliği her biçimde tekrar kontrol edilir. Geçersiz çıktı,
 başarısız biçim ve iptal edilmiş geçici dosya yayımlanmaz. Başarısız bir
 parça/biçim diğer doğrulanmış parçaları durdurmaz. Oturum geri alınamıyorsa
-kalan işler durur; bu durum başarı/iptal diye gizlenmez.
+kalan işler durur; son satır İşleniyor durumunda bırakılmaz. Oluşmuş çıktı
+kısmi sonuç olarak raporlanır; geri alma hatası başarı/iptal diye gizlenmez.
 
 ## Adet, önbellek ve performans
 
@@ -98,7 +99,10 @@ Tarama ve aktarım ayrı işlerdir. GUI JobManager tek CAD işini STA worker'da
 çalıştırır; widget'lara worker'dan dokunulmaz. COM nesnesi UI'ye taşınmaz.
 Önizleme mevcut sınırlı mesh önbelleğini kullanır (8 kayıt / 32 MiB).
 
-Lightweight bileşen gerektiğinde referenced dosyanın salt okunur modeliyle
+Gizli parçanın referenced configuration verisi, belge öne getirilmeden doğrudan
+`ShowConfiguration2` ile okunur. Önceki konfigürasyon ve seçim listesi korunur.
+`IConfiguration.IsSpeedPak` gerçek bir property olarak okunur; eksik SpeedPak
+ağacı kabul edilmez. Lightweight bileşen gerektiğinde referenced dosyanın salt okunur modeliyle
 incelenir. `SetSuppression2` veya global resolve/suppression ayarı değiştirilmez.
 Belirli bir parça okunamıyorsa diğer parçaların doğrulanmış adetleri korunur.
 Okunamayan alt montaj daha fazla aynı parçayı saklıyor olabileceğinden, eksik
@@ -231,7 +235,48 @@ geçti. Native Qt uygulamasında açık/koyu tema yerleşimi sentetik verilerle
 çalıştırılarak gözden geçirildi; bu görüntüler gerçek CAD kabulü değildir ve
 depoya eski ekran görüntüsü/artifact eklenmedi. EXE oluşturulmadı.
 
-Windows GitHub Actions kontrolü mevcut `Windows BOM and shaft UI` iş akışından
-çalıştırılır; lisanslı SolidWorks içermeyen bu CI, native Windows Qt/COM/mocks
-ile canlı CAD kabulünden ayrı değerlendirilir. Son Windows sonucu doğrulanınca
-bu rapora çalışma bağlantısı ve test özeti eklenir.
+Son API düzeltmelerinden sonra **79 ilgili test** (envanter, gizli konfigürasyon,
+geri alma hatası, gerçek önizleme adapteri ve Qt UI) tekrar geçti. Kayıt öncesi
+önizleme akışı ayrıca **14/14** geçti. Bu sonuçlar geniş regresyonun üzerine
+yapılan hedefli kontrollerdir; birbirinden bağımsız toplamlar gibi toplanmaz.
+
+## Doğrulanan Windows CI sonuçları
+
+| Kontrol | Test edilen kaynak | Sonuç | Kanıt |
+|---|---|---|---|
+| DXF/DWG, profil kesim, BOM, mil UI ve domain testleri | `fa7d1f9` | **525 JUnit kaydı; 519 geçti, 6 atlandı, 0 failure/error** | [Windows BOM and shaft UI](https://github.com/gkkizil/gokworks/actions/runs/41041798260) |
+| %125 ve %150 native Qt ölçek kontrolü | `fa7d1f9` | İki adım da geçti | Aynı Windows BOM/UI işi |
+| PowerShell/C# yükleyici, geçici interop referansları ve IPC | `fa7d1f9` | Geçti; SolidWorks sunucusu kullanılmadı | [Windows shaft bridge](https://github.com/gkkizil/gokworks/actions/runs/41041798284) |
+| Ortak çalışma alanları, ayarlar, worker, iptal ve lazy import regresyonu | `3d2934c` | **183/183 geçti**; benchmark ve tam kaynak uygulama self-check geçti | [Windows performance and workbench regression](https://github.com/gkkizil/gokworks/actions/runs/41037260446) |
+| Nesting geometri, UI, raporlar ve çalışma alanı entegrasyonu | `3d2934c` | **282/282 geçti**; %125/%150, başlangıç ve native ekran yakalama geçti | [Windows Nesting workspace](https://github.com/gkkizil/gokworks/actions/runs/41037260610) |
+
+Ortak `gui_qt` değişiklikleri `3d2934c` içinde doğrulandı; sonraki kaynak
+commit'leri yalnız DXF/DWG modülündeki yönergeleri, SpeedPak property okumasını,
+gizli konfigürasyon okumasını ve hata raporlamasını değiştirdi. Son modül
+kaynağı `fa7d1f9` yeniden Windows DXF/BOM ve köprü kontrollerinden geçti.
+Rapor güncellemesi kaynak algoritmalarını değiştirmez.
+
+Windows benchmark'ta hesap/maliyet ve DXF içe aktarma sonuç imzalarının
+referansla aynı kaldığı doğrulandı. Bu ölçüm, SolidWorks montaj tarama hızının
+ölçümü değildir. Yukarıdaki Windows CI işlerinde de lisanslı SolidWorks
+sunucusu çalıştırılmadı; gerçek CAD kabul testleri tamamlandı sayılmıyor.
+
+## Sonraki ajan için veri sözleşmesi
+
+- `sheet_inventory`: COM nesnesi içermeyen, gövde bazında gruplu liste.
+  Kimlik `sheet_id = hash(normalize(source), configuration, body_ref)`;
+  `instances` fiziksel montaj örneklerinin kararlı yolları, `quantity` bunların sayısıdır.
+- `row_id`, gruplu görünümde `sheet_id`, ayrı görünümde gövde+örnek kimliğidir.
+  Aynı kaynak yoluna sahip iki gövdeyi `source` ile upsert etmeyin.
+- `body_ref` ve `flat_ref` kalıcı SolidWorks referanslarıdır. `body_name`,
+  `code` ve `flat_pattern` görüntü/arama alanıdır; kimlik yerine kullanmayın.
+  `FeatureByName` yalnız hızlı bulma içindir; kalıcı kimlik ve sahiplik ayrıca doğrulanır.
+- `sheet_current` gövde kimliğini; `sheet_result` kaynak, konfigürasyon, gövde,
+  `outputs`, durum ve ayrıntıyı taşır. Her biçimin sonucu ayrı saklanır.
+- `export_parts(..., items=..., naming=...)` yeni seçim sınırıdır. `items=None`
+  geriye uyumlu script yoludur. Qt ekranı doğrulanmış envanter üzerinden çalışır.
+- `Request` eski alan sırasını korur; `flat_ref`, `body_name`, `thickness_mm`
+  sondan eklenen isteğe bağlı alanlardır. Mesh/Flat/Payload yalnız düz veri taşır.
+- `done.native_restore_failed=True`, kullanıcı kaynağı kontrol etmeden yeni
+  aktarımın başlatılmamasını sağlar. Geri alma hatasını iptal olarak göstermeyin.
+- PDF worker JSON/IPC, C# mil köprüsü, BOM ve Nesting proje şemaları değişmedi.
