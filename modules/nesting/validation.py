@@ -20,12 +20,14 @@ def validate_result(project, result, *, complete=True, stop=None):
     if complete and result.unplaced:
         raise ValueError(f'{len(result.unplaced)} parça yerleşmedi. Sac stokunu/ölçüsünü ve yerleşim koşullarını kontrol edin.')
     from modules.nesting.dxf_import import check_cancel
+    parts = {part.id:part for part in project.parts}
+    sheets = {sheet.id:sheet for sheet in project.sheets}
     groups = defaultdict(list); counts = Counter(); instances = set(); stocks = defaultdict(set)
     for p in result.placements:
         check_cancel(stop)
-        if p.part_id not in {part.id for part in project.parts} or p.sheet_id not in {sheet.id for sheet in project.sheets}:
+        if p.part_id not in parts or p.sheet_id not in sheets:
             raise ValueError('Yerleşimde tanımsız parça veya sac kimliği.')
-        part, sheet = project.part(p.part_id), project.sheet(p.sheet_id)
+        part, sheet = parts[p.part_id], sheets[p.sheet_id]
         if type(p.sheet_number) is not int or p.sheet_number < 1:
             raise ValueError('Geçersiz levha numarası.')
         if not all(math.isfinite(v) for v in (p.x, p.y, p.angle)):
@@ -60,7 +62,7 @@ def validate_result(project, result, *, complete=True, stop=None):
                 if collision.intersection(other).area > EPS or collision.distance(other)+EPS < required:
                     raise ValueError(part.code + ': parça çakışması veya yetersiz kesim aralığı.')
     for sheet_id, used in stocks.items():
-        if len(used) > project.sheet(sheet_id).stock:
+        if len(used) > sheets[sheet_id].stock:
             raise ValueError('Sac stok adedi aşıldı.')
     expected = sum(p.quantity for p in project.parts)
     if any(counts[p.id] > p.quantity for p in project.parts) or len(result.placements)+len(result.unplaced) != expected:

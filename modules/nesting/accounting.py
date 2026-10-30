@@ -20,31 +20,48 @@ def calculate(project, result, *, complete=True, stop=None):
     groups = defaultdict(list)
     for p in result.placements:
         groups[(p.sheet_id, p.sheet_number)].append(p)
+    part_by_id = {p.id:p for p in project.parts}
+    sheet_by_id = {s.id:s for s in project.sheets}
+    material_by_id = {m.id:m for m in project.materials}
+    part_rows = defaultdict(list)
+    # Invocation-local only: edited geometry/materials are re-read on the next
+    # calculation. Never retain or share an NFP/validation cache here.
+    metrics = {}
+    def details(part_id):
+        if part_id not in metrics:
+            geometry = part_by_id[part_id].polygon
+            components = polygons(geometry)
+            metrics[part_id] = dict(area=geometry.area, perimeter=geometry.length,
+                bounds=geometry.bounds, holes=sum(len(p.interiors) for p in components),
+                outer_count=len(components), outer_perimeter=sum(p.exterior.length for p in components),
+                inner_perimeter=sum(r.length for p in components for r in p.interiors))
+        return metrics[part_id]
     sheets = []; parts = []; material_total = Decimal(0)
     cut_mm = 0.; piercings = 0
     for plate, ((sheet_id, number), placements) in enumerate(groups.items(),1):
-        sheet = project.sheet(sheet_id); material = project.material(sheet.material)
+        sheet = sheet_by_id[sheet_id]; material = material_by_id[sheet.material]
         gross_area = sheet.width*sheet.height
         gross_mass = mass(gross_area, sheet.thickness, material.density)
-        net_area = sum(project.part(p.part_id).area for p in placements)
+        net_area = sum(details(p.part_id)['area'] for p in placements)
         net_mass = mass(net_area, sheet.thickness, material.density)
         cost = money(sheet.price_sheet if sheet.pricing == 'sheet' else gross_mass*sheet.price_kg)
         material_total += cost; assigned = Decimal(0)
         for index, placement in enumerate(placements):
-            part = project.part(placement.part_id); g = part.polygon
-            allocation = cost-assigned if index == len(placements)-1 else min(cost-assigned, money(cost*Decimal(str(part.area/net_area))))
+            part = part_by_id[placement.part_id]; metric = details(part.id)
+            area = metric['area']
+            allocation = cost-assigned if index == len(placements)-1 else min(cost-assigned, money(cost*Decimal(str(area/net_area))))
             assigned += allocation
-            length = g.length
-            holes = sum(len(p.interiors) for p in polygons(g)); outer_count = len(polygons(g))
+            length = metric['perimeter']
+            holes, outer_count = metric['holes'], metric['outer_count']
             cut_mm += length; piercings += holes+outer_count
             parts.append(dict(id=part.id, code=part.code, description=part.description, instance=placement.instance,
                               material=material.name, density=material.density, thickness=part.thickness,
-                              area=part.area, weight=mass(part.area, part.thickness, material.density),
+                              area=area, weight=mass(area, part.thickness, material.density),
                               sheet=f'{plate}. plaka · {sheet.name}', plate=plate, sheet_id=sheet_id, sheet_number=number,
                               allocation=float(allocation), perimeter=length,
-                              outer_perimeter=sum(p.exterior.length for p in polygons(g)),
-                              inner_perimeter=sum(r.length for p in polygons(g) for r in p.interiors),
+                              outer_perimeter=metric['outer_perimeter'], inner_perimeter=metric['inner_perimeter'],
                               holes=holes, source=part.source, sha256=part.source_sha256))
+            part_rows[part.id].append(parts[-1])
         if net_area > gross_area+1e-6 or net_mass > gross_mass+1e-9:
             raise ValueError('Brüt / net alan veya ağırlık tutarsızlığı.')
         sheets.append(dict(id=sheet_id, number=number, plate=plate, name=sheet.name, material=material.name,
@@ -69,11 +86,11 @@ def calculate(project, result, *, complete=True, stop=None):
         raise ValueError('Dağıtılan malzeme maliyetleri toplamı tutarsız.')
     summaries = []
     for part in project.parts:
-        rows = [row for row in parts if row['id'] == part.id]
+        rows = part_rows[part.id]
         if rows:
-            bounds = part.polygon.bounds
+            metric = details(part.id); bounds = metric['bounds']
             summaries.append(dict(id=part.id,code=part.code,description=part.description,material=rows[0]['material'],
-                                  thickness=part.thickness,quantity=len(rows),requested=part.quantity,area=part.area,
+                                  thickness=part.thickness,quantity=len(rows),requested=part.quantity,area=metric['area'],
                                   weight=rows[0]['weight'],total_weight=sum(r['weight'] for r in rows),
                                   allocation=float(sum(money(r['allocation']) for r in rows)),
                                   width=bounds[2]-bounds[0],height=bounds[3]-bounds[1],

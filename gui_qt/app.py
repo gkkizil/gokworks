@@ -16,22 +16,36 @@ from .icons import BrandLogo, ASSETS, icon, set_application_identity
 from .components import label, button, scroll, show_details, Disclosure, card, ElidedLabel
 from . import services
 from solidworks import diagnostics
-from modules.pdf.ui import PdfPage
-from modules.dxf_dwg.ui import DxfDwgPage
-from modules.bom.ui import BomPage
-from modules.naming.ui import NamingPage
-from modules.k_factor.ui import KrPage
-from modules.bolt.ui import BoltPage
-from modules.bolt_torque.ui import TorquePage
-from modules.weight.ui import WeightPage
-from modules.iso_fits.ui import IsoPage
-from modules.geometric_tolerances.ui import GdtPage
-from modules.tolerance_stack.ui import ToleranceStackPage
-from modules.nesting.ui import NestingPage
-from modules.cad_converter.ui import CadConverterPage
-from modules.profile_cutting.ui import ProfileCuttingPage
-from modules.shaft_generator.ui import ShaftPage
-from modules.gear_calculator.ui import GearPage
+from importlib import import_module
+from .pages import PageRegistry
+
+
+PAGE_TYPES = {
+    'pdf': ('modules.pdf.ui', 'PdfPage'),
+    'dxf_dwg': ('modules.dxf_dwg.ui', 'DxfDwgPage'),
+    'bom': ('modules.bom.ui', 'BomPage'),
+    'naming': ('modules.naming.ui', 'NamingPage'),
+    'k_factor': ('modules.k_factor.ui', 'KrPage'),
+    'bolt': ('modules.bolt.ui', 'BoltPage'),
+    'bolt_torque': ('modules.bolt_torque.ui', 'TorquePage'),
+    'weight': ('modules.weight.ui', 'WeightPage'),
+    'iso_fits': ('modules.iso_fits.ui', 'IsoPage'),
+    'geometric_tolerances': ('modules.geometric_tolerances.ui', 'GdtPage'),
+    'tolerance_stack': ('modules.tolerance_stack.ui', 'ToleranceStackPage'),
+    'nesting': ('modules.nesting.ui', 'NestingPage'),
+    'cad_converter': ('modules.cad_converter.ui', 'CadConverterPage'),
+    'profile_cutting': ('modules.profile_cutting.ui', 'ProfileCuttingPage'),
+    'shaft_generator': ('modules.shaft_generator.ui', 'ShaftPage'),
+    'gear_calculator': ('modules.gear_calculator.ui', 'GearPage'),
+}
+
+
+def __getattr__(name):
+    # Preserve explicit legacy imports such as `from gui_qt.app import PdfPage`.
+    for module, class_name in PAGE_TYPES.values():
+        if class_name == name:
+            return getattr(import_module(module), name)
+    raise AttributeError(name)
 
 
 MODULES = (
@@ -99,23 +113,9 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.progress)
         self.connection_button = button('SolidWorks · Bağlantıyı kontrol et', self.check_connection)
         self.statusBar().addPermanentWidget(self.connection_button)
-        # Build once; navigation only changes the visible page. No rebuild/COM on activation.
-        factories = dict(pdf=lambda: PdfPage(self), dxf_dwg=lambda: DxfDwgPage(self),
-                         cad_converter=lambda: CadConverterPage(self),
-                         bom=lambda: BomPage(self), naming=lambda: NamingPage(self), k_factor=lambda: KrPage(self),
-                         iso_fits=lambda: IsoPage(self), geometric_tolerances=lambda: GdtPage(self),
-                         tolerance_stack=lambda: ToleranceStackPage(self),
-                         bolt=lambda: BoltPage(self), bolt_torque=lambda: TorquePage(self),
-                         weight=lambda: WeightPage(self), nesting=lambda: NestingPage(self),
-                         profile_cutting=lambda: ProfileCuttingPage(self),
-                         shaft_generator=lambda: ShaftPage(self),
-                         gear_calculator=lambda: GearPage(self))
-        for mode, factory in factories.items():
-            page = factory()
-            page.statusChanged.connect(lambda text, error, page=page: self.page_status(page, text, error))
-            page.progressChanged.connect(self.set_progress)
-            self.pages[mode] = page
-            self.stack.addWidget(page)
+        # Only the restored initial module is constructed at startup. Existing
+        # mapping access still loads any module explicitly requested by callers.
+        self.pages = PageRegistry(PAGE_TYPES, self.create_page)
         self.jobs.busyChanged.connect(self.job_state_changed)
         self.jobs.finished.connect(self.finished_job)
         self.set_theme(self.appearance)
@@ -126,6 +126,16 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence('Ctrl+,'), self, activated=self.show_settings)
         QShortcut(QKeySequence('Ctrl+B'),self,activated=self.toggle_sidebar)
         QShortcut(QKeySequence('Ctrl+K'),self,activated=self.focus_module_search)
+
+    def create_page(self, mode, factory):
+        module, class_name = factory
+        page = getattr(import_module(module), class_name)(self)
+        page.statusChanged.connect(lambda text, error, page=page: self.page_status(page, text, error))
+        page.progressChanged.connect(self.set_progress)
+        self.stack.addWidget(page)
+        page.refresh_command_icons()
+        page.theme_changed()
+        return page
 
     def toggle_sidebar(self):
         self.set_sidebar_collapsed(not self.sidebar_collapsed)
@@ -189,6 +199,7 @@ class MainWindow(QMainWindow):
 
     def register_inspector(self,mode,widget):
         self.inspectors[mode]=widget;self.inspector_stack.addWidget(widget)
+        widget.setEnabled(not self.jobs.busy)
         self.jobs.busyChanged.connect(lambda busy:widget.setEnabled(not busy))
 
     def inspector_visibility_changed(self,visible):
@@ -267,7 +278,7 @@ class MainWindow(QMainWindow):
         for key,nav in self.navigation.items():nav.setIcon(icon(key,COLORS[self.appearance]['accent' if key==mode else 'muted']))
         self.update_inspector()
         owner = self.jobs.owner
-        page = owner if owner in self.pages.values() else self.pages[mode]
+        page = owner if owner in self.pages.loaded_values() else self.pages[mode]
         self.show_status(page.status_text,page.status.property('role')=='error')
 
     def set_theme(self, appearance):
@@ -286,7 +297,7 @@ class MainWindow(QMainWindow):
         self.logo.set_appearance(appearance)
         for mode, nav in self.navigation.items():
             nav.setIcon(icon(mode, COLORS[appearance]['accent' if nav.isChecked() else 'muted']))
-        for page in self.pages.values():
+        for page in self.pages.loaded_values():
             page.refresh_command_icons()
             page.theme_changed()
         self.settings.set('appearance', appearance)
@@ -389,7 +400,7 @@ class MainWindow(QMainWindow):
                     owner.pending_apply = None
                 self.jobs.cancel()
             return
-        shaft = self.pages.get('shaft_generator')
+        shaft = self.pages.peek('shaft_generator')
         if shaft is not None and not shaft.confirm_close():
             self.closing = False
             event.ignore()

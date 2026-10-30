@@ -1,0 +1,101 @@
+name: Windows performance and workbench regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'gui_qt/**'
+      - 'modules/nesting/accounting.py'
+      - 'modules/nesting/dxf_import.py'
+      - 'modules/nesting/validation.py'
+      - 'packaging/benchmark_performance.py'
+      - 'packaging/hooks/hook-gui_qt.app.py'
+      - 'tests/test_lazy_pages_gui.py'
+      - '.github/workflows/windows-performance.yml'
+  pull_request:
+    paths:
+      - 'gui_qt/**'
+      - 'modules/nesting/**'
+      - 'packaging/benchmark_performance.py'
+      - 'packaging/hooks/hook-gui_qt.app.py'
+      - 'tests/test_lazy_pages_gui.py'
+      - '.github/workflows/windows-performance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-performance:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      PYTHONUTF8: '1'
+      QT_QPA_PLATFORM: windows
+      PERF_BASELINE: b4bb870eeebad6c91f526737158dc58f9c5e4e3a
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python packaging/configure_windows_display.py
+      - name: Verify all workbenches, settings, workers, cancellation and lazy imports
+        shell: pwsh
+        run: |
+          python packaging/run_windows_tests.py tests/test_lazy_pages_gui.py tests/test_qt_workflows.py tests/test_compact_workspaces_gui.py tests/test_shell_feedback.py tests/test_repository_structure.py
+          $testExit=$LASTEXITCODE
+          @'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          if Path('windows-tests.xml').exists():
+              suites=list(ET.parse('windows-tests.xml').iter('testsuite'))
+              print('::notice::Windows performance regression: '+str({k:sum(int(s.get(k,0)) for s in suites) for k in ('tests','failures','errors','skipped')}))
+              for case in ET.parse('windows-tests.xml').iter('testcase'):
+                  for f in list(case.findall('failure'))+list(case.findall('error')):
+                      text=case.get('name','')+': '+(f.text or f.get('message',''))[-8000:]
+                      print('::error::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
+          '@ | python -
+          exit $testExit
+      - name: Compare reference and current source in alternating fresh processes
+        shell: pwsh
+        run: |
+          git fetch --depth=1 origin $env:PERF_BASELINE
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $reference=Join-Path $env:RUNNER_TEMP 'gokworks-performance-baseline'
+          git worktree add --detach $reference $env:PERF_BASELINE
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python packaging/benchmark_performance.py --baseline $reference --repeat 3 --output windows-performance.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          @'
+          import json,statistics
+          data=json.load(open('windows-performance.json'))
+          summary={}
+          for label,scenarios in data['results'].items():
+              summary[label]={}
+              for name,runs in scenarios.items():
+                  keys=('ready_s','cpu_s','idle_cpu_percent','warm_navigation_median_s','ui_import_s','ui_heartbeat_max_gap_s') if name=='startup' else ('elapsed_s','cpu_s','ui_import_s','ui_heartbeat_max_gap_s')
+                  summary[label][name]={k:statistics.median(r[k] for r in runs) for k in keys if k in runs[0]}
+                  if name=='startup':summary[label][name]['rss_ready']=statistics.median(r['resources']['rss'] for r in runs)
+          for name in ('accounting','dxf'):
+              signatures={r['result_sha256'] for runs in data['results'].values() for r in runs[name]}
+              assert len(signatures)==1, name+' output changed'
+          print('::notice::Native Windows benchmark: '+json.dumps(summary,separators=(',',':')))
+          '@ | python -
+      - name: Open the complete source application and validate local CAD workers
+        run: python main.py --self-check windows-performance-smoke.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Windows-performance-evidence
+          path: |
+            windows-tests.xml
+            windows-tests.log
+            windows-qt-native.log
+            windows-display.json
+            windows-performance.json
+            windows-performance-smoke.json
+            windows-performance-smoke*.png

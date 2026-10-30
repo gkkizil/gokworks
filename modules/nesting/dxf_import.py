@@ -101,7 +101,7 @@ def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
         raise ValueError('DXF $INSUNITS birimi desteklenmiyor.') from None
     excluded = set(excluded_layers or [])
     excluded.update(layer.dxf.name for layer in doc.layers if layer.is_off() or layer.is_frozen())
-    records = []; ends = Counter(); curved = False; endpoint_error = 0.
+    records = []; ends = Counter(); curved = False; endpoint_error = 0.; point_count = 0
     endpoints = defaultdict(list)
     def snap(point):
         nonlocal endpoint_error
@@ -137,7 +137,8 @@ def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
             raise ValueError('Sıfır uzunluklu veya kendi kendini kesen kontur bulundu.')
         curved |= has_curves
         records.append((entity, line))
-        if sum(len(r[1].coords) for r in records) > 20000:
+        point_count += len(line.coords)
+        if point_count > 20000:
             raise ValueError('DXF, 20000 kontur noktası sınırını aşıyor. Eğri toleransını gözden geçirin.')
     if not records:
         raise ValueError('Seçilen katmanlarda kesim konturu yok.')
@@ -162,13 +163,20 @@ def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
             p = Polygon(ring)
             rings[p.normalize().wkb] = p
     loops = list(rings.values())
+    boundaries = [p.boundary for p in loops]
+    boundary_tree = STRtree(boundaries)
     for i, p in enumerate(loops):
+        check_cancel(stop)
         if not p.is_valid or p.area <= 0:
             raise ValueError('Geçersiz kontur: ' + explain_validity(p))
-        for other in loops[i+1:]:
-            if p.boundary.intersects(other.boundary):
-                raise ValueError('Konturlar birbirine değiyor veya çakışıyor; üretim geometrisini ayırın.')
-    parents = {i: [j for j, q in enumerate(loops) if j != i and q.contains(p)] for i, p in enumerate(loops)}
+        if any(int(j)>i for j in boundary_tree.query(boundaries[i],predicate='intersects')):
+            raise ValueError('Konturlar birbirine değiyor veya çakışıyor; üretim geometrisini ayırın.')
+    loop_tree = STRtree(loops)
+    parents = {}
+    for i, p in enumerate(loops):
+        check_cancel(stop)
+        # STRtree evaluates input.within(candidate), exactly candidate.contains(input).
+        parents[i] = sorted(int(j) for j in loop_tree.query(p,predicate='within') if int(j)!=i)
     components = []
     for i, outer in enumerate(loops):
         depth = len(parents[i])
@@ -182,13 +190,21 @@ def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
     if grouped:
         components = [union_all(components)]
     result = []
+    short_records = {i for i,line in enumerate(lines) if line.length <= join_tolerance*2}
     for index, g in enumerate(components):
         check_cancel(stop)
         minx, miny, _, _ = g.bounds
         normalized = affinity.translate(g, -minx, -miny)
         original = ezdxf.new('R2018'); original.units = units.MM
-        for entity, line in records:
-            if line.difference(g.boundary.buffer(join_tolerance*2)).length <= join_tolerance*2:
+        boundary_band = g.boundary.buffer(join_tolerance*2)
+        # Broad phase only. The unchanged exact difference test decides inclusion.
+        # Short lines can satisfy the historical residual-length test even when
+        # outside the band, so include them explicitly rather than alter outputs.
+        candidates = sorted(set(map(int,tree.query(boundary_band))) | short_records)
+        for candidate in candidates:
+            check_cancel(stop)
+            entity, line = records[candidate]
+            if line.difference(boundary_band).length <= join_tolerance*2:
                 copy = entity.copy(); copy.transform(Matrix44.translate(-minx, -miny, 0))
                 copy.dxf.layer = '0'; original.modelspace().add_entity(copy)
         stream = StringIO(); original.write(stream)

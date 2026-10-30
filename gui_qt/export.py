@@ -4,11 +4,16 @@ from pathlib import Path
 from PySide6.QtCore import Slot
 
 from modules.pdf.process import export_drawings
-from modules.dxf_dwg.exporter import export_parts
 from gui_qt import services
 from gui_qt.components import (BasePage, ValueForm, ResultsPanel, Disclosure, card, button,
                           open_folder, TransferWorkspace, SourceFiles)
 from solidworks import diagnostics
+
+
+def export_parts(*args, **kwargs):
+    """Keep the callable service boundary without loading DXF on the PDF page."""
+    from modules.dxf_dwg.exporter import export_parts as run
+    return run(*args, **kwargs)
 
 
 class ExportPage(BasePage):

@@ -1,12 +1,18 @@
 """Small worker entry points around unchanged automation services."""
 
 from pathlib import Path
-from modules.pdf.exporter import find_drawings
-from modules.dxf_dwg.exporter import find_parts
 from solidworks import diagnostics
 
 
+def find_drawings(*args, **kwargs):
+    from modules.pdf.exporter import find_drawings as run
+    return run(*args, **kwargs)
+
+
 def scan_files(mode, source, recursive, events, stop):
+    # The PDF workbench must not import the DXF parser/NumPy at startup.
+    if mode != 'pdf':
+        from modules.dxf_dwg.exporter import find_parts
     finder = find_drawings if mode == 'pdf' else find_parts
     files = finder(source, recursive, stop)
     events.put(('files', files))
