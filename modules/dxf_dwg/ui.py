@@ -94,7 +94,7 @@ class DxfDwgPage(ExportPage):
             'preview_before_export', 'Kaydetmeden önce önizle', True)
         self.preview_before_export.setToolTip(
             'Önce seçili parçanın açınımını gösterir. Listeden parçaları kontrol edin; '
-            'kaydetmek için Aktarımı başlat düğmesine tekrar basın.')
+            'kaydetmek için Seçili parçaları dışa aktar düğmesine tekrar basın.')
         self.form.fields['preview_before_export'] = self.preview_before_export
         self.options_form.form.addRow(label('Her sac gövdesi ayrı aktarılır. Kalınlık ve adet dosya adına yazılır; gerekli gövde/konfigürasyon ayrımı otomatik eklenir.', 'muted'))
         self._events = _PageEvents(self)
@@ -477,7 +477,7 @@ class DxfDwgPage(ExportPage):
                 return
             self._preview_cancelled = False
             if self.show_preview():
-                self.set_status('Önce açınımı kontrol edin. Önizleme tamamlanmadan dosyalar kaydedilmez; hazır olunca Aktarımı başlat düğmesine tekrar basın.')
+                self.set_status('Önce açınımı kontrol edin. Önizleme tamamlanmadan dosyalar kaydedilmez; hazır olunca Seçili parçaları dışa aktar düğmesine tekrar basın.')
             return
         if self.preview_running and self.jobs.owner is self and self.jobs.busy:
             self._export_after_preview = True
@@ -595,7 +595,7 @@ class DxfDwgPage(ExportPage):
                         self.preview.flat_label.setText('Açınım · okunuyor…')
                         self.set_status('3D önizleme hazır; açınım okunuyor…')
                     elif result.flat:
-                        self.set_status('Açınım hazır · listeden parçaları kontrol edin. Kaydetmek için Aktarımı başlat düğmesine basın.')
+                        self.set_status('Açınım hazır · listeden parçaları kontrol edin. Kaydetmek için Seçili parçaları dışa aktar düğmesine basın.')
                         if self._awaiting_flat_review:
                             self._reveal_preview()
                             self.preview.focus_flat()
