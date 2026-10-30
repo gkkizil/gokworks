@@ -816,6 +816,7 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
     from modules.cad_converter.models import checkpoint, Cancelled
     summary = dict(state='completed', total=len(items), processed=0, succeeded=0,
                    partial=0, skipped=0, failed=0, warnings=[], error='')
+    active_item=None;outputs=[];metadata={}
     try:
         checkpoint(stop)
         if any(not item.get('exportable') or not item.get('body_ref') or not item.get('flat_ref') for item in items):
@@ -829,6 +830,7 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
             verified = {}
             for item in items:
                 checkpoint(stop)
+                active_item=item
                 model = None
                 outputs, metadata = [], {}
                 events.put(('sheet_current', item['sheet_id']))
@@ -863,12 +865,19 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
                 available = [r['path'] for r in outputs if r['status'] in ('success','skipped')]
                 events.put(('sheet_result', dict(item, **metadata, status=status, detail=detail,
                            outputs=outputs, output=' | '.join(available))))
+                active_item=None
                 events.put(('progress',(summary['processed'],len(items))))
                 checkpoint(stop)
     except Cancelled:
         summary['state'] = 'cancelled'
     except (RestoreError, SourceRestoreError) as error:
         summary.update(state='error', error=str(error), native_restore_failed=True)
+        if active_item is not None:
+            available=[r['path'] for r in outputs if r['status'] in ('success','skipped')]
+            state='partial' if any(r['status']=='success' for r in outputs) else 'error'
+            summary['processed']+=1;summary['partial' if state=='partial' else 'failed']+=1
+            events.put(('sheet_result',dict(active_item,**metadata,status=state,detail=str(error),
+                       outputs=outputs,output=' | '.join(available))))
     except Exception as error:
         summary.update(state='error', error=str(error))
     finally:

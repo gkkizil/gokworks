@@ -77,6 +77,47 @@ def test_actual_configurations_are_separate_and_restored(env,tmp_path):
     assert len({str(p) for targets in paths.values() for p in targets})==2
 
 
+def test_hidden_referenced_configuration_is_read_without_activating_or_showing_part(env,tmp_path):
+    app,_,_=env;p=part(app,tmp_path/'Panel.SLDPRT',{'A':[('Body',1,10)],'B':[('Body',2,20)]});p.Visible=False
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,configuration='B')]);app.ActiveDoc=root
+    activate=app.ActivateDoc3
+    def only_visible(name,*args):
+        assert name!=p.path,'Reading must not activate a hidden component'
+        return activate(name,*args)
+    app.ActivateDoc3=only_visible
+    rows,notes=scan(env)
+    assert len(rows)==1 and rows[0]['exportable'] and rows[0]['configuration']=='B' and not notes
+    assert p.active=='A' and p.Visible is False and p.selection==['user selection'] and app.ActiveDoc is root
+
+
+def test_hidden_referenced_configuration_exports_then_restores_visibility_and_selection(env,tmp_path):
+    app,Session,_=env;p=part(app,tmp_path/'Panel.SLDPRT',{'A':[('Body',1,10)],'B':[('Body',2,20)]});p.Visible=False
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,configuration='B')]);app.ActiveDoc=root
+    activate=app.ActivateDoc3
+    def requires_visible(name,*args):
+        if name==p.path:assert p.Visible is True
+        return activate(name,*args)
+    app.ActivateDoc3=requires_visible;rows,_=scan(env);events=Queue()
+    export_selection(rows,tmp_path,tmp_path/'out',('dxf',),events,session_factory=Session)
+    assert events.queue[-1][1]['succeeded']==1 and p.export_calls==[('B','B-Body',1)]
+    assert p.active=='A' and p.Visible is False and p.selection==['user selection'] and app.ActiveDoc is root
+
+
+def test_restore_failure_reports_current_body_and_completed_output_then_stops(env,tmp_path):
+    app,Session,_=env;p=part(app,tmp_path/'Panel.SLDPRT',{'A':[('Body',1,10)],'B':[('Body',2,20)]})
+    other=part(app,tmp_path/'Next.SLDPRT');root=assembly(app,tmp_path/'Main.SLDASM',
+        [component(p,configuration='B'),component(other,name='Next')]);app.ActiveDoc=root
+    rows,_=scan(env);show=p.ShowConfiguration2
+    p.ShowConfiguration2=lambda name:False if name=='A' else show(name)
+    events=Queue();export_selection(rows,tmp_path,tmp_path/'out',('dxf',),events,session_factory=Session)
+    summary=events.queue[-1][1]
+    assert summary['state']=='error' and summary['native_restore_failed'] and summary['partial']==1
+    result=next(row for kind,row in events.queue if kind=='sheet_result')
+    assert result['status']=='partial' and result['body_name']=='B-Body' and 'konfigürasyon' in result['detail']
+    assert result['outputs'][0]['status']=='success' and Path(result['outputs'][0]['path']).is_file()
+    assert not other.export_calls and not app.saves
+
+
 def test_suppressed_is_ignored_and_lightweight_part_and_subassembly_open_safely(env,tmp_path):
     app,_,_=env;p=part(app,tmp_path/'Panel.SLDPRT',opened=False)
     sub=assembly(app,tmp_path/'Sub.SLDASM',[component(p)]);sub.opened=False

@@ -26,6 +26,43 @@ def identity(source, configuration, body):
 
 
 class Session(ReadSession):
+    def active_configuration(self,model):
+        try:return str(get(get(get(model,'ConfigurationManager'),'ActiveConfiguration'),'Name'))
+        finally:model=None
+
+    @contextmanager
+    def configuration(self,model,name):
+        """Read a referenced configuration without activating hidden components.
+
+        As in the native sheet-metal API workflow, ShowConfiguration2 operates
+        on the explicit document. Only the actual export activates a visible
+        part. Preserve its previous configuration and any selection list.
+        """
+        previous=None;manager=None;suspended=False;changed=False
+        try:
+            previous=self.active_configuration(model)
+            if name not in values(call(model,'GetConfigurationNames')):
+                raise ApiError('İstenen konfigürasyon bulunamadı: '+name)
+            if name!=previous:
+                manager=get(model,'SelectionManager')
+                call(manager,'SuspendSelectionList');suspended=True;changed=True
+                if not call(model,'ShowConfiguration2',name):
+                    raise ApiError('Konfigürasyon açılamadı: '+name)
+            if self.active_configuration(model)!=name:
+                raise ApiError('İstenen konfigürasyon doğrulanamadı.')
+            yield
+        finally:
+            failures=[]
+            try:
+                if changed and (not call(model,'ShowConfiguration2',previous) or self.active_configuration(model)!=previous):
+                    failures.append('Kaynak konfigürasyon geri getirilemedi.')
+            except Exception as error:failures.append(str(error))
+            try:
+                if suspended:call(manager,'ResumeSelectionList2',False)
+            except Exception as error:failures.append('Seçim listesi geri getirilemedi: '+str(error))
+            model=manager=None
+            if failures:raise RestoreError(' '.join(failures))
+
     def part(self, model):
         return interface(model, PART_IID) if hasattr(model, 'QueryInterface') or hasattr(model, '_oleobj_') else model
 
