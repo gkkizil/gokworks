@@ -30,10 +30,24 @@ def validate_imports(entries):
     for entry in entries:
         if (not isinstance(entry,dict) or not isinstance(entry.get('id'),str) or not entry['id'] or entry['id'] in ids
                 or not isinstance(entry.get('source'),str) or not isinstance(entry.get('detail'),str)
-                or entry.get('status') not in ('pending','running','success','error','cancelled')
+                or entry.get('status') not in ('pending','running','success','error','cancelled','review')
                 or not isinstance(entry.get('options'),dict)):
             raise ValueError('DXF yükleme kaydı geçersiz.')
         ids.add(entry['id'])
+        if (not isinstance(entry.get('part_ids',[]),list)
+                or not all(isinstance(k,str) and k for k in entry.get('part_ids',[]))
+                or not isinstance(entry.get('part_code',''),str)):
+            raise ValueError('DXF parça bağlantısı geçersiz.')
+        for key in ('contour_review','contour_approval'):
+            if key not in entry: continue
+            review = entry[key]
+            if (not isinstance(review,dict) or set(review) != {'sha256','count','quantity'}
+                    or not isinstance(review['sha256'],str) or len(review['sha256'])!=64
+                    or any(c not in '0123456789abcdef' for c in review['sha256'])
+                    or type(review['count']) is not int or review['count']<2
+                    or type(review['quantity']) is not int):
+                raise ValueError('DXF bağımsız parça onayı geçersiz.')
+            integer(review['quantity'],'Adet')
         options = entry['options']
         if set(options)-{'material','thickness','quantity','unit','tolerance','join_tolerance','excluded_layers','grouped'}:
             raise ValueError('DXF yükleme seçenekleri desteklenmiyor.')

@@ -21,7 +21,7 @@ from modules.nesting.accounting import mass, calculate
 from .workspace_models import PartTreeModel, PartTree, PartQuantityDelegate, SheetTreeModel, configure_sheet_tree
 from .design import apply_design, PANEL_WIDTH, PROPERTIES_WIDTH, CONTROL_HEIGHT, SPACING
 
-IMPORT_LABELS = {'pending':'Sırada', 'running':'Okunuyor', 'success':'Hazır', 'error':'Okunamadı', 'cancelled':'Durduruldu'}
+IMPORT_LABELS = {'pending':'Sırada', 'running':'Okunuyor', 'success':'Hazır', 'error':'Okunamadı', 'cancelled':'Durduruldu', 'review':'Kontrol gerekli'}
 
 
 def fmt(v, digits=3):
@@ -720,7 +720,8 @@ class NestingPage(BasePage):
         if self.imports:
             self.import_info.setText(f"{len(self.imports)} dosya · {counts['success']} hazır · {counts['error']} sorunlu"
                                      + (f" · {counts['pending']+counts['running']} bekliyor" if counts['pending']+counts['running'] else '')
-                                     + (f" · {counts['cancelled']} durduruldu" if counts['cancelled'] else ''))
+                                     + (f" · {counts['cancelled']} durduruldu" if counts['cancelled'] else '')
+                                     + (f" · {counts['review']} kontrol gerekli" if counts['review'] else ''))
         else: self.import_info.setText(f'{len(self.project.parts)} parça hazır.' if self.project.parts else 'Henüz DXF seçilmedi.')
         self.refresh_sheet_tree(); self._refreshing = False
         if not self.part_table.selectionModel().selectedRows() and self.part_proxy.rowCount(): self.part_table.selectRow(0)
@@ -842,10 +843,16 @@ class NestingPage(BasePage):
         if not self.can_start(): return
         rows = [index.data(Qt.UserRole) for index in self.part_table.selectionModel().selectedRows()]
         if not rows: return
+        self.part_table.clearSelection()
         part_ids = {row['id'] for row in rows if row.get('kind') == 'part'}
         import_ids = {row['id'] for row in rows if row.get('kind') == 'import'}
         self.project.parts = [p for p in self.project.parts if p.id not in part_ids]
         self.imports = [e for e in self.imports if e['id'] not in import_ids]
+        # Once all geometry from a successful source is removed, it can be
+        # selected again. Keep partially removed sources deduplicated.
+        remaining_sources = {p.source for p in self.project.parts}
+        self.imports = [e for e in self.imports if e['status']!='success'
+                        or str(Path(e['source']).resolve()) in remaining_sources]
         self.invalidate(); self.refresh()
         self.set_status(f'{len(rows)} satır listeden kaldırıldı.')
 
@@ -857,48 +864,90 @@ class NestingPage(BasePage):
 
     def configure_import(self, files, *, defaults=None, retry_id=None, detail=''):
         if not self.can_start(): return
-        defaults = defaults or {}
-        def build(f):
-            f.form.addRow(label(f'{len(files)} DXF dosyası seçildi. Hepsi yükleme listesine eklenecek.', 'section'))
-            if detail: f.form.addRow(label(detail,'error'))
-            self.material_field(f,defaults.get('material',self.project.materials[0].id))
-            f.text('thickness','Sac kalınlığı · mm',defaults.get('thickness',2)); f.text('quantity','Her parça için adet',defaults.get('quantity',1))
-            f.combo('unit',"DXF'de birim yazmıyorsa",('Birim seçilmedi','mm','cm','inch'),defaults.get('unit') or 'Birim seçilmedi')
-            f.text('tolerance','Eğri kiriş toleransı · mm',defaults.get('tolerance',.02)); f.text('join_tolerance','Uç birleştirme toleransı · mm',defaults.get('join_tolerance',.001))
-            f.text('excluded_layers','Dışlanacak katmanlar · ; ile ayırın',';'.join(defaults.get('excluded_layers',[])))
-            f.check('grouped','Her dosyadaki bağımsız konturları tek grup olarak tut',defaults.get('grouped',False))
-            f.form.addRow(label('Ölçülendirme, yazı, tarama ve kapalı/dondurulmuş katmanlar kesime alınmaz. '
-                                'Açık veya hatalı kontur sessizce onarılmaz. Kaynak DXF değiştirilmez.', 'muted'))
+        from .import_plan import normalize_options
+        from .import_ui import ImportDialog
+        defaults = normalize_options({'material':self.project.materials[0].id,**(defaults or {})})
+        entry = next((e for e in self.imports if e['id']==retry_id),None)
+        def build(f, values):
+            self.material_field(f,values['material'])
+            f.text('thickness','Varsayılan kalınlık · mm',values['thickness'])
+            f.text('quantity','Varsayılan adet · her parça',values['quantity'])
+            f.combo('unit',"DXF'de birim yazmıyorsa",('Birim seçilmedi','mm','cm','inch'),values['unit'] or 'Birim seçilmedi')
+            f.text('tolerance','Eğri kiriş toleransı · mm',values['tolerance'])
+            f.text('join_tolerance','Uç birleştirme toleransı · mm',values['join_tolerance'])
+            f.text('excluded_layers','Dışlanacak katmanlar · ; ile ayırın',';'.join(values['excluded_layers']))
+            f.check('grouped','Her dosyadaki bağımsız konturları tek grup olarak tut',values['grouped'])
         def parse(f):
-            return dict(material=self.material_value(f),thickness=number(f.value('thickness'),'Kalınlık',positive=True),
-                        quantity=integer(f.value('quantity'),'Adet'),unit=None if f.value('unit') == 'Birim seçilmedi' else f.value('unit'),
-                        tolerance=number(f.value('tolerance'),'Eğri toleransı',positive=True),
-                        join_tolerance=number(f.value('join_tolerance'),'Uç toleransı',positive=True),
-                        excluded_layers=[s.strip() for s in f.value('excluded_layers').split(';') if s.strip()],grouped=f.value('grouped'))
-        dialog = Editor(self,'DXF içe aktarma seçenekleri',build,parse)
+            return normalize_options(dict(material=self.material_value(f),thickness=f.value('thickness'),
+                        quantity=f.value('quantity'),unit=None if f.value('unit') == 'Birim seçilmedi' else f.value('unit'),
+                        tolerance=f.value('tolerance'),join_tolerance=f.value('join_tolerance'),
+                        excluded_layers=[s.strip() for s in f.value('excluded_layers').split(';') if s.strip()],grouped=f.value('grouped')))
+        retained = {k:defaults[k] for k in ('thickness','quantity')} if entry else None
+        dialog = ImportDialog(self,files,defaults,build,parse,retained=retained,
+                              review=entry.get('contour_review') if entry else None,detail=detail)
         try:
-            if dialog.exec() == QDialog.Accepted: self.import_files(files,retry_id=retry_id,**dialog.value)
+            if dialog.exec() == QDialog.Accepted:
+                self.import_files(files,retry_id=retry_id,per_file=dialog.value)
         finally: dialog.deleteLater()
 
-    def import_files(self, files, *, retry_id=None, **options):
+    def import_files(self, files, *, retry_id=None, per_file=None, **options):
         if not self.can_start(): return
+        from .import_plan import normalize_options
         files = list(files)
         if not files: return
+        if retry_id and len(files)!=1:
+            return self.set_status('Yeniden okuma için tek kaynak dosya seçin.',True)
+        source_keys = {}
+        def source_key(path):
+            path = str(path)
+            if path not in source_keys: source_keys[path] = str(Path(path).resolve()).casefold()
+            return source_keys[path]
+        plans = {source_key(p['source']):p for p in per_file or []}
+        by_source = {source_key(e['source']):e for e in self.imports}
+        by_id = {e['id']:e for e in self.imports}
+        parts_by_source = {}
+        for part in self.project.parts:
+            if part.source: parts_by_source.setdefault(source_key(part.source),[]).append(part)
+        entries = []; skipped = 0; seen = set()
+        try:
+            for path in dict.fromkeys(map(str,files)):
+                key = source_key(path)
+                if key in seen: continue
+                seen.add(key)
+                entry = by_id.get(retry_id) if retry_id else by_source.get(key)
+                if retry_id and entry is None: raise ValueError('Yeniden okunacak DXF kaydı bulunamadı.')
+                if not retry_id and ((entry and entry['status']=='success') or (entry is None and key in parts_by_source)):
+                    skipped += 1; continue
+                plan = plans.get(source_key(path),{})
+                file_options = normalize_options({**(entry['options'] if entry else {}),**options,**plan.get('options',{})})
+                draft = deepcopy(entry) if entry else dict(id=uid(),source=str(path))
+                draft.update(source=str(path),status='pending',detail='Okuma sırasında.',options=file_options)
+                for metadata_key in ('part_code','contour_approval'):
+                    if metadata_key in plan: draft[metadata_key] = deepcopy(plan[metadata_key])
+                # Preserve successful geometry until replacement has passed all checks.
+                if entry:
+                    draft['part_ids'] = [p.id for p in parts_by_source.get(key,[])]
+                old_ids = set(draft.get('part_ids',[]))
+                draft['replace_quantity'] = sum(p.quantity for p in self.project.parts if p.id in old_ids)
+                entries.append(draft)
+        except (ValueError,TypeError) as error: return self.set_status(error,True)
+        # No live project mutation until every selection option has validated.
+        if not entries:
+            return self.set_status(f'{skipped} dosya zaten yüklü; tekrar eklenmedi.')
         self.search.clear(); self.invalidate(); self.parts_toggle.setChecked(True)
-        entries = []
-        for path in files:
-            if retry_id:
-                entry = next(e for e in self.imports if e['id'] == retry_id)
-                entry.update(source=str(path),status='pending',detail='Yeniden okuma sırasında.',options=deepcopy(options))
-            else:
-                entry = dict(id=uid(),source=str(path),status='pending',detail='Okuma sırasında.',options=deepcopy(options))
-                self.imports.append(entry)
-            entries.append(deepcopy(entry))
+        for draft in entries:
+            entry = next((e for e in self.imports if e['id']==draft['id']),None)
+            saved = {k:v for k,v in deepcopy(draft).items() if k!='replace_quantity'}
+            if entry is not None: entry.update(saved)
+            else: self.imports.append(saved)
+        existing_quantity = sum(p.quantity for p in self.project.parts)
         self.refresh()
         def operation(sink,stop):
             from modules.nesting.batch_import import import_batch
-            import_batch(entries,options,sink,stop)
-        self.jobs.start(self,operation); self.set_status(f'{len(files)} DXF dosyası sıraya eklendi; konturlar okunuyor…')
+            import_batch(entries,{},sink,stop,existing_quantity=existing_quantity)
+        self.jobs.start(self,operation)
+        self.set_status(f'{len(entries)} DXF dosyası sıraya eklendi; konturlar okunuyor…'
+                        +(f' {skipped} dosya zaten yüklü; tekrar eklenmedi.' if skipped else ''))
 
     def missing_stock(self):
         return sorted({(part.material,part.thickness) for part in self.project.parts
@@ -911,7 +960,7 @@ class NestingPage(BasePage):
         problems = [e for e in self.imports if e['status'] != 'success']
         if problems:
             self.parts_toggle.setChecked(True)
-            return self.set_status(f'{len(problems)} dosya henüz hazır değil. Listede Okunamadı/Durduruldu yazan dosyaya çift tıklayıp yeniden okuyun veya Kaldır ile çıkarın.',True)
+            return self.set_status(f'{len(problems)} dosya henüz hazır değil. Listede Okunamadı/Durduruldu/Kontrol gerekli yazan dosyaya çift tıklayıp yeniden okuyun veya Kaldır ile çıkarın.',True)
         try: self.read_parameters(); self.project.validate()
         except ValueError as error:
             self.set_status(error,True); return self.show_settings(error=str(error))
@@ -1111,15 +1160,21 @@ class NestingPage(BasePage):
                 entry = next((e for e in self.imports if e['id'] == value['id']),None)
                 if entry is not None:
                     entry.update(status=value['status'],detail=value['detail'])
-                    if value['parts']: self.project.parts.extend(value['parts'])
+                    if 'contour_review' in value: entry['contour_review'] = value['contour_review']
+                    if value['parts']:
+                        old_ids = set(entry.get('part_ids',[]))
+                        self.project.parts = [p for p in self.project.parts if p.id not in old_ids]
+                        self.project.parts.extend(value['parts'])
+                        entry['part_ids'] = [p.id for p in value['parts']]
+                        entry.pop('contour_review',None)
                     imports_changed = True
             elif kind == 'nest_import_done':
                 self.progress_timer.stop(); self.pending_progress = None
                 self.refresh()
                 self.set_status(f"Yükleme tamamlandı · {value['selected']} dosya · {value['ready']} hazır · {value['parts']} parça · "
-                                f"{value['errors']} okunamadı · {value['cancelled']} durduruldu. "
-                                + ('Sorunlu dosyalar listede; ayrıntı için çift tıklayın.' if value['errors'] or value['cancelled'] else 'Yerleştir ile plakaları sırayla doldurun.'),
-                                bool(value['errors'] or value['cancelled']))
+                                f"{value['errors']} okunamadı · {value['cancelled']} durduruldu · {value.get('reviews',0)} kontrol gerekli. "
+                                + ('Sorunlu dosyalar listede; ayrıntı için çift tıklayın.' if value['errors'] or value['cancelled'] or value.get('reviews') else 'Yerleştir ile plakaları sırayla doldurun.'),
+                                bool(value['errors'] or value['cancelled'] or value.get('reviews')))
             elif kind == 'nest_result':
                 self.progress_timer.stop(); self.pending_progress = None; self.show_result(*value)
             elif kind == 'nest_project':

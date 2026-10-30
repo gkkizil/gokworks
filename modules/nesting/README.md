@@ -244,3 +244,96 @@ Referanslar ve lisans değerlendirmesi: [teknik rapor](../../docs/nesting.md).
 [Sade arayüz incelemesi ve plaka sekmeleri](../../docs/nesting-usability/README.md).
 [Birleşik çalışma alanı ve güncel ekranlar](../../docs/nesting-workspace/README.md).
 [Okunabilir PDF ve örnek rapor](../../docs/nesting-pdf-readability/README.md).
+
+## Dosya adından kalınlık ve adet
+
+`DXF ekle`, geometrileri okumadan önce seçilen dosyaları düzenlenebilir bir
+önizlemede gösterir. **Dosya adından kalınlık ve adet oku** başlangıçta açıktır.
+Kalınlık ve adet hücreleri doğrudan düzenlenir. Ctrl/Shift ile birden fazla
+satır seçip **Seçili satırlara → Uygula** ile kalınlık, adet veya ikisi birlikte
+atanabilir; seçilmeyen dosyalar etkilenmez. **Seçili dosyanın diğer seçenekleri**
+malzeme, birim, toleranslar, katmanlar ve gruplamayı yalnız o dosyada değiştirir.
+Ortak seçenekler diğer dosyaların varsayılanlarıdır. Hücrede veya dosya
+seçeneklerinde elle girilmiş değerler otomatik algılamanın önündedir.
+
+Kalınlık: `2mm`, `2 mm`, `1,2mm`, `0.6 mm`, `T2`, `T 2mm`, `T=2 mm`,
+`T1.25`, `THK2`, `THK 1,2 mm`, `KALINLIK=3`, `t_2_mm` biçimleri desteklenir.
+Adet: `12AD`, `12 ADET`, `AD12`, `ADET=12`, `QTY 12`, `QTY=12`,
+`QUANTITY 12`, `A_12_AD` biçimleri desteklenir. Harf büyüklüğü, Türkçe
+karakterler, boşluk/tab, alt çizgi ve ifadeler arasındaki tireler desteklenir.
+Nokta/virgül ondalık ayırıcıdır; adet ise 1–10000 arasında tam sayıdır.
+`T=-2`, `T-2`, sıfır, sonlu olmayan değer ve ondalıklı adet inceleme gerektirir.
+`x12`, parça kodları, tarih/revizyon, `500x300mm` ve çap/delik ifadelerinden
+kalınlık veya adet tahmin edilmez. Açık kalınlık/adet belirteci gerekir.
+
+Örneğin aynı seçimde `GOVDE 1,2 mm 12 adet.dxf`, `KAPAK T 2mm 5 adet.dxf`,
+`FLANS_T0,8_QTY20.dxf` sırasıyla **1,2 mm / 12**, **2 mm / 5**,
+**0,8 mm / 20** olarak hazırlanır. Ayrıştırıcı, eşleşen ifadeleri parça
+kodundan çıkarır; kaynak DXF dosyasının adını veya içeriğini değiştirmez.
+Otomatik okuma kapatılırsa dosya adı kod olarak korunur ve mevcut manuel
+ortak seçenekler kullanılır; elle düzenlenmiş hücreler korunur.
+
+Durumlar: **Algılandı**, **Kısmen algılandı**, **Varsayılan değer**,
+**Kontrol gerekli**. Eksik alanlarda görünen varsayılanlar kullanılabilir.
+Farklı iki kalınlık/adet bulunursa ilgili alan otomatik seçilmez; kullanıcı
+hücreyi açıkça düzeltmeden içe aktarma onaylanmaz. Aynı değerin tekrar yazılması
+çelişki sayılmaz. Kural/hata ayrıntıları satırın ipucundadır.
+
+### Bağımsız konturlar ve yeniden okuma
+
+Bir DXF'te üç bağımsız parça ve 8 adet varsa sonuç **her parçadan 8, toplam
+24 kesim parçası** olur. Geometri okunduktan sonra dosya **Kontrol gerekli**
+durumuna alınır; parçalar projeye eklenmez ve Yerleştir çalışmaz. Dosyaya
+çift tıklayıp adet dağılımı açıkça onaylanabilir veya **tek grup** seçilebilir.
+Tek grup, mevcut MultiPolygon davranışıyla birlikte taşınan 8 set oluşturur.
+İç delikler bağımsız parça değildir; delik içindeki bağımsız adalar ise parçadır.
+Onay kaynak SHA256'sına, bulunan parça sayısına ve uygulanacak adede bağlıdır;
+bunlar değişirse tekrar kontrol gerekir. Onay bütünlük kaydıdır, güvenlik imzası
+değildir. Onaylanmış parçaların normal özellikleri sonradan düzenlenebilir.
+
+Hatalı/iptal edilen kaynak tekrar okunurken önceki dosya seçenekleri korunur.
+Başarılı kaynak tekrar seçilirse yeniden eklenmez. Başarılı kaynağın açık bir
+`retry_id` ile okunması, geometri başarıyla doğrulandığında eski `part_ids`
+parçalarını değiştirir; hata/iptal durumunda eski geometri korunur ve dosya
+sorunu çözülene kadar üretim engellenir. Dosyanın bütün parçaları kaldırılırsa
+kaynak da listeden çıkar ve yeniden seçilebilir. Proje toplamında 10000 örnek
+sınırı, çok konturlu dosyaların gerçek toplamı dahil uygulanır.
+
+### Entegrasyon ve kayıt sözleşmeleri
+
+- `filename_parser.py`: Qt/DXF/GEOS bağımlılığı olmayan `parse_filename(path)`;
+  `FilenameInfo` özgün dosya adı, kod, `float | None` kalınlık, `int | None` adet,
+  durum, kural adları ve alan bazlı hata açıklamalarını döndürür. `RULES` açık
+  belirteç kuralları ileride yeni şablonlar için genişletilebilir.
+- `import_plan.py`: `normalize_options()` ve `ImportDraft`; varsayılan → algılanan
+  → manuel önceliğini yönetir. Üretim sınırlarını geometri okumadan denetler.
+- `import_ui.py`: `ImportDialog` ve `ImportPreviewModel`; yerel Qt model/view,
+  hücre düzenleme, seçili satırlara toplu atama ve kontur onayı.
+- `import_files(files, *, retry_id=None, per_file=None, **options)` eski ortak
+  seçenek çağrılarını korur. `per_file`, `source` ve `options` sözlükleri listesidir.
+  Seçenekler: `material`, `thickness`, `quantity`, `unit`, `tolerance`,
+  `join_tolerance`, `excluded_layers`, `grouped`.
+- `import_batch(entries, options, sink, stop, *, existing_quantity=0)` ortak
+  seçenekleri her kaydın `options` alanıyla birleştirip `read_dxf()` çağırır.
+  `nest_file` durumlarına `review`, bu olayın isteğe bağlı `contour_review`
+  alanına `{sha256, count, quantity}`, özete `reviews` eklenmiştir. Qt nesneleri
+  işçi threade geçmez; geometri okuma mevcut JobManager üzerinden sürer.
+- `.goknest.json` **version 1** korunur. `Part` alanları değişmez. Dosyaya özel
+  seçenekler mevcut `import_sources[].options` içinde saklanır. İsteğe bağlı
+  `part_code`, `part_ids`, `contour_review`, `contour_approval` eklenmiştir.
+  Eski projelerde bu alanlar aranmaz. Algılama durumu yeniden üretilebilir;
+  onaylanmış sayısal seçenekler ve manuel `Part` değişiklikleri kalıcıdır.
+- Kalınlık ve adet mevcut `Part` alanlarına aktarılır; stok eşleştirme, ağırlık,
+  maliyet, yerleşim ve bütün raporlar bu alanları kullanır. NFP/geometri motoru,
+  `read_dxf()` algoritması ve diğer GOKWORKS modülleri değiştirilmemiştir.
+
+Yeni testler: `test_filename_parser.py`, `test_filename_import.py`,
+`test_filename_import_gui.py`. Gerçek DXF'lerle farklı kalınlık/adetler,
+100 dosyalık yükleme, manuel/toplu düzenleme, hatalı dosya/yeniden deneme,
+çok kontur/delik/grup onayı, kaynak değişikliği, toplam limit, proje uyumluluğu,
+nesting/ağırlık/maliyet ve Excel/PDF/DXF çıktıları doğrulanır.
+Tam regresyon: `python packaging/run_windows_tests.py modules/nesting/tests
+ tests/test_fusion_workbench.py tests/test_repository_structure.py`.
+Linux'ta `QT_QPA_PLATFORM=offscreen` kullanılabilir. Yerel ekran görüntüleri ve
+üretilen örnek raporlar depoya eklenmez; Windows CI aynı testleri yerel Qt
+platformunda çalıştırır. SolidWorks bu özellik için gerekli değildir.
