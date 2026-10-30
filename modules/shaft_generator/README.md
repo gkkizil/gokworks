@@ -28,9 +28,82 @@ kalıcı navigasyon ve tek CAD işi çalıştıran `JobManager` kullanılır.
   taşınmaz. Listede kenar ve ölçü görünür. Mevcut kaydı düzenlemek için onu
   listeden/önizlemeden seçin. Aynı kenara ikinci pah/radyüs eklenmez.
 
+## Sol parametre paneli
+
+- Üstte parça adı, mil özeti ve seçili kademenin çap/boy bilgisi görünür.
+- **Parametre bölümü** listesinden Kademe ölçüleri, Segman, Kama, Tek kenara pah,
+  Tek kenara radyüs, Kozmetik diş veya Eksenel iç delik seçilir. Dar panelde
+  sekme başlıkları sağa taşmaz; teknik üst görünüş ve kesit aynı kalır.
+- Kademe tablosunda çap/boy hücrelerine yazın; satırlar milin soldan sağa
+  sırasıdır. `+ Kademe`, Kopyala, Sil ve sıra değiştirme komutları korunur.
+- Kanalın **Kademede başlangıç** ölçüsü seçilen kademenin sol başlangıcına
+  göredir. **Yüzeyden derinlik**, silindirin dışından kanal tabanına radyal
+  mesafedir. Kama boyu yuvarlak uçlar dahil toplam uzunluktur. Sayı alanlarında
+  Türkçe ondalık virgül desteklenir; yazım tamamlanınca değer uygulanır.
+- **Yeni işlem ekle** durumunda ölçüler taslaktır; **İşlemi ekle** listeye ekler.
+  Listeden/görünüşten bir işlem seçildiğinde **Seçili işlem düzenleniyor** yazar;
+  bu işlemin ölçüleri eskisi gibi anında güncellenir. **Seçimi temizle · Yeni işlem**
+  ile eski kaydı değiştirmeden yeni bir taslak hazırlanır. Bölüm değiştirilince
+  farklı türdeki önceki düzenleme seçimi temizlenir.
+- Ekle/güncelle düğmeleri uzun formun kaydırmasından bağımsızdır. Eklenen işlem
+  sayısı ve seçili işlem görünür; boş liste gereksiz yükseklik kaplamaz.
+
+## Tüm mil uçlarına ve kademe omuzlarına pah/radyüs
+
+1. **Toplu pah / radyüs…** düğmesine veya aynı adlı bölüme geçin.
+2. **Pah · 45°** ya da **Radyüs** seçin; ortak ölçüyü mm olarak girin.
+3. **Tüm uç ve omuzlara uygula** düğmesine bir kez basın.
+
+Kapsam, kullanıcının seçtiği gibi yalnız dış mil uçları ve kademe omuzlarıdır.
+Kama/segman kanalı kenarları, iç deliğin ağızları ve eksen dahil edilmez.
+Her gerçek omzun iç ve dış dairesel kenarı ayrı değerlendirilir. Varsayılan
+4 kademeli milde 8 kenar bulunur; tek kademeli milde 2 uç vardır. Eş çaplı
+iki kademenin ortak birleşiminde fiziksel omuz olmadığı için iki sahte işlem
+üretilmez; atlanan düz birleşim sayısı işlem sonucunda gösterilir.
+
+**Mevcut pah/radyüsleri de değiştir** başlangıçta kapalıdır: önceki kenar
+işlemleri türü/ölçüsü/kimliğiyle korunur, yalnız boş kenarlara eklenir. Seçenek
+açıksa kapsam içindeki kenarlar yeni tür/ölçüye çevrilir; mevcut kimlikler
+korunur. Kanal, iç delik ve kozmetik diş parametreleri değiştirilmez.
+
+Bütün yeni işlemler önce ayrı bir proje taslağında oluşturulur. Omuzda iki
+işlemin toplam yüksekliği, kademe boyları, kanal çakışmaları, iç delik et
+kalınlığı, dişin kullanılabilir boyu ve 200 operasyon sınırı mevcut doğrulama
+kurallarıyla denetlenir. Bir kenara sığmayan ölçüde **hiçbir değişiklik
+uygulanmaz**; hangi kademede/kenarda sorun olduğu ayrıntıda görünür. Ölçü
+kendiliğinden küçültülmez ve uyumsuz gerçek kenar sessizce atlanmaz.
+
+**Son toplu uygulamayı geri al**, yalnız son toplu parametre değişikliğini
+tek adımda geri alır. Sonrasında elle parametre değiştirildiyse düğme devre
+dışı olur; sonraki düzenlemeler silinmez. Toplu işlemden sonra proje
+kaydedilmişse geri alma projeyi yeniden kaydedilmemiş olarak işaretler.
+Başka proje açıldığında eski geri alma kaydı kaldırılır. Bu komut GOKWORKS
+parametreleri içindir; daha önce oluşturulmuş SolidWorks belgelerini değiştirmez.
+
+Liste ve mevcut önizlemeler güncellendikten sonra katı model oluşturmak için
+**SOLIDWORKS'TE ÇİZ** kullanılır. Her kenar, zaten desteklenen normal `Chamfer`
+veya `Fillet` operasyonu olur; özel bir toplu COM çağrısı eklenmedi. Proje
+şeması v1/v2, `controller.request()` ve C# köprü sözleşmesi değişmedi.
+
+Yeni testler: `tests/test_edge_treatments.py`, `tests/test_bulk_ui.py`.
+Mevcut mil/UI/plan/taşıma regresyonları ve açık/koyu tema, dar ekran, ondalık
+virgül, kayıt/yeniden açma, atomik başarısızlık ve güvenli geri alma test edilir.
+Gerçek Windows/SOLIDWORKS oturumunda ek kabul testi:
+
+```powershell
+$env:GOKWORKS_SHAFT_LIVE = '1'
+.venv\Scripts\python.exe -m pytest -q modules/shaft_generator/tests/test_live.py -k bulk
+```
+
+Bu iki canlı test yalnız açık, kurulu/lisanslı SolidWorks bulunan ve opt-in
+verilen ortamda çalışır. Yeni parçaların tüm kenar özellikleri, düzenlenebilir
+ölçüleri, tek gövde, rebuild, kayıt/yeniden açma ve bağımsız analitik hacim
+sonuçlarını denetler. Linux/mock veya Windows interop testi canlı CAD kabulü
+olarak raporlanmaz.
+
 ## Standart ölçü seçimi
 
-Segman/kama sekmesinde hedef kademeyi seçin; hemen altındaki **Standart yuva**
+Segman/kama bölümünde hedef kademeyi seçin; hemen altındaki **Standart yuva**
 veya **Standart kesit** listesinden DIN önerisini seçin. Genişlik ve milde
 açılacak radyal derinlik birlikte doldurulur. Kama için **Boy önerisi** kalan
 kademe boyuna (`kademe.length-offset`) sığan katalog boylarını listeler;

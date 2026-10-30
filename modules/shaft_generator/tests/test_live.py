@@ -17,7 +17,7 @@ from modules.shaft_generator.bridge import execute
                                'keyway_chamfer','keyway_fillet','keyway_both_ends','groove_keyway_both_ends',
                                'reported_groove_keyway','shared_shoulder_chamfers',
                                'touching_shoulder_chamfers','reported_six_operations','reported_two_stages_driving',
-                               'reported_keyway_volume'])
+                               'reported_keyway_volume','bulk_chamfer','bulk_fillet'])
 def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,case):
     p=Project()
     if case=='single':p.stages=[Stage(30,80)]
@@ -75,6 +75,9 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
         if case!='keyway_fillet': p.operations.append(Chamfer(sid,edge='left'))
         if case!='keyway_chamfer': p.operations.append(Fillet(sid,edge='right'))
         if case=='groove_keyway_both_ends': p.operations.append(Groove(sid,offset=40))
+    if case.startswith('bulk_'):
+        from modules.shaft_generator.edge_treatments import plan_treatments
+        p=plan_treatments(p,'chamfer' if case=='bulk_chamfer' else 'fillet',.5).project
     output=tmp_path/f'{case}.SLDPRT'
     result=execute(request(p,output_path=output,verify_edit=True))
     assert result['edit_verified'] and result['fully_defined'] and result['single_body'] and result['rebuild_success']
@@ -82,6 +85,20 @@ def test_native_driving_dimensions_features_rebuild_save_and_reopen(tmp_path,cas
     assert result['feature_count']==len(p.stages)+len(p.operations)
     assert result['volume_m3']>0
     if case.startswith('zero_'):assert result['zero_offset_verified']
+    if case.startswith('bulk_'):
+        expected=sum(math.pi*(s.diameter/2)**2*s.length for s in p.stages)
+        for op in p.operations:
+            index=next(i for i,s in enumerate(p.stages) if s.id==op.stage_id)
+            stage=p.stages[index];radius=stage.diameter/2
+            other=index-1 if op.edge=='left' else index+1
+            concave=0<=other<len(p.stages) and p.stages[other].diameter>stage.diameter
+            size=op.distance if isinstance(op,Chamfer) else op.radius
+            if isinstance(op,Chamfer):
+                change=math.pi*(radius*size**2+(1 if concave else -1)*size**3/3)
+            else:
+                change=math.pi*(radius*size**2*(2-math.pi/2)+(1 if concave else -1)*size**3*(5/3-math.pi/2))
+            expected+=change if concave else -change
+        assert result['volume_m3']==pytest.approx(expected*1e-9,rel=1e-6)
     if case=='two_chamfers':
         # Two equal 45-degree wedges removed from opposite ends of a cylinder.
         expected=math.pi*15**2*40-2*math.pi*(15-1/3)
@@ -151,6 +168,9 @@ def test_axial_hole_and_cosmetic_thread_rebuild_save_and_reopen(tmp_path,case):
     if 'cosmetic' in case:
         p.operations=[CosmeticThread(p.stages[0].id,edge='right' if case=='cosmetic_right' else 'left',length=20,pitch=1.5)]
     if case=='chamfer_cosmetic':p.operations.insert(0,Chamfer(p.stages[0].id,edge='left',distance=2))
+    if case.startswith('bulk_'):
+        from modules.shaft_generator.edge_treatments import plan_treatments
+        p=plan_treatments(p,'chamfer' if case=='bulk_chamfer' else 'fillet',.5).project
     output=tmp_path/f'{case}.SLDPRT'
     result=execute(request(p,output_path=output,verify_edit=True))
     assert result['fully_defined'] and result['single_body'] and result['edit_verified'] and result['rebuild_success']

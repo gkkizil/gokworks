@@ -11,6 +11,9 @@ on:
       - 'tests/support/solidworks.py'
       - 'modules/shaft_generator/ui.py'
       - 'modules/shaft_generator/tests/test_ui.py'
+      - 'modules/shaft_generator/tests/test_bulk_ui.py'
+      - 'modules/shaft_generator/tests/test_edge_treatments.py'
+      - 'modules/shaft_generator/edge_treatments.py'
       - 'modules/shaft_generator/tests/native/**'
       - 'modules/shaft_generator/tests/test_channel_selection.py'
       - 'modules/shaft_generator/interop/**'
@@ -23,6 +26,9 @@ on:
       - 'tests/support/solidworks.py'
       - 'modules/shaft_generator/ui.py'
       - 'modules/shaft_generator/tests/test_ui.py'
+      - 'modules/shaft_generator/tests/test_bulk_ui.py'
+      - 'modules/shaft_generator/tests/test_edge_treatments.py'
+      - 'modules/shaft_generator/edge_treatments.py'
       - 'modules/shaft_generator/tests/native/**'
       - 'modules/shaft_generator/tests/test_channel_selection.py'
       - 'modules/shaft_generator/interop/**'
@@ -53,7 +59,7 @@ jobs:
         run: python packaging/configure_windows_display.py
       - name: Test profile workflow, DXF, BOM and shaft UI without licensed CAD
         run: |
-          python packaging/run_windows_tests.py modules/profile_cutting/tests modules/dxf_dwg/tests modules/bom/tests modules/shaft_generator/tests/test_ui.py tests/test_qt_workflows.py::test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel tests/test_qt_workflows.py::test_bom_clear_button_empties_both_views_and_pending_filters
+          python packaging/run_windows_tests.py modules/profile_cutting/tests modules/dxf_dwg/tests modules/bom/tests modules/shaft_generator/tests/test_ui.py modules/shaft_generator/tests/test_bulk_ui.py modules/shaft_generator/tests/test_edge_treatments.py tests/test_qt_workflows.py::test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel tests/test_qt_workflows.py::test_bom_clear_button_empties_both_views_and_pending_filters
           $testExit=$LASTEXITCODE
           @'
           from pathlib import Path
@@ -69,6 +75,14 @@ jobs:
                       print('::error::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
           '@ | python -
           exit $testExit
+      - name: Check shaft editor at 125 percent scaling
+        env:
+          QT_SCALE_FACTOR: '1.25'
+        run: python -m pytest -q --timeout=60 modules/shaft_generator/tests/test_bulk_ui.py::test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_classes_unchanged modules/shaft_generator/tests/test_ui.py::test_narrow_page_scrolls_forms_and_keeps_both_views_and_bottom_command_reachable --junitxml=windows-shaft-dpi-125.xml
+      - name: Check shaft editor at 150 percent scaling
+        env:
+          QT_SCALE_FACTOR: '1.5'
+        run: python -m pytest -q --timeout=60 modules/shaft_generator/tests/test_bulk_ui.py::test_bulk_controls_and_add_action_stay_reachable_at_normal_size_and_preview_classes_unchanged modules/shaft_generator/tests/test_ui.py::test_narrow_page_scrolls_forms_and_keeps_both_views_and_bottom_command_reachable --junitxml=windows-shaft-dpi-150.xml
       - name: Upload test evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -77,3 +91,4 @@ jobs:
           path: |
             windows-tests.xml
             windows-tests.log
+            windows-shaft-dpi-*.xml

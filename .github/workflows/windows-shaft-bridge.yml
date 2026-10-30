@@ -25,7 +25,7 @@ jobs:
           architecture: x64
       - run: python -m pip install pytest==9.0.2
       - name: Verify offline DIN catalogue and nominal data contract
-        run: python -m pytest -q modules/shaft_generator/tests/test_standards.py modules/shaft_generator/tests/test_axial_features.py
+        run: python -m pytest -q modules/shaft_generator/tests/test_standards.py modules/shaft_generator/tests/test_axial_features.py modules/shaft_generator/tests/test_edge_treatments.py
       - name: Stage temporary compile references (never packaged)
         run: |
           $directory=Join-Path $env:RUNNER_TEMP 'gokworks-shaft-interop'
