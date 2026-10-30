@@ -88,6 +88,19 @@ def test_suppressed_is_ignored_and_lightweight_part_and_subassembly_open_safely(
     assert not p.opened and not sub.opened and app.ActiveDoc is root and not app.saves
 
 
+def test_speedpak_configuration_property_is_checked_before_reading_a_partial_tree(env,tmp_path):
+    from types import SimpleNamespace as NS
+    from modules.cad_converter.api import ApiError
+    app,_,_=env;root=assembly(app,tmp_path/'Main.SLDASM');app.ActiveDoc=root
+    class SpeedPak(type(root)):
+        @property
+        def ConfigurationManager(self):
+            return NS(ActiveConfiguration=NS(Name=self.active,IsSpeedPak=True,
+                      GetRootComponent3=lambda *args:pytest.fail('Partial SpeedPak tree must not be accepted')))
+    root.__class__=SpeedPak
+    with pytest.raises(ApiError,match='SpeedPak'):scan(env)
+
+
 def test_unreadable_part_is_reported_without_blocking_other_parts(env,tmp_path):
     app,_,_=env;p=part(app,tmp_path/'Panel.SLDPRT')
     root=assembly(app,tmp_path/'Main.SLDASM',[component(p),component(None,name='Missing',path=str(tmp_path/'Missing.SLDPRT'))]);app.ActiveDoc=root

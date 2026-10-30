@@ -305,7 +305,7 @@ def assembly_occurrences(session, assembly, stop, warnings):
     """
     configuration = session.active_configuration(assembly)
     config = get(get(assembly, 'ConfigurationManager'), 'ActiveConfiguration')
-    if optional(config, 'IsSpeedPak', default=False):
+    if optional(config, 'IsSpeedPak', prop=True, default=False):
         raise ApiError('SpeedPak yerine tam montaj konfigürasyonunu açın.')
     root = call(config, 'GetRootComponent3', True)
     if root is None:

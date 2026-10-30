@@ -104,7 +104,7 @@ def assembly(app,path,children=(),configurations=('Default',)):
     class Assembly(type(model)):
         @property
         def ConfigurationManager(self):
-            return NS(ActiveConfiguration=NS(Name=self.active,IsSpeedPak=lambda:False,
+            return NS(ActiveConfiguration=NS(Name=self.active,IsSpeedPak=False,
                        GetRootComponent3=lambda resolve:component(self,name='Root',children=children)))
     model.__class__=Assembly;return model
 
