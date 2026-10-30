@@ -345,3 +345,17 @@ aktivasyon. `test_dxf_dwg.py` ilk aktivasyon hatası ile geri alma hatasını
 ayrı doğrular; hiç çıktı oluşmasa da geri alma hatası artık sessiz geçmez.
 Bu iki dosyanın son doğrudan koşusu **95 test + 44 alt test başarılıdır**.
 Gerçek lisanslı SolidWorks kabulü ve EXE derlemesi bu kontrolün parçası değildir.
+
+Son düzeltme sonrası DXF/DWG + PDF + kompakt çalışma alanı ve ilgili Qt
+tarama/iptal/temizleme koşusu bütünüyle yeniden çalıştırıldı:
+**352 test toplandı, 344 geçti, 8 atlandı; ayrıca 63 alt test geçti**.
+JUnit: 415 kayıt, 0 failure/error. Ruff `F821/F822/F823` ve `git diff --check`
+temiz. Düzeltmenin kaynak commit'i **`d8bf89b`**.
+
+Bu commit için [Windows BOM/UI 41057041770](https://github.com/gkkizil/gokworks/actions/runs/41057041770)
+tamamlandı: **548 JUnit kaydı, 542 başarılı, 6 atlanan, 0 failure/error**;
+%125/%150 ölçek kontrolleri de başarılıdır.
+[Windows shaft bridge 41057041795](https://github.com/gkkizil/gokworks/actions/runs/41057041795)
+katalog, veri sözleşmesi ve PowerShell loader/pipe kontrollerinden geçti.
+Bu koşular lisanslı SolidWorks sunucusu kullanmaz. Sonraki rapor commit'i
+çalıştırılan kaynak kodu değiştirmez.
