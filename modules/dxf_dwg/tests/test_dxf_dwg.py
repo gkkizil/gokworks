@@ -289,10 +289,21 @@ class ExportTests(unittest.TestCase):
 
     def test_activation_failure_does_not_export(self):
         self.app = FakeApp(self.model, previous=FakePart(self.source/'other.sldprt'))
-        self.app.activate_error = 5
+        activate = self.app.ActivateDoc3
+        def fail_part_only(name, *args):
+            self.app.activate_error = 5 if name == self.model.GetPathName() else 0
+            return activate(name, *args)
+        self.app.ActivateDoc3 = fail_part_only
         self.assertEqual(self.run_one()[0], 'error')
         self.assertFalse(self.model.calls)
         self.assertEqual(self.app.activated[-1], self.app.previous.GetPathName())
+
+    def test_activation_and_restore_failure_is_fatal_even_without_an_output(self):
+        self.app = FakeApp(self.model, previous=FakePart(self.source/'other.sldprt'))
+        self.app.activate_error = 5
+        with self.assertRaisesRegex(ex.SourceRestoreError, 'Önceki belge etkinleştirilemedi'):
+            self.run_one()
+        self.assertFalse(self.model.calls)
 
     def test_activation_returning_wrong_document_without_error_is_rejected(self):
         other = FakePart(self.source/'other.sldprt')

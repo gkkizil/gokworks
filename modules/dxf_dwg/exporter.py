@@ -654,8 +654,12 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         if visibility_changed and not opened_here and model is not None:
             try:
                 model.Visible = False
+                if _value(model, 'Visible'):
+                    raise RuntimeError('Belge görünürlüğü doğrulanamadı.')
             except Exception as error:
-                notes.append(f"Önceki belge görünürlüğü geri yüklenemedi: {error}")
+                message = f"Önceki belge görünürlüğü geri yüklenemedi: {error}"
+                notes.append(message)
+                restore_failed = '; '.join(filter(None, (restore_failed, message)))
         if opened_here and model is not None and not save_failed:
             try:
                 app.CloseDoc(_value(model, "GetTitle"))
@@ -667,8 +671,14 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 restored = app.ActivateDoc3(previous_name, False, DONT_REBUILD, errors)
                 if restored is None or errors.value:
                     raise RuntimeError(f"SolidWorks hata kodu: {errors.value}")
+                active = _value(app, 'ActiveDoc')
+                if (active is None or _part_key(_document_name(active), '') != _part_key(previous_name, '')
+                        or _part_key(_document_name(restored), '') != _part_key(previous_name, '')):
+                    raise RuntimeError('Önceki aktif belge doğrulanamadı.')
             except Exception as error:
-                notes.append(f"Önceki belge etkinleştirilemedi: {error}")
+                message = f"Önceki belge etkinleştirilemedi: {error}"
+                notes.append(message)
+                restore_failed = '; '.join(filter(None, (restore_failed, message)))
         # Release child dispatch wrappers before a fatal restoration exception
         # can retain this frame past the owning STA's CoUninitialize.
         model = part_api = previous = active = activated = restored = selected_body = app = None

@@ -113,3 +113,41 @@ def test_cancelled_validation_with_restore_failure_is_an_error_not_a_clean_stop(
     assert summary['state']=='error' and summary['native_restore_failed'] and summary['failed']==1
     results=[r for kind,r in events.queue if kind=='sheet_result']
     assert len(results)==1 and results[0]['status']=='error' and not p.export_calls
+
+
+@pytest.mark.parametrize('failure',['visibility','visibility_ignored','active_document','active_wrong_document'])
+def test_document_state_restore_failure_preserves_output_and_stops_the_batch(env,tmp_path,failure):
+    app,Session,_=env
+    p=part(app,tmp_path/'Panel.SLDPRT');other=part(app,tmp_path/'Next.SLDPRT')
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,name='Panel'),component(other,name='Next')]);app.ActiveDoc=root
+    rows=scan(env)
+    if failure.startswith('visibility'):
+        p._visible=False
+        class HiddenPart(type(p)):
+            @property
+            def Visible(self):return self._visible
+            @Visible.setter
+            def Visible(self,value):
+                if value is False:
+                    if failure=='visibility':raise RuntimeError('visibility restore refused')
+                    return
+                self._visible=value
+        p.__class__=HiddenPart
+    else:
+        activate=app.ActivateDoc3;attempts=[]
+        def fails_once(name,*args):
+            if name==root.path and not attempts:
+                attempts.append(name)
+                if failure=='active_wrong_document':return p
+                args[-1].value=1;return None
+            return activate(name,*args)
+        app.ActivateDoc3=fails_once
+    events=Queue()
+    export_selection(rows,tmp_path,tmp_path/'out',('dxf',),events,session_factory=Session)
+    summary=events.queue[-1][1]
+    assert summary['state']=='error' and summary['native_restore_failed'] and summary['partial']==1
+    results=[r for kind,r in events.queue if kind=='sheet_result']
+    assert len(results)==1 and results[0]['status']=='partial'
+    assert Path(results[0]['outputs'][0]['path']).is_file()
+    assert not other.export_calls and not app.saves and p.selection==['user selection']
+    assert app.ActiveDoc is root

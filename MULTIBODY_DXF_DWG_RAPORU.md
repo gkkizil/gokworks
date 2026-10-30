@@ -323,3 +323,25 @@ Bu commit için Windows sonuçları:
   offline katalog/veri sözleşmesi ve gerçek PowerShell loader/pipe kontrolleri başarılı.
 - Bu işlerde de lisanslı SolidWorks sunucusu çalıştırılmadı. EXE üretilmedi.
   Sonraki rapor commit'i yalnız bu doğrulama kaydını günceller.
+
+## İkinci kontrol ve durum geri alma düzeltmesi
+
+Kullanıcının yeniden kontrol isteğiyle `e0b5586` üzerinden DXF/DWG, profil
+kesim, BOM, 3D dönüştürücü, PDF, mil UI, kompakt çalışma alanları, lazy sayfalar
+ve depo yapısı yeniden test edildi: **713 test toplandı, 702 geçti, 11 atlandı;
+ayrıca 74 alt test geçti** (JUnit: 787 kayıt, 0 failure/error).
+
+Ek hata enjeksiyonuyla iki açık bulundu: `export_one_part` görünürlüğü geri
+alamadığında veya önceki aktif belgeyi açamadığında yalnız uyarı yazıp sıradaki
+parçaya geçebiliyordu. `modules/dxf_dwg/exporter.py` artık bu durumları
+`SourceRestoreError` olarak iletir. Görünürlük yeniden okunur; `ActivateDoc3`
+dönüş belgesi ve gerçek `ActiveDoc` önceki belgeyle karşılaştırılır.
+Başarılı çıktı korunup kısmi sonuç verilir, kalan aktarım durur ve UI'nin mevcut
+`native_restore_failed` koruması devreye girer.
+
+`test_review_regressions.py` dört senaryoyu doğrular: görünürlük setter hatası,
+sessizce uygulanmayan görünürlük, aktivasyon hatası ve yanlış belge döndüren
+aktivasyon. `test_dxf_dwg.py` ilk aktivasyon hatası ile geri alma hatasını
+ayrı doğrular; hiç çıktı oluşmasa da geri alma hatası artık sessiz geçmez.
+Bu iki dosyanın son doğrudan koşusu **95 test + 44 alt test başarılıdır**.
+Gerçek lisanslı SolidWorks kabulü ve EXE derlemesi bu kontrolün parçası değildir.
