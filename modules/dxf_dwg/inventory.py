@@ -78,8 +78,11 @@ def plan_destinations(items, source, output, formats, group_by_thickness=False, 
         if 'material' in naming and item.get('material'):
             chunks.append(safe_name(item['material']))
         # A fixed bound leaves room for thickness/quantity and Windows paths.
-        stem = ' - '.join(chunks)[:140].rstrip(' .')
-        if item.get('body_count',1)>1 or multiple_configs or outside:
+        full_stem = ' - '.join(chunks)
+        stem = full_stem[:140].rstrip(' .')
+        # Explicit names and truncation can hide the source filename. Keep
+        # these identities stable even when each body is exported separately.
+        if item.get('body_count',1)>1 or multiple_configs or outside or naming or stem != full_stem:
             stem=stem[:126].rstrip(' .')+' - '+identifier[:10]
         synthetic = Path(source) / relative.parent / (stem + '.sldprt')
         targets = named_destinations(synthetic, source, output, formats, item['thickness_mm'],

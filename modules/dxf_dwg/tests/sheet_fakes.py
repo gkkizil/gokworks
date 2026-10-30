@@ -121,7 +121,7 @@ def environment(monkeypatch):
             self.app=app;self.constants=dict(C,swSolidBody=0,swThisConfiguration=1,swObjectSame=1,swCustomInfoGetResult_ResolvedValue=2)
             self.owned={};self.load_warnings={};self.previous=app.ActiveDoc.path if app.ActiveDoc else ''
             self.pythoncom=NS(CoUninitialize=lambda:None);return self
-        def describe(self,model,source,configuration,stop=None):
+        def describe(self,model,source,configuration,stop=None,**kwargs):
             calls[(source,configuration)]+=1
-            return super().describe(model,source,configuration,stop)
+            return super().describe(model,source,configuration,stop,**kwargs)
     return app,FakeSession,calls

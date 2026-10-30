@@ -145,9 +145,10 @@ class Session(ReadSession):
 
     def metadata(self, model, configuration, request, body_reference=''):
         properties = {}
+        body_properties = {}
         body_name = request.body_name
         cut_list_name = ''
-        extension = manager = wrapper = part = None
+        extension = manager = wrapper = selected = None
         thicknesses = []
         try:
             extension = get(model, 'Extension')
@@ -177,6 +178,7 @@ class Session(ReadSession):
                             for key, prop in self.properties(feature).items():
                                 if prop.resolved and prop.evaluated:
                                     properties[key.casefold()] = prop.evaluated
+                                    body_properties[key.upper()] = prop.evaluated
                             break
                 except Exception:
                     pass
@@ -184,16 +186,13 @@ class Session(ReadSession):
                     folder = members = member = feature = None
             def field(names):
                 return next((properties[n.casefold()] for n in names if n.casefold() in properties), 'Okunamadı')
-            material = field(('MATERIAL', 'SW-MATERIAL', 'MALZEME'))
-            if material == 'Okunamadı':
+            if body_reference:
                 try:
-                    part = interface(model, PART_IID)
-                    database = variant(0x4008, '')
-                    value = call(part, 'GetMaterialPropertyName2', configuration, database)
-                    if isinstance(value, str) and value:
-                        material = value
+                    selected, _ = self.body(model, body_reference)
                 except Exception:
                     pass
+            material = self.material(model, selected, configuration, {k.upper():v for k,v in properties.items()},
+                                     body_props=body_properties) or 'Okunamadı'
             # Traverse both feature-link contexts, as in the existing exporter.
             feature = definition = None
             pending, seen = [(call(model, 'FirstFeature'), False)], set()
@@ -225,7 +224,6 @@ class Session(ReadSession):
                          and thicknesses[0] > 0 else 'Okunamadı')
             if body_reference and request.flat_ref:
                 try:
-                    selected, _ = self.body(model, body_reference)
                     body_name = str(optional(selected,'Name',prop=True,default=body_name) or body_name)
                     thickness = f'{self.thickness(model, selected, {k.upper():v for k,v in properties.items()}, list(self.features(model))):g} mm'
                 except Exception:
@@ -239,7 +237,7 @@ class Session(ReadSession):
                     ('Adet', str(request.quantity) if request.quantity is not None else 'Henüz montajdan okunmadı'),
                     ('Büküm sayısı', field(('BENDS', 'BEND COUNT', 'BENDCOUNT', 'NUMBER OF BENDS', 'NUMBEROFBENDS', 'BÜKÜM SAYISI')))]
         finally:
-            model = extension = manager = wrapper = part = None
+            model = extension = manager = wrapper = selected = None
 
 
 def flat_for_source(session, model, request, before, update, body_count, stop):

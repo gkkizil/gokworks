@@ -164,20 +164,28 @@ class Session(ReadSession):
             raise ApiError('Gövdeye ait sac kalınlığı kesin belirlenemedi.')
         return measurements[0]
 
-    def material(self, model, body, configuration, props):
-        for name in ('MATERIAL', 'SW-MATERIAL', 'MALZEME'):
-            if props.get(name):
-                return props[name]
-        for owner in (body, self.part(model)):
+    def material(self, model, body, configuration, props, *, body_props=None):
+        """Body Cut List/native assignment precede document-wide defaults."""
+        def property_value(properties):
+            return next((str(properties[n]).strip() for n in ('MATERIAL', 'SW-MATERIAL', 'MALZEME')
+                         if properties.get(n) and str(properties[n]).strip()), '')
+
+        def native(owner):
             try:
                 value = call(owner, 'GetMaterialPropertyName2', configuration, variant(0x4008, ''))
-                if isinstance(value, str) and value:
-                    return value
+                return value.strip() if isinstance(value, str) else ''
             except Exception:
-                pass
-        return ''
+                return ''
 
-    def describe(self, model, source, configuration, stop=None):
+        value = property_value(body_props or {}) or native(body) or property_value(props)
+        if value:
+            return value
+        try:
+            return native(self.part(model))
+        except Exception:
+            return ''
+
+    def describe(self, model, source, configuration, stop=None, *, body_ref=''):
         """Classify with IsSheetMetal first. Mechanical parts get no feature scan."""
         bodies = sheets = features = folders = flats = None
         body = feature = folder = fixed = None
@@ -194,6 +202,9 @@ class Session(ReadSession):
                         sheets.append(body)
                 except Exception as error:
                     warnings.append(f'{source} [{configuration}]: gövdenin sac durumu doğrulanamadı: {error}')
+            sheet_count = len(sheets)
+            if body_ref:
+                sheets = [body for body in sheets if self.persistent_ref(model, body) == body_ref]
             if not sheets:
                 return rows, warnings
             try:
@@ -231,7 +242,7 @@ class Session(ReadSession):
                 reference = self.persistent_ref(model, body)
                 row = dict(source=source, configuration=configuration, body_ref=reference,
                            body_name=str(optional(body, 'Name', prop=True, default='') or 'Adsız sac gövdesi'),
-                           body_count=len(bodies), sheet_count=len(sheets), material='', thickness_mm=None,
+                           body_count=len(bodies), sheet_count=sheet_count, material='', thickness_mm=None,
                            flat_ref='', flat_pattern='', cut_list='', code=Path(source).stem,
                            status='pending', detail='', exportable=True)
                 from .exporter import preview_identity
@@ -242,6 +253,7 @@ class Session(ReadSession):
                         raise ApiError('Kalıcı gövde kimliği okunamadı; isimle tahmin edilmedi.')
                     matches = folder_by_body.get(reference,[])
                     props = dict(document_props)
+                    body_props = {}
                     if len(matches) > 1:
                         raise ApiError('Gövde birden fazla Cut List klasörüne bağlı; eşleşme belirsiz.')
                     if matches:
@@ -252,11 +264,12 @@ class Session(ReadSession):
                         properties = property_cache[row['cut_list']]
                         row['properties'] = {n: dict(raw=p.raw, evaluated=p.evaluated, resolved=p.resolved)
                                              for n, p in properties.items()}
-                        props.update({n.upper():p.evaluated for n,p in properties.items() if p.resolved and p.evaluated})
+                        body_props = {n.upper():p.evaluated for n,p in properties.items() if p.resolved and p.evaluated}
+                        props.update(body_props)
                     else:
                         notes.append('Cut List bulunamadı; doğrudan gövde verisi kullanıldı.')
                     row['thickness_mm'] = self.thickness(model, body, props, features)
-                    row['material'] = self.material(model, body, configuration, props)
+                    row['material'] = self.material(model, body, configuration, props, body_props=body_props)
                     row['code'] = next((props[n] for n in ('PART NUMBER', 'PARTNO', 'KOD', 'PARÇA KODU') if props.get(n)), row['code'])
                     patterns = flat_by_body.get(reference,[])
                     if len(patterns) != 1:

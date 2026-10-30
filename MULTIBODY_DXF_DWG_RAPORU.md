@@ -74,6 +74,10 @@ SheetMetal kalınlıkları aynıysa ortak kaynak olabilir. Farklı kalınlıklar
 arasından ilk değer seçilmez. Eksik Cut List tek başına doğru gövdeyi elemez;
 doğrudan gövde verisi yeterliyse uyarıyla devam edilir.
 
+Malzeme sırası gövdenin çözümlenmiş Cut List alanı, native gövde ataması,
+konfigürasyon/belge alanı, native parça atamasıdır. Tarama ve önizleme aynı
+okuyucuyu kullanır; belge geneli malzeme, gövdeye özel kaliteyi gölgelemez.
+
 Native export öncesi eşleşme, güncel kalınlık ve malzeme yeniden doğrulanır. Gövde ve
 Flat-Pattern sahipliği her biçimde tekrar kontrol edilir. Geçersiz çıktı,
 başarısız biçim ve iptal edilmiş geçici dosya yayımlanmaz. Başarısız bir
@@ -117,6 +121,8 @@ Seçili alt küme değişince bu gövde adı değişmez. Kaynak klasör dışın
 montaj referansları da çakışmasız ad alır. Kod, gövde, malzeme ve konfigürasyon
 adlandırma seçenekleri mevcuttur. Kalınlık/adet Nesting'in mevcut `mm` / `adet`
 kurallarıyla okunur. Aynı kaynak olmayan gövdeler isim/kalınlık eşitliğiyle birleşmez.
+Özel adlandırma veya uzun ad kısaltması kullanıldığında tek gövdede de sabit
+kimlik eki zorunludur; ayrı zamanlarda seçilen iki parça birbirinin üzerine yazmaz.
 
 Kaynak alt klasör ve kalınlık klasörü düzeni korunur. Mevcut dosya varsayılan
 atlanır; kullanıcı üzerine yazmayı açarsa geçerli geçici çıktı atomik yayımlanır.
@@ -280,3 +286,29 @@ sunucusu çalıştırılmadı; gerçek CAD kabul testleri tamamlandı sayılmıy
 - `done.native_restore_failed=True`, kullanıcı kaynağı kontrol etmeden yeni
   aktarımın başlatılmamasını sağlar. Geri alma hatasını iptal olarak göstermeyin.
 - PDF worker JSON/IPC, C# mil köprüsü, BOM ve Nesting proje şemaları değişmedi.
+
+## Son kod incelemesinde giderilen regresyonlar
+
+30 Ekim 2026, önceki kaynak `fa7d1f9` / rapor `25b2127` sonrasındaki inceleme:
+
+| Bulgu | Düzeltme ve doğrulama |
+|---|---|
+| Aynı özel kod veya kısaltılmış uzun ad, ayrı aktarımlarda aynı hedefe düşüyordu | `inventory.py`: adlandırma seçili alt kümeden bağımsız kimlik taşır. Üzerine yazma açıkken iki farklı parçanın çıktıları ayrı kalır. |
+| Belge malzemesi gövdenin native malzemesini gölgeleyebiliyordu | `sheetmetal.py`, `preview/solidworks.py`: ortak malzeme önceliği; beş Cut List/gövde/belge/parça/eksik değer senaryosunda tarama ve gerçek önizleme adapterinin sonuçları karşılaştırılır. |
+| İlk gövdeden sonra değişen ikinci gövdenin kalınlığı/malzemesi eski önbellekten kabul edilebiliyordu | `exporter.py`: her gövde aktarılmadan hemen önce `describe(..., body_ref=...)` ile yeniden doğrulanır. Geometri damgası sabit veya okunamıyorken yapılan metadata değişiklikleri de engellenir. Seçilmemiş gövdelerin özellikleri bu doğrulamada okunmaz; taramanın dosya/konfigürasyon önbelleği korunur. |
+| Doğrulama sırasında durdurulan satır İşleniyor kalabiliyordu | `exporter.py`: aktif satır ve sayaçlar sonlandırılır; tamamlanmış çıktılar korunur. İptal sırasında konfigürasyon geri alınamıyorsa sonuç yine hata olur. |
+| Hata/arama filtresi kayıt öncesi kontrolü yanlış satırda bırakabiliyordu | `ui.py`: seçili hazır gövde kaynak modelden bulunup görünür yapılır; doğru önizleme gelmeden kayıt başlamaz. İşaretli montaj örnekleri korunur. |
+
+Regresyonlar önce hatalı davranışla yeniden üretildi. Yeni testler:
+`modules/dxf_dwg/tests/test_review_regressions.py`,
+`modules/dxf_dwg/tests/test_multibody_preview.py`,
+`modules/dxf_dwg/tests/test_sheet_inventory_ui.py`.
+`tests/sheet_fakes.py` yeni isteğe bağlı `body_ref` sınırını iletir.
+Yerel sınırlı-process regresyon koşusu: DXF/DWG, PDF, kompakt çalışma alanları,
+lazy sayfalar, depo yapısı ve seçilmiş Qt aktarım/iptal/filtre/temizleme akışları.
+**361 test toplandı: 353 geçti, 8 atlandı; ayrıca 63 alt test geçti.**
+Birleşik JUnit: 424 kayıt, 0 failure, 0 error, 8 skipped.
+Yeni malzeme testinin ilk koşusunda property-get test nesnesi düzeltilip koşu
+tam olarak tekrarlandı; yukarıdaki sayılar son başarılı koşuya aittir.
+`git diff --check` ve DXF/DWG için Ruff `F821/F822/F823` temizdir.
+Gerçek lisanslı SolidWorks kabulü bu incelemede de çalıştırılmış sayılmaz.

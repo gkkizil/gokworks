@@ -131,3 +131,31 @@ def test_broken_unchecked_body_cannot_block_review_of_the_checked_ready_body(pag
     p.preview_before_export.setChecked(True);p.start_export()
     qtbot.waitUntil(lambda:not w.jobs.busy and p.preview_payload is not None)
     assert p.preview_request.body_name in ('A','B') and p.preview.flat_view.isVisible()
+
+
+def test_error_filter_cannot_make_export_review_the_wrong_body(page,qtbot,monkeypatch):
+    p,w,files=page;p.source.setText(str(files[0].parent));p.output.setText(str(files[0].parent/'out'));install(p,files)
+    p.results.filter.setCurrentIndex(p.results.filter.findData('error'))
+    p.results.table.selectRow(0)
+    qtbot.waitUntil(lambda:not w.jobs.busy and p.preview_payload is not None)
+    assert p.preview_request.body_name=='Broken'
+    calls=[]
+    monkeypatch.setattr('gui_qt.export.export_parts',lambda *a,**k:calls.append((a,k)))
+    p.preview_before_export.setChecked(True);p.start_export()
+    qtbot.waitUntil(lambda:not w.jobs.busy and p.preview_payload is not None)
+    assert not calls
+    assert p.preview_request.body_name in ('A','B')
+    assert p.results.filter.currentData() is None
+
+
+def test_search_hiding_all_checked_bodies_reveals_a_selected_body_for_review(page,qtbot,monkeypatch):
+    p,w,files=page;p.source.setText(str(files[0].parent));p.output.setText(str(files[0].parent/'out'));install(p,files)
+    p.results.search.setText('no-matching-body')
+    qtbot.waitUntil(lambda:p.results.proxy.rowCount()==0)
+    calls=[]
+    monkeypatch.setattr('gui_qt.export.export_parts',lambda *a,**k:calls.append((a,k)))
+    selected={key:set(value) for key,value in p.checked_instances.items()}
+    p.preview_before_export.setChecked(True);p.start_export()
+    qtbot.waitUntil(lambda:not w.jobs.busy and p.preview_payload is not None)
+    assert not calls and p.preview_request.body_name in ('A','B')
+    assert p.results.search.text()=='' and p.checked_instances==selected

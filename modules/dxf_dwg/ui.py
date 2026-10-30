@@ -454,6 +454,16 @@ class DxfDwgPage(ExportPage):
                     if row and row.get('sheet_id') in chosen:
                         self.results.table.setCurrentIndex(candidate);self.request_preview(row)
                         break
+                else:
+                    # Search/status filters must not substitute an unchecked
+                    # error row for the selected body's pre-export review.
+                    source_index = next((index for index,row in enumerate(self.results.model.rows)
+                                         if row.get('sheet_id') in chosen), None)
+                    if source_index is not None:
+                        self.results.clear_filters()
+                        candidate = self.results.proxy.mapFromSource(self.results.model.index(source_index,0))
+                        self.results.table.setCurrentIndex(candidate)
+                        self.request_preview(self.results.model.rows[source_index])
         if self.inventory is not None and not self.source.text():
             first = self.inventory[0]['source'] if self.inventory else ''
             # Naming root only; active-assembly rows outside it remain in scope.

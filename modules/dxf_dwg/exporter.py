@@ -827,7 +827,6 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
             summary['state'] = 'empty'
             return
         with (session_factory or Session)() as session:
-            verified = {}
             for item in items:
                 checkpoint(stop)
                 active_item=item
@@ -839,11 +838,10 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
                     # legacy single-export primitive sees an already-open doc.
                     model = session.document(item['source'])
                     with session.configuration(model, item['configuration']):
-                        # Revalidate ownership/thickness against current CAD data.
-                        token = _part_key(item['source'],item['configuration'])
-                        if token not in verified:
-                            verified[token], _ = session.describe(model, item['source'], item['configuration'], stop)
-                        fresh = verified[token]
+                        # Material/property edits need not advance the geometry
+                        # stamp. Refresh only this body, immediately before use.
+                        fresh, _ = session.describe(model, item['source'], item['configuration'], stop,
+                                                    body_ref=item['body_ref'])
                         match = [row for row in fresh if row['body_ref']==item['body_ref']]
                         if len(match)!=1 or not match[0]['exportable'] or match[0]['flat_ref']!=item['flat_ref']:
                             raise ValueError('Sac/Flat-Pattern eşleşmesi değişmiş; yeniden tarayın.')
@@ -870,6 +868,15 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
                 checkpoint(stop)
     except Cancelled:
         summary['state'] = 'cancelled'
+        if active_item is not None:
+            available = [r['path'] for r in outputs if r['status'] in ('success','skipped')]
+            state = 'partial' if any(r['status']=='success' for r in outputs) else 'skipped'
+            summary['processed'] += 1
+            summary['partial' if state=='partial' else 'skipped'] += 1
+            events.put(('sheet_result',dict(active_item,**metadata,status=state,
+                       detail='İşlem durduruldu; tamamlanmış çıktılar korundu.' if state=='partial' else 'İşlem durduruldu; yeni çıktı oluşturulmadı.',
+                       outputs=outputs,output=' | '.join(available))))
+            events.put(('progress',(summary['processed'],len(items))))
     except (RestoreError, SourceRestoreError) as error:
         summary.update(state='error', error=str(error), native_restore_failed=True)
         if active_item is not None:
