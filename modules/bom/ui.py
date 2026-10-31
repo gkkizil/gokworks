@@ -19,7 +19,7 @@ def mass(value):
 
 class BomPage(BasePage):
     def __init__(self, context):
-        super().__init__(context, 'BOM · Ürün ağacı', 'Montaj hiyerarşisi, parça adetleri ve canlı ağırlık bilgileri.')
+        super().__init__(context, 'BOM · Ürün ağacı', 'Montaj hiyerarşisi, parça adetleri ve isteğe bağlı ağırlık hesabı.')
         self.result = None
         self.scan_button = self.action('Montajı oku', self.scan, primary=True)
         self.export_button = self.action('Excel kaydet', self.export)
@@ -27,10 +27,17 @@ class BomPage(BasePage):
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
         self.form = ValueForm(self.settings, 'bom_')
+        self.form.combo('read_mode', 'Okuma modu',
+                        ('Hızlı liste · ağırlıksız', 'Tam çözümleme · ağırlıksız', 'Ağırlıklarla birlikte'),
+                        'Hızlı liste · ağırlıksız').setToolTip(
+            'Hızlı liste mevcut bileşen ağacını okur; parça geometrisini çözümlemez ve ağırlık hesaplamaz. '
+            'Yüklenmemiş alt montajlar varsa Tam çözümleme seçin.')
         self.form.check('include_excluded', 'BOM dışındakileri dahil et', False)
         self.options = Disclosure('Okuma seçenekleri', self.form, expanded=True)
         source, source_layout = card('Kaynak montaj')
         source_layout.addWidget(self.options)
+        source_layout.addWidget(label('Ad ve adet için hızlı listeyi kullanın. '
+                                      'Ağırlık hesabı büyük montajlarda daha uzun sürer.', 'muted'))
         self.export_form = ValueForm(self.settings, 'bom_')
         self.include_images = self.export_form.check(
             'include_images', 'Excel’e parça görsellerini ekle', True)
@@ -160,17 +167,25 @@ class BomPage(BasePage):
             return
         self.clear()
         include = self.form.value('include_excluded')
-        self.jobs.start(self, lambda sink, stop: scan_worker(sink, stop, include_excluded=include))
-        self.set_status('Montaj, alt parçalar ve ağırlıkları okunuyor…')
+        mode = self.form.value('read_mode')
+        include_mass = mode == 'Ağırlıklarla birlikte'
+        resolve = mode != 'Hızlı liste · ağırlıksız'
+        self.jobs.start(self, lambda sink, stop: scan_worker(sink, stop, include_excluded=include,
+                        include_mass=include_mass, resolve_lightweight=resolve))
+        self.set_status('Montaj, alt parçalar ve ağırlıkları okunuyor…' if include_mass
+                        else 'Parça listesi ve adetler okunuyor; ağırlık hesabı yapılmıyor…')
 
     def load_result(self, result):
         self.result = result
         self.parts_model.replace([asdict(part) for part in result.parts])
         self.tree_model.replace([dict(asdict(node), id=node.number) for node in result.tree])
+        for column in (2, 3): self.parts.setColumnHidden(column, not result.mass_included)
+        self.tree.setColumnHidden(3, not result.mass_included)
         self.tree.expandToDepth(0)
         self.source_tree.expandToDepth(0)
+        weight = f'Toplam: {mass(result.total_mass_kg)} kg' if result.mass_included else 'Ağırlık hesaplanmadı'
         self.summary.setText(f'{PureWindowsPath(result.assembly).name} · {result.configuration}\n'
-            f'{len(result.parts)} farklı parça · {result.total_parts} adet · Toplam: {mass(result.total_mass_kg)} kg · '
+            f'{len(result.parts)} farklı parça · {result.total_parts} adet · {weight} · '
             f'Bastırılmış: {result.suppressed} · BOM dışı: {result.excluded}')
         self.export_button.setEnabled(not self.busy)
 
@@ -251,7 +266,9 @@ class BomPage(BasePage):
                 state = value.get('state')
                 if state == 'completed':
                     self.load_result(value['result'])
-                    self.set_status('Montaj ve ağırlık bilgileri okundu. Excel’e aktarabilirsiniz.')
+                    self.set_status('Montaj ve ağırlık bilgileri okundu. Excel’e aktarabilirsiniz.'
+                                    if value['result'].mass_included else
+                                    'Parça listesi ve adetler okundu. Ağırlık hesaplanmadı; Excel’e aktarabilirsiniz.')
                 elif state == 'exported':
                     missing = value.get('missing_images', 0)
                     note = f" · {value['images']} izometrik görsel" if 'images' in value else ''

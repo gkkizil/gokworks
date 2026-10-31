@@ -7,7 +7,7 @@ import queue
 import tempfile
 import threading
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from openpyxl import load_workbook
 from modules.bom import exporter as bom
@@ -67,6 +67,80 @@ class BomTests(unittest.TestCase):
         self.assembly = FakeAssembly(r'C:\İmalat\Ana.SLDASM', [branch, branch, hidden])
         self.app = FakeApp(self.assembly)
         self.mass_properties = attach_mass_properties(self.assembly)
+
+    def fast_collect(self, **kwargs):
+        self.assembly.ConfigurationManager.ActiveConfiguration.GetRootComponent3 = Mock(return_value=self.assembly.root)
+        self.assembly.ResolveAllLightWeightComponents = Mock(side_effect=AssertionError('Must not resolve geometry'))
+        with patch.object(bom, '_MassReader', side_effect=AssertionError('Must not calculate mass')):
+            result = bom.collect(self.app, include_mass=False, resolve_lightweight=False, **kwargs)
+        self.assembly.ConfigurationManager.ActiveConfiguration.GetRootComponent3.assert_called_once_with(False)
+        self.assembly.ResolveAllLightWeightComponents.assert_not_called()
+        return result
+
+    def test_fast_list_preserves_repeated_occurrences_and_hierarchy_without_geometry_calls(self):
+        weighted = bom.collect(self.app)
+        self.assembly.root.children += [Component('/light.sldprt', state=1), Component('/light.sldprt', state=4)]
+        result = self.fast_collect()
+        self.assertEqual(result.total_parts, weighted.total_parts+2)
+        self.assertEqual([p.quantity for p in result.parts if p.name != 'light'], [3, 2])
+        self.assertEqual(len(result.tree), len(weighted.tree)+2)
+        self.assertFalse(result.mass_included)
+        self.assertIsNone(result.total_mass_kg)
+        self.assertEqual(result.missing_mass_parts, 0)
+        self.assertTrue(all(n.mass_kg is None and 'hesaplanmadı' in n.mass_note for n in result.tree))
+
+    def test_fast_list_rejects_unloaded_or_lightweight_subassemblies_instead_of_omitting_children(self):
+        for state, unloaded in ((1, False), (4, False), (2, True)):
+            with self.subTest(state=state, unloaded=unloaded):
+                branch = Component('/unloaded.sldasm', state=state)
+                if unloaded: branch.model = None
+                self.assembly.root.children = [Component('/good.sldprt'), branch]
+                with self.assertRaisesRegex(RuntimeError, 'Tam çözümleme'):
+                    self.fast_collect()
+
+    def test_resolved_metadata_mode_resolves_once_but_never_creates_mass_reader(self):
+        phases = []
+        def resolve(flag):
+            self.assertTrue(flag)
+            self.assertIn('Lightweight', phases[-1])
+            return 0
+        self.assembly.ResolveAllLightWeightComponents = Mock(side_effect=resolve)
+        with patch.object(bom, '_MassReader', side_effect=AssertionError('Mass not requested')):
+            result = bom.collect(self.app, include_mass=False, progress=phases.append)
+        self.assertEqual(result.total_parts, 5)
+        self.assertFalse(result.mass_included)
+        self.assembly.ResolveAllLightWeightComponents.assert_called_once_with(True)
+
+    def test_fast_excel_marks_skipped_mass_instead_of_zero_or_failed_mass(self):
+        result = self.fast_collect()
+        destination = self.folder/'fast.xlsx'
+        bom.export_excel(result, destination)
+        book = load_workbook(destination); self.addCleanup(book.close)
+        self.assertEqual(book.worksheets[0]['G5'].value, 'Hesaplanmadı')
+        self.assertEqual(book.worksheets[0]['H5'].value, 'Hesaplanmadı')
+        self.assertEqual(book.worksheets[1]['J5'].value, 'Hesaplanmadı')
+        self.assertTrue(all(sheet['E1'].value == 'Hesaplanmadı' for sheet in book))
+        self.assembly.root.children = []
+        self.assertIsNone(self.fast_collect().total_mass_kg)
+
+    def test_fast_list_thousand_repeated_parts_never_recalculates_or_opens_documents(self):
+        self.assembly.root.children = [Component('/bolt.sldprt', state=1) for _ in range(1000)]
+        result = self.fast_collect()
+        self.assertEqual(result.parts[0].quantity, 1000)
+        self.assertEqual(len(result.tree), 1000)
+        self.assertEqual(self.mass_properties.calls, [])
+        self.assertEqual((self.app.open_count, self.app.closed), (0, []))
+
+    def test_plain_excel_worker_does_not_connect_for_previews(self):
+        result = self.fast_collect()
+        destination = self.folder/'plain.xlsx'
+        events = queue.Queue()
+        with patch('modules.bom.images.collect_previews', side_effect=AssertionError('No CAD previews')):
+            bom.export_worker(result, destination, events, threading.Event(), include_images=False)
+        self.assertEqual(list(events.queue)[-1], ('bom_done', dict(state='exported', path=str(destination))))
+        book = load_workbook(destination); self.addCleanup(book.close)
+        self.assertEqual(book.worksheets[0]['C5'].value, result.parts[0].quantity)
+        self.assertTrue(all(not sheet._images for sheet in book))
 
     def test_mass_uses_referenced_occurrence_in_kg_and_preserves_document_state(self):
         thin = Component('/plate.sldprt', 'İnce', mass_kg={'İnce': .25, 'Kalın': 1.5})
@@ -358,7 +432,10 @@ class BomTests(unittest.TestCase):
         events, stop = queue.Queue(), threading.Event()
         with patch('modules.bom.exporter.connect_to_solidworks', return_value=self.app):
             bom.scan_worker(events, stop)
-        event, outcome = events.get_nowait()
+        messages = list(events.queue); events.queue.clear()
+        self.assertEqual(messages[0][0], 'bom_phase')
+        event, outcome = messages[-1]
+        self.assertEqual(sum(kind == 'bom_done' for kind, _ in messages), 1)
         self.assertEqual(event, 'bom_done')
         self.assertEqual(outcome['state'], 'completed')
         self.assertEqual(outcome['result'].total_parts, 5)
@@ -367,7 +444,7 @@ class BomTests(unittest.TestCase):
         with patch('modules.bom.exporter.collect', side_effect=RuntimeError('read failed')):
             with patch('modules.bom.exporter.connect_to_solidworks', return_value=self.app):
                 bom.scan_worker(events, stop)
-        self.assertEqual(events.get_nowait()[1]['state'], 'error')
+        self.assertEqual(list(events.queue)[-1][1]['state'], 'error')
 
     def test_cancel_during_excel_styling_stops_before_next_row(self):
         from openpyxl.styles import Alignment

@@ -1,5 +1,32 @@
 # BOM - ürün ağacı
 
+## Hızlı liste ve okuma seçenekleri
+
+Varsayılan **Hızlı liste · ağırlıksız**, mevcut montaj ağacındaki adları, dosya ve
+referans konfigürasyonlarını, fiziksel adetleri ve alt montaj ilişkilerini okur.
+`ResolveAllLightWeightComponents` ve ağırlık hesaplayıcısı çağrılmaz;
+`GetRootComponent3(False)` kullanılır. Lightweight yaprak parçaların dosya
+bilgileri sayılabilir. Yüklenmemiş veya lightweight alt montaj görülürse eksik
+bir sonuç sunmak yerine **Tam çözümleme · ağırlıksız** moduna yönlendirilir.
+
+**Tam çözümleme · ağırlıksız**, lightweight bileşenleri çözümleyerek adetleri okur,
+ancak ağırlık hesaplamaz. **Ağırlıklarla birlikte** önceki ayrıntılı okuma yoludur:
+her fiziksel parça örneğinin montaj bağlamındaki ağırlığı yeniden hesaplanır.
+Montaj kesimleri nedeniyle aynı dosyanın iki örneği farklı ağırlıkta olabilir;
+bu nedenle dosya bazında ağırlık önbelleği kullanılmaz.
+
+Ağırlıksız sonuçta ağırlık sütunları arayüzde gizlenir, Excel'de **Hesaplanmadı**
+yazar; eksik ölçüm veya sıfır ağırlık olarak sunulmaz. Excel'e izometrik görsel
+eklemek ayrı bir seçenektir; hızlı çıktı için kapatılabilir. Kapalıyken Excel kaydı CAD
+önizleme oturumu açmaz. API düzeyindeki `collect` ve `export_worker` varsayılanları,
+önceki çağıranlarla uyumluluk için ağırlık/görsel okumasını korur.
+
+Bağlantı, lightweight çözümleme, bileşen ağacı okuma ve ağırlık hesabı durumları
+ayrı mesajlarla gösterilir. Devam eden tek bir SOLIDWORKS COM çağrısı güvenli
+biçimde zorla kesilmez; **Durdur** isteği çağrı döndüğünde uygulanır. Ağ yolları,
+SOLIDWORKS'ün meşgul olması ve büyük montajlar nedeniyle anında sonuç garantisi
+yoktur. Bu okuma yolunun canlı SOLIDWORKS süre ölçümü bulutta yapılmamıştır.
+
 [Örnek Excel ve arayüz görselleri](reports/bom/README.md) sentetik montaj
 verileriyle hazırlanmıştır; kullanıcının gerçek CAD dosyalarını içermez.
 
@@ -20,10 +47,10 @@ görseller alınmaz ve iki Excel sayfasındaki görsel sütunu eklenmez.
 Okunmuş parça listesi, ürün ağacı, adetler ve ağırlıklar yine eksiksiz
 aktarılır; görselsiz kayıt SolidWorks'e yeniden bağlanmayı gerektirmez.
 
-Aktif montajın aktif konfigürasyonu `GetRootComponent3(True)` ile alınır.
+Çözümlemeli modlarda aktif konfigürasyon `GetRootComponent3(True)` ile alınır.
 `GetChildren` her bileşen örneği için ayrı dolaşılır; alt montajın referans
 konfigürasyonuna ait çocuklar kullanılır. Başka konfigürasyona geçilmez ve
-parça tanımları değiştirilmez. Lightweight bileşenler tarama öncesi çözülür.
+parça tanımları değiştirilmez. Lightweight bileşenler yalnız çözümlemeli modlarda tarama öncesi çözülür.
 Tekrarlanan alt montaj dosyası üzerinden dolaşım tekilleştirilmez; her
 fiziksel kullanım adetlere katılır. Aynı dosya + referans konfigürasyonu
 toplu parça listesinde birleştirilir. Özgün Türkçe yollar korunur.

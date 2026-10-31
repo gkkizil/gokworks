@@ -7,6 +7,7 @@ import math
 from pathlib import Path, PureWindowsPath
 import re
 from tempfile import NamedTemporaryFile
+from time import monotonic
 
 from modules.dxf_dwg import exporter as sw
 from solidworks.connection import connect_to_solidworks
@@ -66,6 +67,7 @@ class Result:
     suppressed: int
     excluded: int
     include_excluded: bool
+    mass_included: bool = True
 
     @property
     def total_parts(self):
@@ -73,6 +75,8 @@ class Result:
 
     @property
     def total_mass_kg(self):
+        if not self.mass_included:
+            return None
         # An incomplete sum must not look like the weight of the whole BOM.
         if any(part.total_mass_kg is None for part in self.parts):
             return None
@@ -80,6 +84,8 @@ class Result:
 
     @property
     def missing_mass_parts(self):
+        if not self.mass_included:
+            return 0
         return sum(node.kind == 'Parça' and node.mass_kg is None for node in self.tree)
 
 
@@ -165,12 +171,12 @@ def _roll_up_mass(tree):
     return tuple(reversed(weighted))
 
 
-def _assembly(app):
+def _assembly(app, *, require_resolve=True):
     model = sw._value(app, 'ActiveDoc')
     if model is None or sw._value(model, 'GetType') != sw.ASSEMBLY:
         raise RuntimeError("BOM için SolidWorks'te ana montajı etkinleştirin.")
     api = model
-    if not hasattr(api, 'ResolveAllLightWeightComponents'):
+    if require_resolve and not hasattr(api, 'ResolveAllLightWeightComponents'):
         for interface in ('IAssemblyDoc', 'AssemblyDoc'):
             try:
                 api = win32com.client.CastTo(model, interface)
@@ -193,7 +199,8 @@ def _excluded(component):
     return bool(sw._value(component, 'ExcludeFromBOM'))
 
 
-def collect(app, stop_event=None, *, include_excluded=False, progress=None):
+def collect(app, stop_event=None, *, include_excluded=False, progress=None,
+            include_mass=True, resolve_lightweight=True):
     """Count each physical occurrence; never deduplicate subassembly traversal.
 
     Hidden components are included; suppressed branches are omitted. Excluded
@@ -201,33 +208,48 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
     No feature edits, configuration switches, file saves or document closes.
     """
     _check_cancel(stop_event)
-    assembly, api = _assembly(app)
-    resolved = api.ResolveAllLightWeightComponents(True)
-    if resolved not in (0, 2):
-        raise RuntimeError(f'Montaj bileşenleri çözümlenemedi. API hata kodu: {resolved}')
+    # Mass calculation needs resolved geometry; the metadata-only path does not.
+    resolve_lightweight = resolve_lightweight or include_mass
+    last_progress = 0.0
+    def report(text, *, force=False):
+        nonlocal last_progress
+        now = monotonic()
+        if progress and (force or now-last_progress >= .25):
+            progress(text); last_progress = now
+        _check_cancel(stop_event)
+    assembly, api = _assembly(app, require_resolve=resolve_lightweight)
+    if resolve_lightweight:
+        report('Lightweight bileşenler SOLIDWORKS tarafından çözümleniyor…', force=True)
+        resolved = api.ResolveAllLightWeightComponents(True)
+        if resolved not in (0, 2):
+            raise RuntimeError(f'Montaj bileşenleri çözümlenemedi. API hata kodu: {resolved}')
+    report('Montaj ağacı ve parça adetleri okunuyor…', force=True)
     config = assembly.ConfigurationManager.ActiveConfiguration
     if hasattr(config, 'IsSpeedPak') and sw._value(config, 'IsSpeedPak'):
         raise RuntimeError('SpeedPak yerine tam montaj konfigürasyonunu etkinleştirin.')
-    root = config.GetRootComponent3(True)
+    root = config.GetRootComponent3(resolve_lightweight)
     if root is None:
-        raise RuntimeError('Montaj bileşen ağacı okunamadı.')
+        raise RuntimeError('Montaj bileşen ağacı okunamadı. Okuma modu olarak “Tam çözümleme · ağırlıksız” seçin.')
     configuration = str(sw._value(config, 'Name'))
     assembly_name = str(sw._document_name(assembly))
     masses, originals, tree = {}, {}, []
-    reader = _MassReader(assembly)
-    suppressed = excluded = visited = 0
+    reader = _MassReader(assembly) if include_mass else None
+    suppressed = excluded = visited = inspected = 0
     root_key = sw._part_key(assembly_name, configuration)
     # Sibling records are read once and sorted before entering the traversal.
     def children(component):
-        nonlocal suppressed, excluded
+        nonlocal suppressed, excluded, inspected
         records = []
+        report(f'Ürün ağacı okunuyor · {visited} bileşen')
         for child in sw._value(component, 'GetChildren') or ():
             _check_cancel(stop_event)
+            inspected += 1
+            report(f'Bileşen bilgileri okunuyor · {inspected} kayıt')
             state = sw._value(child, 'GetSuppression')
             if state == 0:
                 suppressed += 1
                 continue
-            if state not in (2, 3):
+            if state not in ((2, 3) if resolve_lightweight else (1, 2, 3, 4)):
                 raise RuntimeError('Çözümlenmemiş bileşen var; eksik BOM oluşturulmadı.')
             if not include_excluded and _excluded(child):
                 excluded += 1
@@ -240,6 +262,11 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
             kind = {'.sldprt': 'Parça', '.sldasm': 'Montaj'}.get(filename.suffix.lower())
             if kind is None:
                 raise RuntimeError(f'Tanınmayan bileşen dosyası: {path}')
+            # Lightweight leaf metadata can be counted without loading geometry.
+            # Never treat an unloaded/lightweight subassembly as an empty branch.
+            if not resolve_lightweight and kind == 'Montaj' and state in (1, 4):
+                raise RuntimeError(f'Alt montaj henüz tam yüklenmemiş: {path}. '
+                                   'Okuma modu olarak “Tam çözümleme · ağırlıksız” seçin; eksik BOM oluşturulmadı.')
             instance = str(sw._value(child, 'Name2'))
             records.append((child, path, ref, filename.stem, instance, kind))
         return sorted(records, key=lambda r: (name_key(r[3]), name_key(r[2]), r[1], name_key(r[4])))
@@ -251,7 +278,8 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
         (component, path, ref, name, instance, kind), number, parent, level, ancestors = stack.pop()
         key = sw._part_key(path, ref)
         if kind == 'Parça':
-            mass, note = reader.read(component, stop_event)
+            report(f'{"Ağırlık hesaplanıyor" if include_mass else "Parça sayılıyor"} · {visited+1} · {name}')
+            mass, note = reader.read(component, stop_event) if reader else (None, 'Ağırlık hesaplanmadı.')
             tree.append(Node(number, parent, level, name, instance, kind, path, ref, mass, note))
             masses.setdefault(key, []).append((mass, note))
             originals.setdefault(key, (name, path, ref))
@@ -260,18 +288,18 @@ def collect(app, stop_event=None, *, include_excluded=False, progress=None):
             if key in ancestors:
                 raise RuntimeError(f'Montaj ağacında döngü bulundu: {path}')
             if sw._value(component, 'GetModelDoc2') is None:
-                raise RuntimeError(f'Alt montaj yüklenmemiş: {path}')
+                raise RuntimeError(f'Alt montaj yüklenmemiş: {path}. “Tam çözümleme · ağırlıksız” seçin.')
             if hasattr(component, 'IsSpeedPak') and sw._value(component, 'IsSpeedPak'):
                 raise RuntimeError(f'SpeedPak alt montajın tam ağacını açın: {path}')
             stack.extend((record, f'{number}.{index}', number, level+1, ancestors | {key})
                          for index, record in reversed(list(enumerate(children(component), 1))))
         visited += 1
-        if progress and visited % 100 == 0:
-            progress(f'Montaj taranıyor · {visited} bileşenin parça ve ağırlık bilgileri okundu')
     _check_cancel(stop_event)
     parts = tuple(sorted((_weighted_part(originals[key], values) for key, values in masses.items()),
                          key=lambda p: (name_key(p.name), name_key(p.configuration), p.path)))
-    return Result(assembly_name, configuration, parts, _roll_up_mass(tree), suppressed, excluded, include_excluded)
+    tree = _roll_up_mass(tree) if include_mass else tuple(
+        replace(node, mass_note='Ağırlık hesaplanmadı.') for node in tree)
+    return Result(assembly_name, configuration, parts, tree, suppressed, excluded, include_excluded, include_mass)
 
 
 def export_excel(result, destination, stop_event=None, *, previews=None):
@@ -318,21 +346,22 @@ def export_excel(result, destination, stop_event=None, *, previews=None):
         return ws
     temporary = None
     try:
+        unknown_mass = 'Okunamadı' if result.mass_included else 'Hesaplanmadı'
         image_headers = ['Kaynak parça · izometrik'] if previews is not None else []
         image_widths = (28,) if previews is not None else ()
         part_sheet = sheet('Parça listesi', ['Sıra', 'Parça adı', 'Adet', 'Konfigürasyon', 'Dosya adı', 'Dosya yolu',
                           'Birim ağırlık (kg)', 'Toplam ağırlık (kg)', 'Ağırlık durumu']+image_headers,
               ([i, p.name, p.quantity, p.configuration, PureWindowsPath(p.path).name, p.path,
-                p.mass_kg if p.mass_kg is not None else 'Değişken' if p.total_mass_kg is not None else 'Okunamadı',
-                p.total_mass_kg if p.total_mass_kg is not None else 'Okunamadı',
-                p.mass_note or ('Okunamadı' if p.total_mass_kg is None else 'Okundu')]
+                p.mass_kg if p.mass_kg is not None else 'Değişken' if p.total_mass_kg is not None else unknown_mass,
+                p.total_mass_kg if p.total_mass_kg is not None else unknown_mass,
+                p.mass_note or (unknown_mass if p.total_mass_kg is None else 'Okundu')]
                for i, p in enumerate(result.parts, 1)), (8, 34, 10, 28, 40, 80, 22, 22, 65)+image_widths)
         tree_sheet = sheet('Ürün ağacı', ['Pozisyon', 'Üst pozisyon', 'Seviye', 'Parça / montaj adı',
                             'Bileşen örneği', 'Tür', 'Adet', 'Konfigürasyon', 'Dosya yolu',
                             'Ağırlık (kg)', 'Ağırlık durumu']+image_headers,
               ([n.number, n.parent, n.level, n.name, n.instance, n.kind, 1, n.configuration, n.path,
-                n.mass_kg if n.mass_kg is not None else 'Okunamadı',
-                n.mass_note or ('Okunamadı' if n.mass_kg is None else
+                n.mass_kg if n.mass_kg is not None else unknown_mass,
+                n.mass_note or (unknown_mass if n.mass_kg is None else
                                'Listelenen alt parçaların toplamı' if n.kind == 'Montaj' else 'Okundu')]
                for n in result.tree), (16, 16, 10, 34, 40, 12, 10, 28, 80, 22, 65)+image_widths)
         for ws, columns in ((part_sheet, (7, 8)), (tree_sheet, (10,))):
@@ -343,10 +372,13 @@ def export_excel(result, destination, stop_event=None, *, previews=None):
             # Metadata stays outside the filterable rows. Use the flat list to
             # avoid summing both subassemblies and their children.
             ws.cell(1, 4, 'BOM toplam ağırlığı (kg)')
-            total_cell = ws.cell(1, 5, result.total_mass_kg if result.total_mass_kg is not None else 'Eksik ağırlık bilgisi')
+            total_cell = ws.cell(1, 5, result.total_mass_kg if result.total_mass_kg is not None else
+                                 'Eksik ağırlık bilgisi' if result.mass_included else 'Hesaplanmadı')
             total_cell.number_format = '0.000000'
-            ws.cell(2, 4, 'Alt montaj ağırlıkları, listelenen alt parçaların toplamıdır.')
-            ws.cell(3, 4, f'Ağırlığı okunamayan parça adedi: {result.missing_mass_parts}')
+            ws.cell(2, 4, 'Alt montaj ağırlıkları, listelenen alt parçaların toplamıdır.' if result.mass_included
+                    else 'Bu dosya ağırlık hesabı yapılmadan oluşturuldu.')
+            ws.cell(3, 4, f'Ağırlığı okunamayan parça adedi: {result.missing_mass_parts}' if result.mass_included
+                    else 'Ağırlık hesabı kullanıcı tarafından atlandı.')
         tree_sheet.sheet_properties.outlinePr.summaryBelow = False
         for row, node in enumerate(result.tree, 5):
             _check_cancel(stop_event)
@@ -422,16 +454,21 @@ def export_worker(result, destination, events, stop_event, *, include_images=Tru
     events.put(('bom_done', outcome))
 
 
-def scan_worker(events, stop_event, *, include_excluded=False):
+def scan_worker(events, stop_event, *, include_excluded=False, include_mass=True, resolve_lightweight=True):
     initialized = False
+    def phase(text):
+        events.put(('bom_phase', text))
+        flush = getattr(events, 'flush', None)
+        if callable(flush): flush()
     try:
         _check_cancel(stop_event)
         if pythoncom is None or win32com is None:
             raise RuntimeError('Montaj taraması Windows, pywin32 ve açık SolidWorks oturumu gerektirir.')
         pythoncom.CoInitialize()
         initialized = True
+        phase('Açık SOLIDWORKS oturumuna bağlanılıyor…')
         result = collect(connect_to_solidworks(), stop_event, include_excluded=include_excluded,
-                         progress=lambda text: events.put(('bom_phase', text)))
+                         progress=phase, include_mass=include_mass, resolve_lightweight=resolve_lightweight)
         outcome = dict(state='completed', result=result)
     except Cancelled:
         outcome = dict(state='cancelled')
