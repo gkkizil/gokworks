@@ -89,3 +89,20 @@ def test_live_dwg_conversion_preserves_original_source():
     parts=read_dwg(source)
     assert parts and all(p.polygon.area>0 and p.original_dxf for p in parts)
     assert source.read_bytes()==before
+
+
+def test_external_converter_uses_its_own_qt_environment(tmp_path,monkeypatch):
+    source=tmp_path/'part.dwg';source.write_bytes(b'AC1032 fixture')
+    destination=tmp_path/'part.dxf';observed=[]
+    monkeypatch.setenv('QT_PLUGIN_PATH','gokworks-qt-plugins')
+    monkeypatch.setenv('QT_QPA_PLATFORM','offscreen')
+    monkeypatch.setattr('modules.nesting.dwg_import.converter_path',lambda:'fake-oda')
+    class Process:
+        returncode=0
+        def poll(self):return 0
+    def launch(command,**kwargs):
+        observed.append(kwargs['env']);dxf(destination);return Process()
+    monkeypatch.setattr('modules.nesting.dwg_import.subprocess.Popen',launch)
+    convert_dwg(source,destination)
+    assert 'QT_PLUGIN_PATH' not in observed[0] and 'QT_QPA_PLATFORM' not in observed[0]
+    assert os.environ['QT_PLUGIN_PATH']=='gokworks-qt-plugins' and os.environ['QT_QPA_PLATFORM']=='offscreen'

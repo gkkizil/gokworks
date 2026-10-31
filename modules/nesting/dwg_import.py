@@ -38,7 +38,15 @@ def convert_dwg(source, destination, stop=None, *, timeout=120):
     check_cancel(stop)
     source,destination=Path(source),Path(destination)
     command=[converter_path(),str(source.parent),str(destination.parent),'ACAD2018','DXF','0','0',source.name]
+    # External ODA owns a separate Qt runtime. Do not send GOKWORKS/PyInstaller
+    # plugin overrides to that application or mutate the parent's environment.
+    environment=os.environ.copy()
+    for name in ('QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH','QT_QPA_PLATFORM','QML2_IMPORT_PATH','QML_IMPORT_PATH'):
+        environment.pop(name,None)
+    if 'LD_LIBRARY_PATH_ORIG' in environment:
+        environment['LD_LIBRARY_PATH']=environment['LD_LIBRARY_PATH_ORIG']
     process=subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
+                             env=environment,
                              creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
     try:
         deadline=time.monotonic()+timeout
