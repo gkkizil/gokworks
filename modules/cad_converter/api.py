@@ -130,6 +130,8 @@ class Session:
         self.pythoncom = pythoncom
         self.app = None
         self.owned = {}
+        self._document_paths = {}
+        self._temporary_windows = {}
         self.load_warnings = {}
         self.previous = ''
         active = None
@@ -163,6 +165,8 @@ class Session:
             self.load_warnings[path_key(path)] = int(warnings.value)
             if model is not None and not warnings.value & self.c('swFileLoadWarning_AlreadyOpen'):
                 self.owned[path_key(path)] = call(model, 'GetTitle')
+                if not hasattr(self, '_document_paths'): self._document_paths = {}
+                self._document_paths[path_key(path)] = path
             if model is None or errors.value:
                 raise ApiError(f'Model açılamadı; SolidWorks kodu {errors.value}.', errors.value, warnings.value)
         model = interface(model, MODEL_IID)
@@ -177,6 +181,12 @@ class Session:
         path = call(model, 'GetPathName') or call(model, 'GetTitle')
         activated = None
         try:
+            # GetOpenDocumentByName also returns assembly references that have
+            # no document window. ActivateDoc3 opens a window for them; that
+            # window belongs to this operation, even though the model was loaded.
+            if path_key(path) not in self.owned and not get(model, 'Visible'):
+                if not hasattr(self, '_temporary_windows'): self._temporary_windows = {}
+                self._temporary_windows.setdefault(path_key(path), path)
             activated = call(self.app, 'ActivateDoc3', path, False, self.c('swDontRebuildActiveDoc'), errors)
             if activated is None or errors.value or path_key(call(activated, 'GetPathName')) != path_key(path):
                 raise ApiError('Kaynak model etkinleştirilemedi; yanlış belgeden aktarım yapılmadı.', errors.value)
@@ -372,22 +382,53 @@ class Session:
         finally:
             extension = model = None
 
+    def _close_document(self, path, *, window_only=False):
+        model = None
+        try:
+            model = call(self.app, 'GetOpenDocumentByName', path)
+            if model is None: return
+            if path_key(call(model, 'GetPathName')) != path_key(path):
+                raise RestoreError('Belge kimliği eşleşmedi; başka bir model kapatılmadı.')
+            if window_only and not get(model, 'Visible'): return
+            title = call(model, 'GetTitle')
+            if not title:
+                raise RestoreError('Belge başlığı okunamadı; etkin belgeyi kapatma komutu gönderilmedi.')
+            model = None  # Drop our model pointer before asking SolidWorks to close it.
+            call(self.app, 'CloseDoc', title)
+            model = call(self.app, 'GetOpenDocumentByName', path)
+            # CloseDoc is void. A referenced component may remain loaded in its
+            # assembly, but its separate window must no longer be visible.
+            if model is not None and get(model, 'Visible'):
+                raise RestoreError('SolidWorks belge penceresini açık bıraktı.')
+        except Exception as error:
+            raise RestoreError(f'Aktarım için açılan model kapatılamadı: {Path(path).name}. {error}') from error
+        finally:
+            model = None
+
     def release(self, path):
         key = path_key(path)
-        title = self.owned.pop(key, None)
-        if title:
-            try: call(self.app, 'CloseDoc', title)
-            except Exception:
-                self.owned[key] = title
-                raise
+        paths = getattr(self, '_document_paths', {})
+        windows = getattr(self, '_temporary_windows', {})
+        if key in self.owned:
+            self._close_document(paths.get(key, str(Path(path).resolve())))
+            del self.owned[key]
+            paths.pop(key, None)
+            windows.pop(key, None)
+        elif key in windows:
+            self._close_document(windows[key], window_only=True)
+            del windows[key]
 
     def __exit__(self, kind, error, tb):
         failures = []
         try:
-            for key, title in reversed(tuple(self.owned.items())):
-                try: call(self.app, 'CloseDoc', title)
-                except Exception: failures.append('Araç tarafından açılan model kapatılamadı.')
+            paths = getattr(self, '_document_paths', {})
+            windows = getattr(self, '_temporary_windows', {})
+            pending = dict.fromkeys((*self.owned, *windows))
+            for key in reversed(pending):
+                try: self.release(paths.get(key, windows.get(key, key)))
+                except Exception as cleanup_error: failures.append(str(cleanup_error))
             self.owned.clear()
+            paths.clear(); windows.clear()
             if self.previous:
                 try:
                     errors = out_int()

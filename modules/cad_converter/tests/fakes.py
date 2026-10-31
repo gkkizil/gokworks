@@ -37,12 +37,17 @@ class Model:
     def __init__(self, path, app, configurations=('Default',), *, opened=False):
         self.path, self.app, self.names = str(path), app, configurations
         self.active = configurations[0]; self.opened = opened
+        self._visible = None; self.keep_loaded = False
         self.SelectionManager = Selection()
         self.Extension = Extension(self)
         self.components = []; self.dependencies = []; self.selected = True
         self.saved_source = False; self.show_calls = []; self.body_count = 1
     def GetPathName(self): return self.path
     def GetTitle(self): return Path(self.path).name
+    @property
+    def Visible(self): return self.opened if self._visible is None else self._visible
+    @Visible.setter
+    def Visible(self, value): self._visible = bool(value)
     def GetType(self): return C['swDocASSEMBLY'] if self.path.lower().endswith('.sldasm') else C['swDocPART']
     @property
     def ConfigurationManager(self): return SimpleNamespace(ActiveConfiguration=SimpleNamespace(Name=self.active))
@@ -79,7 +84,9 @@ class Extension:
         app = self.model.app
         if app.mbd_error: return app.mbd_error
         app.saves.append((self.model.path, self.model.active, name))
-        Path(name).write_bytes(content('step242')); return C['swPublishStep242_Success']
+        Path(name).write_bytes(content('step242'))
+        if app.after_save: app.after_save()
+        return C['swPublishStep242_Success']
 
 
 class Component:
@@ -108,17 +115,19 @@ class App:
     def OpenDoc6(self, path, kind, options, configuration, errors, warnings):
         self.open_calls.append(path); errors.value, warnings.value = self.load_error, self.load_warning
         model = self.models.get(str(path))
-        if model: model.opened = True; self.ActiveDoc = model
+        if model: model.opened = True; model.Visible = True; self.ActiveDoc = model
         return model
     def ActivateDoc3(self, name, preferences, option, errors):
         model = next((m for m in self.models.values() if m.path == name or m.GetTitle() == name), None)
         if model is None: errors.value = 1
-        else: self.ActiveDoc = model
+        else: self.ActiveDoc = model; model.Visible = True
         return model
     def CloseDoc(self, title):
         self.closed.append(title)
         for model in self.models.values():
-            if model.GetTitle() == title: model.opened = False
+            if model.GetTitle() == title:
+                model.opened = model.keep_loaded; model.Visible = False
+                if self.ActiveDoc is model: self.ActiveDoc = None
     def GetDocumentDependencies2(self, path, *args): return self.models[path].dependencies
     def GetUserPreferenceIntegerValue(self, key): return self.preferences[key]
     GetUserPreferenceToggle = GetUserPreferenceIntegerValue
@@ -132,6 +141,7 @@ class FakeSession(Session):
     def __init__(self, app): self.app = app
     def __enter__(self):
         self.constants = C; self.owned = {}; self.load_warnings = {}
+        self._document_paths = {}; self._temporary_windows = {}
         self.previous = self.app.ActiveDoc.path if self.app.ActiveDoc else ''
         self.pythoncom = SimpleNamespace(CoUninitialize=lambda: None)
         return self

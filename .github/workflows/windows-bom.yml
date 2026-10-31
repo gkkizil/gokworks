@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'modules/bom/**'
+      - 'modules/cad_converter/**'
       - 'modules/dxf_dwg/**'
       - 'modules/profile_cutting/**'
       - 'tests/support/solidworks.py'
@@ -21,6 +22,7 @@ on:
   pull_request:
     paths:
       - 'modules/bom/**'
+      - 'modules/cad_converter/**'
       - 'modules/dxf_dwg/**'
       - 'modules/profile_cutting/**'
       - 'tests/support/solidworks.py'
@@ -93,9 +95,9 @@ jobs:
                       print('::error::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
           '@ | python -
           exit $testExit
-      - name: Test profile workflow, DXF, BOM and shaft UI without licensed CAD
+      - name: Test 3D exports, profile workflow, DXF, BOM and shaft UI without licensed CAD
         run: |
-          python packaging/run_windows_tests.py modules/profile_cutting/tests modules/dxf_dwg/tests modules/bom/tests modules/shaft_generator/tests/test_ui.py modules/shaft_generator/tests/test_bulk_ui.py modules/shaft_generator/tests/test_edge_treatments.py tests/test_qt_workflows.py::test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel tests/test_qt_workflows.py::test_bom_clear_button_empties_both_views_and_pending_filters
+          python packaging/run_windows_tests.py modules/cad_converter/tests modules/profile_cutting/tests modules/dxf_dwg/tests modules/bom/tests modules/shaft_generator/tests/test_ui.py modules/shaft_generator/tests/test_bulk_ui.py modules/shaft_generator/tests/test_edge_treatments.py tests/test_qt_workflows.py::test_bom_hierarchy_missing_mass_filter_copy_and_complete_excel tests/test_qt_workflows.py::test_bom_clear_button_empties_both_views_and_pending_filters
           $testExit=$LASTEXITCODE
           @'
           from pathlib import Path

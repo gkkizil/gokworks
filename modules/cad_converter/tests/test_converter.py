@@ -44,6 +44,7 @@ def test_every_selected_format_has_its_own_folder_and_validated_file(setup, fmt)
     assert target.parent.name == fmt.folder and target.suffix == fmt.extension
     assert validate_output(target, fmt.key)
     assert app.preferences == before and model.active == 'Default' and model.SelectionManager.depth == 0
+    assert not model.opened and not model.Visible and app.closed == [model.GetTitle()]
     assert not list(target.parent.glob('.gokworks-*'))
     assert Path(model.path).read_bytes() == b'source CAD fixture'
 

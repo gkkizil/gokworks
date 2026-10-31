@@ -51,6 +51,16 @@ açık modeller kapatılmaz; konfigürasyon/seçim listesi, önceki aktif belge 
 değiştirilen STEP/STL/IGES tercihlerinin geri yüklemesi doğrulanır. Geri
 yükleme başarısız olursa işlem durur ve açık hata gösterilir.
 
+Bu kural bütün çıktı biçimlerinde ortaktır: bir parçanın seçilen konfigürasyon
+ve biçimleri tamamlandığında, hata oluştuğunda veya işlem durdurulduğunda araç
+tarafından açılan belge penceresi kapatılır. Montajın zaten belleğe yüklediği
+gizli bir bileşeni etkinleştirmek de geçici bir parça penceresi oluşturabilir;
+bu pencere aktarım sonunda kapatılır. Montajın ihtiyaç duyduğu bileşen
+geometrisi bellekte kalabilir. Önceden görünür olan kullanıcı penceresi
+kapatılmaz. `CloseDoc` boş dönüşlü olduğundan pencerenin kapandığı ayrıca
+kontrol edilir; açık kalırsa belge adıyla hata bildirilir ve sıradaki kaynağa
+geçilmez. Kaynak dosyaya otomatik kayıt yapılmaz.
+
 Her hedef önce aynı klasörde benzersiz geçici dosyaya yazılır; format
 doğrulanınca atomik yayımlanır. Mevcut çıktılar varsayılan atlanır. Üzerine
 yazma açıksa hatalı geçici çıktı mevcut doğru dosyanın yerini almaz.
