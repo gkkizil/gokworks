@@ -397,3 +397,18 @@ geometri ve DWG kaynak korumasını doğrular. Dönüştürücü sınırı mock'
 gerçek ODA/DWG kabul testi açık kaynak ortam değişkeniyle hazırlanmıştır ve
 kurulu ODA/test kopyası olmadan atlanır. Canlı DWG ve SolidWorks bu ortamda
 çalıştırılmadı. Bu görev EXE üretmez.
+
+Nesting doğrulaması: yerel tam Nesting + kompakt çalışma alanı koşusu
+**299 JUnit kaydı, 298 başarılı, 1 atlanan, 0 failure/error**.
+Son klasör/DWG testleri **11 başarılı, 1 canlı test atlanan**; eş zamanlı
+`3128b1e` BOM güncellemesi korunarak yapılan birleşik kontrol **88 kayıt,
+86 başarılı, 2 canlı test atlanan, 0 failure/error**.
+
+Son kaynak **`159c0eb`** için
+[Windows Nesting 41195826592](https://github.com/gkkizil/gokworks/actions/runs/41195826592):
+**294 JUnit kaydı, 293 başarılı, 1 canlı ODA/DWG testi atlanan, 0 failure/error**.
+%125/%150 ölçek, bütün uygulamanın açılışı ve native ekran yakalama adımları da
+başarılıdır. Harici dönüştürücü uygulamaya ait Qt plugin ayarlarını devralmaz;
+bu ayırma, ebeveyn ortamını değiştirmeden test edilmiştir.
+Bu sonuçlar gerçek lisanslı SolidWorks ve kurulu ODA ile native DWG kabulü
+yerine geçmez. Son rapor commit'i yalnız doğrulama kaydını günceller.
