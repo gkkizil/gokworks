@@ -1,4 +1,5 @@
 from dataclasses import replace
+import json
 from pathlib import Path
 import gc
 import threading
@@ -196,6 +197,38 @@ def test_project_save_load_marks_archive_historical_and_exports_real_reports(win
         page.open_project();qtbot.waitUntil(lambda:not window.jobs.busy)
     assert page.result is None and not page.project.confirmed_digest
     assert 'Eski sonuç güncel sayılmaz' in page.status_text
+
+
+@pytest.mark.parametrize('field',['factor','physical_id','dimensions'])
+def test_broken_project_keeps_the_current_analysis_and_its_result(window,qtbot,tmp_path,monkeypatch,field):
+    from modules.tolerance_stack import storage
+    page=window.pages['tolerance_stack'];page.load_example();compute(page,window,qtbot)
+    project,result=page.project,page.result
+    page.project_path='current-analysis.json'
+    path=tmp_path/'broken.json';storage.save_project(project,path)
+    data=json.loads(path.read_text())
+    if field=='factor':data['project']['terms'][0]['factor']=None
+    elif field=='physical_id':data['project']['dimensions'][0]['physical_id']=[]
+    else:data['project']['dimensions']=None
+    path.write_text(json.dumps(data),encoding='utf-8')
+    monkeypatch.setattr(page,'confirm_discard',lambda:True)
+    monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *args:(str(path),''))
+
+    page.open_project();qtbot.waitUntil(lambda:not window.jobs.busy,timeout=10000)
+
+    assert page.project is project and page.result is result
+    assert page.project_path=='current-analysis.json' and page.status.property('role')=='error'
+    assert page.metric_model.rowCount()>0 and page.dirty
+
+
+def test_extreme_numeric_input_shows_an_error_and_valid_input_recovers(window,qtbot):
+    page=window.pages['tolerance_stack'];page.load_example()
+    page.form.set_value('acceptance_max','1e999999999')
+    assert page.metadata_error and '10¹²' in page.metadata_error and page.result is None
+    page.form.set_value('acceptance_max','.40')
+    assert not page.metadata_error
+    compute(page,window,qtbot)
+    assert str(page.result.minimum)=='0.02' and str(page.result.maximum)=='0.38'
 
 
 def test_source_save_is_not_called_when_explicit_user_confirmation_is_denied(window,qtbot,tmp_path):

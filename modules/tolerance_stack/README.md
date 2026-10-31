@@ -13,3 +13,8 @@ Manuel veya SolidWorks teknik resim ölçülerinden fonksiyonel 1D ölçü zinci
 - [Kullanım, matematik ve gerçek SolidWorks kabul adımları](../../docs/tolerance-stack.md).
 
 Test: `python -m pytest modules/tolerance_stack/tests`.
+
+Proje dosyasının yapısı, katsayıları ve kaynak alanları arayüze uygulanmadan
+önce kontrol edilir. Bozuk bir dosya açıldığında mevcut analiz ve hesaplanan
+sonuç korunur. Desteklenen ±10¹² aralığını aşan sayısal girişler, taşma hatası
+yerine düzeltilebilir bir giriş mesajıyla reddedilir.

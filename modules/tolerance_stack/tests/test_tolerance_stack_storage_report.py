@@ -106,3 +106,36 @@ def test_alignment_confirmation_roundtrips_and_old_projects_remain_readable(tmp_
     data['project']['terms'][0]['alignment_confirmed']='true'
     path.write_text(json.dumps(data))
     with pytest.raises(ValueError,match='doğrultu kontrolü'):storage.load_project(path)
+
+
+@pytest.mark.parametrize('field,value',[
+    ('project.terms.0.factor',None),('project.dimensions.0.physical_id',[]),
+    ('project.dimensions.0.display_text',{}),('project.dimensions',None),
+    ('project.terms',False),('project.sources',{}),('project',None),
+    ('project.input_sigma',None),('project.output_sigma',None),
+    ('project.samples',[]),('project.seed',True),
+    ('project.sources.0.notes',[['invalid']]),('project.sources.0.title',False),
+    ('project.sources.0.dirty','false'),('project.sources.0.size',{}),
+    ('project.sources.0.modified_ns',None),
+])
+def test_malformed_saved_field_types_are_rejected_before_entering_the_ui(tmp_path,field,value):
+    source=tmp_path/'source.SLDDRW';source.write_bytes(b'unchanged CAD source')
+    project=example();project.sources=[storage.fingerprint(source)]
+    path=tmp_path/'broken.json';storage.save_project(project,path)
+    payload=json.loads(path.read_text())
+    target=payload;keys=field.split('.')
+    for key in keys[:-1]:target=target[int(key)] if isinstance(target,list) else target[key]
+    key=keys[-1];target[int(key) if isinstance(target,list) else key]=value
+    path.write_text(json.dumps(payload),encoding='utf-8')
+
+    with pytest.raises(ValueError):storage.load_project(path)
+
+    assert source.read_bytes()==b'unchanged CAD source'
+
+
+def test_missing_project_body_and_excessive_json_nesting_are_plain_validation_errors(tmp_path):
+    path=tmp_path/'broken.json'
+    path.write_text(json.dumps(dict(format='GOKWORKS-TOLERANCE-STACK',version=1,unit='mm')))
+    with pytest.raises(ValueError):storage.load_project(path)
+    path.write_text('['*2000+'0'+']'*2000)
+    with pytest.raises(ValueError):storage.load_project(path)

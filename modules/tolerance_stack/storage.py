@@ -79,12 +79,19 @@ def load_project(path):
     path=Path(path)
     if path.stat().st_size>20*1024*1024:
         raise ValueError('Analiz proje dosyası 20 MB sınırını aşıyor.')
-    data=json.loads(path.read_text(encoding='utf-8'),parse_constant=lambda value: (_ for _ in ()).throw(ValueError('Sonlu olmayan JSON sayısı.')))
+    try:
+        data=json.loads(path.read_text(encoding='utf-8'),parse_constant=lambda value: (_ for _ in ()).throw(ValueError('Sonlu olmayan JSON sayısı.')))
+    except RecursionError as error:
+        raise ValueError('Analiz projesi aşırı iç içe veri içeriyor.') from error
     if not isinstance(data,dict) or data.get('format')!='GOKWORKS-TOLERANCE-STACK' or type(data.get('version')) is not int or data.get('version')!=1 or data.get('unit')!='mm':
         raise ValueError('Analiz biçimi, sürümü veya normalize birimi desteklenmiyor.')
-    raw=data['project']
-    if not isinstance(raw,dict) or len(raw.get('dimensions',[]))>20000 or len(raw.get('terms',[]))>1000:
+    raw=data.get('project')
+    if not isinstance(raw,dict):
         raise ValueError('Proje boyutu veya yapısı geçersiz.')
+    for key,maximum in (('dimensions',20000),('terms',1000),('sources',20000)):
+        entries=raw.get(key,[])
+        if not isinstance(entries,list) or len(entries)>maximum:
+            raise ValueError('Proje boyutu veya yapısı geçersiz: '+key)
     raw=dict(raw)
     try:
         raw['dimensions']=[Dimension(**dict(item,position=tuple(item.get('position',())))) for item in raw['dimensions']]
@@ -95,6 +102,10 @@ def load_project(path):
         project=Project(**raw)
         for dimension in project.dimensions:
             validate_dimension(dimension)
+        for key in ('input_sigma','output_sigma'):
+            number(getattr(project,key),key)
+        if type(project.samples) is not int or project.seed is not None and type(project.seed) is not int:
+            raise ValueError('Kayıtlı örnek sayısı ve seed tam sayı olmalı.')
         from modules.tolerance_stack.models import DISTRIBUTIONS
         if project.method not in ('worst_case','rss','all') or project.distribution not in DISTRIBUTIONS:
             raise ValueError('Kayıtlı analiz yöntemi/dağılımı desteklenmiyor.')
@@ -103,6 +114,7 @@ def load_project(path):
         for key in ('independent','truncate_normal','offline_snapshot'):
             if not isinstance(getattr(project,key),bool):raise ValueError('Proje mantıksal alanı geçersiz.')
         for term in project.terms:
+            number(term.factor,'Ölçü katsayısı')
             if not isinstance(term.alignment_confirmed,bool):
                 raise ValueError('Ölçünün doğrultu kontrolü geçersiz; projeyi yeniden açın.')
             if term.distribution not in ('inherit',*DISTRIBUTIONS) or type(term.direction) is not int or term.direction not in (-1,1):
@@ -112,6 +124,11 @@ def load_project(path):
         for source in project.sources:
             if not isinstance(source.path,str) or not isinstance(source.sha256,str) or len(source.sha256)!=64:
                 raise ValueError('Kaynak dosya kimliği geçersiz.')
+            if (not isinstance(source.title,str) or type(source.dirty) is not bool
+                    or type(source.size) is not int or source.size<0
+                    or type(source.modified_ns) is not int or source.modified_ns<0
+                    or not all(isinstance(note,str) for note in source.notes)):
+                raise ValueError('Kaynak dosya bilgileri geçersiz.')
     except (TypeError,KeyError,AttributeError) as error:
         raise ValueError('Analiz kaydı eksik veya alan türleri geçersiz.') from error
     project.invalidate()  # Saved calculations are historical, never current on open.

@@ -20,7 +20,7 @@ def number(value, title='Değer'):
         result = Decimal(str(value).strip().replace(',', '.'))
     except (InvalidOperation, ValueError):
         raise ValueError(f'{title}: geçerli bir sayı girin.') from None
-    if not result.is_finite() or abs(result) > Decimal('1e12'):
+    if not result.is_finite() or result.copy_abs() > Decimal('1e12'):
         raise ValueError(f'{title}: sonlu, en çok ±10¹² bir sayı girin.')
     return result
 

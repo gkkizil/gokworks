@@ -7,6 +7,20 @@ import pytest
 
 from modules.tolerance_stack.models import Project, Term, manual_dimension, iso_dimension, length
 from modules.tolerance_stack.calculator import calculate, Cancelled
+from modules.tolerance_stack.models import number
+
+
+@pytest.mark.parametrize('value',[
+    '1e999999999','-1e999999999',
+    '1000000000000.000000000000000000001','-1000000000000.000000000000000000001',
+])
+def test_out_of_range_numbers_are_validation_errors_without_decimal_overflow_or_rounding(value):
+    with pytest.raises(ValueError,match='10¹²'):number(value)
+
+
+def test_large_allowed_numbers_keep_their_exact_value():
+    for value in ('1000000000000','-1000000000000','999999999999.9999999999999999999999999'):
+        assert number(value)==D(value)
 
 
 def example(**changes):

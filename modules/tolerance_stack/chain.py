@@ -17,6 +17,10 @@ class ChainIssue(ValueError):
 def validate_dimension(dimension):
     if not isinstance(dimension.id,str) or not dimension.id or not isinstance(dimension.name,str) or not dimension.name.strip() or dimension.kind not in KINDS:
         raise ValueError('Ölçü kimliği, adı veya türü geçersiz.')
+    for key in ('tolerance_type','source','sheet','view','configuration','model','api_name','persistent_ref',
+                'physical_id','display_text','provenance','original_signature','note'):
+        if not isinstance(getattr(dimension,key),str):
+            raise ValueError(f'{dimension.name}: ölçünün kaynak metin bilgileri geçersiz.')
     if dimension.display_unit not in (*UNITS, 'rad', 'deg', 'unknown'):
         raise ValueError(f'{dimension.name}: birim tanınmıyor.')
     if not isinstance(dimension.geometry_kind,str) or dimension.geometry_kind and dimension.geometry_kind not in KINDS:
