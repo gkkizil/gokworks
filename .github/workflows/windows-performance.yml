@@ -46,7 +46,7 @@ jobs:
       - name: Verify all workbenches, settings, workers, cancellation and lazy imports
         shell: pwsh
         run: |
-          python packaging/run_windows_tests.py tests/test_lazy_pages_gui.py tests/test_qt_workflows.py tests/test_compact_workspaces_gui.py tests/test_shell_feedback.py tests/test_repository_structure.py
+          python packaging/run_windows_tests.py tests/test_lazy_pages_gui.py tests/test_qt_workflows.py tests/test_compact_workspaces_gui.py tests/test_shell_feedback.py tests/test_repository_structure.py tests/test_about_contact_gui.py tests/test_app_info.py
           $testExit=$LASTEXITCODE
           @'
           from pathlib import Path

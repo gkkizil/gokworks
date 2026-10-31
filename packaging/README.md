@@ -75,8 +75,8 @@ py -3.13 -m venv .build-venv
 Çıktı: **`dist/GOKWORKS.exe`**. SHA256, kullanım notu ve açılış kontrolü raporları
 derleme kayıtlarında tutulur; kullanıcı EXE yanında bunları taşımak zorunda değildir.
 
-Lisans metinleri EXE içindedir: **Lisanslar → Lisansları kaydet** ile tam bildirim
-arşivi kaydedilebilir. Uyumlu değiştirilmiş LGPL kitaplıklarını kullanmak için
+Geliştirici ve sürüm bilgileri **Hakkında**, e-posta ve LinkedIn bağlantıları
+**İletişim** girişindedir. Uyumlu değiştirilmiş LGPL kitaplıklarını kullanmak için
 `GOKWORKS_LIBRARY_DIR`, `PySide6` ve `shiboken6` paketlerini içeren klasöre
 ayarlanabilir. Python 3.13 x64 / Qt-PySide ABI uyumu gerekir. Bu yol özel runtime
 hook ile Qt yüklenmeden önce uygulanır; üçüncü DPI kontrolü dış paketlerden

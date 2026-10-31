@@ -26,7 +26,8 @@ def apply_theme(app, appearance):
                       (QPalette.Text, 'text'), (QPalette.Button, 'panel'),
                       (QPalette.ButtonText, 'text'), (QPalette.Highlight, 'selected'),
                       (QPalette.HighlightedText, 'text'), (QPalette.ToolTipBase, 'panel'),
-                      (QPalette.ToolTipText, 'text'), (QPalette.PlaceholderText, 'muted')):
+                      (QPalette.ToolTipText, 'text'), (QPalette.PlaceholderText, 'muted'),
+                      (QPalette.Link, 'accent'), (QPalette.LinkVisited, 'accent')):
         palette.setColor(role, QColor(c[key]))
     palette.setColor(QPalette.Disabled, QPalette.Text, QColor(c['muted']))
     app.setPalette(palette)

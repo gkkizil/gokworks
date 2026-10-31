@@ -40,7 +40,7 @@ class NavigationGroup(QFrame):
 
 
 class ModuleBrowser(QFrame):
-    def __init__(self, modules, settings, navigate, toggle_sidebar, show_settings, show_licenses, set_theme):
+    def __init__(self, modules, settings, navigate, toggle_sidebar, show_settings, show_about, set_theme, *, show_contact=None):
         super().__init__()
         self.settings = settings; self.collapsed = False
         self.setObjectName('sidebar'); self.setFixedWidth(232)
@@ -85,10 +85,14 @@ class ModuleBrowser(QFrame):
         groups_layout.addStretch()
         self.menu_scroll = scroll(menu); self.menu_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body.addWidget(self.menu_scroll,1)
-        self.footer = QWidget(); footer = QHBoxLayout(self.footer)
+        self.footer = QWidget(); footer = QVBoxLayout(self.footer)
         footer.setContentsMargins(0,0,0,0); footer.setSpacing(4)
-        self.settings_button = button('Ayarlar',show_settings); self.licenses_button = button('Lisanslar',show_licenses)
-        footer.addWidget(self.settings_button); footer.addWidget(self.licenses_button); body.addWidget(self.footer)
+        row=QHBoxLayout();row.setSpacing(4)
+        self.settings_button = button('Ayarlar',show_settings); self.about_button = button('Hakkında',show_about)
+        row.addWidget(self.settings_button);row.addWidget(self.about_button);footer.addLayout(row)
+        self.contact_button=button('İletişim',show_contact)
+        self.contact_button.setToolTip('E-posta ve LinkedIn iletişim bilgileri')
+        footer.addWidget(self.contact_button);body.addWidget(self.footer)
         self.theme_picker = QComboBox()
         self.theme_picker.addItem('Koyu tema','dark'); self.theme_picker.addItem('Açık tema','light')
         self.theme_picker.setCurrentIndex(0 if settings.get('appearance','dark')=='dark' else 1)

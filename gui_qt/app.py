@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, QSize, QEvent
-from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QGuiApplication
+from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QGuiApplication, QSurfaceFormat
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
     QVBoxLayout, QFrame, QStackedWidget, QProgressBar, QComboBox, QMessageBox,
     QDialog, QDialogButtonBox, QToolButton, QCheckBox, QToolBar, QDockWidget, QMenu, QSizePolicy)
@@ -71,6 +71,19 @@ MODULES = (
 class MainWindow(QMainWindow):
     def __init__(self, settings_path=None):
         super().__init__()
+        self._graphics_anchor=None
+        if QApplication.platformName() not in ('offscreen','minimal'):
+            # Qt chooses the native window surface from its child hierarchy.
+            # A hidden 1px GL anchor prepares that surface before first show,
+            # without eagerly constructing any engineering page. Otherwise the
+            # first lazy QOpenGLWidget changes RasterSurface to OpenGLSurface
+            # and QWidget destroys/recreates the already-visible native HWND.
+            from PySide6.QtOpenGLWidgets import QOpenGLWidget
+            self._graphics_anchor=QOpenGLWidget(self)
+            self._graphics_anchor.setObjectName('graphicsSurfaceAnchor')
+            self._graphics_anchor.setFixedSize(1,1)
+            self._graphics_anchor.setFocusPolicy(Qt.NoFocus)
+            self._graphics_anchor.hide()
         self.setWindowTitle('GOKWORKS · Mühendislik araçları')
         self.setWindowIcon(QIcon(str(ASSETS / 'GOK_app_windows.ico')))
         self.settings = SettingsStore(parent=self) if settings_path is None else SettingsStore(settings_path, self)
@@ -89,13 +102,14 @@ class MainWindow(QMainWindow):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
         self.browser = ModuleBrowser(MODULES,self.settings,self.navigate,self.toggle_sidebar,
-                                     self.show_settings,self.show_licenses,self.set_theme)
+                                     self.show_settings,self.show_about,self.set_theme,show_contact=self.show_contact)
         self.sidebar = self.browser; self.sidebar_collapsed = False
         self.navigation = self.browser.buttons
         self.logo = self.browser.logo; self.brand_label = self.browser.caption
         self.menu_toggle = self.browser.menu_toggle
         self.section_labels = [group.toggle for group in self.browser.groups.values()]
-        self.settings_button = self.browser.settings_button; self.licenses_button = self.browser.licenses_button
+        self.settings_button = self.browser.settings_button
+        self.about_button=self.browser.about_button;self.contact_button=self.browser.contact_button
         self.theme_picker = self.browser.theme_picker
         self.stack = QStackedWidget()
         outer.addWidget(self.sidebar)
@@ -185,8 +199,9 @@ class MainWindow(QMainWindow):
         view_menu.addAction('Koyu tema',lambda:self.set_theme('dark'))
         view_menu.addAction('Açık tema',lambda:self.set_theme('light'))
         view_menu.addSeparator();view_menu.addAction('Uygulama ayarları…',self.show_settings)
+        view_menu.addAction('İletişim…',self.show_contact)
         view.setMenu(view_menu);self.workbench_bar.addWidget(view)
-        self.workbench_bar.addAction('Lisanslar',self.show_licenses)
+        self.workbench_bar.addAction('Hakkında',self.show_about)
 
     def change_workspace(self):
         group=self.workspace_picker.currentData()
@@ -378,9 +393,15 @@ class MainWindow(QMainWindow):
         try:dialog.exec()
         finally:self.settings.flush();dialog.deleteLater()
 
-    def show_licenses(self):
-        from .licenses import LicensesDialog
-        dialog = LicensesDialog(self)
+    def show_about(self):
+        from .about import AboutDialog
+        dialog=AboutDialog(self)
+        try:dialog.exec()
+        finally:dialog.deleteLater()
+
+    def show_contact(self):
+        from .about import ContactDialog
+        dialog=ContactDialog(self)
         try:dialog.exec()
         finally:dialog.deleteLater()
 
@@ -423,6 +444,12 @@ def create_application(argv=None):
     if existing is not None and existing.applicationName() == 'GOKWORKS':
         return existing
     set_application_identity()
+    if existing is None:
+        # Share resources across lazy/reparented GL widgets. The hidden anchor
+        # in MainWindow separately fixes its native surface before first show.
+        QApplication.setAttribute(Qt.AA_ShareOpenGLContexts,True)
+        surface=QSurfaceFormat();surface.setDepthBufferSize(24);surface.setVersion(2,1)
+        QSurfaceFormat.setDefaultFormat(surface)
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     app = QApplication.instance() or QApplication(sys.argv if argv is None else argv)
     app.setApplicationName('GOKWORKS')

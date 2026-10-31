@@ -236,5 +236,6 @@ gerçek SolidWorks gerektiren kontrollerin kapsamı ilgili raporlarda belirtilir
 - [Kaynak ve telif envanteri](sources/README.md)
 - [Üçüncü taraf lisans bildirimleri](docs/THIRD_PARTY_NOTICES.md)
 
-Kullanılan kütüphanelerin lisans metinleri uygulamadaki **Lisanslar** bölümünden
-görüntülenebilir ve kaydedilebilir.
+Uygulamadaki **Hakkında** girişi geliştirici, sürüm, GitHub ve sorumluluk reddi
+bilgilerini gösterir. Sol alttaki **İletişim** girişinde e-posta ve LinkedIn
+bağlantıları bulunur.

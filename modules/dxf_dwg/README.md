@@ -103,6 +103,12 @@ görüntü kullanılmaz; önizleme öncesi kayıt kontrolü de saklanmış gör�
 canlı CAD doğrulaması yerine kabul etmez. Aktarım sırasında sonuç/satır
 güncellemeleri kendiliğinden yeni önizleme kuyruğu oluşturmaz.
 
+Windows'ta ana pencerenin OpenGL yüzeyi ilk gösterimden önce hazırlanır.
+DXF/DWG'ye ilk geçişte 3D görüntüleyicinin eklenmesi ana pencereyi yeniden
+oluşturmaz. `tests/test_window_lifecycle.py`, üretim başlangıcını ayrı süreçte
+açar ve sekme geçişlerinde gerçek Windows pencere kimliğinin sabit kaldığını
+kontrol eder; SolidWorks oturumu gerektirmez.
+
 Yeni testler: `tests/test_sheet_inventory*.py`, `test_flat_checks.py`.
 Gerçek SolidWorks kabulü: `tests/test_multibody_live.py`.
 [Ayrıntılı rapor, sınırlamalar ve test komutları](../../MULTIBODY_DXF_DWG_RAPORU.md).

@@ -44,6 +44,9 @@ def main():
     options = parser.parse_args()
     mode = 'onedir' if options.onedir else 'onefile'
     collect_licenses()
+    from shared.app_info import source_revision
+    info=ROOT/'build/application-info.json';info.parent.mkdir(parents=True,exist_ok=True)
+    info.write_text(json.dumps(dict(schema=1,revision=source_revision(ROOT))),encoding='utf-8')
     args = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--'+mode, '--windowed', '--noupx',
             '--name', 'GOKWORKS', '--icon', str(ROOT/'assets/GOK_app_windows.ico'),
             '--distpath', str(ROOT/'dist'), '--workpath', str(ROOT/'build/pyinstaller'),
@@ -59,6 +62,7 @@ def main():
             '--exclude-module', 'tkinter', '--exclude-module', '_tkinter',
             '--exclude-module', 'customtkinter', '--exclude-module', 'PySide6.QtQml',
             '--exclude-module', 'PySide6.QtQuick', '--exclude-module', 'PySide6.QtWebEngineCore',
+            '--add-data', f'{info};build',
             '--add-data', f'{ROOT / "packaging/licenses"};licenses',
             '--add-data', f'{ROOT / "docs/THIRD_PARTY_NOTICES.md"};licenses',
             '--add-data', f'{ROOT / "assets/GOK_logo_light_UI_1024.png"};assets',
@@ -121,7 +125,7 @@ def main():
         'Ayarlar %APPDATA%\\GOKWORKS altında saklanır.\n'
         'Bu deneme paketi kod imzası taşımaz.\n\n'
         'PySide6/Qt dinamik DLL dosyaları LGPL v3 kapsamında dağıtılır.\n'
-        'Gömülü lisanslar uygulamadaki Lisanslar düğmesinden okunabilir ve kaydedilebilir.\n'
+        'Geliştirici ve sürüm bilgileri Hakkında ekranındadır. E-posta ve LinkedIn bilgileri İletişim ekranındadır.\n'
         'Uyumlu Qt/PySide kitaplıkları GOKWORKS_LIBRARY_DIR ile değiştirilebilir.\n\n'
         f'Kaynak commit: {os.environ.get("GITHUB_SHA", "yerel derleme")}\n', encoding='utf-8')
     request_path = ROOT/'packaging/windows-build-request.json'
@@ -131,7 +135,7 @@ def main():
                        if request.get('validation_profile') == 'package-only' else '')
     (ROOT/'dist/release-notes.md').write_text(
         'Windows 10/11 x64 · Tek dosya GOKWORKS.exe. Yanında klasör veya Python kurulumu gerekmez.\n\n'
-        'Lisanslar uygulamadaki Lisanslar ekranındadır. CAD işlemleri kurulu ve açık SolidWorks gerektirir.\n\n'
+        'Uygulama ve geliştirici bilgileri Hakkında ekranındadır. CAD işlemleri kurulu ve açık SolidWorks gerektirir.\n\n'
         + validation_note + f'SHA256: `{digest}`\n\nKaynak: `{os.environ.get("GITHUB_SHA", "yerel derleme")}`\n', encoding='utf-8')
     print(json.dumps({'exe': str(exe), 'bytes': exe.stat().st_size, 'sha256': digest, 'smoke': reports}))
 
