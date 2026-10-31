@@ -26,7 +26,11 @@ def import_batch(entries, options, sink, stop, *, existing_quantity=0):
         if hasattr(sink,'flush'): sink.flush()
         try:
             file_options = normalize_options({**options, **entry.get('options',{})})
-            parts = read_dxf(source, stop=stop, **file_options)
+            if Path(source).suffix.lower()=='.dwg':
+                from .dwg_import import read_dwg
+                parts = read_dwg(source,stop=stop,**file_options)
+            else:
+                parts = read_dxf(source, stop=stop, **file_options)
             if not parts:
                 raise ValueError('Kapalı kesim parçası bulunamadı.')
             code = entry.get('part_code')

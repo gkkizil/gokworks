@@ -80,7 +80,7 @@ class ImportDialog(Editor):
         self.parse_options = parse; self.build_options = build
         self.review = review
         self.drafts = [ImportDraft.create(path,retained=retained) for path in files]
-        super().__init__(parent,'DXF dosyalarını kontrol et',lambda f:build(f,defaults),self.make_plan)
+        super().__init__(parent,'DXF/DWG dosyalarını kontrol et',lambda f:build(f,defaults),self.make_plan)
         available = self.screen().availableGeometry()
         self.resize(min(1000,available.width()-48),min(790,available.height()-48))
         for widget in self.form.fields.values():

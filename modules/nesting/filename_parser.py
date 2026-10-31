@@ -57,7 +57,7 @@ def parse_filename(path) -> FilenameInfo:
     never contribute metadata. No source file is opened or renamed.
     """
     filename = PureWindowsPath(str(path)).name
-    stem = filename[:-4] if filename.lower().endswith('.dxf') else filename
+    stem = filename[:-4] if filename.lower().endswith(('.dxf','.dwg')) else filename
     values = {'thickness': [], 'quantity': []}
     issues = {'thickness': [], 'quantity': []}
     spans = []; rules = []

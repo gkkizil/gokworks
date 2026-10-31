@@ -359,3 +359,41 @@ tamamlandı: **548 JUnit kaydı, 542 başarılı, 6 atlanan, 0 failure/error**;
 katalog, veri sözleşmesi ve PowerShell loader/pipe kontrollerinden geçti.
 Bu koşular lisanslı SolidWorks sunucusu kullanmaz. Sonraki rapor commit'i
 çalıştırılan kaynak kodu değiştirmez.
+
+## Satır seçimi, önizleme tekrar kullanımı ve Nesting klasör aktarımı
+
+31 Ekim 2026. `4d75da1` sağdaki 3D/açınım önizlemesini satır seçimiyle gösterir;
+başarılı tam görüntüyü kaynak, gövde, konfigürasyon, seçenekler ve kaynak/çıktı
+dosyası revizyonuyla saklar. Aynı parçaya dönüş yeniden native açınım üretmez.
+Yenile canlı okur; kayıt öncesi kontrol saklanmış görüntüyü canlı doğrulama
+yerine kullanmaz. Aktarım sonucu güncellemeleri ve aktarım sırasında seçim,
+kendiliğinden yeni CAD işi başlatmaz. Durdurulmuş aynı satıra tıklama yeniden
+çalışır. Bellek/öğe sayısı sınırlıdır; eksik/başarısız açınımlar saklanmaz.
+
+`modules/dxf_dwg/tests/test_preview_reuse_ui.py` ve
+`test_preview_snapshot_cache.py`: 10 yeni test geçti. İlk 5 regresyon önce
+eski kodda hata vererek yeniden üretildi. Mevcut DXF/PDF/Qt regresyonu da geçti.
+[Windows BOM/UI 41194838324](https://github.com/gkkizil/gokworks/actions/runs/41194838324):
+558 JUnit kaydı, **552 başarılı, 6 atlanan, 0 failure/error**; %125/%150 başarılı.
+[Windows shaft bridge 41194838391](https://github.com/gkkizil/gokworks/actions/runs/41194838391)
+da başarılıdır. Bunlar lisanslı SolidWorks kabulü değildir.
+
+Nesting **DOSYA → Klasör ve alt klasörlerden ekle…** komutu ve DXF ekle
+yanındaki klasör düğmesi, arka planda recursive DXF/DWG keşfi yapar.
+`modules/nesting/folder_import.py` dosyaları bulur; aynı dizindeki aynı adlı
+DXF/DWG çiftinde DXF tercih edilir. Farklı dizinler ayrı kaynaktır. Mevcut
+`ImportDialog` adet/kalınlık önizlemesi ve `batch_import` akışı korunur.
+Başarılı kaynaklar yeniden yüklenmez, mevcut parçalar silinmez; farklı Unicode
+adlar casefold genişletmesi yüzünden birleştirilmez.
+
+`modules/nesting/dwg_import.py`, ayrıca kurulu yerel ODA File Converter'ı
+yalnız geçici DWG kopyasında, 120 saniye sınırı ve iptal desteğiyle çalıştırır.
+Dönüşen DXF mevcut sıkı kontur/birim okuyucusuna girer. Kaynak yol/SHA256,
+orijinal DWG'ye aittir; geçici dosya proje kaynağı olarak saklanmaz.
+Araç indirilmez/paketlenmez; yoksa ilgili DWG hata satırıyla raporlanır,
+diğer dosyalar işlenir. Hesap/yerleşim motorları değiştirilmedi.
+`test_folder_import*.py` yeni testleri klasör/iptal/tekrar yükleme, adet/kalınlık,
+geometri ve DWG kaynak korumasını doğrular. Dönüştürücü sınırı mock'tur;
+gerçek ODA/DWG kabul testi açık kaynak ortam değişkeniyle hazırlanmıştır ve
+kurulu ODA/test kopyası olmadan atlanır. Canlı DWG ve SolidWorks bu ortamda
+çalıştırılmadı. Bu görev EXE üretmez.

@@ -34,6 +34,8 @@ class NestingPage(BasePage):
         super().__init__(context, 'Nesting · Sac maliyeti',
                          'Parçaları ekleyin, sacı tanımlayın ve plakaları sırayla doldurun.')
         self.project = new_project(); self.result = None; self.loading = False
+        self.folder_import_pending=None;self.folder_import_cancelled=False
+        self.jobs.finished.connect(self.resume_folder_import)
         self.setObjectName('nestingWorkspace')
         self.preview_target = None; self._refreshing = False; self._syncing_sheet = False
         self.imports = []; self.sheet_totals = []; self.totals = None; self.preferred_sheet = None
@@ -75,6 +77,7 @@ class NestingPage(BasePage):
         self.controls.append(self.settings_button)
         spacer = QWidget(); spacer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Preferred); commands.addWidget(spacer)
         self.stop_button = button('Durdur',self.jobs.cancel); self.stop_button.hide(); commands.addWidget(self.stop_button)
+        self.stop_button.clicked.connect(self.cancel_folder_import)
         self.nest_button = button('Yerleştir',self.start_nest,primary=True); commands.addWidget(self.nest_button)
         self.nest_button.setMinimumHeight(CONTROL_HEIGHT); self.stop_button.setMinimumHeight(CONTROL_HEIGHT)
         self.nest_button.setToolTip('Birinci plakadan başlayarak, stok adedi kadar plakayı sırayla doldur')
@@ -89,6 +92,14 @@ class NestingPage(BasePage):
         browser = QWidget(); left_layout = QVBoxLayout(browser); left_layout.setContentsMargins(0,0,0,0); left_layout.setSpacing(6)
         title_row = QHBoxLayout(); title_row.addWidget(label('PARÇA AĞACI','section')); title_row.addStretch()
         self.import_button = button('DXF ekle', self.import_dialog); title_row.addWidget(self.import_button)
+        self.import_button.setToolTip('DXF veya DWG dosyaları seç')
+        from gui_qt.icons import icon
+        self.import_folder_button=QToolButton();self.import_folder_button.setIcon(icon('folder',COLORS[self.context.appearance]['muted']))
+        self.import_folder_button.setProperty('nestingIcon','folder')
+        self.import_folder_button.setAccessibleName('Klasör ve alt klasörlerden DXF/DWG ekle')
+        self.import_folder_button.setToolTip('Klasör ve alt klasörlerden DXF/DWG ekle')
+        self.import_folder_button.clicked.connect(self.import_folder_dialog)
+        title_row.addWidget(self.import_folder_button);self.controls.append(self.import_folder_button)
         left_layout.addLayout(title_row); self.controls.append(self.import_button)
         part_tools = QHBoxLayout()
         self.search = QLineEdit(); self.search.setPlaceholderText('Parça veya dosya ara…'); self.search.setClearButtonEnabled(True)
@@ -241,6 +252,8 @@ class NestingPage(BasePage):
         import_action.setProperty('nestingIcon','folder')
         files.insertAction(files.actions()[0],import_action); self.addAction(import_action)
         self.controls.append(import_action)
+        folder_action=action(files,'Klasör ve alt klasörlerden ekle…',self.import_folder_dialog,'folder')
+        self.controls.append(folder_action)
         edit = self.command_menus['DÜZENLE']
         self.edit_action = action(edit,'Seçili parçayı düzenle…',self.edit_part)
         self.remove_action = action(edit,'Seçili parçaları kaldır',self.remove_part)
@@ -251,6 +264,7 @@ class NestingPage(BasePage):
         placement = self.command_menus['YERLEŞİM']
         self.nest_action = action(placement,'Otomatik yerleştir',self.start_nest,'play')
         self.stop_action = action(placement,'İşlemi durdur',self.jobs.cancel,'stop')
+        self.stop_action.triggered.connect(self.cancel_folder_import)
         placement.addAction(self.verify_button)
         action(placement,'Yerleşim ve maliyet ayarları…',self.show_settings)
         view = self.command_menus['GÖRÜNÜM']
@@ -858,9 +872,42 @@ class NestingPage(BasePage):
 
     def import_dialog(self):
         if not self.can_start(): return
-        files,_ = QFileDialog.getOpenFileNames(self,'DXF dosyalarını yükle','','DXF (*.dxf *.DXF)')
+        files,_ = QFileDialog.getOpenFileNames(self,'DXF/DWG dosyalarını yükle','','DXF/DWG (*.dxf *.DXF *.dwg *.DWG)')
         if not files: return
         self.configure_import(files)
+
+    def import_folder_dialog(self):
+        if not self.can_start():return
+        folder=QFileDialog.getExistingDirectory(self,'DXF/DWG klasörü seç · alt klasörler dahil')
+        if folder:self.import_folder(folder)
+
+    def import_folder(self, folder, *, recursive=True, prefer_dxf=True):
+        if not self.can_start():return
+        self.folder_import_pending=None;self.folder_import_cancelled=False
+        def operation(sink,stop):
+            from .folder_import import discover_sources
+            try:
+                files,paired=discover_sources(folder,recursive=recursive,prefer_dxf=prefer_dxf,stop=stop)
+                if not stop.is_set():sink.put(('nest_folder_sources',(files,paired)))
+            except InterruptedError:sink.put(('nest_message','Klasör taraması durduruldu.'))
+        self.jobs.start(self,operation)
+        self.set_status('Klasör ve alt klasörlerdeki DXF/DWG dosyaları taranıyor…')
+
+    def cancel_folder_import(self):
+        self.folder_import_cancelled=True;self.folder_import_pending=None
+
+    def resume_folder_import(self):
+        if self.folder_import_pending is None:return
+        QTimer.singleShot(0,self.configure_folder_import)
+
+    def configure_folder_import(self):
+        pending,self.folder_import_pending=self.folder_import_pending,None
+        if pending is None or self.folder_import_cancelled or self.context.closing:return
+        files,paired=pending
+        if not files:return self.set_status('Klasörde DXF/DWG dosyası bulunamadı.')
+        detail=(f'{len(files)} dosya bulundu. Alt klasörler dahildir. '
+                + (f'{len(paired)} aynı adlı DWG yerine DXF tercih edildi; adetler iki kez eklenmez.' if paired else ''))
+        self.configure_import(files,detail=detail)
 
     def configure_import(self, files, *, defaults=None, retry_id=None, detail=''):
         if not self.can_start(): return
@@ -900,7 +947,7 @@ class NestingPage(BasePage):
         source_keys = {}
         def source_key(path):
             path = str(path)
-            if path not in source_keys: source_keys[path] = str(Path(path).resolve()).casefold()
+            if path not in source_keys: source_keys[path] = str(Path(path).resolve()).lower()
             return source_keys[path]
         plans = {source_key(p['source']):p for p in per_file or []}
         by_source = {source_key(e['source']):e for e in self.imports}
@@ -946,7 +993,7 @@ class NestingPage(BasePage):
             from modules.nesting.batch_import import import_batch
             import_batch(entries,{},sink,stop,existing_quantity=existing_quantity)
         self.jobs.start(self,operation)
-        self.set_status(f'{len(entries)} DXF dosyası sıraya eklendi; konturlar okunuyor…'
+        self.set_status(f'{len(entries)} DXF/DWG dosyası sıraya eklendi; konturlar okunuyor…'
                         +(f' {skipped} dosya zaten yüklü; tekrar eklenmedi.' if skipped else ''))
 
     def missing_stock(self):
@@ -1153,7 +1200,9 @@ class NestingPage(BasePage):
     def handle_events(self,events):
         imports_changed = False
         for kind,value in events:
-            if kind == 'nest_progress':
+            if kind=='nest_folder_sources':
+                if not self.folder_import_cancelled:self.folder_import_pending=value
+            elif kind == 'nest_progress':
                 self.pending_progress = value
                 if not self.progress_timer.isActive(): self.progress_timer.start()
             elif kind == 'nest_file':

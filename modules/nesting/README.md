@@ -3,6 +3,31 @@
 GOKWORKS → **Üretim → Nesting · Sac maliyeti**.
 Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı gerekmez.
 
+## Klasör ve alt klasörlerden DXF/DWG ekleme
+
+**DXF ekle** yanındaki klasör düğmesini veya **DOSYA → Klasör ve alt klasörlerden ekle…**
+komutunu kullanın. Klasör seçildikten sonra tüm alt klasörler arka planda taranır.
+Bulunan dosyalar mevcut adet/kalınlık kontrol tablosuna gelir; **Kontrol ettim · İçe aktar**
+ile Nesting parça listesine eklenir. Dosya adından adet/kalınlık algılama korunur.
+Mevcut parçalar silinmez; başarıyla eklenmiş aynı dosya ikinci kez çoğaltılmaz.
+Aynı klasörde aynı adlı DXF ve DWG varsa yalnız DXF alınır; farklı alt klasördeki
+aynı adlı dosyalar ayrı kaynaktır. Tarama sırasında **Durdur** kullanılabilir.
+
+DXF doğrudan mevcut okuyucuyla okunur. DWG için ayrıca kurulu, yerel
+[ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) gerekir;
+DWG, geçici bir kopyadan DXF'ye çevrilip aynı kontur/birim doğrulamasına girer.
+Kaynak DWG değiştirilmez. Araç PATH'te, ezdxf ODA ayarında veya standart Windows
+ODA kurulum klasöründe bulunabilir. Özel konum için uygulamayı başlatmadan önce
+`GOKWORKS_ODA_FILE_CONVERTER` ortam değişkenine yürütülebilir dosya yolunu verin.
+Eksik dönüştürücü, bozuk geometri, eksik birim ve diğer hatalar ilgili dosya
+satırında raporlanır; diğer dosyalar okunmaya devam eder. Bulut servisi kullanılmaz.
+
+Gerçek DWG kabul testi `GOKWORKS_NESTING_DWG_LIVE_SOURCE` ile açıkça seçilen bir
+test kopyası ve kurulu ODA gerektirir. Bu ortamda ODA bulunmadığından bu canlı test
+çalıştırılmadı; mock dönüştürme testleri native DWG kabulü sayılmaz.
+
+## Çalışma alanı
+
 **GOKWORKS / Nesting** çalışma alanında solda parça ağacı ve sac listesi,
 ortada geometri, sağda mevcut yerel **Özellikler** paneli bulunur.
 Üst komut grupları **DOSYA / DÜZENLE / YERLEŞİM / GÖRÜNÜM / RAPOR**'dur.
