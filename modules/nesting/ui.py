@@ -33,7 +33,9 @@ class NestingPage(BasePage):
     def __init__(self, context):
         super().__init__(context, 'Nesting · Sac maliyeti',
                          'Parçaları ekleyin, sacı tanımlayın ve plakaları sırayla doldurun.')
-        self.project = new_project(); self.result = None; self.loading = False
+        from .stock_library import StockLibrary
+        self.stock_library=StockLibrary(self.settings);self.stock_load_error=''
+        self.project = self.fresh_stock_project(); self.result = None; self.loading = False
         self.folder_import_pending=None;self.folder_import_cancelled=False
         self.jobs.finished.connect(self.resume_folder_import)
         self.setObjectName('nestingWorkspace')
@@ -161,7 +163,7 @@ class NestingPage(BasePage):
         self.settings_dialog = QDialog(self); self.settings_dialog.setWindowTitle('Nesting · Sac ve ayarlar')
         self.settings_dialog.setWindowModality(Qt.WindowModal)
         settings_layout = QVBoxLayout(self.settings_dialog)
-        settings_layout.addWidget(label('Sac stokunu ve yerleşim koşullarını buradan düzenleyin. Değişiklikler projeye hemen uygulanır.','muted'))
+        settings_layout.addWidget(label('Sac tanımları otomatik kaydedilir ve yeni projelerde de kullanılır. Yerleşim ayarları bu projeye aittir.','muted'))
         self.settings_error = label('','error'); self.settings_error.hide(); settings_layout.addWidget(self.settings_error)
         self.stock_widget = self.build_stock(); settings_layout.addWidget(self.stock_widget,1)
         self.settings_dialog.installEventFilter(self)
@@ -234,6 +236,9 @@ class NestingPage(BasePage):
         self.style_sheet_tabs()
         apply_design(self,self.context.appearance)
         self.set_status('DXF ekleyin · Sac ve ayarlardan stok tanımlayın · Yerleştir')
+        if self.stock_load_error:
+            self.stock_save_notice.setText(self.stock_load_error)
+            self.set_status(self.stock_load_error,True)
 
     def bind_commands(self):
         from PySide6.QtGui import QAction
@@ -581,12 +586,28 @@ class NestingPage(BasePage):
         if value is not None and self.jobs.owner is self:
             self.progressChanged.emit(value[0],value[1]); self.set_status(value[2])
 
+    def fresh_stock_project(self):
+        self.stock_load_error=''
+        try:return self.stock_library.new_project()
+        except ValueError as error:
+            self.stock_load_error=str(error)+' Kayıt korundu; geçici varsayılan stok gösteriliyor.'
+            return new_project()
+
+    def persist_stock(self,**change):
+        try:self.stock_library.remember(self.project,**change)
+        except (ValueError,OSError,StopIteration) as error:
+            message='Sac stoğu otomatik kaydedilemedi: '+str(error)
+            self.stock_save_notice.setText(message);self.set_status(message,True)
+            return False
+        self.stock_save_notice.setText('Sac stoğu otomatik kaydedildi; yeni projelerde de kullanılacak.')
+        return True
+
     def new_project(self):
         if not self.can_start(): return
-        self.project = new_project(); self.result = None; self.imports = []; self.sync_forms(); self.refresh(); self.invalidate()
+        self.project = self.fresh_stock_project(); self.result = None; self.imports = []; self.sync_forms(); self.refresh(); self.invalidate()
         self.search.clear(); self.parts_toggle.setChecked(True)
         self.settings_dialog.reject()
-        self.set_status('Yeni proje hazır. Kaynak DXF dosyaları değiştirilmez.')
+        self.set_status(self.stock_load_error or 'Yeni proje hazır. Kayıtlı sac tanımları kullanılabilir.',bool(self.stock_load_error))
 
     def build_stock(self):
         widget = QWidget(); self.stock_layout = QBoxLayout(QBoxLayout.LeftToRight,widget)
@@ -604,6 +625,8 @@ class NestingPage(BasePage):
         row = QHBoxLayout()
         for text, callback in [('Sac ekle',lambda:self.edit_sheet(new=True)),('Düzenle',self.edit_sheet),('Kaldır',self.remove_sheet)]: row.addWidget(button(text,callback))
         layout.addLayout(row)
+        self.stock_save_notice=label('Sac ekleme, düzenleme ve kaldırma işlemleri otomatik kaydedilir; stok yeni projelerde korunur.','muted')
+        layout.addWidget(self.stock_save_notice)
         layout.addWidget(label('İlk plaka dolunca sıradakine geçilir. En fazla stok adedi kadar plaka kullanılır.', 'muted'))
         self.stock_hint = label('', 'muted'); layout.addWidget(self.stock_hint)
         layout.addWidget(button('Malzeme kütüphanesi…',self.show_materials)); layout.addStretch()
@@ -615,7 +638,7 @@ class NestingPage(BasePage):
         if not self.can_start(): return
         dialog = QDialog(self); dialog.setWindowTitle('Malzeme kütüphanesi'); dialog.resize(720,500)
         layout = QVBoxLayout(dialog)
-        layout.addWidget(label('Yoğunluklar yaklaşık başlangıç değerleridir; düzenlemeler bu projeye kaydedilir.', 'muted'))
+        layout.addWidget(label('Yoğunluklar yaklaşık başlangıç değerleridir. Malzeme tanımları sac stoğuyla birlikte kaydedilir ve yeni projelerde kullanılır.', 'muted'))
         self.material_model = TableModel([Column('Malzeme','name'),Column('Yoğunluk kg/m³','density',fmt),Column('Kaynak','source')])
         self.material_table = configure_view(QTableView()); self.material_table.setModel(self.material_model)
         self.material_model.replace([asdict(m) for m in self.project.materials])
@@ -764,6 +787,7 @@ class NestingPage(BasePage):
                 if new: self.project.materials.append(dialog.value)
                 else: self.project.materials[self.project.materials.index(item)] = dialog.value
                 self.refresh()
+                self.persist_stock(material=dialog.value)
         finally: dialog.deleteLater()
 
     def edit_sheet(self, *args, new=False):
@@ -794,6 +818,7 @@ class NestingPage(BasePage):
                 if new: self.project.sheets.append(dialog.value)
                 else: self.project.sheets[self.project.sheets.index(item)] = dialog.value
                 self.refresh()
+                self.persist_stock(sheet=dialog.value)
         finally: dialog.deleteLater()
 
     def remove_sheet(self):
@@ -801,6 +826,7 @@ class NestingPage(BasePage):
         row = self.selected(self.sheet_table)
         if row:
             self.project.sheets = [s for s in self.project.sheets if s.id != row['id']]; self.invalidate(); self.refresh()
+            self.persist_stock(removed=row['id'])
 
     def part_double_clicked(self, index):
         if index.column() == 1 and (index.data(Qt.UserRole) or {}).get('kind') == 'part':

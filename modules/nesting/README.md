@@ -3,6 +3,31 @@
 GOKWORKS → **Üretim → Nesting · Sac maliyeti**.
 Mevcut PySide6 uygulamasının modülüdür; SolidWorks veya bulut bağlantısı gerekmez.
 
+## Kalıcı sac stoğu
+
+**Sac ve fiyatlar → Sac ekle / Düzenle** ile kaydedilen sac tanımları artık
+otomatik olarak kullanıcının ortak stoğuna yazılır. Sağdaki özellikler panelinde
+**Uygula** ile kabul edilen değişiklikler de korunur. Ayrı bir proje kaydetme
+işlemi gerekmez; **Yeni proje** ve uygulamanın yeniden açılması bu stoğu yükler.
+
+Sac adı, en/boy, kalınlık, malzeme, stok adedi, fiyatlandırma modeli, TL/kg ve
+TL/levha değerleri; ayrıca kullanılan özel malzeme adı, yoğunluğu ve kaynağı
+saklanır. Stok düzenleme ve kaldırma işlemleri de kalıcıdır; bütün saclar
+kaldırılırsa sonraki projeye örnek sac geri eklenmez.
+
+Bir proje dosyasını açmak, o dosyanın kendi saclarını gösterir ve ortak stoğu
+değiştirmez. O projede açıkça eklenen/düzenlenen sac ortak listede güncellenir;
+diğer kayıtlı saclar silinmez. Her yeni proje bağımsız nesne kopyaları alır.
+Parçalar, yerleşimler ve proje ayarları ortak stoğa taşınmaz. Hesaplama stoktan
+otomatik adet düşmez; mevcut yerleşim/maliyet algoritmaları korunur.
+
+Kayıt mevcut atomik ayar altyapısında, `%APPDATA%/GOKWORKS/settings.json`
+dosyasının sürümlü `nesting_stock_library` alanındadır. Bozuk kayıt otomatik
+ezilmez; okuma/yazma hatası kullanıcıya bildirilir. Kayıt edilemeyen düzenleme
+geçerli projenin belleğinde korunur. `tests/test_stock_library.py` ve
+`tests/test_stock_library_gui.py` kalıcılık, yeniden açma, özel malzeme, sıfır stok,
+eski proje, silme ve hata davranışlarını doğrular.
+
 ## Klasör ve alt klasörlerden DXF/DWG ekleme
 
 **DXF ekle** yanındaki klasör düğmesini veya **DOSYA → Klasör ve alt klasörlerden ekle…**

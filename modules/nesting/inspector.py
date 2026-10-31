@@ -188,6 +188,7 @@ class NestingInspector(QWidget):
         self.sheet_dirty = False; self.sheet_draft.hide(); self.sheet_error.hide(); self.sheet_actions.hide()
         self.page.project.sheets[self.page.project.sheets.index(sheet)] = updated
         self.page.invalidate(); self.page.refresh()
+        self.page.persist_stock(sheet=updated)
         return True
 
     def revert_sheet(self):
