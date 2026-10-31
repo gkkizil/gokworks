@@ -89,3 +89,40 @@ class MeshCache:
     def clear(self):
         self.items.clear()
         self.size = 0
+
+
+class PreviewCache:
+    """GUI-owned snapshots, keyed by request and source/output file revisions.
+
+    Includes folded mesh AND flat geometry. Memory charges conservatively
+    include Python point/metadata overhead, rather than just mesh byte arrays.
+    Snapshots are visual history; production review still validates live CAD.
+    """
+    def __init__(self, maximum=64 * 1024 * 1024, entries=64):
+        self.maximum, self.entries = maximum, entries
+        self.items = OrderedDict()
+        self.size = 0
+
+    def get(self, key):
+        if key not in self.items:return None
+        self.items.move_to_end(key)
+        return self.items[key][0]
+
+    def put(self, key, payload):
+        if not payload.flat or not payload.flat.strokes:return
+        size = payload.mesh.size + 1024
+        size += sum(512 + len(s.points)*192 + 4*(len(s.layer)+len(s.color)) for s in payload.flat.strokes)
+        size += sum(256 + 4*(len(str(k))+len(str(v))) for k,v in payload.info)
+        size += sum(128 + len(w)*4 for w in (*payload.warnings,*payload.flat.warnings))
+        if key in self.items:self.size -= self.items.pop(key)[1]
+        if size>self.maximum:return
+        self.items[key] = (payload,size);self.size += size
+        while self.size>self.maximum or len(self.items)>self.entries:
+            self.size -= self.items.popitem(last=False)[1][1]
+
+    def invalidate_source(self, source):
+        for key in list(self.items):
+            if key[0].source==source:self.size -= self.items.pop(key)[1]
+
+    def clear(self):
+        self.items.clear();self.size = 0

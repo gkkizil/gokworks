@@ -94,6 +94,15 @@ DXF ile okunur; DWG dosyası okunmuş gibi sunulmaz. Önizleme üretim çıktıs
 ve kaynak CAD'ı kaydetmez. İlk tıklama görsel kontrolü açar, kayıt kendiliğinden
 başlamaz. Bu, bütün gövdeler için imalat geometri sertifikası değildir.
 
+Satır seçimi sağdaki önizlemeyi otomatik gösterir. Başarılı 3D + açınım
+görüntüleri, kaynak/çıktı dosyası revizyonu ve tam gövde/konfigürasyon isteğiyle
+sınırlı bellekte saklanır (64 kayıt / 64 MiB muhafazakâr bellek hesabı).
+Aynı parçaya dönmek yeni bir SolidWorks/açınım çağrısı başlatmaz.
+**Yenile** CAD verisini yeniden okur. Kaynak veya çıktı dosyası değişmişse eski
+görüntü kullanılmaz; önizleme öncesi kayıt kontrolü de saklanmış görüntüyü
+canlı CAD doğrulaması yerine kabul etmez. Aktarım sırasında sonuç/satır
+güncellemeleri kendiliğinden yeni önizleme kuyruğu oluşturmaz.
+
 Yeni testler: `tests/test_sheet_inventory*.py`, `test_flat_checks.py`.
 Gerçek SolidWorks kabulü: `tests/test_multibody_live.py`.
 [Ayrıntılı rapor, sınırlamalar ve test komutları](../../MULTIBODY_DXF_DWG_RAPORU.md).

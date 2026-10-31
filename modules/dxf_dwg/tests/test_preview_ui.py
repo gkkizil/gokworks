@@ -112,7 +112,7 @@ def test_preview_defers_to_existing_export_job_instead_of_starting_parallel_com(
     p, w, files = page; calls = []; release = threading.Event()
     p._capture = lambda request, cache, stop: calls.append(request.source) or payload(request.source)
     w.jobs.start(w.pages['pdf'], lambda sink, stop: release.wait(3))
-    p.results.table.selectRow(0); qtbot.wait(250)
+    p.results.table.selectRow(0); p.preview_button.click(); qtbot.wait(250)
     assert not calls and p.preview_pending is not None
     release.set(); qtbot.waitUntil(lambda: p.preview_payload is not None and not w.jobs.busy, timeout=6000)
     assert calls == [str(files[0])]

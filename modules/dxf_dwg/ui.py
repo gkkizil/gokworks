@@ -9,7 +9,7 @@ from gui_qt.export import ExportPage
 from gui_qt.components import label, button, ValueForm, Disclosure
 from modules.cad_converter.models import Cancelled
 from modules.cad_converter.api import RestoreError
-from .preview.models import Request, MeshCache
+from .preview.models import Request, MeshCache, PreviewCache
 from .preview.panel import PreviewPanel
 from .preview.solidworks import capture, file_stamp
 from .preview.solidworks import capture_geometry
@@ -101,6 +101,9 @@ class DxfDwgPage(ExportPage):
         self.handle_events = self._events.accept
         self.preview = PreviewPanel()
         self.preview_cache = MeshCache()
+        self.preview_snapshots = PreviewCache()
+        self.preview_snapshot_cached = False
+        self.preview_snapshot_key = None
         self.preview_generation = 0
         self.preview_request = self.preview_pending = None
         self.preview_running = False
@@ -132,9 +135,12 @@ class DxfDwgPage(ExportPage):
         self._moving_preview = False
         self.results.table.selectionModel().currentChanged.connect(self.selection_changed)
         self.source_files.view.selectionModel().currentChanged.connect(self.selection_changed)
+        self.results.table.clicked.connect(self.selection_changed)
+        self.source_files.view.clicked.connect(self.selection_changed)
         self.results.model.dataChanged.connect(self.selected_updated)
         self.results.model.modelReset.connect(self.clear_preview)
         self.results.cleared.connect(self.clear_preview)
+        self.results.cleared.connect(self.preview_snapshots.clear)
         self.jobs.finished.connect(self.resume_preview)
         self.watcher = QFileSystemWatcher(self)
         self.watcher.fileChanged.connect(self.source_changed)
@@ -218,6 +224,7 @@ class DxfDwgPage(ExportPage):
         from .sheetmetal import scan_sources
         mode,path = self.scan_origin
         self._preview_cancelled = False
+        self.preview_snapshots.clear()
         self.inventory = None; self.checked_instances.clear()
         self.results.reset()
         recursive = self.form.value('recursive')
@@ -307,6 +314,7 @@ class DxfDwgPage(ExportPage):
         return True
 
     def scan(self):
+        self.preview_snapshots.clear()
         self.scan_origin = ('folder',self.form.value('source'))
         self.inventory = None; self.checked_instances.clear()
         if not self.jobs.busy and not self.context.closing:
@@ -317,6 +325,7 @@ class DxfDwgPage(ExportPage):
 
     def preview_option_changed(self, key):
         if key in ('source', 'recursive'):
+            self.preview_snapshots.clear()
             had_inventory = self.inventory is not None
             self.clear_inventory()
             self.scan_origin = ('folder','')
@@ -343,6 +352,8 @@ class DxfDwgPage(ExportPage):
         self.preview_generation += 1
         self.preview_timer.stop()
         self.preview_request = self.preview_pending = self.preview_payload = None
+        self.preview_snapshot_cached = False
+        self.preview_snapshot_key = None
         self._awaiting_flat_review = False
         self.preview.clear()
         if self.watcher.files(): self.watcher.removePaths(self.watcher.files())
@@ -351,7 +362,8 @@ class DxfDwgPage(ExportPage):
     def selection_changed(self, current, previous=None):
         row = current.data(Qt.UserRole) if current.isValid() else None
         if row:
-            self.request_preview(row)
+            if not self.preview_compact:self._reveal_preview()
+            self.request_preview(row, read=not self.jobs.busy or self.preview_running)
         else:
             self.clear_preview()
 
@@ -360,7 +372,7 @@ class DxfDwgPage(ExportPage):
             return
         if self.preview_request:
             row = self.preview_row()
-            if row: self.request_preview(row)
+            if row: self.request_preview(row, read=False)
 
     def preview_row(self):
         request = self.preview_request
@@ -370,7 +382,14 @@ class DxfDwgPage(ExportPage):
                      and str(r.get('configuration',''))==request.configuration
                      and str(r.get('body_ref',''))==request.body_ref),None) if request else None
 
-    def request_preview(self, row, force=False):
+    def snapshot_key(self, request):
+        try:
+            output_stamp = file_stamp(request.output) if request.output and Path(request.output).is_file() else None
+            return request, file_stamp(request.source), output_stamp
+        except RuntimeError:
+            return None
+
+    def request_preview(self, row, force=False, *, read=True):
         if row.get('sheet_id') and not Path(row['source']).is_file():
             self.clear_preview(); self.preview.clear(row.get('detail','Kaynak dosya bulunamadı.'))
             return
@@ -383,21 +402,38 @@ class DxfDwgPage(ExportPage):
                           str(output.get('path', '')), str(output.get('status', '')), tuple(row.get('source_stamp') or ()),
                           row.get('update_stamp'), quantity if type(quantity) is int and quantity > 0 else None,
                           bool(bend_lines),str(row.get('flat_ref','')),str(row.get('body_name','')),row.get('thickness_mm'))
-        if not force and request == self.preview_request:
+        if (not force and request == self.preview_request and not self._preview_cancelled
+                and self.preview_snapshot_key == self.snapshot_key(request)
+                and (self.preview_payload is not None or self.preview_pending is not None or self.preview_running)):
             return
+        if force:self.preview_snapshots.invalidate_source(request.source)
+        key = self.snapshot_key(request)
+        snapshot = self.preview_snapshots.get(key) if key and not force and not self._preview_restore_failed else None
         self.preview_generation += 1
         self._preview_cancelled = False
         self._stop_message_pending = False
-        self.preview_request = self.preview_pending = request
+        self.preview_request = request
+        self.preview_pending = request if read and snapshot is None else None
         self.preview_payload = None
+        self.preview_snapshot_key = key
+        self.preview_snapshot_cached = snapshot is not None
         self.preview_force |= force
+        self.preview_timer.stop()
         self.preview.clear('SolidWorks kaynak ve bükülmüş geometri kontrol ediliyor…')
         self.preview.source_label.setText(Path(request.source).name+(' · '+request.body_name if request.body_name else ''))
         self.preview.source_label.setToolTip(request.source)
         if self.watcher.files(): self.watcher.removePaths(self.watcher.files())
         self.watcher.addPath(request.source)
         if self.preview_running and self.jobs.owner is self: self.jobs.cancel()
-        self.preview_timer.start()
+        if snapshot is not None:
+            self.preview_payload = snapshot
+            self.preview.show_payload(snapshot)
+            self.set_status('Önizleme hazır · son okunan görüntü. Güncel CAD verisi için Yenile.')
+        elif read:
+            self.preview_timer.start()
+        else:
+            self.preview.clear('Seçili parçayı görüntülemek için Önizleme veya Yenile’ye basın.')
+            self.preview.source_label.setText(Path(request.source).name+(' · '+request.body_name if request.body_name else ''))
 
     def refresh_preview(self):
         self.selected_updated()
@@ -407,6 +443,7 @@ class DxfDwgPage(ExportPage):
             if row: self.request_preview(row, force=True)
 
     def source_changed(self, path):
+        self.preview_snapshots.invalidate_source(path)
         if self._preview_cancelled:
             return
         if self.preview_request and path == self.preview_request.source:
@@ -479,6 +516,10 @@ class DxfDwgPage(ExportPage):
             return
         if self._preview_restore_failed and not self.preview_running:
             self.set_status('Kaynak durumu geri alınamadığı için aktarım başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.', True)
+            return
+        if self.preview_before_export.isChecked() and self.preview_snapshot_cached:
+            self.refresh_preview()
+            self.set_status('Kayıt öncesi güncel açınım doğrulanıyor. Hazır olunca açınımı kontrol edip tekrar dışa aktarın.')
             return
         if self.preview_before_export.isChecked() and (not self._flat_ready_for_export()
                                                        or not self.preview.flat_view.isVisible()):
@@ -599,6 +640,11 @@ class DxfDwgPage(ExportPage):
                 if kind in ('dxf_preview_geometry', 'dxf_preview'):
                     self._preview_restore_failed = False
                     self.preview_payload = result
+                    self.preview_snapshot_cached = False
+                    if (kind=='dxf_preview' and self.preview_snapshot_key is not None
+                            and self.snapshot_key(self.preview_request)==self.preview_snapshot_key
+                            and result.revision[1]==self.preview_snapshot_key[1]):
+                        self.preview_snapshots.put(self.preview_snapshot_key,result)
                     self.preview.show_payload(result)
                     self.set_status('3D önizleme hazır · ' + result.configuration)
                     if kind == 'dxf_preview_geometry':
