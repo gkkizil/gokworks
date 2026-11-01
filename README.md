@@ -15,36 +15,30 @@ bağımsız hesaplar ve nesting için SolidWorks gerekmez.
 [Kullanım](#nasıl-kullanılır) · [Kaynak kod](#kaynak-koddan-çalıştırma)
 
 [Çalışma alanının kullanımı](docs/fusion-workspace/README.md).
-Bu arayüz kaynak kodda bulunur; aşağıdaki son başarılı EXE bağlantısının sürümü ayrıca belirtilmiştir.
+Güncel arayüz kaynak kodda bulunur.
 
 ## İndirme ve kurulum
 
 **Kaynak ve paylaşım sayfası:** [main dalı](https://github.com/gkkizil/gokworks/tree/main).
-Hazır uygulamayı indirmek için aşağıdaki doğrudan EXE bağlantısını kullanın;
-**Code → Download ZIP** kaynak kodu indirir.
+**Code → Download ZIP** kaynak kodu indirir. Uygulamayı kaynak koddan
+çalıştırabilir veya Windows'ta yerel EXE oluşturabilirsiniz.
 
 <!-- windows-release:start -->
-**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-40939155902-1/GOKWORKS.exe)
-
-**GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
-
-Uygulama kodu: `9c70035` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/40939155902) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+**Hazır EXE yayını bulunmuyor.** Önceki yayınlar ve sürüm etiketleri temizlendi.
 <!-- windows-release:end -->
 
-1. Yukarıdaki bağlantıdan `GOKWORKS.exe` dosyasını indirin.
-2. Dosyayı bilgisayarınızda bir klasöre kaydedip çalıştırın.
+1. [Kaynak koddan çalıştırma](#kaynak-koddan-çalıştırma) adımlarını uygulayın.
+2. EXE oluşturmak için [Windows paketleme rehberini](packaging/README.md) kullanın.
 3. Sol menüden kullanacağınız aracı seçin. CAD işlemi yapacaksanız SolidWorks’ü
    açın ve ilgili montajı, parçayı veya teknik resmi etkinleştirin.
 
-Hazır paketin sürüm bilgisi yukarıdaki derleme kaydındadır. Bu daldaki kaynak
-kod, son EXE yayınından daha yeni değişiklikler içerebilir. EXE'nin içerdiği
-sürüm, indirme bağlantısının yanındaki **Uygulama kodu** ile belirtilir.
+Yerel derlemenin kaynak revizyonu uygulamadaki **Hakkında** ekranında gösterilir.
 
 ### Gereksinimler
 
 | Kullanım | Gereksinim |
 | --- | --- |
-| Hazır EXE ile çalışma | Windows 10/11, 64 bit. Python kurulumu gerekmez. |
+| Yerel oluşturulmuş EXE ile çalışma | Windows 10/11, 64 bit. Python kurulumu gerekmez. |
 | CAD aktarımı ve montaj işlemleri | Kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks. |
 | Mühendislik hesapları ve DXF nesting | SolidWorks bağlantısı gerekmez. |
 | Kaynak koddan çalışma | Python 3.13 ve `requirements.txt` bağımlılıkları. |

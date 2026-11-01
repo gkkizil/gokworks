@@ -57,12 +57,10 @@ Uygulama paketi yalnız çalıştırılan Python modüllerini, bağımlılıklar
 `assets/` kaynaklarını ve `modules/iso_fits/tables.json` verisini içerir.
 Testler, belgeler, ekran görüntüleri ve geçmiş raporlar EXE'ye eklenmez.
 
-Son başarılı paketin bağlantısı ana [README](../README.md) dosyasında bulunur.
-[Paket bilgisi](latest-windows.json) ve [son derleme durumu](windows-build-status.json)
-aynı kaynak dalda tutulur. Başarısız bir derleme, önceki başarılı indirme
-bağlantısını değiştirmez. Büyük EXE dosyaları Git geçmişine eklenmez;
-Releases ve Actions çıktıları olarak saklanır. Yeni derleme için ayrıca dal
-oluşturulmaz; yedek depoya işlem yapılmaz.
+Eski EXE yayınları ve bunlara ait indirme kayıtları kaldırılmıştır.
+Güncel EXE'yi aşağıdaki komutla yerel olarak oluşturabilirsiniz.
+İleride yeniden GitHub yayını istenirse paket bilgisi ve derleme durumu aynı
+kaynak dalda oluşturulur; büyük EXE dosyaları Git geçmişine eklenmez.
 
 Yerel Windows derlemesi, depo kökünden:
 
