@@ -12,6 +12,10 @@ import argparse
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+# Running this file directly puts packaging/, rather than the checkout root,
+# on sys.path. Local build metadata must work without a custom PYTHONPATH.
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def collect_licenses():
