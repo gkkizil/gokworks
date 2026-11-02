@@ -179,6 +179,9 @@ class MeshView(QWidget):
         self.auto_fit = True
         self.pool = QThreadPool(self); self.pool.setMaxThreadCount(1)
         self.generation = 0; self.running = None; self.pending = False
+        # Mesh/canvas identity: a frame of the same part and canvas may be
+        # shown while dragging even if the camera has moved on since.
+        self.scene_generation = 0; self.dragging = False; self.context_checks = 0
         self.software = SoftwareCanvas(self)
         self.software.background = self.background
         self.stack = QStackedLayout(self); self.stack.setContentsMargins(0, 0, 0, 0)
@@ -203,6 +206,7 @@ class MeshView(QWidget):
         self.background = color
         self.software.background = color
         self.software.image = QImage()  # the old frame carries the old canvas
+        self.scene_generation += 1
         self.software.update()
         if self.hardware: self.hardware.update()
         self.changed()
@@ -212,6 +216,8 @@ class MeshView(QWidget):
 
     @Slot(str)
     def fallback(self, message=''):
+        if message:
+            self.setToolTip('Sol sürükle: döndür · Sağ/orta sürükle: kaydır · Tekerlek: yakınlaştır\n' + message)
         self.stack.setCurrentWidget(self.software)
         self.render()
 
@@ -219,7 +225,7 @@ class MeshView(QWidget):
         if mesh is not None and mesh is self.mesh:
             return
         self.mesh = mesh
-        self.generation += 1
+        self.generation += 1; self.scene_generation += 1
         self.software.image = QImage(); self.software.update()
         if self.hardware: self.hardware.dirty = True; self.hardware.update()
         self.cancel_render()
@@ -229,9 +235,17 @@ class MeshView(QWidget):
 
     def changed(self):
         self.generation += 1
+        if self.hardware: self.hardware.update()
+        if self.dragging:
+            # CPU fallback while dragging: let the running frame finish and
+            # render at most every timer interval, instead of restarting the
+            # debounce on every mouse move (which showed nothing until the
+            # pointer stopped).
+            if not self.timer.isActive():
+                self.timer.start()
+            return
         self.cancel_render()
         self.timer.start()
-        if self.hardware: self.hardware.update()
 
     def view(self, name):
         self.camera.yaw, self.camera.pitch = VIEWS[name]
@@ -266,15 +280,17 @@ class MeshView(QWidget):
         task = RenderJob(self.generation, self.mesh, size, self.camera.state(), threading.Event(),
                          (self.background.red(), self.background.green(), self.background.blue()))
         task.signals.done.connect(self.rendered, Qt.QueuedConnection)
+        task.scene_generation = self.scene_generation
         self.running = task
         self.pool.start(task)
 
     @Slot(int, object)
     def rendered(self, generation, image):
-        self.running = None
-        if generation == self.generation and image is not None:
+        task, self.running = self.running, None
+        same_scene = task is not None and getattr(task, 'scene_generation', None) == self.scene_generation
+        if image is not None and (generation == self.generation or (self.dragging and same_scene)):
             self.software.image = image; self.software.update(); self.frameReady.emit()
-        if self.pending:
+        if self.pending or generation != self.generation:
             self.pending = False; self.timer.start()
 
     def resizeEvent(self, event):
@@ -288,11 +304,28 @@ class MeshView(QWidget):
             QTimer.singleShot(150, self.check_context)
 
     def check_context(self):
-        if self.hardware and self.stack.currentWidget() is self.hardware and not self.hardware.isValid():
-            self.fallback()
+        if not self.hardware or self.stack.currentWidget() is not self.hardware or self.hardware.isValid():
+            self.context_checks = 0
+            return
+        # A context is created on the first real paint. A view that is not yet
+        # laid out (hidden, zero size, page still opening) is not a GL failure:
+        # retry for a few seconds before switching permanently to the CPU path.
+        if not (self.isVisible() and self.width() > 1 and self.height() > 1):
+            return  # showEvent checks again once the view is really on screen
+        if self.context_checks < 10:
+            self.context_checks += 1
+            self.hardware.update()
+            QTimer.singleShot(150, self.check_context)
+            return
+        self.fallback('OpenGL bağlamı oluşturulamadı; yazılımsal görüntüleyici etkin.')
 
     def mousePressEvent(self, event):
-        self.last = event.position()
+        self.last = event.position(); self.dragging = True
+        event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.dragging = False
+        self.changed()  # one exact frame for the final camera
         event.accept()
 
     def mouseMoveEvent(self, event):
