@@ -233,6 +233,11 @@ class MainWindow(QMainWindow):
         screen = self.screen() or QGuiApplication.primaryScreen()
         if screen:
             available = screen.availableGeometry()
+            # 1366 x 768 at 150 % leaves about 911 x 480 logical pixels. Never
+            # demand a minimum larger than the screen; panes scroll instead.
+            frame = self.frameGeometry().size() - self.geometry().size()
+            self.setMinimumSize(min(820, max(480, available.width() - frame.width())),
+                                min(560, max(360, available.height() - frame.height())))
             self.resize(min(self.width(), available.width()), min(self.height(), available.height()))
             # Reconnects or unplugged monitors must not leave the saved window unreachable.
             if not any(s.availableGeometry().intersects(self.frameGeometry()) for s in QGuiApplication.screens()):

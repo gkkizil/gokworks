@@ -42,3 +42,19 @@ def test_iso_fits_page_survives_window_width_sweep(qtbot, tmp_path):
                 assert not window.grab().isNull()
     finally:
         window.settings.flush()
+
+
+def test_minimum_window_fits_a_1366x768_screen_at_150_percent(qtbot, tmp_path):
+    from PySide6.QtCore import QRect
+    create_application([])
+    window = MainWindow(tmp_path / 'settings.json'); qtbot.addWidget(window)
+
+    class SmallScreen:
+        def availableGeometry(self):
+            return QRect(0, 0, 911, 480)   # 1366 x 768 minus taskbar, at 150 %
+
+    window.screen = lambda: SmallScreen()
+    window.restore_window()
+    assert window.minimumWidth() <= 911 and window.minimumHeight() <= 480
+    assert window.width() <= 911 and window.height() <= 480
+    window.settings.flush()
