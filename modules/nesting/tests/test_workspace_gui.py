@@ -31,7 +31,7 @@ def plan(p,w,qtbot):
 
 def test_only_existing_commands_and_actual_stock_are_present_in_the_empty_workbench(window):
     p=window.pages['nesting']
-    assert [b.text() for b in p.command_groups]==['DOSYA','DÜZENLE','YERLEŞİM','GÖRÜNÜM','RAPOR']
+    assert [b.text() for b in p.command_groups]==['Dosya','Düzenle','Yerleşim','Görünüm','Rapor']
     assert isinstance(p.part_tree,QTreeView) and isinstance(p.sheet_tree,QTreeView)
     assert p.sheet_tree_model.rowCount()==len(p.project.sheets) and not p.sheet_tree_model.by_key
     assert p.result is None and p.canvas.mode=='stock'

@@ -92,6 +92,11 @@ QPushButton[destructive="true"]:hover { border-color: %(danger)s; }
 QPushButton[flat="true"] { background: transparent; border: 1px solid transparent; color: %(muted)s; padding: 3px 6px; }
 QPushButton[flat="true"]:hover { background: %(hover)s; color: %(text)s; }
 QPushButton[flat="true"]:focus { border-color: %(focus)s; }
+QPushButton[flat="true"]:checked { background: %(selected)s; color: %(text)s; }
+QToolButton[popupMode="1"], QToolButton[popupMode="2"] { padding-right: 16px; }
+QToolButton::menu-indicator { image: url("%(chevron)s"); width: 9px; height: 9px;
+    subcontrol-origin: padding; subcontrol-position: right center; right: 4px; }
+QToolButton::menu-button { border: 0; width: 14px; }
 
 /* ---- Sidebar navigation ----------------------------------------------- */
 QPushButton[nav="true"] { text-align: left; background: transparent; border: 0;

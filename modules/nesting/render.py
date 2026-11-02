@@ -3,6 +3,9 @@
 from modules.nesting.geometry import rings, placed
 
 PALETTE = ('#69a9e9', '#b29be0', '#e3b76e', '#65bec8', '#de8d98', '#8eafe0', '#c3b285')
+# Interactive drawing: the accent blue is reserved for selection, so part
+# types use distinct non-blue hues (tinted per theme in ui_widgets.part_colors).
+CANVAS_PALETTE = ('#9d8ce0', '#e0a94f', '#4fb8a8', '#de7f93', '#8fbf5a', '#c99a6b', '#6fa3b8', '#c58bd0')
 
 
 def painter_path(geometry):
