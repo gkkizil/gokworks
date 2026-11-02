@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTableView, QHeaderView
 
 from gui_qt.components import label, configure_view
-from gui_qt.diagrams import EngineeringDiagram
+from gui_qt.diagrams import EngineeringDiagram, palette
 from gui_qt.models import TableModel, Column
 from .models import number
 
@@ -96,25 +96,24 @@ class CutOrder(QWidget):
 
         def draw(scene):
             scene.delete('all')
-            dark = self.context.appearance == 'dark'
-            text = '#E8EEF7' if dark else '#203550'
-            waste = '#41464D' if dark else '#DFE3E8'
-            scene.configure(background='#1C2533' if dark else '#F4F7FC')
+            c = palette(self.context.appearance)
+            text, waste = c['text'], c['border']
+            scene.configure(background=c['canvas'])
             scale = 610 / float(plan.stock_length)
             trim = float(plan.trim) * scale
             left = 20 + trim
-            scene.create_rectangle(20, 42, 630, 94, outline=text, tags='stock')
+            scene.create_rectangle(20, 42, 630, 94, outline=c['muted'], tags='stock')
             if trim:
                 scene.create_rectangle(20, 42, left, 94, fill=waste, outline='', tags='trim')
                 scene.create_rectangle(630-trim, 42, 630, 94, fill=waste, outline='', tags='trim')
             for order, cut in enumerate(bar.cuts, 1):
                 width = float(number(cut.length) + number(cut.allowance)) * scale
                 part = scene.create_rectangle(left, 42, left+width, 94,
-                    fill='#80B6F5', outline=text, tags='cut')
+                    fill=c['selected'], outline=c['accent'], tags='cut')
                 part.setToolTip(f'{order}. kesim · {mm(cut.length)} mm · İlave {mm(cut.allowance)} mm')
                 if width > 55:
                     scene.create_text(left+width/2, 68, text=mm(cut.length),
-                        fill='#10233A', font=('Segoe UI', -12))
+                        fill=text, font=('Segoe UI', -12))
                 left += width
                 saw = float(plan.kerf) * scale
                 if saw:

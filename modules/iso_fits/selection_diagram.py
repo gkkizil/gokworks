@@ -5,7 +5,10 @@ boşluk ve sıkılık görülebilmeleri için büyütülür; fiziksel deformasyo
 montaj yöntemi modellenmez. Manuel tolerans görünümünden bağımsızdır.
 """
 
-from shared.theme import ACCENT, ACCENT_BG, BORDER, MUTED, PANEL, PRIMARY_TEXT, RED, TEXT, UI_FONT
+from shared.theme import UI_FONT
+from gui_qt.diagrams import mix
+from gui_qt.diagrams import (ACCENT, ACCENT_BG, BORDER, MUTED, CANVAS as PANEL, ON_ACCENT as PRIMARY_TEXT,
+                             DANGER as RED, TEXT, GRID, BORDER_STRONG)
 from modules.iso_fits.rules import format_mm, mm
 
 
@@ -66,8 +69,8 @@ def draw_selection(canvas, fit, appearance, scale, sample='Orta değer'):
 
     text(20 * scale, 21 * scale, 'MONTAJ KESİTİ', fill=color(MUTED),
          font=small, anchor='w', tags='diagram_title')
-    housing_fill = '#EDF0F5' if appearance != 'Dark' else '#343A45'
-    hatch_color = '#A8B3C2' if appearance != 'Dark' else '#58616F'
+    housing_fill = color(GRID)
+    hatch_color = color(BORDER_STRONG)
     for top, bottom, edge in ((bore_top - housing_thickness, bore_top, 'bottom'),
                               (bore_bottom, bore_bottom + housing_thickness, 'top')):
         canvas.create_rectangle(left, top, right, bottom, fill=housing_fill,
@@ -95,7 +98,7 @@ def draw_selection(canvas, fit, appearance, scale, sample='Orta değer'):
             canvas.create_rectangle(shaft_left, top, shaft_right, bottom,
                                     fill=color(ACCENT_BG), outline='', tags='clearance')
     elif difference < 0:
-        overlap_fill = '#973347' if appearance != 'Dark' else '#CF6F81'
+        overlap_fill = mix(color(RED), color(TEXT), .3)
         for top, bottom in ((shaft_top, bore_top), (bore_bottom, shaft_bottom)):
             canvas.create_rectangle(shaft_left, top, shaft_right, bottom,
                                     fill=overlap_fill, outline='', tags='overlap')

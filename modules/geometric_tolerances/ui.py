@@ -6,7 +6,8 @@ from modules.geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUP
 from modules.geometric_tolerances import rules as r
 from modules.geometric_tolerances.diagram import draw
 from gui_qt.calculations import CalculationPage
-from gui_qt.components import card, label, scroll, configure_view, show_details
+from gui_qt.calculations import pane
+from gui_qt.components import label, scroll, configure_view, show_details
 from gui_qt.models import TreeModel, FilterProxy, Column
 
 
@@ -58,7 +59,7 @@ class GdtPage(CalculationPage):
         self.measurement_hint = label('', 'muted')
         self.note_label = label()
         self.assessment_label = label()
-        panel, body = card()
+        panel, body = pane(rule=True)
         self.explanation_tabs = QTabWidget()
         overview = QWidget()
         overview_body = QVBoxLayout(overview)

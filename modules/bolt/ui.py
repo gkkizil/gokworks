@@ -4,8 +4,8 @@ from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtWidgets import QProgressBar
 from modules.bolt import rules as r
 from modules.bolt.diagram import draw, draw_dimensions
-from gui_qt.calculations import CalculationPage
-from gui_qt.components import Disclosure, card, label, show_details
+from gui_qt.calculations import CalculationPage, pane
+from gui_qt.components import Disclosure, label, show_details
 from gui_qt.theme import COLORS
 
 
@@ -45,7 +45,7 @@ class BoltPage(CalculationPage):
         self.diagram_tabs.currentChanged.connect(
             lambda index: self.settings.set('bolt_view', self.diagram_tabs.tabText(index)))
 
-        self.safety_card, safety = card('Güvenlik kontrolü')
+        self.safety_card, safety = pane('Güvenlik kontrolü')
         self.safety_card.setObjectName('boltSafetyCard')
         self.safety_verdict = label()
         self.safety_progress = QProgressBar()
@@ -59,13 +59,13 @@ class BoltPage(CalculationPage):
             safety.addWidget(widget)
         self.right.insertWidget(self.right.indexOf(self.diagram_tabs), self.safety_card)
 
-        self.capacity_card, capacity = card('Taşıma sınırları')
+        self.capacity_card, capacity = pane('Taşıma sınırları', rule=True)
         self.capacity_text = label()
         self.capacity_text.setTextInteractionFlags(Qt.TextSelectableByMouse)
         capacity.addWidget(self.capacity_text)
         self.right.insertWidget(self.right.indexOf(self.details), self.capacity_card)
         self.details.hide()
-        technical_card, technical = card('Teknik bilgi')
+        technical_card, technical = pane()
         technical.addWidget(label('As = π/4 × (d − 0,938194P)²\n'
                                  'İzin verilen gerilme = Sp / emniyet katsayısı\n'
                                  'Birleşik yük: σeş = √(σ² + 3τ²)\n\n'
@@ -79,9 +79,10 @@ class BoltPage(CalculationPage):
 
     def paint_safety(self, state):
         colors = COLORS[self.context.appearance]
-        color = colors[{'safe': 'accent', 'unsafe': 'danger', 'empty': 'warning'}[state]]
-        self.safety_card.setStyleSheet(f'QFrame#boltSafetyCard {{ border-color: {color}; }}')
-        self.safety_verdict.setStyleSheet(f'font-size: 19px; font-weight: 650; color: {color};')
+        # Semantic state colour only: success / danger / warning. The verdict
+        # stays body-sized; the 20 px result headline above remains the focus.
+        color = colors[{'safe': 'success', 'unsafe': 'danger', 'empty': 'warning'}[state]]
+        self.safety_verdict.setStyleSheet(f'font-weight: 600; color: {color};')
         self.safety_progress.setStyleSheet(
             f'QProgressBar#boltUtilization {{ background: {colors["input"]}; border-radius: 4px; }}'
             f'QProgressBar#boltUtilization::chunk {{ background: {color}; border-radius: 4px; }}')

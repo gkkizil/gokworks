@@ -34,7 +34,7 @@ def test_bore_controls_show_actual_empty_section_and_save_extended_schema(page,q
 
 def test_cosmetic_thread_form_metadata_preview_and_atomic_edit(page,qtbot):
     page.operation_fields['cosmetic_thread']['pitch'].setValue(3.5)
-    assert 'M30 × 3.5' in page.thread_caption.text()
+    assert 'M30 × 3,5' in page.thread_caption.text()
     page.add_operation('cosmetic_thread');qtbot.wait(20)
     op=page.project.operations[0]
     assert op.kind=='cosmetic_thread' and op.pitch==3.5 and page.project.to_dict()['version']==2

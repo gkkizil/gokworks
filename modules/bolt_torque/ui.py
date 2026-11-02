@@ -7,7 +7,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QBoxLayout, QFormLayout, QAp
 
 from modules.bolt.rules import THREADS, STANDARD_FINE_PITCHES
 from modules.bolt_torque import rules as r
-from gui_qt.components import BasePage, ValueForm, Disclosure, card, label, scroll, button
+from gui_qt.components import BasePage, ValueForm, Disclosure, label, scroll, button, separator
+from gui_qt.calculations import pane
 from gui_qt.diagrams import EngineeringDiagram
 from modules.bolt_torque.diagram import draw_section
 
@@ -36,7 +37,7 @@ class TorquePage(BasePage):
         body.addLayout(self.columns)
         body.addStretch()
 
-        self.input_card, inputs = card('Cıvata ve sıkma koşulları')
+        self.input_card, inputs = pane('Cıvata ve sıkma koşulları')
         self.form = f = ValueForm(self.settings, 'torque_')
         f.combo('metric', 'Cıvata ölçüsü', r.METRICS, 'M10')
         f.combo('thread_series', 'Diş türü', r.THREAD_SERIES)
@@ -55,6 +56,7 @@ class TorquePage(BasePage):
         inputs.addWidget(self.k_hint)
         self.reset_k_button = button('Varsayılan K’yı kullan', self.reset_k)
         inputs.addWidget(self.reset_k_button)
+        inputs.addWidget(separator())
         inputs.addWidget(label('Yüzeye göre yaklaşık K', 'section'))
         self.k_guide = QWidget()
         self.k_guide.setAccessibleName('Yüzey durumuna göre yaklaşık K tork katsayıları')
@@ -75,7 +77,7 @@ class TorquePage(BasePage):
         self.assumptions_section = Disclosure('K katsayısı hakkında',assumptions)
         inputs.addWidget(self.assumptions_section)
 
-        self.output_card, output = card('Tahmini Sıkma Torku')
+        self.output_card, output = pane('Tahmini sıkma torku')
         self.torque_value = label('—', 'result')
         self.preload_value = label('', 'section')
         self.selection_label = label('', 'muted')
@@ -84,6 +86,7 @@ class TorquePage(BasePage):
         for widget in (self.torque_value, self.preload_value, self.selection_label):
             widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
             output.addWidget(widget)
+        output.addWidget(separator())
         output.addWidget(label('Bağlantı kesiti', 'section'))
         self.section_diagram = EngineeringDiagram(width=500, height=300)
         self.section_diagram.setMinimumHeight(230)
@@ -97,9 +100,11 @@ class TorquePage(BasePage):
         output.addWidget(label('T = K × F × d\nF = As × akma dayanımı × ön yük oranı', 'muted'))
         output.addWidget(label(r.MANUFACTURER_NOTE))
         output.addStretch()
-        self.columns.addWidget(self.input_card, 5)
-        self.columns.addWidget(self.output_card, 6)
+        # Both flat panes start at the same top edge (no vertical centring).
+        self.columns.addWidget(self.input_card, 5, Qt.AlignTop)
+        self.columns.addWidget(self.output_card, 6, Qt.AlignTop)
         self.columns.setAlignment(Qt.AlignTop)
+        self.columns.setSpacing(20)
         self.layout.addWidget(scroll(content), 1)
         self.finish_layout()
 

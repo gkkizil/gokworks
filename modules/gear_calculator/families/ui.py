@@ -96,7 +96,7 @@ class MechanismCanvas(QGraphicsView):
     def select(self,index):
         self.selected=index;c=COLORS[self.owner.context.appearance]
         for item in self.items+self.pin_items:
-            selected=item.data(0)==index;color=c['accent'] if item.data(0)==0 else c['warning']
+            selected=item.data(0)==index;color=c['accent'] if item.data(0)==0 else c['muted']
             pen=QPen(QColor(color));pen.setCosmetic(True);pen.setWidthF(1.7 if selected else 1.)
             fill=QColor(color);fill.setAlpha(58 if selected else 28);item.setPen(pen);item.setBrush(QBrush(fill))
 
@@ -141,7 +141,7 @@ class FamilyPanel(QWidget):
         super().__init__();self.owner=owner;self.context=owner.context;self.spec=None;self.result=None;self.mesh_view=None;self.last_export=None
         self.kind='rack';self.saved={};self.fields={};layout=QVBoxLayout(self);layout.setContentsMargins(0,0,0,0)
         self.input_panel=QWidget();iv=QVBoxLayout(self.input_panel);iv.setContentsMargins(6,6,6,6)
-        iv.addWidget(label('GEOMETRİ','section'));self.form=QFormLayout();self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        iv.addWidget(label('Geometri','section'));self.form=QFormLayout();self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.load_form=QFormLayout();self.load_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         definitions=definitions if definitions is not None else [('module_mm','Modül m / mₙ / mₓ · mm',2,.1,20),('teeth1','Pinyon / güneş diş sayısı',20,6,300),
             ('teeth2','Çark / planet dişi / pim adedi',40,6,300),('pressure_angle_deg','Basınç açısı α / αₙ · °',20,14.5,30),
@@ -156,13 +156,13 @@ class FamilyPanel(QWidget):
             ('torque_nm','Tork T₁ · N·m',10,.0001,1e7)]
         integer={'teeth1','teeth2','rack_teeth','planets','worm_starts','link_count'}
         for key,title,value,low,high in definitions:
-            w=QSpinBox() if key in integer else QDoubleSpinBox()
-            if key not in integer:w.setDecimals(4)
+            from ..ui import number_box
+            w=number_box(key in integer)
             w.setRange(low,high);w.setValue(value);w.setKeyboardTracking(False);w.setAccessibleName(title)
             w.setMinimumWidth(90);self.fields[key]=w
             (self.load_form if key in ('input_rpm','power_kw','torque_nm') else self.form).addRow(title,w)
             w.valueChanged.connect(self.changed)
-        iv.addLayout(self.form);iv.addWidget(label('İŞLETME DEĞERLERİ','section'))
+        iv.addLayout(self.form);iv.addWidget(label('İşletme değerleri','section'))
         self.load_mode=QComboBox();self.load_mode.addItem('Güç → Tork','power');self.load_mode.addItem('Tork → Güç','torque')
         self.load_form.insertRow(0,'Birincil yük',self.load_mode);iv.addLayout(self.load_form)
         self.load_mode.currentIndexChanged.connect(self.changed)
@@ -202,8 +202,9 @@ class FamilyPanel(QWidget):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents);self.table.setMinimumHeight(220)
+        from ..ui import style_result_table;style_result_table(self.table)
         rv.addWidget(self.table,1);self.warnings=label('','muted');rv.addWidget(self.warnings)
-        rv.addWidget(label('CAD AKTARIMI','section'))
+        rv.addWidget(label('CAD aktarımı','section'))
         self.target=QComboBox();self.target.setAccessibleName('Mekanizma CAD hedefi')
         for title,key in (('İlk parça · kendi merkezi','pinion'),('İkinci parça / halka / pimler','wheel'),('Tam takım · ayrı katılar','pair')):self.target.addItem(title,key)
         self.target.setCurrentIndex(2);rv.addWidget(self.target)

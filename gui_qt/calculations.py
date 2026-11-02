@@ -2,12 +2,31 @@
 
 import csv
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QTabWidget,
+from PySide6.QtWidgets import (QWidget, QFrame, QVBoxLayout, QSplitter, QTabWidget,
     QTableView, QFileDialog, QApplication, QStackedWidget, QMenu, QSizePolicy)
-from gui_qt.components import BasePage, ValueForm, card, label, scroll, configure_view, show_details
+from gui_qt.components import BasePage, ValueForm, label, scroll, separator, configure_view, show_details
 from gui_qt.components import Disclosure
 from gui_qt.diagrams import EngineeringDiagram
 from gui_qt.models import Column, TableModel
+
+
+def pane(title=None, *, rule=False):
+    """Flat parameter/result group: semibold heading over content, no frame.
+
+    Calculation pages separate groups with spacing and optional 1 px rules
+    instead of nested cards (docs/UI_DESIGN_SYSTEM.md, "Düz yüzeyler").
+    """
+    widget = QFrame()
+    layout = QVBoxLayout(widget)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(6)
+    if rule:
+        layout.addWidget(separator())
+    if title:
+        heading = label(title, 'section')
+        layout.addWidget(heading)
+        widget.heading = heading
+    return widget, layout
 
 
 class CalculationWorkspace(QStackedWidget):
@@ -70,7 +89,8 @@ class CalculationPage(BasePage):
         self.report_menu=QMenu(self)
         self.report_menu.addAction('CSV kaydet…',self.save_report)
         self.action('Rapor / yardım',None).setMenu(self.report_menu)
-        left, left_layout = card('Hesap değerleri')
+        left, left_layout = pane('Hesap değerleri')
+        left_layout.setContentsMargins(0, 0, 8, 0)
         self.input_card = left
         self.form = ValueForm(self.settings, prefix)
         left_layout.addWidget(self.form)
@@ -79,15 +99,23 @@ class CalculationPage(BasePage):
         left_layout.addStretch()
         right = QWidget()
         self.right = QVBoxLayout(right)
-        self.right.setContentsMargins(0, 0, 0, 0)
-        self.right.setSpacing(8)
+        self.right.setContentsMargins(8, 0, 0, 0)
+        self.right.setSpacing(6)
+        # Hierarchy: 20 px result headline, one muted summary line, a rule,
+        # then the drawing and supporting text.
         self.headline = label('—', 'result')
+        self.headline.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.headline.setAccessibleName('Hesap sonucu')
         self.right.addWidget(self.headline)
-        self.summary = label('', 'subtitle')
+        self.summary = label('', 'muted')
+        self.summary.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.right.addWidget(self.summary)
+        self.result_rule = separator()
+        self.right.addWidget(self.result_rule)
         self.diagram_tabs = QTabWidget()
+        self.diagram_tabs.setDocumentMode(True)
         self.diagrams = {}
-        self.right.addWidget(self.diagram_tabs)
+        self.right.addWidget(self.diagram_tabs, 1)
         self.details = label()
         self.right.addWidget(self.details)
         self.metric_model = TableModel((Column('Özellik', 'key'), Column('Değer', 'value')))
@@ -122,9 +150,15 @@ class CalculationPage(BasePage):
         # Keep the full engineering scene, while avoiding a mandatory tall
         # viewport that pushes the result and report below smaller windows.
         diagram.setMinimumHeight(min(height, 220))
-        diagram.setMaximumHeight(max(260, height))
+        # Wide windows may give the drawing more room (it scales to fit),
+        # instead of leaving an empty band below the result.
+        diagram.setMaximumHeight(max(300, round(height * 1.35)))
         self.diagrams[key] = diagram
         self.diagram_tabs.addTab(diagram, title)
+        # The tab widget may grow with the window, but never beyond its tallest
+        # drawing; otherwise an empty band opens below the scene.
+        self.diagram_tabs.setMaximumHeight(max(d.maximumHeight() for d in self.diagrams.values())
+                                           + self.diagram_tabs.tabBar().sizeHint().height() + 2)
         return diagram
 
     def info_action(self,title,callback):

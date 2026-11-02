@@ -6,7 +6,8 @@ Section dimensions are shown in millimetres; stock length uses the selected unit
 
 import math
 
-from shared.theme import PANEL, MUTED, ACCENT, UI_FONT
+from shared.theme import UI_FONT
+from gui_qt.diagrams import CANVAS as PANEL, MUTED, ACCENT
 
 
 _I_SECTIONS = frozenset(('HEA', 'HP', 'HD', 'HL', 'HE', 'IPE', 'IPN'))

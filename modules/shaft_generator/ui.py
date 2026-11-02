@@ -8,7 +8,8 @@ from PySide6.QtCore import Qt, QSignalBlocker, QLocale
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QSplitter,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QTabWidget,
     QLineEdit,QComboBox,QDoubleSpinBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
-from gui_qt.components import BasePage, label, button, scroll
+from gui_qt.components import BasePage, label, button, scroll, separator
+from gui_qt.theme import ROW_HEIGHT
 from . import controller, storage
 from .geometry import operation_plan
 from .models import Project, Groove, Keyway, Chamfer, Fillet, Bore, CosmeticThread
@@ -16,6 +17,26 @@ from .preview import ShaftPreview
 from .standard_picker import ChannelStandardPicker
 from .validation import validate
 from .edge_treatments import circular_edges, plan_treatments
+
+
+def num(value):
+    """Shortest exact display with the Turkish decimal comma (12,5 not 12.5)."""
+    return f'{value:g}'.replace('.',',')
+
+
+class MeasureSpinBox(QDoubleSpinBox):
+    """tr_TR decimal comma, right-aligned; full precision kept, trailing zeros hidden."""
+    def __init__(self,parent=None):
+        super().__init__(parent)
+        locale=QLocale(QLocale.Turkish,QLocale.Turkey)
+        locale.setNumberOptions(QLocale.OmitGroupSeparator|QLocale.RejectGroupSeparator)
+        self.setLocale(locale);self.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+
+    def textFromValue(self,value):
+        text=self.locale().toString(float(value),'f',self.decimals())
+        point=self.locale().decimalPoint()
+        if point in text:text=text.rstrip('0').rstrip(point)
+        return '0' if text in ('-0','') else text
 
 
 TITLES = {'groove':'Segman kanalı','keyway':'Kama kanalı','chamfer':'Pah','fillet':'Radyüs','cosmetic_thread':'Kozmetik diş'}
@@ -37,37 +58,52 @@ class ShaftPage(BasePage):
         self.splitter=QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
         self.editor=QWidget(); self.editor.setMinimumWidth(280); self.editor.setMaximumWidth(480)
         edit=QVBoxLayout(self.editor); edit.setContentsMargins(0,0,0,0); edit.setSpacing(6)
-        edit.addWidget(label('MİL PARAMETRELERİ','section'))
-        form=QFormLayout(); self.name=QLineEdit(self.project.name); self.name.setAccessibleName('Mil parça adı')
+        # Group 1 · Part: name and the live envelope (L, Ømax) of the shaft.
+        edit.addWidget(label('Parça','section'))
+        form=QFormLayout(); form.setContentsMargins(0,0,0,0); form.setVerticalSpacing(4)
+        self.name=QLineEdit(self.project.name); self.name.setAccessibleName('Mil parça adı')
         form.addRow('Parça adı',self.name); edit.addLayout(form)
-        self.summary=label('', 'subtitle'); edit.addWidget(self.summary)
-        self.selected_stage_caption=label('','muted');edit.addWidget(self.selected_stage_caption)
+        self.summary=label('', 'muted'); edit.addWidget(self.summary)
+        edit.addWidget(separator())
+        # Group 2 · Parameter section: one picker for stages, channels, edges,
+        # thread and bore; the selected section's fields appear below it.
+        picker_row=QHBoxLayout(); picker_row.setSpacing(4)
         self.section_picker=QComboBox();self.section_picker.setAccessibleName('Mil parametre bölümü')
+        self.section_picker.setToolTip('Düzenlenecek parametre grubu: kademeler, kanallar, kenar işlemleri, diş veya iç delik')
         self.section_picker.setMinimumWidth(0);self.section_picker.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
-        self.section_picker.setMinimumContentsLength(12);edit.addWidget(self.section_picker)
+        self.section_picker.setMinimumContentsLength(12);picker_row.addWidget(self.section_picker,1)
         self.bulk_shortcut=button('Toplu pah / radyüs…',self.show_bulk_treatments)
         self.bulk_shortcut.setToolTip('Mil uçları ve kademe omuzlarını tek işlemle düzenleyin.')
-        edit.addWidget(self.bulk_shortcut)
+        picker_row.addWidget(self.bulk_shortcut); edit.addLayout(picker_row)
+        self.selected_stage_caption=label('','muted');edit.addWidget(self.selected_stage_caption)
         self.edit_mode=label('','section');edit.addWidget(self.edit_mode)
         self.new_operation_button=button('Seçimi temizle · Yeni işlem',self.clear_operation_selection)
         edit.addWidget(self.new_operation_button)
         self.tabs=QTabWidget(); self.tabs.tabBar().hide();self.tabs.setDocumentMode(True)
         self.tabs.setMinimumWidth(0)
 
-        stage_page=QWidget(); stages=QVBoxLayout(stage_page); stages.setContentsMargins(4,6,4,4)
+        stage_page=QWidget(); stages=QVBoxLayout(stage_page); stages.setContentsMargins(0,4,0,0); stages.setSpacing(4)
         stages.addWidget(label('Çap ve boy hücrelerine yazın. Kademeler soldan sağa sıralanır.','muted'))
         self.table=QTableWidget(0,3); self.table.setHorizontalHeaderLabels(['Kademe','Çap · mm','Boy · mm'])
         self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.horizontalHeader().setDefaultAlignment(Qt.AlignLeft|Qt.AlignVCenter)
+        self.table.horizontalHeader().setHighlightSections(False)
+        self.table.verticalHeader().setDefaultSectionSize(ROW_HEIGHT); self.table.setShowGrid(False)
         self.table.setMinimumHeight(150); self.table.setAccessibleName('Düzenlenebilir mil kademeleri')
         stages.addWidget(self.table,1)
-        commands=QHBoxLayout(); commands.setSpacing(3)
+        # Compact toolbar under the stage table; commands act on the selected row.
+        commands=QHBoxLayout(); commands.setSpacing(2)
         for text,callback in (('+ Kademe',lambda:self.add_stage()),('Kopyala',lambda:self.add_stage(copy=True)),
                                ('Sil',self.delete_stage),('↑',lambda:self.move_stage(-1)),('↓',lambda:self.move_stage(1))):
             control=button(text,callback); control.setMinimumWidth(0)
             control.setAccessibleName({'+ Kademe':'Kademe ekle','↑':'Kademeyi yukarı taşı','↓':'Kademeyi aşağı taşı'}.get(text,'Kademe '+text.lower()))
+            control.setToolTip({'+ Kademe':'Sona yeni kademe ekle','Kopyala':'Seçili kademeyi kopyala','Sil':'Seçili kademeyi sil',
+                                '↑':'Seçili kademeyi sola taşı','↓':'Seçili kademeyi sağa taşı'}[text])
+            if text in ('↑','↓'):control.setFixedWidth(32)
             commands.addWidget(control)
+        commands.addStretch(1)
         stages.addLayout(commands); self.tabs.addTab(stage_page,'Kademeler')
         self.operation_fields={}; self.operation_targets={}; self.standard_pickers={}; self.loading_operation=False
         self.add_operation_buttons={};self.update_operation_buttons={};self.operation_hints={};self.operation_actions={}
@@ -91,7 +127,7 @@ class ShaftPage(BasePage):
                     control=QComboBox();control.addItem('Sol kenar','left');control.addItem('Sağ kenar','right')
                     form.addRow('Hedef kenar',control)
                 else:
-                    control=QDoubleSpinBox();control.setLocale(QLocale('tr_TR'));control.setDecimals(4);control.setRange(0,1_000_000)
+                    control=MeasureSpinBox();control.setDecimals(4);control.setRange(0,1_000_000)
                     control.setMinimumWidth(100);control.setKeyboardTracking(False)
                     title='Toplam boy · mm' if kind=='keyway' and key=='length' else FIELD_TITLES[key]
                     control.setValue(getattr(prototype,key));form.addRow(title,control)
@@ -125,7 +161,7 @@ class ShaftPage(BasePage):
         self.bore_controls={};self.loading_bore=False
         for key,title in (('diameter','İç çap · mm'),('end_condition','Sonlandırma'),('entry','Giriş'),('depth','Kör delik boyu · mm')):
             if key in ('diameter','depth'):
-                control=QDoubleSpinBox();control.setLocale(QLocale('tr_TR'));control.setDecimals(4)
+                control=MeasureSpinBox();control.setDecimals(4)
                 control.setKeyboardTracking(False);control.setRange(.0001,1_000_000);control.setValue(getattr(Bore(),key))
             else:
                 control=QComboBox()
@@ -138,20 +174,26 @@ class ShaftPage(BasePage):
         self.build_bulk_page()
         advanced=label('Matkap uç konisi, iç diş, gerçek helisel diş, freze düzlüğü ve omuz boşaltması henüz desteklenmiyor.','muted')
         self.tabs.addTab(advanced,'İleri'); self.tabs.setTabEnabled(self.tabs.count()-1,False)
-        for index,title in enumerate(('1 · Kademe ölçüleri','Segman kanalı','Kama kanalı','Tek kenara pah',
-                                      'Tek kenara radyüs','Kozmetik diş','Eksenel iç delik','Toplu pah / radyüs')):
+        # Group prefixes keep related sections together in the single picker.
+        for index,title in enumerate(('Kademeler · Çap ve boy','Kanal · Segman kanalı','Kanal · Kama kanalı','Kenar · Tek kenara pah',
+                                      'Kenar · Tek kenara radyüs','Diş · Kozmetik diş','Delik · Eksenel iç delik','Kenar · Toplu pah / radyüs')):
             self.section_picker.addItem(title,index)
         self.section_picker.currentIndexChanged.connect(lambda:self.tabs.setCurrentIndex(self.section_picker.currentData()))
         self.tabs.currentChanged.connect(self.section_changed)
         edit.addWidget(self.tabs,2)
         for action_bar in self.operation_actions.values():edit.addWidget(action_bar)
-        self.operation_count=label('EKLENEN İŞLEMLER · 0','section');edit.addWidget(self.operation_count)
+        edit.addWidget(separator())
+        self.operation_count=label('Eklenen işlemler · 0','section');edit.addWidget(self.operation_count)
         self.operations=QListWidget();self.operations.setMinimumHeight(72);self.operations.setMaximumHeight(140)
         self.operations.setAlternatingRowColors(True)
         self.operations.setToolTip('İşlemi seçin: parametrelerini düzenleyin. Tekil işlemlerin ölçü değişiklikleri anında uygulanır.')
         self.operations.setAccessibleName('Mil operasyonları');edit.addWidget(self.operations,1)
-        self.remove_operation_button=button('Seçili operasyonu sil',self.delete_operation);edit.addWidget(self.remove_operation_button)
-        wall=QFormLayout();self.minimum_wall=QDoubleSpinBox();self.minimum_wall.setLocale(QLocale('tr_TR'));self.minimum_wall.setDecimals(3)
+        self.remove_operation_button=button('Seçili operasyonu sil',self.delete_operation)
+        self.remove_operation_button.setToolTip('Listede seçili segman, kama, pah, radyüs veya diş işlemini kaldır')
+        edit.addWidget(self.remove_operation_button,alignment=Qt.AlignLeft)
+        # Group 4 · Manufacturing check used by validation before CAD output.
+        edit.addWidget(separator()); edit.addWidget(label('Üretim kontrolü','section'))
+        wall=QFormLayout(); wall.setContentsMargins(0,0,0,0);self.minimum_wall=MeasureSpinBox();self.minimum_wall.setDecimals(3)
         self.minimum_wall.setKeyboardTracking(False)
         self.minimum_wall.setRange(.001,100000);self.minimum_wall.setValue(self.project.minimum_wall)
         self.minimum_wall.setAccessibleName('En az kalan radyal et kalınlığı');wall.addRow('En az radyal et · mm',self.minimum_wall)
@@ -167,7 +209,8 @@ class ShaftPage(BasePage):
         self.splitter.addWidget(views);self.splitter.setStretchFactor(1,1);self.splitter.setSizes([370,850])
         self.layout.addWidget(self.splitter,1)
         self.validation_label=label('','muted');self.validation_label.setMaximumHeight(60);self.layout.addWidget(self.validation_label)
-        footer=QHBoxLayout();self.create_button=button("SOLIDWORKS'TE ÇİZ",self.create_model,primary=True)
+        footer=QHBoxLayout();self.create_button=button("SolidWorks’te çiz",self.create_model,primary=True)
+        self.create_button.setToolTip('Açık SolidWorks oturumunda yeni parametrik mil parçası oluştur')
         self.create_button.setAccessibleName('Yeni parametrik SOLIDWORKS parçası oluştur')
         self.save_part_button=button('SLDPRT oluştur ve kaydet…',self.create_and_save)
         self.stop_button=button('Durdur',self.jobs.cancel);self.stop_button.hide()
@@ -189,13 +232,13 @@ class ShaftPage(BasePage):
 
     def build_bulk_page(self):
         page=QWidget();box=QVBoxLayout(page);box.setContentsMargins(6,6,6,6)
-        box.addWidget(label('TÜM UÇLAR VE OMUZLAR','section'))
+        box.addWidget(label('Tüm uçlar ve omuzlar','section'))
         box.addWidget(label('Milin iki ucu ve kademeler arasındaki dairesel omuz kenarları birlikte işlenir.', 'muted'))
         form=QFormLayout();form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.bulk_kind=QComboBox();self.bulk_kind.addItem('Pah · 45°','chamfer');self.bulk_kind.addItem('Radyüs','fillet')
         self.bulk_kind.setAccessibleName('Toplu kenar işlemi türü')
         form.addRow('Uygulanacak işlem',self.bulk_kind)
-        self.bulk_size=QDoubleSpinBox();self.bulk_size.setLocale(QLocale('tr_TR'))
+        self.bulk_size=MeasureSpinBox()
         self.bulk_size.setDecimals(4);self.bulk_size.setRange(.0001,1_000_000);self.bulk_size.setValue(1)
         self.bulk_size.setKeyboardTracking(False);self.bulk_size.setAccessibleName('Toplu pah mesafesi veya radyüs ölçüsü · mm')
         self.bulk_size_label=label('Pah mesafesi · mm');form.addRow(self.bulk_size_label,self.bulk_size);box.addLayout(form)
@@ -209,7 +252,7 @@ class ShaftPage(BasePage):
         self.edge_undo_button.setToolTip('GOKWORKS parametre listesini geri alır. Oluşturulmuş SolidWorks dosyaları değiştirilmez.')
         self.edge_undo_button.setEnabled(False);box.addWidget(self.edge_undo_button)
         box.addWidget(label('Ölçü bir kenara sığmazsa hiçbir işlem değiştirilmez. Eş çaplı birleşimlerde fiziksel omuz yoktur.', 'muted'))
-        box.addWidget(label('Katı modeli üretmek için ardından SOLIDWORKS’TE ÇİZ düğmesini kullanın.', 'muted'))
+        box.addWidget(label('Katı modeli üretmek için ardından SolidWorks’te çiz düğmesini kullanın.', 'muted'))
         box.addStretch();self.tabs.addTab(scroll(page),'Toplu pah / radyüs')
         self.bulk_kind.currentIndexChanged.connect(self.refresh_bulk_info)
         self.bulk_size.valueChanged.connect(self.refresh_bulk_info)
@@ -239,13 +282,13 @@ class ShaftPage(BasePage):
         row=next((i for i,s in enumerate(self.project.stages,1) if s.id==self.selected_stage),None)
         if row is not None:
             stage=self.project.stage(self.selected_stage)
-            self.selected_stage_caption.setText(f'Seçili: {row}. kademe · Ø{stage.diameter:g} · Boy {stage.length:g} mm')
+            self.selected_stage_caption.setText(f'Seçili: {row}. kademe · Ø{num(stage.diameter)} · Boy {num(stage.length)} mm')
         op=next((op for op in self.project.operations if op.id==self.selected_operation),None)
         is_single=1<=self.tabs.currentIndex()<=5
         self.edit_mode.setVisible(is_single)
         self.new_operation_button.setVisible(is_single and op is not None)
         self.edit_mode.setText('Seçili işlem düzenleniyor' if op is not None else 'Yeni işlem ekle')
-        self.operation_count.setText(f'EKLENEN İŞLEMLER · {len(self.project.operations)}')
+        self.operation_count.setText(f'Eklenen işlemler · {len(self.project.operations)}')
         self.operations.setFixedHeight(max(72,min(148,len(self.project.operations)*28+8)))
         self.bulk_shortcut.setVisible(self.tabs.currentIndex()!=7)
         self.remove_operation_button.setEnabled(not self.busy and op is not None)
@@ -316,14 +359,15 @@ class ShaftPage(BasePage):
             self.table.setRowCount(len(self.project.stages))
             for row,stage in enumerate(self.project.stages):
                 for col,value in enumerate((row+1,stage.diameter,stage.length)):
-                    item=QTableWidgetItem(f'{value:g}');item.setData(Qt.UserRole,stage.id)
+                    item=QTableWidgetItem(f'{num(value)}');item.setData(Qt.UserRole,stage.id)
                     if col==0:item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                    item.setTextAlignment(Qt.AlignCenter);self.table.setItem(row,col,item)
+                    item.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter if col else Qt.AlignLeft|Qt.AlignVCenter)
+                    self.table.setItem(row,col,item)
         for target in self.operation_targets.values():
             previous=target.currentData()
             with QSignalBlocker(target):
                 target.clear()
-                for i,stage in enumerate(self.project.stages,1):target.addItem(f'{i}. kademe · Ø{stage.diameter:g}',stage.id)
+                for i,stage in enumerate(self.project.stages,1):target.addItem(f'{i}. kademe · Ø{num(stage.diameter)}',stage.id)
                 index=target.findData(previous or self.selected_stage);target.setCurrentIndex(max(index,0))
         with QSignalBlocker(self.operations):
             self.operations.clear()
@@ -333,10 +377,10 @@ class ShaftPage(BasePage):
                 if isinstance(op,(Chamfer,Fillet)):
                     side='Sol' if op.edge=='left' else 'Sağ'
                     size=op.distance if isinstance(op,Chamfer) else op.radius
-                    detail=f' · {side} · {size:g} mm'
+                    detail=f' · {side} · {num(size)} mm'
                 elif isinstance(op,CosmeticThread):
                     side='Sol' if op.edge=='left' else 'Sağ'
-                    detail=f' · M{self.project.stage(op.stage_id).diameter:g}×{op.pitch:g} · {side} · {op.length:g} mm'
+                    detail=f' · M{num(self.project.stage(op.stage_id).diameter)}×{num(op.pitch)} · {side} · {num(op.length)} mm'
                 item=QListWidgetItem(f'{TITLES[op.kind]} · {index}. kademe{detail}');item.setData(Qt.UserRole,op.id)
                 self.operations.addItem(item)
         self.select_stage(self.selected_stage)
@@ -349,7 +393,7 @@ class ShaftPage(BasePage):
         self.create_button.setEnabled(not self.busy and not errors)
         self.save_part_button.setEnabled(not self.busy and not errors)
         self.save_button.setEnabled(not self.busy and not errors)
-        self.summary.setText('Ölçü hatası' if errors else f'{len(self.project.stages)} kademe · L {self.project.total_length:g} mm · Ømaks {self.project.maximum_diameter:g} mm')
+        self.summary.setText('Ölçü hatası' if errors else f'{len(self.project.stages)} kademe · L {num(self.project.total_length)} mm · Ømaks {num(self.project.maximum_diameter)} mm')
         self.validation_label.setText('\n'.join(errors) if errors else 'Ölçüler geçerli · Yeni parça oluşturulur · Önizleme boyut oranlarını korur')
         self.validation_label.setToolTip('\n'.join(errors));self.validation_label.setProperty('role','error' if errors else 'muted')
         self.validation_label.style().unpolish(self.validation_label);self.validation_label.style().polish(self.validation_label)
@@ -372,7 +416,7 @@ class ShaftPage(BasePage):
     def refresh_thread_caption(self):
         values=self.operation_values('cosmetic_thread')
         stage=next((s for s in self.project.stages if s.id==values['stage_id']),None)
-        if stage is not None:self.thread_caption.setText(f"M{stage.diameter:g} × {values['pitch']:g} · Gösterim boyu {values['length']:g} mm")
+        if stage is not None:self.thread_caption.setText(f"M{num(stage.diameter)} × {num(values['pitch'])} · Gösterim boyu {num(values['length'])} mm")
 
     def refresh_standards(self):
         for kind,picker in self.standard_pickers.items():

@@ -9,12 +9,50 @@ from PySide6.QtCore import Qt, QRectF, QPointF, QTimer
 from PySide6.QtGui import QColor, QPen, QBrush, QPolygonF, QPainterPath, QFont, QPainter
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QGraphicsTextItem
 
+from .theme import COLORS
+
+
+def token_pair(key):
+    """(light, dark) pair of a design-system colour for appearance-indexed drawings."""
+    return COLORS['light'][key], COLORS['dark'][key]
+
+
+# Drawing palette shared by engineering diagrams. Index with
+# ``pair[appearance == 'Dark']``; every value comes from gui_qt.theme.COLORS so
+# drawings follow the application theme instead of a private palette.
+CANVAS = token_pair('canvas')      # drawing surface
+PART = token_pair('panel')         # neutral part/section fill on the canvas
+GRID = token_pair('grid')
+TEXT = token_pair('text')
+MUTED = token_pair('muted')
+BORDER = token_pair('border')
+BORDER_STRONG = token_pair('border_strong')
+ACCENT = token_pair('accent')
+ACCENT_BG = token_pair('selected')
+ON_ACCENT = token_pair('on_accent')
+SUCCESS = token_pair('success')
+WARNING = token_pair('warning')
+DANGER = token_pair('danger')
+
+
+def mix(color, other, amount):
+    """Blend two '#RRGGBB' colours; amount 0 keeps ``color``, 1 gives ``other``."""
+    a, b = QColor(color), QColor(other)
+    channel = lambda x, y: round(x + (y - x) * amount)
+    return QColor(channel(a.red(), b.red()), channel(a.green(), b.green()),
+                  channel(a.blue(), b.blue())).name().upper()
+
+
+def palette(appearance):
+    """Token dict for 'Dark'/'Light' (or 'dark'/'light') drawing appearance."""
+    return dict(COLORS['dark' if str(appearance).lower() in ('dark', 'koyu') else 'light'])
+
 
 class VectorScene(QGraphicsScene):
     def __init__(self, width, height, parent=None):
         super().__init__(parent)
         self.width, self.height = width, height
-        self.background = '#1C2431'
+        self.background = COLORS['dark']['canvas']
         self.tagged = {}
         self.setSceneRect(0, 0, width, height)
 
@@ -29,7 +67,6 @@ class VectorScene(QGraphicsScene):
             self.background = options['background']
             # Older drawing renderers still name their original paper colors.
             # Normalize only the paper, preserving technical fills and labels.
-            from .theme import COLORS
             if self.background.lower() in ('#1c2431','#1c2533','#242831','#262a33'):
                 self.background = COLORS['dark']['canvas']
             elif self.background.lower() in ('#f4f7fc','#eff4fa','#f7faff'):
@@ -54,7 +91,7 @@ class VectorScene(QGraphicsScene):
                 self.removeItem(item)
 
     def _pen(self, options, *, line=False):
-        color = options.get('fill' if line else 'outline', '#8899AA')
+        color = options.get('fill' if line else 'outline', COLORS['dark']['muted'])
         pen = QPen(QColor(color)) if color else QPen(Qt.NoPen)
         pen.setWidthF(float(options.get('width', 1)))
         pen.setJoinStyle(Qt.RoundJoin)
@@ -101,7 +138,7 @@ class VectorScene(QGraphicsScene):
         half = float(options.get('arrowshape', (6, 8, 3))[2])
         points = QPolygonF([QPointF(x, y), QPointF(x - length*cos(angle) + half*sin(angle), y - length*sin(angle) - half*cos(angle)),
                            QPointF(x - length*cos(angle) - half*sin(angle), y - length*sin(angle) + half*cos(angle))])
-        self.addPolygon(points, QPen(Qt.NoPen), QBrush(QColor(options.get('fill', '#8899AA'))))
+        self.addPolygon(points, QPen(Qt.NoPen), QBrush(QColor(options.get('fill', COLORS['dark']['muted']))))
 
     def create_rectangle(self, *box, **options):
         x0, y0, x1, y1 = self._points(box)
@@ -133,7 +170,7 @@ class VectorScene(QGraphicsScene):
         font.setPixelSize(max(1, abs(int(font_value[1]))))
         font.setBold('bold' in font_value[2:])
         item.setFont(font)
-        item.setDefaultTextColor(QColor(options.get('fill', '#E8EEF7')))
+        item.setDefaultTextColor(QColor(options.get('fill', COLORS['dark']['text'])))
         item.setPlainText(str(options.get('text', '')))
         if options.get('width'):
             item.setTextWidth(float(options['width']))

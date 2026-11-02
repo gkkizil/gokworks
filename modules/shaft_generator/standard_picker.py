@@ -8,6 +8,10 @@ from .standards import (DIN_471_SOURCE, DIN_6885_SOURCE, ISO_773_STATUS,
                         groove_size, keyway_size, keyway_lengths, same_dimension)
 
 
+def _num(value):
+    return f'{value:g}'.replace('.',',')
+
+
 class ChannelStandardPicker(QWidget):
     valuesSelected = Signal(dict)
 
@@ -66,15 +70,15 @@ class ChannelStandardPicker(QWidget):
             self.preset.clear()
             self.preset.addItem('Özel ölçü (elle)', None)
             if size is not None:
-                text = (f'DIN 471 · Ø{size.diameter:g} · s {size.ring_thickness:g} mm'
+                text = (f'DIN 471 · Ø{_num(size.diameter)} · s {_num(size.ring_thickness)} mm'
                         if self.kind == 'groove' else
-                        f'DIN 6885-1 A · {size.width:g} × {size.key_height:g} mm')
+                        f'DIN 6885-1 A · {_num(size.width)} × {_num(size.key_height)} mm')
                 self.preset.addItem(text, 'DIN471' if self.kind == 'groove' else 'DIN6885-1')
                 self.preset.setCurrentIndex(1 if matched else 0)
         if self.kind == 'groove':
             self.details.setText(
-                f'Yuva: m={size.width:g} mm · Ød₂={size.groove_diameter:g} mm\n'
-                f'Radyal derinlik={size.depth:g} mm · En az kenar payı n={size.edge_margin:g} mm'
+                f'Yuva: m={_num(size.width)} mm · Ød₂={_num(size.groove_diameter)} mm\n'
+                f'Radyal derinlik={_num(size.depth)} mm · En az kenar payı n={_num(size.edge_margin)} mm'
                 if size else 'Bu çap için DIN 471 ölçüsü yok. Katalog: nominal Ø3–100 mm; özel ölçü girin.')
             return
         self.lengths = keyway_lengths(size, stage_length - values['offset'])
@@ -82,14 +86,14 @@ class ChannelStandardPicker(QWidget):
             self.length.clear()
             self.length.addItem('Özel boy (elle)', None)
             for length in self.lengths:
-                self.length.addItem(f'{length:g}', length)
+                self.length.addItem(f'{_num(length)}', length)
             index = self.length.findData(values['length'])
             self.length.setCurrentIndex(max(index, 0))
         self.length.setEnabled(bool(self.lengths))
         if size is None:
             self.details.setText('Bu çap için DIN 6885-1 kesiti yok. Katalog: Ø6–500 mm; özel ölçü girin.')
         else:
-            self.details.setText(f'Kama b×h={size.width:g}×{size.key_height:g} mm · Mil kanal derinliği={size.depth:g} mm'
+            self.details.setText(f'Kama b×h={_num(size.width)}×{_num(size.key_height)} mm · Mil kanal derinliği={_num(size.depth)} mm'
                                  + ('' if self.lengths else '\nBu konuma sığan katalog boyu yok; toplam boyu elle girin.'))
 
     def choose_preset(self, index):

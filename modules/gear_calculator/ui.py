@@ -1,6 +1,6 @@
 """Turkish Qt workbench. Basic math is synchronous; CAD runs in a bounded process."""
 
-from PySide6.QtCore import Qt,QTimer,QSignalBlocker
+from PySide6.QtCore import Qt,QTimer,QSignalBlocker,QLocale
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QComboBox,QDoubleSpinBox,
     QSpinBox,QCheckBox,QTabWidget,QStackedWidget,QTableWidget,QTableWidgetItem,
     QHeaderView,QFileDialog,QAbstractItemView)
@@ -19,6 +19,50 @@ def number(value):
     return f'{value:,.4f}'.replace(',',' ').replace('.',',').rstrip('0').rstrip(',')
 
 
+def turkish_locale():
+    """tr_TR number format (decimal comma) without the ambiguous '1.500' grouping."""
+    locale=QLocale(QLocale.Turkish,QLocale.Turkey)
+    locale.setNumberOptions(QLocale.OmitGroupSeparator|QLocale.RejectGroupSeparator)
+    return locale
+
+
+class EngineeringSpinBox(QDoubleSpinBox):
+    """Decimal comma, right-aligned; keeps full precision but hides trailing zeros.
+
+    The stored value still rounds to ``decimals()`` places, so engineering
+    precision is unchanged: 2.0000 is shown as 2 and 0.0125 as 0,0125.
+    """
+    def __init__(self,decimals=4,parent=None):
+        super().__init__(parent)
+        self.setLocale(turkish_locale());self.setDecimals(decimals)
+        self.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+
+    def textFromValue(self,value):
+        text=self.locale().toString(float(value),'f',self.decimals())
+        point=self.locale().decimalPoint()
+        if point in text:text=text.rstrip('0').rstrip(point)
+        return '0' if text in ('-0','') else text
+
+
+def number_box(integer=False,decimals=4):
+    """Numeric field shared by every gear family form."""
+    if not integer:return EngineeringSpinBox(decimals)
+    w=QSpinBox();w.setLocale(turkish_locale());w.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+    return w
+
+
+def style_result_table(table):
+    """Dense, read-only result grid: design-system row height and left headers."""
+    from gui_qt.theme import ROW_HEIGHT
+    table.verticalHeader().setDefaultSectionSize(ROW_HEIGHT)
+    table.verticalHeader().setMinimumSectionSize(ROW_HEIGHT-4)
+    table.setShowGrid(False);table.setWordWrap(False)
+    table.setSelectionBehavior(QAbstractItemView.SelectRows)
+    header=table.horizontalHeader()
+    header.setDefaultAlignment(Qt.AlignLeft|Qt.AlignVCenter);header.setHighlightSections(False)
+    return table
+
+
 class GearPage(BasePage):
     def __init__(self,context):
         super().__init__(context,'Dişli Hesaplama','Dişli türleri · Hesap, hareket ve CAD · türe göre doğrulama kapsamı')
@@ -28,7 +72,7 @@ class GearPage(BasePage):
         self.update_button=self.action('Hesapla / Güncelle',self.calculate,primary=True)
         self.stop_button=self.action('Durdur',self.jobs.cancel,locked=False)
         self.input_panel=QWidget();form_box=QVBoxLayout(self.input_panel);form_box.setContentsMargins(6,6,6,6)
-        form_box.addWidget(label('GEOMETRİ','section'));self.form=QFormLayout();self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        form_box.addWidget(label('Geometri','section'));self.form=QFormLayout();self.form.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.fields={}
         self.type_picker=QComboBox();self.type_picker.addItem('Dış düz · Evolvent','external_spur')
         from .families.models import CATALOG
@@ -41,7 +85,7 @@ class GearPage(BasePage):
             ('bore1','Pinyon delik çapı · mm',8.,0,5999.,False),('bore2','Çark delik çapı · mm',12.,0,5999.,False)):
             self.add_number(self.form,key,title,value,low,high,integer)
         form_box.addLayout(self.form)
-        form_box.addWidget(label('İŞLETME DEĞERLERİ','section'));load=QFormLayout();load.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        form_box.addWidget(label('İşletme değerleri','section'));load=QFormLayout();load.setRowWrapPolicy(QFormLayout.WrapLongRows)
         self.load_form=load
         self.load_mode=QComboBox();self.load_mode.addItem('Güç P → Tork hesaplanır','power');self.load_mode.addItem('Tork T₁ → Güç hesaplanır','torque')
         self.load_mode.setAccessibleName('Birincil yük girdisi');load.addRow('Birincil yük',self.load_mode)
@@ -81,9 +125,10 @@ class GearPage(BasePage):
         self.result_table.setAlternatingRowColors(True);self.result_table.setAccessibleName('Dişli mühendislik sonuçları')
         self.result_table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
         self.result_table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        style_result_table(self.result_table)
         self.result_table.setMinimumHeight(220);results.addWidget(self.result_table,1)
         self.warning_label=label('','muted');results.addWidget(self.warning_label)
-        results.addWidget(label('CAD AKTARIMI','section'));self.export_target=QComboBox()
+        results.addWidget(label('CAD aktarımı','section'));self.export_target=QComboBox()
         for title,key in (('Pinyon · kendi merkezi','pinion'),('Çark · kendi merkezi','wheel'),('Dişli takımı · 2 ayrı gövde','pair')):
             self.export_target.addItem(title,key)
         self.export_target.setCurrentIndex(2);self.export_target.setAccessibleName('CAD aktarım hedefi');results.addWidget(self.export_target)
@@ -134,8 +179,7 @@ class GearPage(BasePage):
         return self.family_panel is not None and self.type_picker.currentData()!='external_spur'
 
     def add_number(self,form,key,title,value,low,high,integer=False):
-        w=QSpinBox() if integer else QDoubleSpinBox()
-        if not integer:w.setDecimals(4)
+        w=number_box(integer)
         w.setRange(low,high);w.setValue(value);w.setKeyboardTracking(False);w.setAccessibleName(title)
         w.setMinimumWidth(90);self.fields[key]=w;form.addRow(title,w)
 

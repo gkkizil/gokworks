@@ -6,7 +6,8 @@ from modules.iso_fits import rules as r
 from modules.iso_fits import manual as m
 from modules.iso_fits.diagram import draw
 from gui_qt.calculations import CalculationPage
-from gui_qt.components import Disclosure, card, label, scroll, configure_view, show_details
+from gui_qt.calculations import pane
+from gui_qt.components import Disclosure, label, scroll, configure_view, show_details
 from gui_qt.models import TreeModel, FilterProxy, Column
 
 
@@ -97,7 +98,7 @@ class IsoPage(CalculationPage):
             f.show_field(key, False)
         self.right.insertWidget(self.right.indexOf(self.diagram_tabs), self.view_tabs)
         self.right.insertWidget(self.right.indexOf(self.diagram_tabs) + 1, self.sample_tabs)
-        self.explanation_card, explanation = card('Geçme yorumu')
+        self.explanation_card, explanation = pane('Geçme yorumu', rule=True)
         self.right.removeWidget(self.details)
         explanation.addWidget(self.details)
         self.details.setTextInteractionFlags(Qt.TextSelectableByMouse)

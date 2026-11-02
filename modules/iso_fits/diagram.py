@@ -1,7 +1,8 @@
 """ISO ve manuel kontrol için ortak vektör kesiti ve sapma bölgesi grafiği."""
 
-from shared.theme import (INPUT, PANEL, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
-                       SUCCESS, AMBER, RED, UI_FONT, PRIMARY_TEXT)
+from shared.theme import UI_FONT
+from gui_qt.diagrams import (CANVAS as INPUT, PART as PANEL, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG,
+                             SUCCESS, WARNING as AMBER, DANGER as RED, ON_ACCENT as PRIMARY_TEXT)
 from modules.iso_fits.rules import CLASSIFICATION, format_mm, format_deviation, mm
 
 

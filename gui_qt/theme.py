@@ -89,6 +89,7 @@ QPushButton[primary="true"]:hover { border-color: %(text)s; }
 QPushButton[primary="true"]:disabled { background: %(input)s; color: %(muted)s; border-color: %(border)s; }
 QPushButton[destructive="true"] { color: %(danger)s; }
 QPushButton[destructive="true"]:hover { border-color: %(danger)s; }
+QPushButton[destructive="true"]:disabled { color: %(muted)s; border-color: %(border)s; }
 QPushButton[flat="true"] { background: transparent; border: 1px solid transparent; color: %(muted)s; padding: 3px 6px; }
 QPushButton[flat="true"]:hover { background: %(hover)s; color: %(text)s; }
 QPushButton[flat="true"]:focus { border-color: %(focus)s; }

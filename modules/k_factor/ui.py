@@ -11,6 +11,8 @@ from modules.k_factor.rules import (ManualAssignment, AssignmentTable, Recipe, c
 from gui_qt.components import BasePage, ValueForm, ResultsPanel, card, scroll, button, label, configure_view
 from gui_qt.models import TableModel, Column
 from gui_qt.diagrams import EngineeringDiagram
+from gui_qt.calculations import pane
+from gui_qt.theme import ROW_HEIGHT
 from modules.k_factor.tooling_diagram import draw_tooling, PUNCH_TYPES, DIE_TYPES
 
 
@@ -68,8 +70,8 @@ class KrPage(BasePage):
         self.stop_button = self.action('Durdur', self.stop, locked=False)
         self.stop_button.setEnabled(False)
         self.tabs = QTabWidget()
-        manual, body = card('Sac kalınlığı → K / R ataması')
-        manual.setProperty('card',False)
+        manual, body = pane('Sac kalınlığı → K / R ataması')
+        body.setContentsMargins(0, 4, 0, 0)
         first = {key: str(self.settings.get('kr_manual_' + field, default))
                  for key, field, default in (('thickness', 'thickness', '2'), ('k', 'k', ''), ('r', 'r', ''))}
         try:
@@ -78,11 +80,14 @@ class KrPage(BasePage):
             saved_rows = []
         rows = [first] + [{key: str(row.get(key, '')) for key in ('thickness', 'k', 'r')}
                            for row in saved_rows if isinstance(row, dict)] if isinstance(saved_rows, list) else [first]
-        self.rows_model = TableModel((Column('Sac kalınlığı (mm)', 'thickness'), Column('K faktörü (0–1)', 'k'),
-                                      Column('İç yarıçap R (mm)', 'r')), rows, editable=('thickness', 'k', 'r'))
+        self.rows_model = TableModel((Column('Sac kalınlığı · mm', 'thickness'), Column('K faktörü · 0–1', 'k'),
+                                      Column('İç yarıçap R · mm', 'r')), rows, editable=('thickness', 'k', 'r'))
         self.rows = configure_view(QTableView())
         self.rows.setSortingEnabled(False)
         self.rows.setModel(self.rows_model)
+        # Three short numeric columns: keep the grid compact instead of page-wide.
+        self.rows.setMaximumWidth(640)
+        for column, width in enumerate((200, 200)): self.rows.setColumnWidth(column, width)
         self.rows_model.edited.connect(self.persist_rows)
         self.rows_model.rowsInserted.connect(self.fit_assignment_rows)
         self.rows_model.modelReset.connect(self.fit_assignment_rows)
@@ -102,26 +107,28 @@ class KrPage(BasePage):
         body.addWidget(label('Yalnız ana Sac-Levha K faktörü ve iç yarıçapı değiştirilir. Kalınlık ve özel alt büküm ayarları korunur. Büküm tablosundan değer alınmaz.', 'muted'))
         body.addStretch(1)
         self.tabs.addTab(manual, 'Manuel K / R')
-        helper, helper_body = card('Hesap yardımı · atamadan bağımsız')
+        helper, helper_body = pane('Hesap yardımı · atamadan bağımsız')
+        helper_body.setContentsMargins(0, 4, 8, 0)
         self.helper = ValueForm(self.settings, 'kr_')
         self.helper.combo('material', 'Malzeme', [item.label for item in MATERIALS])
         self.helper.combo('punch_type', 'Üst bıçak türü', PUNCH_TYPES)
         self.helper.combo('die_type', 'Alt kalıp türü', DIE_TYPES)
-        self.helper.combo('punch', 'Üst bıçak uç R (mm)', [str(value) for value in PUNCH_RADII], '1', editable=True)
-        self.helper.combo('die', 'Kalıp V açıklığı (mm)', ['Otomatik (8 × t)'] + [str(value) for value in DIE_OPENINGS], editable=True)
-        self.helper.combo('punch_angle', 'Üst bıçak açısı (°)', [str(x) for x in TOOL_ANGLES], '85', editable=True)
-        self.helper.combo('die_angle', 'Alt kalıp açısı (°)', [str(x) for x in TOOL_ANGLES], '85', editable=True)
-        for key, title, default in (('thickness', 'Numune kalınlığı (mm)', '2'), ('angle', 'Düz sactan büküm açısı (°)', '90'),
-                                     ('radius', 'Ölçülmüş iç R (mm, isteğe bağlı)', ''), ('ba', 'Ölçülmüş BA (mm)', ''),
-                                     ('outside_a', 'Dış ölçü A (mm)', ''), ('outside_b', 'Dış ölçü B (mm)', ''),
-                                     ('flat', 'Ölçülmüş açınım boyu (mm)', '')):
+        self.helper.combo('punch', 'Üst bıçak uç R · mm', [str(value) for value in PUNCH_RADII], '1', editable=True)
+        self.helper.combo('die', 'Kalıp V açıklığı · mm', ['Otomatik (8 × t)'] + [str(value) for value in DIE_OPENINGS], editable=True)
+        self.helper.combo('punch_angle', 'Üst bıçak açısı · °', [str(x) for x in TOOL_ANGLES], '85', editable=True)
+        self.helper.combo('die_angle', 'Alt kalıp açısı · °', [str(x) for x in TOOL_ANGLES], '85', editable=True)
+        for key, title, default in (('thickness', 'Numune kalınlığı · mm', '2'), ('angle', 'Düz sactan büküm açısı · °', '90'),
+                                     ('radius', 'Ölçülmüş iç R · mm (isteğe bağlı)', ''), ('ba', 'Ölçülmüş BA · mm', ''),
+                                     ('outside_a', 'Dış ölçü A · mm', ''), ('outside_b', 'Dış ölçü B · mm', ''),
+                                     ('flat', 'Ölçülmüş açınım boyu · mm', '')):
             self.helper.text(key, title, default)
         self.helper.combo('method', 'Hesap yöntemi', ('Tablo', 'BA ölçümü'))
         helper_body.addWidget(self.helper)
         helper_body.addWidget(label('Üst bıçak / kalıp türü çizimin gövde biçimini seçer. '
                                    'Uç R, V açıklığı ve açılar girilen değerlerden alınır.', 'muted'))
         helper_body.addStretch()
-        tooling, tooling_body = card('Abkant takım kesiti')
+        tooling, tooling_body = pane('Abkant takım kesiti')
+        tooling_body.setContentsMargins(8, 4, 0, 0)
         self.tool_diagram = EngineeringDiagram(width=800, height=520)
         self.tool_diagram.setMinimumHeight(360)
         self.tool_diagram.setMaximumHeight(520)
@@ -152,7 +159,9 @@ class KrPage(BasePage):
         self.calculate_helper()
 
     def fit_assignment_rows(self, *args):
-        self.rows.setFixedHeight(min(280,max(86,38+self.rows_model.rowCount()*32)))
+        # Header + one ROW_HEIGHT per assignment; grows up to ~9 rows, then scrolls.
+        header = self.rows.horizontalHeader().sizeHint().height()
+        self.rows.setFixedHeight(min(280, max(80, header + 4 + self.rows_model.rowCount()*ROW_HEIGHT)))
 
     def persist_rows(self, *args):
         first = self.rows_model.rows[0]

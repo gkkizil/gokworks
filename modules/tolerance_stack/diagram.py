@@ -1,13 +1,13 @@
 """Toolkit-independent 1D chain, sensitivity and simulation drawings."""
 
+from gui_qt.diagrams import palette
 from modules.tolerance_stack.models import fmt
 
 
 def setup(canvas,appearance):
-    dark=appearance=='Dark'
-    colors=dict(bg='#1C2431' if dark else '#FFFFFF',text='#E8EEF7' if dark else '#20344F',
-                muted='#A5B3C8' if dark else '#5D718D',accent='#80B6F5' if dark else '#2466B2',
-                border='#344155' if dark else '#D7E0EC',danger='#F0A5B1' if dark else '#B23D53')
+    t=palette(appearance)
+    colors=dict(bg=t['canvas'],text=t['text'],muted=t['muted'],accent=t['accent'],
+                border=t['border'],danger=t['danger'])
     canvas.delete('all');canvas.configure(background=colors['bg'])
     return colors,canvas.winfo_width(),canvas.winfo_height()
 

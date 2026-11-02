@@ -2,7 +2,8 @@
 
 from math import cos, sin, pi
 
-from shared.theme import PANEL, INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG, AMBER, UI_FONT
+from shared.theme import UI_FONT
+from gui_qt.diagrams import CANVAS as PANEL, PART as INPUT, TEXT, MUTED, BORDER, ACCENT, ACCENT_BG, WARNING as AMBER
 from modules.bolt.rules import fmt, force_text
 from modules.bolt.dimensions import dimensions
 

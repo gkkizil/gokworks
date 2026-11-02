@@ -12,7 +12,7 @@ from modules.tolerance_stack.calculator import calculate,Cancelled,check_cancel
 from modules.tolerance_stack.chain import validate,ChainIssue
 from modules.tolerance_stack import storage,solidworks_reader,drawing_writer,report
 from modules.tolerance_stack.diagram import draw_chain,draw_contributions,draw_histogram
-from gui_qt.components import BasePage,ValueForm,PathPicker,card,label,button,scroll,configure_view,show_details
+from gui_qt.components import BasePage,ValueForm,PathPicker,card,label,button,scroll,separator,configure_view,show_details
 from gui_qt.models import Column,TableModel,FilterProxy
 from modules.tolerance_stack.ui_dialogs import MemorySettings,DimensionDialog,TermDialog,IsoPairDialog,KINDS,KIND_TITLES,DIST
 from modules.tolerance_stack.ui_widgets import Disclosure,StackDiagram,compact,short_name
@@ -46,6 +46,13 @@ HELP=('1 · ÖLÇÜLERİ AL\n'
       'Proje menüsü analizi kaydeder/açar. Sonuçlardan PDF/Excel alınabilir. Teknik resme aktar '
       'ayrı analiz notları ekler; üretim ölçülerini değiştirmez. Kaynağa kayıt açık onay ve yedek gerektirir. '
       'Kaynak ölçü değişirse eski sonuç kaldırılır ve yeniden hesaplama gerekir.')
+
+
+def pane(title):
+    """Flat tab page: section heading and content, no framed card."""
+    widget=QWidget();layout=QVBoxLayout(widget);layout.setContentsMargins(0,4,0,0);layout.setSpacing(6)
+    layout.addWidget(label(title,'section'))
+    return widget,layout
 
 
 class StackTable(TableModel):
@@ -91,27 +98,30 @@ class ToleranceStackPage(BasePage):
         self.action('Yardım',lambda:show_details(self,'Tolerans yığılması · Kullanım',HELP))
         self.library_button=self.action('Ölçü listesi',self.show_library,locked=False);self.library_button.hide()
         self.stop_button=self.action('Durdur',self.jobs.cancel,locked=False);self.stop_button.setEnabled(False)
-        source,body=card()
-        body.setContentsMargins(14,10,14,10);body.setSpacing(6)
-        toolbar=QHBoxLayout()
-        toolbar.addWidget(label('Ölçü kaynağı','section'),1)
-        self.active_button=button('Aktif resmi oku',lambda:self.scan(active=True),primary=True)
+        # Flat source strip: heading, one-line guidance and source commands in a single row.
+        source=QWidget();body=QVBoxLayout(source)
+        body.setContentsMargins(0,0,0,0);body.setSpacing(4)
+        toolbar=QHBoxLayout();toolbar.setSpacing(4)
+        toolbar.addWidget(label('Ölçü kaynağı','section',wrap=False))
+        self.active_button=button('Aktif resmi oku',lambda:self.scan(active=True))
+        self.active_button.setToolTip('SolidWorks içinde açık olan teknik resmin ölçülerini oku')
         self.choose_button=button('Dosya seç ve oku',self.choose_sources)
         self.scan_button=button('Yeniden tara',self.scan)
         self.check_button=button('Güncelliği kontrol et',self.check_sources)
         self.check_button.setVisible(False)
+        self.source_info=label('Açık teknik resmi okuyun veya Manuel ölçü ile SolidWorks olmadan başlayın.','muted')
+        toolbar.addSpacing(8);toolbar.addWidget(self.source_info,1)
         toolbar.addWidget(self.active_button);toolbar.addWidget(self.choose_button)
         source_menu=QMenu(self)
         source_menu.addAction('Seçili kaynakları yeniden tara',lambda:self.scan_button.click())
         source_menu.addAction('Kaynakların güncelliğini kontrol et',self.check_sources)
         source_more=button('Diğer');source_more.setMenu(source_menu);toolbar.addWidget(source_more)
         self.scan_button.setParent(source);self.scan_button.hide()
-        body.addLayout(toolbar)
-        self.source_info=label('Açık teknik resmi okuyun veya Manuel ölçü ile SolidWorks olmadan başlayın.','muted')
-        body.addWidget(self.source_info);self.layout.addWidget(source)
+        body.addLayout(toolbar);body.addWidget(separator())
+        self.layout.addWidget(source)
         self.splitter=QSplitter(Qt.Horizontal)
-        library,left=card()
-        left.setContentsMargins(12,12,12,12);left.setSpacing(8)
+        library=QWidget();left=QVBoxLayout(library)
+        left.setContentsMargins(0,0,8,0);left.setSpacing(6)
         library_heading=QHBoxLayout();library_heading.addWidget(label('1 · Ölçüleri seç','section'),1)
         self.library_count=label('0 ölçü','muted');library_heading.addWidget(self.library_count);left.addLayout(library_heading)
         manual_row=QHBoxLayout()
@@ -139,7 +149,7 @@ class ToleranceStackPage(BasePage):
         self.selection_info=label('Bir ölçü seçin. Sonuca eklemek için +, çıkarmak için − kullanın.','muted')
         self.selection_info.setMinimumHeight(0);left.addWidget(self.selection_info)
         add_row=QHBoxLayout()
-        self.add_plus=button('+ Topla',lambda:self.add_selected(1),primary=True)
+        self.add_plus=button('+ Topla',lambda:self.add_selected(1))
         self.add_minus=button('− Çıkar',lambda:self.add_selected(-1))
         add_row.addWidget(self.add_plus);add_row.addWidget(self.add_minus);left.insertLayout(3,add_row)
         self.add_plus.setToolTip('Örnek: dış ölçü (+) − içteki parçalar (−) = kalan boşluk')
@@ -148,10 +158,11 @@ class ToleranceStackPage(BasePage):
         self.edit_dimension_button=button('Ölçüyü düzenle',self.edit_dimension)
         self.locate_button=button('Kaynağı göster',self.locate)
         edit_row.addWidget(self.edit_dimension_button);edit_row.addWidget(self.locate_button);left.addLayout(edit_row)
-        self.expand_library=button('Tüm sütunları göster')
+        self.expand_library=button('Tüm sütunları göster',flat=True)
         self.expand_library.setCheckable(True)
+        self.expand_library.setToolTip('Sapma, sınır, sayfa/görünüm ve kaynak sütunlarını göster')
         self.expand_library.toggled.connect(self.toggle_library)
-        left.addWidget(self.expand_library)
+        library_heading.insertWidget(1,self.expand_library)
         left.addWidget(label('Değişiklikler yalnız analize uygulanır. CAD ölçüleri korunur.','muted'))
         self.library_scroll=scroll(library);self.library_scroll.setMinimumWidth(300)
         self.splitter.addWidget(self.library_scroll)
@@ -180,34 +191,50 @@ class ToleranceStackPage(BasePage):
         self.chain_table.horizontalHeader().setMinimumSectionSize(40)
         for index,width in enumerate((45,110,100,90,150,75,80,80,140,240)):self.chain_table.setColumnWidth(index,width)
         for index in range(5,self.chain_model.columnCount()):self.chain_table.setColumnHidden(index,True)
-        actions=QHBoxLayout()
+        # Compact toolbar above the chain table: commands act on the selected row.
+        actions=QHBoxLayout();actions.setSpacing(2);actions.setContentsMargins(0,0,0,0)
         self.term_controls=[]
         for title,callback in (('↑',lambda:self.move_term(-1)),('↓',lambda:self.move_term(1)),
                                ('+ / −',self.flip_term),('Düzenle',self.edit_term),('Çıkar',self.remove_term)):
-            control=button(title,callback);actions.addWidget(control);self.term_controls.append(control)
+            control=button(title,callback)
+            if len(title)<=5:control.setFixedWidth(max(32,control.fontMetrics().horizontalAdvance(title)+22))
+            actions.addWidget(control);self.term_controls.append(control)
+            if title=='+ / −':actions.addWidget(separator(vertical=True))
+        actions.addStretch(1)
         self.term_controls[0].setToolTip('Seçili ölçüyü yukarı taşı');self.term_controls[1].setToolTip('Seçili ölçüyü aşağı taşı')
         self.term_controls[2].setToolTip('Seçili ölçünün toplama / çıkarma yönünü değiştir')
         self.term_controls[3].setToolTip('Seçili ölçünün yönünü, kullanımını ve gelişmiş ayarlarını düzenle')
+        self.term_controls[4].setToolTip('Seçili ölçüyü zincirden çıkar (ölçü listesinde kalır)')
         self.chain_table.selectionModel().currentRowChanged.connect(self.update_term_controls)
         chain.insertLayout(3,actions)
         self.chain_details=QCheckBox('Bağlantı ve dağılım ayrıntıları')
-        self.chain_details.toggled.connect(self.toggle_chain_details);chain.addWidget(self.chain_details)
+        self.chain_details.setToolTip('Zincir tablosunda katsayı, başlangıç/bitiş, doğrultu ve dağılım sütunlarını göster')
+        self.chain_details.toggled.connect(self.toggle_chain_details);actions.addWidget(self.chain_details)
         self.chain_footer=QWidget();footer=QVBoxLayout(self.chain_footer);footer.setContentsMargins(0,0,0,0);footer.setSpacing(6)
-        self.acceptance_button=button('',self.show_settings);footer.addWidget(self.acceptance_button)
-        self.review,review_body=card();review_body.setContentsMargins(12,10,12,10);review_body.setSpacing(6)
-        self.review_title=label('Sonraki adım','section');review_body.addWidget(self.review_title)
-        self.review_text=label('Ölçülerinizi soldaki listeden ekleyin.','muted');review_body.addWidget(self.review_text)
-        self.fix_button=button('Düzelt',self.fix_issue);review_body.addWidget(self.fix_button,alignment=Qt.AlignLeft)
-        footer.insertWidget(0,self.review)
+        footer.addWidget(separator())
+        # Guidance is a flat message line (title · text · fix), not a nested card.
+        self.review=QWidget();review_body=QHBoxLayout(self.review);review_body.setContentsMargins(0,0,0,0);review_body.setSpacing(8)
+        review_text_body=QVBoxLayout();review_text_body.setSpacing(2)
+        self.review_title=label('Sonraki adım','section');review_text_body.addWidget(self.review_title)
+        self.review_text=label('Ölçülerinizi soldaki listeden ekleyin.','muted');review_text_body.addWidget(self.review_text)
+        review_body.addLayout(review_text_body,1)
+        self.fix_button=button('Düzelt',self.fix_issue);review_body.addWidget(self.fix_button,alignment=Qt.AlignTop)
+        footer.addWidget(self.review)
+        self.acceptance_button=button('',self.show_settings,flat=True)
+        self.acceptance_button.setToolTip('İstenen en küçük / en büyük sonucu ve hesap yöntemini Analiz ayarları sekmesinde düzenle')
         self.confirm_box=QCheckBox('Ortak doğrultuyu ve + / − yönlerini kontrol ettim.')
         self.confirm_box.setToolTip('Gerçek çizimde ölçülerin aynı doğrultuda ve ortak referansa göre alındığını kontrol edin. '
             'Şema CAD geometrisini doğrulamaz. Doğrusal ölçüler için ayrıca açıklama yazmanız gerekmez.')
         self.confirm_box.toggled.connect(self.confirm_chain);footer.addWidget(self.confirm_box)
-        self.calculate_button=button('Hesapla ve sonuçları göster',self.start_calculation,primary=True);footer.addWidget(self.calculate_button)
+        self.calculate_button=button('Hesapla ve sonuçları göster',self.start_calculation,primary=True)
+        self.calculate_button.setToolTip('Zinciri doğrula, sonucu hesapla ve Sonuçlar sekmesini aç')
+        commands=QHBoxLayout();commands.setSpacing(6)
+        commands.addWidget(self.acceptance_button);commands.addStretch(1);commands.addWidget(self.calculate_button)
+        footer.addLayout(commands)
         right.addWidget(self.chain_footer)
         self.tabs.currentChanged.connect(lambda index:self.chain_footer.setVisible(index==0))
         self.tabs.addTab(scroll(self.chain_host),'Zincir')
-        settings,settings_body=card('İstenen sonuç ve hesap yöntemi')
+        settings,settings_body=pane('İstenen sonuç ve hesap yöntemi')
         self.form=ValueForm(MemorySettings(),'')
         for key,title in (('name','Analiz adı'),('critical','Hesaplanan mesafenin adı')):
             self.form.text(key,title,getattr(self.project,key))
@@ -249,13 +276,14 @@ class ToleranceStackPage(BasePage):
         settings_body.addStretch()
         self.form.changed.connect(self.form_changed);self.settings_scroll=scroll(settings)
         self.tabs.addTab(self.settings_scroll,'Analiz ayarları')
-        results,results_body=card()
+        results=QWidget();results_body=QVBoxLayout(results);results_body.setContentsMargins(0,4,0,0);results_body.setSpacing(8)
         self.headline=label('3 · Hesap sonucu','result');results_body.addWidget(self.headline)
         self.result_summary=label('Ölçüleri zincire ekleyip Hesapla düğmesine basın.');results_body.addWidget(self.result_summary)
-        self.result_cards={};cards=QHBoxLayout()
-        for key,title in (('nominal','Nominal sonuç'),('minimum','En küçük olası sonuç'),('maximum','En büyük olası sonuç')):
-            tile,tile_body=card();tile_body.setContentsMargins(12,10,12,10);tile_body.addWidget(label(title,'muted'))
-            value=label('—','section');tile_body.addWidget(value);self.result_cards[key]=value;cards.addWidget(tile)
+        self.result_cards={};cards=QHBoxLayout();cards.setSpacing(12)
+        for index,(key,title) in enumerate((('nominal','Nominal sonuç'),('minimum','En küçük olası sonuç'),('maximum','En büyük olası sonuç'))):
+            if index:cards.addWidget(separator(vertical=True))
+            tile=QVBoxLayout();tile.setSpacing(2);tile.addWidget(label(title,'muted'))
+            value=label('—','section');tile.addWidget(value);self.result_cards[key]=value;cards.addLayout(tile,1)
         results_body.addLayout(cards)
         plots=QTabWidget();self.contribution_diagram=StackDiagram(width=700,height=320);self.histogram=StackDiagram(width=700,height=300)
         plots.addTab(self.contribution_diagram,'Tolerans katkıları');plots.addTab(self.histogram,'Monte Carlo dağılımı');results_body.addWidget(plots)
@@ -266,11 +294,15 @@ class ToleranceStackPage(BasePage):
         details=QWidget();details_body=QVBoxLayout(details);details_body.setContentsMargins(0,0,0,0)
         self.assumptions=label('Hesap sonucu henüz yok.','muted');details_body.addWidget(self.assumptions);details_body.addWidget(self.metrics)
         results_body.addWidget(Disclosure('Tüm sonuçlar ve hesap varsayımları',details))
-        outputs=QHBoxLayout()
-        for title,callback in (('Sonucu kopyala',self.copy_result),('PDF raporu',lambda:self.export_report('pdf')),('Excel raporu',lambda:self.export_report('xlsx'))):
-            outputs.addWidget(button(title,callback))
-        results_body.insertLayout(2,outputs);self.tabs.addTab(scroll(results),'Sonuçlar')
-        output,output_body=card('Teknik resme analiz raporu')
+        # Result outputs: one compact command row under the result values.
+        outputs=QHBoxLayout();outputs.setSpacing(4)
+        for title,callback,tip in (('Sonucu kopyala',self.copy_result,'Sonuç özetini panoya kopyala'),
+                                   ('PDF raporu',lambda:self.export_report('pdf'),'Zincir, sonuç ve grafiklerle PDF raporu kaydet'),
+                                   ('Excel raporu',lambda:self.export_report('xlsx'),'Tüm ölçü ve sonuç tablolarını Excel dosyasına kaydet')):
+            control=button(title,callback);control.setToolTip(tip);outputs.addWidget(control)
+        outputs.addStretch(1)
+        results_body.insertLayout(results_body.indexOf(self.critical_label)-1,outputs);self.tabs.addTab(scroll(results),'Sonuçlar')
+        output,output_body=pane('Teknik resme analiz raporu')
         self.target=PathPicker(folder=False,title='Hedef .SLDDRW teknik resmi');output_body.addWidget(self.target)
         self.output_mode=QComboBox();self.output_mode.addItems(('Yalnız GOKWORKS içinde görüntüle','Anotasyon ekle · kaydetme','Analizli kopyayı farklı kaydet','Kaynağa kaydet · onay + yedek'))
         output_body.addWidget(self.output_mode)

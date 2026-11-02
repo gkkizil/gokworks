@@ -85,7 +85,7 @@ class GearCanvas(QGraphicsView):
     def select(self,index):
         self.selected=index;c=COLORS[self.appearance]
         for i,item in enumerate(self.gears):
-            color=c['accent'] if i==0 else c['warning']
+            color=c['accent'] if i==0 else c['muted']
             fill=QColor(color);fill.setAlpha(58 if i==index else 28)
             item.setBrush(QBrush(fill));item.setPen(cosmetic_pen(color,1.7 if i==index else 1.))
 

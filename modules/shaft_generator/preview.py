@@ -9,6 +9,10 @@ from .models import Groove, Keyway, CosmeticThread
 from .validation import validate
 
 
+def _num(value):
+    return f'{value:g}'.replace('.',',')
+
+
 class ShaftPreview(QWidget):
     stageSelected = Signal(str)
     operationSelected = Signal(str)
@@ -96,9 +100,9 @@ class ShaftPreview(QWidget):
             painter.drawLine(QPointF(x2,y-5),QPointF(x2,y+5))
             painter.drawLine(QPointF(x1,y),QPointF(x2,y))
             if x2-x1 > 30:
-                painter.drawText(QRectF(x1,y+3,x2-x1,18),Qt.AlignCenter,f'{stage.length:g}')
+                painter.drawText(QRectF(x1,y+3,x2-x1,18),Qt.AlignCenter,f'{_num(stage.length)}')
             if rect.width() > 38:
-                painter.drawText(QRectF(rect.x(),rect.top()-22,rect.width(),20),Qt.AlignCenter,f'Ø{stage.diameter:g}')
+                painter.drawText(QRectF(rect.x(),rect.top()-22,rect.width(),20),Qt.AlignCenter,f'Ø{_num(stage.diameter)}')
         painter.setPen(QPen(muted,.8,Qt.DashDotLine))
         painter.drawLine(point(-5,0),point(project.total_length+5,0))
         if not self.section and project.bore is not None:
@@ -119,7 +123,7 @@ class ShaftPreview(QWidget):
                     painter.drawLine(point(b if op.edge=='left' else a,sign*r),point(b if op.edge=='left' else a,sign*minor))
                 hit=QRectF(point(a,r),point(b,minor)).normalized().adjusted(-3,-4,3,4)
                 if hit.width()>80:
-                    painter.drawText(QRectF(hit.left(),hit.bottom()+2,hit.width(),20),Qt.AlignLeft,f'M{stage.diameter:g}×{op.pitch:g}')
+                    painter.drawText(QRectF(hit.left(),hit.bottom()+2,hit.width(),20),Qt.AlignLeft,f'M{_num(stage.diameter)}×{_num(op.pitch)}')
             elif isinstance(op,(Groove,Keyway)):
                 x=project.start(stage.id)+op.offset
                 length=op.width if isinstance(op,Groove) else op.length
@@ -148,7 +152,7 @@ class ShaftPreview(QWidget):
                 painter.drawRect(hit)
         painter.setPen(muted)
         painter.drawText(QRectF(12,self.height()-23,self.width()-24,19),Qt.AlignRight|Qt.AlignVCenter,
-                         f'Toplam {project.total_length:g} mm · {len(project.stages)} kademe')
+                         f'Toplam {_num(project.total_length)} mm · {len(project.stages)} kademe')
 
     def mousePressEvent(self,event):
         if event.button()==Qt.LeftButton:

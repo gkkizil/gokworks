@@ -2,7 +2,8 @@
 
 from math import cos, radians, sin
 
-from shared.theme import INPUT, TEXT, MUTED, ACCENT, ACCENT_BG, UI_FONT
+from shared.theme import UI_FONT
+from gui_qt.diagrams import CANVAS as INPUT, TEXT, MUTED, ACCENT, ACCENT_BG
 from modules.geometric_tolerances.rules import fmt, fmt_mm
 
 
