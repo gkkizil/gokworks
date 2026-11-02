@@ -1,14 +1,15 @@
 """Read the exact source in one STA; no Save, feature suppression or new SW instance."""
 
 from contextlib import contextmanager, ExitStack
+from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import perf_counter
 
 from modules.cad_converter.api import call, get, interface, invoke, PART_IID, ApiError, RestoreError
 from modules.cad_converter.models import checkpoint
 from modules.profile_cutting.solidworks import optional, values
 from modules.dxf_dwg.sheetmetal import Session as ReadSession
-from modules.tolerance_stack.com import variant
 from modules.dxf_dwg import exporter
 from .flat import read_flat
 from .geometry import make_mesh, MAX_TRIANGLES
@@ -143,13 +144,12 @@ class Session(ReadSession):
         finally:
             body = tessellation = None
 
-    def metadata(self, model, configuration, request, body_reference=''):
+    def metadata(self, model, configuration, request, body_reference='', *, selected=None):
         properties = {}
         body_properties = {}
         body_name = request.body_name
         cut_list_name = ''
-        extension = manager = wrapper = selected = None
-        thicknesses = []
+        extension = manager = wrapper = None
         try:
             extension = get(model, 'Extension')
             for scope in ('', configuration):
@@ -168,66 +168,48 @@ class Session(ReadSession):
             if body_reference:
                 folder = members = member = feature = None
                 try:
-                    for feature, kind in self.cut_folders(model):
-                        if kind != 'CutListFolder':
-                            continue
+                    def matches(feature, kind):
+                        if feature is None or kind != 'CutListFolder':
+                            return False
                         folder = call(feature, 'GetSpecificFeature2')
                         members = values(call(folder, 'GetBodies'))
-                        if any(self.persistent_ref(model, member) == body_reference for member in members):
-                            cut_list_name = str(get(feature,'Name'))
-                            for key, prop in self.properties(feature).items():
-                                if prop.resolved and prop.evaluated:
-                                    properties[key.casefold()] = prop.evaluated
-                                    body_properties[key.upper()] = prop.evaluated
-                            break
+                        return any(self.persistent_ref(model, member) == body_reference for member in members)
+                    # Names are hints only: membership must still match the
+                    # live persistent body. Renames fall back to tree traversal.
+                    if request.cut_list:
+                        try:
+                            feature = call(model, 'FeatureByName', request.cut_list)
+                        except Exception:
+                            feature = None
+                    if not matches(feature, optional(feature, 'GetTypeName2')):
+                        feature = next((f for f, kind in self.cut_folders(model) if matches(f, kind)), None)
+                    if feature is not None:
+                        cut_list_name = str(get(feature,'Name'))
+                        for key, prop in self.properties(feature).items():
+                            if prop.resolved and prop.evaluated:
+                                properties[key.casefold()] = prop.evaluated
+                                body_properties[key.upper()] = prop.evaluated
                 except Exception:
                     pass
                 finally:
                     folder = members = member = feature = None
             def field(names):
                 return next((properties[n.casefold()] for n in names if n.casefold() in properties), 'Okunamadı')
-            if body_reference:
+            if body_reference and selected is None:
                 try:
                     selected, _ = self.body(model, body_reference)
                 except Exception:
                     pass
             material = self.material(model, selected, configuration, {k.upper():v for k,v in properties.items()},
                                      body_props=body_properties) or 'Okunamadı'
-            # Traverse both feature-link contexts, as in the existing exporter.
-            feature = definition = None
-            pending, seen = [(call(model, 'FirstFeature'), False)], set()
+            thickness = 'Okunamadı'
             try:
-                while pending:
-                    feature, sub = pending.pop()
-                    if feature is None:
-                        continue
-                    kind, name = call(feature, 'GetTypeName2'), str(get(feature, 'Name'))
-                    token = name, kind, sub
-                    if token in seen:
-                        continue
-                    seen.add(token)
-                    if len(seen) > 20000:
-                        break
-                    pending.append((call(feature, 'GetNextSubFeature' if sub else 'GetNextFeature'), sub))
-                    pending.append((call(feature, 'GetFirstSubFeature'), True))
-                    if kind == 'SheetMetal':
-                        suppressed = call(feature, 'IsSuppressed2', self.c('swThisConfiguration'), variant(0, None))
-                        if suppressed is not None and not any(values(suppressed)):
-                            definition = call(feature, 'GetDefinition')
-                            thicknesses.append(float(get(definition, 'Thickness')) * 1000)
+                body_name = str(optional(selected, 'Name', prop=True, default=body_name) or body_name)
+                # Use body-linked sheet features first. The whole-tree fallback
+                # remains lazy, so known body thickness costs no global walk.
+                thickness = f'{self.thickness(model, selected, {k.upper():v for k,v in properties.items()}, self.features(model)):g} mm'
             except Exception:
-                thicknesses = []
-            finally:
-                feature = definition = None
-                pending = []
-            thickness = (f'{thicknesses[0]:g} mm' if thicknesses and all(abs(t-thicknesses[0]) < 1e-6 for t in thicknesses)
-                         and thicknesses[0] > 0 else 'Okunamadı')
-            if body_reference and request.flat_ref:
-                try:
-                    body_name = str(optional(selected,'Name',prop=True,default=body_name) or body_name)
-                    thickness = f'{self.thickness(model, selected, {k.upper():v for k,v in properties.items()}, list(self.features(model))):g} mm'
-                except Exception:
-                    thickness = 'Okunamadı'
+                pass
             code = field(('PART NUMBER', 'PARTNO', 'KOD', 'PARÇA KODU'))
             if code == 'Okunamadı': code = Path(request.source).stem + ' (dosya adı)'
             return ([('Gövde',body_name)] if body_name else []) + ([('Cut List',cut_list_name)] if cut_list_name else []) + [('Parça kodu', code),
@@ -240,11 +222,15 @@ class Session(ReadSession):
             model = extension = manager = wrapper = selected = None
 
 
+def source_changes(request, before, update):
+    return (bool(request.source_stamp and tuple(request.source_stamp) != before)
+            or request.update_stamp is not None and update != request.update_stamp)
+
+
 def flat_for_source(session, model, request, before, update, body_count, stop):
     """Work in the exported configuration, before taking the folded snapshot."""
     warnings = []
-    changed = bool(request.source_stamp and tuple(request.source_stamp) != before)
-    changed |= request.update_stamp is not None and update != request.update_stamp
+    changed = source_changes(request, before, update)
     output = Path(request.output) if request.output else None
     if output and output.suffix.casefold() == '.dxf' and not changed and output.is_file():
         flat = read_flat(output, 'Oluşturulmuş DXF çıktısı', stop)
@@ -264,7 +250,7 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
                 status, detail = exporter.export_one_part(session.app, request.source, [temporary],
                     bend_lines=request.bend_lines, stop_event=stop,
                     sheet=dict(configuration=request.configuration, body_ref=request.body_ref,
-                               flat_ref=request.flat_ref) if request.flat_ref else None,
+                               flat_ref=request.flat_ref, flat_pattern=request.flat_pattern) if request.flat_ref else None,
                     selection_session=session if request.flat_ref else None)
             except exporter.SourceRestoreError as error:
                 raise RestoreError(str(error)) from error
@@ -278,12 +264,19 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
     return flat, warnings
 
 
-def capture(request, cache, stop=None, *, session_factory=Session, geometry_only=False):
-    """Attach to the existing SW and publish only after state restoration."""
+def capture(request, cache, stop=None, *, session_factory=Session, geometry_only=False, on_flat=None):
+    """One native read; final payload is published only after state restoration.
+
+    on_flat receives immutable, provisional geometry after flat-export/config
+    restoration. It is for early display only; live validation, folded capture
+    and session restoration must succeed before production review is allowed.
+    """
     if Path(request.source).suffix.casefold() != '.sldprt':
         raise ValueError('Önizleme için bir SLDPRT kaynağı seçin.')
     before = file_stamp(request.source)
     warnings = []
+    started, timings = perf_counter(), []
+    flat_cache_key = None
     with session_factory() as session:
         model = body = None
         try:
@@ -296,18 +289,49 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
             exported_configuration = request.configuration or session.active_configuration(model)
             flat = None
             if not geometry_only:
+                flat_started = perf_counter()
                 with session.configuration(model, exported_configuration):
+                    if session.rebuild_pending(model) is not False:
+                        raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
                     body, body_count = session.body(model, request.body_ref)
+                    update = optional(model, 'GetUpdateStamp')
+                    # Cache only native, body-specific flat geometry with a
+                    # known live revision. Existing DXFs retain their own read
+                    # path. Metadata and native ownership are always refreshed.
+                    cache_flat = (type(update) is int and request.body_ref and request.flat_ref
+                                  and Path(request.output).suffix.casefold() != '.dxf'
+                                  and optional(model, 'GetSaveFlag') is False)
+                    def flat_key(stamp):
+                        return (str(Path(request.source).resolve()), before, exported_configuration,
+                                request.body_ref, request.flat_ref, stamp, request.bend_lines,
+                                Path(request.output).suffix.casefold())
                     body = None
                     try:
-                        flat, notes = flat_for_source(session, model, request, before,
-                                                      optional(model, 'GetUpdateStamp'), body_count, stop)
+                        flat = cache.get_flat(flat_key(update)) if cache_flat else None
+                        if flat is None:
+                            flat, notes = flat_for_source(session, model, request, before, update, body_count, stop)
+                        else:
+                            with session.selected_flat(model, request.body_ref, request.flat_ref, stop,
+                                                       feature_name=request.flat_pattern):
+                                checkpoint(stop)
+                            notes = list(flat.warnings)
+                            if source_changes(request, before, update):
+                                notes.append('Kaynak çıktıdan sonra değişmiş; çıktı yeniden alınmalı. Açınım güncel kaynaktan önizleniyor.')
                         warnings.extend(notes)
+                        after_flat = optional(model, 'GetUpdateStamp')
+                        if cache_flat and type(after_flat) is int:
+                            flat_cache_key = flat_key(after_flat)
                     except Exception as error:
                         from modules.cad_converter.models import Cancelled
                         if isinstance(error, (Cancelled, RestoreError)):
                             raise
+                        flat = None
+                        flat_cache_key = None
                         warnings.append('Açınım önizlemesi okunamadı: ' + str(error))
+                checkpoint(stop)
+                timings.append(('açınım', perf_counter()-flat_started))
+                if flat is not None and on_flat is not None:
+                    on_flat(flat)
             with session.folded(model, exported_configuration) as (configuration, _):
                 if session.rebuild_pending(model) is not False:
                     raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
@@ -316,12 +340,20 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                 update = optional(model, 'GetUpdateStamp')
                 update = update if type(update) is int else None
                 revision = (str(Path(request.source).resolve()), before, configuration, reference, update)
-                mesh = cache.get(revision) if update is not None else None
+                # Update counters can restart when a document is reopened.
+                # Unsaved geometry cannot rely on file revision + counter to
+                # identify its contents across document lifetimes.
+                cache_mesh = update is not None and optional(model, 'GetSaveFlag') is False
+                mesh = cache.get(revision) if cache_mesh else None
                 cached = mesh is not None
+                mesh_started = perf_counter()
                 if mesh is None:
                     mesh = session.triangles(body, stop)
+                timings.append(('3D', perf_counter()-mesh_started))
+                metadata_started = perf_counter()
+                info = session.metadata(model, configuration, request, reference, selected=body)
+                timings.append(('bilgiler', perf_counter()-metadata_started))
                 body = None
-                info = session.metadata(model, configuration, request, reference)
                 if configuration != exported_configuration:
                     warnings.append(f'3D: türetilmiş açınımın üst konfigürasyonu {configuration}; çıktı: {exported_configuration}.')
                 if optional(model, 'GetSaveFlag', default=False):
@@ -335,13 +367,17 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                 checkpoint(stop)
                 if file_stamp(request.source) != before or optional(model, 'GetUpdateStamp') != update:
                     raise ApiError('Kaynak önizleme sırasında değişti; eski geometri gösterilmedi. Yenileyin.')
-                if update is not None:
-                    cache.put(revision, mesh)
+                cache_mesh &= optional(model, 'GetSaveFlag') is False
                 payload = Payload(request.source, configuration, mesh, flat, tuple(info), revision, tuple(warnings), cached)
         finally:
             # Drop all CAD pointers while still inside the owning STA.
             model = body = None
-    return payload
+    if cache_mesh:
+        cache.put(revision, mesh)
+    if (cache_mesh and flat is not None and flat_cache_key is not None and configuration == exported_configuration
+            and update == flat_cache_key[5]):
+        cache.put_flat(flat_cache_key, flat)
+    return replace(payload, timings=tuple(timings) + (('toplam', perf_counter()-started),))
 
 
 def capture_geometry(request, cache, stop=None, *, session_factory=Session):

@@ -22,8 +22,12 @@ class FlatView(QGraphicsView):
         self.empty_message.setAlignment(Qt.AlignCenter)
         self.empty_message.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.empty_message.setStyleSheet('color: #596575; background: transparent; padding: 12px;')
+        self._flat = None
 
     def show_flat(self, flat, empty_text='Açınımı görmek için listeden bir sac parçası seçin.'):
+        if flat is not None and flat is self._flat:
+            return
+        self._flat = flat
         self.scene().clear()
         self.empty_message.setText(empty_text)
         self.empty_message.setVisible(flat is None)
@@ -125,6 +129,11 @@ class PreviewPanel(QWidget):
     def focus_flat(self):
         self.scroll.ensureWidgetVisible(self.flat_section, 0, 8)
         self.flat_view.fit()
+
+    def show_pending_flat(self, flat):
+        self.flat_view.show_flat(flat)
+        self.flat_label.setText('Açınım · kaynak kontrolü tamamlanıyor…')
+        self.message.setText('Açınım görüntüsü hazır. 3D ve kaynak kontrolü tamamlanıyor…')
 
     def show_payload(self, payload):
         from pathlib import Path

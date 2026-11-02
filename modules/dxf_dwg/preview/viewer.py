@@ -192,6 +192,8 @@ class MeshView(QWidget):
         self.render()
 
     def set_mesh(self, mesh):
+        if mesh is not None and mesh is self.mesh:
+            return
         self.mesh = mesh
         self.generation += 1
         self.software.image = QImage(); self.software.update()

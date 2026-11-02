@@ -103,6 +103,23 @@ görüntü kullanılmaz; önizleme öncesi kayıt kontrolü de saklanmış gör�
 canlı CAD doğrulaması yerine kabul etmez. Aktarım sırasında sonuç/satır
 güncellemeleri kendiliğinden yeni önizleme kuyruğu oluşturmaz.
 
+Önizleme tek SolidWorks okuma oturumunda hazırlanır. Bilinen Flat-Pattern ve
+Cut List adları doğrudan aranır; kalıcı kimlik ve gövde sahipliği yine kontrol
+edilir. Ad değişmişse güvenli ağaç taramasına dönülür. Kalınlık için önce
+gövdenin kendi unsurları okunur. Açınım hazır olduğunda 3D ve bilgi panelini
+beklemeden görünür; son kaynak kontrolü ve oturumun geri alınması bitmeden
+kayıt öncesi inceleme tamamlanmış sayılmaz. İptal/hata halinde bu ara görüntü
+temizlenir.
+
+Kaydedilmiş ve canlı SolidWorks revizyonu bilinen gövdelerde açınım ve 3D geometrisi ortak,
+32 MiB / 16 öğelik önbelleği kullanır. Dosya, konfigürasyon, gövde, açınım
+kimliği, büküm çizgisi seçeneği veya revizyon değişirse geometri yeniden
+okunur. Önbellek kullanılırken de gövde/açınım sahipliği ve güncel teknik
+bilgiler doğrulanır. Kaydedilmemiş model değişiklikleri canlı okunur; bu
+geometri işçi önbelleğinde tutulmaz. **Yenile** önbelleği atlar. Günlükte açınım, 3D, teknik
+bilgi ve toplam önizleme süreleri görünür; gerçek SolidWorks beklemeleri bu
+sürelerden izlenebilir.
+
 Windows'ta ana pencerenin OpenGL yüzeyi ilk gösterimden önce hazırlanır.
 DXF/DWG'ye ilk geçişte 3D görüntüleyicinin eklenmesi ana pencereyi yeniden
 oluşturmaz. `tests/test_window_lifecycle.py`, üretim başlangıcını ayrı süreçte

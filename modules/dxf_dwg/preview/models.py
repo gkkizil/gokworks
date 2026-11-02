@@ -18,6 +18,8 @@ class Request:
     flat_ref: str = ''
     body_name: str = ''
     thickness_mm: float | None = None
+    flat_pattern: str = ''
+    cut_list: str = ''
 
 
 @dataclass(frozen=True)
@@ -50,6 +52,11 @@ class Flat:
     cut_length: float | None
     warnings: tuple = ()
 
+    @property
+    def size(self):
+        return (1024 + len(self.description)*4 + sum(128 + len(w)*4 for w in self.warnings)
+                + sum(512 + len(s.points)*192 + 4*(len(s.layer)+len(s.color)) for s in self.strokes))
+
 
 @dataclass(frozen=True)
 class Payload:
@@ -61,11 +68,12 @@ class Payload:
     revision: tuple
     warnings: tuple = ()
     cached: bool = False
+    timings: tuple = ()
 
 
 class MeshCache:
     """Worker-owned LRU. Keys include live revision; no path-only cache hit."""
-    def __init__(self, maximum=32 * 1024 * 1024, entries=8):
+    def __init__(self, maximum=32 * 1024 * 1024, entries=16):
         self.maximum, self.entries = maximum, entries
         self.items = OrderedDict()
         self.size = 0
@@ -85,6 +93,12 @@ class MeshCache:
         self.size += mesh.size
         while self.size > self.maximum or len(self.items) > self.entries:
             self.size -= self.items.popitem(last=False)[1].size
+
+    def get_flat(self, key):
+        return self.get(('flat', key))
+
+    def put_flat(self, key, flat):
+        self.put(('flat', key), flat)
 
     def clear(self):
         self.items.clear()

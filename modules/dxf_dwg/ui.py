@@ -12,7 +12,6 @@ from modules.cad_converter.api import RestoreError
 from .preview.models import Request, MeshCache, PreviewCache
 from .preview.panel import PreviewPanel
 from .preview.solidworks import capture, file_stamp
-from .preview.solidworks import capture_geometry
 from .preview.cancellation import cancellable_read
 from .inventory import display_rows, selected_items
 from .table import SheetTableModel
@@ -401,7 +400,8 @@ class DxfDwgPage(ExportPage):
         request = Request(str(row['source']), str(row.get('configuration', '')), str(row.get('body_ref', '')),
                           str(output.get('path', '')), str(output.get('status', '')), tuple(row.get('source_stamp') or ()),
                           row.get('update_stamp'), quantity if type(quantity) is int and quantity > 0 else None,
-                          bool(bend_lines),str(row.get('flat_ref','')),str(row.get('body_name','')),row.get('thickness_mm'))
+                          bool(bend_lines),str(row.get('flat_ref','')),str(row.get('body_name','')),row.get('thickness_mm'),
+                          str(row.get('flat_pattern','')),str(row.get('cut_list','')))
         if (not force and request == self.preview_request and not self._preview_cancelled
                 and self.preview_snapshot_key == self.snapshot_key(request)
                 and (self.preview_payload is not None or self.preview_pending is not None or self.preview_running)):
@@ -562,18 +562,24 @@ class DxfDwgPage(ExportPage):
         request, generation, force = self.preview_pending, self.preview_generation, self.preview_force
         self.preview_pending = None; self.preview_force = False
         self.preview_running = True
+        self.preview.flat_label.setText('Açınım · okunuyor…')
+        self.set_status('Seçili gövdenin açınımı okunuyor…')
         def operation(sink, stop):
             try:
                 if force: self.preview_cache.clear()
                 with cancellable_read(stop):
-                    geometry_reader = self._capture_geometry
-                    if geometry_reader is None and self._capture is capture:
-                        geometry_reader = capture_geometry
-                    if geometry_reader is not None:
-                        geometry = geometry_reader(request, self.preview_cache, stop)
-                        sink.put(('dxf_preview_geometry', (generation, geometry)))
-                        sink.flush()  # Show 3D even while the later flat COM call is pending.
-                    payload = self._capture(request, self.preview_cache, stop)
+                    if self._capture is capture and self._capture_geometry is None:
+                        def flat_ready(flat):
+                            sink.put(('dxf_preview_flat', (generation, flat)))
+                            sink.flush()
+                        payload = capture(request, self.preview_cache, stop, on_flat=flat_ready)
+                    else:
+                        # Optional injected readers retain their staged contract.
+                        if self._capture_geometry is not None:
+                            geometry = self._capture_geometry(request, self.preview_cache, stop)
+                            sink.put(('dxf_preview_geometry', (generation, geometry)))
+                            sink.flush()
+                        payload = self._capture(request, self.preview_cache, stop)
                 sink.put(('dxf_preview', (generation, payload)))
             except Cancelled:
                 sink.put(('dxf_preview_cancelled', (generation, 'Önizleme durduruldu. Yenile ile tekrar okuyabilirsiniz.')))
@@ -633,11 +639,19 @@ class DxfDwgPage(ExportPage):
                 if self.preview_running and self.jobs.owner is self: self.jobs.cancel()
                 self.preview.clear(value[1])
                 self.set_status('SolidWorks oturum durumu geri alınamadı: ' + value[1], True)
-            elif kind in ('dxf_preview_geometry', 'dxf_preview', 'dxf_preview_error', 'dxf_preview_cancelled'):
+            elif kind in ('dxf_preview_flat', 'dxf_preview_geometry', 'dxf_preview', 'dxf_preview_error', 'dxf_preview_cancelled'):
                 generation, result = value
                 if generation != self.preview_generation:
                     continue  # An older selection must never repaint the current part.
-                if kind in ('dxf_preview_geometry', 'dxf_preview'):
+                if kind == 'dxf_preview_flat':
+                    # Provisional display only. Export review/cache require the
+                    # final payload after live validation and full restoration.
+                    self.preview.show_pending_flat(result)
+                    self.set_status('Açınım görüntüsü hazır · 3D ve kaynak kontrolü tamamlanıyor…')
+                    if self._awaiting_flat_review:
+                        self._reveal_preview()
+                        self.preview.focus_flat()
+                elif kind in ('dxf_preview_geometry', 'dxf_preview'):
                     self._preview_restore_failed = False
                     self.preview_payload = result
                     self.preview_snapshot_cached = False
@@ -646,6 +660,9 @@ class DxfDwgPage(ExportPage):
                             and result.revision[1]==self.preview_snapshot_key[1]):
                         self.preview_snapshots.put(self.preview_snapshot_key,result)
                     self.preview.show_payload(result)
+                    if kind == 'dxf_preview' and result.timings:
+                        self.results.append_log('Önizleme · ' + Path(result.source).name + ' · '
+                            + ' · '.join(f'{name}: {seconds:.2f} sn' for name, seconds in result.timings))
                     self.set_status('3D önizleme hazır · ' + result.configuration)
                     if kind == 'dxf_preview_geometry':
                         self.preview.flat_label.setText('Açınım · okunuyor…')
