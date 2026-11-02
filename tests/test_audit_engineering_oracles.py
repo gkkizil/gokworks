@@ -15,7 +15,7 @@ from modules.tolerance_stack.calculator import calculate
 
 
 def test_independent_m10_88_torque_example_and_surface_ratio():
-    # M10x1.5 As≈58 mm², ReL=640 MPa, 70% =>25.984 kN, T≈51.968 Nm.
+    # M10x1.5 As≈58 mm², Rp0,2=640 MPa, 70% =>25.984 kN, T≈51.968 Nm.
     dry = torque(metric='M10'); oily = torque(metric='M10', condition='Hafif yağlı')
     assert dry.tensile_area_mm2 == pytest.approx(58, abs=.02)
     assert dry.preload_kn == pytest.approx(25.984, abs=.01)

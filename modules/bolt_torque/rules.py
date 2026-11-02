@@ -45,11 +45,11 @@ class Strength:
 STRENGTHS = {
     '4.8': Strength(320., 'Rp0,2', 'ISO 898-1 · nominal Rp0,2'),
     '5.8': Strength(400., 'Rp0,2', 'ISO 898-1 · nominal Rp0,2'),
-    '8.8': Strength(640., 'ReL', 'ISO 898-1 · minimum ReL · d ≤ 16 mm'),
+    '8.8': Strength(640., 'Rp0,2', 'ISO 898-1 · minimum Rp0,2 · d ≤ 16 mm'),
     '10.9': Strength(940., 'Rp0,2', 'ISO 898-1 · minimum Rp0,2'),
     '12.9': Strength(1100., 'Rp0,2', 'ISO 898-1 · minimum Rp0,2'),
 }
-LARGE_88 = Strength(660., 'ReL', 'ISO 898-1 · minimum ReL · d > 16 mm')
+LARGE_88 = Strength(660., 'Rp0,2', 'ISO 898-1 · minimum Rp0,2 · d > 16 mm')
 
 
 def _choice(value, choices, title):

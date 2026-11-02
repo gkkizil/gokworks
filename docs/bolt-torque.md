@@ -69,8 +69,8 @@ gösterilir; kalite sınıfı sayıları gelişigüzel çarpılarak bütün tabl
 | --- | --- | ---: | --- |
 | 4.8 | Sunulan çaplar | 320 | Nominal Rp0,2 |
 | 5.8 | Sunulan çaplar | 400 | Nominal Rp0,2 |
-| 8.8 | d ≤ 16 mm | 640 | Minimum ReL |
-| 8.8 | d > 16 mm | 660 | Minimum ReL |
+| 8.8 | d ≤ 16 mm | 640 | Minimum Rp0,2 |
+| 8.8 | d > 16 mm | 660 | Minimum Rp0,2 |
 | 10.9 | Sunulan çaplar | 940 | Minimum Rp0,2 |
 | 12.9 | Sunulan çaplar | 1100 | Minimum Rp0,2 |
 

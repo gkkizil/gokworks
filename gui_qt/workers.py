@@ -9,22 +9,57 @@ from solidworks import diagnostics
 
 
 class EventSink:
-    """Queue-compatible endpoint for unchanged service engines; used on worker only."""
+    """Queue-compatible endpoint for unchanged service engines; used on worker only.
+
+    Events are batched for at most ``interval`` seconds. A short timer delivers
+    a partial batch when the engine then blocks in a long CAD/COM call, so
+    status text such as the current part is not held until the next event.
+    """
+    interval = .016
+
     def __init__(self, emit):
         self.emit = emit
         self.pending = []
         self.last_flush = time.monotonic()
+        self._lock = threading.Lock()
+        self._timer = None
+        self._closed = False
 
     def put(self, value):
-        self.pending.append(value)
-        if len(self.pending) >= 64 or time.monotonic() - self.last_flush >= .016:
-            self.flush()
+        with self._lock:
+            self.pending.append(value)
+            elapsed = time.monotonic() - self.last_flush
+            if len(self.pending) >= 64 or elapsed >= self.interval:
+                self._flush_locked()
+            elif self._timer is None and not self._closed:
+                self._timer = threading.Timer(max(0., self.interval - elapsed), self._timed_flush)
+                self._timer.daemon = True
+                self._timer.start()
 
-    def flush(self):
+    def _timed_flush(self):
+        with self._lock:
+            self._timer = None
+            if not self._closed:
+                self._flush_locked()
+
+    def _flush_locked(self):
         if self.pending:
             values, self.pending = self.pending, []
             self.emit(values)
             self.last_flush = time.monotonic()
+
+    def flush(self):
+        with self._lock:
+            self._flush_locked()
+
+    def close(self):
+        """Deliver the rest and stop timed delivery before the emitter is deleted."""
+        with self._lock:
+            self._closed = True
+            timer, self._timer = self._timer, None
+            self._flush_locked()
+        if timer is not None:
+            timer.cancel()
 
 
 class JobWorker(QObject):
@@ -46,7 +81,7 @@ class JobWorker(QObject):
             sink.put(('job_error', {'error': str(error), 'traceback': traceback.format_exc()}))
         finally:
             diagnostics.record('qt_worker_flush_started')
-            sink.flush()
+            sink.close()
             diagnostics.record('qt_worker_completed_signal')
             self.completed.emit()
 

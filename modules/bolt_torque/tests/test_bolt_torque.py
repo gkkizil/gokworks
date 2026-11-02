@@ -30,7 +30,7 @@ def test_stress_area_matches_rounded_metric_references(metric, area):
 
 
 @pytest.mark.parametrize('grade,expected,symbol', [('4.8',320,'Rp0,2'),('5.8',400,'Rp0,2'),
-    ('8.8',640,'ReL'),('10.9',940,'Rp0,2'),('12.9',1100,'Rp0,2')])
+    ('8.8',640,'Rp0,2'),('10.9',940,'Rp0,2'),('12.9',1100,'Rp0,2')])
 def test_grade_values_use_the_documented_yield_basis(grade, expected, symbol):
     result = calculate(grade=grade)
     assert result.yield_strength_mpa == expected and result.strength_symbol == symbol
