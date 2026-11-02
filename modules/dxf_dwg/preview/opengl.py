@@ -59,7 +59,8 @@ class OpenGLCanvas(QOpenGLWidget):
             return
         try:
             f = self.f
-            f.glClearColor(.973, .973, .973, 1.)
+            background = parent.background  # theme ``canvas`` token
+            f.glClearColor(background.redF(), background.greenF(), background.blueF(), 1.)
             f.glClear(0x4000 | 0x0100)  # GL_COLOR_BUFFER_BIT / DEPTH_BUFFER_BIT
             if parent.mesh is None:
                 return

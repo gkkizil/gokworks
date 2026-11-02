@@ -5,10 +5,12 @@ from pathlib import Path
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QCheckBox, QFileDialog, QTableView, QAbstractItemView, QListWidget, QListWidgetItem,
-    QProgressBar, QComboBox)
+    QProgressBar, QComboBox, QHeaderView)
 
 from gui_qt.components import (BasePage, ValueForm, ResultsPanel, TransferWorkspace,
-    Disclosure, card, button, label, configure_view, open_folder)
+    Disclosure, button, label, separator, configure_view, open_folder)
+from gui_qt.export import StatusDelegate, AdaptiveRow, source_section
+from gui_qt.theme import COLORS, SPACING
 from gui_qt.models import TableModel, Column, FilterProxy, LABELS
 from .formats import FORMATS
 from .models import Source, Options, Cancelled
@@ -20,6 +22,25 @@ CONFIGURATIONS = {'Aktif konfigürasyon': 'active', 'Bütün konfigürasyonlar':
 ASSEMBLIES = {'Montajı tek dosya aktar': 'single', 'Bileşenleri ayrı aktar': 'components'}
 NAMING = {'Orijinal dosya adı': 'original', 'Dosya adı + konfigürasyon': 'configuration', 'Dosya adı + format': 'format'}
 QUALITY = {'Kaba': 'coarse', 'Orta': 'medium', 'Yüksek': 'fine', 'Özel': 'custom'}
+
+
+def counts_text(counts, appearance):
+    """Outcome counter: numbers in their semantic colour only when non-zero."""
+    colors = COLORS[appearance]
+    parts = [f"<b>{counts.get('processed', 0)}</b> işlem"]
+    for key, title, token in (('succeeded', 'başarılı', 'success'), ('warned', 'uyarılı', 'warning'),
+                              ('skipped', 'atlanan', 'warning'), ('failed', 'hatalı', 'danger')):
+        value = counts.get(key, 0)
+        color = colors[token] if value else colors['muted']
+        parts.append(f'<span style="color:{color}"><b>{value}</b> {title}</span>')
+    return f'<span style="color:{colors["muted"]}">' + ' · '.join(parts) + '</span>'
+
+
+def flat_pane():
+    """Source-column pane: no card frame, groups separated by hairlines."""
+    widget = QWidget(); layout = QVBoxLayout(widget)
+    layout.setContentsMargins(0, 0, SPACING['xs'], 0); layout.setSpacing(SPACING['m'])
+    return widget, layout
 
 
 class CadResults(ResultsPanel):
@@ -60,27 +81,34 @@ class CadConverterPage(BasePage):
         self.sources = []
         # Source selection stays above the settings scroll area. It is the
         # first action in the workflow and must not live beside the run button.
-        self.source_panel, source_body = card('Kaynak dosyaları')
-        self.scan_button = button('Dosyaları seç…', self.add_files, primary=True)
+        # One primary command per page: 'Aktarımı başlat'. Source pickers are
+        # compact secondary buttons on one row.
+        self.source_panel, source_body = flat_pane()
+        source_body.setContentsMargins(0, 0, SPACING['xs'], SPACING['xs'])
+        self.scan_button = button('Dosyaları seç…', self.add_files)
         self.folder_button = button('Kaynak klasörü seç…', self.add_folder)
-        source_body.addWidget(self.scan_button)
-        source_body.addWidget(self.folder_button)
+        source_body.addWidget(source_section('Kaynak'))
+        source_body.addWidget(AdaptiveRow(self.scan_button, self.folder_button))
         self.source_form = ValueForm(self.settings, 'cad_converter_')
         self.source_form.check('recursive', 'Alt klasörleri tara', True)
         source_body.addWidget(self.source_form)
         self.source_count = label('SLDPRT / SLDASM · Dosya seçilmedi.', 'muted')
         source_body.addWidget(self.source_count)
+        source_body.addWidget(separator())
         self.start_button = self.action('Aktarımı başlat', self.start_export, primary=True)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
-        panel, body = card('Çıktı ve formatlar')
+        panel, body = flat_pane()
         self.form = ValueForm(self.settings, 'cad_converter_')
         self.form.path('output', 'Çıktı klasörü')
         self.form.fields.update(self.source_form.fields)
+        self.open_output_button = button('Çıktı klasörünü aç', lambda: open_folder(self.form.value('output')) if self.form.value('output') else None, flat=True)
+        self.open_output_button.setToolTip('Çıktı klasörünü dosya gezgininde aç')
+        body.addWidget(source_section('Çıktı', self.open_output_button))
         body.addWidget(self.form); self.form.stack_fields()
         self.remove_button = button('Seçileni kaldır', self.remove_selected)
         formats_widget = QWidget(); grid = QGridLayout(formats_widget)
-        grid.setContentsMargins(0, 0, 0, 0); grid.setSpacing(5)
+        grid.setContentsMargins(0, 0, 0, 0); grid.setHorizontalSpacing(SPACING['m']); grid.setVerticalSpacing(0)
         self.format_checks = {}
         for index, fmt in enumerate(FORMATS):
             title = {'xt': 'Parasolid X_T', 'xb': 'Parasolid X_B'}.get(fmt.key, fmt.label.replace(' · MBD lisansı', ' · MBD'))
@@ -91,7 +119,9 @@ class CadConverterPage(BasePage):
             check.toggled.connect(self.update_choices)
             self.format_checks[fmt.key] = check
             grid.addWidget(check, index, 0)
-        body.addWidget(label('Çıktı formatları', 'section')); body.addWidget(formats_widget)
+        body.addWidget(separator())
+        body.addWidget(source_section('Formatlar')); body.addWidget(formats_widget)
+        body.addWidget(separator())
 
         self.model_form = ValueForm(self.settings, 'cad_converter_')
         self.model_form.combo('configurations', 'Konfigürasyon', CONFIGURATIONS)
@@ -99,11 +129,13 @@ class CadConverterPage(BasePage):
         self.config_button = button('Konfigürasyonları oku', self.read_configurations)
         self.config_list = QListWidget(); self.config_list.setMaximumHeight(120)
         self.config_list.itemChanged.connect(self.selected_names_changed)
-        self.model_form.form.addRow(self.config_button); self.model_form.form.addRow(self.config_list)
+        self.model_form.form.addRow(AdaptiveRow(self.config_button)); self.model_form.form.addRow(self.config_list)
         self.model_form.combo('assembly_mode', 'Montaj aktarımı', ASSEMBLIES)
         self.model_form.check('include_subassemblies', 'Alt montajları da ayrı aktar', False)
         self.model_form.stack_fields()
+        body.addWidget(source_section('Model'))
         body.addWidget(self.model_form)
+        body.addWidget(separator())
 
         self.naming_form = ValueForm(self.settings, 'cad_converter_')
         self.naming_form.combo('naming', 'Dosya adı', NAMING)
@@ -122,8 +154,7 @@ class CadConverterPage(BasePage):
         self.stl_form.stack_fields()
         self.stl_options = Disclosure('STL ayarları', self.stl_form)
         body.addWidget(self.stl_options)
-        body.addWidget(label('Kaynak CAD dosyaları kaydedilmez. AP242, MBD yayınlamasıdır; PMI içeriğinin eksiksizliği ayrıca kontrol edilir.', 'muted'))
-        body.addWidget(button('Çıktı klasörünü aç', lambda: open_folder(self.form.value('output')) if self.form.value('output') else None))
+        body.addWidget(label('Kaynak CAD dosyaları kaydedilmez. AP242, MBD yayınlamasıdır; PMI içeriğinin eksiksizliği ayrıca kontrol edilir.', 'subtitle'))
         body.addStretch()
         self.controls.extend((self.source_panel, self.scan_button, panel, self.folder_button, self.remove_button, self.config_button))
 
@@ -135,9 +166,14 @@ class CadConverterPage(BasePage):
         self.files_proxy.setSourceModel(self.files_model)
         self.files_view = configure_view(QTableView()); self.files_view.setModel(self.files_proxy)
         self.files_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.files_view.setColumnWidth(0, 260)
+        self.files_view.setColumnWidth(0, 260); self.files_view.setColumnWidth(1, 70)
+        self.files_view.setColumnWidth(2, 150); self.files_view.setColumnWidth(3, 200)
+        self.files_view.setColumnWidth(4, 110)
+        self.files_view.horizontalHeader().setStretchLastSection(False)
+        self.files_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.files_view.setItemDelegateForColumn(4, StatusDelegate(lambda: self.context.appearance, self.files_view))
         inventory = QWidget(); inventory_layout = QVBoxLayout(inventory)
-        inventory_layout.setContentsMargins(0, 0, 0, 0)
+        inventory_layout.setContentsMargins(0, SPACING['s'], 0, 0); inventory_layout.setSpacing(SPACING['s'])
         inventory_tools = QHBoxLayout()
         self.type_filter = QComboBox(); self.type_filter.addItems(('Bütün modeller', 'Yalnız parçalar', 'Yalnız montajlar'))
         self.type_filter.currentIndexChanged.connect(self.refresh_sources)
@@ -146,15 +182,26 @@ class CadConverterPage(BasePage):
         self.empty_hint = label('Başlamak için soldaki Dosyaları seç veya Kaynak klasörü seç düğmesini kullanın.', 'muted')
         inventory_layout.addWidget(self.empty_hint)
         inventory_layout.addWidget(self.files_view)
-        inventory_layout.addWidget(label('Çoklu seçim: Ctrl / Shift · Dosya veya klasörleri pencereye bırakabilirsiniz.', 'muted'))
+        inventory_layout.addWidget(label('Çoklu seçim: Ctrl / Shift · Dosya veya klasörleri pencereye bırakabilirsiniz.', 'subtitle'))
         self.results.tabs.insertTab(0, inventory, 'Dosyalar')
         self.results.tabs.setCurrentIndex(0)
         self.results.search.textChanged.connect(self.files_proxy.set_query)
         self.results.cleared.connect(self.clear_sources)
+        self.results.table.setItemDelegateForColumn(4, StatusDelegate(lambda: self.context.appearance, self.results.table))
+        self.results.table.setColumnWidth(4, 110)
+        # Counter row: row count left, coloured outcome counts and a thin
+        # progress bar right — one line instead of three.
         self.progress = QProgressBar(); self.progress.setRange(0, 1); self.progress.setValue(0)
-        self.results.layout.addWidget(self.progress)
-        self.counts = label('0 başarılı · 0 uyarılı · 0 atlanan · 0 hatalı', 'muted')
-        self.results.layout.addWidget(self.counts)
+        self.progress.setTextVisible(False); self.progress.setFixedWidth(160)
+        self.progress.setAccessibleName('Aktarım ilerlemesi')
+        self.counts = label('', wrap=False); self.counts.setTextFormat(Qt.RichText)
+        self.counts.setAccessibleName('Aktarım sonucu sayaçları')
+        self._counts = {}
+        self.set_counts({})
+        position = self.results.layout.indexOf(self.results.counter)
+        self.results.layout.removeWidget(self.results.counter); self.results.counter.setWordWrap(False)
+        self.status_row = AdaptiveRow(self.results.counter, self.counts, self.progress, spacing=SPACING['l'], stretch=0)
+        self.results.layout.insertWidget(position, self.status_row)
         self.splitter = TransferWorkspace(self, panel, self.results)
         self.splitter.source_column.layout().insertWidget(0, self.source_panel)
         self.source_scroll = self.splitter.source_scroll
@@ -165,6 +212,15 @@ class CadConverterPage(BasePage):
         self.setAcceptDrops(True)
         self.update_choices()
         self.finish_layout()
+
+    def set_counts(self, counts):
+        self._counts = dict(counts)
+        self.counts.setText(counts_text(self._counts, self.context.appearance))
+
+    def theme_changed(self):
+        if hasattr(self, 'counts'):
+            self.set_counts(self._counts)
+            self.results.table.viewport().update(); self.files_view.viewport().update()
 
     def selected_names_changed(self):
         names = [self.config_list.item(i).text() for i in range(self.config_list.count()) if self.config_list.item(i).checkState() == Qt.Checked]
@@ -197,7 +253,7 @@ class CadConverterPage(BasePage):
     def clear_sources(self):
         self.sources.clear(); self.config_list.clear()
         self.progress.setRange(0, 1); self.progress.setValue(0)
-        self.counts.setText('0 başarılı · 0 uyarılı · 0 atlanan · 0 hatalı')
+        self.set_counts({})
         self.refresh_sources(); self.set_status('Dosya listesi, sonuçlar ve günlük temizlendi.')
 
     def remove_selected(self):
@@ -313,7 +369,7 @@ class CadConverterPage(BasePage):
             elif kind == 'cad_current': self.results.job_row(dict(value, status='running'))
             elif kind == 'cad_result': self.results.job_row(value, completed=True)
             elif kind == 'cad_counts':
-                self.counts.setText(f"{value['processed']} işlem · {value['succeeded']} başarılı · {value['warned']} uyarılı · {value['skipped']} atlanan · {value['failed']} hatalı")
+                self.set_counts(value)
             elif kind == 'progress': self.progressChanged.emit(*value)
             elif kind == 'cad_done':
                 self.progress.setRange(0, max(1, value['processed'])); self.progress.setValue(value['processed'])

@@ -19,6 +19,11 @@ VIEWS = {'İzometrik': (-45, math.degrees(math.asin(1/math.sqrt(3)))),
          'Sol': (90, 0), 'Üst': (0, 90), 'Alt': (0, -90)}
 
 
+# Drawing surfaces follow the theme's ``canvas`` token; this is only the value
+# used before the page reports its appearance (dark is the application default).
+DEFAULT_CANVAS = '#1A1B1E'
+
+
 class Camera:
     def __init__(self):
         self.yaw, self.pitch = VIEWS['İzometrik']
@@ -62,8 +67,11 @@ def normalized(mesh):
     return vertices, normals, edges
 
 
-def raster(mesh, width, height, state, stop):
-    """True depth testing; holes remain holes, independent of triangle order."""
+def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
+    """True depth testing; holes remain holes, independent of triangle order.
+
+    ``background`` is the RGB canvas colour (the theme's ``canvas`` token).
+    """
     width, height = max(1, width), max(1, height)
     vertices, normals, edges = normalized(mesh)
     view, mvp = matrices(state, width/height)
@@ -73,7 +81,7 @@ def raster(mesh, width, height, state, stop):
     p = project(vertices)
     p[:, 0] = (p[:, 0]+1) * .5 * (width-1)
     p[:, 1] = (1-p[:, 1]) * .5 * (height-1)
-    pixels = np.full((height, width, 3), 248, dtype=np.uint8)
+    pixels = np.empty((height, width, 3), dtype=np.uint8); pixels[:] = background
     depth = np.full((height, width), np.inf)
     light = np.array([.25, .45, 1.]); light /= np.linalg.norm(light)
     shade = .42 + .58 * np.abs((normals[::3] @ view[:3, :3].T) @ light)
@@ -124,14 +132,15 @@ class RenderSignals(QObject):
 
 
 class RenderJob(QRunnable):
-    def __init__(self, generation, mesh, size, state, stop):
+    def __init__(self, generation, mesh, size, state, stop, background=(248, 248, 248)):
         super().__init__()
         self.generation, self.mesh, self.size, self.state, self.stop = generation, mesh, size, state, stop
+        self.background = background
         self.signals = RenderSignals()
 
     def run(self):
         try:
-            result = raster(self.mesh, *self.size, self.state, self.stop)
+            result = raster(self.mesh, *self.size, self.state, self.stop, self.background)
         except Exception:
             result = None
         self.signals.done.emit(self.generation, result)
@@ -141,10 +150,11 @@ class SoftwareCanvas(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.image = QImage()
+        self.background = QColor(DEFAULT_CANVAS)
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.fillRect(self.rect(), QColor('#f8f8f8'))
+        painter.fillRect(self.rect(), self.background)
         if not self.image.isNull():
             painter.setRenderHint(QPainter.SmoothPixmapTransform)
             painter.drawImage(self.rect(), self.image)
@@ -165,10 +175,12 @@ class MeshView(QWidget):
         self.setAccessibleName('Gerçek SolidWorks parçası · 3D görünüm')
         self.setToolTip('Sol sürükle: döndür · Sağ/orta sürükle: kaydır · Tekerlek: yakınlaştır')
         self.camera, self.mesh = Camera(), None
+        self.background = QColor(DEFAULT_CANVAS)
         self.auto_fit = True
         self.pool = QThreadPool(self); self.pool.setMaxThreadCount(1)
         self.generation = 0; self.running = None; self.pending = False
         self.software = SoftwareCanvas(self)
+        self.software.background = self.background
         self.stack = QStackedLayout(self); self.stack.setContentsMargins(0, 0, 0, 0)
         self.stack.addWidget(self.software)
         self.hardware = None
@@ -182,6 +194,18 @@ class MeshView(QWidget):
         self.timer = QTimer(self); self.timer.setSingleShot(True); self.timer.setInterval(35)
         self.timer.timeout.connect(self.render)
         self.destroyed.connect(self.cancel_render)
+
+    def set_background(self, color):
+        """Repaint both render paths on the theme's canvas colour."""
+        color = QColor(color)
+        if color == self.background:
+            return
+        self.background = color
+        self.software.background = color
+        self.software.image = QImage()  # the old frame carries the old canvas
+        self.software.update()
+        if self.hardware: self.hardware.update()
+        self.changed()
 
     def cancel_render(self, *args):
         if self.running: self.running.stop.set()
@@ -239,7 +263,8 @@ class MeshView(QWidget):
         # Render off the GUI thread; a large part never blocks input or CAD jobs.
         factor = min(1., 640/max(1, self.width()), 480/max(1, self.height()))
         size = max(1, int(self.width()*factor)), max(1, int(self.height()*factor))
-        task = RenderJob(self.generation, self.mesh, size, self.camera.state(), threading.Event())
+        task = RenderJob(self.generation, self.mesh, size, self.camera.state(), threading.Event(),
+                         (self.background.red(), self.background.green(), self.background.blue()))
         task.signals.done.connect(self.rendered, Qt.QueuedConnection)
         self.running = task
         self.pool.start(task)

@@ -6,14 +6,29 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QSplitter, QLa
     QComboBox, QCheckBox, QPushButton, QGraphicsView, QGraphicsScene, QTableWidget,
     QTableWidgetItem, QHeaderView, QAbstractItemView, QScrollArea, QFrame)
 
+from gui_qt.theme import COLORS, ROW_HEIGHT
 from .viewer import MeshView, VIEWS
+
+# DXF ACI 7 ("white") is stored as a dark slate for white paper (flat.py).
+# On a dark canvas it is drawn in the theme's text colour instead; the Flat
+# data and exported DXF stay unchanged.
+PAPER_INK = '#475569'
+
+
+def stroke_color(color, appearance):
+    """Display colour of a DXF stroke on the current theme canvas."""
+    if str(color).lower() == PAPER_INK:
+        return COLORS[appearance]['text']
+    return color
 
 
 class FlatView(QGraphicsView):
     def __init__(self):
         super().__init__()
         self.setScene(QGraphicsScene(self))
-        self.setBackgroundBrush(QColor('#ffffff'))
+        self.appearance = 'dark'
+        self.setFrameShape(QFrame.NoFrame)
+        self.setBackgroundBrush(QColor(COLORS[self.appearance]['canvas']))
         self.setRenderHint(QPainter.Antialiasing)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setAccessibleName('Seçili parçanın DXF açınımı')
@@ -21,14 +36,16 @@ class FlatView(QGraphicsView):
         self.empty_message.setWordWrap(True)
         self.empty_message.setAlignment(Qt.AlignCenter)
         self.empty_message.setAttribute(Qt.WA_TransparentForMouseEvents)
-        self.empty_message.setStyleSheet('color: #596575; background: transparent; padding: 12px;')
+        self.empty_message.setProperty('role', 'muted')  # theme stylesheet colour
+        self.empty_message.setContentsMargins(12, 12, 12, 12)
         self._flat = None
+        self._strokes = []  # (path item, source colour) for theme recolouring
 
     def show_flat(self, flat, empty_text='Açınımı görmek için listeden bir sac parçası seçin.'):
         if flat is not None and flat is self._flat:
             return
         self._flat = flat
-        self.scene().clear()
+        self.scene().clear(); self._strokes = []
         self.empty_message.setText(empty_text)
         self.empty_message.setVisible(flat is None)
         if flat is not None:
@@ -38,11 +55,19 @@ class FlatView(QGraphicsView):
                 path.moveTo(stroke.points[0][0], -stroke.points[0][1])
                 for x, y in stroke.points[1:]: path.lineTo(x, -y)
             for (color, bend), path in paths.items():
-                pen = QPen(QColor(color)); pen.setCosmetic(True)
+                pen = QPen(QColor(stroke_color(color, self.appearance))); pen.setCosmetic(True)
                 if bend: pen.setStyle(Qt.DashLine)
-                self.scene().addPath(path, pen)
+                self._strokes.append((self.scene().addPath(path, pen), color))
         self.scene().setSceneRect(self.scene().itemsBoundingRect().adjusted(-2, -2, 2, 2))
         self.fit()
+
+    def set_appearance(self, appearance):
+        """Canvas and ink follow the theme; scene items and camera are kept."""
+        self.appearance = appearance
+        self.setBackgroundBrush(QColor(COLORS[appearance]['canvas']))
+        for item, color in self._strokes:
+            pen = item.pen(); pen.setColor(QColor(stroke_color(color, appearance))); item.setPen(pen)
+        self.viewport().update()
 
     def fit(self):
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
@@ -72,34 +97,46 @@ class PreviewPanel(QWidget):
         self.scroll.setWidget(content); outer.addWidget(self.scroll)
         body = QVBoxLayout(content); body.setContentsMargins(0, 0, 0, 0); body.setSpacing(4)
         self.source_label = QLabel('Önizleme · listeden bir sac parçası seçin')
+        self.source_label.setProperty('role', 'section')
         self.source_label.setWordWrap(True); body.addWidget(self.source_label)
         self.splitter = QSplitter(Qt.Vertical)
         self.splitter.setChildrenCollapsible(False)
         upper = QWidget(); layout = QVBoxLayout(upper); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(3)
         upper.setMinimumHeight(185)
         row = QHBoxLayout()
+        row.setSpacing(4)
         self.views = QComboBox(); self.views.addItems(VIEWS); self.views.setAccessibleName('3D standart görünüş')
+        self.views.setMinimumContentsLength(6); self.views.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         self.fit_button = QPushButton('Sığdır'); self.refresh_button = QPushButton('Yenile')
+        self.fit_button.setProperty('flat', True); self.fit_button.setToolTip('3D görünümü sığdır')
         self.refresh_button.setToolTip('SolidWorks kaynak, konfigürasyon ve geometri güncelliğini yeniden kontrol et')
+        self.perspective = QCheckBox('Perspektif'); self.edges = QCheckBox('Kenarlar'); self.edges.setChecked(True)
         row.addWidget(self.views, 1); row.addWidget(self.fit_button); row.addWidget(self.refresh_button)
         layout.addLayout(row)
-        row = QHBoxLayout()
-        self.perspective = QCheckBox('Perspektif'); self.edges = QCheckBox('Kenarlar'); self.edges.setChecked(True)
+        row = QHBoxLayout(); row.setSpacing(8)
         row.addWidget(self.perspective); row.addWidget(self.edges); row.addStretch()
         layout.addLayout(row)
         self.mesh_view = MeshView(); layout.addWidget(self.mesh_view, 1)
         self.message = QLabel('Gerçek SolidWorks geometrisi · görsel inceleme içindir')
+        self.message.setProperty('role', 'subtitle')
         self.message.setWordWrap(True); layout.addWidget(self.message)
         self.splitter.addWidget(upper)
         middle = self.flat_section = QWidget(); layout = QVBoxLayout(middle); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(3)
         middle.setMinimumHeight(125)
         row = QHBoxLayout(); self.flat_label = QLabel('Açınım · henüz okunmadı'); self.flat_label.setWordWrap(True)
-        self.flat_fit = QPushButton('Sığdır'); row.addWidget(self.flat_label, 1); row.addWidget(self.flat_fit)
+        self.flat_label.setProperty('role', 'section')
+        self.flat_fit = QPushButton('Sığdır'); self.flat_fit.setProperty('flat', True)
+        self.flat_fit.setToolTip('Açınımı sığdır'); row.addWidget(self.flat_label, 1); row.addWidget(self.flat_fit)
         layout.addLayout(row); self.flat_view = FlatView(); layout.addWidget(self.flat_view)
         self.splitter.addWidget(middle)
         self.info = QTableWidget(0, 2)
         self.info.setHorizontalHeaderLabels(('Parça bilgisi', 'Değer'))
         self.info.verticalHeader().hide()
+        self.info.verticalHeader().setDefaultSectionSize(ROW_HEIGHT)
+        self.info.setShowGrid(False); self.info.setAlternatingRowColors(True)
+        self.info.setWordWrap(False); self.info.setTextElideMode(Qt.ElideMiddle)
+        self.info.horizontalHeader().setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.info.horizontalHeader().setHighlightSections(False)
         self.info.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.info.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.info.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -112,6 +149,12 @@ class PreviewPanel(QWidget):
         self.refresh_button.clicked.connect(self.refreshRequested)
         self.perspective.toggled.connect(self.camera_changed)
         self.edges.toggled.connect(self.camera_changed)
+
+    def set_appearance(self, appearance):
+        """Theme hook: both drawing surfaces use the ``canvas`` token."""
+        self.appearance = appearance
+        self.mesh_view.set_background(COLORS[appearance]['canvas'])
+        self.flat_view.set_appearance(appearance)
 
     def camera_changed(self):
         projection_changed = self.mesh_view.camera.perspective != self.perspective.isChecked()
@@ -149,6 +192,5 @@ class PreviewPanel(QWidget):
             self.info.setItem(row, 0, QTableWidgetItem(str(name)))
             item = QTableWidgetItem(str(value)); item.setToolTip(str(value))
             self.info.setItem(row, 1, item)
-        self.info.resizeRowsToContents()
         text = '\n'.join(payload.warnings) if payload.warnings else f'{payload.mesh.triangles:,} üçgen · görsel inceleme · imalat ölçümü değildir'
         self.message.setText(text); self.message.setToolTip(text)

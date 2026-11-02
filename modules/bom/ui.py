@@ -10,11 +10,35 @@ from PySide6.QtWidgets import (QVBoxLayout, QWidget, QLineEdit, QTabWidget,
 from modules.bom.exporter import scan_worker, export_worker
 from gui_qt.models import Column, TableModel, TreeModel, FilterProxy
 from gui_qt.components import (BasePage, ValueForm, Disclosure, label, button, configure_view,
-                           show_details, card, TransferWorkspace, SearchToolbar)
+                           show_details, separator, section_header, TransferWorkspace, SearchToolbar)
+from gui_qt.theme import SPACING
 
 
 def mass(value):
     return 'Okunamadı' if value is None else f'{value:,.6f}'.replace(',', '_').replace('.', ',').replace('_', '.')
+
+
+class _NumericColumns:
+    """Right-aligned numeric columns (cells and headers), like a technical table."""
+    numeric = ()
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.TextAlignmentRole and orientation == Qt.Horizontal:
+            return (Qt.AlignRight if section in self.numeric else Qt.AlignLeft) | Qt.AlignVCenter
+        return super().headerData(section, orientation, role)
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.TextAlignmentRole and index.isValid() and index.column() in self.numeric:
+            return Qt.AlignRight | Qt.AlignVCenter
+        return super().data(index, role)
+
+
+class PartsModel(_NumericColumns, TableModel):
+    numeric = (1, 2, 3)
+
+
+class BomTreeModel(_NumericColumns, TreeModel):
+    numeric = (3,)
 
 
 class BomPage(BasePage):
@@ -33,21 +57,29 @@ class BomPage(BasePage):
             'Hızlı liste mevcut bileşen ağacını okur; parça geometrisini çözümlemez ve ağırlık hesaplamaz. '
             'Yüklenmemiş alt montajlar varsa Tam çözümleme seçin.')
         self.form.check('include_excluded', 'BOM dışındakileri dahil et', False)
+        self.form.stack_fields()
         self.options = Disclosure('Okuma seçenekleri', self.form, expanded=True)
-        source, source_layout = card('Kaynak montaj')
+        self.options.layout().setSpacing(SPACING['xs'])
+        # Flat source column: Okuma → Excel → Montaj ağacı, hairline-separated.
+        source = QWidget(); source_layout = QVBoxLayout(source)
+        source_layout.setContentsMargins(0, 0, SPACING['xs'], 0); source_layout.setSpacing(SPACING['m'])
         source_layout.addWidget(self.options)
         source_layout.addWidget(label('Ad ve adet için hızlı listeyi kullanın. '
-                                      'Ağırlık hesabı büyük montajlarda daha uzun sürer.', 'muted'))
+                                      'Ağırlık hesabı büyük montajlarda daha uzun sürer.', 'subtitle'))
+        source_layout.addWidget(separator())
         self.export_form = ValueForm(self.settings, 'bom_')
         self.include_images = self.export_form.check(
             'include_images', 'Excel’e parça görsellerini ekle', True)
         self.include_images.setToolTip(
             'İzometrik görselleri her iki Excel sayfasına ekler. '
             'Kapalıyken görseller alınmaz ve görsel sütunu eklenmez.')
+        source_layout.addWidget(section_header('Excel'))
         source_layout.addWidget(self.export_form)
+        source_layout.addWidget(separator())
         self.controls.append(self.form)
         self.controls.append(self.export_form)
         self.summary = label('SolidWorks’te ana montajı etkinleştirip Montajı oku düğmesine basın.', 'muted')
+        source_layout.addWidget(section_header('Kaynak montaj'))
         source_layout.addWidget(self.summary)
         self.results_panel = QWidget(); result_layout = QVBoxLayout(self.results_panel)
         result_layout.setContentsMargins(0,0,0,0); result_layout.setSpacing(8)
@@ -80,15 +112,15 @@ class BomPage(BasePage):
         result_layout.addWidget(self.toolbar)
         self.tabs = QTabWidget()
         self.parts = configure_view(QTableView())
-        self.parts_model = TableModel((Column('Parça adı', 'name'), Column('Adet', 'quantity'),
-            Column('Birim ağırlık (kg)', 'mass_kg', mass), Column('Toplam (kg)', 'total_mass_kg', mass),
+        self.parts_model = PartsModel((Column('Parça adı', 'name'), Column('Adet', 'quantity'),
+            Column('Birim ağırlık · kg', 'mass_kg', mass), Column('Toplam · kg', 'total_mass_kg', mass),
             Column('Konfigürasyon', 'configuration'), Column('Dosya yolu', 'path'), Column('Ağırlık durumu', 'mass_note')))
         self.parts_proxy = FilterProxy(self)
         self.parts_proxy.setSourceModel(self.parts_model)
         self.parts.setModel(self.parts_proxy)
         self.tree = configure_view(QTreeView())
-        self.tree_model = TreeModel((Column('Montaj / parça', 'name'), Column('Pozisyon', 'number'),
-            Column('Tür', 'kind'), Column('Ağırlık (kg)', 'mass_kg', mass),
+        self.tree_model = BomTreeModel((Column('Montaj / parça', 'name'), Column('Pozisyon', 'number'),
+            Column('Tür', 'kind'), Column('Ağırlık · kg', 'mass_kg', mass),
             Column('Konfigürasyon', 'configuration'), Column('Dosya yolu', 'path')))
         self.tree_proxy = FilterProxy(self, tree=True)
         self.tree_proxy.setSourceModel(self.tree_model)
@@ -115,7 +147,7 @@ class BomPage(BasePage):
         for column in range(1,self.tree_model.columnCount()): self.source_tree.setColumnHidden(column,True)
         self.source_tree.selectionModel().currentChanged.connect(self.select_source)
         source_layout.addWidget(self.source_tree,1)
-        self.selection = label('Bir satır seçerek ayrıntıları görün. Excel’e tüm montaj aktarılır.', 'muted')
+        self.selection = label('Bir satır seçerek ayrıntıları görün. Excel’e tüm montaj aktarılır.', 'subtitle')
         source_layout.addWidget(self.selection)
         self.splitter = TransferWorkspace(self,source,self.results_panel)
         self.source_scroll = self.splitter.source_scroll

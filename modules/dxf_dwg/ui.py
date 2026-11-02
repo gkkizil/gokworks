@@ -4,8 +4,8 @@ from pathlib import Path
 import csv
 
 from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject, QSignalBlocker
-from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QVBoxLayout, QCheckBox, QWidget
-from gui_qt.export import ExportPage
+from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QCheckBox
+from gui_qt.export import ExportPage, AdaptiveRow
 from gui_qt.components import label, button, ValueForm, Disclosure
 from modules.cad_converter.models import Cancelled
 from modules.cad_converter.api import RestoreError
@@ -44,10 +44,11 @@ class DxfDwgPage(ExportPage):
         self.active_scan_button = button('Aktif montajı tara', self.scan_active)
         self.file_scan_button = button('Dosya seç…', self.scan_file)
         self.file_scan_button.setToolTip('SLDPRT veya SLDASM seçerek sac gövdelerini tara')
+        self.active_scan_button.setToolTip('SolidWorks’te açık olan etkin montajın sac gövdelerini tara')
         self.controls.extend((self.active_scan_button,self.file_scan_button))
-        scan_actions = QWidget();scan_layout=QVBoxLayout(scan_actions);scan_layout.setContentsMargins(0,0,0,0)
-        scan_layout.addWidget(self.active_scan_button);scan_layout.addWidget(self.file_scan_button)
-        self.form.form.insertRow(1,scan_actions)
+        # Alternative sources sit directly under the folder field, side by side.
+        self.scan_actions = AdaptiveRow(self.active_scan_button,self.file_scan_button)
+        self.form.form.insertRow(1,self.scan_actions)
         self.start_button.setText('Seçili parçaları dışa aktar')
         self.start_button.setToolTip('İşaretli sac gövdelerini ayrı DXF/DWG dosyalarına aktarır; kaynak CAD dosyaları kaydedilmez.')
         previous_model = self.results.model
@@ -55,12 +56,11 @@ class DxfDwgPage(ExportPage):
         self.results.proxy.setSourceModel(self.results.model)
         self.source_files.proxy.setSourceModel(self.results.model)
         previous_model.deleteLater()
-        header = self.results.table.horizontalHeader()
-        for index, width in enumerate((36,190,90,95,90,50,115,200)):
-            header.setSectionResizeMode(index, QHeaderView.Interactive)
-            self.results.table.setColumnWidth(index,width)
-        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        self.results.table.setItemDelegateForColumn(1, None)
+        self.results.table.setItemDelegateForColumn(6, self.status_delegate)
+        self.fit_sheet_columns()
         self.results.table.setColumnHidden(7,True)  # Full detail remains in tooltip / Return / CSV.
+        self.results.table.setColumnHidden(2,True)  # Body column appears for multi-body inventories.
         self.results.filter.setItemText(self.results.filter.findData('pending'),'Hazır')
         controls = QHBoxLayout()
         self.select_all_button = button('Tümünü seç', lambda:self.select_sheets(True))
@@ -80,6 +80,7 @@ class DxfDwgPage(ExportPage):
         self.results.model.selectionEdited.connect(self.sheet_selection_changed)
         for signal in (self.results.model.modelReset,self.results.model.rowsInserted,self.results.model.rowsRemoved):
             signal.connect(self.update_source_count)
+            signal.connect(self.refresh_outcome)
         self.results.cleared.connect(self.clear_inventory)
         self.naming_form=ValueForm(self.settings,'dxf_dwg_')
         for option, title in (('code','Parça kodunu kullan'),('body','Gövde adını ekle'),
@@ -125,7 +126,7 @@ class DxfDwgPage(ExportPage):
         self.results.tabs.removeTab(0)
         self.preview_splitter.addWidget(self.results.table)
         self.preview_splitter.addWidget(self.preview)
-        self.preview_splitter.setSizes([650, 380])
+        self.preview_splitter.setSizes([650, self.preview_width()])
         self.results.tabs.insertTab(0, self.preview_splitter, 'Dosyalar')
         self.results.tabs.setCurrentIndex(0)
         self.results.table.show()
@@ -146,6 +147,42 @@ class DxfDwgPage(ExportPage):
         self.form.changed.connect(self.preview_option_changed)
         self._capture = capture  # injectable boundary; no COM import or connection during construction
         QTimer.singleShot(0, self.layout_preview)
+
+    def fit_sheet_columns(self):
+        """Header-fitted widths: every caption stays readable, the part name stretches."""
+        table = self.results.table; header = table.horizontalHeader()
+        header.setStretchLastSection(False)
+        header.setMinimumSectionSize(32)
+        header.setTextElideMode(Qt.ElideRight)
+        bold = header.font(); bold.setBold(True)
+        from PySide6.QtGui import QFontMetrics
+        metrics = QFontMetrics(bold)
+        # Caption + section padding (6+6 px, 1 px rule) + a little air; content
+        # minimums keep typical values (S235JR, Kısmen tamamlandı) unclipped.
+        minimum = {0: 44, 1: 150, 2: 90, 3: 0, 4: 76, 5: 52, 6: 150, 7: 160}
+        for index in range(self.results.model.columnCount()):
+            title = self.results.model.headerData(index, Qt.Horizontal)
+            width = max(minimum.get(index, 60), metrics.horizontalAdvance(title) + 20)
+            header.setSectionResizeMode(index, QHeaderView.Interactive)
+            table.setColumnWidth(index, width)
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        # Status reads right after the part name, so it stays in view when a
+        # narrow table scrolls horizontally (model column order is unchanged).
+        header.moveSection(header.visualIndex(6), 2)
+        table.viewport().installEventFilter(self)
+
+    def fit_part_column(self):
+        """The part name takes the free width but never drops below a readable
+        minimum; a narrow table scrolls horizontally instead of clipping it."""
+        table = self.results.table
+        others = sum(table.columnWidth(c) for c in range(self.results.model.columnCount())
+                     if c != 1 and not table.isColumnHidden(c))
+        table.setColumnWidth(1, max(170, table.viewport().width() - others))
+
+    def theme_changed(self):
+        super().theme_changed()
+        if hasattr(self, 'preview'):
+            self.preview.set_appearance(self.context.appearance)
 
     def clear_inventory(self):
         self.inventory = None; self.checked_instances.clear()
@@ -172,6 +209,7 @@ class DxfDwgPage(ExportPage):
             return
         self.results.model.replace(display_rows(self.inventory,self.checked_instances,self.group_instances.isChecked()))
         self.results.table.setColumnHidden(2,all(r.get('body_count',1)==1 for r in self.inventory))
+        self.fit_part_column()
         self.results.refresh_count()
 
     def sheet_selection_changed(self,row,checked):
@@ -202,7 +240,7 @@ class DxfDwgPage(ExportPage):
         if self.inventory is None:
             return super().prepare_export_results()
         self.results.results.clear(); self.results.log.clear()
-        self.results.refresh_count()
+        self.results.refresh_count(); self.refresh_outcome()
 
     def scan_active(self):
         self.scan_origin = ('active','')
@@ -233,6 +271,8 @@ class DxfDwgPage(ExportPage):
     def eventFilter(self, watched, event):
         if watched is self.results and event.type() == QEvent.Resize:
             QTimer.singleShot(0, self.layout_preview)
+        elif watched is self.results.table.viewport() and event.type() == QEvent.Resize:
+            self.fit_part_column()
         return super().eventFilter(watched, event)
 
     def layout_preview(self):
@@ -249,12 +289,17 @@ class DxfDwgPage(ExportPage):
                 index = self.results.tabs.indexOf(self.preview)
                 if index >= 0: self.results.tabs.removeTab(index)
                 self.preview_splitter.addWidget(self.preview)
-                self.preview_splitter.setSizes([max(250, self.results.width()-380), 380])
+                width = self.preview_width()
+                self.preview_splitter.setSizes([max(250, self.results.width()-width), width])
                 self.results.table.show()
                 self.preview.show()
             self.preview_compact = compact
         finally:
             self._moving_preview = False
+
+    def preview_width(self):
+        """Preview takes ~38 % of the results pane; the file table keeps the rest."""
+        return max(300, min(420, int(self.results.width()*.38)))
 
     def _reveal_preview(self):
         self.layout_preview()
@@ -622,7 +667,7 @@ class DxfDwgPage(ExportPage):
                         if row['sheet_id']==identifier: row.update(changes)
                     self.results.results.append(value)
                     self.results.append_log(f"{value['status']} · {value['source']} [{value['configuration']}] · {value['body_name']} · {value['detail']}")
-                    self.results.refresh_count()
+                    self.results.refresh_count(); self.refresh_outcome()
                 continue
             if kind == 'done' and value.get('state') == 'preview' and not self._preview_cancelled:
                 self._preview_after_scan |= self.preview_before_export.isChecked()

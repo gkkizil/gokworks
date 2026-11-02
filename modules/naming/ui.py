@@ -10,8 +10,17 @@ from modules.naming import exporter as engine
 from modules.naming.hierarchy import document_rows
 from gui_qt import services
 from gui_qt.models import TreeModel, FilterProxy, Column
-from gui_qt.components import (BasePage, ValueForm, Disclosure, card, label, button,
-                           configure_view, open_folder, TransferWorkspace)
+from gui_qt.components import (BasePage, ValueForm, Disclosure, label, button, separator,
+                           section_header, configure_view, open_folder, TransferWorkspace)
+from gui_qt.theme import SPACING
+from gui_qt.export import AdaptiveRow
+
+
+def flat_pane(right_margin=0):
+    """Workspace pane without a card frame; groups use hairline separators."""
+    widget = QWidget(); layout = QVBoxLayout(widget)
+    layout.setContentsMargins(0, 0, right_margin, 0); layout.setSpacing(SPACING['m'])
+    return widget, layout
 
 
 class NamingPage(BasePage):
@@ -30,15 +39,18 @@ class NamingPage(BasePage):
         self.save_button.setEnabled(False)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.stop_button.setEnabled(False)
-        panel, body = card('Kaynak ve yeni paket')
+        # Source column, top to bottom: Kaynak → Yeni paket → Kurallar.
+        panel, body = flat_pane(SPACING['xs'])
         self.form = ValueForm(self.settings, 'naming_')
         self.source_folder = self.form.path('source_folder', 'Montaj klasörü')
         destination = self.settings.get('naming_destination')
         if destination is None:
             parent = self.settings.get('naming_parent', '')
             destination = str(Path(parent) / str(self.settings.get('naming_package', 'Yeni-paket'))) if isinstance(parent, str) and parent else ''
-        self.destination = self.form.path('destination', 'Yeni paket klasörü', destination)
-        self.form.stack_fields()
+        self.destination_form = ValueForm(self.settings, 'naming_')
+        self.destination = self.destination_form.path('destination', 'Yeni paket klasörü', destination)
+        self.form.stack_fields(); self.destination_form.stack_fields()
+        body.addWidget(section_header('Kaynak'))
         body.addWidget(self.form)
 
         self.source_options_form = ValueForm(self.settings, 'naming_')
@@ -53,12 +65,17 @@ class NamingPage(BasePage):
         self.assemblies.setPlaceholderText('Montaj seçin…')
         self.assemblies.setAccessibleName('Klasörde bulunan montajlar')
         self.assemblies.activated.connect(self.choose_assembly)
-        choices=QVBoxLayout();choices.addWidget(self.assemblies);choices.addWidget(self.discover_button)
+        self.assemblies.setMinimumContentsLength(12)
+        choices=AdaptiveRow(self.assemblies,self.discover_button,stretch=0)
         self.form.form.addRow(label('Kaynak montaj'),choices)
         self.source_folder.choose.clicked.connect(lambda:self.discover() if self.source_folder.text() else None)
         self.source_options = Disclosure('Dosya / aktif montaj', self.source_options_form)
         self.source_options.toggle.setToolTip('Dosyadan seç veya SolidWorks’teki aktif montajı kullan')
         body.addWidget(self.source_options)
+        body.addWidget(separator())
+        body.addWidget(section_header('Yeni paket'))
+        body.addWidget(self.destination_form)
+        body.addWidget(separator())
 
         rules = QWidget()
         rules_layout = QVBoxLayout(rules)
@@ -82,20 +99,18 @@ class NamingPage(BasePage):
         self.replacement_form=ValueForm(self.settings,'naming_')
         self.replacement_form.text('find','Bul'); self.replacement_form.text('replacement','Yerine yaz')
         self.replacement_form.stack_fields(); rules_layout.addWidget(self.replacement_form)
-        for subform in (self.source_options_form, self.rules_form, self.name_left, self.name_right,self.replacement_form):
+        for subform in (self.destination_form, self.source_options_form, self.rules_form, self.name_left, self.name_right,self.replacement_form):
             self.form.fields.update(subform.fields)
             subform.changed.connect(self.form.changed)
         self.rules_options = Disclosure('İsimlendirme kuralları', rules, expanded=True)
         body.addWidget(self.rules_options)
-        self.safety_note = label('Hedef klasör yeni veya boş olmalı. Teknik resimler, bastırılmış parçalar ve Toolbox bileşenleri dahil edilir.', 'muted')
+        self.safety_note = label('Hedef klasör yeni veya boş olmalı. Teknik resimler, bastırılmış parçalar ve Toolbox bileşenleri dahil edilir.', 'subtitle')
+        body.addWidget(separator())
         body.addWidget(self.safety_note)
         body.addStretch()
-        preview, layout = card('İsimlendirme önizlemesi')
-        toolbar = QHBoxLayout()
+        preview, layout = flat_pane()
         self.edit_button = button('Adı düzenle', self.edit_selected)
         self.edit_button.setToolTip('Seçili dosyanın yeni adını düzenle')
-        toolbar.addWidget(self.edit_button)
-        toolbar.addStretch()
         self.more_button = QToolButton()
         self.more_button.setText('Diğer')
         self.more_button.setAccessibleName('İsimlendirme önizleme işlemleri')
@@ -106,8 +121,7 @@ class NamingPage(BasePage):
         self.source_column_action=menu.addAction('Kaynak dosya sütununu göster');self.source_column_action.setCheckable(True)
         self.source_column_action.toggled.connect(lambda visible:self.tree.setColumnHidden(3,not visible))
         self.more_button.setMenu(menu)
-        toolbar.addWidget(self.more_button)
-        layout.addLayout(toolbar)
+        layout.addWidget(section_header('İsimlendirme önizlemesi', self.edit_button, self.more_button))
         self.tree = configure_view(QTreeView())
         self.model = TreeModel((Column('Montaj / mevcut dosya adı', 'name'), Column('Yeni dosya adı', 'new_name'),
                                 Column('Tür', 'kind'), Column('Kaynak dosya', 'source')))
@@ -129,7 +143,7 @@ class NamingPage(BasePage):
         self.splitter=TransferWorkspace(self,panel,preview)
         self.source_scroll=self.splitter.source_scroll
         self.layout.addWidget(self.splitter, 1)
-        self.controls.extend((self.form, self.source_options_form, rules,
+        self.controls.extend((self.form, self.destination_form, self.source_options_form, rules,
                               self.discover_button, self.active_button, self.edit_button))
         self.preview_timer = QTimer(self)
         self.preview_timer.setSingleShot(True)

@@ -11,8 +11,17 @@ class SheetTableModel(TableModel):
         super().__init__((Column('Seç', 'selected'), Column('Parça / kod', 'source_label'),
                           Column('Gövde', 'body_name'), Column('Kalınlık · mm', 'thickness_mm', lambda v:f'{v:g}' if isinstance(v,(float,int)) else ''),
                           Column('Malzeme', 'material'), Column('Adet', 'quantity'),
-                          Column('Açınım durumu', 'status', lambda v:LABELS.get(v,v)), Column('Açıklama', 'detail')))
+                          Column('Durum', 'status', lambda v:LABELS.get(v,v)), Column('Açıklama', 'detail')))
         self.locked = False
+
+    NUMERIC = (3, 5)  # thickness and quantity: right-aligned like a technical table
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.TextAlignmentRole and orientation == Qt.Horizontal:
+            return (Qt.AlignRight if section in self.NUMERIC else Qt.AlignLeft) | Qt.AlignVCenter
+        if role == Qt.ToolTipRole and orientation == Qt.Horizontal:
+            return {0: 'Aktarılacak gövdeleri işaretleyin', 6: 'Açınım durumu'}.get(section, self.columns[section].title)
+        return super().headerData(section, orientation, role)
 
     @staticmethod
     def token(row):
@@ -50,6 +59,10 @@ class SheetTableModel(TableModel):
                 return row.get('code') or row.get('source_label') or row['source']
             if role == Qt.DisplayRole and index.column()==6 and row.get('sheet_id') and row.get('status')=='pending':
                 return 'Hazır'
+            if role == Qt.TextAlignmentRole and index.column() in self.NUMERIC:
+                return Qt.AlignRight | Qt.AlignVCenter
+            if role == Qt.ForegroundRole:
+                return None  # the status cell carries the state colour (StatusDelegate)
             if role == Qt.ToolTipRole:
                 if not row.get('sheet_id'):return row['source']
                 return row['source']+'\n'+row.get('configuration','')+'\n'+row.get('cut_list','')+'\n'+row.get('detail','')

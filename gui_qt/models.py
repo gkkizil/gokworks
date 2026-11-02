@@ -61,8 +61,9 @@ class TableModel(QAbstractTableModel):
             if role == Qt.DisplayRole and column.key == 'status' and row.get('_status_label'):
                 return row['_status_label']
             return column.format(value) if column.format and role == Qt.DisplayRole else value
-        if role == Qt.ForegroundRole and row.get('status') == 'error':
-            return QBrush(QColor('#CB6477'))
+        if role == Qt.ForegroundRole and row.get('status') == 'error' and column.key == 'status':
+            # Only the status cell signals the error; file names stay readable.
+            return QBrush(QColor(_danger()))
         return None
 
     def flags(self, index):
@@ -179,8 +180,9 @@ class TreeModel(QAbstractItemModel):
             return value
         if role in (Qt.DisplayRole, Qt.ToolTipRole):
             return column.format(value) if column.format else value
-        if role == Qt.ForegroundRole and row.get('status') == 'error':
-            return QBrush(QColor('#CB6477'))
+        if role == Qt.ForegroundRole and row.get('status') == 'error' and column.key == 'status':
+            # Only the status cell signals the error; file names stay readable.
+            return QBrush(QColor(_danger()))
         return None
 
 
@@ -220,3 +222,12 @@ class FilterProxy(QSortFilterProxyModel):
         if isinstance(a, (int, float)) and isinstance(b, (int, float)):
             return a < b
         return self.collator.compare(str(a), str(b)) < 0
+
+
+def _danger():
+    """Theme danger token for the active appearance (falls back to dark)."""
+    from PySide6.QtWidgets import QApplication
+    from .theme import COLORS
+    app = QApplication.instance()
+    light = app is not None and app.palette().window().color().lightness() > 128
+    return COLORS['light' if light else 'dark']['danger']
