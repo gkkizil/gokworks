@@ -19,7 +19,9 @@ tutarlılık için tasarlanır. Kaynak kod: `gui_qt/theme.py` (token'lar ve QSS)
 4. **Ölçü her zaman birimiyle.** Etiket biçimi `Ad · birim`
    (`Kalınlık · mm`). Sayılar sağa hizalanır; ondalık ayırıcı virgüldür
    (`QLocale('tr_TR')`).
-5. **Animasyon ve süs yok.** Yalnız işlevsel ikonlar kullanılır.
+5. **Hareket en aza indirilir.** Tek animasyon, modüller arası geçişte
+   yaklaşık 150 ms süren sade solmadır (`gui_qt/transitions.py`). Dekoratif
+   animasyon ve süs kullanılmaz. Yalnız işlevsel ikonlar kullanılır.
 
 ## 2. Renk token'ları
 
@@ -125,3 +127,16 @@ kırmızı = bağlantı yok. Kısayollar: `Ctrl+K` araç ara, `Ctrl+B` menüyü 
    sunulur.
 7. Dar pencerede (820 px) komutlar kesilmemelidir; testler
    `tests/test_compact_workspaces_gui.py` ile denetler.
+
+## 7. Sayfa geçişi
+
+- `PageTransition`, yeni sayfanın üstüne `bg` renginde, fareyi engellemeyen
+  bir katman koyar ve 150 ms'de (OutCubic) saydamlaştırır. Sayfa bileşenleri
+  efekt içine alınmaz; OpenGL önizlemeleri ve odak etkilenmez.
+- Saat, yeni sayfa ilk kez çizildikten sonra başlar; ilk kez açılan ağır
+  sayfalarda solma kaybolmaz.
+- Aynı sayfaya geçişte, ekransız (`offscreen`) test platformunda ve
+  **Ayarlar → Sayfa geçişlerinde yumuşak geçiş** kapalıyken çalışmaz.
+  Tercih `page_transitions` ayarında saklanır.
+- Sol menü ve durum çubuğu sabit kalır; sayfa başlığı dahil yalnız çalışma
+  alanı geçiş yapar.

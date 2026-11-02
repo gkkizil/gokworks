@@ -112,6 +112,8 @@ class MainWindow(QMainWindow):
         self.about_button=self.browser.about_button;self.contact_button=self.browser.contact_button
         self.theme_picker = self.browser.theme_picker
         self.stack = QStackedWidget()
+        from .transitions import PageTransition
+        self.page_transition = PageTransition(self.stack, self.settings.get('page_transitions', True) is not False)
         outer.addWidget(self.sidebar)
         outer.addWidget(self.stack, 1)
         self.setCentralWidget(container)
@@ -246,8 +248,11 @@ class MainWindow(QMainWindow):
     def navigate(self, mode):
         if mode not in self.pages:
             return
+        changed = getattr(self, 'mode', None) not in (None, mode)
         self.mode = mode
         self.stack.setCurrentWidget(self.pages[mode])
+        if changed:
+            self.page_transition.play(COLORS[self.appearance]['bg'])
         for key, nav in self.navigation.items():
             nav.setChecked(key == mode)
         self.settings.set('mode', mode)
@@ -327,6 +332,12 @@ class MainWindow(QMainWindow):
             elif kind == 'job_error':
                 self.set_status(result['error'], True)
 
+    def set_page_transitions(self, enabled):
+        self.page_transition.enabled = bool(enabled)
+        if not enabled:
+            self.page_transition.stop()
+        self.settings.set('page_transitions', bool(enabled))
+
     def set_connection_state(self, state, detail=''):
         indicator = self.connection_indicator
         indicator.setToolTip(detail)
@@ -352,7 +363,10 @@ class MainWindow(QMainWindow):
         appearance.currentIndexChanged.connect(lambda:self.set_theme(appearance.currentData()));body.addWidget(appearance)
         compact=QCheckBox('Sol menüyü simgelere daralt');compact.setObjectName('compactNavigationPreference')
         compact.setChecked(self.sidebar_collapsed);compact.toggled.connect(self.set_sidebar_collapsed);body.addWidget(compact)
-        body.addWidget(label('Menüyü Ctrl+B ile de daraltıp genişletebilirsiniz.','muted'));layout.addWidget(panel)
+        body.addWidget(label('Menüyü Ctrl+B ile de daraltıp genişletebilirsiniz.','muted'))
+        motion=QCheckBox('Sayfa geçişlerinde yumuşak geçiş');motion.setObjectName('pageTransitionPreference')
+        motion.setChecked(self.page_transition.enabled);motion.toggled.connect(self.set_page_transitions);body.addWidget(motion)
+        layout.addWidget(panel)
         layout.addWidget(label('Tercihler ve girdiğiniz değerler otomatik kaydedilir.','muted'))
         details=label(f'Ayar dosyası: {self.settings.path}\n\nPencere konumu ve boyutu ayrıca korunur. '
             'SolidWorks araçları açık oturumu kullanır; hesap araçları bağlantı olmadan çalışır. '
