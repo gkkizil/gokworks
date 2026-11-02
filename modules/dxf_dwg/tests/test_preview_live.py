@@ -38,13 +38,22 @@ def test_native_windows_renderer_shows_real_mesh_and_open_hole(qtbot):
     create_application([])
     if QApplication.platformName() != 'windows':
         pytest.skip('Native Qt Windows platform not selected.')
+    from PySide6.QtGui import QColor
+    from gui_qt.theme import COLORS
     widget = MeshView(); qtbot.addWidget(widget); widget.resize(600, 400)
     frames = []; widget.frameReady.connect(lambda: frames.append(True))
     widget.set_mesh(ring_mesh()); widget.view('Ön'); widget.show()
-    qtbot.waitUntil(lambda: bool(frames), timeout=10000)
-    image = widget.grab().toImage()
-    assert image.pixelColor(image.width()//2, image.height()//2).red() > 230
-    assert image.pixelColor(int(image.width()/2-image.height()*.3), image.height()//2).red() < 220
+    for appearance in ('dark', 'light'):
+        canvas = QColor(COLORS[appearance]['canvas'])
+        if canvas != widget.background:
+            frames.clear(); widget.set_background(canvas)
+        qtbot.waitUntil(lambda: bool(frames), timeout=10000)
+        image = widget.grab().toImage()
+        hole = image.pixelColor(image.width()//2, image.height()//2)
+        ring = image.pixelColor(int(image.width()/2-image.height()*.3), image.height()//2)
+        # The open hole shows the theme canvas; the ring material is shaded.
+        assert max(abs(hole.red()-canvas.red()), abs(hole.green()-canvas.green()), abs(hole.blue()-canvas.blue())) <= 6
+        assert abs(ring.lightness()-canvas.lightness()) > 20, appearance
     backend = 'OpenGL' if widget.hardware and widget.stack.currentWidget() is widget.hardware else 'CPU fallback'
     print('Native DXF mesh renderer:', backend)
     widget.cancel_render(); widget.close()
