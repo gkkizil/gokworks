@@ -62,13 +62,14 @@ aktarma farklı işlemlerdir; ODA gereksinimi Nesting'e DWG ekleme içindir.
 
 ## Ekranı tanıma
 
-- **Sol menü:** araç seçimi ve araç araması. Üstteki **Çalışma alanı**
-  listesinden Aktarım, Montaj, Üretim, Hesaplar veya Makine Elemanları'na geçebilirsiniz.
+- **Sol menü:** araç seçimi ve araç araması. Aktarım, Montaj, Üretim,
+  Hesaplar ve Makine Elemanları gruplarından istediğiniz aracı açabilirsiniz.
 - **Kaynak ve ayarlar:** dosyaları, ölçüleri ve işlem seçeneklerini girersiniz.
 - **Önizleme ve sonuçlar:** seçilen parçayı, yerleşimi, hesapları veya işlem
   listesini görürsünüz. Panellerin arasındaki ayırıcıları sürükleyebilirsiniz.
 - **Özellikler:** Nesting gibi araçlarda seçili parçanın veya sacın bilgilerini
-  düzenlersiniz. Panel gizliyse **Özellikler / Görünüm** komutlarından açın.
+  düzenlersiniz. Panel gizliyse Nesting ekranındaki **GÖRÜNÜM → Sağ özellikler
+  panelini göster** komutundan açın.
 - **Alt durum çubuğu:** işlemin ilerleyişini ve hata açıklamasını gösterir.
   Uzun açıklamalar için **Ayrıntı**, aktarım kayıtları için **Günlük** bölümünü kullanın.
 
@@ -76,7 +77,7 @@ aktarma farklı işlemlerdir; ODA gereksinimi Nesting'e DWG ekleme içindir.
 | --- | --- |
 | `Ctrl+K` | Araç aramasına geçer. |
 | `Ctrl+B` | Sol menüyü daraltır veya genişletir. |
-| Görünüm / Ayarlar | Açık-koyu tema ve görünüm tercihlerini değiştirir. |
+| Ayarlar / sol menüdeki tema listesi | Açık-koyu tema ve görünüm tercihlerini değiştirir. |
 | Durdur | Yürüyen işlemin durdurulmasını ister. Süren SolidWorks çağrısının bitmesi beklenebilir. |
 
 Yeni bir aktarım için önce yürüyen işin tamamlanmasını veya durdurulmasını

@@ -26,12 +26,12 @@ def window(qtbot,tmp_path):
 def test_workspaces_groups_and_search_navigate_existing_pages_without_reset(window,qtbot):
     w=window;pages=dict(w.pages)
     w.pages['weight'].form.set_value('length','2350')
-    w.workspace_picker.setCurrentIndex(w.workspace_picker.findData('Üretim'))
+    w.navigation['nesting'].click()
     assert w.mode=='nesting'
     w.navigation['profile_cutting'].click()
-    w.workspace_picker.setCurrentIndex(w.workspace_picker.findData('Aktarım'))
+    w.navigation['pdf'].click()
     assert w.mode=='pdf'
-    w.workspace_picker.setCurrentIndex(w.workspace_picker.findData('Üretim'))
+    w.navigation['profile_cutting'].click()
     assert w.mode=='profile_cutting'
     w.browser.search.setText('tork');qtbot.wait(10)
     assert w.navigation['bolt_torque'].isVisible() and not w.navigation['pdf'].isVisible()
@@ -53,7 +53,7 @@ def test_native_command_strip_stays_above_source_scrolling_and_uses_same_buttons
             if control.isVisible():
                 assert p.command_bar.isAncestorOf(control)
                 assert p.rect().contains(control.mapTo(p,control.rect().bottomRight()))
-    assert isinstance(window.workbench_bar,QToolBar)
+    assert window.findChild(QToolBar,'applicationTools') is None
 
 
 def example(w):
@@ -124,7 +124,7 @@ def test_docked_narrow_and_floating_properties_preserve_the_viewport(window,qtbo
         window.resize(width,height);qtbot.wait(50)
         assert window.size().toTuple()==(width,height) and not window.property_dock.isVisible()
         assert p.canvas.width()>=190 and p.canvas.height()>=60
-    window.inspector_button.click();qtbot.wait(30)
+    p.properties_action.trigger();qtbot.wait(30)
     assert window.property_dock.isFloating() and window.property_dock.isVisible()
     assert p.canvas.width()>=190
     window.property_dock.close();assert not window.inspector_requested

@@ -3,17 +3,17 @@
 import os
 import sys
 from pathlib import Path
-from PySide6.QtCore import Qt, QTimer, QSize, QEvent
+from PySide6.QtCore import Qt, QTimer, QEvent
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QGuiApplication, QSurfaceFormat
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
-    QVBoxLayout, QFrame, QStackedWidget, QProgressBar, QComboBox, QMessageBox,
-    QDialog, QDialogButtonBox, QToolButton, QCheckBox, QToolBar, QDockWidget, QMenu, QSizePolicy)
+    QVBoxLayout, QStackedWidget, QProgressBar, QComboBox, QMessageBox,
+    QDialog, QDialogButtonBox, QCheckBox, QDockWidget)
 from .settings import SettingsStore
 from .workers import JobManager
-from .workspace import ModuleBrowser, WORKSPACES
+from .workspace import ModuleBrowser
 from .theme import apply_theme, COLORS
-from .icons import BrandLogo, ASSETS, icon, set_application_identity
-from .components import label, button, scroll, show_details, Disclosure, card, ElidedLabel
+from .icons import ASSETS, icon, set_application_identity
+from .components import label, button, Disclosure, card, ElidedLabel
 from . import services
 from solidworks import diagnostics
 from importlib import import_module
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         outer.addWidget(self.sidebar)
         outer.addWidget(self.stack, 1)
         self.setCentralWidget(container)
-        self.create_workbench_chrome()
+        self.create_inspector()
         self.global_status = ElidedLabel('Hazır')
         self.global_status.setProperty('role', 'muted')
         self.global_status.setMaximumWidth(600)
@@ -159,24 +159,7 @@ class MainWindow(QMainWindow):
         self.browser.set_collapsed(self.sidebar_collapsed)
         self.settings.set('sidebar_collapsed',self.sidebar_collapsed)
 
-    def create_workbench_chrome(self):
-        self.workbench_bar = QToolBar('Çalışma alanı',self)
-        self.workbench_bar.setObjectName('applicationTools'); self.workbench_bar.setMovable(False)
-        self.workbench_bar.setFloatable(False); self.workbench_bar.setIconSize(QSize(16,16))
-        self.addToolBar(Qt.TopToolBarArea,self.workbench_bar)
-        self.workspace_caption = label('ÇALIŞMA ALANI','muted')
-        self.workspace_caption_action = self.workbench_bar.addWidget(self.workspace_caption)
-        self.workspace_picker = QComboBox(); self.workspace_picker.setMinimumWidth(138)
-        self.workspace_picker.setAccessibleName('Mühendislik çalışma alanı')
-        for title,_ in WORKSPACES:self.workspace_picker.addItem(title,title)
-        self.last_workspaces = {}
-        self.workspace_picker.currentIndexChanged.connect(self.change_workspace)
-        self.workbench_bar.addWidget(self.workspace_picker)
-        self.workbench_bar.addSeparator()
-        self.workspace_context = ElidedLabel()
-        self.workspace_context.setProperty('role', 'muted')
-        self.workspace_context.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.workbench_bar.addWidget(self.workspace_context)
+    def create_inspector(self):
         self.inspectors = {}; self._syncing_dock = False
         self.inspector_requested = self.settings.get('inspector_visible',True) is not False
         self.property_dock = QDockWidget('ÖZELLİKLER',self)
@@ -188,25 +171,6 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea,self.property_dock)
         self.property_dock.hide()
         self.property_dock.visibilityChanged.connect(self.inspector_visibility_changed)
-        self.inspector_button = button('Özellikler',self.toggle_inspector)
-        self.inspector_button.setCheckable(True);self.inspector_button.setToolTip('Bağlamsal özellikler panelini göster / gizle')
-        self.inspector_action=self.workbench_bar.addWidget(self.inspector_button)
-        view = QToolButton();view.setText('Görünüm');view.setPopupMode(QToolButton.InstantPopup)
-        view_menu=QMenu(view)
-        view_menu.addAction('Sol gezgini daralt / genişlet · Ctrl+B',self.toggle_sidebar)
-        view_menu.addAction('Araç bul · Ctrl+K',self.focus_module_search)
-        view_menu.addSeparator()
-        view_menu.addAction('Koyu tema',lambda:self.set_theme('dark'))
-        view_menu.addAction('Açık tema',lambda:self.set_theme('light'))
-        view_menu.addSeparator();view_menu.addAction('Uygulama ayarları…',self.show_settings)
-        view_menu.addAction('İletişim…',self.show_contact)
-        view.setMenu(view_menu);self.workbench_bar.addWidget(view)
-        self.workbench_bar.addAction('Hakkında',self.show_about)
-
-    def change_workspace(self):
-        group=self.workspace_picker.currentData()
-        modes=dict(WORKSPACES).get(group,())
-        if modes:self.navigate(self.last_workspaces.get(group,modes[0]))
 
     def focus_module_search(self):
         if self.sidebar_collapsed:self.set_sidebar_collapsed(False)
@@ -218,7 +182,6 @@ class MainWindow(QMainWindow):
         self.jobs.busyChanged.connect(lambda busy:widget.setEnabled(not busy))
 
     def inspector_visibility_changed(self,visible):
-        self.inspector_button.setChecked(visible)
         if not self._syncing_dock and not self.closing and self.isVisible() and getattr(self,'mode',None) in self.inspectors:
             self.inspector_requested=visible;self.settings.set('inspector_visible',visible)
 
@@ -227,12 +190,10 @@ class MainWindow(QMainWindow):
         self._syncing_dock=True
         try:
             widget=self.inspectors.get(getattr(self,'mode',None))
-            self.inspector_button.setEnabled(widget is not None)
-            self.inspector_action.setVisible(widget is not None)
             if widget is not None:self.inspector_stack.setCurrentWidget(widget)
             show=widget is not None and self.inspector_requested and (self.width()>=1320 or self.property_dock.isFloating())
             was_visible=self.property_dock.isVisible()
-            self.property_dock.setVisible(show);self.inspector_button.setChecked(show)
+            self.property_dock.setVisible(show)
             if show and not was_visible and not self.property_dock.isFloating():
                 width=self.settings.get('inspector_width',286)
                 if not isinstance(width,int) or isinstance(width,bool):width=286
@@ -253,8 +214,6 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
-        if hasattr(self, 'workspace_caption_action'):
-            self.workspace_caption_action.setVisible(self.width() >= 1100)
         if hasattr(self,'property_dock'):self.update_inspector()
 
     def restore_window(self):
@@ -281,13 +240,6 @@ class MainWindow(QMainWindow):
         for key, nav in self.navigation.items():
             nav.setChecked(key == mode)
         self.settings.set('mode', mode)
-        group=self.browser.group_for_mode[mode];self.last_workspaces[group]=mode
-        blocked=self.workspace_picker.blockSignals(True)
-        self.workspace_picker.setCurrentIndex(self.workspace_picker.findData(group))
-        self.workspace_picker.blockSignals(blocked)
-        self.workspace_context.setText(group+' / '+dict((key,title) for key,title,_ in MODULES)[mode])
-        self.workspace_context.setToolTip(self.workspace_context.text())
-        self.workspace_context.setAccessibleName(self.workspace_context.text())
         if self.browser.buttons[mode].isHidden() and self.browser.search.text():self.browser.search.clear()
         self.browser.activate(mode)
         for key,nav in self.navigation.items():nav.setIcon(icon(key,COLORS[self.appearance]['accent' if key==mode else 'muted']))
@@ -307,8 +259,6 @@ class MainWindow(QMainWindow):
             self.theme_picker.setCurrentIndex(0 if appearance == 'dark' else 1)
             self.theme_picker.blockSignals(blocked)
         apply_theme(QApplication.instance(), appearance)
-        self.inspector_button.setIcon(icon('inspector',COLORS[appearance]['muted']))
-        self.inspector_button.setIconSize(QSize(16,16))
         self.logo.set_appearance(appearance)
         for mode, nav in self.navigation.items():
             nav.setIcon(icon(mode, COLORS[appearance]['accent' if nav.isChecked() else 'muted']))

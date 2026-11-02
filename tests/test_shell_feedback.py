@@ -2,6 +2,7 @@
 
 import pytest
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QToolBar
 from gui_qt.app import MainWindow, create_application
 from gui_qt.components import ResultsPanel
 
@@ -42,21 +43,17 @@ def test_search_keyboard_no_matches_and_reset_keep_existing_page_inputs(window, 
 
 
 @pytest.mark.parametrize('theme', ['light', 'dark'])
-def test_long_breadcrumb_yields_to_toolbar_controls_and_selected_nav_is_reachable(window, qtbot, theme):
+def test_content_uses_top_edge_without_workspace_bar_and_selected_nav_is_reachable(window, qtbot, theme):
     w = window; w.set_theme(theme); w.resize(820, 560)
     w.navigate('geometric_tolerances'); qtbot.wait(50)
-    assert w.workspace_context.text() == 'Hesaplar / Geometrik toleranslar'
-    assert w.workspace_context.toolTip() == w.workspace_context.text()
-    assert not w.workspace_caption_action.isVisible()
-    for action in w.workbench_bar.actions():
-        widget = w.workbench_bar.widgetForAction(action)
-        if widget is not None and action.isVisible():
-            assert widget.isVisible()
-            assert w.workbench_bar.rect().contains(widget.mapTo(w.workbench_bar, widget.rect().bottomRight()))
+    assert w.findChild(QToolBar,'applicationTools') is None
+    assert w.centralWidget().geometry().top() == 0
+    assert w.stack.geometry().top() == 0 and w.sidebar.geometry().top() == 0
     nav = w.navigation['geometric_tolerances']; viewport = w.browser.menu_scroll.viewport()
     assert viewport.rect().contains(nav.mapTo(viewport, nav.rect().center()))
     w.resize(1440, 900); qtbot.wait(30)
-    assert w.workspace_caption_action.isVisible()
+    assert w.centralWidget().geometry().top() == 0
+    assert w.stack.height() == w.centralWidget().height()
 
 
 def test_empty_results_distinguish_new_work_filtered_data_and_running_jobs(qtbot, monkeypatch):

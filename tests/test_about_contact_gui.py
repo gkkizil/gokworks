@@ -13,10 +13,7 @@ def test_main_entries_are_about_and_contact_without_a_license_entry(window,monke
     assert window.about_button.text()=='Hakkında' and window.contact_button.text()=='İletişim'
     assert not any(b.text()=='Lisanslar' for b in window.findChildren(QPushButton))
     window.about_button.click();window.contact_button.click()
-    actions=[a for a in window.workbench_bar.actions() if a.text()=='Hakkında']
-    assert len(actions)==1 and not any(a.text()=='Lisanslar' for a in window.workbench_bar.actions())
-    actions[0].trigger()
-    assert opened==['GOKWORKS · Hakkında','GOKWORKS · İletişim','GOKWORKS · Hakkında']
+    assert opened==['GOKWORKS · Hakkında','GOKWORKS · İletişim']
     assert window.browser.footer.layout().indexOf(window.contact_button)>=0
 
 
