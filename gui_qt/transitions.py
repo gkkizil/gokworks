@@ -5,6 +5,8 @@ about 150 ms. Pages themselves are never wrapped in graphics effects, so
 OpenGL previews, native windows and focus behave exactly as without it.
 """
 
+import os
+
 from PySide6.QtCore import Property, QEasingCurve, QEvent, QObject, QPropertyAnimation, QTimer, Qt
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QApplication, QWidget
@@ -69,7 +71,11 @@ class PageTransition(QObject):
     def active(self):
         if not self.enabled or not self.stack.isVisible():
             return False
-        return self.headless_allowed or QApplication.platformName() not in _HEADLESS
+        if self.headless_allowed:
+            return True
+        if os.environ.get('GOKWORKS_PAGE_TRANSITIONS', '1') == '0':
+            return False
+        return QApplication.platformName() not in _HEADLESS
 
     def play(self, color):
         """Start the fade over the page that is now current."""

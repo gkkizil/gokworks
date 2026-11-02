@@ -46,3 +46,12 @@ def test_headless_runs_skip_the_animation_by_default(qtbot, tmp_path):
     window.navigate('iso_fits')
     assert not window.page_transition.veil.isVisible()
     window.settings.flush()
+
+
+def test_test_runs_disable_the_animation_through_the_environment(qtbot, tmp_path, monkeypatch):
+    monkeypatch.setenv('GOKWORKS_PAGE_TRANSITIONS', '0')
+    create_application([])
+    window = MainWindow(tmp_path / 'settings.json'); qtbot.addWidget(window); window.show()
+    window.navigate('bolt')
+    assert window.page_transition.enabled and not window.page_transition.veil.isVisible()
+    window.settings.flush()
