@@ -70,12 +70,41 @@ class ViewEmptyState(QWidget):
         self.setVisible(empty)
 
 
-def button(text, callback=None, *, primary=False):
+def button(text, callback=None, *, primary=False, destructive=False, flat=False):
+    """Design-system button: secondary by default; primary, destructive or flat."""
     widget = QPushButton(text)
     if callback:
         widget.clicked.connect(callback)
     widget.setProperty('primary', primary)
+    if destructive:
+        widget.setProperty('destructive', True)
+    if flat:
+        widget.setProperty('flat', True)
     return widget
+
+
+def separator(vertical=False):
+    """A 1 px rule that separates regions instead of nesting another card."""
+    line = QFrame()
+    line.setProperty('separator', True)
+    line.setFrameShape(QFrame.VLine if vertical else QFrame.HLine)
+    if vertical:
+        line.setFixedWidth(1)
+    else:
+        line.setFixedHeight(1)
+    return line
+
+
+def section_header(title, *trailing):
+    """Pane heading: semibold title on the left, optional compact controls right."""
+    row = QWidget(); layout = QHBoxLayout(row)
+    layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(4)
+    caption = label(title, 'section', wrap=False)
+    layout.addWidget(caption, 1)
+    for widget in trailing:
+        layout.addWidget(widget)
+    row.caption = caption
+    return row
 
 
 def card(title=None):
@@ -118,8 +147,34 @@ class Disclosure(QWidget):
         if changed or self.sender() is self.toggle: self.expandedChanged.emit(expanded)
 
 
+class StableScrollArea(QScrollArea):
+    """QScrollArea that cannot recurse on its own content resize.
+
+    Word-wrapped labels make content height depend on width. When the vertical
+    scroll bar appears it narrows the viewport, which changes the height again;
+    at some window widths Qt re-enters its resize handling until the native
+    stack overflows. Nested passes are skipped; the outer pass and the next
+    resize/layout event settle the geometry.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._resizing = False
+
+    def eventFilter(self, watched, event):
+        if event.type() != QEvent.Resize:
+            return super().eventFilter(watched, event)
+        if self._resizing:
+            return False
+        self._resizing = True
+        try:
+            return super().eventFilter(watched, event)
+        finally:
+            self._resizing = False
+
+
 def scroll(widget):
-    area = QScrollArea()
+    area = StableScrollArea()
     area.setWidgetResizable(True)
     area.setWidget(widget)
     area.setMinimumWidth(0)
@@ -138,8 +193,13 @@ def configure_view(view):
     header.setSectionResizeMode(QHeaderView.Interactive)
     header.setDefaultSectionSize(180)
     header.setMinimumSectionSize(60)
+    header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+    header.setHighlightSections(False)
     if isinstance(view, QTableView):
-        view.verticalHeader().setDefaultSectionSize(28)
+        from .theme import ROW_HEIGHT
+        view.verticalHeader().setDefaultSectionSize(ROW_HEIGHT)
+        view.setShowGrid(False)
+        view.setWordWrap(False)
     view.setMinimumWidth(0)
     return view
 
@@ -209,9 +269,11 @@ class ValueForm(QWidget):
         widget = QLineEdit(str(self.settings.get(self.prefix + key, default)))
         try:
             float(str(default).replace(',','.'))
-            widget.setAlignment(Qt.AlignRight)
-        except (ValueError,TypeError): pass
-        widget.setClearButtonEnabled(True)
+            # Numbers align right like a technical table; a clear icon would
+            # only add noise beside a short numeric value.
+            widget.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        except (ValueError,TypeError):
+            widget.setClearButtonEnabled(True)
         self.form.addRow(label(title), widget)
         return self._bind(key, widget, default, widget.textChanged)
 
@@ -389,12 +451,12 @@ class BasePage(QWidget):
         self.command_controls = []
         self.status_text = ''
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(12, 10, 12, 8)
-        self.layout.setSpacing(10)
+        self.layout.setContentsMargins(12, 8, 12, 8)
+        self.layout.setSpacing(8)
         heading = QBoxLayout(QBoxLayout.LeftToRight)
         self.heading = heading
         captions = QVBoxLayout()
-        captions.setSpacing(3)
+        captions.setSpacing(1)
         self.title_label = label(title, 'title'); self.description_label = label(description, 'subtitle')
         self.title_label.setToolTip(description)
         captions.addWidget(self.title_label); captions.addWidget(self.description_label)
@@ -409,6 +471,8 @@ class BasePage(QWidget):
         self.command_bar.addWidget(self.action_host)
         heading.addWidget(self.command_bar)
         self.layout.addLayout(heading)
+        # One hairline separates the module header from its workspace.
+        self.header_rule = separator(); self.layout.addWidget(self.header_rule)
         self.status = label('Hazır', 'muted'); self.status.hide()
 
     def resizeEvent(self, event):
@@ -442,7 +506,7 @@ class BasePage(QWidget):
         colors=COLORS[self.context.appearance]
         for widget in self.command_controls:
             name=widget.property('commandIcon')
-            if name:widget.setIcon(icon(name,colors['sidebar' if widget.property('primary') else 'muted']))
+            if name:widget.setIcon(icon(name,colors['on_accent' if widget.property('primary') else 'muted']))
 
     def finish_layout(self):
         row = QHBoxLayout()

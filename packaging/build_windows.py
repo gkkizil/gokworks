@@ -74,6 +74,8 @@ def main():
             '--add-data', f'{ROOT / "assets/GOK_app_windows.ico"};assets',
             '--add-data', f'{ROOT / "assets/qt/chevron-dark.png"};assets/qt',
             '--add-data', f'{ROOT / "assets/qt/chevron-light.png"};assets/qt',
+            '--add-data', f'{ROOT / "assets/qt/chevron-up-dark.png"};assets/qt',
+            '--add-data', f'{ROOT / "assets/qt/chevron-up-light.png"};assets/qt',
             '--add-data', f'{ROOT / "modules/iso_fits/tables.json"};modules/iso_fits',
             '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop',
             '--add-data', f'{ROOT / "modules/shaft_generator/interop/ShaftHost.cs"};modules/shaft_generator/interop', str(ROOT/'main.py')]

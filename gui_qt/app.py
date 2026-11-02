@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, QEvent
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QGuiApplication, QSurfaceFormat
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout,
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, QLabel,
     QVBoxLayout, QStackedWidget, QProgressBar, QComboBox, QMessageBox,
     QDialog, QDialogButtonBox, QCheckBox, QDockWidget)
 from .settings import SettingsStore
@@ -121,11 +121,17 @@ class MainWindow(QMainWindow):
         self.global_status.setMaximumWidth(600)
         self.statusBar().addWidget(self.global_status, 1)
         self.progress = QProgressBar()
-        self.progress.setFixedWidth(130)
+        self.progress.setFixedWidth(120)
         self.progress.setTextVisible(False)
         self.progress.hide()
         self.statusBar().addPermanentWidget(self.progress)
+        # CAD state reads at a glance: grey = not checked, green = connected, red = offline.
+        self.connection_indicator = QLabel('●'); self.connection_indicator.setObjectName('connectionIndicator')
+        self.connection_indicator.setAccessibleName('SolidWorks bağlantı durumu')
+        self.set_connection_state('unknown', 'SolidWorks bağlantısı henüz kontrol edilmedi.')
+        self.statusBar().addPermanentWidget(self.connection_indicator)
         self.connection_button = button('SolidWorks · Bağlantıyı kontrol et', self.check_connection)
+        self.connection_button.setToolTip('Açık SolidWorks oturumunu kontrol et')
         self.statusBar().addPermanentWidget(self.connection_button)
         # Only the restored initial module is constructed at startup. Existing
         # mapping access still loads any module explicitly requested by callers.
@@ -305,14 +311,23 @@ class MainWindow(QMainWindow):
         for kind, result in events:
             if kind == 'connection_done':
                 if result['connected']:
+                    self.set_connection_state('connected', 'SolidWorks bağlı · ' + result['revision'])
                     self.connection_button.setText('SolidWorks · ' + result['revision'])
                     self.set_status('Açık SolidWorks oturumuna bağlanıldı.')
                 else:
+                    self.set_connection_state('offline', result['error'])
                     self.connection_button.setText('SolidWorks · Bağlantı yok')
                     self.connection_button.setToolTip(result['error'])
                     self.set_status(result['error'], True)
             elif kind == 'job_error':
                 self.set_status(result['error'], True)
+
+    def set_connection_state(self, state, detail=''):
+        indicator = self.connection_indicator
+        indicator.setToolTip(detail)
+        if indicator.property('state') != state:
+            indicator.setProperty('state', state)
+            indicator.style().unpolish(indicator); indicator.style().polish(indicator)
 
     def job_finished(self):
         pass
@@ -389,6 +404,9 @@ class MainWindow(QMainWindow):
         event.accept()
 
 
+_STYLE = None
+
+
 def create_application(argv=None):
     existing = QApplication.instance()
     if existing is not None and existing.applicationName() == 'GOKWORKS':
@@ -404,7 +422,12 @@ def create_application(argv=None):
     app = QApplication.instance() or QApplication(sys.argv if argv is None else argv)
     app.setApplicationName('GOKWORKS')
     app.setOrganizationName('GOKWORKS')
-    app.setStyle('Fusion')
+    from .theme import GokworksStyle
+    global _STYLE
+    # Keep the Python override alive for the whole application lifetime.
+    if _STYLE is None:
+        _STYLE = GokworksStyle('Fusion')
+    app.setStyle(_STYLE)
     app.setWindowIcon(QIcon(str(ASSETS / 'GOK_app_windows.ico')))
     return app
 

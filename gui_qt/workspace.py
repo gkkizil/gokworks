@@ -44,21 +44,23 @@ class ModuleBrowser(QFrame):
         super().__init__()
         self.settings = settings; self.collapsed = False
         self.setObjectName('sidebar'); self.setFixedWidth(232)
-        body = QVBoxLayout(self); body.setContentsMargins(8,6,8,8); body.setSpacing(6)
-        brand = QHBoxLayout(); brand.setSpacing(6)
-        self.logo = BrandLogo(); self.logo.setMinimumWidth(80); self.logo.setFixedSize(104,30)
+        body = QVBoxLayout(self); body.setContentsMargins(6,8,6,6); body.setSpacing(6)
+        brand = QHBoxLayout(); brand.setSpacing(4); brand.setContentsMargins(4,0,0,0)
+        self.logo = BrandLogo(); self.logo.setMinimumWidth(64); self.logo.setFixedSize(84,24)
         brand.addWidget(self.logo); brand.addStretch()
-        self.menu_toggle = QToolButton(); self.menu_toggle.setText('‹'); self.menu_toggle.setFixedSize(28,28)
+        self.menu_toggle = QToolButton(); self.menu_toggle.setObjectName('sidebarToggle')
+        self.menu_toggle.setText('‹'); self.menu_toggle.setFixedSize(24,24)
         self.menu_toggle.clicked.connect(toggle_sidebar); brand.addWidget(self.menu_toggle); body.addLayout(brand)
         self.caption = label('ÇALIŞMA ALANLARI','muted'); self.caption.setProperty('eyebrow',True)
-        body.addWidget(self.caption)
+        # The workspace caption is retained for callers; the grouped list is self-explanatory.
+        self.caption.setParent(self); self.caption.hide()
         self.search = QLineEdit(); self.search.setPlaceholderText('Araç bul…  Ctrl+K'); self.search.setClearButtonEnabled(True)
         self.search.installEventFilter(self)
         self.search.setAccessibleName('GOKWORKS araçlarında ara')
         self.search.setToolTip('Ctrl+K: ara · Enter: ilk aracı aç · Esc: aramayı temizle')
         body.addWidget(self.search)
         menu = QWidget(); groups_layout = QVBoxLayout(menu)
-        groups_layout.setContentsMargins(0,0,0,0); groups_layout.setSpacing(4)
+        groups_layout.setContentsMargins(0,0,0,0); groups_layout.setSpacing(0)
         self.groups = {}; self.buttons = {}; self.group_for_mode = {}
         titles = {key:title for key,title,_ in modules}
         preferences = settings.get('navigation_groups',{})
@@ -68,7 +70,7 @@ class ModuleBrowser(QFrame):
             group.toggle.setText(group.toggle.text()+'  ·  '+str(len(keys)))
             for key in keys:
                 nav = button(titles[key],lambda checked=False,key=key:navigate(key))
-                nav.setProperty('nav',True); nav.setCheckable(True); nav.setIconSize(QSize(18,18))
+                nav.setProperty('nav',True); nav.setCheckable(True); nav.setIconSize(QSize(16,16))
                 nav.setAccessibleName(titles[key]); nav.setToolTip(titles[key])
                 group.items.addWidget(nav); self.buttons[key] = nav; self.group_for_mode[key] = title
             group.toggle.setChecked(preferences.get(title,True) is not False)
@@ -85,20 +87,25 @@ class ModuleBrowser(QFrame):
         groups_layout.addStretch()
         self.menu_scroll = scroll(menu); self.menu_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body.addWidget(self.menu_scroll,1)
-        self.footer = QWidget(); footer = QVBoxLayout(self.footer)
-        footer.setContentsMargins(0,0,0,0); footer.setSpacing(4)
-        row=QHBoxLayout();row.setSpacing(4)
-        self.settings_button = button('Ayarlar',show_settings); self.about_button = button('Hakkında',show_about)
-        row.addWidget(self.settings_button);row.addWidget(self.about_button);footer.addLayout(row)
-        self.contact_button=button('İletişim',show_contact)
-        self.contact_button.setToolTip('E-posta ve LinkedIn iletişim bilgileri')
-        footer.addWidget(self.contact_button);body.addWidget(self.footer)
         self.theme_picker = QComboBox()
         self.theme_picker.addItem('Koyu tema','dark'); self.theme_picker.addItem('Açık tema','light')
         self.theme_picker.setCurrentIndex(0 if settings.get('appearance','dark')=='dark' else 1)
         self.theme_picker.setAccessibleName('Arayüz teması')
         self.theme_picker.currentIndexChanged.connect(lambda:set_theme(self.theme_picker.currentData()))
+        self.theme_picker.setToolTip('Arayüz teması')
         body.addWidget(self.theme_picker)
+        # Secondary application links: one quiet row instead of stacked buttons.
+        self.footer = QFrame(); self.footer.setObjectName('sidebarFooter')
+        footer = QHBoxLayout(self.footer); footer.setContentsMargins(0,0,0,0); footer.setSpacing(0)
+        self.settings_button = button('Ayarlar',show_settings); self.about_button = button('Hakkında',show_about)
+        self.contact_button=button('İletişim',show_contact)
+        self.settings_button.setToolTip('Uygulama ayarları · Ctrl+,')
+        self.about_button.setToolTip('Sürüm, lisans ve kaynak bilgileri')
+        self.contact_button.setToolTip('E-posta ve LinkedIn iletişim bilgileri')
+        for link in (self.settings_button,self.about_button,self.contact_button):
+            link.setProperty('flat',True); link.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
+            footer.addWidget(link)
+        body.addWidget(self.footer)
         self.search.textChanged.connect(self.filter)
 
     def remember_group(self,title,expanded):
@@ -149,7 +156,7 @@ class ModuleBrowser(QFrame):
 
     def set_collapsed(self, collapsed):
         self.collapsed = collapsed; self.setFixedWidth(64 if collapsed else 232)
-        for widget in (self.logo,self.caption,self.search,self.footer,self.theme_picker): widget.setVisible(not collapsed)
+        for widget in (self.logo,self.search,self.footer,self.theme_picker): widget.setVisible(not collapsed)
         for group in self.groups.values():
             group.toggle.setVisible(not collapsed)
         for control in self.buttons.values():
