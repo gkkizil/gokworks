@@ -4,7 +4,7 @@ import threading
 import time
 import traceback
 
-from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot, Qt
+from PySide6.QtCore import QCoreApplication, QObject, QThread, QTimer, Signal, Slot, Qt
 from solidworks import diagnostics
 
 
@@ -82,6 +82,14 @@ class JobWorker(QObject):
         finally:
             diagnostics.record('qt_worker_flush_started')
             sink.close()
+            # Destroying this Python-wrapped QObject on the worker thread can
+            # deadlock: ~QObject holds Qt's signal/slot mutex while PySide asks
+            # for the GIL, and the GUI thread may hold the GIL while waiting for
+            # that mutex in connect(). Hand the object back to the GUI thread;
+            # JobManager deletes it there after the native thread has exited.
+            application = QCoreApplication.instance()
+            if application is not None:
+                self.moveToThread(application.thread())
             diagnostics.record('qt_worker_completed_signal')
             self.completed.emit()
 
@@ -118,7 +126,6 @@ class JobManager(QObject):
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.batch.connect(owner.handle_events, Qt.QueuedConnection)
-        self.worker.completed.connect(self.worker.deleteLater)
         self.worker.completed.connect(self.thread.quit)
         self.thread.finished.connect(self._finished)
         owner.set_busy(True)
@@ -151,8 +158,10 @@ class JobManager(QObject):
         self.join_timer.stop()
         self._joining = False
         diagnostics.record('qt_job_native_joined')
-        owner = self.owner
+        owner, worker = self.owner, self.worker
         self.thread = self.worker = self.owner = self.stop = None
+        if worker is not None:
+            worker.deleteLater()   # GUI thread: see JobWorker.run
         thread.deleteLater()
         if owner is not None:
             owner.set_busy(False)
