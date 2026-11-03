@@ -845,6 +845,8 @@ def test_weight_cad_button_reports_missing_solidworks(window, qtbot):
     page.read_cad()
     qtbot.waitUntil(lambda: 'başarısız' in page.cad_label.text(), timeout=5000)
     assert page.form.fields['kind'].isEnabled()
+    page.update_result()                       # a recalculation must not wipe the error
+    assert 'başarısız' in page.cad_label.text()
 
 
 @pytest.mark.parametrize('manual', [True,False])

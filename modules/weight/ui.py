@@ -68,6 +68,7 @@ class WeightPage(CalculationPage):
         self.extra_layout.addWidget(self.cad_label)
         self.controls.append(self.cad_button)
         self.cad = None
+        self.cad_error = ''
         self.old_unit = f.value('unit')
         self.current_kind = None
         self._add_section_view()
@@ -451,6 +452,7 @@ class WeightPage(CalculationPage):
         if not self.can_start():
             return
         from modules.weight import cad
+        self.cad_error = ''
         self.cad_label.setText('SOLIDWORKS etkin modeli okunuyor…')
         self.jobs.start(self, cad.worker)
 
@@ -459,17 +461,20 @@ class WeightPage(CalculationPage):
             if kind == 'weight_cad_phase':
                 self.set_status(value)
             elif kind == 'weight_cad':
-                self.cad = value
+                self.cad, self.cad_error = value, ''
                 self.update_cad_comparison()
                 self.set_status('CAD modeli kütlesi okundu.')
             elif kind == 'job_error':
-                self.cad_label.setText('CAD okuması başarısız: ' + str(value.get('error', '')))
+                # Kept as state: a later recalculation must not wipe the message.
+                self.cad, self.cad_error = None, 'CAD okuması başarısız: ' + str(value.get('error', ''))
+                self.update_cad_comparison()
         super().handle_events(events)
 
     def update_cad_comparison(self):
         cad = self.cad
         if cad is None:
-            self.cad_label.setText('Formül hesabından ayrı yöntem: SOLIDWORKS model hacmi × malzeme yoğunluğu.')
+            self.cad_label.setText(self.cad_error or
+                                   'Formül hesabından ayrı yöntem: SOLIDWORKS model hacmi × malzeme yoğunluğu.')
             return
         text = (f'CAD modeli ({cad.kind}): {cad.document}' + (f' · {cad.configuration}' if cad.configuration else '') +
                 f'\nMalzeme {cad.material} · yoğunluk {r.fmt_fixed(cad.density_kg_m3, 0)} kg/m³'
