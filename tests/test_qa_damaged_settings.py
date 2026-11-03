@@ -58,7 +58,7 @@ def _open_every_page(qtbot, path):
         QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
 
 
-@pytest.mark.parametrize('value', HOSTILE, ids=lambda v: type(v).__name__ + ':' + str(v)[:12])
+@pytest.mark.parametrize('value', HOSTILE, ids=['none', 'text', 'huge_int', 'list', 'dict', 'bool'])
 def test_every_key_with_a_wrong_type_still_opens_every_page(qtbot, tmp_path, unhandled, value):
     path = tmp_path / 'settings.json'
     path.write_text(json.dumps({key: value for key in KEYS}), encoding='utf-8')
@@ -66,7 +66,8 @@ def test_every_key_with_a_wrong_type_still_opens_every_page(qtbot, tmp_path, unh
     assert not unhandled, unhandled[0]
 
 
-@pytest.mark.parametrize('raw', [b'', b'{', b'[]', b'null', b'"x"', b'\xff\xfe\x00garbage', b'{"a":NaN}', b'1e999'])
+@pytest.mark.parametrize('raw', [b'', b'{', b'[]', b'null', b'"x"', b'\xff\xfe\x00garbage', b'{"a":NaN}', b'1e999'],
+                         ids=['empty', 'truncated', 'list_root', 'null_root', 'string_root', 'binary', 'nan', 'infinite'])
 def test_raw_corruption_still_opens_every_page(qtbot, tmp_path, unhandled, raw):
     path = tmp_path / 'settings.json'
     path.write_bytes(raw)

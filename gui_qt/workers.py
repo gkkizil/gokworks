@@ -4,7 +4,8 @@ import threading
 import time
 import traceback
 
-from PySide6.QtCore import QCoreApplication, QObject, QThread, QTimer, Signal, Slot, Qt
+from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot, Qt
+import shiboken6
 from solidworks import diagnostics
 
 
@@ -82,14 +83,6 @@ class JobWorker(QObject):
         finally:
             diagnostics.record('qt_worker_flush_started')
             sink.close()
-            # Destroying this Python-wrapped QObject on the worker thread can
-            # deadlock: ~QObject holds Qt's signal/slot mutex while PySide asks
-            # for the GIL, and the GUI thread may hold the GIL while waiting for
-            # that mutex in connect(). Hand the object back to the GUI thread;
-            # JobManager deletes it there after the native thread has exited.
-            application = QCoreApplication.instance()
-            if application is not None:
-                self.moveToThread(application.thread())
             diagnostics.record('qt_worker_completed_signal')
             self.completed.emit()
 
@@ -160,8 +153,14 @@ class JobManager(QObject):
         diagnostics.record('qt_job_native_joined')
         owner, worker = self.owner, self.worker
         self.thread = self.worker = self.owner = self.stop = None
-        if worker is not None:
-            worker.deleteLater()   # GUI thread: see JobWorker.run
+        if worker is not None and shiboken6.isValid(worker):
+            # Never destroy the worker on its own QThread (no deleteLater there):
+            # ~QObject holds Qt's signal/slot mutex while PySide asks for the
+            # GIL, and the GUI thread may hold the GIL while waiting for that
+            # mutex in connect() - an ABBA deadlock that froze the window. The
+            # native thread has been joined above, so nothing else can touch
+            # the worker; delete it here, synchronously, on the GUI thread.
+            shiboken6.delete(worker)
         thread.deleteLater()
         if owner is not None:
             owner.set_busy(False)

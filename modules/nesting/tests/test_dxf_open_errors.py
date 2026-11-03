@@ -1,6 +1,6 @@
 """Unreadable DXF files fail with a Turkish, per-file message (QA 2026-11-03)."""
 
-import os
+import random
 
 import ezdxf
 import pytest
@@ -18,9 +18,9 @@ def _rectangle(path):
 
 @pytest.mark.parametrize('content, expected', [
     (b'', 'dosya boş'),
-    (os.urandom(4096), 'geçerli bir DXF dosyası okunamadı'),
+    (random.Random(20261103).randbytes(4096), 'geçerli bir DXF dosyası okunamadı'),
     (b'%PDF-1.7\n' + b'x' * 200, 'geçerli bir DXF dosyası okunamadı'),
-])
+], ids=['empty', 'binary', 'pdf'])   # readable ids: Windows CI passes node ids on the command line
 def test_empty_or_non_dxf_content_is_a_turkish_value_error(tmp_path, content, expected):
     path = tmp_path / 'Çalışma ğüş (1) & #2' / 'parça.dxf'
     path.parent.mkdir()
