@@ -339,12 +339,12 @@ namespace Gokworks.ShaftInterop
                 double s1 = Convert.ToDouble(scale[0], Inv), s2 = Convert.ToDouble(scale[1], Inv);
                 bool firstAngle = S(plan, "projection") != "third";
                 SetupSheet(drawing, S(request, "sheet_format"), paper, s1, s2, firstAngle, width, height, issues);
-                double factor = s1 / s2;
+                double factor = s1 / s2; PlannedFactor = factor;
 
                 Report("Görünüşler oluşturuluyor");
                 var views = new Dictionary<string, IView>();
                 var viewBoxes = D(layout["views"]);
-                IView main = MainView(drawing, part, partPath, shaft, BoxCentre(viewBoxes, "main"));
+                IView main = MainView(drawing, part, partPath, shaft, BoxCentre(viewBoxes, "main"), factor, issues);
                 if (B(D(((ArrayList)plan["views"])[0]), "hidden_lines"))
                     main.SetDisplayMode4(false, (int)swDisplayMode_e.swHIDDEN_GREYED, false, true, false);
                 views["main"] = main;
@@ -567,7 +567,7 @@ namespace Gokworks.ShaftInterop
             throw new InvalidOperationException("Model görünüşü oluşturulamadı (denenen adlar: " + String.Join(", ", tried) + ").");
         }
 
-        private static IView MainView(IDrawingDoc drawing, IModelDoc2 part, string partPath, Shaft shaft, double[] at)
+        private static IView MainView(IDrawingDoc drawing, IModelDoc2 part, string partPath, Shaft shaft, double[] at, double factor, List<string> issues)
         {
             // The viewer must look along +Normal so that +Axis is right and +Radial (keyway) is up.
             // Front, Back, Top, Bottom, Right, Left as swStandardViews_e values.
@@ -590,6 +590,16 @@ namespace Gokworks.ShaftInterop
                 IView view = (IView)drawing.CreateDrawViewFromModelView3(partPath, name, at[0], at[1], 0);
                 if (view == null) { tried.Add(name + " (oluşmadı)"); continue; }
                 view.UseSheetScale = 1;
+                // SOLIDWORKS may auto-scale a new view ('Auto-scale new drawing views'); the
+                // layout was planned at the sheet scale, so enforce it and read it back.
+                if (Math.Abs(view.ScaleDecimal - factor) > 1e-9 * Math.Max(1, factor))
+                {
+                    view.UseSheetScale = 0;
+                    view.ScaleDecimal = factor;
+                    if (Math.Abs(view.ScaleDecimal - factor) > 1e-9 * Math.Max(1, factor))
+                        issues.Add("Ana görünüş ölçeği " + factor.ToString("0.####", Inv) + " yapılamadı (okunan "
+                                   + view.ScaleDecimal.ToString("0.####", Inv) + "); ölçüler gerçek görünüşe göre yerleştirildi.");
+                }
                 if (Aligned(view, shaft))
                 {
                     view.Position = at;
@@ -732,20 +742,37 @@ namespace Gokworks.ShaftInterop
             return view.SelectEntity(entity, append);
         }
 
+        internal static double PlannedFactor = 1;
+
         private static double[] Place(IView view, Shaft shaft, Dictionary<string, object> viewBoxes, Dictionary<string, object> placements,
                                       string viewId, string id, double fallbackX)
         {
-            // Layout positions are sheet mm relative to the planned view box; shift
-            // them by the real view outline so they follow the actual geometry.
             double[] outline = (double[])view.GetOutline();
             double cx = (outline[0] + outline[2]) / 2, cy = (outline[1] + outline[3]) / 2;
             if (!placements.ContainsKey(id) || !viewBoxes.ContainsKey(viewId))
                 return new double[] { cx, outline[3] + .01 };
             var p = D(placements[id]);
             ArrayList box = (ArrayList)D(viewBoxes[viewId])["box"];
-            double bx = (Convert.ToDouble(box[0], Inv) + Convert.ToDouble(box[2], Inv)) / 2;
-            double by = (Convert.ToDouble(box[1], Inv) + Convert.ToDouble(box[3], Inv)) / 2;
-            return new double[] { cx + (N(p, "x_mm") - bx) * .001, cy + (N(p, "y_mm") - by) * .001 };
+            double bx0 = Convert.ToDouble(box[0], Inv), by0 = Convert.ToDouble(box[1], Inv);
+            double bx1 = Convert.ToDouble(box[2], Inv), by1 = Convert.ToDouble(box[3], Inv);
+            double x = N(p, "x_mm"), y = N(p, "y_mm");
+            if (viewId == "main" || viewId == "top")
+            {
+                // Along the axis: the planned paper position is a model position (planned
+                // scale), mapped through the view's real ModelToViewTransform, so a view that
+                // SOLIDWORKS scaled or moved still gets every dimension at its feature.
+                // Across the axis: tiers keep their planned paper distance from the real
+                // view outline.
+                double[] axis = ToSheet(view, shaft, (x - bx0) / PlannedFactor, 0, 0);
+                string band = S(p, "band");
+                double sheetY = band == "inside" ? axis[1]
+                    : band == "below" ? outline[1] - (by0 - y) * .001
+                    : band == "above" ? outline[3] + (y - by1) * .001
+                    : axis[1] + (y - (by0 + by1) / 2) * .001;
+                return new double[] { axis[0], sheetY };
+            }
+            // Other views (sections, details): offset from the real outline centre.
+            return new double[] { cx + (x - (bx0 + bx1) / 2) * .001, cy + (y - (by0 + by1) / 2) * .001 };
         }
 
         // COM arrays arrive as string[], object[] or double[] depending on the call.
@@ -789,6 +816,13 @@ namespace Gokworks.ShaftInterop
                 for (int i = 0; i < entities.Count; i++)
                     Need(SelectIn(view, entities[i], i > 0), "kenar görünüşte seçilemedi");
                 double[] at = Place(view, shaft, viewBoxes, placements, viewId, id, 0);
+                if (S(dim, "kind") == "diameter" && (viewId == "main" || viewId == "top"))
+                {
+                    // Diameter text in the upper half of the step, clear of the centre line.
+                    double xm = (N(dim, "x0_mm") + N(dim, "x1_mm")) / 2;
+                    double[] text = ToSheet(view, shaft, xm, N(dim, "nominal_mm") / 4, 0);
+                    at = new double[] { text[0], text[1] };
+                }
                 IDisplayDimension display = (IDisplayDimension)model.AddDimension2(at[0], at[1], 0);
                 Need(display != null, "SOLIDWORKS ölçü oluşturmadı");
                 IDimension dimension = display.GetDimension2(0);
@@ -812,6 +846,11 @@ namespace Gokworks.ShaftInterop
                     ((IAnnotation)display.GetAnnotation()).Select3(false, null); model.EditDelete();
                     throw new InvalidOperationException("ölçü değeri " + Mm(value * 1000) + " mm, beklenen " + Mm(expected * 1000) + " mm; silindi");
                 }
+                // 40 not "40,00": whole millimetres without decimals, otherwise only the
+                // decimals the value needs (tolerance digits follow the document).
+                double nominal = N(dim, "nominal_mm"); int decimals = 0;
+                while (decimals < 3 && Math.Abs(nominal * Math.Pow(10, decimals) - Math.Round(nominal * Math.Pow(10, decimals))) > 1e-6) decimals++;
+                display.SetPrecision3(decimals, -1, -1, -1);
                 if (S(dim, "prefix") == "Ø" && display.GetType() != (int)swDimensionType_e.swDiameterDimension)
                     display.SetText((int)swDimensionTextParts_e.swDimensionTextPrefix, "<MOD-DIAM>");
                 if (B(dim, "reference")) display.ShowParenthesis = true;
