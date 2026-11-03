@@ -67,10 +67,70 @@ def normalized(mesh):
     return vertices, normals, edges
 
 
+BASE_COLOUR = np.array([155, 172, 188], dtype=float)
+EDGE_COLOUR = (63, 77, 91)
+
+
+def _fill(triangles, shade, ids, size, depth, pixels, stop):
+    """Rasterize triangles whose screen bounding box fits in size = (columns, rows), all at once.
+
+    Every candidate sample gets barycentric coordinates and a depth; the
+    nearest sample per pixel (also against the existing depth buffer) wins.
+    Same coverage rule and depth range as the per-triangle loop it replaces.
+    """
+    height, width = depth.shape
+    columns, rows = size
+    dx, dy = np.arange(columns, dtype=np.float32), np.arange(rows, dtype=np.float32)
+    flat_depth, flat_pixels = depth.reshape(-1), pixels.reshape(-1, 3)
+    batch = max(1, 300000 // (columns*rows))
+    for begin in range(0, len(ids), batch):
+        if stop.is_set():
+            return False
+        chunk = ids[begin:begin + batch]
+        t = triangles[chunk].astype(np.float32)
+        x0 = np.maximum(0, np.floor(t[:, :, 0].min(axis=1)))
+        y0 = np.maximum(0, np.floor(t[:, :, 1].min(axis=1)))
+        x1 = np.minimum(width-1, np.ceil(t[:, :, 0].max(axis=1)))
+        y1 = np.minimum(height-1, np.ceil(t[:, :, 1].max(axis=1)))
+        a, b, c = t[:, 0], t[:, 1], t[:, 2]
+        den = (b[:, 1]-c[:, 1])*(a[:, 0]-c[:, 0]) + (c[:, 0]-b[:, 0])*(a[:, 1]-c[:, 1])
+        good = np.abs(den) >= 1e-10
+        den = np.where(good, den, np.float32(1))
+        # Barycentrics are affine in x and y: u = u0 + ux*dx + uy*dy.
+        ux, uy = (b[:, 1]-c[:, 1])/den, (c[:, 0]-b[:, 0])/den
+        vx, vy = (c[:, 1]-a[:, 1])/den, (a[:, 0]-c[:, 0])/den
+        u0 = ux*(x0-c[:, 0]) + uy*(y0-c[:, 1])
+        v0 = vx*(x0-c[:, 0]) + vy*(y0-c[:, 1])
+        u = u0[:, None, None] + uy[:, None, None]*dy[None, :, None] + ux[:, None, None]*dx[None, None, :]
+        v = v0[:, None, None] + vy[:, None, None]*dy[None, :, None] + vx[:, None, None]*dx[None, None, :]
+        w = 1-u-v
+        mask = (u >= -1e-8) & (v >= -1e-8) & (w >= -1e-8)
+        mask &= (x0[:, None, None] + dx[None, None, :] <= x1[:, None, None])
+        mask &= (y0[:, None, None] + dy[None, :, None] <= y1[:, None, None])
+        mask &= good[:, None, None]
+        triangle, row, column = np.nonzero(mask)
+        if not len(triangle):
+            continue
+        uu, vv = u[triangle, row, column], v[triangle, row, column]
+        z = (uu*a[triangle, 2] + vv*b[triangle, 2] + (1-uu-vv)*c[triangle, 2]).astype(float)
+        inside = (z >= -1) & (z <= 1)
+        triangle, z = triangle[inside], z[inside]
+        index = ((y0[triangle] + row[inside])*width + x0[triangle] + column[inside]).astype(np.int64)
+        before = flat_depth[index]
+        np.minimum.at(flat_depth, index, z)
+        won = (z == flat_depth[index]) & (z < before)
+        flat_pixels[index[won]] = (BASE_COLOUR[None, :] * shade[chunk[triangle[won]]][:, None]).astype(np.uint8)
+    return True
+
+
 def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
     """True depth testing; holes remain holes, independent of triangle order.
 
     ``background`` is the RGB canvas colour (the theme's ``canvas`` token).
+    Triangles are rasterized in vectorized batches grouped by screen size, so
+    a CPU frame of a few thousand triangles takes milliseconds, not a
+    Python-level loop per triangle (the old cause of a stuttering rotation
+    when OpenGL is unavailable).
     """
     width, height = max(1, width), max(1, height)
     vertices, normals, edges = normalized(mesh)
@@ -85,17 +145,25 @@ def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
     depth = np.full((height, width), np.inf)
     light = np.array([.25, .45, 1.]); light /= np.linalg.norm(light)
     shade = .42 + .58 * np.abs((normals[::3] @ view[:3, :3].T) @ light)
-    for i, triangle in enumerate(p.reshape((-1, 3, 3))):
-        if i % 32 == 0 and stop.is_set():
+    triangles = p.reshape((-1, 3, 3))
+    low, high = triangles[:, :, :2].min(axis=1), triangles[:, :, :2].max(axis=1)
+    keep = ((triangles[:, :, 2].max(axis=1) >= -1) & (triangles[:, :, 2].min(axis=1) <= 1)
+            & (high[:, 0] >= 0) & (high[:, 1] >= 0) & (low[:, 0] <= width-1) & (low[:, 1] <= height-1)
+            & np.isfinite(triangles).all(axis=(1, 2)))
+    span = np.ceil(np.minimum(high, [width-1, height-1])) - np.floor(np.maximum(low, 0)) + 1
+    limits = (2, 4, 8, 16, 32, 64, 128, 256)
+    bucket = np.searchsorted(limits, np.clip(span, 1, None))      # per axis; slivers stay cheap
+    large = keep & (bucket.max(axis=1) >= len(limits))
+    for bx, by in sorted(set(map(tuple, bucket[keep & ~large]))):
+        ids = np.nonzero(keep & ~large & (bucket[:, 0] == bx) & (bucket[:, 1] == by))[0]
+        if not _fill(triangles, shade, ids, (limits[bx], limits[by]), depth, pixels, stop):
             return None
-        if np.max(triangle[:, 2]) < -1 or np.min(triangle[:, 2]) > 1:
-            continue
-        x0, y0 = np.floor(triangle[:, :2].min(axis=0)).astype(int)
-        x1, y1 = np.ceil(triangle[:, :2].max(axis=0)).astype(int)
+    for i in np.nonzero(large)[0]:   # rare very large triangles
+        if stop.is_set():
+            return None
+        x0, y0 = np.floor(low[i]).astype(int); x1, y1 = np.ceil(high[i]).astype(int)
         x0, x1, y0, y1 = max(0, x0), min(width-1, x1), max(0, y0), min(height-1, y1)
-        if x0 > x1 or y0 > y1:
-            continue
-        a, b, c = triangle
+        a, b, c = triangles[i]
         denominator = (b[1]-c[1])*(a[0]-c[0]) + (c[0]-b[0])*(a[1]-c[1])
         if abs(denominator) < 1e-10:
             continue
@@ -107,23 +175,26 @@ def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
         old = depth[y0:y1+1, x0:x1+1]
         mask = (u >= -1e-8) & (v >= -1e-8) & (w >= -1e-8) & (z < old) & (z >= -1) & (z <= 1)
         old[mask] = z[mask]
-        pixels[y0:y1+1, x0:x1+1][mask] = np.array([155, 172, 188]) * shade[i]
+        pixels[y0:y1+1, x0:x1+1][mask] = BASE_COLOUR * shade[i]
     if state[-1] and len(edges):
+        if stop.is_set():
+            return None
         lines = project(edges).reshape((-1, 2, 3))
-        for i, (a, b) in enumerate(lines):
-            if i % 64 == 0 and stop.is_set():
-                return None
-            a = a.copy(); b = b.copy()
-            for point in (a, b):
-                point[0] = (point[0]+1)*.5*(width-1)
-                point[1] = (1-point[1])*.5*(height-1)
-            samples = min(2*max(width, height), max(2, int(np.max(np.abs(b[:2]-a[:2])))+1))
-            points = a + np.linspace(0, 1, samples)[:, None]*(b-a)
-            xy = np.rint(points[:, :2]).astype(int)
-            good = (xy[:, 0] >= 0) & (xy[:, 0] < width) & (xy[:, 1] >= 0) & (xy[:, 1] < height)
-            xy, z = xy[good], points[good, 2]
-            visible = (z <= depth[xy[:, 1], xy[:, 0]]+1e-5) & (z >= -1) & (z <= 1)
-            pixels[xy[visible, 1], xy[visible, 0]] = (63, 77, 91)
+        lines[:, :, 0] = (lines[:, :, 0]+1)*.5*(width-1)
+        lines[:, :, 1] = (1-lines[:, :, 1])*.5*(height-1)
+        lines = lines[np.isfinite(lines).all(axis=(1, 2))]
+        a, b = lines[:, 0], lines[:, 1]
+        counts = np.minimum(2*max(width, height),
+                            np.maximum(2, (np.max(np.abs(b[:, :2]-a[:, :2]), axis=1)+1).astype(int)))
+        line = np.repeat(np.arange(len(lines)), counts)
+        start = np.repeat(np.cumsum(counts)-counts, counts)
+        step = (np.arange(counts.sum())-start) / np.repeat(np.maximum(counts-1, 1), counts)
+        points = a[line] + step[:, None]*(b[line]-a[line])
+        xy = np.rint(points[:, :2]).astype(int)
+        good = (xy[:, 0] >= 0) & (xy[:, 0] < width) & (xy[:, 1] >= 0) & (xy[:, 1] < height)
+        xy, z = xy[good], points[good, 2]
+        visible = (z <= depth[xy[:, 1], xy[:, 0]]+1e-5) & (z >= -1) & (z <= 1)
+        pixels[xy[visible, 1], xy[visible, 0]] = EDGE_COLOUR
     return QImage(pixels.data, width, height, pixels.strides[0], QImage.Format_RGB888).copy()
 
 
@@ -275,7 +346,10 @@ class MeshView(QWidget):
             self.pending = True
             return
         # Render off the GUI thread; a large part never blocks input or CAD jobs.
-        factor = min(1., 640/max(1, self.width()), 480/max(1, self.height()))
+        # While dragging, a lighter frame keeps rotation fluid; the release
+        # renders one exact frame at the normal resolution.
+        limit = (400, 300) if self.dragging else (640, 480)
+        factor = min(1., limit[0]/max(1, self.width()), limit[1]/max(1, self.height()))
         size = max(1, int(self.width()*factor)), max(1, int(self.height()*factor))
         task = RenderJob(self.generation, self.mesh, size, self.camera.state(), threading.Event(),
                          (self.background.red(), self.background.green(), self.background.blue()))
