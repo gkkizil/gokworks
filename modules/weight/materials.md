@@ -1,6 +1,6 @@
 # Malzeme yoğunluk kataloğu
 
-Ağırlık hesabında 50 kayıtlı malzeme ve **Özel malzeme** kullanılır. Kayıtlı malzemelerin
+Ağırlık hesabında 58 kayıtlı malzeme ve **Özel malzeme** kullanılır. Kayıtlı malzemelerin
 yoğunluğu sabittir; farklı bir değer için Özel malzeme seçilip yoğunluk girilir. Değerler kaynaklardaki
 nominal kütle hesabı değerleridir; üretici sertifikası veya mekanik dayanım tablosu değildir.
 Aynı malzeme için kaynaklar farklı değer verebilir. 1 g/cm³ = 1.000 kg/m³.
@@ -78,6 +78,19 @@ _Bu tablo `modules/weight/materials.py` dosyasından üretilmiştir._
 | 6063 | 2700 | 2,7 | [Kayıt](https://www.aalco.co.uk/datasheets/Aluminium-Alloy-6063-T6-Extrusions_158.ashx) |
 | 6082 | 2700 | 2,7 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/AlMgSi1F31.FCMat) |
 | 7075 | 2810 | 2,81 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/Aluminum-7075-T6.FCMat) |
+
+## Saf metaller
+
+| Malzeme | kg/m³ | g/cm³ | Referans |
+| --- | ---: | ---: | --- |
+| Nikel | 8908 | 8,908 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Magnezyum | 1738 | 1,738 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Kalay | 7365 | 7,365 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Krom | 7190 | 7,19 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Kobalt | 8900 | 8,9 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Molibden | 10280 | 10,28 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Tungsten | 19250 | 19,25 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
+| Gümüş | 10490 | 10,49 | [Kayıt](https://github.com/Bowserinator/Periodic-Table-JSON/blob/9090b1c472a1e68f7295e77280f374f8d125cefc/PeriodicTableJSON.json) |
 
 ## Plastikler
 

@@ -89,6 +89,10 @@ def geometry(result):
         h, b, tw, tf, r = d['h'], d['b'], d['tw'], d['tf'], d.get('r', 0.0)
         pts = [(0, 0), (b, 0), (b, tf), (tw, tf), (tw, h - tf), (b, h - tf), (b, h), (0, h)]
         return [fillet(pts, {3: r, 4: r})], [], b, h
+    if shape == 'bent_channel':
+        h, b, t, r = d['h'], d['b'], d['t'], d.get('r', 0.0)
+        pts = [(0, 0), (b, 0), (b, t), (t, t), (t, h - t), (b, h - t), (b, h), (0, h)]
+        return [fillet(pts, {0: r + t, 3: r, 4: r, 7: r + t})], [], b, h
     if shape == 'tee':
         b, h, tw, tf = d['b'], d['h'], d['tw'], d['tf']
         x0, x1 = (b - tw) / 2, (b + tw) / 2

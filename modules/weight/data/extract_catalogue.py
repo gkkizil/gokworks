@@ -204,7 +204,8 @@ def build(folder):
         'bs_he': british_rows(folder / 'HE-datasheet-21.07.26.pdf', he_family),
         'bs_ea': angle_rows(folder / 'EA-datasheet-21.07.26.pdf', 'L'),
         'bs_ua': angle_rows(folder / 'UA-datasheet-21.07.26.pdf', 'LU'),
-        'swt_ipe': [dict(r, family='IPE') for r in swt_rows(folder / 'SWT-IPE-Details.pdf', r'IPE [0-9]+')],
+        # IPE A (light) and IPE O (heavy) are EN 10365 series; IPE AA/V are SWT-only and excluded.
+        'swt_ipe': [dict(r, family='IPE') for r in swt_rows(folder / 'SWT-IPE-Details.pdf', r'IPE(?: [AO])? [0-9]+')],
         'swt_he': [dict(r, family='HE' + r['designation'][-1]) for r in
                    swt_rows(folder / 'SWT-HE-Details.pdf', r'HE [0-9]+ [ABM]')],
         'swt_hphd': [dict(r, family=r['designation'][:2]) for r in

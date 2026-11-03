@@ -109,6 +109,19 @@
      ]
     },
     {
+     "designation": "IPE A 140",
+     "h": 137.4,
+     "b": 73.0,
+     "tw": 3.8,
+     "tf": 5.6,
+     "r": 7.0,
+     "area_cm2": 13.4,
+     "mass_kg_m": 10.5,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 140",
      "h": 140.0,
      "b": 73.0,
@@ -120,6 +133,19 @@
      "sources": [
       "swt_ipe",
       "bs_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 160",
+     "h": 157.0,
+     "b": 82.0,
+     "tw": 4.0,
+     "tf": 5.9,
+     "r": 9.0,
+     "area_cm2": 16.2,
+     "mass_kg_m": 12.7,
+     "sources": [
+      "swt_ipe"
      ]
     },
     {
@@ -137,6 +163,19 @@
      ]
     },
     {
+     "designation": "IPE A 180",
+     "h": 177.0,
+     "b": 91.0,
+     "tw": 4.3,
+     "tf": 6.5,
+     "r": 9.0,
+     "area_cm2": 19.6,
+     "mass_kg_m": 15.4,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 180",
      "h": 180.0,
      "b": 91.0,
@@ -148,6 +187,32 @@
      "sources": [
       "swt_ipe",
       "bs_ipe"
+     ]
+    },
+    {
+     "designation": "IPE O 180",
+     "h": 182.0,
+     "b": 92.0,
+     "tw": 6.0,
+     "tf": 9.0,
+     "r": 9.0,
+     "area_cm2": 27.1,
+     "mass_kg_m": 21.3,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 200",
+     "h": 197.0,
+     "b": 100.0,
+     "tw": 4.5,
+     "tf": 7.0,
+     "r": 12.0,
+     "area_cm2": 23.5,
+     "mass_kg_m": 18.4,
+     "sources": [
+      "swt_ipe"
      ]
     },
     {
@@ -165,6 +230,32 @@
      ]
     },
     {
+     "designation": "IPE O 200",
+     "h": 202.0,
+     "b": 102.0,
+     "tw": 6.2,
+     "tf": 9.5,
+     "r": 12.0,
+     "area_cm2": 32.0,
+     "mass_kg_m": 25.1,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 220",
+     "h": 217.0,
+     "b": 110.0,
+     "tw": 5.0,
+     "tf": 7.7,
+     "r": 12.0,
+     "area_cm2": 28.3,
+     "mass_kg_m": 22.2,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 220",
      "h": 220.0,
      "b": 110.0,
@@ -176,6 +267,32 @@
      "sources": [
       "swt_ipe",
       "bs_ipe"
+     ]
+    },
+    {
+     "designation": "IPE O 220",
+     "h": 222.0,
+     "b": 112.0,
+     "tw": 6.6,
+     "tf": 10.2,
+     "r": 12.0,
+     "area_cm2": 37.4,
+     "mass_kg_m": 29.4,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 240",
+     "h": 237.0,
+     "b": 120.0,
+     "tw": 5.2,
+     "tf": 8.3,
+     "r": 15.0,
+     "area_cm2": 33.3,
+     "mass_kg_m": 26.2,
+     "sources": [
+      "swt_ipe"
      ]
     },
     {
@@ -193,6 +310,32 @@
      ]
     },
     {
+     "designation": "IPE O 240",
+     "h": 242.0,
+     "b": 122.0,
+     "tw": 7.0,
+     "tf": 10.8,
+     "r": 15.0,
+     "area_cm2": 43.7,
+     "mass_kg_m": 34.3,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 270",
+     "h": 267.0,
+     "b": 135.0,
+     "tw": 5.5,
+     "tf": 8.7,
+     "r": 15.0,
+     "area_cm2": 39.2,
+     "mass_kg_m": 30.7,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 270",
      "h": 270.0,
      "b": 135.0,
@@ -204,6 +347,32 @@
      "sources": [
       "swt_ipe",
       "bs_ipe"
+     ]
+    },
+    {
+     "designation": "IPE O 270",
+     "h": 274.0,
+     "b": 136.0,
+     "tw": 7.5,
+     "tf": 12.2,
+     "r": 15.0,
+     "area_cm2": 53.8,
+     "mass_kg_m": 42.3,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 300",
+     "h": 297.0,
+     "b": 150.0,
+     "tw": 6.1,
+     "tf": 9.2,
+     "r": 15.0,
+     "area_cm2": 46.5,
+     "mass_kg_m": 36.5,
+     "sources": [
+      "swt_ipe"
      ]
     },
     {
@@ -221,6 +390,32 @@
      ]
     },
     {
+     "designation": "IPE O 300",
+     "h": 304.0,
+     "b": 152.0,
+     "tw": 8.0,
+     "tf": 12.7,
+     "r": 15.0,
+     "area_cm2": 62.8,
+     "mass_kg_m": 49.3,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 330",
+     "h": 327.0,
+     "b": 160.0,
+     "tw": 6.5,
+     "tf": 10.0,
+     "r": 18.0,
+     "area_cm2": 54.7,
+     "mass_kg_m": 43.0,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 330",
      "h": 330.0,
      "b": 160.0,
@@ -234,6 +429,32 @@
      ]
     },
     {
+     "designation": "IPE O 330",
+     "h": 334.0,
+     "b": 162.0,
+     "tw": 8.5,
+     "tf": 13.5,
+     "r": 18.0,
+     "area_cm2": 72.6,
+     "mass_kg_m": 57.0,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 360",
+     "h": 357.6,
+     "b": 170.0,
+     "tw": 6.6,
+     "tf": 11.5,
+     "r": 18.0,
+     "area_cm2": 64.0,
+     "mass_kg_m": 50.2,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 360",
      "h": 360.0,
      "b": 170.0,
@@ -242,6 +463,32 @@
      "r": 18.0,
      "area_cm2": 72.7,
      "mass_kg_m": 57.1,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE O 360",
+     "h": 364.0,
+     "b": 172.0,
+     "tw": 9.2,
+     "tf": 14.7,
+     "r": 18.0,
+     "area_cm2": 84.1,
+     "mass_kg_m": 66.0,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 400",
+     "h": 397.0,
+     "b": 180.0,
+     "tw": 7.0,
+     "tf": 12.0,
+     "r": 21.0,
+     "area_cm2": 73.1,
+     "mass_kg_m": 57.4,
      "sources": [
       "swt_ipe"
      ]
@@ -263,6 +510,32 @@
      ]
     },
     {
+     "designation": "IPE O 400",
+     "h": 404.0,
+     "b": 182.0,
+     "tw": 9.7,
+     "tf": 15.5,
+     "r": 21.0,
+     "area_cm2": 96.4,
+     "mass_kg_m": 75.7,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 450",
+     "h": 447.0,
+     "b": 190.0,
+     "tw": 7.6,
+     "tf": 13.1,
+     "r": 21.0,
+     "area_cm2": 85.6,
+     "mass_kg_m": 67.2,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 450",
      "h": 450.0,
      "b": 190.0,
@@ -276,6 +549,32 @@
      ],
      "differences": [
       "British Steel: r = 20"
+     ]
+    },
+    {
+     "designation": "IPE O 450",
+     "h": 456.0,
+     "b": 192.0,
+     "tw": 11.0,
+     "tf": 17.6,
+     "r": 21.0,
+     "area_cm2": 117.7,
+     "mass_kg_m": 92.4,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 500",
+     "h": 497.0,
+     "b": 200.0,
+     "tw": 8.4,
+     "tf": 14.5,
+     "r": 21.0,
+     "area_cm2": 101.1,
+     "mass_kg_m": 79.4,
+     "sources": [
+      "swt_ipe"
      ]
     },
     {
@@ -295,6 +594,32 @@
      ]
     },
     {
+     "designation": "IPE O 500",
+     "h": 506.0,
+     "b": 202.0,
+     "tw": 12.0,
+     "tf": 19.0,
+     "r": 21.0,
+     "area_cm2": 136.7,
+     "mass_kg_m": 107.0,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE A 550",
+     "h": 547.0,
+     "b": 210.0,
+     "tw": 9.0,
+     "tf": 15.7,
+     "r": 24.0,
+     "area_cm2": 117.3,
+     "mass_kg_m": 92.1,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
      "designation": "IPE 550",
      "h": 550.0,
      "b": 210.0,
@@ -303,6 +628,19 @@
      "r": 24.0,
      "area_cm2": 134.3,
      "mass_kg_m": 106.0,
+     "sources": [
+      "swt_ipe"
+     ]
+    },
+    {
+     "designation": "IPE O 550",
+     "h": 556.0,
+     "b": 212.0,
+     "tw": 12.7,
+     "tf": 20.2,
+     "r": 24.0,
+     "area_cm2": 156.1,
+     "mass_kg_m": 123.0,
      "sources": [
       "swt_ipe"
      ]

@@ -11,7 +11,7 @@ olmadan da tam çalışır. “Ağırlık” günlük kullanımdaki kütle anlam
 | --- | --- | --- |
 | Dolu malzeme | Mil, kare dolu çubuk, lama / dikdörtgen çubuk, altıköşe çubuk, sac levha | d · b · b×t · s (anahtar ağzı) · en×kalınlık (boy = sac boyu) |
 | İçi boş kesit | Boru, kare kutu profil, dikdörtgen kutu profil | D, t · b, t · b, h, t; köşe biçimi |
-| Açık profil | Eşit / farklı kollu köşebent, U, T, I profil | kollar, t, kök yarıçapı r₁ · h, b, tw, tf, r |
+| Açık profil | Eşit / farklı kollu köşebent, U (hadde), bükme U (sac), T, I profil | kollar, t, kök yarıçapı r₁ · h, b, tw, tf, r · A, B, t, iç büküm r |
 | Standart profil | IPE, HEA, HEB, HEM, HP, HD, UPE, UPN (NPU), eşit ve farklı kollu köşebent (EN 10056-1) | listeden seçilir |
 
 Her kesit türü `sections.py` içinde tek bir kayıt (alanlar + alan fonksiyonu +
@@ -39,6 +39,7 @@ hacim m³  = A × L / 10⁹
 | Kutu, köşe yarıçaplı | 2t(B+H−2t) − (4−π)(rₒ² − rᵢ²) |
 | Köşebent (EN 10056-1) | t(a+b−t) + (1−π/4)(r₁² − 2r₂²), r₂ = r₁/2 |
 | U (paralel başlık) | 2b·tf + (h−2tf)·tw + (4−π)/2·r² |
+| Bükme U (sac) | t·[(A − 2(r+t)) + 2(B − (r+t))] + 2·π/4·((r+t)² − r²) |
 | T | b·tf + (h−tf)·tw |
 | I / H (EN 10365) | 2b·tf + (h−2tf)·tw + (4−π)·r² |
 
@@ -56,12 +57,12 @@ geometrik modelde yaklaşıktır.
 
 ## Standart profil kütüphanesi
 
-`data/sections.json`: 149 kesit. Değerler üretici veri sayfalarından
+`data/sections.json`: 175 kesit. Değerler üretici veri sayfalarından
 `data/extract_catalogue.py` ile **programla** çıkarıldı, elle yazılmadı:
 
 | Aile | Kaynak |
 | --- | --- |
-| IPE, HEA/HEB/HEM | Stahlwerk Thüringen (EN 10365:2017), eksik boylar British Steel |
+| IPE, IPE A, IPE O, HEA/HEB/HEM | Stahlwerk Thüringen (EN 10365:2017), eksik boylar British Steel |
 | HP, HD, UPE | Stahlwerk Thüringen (EN 10365:2017) |
 | UPN | Stahlwerk Thüringen (EN 10365:2017) + Kocaer Çelik (DIN 1026-1) |
 | Köşebent 120–200, 200×100, 200×150 | British Steel (EN 10056-1) |
@@ -83,13 +84,27 @@ girerek hesaplanır.
 
 ## Malzemeler
 
-50 kayıtlı malzeme (Genel, Sac / Yapı, Makine / Takım, Kalıp çelikleri,
-Paslanmaz, Alüminyum alaşımları, Plastikler) ve **Özel malzeme**. Kayıtlı
+58 kayıtlı malzeme (Genel, Sac / Yapı, Makine / Takım, Kalıp çelikleri,
+Paslanmaz, Alüminyum alaşımları, Saf metaller, Plastikler) ve **Özel malzeme**. Kayıtlı
 malzemelerde yoğunluk sabittir; farklı bir değer için Özel malzeme seçilip ad
 ve yoğunluk (100–25.000 kg/m³) girilir. Kaynaklar [materials.md](materials.md)
 ve `materials.py` içindedir. Yoğunluk alaşıma ve ürüne göre değişebilir; aynı
 malzeme için kaynaklar farklı değer verebilir (ör. FreeCAD S235JR 7800,
 nominal yapı çeliği 7850 kg/m³).
+
+## ESN Metal karşılaştırması
+
+[ESN Metal ağırlık hesaplama](https://www.esnmetal.com/agirlik-hesaplama/) 12
+ayrı hesaplayıcı sunar: altıköşe, boru, HEA, IPE, kare demir, köşebent, kutu
+profil (köşe radyüsü dahil), mil, sac, silme lama, T demir ve bükme U profil
+(büküm radyüsü). Tamamı burada karşılanır; ek olarak HEB, HEM, HP, HD, UPE,
+UPN, standart köşebentler, I ve hadde U profil, keskin/EN köşe seçimi vardır.
+ESN’in hesabı sunucuda yapılır (formül sayfada yoktur); malzeme listesindeki
+bazı değerler hatalıdır (ör. Nikel 1,74 g/cm³, Polietilen 1,2 g/cm³), bu
+yüzden veri kaynağı olarak kullanılmadı. ESN’de serbest yoğunluk girişi ve
+toplam ağırlıklı hesap geçmişi vardır; burada Özel malzeme ve maliyetli
+hesaplama listesi karşılığıdır. IPE 80, IPE 600 ve IPE 750 serisi ESN’de olup
+burada yoktur: erişilen kaynaklarda bu satırlar kendi içinde tutarlı değildi.
 
 ## Hesaplama listesi ve maliyet
 

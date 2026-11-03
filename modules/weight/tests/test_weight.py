@@ -42,6 +42,7 @@ HAND = {
     'Eşit kollu köşebent': (dict(b=50, t=5, r1=0), 5 * (50 + 50 - 5)),
     'Farklı kollu köşebent': (dict(b=50, h=80, t=6, r1=0), 6 * (50 + 80 - 6)),
     'U profil': (dict(h=100, b=50, tw=6, tf=8, r=0), 2 * 50 * 8 + (100 - 16) * 6),
+    'Bükme U profil (sac)': (dict(h=100, b=50, t=3, r=3), 3 * (88 + 2 * 44) + math.pi / 2 * (36 - 9)),
     'T profil': (dict(b=60, h=60, tw=7, tf=7), 60 * 7 + 53 * 7),
     'I profil': (dict(h=200, b=100, tw=5.6, tf=8.5, r=0), 2 * 100 * 8.5 + (200 - 17) * 5.6),
 }
@@ -103,7 +104,8 @@ def test_shipped_catalogue_passes_its_own_area_and_mass_checks():
 
 
 @pytest.mark.parametrize('kind,name,kg_m,area_cm2', [
-    ('IPE', 'IPE 200', 22.4, 28.5), ('HEA', 'HEA 200', 42.3, 53.8), ('HEB', 'HEB 300', 117.0, 149.1),
+    ('IPE', 'IPE 200', 22.4, 28.5), ('IPE', 'IPE A 200', 18.4, 23.5), ('IPE', 'IPE O 200', 25.1, 32.0),
+    ('HEA', 'HEA 200', 42.3, 53.8), ('HEB', 'HEB 300', 117.0, 149.1),
     ('HEM', 'HEM 200', 103.0, 131.3), ('UPN (NPU)', 'UPN 200', 25.3, 32.2), ('UPE', 'UPE 200', 22.8, 29.0),
     ('Eşit kollu köşebent · EN 10056-1', 'L 150x150x12', 27.3, 34.8),
     ('Farklı kollu köşebent · EN 10056-1', 'L 200x100x10', 23.0, 29.2)])
@@ -239,7 +241,8 @@ def test_every_selectable_material_has_density_note_and_source():
 
 @pytest.mark.parametrize('name,density', [('S235JR', 7850), ('C45', 7850), ('42CrMo4', 7850), ('304L', 8000),
                                           ('430', 7750), ('1050A', 2710), ('6063', 2700), ('6082', 2700),
-                                          ('7075', 2810), ('PA66', 1150), ('PE-HD', 950), ('PTFE', 2070)])
+                                          ('7075', 2810), ('PA66', 1150), ('PE-HD', 950), ('PTFE', 2070),
+                                          ('Nikel', 8908), ('Magnezyum', 1738), ('Tungsten', 19250)])
 def test_requested_material_densities(name, density):
     assert rules.MATERIALS[name] == density
     assert rules.calculate(material=name, b=1000, t=10, length=1000).mass_kg == pytest.approx(density / 100)

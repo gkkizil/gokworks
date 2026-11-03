@@ -10,6 +10,7 @@ MATERIAL_GROUPS = {
     'Kalıp Çelikleri': ('1.2311', '1.2312', '1.2344', '1.2379'),
     'Paslanmaz': ('304', '304L', '316', '316L', '430'),
     'Alüminyum alaşımları': ('1050A', '5005', '5754', '6061', '6063', '6082', '7075'),
+    'Saf metaller': ('Nikel', 'Magnezyum', 'Kalay', 'Krom', 'Kobalt', 'Molibden', 'Tungsten', 'Gümüş'),
     'Plastikler': ('Delrin (POM-H)', 'Kestamit (PA6G)', 'PA6', 'PA66', 'PE-HD', 'PP', 'PTFE', 'PVC'),
 }
 
@@ -45,6 +46,14 @@ MATERIALS = {
     '6082': 2700,
     '7075': 2810,
     'PA66': 1150,
+    'Nikel': 8908,
+    'Magnezyum': 1738,
+    'Kalay': 7365,
+    'Krom': 7190,
+    'Kobalt': 8900,
+    'Molibden': 10280,
+    'Tungsten': 19250,
+    'Gümüş': 10490,
     'PE-HD': 950,
     'Delrin (POM-H)': 1420,
     'Kestamit (PA6G)': 1150,
@@ -99,6 +108,8 @@ MATERIAL_NOTES.update({
     '6063': 'EN AW-6063 (profil alaşımı). ' + _ALLOY,
     '6082': 'EN AW-6082 (AlSi1MgMn / AlMgSi1). ' + _ALLOY,
     '7075': 'EN AW-7075 (yüksek dayanımlı, çinko alaşımlı). ' + _ALLOY,
+    **{name: 'Saf elementin oda sıcaklığı yoğunluğu; ticari alaşımlar ve sinter ürünler farklıdır.'
+       for name in ('Nikel', 'Magnezyum', 'Kalay', 'Krom', 'Kobalt', 'Molibden', 'Tungsten', 'Gümüş')},
     'PA66': 'Dolgusuz PA66 yarı mamul; cam elyaf takviyeli kaliteler daha ağırdır.',
     'PE-HD': 'Yüksek yoğunluklu polietilen yarı mamul.',
     '304': 'AISI 304 paslanmaz; MMPDS referanslı malzeme kartının nominal yoğunluğu kullanılır.',
@@ -163,6 +174,8 @@ MATERIAL_SOURCES = {
     '6063': _AALCO + 'Aluminium-Alloy-6063-T6-Extrusions_158.ashx',
     '6082': _FREECAD + 'Metal/Aluminum/AlMgSi1F31.FCMat',
     '7075': _FREECAD + 'Metal/Aluminum/Aluminum-7075-T6.FCMat',
+    **{name: _ELEMENT_SOURCE for name in ('Nikel', 'Magnezyum', 'Kalay', 'Krom', 'Kobalt', 'Molibden',
+                                          'Tungsten', 'Gümüş')},
     'PA66': 'https://www.ensingerplastics.com/en/shapes/pa66-tecamid-66-natural',
     'PE-HD': 'https://www.ensingerplastics.com/en-us/shapes/polyethylene-tecafine-hdpe-natural',
 }

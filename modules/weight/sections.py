@@ -130,6 +130,16 @@ def channel(d):
     return 2 * b * tf + (h - 2 * tf) * tw + (4 - math.pi) / 2 * r ** 2, []
 
 
+def bent_channel(d):
+    """Press-brake U from sheet: straight legs plus two quarter rings (inner radius r)."""
+    h, b, t, r = d['h'], d['b'], d['t'], d.get('r', 0.0)
+    outer = r + t
+    _require(b > outer, 'Başlık genişliği büküm yarıçapı + kalınlıktan büyük olmalı.')
+    _require(h > 2 * outer, 'Yükseklik iki büküm (r + t) toplamından büyük olmalı.')
+    straight = (h - 2 * outer) + 2 * (b - outer)
+    return t * straight + 2 * (math.pi / 4) * (outer ** 2 - r ** 2), [f'İç büküm yarıçapı r = {r:g} mm, dış = {outer:g} mm']
+
+
 # ---- registry ---------------------------------------------------------------------
 F = Field
 _ROOT = 'r1'
@@ -165,6 +175,9 @@ _add(SectionType('U profil', 'Açık profil',
                  (F('h', 'Yükseklik', 100), F('b', 'Başlık genişliği', 50), F('tw', 'Gövde kalınlığı', 6),
                   F('tf', 'Başlık kalınlığı', 8), F('r', 'Kök yarıçapı', 0, True)), channel, 'channel',
                  'Paralel başlıklı geometrik model; UPN gibi eğimli başlıklı profillerde Standart profilden seçin.'))
+_add(SectionType('Bükme U profil (sac)', 'Açık profil',
+                 (F('h', 'Yükseklik (A)', 100), F('b', 'Başlık genişliği (B)', 50), F('t', 'Sac kalınlığı', 3),
+                  F('r', 'İç büküm yarıçapı', 3, True)), bent_channel, 'bent_channel'))
 _add(SectionType('T profil', 'Açık profil',
                  (F('b', 'Başlık genişliği', 60), F('h', 'Yükseklik', 60), F('tw', 'Gövde kalınlığı', 7),
                   F('tf', 'Başlık kalınlığı', 7)), tee, 'tee',
