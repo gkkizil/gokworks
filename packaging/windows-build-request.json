@@ -1,9 +1,9 @@
 {
-  "request_id": "20261103-excel-columns-shaft-schema-exe",
-  "requested_at": "2026-11-03T12:30:00+00:00",
-  "source_commit": "a07e32f51565bddd1cdda82e910e19d27640f12c",
+  "request_id": "20261103-shaft-drawing-runtime-fix-exe",
+  "requested_at": "2026-11-03T13:30:00+00:00",
+  "source_commit": "10487f80b03c3a59bef93a849826b5a86d74f9bf",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Build the Windows EXE with spreadsheet-like (Excel) column resizing in every table and the fix for 'Unsupported shaft schema' when a shaft project has drawing settings. Affected Linux module tests passed. Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
+  "reason": "Build the Windows EXE with the shaft drawing host runtime fixes (JSON arrays as ArrayList, overlap width, COM array reads, sketch snapping, skip drawing when part fails). Shaft module tests passed; host compiles against SOLIDWORKS 2024 interop. Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
   "cancelled": false
 }
