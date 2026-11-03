@@ -406,7 +406,9 @@ namespace Gokworks.ShaftInterop
                 catch (Exception error) { result["layout_conflicts"] = new List<object>(); issues.Add("Yerleşim çakışma kontrolü yapılamadı: " + error.Message); }
 
                 Report("Teknik resim kaydediliyor, kapatılıp yeniden açılarak doğrulanıyor");
-                Need(drawingModel.ForceRebuild3(false), "Teknik resim rebuild başarısız.");
+                // A dangling annotation can make the rebuild report failure; keep and save the
+                // drawing, and say so, instead of discarding every created view.
+                if (!drawingModel.ForceRebuild3(false)) issues.Add("Teknik resim rebuild uyarı verdi; kaydedilen resmi SOLIDWORKS'te kontrol edin.");
                 temporary = Path.Combine(Path.GetDirectoryName(drawingPath), ".gokworks-" + Guid.NewGuid().ToString("N") + ".SLDDRW");
                 int errors = 0, warnings = 0;
                 Need(drawingModel.Extension.SaveAs3(temporary, 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, null, ref errors, ref warnings)
