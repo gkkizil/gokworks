@@ -114,6 +114,18 @@ def test_results_keep_separate_rows_for_same_file_different_configuration_and_fo
     p.results.clear_button.click(); assert not p.results.results and p.results.model.rowCount() == 0
 
 
+def _settled_position(qtbot, page, widget):
+    """Position once deferred layout passes (header reflow, adaptive rows) are done."""
+    previous = None
+    for _ in range(20):
+        page.layout.activate(); qtbot.wait(15)
+        current = widget.mapTo(page, widget.rect().topLeft())
+        if current == previous:
+            return current
+        previous = current
+    return previous
+
+
 @pytest.mark.parametrize('theme', ['dark', 'light'])
 def test_left_source_right_results_and_actions_fit_small_and_large_windows(page, qtbot, theme):
     p, w = page; w.set_theme(theme)
@@ -125,7 +137,7 @@ def test_left_source_right_results_and_actions_fit_small_and_large_windows(page,
         # Source selection is the first step and stays fixed above the long
         # options form, even when that form is scrolled to the bottom.
         p.source_scroll.verticalScrollBar().setValue(0)
-        first = p.scan_button.mapTo(p, p.scan_button.rect().topLeft())
+        first = _settled_position(qtbot, p, p.scan_button)
         assert p.scan_button.isVisible() and p.folder_button.isVisible()
         for control in (p.scan_button, p.folder_button):
             assert p.rect().contains(control.mapTo(p, control.rect().bottomRight()))
@@ -134,7 +146,9 @@ def test_left_source_right_results_and_actions_fit_small_and_large_windows(page,
         assert first.y() < output.mapTo(p, output.rect().topLeft()).y()
         p.source_scroll.verticalScrollBar().setValue(p.source_scroll.verticalScrollBar().maximum())
         qtbot.wait(10)
-        assert p.scan_button.mapTo(p, p.scan_button.rect().topLeft()) == first
+        moved = p.scan_button.mapTo(p, p.scan_button.rect().topLeft())
+        assert moved == first, (size, moved, first, p.heading.direction(), p.title_label.geometry(),
+                                p.description_label.geometry(), p.command_bar.geometry())
         assert not w.grab().isNull()
 
 
