@@ -83,6 +83,7 @@ kullanılmaz.
 | Form | `ValueForm.text/combo/check/path` | Değerleri ayarlara otomatik kaydeder |
 | Dosya alanı | `PathPicker` / `ValueForm.path` | Dar sütunda `stack_fields()` |
 | Tablo | `configure_view(view)` | Sola hizalı başlık, ızgarasız, sıralanabilir; sütunlar `ColumnFitter` ile |
+| Açık/kapalı seçenek | `toggle_button(text, appearance)` | Komşu eylem butonlarının yaptığı işi değiştiren seçenek; kapalıyken boş kutu ikonu, açıkken vurgu çerçevesi ve dolu tik. Eylem butonlarının yazısı da sonucu söyler (örn. “SolidWorks’te çiz + teknik resim…”) |
 | Sütun genişliği | `fit_columns(view, elastic=, minimum=, defaults=, autofit=, fixed=, settings=, key=)` | Bkz. §8 |
 | Sonuç listesi | `ResultsPanel` | Arama, durum filtresi, CSV, günlük |
 | Boş durum | `ViewEmptyState` | Tablonun üstünde, filtre temizleme |

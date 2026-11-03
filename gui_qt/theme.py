@@ -87,6 +87,10 @@ QPushButton[primary="true"] { background: %(accent)s; color: %(on_accent)s; font
     border: 1px solid %(accent)s; }
 QPushButton[primary="true"]:hover { border-color: %(text)s; }
 QPushButton[primary="true"]:disabled { background: %(input)s; color: %(muted)s; border-color: %(border)s; }
+QPushButton[toggle="true"] { color: %(muted)s; padding: 3px 12px 3px 8px; }
+QPushButton[toggle="true"]:hover { color: %(text)s; }
+QPushButton[toggle="true"]:checked { background: %(selected)s; color: %(text)s; border: 1px solid %(accent)s; }
+QPushButton[toggle="true"]:checked:hover { border-color: %(text)s; }
 QPushButton[destructive="true"] { color: %(danger)s; }
 QPushButton[destructive="true"]:hover { border-color: %(danger)s; }
 QPushButton[destructive="true"]:disabled { color: %(muted)s; border-color: %(border)s; }

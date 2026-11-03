@@ -3,7 +3,7 @@
 import csv
 from pathlib import Path, PureWindowsPath
 
-from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent, QObject
+from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent, QObject, QPointF
 from PySide6.QtGui import QCursor, QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette, QColor
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
@@ -82,6 +82,40 @@ def button(text, callback=None, *, primary=False, destructive=False, flat=False)
         widget.setProperty('destructive', True)
     if flat:
         widget.setProperty('flat', True)
+    return widget
+
+
+def toggle_icon(appearance):
+    """Check-box icon for an on/off option button: empty when off, ticked when on."""
+    from PySide6.QtGui import QIcon, QPixmap, QPen
+    from .theme import COLORS
+    colors = COLORS.get(appearance, next(iter(COLORS.values())))
+    icon = QIcon()
+    for state, checked in ((QIcon.Off, False), (QIcon.On, True)):
+        for scale in (1, 2):
+            size = 16 * scale
+            pixmap = QPixmap(size, size); pixmap.setDevicePixelRatio(scale); pixmap.fill(Qt.transparent)
+            painter = QPainter(pixmap); painter.setRenderHint(QPainter.Antialiasing)
+            if checked:
+                painter.setPen(Qt.NoPen); painter.setBrush(QColor(colors['accent']))
+                painter.drawRoundedRect(1.5, 1.5, 13, 13, 3, 3)
+                pen = QPen(QColor(colors['on_accent']), 2); pen.setCapStyle(Qt.RoundCap); pen.setJoinStyle(Qt.RoundJoin)
+                painter.setPen(pen); painter.drawPolyline([QPointF(4.5, 8.2), QPointF(7, 10.7), QPointF(11.6, 5.4)])
+            else:
+                painter.setPen(QPen(QColor(colors['muted']), 1.4)); painter.setBrush(Qt.NoBrush)
+                painter.drawRoundedRect(2, 2, 12, 12, 3, 3)
+            painter.end()
+            icon.addPixmap(pixmap, QIcon.Normal, state)
+    return icon
+
+
+def toggle_button(text, appearance='dark', *, checked=False):
+    """Design-system on/off option shown as a button: clearer than a bare check box
+    when it changes what the neighbouring action buttons do."""
+    widget = QPushButton(text)
+    widget.setCheckable(True); widget.setChecked(checked)
+    widget.setProperty('toggle', True)
+    widget.setIcon(toggle_icon(appearance))
     return widget
 
 

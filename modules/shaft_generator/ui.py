@@ -10,7 +10,7 @@ from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QSplitter,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QTabWidget,
     QLineEdit,QComboBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
-from gui_qt.components import BasePage, label, button, scroll, separator
+from gui_qt.components import BasePage, label, button, scroll, separator, toggle_button, toggle_icon
 from gui_qt.theme import ROW_HEIGHT
 from . import controller, storage
 from .geometry import operation_plan
@@ -210,7 +210,7 @@ class ShaftPage(BasePage):
         self.save_part_button=button('SLDPRT oluştur ve kaydet…',self.create_and_save)
         self.stop_button=button('Durdur',self.jobs.cancel);self.stop_button.hide()
         # Same setting as 'Otomatik teknik resim oluştur' in the drawing section.
-        self.auto_drawing=QCheckBox('Teknik resim oluştur')
+        self.auto_drawing=toggle_button('Teknik resmi de oluştur',self.context.appearance)
         self.auto_drawing.setToolTip('İşaretliyse katı model oluşturulup kaydedildikten hemen sonra aynı SOLIDWORKS oturumunda '
                                      '.SLDDRW teknik resmi de oluşturulur. Teknik resim kayıtlı parçaya bağlandığı için '
                                      'SolidWorks’te çiz de önce kayıt yeri sorar. Ayarlar: Teknik resim · Tolerans ve yüzey.')
@@ -617,8 +617,13 @@ class ShaftPage(BasePage):
         return self.project.drawing is not None and self.project.drawing.enabled
 
     def sync_auto_drawing(self):
-        if hasattr(self,'auto_drawing') and self.auto_drawing.isChecked()!=self.drawing_enabled():
-            with QSignalBlocker(self.auto_drawing):self.auto_drawing.setChecked(self.drawing_enabled())
+        if not hasattr(self,'auto_drawing'):return
+        on=self.drawing_enabled()
+        if self.auto_drawing.isChecked()!=on:
+            with QSignalBlocker(self.auto_drawing):self.auto_drawing.setChecked(on)
+        # The action buttons say exactly what will happen.
+        self.create_button.setText('SolidWorks’te çiz + teknik resim…' if on else 'SolidWorks’te çiz')
+        self.save_part_button.setText('SLDPRT + teknik resim kaydet…' if on else 'SLDPRT oluştur ve kaydet…')
 
     def auto_drawing_toggled(self,checked):
         if checked==self.drawing_enabled():return
@@ -680,5 +685,6 @@ class ShaftPage(BasePage):
         super().set_busy(busy);self.refresh()
 
     def theme_changed(self):
+        if hasattr(self,'auto_drawing'):self.auto_drawing.setIcon(toggle_icon(self.context.appearance))
         for picker in self.standard_pickers.values():picker.set_appearance(self.context.appearance)
         for view in (self.top_view,self.section_view):view.appearance=self.context.appearance;view.update()

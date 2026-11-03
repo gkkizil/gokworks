@@ -495,10 +495,13 @@ def test_footer_checkbox_creates_the_drawing_right_after_the_solid_model(qtbot, 
     window = MainWindow(tmp_path / 'settings.json'); qtbot.addWidget(window); window.show()
     window.navigate('shaft_generator'); page = window.pages['shaft_generator']; panel = page.drawing_panel
     box = page.auto_drawing
-    assert box.isVisible() and box.text() == 'Teknik resim oluştur' and not box.isChecked()
+    assert box.isVisible() and box.text() == 'Teknik resmi de oluştur' and box.isCheckable() and not box.isChecked()
+    assert page.create_button.text() == 'SolidWorks’te çiz'
     assert box.parentWidget() is page.create_button.parentWidget()          # in the button row
     box.setChecked(True)
     assert page.project.drawing.enabled and panel.enabled.isChecked()       # one setting
+    assert page.create_button.text() == 'SolidWorks’te çiz + teknik resim…'  # says what happens
+    assert page.save_part_button.text() == 'SLDPRT + teknik resim kaydet…'
     panel.enabled.setChecked(False)
     assert not box.isChecked()
     panel.enabled.setChecked(True)
