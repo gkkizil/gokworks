@@ -1,9 +1,9 @@
 {
-  "request_id": "20261103-shaft-drawing-runtime-fix-exe",
-  "requested_at": "2026-11-03T13:30:00+00:00",
-  "source_commit": "10487f80b03c3a59bef93a849826b5a86d74f9bf",
+  "request_id": "20261103-weight-ui-workbench-exe",
+  "requested_at": "2026-11-03T14:30:00+00:00",
+  "source_commit": "785a8e0aee4f00cbfc5132a4461fab05926aaa36",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Build the Windows EXE with the shaft drawing host runtime fixes (JSON arrays as ArrayList, overlap width, COM array reads, sketch snapping, skip drawing when part fails). Shaft module tests passed; host compiles against SOLIDWORKS 2024 interop. Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
+  "reason": "Build the Windows EXE with the rebuilt weight module (verified EN profile library, list/cost, XLSX/PDF/CSV, CAD mass), shaft drawing runtime fixes and 'Teknik resmi de oluştur', shared sketch view controls, persistent panels, status tones and module keys. Linux full suite passed (2448 passed, 69 skipped). Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
   "cancelled": false
 }
