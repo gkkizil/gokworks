@@ -34,6 +34,14 @@ def table(qtbot, width=640, **options):
     return view, view.horizontalHeader(), fitter
 
 
+def drag(header, column, width):
+    """Resize a section as the user does: with the left mouse button down."""
+    from unittest.mock import patch
+    import gui_qt.components as components
+    with patch.object(components.QApplication, 'mouseButtons', return_value=Qt.LeftButton):
+        header.resizeSection(column, width)
+
+
 def used(header):
     return sum(header.sectionSize(c) for c in range(header.count()) if not header.isSectionHidden(c))
 
@@ -50,12 +58,12 @@ def test_every_column_is_draggable_and_the_elastic_column_fills_the_view(qtbot):
 def test_dragging_changes_only_that_column_like_a_spreadsheet(qtbot):
     view, header, fitter = table(qtbot, elastic=0, minimum=100)
     before = [header.sectionSize(c) for c in range(4)]
-    header.resizeSection(1, before[1] + 200)
+    drag(header, 1, before[1] + 200); qtbot.wait(20)
     after = [header.sectionSize(c) for c in range(4)]
     assert after == [before[0], before[1] + 200, before[2], before[3]]
     qtbot.waitUntil(lambda: view.horizontalScrollBar().maximum() > 0, timeout=1000)
     assert fitter.manual
-    header.resizeSection(3, 30)
+    drag(header, 3, 30)
     assert header.sectionSize(0) == before[0] and header.sectionSize(1) == before[1] + 200
     assert used(header) < view.viewport().width() + 200   # shrinking leaves empty space, nothing moves
 
@@ -63,14 +71,14 @@ def test_dragging_changes_only_that_column_like_a_spreadsheet(qtbot):
 def test_dragging_the_elastic_column_does_not_move_its_neighbour(qtbot):
     view, header, _ = table(qtbot, elastic=0, minimum=100)
     neighbour = header.sectionSize(1)
-    header.resizeSection(0, header.sectionSize(0) - 40)
+    drag(header, 0, header.sectionSize(0) - 40); qtbot.wait(20)
     assert header.sectionSize(1) == neighbour
     assert used(header) == view.viewport().width() - 40
 
 
 def test_manual_widths_survive_view_resize_and_content_changes(qtbot):
     view, header, _ = table(qtbot, elastic=0, minimum=100)
-    header.resizeSection(2, 150)
+    drag(header, 2, 150)
     widths = [header.sectionSize(c) for c in range(4)]
     view.resize(900, 240); view.model().layoutChanged.emit(); qtbot.wait(30)
     assert [header.sectionSize(c) for c in range(4)] == widths
@@ -95,7 +103,7 @@ def test_user_widths_persist_and_reset_restores_defaults(qtbot, tmp_path):
     settings = SettingsStore(tmp_path / 'settings.json')
     view, header, fitter = table(qtbot, elastic=0, minimum=100, defaults={1: 90, 2: 90, 3: 90},
                                  settings=settings, key='test.table')
-    header.resizeSection(2, 150)
+    drag(header, 2, 150)
     fitter._save()
     saved = settings.get('columns/test.table')
     assert saved['2'] == 150 and saved == {str(c): header.sectionSize(c) for c in range(4)}
@@ -145,3 +153,14 @@ def test_every_table_and_tree_in_the_app_uses_the_shared_behaviour(qtbot, tmp_pa
                                                   for c in range(header.count())):
                 problems.append(name + ' has non-draggable columns')
     assert not problems, problems
+
+
+def test_programmatic_widths_are_defaults_not_a_manual_layout(qtbot):
+    """setColumnWidth() from page code must not freeze the table (K factor page)."""
+    view, header, fitter = table(qtbot, elastic=3, minimum=80)
+    for column in range(4):
+        view.setColumnWidth(column, 120)
+    qtbot.wait(20)
+    assert not fitter.manual
+    assert [header.sectionSize(c) for c in range(3)] == [120, 120, 120]
+    assert used(header) == view.viewport().width()

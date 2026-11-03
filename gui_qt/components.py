@@ -1004,11 +1004,19 @@ class ColumnFitter(QObject):
             if not self.manual:
                 self._autofit_timer.start()
             return
+        if not QApplication.mouseButtons() & Qt.LeftButton:
+            # Programmatic setColumnWidth(): a default width for the automatic
+            # layout, not a user drag (must not switch to manual mode).
+            if not self.manual:
+                self.defaults[column] = new
+                if self.autofit != 'auto' and column in self.autofit:
+                    self.autofit = set(self.autofit) - {column}
+                self._autofit_timer.start()
+            return
         # Spreadsheet behaviour: only the dragged column changes.
         self.manual = True
         self.user.add(column)
-        if QApplication.mouseButtons() & Qt.LeftButton:
-            QToolTip.showText(QCursor.pos(), f'Genişlik: {new} piksel', self.header)
+        QToolTip.showText(QCursor.pos(), f'Genişlik: {new} piksel', self.header)
         self._save_timer.start()
 
     def detach(self):
