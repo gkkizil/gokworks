@@ -399,8 +399,11 @@ namespace Gokworks.ShaftInterop
                 result["frames"] = frameResults;
 
                 Report("Antet özellikleri yazılıyor");
-                result["title"] = Title(drawingModel, part, D(plan["title"]), S(plan, "part_name"), issues);
-                result["layout_conflicts"] = Overlaps(drawing, views);
+                try { result["title"] = Title(drawingModel, part, D(plan["title"]), S(plan, "part_name"), issues); }
+                catch (Exception error) { issues.Add("Antet özellikleri yazılamadı: " + error.Message); }
+                // Diagnostic only: a missing annotation position must not cost the drawing.
+                try { result["layout_conflicts"] = Overlaps(drawing, views); }
+                catch (Exception error) { result["layout_conflicts"] = new List<object>(); issues.Add("Yerleşim çakışma kontrolü yapılamadı: " + error.Message); }
 
                 Report("Teknik resim kaydediliyor, kapatılıp yeniden açılarak doğrulanıyor");
                 Need(drawingModel.ForceRebuild3(false), "Teknik resim rebuild başarısız.");
