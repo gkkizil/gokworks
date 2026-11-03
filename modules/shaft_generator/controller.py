@@ -6,7 +6,7 @@ from .models import Project
 
 def request(project, *, output_path='', verify_edit=False):
     plan = operation_plan(project)
-    return dict(operation='create_shaft', project=project.to_dict(), plan=plan,
+    return dict(operation='create_shaft', project=project.geometry_dict(), plan=plan,
                 output_path=str(output_path), verify_edit=bool(verify_edit))
 
 

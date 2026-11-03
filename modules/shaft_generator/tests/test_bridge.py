@@ -43,3 +43,19 @@ def test_linux_reports_platform_limit_without_simulating_cad():
     with patch('modules.shaft_generator.bridge.sys.platform','linux'):
         with pytest.raises(RuntimeError,match='Windows'):execute(request(Project()))
     assert HOST_SOURCE.is_file()
+
+
+def test_part_command_never_sends_drawing_schema_to_the_part_host():
+    """Regression: a project with drawing settings (file schema v3) made the
+    part host reject the job with 'Unsupported shaft schema.'."""
+    import re
+    from modules.shaft_generator.drawing.models import DrawingSettings
+    project = Project()
+    project.drawing = DrawingSettings(enabled=True, isometric=True)
+    assert project.to_dict()['version'] == 3
+    payload = request(project)
+    assert payload['project']['version'] in (1, 2) and 'drawing' not in payload['project']
+    accepted = re.search(r'p\.schema == "gokworks\.shaft" && \(([^)]*)\)', HOST_SOURCE.read_text(encoding='utf-8')).group(1)
+    assert f'p.version == {payload["project"]["version"]}' in accepted
+    assert checked_payload(payload).drawing is None
+    assert project.drawing is not None   # the user's project keeps its drawing settings

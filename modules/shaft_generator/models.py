@@ -159,6 +159,14 @@ class Project:
         if 0 <= target < len(self.stages):
             self.stages[index], self.stages[target] = self.stages[target], self.stages[index]
 
+    def geometry_dict(self):
+        """Part geometry only (schema version 1/2) for the SOLIDWORKS part host.
+
+        Drawing settings belong to the separate drawing command; the part host
+        (ShaftHost.cs) accepts only versions 1 and 2.
+        """
+        return dataclass_replace(self, drawing=None).to_dict()
+
     def to_dict(self):
         drawing = self.drawing
         values = asdict(dataclass_replace(self, drawing=None))
