@@ -169,6 +169,18 @@ namespace Gokworks.ShaftInterop
                     Need(Math.Abs(builder.Volume()-volume) < Math.Max(1e-15,volume*1e-8), "Reopened part volume differs.");
                 }
                 model.ShowNamedView2("", (int)swStandardViews_e.swIsometricView); model.ViewZoomtofit2();
+                if (!String.IsNullOrEmpty(request.output_path) && model.GetSaveFlag())
+                {
+                    // Verify() rebuilds the reopened part, which marks it modified although
+                    // its geometry is the one just saved and verified. Leaving it dirty made
+                    // the drawing step refuse it ("kaydedilmemiş değişiklik var"). This is
+                    // our own new file at output_path, so save it in place.
+                    Report("Doğrulanan SLDPRT yeniden kaydediliyor");
+                    int saveErrors = 0, saveWarnings = 0;
+                    Need(model.Save3((int)swSaveAsOptions_e.swSaveAsOptions_Silent, ref saveErrors, ref saveWarnings) && saveErrors == 0,
+                        "Verified part could not be saved: " + saveErrors);
+                    Need(!model.GetSaveFlag(), "Saved part is still marked as modified: " + request.output_path);
+                }
                 app.SetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate, inputPreference);
                 Need(app.GetUserPreferenceToggle((int)swUserPreferenceToggle_e.swInputDimValOnCreate)==inputPreference,
                     "Original dimension input preference could not be restored.");
