@@ -6,7 +6,7 @@ import csv
 from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject, QSignalBlocker
 from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QCheckBox
 from gui_qt.export import ExportPage, AdaptiveRow
-from gui_qt.components import label, button, ValueForm, Disclosure
+from gui_qt.components import label, button, ValueForm, Disclosure, fit_columns
 from modules.cad_converter.models import Cancelled
 from modules.cad_converter.api import RestoreError
 from .preview.models import Request, MeshCache, PreviewCache
@@ -149,35 +149,26 @@ class DxfDwgPage(ExportPage):
         QTimer.singleShot(0, self.layout_preview)
 
     def fit_sheet_columns(self):
-        """Header-fitted widths: every caption stays readable, the part name stretches."""
+        """Header-fitted, draggable widths: every caption stays readable and the
+        part name takes the free width (shared ColumnFitter behaviour)."""
         table = self.results.table; header = table.horizontalHeader()
-        header.setStretchLastSection(False)
-        header.setMinimumSectionSize(32)
         header.setTextElideMode(Qt.ElideRight)
         bold = header.font(); bold.setBold(True)
         from PySide6.QtGui import QFontMetrics
         metrics = QFontMetrics(bold)
-        # Caption + section padding (6+6 px, 1 px rule) + a little air; content
-        # minimums keep typical values (S235JR, Kısmen tamamlandı) unclipped.
-        minimum = {0: 44, 1: 150, 2: 90, 3: 0, 4: 76, 5: 52, 6: 150, 7: 160}
-        for index in range(self.results.model.columnCount()):
-            title = self.results.model.headerData(index, Qt.Horizontal)
-            width = max(minimum.get(index, 60), metrics.horizontalAdvance(title) + 20)
-            header.setSectionResizeMode(index, QHeaderView.Interactive)
-            table.setColumnWidth(index, width)
-        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        # Caption + section padding + a little air; content minimums keep
+        # typical values (S235JR, Kısmen tamamlandı) unclipped.
+        minimum = {0: 44, 2: 90, 3: 0, 4: 76, 5: 52, 6: 150, 7: 160}
+        defaults = {index: max(minimum.get(index, 60), metrics.horizontalAdvance(self.results.model.headerData(index, Qt.Horizontal)) + 20)
+                    for index in range(self.results.model.columnCount()) if index != 1}
+        fit_columns(table, elastic=1, minimum=170, fixed=(0,), defaults=defaults, autofit=(4, 6),
+                    settings=self.settings, key='dxf_dwg.sheets')
         # Status reads right after the part name, so it stays in view when a
         # narrow table scrolls horizontally (model column order is unchanged).
         header.moveSection(header.visualIndex(6), 2)
-        table.viewport().installEventFilter(self)
 
     def fit_part_column(self):
-        """The part name takes the free width but never drops below a readable
-        minimum; a narrow table scrolls horizontally instead of clipping it."""
-        table = self.results.table
-        others = sum(table.columnWidth(c) for c in range(self.results.model.columnCount())
-                     if c != 1 and not table.isColumnHidden(c))
-        table.setColumnWidth(1, max(170, table.viewport().width() - others))
+        self.results.table.column_fitter.fit()
 
     def theme_changed(self):
         super().theme_changed()
@@ -271,8 +262,6 @@ class DxfDwgPage(ExportPage):
     def eventFilter(self, watched, event):
         if watched is self.results and event.type() == QEvent.Resize:
             QTimer.singleShot(0, self.layout_preview)
-        elif watched is self.results.table.viewport() and event.type() == QEvent.Resize:
-            self.fit_part_column()
         return super().eventFilter(watched, event)
 
     def layout_preview(self):

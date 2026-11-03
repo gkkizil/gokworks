@@ -1,5 +1,6 @@
 """Three linked native Qt panes: folded mesh / native flat output / properties."""
 
+from gui_qt.components import fit_columns
 from PySide6.QtCore import Qt, QRectF, Signal
 from PySide6.QtGui import QPainterPath, QPen, QColor, QPainter
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QSplitter, QLabel,
@@ -137,8 +138,7 @@ class PreviewPanel(QWidget):
         self.info.setWordWrap(False); self.info.setTextElideMode(Qt.ElideMiddle)
         self.info.horizontalHeader().setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.info.horizontalHeader().setHighlightSections(False)
-        self.info.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.info.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        fit_columns(self.info, elastic=1, minimum=80, autofit=(0,))
         self.info.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.info.setMinimumHeight(85); self.info.setAccessibleName('Seçili sac parçasının teknik bilgileri')
         self.splitter.addWidget(self.info)

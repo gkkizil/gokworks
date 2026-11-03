@@ -3,7 +3,7 @@
 import csv
 from pathlib import Path, PureWindowsPath
 
-from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent
+from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent, QObject
 from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette, QColor
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
@@ -190,11 +190,8 @@ def configure_view(view):
     view.setSortingEnabled(True)
     view.setUniformRowHeights(True) if isinstance(view, QTreeView) else view.verticalHeader().setVisible(False)
     view.setTextElideMode(Qt.ElideMiddle)
-    view.header().setStretchLastSection(True) if isinstance(view, QTreeView) else view.horizontalHeader().setStretchLastSection(True)
     header = view.header() if isinstance(view, QTreeView) else view.horizontalHeader()
-    header.setSectionResizeMode(QHeaderView.Interactive)
-    header.setDefaultSectionSize(180)
-    header.setMinimumSectionSize(60)
+    header.setDefaultSectionSize(140)
     header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
     header.setHighlightSections(False)
     if isinstance(view, QTableView):
@@ -203,6 +200,7 @@ def configure_view(view):
         view.setShowGrid(False)
         view.setWordWrap(False)
     view.setMinimumWidth(0)
+    fit_columns(view, minimum=80)
     return view
 
 
@@ -597,10 +595,9 @@ class ResultsPanel(QWidget):
         self.table.setModel(self.proxy)
         self.empty_state = ViewEmptyState(self.table, self.clear_filters, empty_hint)
         self.empty_state.show_state(empty=True, filtered=False, busy=False)
-        self.table.horizontalHeader().setStretchLastSection(False)
-        self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(2,QHeaderView.Stretch)
-        self.table.setColumnWidth(1, 100)
+        # Description takes the free width; the file name follows its contents
+        # until dragged; every edge stays draggable.
+        fit_columns(self.table, elastic=2, minimum=160, defaults={1: 110}, autofit=(0,))
         self.table.doubleClicked.connect(self.show_details)
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
@@ -828,3 +825,301 @@ class AdaptiveRow(QWidget):
         direction = QBoxLayout.LeftToRight if self.width() >= self._row_width() else QBoxLayout.TopToBottom
         if self.box.direction() != direction:
             self.box.setDirection(direction)
+
+
+class ColumnFitter(QObject):
+    """One consistent column behaviour for every table and tree in GOKWORKS.
+
+    * Every column is draggable (Interactive); fixed columns stay fixed.
+    * One *elastic* column absorbs the free width, so the view never shows an
+      empty band or an unnecessary horizontal scroll bar. It keeps a readable
+      minimum; below that the view scrolls horizontally instead of clipping.
+    * Dragging the elastic column's own edge moves the boundary with its right
+      neighbour (splitter-like) instead of pushing the table off-screen.
+    * Columns listed in ``autofit`` follow their contents until the user
+      resizes them; double-clicking a handle fits a column to its contents.
+    * Optional ``settings``/``key`` remember user widths across sessions.
+    * Header context menu: fit all columns to contents / restore defaults.
+    """
+
+    MAX_AUTOFIT = 420
+
+    def __init__(self, view, *, elastic=None, minimum=120, defaults=None, autofit='auto', fixed=(),
+                 settings=None, key=None):
+        super().__init__(view)
+        self.view = view
+        self.header = view.header() if isinstance(view, QTreeView) else view.horizontalHeader()
+        self.elastic, self.minimum = elastic, minimum
+        self.defaults = dict(defaults or {})
+        self.autofit = autofit if autofit == 'auto' else set(autofit)
+        self.fixed = set(fixed)
+        self.settings, self.key = settings, key
+        self.user = set()
+        self._guard = False
+        self.header.setStretchLastSection(False)
+        self.header.setCascadingSectionResizes(False)
+        self.header.setMinimumSectionSize(28)
+        self.header.setSectionResizeMode(QHeaderView.Interactive)
+        for column in self.fixed:
+            self.header.setSectionResizeMode(column, QHeaderView.Fixed)
+        self.header.sectionResized.connect(self._resized)
+        self.header.sectionHandleDoubleClicked.connect(self.fit_to_contents)
+        self.header.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.header.customContextMenuRequested.connect(self._menu)
+        self.header.sectionCountChanged.connect(self._count_changed)
+        self._viewport = view.viewport()
+        self._viewport.installEventFilter(self)
+        view.destroyed.connect(self._view_destroyed)
+        self._save_timer = QTimer(self); self._save_timer.setSingleShot(True); self._save_timer.setInterval(400)
+        self._save_timer.timeout.connect(self._save)
+        self._autofit_timer = QTimer(self); self._autofit_timer.setSingleShot(True); self._autofit_timer.setInterval(0)
+        self._autofit_timer.timeout.connect(self._autofit)
+        self.alive = True
+        self._model = None
+        self.attach_model()
+        self.apply_defaults()
+        self._restore()
+        self._autofit_timer.start()
+
+    # -- model hooks -------------------------------------------------------
+    def attach_model(self):
+        model = self.view.model()
+        if model is None or model is self._model:
+            return
+        self._model = model
+        for signal in (model.modelReset, model.rowsInserted, model.layoutChanged):
+            signal.connect(self._contents_changed)
+
+    def _count_changed(self, old, new):
+        """A model was set or columns were added later: size the new columns."""
+        self.attach_model()
+        self._guard = True
+        try:
+            for column in self.fixed:
+                if column < new:
+                    self.header.setSectionResizeMode(column, QHeaderView.Fixed)
+        finally:
+            self._guard = False
+        if new > old:
+            self.apply_defaults(range(old, new))
+            self._restore()
+        self._contents_changed()
+
+    def _contents_changed(self, *args):
+        self._autofit_timer.start()
+
+    def _auto_columns(self):
+        """Columns that follow their contents until the user resizes them."""
+        elastic = self.elastic_column()
+        if self.autofit == 'auto':
+            columns = {c for c in range(self.header.count()) if c not in self.defaults}
+        else:
+            columns = set(self.autofit)
+        return {c for c in columns - self.user - self.fixed
+                if c != elastic and c < self.header.count() and not self.header.isSectionHidden(c)}
+
+    def _autofit(self):
+        if not self.alive:
+            return
+        columns = self._auto_columns() if self.autofit else set()
+        if not columns:
+            self.fit(); return
+        wanted = {}
+        for column in columns:
+            content = self.view.sizeHintForColumn(column)
+            wanted[column] = min(max(content + 12, self._header_width(column), 60), self.MAX_AUTOFIT)
+        # Never push the elastic column below its minimum just to show long text:
+        # shrink the auto columns toward their header width instead.
+        elastic = self.elastic_column()
+        fixed_width = sum(self.header.sectionSize(c) for c in range(self.header.count())
+                          if c not in columns and c != elastic and not self.header.isSectionHidden(c))
+        room = self.view.viewport().width() - fixed_width - self.minimum
+        total = sum(wanted.values())
+        if room > 0 and total > room:
+            floors = {c: max(self._header_width(c), 60) for c in columns}
+            spare = sum(wanted[c] - floors[c] for c in columns)
+            excess = total - room
+            if spare > 0:
+                for c in columns:
+                    wanted[c] = int(wanted[c] - (wanted[c] - floors[c]) * min(1.0, excess / spare))
+        self._guard = True
+        try:
+            for column, width in wanted.items():
+                self.header.resizeSection(column, width)
+        finally:
+            self._guard = False
+        self.fit()
+
+    # -- geometry ------------------------------------------------------------
+    def _header_width(self, column):
+        model = self.view.model()
+        title = str(model.headerData(column, Qt.Horizontal)) if model is not None else ''
+        font = self.header.font(); font.setBold(True)
+        from PySide6.QtGui import QFontMetrics
+        return QFontMetrics(font).horizontalAdvance(title) + 22
+
+    def elastic_column(self):
+        if self.elastic is not None:
+            return self.elastic
+        visible = [self.header.logicalIndex(v) for v in range(self.header.count())
+                   if not self.header.isSectionHidden(self.header.logicalIndex(v))]
+        return visible[-1] if visible else None
+
+    def apply_defaults(self, columns=None):
+        self._guard = True
+        try:
+            for column in (range(self.header.count()) if columns is None else columns):
+                width = self.defaults.get(column)
+                if width is None and column != self.elastic_column() and column not in self.fixed:
+                    width = max(self._header_width(column), 90)
+                if width is not None:
+                    self.header.resizeSection(column, int(width))
+        finally:
+            self._guard = False
+
+    def fit(self):
+        """Give the elastic column exactly the free width (or its minimum)."""
+        if not self.alive:
+            return
+        elastic = self.elastic_column()
+        if elastic is None or elastic >= self.header.count() or self.header.isSectionHidden(elastic):
+            return
+        others = sum(self.header.sectionSize(c) for c in range(self.header.count())
+                     if c != elastic and not self.header.isSectionHidden(c))
+        width = max(self.minimum, self.view.viewport().width() - others)
+        if self.header.sectionSize(elastic) != width:
+            self._guard = True
+            try:
+                self.header.resizeSection(elastic, width)
+            finally:
+                self._guard = False
+
+    def _neighbour(self, column):
+        visual = self.header.visualIndex(column)
+        for v in range(visual + 1, self.header.count()):
+            logical = self.header.logicalIndex(v)
+            if not self.header.isSectionHidden(logical) and logical not in self.fixed:
+                return logical
+        return None
+
+    def _resized(self, column, old, new):
+        if self._guard:
+            return
+        if new == 0 or old == 0:          # shown / hidden
+            self._autofit_timer.start(); return
+        if column == self.elastic_column():
+            neighbour = self._neighbour(column)
+            if neighbour is not None:
+                size = self.header.sectionSize(neighbour) - (new - old)
+                floor = max(self.header.minimumSectionSize(), 28)
+                self._guard = True
+                try:
+                    if size >= floor:
+                        self.header.resizeSection(neighbour, size); self.user.add(neighbour)
+                    else:
+                        self.header.resizeSection(column, old)
+                finally:
+                    self._guard = False
+        else:
+            self.user.add(column)
+            self.fit()
+        self._save_timer.start()
+
+    def detach(self):
+        self.alive = False
+        self._autofit_timer.stop(); self._save_timer.stop()
+        self._viewport.removeEventFilter(self)
+        connections = [(self.header.sectionResized, self._resized),
+                       (self.header.sectionHandleDoubleClicked, self.fit_to_contents),
+                       (self.header.customContextMenuRequested, self._menu),
+                       (self.header.sectionCountChanged, self._count_changed)]
+        if self._model is not None:
+            connections += [(signal, self._contents_changed) for signal in
+                            (self._model.modelReset, self._model.rowsInserted, self._model.layoutChanged)]
+        for signal, slot in connections:
+            try:
+                signal.disconnect(slot)
+            except (RuntimeError, TypeError):
+                pass
+
+    def _view_destroyed(self, *args):
+        self.alive = False
+
+    def eventFilter(self, watched, event):
+        if self.alive and watched is self._viewport and event.type() == QEvent.Resize:
+            try:
+                self.attach_model()
+                self.fit()
+            except RuntimeError:      # view is being destroyed
+                self.alive = False
+        return False
+
+    # -- commands ---------------------------------------------------------------
+    def fit_to_contents(self, column=None):
+        columns = [column] if isinstance(column, int) else [c for c in range(self.header.count())
+                                                            if c != self.elastic_column() and c not in self.fixed]
+        self._guard = True
+        try:
+            for c in columns:
+                if self.header.isSectionHidden(c) or c in self.fixed:
+                    continue
+                self.view.resizeColumnToContents(c)
+                width = max(self.header.sectionSize(c), self._header_width(c))
+                self.header.resizeSection(c, min(width, self.MAX_AUTOFIT))
+                self.user.add(c)
+        finally:
+            self._guard = False
+        self.fit(); self._save_timer.start()
+
+    def reset(self):
+        self.user.clear()
+        if self.settings is not None and self.key:
+            self.settings.set(self._settings_key(), {})
+        self.apply_defaults()
+        self._autofit() if self.autofit else self.fit()
+        self._save_timer.stop()
+
+    def _menu(self, point):
+        menu = QMenu(self.header)
+        menu.addAction('Sütunları içeriğe sığdır', self.fit_to_contents)
+        menu.addAction('Varsayılan sütun genişlikleri', self.reset)
+        menu.exec(self.header.mapToGlobal(point))
+
+    # -- persistence ----------------------------------------------------------
+    def _settings_key(self):
+        return 'columns/' + self.key
+
+    def _save(self):
+        if self.settings is None or not self.key:
+            return
+        elastic = self.elastic_column()
+        widths = {str(c): self.header.sectionSize(c) for c in self.user
+                  if c != elastic and c < self.header.count() and not self.header.isSectionHidden(c)}
+        self.settings.set(self._settings_key(), widths)
+
+    def _restore(self):
+        if self.settings is None or not self.key:
+            return
+        saved = self.settings.get(self._settings_key(), {})
+        if not isinstance(saved, dict):
+            return
+        self._guard = True
+        try:
+            for text, width in saved.items():
+                if not str(text).isdigit() or type(width) is not int or not 28 <= width <= 1200:
+                    continue
+                column = int(text)
+                if column < self.header.count() and column != self.elastic_column() and column not in self.fixed:
+                    self.header.resizeSection(column, width); self.user.add(column)
+        finally:
+            self._guard = False
+
+
+def fit_columns(view, **options):
+    """Install (or replace) the shared column behaviour on a table or tree."""
+    previous = getattr(view, 'column_fitter', None)
+    if previous is not None:
+        previous.detach()
+        previous.deleteLater()
+    view.column_fitter = ColumnFitter(view, **options)
+    return view.column_fitter

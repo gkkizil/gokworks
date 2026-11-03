@@ -1,5 +1,6 @@
 """Plain-language presentation of the existing, validated 1D plan."""
 
+from gui_qt.components import fit_columns
 from decimal import Decimal
 from itertools import groupby
 
@@ -74,9 +75,7 @@ class CutOrder(QWidget):
         self.table.setSortingEnabled(False)
         self.table.setAccessibleName('Seçili çubuğun değiştirilmeyen kesim sırası')
         self.table.setMinimumHeight(100)
-        self.table.horizontalHeader().setStretchLastSection(False)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        fit_columns(self.table, elastic=1, minimum=90, autofit=(0, 2, 3))
         body.addWidget(self.table, 1)
 
     def clear(self):

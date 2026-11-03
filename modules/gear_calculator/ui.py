@@ -1,5 +1,6 @@
 """Turkish Qt workbench. Basic math is synchronous; CAD runs in a bounded process."""
 
+from gui_qt.components import fit_columns
 from gui_qt.components import NumberSpinBox, turkish_locale
 from PySide6.QtCore import Qt,QTimer,QSignalBlocker
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QComboBox,QSpinBox,QCheckBox,QTabWidget,QStackedWidget,QTableWidget,QTableWidgetItem,
@@ -102,8 +103,7 @@ class GearPage(BasePage):
         self.result_table=QTableWidget(0,2);self.result_table.setHorizontalHeaderLabels(['Büyüklük','Değer'])
         self.result_table.verticalHeader().hide();self.result_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.result_table.setAlternatingRowColors(True);self.result_table.setAccessibleName('Dişli mühendislik sonuçları')
-        self.result_table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        self.result_table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        fit_columns(self.result_table,elastic=0,minimum=140,autofit=(1,))
         style_result_table(self.result_table)
         self.result_table.setMinimumHeight(220);results.addWidget(self.result_table,1)
         self.warning_label=label('','muted');results.addWidget(self.warning_label)

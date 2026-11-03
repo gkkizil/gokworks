@@ -1,4 +1,5 @@
 """Mechanism workbench using the existing window's cancellable job owner."""
+from gui_qt.components import fit_columns
 from math import cos,sin,pi,degrees
 from PySide6.QtCore import Qt,QTimer,QElapsedTimer,QRectF,Signal,QSignalBlocker
 from PySide6.QtGui import QPainterPath,QPen,QColor,QBrush,QPainter
@@ -200,8 +201,7 @@ class FamilyPanel(QWidget):
         self.table.verticalHeader().hide();self.table.setAlternatingRowColors(True)
         self.table.setAccessibleName('Mekanizma hesap sonuçları')
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents);self.table.setMinimumHeight(220)
+        fit_columns(self.table,elastic=0,minimum=140,autofit=(1,));self.table.setMinimumHeight(220)
         from ..ui import style_result_table;style_result_table(self.table)
         rv.addWidget(self.table,1);self.warnings=label('','muted');rv.addWidget(self.warnings)
         rv.addWidget(label('CAD aktarımı','section'))

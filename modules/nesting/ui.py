@@ -1,5 +1,6 @@
 """Integrated DXF nesting workspace; every heavy operation uses the existing job runner."""
 
+from gui_qt.components import fit_columns
 from copy import deepcopy
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -138,14 +139,11 @@ class NestingPage(BasePage):
         self.part_tree = self.part_table
         self.part_tree_model.modelReset.connect(self.part_table.expandAll)
         self.part_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.part_table.header().setMinimumSectionSize(30)
-        self.part_table.header().setStretchLastSection(False)
-        self.part_table.header().setSectionResizeMode(0,QHeaderView.Stretch)
         self.part_table.setTextElideMode(Qt.ElideRight)
         metrics = self.part_table.fontMetrics()
-        for column,sample in ((1,'Adet '),(2,'t · mm '),(3,'Malzeme ')):
-            self.part_table.header().setSectionResizeMode(column,QHeaderView.Fixed)
-            self.part_table.header().resizeSection(column,metrics.horizontalAdvance(sample)+(28 if column==3 else 18))
+        fit_columns(self.part_table, elastic=0, minimum=60, autofit=(),
+                    defaults={column: metrics.horizontalAdvance(sample)+(28 if column==3 else 18)
+                              for column,sample in ((1,'Adet '),(2,'t · mm '),(3,'Malzeme '))})
         # Part, quantity and thickness always stay visible; the material
         # column appears when the pane is wide enough. Import status and
         # source remain in the row tooltip and the properties dock.
@@ -349,23 +347,17 @@ class NestingPage(BasePage):
             Column('Verim · %','efficiency',lambda v:fmt(v,1)),
             Column('Brüt · kg','gross_weight',fmt),Column('Net · kg','net_weight',fmt),Column('Fire · kg','waste_weight',fmt)])
         self.result_sheet_view = configure_view(QTableView()); self.result_sheet_view.setModel(self.result_sheet_model)
-        self.result_sheet_view.horizontalHeader().setMinimumSectionSize(30)
-        self.result_sheet_view.horizontalHeader().setStretchLastSection(False)
-        self.result_sheet_view.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         from PySide6.QtGui import QFontMetrics
         bold = self.result_sheet_view.horizontalHeader().font(); bold.setBold(True); metrics = QFontMetrics(bold)
-        for column,width in enumerate((52,90,64,64,64,64,64,64)):
-            title = self.result_sheet_model.columns[column].title
-            self.result_sheet_view.setColumnWidth(column,max(width,metrics.horizontalAdvance(title)+28))
+        fit_columns(self.result_sheet_view, elastic=1, minimum=90, autofit=(),
+                    defaults={column: max(width, metrics.horizontalAdvance(self.result_sheet_model.columns[column].title)+28)
+                              for column,width in enumerate((52,90,64,64,64,64,64,64)) if column != 1})
         self.result_sheet_view.selectionModel().currentChanged.connect(self.select_result_sheet)
         self.result_tabs.addTab(self.result_sheet_view,'Saclar')
         self.result_part_model = NestingTableModel([Column('Parça','code'),Column('Yerleşen','quantity'),
             Column('İstenen','requested'),Column('Malzeme','material'),Column('Net · kg','total_weight',fmt),Column('Plakalar','sheets')])
         table = configure_view(QTableView()); table.setModel(self.result_part_model)
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        table.horizontalHeader().setStretchLastSection(False)
-        table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        table.horizontalHeader().setSectionResizeMode(5,QHeaderView.Interactive); table.setColumnWidth(5,120)
+        fit_columns(table, elastic=0, minimum=120, defaults={5: 120}, autofit=(1,2,3,4))
         self.result_tabs.addTab(table,'Parçalar')
         self.result_tabs.hide(); layout.addWidget(self.result_tabs)
 
@@ -677,10 +669,7 @@ class NestingPage(BasePage):
                                       Column('t · mm','thickness',lambda v:fmt(v,2)),Column('Stok','stock'),Column('Fiyat','price')])
         self.sheet_table = configure_view(QTableView()); self.sheet_table.setModel(self.sheet_model)
         self.sheet_table.setMinimumHeight(170); self.sheet_table.setMaximumHeight(260)
-        self.sheet_table.horizontalHeader().setMinimumSectionSize(45)
-        self.sheet_table.horizontalHeader().setStretchLastSection(False)
-        self.sheet_table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        for index,width in enumerate((140,125,75,60,110)): self.sheet_table.setColumnWidth(index,width)
+        fit_columns(self.sheet_table, elastic=0, minimum=140, defaults={1: 125, 2: 75, 3: 60, 4: 110})
         self.sheet_table.doubleClicked.connect(self.edit_sheet); layout.addWidget(self.sheet_table,1)
         row = QHBoxLayout()
         for text, callback in [('Sac ekle',lambda:self.edit_sheet(new=True)),('Düzenle',self.edit_sheet),('Kaldır',self.remove_sheet)]: row.addWidget(button(text,callback))

@@ -1,5 +1,6 @@
 """Integrated, asynchronous profile cut-list and Weldments workflow."""
 
+from gui_qt.components import fit_columns
 from copy import deepcopy
 from dataclasses import asdict
 
@@ -100,13 +101,8 @@ class ProfileCuttingPage(BasePage):
         self.demands.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.demands.setEditTriggers(QAbstractItemView.EditKeyPressed)
         self.demands.doubleClicked.connect(lambda _: self.edit_selected())
-        for i,width in enumerate((170,100,120,55,120,240)): self.demands.setColumnWidth(i,width)
-        header = self.demands.horizontalHeader()
-        header.setStretchLastSection(False)
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        fit_columns(self.demands, elastic=0, minimum=120, defaults={1: 100, 4: 120, 5: 240}, autofit=(2, 3),
+                    settings=self.settings, key='profile_cutting.demands')
         self.demands.selectionModel().selectionChanged.connect(self.update_actions)
         self.demand_model.edited.connect(self.edit_demand_cell)
         self.demand_stack = QStackedWidget(); self.demand_stack.addWidget(self.demands)
@@ -232,10 +228,7 @@ class ProfileCuttingPage(BasePage):
         self.plan_view = configure_view(QTableView()); self.plan_view.setModel(self.plan_model)
         self.plan_view.setSortingEnabled(False); self.plan_view.setMinimumHeight(100)
         self.plan_view.setColumnHidden(2,True)
-        self.plan_view.horizontalHeader().setStretchLastSection(False)
-        self.plan_view.horizontalHeader().setSectionResizeMode(0,QHeaderView.ResizeToContents)
-        self.plan_view.horizontalHeader().setSectionResizeMode(1,QHeaderView.Stretch)
-        self.plan_view.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
+        fit_columns(self.plan_view, elastic=1, minimum=100, autofit=(0, 3))
         self.plan_view.selectionModel().currentRowChanged.connect(lambda index, _: self.draw_bar(index.row()))
         layout.addWidget(self.plan_view,1); self.plan_splitter.addWidget(left)
         self.cut_order = CutOrder(self.context); self.diagram = self.cut_order.diagram

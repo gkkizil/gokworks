@@ -1,5 +1,6 @@
 """Native editable import preview. Geometry remains in the background job."""
 
+from gui_qt.components import fit_columns
 from copy import deepcopy
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
@@ -101,10 +102,7 @@ class ImportDialog(Editor):
         self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.table.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed | QAbstractItemView.SelectedClicked)
         self.table.setSortingEnabled(False)
-        header = self.table.horizontalHeader(); header.setStretchLastSection(False)
-        header.setSectionResizeMode(0,QHeaderView.Stretch)
-        for column,width in ((1,125),(2,80),(3,155)):
-            self.table.setColumnWidth(column,width)
+        fit_columns(self.table, elastic=0, minimum=160, defaults={1: 125, 2: 80, 3: 155})
         panel_layout.addWidget(self.table,1)
         row = QHBoxLayout(); row.addWidget(label('Seçili satırlara:'))
         self.bulk_thickness = QLineEdit(); self.bulk_thickness.setPlaceholderText('Kalınlık · mm')

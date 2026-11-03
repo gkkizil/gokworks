@@ -82,7 +82,8 @@ kullanılmaz.
 | Durum hücresi | `StatusDelegate(appearance)` | Yalnız durum hücresini anlam rengiyle boyar |
 | Form | `ValueForm.text/combo/check/path` | Değerleri ayarlara otomatik kaydeder |
 | Dosya alanı | `PathPicker` / `ValueForm.path` | Dar sütunda `stack_fields()` |
-| Tablo | `configure_view(view)` | Sola hizalı başlık, ızgarasız, sıralanabilir |
+| Tablo | `configure_view(view)` | Sola hizalı başlık, ızgarasız, sıralanabilir; sütunlar `ColumnFitter` ile |
+| Sütun genişliği | `fit_columns(view, elastic=, minimum=, defaults=, autofit=, fixed=, settings=, key=)` | Bkz. §8 |
 | Sonuç listesi | `ResultsPanel` | Arama, durum filtresi, CSV, günlük |
 | Boş durum | `ViewEmptyState` | Tablonun üstünde, filtre temizleme |
 | Ayrıntı/hata | `show_details(parent, title, text)` | Kopyalanabilir metin |
@@ -144,3 +145,24 @@ kırmızı = bağlantı yok. Kısayollar: `Ctrl+K` araç ara, `Ctrl+B` menüyü 
   Tercih `page_transitions` ayarında saklanır.
 - Sol menü ve durum çubuğu sabit kalır; sayfa başlığı dahil yalnız çalışma
   alanı geçiş yapar.
+
+## 8. Tablo sütunları
+
+Bütün tablo ve ağaçlar aynı davranışı `gui_qt.components.fit_columns`
+(`ColumnFitter`) ile alır. `QHeaderView.Stretch`, `ResizeToContents` veya
+`setStretchLastSection(True)` kullanılmaz; bunlar sütunu sürüklenemez yapar
+veya tabloyu görünür alanın dışına iter.
+
+- Her sütun kenarı sürüklenebilir (`Interactive`); yalnız onay kutusu gibi
+  sütunlar `fixed=` ile sabittir.
+- Tek bir *esnek* sütun (`elastic=`, verilmezse son görünür sütun) boş genişliği
+  alır. Tablo daralınca esnek sütun `minimum=` altına inmez; yatay kaydırma
+  çubuğu çıkar, metin kırpılmaz.
+- Esnek sütunun kenarı sürüklenince sınır sağ komşusuyla birlikte kayar
+  (ayırıcı gibi); tablo genişliği değişmez.
+- `defaults=` verilmeyen sütunlar, kullanıcı dokunana kadar içeriğe göre
+  boyutlanır; uzun içerik esnek sütunu minimumunun altına itemez.
+- Başlık kenarına çift tıklama sütunu içeriğe sığdırır. Başlıkta sağ tık:
+  **Sütunları içeriğe sığdır** / **Varsayılan sütun genişlikleri**.
+- `settings=` ve `key=` verilirse kullanıcının genişlikleri
+  `columns/<key>` ayarında saklanır (28–1200 px, geçersiz değer yok sayılır).

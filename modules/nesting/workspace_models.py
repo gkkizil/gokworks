@@ -4,6 +4,7 @@ No CAD geometry, placement or accounting is calculated here. The flat import
 model remains the source of truth; tree leaves map back to those exact rows.
 """
 
+from gui_qt.components import fit_columns
 from dataclasses import dataclass, field
 
 from PySide6.QtCore import QAbstractProxyModel, QModelIndex, Qt, Signal, QItemSelectionModel
@@ -216,6 +217,4 @@ def configure_sheet_tree(view):
     view.setEditTriggers(QAbstractItemView.NoEditTriggers)
     view.setSelectionBehavior(QAbstractItemView.SelectRows)
     view.setAccessibleName('Sac listesi: stoklar ve hesaplanan fiziksel plakalar')
-    view.header().setStretchLastSection(False)
-    view.header().setSectionResizeMode(0, QHeaderView.Stretch)
-    view.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+    fit_columns(view, elastic=0, minimum=60, autofit=(1,))

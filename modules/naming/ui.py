@@ -1,5 +1,6 @@
 """Folder-first Pack and Go workflow with a hierarchical, collision-aware preview."""
 
+from gui_qt.components import fit_columns
 from pathlib import Path, PureWindowsPath
 from collections import Counter
 from PySide6.QtCore import Qt, QTimer
@@ -128,12 +129,8 @@ class NamingPage(BasePage):
         self.proxy = FilterProxy(self, tree=True)
         self.proxy.setSourceModel(self.model)
         self.tree.setModel(self.proxy)
-        self.tree.setColumnWidth(0, 240)
-        self.tree.setColumnWidth(1, 230)
-        self.tree.setColumnWidth(2, 100)
-        self.tree.header().setStretchLastSection(False)
-        self.tree.header().setSectionResizeMode(0,QHeaderView.Stretch)
-        self.tree.header().setSectionResizeMode(1,QHeaderView.Stretch)
+        fit_columns(self.tree, elastic=1, minimum=160, defaults={0: 260, 2: 100, 3: 260},
+                    settings=self.settings, key='naming.preview')
         self.tree.setColumnHidden(3,True)
         self.tree.doubleClicked.connect(self.edit_selected)
         layout.addWidget(self.tree, 1)

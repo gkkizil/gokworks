@@ -1,5 +1,6 @@
 """GOKWORKS transfer workspace; all scanning, COM and reports run as jobs."""
 
+from gui_qt.components import fit_columns
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Slot
@@ -166,11 +167,8 @@ class CadConverterPage(BasePage):
         self.files_proxy.setSourceModel(self.files_model)
         self.files_view = configure_view(QTableView()); self.files_view.setModel(self.files_proxy)
         self.files_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.files_view.setColumnWidth(0, 260); self.files_view.setColumnWidth(1, 70)
-        self.files_view.setColumnWidth(2, 150); self.files_view.setColumnWidth(3, 200)
-        self.files_view.setColumnWidth(4, 110)
-        self.files_view.horizontalHeader().setStretchLastSection(False)
-        self.files_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        fit_columns(self.files_view, elastic=0, minimum=120, defaults={1: 70, 2: 150, 3: 200, 4: 110},
+                    settings=self.settings, key='cad_converter.files')
         self.files_view.setItemDelegateForColumn(4, StatusDelegate(lambda: self.context.appearance, self.files_view))
         inventory = QWidget(); inventory_layout = QVBoxLayout(inventory)
         inventory_layout.setContentsMargins(0, SPACING['s'], 0, 0); inventory_layout.setSpacing(SPACING['s'])

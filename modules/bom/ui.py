@@ -1,5 +1,6 @@
 """Virtualized hierarchical BOM, instance weights and complete Excel export."""
 
+from gui_qt.components import fit_columns
 from dataclasses import asdict
 from pathlib import PureWindowsPath
 
@@ -125,14 +126,10 @@ class BomPage(BasePage):
         self.tree_proxy = FilterProxy(self, tree=True)
         self.tree_proxy.setSourceModel(self.tree_model)
         self.tree.setModel(self.tree_proxy)
-        self.tree.setColumnWidth(0, 240)
-        for column, width in enumerate((200, 65, 135, 125, 150, 210, 170)):
-            self.parts.setColumnWidth(column, width)
-        self.parts.horizontalHeader().setSectionResizeMode(0,QHeaderView.Stretch)
-        self.parts.horizontalHeader().setStretchLastSection(False)
-        self.tree.header().setSectionResizeMode(0,QHeaderView.Stretch)
-        self.tree.header().setStretchLastSection(False)
-        for column,width in enumerate((200,70,85,115)):self.tree.setColumnWidth(column,width)
+        fit_columns(self.parts, elastic=0, minimum=200, defaults={1: 65, 2: 135, 3: 125, 4: 150, 5: 210, 6: 170},
+                    settings=self.settings, key='bom.parts')
+        fit_columns(self.tree, elastic=0, minimum=200, defaults={1: 70, 2: 85, 3: 115, 4: 150, 5: 210},
+                    settings=self.settings, key='bom.tree')
         self.show_technical_columns(False)
         self.tabs.addTab(self.parts, 'Parça listesi')
         self.tabs.addTab(self.tree, 'Ürün ağacı')

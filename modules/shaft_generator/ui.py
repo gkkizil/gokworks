@@ -1,5 +1,6 @@
 """GOKWORKS BasePage: stage editor, native operations and two linked views."""
 
+from gui_qt.components import fit_columns
 from gui_qt.components import NumberSpinBox
 from copy import deepcopy
 from dataclasses import fields
@@ -77,7 +78,7 @@ class ShaftPage(BasePage):
         self.table=QTableWidget(0,3); self.table.setHorizontalHeaderLabels(['Kademe','Çap · mm','Boy · mm'])
         self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        fit_columns(self.table, elastic=0, minimum=70, defaults={1: 110, 2: 110})
         self.table.horizontalHeader().setDefaultAlignment(Qt.AlignLeft|Qt.AlignVCenter)
         self.table.horizontalHeader().setHighlightSections(False)
         self.table.verticalHeader().setDefaultSectionSize(ROW_HEIGHT); self.table.setShowGrid(False)
