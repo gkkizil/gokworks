@@ -82,8 +82,9 @@ alt büküm bayraklarını değiştirmesini bekleyen eski bir beklenti, mevcut �
 sözleşmesine göre düzeltilmiştir: yalnız ana SheetMetal parametreleri değiştirilir.
 Eski testin aslı başlangıç commit’inde korunur.
 
-210 Tk GUI testi **verbatim** `tests/legacy_tk` altında saklanır; çalıştırmak için
-başlangıç commit’i ve eski bağımlılıklar gerekir. Bunlar Qt suite sonucu olarak
+210 Tk GUI testi göç sırasında `tests/legacy_tk` altında saklanmıştı; Tk arayüzü
+kaldırıldığı için çalıştırılamıyorlardı ve 3 Kasım 2026'da depodan silindi (Git
+geçmişinde durur). Çalıştırmak için başlangıç commit’i ve eski bağımlılıklar gerekir. Bunlar Qt suite sonucu olarak
 sayılmaz. `gui-test-mapping.json` her eski testin karşılık grubunu gösterir.
 Qt testleri gerçek widget/model/event-loop kullanır; yalnız CAD sınırı sahte
 nesnelerle kontrol edilir. Eski widget iç yapısına bağlı iddialar yerine kullanıcı

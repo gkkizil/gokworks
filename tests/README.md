@@ -11,7 +11,6 @@ Bu klasör yalnız ortak altyapıyı ve uygulama bütününü sınayan grupları
 - `test_single_file_distribution.py`: tek EXE dağıtımı ve lisanslar.
 - `test_workspace_layout.py`: ortak pencere geometrisi.
 - `support/`: tüm modüllerin kullandığı test nesneleri ve PDF hata enjektörü.
-- `legacy_tk/`: güncel test grubuna dahil edilmeyen, değiştirilmeden korunan tarihsel testler.
 
 Depo kökünde `python -m pytest` hem burayı hem `modules/` altını toplar.
 Yalnız bir modül: `python -m pytest modules/nesting/tests`.
