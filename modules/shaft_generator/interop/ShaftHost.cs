@@ -50,6 +50,31 @@ namespace Gokworks.ShaftInterop
             GetActiveObject(ref clsid, IntPtr.Zero, out active);
             return active;
         }
+        // SOLIDWORKS (and OneDrive/antivirus on the Desktop) may keep a just-closed
+        // file locked for a moment: "used by another process". Retry only sharing
+        // violations, for at most ~10 s; never overwrite (File.Move refuses).
+        internal static void MoveReleased(string source, string target)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                try { File.Move(source, target); return; }
+                catch (IOException error)
+                {
+                    if (File.Exists(target) || !File.Exists(source) || attempt >= 40 || (error.HResult & 0xFFFF) != 32 && (error.HResult & 0xFFFF) != 33) throw;
+                    Thread.Sleep(250);
+                }
+                catch (UnauthorizedAccessException) { if (attempt >= 40) throw; Thread.Sleep(250); }
+            }
+        }
+        internal static void DeleteReleased(string path)
+        {
+            for (int attempt = 0; File.Exists(path); attempt++)
+            {
+                try { File.Delete(path); return; }
+                catch (IOException) { if (attempt >= 40) throw; Thread.Sleep(250); }
+                catch (UnauthorizedAccessException) { if (attempt >= 40) throw; Thread.Sleep(250); }
+            }
+        }
         internal static void Need(bool condition, string message)
         {
             if (!condition) throw new InvalidOperationException(message);
@@ -159,7 +184,11 @@ namespace Gokworks.ShaftInterop
                         && errors == 0 && File.Exists(temporary) && new FileInfo(temporary).Length > 0, "SLDPRT save failed: " + errors);
                     string ownTitle = model.GetTitle(); model = null;
                     app.CloseDoc(ownTitle); // only the document created above
-                    File.Move(temporary, request.output_path); // atomic, refuses any overwrite
+                    // A title without extension (Explorer setting) may not match; close by full
+                    // path so SOLIDWORKS really releases the temporary file before it is moved.
+                    if (app.GetOpenDocumentByName(temporary) != null) app.CloseDoc(temporary);
+                    Need(app.GetOpenDocumentByName(temporary) == null, "Geçici SLDPRT SOLIDWORKS'te kapatılamadı: " + temporary);
+                    MoveReleased(temporary, request.output_path); // refuses any overwrite; waits for SOLIDWORKS to release the file
                     temporary = null;
                     model = (IModelDoc2)app.OpenDoc6(request.output_path, (int)swDocumentTypes_e.swDocPART,
                         (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", ref errors, ref warnings);
@@ -211,7 +240,7 @@ namespace Gokworks.ShaftInterop
                 }
                 if (temporary != null)
                 {
-                    try { if (File.Exists(temporary)) File.Delete(temporary); }
+                    try { DeleteReleased(temporary); }
                     catch (Exception failure) { cleanup += " Temporary file cleanup failed: " + failure.Message; }
                 }
                 if (model == null && app != null && previous != null)

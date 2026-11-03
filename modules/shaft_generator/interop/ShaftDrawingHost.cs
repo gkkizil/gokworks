@@ -174,6 +174,31 @@ namespace Gokworks.ShaftInterop
         private static string lastPhase = "Başlangıç";
         private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
+        // SOLIDWORKS (and OneDrive/antivirus on the Desktop) may keep a just-closed
+        // file locked for a moment: "used by another process". Retry only sharing
+        // violations, for at most ~10 s; never overwrite (File.Move refuses).
+        internal static void MoveReleased(string source, string target)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                try { File.Move(source, target); return; }
+                catch (IOException error)
+                {
+                    if (File.Exists(target) || !File.Exists(source) || attempt >= 40 || (error.HResult & 0xFFFF) != 32 && (error.HResult & 0xFFFF) != 33) throw;
+                    Thread.Sleep(250);
+                }
+                catch (UnauthorizedAccessException) { if (attempt >= 40) throw; Thread.Sleep(250); }
+            }
+        }
+        internal static void DeleteReleased(string path)
+        {
+            for (int attempt = 0; File.Exists(path); attempt++)
+            {
+                try { File.Delete(path); return; }
+                catch (IOException) { if (attempt >= 40) throw; Thread.Sleep(250); }
+                catch (UnauthorizedAccessException) { if (attempt >= 40) throw; Thread.Sleep(250); }
+            }
+        }
         internal static void Need(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
         private static void Report(string phase)
         {
@@ -385,7 +410,9 @@ namespace Gokworks.ShaftInterop
                      && errors == 0 && File.Exists(temporary), "SLDDRW kaydedilemedi: " + errors);
                 string title = drawingModel.GetTitle(); drawingModel = null; drawing = null; views.Clear(); dimensionObjects.Clear();
                 app.CloseDoc(title);
-                File.Move(temporary, drawingPath); temporary = null; savedDrawing = drawingPath;
+                if (app.GetOpenDocumentByName(temporary) != null) app.CloseDoc(temporary);
+                Need(app.GetOpenDocumentByName(temporary) == null, "Geçici SLDDRW SOLIDWORKS'te kapatılamadı: " + temporary);
+                MoveReleased(temporary, drawingPath); temporary = null; savedDrawing = drawingPath;
                 drawingModel = (IModelDoc2)app.OpenDoc6(drawingPath, (int)swDocumentTypes_e.swDocDRAWING,
                     (int)swOpenDocOptions_e.swOpenDocOptions_Silent, "", ref errors, ref warnings);
                 Need(drawingModel != null && errors == 0, "Kaydedilen teknik resim yeniden açılamadı: " + drawingPath);
@@ -416,7 +443,7 @@ namespace Gokworks.ShaftInterop
                 string cleanup = "";
                 if (temporary != null)
                 {
-                    try { if (File.Exists(temporary)) File.Delete(temporary); }
+                    try { DeleteReleased(temporary); }
                     catch (Exception failure) { cleanup += " Geçici dosya silinemedi: " + failure.Message; }
                 }
                 if (drawingModel != null && savedDrawing.Length == 0)
@@ -558,15 +585,7 @@ namespace Gokworks.ShaftInterop
                 IView view = (IView)drawing.CreateDrawViewFromModelView3(partPath, name, at[0], at[1], 0);
                 if (view == null) { tried.Add(name + " (oluşmadı)"); continue; }
                 view.UseSheetScale = 1;
-                double[] o = ToSheet(view, shaft, 0, 0, 0), a = ToSheet(view, shaft, 100, 0, 0);
-                double angle = Math.Atan2(a[1] - o[1], a[0] - o[0]);
-                if (Math.Abs(angle) > 1e-9) view.Angle = view.Angle - angle;
-                o = ToSheet(view, shaft, 0, 0, 0); a = ToSheet(view, shaft, 100, 0, 0);
-                double[] r = ToSheet(view, shaft, 0, 100, 0), n = ToSheet(view, shaft, 0, 0, 100);
-                // Looking straight along the profile normal: the normal collapses to a point
-                // (rejects isometric/trimetric/'normal to' views that only look similar).
-                if (a[0] - o[0] > 0 && Math.Abs(a[1] - o[1]) < 1e-7 && r[1] - o[1] > 0
-                    && Math.Abs(n[0] - o[0]) < 1e-7 && Math.Abs(n[1] - o[1]) < 1e-7)
+                if (Aligned(view, shaft))
                 {
                     view.Position = at;
                     return view;
@@ -578,6 +597,33 @@ namespace Gokworks.ShaftInterop
             }
             throw new InvalidOperationException("Ana görünüş oluşturulamadı; mil ekseni yatay ve kama tarafı yukarı olan model görünüşü bulunamadı (denenen: "
                                                 + String.Join(", ", tried) + ").");
+        }
+
+        // Judge the view from one reading of its transform (no reliance on SOLIDWORKS
+        // refreshing ModelToViewTransform after Angle changes): it must look straight
+        // along the profile normal and, once the shaft axis is turned horizontal, show
+        // the keyway side up. Then rotate, and if the read-back shows the rotation went
+        // the other way, use the opposite sign.
+        private static bool Aligned(IView view, Shaft shaft)
+        {
+            double[] o = ToSheet(view, shaft, 0, 0, 0), a = ToSheet(view, shaft, 100, 0, 0);
+            double[] r = ToSheet(view, shaft, 0, 100, 0), n = ToSheet(view, shaft, 0, 0, 100);
+            double ax = a[0] - o[0], ay = a[1] - o[1], rx = r[0] - o[0], ry = r[1] - o[1];
+            double length = Math.Sqrt(ax * ax + ay * ay);
+            if (length < 1e-9) return false;
+            double tolerance = length * 1e-6;
+            if (Math.Abs(n[0] - o[0]) > tolerance || Math.Abs(n[1] - o[1]) > tolerance) return false;   // not straight-on
+            double c = ax / length, s = ay / length;
+            double radialUp = -rx * s + ry * c, radialAlong = rx * c + ry * s;   // radial after turning the axis to +x
+            if (radialUp <= 0 || Math.Abs(radialAlong) > tolerance) return false;   // mirrored view (keyway would be down)
+            double angle = Math.Atan2(ay, ax);
+            if (Math.Abs(angle) < 1e-9) return true;
+            double original = view.Angle;
+            view.Angle = original - angle;
+            double[] o2 = ToSheet(view, shaft, 0, 0, 0), a2 = ToSheet(view, shaft, 100, 0, 0);
+            bool refreshed = Math.Abs((a2[0] - o2[0]) - ax) > tolerance || Math.Abs((a2[1] - o2[1]) - ay) > tolerance;
+            if (refreshed && a2[0] - o2[0] < 0) view.Angle = original + angle;   // SOLIDWORKS turned the other way
+            return true;
         }
 
         private static IView Projected(IDrawingDoc drawing, IView parent, double[] at)
@@ -1039,9 +1085,9 @@ namespace Gokworks.ShaftInterop
                     using (FileStream s = File.OpenRead(temporary)) s.Read(head, 0, 4);
                     ok = System.Text.Encoding.ASCII.GetString(head).StartsWith(magic.Substring(0, Math.Min(magic.Length, 4)));
                 }
-                if (ok) File.Move(temporary, path);
+                if (ok) MoveReleased(temporary, path);
             }
-            finally { if (File.Exists(temporary)) File.Delete(temporary); }
+            finally { try { DeleteReleased(temporary); } catch (IOException) { } catch (UnauthorizedAccessException) { } }
             if (!ok) issues.Add(Path.GetExtension(path).ToUpperInvariant() + " dışa aktarımı doğrulanamadı (" + errors + ").");
             return new Dictionary<string, object> { { "path", ok ? path : "" }, { "verified", ok } };
         }
