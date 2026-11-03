@@ -221,6 +221,37 @@ def test_folder_scope_keeps_active_assembly_quantities_and_discards_unused_parts
     assert len(rows)==1 and rows[0]['quantity']==6 and rows[0]['source']==p.path
 
 
+def test_folder_scope_reports_parts_left_out_by_the_active_assembly(env,tmp_path):
+    app,_,_=env;p=part(app,tmp_path/'Panel.SLDPRT');part(app,tmp_path/'Unused.SLDPRT')
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,name='P-1')]);app.ActiveDoc=root
+    rows,notes=scan(env,str(tmp_path),mode='folder')
+    assert len(rows)==1 and any('1 parça açık montajda kullanılmadığı' in n for n in notes)
+
+
+def test_folder_scan_ignores_an_unrelated_open_assembly(env,tmp_path):
+    """Regression: an assembly from another folder was open in SOLIDWORKS and the
+    folder scan silently returned 0 bodies."""
+    app,_,_=env
+    elsewhere=tmp_path/'other';folder=tmp_path/'parts'
+    p=part(app,folder/'Flans.SLDPRT');q=part(app,folder/'Kapak.SLDPRT')
+    unrelated=part(app,elsewhere/'Baska.SLDPRT')
+    app.ActiveDoc=assembly(app,elsewhere/'Baska.SLDASM',[component(unrelated)])
+    rows,notes=scan(env,str(folder),mode='folder')
+    assert sorted(r['source'] for r in rows)==sorted([p.path,q.path])
+    assert all(r['quantity']==1 and r['exportable'] for r in rows)
+    assert any('hiçbirini içermiyor' in n for n in notes)
+
+
+def test_empty_folder_says_why_and_points_to_subfolders(env,tmp_path):
+    app,_,_=env;part(app,tmp_path/'alt'/'Panel.SLDPRT')
+    with env[1]() as session:
+        rows,notes=scan_inventory(session,str(tmp_path),recursive=False,mode='folder')
+    assert rows==[] and any('SLDPRT dosyası bulunamadı' in n and 'Alt klasörleri tara' in n for n in notes)
+    with env[1]() as session:
+        rows,_=scan_inventory(session,str(tmp_path),recursive=True,mode='folder')
+    assert len(rows)==1
+
+
 def test_stopped_scan_never_emits_a_successful_partial_list(env,tmp_path):
     app,Session,_=env;app.ActiveDoc=part(app,tmp_path/'P.SLDPRT');stop=Event();stop.set();events=Queue()
     scan_sources(None,True,events,stop,mode='active',session_factory=Session)
@@ -272,3 +303,16 @@ def test_cancel_after_native_export_prevents_publication_and_restores_selection(
     export_selection(rows,tmp_path,tmp_path/'out',('dxf',),events,stop,session_factory=Session)
     assert events.queue[-1][1]['state']=='cancelled' and not list((tmp_path/'out').glob('*.dxf'))
     assert p.selection==['user selection'] and app.ActiveDoc is p
+
+
+def test_empty_scan_result_is_a_warning_with_the_reason(qtbot, tmp_path):
+    from gui_qt.app import MainWindow, create_application
+    create_application([])
+    window = MainWindow(tmp_path / 'settings.json'); qtbot.addWidget(window); window.show()
+    window.navigate('dxf_dwg'); page = window.pages['dxf_dwg']
+    reason = 'Açık montaj bu klasördeki parçaların hiçbirini içermiyor; klasördeki parçalar tek tek tarandı (adet 1).'
+    page.process_events([('sheet_inventory', []), ('done', dict(state='preview', total=0, warnings=[reason]))])
+    assert page.status_text.startswith('Sac gövdesi bulunamadı.') and reason in page.status_text
+    assert window.global_status.property('role') == 'warning'
+    page.process_events([('sheet_inventory', []), ('done', dict(state='preview', total=0, warnings=[]))])
+    assert 'Alt klasörleri tara' in page.status_text

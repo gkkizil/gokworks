@@ -462,12 +462,28 @@ def scan_inventory(session, source=None, recursive=True, stop=None, *, mode='act
     try:
         if mode == 'folder':
             paths = find_parts(source, recursive, stop)
-            active = get(session.app,'ActiveDoc')
+            if not paths:
+                hint = ''
+                if not recursive and find_parts(source, True, stop):
+                    hint = ' Parçalar alt klasörlerde; “Alt klasörleri tara” seçeneğini açın.'
+                warnings.append(f'Klasörde SLDPRT dosyası bulunamadı: {source}.{hint}')
+            active = get(session.app,'ActiveDoc') if paths else None
+            records = []
             if active is not None and call(active,'GetType')==session.c('swDocASSEMBLY'):
+                # The folder narrows the open assembly (its quantities are kept).
                 allowed = {key(path)[0] for path in paths}
-                records,complete = assembly_occurrences(session,active,stop,warnings)
-                records = [r for r in records if key(r[0])[0] in allowed]
-            else:
+                occurrences,complete = assembly_occurrences(session,active,stop,warnings)
+                records = [r for r in occurrences if key(r[0])[0] in allowed]
+                used = {key(r[0])[0] for r in records}
+                if not records:
+                    # An unrelated assembly is open: scanning it would silently find nothing.
+                    warnings.append('Açık montaj bu klasördeki parçaların hiçbirini içermiyor; '
+                                    'klasördeki parçalar tek tek tarandı (adet 1).')
+                    complete = True
+                elif len(used) < len(allowed):
+                    warnings.append(f'{len(allowed) - len(used)} parça açık montajda kullanılmadığı için listelenmedi; '
+                                    'adetler montajdan alındı.')
+            if not records:
                 records = [(path, '', path, False, None) for path in paths]
             active = None
         else:

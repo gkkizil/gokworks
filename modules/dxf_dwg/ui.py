@@ -719,5 +719,12 @@ class DxfDwgPage(ExportPage):
             if any(kind=='done' and value.get('state')=='preview' for kind,value in ordinary) and self.inventory is not None:
                 summary=next(value for kind,value in ordinary if kind=='done' and value.get('state')=='preview')
                 warnings=len(summary.get('warnings',()))
-                self.set_status(f'Tarama tamamlandı. {len(self.inventory)} benzersiz sac gövdesi bulundu.'
-                                +(f' · {warnings} uyarı: Günlük bölümünü kontrol edin.' if warnings else ''))
+                if not self.inventory:
+                    reason = next(iter(summary.get('warnings', ())), '') or (
+                        'Seçilen kaynakta sac gövdesi bulunamadı. Parçaların SolidWorks Sac Levha özelliğiyle '
+                        'modellendiğini ve “Alt klasörleri tara” seçeneğini kontrol edin.')
+                    self.set_status('Sac gövdesi bulunamadı. ' + reason, tone='warning')
+                else:
+                    self.set_status(f'Tarama tamamlandı. {len(self.inventory)} benzersiz sac gövdesi bulundu.'
+                                    +(f' · {warnings} uyarı: Günlük bölümünü kontrol edin.' if warnings else ''),
+                                    tone='warning' if warnings else 'success')
