@@ -225,6 +225,38 @@ namespace Gokworks.ShaftInterop
             return path;
         }
 
+        // Reads a request through the same parser and accessors as Run(), without
+        // SOLIDWORKS. Used by the Windows CI test with the real JavaScriptSerializer.
+        public static string CheckPayload(string line)
+        {
+            var request = D(Lists(Json.DeserializeObject(line)));
+            var plan = D(request["plan"]); var layout = D(plan["layout"]); var sheet = D(layout["sheet"]);
+            ArrayList scale = L(sheet, "scale");
+            double s1 = Convert.ToDouble(scale[0], Inv), s2 = Convert.ToDouble(scale[1], Inv);
+            double width = N(sheet, "width_mm"), height = N(sheet, "height_mm"); Paper(S(sheet, "size"));
+            var viewBoxes = D(layout["views"]);
+            foreach (string id in viewBoxes.Keys) BoxCentre(viewBoxes, id);
+            foreach (object p in D(layout["placements"]).Values) { N(D(p), "x_mm"); N(D(p), "y_mm"); }
+            int items = 0;
+            foreach (string group in new string[] { "views", "dimensions", "notes", "finishes", "datums", "frames" })
+                foreach (object raw in (ArrayList)plan[group]) { D(raw); items++; }
+            foreach (object raw in L(plan, "segments")) { var seg = D(raw); N(seg, "x0"); N(seg, "x1"); N(seg, "r"); }
+            foreach (object raw in (ArrayList)plan["dimensions"])
+            {
+                var dim = D(raw); N(dim, "nominal_mm");
+                foreach (object r in (ArrayList)dim["refs"]) D(r);
+                object t; if (dim.TryGetValue("tolerance", out t) && t != null)
+                { var tol = D(t); Convert.ToInt32(tol["sw_type"], Inv); N(tol, "upper_mm"); N(tol, "lower_mm"); }
+            }
+            foreach (object raw in (ArrayList)plan["frames"])
+            { var g = D(raw); N(g, "value"); foreach (object d in L(g, "datums")) Need(d is string, "datum harfi metin değil"); D(g["surface"]); }
+            foreach (object raw in (ArrayList)plan["notes"]) D(D(raw)["ref"]);
+            foreach (object raw in (ArrayList)plan["finishes"]) D(D(raw)["surface"]);
+            D(plan["title"]);
+            return Json.Serialize(new Dictionary<string, object> { { "scale", new double[] { s1, s2 } }, { "items", items },
+                { "sheet", new double[] { width, height } }, { "process_id", Convert.ToInt32(request["process_id"], Inv) } });
+        }
+
         public static void Run()
         {
             IModelDoc2 drawingModel = null; string previous = null; string temporary = null; string savedDrawing = "";

@@ -374,6 +374,35 @@ def test_drawing_host_compiles_through_the_shipping_loader():
     assert 'GOKWORKS_DRAWING_HOST_COMPILED Gokworks.ShaftInterop.DrawingHost' in result.stdout
 
 
+@pytest.mark.skipif(sys.platform != 'win32' or not os.environ.get('GOKWORKS_SHAFT_TEST_INTEROP'),
+                    reason='Windows and explicitly staged interop compile references required; no live CAD.')
+def test_drawing_host_reads_the_real_payload_with_javascriptserializer(tmp_path):
+    """Regression for 'Index was out of range': the real .NET parser returns
+    arrays as object[]; the host must read scale, lists and boxes without SOLIDWORKS."""
+    library = Path(os.environ['GOKWORKS_SHAFT_TEST_INTEROP']).resolve()
+    marker = '[Gokworks.ShaftInterop.DrawingHost]::Run()'
+    probe = '[Console]::WriteLine([Gokworks.ShaftInterop.DrawingHost]::CheckPayload([Console]::In.ReadLine()))'
+    p = three_stage(); a, b, c = p.stages
+    p.operations = [Groove(b.id, 10, 1.3, .6), Keyway(b.id, 20, 28, 8, 4), Chamfer(a.id, 'left', 1)]
+    p.drawing = DrawingSettings(enabled=True, isometric=True, default_finish=FinishSpec(3.2),
+                                tolerances={f'stage:{a.id}:diameter': ToleranceSpec('iso_fit', fit='h6')},
+                                datums=[Datum('A', f'stage:{a.id}:cylinder')],
+                                geometric=[GeometricTolerance('circular_runout', .02, f'stage:{b.id}:cylinder', ['A'])])
+    part = tmp_path / 'MIL_T.SLDPRT'; part.write_bytes(b'part')
+    payload = dict(controller.request(p, part), process_id=1234)
+    powershell = Path(os.environ['SystemRoot']) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    result = subprocess.run([str(powershell), '-NoLogo', '-NoProfile', '-NonInteractive', '-STA', '-Command',
+                             controller.LOADER.replace(marker, probe)], input=json.dumps(payload, ensure_ascii=False) + '\n',
+                            encoding='utf-8', capture_output=True, timeout=120, creationflags=subprocess.CREATE_NO_WINDOW,
+                            env={**os.environ, 'GOKWORKS_SHAFT_INTEROP': str(library),
+                                 'GOKWORKS_SHAFT_HOST': str(controller.HOST_SOURCE)})
+    assert result.returncode == 0, result.stdout + result.stderr
+    reply = json.loads([line for line in result.stdout.splitlines() if line.startswith('{"scale"')][-1])
+    plan_ = payload['plan']
+    assert reply['scale'] == plan_['layout']['sheet']['scale'] and reply['process_id'] == 1234
+    assert reply['items'] == sum(len(plan_[g]) for g in ('views', 'dimensions', 'notes', 'finishes', 'datums', 'frames'))
+
+
 @pytest.mark.skipif(sys.platform != 'win32' or os.environ.get('GOKWORKS_SHAFT_DRAWING_LIVE') != '1',
                     reason='Live SOLIDWORKS drawing test: Windows, open SOLIDWORKS and GOKWORKS_SHAFT_DRAWING_LIVE=1.')
 def test_live_part_drawing_pdf_and_reopen(tmp_path):
@@ -401,7 +430,7 @@ def test_host_reads_the_real_payload_with_the_types_it_expects(tmp_path):
     now normalised once; every key the host reads must exist with its type."""
     import re
     source = (Path(controller.__file__).parents[1] / 'interop' / 'ShaftDrawingHost.cs').read_text(encoding='utf-8')
-    assert source.count('Json.DeserializeObject(') == 1 and 'D(Lists(Json.DeserializeObject(line)))' in source
+    assert source.count('Json.DeserializeObject(') == source.count('D(Lists(Json.DeserializeObject(line)))') >= 1
     assert re.search(r'var array = o as object\[\];', source)
     p = three_stage(); a, b, c = p.stages
     p.operations = [Groove(b.id, offset=10, width=1.3, depth=.6), Keyway(b.id, offset=20, length=28, width=8, depth=4),
