@@ -23,9 +23,13 @@ değişmedi. Teknik resim ayrı bir `create_shaft_drawing` komutudur.
    bütün silindirik dış yüzeylere verilir; yüzeye özel değer önceliklidir.
 5. Gerekirse datum (A, B, C…) ve geometrik tolerans ekleyin. Salgı, diklik,
    paralellik ve konum, tanımlı bir datum olmadan eklenemez.
-6. **Otomatik teknik resim oluştur** açıksa **SLDPRT oluştur ve kaydet…**
-   önce parçayı, ardından aynı klasöre `MIL_001.SLDDRW` ve seçilen
-   `MIL_001.PDF` / `.DWG` dosyalarını oluşturur. Kayıtlı bir parça için
+6. Butonların yanındaki **Teknik resim oluştur** kutusunu işaretleyin (Teknik
+   resim bölümündeki **Otomatik teknik resim oluştur** ile aynı ayardır).
+   İşaretliyken **SolidWorks’te çiz** ve **SLDPRT oluştur ve kaydet…** önce
+   katı modeli oluşturup kaydeder, hemen ardından aynı klasöre
+   `MIL_001.SLDDRW` ve seçilen `MIL_001.PDF` / `.DWG` dosyalarını oluşturur.
+   Teknik resim kayıtlı parçaya bağlandığı için **SolidWorks’te çiz** bu
+   durumda önce kayıt yerini sorar. Kayıtlı bir parça için
    **Kayıtlı SLDPRT’den teknik resim…** kullanılır.
 
 Var olan hiçbir çıktı dosyasının üzerine yazılmaz. Parça oluşur ama teknik

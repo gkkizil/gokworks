@@ -484,3 +484,43 @@ def test_drawing_is_not_started_when_the_part_was_not_created(tmp_path, monkeypa
     controller.create_part_and_drawing(three_stage(), tmp_path / 'MIL_X.SLDPRT', events, threading.Event())
     kind, value = events.get_nowait()
     assert kind == 'shaft_drawing' and value['state'] == 'skipped' and not started
+
+
+def test_footer_checkbox_creates_the_drawing_right_after_the_solid_model(qtbot, tmp_path, monkeypatch):
+    """'Teknik resim oluştur' next to the CAD buttons: same setting as the drawing
+    section; when ticked, both buttons save the part and then create the drawing."""
+    from unittest.mock import patch
+    from gui_qt.app import MainWindow, create_application
+    create_application([])
+    window = MainWindow(tmp_path / 'settings.json'); qtbot.addWidget(window); window.show()
+    window.navigate('shaft_generator'); page = window.pages['shaft_generator']; panel = page.drawing_panel
+    box = page.auto_drawing
+    assert box.isVisible() and box.text() == 'Teknik resim oluştur' and not box.isChecked()
+    assert box.parentWidget() is page.create_button.parentWidget()          # in the button row
+    box.setChecked(True)
+    assert page.project.drawing.enabled and panel.enabled.isChecked()       # one setting
+    panel.enabled.setChecked(False)
+    assert not box.isChecked()
+    panel.enabled.setChecked(True)
+    assert box.isChecked()
+
+    started = []
+    monkeypatch.setattr(page, 'can_start', lambda: True)
+    monkeypatch.setattr(page.jobs, 'start', lambda owner, job: started.append(job))
+    from modules.shaft_generator.drawing import controller as drawing_controller
+    calls = []
+    monkeypatch.setattr(drawing_controller, 'create_part_and_drawing', lambda *a: calls.append(a))
+    part = tmp_path / 'MIL_T.SLDPRT'
+    with patch('modules.shaft_generator.ui.QFileDialog.getSaveFileName', return_value=(str(part), '')) as ask:
+        page.create_button.click()                                          # SolidWorks’te çiz
+        assert ask.call_count == 1                                          # a saved part is needed
+    assert len(started) == 1
+    started[0](None, None)
+    assert calls and calls[0][1] == str(part)                               # part, then its drawing
+
+    box.setChecked(False); started.clear()
+    with patch('modules.shaft_generator.ui.QFileDialog.getSaveFileName') as ask:
+        page.create_button.click()
+        assert ask.call_count == 0                                          # model only, no dialog
+    assert len(started) == 1
+    page.dirty = False

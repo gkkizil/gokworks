@@ -209,9 +209,17 @@ class ShaftPage(BasePage):
         self.create_button.setAccessibleName('Yeni parametrik SOLIDWORKS parçası oluştur')
         self.save_part_button=button('SLDPRT oluştur ve kaydet…',self.create_and_save)
         self.stop_button=button('Durdur',self.jobs.cancel);self.stop_button.hide()
-        footer.addWidget(self.create_button);footer.addWidget(self.save_part_button);footer.addStretch();footer.addWidget(self.stop_button)
+        # Same setting as 'Otomatik teknik resim oluştur' in the drawing section.
+        self.auto_drawing=QCheckBox('Teknik resim oluştur')
+        self.auto_drawing.setToolTip('İşaretliyse katı model oluşturulup kaydedildikten hemen sonra aynı SOLIDWORKS oturumunda '
+                                     '.SLDDRW teknik resmi de oluşturulur. Teknik resim kayıtlı parçaya bağlandığı için '
+                                     'SolidWorks’te çiz de önce kayıt yeri sorar. Ayarlar: Teknik resim · Tolerans ve yüzey.')
+        self.auto_drawing.setAccessibleName('Katı modelden sonra teknik resmi otomatik oluştur')
+        self.auto_drawing.toggled.connect(self.auto_drawing_toggled)
+        footer.addWidget(self.create_button);footer.addWidget(self.save_part_button);footer.addWidget(self.auto_drawing)
+        footer.addStretch();footer.addWidget(self.stop_button)
         self.layout.addLayout(footer);self.finish_layout()
-        self.controls.extend([self.source_scroll,self.create_button,self.save_part_button])
+        self.controls.extend([self.source_scroll,self.create_button,self.save_part_button,self.auto_drawing])
         self.name.textChanged.connect(self.name_changed);self.minimum_wall.valueChanged.connect(self.wall_changed)
         self.table.cellChanged.connect(self.cell_changed);self.table.itemSelectionChanged.connect(self.table_selected)
         self.operations.currentItemChanged.connect(self.operation_selected)
@@ -397,6 +405,7 @@ class ShaftPage(BasePage):
         self.refresh_thread_caption()
         self.refresh_editor_context()
         if hasattr(self,'drawing_panel') and not getattr(self,'_drawing_refresh',False):self.drawing_panel.populate()
+        self.sync_auto_drawing()
 
     def update_bore_controls(self):
         enabled=self.bore_enabled.isChecked()
@@ -604,6 +613,20 @@ class ShaftPage(BasePage):
             return
         self.create_model(output_path=path)
 
+    def drawing_enabled(self):
+        return self.project.drawing is not None and self.project.drawing.enabled
+
+    def sync_auto_drawing(self):
+        if hasattr(self,'auto_drawing') and self.auto_drawing.isChecked()!=self.drawing_enabled():
+            with QSignalBlocker(self.auto_drawing):self.auto_drawing.setChecked(self.drawing_enabled())
+
+    def auto_drawing_toggled(self,checked):
+        if checked==self.drawing_enabled():return
+        # Write through the drawing panel so the project, its checkbox and the plan stay in one place.
+        self.drawing_panel.enabled.setChecked(checked)
+        self.set_status('Katı modelden sonra teknik resim de oluşturulacak; SolidWorks’te çiz önce kayıt yeri sorar.'
+                        if checked else 'Yalnız katı model oluşturulacak.')
+
     def drawing_changed(self):
         self._drawing_refresh=True
         try:self.refresh(changed=True)
@@ -624,6 +647,9 @@ class ShaftPage(BasePage):
         self.jobs.start(self,lambda events,stop:create_drawing(snapshot,path,events,stop))
 
     def create_model(self, *, output_path=''):
+        if not output_path and self.drawing_enabled():
+            # A drawing references a saved part: save first, then draw.
+            self.create_and_save();return
         if not self.can_start():return
         errors=validate(self.project)
         if errors:self.set_status('\n'.join(errors),True);return
