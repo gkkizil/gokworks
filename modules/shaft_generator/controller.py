@@ -19,3 +19,4 @@ def create(project, events, stop, *, output_path='', verify_edit=False):
     events.put(('shaft_phase', 'SOLIDWORKS bağlantısı ve yerel özellikler hazırlanıyor…'))
     result = execute(payload, stop=stop, on_status=lambda text:events.put(('shaft_phase',text)))
     events.put(('shaft_created', result))
+    return result

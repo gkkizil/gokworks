@@ -185,7 +185,10 @@ def create_part_and_drawing(project, output_path, events, stop):
     """Worker entry: new SLDPRT, then its drawing. A failed drawing keeps the model."""
     from .. import controller as part_controller
     snapshot = deepcopy(project)
-    part_controller.create(snapshot, events, stop, output_path=output_path)
+    created = part_controller.create(snapshot, events, stop, output_path=output_path)
+    if not (isinstance(created, dict) and created.get('success') is True) or not Path(output_path).is_file():
+        events.put(('shaft_drawing', dict(state='skipped', problems=['Model oluşturulamadığı için teknik resim başlatılmadı.'])))
+        return
     if stop.is_set():
         events.put(('shaft_drawing', dict(state='skipped', problems=['Model oluşturuldu; teknik resim durdurma isteği nedeniyle başlatılmadı.'])))
         return

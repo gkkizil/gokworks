@@ -393,3 +393,65 @@ def test_live_part_drawing_pdf_and_reopen(tmp_path):
     outcome = controller.execute(controller.request(p, part))
     assert outcome['state'] == 'complete', outcome['problems']
     assert Path(outcome['drawing_path']).is_file() and Path(outcome['pdf_path']).read_bytes()[:4] == b'%PDF'
+
+
+def test_host_reads_the_real_payload_with_the_types_it_expects(tmp_path):
+    """Regression: JavaScriptSerializer returns JSON arrays as object[] while the
+    host reads ArrayList ('Index was out of range' on the sheet scale). Arrays are
+    now normalised once; every key the host reads must exist with its type."""
+    import re
+    source = (Path(controller.__file__).parents[1] / 'interop' / 'ShaftDrawingHost.cs').read_text(encoding='utf-8')
+    assert source.count('Json.DeserializeObject(') == 1 and 'D(Lists(Json.DeserializeObject(line)))' in source
+    assert re.search(r'var array = o as object\[\];', source)
+    p = three_stage(); a, b, c = p.stages
+    p.operations = [Groove(b.id, offset=10, width=1.3, depth=.6), Keyway(b.id, offset=20, length=28, width=8, depth=4),
+                    Chamfer(a.id, 'left', 1), Fillet(c.id, 'left', .8)]
+    p.drawing = DrawingSettings(enabled=True, isometric=True, default_finish=FinishSpec(3.2),
+                                finishes={f'stage:{c.id}:cylinder': FinishSpec(1.6, 'removal_required', 'taşlama', '='),
+                                          f'stage:{c.id}:face_right': FinishSpec(3.2)},
+                                datums=[Datum('A', f'stage:{a.id}:cylinder')],
+                                geometric=[GeometricTolerance('circular_runout', .02, f'stage:{b.id}:cylinder', ['A'])],
+                                tolerances={f'stage:{b.id}:diameter': ToleranceSpec('iso_fit', fit='h6')})
+    part = tmp_path / 'MIL_T.SLDPRT'; part.write_bytes(b'part')
+    payload = json.loads(json.dumps(controller.request(p, part)))
+    assert payload['plan']['ready'], payload['plan'].get('errors')
+    seen = {}
+    def walk(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                seen.setdefault(key, set()).add(type(item).__name__); walk(item)
+        elif isinstance(value, list):
+            for item in value: walk(item)
+    walk(payload)
+    expected = {'N': {'int', 'float'}, 'L': {'list'}, 'D': {'dict'}, 'A': {'list'}}
+    accessors = ([('N', k) for k in re.findall(r'\bN\(\w+, "(\w+)"\)', source)]
+                 + [('L', k) for k in re.findall(r'\bL\(\w+, "(\w+)"\)', source)]
+                 + [('D', k) for k in re.findall(r'\bD\(\w+\["(\w+)"\]\)', source)]
+                 + [('A', k) for k in re.findall(r'\(ArrayList\)\w+\["(\w+)"\]', source)]
+                 + [('A', k) for k in re.findall(r'\(ArrayList\)D\([^()]*(?:\([^()]*\))?[^()]*\)\["(\w+)"\]', source)])
+    assert len(accessors) > 20
+    wrong = sorted({f'{kind}:{key} -> {sorted(seen.get(key, {"missing"}))}' for kind, key in accessors
+                    if not seen.get(key, set()) & expected[kind]})
+    assert not wrong, wrong
+    sheet = payload['plan']['layout']['sheet']
+    assert isinstance(sheet['scale'], list) and len(sheet['scale']) == 2
+
+
+def test_host_runtime_pitfalls_found_in_review_stay_fixed():
+    source = (Path(controller.__file__).parents[1] / 'interop' / 'ShaftDrawingHost.cs').read_text(encoding='utf-8')
+    assert 'Math.Max(.006, (text.Length + 4) * .0022)' in source     # was 6 m: every label "overlapped"
+    assert '(string[])gtol' not in source and 'Strings(gtol.GetFrameValues(1))' in source
+    assert '(IMathPoint)edge.GetStartPoint()' not in source
+    assert source.count('model.SketchManager.AddToDB = true;') == 2
+
+
+def test_drawing_is_not_started_when_the_part_was_not_created(tmp_path, monkeypatch):
+    import queue, threading
+    from modules.shaft_generator import controller as part_controller
+    monkeypatch.setattr(part_controller, 'create', lambda *a, **k: None)
+    started = []
+    monkeypatch.setattr(controller, 'create_drawing', lambda *a, **k: started.append(a))
+    events = queue.Queue()
+    controller.create_part_and_drawing(three_stage(), tmp_path / 'MIL_X.SLDPRT', events, threading.Event())
+    kind, value = events.get_nowait()
+    assert kind == 'shaft_drawing' and value['state'] == 'skipped' and not started

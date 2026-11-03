@@ -187,6 +187,25 @@ namespace Gokworks.ShaftInterop
         private static string S(Dictionary<string, object> d, string k) { object v; return d.TryGetValue(k, out v) && v != null ? Convert.ToString(v, Inv) : ""; }
         private static double N(Dictionary<string, object> d, string k) { return Convert.ToDouble(d[k], Inv); }
         private static bool B(Dictionary<string, object> d, string k) { object v; return d.TryGetValue(k, out v) && v is bool && (bool)v; }
+        // JavaScriptSerializer.DeserializeObject returns JSON arrays as object[];
+        // the drawing code reads them as ArrayList, so convert once, recursively.
+        private static object Lists(object o)
+        {
+            var map = o as Dictionary<string, object>;
+            if (map != null)
+            {
+                foreach (string key in new List<string>(map.Keys)) map[key] = Lists(map[key]);
+                return map;
+            }
+            var array = o as object[];
+            if (array != null)
+            {
+                var list = new ArrayList(array.Length);
+                foreach (object item in array) list.Add(Lists(item));
+                return list;
+            }
+            return o;
+        }
         private static ArrayList L(Dictionary<string, object> d, string k) { object v; return d.TryGetValue(k, out v) && v is ArrayList ? (ArrayList)v : new ArrayList(); }
         private static string Mm(double v) { return v.ToString("0.####", Inv); }
 
@@ -215,7 +234,7 @@ namespace Gokworks.ShaftInterop
             {
                 Need(Thread.CurrentThread.GetApartmentState() == ApartmentState.STA, "Drawing host must run in STA.");
                 string line = Console.ReadLine(); if (line == null) return;
-                var request = D(Json.DeserializeObject(line));
+                var request = D(Lists(Json.DeserializeObject(line)));
                 Need(S(request, "operation") == "create_shaft_drawing", "Desteklenmeyen teknik resim komutu.");
                 var plan = D(request["plan"]);
                 Need(B(plan, "ready"), "Teknik resim planında çözülmemiş hata var; çizim başlatılmadı.");
@@ -487,7 +506,10 @@ namespace Gokworks.ShaftInterop
             Need(drawing.ActivateView(parent.GetName2()), "Ana görünüş etkinleştirilemedi.");
             double reach = 0; foreach (AxialCircle c in shaft.Circles) reach = Math.Max(reach, c.R);
             double[] top = ToSheet(parent, shaft, x, reach + 6, 0), bottom = ToSheet(parent, shaft, x, -reach - 6, 0);
-            ISketchSegment cut = (ISketchSegment)model.SketchManager.CreateLine(top[0], top[1], 0, bottom[0], bottom[1], 0);
+            model.SketchManager.AddToDB = true;
+            ISketchSegment cut;
+            try { cut = (ISketchSegment)model.SketchManager.CreateLine(top[0], top[1], 0, bottom[0], bottom[1], 0); }
+            finally { model.SketchManager.AddToDB = false; }
             Need(cut != null && cut.Select4(false, null), "Kesit çizgisi oluşturulamadı.");
             return (IView)drawing.CreateSectionViewAt5(at[0], at[1], 0, label, 0, null, 0);
         }
@@ -499,7 +521,10 @@ namespace Gokworks.ShaftInterop
             ArrayList centre = L(v, "center");
             double[] c = ToSheet(parent, shaft, Convert.ToDouble(centre[0], Inv), Convert.ToDouble(centre[1], Inv), 0);
             double radius = N(v, "radius") * .001 * factor;
-            ISketchSegment circle = (ISketchSegment)model.SketchManager.CreateCircleByRadius(c[0], c[1], 0, radius);
+            model.SketchManager.AddToDB = true;
+            ISketchSegment circle;
+            try { circle = (ISketchSegment)model.SketchManager.CreateCircleByRadius(c[0], c[1], 0, radius); }
+            finally { model.SketchManager.AddToDB = false; }
             Need(circle != null && circle.Select4(false, null), "Detay dairesi oluşturulamadı.");
             double k = N(v, "enlargement");
             object view = drawing.CreateDetailViewAt4(at[0], at[1], 0, (int)swDetViewStyle_e.swDetViewSTANDARD, factor * k, 1,
@@ -546,7 +571,7 @@ namespace Gokworks.ShaftInterop
                 foreach (object o in (object[])raw)
                 {
                     ISilhouetteEdge edge = o as ISilhouetteEdge; if (edge == null) continue;
-                    double[] a = (double[])((IMathPoint)edge.GetStartPoint()).ArrayData, b = (double[])((IMathPoint)edge.GetEndPoint()).ArrayData;
+                    double[] a = Coordinates(edge.GetStartPoint()), b = Coordinates(edge.GetEndPoint());
                     double y = N(r, "y");
                     if (Math.Abs(shaft.RadialMm(a) - y) < 1e-3 && Math.Abs(shaft.RadialMm(b) - y) < 1e-3
                         && Math.Min(shaft.AxialMm(a), shaft.AxialMm(b)) < N(r, "x1") && Math.Max(shaft.AxialMm(a), shaft.AxialMm(b)) > N(r, "x0"))
@@ -582,6 +607,21 @@ namespace Gokworks.ShaftInterop
             double bx = (Convert.ToDouble(box[0], Inv) + Convert.ToDouble(box[2], Inv)) / 2;
             double by = (Convert.ToDouble(box[1], Inv) + Convert.ToDouble(box[3], Inv)) / 2;
             return new double[] { cx + (N(p, "x_mm") - bx) * .001, cy + (N(p, "y_mm") - by) * .001 };
+        }
+
+        // COM arrays arrive as string[], object[] or double[] depending on the call.
+        private static string[] Strings(object raw)
+        {
+            var array = raw as Array; if (array == null) return new string[0];
+            var values = new string[array.Length];
+            for (int i = 0; i < array.Length; i++) values[i] = Convert.ToString(array.GetValue(i), Inv) ?? "";
+            return values;
+        }
+        private static double[] Coordinates(object raw)
+        {
+            IMathPoint point = raw as IMathPoint; if (point != null) raw = point.ArrayData;
+            var array = raw as Array; Need(array != null && array.Length >= 3, "nokta okunamadı");
+            return new double[] { Convert.ToDouble(array.GetValue(0), Inv), Convert.ToDouble(array.GetValue(1), Inv), Convert.ToDouble(array.GetValue(2), Inv) };
         }
 
         private static bool Close(double a, double b) { return Math.Abs(a - b) < 1e-7; }
@@ -809,8 +849,8 @@ namespace Gokworks.ShaftInterop
                 gtol.SetFrameSymbols2(1, GtolSymbols[S(g, "characteristic")], B(g, "diameter_zone"), "", false, "", "", "", "");
                 string value = N(g, "value").ToString("0.###", CultureInfo.GetCultureInfo("tr-TR"));
                 Need(gtol.SetFrameValues2(1, value, "", d1, d2, d3), "çerçeve değerleri yazılamadı");
-                string[] back = (string[])gtol.GetFrameValues(1);
-                Need(back != null && back.Length >= 3 && back[0].Trim() == value && back[2].Trim() == d1, "çerçeve değerleri geri okunamadı");
+                string[] back = Strings(gtol.GetFrameValues(1));
+                Need(back.Length >= 3 && back[0].Trim() == value && back[2].Trim() == d1, "çerçeve değerleri geri okunamadı");
                 double[] at = Place(view, shaft, viewBoxes, placements, S(g, "view"), S(g, "id"), 0);
                 ((IAnnotation)gtol.GetAnnotation()).SetPosition2(at[0], at[1], 0);
                 Need(Attached((IAnnotation)gtol.GetAnnotation(), face), "çerçeve hedef yüzeye bağlanmadı");
@@ -860,7 +900,7 @@ namespace Gokworks.ShaftInterop
                     IAnnotation a = (IAnnotation)d.GetAnnotation();
                     double[] p = (double[])a.GetPosition();
                     string text = d.GetText((int)swDimensionTextParts_e.swDimensionTextAll) ?? "";
-                    double w = Math.Max(6, (text.Length + 4) * .0022), h = .0035;
+                    double w = Math.Max(.006, (text.Length + 4) * .0022), h = .0035;
                     boxes.Add(new KeyValuePair<string, double[]>(pair.Key + ":" + a.GetName(), new double[] { p[0] - w / 2, p[1] - h / 2, p[0] + w / 2, p[1] + h / 2 }));
                 }
             }
