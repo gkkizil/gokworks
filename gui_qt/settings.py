@@ -6,7 +6,7 @@ import shutil
 from datetime import datetime
 
 from PySide6.QtCore import QObject, QSettings, QTimer
-from shared.settings import SETTINGS_PATH, load_settings, save_settings
+from shared.settings import SETTINGS_PATH, load_settings, save_settings, strict_loads
 
 
 class SettingsStore(QObject):
@@ -38,7 +38,7 @@ class SettingsStore(QObject):
         try:
             if self.path.exists():
                 try:
-                    valid = json.loads(self.path.read_text(encoding='utf-8'))
+                    valid = strict_loads(self.path.read_text(encoding='utf-8'))
                     if not isinstance(valid, dict):
                         raise ValueError('Settings root is not an object')
                 except (ValueError, UnicodeError):

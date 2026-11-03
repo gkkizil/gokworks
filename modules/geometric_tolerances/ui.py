@@ -16,7 +16,7 @@ class GdtPage(CalculationPage):
         super().__init__(context, 'Geometrik toleranslar', 'ASME Y14.5-2018 · Tolerans çerçevesi, bölge ve ölçüm karşılaştırması.', 'gdt_')
         self.info_action('Okuma rehberi', lambda: show_details(self, 'GD&T rehberi', GUIDE))
         self.kind = self.settings.get('gdt_kind', 'cylindricity')
-        if self.kind not in CHARACTERISTICS:
+        if not isinstance(self.kind, str) or self.kind not in CHARACTERISTICS:   # damaged settings value
             self.kind = 'cylindricity'
         f = self.form
         f.text('size', 'Gösterim boyutu · mm', '100')

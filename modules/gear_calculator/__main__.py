@@ -37,7 +37,7 @@ def main():
         def __init__(self):
             super().__init__();self.settings=SettingsStore(parent=self)
             self.appearance=self.settings.get('appearance','dark')
-            if self.appearance not in COLORS:self.appearance='dark'
+            if not isinstance(self.appearance,str) or self.appearance not in COLORS:self.appearance='dark'
             self.jobs=JobManager(self);self.closing=False
             self.page=GearPage(self);self.setCentralWidget(self.page)
             self.page.statusChanged.connect(lambda text,error:self.statusBar().showMessage(text))

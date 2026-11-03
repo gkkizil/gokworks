@@ -26,9 +26,19 @@ def _publish(temporary, path):
                 time.sleep(.01*(attempt+1))
 
 
+def _reject_constant(name):
+    raise ValueError(f'Non-finite JSON number {name} in settings')
+
+
+def strict_loads(text):
+    """json.loads without NaN/Infinity: save_settings can never write those back,
+    so accepting them would make every later save fail."""
+    return json.loads(text, parse_constant=_reject_constant)
+
+
 def load_settings(path=SETTINGS_PATH):
     try:
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        data = strict_loads(Path(path).read_text(encoding="utf-8"))
         return data if isinstance(data, dict) else {}
     except (OSError, ValueError):
         return {}
