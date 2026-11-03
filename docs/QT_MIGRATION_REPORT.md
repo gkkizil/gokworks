@@ -181,8 +181,8 @@ Windows/SolidWorks’te şu kabul kontrolleri yapılmalıdır:
 
 Kod imzası yoktur. Ticari dağıtım için LGPL/EULA ve diğer bildirimler
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) kapsamında gözden geçirilmelidir.
-Eski bağımsız `k_factor/standalone` denemesi tarihsel kaynaktır; yeni uygulamanın
-çalışma veya paketleme yolunda bulunmaz. Eski rapor araçları önceki commit’e ait
+Eski bağımsız `k_factor/standalone` denemesi yeni uygulamanın çalışma veya paketleme
+yolunda bulunmadığı için 3 Kasım 2026'da depodan silindi (Git geçmişinde durur). Eski rapor araçları önceki commit’e ait
 kanıtları üretir; güncel Qt denetimi ayrı araçla yapılır.
 
 ## Bulut geliştirme ortamı

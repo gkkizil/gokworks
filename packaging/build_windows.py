@@ -62,7 +62,6 @@ def main():
             '--collect-all', 'OCP', '--collect-all', 'cadquery_ocp_proxy',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
-            '--exclude-module', 'modules.k_factor.standalone',
             '--exclude-module', 'tkinter', '--exclude-module', '_tkinter',
             '--exclude-module', 'customtkinter', '--exclude-module', 'PySide6.QtQml',
             '--exclude-module', 'PySide6.QtQuick', '--exclude-module', 'PySide6.QtWebEngineCore',

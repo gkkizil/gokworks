@@ -74,4 +74,4 @@ def test_windows_builder_copies_resources_to_their_actual_runtime_locations(mode
             assert Path(source).parent.relative_to(ROOT).as_posix()==destination
     assert any(dest=='modules/iso_fits' for _,dest in resources)
     assert any(dest=='modules/naming/interop' for _,dest in resources)
-    assert 'modules.k_factor.standalone' in command
+    assert not (ROOT / 'modules/k_factor/standalone').exists()  # retired standalone K/R app was removed

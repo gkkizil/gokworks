@@ -132,7 +132,7 @@ python main.py                                         # uygulama
 python packaging/build_windows.py                      # Windows EXE (Windows'ta)
 ```
 
-`pytest.ini`: `testpaths = tests modules`, `legacy_tk` ve `standalone`
+`pytest.ini`: `testpaths = tests modules`; yalnız `examples` klasörleri
 toplanmaz. Windows'a özel testler `packaging/run_windows_tests.py` ile
 GitHub Actions'ta parçalı süreçlerde çalışır.
 

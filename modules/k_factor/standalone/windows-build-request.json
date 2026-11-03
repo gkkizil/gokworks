@@ -1,5 +1,0 @@
-{
-  "request_id": "53120d5b-119d-49b3-a4bd-f6d1f4c7f85e",
-  "requested_at": "2026-10-17T17:17:10.544268+00:00",
-  "reason": "Correct the just-requested K/R executable after user failure: C#-only inspect/apply, no mandatory Python COM parity, successful assignments remain in the open part, legitimate sheet-metal gauge-getter statuses no longer block direct definition writes. Require Defender scan and frozen Windows UI check."
-}
