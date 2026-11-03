@@ -164,10 +164,14 @@ class ShaftPage(BasePage):
         self.build_bulk_page()
         advanced=label('Matkap uç konisi, iç diş, gerçek helisel diş, freze düzlüğü ve omuz boşaltması henüz desteklenmiyor.','muted')
         self.tabs.addTab(advanced,'İleri'); self.tabs.setTabEnabled(self.tabs.count()-1,False)
+        from .drawing.ui import DrawingPanel
+        self.drawing_panel=DrawingPanel(self);self.drawing_tab=self.tabs.count()
+        self.tabs.addTab(scroll(self.drawing_panel),'Teknik resim')
         # Group prefixes keep related sections together in the single picker.
         for index,title in enumerate(('Kademeler · Çap ve boy','Kanal · Segman kanalı','Kanal · Kama kanalı','Kenar · Tek kenara pah',
                                       'Kenar · Tek kenara radyüs','Diş · Kozmetik diş','Delik · Eksenel iç delik','Kenar · Toplu pah / radyüs')):
             self.section_picker.addItem(title,index)
+        self.section_picker.addItem('Teknik resim · Tolerans ve yüzey',self.drawing_tab)
         self.section_picker.currentIndexChanged.connect(lambda:self.tabs.setCurrentIndex(self.section_picker.currentData()))
         self.tabs.currentChanged.connect(self.section_changed)
         edit.addWidget(self.tabs,2)
@@ -391,6 +395,7 @@ class ShaftPage(BasePage):
         self.refresh_standards()
         self.refresh_thread_caption()
         self.refresh_editor_context()
+        if hasattr(self,'drawing_panel') and not getattr(self,'_drawing_refresh',False):self.drawing_panel.populate()
 
     def update_bore_controls(self):
         enabled=self.bore_enabled.isChecked()
@@ -458,8 +463,9 @@ class ShaftPage(BasePage):
         attached=sum(op.stage_id==self.selected_stage for op in self.project.operations)
         if attached and QMessageBox.question(self,'Kademeyi sil',f'Bu kademeye bağlı {attached} operasyon da silinecek. Devam edilsin mi?',
                                              QMessageBox.Yes|QMessageBox.No,QMessageBox.No)!=QMessageBox.Yes:return
-        try:self.project.remove_stage(self.selected_stage)
+        try:removed=self.project.remove_stage(self.selected_stage)
         except ValueError as error:self.set_status(str(error),True);return
+        self.notify_pruned(removed)
         self.selected_stage=self.project.stages[0].id;self.selected_operation=''
         self.populate();self.refresh(changed=True)
 
@@ -509,7 +515,13 @@ class ShaftPage(BasePage):
 
     def delete_operation(self):
         self.project.operations[:]=[o for o in self.project.operations if o.id!=self.selected_operation]
-        self.selected_operation='';self.populate();self.refresh(changed=True)
+        self.selected_operation='';self.notify_pruned(self.project.prune_drawing())
+        self.populate();self.refresh(changed=True)
+
+    def notify_pruned(self,removed):
+        if removed:
+            self.set_status(f'Silinen öğeye bağlı {len(removed)} teknik resim gereksinimi kaldırıldı: '+', '.join(removed[:4])
+                            +(' …' if len(removed)>4 else ''))
 
     def operation_selected(self,item,previous):
         if item:self.select_operation(item.data(Qt.UserRole))
@@ -575,7 +587,40 @@ class ShaftPage(BasePage):
         path,_=QFileDialog.getSaveFileName(self,'Yeni SLDPRT kaydet',self.project.name+'.SLDPRT','SOLIDWORKS parçası (*.SLDPRT)')
         if not path:return
         if Path(path).exists():self.set_status('Mevcut SLDPRT üzerine yazılmaz. Yeni bir dosya adı seçin.',True);return
+        drawing=self.project.drawing
+        if drawing is not None and drawing.enabled:
+            from .drawing.controller import output_paths
+            plan=self.drawing_panel.refresh_plan()
+            if plan['errors']:
+                self.set_status('Teknik resim planında hata var; önce Teknik resim bölümünü düzeltin.\n'+'\n'.join(plan['errors']),True);return
+            taken=[v for v in output_paths(path,drawing).values() if v and Path(v).exists()]
+            if taken:self.set_status('Teknik resim çıktısı zaten var, üzerine yazılmaz: '+taken[0],True);return
+            if not self.can_start():return
+            snapshot=deepcopy(self.project)
+            from .drawing.controller import create_part_and_drawing
+            self.set_status('SOLIDWORKS parçası ve teknik resmi hazırlanıyor…')
+            self.jobs.start(self,lambda events,stop:create_part_and_drawing(snapshot,path,events,stop))
+            return
         self.create_model(output_path=path)
+
+    def drawing_changed(self):
+        self._drawing_refresh=True
+        try:self.refresh(changed=True)
+        finally:self._drawing_refresh=False
+
+    def drawing_from_part(self):
+        if not self.can_start():return
+        plan=self.drawing_panel.refresh_plan()
+        if plan['errors']:self.set_status('Teknik resim planında hata var:\n'+'\n'.join(plan['errors']),True);return
+        path,_=QFileDialog.getOpenFileName(self,'GOKWORKS mil parçası seç','','SOLIDWORKS parçası (*.SLDPRT *.sldprt)')
+        if not path:return
+        from .drawing.controller import output_paths, create_drawing
+        from .drawing.models import DrawingSettings
+        taken=[v for v in output_paths(path,self.project.drawing or DrawingSettings()).values() if v and Path(v).exists()]
+        if taken:self.set_status('Teknik resim çıktısı zaten var, üzerine yazılmaz: '+taken[0],True);return
+        snapshot=deepcopy(self.project)
+        self.set_status('Kayıtlı parça için teknik resim hazırlanıyor… Parça ölçüleri mil parametreleriyle karşılaştırılır.')
+        self.jobs.start(self,lambda events,stop:create_drawing(snapshot,path,events,stop))
 
     def create_model(self, *, output_path=''):
         if not self.can_start():return
@@ -589,6 +634,14 @@ class ShaftPage(BasePage):
         for kind,value in events:
             if kind=='shaft_phase':self.set_status(value)
             elif kind=='shaft_cancelled':self.set_status('İşlem başlamadan durduruldu.')
+            elif kind=='shaft_drawing':
+                state=value.get('state');problems=value.get('problems',[])
+                if state=='complete':
+                    self.set_status(f"Teknik resim oluşturuldu ve yeniden açılarak doğrulandı: {value.get('drawing_path','')}")
+                elif state=='partial':
+                    self.set_status('Teknik resim kısmen tamamlandı; eksikler gizlenmedi:\n'+'\n'.join(problems),True)
+                else:
+                    self.set_status('Model korundu, teknik resim oluşturulamadı:\n'+'\n'.join(problems),True)
             elif kind=='shaft_created':
                 self.last_result=value
                 self.set_status(f"{value['document']} oluşturuldu · {value['feature_count']} yerel özellik · Rebuild başarılı")

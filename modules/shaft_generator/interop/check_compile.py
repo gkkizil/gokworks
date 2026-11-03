@@ -16,6 +16,7 @@ def main():
     parser.add_argument('--interop-dir',type=Path,required=True)
     parser.add_argument('--constants-dir',type=Path)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--source',default='ShaftHost.cs',choices=('ShaftHost.cs','ShaftDrawingHost.cs'))
     args=parser.parse_args()
     sdk=sorted((args.dotnet.parent/'sdk').glob('*/Roslyn/bincore/csc.dll'))
     if not sdk:parser.error('Roslyn csc.dll bulunamadı.')
@@ -29,7 +30,7 @@ def main():
     command=[str(args.dotnet),str(sdk[-1]),'-nologo','-noconfig','-nostdlib+',
              '-langversion:5','-warnaserror+','-target:library','-out:'+str(args.output)]
     command.extend('-r:'+str(ref) for ref in refs)
-    command.append(str(Path(__file__).with_name('ShaftHost.cs')))
+    command.append(str(Path(__file__).with_name(args.source)))
     subprocess.run(command,check=True)
     print('C# compile passed (C# 5, warnings as errors). This is NOT a live SOLIDWORKS test.')
 

@@ -1,6 +1,6 @@
 """Millimetre-based project data with stable stage/operation identities."""
 
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields, replace as dataclass_replace
 import math
 from uuid import uuid4
 
@@ -92,6 +92,9 @@ class Project:
     operations: list[Groove | Keyway | Chamfer | Fillet | CosmeticThread] = field(default_factory=list)
     minimum_wall: float = .5
     bore: Bore | None = None
+    # Optional drawing requirements (modules.shaft_generator.drawing.models.DrawingSettings).
+    # Absent or default settings keep the v1/v2 file format byte-for-byte compatible.
+    drawing: object = None
 
     @property
     def total_length(self):
@@ -141,6 +144,14 @@ class Project:
             raise ValueError('En az bir kademe gerekli.')
         self.stages.remove(self.stage(stage_id))
         self.operations[:] = [op for op in self.operations if op.stage_id != stage_id]
+        return self.prune_drawing()
+
+    def prune_drawing(self):
+        """Drop drawing requirements whose stage/operation/surface no longer exists."""
+        if self.drawing is None:
+            return []
+        from .drawing.targets import prune
+        return prune(self.drawing, self)
 
     def move_stage(self, stage_id, direction):
         index = self.stages.index(self.stage(stage_id))
@@ -149,7 +160,11 @@ class Project:
             self.stages[index], self.stages[target] = self.stages[target], self.stages[index]
 
     def to_dict(self):
-        values = asdict(self)
+        drawing = self.drawing
+        values = asdict(dataclass_replace(self, drawing=None))
+        values.pop('drawing')
+        if drawing is not None and not drawing.is_default():
+            return dict(schema='gokworks.shaft', version=3, units='mm', **values, drawing=drawing.to_dict())
         extended = self.bore is not None or any(isinstance(op, CosmeticThread) for op in self.operations)
         if not extended:
             values.pop('bore')
@@ -157,11 +172,12 @@ class Project:
 
     @classmethod
     def from_dict(cls, data):
-        if not isinstance(data, dict) or data.get('schema') != 'gokworks.shaft' or type(data.get('version')) is not int or data['version'] not in (1,2) or data.get('units') != 'mm':
+        if not isinstance(data, dict) or data.get('schema') != 'gokworks.shaft' or type(data.get('version')) is not int or data['version'] not in (1,2,3) or data.get('units') != 'mm':
             raise ValueError('Desteklenmeyen mil projesi, sürüm veya ölçü birimi.')
         try:
             expected = {'schema', 'version', 'units', 'name', 'stages', 'operations', 'minimum_wall'}
-            if data['version'] == 2:expected.add('bore')
+            if data['version'] >= 2:expected.add('bore')
+            if data['version'] == 3:expected.add('drawing')
             if set(data) != expected:
                 raise ValueError('Bilinmeyen veya eksik proje alanı.')
             bore_data = data.get('bore')
@@ -184,7 +200,11 @@ class Project:
                 if set(row) != {f.name for f in fields(constructor)}:
                     raise ValueError('Operasyon alanları eksik veya geçersiz.')
                 operations.append(constructor(**values))
-            project = cls(data['name'], stages, operations, data['minimum_wall'], bore)
+            drawing = None
+            if data['version'] == 3:
+                from .drawing.models import DrawingSettings
+                drawing = DrawingSettings.from_dict(data['drawing'])
+            project = cls(data['name'], stages, operations, data['minimum_wall'], bore, drawing)
         except (KeyError, TypeError) as error:
             raise ValueError('Mil projesi alanları geçersiz veya eksik.') from error
         from .validation import require_valid

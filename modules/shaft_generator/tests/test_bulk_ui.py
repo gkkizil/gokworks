@@ -11,7 +11,8 @@ from modules.shaft_generator import storage,controller
 
 
 def test_section_picker_replaces_overflowing_tabs_and_keeps_targets_in_sync(page,qtbot):
-    assert page.tabs.tabBar().isHidden() and page.section_picker.count()==8
+    # 8 geometry sections + the drawing/tolerance section added for SLDDRW generation.
+    assert page.tabs.tabBar().isHidden() and page.section_picker.count()==9
     assert not page.new_operation_button.isVisible() and page.operation_count.text().endswith('0')
     page.section_picker.setCurrentIndex(2)
     assert page.tabs.currentIndex()==2 and page.add_operation_buttons['keyway'].isVisible()
