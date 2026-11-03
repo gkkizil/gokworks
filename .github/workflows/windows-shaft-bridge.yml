@@ -34,7 +34,7 @@ jobs:
           "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
       - name: Exercise real PowerShell loader and pipes without SOLIDWORKS
         run: |
-          python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py modules/shaft_generator/tests/test_axial_transport.py modules/shaft_generator/tests/test_drawing.py::test_drawing_host_compiles_through_the_shipping_loader modules/shaft_generator/tests/test_drawing.py::test_drawing_host_reads_the_real_payload_with_javascriptserializer --junitxml windows-shaft-tests.xml
+          python -m pytest -vv -s modules/shaft_generator/tests/test_windows_transport.py modules/shaft_generator/tests/test_channel_selection.py modules/shaft_generator/tests/test_axial_transport.py modules/shaft_generator/tests/test_drawing.py::test_drawing_host_compiles_through_the_shipping_loader modules/shaft_generator/tests/test_drawing.py::test_drawing_host_reads_the_real_payload_with_javascriptserializer modules/shaft_generator/tests/test_drawing.py::test_drawing_host_self_test_localized_views_and_axis_placement --junitxml windows-shaft-tests.xml
           $testExit=$LASTEXITCODE
           if ($testExit -ne 0) {
           @'
