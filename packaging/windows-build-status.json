@@ -1,10 +1,14 @@
 {
   "commit": "46fd89b8b80d7f9d7785718f87c58a5ac0f14d9d",
-  "status": "building",
+  "status": "failure",
   "run_url": "https://github.com/gkkizil/gokworks/actions/runs/41592916465",
-  "download_url": "",
-  "artifact_url": "",
-  "setup_steps": {},
+  "download_url": "https://github.com/gkkizil/gokworks/actions/runs/41592916465/artifacts/13210743466",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/41592916465/artifacts/13210743466",
+  "setup_steps": {
+    "checkout": "success",
+    "python": "success",
+    "dependencies": "success"
+  },
   "source_commit": "10487f80b03c3a59bef93a849826b5a86d74f9bf",
   "validation_profile": "package-only",
   "regression_suite": "not-run-user-request",
@@ -102,5 +106,381 @@
         64
       ]
     ]
-  }
+  },
+  "setup_log_tail": "Collecting PySide6==6.10.3 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached pyside6-6.10.3-cp39-abi3-win_amd64.whl.metadata (5.5 kB)\nCollecting Pillow==13.0.0 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 2))\n  Using cached pillow-13.0.0-cp313-cp313-win_amd64.whl.metadata (9.3 kB)\nCollecting pywin32==312 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 3))\n  Using cached pywin32-312-cp313-cp313-win_amd64.whl.metadata (11 kB)\nCollecting ezdxf==1.4.3 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached ezdxf-1.4.3-cp313-cp313-win_amd64.whl.metadata (10 kB)\nCollecting openpyxl==3.1.5 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 5))\n  Using cached openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)\nCollecting shapely==2.1.2 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 6))\n  Using cached shapely-2.1.2-cp313-cp313-win_amd64.whl.metadata (7.1 kB)\nCollecting cadquery-ocp-novtk==8.0.1.1.0 (from -r D:\\a\\gokworks\\gokworks\\requirements.txt (line 7))\n  Using cached cadquery_ocp_novtk-8.0.1.1.0-cp313-cp313-win_amd64.whl.metadata (910 bytes)\nCollecting pyinstaller==6.16.0 (from -r packaging/windows-requirements.txt (line 2))\n  Using cached pyinstaller-6.16.0-py3-none-win_amd64.whl.metadata (8.5 kB)\nCollecting shiboken6==6.10.3 (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached shiboken6-6.10.3-cp39-abi3-win_amd64.whl.metadata (2.6 kB)\nCollecting PySide6_Essentials==6.10.3 (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached pyside6_essentials-6.10.3-cp39-abi3-win_amd64.whl.metadata (3.9 kB)\nCollecting PySide6_Addons==6.10.3 (from PySide6==6.10.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 1))\n  Using cached pyside6_addons-6.10.3-cp39-abi3-win_amd64.whl.metadata (4.2 kB)\nCollecting pyparsing>=2.0.1 (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached pyparsing-3.3.3-py3-none-any.whl.metadata (5.9 kB)\nCollecting typing_extensions>=4.6.0 (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)\nCollecting numpy (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached numpy-2.5.4-cp313-cp313-win_amd64.whl.metadata (6.6 kB)\nCollecting fonttools (from ezdxf==1.4.3->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 4))\n  Using cached fonttools-4.68.0-cp313-cp313-win_amd64.whl.metadata (142 kB)\nCollecting et-xmlfile (from openpyxl==3.1.5->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 5))\n  Using cached et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)\nCollecting cadquery-ocp-proxy==8.0.1.1.0 (from cadquery-ocp-novtk==8.0.1.1.0->-r D:\\a\\gokworks\\gokworks\\requirements.txt (line 7))\n  Using cached cadquery_ocp_proxy-8.0.1.1.0-py3-none-any.whl.metadata (4.7 kB)\nCollecting altgraph (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached altgraph-0.17.5-py2.py3-none-any.whl.metadata (7.5 kB)\nCollecting packaging>=22.0 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)\nCollecting pefile!=2024.8.26,>=2022.5.30 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached pefile-2023.2.7-py3-none-any.whl.metadata (1.4 kB)\nCollecting pyinstaller-hooks-contrib>=2025.8 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached pyinstaller_hooks_contrib-2026.9-py3-none-any.whl.metadata (16 kB)\nCollecting pywin32-ctypes>=0.2.1 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached pywin32_ctypes-0.2.3-py3-none-any.whl.metadata (3.9 kB)\nCollecting setuptools>=42.0.0 (from pyinstaller==6.16.0->-r packaging/windows-requirements.txt (line 2))\n  Using cached setuptools-84.2.1-py3-none-any.whl.metadata (6.6 kB)\nUsing cached pyside6-6.10.3-cp39-abi3-win_amd64.whl (569 kB)\nUsing cached pillow-13.0.0-cp313-cp313-win_amd64.whl (7.3 MB)\nUsing cached pywin32-312-cp313-cp313-win_amd64.whl (6.9 MB)\nUsing cached ezdxf-1.4.3-cp313-cp313-win_amd64.whl (2.9 MB)\nUsing cached openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)\nUsing cached shapely-2.1.2-cp313-cp313-win_amd64.whl (1.7 MB)\nUsing cached cadquery_ocp_novtk-8.0.1.1.0-cp313-cp313-win_amd64.whl (47.8 MB)\nUsing cached pyinstaller-6.16.0-py3-none-win_amd64.whl (1.4 MB)\nUsing cached cadquery_ocp_proxy-8.0.1.1.0-py3-none-any.whl (3.2 kB)\nUsing cached pyside6_addons-6.10.3-cp39-abi3-win_amd64.whl (164.7 MB)\nUsing cached pyside6_essentials-6.10.3-cp39-abi3-win_amd64.whl (74.6 MB)\nUsing cached shiboken6-6.10.3-cp39-abi3-win_amd64.whl (1.2 MB)\nUsing cached numpy-2.5.4-cp313-cp313-win_amd64.whl (12.6 MB)\nUsing cached packaging-26.3-py3-none-any.whl (129 kB)\nUsing cached pefile-2023.2.7-py3-none-any.whl (71 kB)\nUsing cached pyinstaller_hooks_contrib-2026.9-py3-none-any.whl (462 kB)\nUsing cached pyparsing-3.3.3-py3-none-any.whl (126 kB)\nUsing cached pywin32_ctypes-0.2.3-py3-none-any.whl (30 kB)\nUsing cached setuptools-84.2.1-py3-none-any.whl (876 kB)\nUsing cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)\nUsing cached altgraph-0.17.5-py2.py3-none-any.whl (21 kB)\nUsing cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)\nUsing cached fonttools-4.68.0-cp313-cp313-win_amd64.whl (2.5 MB)\nInstalling collected packages: altgraph, typing_extensions, shiboken6, setuptools, pywin32-ctypes, pywin32, pyparsing, Pillow, pefile, packaging, numpy, fonttools, et-xmlfile, cadquery-ocp-proxy, shapely, PySide6_Essentials, pyinstaller-hooks-contrib, openpyxl, ezdxf, cadquery-ocp-novtk, PySide6_Addons, pyinstaller, PySide6\n\nSuccessfully installed Pillow-13.0.0 PySide6-6.10.3 PySide6_Addons-6.10.3 PySide6_Essentials-6.10.3 altgraph-0.17.5 cadquery-ocp-novtk-8.0.1.1.0 cadquery-ocp-proxy-8.0.1.1.0 et-xmlfile-2.0.0 ezdxf-1.4.3 fonttools-4.68.0 numpy-2.5.4 openpyxl-3.1.5 packaging-26.3 pefile-2023.2.7 pyinstaller-6.16.0 pyinstaller-hooks-contrib-2026.9 pyparsing-3.3.3 pywin32-312 pywin32-ctypes-0.2.3 setuptools-84.2.1 shapely-2.1.2 shiboken6-6.10.3 typing_extensions-4.16.0\n",
+  "bytes": 132030728,
+  "sha256": "966415c4a1d12ad4f7a7234aecf61ed22c83bae74d8d348683aaf72333d7d6f3",
+  "smoke": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "distribution": "onefile",
+    "external_qt_verified": false,
+    "external_cad_verified": false,
+    "pdf_exit_observer": "passed",
+    "python": "3.13.17",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "qt_platform": "windows",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "nesting",
+      "cad_converter",
+      "profile_cutting",
+      "shaft_generator",
+      "gear_calculator"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 756.96,
+    "navigation_median_ms": 59.84,
+    "navigation_max_ms": 508.28,
+    "resize_median_ms": 55.56,
+    "resize_max_ms": 121.61,
+    "table_50000_load_ms": 80.04,
+    "table_50000_filter_ms": 121.79,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "pdf_export_engine": "isolated COM process",
+    "solidworks_live_tested": false,
+    "checks": [
+      "16 modules",
+      "two themes",
+      "resolution matrix",
+      "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+      "3D CAD converter / eight formats / queue, options and clear / no live COM",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "hole nesting / five parts on one plate / contour cut-order CSV",
+      "nesting shared parts-and-layout workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "external involute gear pair / native OCCT STEP readback / closed DXF",
+      "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+      "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "distribution": "onefile",
+  "smoke_scales": [
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "external_cad_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.17",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.25,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "nesting",
+        "cad_converter",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 745.88,
+      "navigation_median_ms": 76.03,
+      "navigation_max_ms": 834.92,
+      "resize_median_ms": 45.5,
+      "resize_max_ms": 299.66,
+      "table_50000_load_ms": 88.96,
+      "table_50000_filter_ms": 122.98,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "16 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": true,
+      "external_cad_verified": true,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.17",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.5,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "nesting",
+        "cad_converter",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 395.94,
+      "navigation_median_ms": 88.64,
+      "navigation_max_ms": 617.93,
+      "resize_median_ms": 56.46,
+      "resize_max_ms": 201.42,
+      "table_50000_load_ms": 92.71,
+      "table_50000_filter_ms": 117.04,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "16 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "external_cad_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.17",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.0,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "nesting",
+        "cad_converter",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 756.96,
+      "navigation_median_ms": 59.84,
+      "navigation_max_ms": 508.28,
+      "resize_median_ms": 55.56,
+      "resize_max_ms": 121.61,
+      "table_50000_load_ms": 80.04,
+      "table_50000_filter_ms": 121.79,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "16 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    }
+  ],
+  "build_log_tail": "ing standard module hook 'hook-PySide6.QtOpenGL.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n39293 INFO: Processing standard module hook 'hook-PIL.SpiderImagePlugin.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n39354 INFO: Performing binary vs. data reclassification (904 entries)\n39436 INFO: Looking for ctypes DLLs\n39476 INFO: Analyzing run-time hooks ...\n39476 INFO: Including custom run-time hook 'D:\\\\a\\\\gokworks\\\\gokworks\\\\packaging\\\\runtime_hook.py'\n39485 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks\\\\rthooks'\n39487 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks\\\\rthooks'\n39489 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks\\\\rthooks'\n39491 INFO: Including run-time hook 'pyi_rth_pywintypes.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\_pyinstaller_hooks_contrib\\\\rthooks'\n39492 INFO: Including run-time hook 'pyi_rth_pythoncom.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\_pyinstaller_hooks_contrib\\\\rthooks'\n39493 INFO: Including run-time hook 'pyi_rth_pyside6.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks\\\\rthooks'\n39494 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks\\\\pre_find_module_path'\n39496 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n39529 INFO: Creating base_library.zip...\n39546 INFO: Looking for dynamic libraries\nVTK not installed\n45776 INFO: Extra DLL search directories (AddDllDirectory): ['C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\shiboken6', 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\cadquery_ocp_novtk.libs', 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\shapely.libs', 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\numpy.libs']\n45776 INFO: Extra DLL search directories (PATH): ['C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6']\n48692 WARNING: Library not found: could not resolve 'api-ms-win-core-path-l1-1-0.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\python313.dll'.\n48693 WARNING: Library not found: could not resolve 'api-ms-win-shcore-scaling-l1-1-1.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6\\\\plugins\\\\platforms\\\\qdirect2d.dll'.\n48693 WARNING: Library not found: could not resolve 'api-ms-win-core-winrt-l1-1-0.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6\\\\plugins\\\\platforms\\\\qdirect2d.dll'.\n48693 WARNING: Library not found: could not resolve 'api-ms-win-core-winrt-string-l1-1-0.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6\\\\plugins\\\\platforms\\\\qdirect2d.dll'.\n48694 WARNING: Library not found: could not resolve 'api-ms-win-shcore-scaling-l1-1-1.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6\\\\plugins\\\\platforms\\\\qwindows.dll'.\n48694 WARNING: Library not found: could not resolve 'api-ms-win-core-winrt-l1-1-0.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6\\\\plugins\\\\platforms\\\\qwindows.dll'.\n48694 WARNING: Library not found: could not resolve 'api-ms-win-core-winrt-string-l1-1-0.dll', dependency of 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PySide6\\\\plugins\\\\platforms\\\\qwindows.dll'.\n48730 INFO: Warnings written to D:\\a\\gokworks\\gokworks\\build\\pyinstaller\\GOKWORKS\\warn-GOKWORKS.txt\n48839 INFO: Graph cross-reference written to D:\\a\\gokworks\\gokworks\\build\\pyinstaller\\GOKWORKS\\xref-GOKWORKS.html\n48902 INFO: checking PYZ\n48902 INFO: Building PYZ because PYZ-00.toc is non existent\n48902 INFO: Building PYZ (ZlibArchive) D:\\a\\gokworks\\gokworks\\build\\pyinstaller\\GOKWORKS\\PYZ-00.pyz\n49999 INFO: Building PYZ (ZlibArchive) D:\\a\\gokworks\\gokworks\\build\\pyinstaller\\GOKWORKS\\PYZ-00.pyz completed successfully.\n50043 INFO: checking PKG\n50043 INFO: Building PKG because PKG-00.toc is non existent\n50043 INFO: Building PKG (CArchive) GOKWORKS.pkg\n83565 INFO: Building PKG (CArchive) GOKWORKS.pkg completed successfully.\n83581 INFO: Bootloader C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe\n83582 INFO: checking EXE\n83582 INFO: Building EXE because EXE-00.toc is non existent\n83582 INFO: Building EXE from EXE-00.toc\n83582 INFO: Copying bootloader EXE to D:\\a\\gokworks\\gokworks\\dist\\GOKWORKS.exe\n83584 INFO: Copying icon to EXE\n83585 INFO: Copying 0 resources to EXE\n83585 INFO: Embedding manifest in EXE\n83587 INFO: Appending PKG archive to EXE\n83647 INFO: Fixing EXE headers\n84752 INFO: Building EXE from EXE-00.toc completed successfully.\n84769 INFO: Build complete! The results are available in: D:\\a\\gokworks\\gokworks\\dist\n{\"exe\": \"D:\\\\a\\\\gokworks\\\\gokworks\\\\dist\\\\GOKWORKS.exe\", \"bytes\": 132030728, \"sha256\": \"966415c4a1d12ad4f7a7234aecf61ed22c83bae74d8d348683aaf72333d7d6f3\", \"smoke\": [{\"status\": \"passed\", \"framework\": \"PySide6 / Qt Widgets\", \"pyside\": \"6.10.3\", \"qt\": \"6.10.3\", \"distribution\": \"onefile\", \"external_qt_verified\": false, \"external_cad_verified\": false, \"pdf_exit_observer\": \"passed\", \"python\": \"3.13.17\", \"platform\": \"Windows-2025Server-10.0.26100-SP0\", \"qt_platform\": \"windows\", \"dpi_scale\": 1.0, \"pages\": [\"pdf\", \"dxf_dwg\", \"bom\", \"naming\", \"k_factor\", \"bolt\", \"bolt_torque\", \"weight\", \"iso_fits\", \"geometric_tolerances\", \"tolerance_stack\", \"nesting\", \"cad_converter\", \"profile_cutting\", \"shaft_generator\", \"gear_calculator\"], \"themes\": [\"dark\", \"light\"], \"resolutions\": [[1024, 700], [1366, 768], [1920, 1080], [2560, 1440]], \"startup_ms\": 756.96, \"navigation_median_ms\": 59.84, \"navigation_max_ms\": 508.28, \"resize_median_ms\": 55.56, \"resize_max_ms\": 121.61, \"table_50000_load_ms\": 80.04, \"table_50000_filter_ms\": 121.79, \"tk_imports\": [], \"kr_assignment_engine\": \"embedded Python SheetMetal parameters\", \"pdf_export_engine\": \"isolated COM process\", \"solidworks_live_tested\": false, \"checks\": [\"16 modules\", \"two themes\", \"resolution matrix\", \"1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM\", \"3D CAD converter / eight formats / queue, options and clear / no live COM\", \"NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF\", \"hole nesting / five parts on one plate / contour cut-order CSV\", \"nesting shared parts-and-layout workspace / document plate tabs\", \"live press-brake tooling profiles and dimensions\", \"quick bolt torque / 51.96 Nm / 25.98 kN / clipboard\", \"torque joint section / live thread and preload\", \"tolerance stack 0.20 / 0.02 / 0.38 mm\", \"tolerance stack PDF/XLSX\", \"vector diagrams\", \"bolt kg/N\", \"weight 157 kg\", \"BOM XLSX\", \"DXF dependency\", \"Pack and Go interop source bundled\", \"isolated PDF worker startup/IPC\", \"external involute gear pair / native OCCT STEP readback / closed DXF\", \"mechanism catalogue capabilities / rack and helical frozen-worker STEP readback\", \"roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF\", \"embedded licenses and export\", \"no Tk runtime\"]}, {\"status\": \"passed\", \"framework\": \"PySide6 / Qt Widgets\", \"pyside\": \"6.10.3\", \"qt\": \"6.10.3\", \"distribution\": \"onefile\", \"external_qt_verified\": false, \"external_cad_verified\": false, \"pdf_exit_observer\": \"passed\", \"python\": \"3.13.17\", \"platform\": \"Windows-2025Server-10.0.26100-SP0\", \"qt_platform\": \"windows\", \"dpi_scale\": 1.25, \"pages\": [\"pdf\", \"dxf_dwg\", \"bom\", \"naming\", \"k_factor\", \"bolt\", \"bolt_torque\", \"weight\", \"iso_fits\", \"geometric_tolerances\", \"tolerance_stack\", \"nesting\", \"cad_converter\", \"profile_cutting\", \"shaft_generator\", \"gear_calculator\"], \"themes\": [\"dark\", \"light\"], \"resolutions\": [[1024, 700], [1366, 768], [1920, 1080], [2560, 1440]], \"startup_ms\": 745.88, \"navigation_median_ms\": 76.03, \"navigation_max_ms\": 834.92, \"resize_median_ms\": 45.5, \"resize_max_ms\": 299.66, \"table_50000_load_ms\": 88.96, \"table_50000_filter_ms\": 122.98, \"tk_imports\": [], \"kr_assignment_engine\": \"embedded Python SheetMetal parameters\", \"pdf_export_engine\": \"isolated COM process\", \"solidworks_live_tested\": false, \"checks\": [\"16 modules\", \"two themes\", \"resolution matrix\", \"1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM\", \"3D CAD converter / eight formats / queue, options and clear / no live COM\", \"NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF\", \"hole nesting / five parts on one plate / contour cut-order CSV\", \"nesting shared parts-and-layout workspace / document plate tabs\", \"live press-brake tooling profiles and dimensions\", \"quick bolt torque / 51.96 Nm / 25.98 kN / clipboard\", \"torque joint section / live thread and preload\", \"tolerance stack 0.20 / 0.02 / 0.38 mm\", \"tolerance stack PDF/XLSX\", \"vector diagrams\", \"bolt kg/N\", \"weight 157 kg\", \"BOM XLSX\", \"DXF dependency\", \"Pack and Go interop source bundled\", \"isolated PDF worker startup/IPC\", \"external involute gear pair / native OCCT STEP readback / closed DXF\", \"mechanism catalogue capabilities / rack and helical frozen-worker STEP readback\", \"roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF\", \"embedded licenses and export\", \"no Tk runtime\"]}, {\"status\": \"passed\", \"framework\": \"PySide6 / Qt Widgets\", \"pyside\": \"6.10.3\", \"qt\": \"6.10.3\", \"distribution\": \"onefile\", \"external_qt_verified\": true, \"external_cad_verified\": true, \"pdf_exit_observer\": \"passed\", \"python\": \"3.13.17\", \"platform\": \"Windows-2025Server-10.0.26100-SP0\", \"qt_platform\": \"windows\", \"dpi_scale\": 1.5, \"pages\": [\"pdf\", \"dxf_dwg\", \"bom\", \"naming\", \"k_factor\", \"bolt\", \"bolt_torque\", \"weight\", \"iso_fits\", \"geometric_tolerances\", \"tolerance_stack\", \"nesting\", \"cad_converter\", \"profile_cutting\", \"shaft_generator\", \"gear_calculator\"], \"themes\": [\"dark\", \"light\"], \"resolutions\": [[1024, 700], [1366, 768], [1920, 1080], [2560, 1440]], \"startup_ms\": 395.94, \"navigation_median_ms\": 88.64, \"navigation_max_ms\": 617.93, \"resize_median_ms\": 56.46, \"resize_max_ms\": 201.42, \"table_50000_load_ms\": 92.71, \"table_50000_filter_ms\": 117.04, \"tk_imports\": [], \"kr_assignment_engine\": \"embedded Python SheetMetal parameters\", \"pdf_export_engine\": \"isolated COM process\", \"solidworks_live_tested\": false, \"checks\": [\"16 modules\", \"two themes\", \"resolution matrix\", \"1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM\", \"3D CAD converter / eight formats / queue, options and clear / no live COM\", \"NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF\", \"hole nesting / five parts on one plate / contour cut-order CSV\", \"nesting shared parts-and-layout workspace / document plate tabs\", \"live press-brake tooling profiles and dimensions\", \"quick bolt torque / 51.96 Nm / 25.98 kN / clipboard\", \"torque joint section / live thread and preload\", \"tolerance stack 0.20 / 0.02 / 0.38 mm\", \"tolerance stack PDF/XLSX\", \"vector diagrams\", \"bolt kg/N\", \"weight 157 kg\", \"BOM XLSX\", \"DXF dependency\", \"Pack and Go interop source bundled\", \"isolated PDF worker startup/IPC\", \"external involute gear pair / native OCCT STEP readback / closed DXF\", \"mechanism catalogue capabilities / rack and helical frozen-worker STEP readback\", \"roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF\", \"embedded licenses and export\", \"no Tk runtime\"]}]}\n",
+  "release_log_tail": "HTTP 403: Resource not accessible by integration (https://api.github.com/repos/gkkizil/gokworks/releases)\n"
 }
