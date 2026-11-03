@@ -8,9 +8,14 @@ MATERIAL_GROUPS = {
                   'S355MC', 'P265GH'),
     'Makine / Takım': ('C45', 'C45E (CK45)', '42CrMo4', '16MnCr5', '34CrNiMo6'),
     'Kalıp Çelikleri': ('1.2311', '1.2312', '1.2344', '1.2379'),
-    'Paslanmaz': ('304', '316', '316L'),
-    'Plastikler': ('Delrin (POM-H)', 'Kestamit (PA6G)', 'PA6', 'PP', 'PTFE', 'PVC'),
+    'Paslanmaz': ('304', '304L', '316', '316L', '430'),
+    'Alüminyum alaşımları': ('1050A', '5005', '5754', '6061', '6063', '6082', '7075'),
+    'Plastikler': ('Delrin (POM-H)', 'Kestamit (PA6G)', 'PA6', 'PA66', 'PE-HD', 'PP', 'PTFE', 'PVC'),
 }
+
+# Selecting this entry enables the density field; every other density is fixed.
+CUSTOM_MATERIAL = 'Özel malzeme'
+CUSTOM_DENSITY_RANGE = (100.0, 25000.0)  # kg/m³: below cork/foam, above osmium (22.590)
 
 MATERIALS = {
     'Demir / Çelik': 7850,
@@ -30,6 +35,17 @@ MATERIALS = {
     '304': 7916,
     '316': 8000,
     '316L': 8000,
+    '304L': 8000,
+    '430': 7750,
+    '1050A': 2710,
+    '5005': 2700,
+    '5754': 2700,
+    '6061': 2700,
+    '6063': 2700,
+    '6082': 2700,
+    '7075': 2810,
+    'PA66': 1150,
+    'PE-HD': 950,
     'Delrin (POM-H)': 1420,
     'Kestamit (PA6G)': 1150,
     'PA6': 1150,
@@ -72,7 +88,19 @@ MATERIAL_NOTES = {
     'PTFE': 'Genel PTFE malzeme kartı değeri.',
     'PVC': 'Genel PVC malzeme kartı değeri.',
 }
+_ALLOY = 'Alaşım veri sayfasındaki nominal yoğunluk; temper ve ürün biçimi yoğunluğu pratikte değiştirmez.'
 MATERIAL_NOTES.update({
+    '304L': 'EN 1.4307 (304L), çubuk ve profil veri sayfası değeri.',
+    '430': 'EN 1.4016 (430) ferritik paslanmaz, sac ve plaka veri sayfası değeri.',
+    '1050A': 'EN AW-1050A ticari saf alüminyum. ' + _ALLOY,
+    '5005': 'EN AW-5005. ' + _ALLOY,
+    '5754': 'EN AW-5754 (AlMg3). ' + _ALLOY,
+    '6061': 'EN AW-6061. ' + _ALLOY,
+    '6063': 'EN AW-6063 (profil alaşımı). ' + _ALLOY,
+    '6082': 'EN AW-6082 (AlSi1MgMn / AlMgSi1). ' + _ALLOY,
+    '7075': 'EN AW-7075 (yüksek dayanımlı, çinko alaşımlı). ' + _ALLOY,
+    'PA66': 'Dolgusuz PA66 yarı mamul; cam elyaf takviyeli kaliteler daha ağırdır.',
+    'PE-HD': 'Yüksek yoğunluklu polietilen yarı mamul.',
     '304': 'AISI 304 paslanmaz; MMPDS referanslı malzeme kartının nominal yoğunluğu kullanılır.',
     'S235JR': 'Piyasada St37 adıyla anılan grupta; sertifikadaki EN kaliteyi esas alın. ' + _STEEL_NOTE,
     'S355JR': 'Piyasada St52 adıyla anılan grupta; sertifikadaki EN kaliteyi esas alın. ' + _STEEL_NOTE,
@@ -99,6 +127,7 @@ _STEEL_316_SOURCE = ('https://github.com/scroberts/Engineering-Materials-Databas
                      'bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/stainless-316.json')
 _TOOL_STEEL_SOURCE = ('https://github.com/scroberts/Engineering-Materials-Database/blob/'
                      'bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/')
+_AALCO = 'https://www.aalco.co.uk/datasheets/'
 _PFM_SOURCE = ('https://github.com/RF555/PFM-Calculator/blob/'
                '1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json')
 MATERIAL_SOURCES = {
@@ -125,6 +154,17 @@ MATERIAL_SOURCES = {
     'PP': _FREECAD + 'Thermoplast/PP-Generic.FCMat',
     'PTFE': _FREECAD + 'Thermoplast/PTFE-Generic.FCMat',
     'PVC': _FREECAD + 'Thermoplast/PVC-Generic.FCMat',
+    '304L': _AALCO + 'Stainless-Steel-14307-304L-Bar-and-Section_35.ashx',
+    '430': _AALCO + 'Stainless-Steel-14016-430-Sheet-and-Plate_95.ashx',
+    '1050A': _AALCO + 'Aluminium-Alloy-1050A-H14-Sheet_57.ashx',
+    '5005': _AALCO + 'Aluminium-Alloy-5005-H34-Sheet_137.ashx',
+    '5754': _FREECAD + 'Metal/Aluminum/AlMg3F24.FCMat',
+    '6061': _FREECAD + 'Metal/Aluminum/Aluminum-6061-T6.FCMat',
+    '6063': _AALCO + 'Aluminium-Alloy-6063-T6-Extrusions_158.ashx',
+    '6082': _FREECAD + 'Metal/Aluminum/AlMgSi1F31.FCMat',
+    '7075': _FREECAD + 'Metal/Aluminum/Aluminum-7075-T6.FCMat',
+    'PA66': 'https://www.ensingerplastics.com/en/shapes/pa66-tecamid-66-natural',
+    'PE-HD': 'https://www.ensingerplastics.com/en-us/shapes/polyethylene-tecafine-hdpe-natural',
 }
 
 DENSITY_NOTE = ('Yoğunluk seçilen malzemeye göre sabittir ve kullanıcı tarafından değiştirilemez. '

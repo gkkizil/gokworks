@@ -762,11 +762,21 @@ def test_gdt_retains_measurement_instructions_size_rule_and_boundary_assessment(
 @pytest.mark.parametrize('kind', weight.KINDS)
 def test_weight_all_shapes_and_native_sections(window, kind):
     page = window.pages['weight']
-    page.form.set_value('kind',kind)
+    page.form.set_value('category', weight.category_of(kind))
+    page.form.set_value('kind', kind)
     page.update_result()
-    assert page.result is not None
+    assert page.result is not None and page.result.kind == kind
     assert page.result.total_mass_kg > 0
     assert page.diagrams['section'].scene().items()
+    standard = kind in weight.STANDARD_KINDS
+    assert page.form.fields['profile'].isVisibleTo(page) == standard
+    assert page.form.fields['method'].isVisibleTo(page) == (not standard)
+    if standard:
+        assert page.result.method == weight.STANDARD_METHOD and page.result.source
+        return
+    for key in weight.FIELDS[kind]:
+        if key not in ('ro', 'ri'):
+            assert page.form.fields[key].isVisibleTo(page)
     page.form.set_value('method','Katalog alanından')
     page.form.set_value('area_cm2','20')
     page.update_result()
@@ -775,6 +785,7 @@ def test_weight_all_shapes_and_native_sections(window, kind):
 
 def test_weight_material_densities_tool_names_and_unit_conversion(window):
     page = window.pages['weight']
+    page.form.set_value('category','Dolu malzeme')
     page.form.set_value('kind','Sac levha')
     page.form.set_value('b','2000')
     page.form.set_value('t','10')
@@ -794,7 +805,46 @@ def test_weight_material_densities_tool_names_and_unit_conversion(window):
             page.update_result()
             assert page.result.density == weight.MATERIALS[name]
             assert 'kg/m³' in box.currentText()
-    assert 'density' not in page.form.fields
+            assert not page.form.fields['density'].isVisibleTo(page)   # preset densities stay fixed
+
+
+def test_weight_custom_material_list_cost_and_exports(window, tmp_path, monkeypatch):
+    page = window.pages['weight']
+    page.form.set_value('category','Dolu malzeme'); page.form.set_value('kind','Mil')
+    page.form.set_value('d','220'); page.form.set_value('length','200'); page.form.set_value('count','1')
+    page.form.set_value('material_group','Özel'); page.update_result()
+    assert page.form.fields['density'].isVisibleTo(page)
+    page.form.set_value('density','7850'); page.form.set_value('material_name','Deneme çeliği'); page.update_result()
+    assert page.result.mass_kg == pytest.approx(59.681, abs=5e-4) and page.result.material_label == 'Deneme çeliği'
+    page.form.set_value('mass_unit','g'); page.form.set_value('digits','0'); page.update_result()
+    assert page.headline.text().startswith('59.681 g')
+    page.items.clear(); page.refresh_list()
+    page.part_name.setText('Mil'); page.price.setText('40'); page.add_item()
+    page.form.set_value('category','Standart profil'); page.form.set_value('kind','IPE')
+    page.form.set_value('profile','IPE 200'); page.form.set_value('length','6000'); page.update_result()
+    page.add_item()
+    assert page.list_model.rowCount() == 2 and page.items[1].kg_per_m == 22.4
+    page.list_model.setData(page.list_model.index(1, 5), '3')            # count edited in the table
+    assert page.items[1].count == 3 and page.items[1].total_mass_kg == pytest.approx(22.4 * 6 * 3)
+    page.list_model.setData(page.list_model.index(1, 5), '1,5')          # rejected, row unchanged
+    assert page.items[1].count == 3 and 'tam sayı' in page.status_text
+    page.list_view.selectRow(1); page.duplicate_item()
+    assert len(page.items) == 3
+    page.list_view.selectRow(2); page.remove_item()
+    page.scrap.setText('10'); page.vat.setText('20')
+    assert 'KDV' in page.totals_label.text() and 'işçilik' in page.totals_label.text()
+    for kind in ('xlsx', 'pdf', 'csv'):
+        target = tmp_path / f'liste.{kind}'
+        monkeypatch.setattr('modules.weight.ui.QFileDialog.getSaveFileName', lambda *a, target=target: (str(target), ''))
+        page.export_list(kind)
+        assert target.is_file() and target.stat().st_size > 100
+
+
+def test_weight_cad_button_reports_missing_solidworks(window, qtbot):
+    page = window.pages['weight']
+    page.read_cad()
+    qtbot.waitUntil(lambda: 'başarısız' in page.cad_label.text(), timeout=5000)
+    assert page.form.fields['kind'].isEnabled()
 
 
 @pytest.mark.parametrize('manual', [True,False])

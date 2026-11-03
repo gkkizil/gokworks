@@ -1,9 +1,11 @@
-# Sabit yoğunluk kataloğu
+# Malzeme yoğunluk kataloğu
 
-Ağırlık hesabında aşağıdaki 39 kayıt kullanılır. Yoğunluklar malzemeden otomatik alınır;
-arayüzden, eski tercih dosyasından veya hesap çağrısındaki farklı bir yoğunlukla değiştirilemez.
-Değerler kaynaklardaki nominal kütle hesabı değerleridir; üretici sertifikası ya da mekanik
-dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
+Ağırlık hesabında 50 kayıtlı malzeme ve **Özel malzeme** kullanılır. Kayıtlı malzemelerin
+yoğunluğu sabittir; farklı bir değer için Özel malzeme seçilip yoğunluk girilir. Değerler kaynaklardaki
+nominal kütle hesabı değerleridir; üretici sertifikası veya mekanik dayanım tablosu değildir.
+Aynı malzeme için kaynaklar farklı değer verebilir. 1 g/cm³ = 1.000 kg/m³.
+
+_Bu tablo `modules/weight/materials.py` dosyasından üretilmiştir._
 
 ## Genel
 
@@ -48,20 +50,34 @@ dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
 
 ## Kalıp Çelikleri
 
-| Malzeme | Tür | kg/m³ | g/cm³ | Referans |
-| --- | --- | ---: | ---: | --- |
-| 1.2311 | Plastik kalıp çeliği | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
-| 1.2312 | Plastik kalıp çeliği | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
-| 1.2344 | Sıcak iş takım çeliği | 7800 | 7,8 | [Kayıt](https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json) |
-| 1.2379 | Soğuk iş takım çeliği | 7700 | 7,7 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| Malzeme | kg/m³ | g/cm³ | Referans |
+| --- | ---: | ---: | --- |
+| 1.2311 | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| 1.2312 | 7850 | 7,85 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
+| 1.2344 | 7800 | 7,8 | [Kayıt](https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/steel-h13.json) |
+| 1.2379 | 7700 | 7,7 | [Kayıt](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/src/calculator/data/materials.json) |
 
 ## Paslanmaz
 
 | Malzeme | kg/m³ | g/cm³ | Referans |
 | --- | ---: | ---: | --- |
 | 304 | 7916 | 7,916 | [Kayıt](https://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_304.yaml) |
+| 304L | 8000 | 8 | [Kayıt](https://www.aalco.co.uk/datasheets/Stainless-Steel-14307-304L-Bar-and-Section_35.ashx) |
 | 316 | 8000 | 8 | [Kayıt](https://github.com/scroberts/Engineering-Materials-Database/blob/bf225bb98d95df288a02ee3ab0ac9fb691a5c4ad/materials/metals/stainless-316.json) |
 | 316L | 8000 | 8 | [Kayıt](https://github.com/mvernacc/material-properties-interchange/blob/561d181d8b2c83c53c17b177c21505c55809fc11/materials/materials_data/AISI_316L.yaml) |
+| 430 | 7750 | 7,75 | [Kayıt](https://www.aalco.co.uk/datasheets/Stainless-Steel-14016-430-Sheet-and-Plate_95.ashx) |
+
+## Alüminyum alaşımları
+
+| Malzeme | kg/m³ | g/cm³ | Referans |
+| --- | ---: | ---: | --- |
+| 1050A | 2710 | 2,71 | [Kayıt](https://www.aalco.co.uk/datasheets/Aluminium-Alloy-1050A-H14-Sheet_57.ashx) |
+| 5005 | 2700 | 2,7 | [Kayıt](https://www.aalco.co.uk/datasheets/Aluminium-Alloy-5005-H34-Sheet_137.ashx) |
+| 5754 | 2700 | 2,7 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/AlMg3F24.FCMat) |
+| 6061 | 2700 | 2,7 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/Aluminum-6061-T6.FCMat) |
+| 6063 | 2700 | 2,7 | [Kayıt](https://www.aalco.co.uk/datasheets/Aluminium-Alloy-6063-T6-Extrusions_158.ashx) |
+| 6082 | 2700 | 2,7 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/AlMgSi1F31.FCMat) |
+| 7075 | 2810 | 2,81 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Metal/Aluminum/Aluminum-7075-T6.FCMat) |
 
 ## Plastikler
 
@@ -70,18 +86,8 @@ dayanım tablosu değildir. 1 g/cm³ = 1.000 kg/m³.
 | Delrin (POM-H) | 1420 | 1,42 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/POM-Homopolymer-Generic.FCMat) |
 | Kestamit (PA6G) | 1150 | 1,15 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat) |
 | PA6 | 1150 | 1,15 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat) |
+| PA66 | 1150 | 1,15 | [Kayıt](https://www.ensingerplastics.com/en/shapes/pa66-tecamid-66-natural) |
+| PE-HD | 950 | 0,95 | [Kayıt](https://www.ensingerplastics.com/en-us/shapes/polyethylene-tecafine-hdpe-natural) |
 | PP | 916 | 0,916 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PP-Generic.FCMat) |
 | PTFE | 2070 | 2,07 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PTFE-Generic.FCMat) |
 | PVC | 1380 | 1,38 | [Kayıt](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PVC-Generic.FCMat) |
-
-## Kullanım notları
-
-- Sac/yapı ve makine çeliklerinde 7.850 kg/m³ genel nominal çelik değeri kullanılır. Bağlantılı kaynak bu kütle hesabı temelini destekler; her kalite için ayrı bir ölçüm raporu okunduğu iddia edilmez.
-- Kalıp çelikleri genel çelik değerine eşitlenmez: 1.2379 için 7.700, 1.2344 için 7.800 kg/m³ kullanılır. 1.2344 değeri DIN kalite adını açıkça belirten H13 GitHub kartındandır. 1.2379, 1.2311 ve 1.2312 değerleri PFM Calculator'ın elle tutulan nominal ağırlık kataloğundandır ([birimler](https://github.com/RF555/PFM-Calculator/blob/1be015cb20aad00cec018a13705312073dafac5f/README.md)). Üretici teknik föyü veya standart belgesi doğrulanmış gibi sunulmaz.
-- St37/St52, C45/CK45 ve Avrupa/SAE adları kesin eşdeğer kalite olarak birleştirilmez. Kaliteler ayrı kayıtlardır; ticari adlar açıklama notudur.
-- DX51D+Z ve DX52D+Z için çelik taban hesaplanır. Çinko kaplaması ilave kütlesi dahil değildir.
-- 304 değeri MMPDS referansı taşıyan GitHub kartından; 316/316L değerleri bağlantılı GitHub veritabanı kayıtlarından alınmıştır. Özgün MMPDS, MatWeb veya AZoM yayınının tam metninin ayrıca doğrulandığı iddia edilmez.
-- Kestamit (PA6G), genel PA6 kartındaki 1.150 kg/m³ ile nominal olarak temsil edilir; bu kaynak belirli bir döküm PA6G ürün sertifikası değildir.
-- Pirinç C23000 ve fosfor bronz C51000 belirli alaşımlardır. Eski genel Pirinç/Bronz tercihleri bu açık adlı kayıtlara aktarılır.
-- PP, PTFE ve PVC değerleri bağlantılı FreeCAD genel kart değerleridir. Çinko, kurşun ve titanyum elementel yoğunluk kayıtlarıdır.
-- Kayıtların kaynak commitleri bağlantılarda sabitlenmiştir. Üçüncü taraf kod veya kütüphane uygulamaya alınmamıştır.

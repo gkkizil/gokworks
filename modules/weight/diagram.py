@@ -1,38 +1,15 @@
-"""Native, schematic stock-section illustrations for the weight calculator.
+"""True-proportion cross-section sketch with dimension lines for the weight calculator.
 
-Only drawing lives here: no calculation, Tk root, image files or COM imports.
-Section dimensions are shown in millimetres; stock length uses the selected unit.
+The outline is built from the same millimetre dimensions the area is computed from
+(including corner and root radii), scaled uniformly and centred. Only a thickness
+that would be thinner than 2 px is widened, and the sketch then says so.
+Drawing only: no calculation, file or COM access.
 """
 
 import math
 
 from shared.theme import UI_FONT
 from gui_qt.diagrams import CANVAS as PANEL, MUTED, ACCENT
-
-
-_I_SECTIONS = frozenset(('HEA', 'HP', 'HD', 'HL', 'HE', 'IPE', 'IPN'))
-_U_SECTIONS = frozenset(('U profil', 'UPE', 'UPN'))
-
-
-def _value(result, name, default=None):
-    if isinstance(result, dict):
-        return result.get(name, default)
-    return getattr(result, name, default)
-
-
-def _positive(value, default=None):
-    try:
-        value = float(value)
-    except (TypeError, ValueError, OverflowError):
-        return default
-    return value if math.isfinite(value) and value > 0 else default
-
-
-def _dimensions(values):
-    if not hasattr(values, 'items'):
-        return {}
-    return {key: number for key, value in values.items()
-            if (number := _positive(value)) is not None}
 
 
 def _color(value, appearance):
@@ -45,229 +22,190 @@ def _mix(first, second, fraction):
     return '#' + ''.join(f'{round(x * (1 - fraction) + y * fraction):02x}' for x, y in zip(a, b))
 
 
-def _number(value):
-    if value >= 10000000 or 0 < value < .001:
-        return f'{value:.3g}'.replace('.', ',')
-    text = f'{value:,.3f}'.rstrip('0').rstrip('.')
+def num(value):
+    text = f'{value:,.2f}'.rstrip('0').rstrip('.')
     return text.replace(',', '\0').replace('.', ',').replace('\0', '.')
 
 
-def _fillet(points, radii):
-    """Round polygon vertices: ``radii`` maps vertex index -> radius (schematic units)."""
-    rounded = []
-    count = len(points)
-    for index, point in enumerate(points):
+def fillet(points, radii, segments=8):
+    """Round polygon vertices (index → radius); works for convex and concave 90° corners."""
+    rounded, count = [], len(points)
+    for index, (px, py) in enumerate(points):
         radius = radii.get(index, 0)
         if radius <= 0:
-            rounded.append(point); continue
-        px, py = point
-        ax, ay = points[index - 1]; bx, by = points[(index + 1) % count]
+            rounded.append((px, py))
+            continue
+        ax, ay = points[index - 1]
+        bx, by = points[(index + 1) % count]
         la, lb = math.hypot(ax - px, ay - py), math.hypot(bx - px, by - py)
-        radius = min(radius, la * .49, lb * .49)
-        ux, uy = (ax - px) / la, (ay - py) / la
-        vx, vy = (bx - px) / lb, (by - py) / lb
+        radius = min(radius, la * .5, lb * .5)
+        ux, uy, vx, vy = (ax - px) / la, (ay - py) / la, (bx - px) / lb, (by - py) / lb
         cx, cy = px + (ux + vx) * radius, py + (uy + vy) * radius
         start = math.atan2(py + uy * radius - cy, px + ux * radius - cx)
         end = math.atan2(py + vy * radius - cy, px + vx * radius - cx)
         sweep = (end - start + math.pi) % (2 * math.pi) - math.pi
-        rounded += [(cx + radius * math.cos(start + sweep * i / 8), cy + radius * math.sin(start + sweep * i / 8))
-                    for i in range(9)]
+        rounded += [(cx + radius * math.cos(start + sweep * i / segments),
+                     cy + radius * math.sin(start + sweep * i / segments)) for i in range(segments + 1)]
     return rounded
 
 
-def _section(kind, dimensions):
-    """Return a front outline, optional opening and the schematic envelope.
-
-    Extremely thin walls remain visible in this explicitly schematic drawing.
-    The values printed beside it always retain the actual supplied dimensions.
-    """
-    dims = dimensions
-    if kind in ('Mil', 'Boru'):
-        diameter = dims.get('d', 80)
-        wall = min(.34, max(.065, dims.get('t', diameter * .1) / diameter))
-        return 'circle', (wall if kind == 'Boru' else None), 1.0, 1.0
-    if kind == 'Altıköşe':
-        width = 2 / math.sqrt(3)
-        return [(width * .25, 0), (width * .75, 0), (width, .5),
-                (width * .75, 1), (width * .25, 1), (0, .5)], None, width, 1
-
-    if kind in ('Sac levha', 'Silme lama'):
-        b, h = dims.get('b', 140), dims.get('t', 14)
-    elif kind == 'Kare demir':
-        b = h = dims.get('b', 80)
-    else:
-        defaults = (100, 160) if kind in ('IPE', 'IPN', 'UPE', 'UPN', 'U profil') else (120, 120)
-        b, h = dims.get('b', defaults[0]), dims.get('h', defaults[1])
-    aspect = min(3.2, max(.4, b / h))
-    w, h = aspect, 1.0
-    wall = dims.get('t', min(b, dims.get('h', b)) * .09)
-    tx = min(w * .25, max(w * .065, wall / b * w))
-    ty = min(.25, max(.065, wall / (dims.get('h', b) or b)))
-    web = min(w * .35, max(w * .075, dims.get('tw', wall) / b * w))
-    flange = min(.26, max(.08, dims.get('tf', wall) / dims.get('h', 120)))
-    rectangle = [(0, 0), (w, 0), (w, h), (0, h)]
-    radii = dims.get('_corner_radii') or ()
-    unit = w / b if b else 0
-    if kind == 'Kutu profil':
-        opening = [(tx, ty), (w - tx, ty), (w - tx, 1 - ty), (tx, 1 - ty)]
-        if len(radii) == 2 and radii[0] > 0:
-            outer = min(radii[0] * unit, min(w, h) * .45)
-            inner = max(0.0, outer - max(tx, ty))
-            rectangle = _fillet(rectangle, dict.fromkeys(range(4), outer))
-            opening = _fillet(opening, dict.fromkeys(range(4), inner))
-        return rectangle, opening, w, h
-    if kind == 'Köşebent':
-        angle = [(0, 0), (tx, 0), (tx, 1 - ty), (w, 1 - ty), (w, 1), (0, 1)]
-        if len(radii) == 2 and radii[0] > 0:
-            root, toe = radii[0] * unit, radii[1] * unit
-            angle = _fillet(angle, {1: toe, 2: root, 3: toe})
-        return angle, None, w, h
-    if kind == 'T profil':
-        x1, x2 = (w - web) / 2, (w + web) / 2
-        return [(0, 0), (w, 0), (w, flange), (x2, flange), (x2, 1),
-                (x1, 1), (x1, flange), (0, flange)], None, w, h
-    if kind in _I_SECTIONS:
-        x1, x2 = (w - web) / 2, (w + web) / 2
-        toe, heel = (flange * .75, flange * 1.3) if kind == 'IPN' else (flange, flange)
-        return [(0, 0), (w, 0), (w, toe), (x2, heel), (x2, 1 - heel),
-                (w, 1 - toe), (w, 1), (0, 1), (0, 1 - toe),
-                (x1, 1 - heel), (x1, heel), (0, toe)], None, w, h
-    if kind in _U_SECTIONS:
-        toe, heel = (flange * .75, flange * 1.3) if kind == 'UPN' else (flange, flange)
-        return [(0, 0), (w, 0), (w, toe), (web, heel), (web, 1 - heel),
-                (w, 1 - toe), (w, 1), (0, 1)], None, w, h
-    return rectangle, None, w, h
+def rectangle(x, y, w, h, r=0.0):
+    points = [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+    return fillet(points, dict.fromkeys(range(4), r)) if r > 0 else points
 
 
-def _coordinates(points, x, y, factor):
-    return [coordinate for a, b in points for coordinate in (x + a * factor, y + b * factor)]
+def regular(radius, sides, rotation=0.0):
+    return [(radius * math.cos(rotation + 2 * math.pi * i / sides), radius * math.sin(rotation + 2 * math.pi * i / sides))
+            for i in range(sides)]
 
 
-def _polygon(canvas, points, x, y, factor, **options):
-    return canvas.create_polygon(*_coordinates(points, x, y, factor), **options)
+def geometry(result):
+    """(outlines, holes, width, height, thin_axis) in mm, y up; outlines/holes are point lists or circles."""
+    d = dict(result.dimensions_mm)
+    shape = result.drawing
+    if shape in ('round', 'tube'):
+        outer = d['d']
+        holes = [('circle', outer / 2, outer / 2, outer / 2 - d['t'])] if shape == 'tube' else []
+        return [('circle', outer / 2, outer / 2, outer / 2)], holes, outer, outer
+    if shape == 'hexagon':
+        corner = d['s'] / math.sqrt(3)
+        pts = [(x + corner, y + d['s'] / 2) for x, y in regular(corner, 6)]
+        return [pts], [], 2 * corner, d['s']
+    if shape == 'square':
+        return [rectangle(0, 0, d['b'], d['b'])], [], d['b'], d['b']
+    if shape in ('flat', 'plate'):
+        return [rectangle(0, 0, d['b'], d['t'])], [], d['b'], d['t']
+    if shape == 'box':
+        b, t = d['b'], d['t']
+        h = d.get('h', b)
+        outer, inner = result.corner_radii or (0.0, 0.0)
+        return [rectangle(0, 0, b, h, outer)], [rectangle(t, t, b - 2 * t, h - 2 * t, inner)], b, h
+    if shape == 'angle':
+        b, h, t = d['b'], d.get('h', d['b']), d.get('t', d.get('tf'))
+        root, toe = result.corner_radii or (0.0, 0.0)
+        pts = [(0, 0), (b, 0), (b, t), (t, t), (t, h), (0, h)]
+        return [fillet(pts, {2: toe, 3: root, 4: toe})], [], b, h
+    if shape == 'channel':
+        h, b, tw, tf, r = d['h'], d['b'], d['tw'], d['tf'], d.get('r', 0.0)
+        pts = [(0, 0), (b, 0), (b, tf), (tw, tf), (tw, h - tf), (b, h - tf), (b, h), (0, h)]
+        return [fillet(pts, {3: r, 4: r})], [], b, h
+    if shape == 'tee':
+        b, h, tw, tf = d['b'], d['h'], d['tw'], d['tf']
+        x0, x1 = (b - tw) / 2, (b + tw) / 2
+        pts = [(x0, 0), (x1, 0), (x1, h - tf), (b, h - tf), (b, h), (0, h), (0, h - tf), (x0, h - tf)]
+        return [pts], [], b, h
+    if shape == 'i':
+        h, b, tw, tf, r = d['h'], d['b'], d['tw'], d['tf'], d.get('r', 0.0)
+        x0, x1 = (b - tw) / 2, (b + tw) / 2
+        pts = [(0, 0), (b, 0), (b, tf), (x1, tf), (x1, h - tf), (b, h - tf), (b, h), (0, h), (0, h - tf),
+               (x0, h - tf), (x0, tf), (0, tf)]
+        return [fillet(pts, {3: r, 4: r, 9: r, 10: r})], [], b, h
+    return [], [], 1, 1
 
 
-def _front(canvas, kind, dimensions, x, y, factor, fill, edge, background, line_width):
-    """Draw one flat section, keeping hollow profiles genuinely open."""
-    outline, opening, width, height = _section(kind, dimensions)
-    if outline == 'circle':
-        canvas.create_oval(x, y, x + factor, y + factor, fill=fill, outline=edge, width=line_width)
-        if opening is not None:
-            inset = factor * opening
-            canvas.create_oval(x + inset, y + inset, x + factor - inset, y + factor - inset,
-                               fill=background, outline=edge, width=line_width)
-        return width * factor, height * factor
-    _polygon(canvas, outline, x, y, factor, fill=fill, outline=edge, width=line_width)
-    if opening:
-        _polygon(canvas, opening, x, y, factor, fill=background, outline=edge, width=line_width)
-    return width * factor, height * factor
-
-
-def _dimension(canvas, start, end, offset, text, color, background, scale, vertical=False):
-    sx, sy = start
-    ex, ey = end
-    width = max(1, scale)
-    font = (UI_FONT, -max(9, round(10 * scale)))
-    tick = 3 * scale
+def _dimension(canvas, start, end, offset, text, color, font, vertical=False):
+    (sx, sy), (ex, ey) = start, end
     if vertical:
-        line_x = sx + offset
-        canvas.create_line(line_x, sy, line_x, ey, fill=color, width=width)
-        canvas.create_line(line_x - tick, sy, line_x + tick, sy, fill=color, width=width)
-        canvas.create_line(line_x - tick, ey, line_x + tick, ey, fill=color, width=width)
-        canvas.create_text(line_x - 12 * scale, (sy + ey) / 2, text=text, fill=color,
-                           font=font, angle=90)
+        x = sx + offset
+        canvas.create_line(sx, sy, x, sy, fill=color, width=.8)
+        canvas.create_line(ex, ey, x, ey, fill=color, width=.8)
+        canvas.create_line(x, sy, x, ey, fill=color, width=1, arrow='both', arrowshape=(6, 7, 2.6))
+        canvas.create_text(x + (8 if offset > 0 else -8), (sy + ey) / 2, text=text, fill=color, font=font,
+                           anchor='w' if offset > 0 else 'e', tags=('dimension',))
     else:
-        line_y = sy + offset
-        canvas.create_line(sx, line_y, ex, line_y, fill=color, width=width)
-        canvas.create_line(sx, line_y - tick, sx, line_y + tick, fill=color, width=width)
-        canvas.create_line(ex, line_y - tick, ex, line_y + tick, fill=color, width=width)
-        canvas.create_text((sx + ex) / 2, line_y + 12 * scale, text=text, fill=color, font=font)
+        y = sy + offset
+        canvas.create_line(sx, sy, sx, y, fill=color, width=.8)
+        canvas.create_line(ex, ey, ex, y, fill=color, width=.8)
+        canvas.create_line(sx, y, ex, y, fill=color, width=1, arrow='both', arrowshape=(6, 7, 2.6))
+        canvas.create_text((sx + ex) / 2, y + (9 if offset > 0 else -9), text=text, fill=color, font=font,
+                           anchor='n' if offset > 0 else 's', tags=('dimension',))
 
 
-def draw(canvas, result, appearance, scale, kind='Sac levha', dimensions=None):
-    """Redraw a simple 2D section with minimal, result-backed measurements."""
-    scale = _positive(scale, 1)
-    kind = str(_value(result, 'kind', kind) or kind)
-    method = str(_value(result, 'method', ''))
-    catalog = method == 'Katalog alanından'
-    supplied = _dimensions(_value(result, 'dimensions_mm', dimensions) or dimensions)
-    actual = {} if catalog else supplied
-    dims = {} if catalog else supplied
-    radii = _value(result, 'corner_radii', ()) or ()
-    if dims and radii:
-        dims = dict(dims, _corner_radii=tuple(radii))
+def labels(result):
+    """Dimension texts that are not drawn as dimension lines (thickness, radii)."""
+    d, out = result.dimensions_mm, []
+    for key, title in (('t', 't'), ('tw', 'tw'), ('tf', 'tf'), ('r', 'r'), ('r1', 'r₁')):
+        if d.get(key):
+            out.append(f'{title} = {num(d[key])} mm')
+    if result.drawing == 'box' and result.corner_radii and result.corner_radii[0]:
+        out.append(f'rₒ = {num(result.corner_radii[0])} mm · rᵢ = {num(result.corner_radii[1])} mm')
+    return out
+
+
+def draw(canvas, result, appearance, scale=1, **_):
+    """Render ``result`` (rules.Result) into a VectorScene-like canvas."""
     background = _color(PANEL, appearance)
     accent, muted = _color(ACCENT, appearance), _color(MUTED, appearance)
     dark = str(appearance).lower() in ('dark', 'koyu')
-    fill = _mix(accent, background, .87 if dark else .92)
+    fill = _mix(accent, background, .80 if dark else .86)
     canvas.delete('all')
     canvas.configure(background=background, highlightthickness=0)
-    width, height = canvas.winfo_width(), canvas.winfo_height()
-    if width <= 1:
-        width = _positive(canvas.cget('width'), 440 * scale)
-    if height <= 1:
-        height = _positive(canvas.cget('height'), 250 * scale)
-    if width < 100 * scale or height < 100 * scale:
+    width = canvas.winfo_width() if canvas.winfo_width() > 1 else 650
+    height = canvas.winfo_height() if canvas.winfo_height() > 1 else 320
+    font = (UI_FONT, -max(10, round(11 * scale)))
+    small = (UI_FONT, -max(9, round(10 * scale)))
+    if result is None or not result.dimensions_mm or result.method == 'Katalog alanından':
+        canvas.create_text(width / 2, height / 2, text='Katalog alanıyla hesap: kesit ölçüsü girilmedi.',
+                           fill=muted, font=font)
         return
-    _, _, aspect_width, aspect_height = _section(kind, dims)
-    room_width, room_height = max(40 * scale, width - 128 * scale), max(25 * scale, height - 112 * scale)
-    factor = min(135 * scale / aspect_height, 180 * scale / aspect_width,
-                 room_width / aspect_width, room_height / aspect_height)
-    factor = max(12 * scale, factor)
-    front_width, front_height = aspect_width * factor, aspect_height * factor
-    x = (width - front_width) / 2
-    y = max(15 * scale, (height - 76 * scale - front_height) / 2)
-    _front(canvas, kind, dims, x, y, factor, fill, accent, background, max(1, 1.35 * scale))
+    outlines, holes, gw, gh = geometry(result)
+    margin_x, margin_top, margin_bottom = 110 * scale, 34 * scale, 84 * scale
+    box_w, box_h = width - 2 * margin_x, height - margin_top - margin_bottom
+    factor = min(box_w / gw, box_h / gh)
+    minimum = 2.0 / factor            # 2 px in mm
+    widened = gh * factor < 2 or gw * factor < 2
+    sx, sy = factor, factor
+    if gh * factor < 2:               # plate/flat: keep it visible, say so below
+        sy = minimum * factor / gh * 2
+    ox = (width - gw * sx) / 2
+    oy = margin_top + (box_h + gh * sy) / 2   # baseline (y up → screen down)
 
-    horizontal = 'd' if kind in ('Mil', 'Boru') else ('' if kind == 'Altıköşe' else 'b')
-    vertical = 's' if kind == 'Altıköşe' else 'h'
-    if horizontal in actual:
-        symbol = 'Ø' if horizontal == 'd' else horizontal
-        _dimension(canvas, (x, y + front_height), (x + front_width, y + front_height),
-                   14 * scale, f'{symbol} {_number(actual[horizontal])} mm', muted, background, scale)
-    if vertical in actual and kind not in ('Mil', 'Boru', 'Kare demir'):
-        _dimension(canvas, (x, y), (x, y + front_height), -20 * scale,
-                   f'{vertical} {_number(actual[vertical])} mm', muted, background, scale, vertical=True)
+    def map_points(points):
+        return [coord for x, y in points for coord in (ox + x * sx, oy - y * sy)]
 
-    thickness = [(key, actual[key]) for key in ('t', 'tw', 'tf') if key in actual]
-    if thickness:
-        canvas.create_text(width - 18 * scale, 20 * scale,
-                           text='\n'.join(f'{key} {_number(value)} mm' for key, value in thickness),
-                           anchor='ne', justify='right', fill=muted, font=(UI_FONT, -round(10 * scale)))
-
-    length = _positive(_value(result, 'length_mm'))
-    if length:
-        selected = str(_value(result, 'unit', 'mm')).lower().strip()
-        unit, divisor = {'cm': ('cm', 10), 'm': ('m', 1000), 'mm': ('mm', 1),
-                         'milimetre': ('mm', 1), 'santimetre': ('cm', 10), 'metre': ('m', 1000)}.get(selected, ('mm', 1))
-        canvas.create_text(width / 2, height - 41 * scale,
-                           text=f'Boy: {_number(length / divisor)} {unit}', fill=accent,
-                           font=(UI_FONT, -round(11 * scale)))
-
-    area = _positive(_value(result, 'area_mm2'))
-    if catalog and area:
-        canvas.create_text(width / 2, height - 63 * scale, text=f'Alan: {_number(area)} mm²',
-                           fill=muted, font=(UI_FONT, -round(10 * scale)))
-    canvas.create_text(width / 2, height - 18 * scale, text='Ölçeksiz kesit', fill=muted,
-                       font=(UI_FONT, -round(9 * scale)))
-
-
-def draw_icon(canvas, kind, color, bg, size=34):
-    """Draw a crisp section thumbnail on a native Tk Canvas."""
-    size = _positive(size, 34)
-    canvas.delete('all')
-    canvas.configure(background=bg, highlightthickness=0)
-    outline, opening, width, height = _section(kind, {})
-    factor = (size * .7) / max(width, height)
-    x, y = (size - width * factor) / 2, (size - height * factor) / 2
-    stroke = max(1, size / 23)
-    if outline == 'circle':
-        canvas.create_oval(x, y, x + factor, y + factor, fill=color, outline=color, width=stroke)
-        if opening is not None:
-            inset = max(stroke * 1.4, factor * opening)
-            canvas.create_oval(x + inset, y + inset, x + factor - inset, y + factor - inset,
-                               fill=bg, outline=bg)
+    for item in outlines:
+        if item[0] == 'circle':
+            _, cx, cy, radius = item
+            canvas.create_oval(ox + (cx - radius) * sx, oy - (cy + radius) * sy, ox + (cx + radius) * sx,
+                               oy - (cy - radius) * sy, fill=fill, outline=accent, width=1.4, tags=('section',))
+        else:
+            canvas.create_polygon(*map_points(item), fill=fill, outline=accent, width=1.4, tags=('section',))
+    for item in holes:
+        if item[0] == 'circle':
+            _, cx, cy, radius = item
+            canvas.create_oval(ox + (cx - radius) * sx, oy - (cy + radius) * sy, ox + (cx + radius) * sx,
+                               oy - (cy - radius) * sy, fill=background, outline=accent, width=1.4, tags=('section',))
+        else:
+            canvas.create_polygon(*map_points(item), fill=background, outline=accent, width=1.4, tags=('section',))
+    left, right, top, bottom = ox, ox + gw * sx, oy - gh * sy, oy
+    d = result.dimensions_mm
+    if result.drawing in ('round', 'tube'):
+        canvas.create_line((left + right) / 2, top - 8, (left + right) / 2, bottom + 8, fill=muted, width=.7,
+                           dash=(8, 3, 2, 3))
+        canvas.create_line(left - 8, (top + bottom) / 2, right + 8, (top + bottom) / 2, fill=muted, width=.7,
+                           dash=(8, 3, 2, 3))
+        _dimension(canvas, (left, bottom), (right, bottom), 26 * scale, f'Ø{num(d["d"])}', muted, font)
+    elif result.drawing == 'hexagon':
+        _dimension(canvas, (right, top), (right, bottom), 26 * scale, f'SW {num(d["s"])}', muted, font, vertical=True)
     else:
-        _polygon(canvas, outline, x, y, factor, fill=color, outline=color, width=stroke)
-        if opening:
-            _polygon(canvas, opening, x, y, factor, fill=bg, outline=bg)
+        b = d.get('b', gw)
+        _dimension(canvas, (left, bottom), (right, bottom), 26 * scale, num(b), muted, font)
+        height_value = d.get('h', d.get('t') if result.drawing in ('flat', 'plate') else d.get('b'))
+        _dimension(canvas, (left, top), (left, bottom), -26 * scale, num(height_value), muted, font, vertical=True)
+    notes = labels(result)
+    if result.drawing == 'tube':
+        notes.insert(0, f'iç Ø{num(d["d"] - 2 * d["t"])} mm')
+    if widened:
+        notes.append('kalınlık çizimde okunur olsun diye büyütüldü')
+    caption = '   ·   '.join(notes)
+    title = result.profile or result.kind
+    canvas.create_text(width / 2, 12 * scale, text=title, fill=_color(('#1F2329', '#E6E8EB'), appearance),
+                       font=(UI_FONT, -max(11, round(12 * scale)), 'bold'), tags=('title',))
+    if caption:
+        # Below the bottom dimension line and its text, never on top of them.
+        canvas.create_text(width / 2, bottom + 62 * scale, text=caption, fill=muted, font=small, tags=('caption',))
+    canvas.create_text(width - 6, height - 30 * scale, text='Ölçek: gerçek oran' if not widened else 'Ölçek: genişlikte gerçek',
+                       fill=muted, font=small, anchor='e', tags=('scale',))
+
+
+__all__ = ['draw', 'geometry', 'fillet', 'labels']

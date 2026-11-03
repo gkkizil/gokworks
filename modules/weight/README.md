@@ -1,160 +1,138 @@
 # Ağırlık hesabı
 
-**Mühendislik hesapları → Ağırlık hesabı**. SolidWorks veya internet bağlantısı
-gerektirmeyen, ölçü ve yoğunluktan kütle hesabı. Sonuçlar kg olarak gösterilir;
-ekranda kullanılan “ağırlık” günlük kullanımdaki kütle anlamındadır, Newton
-cinsinden yerçekimi kuvveti hesabı değildir.
+**Hesaplar → Ağırlık hesabı.** Kesit ölçülerinden, doğrulanmış standart profil
+kütüphanesinden veya açık SOLIDWORKS modelinden kütle; birden çok parçayı bir
+listede toplayıp malzeme maliyeti ve rapor üretme. SOLIDWORKS ve internet
+olmadan da tam çalışır. “Ağırlık” günlük kullanımdaki kütle anlamındadır (kg).
 
-## Kesit ve malzemeler
+## Kesit türleri
 
-Kutu profil, sac levha, boru, köşebent, kare demir, T profil, U profil,
-HEA, HP, HD, HL, IPN, UPE, altıköşe, HE, IPE, UPN, mil ve silme lama:
-kullanıcının referans görselindeki 19 tür bulunur. Boyutlar kesite göre değişir.
-H/I/U aile adları otomatik standart profil boyutu veya katalog ağırlığı seçmez;
-girilen ölçüler esas alınır.
+| Kategori | Türler | Ölçüler |
+| --- | --- | --- |
+| Dolu malzeme | Mil, kare dolu çubuk, lama / dikdörtgen çubuk, altıköşe çubuk, sac levha | d · b · b×t · s (anahtar ağzı) · en×kalınlık (boy = sac boyu) |
+| İçi boş kesit | Boru, kare kutu profil, dikdörtgen kutu profil | D, t · b, t · b, h, t; köşe biçimi |
+| Açık profil | Eşit / farklı kollu köşebent, U, T, I profil | kollar, t, kök yarıçapı r₁ · h, b, tw, tf, r |
+| Standart profil | IPE, HEA, HEB, HEM, HP, HD, UPE, UPN (NPU), eşit ve farklı kollu köşebent (EN 10056-1) | listeden seçilir |
 
-**39 kayıtlı malzeme** Genel, Sac / Yapı, Makine / Takım, Kalıp Çelikleri,
-Paslanmaz ve Plastikler gruplarında sunulur. Yaygın S235JR/S275JR/S355JR/S355J2, DC01–DC04
-DKP, DX51D+Z/DX52D+Z galvaniz, S355MC, P265GH, C45, C45E, 42CrMo4, 16MnCr5,
-34CrNiMo6 ve 304/316/316L seçenekleri bulunur. Delrin ve Kestamit korunur.
-Kalıp Çelikleri grubunda 1.2379 soğuk iş, 1.2344 sıcak iş ve 1.2311/1.2312
-plastik kalıp çelikleri bulunur;
-genel çelik yoğunluğu yerine her kalitenin kaynaklı yoğunluğu kullanılır.
-Kalite adlarının yanında türleri de yazılır: **1.2344 · Sıcak iş takım çeliği**,
-**1.2379 · Soğuk iş takım çeliği**, **1.2311 / 1.2312 · Plastik kalıp çeliği**.
-Tür bilgisi seçim menüsünde, sonuç kartında ve kopyalanan raporda görünür.
-[Tam yoğunluk tablosu ve kaynak bağlantıları](materials.md).
+Her kesit türü `sections.py` içinde tek bir kayıt (alanlar + alan fonksiyonu +
+çizim) olarak tanımlıdır; yeni bir aile bu kayda eklenerek genişletilir. Her
+tür kendi ölçülerini ayrıca hatırlar (sac için b = 1000 mm, kutu için 100 mm).
 
-Yoğunluk **sabittir**: menüde g/cm³, yanında kg/m³ olarak gösterilir ve seçilen
-malzemeden otomatik alınır. Yoğunluk giriş alanı, özel malzeme ve elle
-değiştirme seçeneği yoktur. Eski `weight_density` tercihi okunmaz ve bir
-sonraki kayıt sırasında silinir. Hesap API'si de farklı yoğunluk atamasını reddeder.
-Kayıtlı değerler kaynaklardaki nominal ağırlık hesabı değerleridir; mekanik
-dayanım veya malzeme sertifikası yerine geçmez. Aynı yoğunluğu paylaşan
-çelik kalitelerinin ağırlığı aynı çıkabilir; dayanım özellikleri aynı değildir.
+## Hesap yöntemleri
 
-## Kullanım
-
-1. Kesit ve malzemeyi seçin.
-2. Ölçü birimini belirleyin; ilgili kesit ölçülerini ve boyu girin.
-3. Adedi girin. Adet başına kg, kg/m, hacim, kesit alanı ve toplam kg canlı güncellenir.
-4. **Hesabı kopyala** girdileri, birimleri, yöntemi ve sonuçları panoya alır.
-
-mm/cm/m değişimi mevcut ölçüleri dönüştürerek fiziksel sonucu korur. Adet ve
-katalog alanı bu dönüşüme dahil değildir. Katalog alanı her zaman cm²,
-yoğunluk her zaman seçilen malzemenin kayıtlı değeridir. Seçimler sayfa değişiminde ve yeniden
-açılışta korunur. Geçersiz girişte önceki sonuç kaldırılır.
-
-Kesit görünümü düz, hafif dolgulu **2D ön kesittir**. Perspektif ve gölgeler
-kaldırılmıştır; temel kesit ölçüleri, kısa kalınlık bilgisi ve boy gösterilir.
-
-## Hesap yöntemi
-
-`A` mm² cinsinden kesit alanı, `L` mm cinsinden boy, `ρ` kg/m³ cinsinden yoğunluktur.
+`A` mm², `L` mm, `ρ` kg/m³:
 
 ```text
-Bir parçanın hacmi = A × L / 1.000.000.000   [m³]
-Bir parçanın kütlesi = hacim × ρ            [kg]
-Birim boy kütlesi = A × ρ / 1.000.000       [kg/m]
-Toplam kütle = bir parçanın kütlesi × adet
+kg/m      = A × ρ / 1.000.000
+parça kg  = kg/m × L / 1000
+toplam kg = parça kg × adet
+hacim m³  = A × L / 10⁹
 ```
 
-| Kesit | Alan hesabı |
+| Kesit | Alan |
 | --- | --- |
-| Sac levha / silme lama | b × t |
-| Kare demir | b² |
-| Mil | πd²/4 |
-| Boru | π/4 × (d² − (d−2t)²) |
-| Kutu profil | bh − (b−2t)(h−2t) |
-| Köşebent | t(b+h−t) |
-| T profil | b·tf + (h−tf)·tw |
-| U ve H/I aileleri | 2b·tf + (h−2tf)·tw |
-| Altıköşe | √3/2 × s²; s anahtar ağzıdır |
+| Mil | πD²/4 |
+| Boru | π(D² − d²)/4, d = D − 2t |
+| Kare / lama / sac | a² · a×b |
+| Altıköşe | √3·s²/2 |
+| Kutu, keskin köşe | BH − (B−2t)(H−2t) |
+| Kutu, köşe yarıçaplı | 2t(B+H−2t) − (4−π)(rₒ² − rᵢ²) |
+| Köşebent (EN 10056-1) | t(a+b−t) + (1−π/4)(r₁² − 2r₂²), r₂ = r₁/2 |
+| U (paralel başlık) | 2b·tf + (h−2tf)·tw + (4−π)/2·r² |
+| T | b·tf + (h−tf)·tw |
+| I / H (EN 10365) | 2b·tf + (h−2tf)·tw + (4−π)·r² |
 
-Et kalınlığı, gövde/flanş çakışmaları, pozitif ölçüler, tam sayı adet ve sayısal
-girdiler kontrol edilir. İçi boş kesitte iç boyut sıfır veya negatif olamaz.
+Kutu profilde **Soğuk şekillendirilmiş · EN 10219-2** (varsayılan) seçeneği
+rₒ = 2t (t ≤ 6), 2,5t (6 < t ≤ 10), 3t (t > 10) ve rᵢ = rₒ − t kullanır. Bu
+değerler EN 10219-2 dış köşe tolerans bantlarının (1,6–2,4t, 2,0–3,0t,
+2,4–3,6t; Tata Steel Hybox veri sayfası) ortasıdır. **Elle yarıçap** rₒ ve rᵢ
+girer, **Keskin köşe** yaklaşık modeldir. Sıcak bitirilmiş (EN 10210-2) için
+yarıçaplar doğrulanmış bir kaynaktan teyit edilemediği için otomatik seçenek
+yoktur; elle girin.
 
-**Ölçülerden** yönteminde kutu profil ve köşebent köşe yarıçaplarıyla hesaplanır:
+Köşebent, U ve I profilde kök yarıçapı 0 bırakılırsa sonuç **yaklaşık** olarak
+işaretlenir. T profil ve eğimli başlıklı profiller (IPN, UPN elle girilirse)
+geometrik modelde yaklaşıktır.
 
-| Kesit | Köşe biçimi | Alan |
-| --- | --- | --- |
-| Kutu profil | Soğuk şekillendirilmiş · EN 10219-2 (varsayılan): rₒ = 2t, rᵢ = t (t ≤ 6); 2,5t / 1,5t (6 < t ≤ 10); 3t / 2t (t > 10) | 2t(b+h−2t) − (4−π)(rₒ² − rᵢ²) |
-| Kutu profil | Sıcak bitirilmiş · EN 10210-2: rₒ = 1,5t, rᵢ = t | aynı formül |
-| Köşebent | Sıcak haddelenmiş · EN 10056-1 (varsayılan): kök r₁ tablodan, uç r₂ = r₁/2 | t(b+h−t) + (4−π)/4·(r₁² − 2r₂²) |
-| İkisi de | Keskin köşe | yarıçapsız alan (“yaklaşık”) |
+## Standart profil kütüphanesi
 
-Köşebentte r₁, uzun kola karşılık gelen EN 10056-1 eşit kollu boyuttan alınır;
-eşit kollu tablo boyutu değilse sonuç “yaklaşık” olarak belirtilir. T, U ve H/I
-profillerde kök yarıçapı ve flanş eğimi modellenmez; bu sonuçlar “yaklaşık”tır.
-İmalat toleransı hiçbir kesitte dahil değildir. **Katalog alanından**
-yönteminde üretici katalog alanı cm² olarak girilir (`A = cm² × 100`). Böylece
-gerçek nominal kesit alanı kullanılır; yoğunluk malzemeden, boy girişten alınır.
-Bu moddaki çizim ölçülendirilmiş bir katalog çizimi değil, kesit türü şemasıdır.
+`data/sections.json`: 149 kesit. Değerler üretici veri sayfalarından
+`data/extract_catalogue.py` ile **programla** çıkarıldı, elle yazılmadı:
 
-Örnek: 1.000 × 2.000 × 10 mm çelik levha, 7.850 kg/m³ yoğunlukla **157 kg**;
-aynı ölçülerde alüminyum 2.700 kg/m³ ile **54 kg**. 100 × 100 × 5 mm kutu profil:
-soğuk şekillendirilmiş **1.836 mm² · 14,41 kg/m**, sıcak bitirilmiş **1.873 mm² ·
-14,70 kg/m**, keskin köşe **1.900 mm² · 14,915 kg/m**. L 100 × 100 × 10 köşebent
-(r₁ = 12 mm) **1.915 mm² · 15,04 kg/m**.
+| Aile | Kaynak |
+| --- | --- |
+| IPE, HEA/HEB/HEM | Stahlwerk Thüringen (EN 10365:2017), eksik boylar British Steel |
+| HP, HD, UPE | Stahlwerk Thüringen (EN 10365:2017) |
+| UPN | Stahlwerk Thüringen (EN 10365:2017) + Kocaer Çelik (DIN 1026-1) |
+| Köşebent 120–200, 200×100, 200×150 | British Steel (EN 10056-1) |
 
-## Kaynak ve erişim durumu
+Her satır yazılmadan önce iki kontrolden geçer: ölçülerden yeniden hesaplanan
+alan tablo alanıyla, alan × 7850 de tablodaki kg/m ile eşleşmelidir. İki
+üretici aynı kesiti veriyorsa ölçüler karşılaştırılır. Kendi içinde tutarsız
+19 satır reddedildi (ör. British Steel IPE 330: r = 20 mm ile verilen alan,
+kg/m sütunundaki r = 18 mm değeriyle uyuşmuyor). Üreticiler arasında farklı
+olan 8 kesitte EN 10365 değeri kullanılır, diğer değer sonuçta not olarak
+gösterilir.
 
-İstenen [ESN Metal sayfasına](https://www.esnmetal.com/sac-agirlik-hesaplama/)
-15 Ekim 2026 tarihinde normal ve yetkili ağ erişimiyle yapılan istekler HTTP403
-döndürdü. Bu nedenle sayfanın malzeme listesi veya algoritması okunmuş ya da
-birebir aktarılmış olarak sunulmaz. Kullanıcının belirttiği malzemeler ve
-görseldeki kesitler esas alınmıştır.
+Standart profilde **katalog kg/m esastır** (çelik, 7850 kg/m³). Başka bir
+yoğunluk seçilirse kg/m = katalog alanı × ρ hesaplanır ve bu ayrıca yazılır.
+Ölçülerden hesaplanan geometrik alan ve katalogdan farkı rapor satırında
+gösterilir. **IPN, HL ve 120 mm altı köşebentler** için erişilebilir doğrulanmış
+kaynak bulunamadı; bunlar kütüphanede yoktur, Açık profil türleriyle ölçü
+girerek hesaplanır.
 
-Delrin ile genel POM değerini karıştırmamak için FreeCAD malzeme kartları
-karşılaştırıldı: [POM-H](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/POM-Homopolymer-Generic.FCMat)
-**1.420 kg/m³**, POM-C **1.410 kg/m³**; [genel PA6](https://github.com/FreeCAD/FreeCAD/blob/384314776045a67fcdf09d49aa29306243578d4f/src/Mod/Material/Resources/Materials/Standard/Thermoplast/PA6-Generic.FCMat)
-**1.150 kg/m³**. Kestamit/PA6G değeri tipik yaklaşık başlangıç değeridir;
-bu genel PA6 kartı özel bir üreticinin döküm PA6G ürününü doğrulamaz.
+## Malzemeler
 
-Alüminyum **2.700 kg/m³** ve bakır **8.960 kg/m³** değerleri de aynı FreeCAD
-sürümündeki `Metal/Aluminum/Aluminum-Generic.FCMat` ve
-`Metal/Copper/Copper-Generic.FCMat` kartlarıyla karşılaştırıldı. Genel çelik
-**7.850 kg/m³** için [section-properties örneği](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/docs/user_guide/overview.rst)
-`7,85 × 10⁻⁶ kg/mm³` değerini kullanır. Bu değer saf demirin yoğunluğu değildir.
-Diğer sabit kayıtlar ve nominal kaynakları [yoğunluk tablosundadır](materials.md).
-Kalıp çeliklerinde 1.2379 **7.700**, 1.2344 **7.800**, 1.2311/1.2312
-**7.850 kg/m³** kullanılır. Değerler bağlantılı GitHub malzeme kartı ve
-ağırlık hesabı kataloğundan alınmıştır; üretici föyü doğrulaması değildir.
-304 için MMPDS referansı taşıyan GitHub kartı 7.916 kg/m³, 316/316L kartları
-8.000 kg/m³ kullanır; özgün MMPDS/MatWeb/AZoM yayınlarının bu oturumda ayrıca
-okunduğu iddia edilmez. PP 916, PTFE 2.070 ve PVC 1.380 kg/m³ olarak kaynak
-kartlarına göre güncellendi. Kaynağı bu ortamda doğrulanamayan eski PE-HD
-seçeneği çıkarıldı; başka bir polietilen türüne eşlenmedi.
-Kesit alanının köşe/eğimlerden etkilenmesi
-[I profil geometri örneğinde](https://github.com/robbievanleeuwen/section-properties/blob/1e12d48b3ccb9ee1b7df8e2ac357c633cc004bdf/src/sectionproperties/pre/library/steel_sections.py)
-ayrıca incelendi. Bu projelerden kod veya katalog tablosu aktarılmadı.
+50 kayıtlı malzeme (Genel, Sac / Yapı, Makine / Takım, Kalıp çelikleri,
+Paslanmaz, Alüminyum alaşımları, Plastikler) ve **Özel malzeme**. Kayıtlı
+malzemelerde yoğunluk sabittir; farklı bir değer için Özel malzeme seçilip ad
+ve yoğunluk (100–25.000 kg/m³) girilir. Kaynaklar [materials.md](materials.md)
+ve `materials.py` içindedir. Yoğunluk alaşıma ve ürüne göre değişebilir; aynı
+malzeme için kaynaklar farklı değer verebilir (ör. FreeCAD S235JR 7800,
+nominal yapı çeliği 7850 kg/m³).
 
-Üçüncü taraf kod veya bağımlılık eklenmez. Windows EXE yalnız kullanıcı istediğinde oluşturulur.
+## Hesaplama listesi ve maliyet
 
-## Doğrulama ve ekranlar
+**Hesaplamaya ekle** geçerli hesabı parça adı ve isteğe bağlı TL/kg fiyatla
+listeye ekler. Tabloda parça adı, boy, adet ve fiyat çift tıklanarak
+düzenlenir; satır çoğaltılır veya silinir. Fire % malzeme ağırlığına ve
+tutara eklenir, KDV % tutara uygulanır; ikisi de kullanıcı tarafından
+değiştirilir. **Tutar yalnız malzeme bedelidir; işçilik, kesim, nakliye ve diğer
+üretim giderleri dahil değildir.** Liste kapatıp açınca korunur.
 
-Sabit katalog ve sade çizim revizyonunda **18 ilgili kontrol geçti**:
-13 hesap, 4 gerçek Tk ve 1 menü ön yükleme kontrolü. Malzeme grupları,
-gerçek menü seçimi, eski yoğunluk tercihlerinin etkisiz olması, backend'de
-yoğunluk değiştirme girişiminin reddi ve galvaniz kaplama açıklaması kontrol edildi.
+**Dışa aktar**: Excel (.xlsx; sayılar sayı hücresi ve sayı biçimiyle), PDF
+(seçili hesap, kesit çizimi, liste ve toplamlar), CSV (`;` ve ondalık virgül).
 
-Galvanizli DX51D+Z / DX52D+Z hesapları **çelik taban** içindir;
-çinko kaplamasının ilave kütlesi hesaplanmaz ve sonuçta açıkça belirtilir.
+## Kesit çizimi
 
-15 Ekim 2026: 19 kesit, malzeme seçimi, sabit yoğunluk, adet, mm/cm/m,
-katalog alanı, geçersiz girişler, tercihler, açık/koyu tema, küçük pencere ve
-%125 ölçek kontrol edildi. Windows/SolidWorks veya
-EXE derlemesi çalıştırılmadı.
+Kesit hesapta kullanılan ölçülerle **gerçek oranında** çizilir: köşe ve kök
+yarıçapları dahil, ölçü çizgileri ve okları otomatik yerleşir, çizim ortalanır
+ve panele sığdırılır. Fare tekerleği yakınlaştırır, sürükleme kaydırır,
+**Sığdır** görünümü sıfırlar. 2 pikselden ince kalan kalınlık (ör. sac) okunur
+olsun diye büyütülür ve çizimde bu yazılır.
 
-Kalıp çeliği eklemesinde 13 mevcut hesap/katalog kontrolü geçti. Uygulama açılarak
-200 × 300 × 40 mm levhada 1.2379 için **18,480 kg**, 1.2344 için **18,720 kg**
-sonucu ve sabit yoğunluk gösterimi gerçek ekranlarda doğrulandı.
+## Aktif CAD modelinden hesap
 
-[Arşiv: Çelik kutu profil, koyu tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-steel-dark.png) ·
-[Arşiv: Delrin mil, açık tema](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-delrin-light.png) ·
-[Arşiv: 1.2379 kalıp çeliği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-2379-dark.png) ·
-[Arşiv: 1.2344 kalıp çeliği](https://github.com/gkkizil/gokworks/blob/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9/modules/weight/examples/weight-2344-dark.png).
-Güncel PySide6 ekran görüntülerini yeniden almak için `modules/weight/examples/capture.py` kullanılır.
-Başka klasöre kaydetmek için `--output-dir <klasör>` verilebilir; kullanıcı tercihleri değiştirilmez.
-Yalnız kalıp çeliği ekranları için dosya adlarını uzantısız verin:
-`python modules/weight/examples/capture.py weight-2379-dark weight-2344-dark`.
+**Aktif CAD modelinden hesapla** SOLIDWORKS’te açık parça veya montajın
+hacmini, malzemesini, yoğunluğunu ve kütlesini mevcut bağlantıyla okur
+(`IModelDocExtension.CreateMassProperty2`, sistem birimleri). Bu ayrı bir
+yöntemdir: delik, pah ve boşaltmalar model hacmine dahildir. Tek adetli
+formül hesabıyla yüzde farkı gösterilir. Parçada malzeme yoksa (SOLIDWORKS
+1000 kg/m³ varsayar) veya etkin belge teknik resimse anlamlı hata verilir.
+Canlı SOLIDWORKS oturumunda henüz denenmedi; okuma mantığı sahte nesnelerle test edilir.
+
+## Giriş kuralları
+
+Ondalık virgül veya nokta kabul edilir; `1.234,5` binlik ayırıcılı yazımdır.
+`1.000` gibi belirsiz yazım (bin mi, bir mi?) reddedilir; sessizce 1 olarak
+okunmaz. Sıfır, negatif, sonsuz ve geometriyi geçersiz kılan değerler (et
+kalınlığı, sığmayan yarıçap) hata verir. Ara hesaplarda yuvarlama yapılmaz;
+sonuç birimi (kg, g, t) ve ondalık hassasiyet (0–4) seçilir.
+
+## Testler
+
+`python -m pytest modules/weight` — kabul değerleri (Ø220×200 mil 59,681 kg;
+1000×2000×2 sac 31,4 kg; 20×20×1000 kare 3,14 kg; Ø60×3×1000 boru 4,217 kg),
+her kesit için bağımsız el formülü, katalog karşılaştırmaları, birimler, adet,
+yoğunluk, geçersiz/aşırı değerler, ondalık biçimleri, liste toplamları,
+CSV/XLSX/PDF ve SOLIDWORKS okuma (sahte nesnelerle).
