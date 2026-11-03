@@ -1,9 +1,9 @@
 {
-  "request_id": "20261103-weight-ui-workbench-exe",
-  "requested_at": "2026-11-03T14:30:00+00:00",
-  "source_commit": "785a8e0aee4f00cbfc5132a4461fab05926aaa36",
+  "request_id": "20261103-dxf-folder-scan-fix-exe",
+  "requested_at": "2026-11-03T15:30:00+00:00",
+  "source_commit": "9fca51e4b88c684040a54aac8dbf95bcf1efe9e9",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Build the Windows EXE with the rebuilt weight module (verified EN profile library, list/cost, XLSX/PDF/CSV, CAD mass), shaft drawing runtime fixes and 'Teknik resmi de oluştur', shared sketch view controls, persistent panels, status tones and module keys. Linux full suite passed (2448 passed, 69 skipped). Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
+  "reason": "Build the Windows EXE with the DXF/DWG folder-scan fix (an unrelated open assembly no longer makes the folder scan return 0 silently; empty results explain why) on top of the weight, shaft drawing and workbench updates. DXF/DWG suite passed (301 passed). Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
   "cancelled": false
 }
