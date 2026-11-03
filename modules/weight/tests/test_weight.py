@@ -38,7 +38,8 @@ class WeightTests(unittest.TestCase):
         self.assertEqual(set(expected), set(rules.KINDS))
         for kind, area in expected.items():
             with self.subTest(kind=kind):
-                result = rules.calculate(kind=kind, b=100, h=80, t=5, tw=4, tf=6, d=50, s=30)
+                result = rules.calculate(kind=kind, b=100, h=80, t=5, tw=4, tf=6, d=50, s=30,
+                                         box_corner='Keskin köşe', angle_corner='Keskin köşe')
                 self.assertAlmostEqual(result.area_mm2, area)
                 self.assertAlmostEqual(result.mass_kg, area * .00785)
 
@@ -143,3 +144,29 @@ class WeightTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    def test_box_and_angle_corner_radii_match_en_catalogue_masses(self):
+        """kg/m from EN 10219-2 (cold), EN 10210-2 (hot) and EN 10056-1 tables."""
+        cold, hot = rules.BOX_CORNERS[0], rules.BOX_CORNERS[1]
+        cases = [(dict(kind='Kutu profil', b=100, h=100, t=5, box_corner=cold), 14.4),
+                 (dict(kind='Kutu profil', b=100, h=100, t=5, box_corner=hot), 14.7),
+                 (dict(kind='Kutu profil', b=40, h=40, t=3, box_corner=cold), 3.30),
+                 (dict(kind='Kutu profil', b=40, h=40, t=3, box_corner=hot), 3.41),
+                 (dict(kind='Kutu profil', b=200, h=100, t=8, box_corner=hot), 35.1),
+                 (dict(kind='Köşebent', b=50, h=50, t=5), 3.77),
+                 (dict(kind='Köşebent', b=80, h=80, t=8), 9.63),
+                 (dict(kind='Köşebent', b=100, h=100, t=10), 15.0)]
+        for args, kg_per_m in cases:
+            with self.subTest(**args):
+                result = rules.calculate(length=1000, **args)
+                self.assertAlmostEqual(result.kg_per_m, kg_per_m, delta=.05)
+                self.assertFalse(result.approximate)
+        self.assertEqual(rules.calculate(kind='Kutu profil').area_mm2,
+                         rules.calculate(kind='Kutu profil', box_corner=cold).area_mm2)  # cold is the default
+        self.assertTrue(rules.calculate(kind='Köşebent', b=100, h=65, t=8).approximate)  # unequal leg: nearest r1
+        self.assertTrue(rules.calculate(kind='Kutu profil', box_corner='Keskin köşe').approximate)
+        with self.assertRaises(ValueError):
+            rules.calculate(kind='Kutu profil', b=20, h=20, t=8)  # corner radius larger than the section
+        with self.assertRaises(ValueError):
+            rules.calculate(kind='Kutu profil', box_corner='Yuvarlak')
+

@@ -74,16 +74,28 @@ Toplam kütle = bir parçanın kütlesi × adet
 Et kalınlığı, gövde/flanş çakışmaları, pozitif ölçüler, tam sayı adet ve sayısal
 girdiler kontrol edilir. İçi boş kesitte iç boyut sıfır veya negatif olamaz.
 
-**Ölçülerden** yönteminde kutu, köşebent, T, U ve H/I profiller keskin köşeli
-geometriyle hesaplanır. Hadde köşe yarıçapı, flanş eğimi ve imalat toleransı
-modellenmez; bu sonuçlar “yaklaşık” olarak belirtilir. **Katalog alanından**
+**Ölçülerden** yönteminde kutu profil ve köşebent köşe yarıçaplarıyla hesaplanır:
+
+| Kesit | Köşe biçimi | Alan |
+| --- | --- | --- |
+| Kutu profil | Soğuk şekillendirilmiş · EN 10219-2 (varsayılan): rₒ = 2t, rᵢ = t (t ≤ 6); 2,5t / 1,5t (6 < t ≤ 10); 3t / 2t (t > 10) | 2t(b+h−2t) − (4−π)(rₒ² − rᵢ²) |
+| Kutu profil | Sıcak bitirilmiş · EN 10210-2: rₒ = 1,5t, rᵢ = t | aynı formül |
+| Köşebent | Sıcak haddelenmiş · EN 10056-1 (varsayılan): kök r₁ tablodan, uç r₂ = r₁/2 | t(b+h−t) + (4−π)/4·(r₁² − 2r₂²) |
+| İkisi de | Keskin köşe | yarıçapsız alan (“yaklaşık”) |
+
+Köşebentte r₁, uzun kola karşılık gelen EN 10056-1 eşit kollu boyuttan alınır;
+eşit kollu tablo boyutu değilse sonuç “yaklaşık” olarak belirtilir. T, U ve H/I
+profillerde kök yarıçapı ve flanş eğimi modellenmez; bu sonuçlar “yaklaşık”tır.
+İmalat toleransı hiçbir kesitte dahil değildir. **Katalog alanından**
 yönteminde üretici katalog alanı cm² olarak girilir (`A = cm² × 100`). Böylece
 gerçek nominal kesit alanı kullanılır; yoğunluk malzemeden, boy girişten alınır.
 Bu moddaki çizim ölçülendirilmiş bir katalog çizimi değil, kesit türü şemasıdır.
 
 Örnek: 1.000 × 2.000 × 10 mm çelik levha, 7.850 kg/m³ yoğunlukla **157 kg**;
-aynı ölçülerde alüminyum 2.700 kg/m³ ile **54 kg**. 100 × 100 × 5 mm keskin
-köşeli kutu profil alanı **1.900 mm²**, çelikte **14,915 kg/m** olur.
+aynı ölçülerde alüminyum 2.700 kg/m³ ile **54 kg**. 100 × 100 × 5 mm kutu profil:
+soğuk şekillendirilmiş **1.836 mm² · 14,41 kg/m**, sıcak bitirilmiş **1.873 mm² ·
+14,70 kg/m**, keskin köşe **1.900 mm² · 14,915 kg/m**. L 100 × 100 × 10 köşebent
+(r₁ = 12 mm) **1.915 mm² · 15,04 kg/m**.
 
 ## Kaynak ve erişim durumu
 

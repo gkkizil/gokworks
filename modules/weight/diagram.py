@@ -52,6 +52,29 @@ def _number(value):
     return text.replace(',', '\0').replace('.', ',').replace('\0', '.')
 
 
+def _fillet(points, radii):
+    """Round polygon vertices: ``radii`` maps vertex index -> radius (schematic units)."""
+    rounded = []
+    count = len(points)
+    for index, point in enumerate(points):
+        radius = radii.get(index, 0)
+        if radius <= 0:
+            rounded.append(point); continue
+        px, py = point
+        ax, ay = points[index - 1]; bx, by = points[(index + 1) % count]
+        la, lb = math.hypot(ax - px, ay - py), math.hypot(bx - px, by - py)
+        radius = min(radius, la * .49, lb * .49)
+        ux, uy = (ax - px) / la, (ay - py) / la
+        vx, vy = (bx - px) / lb, (by - py) / lb
+        cx, cy = px + (ux + vx) * radius, py + (uy + vy) * radius
+        start = math.atan2(py + uy * radius - cy, px + ux * radius - cx)
+        end = math.atan2(py + vy * radius - cy, px + vx * radius - cx)
+        sweep = (end - start + math.pi) % (2 * math.pi) - math.pi
+        rounded += [(cx + radius * math.cos(start + sweep * i / 8), cy + radius * math.sin(start + sweep * i / 8))
+                    for i in range(9)]
+    return rounded
+
+
 def _section(kind, dimensions):
     """Return a front outline, optional opening and the schematic envelope.
 
@@ -83,11 +106,22 @@ def _section(kind, dimensions):
     web = min(w * .35, max(w * .075, dims.get('tw', wall) / b * w))
     flange = min(.26, max(.08, dims.get('tf', wall) / dims.get('h', 120)))
     rectangle = [(0, 0), (w, 0), (w, h), (0, h)]
+    radii = dims.get('_corner_radii') or ()
+    unit = w / b if b else 0
     if kind == 'Kutu profil':
         opening = [(tx, ty), (w - tx, ty), (w - tx, 1 - ty), (tx, 1 - ty)]
+        if len(radii) == 2 and radii[0] > 0:
+            outer = min(radii[0] * unit, min(w, h) * .45)
+            inner = max(0.0, outer - max(tx, ty))
+            rectangle = _fillet(rectangle, dict.fromkeys(range(4), outer))
+            opening = _fillet(opening, dict.fromkeys(range(4), inner))
         return rectangle, opening, w, h
     if kind == 'Köşebent':
-        return [(0, 0), (tx, 0), (tx, 1 - ty), (w, 1 - ty), (w, 1), (0, 1)], None, w, h
+        angle = [(0, 0), (tx, 0), (tx, 1 - ty), (w, 1 - ty), (w, 1), (0, 1)]
+        if len(radii) == 2 and radii[0] > 0:
+            root, toe = radii[0] * unit, radii[1] * unit
+            angle = _fillet(angle, {1: toe, 2: root, 3: toe})
+        return angle, None, w, h
     if kind == 'T profil':
         x1, x2 = (w - web) / 2, (w + web) / 2
         return [(0, 0), (w, 0), (w, flange), (x2, flange), (x2, 1),
@@ -159,6 +193,9 @@ def draw(canvas, result, appearance, scale, kind='Sac levha', dimensions=None):
     supplied = _dimensions(_value(result, 'dimensions_mm', dimensions) or dimensions)
     actual = {} if catalog else supplied
     dims = {} if catalog else supplied
+    radii = _value(result, 'corner_radii', ()) or ()
+    if dims and radii:
+        dims = dict(dims, _corner_radii=tuple(radii))
     background = _color(PANEL, appearance)
     accent, muted = _color(ACCENT, appearance), _color(MUTED, appearance)
     dark = str(appearance).lower() in ('dark', 'koyu')

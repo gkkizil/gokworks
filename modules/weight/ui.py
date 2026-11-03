@@ -23,6 +23,8 @@ class WeightPage(CalculationPage):
         f.combo('unit', 'Ölçü birimi', r.UNITS, 'mm')
         for key, value in r.DEFAULT_DIMENSIONS.items():
             f.text(key, r.FIELD_LABELS[key], str(value))
+        f.combo('box_corner', 'Köşe biçimi', r.BOX_CORNERS, r.BOX_CORNERS[0])
+        f.combo('angle_corner', 'Köşe biçimi', r.ANGLE_CORNERS, r.ANGLE_CORNERS[0])
         f.text('area_cm2', 'Katalog kesit alanı · cm²', '10')
         f.text('count', 'Adet', '1')
         self.density_label = label('', 'subtitle')
@@ -81,6 +83,8 @@ class WeightPage(CalculationPage):
         for key in r.DEFAULT_DIMENSIONS:
             self.form.show_field(key, key == 'length' or (geometry and key in r.FIELDS[values['kind']]))
         self.form.show_field('area_cm2', not geometry)
+        self.form.show_field('box_corner', geometry and values['kind'] == 'Kutu profil')
+        self.form.show_field('angle_corner', geometry and values['kind'] == 'Köşebent')
         self.catalog_hint.setVisible(not geometry)
         for key in r.DEFAULT_DIMENSIONS:
             self.form.form.labelForField(self.form.fields[key]).setText(f'{r.FIELD_LABELS[key]} · {values["unit"]}')
@@ -94,7 +98,13 @@ class WeightPage(CalculationPage):
         self.headline.setText(result.total_text + ' · Toplam ağırlık')
         self.summary.setText(f'{result.piece_text} / parça · {result.count} adet · {result.kind}')
         note = r.MATERIAL_NOTES.get(material, '')
-        self.details.setText(note + ('\nKeskin köşeli kesit yaklaşımı.' if result.approximate else ''))
+        if result.kind == 'Köşebent' and result.approximate and values.get('angle_corner') != 'Keskin köşe':
+            approximation = '\nKök yarıçapı en yakın EN 10056-1 eşit kollu boyuttan alındı.'
+        elif result.approximate:
+            approximation = '\nKeskin köşeli kesit yaklaşımı.'
+        else:
+            approximation = ''
+        self.details.setText(note + approximation)
         rows = [('Kesit türü', result.kind), ('Malzeme', material), ('Malzeme türü', MATERIAL_TYPES.get(material, '')),
                 ('Yoğunluk (kg/m³)', r.fmt(result.density)), ('Adet', result.count),
                 ('Boy (mm)', r.fmt(result.length_mm)), ('Kesit alanı (mm²)', r.fmt(result.area_mm2)),
@@ -103,6 +113,12 @@ class WeightPage(CalculationPage):
                 ('Toplam hacim (m³)', r.fmt(result.total_volume_m3, 9)),
                 ('Parça ağırlığı (kg)', r.fmt(result.mass_kg)), ('Toplam ağırlık (kg)', r.fmt(result.total_mass_kg))]
         rows += [(r.FIELD_LABELS[key] + ' (mm)', r.fmt(value)) for key, value in result.dimensions_mm.items()]
+        if geometry and result.kind == 'Kutu profil':
+            outer, inner = r.box_radii(result.dimensions_mm['t'], values['box_corner'])
+            rows += [('Köşe biçimi', values['box_corner']), ('Dış / iç köşe yarıçapı (mm)', f'{r.fmt(outer)} / {r.fmt(inner)}')]
+        elif geometry and result.kind == 'Köşebent':
+            root, _ = r.angle_root_radius(result.dimensions_mm['b'], result.dimensions_mm['h'], values['angle_corner'])
+            rows += [('Köşe biçimi', values['angle_corner']), ('Kök / uç yarıçapı (mm)', f'{r.fmt(root)} / {r.fmt(root / 2)}')]
         rows += [('Hesap yöntemi', result.method), ('Malzeme notu', note),
                  ('Kaynak', r.MATERIAL_SOURCES.get(material, '')), ('Kapsam', r.SCOPE)]
         self.present(rows)

@@ -35,10 +35,43 @@ FIELD_LABELS = {
 }
 DEFAULT_DIMENSIONS = {'b': 100, 'h': 100, 't': 5, 'tw': 5,
                       'tf': 8, 'd': 50, 's': 30, 'length': 1000}
-SCOPE = ('Ağırlık, kesit alanı × boy × yoğunluk ile hesaplanır. Ölçülerden hesaplanan '
-         'profil kesitleri köşe ve kök radyüslerini, başlık eğimlerini ve üretim '
-         'toleranslarını içermez. Standart profil için katalog kesit alanını '
-         'kullanabilirsiniz. Yoğunluk seçilen malzemeye göre sabittir ve değiştirilemez.')
+SCOPE = ('Ağırlık, kesit alanı × boy × yoğunluk ile hesaplanır. Kutu profilde köşe '
+         'yarıçapları EN 10219-2 (soğuk) / EN 10210-2 (sıcak) hesap değerleriyle, köşebentte '
+         'kök ve uç yarıçapları EN 10056-1 değerleriyle kesitten düşülür. Diğer profillerde '
+         'kök radyüsleri ve başlık eğimleri yoktur; standart profil için katalog kesit alanını '
+         'kullanabilirsiniz. Üretim toleransları dahil değildir. Yoğunluk seçilen malzemeye '
+         'göre sabittir ve değiştirilemez.')
+
+# Corner geometry. Box sections: A = 2t(b+h-2t) - (4-pi)(ro^2 - ri^2) with the
+# radii EN 10219-2 / EN 10210-2 specify for calculating section properties.
+BOX_CORNERS = ('Soğuk şekillendirilmiş · EN 10219', 'Sıcak bitirilmiş · EN 10210', 'Keskin köşe')
+# Angles (EN 10056-1): A = t(b+h-t) + (4-pi)/4 · (r1^2 - 2·r2^2), r2 = r1/2.
+ANGLE_CORNERS = ('Sıcak haddelenmiş · EN 10056-1', 'Keskin köşe')
+# Root radius r1 of equal-leg angles by leg length (EN 10056-1).
+ANGLE_ROOT_RADIUS = {20: 3.5, 25: 3.5, 30: 5, 35: 5, 40: 6, 45: 7, 50: 7, 60: 8, 65: 9, 70: 9,
+                     75: 10, 80: 10, 90: 11, 100: 12, 120: 13, 130: 14, 150: 16, 160: 17,
+                     180: 18, 200: 18, 250: 18}
+
+
+def box_radii(t, corner):
+    """(outer, inner) corner radius in mm for the section-property calculation."""
+    if corner == BOX_CORNERS[0]:
+        factor = (2.0, 1.0) if t <= 6 else (2.5, 1.5) if t <= 10 else (3.0, 2.0)
+    elif corner == BOX_CORNERS[1]:
+        factor = (1.5, 1.0)
+    else:
+        return 0.0, 0.0
+    return factor[0] * t, factor[1] * t
+
+
+def angle_root_radius(b, h, corner):
+    """(r1, exact) — EN 10056-1 root radius for the longer leg; exact if it is a table size."""
+    if corner != ANGLE_CORNERS[0]:
+        return 0.0, True
+    leg = max(b, h)
+    sizes = [size for size in ANGLE_ROOT_RADIUS if size <= leg] or [min(ANGLE_ROOT_RADIUS)]
+    nearest = max(sizes)
+    return float(ANGLE_ROOT_RADIUS[nearest]), (b == h and leg == nearest)
 
 
 def _number(value, label):
@@ -90,6 +123,7 @@ class Result:
     dimensions_mm: dict
     method: str
     approximate: bool
+    corner_radii: tuple = ()   # box: (outer, inner); angle: (root, toe) in mm
 
     @property
     def piece_text(self):
@@ -100,7 +134,7 @@ class Result:
         return f'{fmt(self.total_mass_kg)} kg'
 
 
-def _area(kind, dimensions):
+def _area(kind, dimensions, corner=None):
     if kind in ('Sac levha', 'Silme lama'):
         return dimensions['b'] * dimensions['t']
     if kind == 'Kare demir':
@@ -120,10 +154,14 @@ def _area(kind, dimensions):
             if 2 * t >= min(b, h):
                 raise ValueError('Kutu profil et kalınlığının iki katı genişlik ve yükseklikten küçük olmalı.')
             # Equivalent to b*h-(b-2*t)*(h-2*t), with less cancellation for thin walls.
-            return 2 * t * (b + h - 2 * t)
+            outer, inner = box_radii(t, corner or BOX_CORNERS[0])
+            if 2 * outer > min(b, h):
+                raise ValueError('Köşe yarıçapı bu kesit için çok büyük; Keskin köşe seçin veya ölçüleri kontrol edin.')
+            return 2 * t * (b + h - 2 * t) - (4 - math.pi) * (outer ** 2 - inner ** 2)
         if t >= min(b, h):
             raise ValueError('Köşebent kalınlığı iki kol ölçüsünden de küçük olmalı.')
-        return t * (b + h - t)
+        root, _ = angle_root_radius(b, h, corner or ANGLE_CORNERS[0])
+        return t * (b + h - t) + (4 - math.pi) / 4 * (root ** 2 - 2 * (root / 2) ** 2)
     b, h, tw, tf = (dimensions[field] for field in ('b', 'h', 'tw', 'tf'))
     if tw >= b:
         raise ValueError('Gövde kalınlığı başlık genişliğinden küçük olmalı.')
@@ -135,7 +173,7 @@ def _area(kind, dimensions):
 
 def calculate(*, kind='Sac levha', material='Demir / Çelik', density=None,
               unit='mm', length='1000', count='1', method='Ölçülerden',
-              area_cm2=None, **dimensions):
+              area_cm2=None, box_corner=None, angle_corner=None, **dimensions):
     """Compute one-piece and total weight; parse only the selected method's fields."""
     material = MATERIAL_ALIASES.get(material, material)
     if kind not in KINDS:
@@ -157,6 +195,7 @@ def calculate(*, kind='Sac levha', material='Demir / Çelik', density=None,
     length_mm = _positive(length, 'Boy / uzunluk') * UNITS[unit]
     dimensions_mm = {}
     approximate = False
+    corner_radii = ()
     try:
         if method == 'Katalog alanından':
             area_mm2 = _positive(area_cm2, 'Katalog kesit alanı (cm²)') * 100
@@ -165,8 +204,23 @@ def calculate(*, kind='Sac levha', material='Demir / Çelik', density=None,
                 field: _positive(dimensions.get(field, DEFAULT_DIMENSIONS[field]), FIELD_LABELS[field]) * UNITS[unit]
                 for field in FIELDS[kind]
             }
-            area_mm2 = _area(kind, dimensions_mm)
-            approximate = kind in ('Kutu profil', 'Köşebent', 'T profil', *_BEAM_KINDS)
+            corner = box_corner if kind == 'Kutu profil' else angle_corner if kind == 'Köşebent' else None
+            if corner is not None and corner not in (BOX_CORNERS if kind == 'Kutu profil' else ANGLE_CORNERS):
+                raise ValueError('Geçerli bir köşe biçimi seçin.')
+            area_mm2 = _area(kind, dimensions_mm, corner)
+            if kind == 'Kutu profil':
+                corner_radii = box_radii(dimensions_mm['t'], corner or BOX_CORNERS[0])
+            elif kind == 'Köşebent':
+                root, _ = angle_root_radius(dimensions_mm['b'], dimensions_mm['h'], corner or ANGLE_CORNERS[0])
+                corner_radii = (root, root / 2)
+            if kind == 'Kutu profil':
+                approximate = (corner or BOX_CORNERS[0]) == 'Keskin köşe'
+            elif kind == 'Köşebent':
+                chosen = corner or ANGLE_CORNERS[0]
+                approximate = chosen == 'Keskin köşe' or not angle_root_radius(
+                    dimensions_mm['b'], dimensions_mm['h'], chosen)[1]
+            else:
+                approximate = kind in ('T profil', *_BEAM_KINDS)
         volume_m3 = (area_mm2 / 1000000) * (length_mm / 1000)
         mass_kg = volume_m3 * density
         total_volume_m3 = volume_m3 * number_of_pieces
@@ -182,4 +236,5 @@ def calculate(*, kind='Sac levha', material='Demir / Çelik', density=None,
                   count=number_of_pieces, length_mm=length_mm, area_mm2=area_mm2,
                   volume_m3=volume_m3, mass_kg=mass_kg, total_volume_m3=total_volume_m3,
                   total_mass_kg=total_mass_kg, kg_per_m=kg_per_m,
-                  dimensions_mm=dimensions_mm, method=method, approximate=approximate)
+                  dimensions_mm=dimensions_mm, method=method, approximate=approximate,
+                  corner_radii=corner_radii)
