@@ -1,9 +1,9 @@
 {
-  "request_id": "20261103-column-resize-exe",
-  "requested_at": "2026-11-03T12:00:00+00:00",
-  "source_commit": "b3a3604f0eed87f784b4097b9556972e3219cc7b",
+  "request_id": "20261103-excel-columns-shaft-schema-exe",
+  "requested_at": "2026-11-03T12:30:00+00:00",
+  "source_commit": "a07e32f51565bddd1cdda82e910e19d27640f12c",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Build the Windows EXE with the latest changes: consistent draggable column resizing in every table (ColumnFitter), ISO fits screen redesign (grouped presets, assembly card, usage examples) and parametric shaft automatic drawing. Linux full suite passed (2334 passed, 68 skipped). Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
+  "reason": "Build the Windows EXE with spreadsheet-like (Excel) column resizing in every table and the fix for 'Unsupported shaft schema' when a shaft project has drawing settings. Affected Linux module tests passed. Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
   "cancelled": false
 }
