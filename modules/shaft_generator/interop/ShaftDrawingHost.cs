@@ -545,19 +545,39 @@ namespace Gokworks.ShaftInterop
             int best = 0; double score = -2;
             for (int i = 0; i < names.Length; i++) { double d = Shaft.Dot(eyes[i], shaft.Normal); if (d > score) { score = d; best = i; } }
             Need(score > 1 - 1e-6, "Mil profil düzlemi standart model görünüşlerine dik değil; ana görünüş yönü belirlenemedi.");
-            IView view;
-            try { view = ModelView(drawing, part, partPath, names[best], at); }
-            catch (InvalidOperationException error) { throw new InvalidOperationException("Ana görünüş oluşturulamadı: " + error.Message); }
-            view.UseSheetScale = 1;
-            double[] o = ToSheet(view, shaft, 0, 0, 0), a = ToSheet(view, shaft, 100, 0, 0);
-            double angle = Math.Atan2(a[1] - o[1], a[0] - o[0]);
-            if (Math.Abs(angle) > 1e-9) view.Angle = view.Angle - angle;
-            o = ToSheet(view, shaft, 0, 0, 0); a = ToSheet(view, shaft, 100, 0, 0);
-            double[] r = ToSheet(view, shaft, 0, 100, 0);
-            Need(a[0] - o[0] > 0 && Math.Abs(a[1] - o[1]) < 1e-7 && r[1] - o[1] > 0,
-                "Ana görünüşte mil ekseni yatay ve kama tarafı yukarı hizalanamadı.");
-            view.Position = at;
-            return view;
+            object modelViews = null;
+            try { modelViews = part.GetModelViewNames(); } catch (COMException) { }
+            // Expected name first; then every other standard ('*') view of the part, so a
+            // version that orders or names them differently still yields the right view.
+            var candidates = ViewNameCandidates(modelViews, names[best]);
+            foreach (string other in Strings(modelViews)) if (other.StartsWith("*") && !candidates.Contains(other)) candidates.Add(other);
+            IModelDoc2 model = (IModelDoc2)drawing;
+            var tried = new List<string>();
+            foreach (string name in candidates)
+            {
+                IView view = (IView)drawing.CreateDrawViewFromModelView3(partPath, name, at[0], at[1], 0);
+                if (view == null) { tried.Add(name + " (oluşmadı)"); continue; }
+                view.UseSheetScale = 1;
+                double[] o = ToSheet(view, shaft, 0, 0, 0), a = ToSheet(view, shaft, 100, 0, 0);
+                double angle = Math.Atan2(a[1] - o[1], a[0] - o[0]);
+                if (Math.Abs(angle) > 1e-9) view.Angle = view.Angle - angle;
+                o = ToSheet(view, shaft, 0, 0, 0); a = ToSheet(view, shaft, 100, 0, 0);
+                double[] r = ToSheet(view, shaft, 0, 100, 0), n = ToSheet(view, shaft, 0, 0, 100);
+                // Looking straight along the profile normal: the normal collapses to a point
+                // (rejects isometric/trimetric/'normal to' views that only look similar).
+                if (a[0] - o[0] > 0 && Math.Abs(a[1] - o[1]) < 1e-7 && r[1] - o[1] > 0
+                    && Math.Abs(n[0] - o[0]) < 1e-7 && Math.Abs(n[1] - o[1]) < 1e-7)
+                {
+                    view.Position = at;
+                    return view;
+                }
+                tried.Add(name + " (yön uymadı)");
+                model.ClearSelection2(true);
+                if (model.Extension.SelectByID2(view.GetName2(), "DRAWINGVIEW", 0, 0, 0, false, 0, null, 0)) model.EditDelete();
+                model.ClearSelection2(true);
+            }
+            throw new InvalidOperationException("Ana görünüş oluşturulamadı; mil ekseni yatay ve kama tarafı yukarı olan model görünüşü bulunamadı (denenen: "
+                                                + String.Join(", ", tried) + ").");
         }
 
         private static IView Projected(IDrawingDoc drawing, IView parent, double[] at)
