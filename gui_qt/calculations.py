@@ -1,6 +1,6 @@
 """Shared engineering workspace with Qt vector scenes and exportable reports."""
 
-import csv
+from shared.files import write_csv_atomic
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (QWidget, QFrame, QVBoxLayout, QSplitter, QTabWidget,
@@ -231,10 +231,7 @@ class CalculationPage(BasePage):
         path, _ = QFileDialog.getSaveFileName(self, 'Hesabı kaydet', 'GOKWORKS_hesap.csv', 'CSV (*.csv)')
         if path:
             try:
-                with open(path, 'w', encoding='utf-8-sig', newline='') as stream:
-                    writer = csv.writer(stream, delimiter=';')
-                    writer.writerow(('Alan', 'Değer'))
-                    writer.writerows(self.report)
+                write_csv_atomic(path, ('Alan', 'Değer'), self.report)
                 self.set_status('CSV raporu kaydedildi.')
             except OSError as error:
                 self.set_status(str(error), True)

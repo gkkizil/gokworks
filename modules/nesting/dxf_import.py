@@ -51,8 +51,26 @@ def check_cancel(stop):
         raise InterruptedError('İşlem durduruldu.')
 
 
+def open_dxf(path):
+    """ezdxf.readfile with a Turkish, actionable message for unreadable files.
+
+    A missing file or a permission problem keeps its OSError type; an empty,
+    binary or structurally broken DXF becomes a ValueError the import list shows.
+    """
+    path = Path(path)
+    try:
+        return ezdxf.readfile(path)
+    except (FileNotFoundError, PermissionError, IsADirectoryError):
+        raise
+    except (OSError, ezdxf.DXFError, UnicodeError) as error:
+        if path.is_file() and path.stat().st_size == 0:
+            raise ValueError(f'{path.name}: dosya boş (0 bayt); geçerli bir DXF değil.') from error
+        raise ValueError(f'{path.name}: geçerli bir DXF dosyası okunamadı (bozuk, ikili veya DXF olmayan içerik). '
+                         'Dosyayı CAD programında açıp yeniden DXF olarak kaydedin.') from error
+
+
 def layers(path):
-    doc = ezdxf.readfile(path)
+    doc = open_dxf(path)
     return [(layer.dxf.name, not layer.is_off() and not layer.is_frozen()) for layer in doc.layers]
 
 
@@ -88,7 +106,7 @@ def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
     if filename.stat().st_size > 100*1024*1024:
         raise ValueError('DXF dosyası 100 MB sınırını aşıyor; kesim katmanlarını ayrı dosyaya aktarın.')
     before = filename.read_bytes()
-    doc = ezdxf.readfile(filename)
+    doc = open_dxf(filename)
     code = doc.header.get('$INSUNITS', 0)
     if not code:
         if unit not in ('mm', 'cm', 'inch'):

@@ -1,6 +1,6 @@
 """Shared Qt Widgets: forms, persistent workspaces and model-backed results."""
 
-import csv
+from shared.files import write_csv_atomic
 from pathlib import Path, PureWindowsPath
 
 from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent, QObject, QPointF
@@ -737,11 +737,9 @@ class ResultsPanel(QWidget):
         show_details(self, 'Dosya ayrıntıları', '\n\n'.join(f'{key}: {value}' for key, value in row.items()))
 
     def save_csv(self, path):
-        with Path(path).open('w', newline='', encoding='utf-8-sig') as stream:
-            writer = csv.writer(stream, delimiter=';')
-            writer.writerow(('Kaynak', 'Çıktı', 'Durum', 'Açıklama'))
-            writer.writerows((row['source'], row.get('output', ''), row.get('_status_label', LABELS.get(row['status'], row['status'])),
-                              row.get('detail', '')) for row in self.results)
+        write_csv_atomic(path, ('Kaynak', 'Çıktı', 'Durum', 'Açıklama'),
+                         [(row['source'], row.get('output', ''), row.get('_status_label', LABELS.get(row['status'], row['status'])),
+                           row.get('detail', '')) for row in self.results])
 
     def save_dialog(self):
         path, _ = QFileDialog.getSaveFileName(self, 'Rapor kaydet', 'GOKWORKS_rapor.csv', 'CSV (*.csv)')

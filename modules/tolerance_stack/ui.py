@@ -197,7 +197,11 @@ class ToleranceStackPage(BasePage):
         for title,callback in (('↑',lambda:self.move_term(-1)),('↓',lambda:self.move_term(1)),
                                ('+ / −',self.flip_term),('Düzenle',self.edit_term),('Çıkar',self.remove_term)):
             control=button(title,callback)
-            if len(title)<=5:control.setFixedWidth(max(32,control.fontMetrics().horizontalAdvance(title)+22))
+            if len(title)<=5:
+                # The theme's button padding decides the real width; a font-only
+                # estimate clipped '+ / −' by a few pixels at every scale.
+                control.ensurePolished()
+                control.setFixedWidth(max(32,control.fontMetrics().horizontalAdvance(title)+22,control.sizeHint().width()))
             actions.addWidget(control);self.term_controls.append(control)
             if title=='+ / −':actions.addWidget(separator(vertical=True))
         actions.addStretch(1)

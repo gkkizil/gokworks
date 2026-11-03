@@ -1,7 +1,7 @@
 """Sheet-metal exports and source-matched preview; shared export flow is intact."""
 
 from pathlib import Path
-import csv
+from shared.files import write_csv_atomic
 
 from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject, QSignalBlocker
 from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QCheckBox
@@ -180,15 +180,14 @@ class DxfDwgPage(ExportPage):
 
     def save_sheet_csv(self,path):
         if self.inventory is None:return self._legacy_save_csv(path)
-        with Path(path).open('w',newline='',encoding='utf-8-sig') as stream:
-            writer=csv.writer(stream,delimiter=';')
-            writer.writerow(('Kaynak','Konfigürasyon','Parça kodu','Gövde','Kalınlık mm','Malzeme',
-                             'Montaj adedi','Seçili adet','Durum','Çıktı','Açıklama'))
-            for row in self.inventory:
-                selected=len(set(row['instances']) & self.checked_instances.get(row['sheet_id'],set()))
-                writer.writerow((row['source'],row['configuration'],row.get('code',''),row['body_name'],
-                    row.get('thickness_mm',''),row.get('material',''),row['quantity'],selected,
-                    'Hazır' if row['status']=='pending' else LABELS.get(row['status'],row['status']),row.get('output',''),row.get('detail','')))
+        rows=[]
+        for row in self.inventory:
+            selected=len(set(row['instances']) & self.checked_instances.get(row['sheet_id'],set()))
+            rows.append((row['source'],row['configuration'],row.get('code',''),row['body_name'],
+                row.get('thickness_mm',''),row.get('material',''),row['quantity'],selected,
+                'Hazır' if row['status']=='pending' else LABELS.get(row['status'],row['status']),row.get('output',''),row.get('detail','')))
+        write_csv_atomic(path,('Kaynak','Konfigürasyon','Parça kodu','Gövde','Kalınlık mm','Malzeme',
+                               'Montaj adedi','Seçili adet','Durum','Çıktı','Açıklama'),rows)
 
     def update_source_count(self,*args):
         self.source_files.counter.setText(f'Sac gövdeleri · {self.results.model.rowCount()}')
