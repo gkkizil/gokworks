@@ -764,15 +764,40 @@ namespace Gokworks.ShaftInterop
                 // Across the axis: tiers keep their planned paper distance from the real
                 // view outline.
                 double[] axis = ToSheet(view, shaft, (x - bx0) / PlannedFactor, 0, 0);
-                string band = S(p, "band");
-                double sheetY = band == "inside" ? axis[1]
-                    : band == "below" ? outline[1] - (by0 - y) * .001
-                    : band == "above" ? outline[3] + (y - by1) * .001
-                    : axis[1] + (y - (by0 + by1) / 2) * .001;
-                return new double[] { axis[0], sheetY };
+                return AxisPlacement(axis, outline, S(p, "band"), by0, by1, y);
             }
             // Other views (sections, details): offset from the real outline centre.
             return new double[] { cx + (x - (bx0 + bx1) / 2) * .001, cy + (y - (by0 + by1) / 2) * .001 };
+        }
+
+        // Pure placement rule (no COM): axis = sheet point of the feature on the shaft axis;
+        // outline = real view outline (sheet m); by0/by1/y = planned paper mm.
+        public static double[] AxisPlacement(double[] axis, double[] outline, string band, double by0, double by1, double y)
+        {
+            double sheetY = band == "inside" ? axis[1]
+                : band == "below" ? outline[1] - (by0 - y) * .001
+                : band == "above" ? outline[3] + (y - by1) * .001
+                : axis[1] + (y - (by0 + by1) / 2) * .001;
+            return new double[] { axis[0], sheetY };
+        }
+
+        // Windows CI self-test of the SOLIDWORKS-free rules, with the real compiler/runtime.
+        public static string SelfTest()
+        {
+            var failures = new List<string>();
+            object[] turkish = { "*Normal", "*Ön", "*Arka", "*Sol", "*Sağ", "*Üst", "*Alt", "*İzometrik" };
+            if (String.Join("|", ViewNameCandidates(turkish, 1)) != "*Ön|*Front") failures.Add("front:" + String.Join("|", ViewNameCandidates(turkish, 1)));
+            if (String.Join("|", ViewNameCandidates(turkish, 7)) != "*İzometrik|*Isometric") failures.Add("iso");
+            if (String.Join("|", ViewNameCandidates(new string[] { "*Front", "*Front" }, 1)) != "*Front") failures.Add("english");
+            if (String.Join("|", ViewNameCandidates(null, 5)) != "*Top") failures.Add("none");
+            double[] outline = { .05, .18, .25, .22 }, axis = { .1, .2 };
+            double[] below = AxisPlacement(axis, outline, "below", 100, 150, 90);
+            double[] above = AxisPlacement(axis, outline, "above", 100, 150, 158);
+            double[] inside = AxisPlacement(axis, outline, "inside", 100, 150, 125);
+            if (Math.Abs(below[0] - .1) > 1e-12 || Math.Abs(below[1] - .17) > 1e-12) failures.Add("below");
+            if (Math.Abs(above[1] - .228) > 1e-12) failures.Add("above");
+            if (Math.Abs(inside[1] - .2) > 1e-12) failures.Add("inside");
+            return Json.Serialize(new Dictionary<string, object> { { "self_test", failures.Count == 0 }, { "failures", failures } });
         }
 
         // COM arrays arrive as string[], object[] or double[] depending on the call.

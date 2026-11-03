@@ -527,3 +527,21 @@ def test_footer_checkbox_creates_the_drawing_right_after_the_solid_model(qtbot, 
         assert ask.call_count == 0                                          # model only, no dialog
     assert len(started) == 1
     page.dirty = False
+
+
+@pytest.mark.skipif(sys.platform != 'win32' or not os.environ.get('GOKWORKS_SHAFT_TEST_INTEROP'),
+                    reason='Windows and explicitly staged interop compile references required; no live CAD.')
+def test_drawing_host_self_test_localized_views_and_axis_placement():
+    """Real C# (shipping loader): Turkish standard view names and the axis placement rule."""
+    library = Path(os.environ['GOKWORKS_SHAFT_TEST_INTEROP']).resolve()
+    marker = '[Gokworks.ShaftInterop.DrawingHost]::Run()'
+    probe = '[Console]::WriteLine([Gokworks.ShaftInterop.DrawingHost]::SelfTest())'
+    powershell = Path(os.environ['SystemRoot']) / 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    result = subprocess.run([str(powershell), '-NoLogo', '-NoProfile', '-NonInteractive', '-STA', '-Command',
+                             controller.LOADER.replace(marker, probe)], input='', encoding='utf-8', capture_output=True,
+                            timeout=120, creationflags=subprocess.CREATE_NO_WINDOW,
+                            env={**os.environ, 'GOKWORKS_SHAFT_INTEROP': str(library),
+                                 'GOKWORKS_SHAFT_HOST': str(controller.HOST_SOURCE)})
+    assert result.returncode == 0, result.stdout + result.stderr
+    reply = json.loads([line for line in result.stdout.splitlines() if line.startswith('{"self_test"')][-1])
+    assert reply == {'self_test': True, 'failures': []}
