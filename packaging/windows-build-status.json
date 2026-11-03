@@ -1,0 +1,106 @@
+{
+  "commit": "51b364f4ec4cddc660646530bb1e07f050f9897d",
+  "status": "building",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/41575850602",
+  "download_url": "",
+  "artifact_url": "",
+  "setup_steps": {},
+  "source_commit": "496b4efe0fd2419adeb51090b2573ef829b24799",
+  "validation_profile": "package-only",
+  "regression_suite": "not-run-user-request",
+  "display": {
+    "before": [
+      1024,
+      768
+    ],
+    "requested": [
+      1920,
+      1080
+    ],
+    "actual": [
+      1920,
+      1080
+    ],
+    "change_result": 0,
+    "available": [
+      [
+        640,
+        480,
+        32,
+        64
+      ],
+      [
+        800,
+        600,
+        32,
+        64
+      ],
+      [
+        1024,
+        768,
+        32,
+        64
+      ],
+      [
+        1152,
+        864,
+        32,
+        64
+      ],
+      [
+        1280,
+        720,
+        32,
+        64
+      ],
+      [
+        1280,
+        800,
+        32,
+        64
+      ],
+      [
+        1280,
+        1024,
+        32,
+        64
+      ],
+      [
+        1366,
+        768,
+        32,
+        64
+      ],
+      [
+        1440,
+        900,
+        32,
+        64
+      ],
+      [
+        1600,
+        900,
+        32,
+        64
+      ],
+      [
+        1600,
+        1200,
+        32,
+        64
+      ],
+      [
+        1680,
+        1050,
+        32,
+        64
+      ],
+      [
+        1920,
+        1080,
+        32,
+        64
+      ]
+    ]
+  }
+}
