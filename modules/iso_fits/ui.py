@@ -1,7 +1,7 @@
 """ISO 286 selection and independent manual limits with exact Decimal results."""
 
 from PySide6.QtCore import Qt, QSignalBlocker
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTreeView, QTabWidget, QTabBar
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLineEdit, QTreeView, QTabWidget, QTabBar, QAbstractItemView
 from modules.iso_fits import rules as r
 from modules.iso_fits import manual as m
 from modules.iso_fits.diagram import draw
@@ -9,6 +9,8 @@ from gui_qt.calculations import CalculationPage
 from gui_qt.calculations import pane
 from gui_qt.components import Disclosure, label, scroll, configure_view, show_details
 from gui_qt.models import TreeModel, FilterProxy, Column
+from modules.iso_fits import guidance
+from modules.iso_fits.fit_widgets import AssemblyCard, InsightPanel, PresetDelegate
 
 
 HELP = ('ISO 286-1:2010 / ISO 286-2:2010 · Doğrulanan tablo: 1–400 mm.\n'
@@ -64,21 +66,28 @@ class IsoPage(CalculationPage):
         f.combo('basis', 'Geçme esası', ('Tümü', 'Delik esaslı', 'Mil esaslı'))
         self.search = QLineEdit()
         self.search.setPlaceholderText('Hazır geçme ara…')
-        preset_content = QWidget()
-        preset_layout = QVBoxLayout(preset_content)
-        preset_layout.setContentsMargins(0, 0, 0, 0)
-        preset_layout.setSpacing(6)
+        # Always-visible preset cards grouped by the fit type computed at this diameter.
+        self.preset_section, preset_layout = pane('Hazır geçmeler', rule=True)
+        self.search.setClearButtonEnabled(True)
         preset_layout.addWidget(self.search)
         self.presets = configure_view(QTreeView())
         self.presets.setSortingEnabled(False)
+        self.presets.setHeaderHidden(True)
+        self.presets.setRootIsDecorated(False)
+        self.presets.setIndentation(0)
+        self.presets.setUniformRowHeights(False)
+        self.presets.setAlternatingRowColors(False)
+        self.presets.setMouseTracking(True)
+        self.presets.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.presets.setObjectName('fitPresetCards')
+        self.presets.setItemDelegate(PresetDelegate(lambda: self.context.appearance, self.presets))
         self.preset_model = TreeModel((Column('Hazır geçmeler', 'name'),))
         self.preset_proxy = FilterProxy(self, tree=True)
         self.preset_proxy.setSourceModel(self.preset_model)
         self.presets.setModel(self.preset_proxy)
-        self.presets.setMinimumHeight(180)
-        preset_layout.addWidget(self.presets)
-        self.preset_section = Disclosure('Hazır geçme örnekleri', preset_content)
-        self.extra_layout.addWidget(self.preset_section)
+        self.presets.setMinimumHeight(320)
+        preset_layout.addWidget(self.presets, 1)
+        self.extra_layout.addWidget(self.preset_section, 1)
         self.search.textChanged.connect(self.preset_proxy.set_query)
         self.presets.clicked.connect(self.select_preset)
         # The shared section includes result labels through y=290. Keep them
@@ -105,6 +114,13 @@ class IsoPage(CalculationPage):
         self.usage_label = label('', 'muted')
         explanation.addWidget(self.usage_label)
         self.right.insertWidget(self.right.indexOf(self.sample_tabs) + 1, self.explanation_card)
+        # Assembly method card + signed clearance and usage examples, side by side.
+        self.assembly_card = AssemblyCard(lambda: self.context.appearance)
+        self.insight = InsightPanel(lambda: self.context.appearance)
+        self.result_strip = QWidget(); strip = QHBoxLayout(self.result_strip)
+        strip.setContentsMargins(0, 0, 0, 0); strip.setSpacing(8)
+        strip.addWidget(self.assembly_card); strip.addWidget(self.insight, 1)
+        self.right.insertWidget(self.right.indexOf(self.explanation_card), self.result_strip)
         self.section_help = label(SECTION_HELP, 'muted')
         self.section_summary = label('', 'muted')
         self.right.insertWidget(self.right.indexOf(self.sample_tabs) + 1, self.section_summary)
@@ -134,21 +150,26 @@ class IsoPage(CalculationPage):
             self.loading = False
             self.update_result()
 
+    def mark_preset(self, code):
+        """Highlight the card of the current hole/shaft pair, if it is a preset."""
+        selection = self.presets.selectionModel()
+        for parent in range(self.preset_proxy.rowCount()):
+            group = self.preset_proxy.index(parent, 0)
+            for row in range(self.preset_proxy.rowCount(group)):
+                index = self.preset_proxy.index(row, 0, group)
+                if code and (index.data(Qt.UserRole) or {}).get('id') == code:
+                    with QSignalBlocker(selection):
+                        self.presets.setCurrentIndex(index)
+                    self.presets.scrollTo(index)
+                    return
+        selection.clearSelection()
+
     def populate_presets(self):
         basis = self.form.value('basis')
         key = (self.form.value('diameter'), basis)
         if getattr(self, '_preset_key', None) == key:
             return
-        rows = [dict(id=kind, parent='', name=title) for kind, title in r.CLASSIFICATION.items()]
-        for preset in r.PRESETS:
-            if basis not in ('Tümü', preset.basis):
-                continue
-            try:
-                kind = r.calculate(key[0], preset.hole, preset.shaft).kind
-            except ValueError:
-                kind = 'clearance'
-            rows.append(dict(id=preset.code, parent=kind, name=f'{preset.code} · {preset.label}', hole=preset.hole, shaft=preset.shaft))
-        self.preset_model.replace(rows)
+        self.preset_model.replace(guidance.preset_rows(key[0], basis))
         self.presets.expandAll()
         self._preset_key = key
 
@@ -197,6 +218,7 @@ class IsoPage(CalculationPage):
         super().invalid(error)
         self.details.setText('Geçerli sınırlar girildiğinde geçme açıklaması burada görünür.')
         self.usage_label.clear()
+        self.assembly_card.clear(); self.insight.clear()
         self.section_summary.clear()
         self.section_help.setText(SECTION_HELP)
 
@@ -225,6 +247,9 @@ class IsoPage(CalculationPage):
                 widget.setText('Geçerli sınırlar girin.')
             return
         unit = f.value('unit')
+        self.assembly_card.set_fit(fit)
+        self.insight.set_fit(fit, unit)
+        self.mark_preset(None if manual else f'{f.value("hole")} / {f.value("shaft")}')
         self.headline.setText(r.CLASSIFICATION[fit.kind])
         self.summary.setText(f'Cmin = {r.format_deviation(fit.minimum_clearance_nm, unit)}    ·    Cmax = {r.format_deviation(fit.maximum_clearance_nm, unit)}')
         explanation = self.fit_explanation(fit, unit)
