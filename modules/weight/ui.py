@@ -5,11 +5,10 @@ import json
 from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtGui import QImage, QPainter
 from PySide6.QtWidgets import (QAbstractItemView, QFileDialog, QHBoxLayout, QLineEdit, QMenu, QMessageBox,
-                               QTableView, QToolButton, QWidget)
+                               QTableView, QWidget)
 
 from gui_qt.calculations import CalculationPage
 from gui_qt.components import button, configure_view, fit_columns, label, section_header, show_details
-from gui_qt.diagrams import EngineeringDiagram
 from gui_qt.models import Column, TableModel
 from modules.weight import catalog, export, rules as r, sections, worklist
 from modules.weight.diagram import draw
@@ -17,38 +16,6 @@ from modules.weight.materials import CUSTOM_MATERIAL, MATERIAL_TYPES
 
 DIGITS = ('0', '1', '2', '3', '4')
 LIST_KEY = 'weight_worklist'
-
-
-class ZoomDiagram(EngineeringDiagram):
-    """Section sketch: mouse wheel zooms around the cursor, drag pans, reset fits."""
-
-    def __init__(self, **options):
-        super().__init__(**options)
-        self.setTransformationAnchor(EngineeringDiagram.AnchorUnderMouse)
-        self.setDragMode(EngineeringDiagram.ScrollHandDrag)
-        self.zoom = 1.0
-
-    def wheelEvent(self, event):
-        step = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15
-        if .5 <= self.zoom * step <= 12:
-            self.zoom *= step
-            self.scale(step, step)
-        event.accept()
-
-    def reset_view(self):
-        self.zoom = 1.0
-        self.resetTransform()
-        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
-
-    def render_geometry(self, renderer):
-        super().render_geometry(renderer)
-        self.zoom = 1.0
-
-    def resizeEvent(self, event):
-        if self.zoom == 1.0:
-            super().resizeEvent(event)
-        else:
-            EngineeringDiagram.__base__.resizeEvent(self, event)
 
 
 class WeightPage(CalculationPage):
@@ -140,17 +107,10 @@ class WeightPage(CalculationPage):
 
     # ---- layout pieces ---------------------------------------------------------------
     def _add_section_view(self):
-        diagram = ZoomDiagram(width=650, height=330)
+        diagram = self.add_diagram('section', 'Kesit', width=650, height=330)
         diagram.setMinimumHeight(240)
         diagram.setMaximumHeight(460)
-        self.diagrams['section'] = diagram
-        self.diagram_tabs.addTab(diagram, 'Kesit')
         self.diagram_tabs.setMaximumHeight(460 + self.diagram_tabs.tabBar().sizeHint().height() + 2)
-        reset = QToolButton(); reset.setText('Sığdır'); reset.setAutoRaise(True)
-        reset.setToolTip('Görünümü sıfırla (fare tekerleği yakınlaştırır, sürükleme kaydırır)')
-        reset.clicked.connect(diagram.reset_view)
-        self.diagram_tabs.setCornerWidget(reset, Qt.TopRightCorner)
-        self.reset_view_button = reset
 
     def _build_list(self):
         self.items = []
@@ -530,4 +490,4 @@ class WeightPage(CalculationPage):
                      '\n\nDoğrulanmış verisi olmayan aileler: ' + ', '.join(catalog.MISSING))
 
 
-__all__ = ['WeightPage', 'ZoomDiagram']
+__all__ = ['WeightPage']

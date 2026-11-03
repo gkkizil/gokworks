@@ -197,6 +197,17 @@ class VectorScene(QGraphicsScene):
 
 
 class EngineeringDiagram(QGraphicsView):
+    """Technical sketch view shared by every module.
+
+    View controls are the same everywhere: Ctrl + wheel zooms around the cursor
+    (a plain wheel keeps scrolling the page), dragging pans while zoomed,
+    double-click / 0 / Home fits, + and − zoom with the keyboard. A zoomed view
+    is kept when the values (and so the drawing) change; a fitted view refits.
+    """
+
+    ZOOM_LIMITS = (1.0, 16.0)
+    HINT = 'Ctrl + tekerlek: yakınlaştır · sürükle: kaydır · çift tık veya 0: sığdır'
+
     def __init__(self, *, width=520, height=320, parent=None):
         super().__init__(parent)
         self.vector = VectorScene(width, height, self)
@@ -207,7 +218,15 @@ class EngineeringDiagram(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setFrameShape(QGraphicsView.NoFrame)
         self.setMinimumSize(160, 190)
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setFocusPolicy(Qt.ClickFocus)
+        self.setToolTip(self.HINT)
         self.renderer = None
+        self.zoom = 1.0
+
+    @property
+    def zoomed(self):
+        return self.zoom > 1.0001
 
     def render_geometry(self, renderer):
         self.renderer = renderer
@@ -217,8 +236,55 @@ class EngineeringDiagram(QGraphicsView):
         bounds = QRectF(0,0,self.vector.width,self.vector.height)
         if self.vector.items(): bounds = bounds.united(self.vector.itemsBoundingRect().adjusted(-4,-4,4,4))
         self.vector.setSceneRect(bounds)
+        if not self.zoomed:
+            self.fit_view()
+
+    def fit_view(self):
+        """Fit the whole drawing (also the reset command)."""
+        self.zoom = 1.0
+        self.setDragMode(QGraphicsView.NoDrag)
+        self.resetTransform()
         self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+
+    reset_view = fit_view
+
+    def zoom_by(self, factor):
+        low, high = self.ZOOM_LIMITS
+        target = min(high, max(low, self.zoom * factor))
+        if abs(target - self.zoom) < 1e-9:
+            return
+        if target <= low + 1e-9:
+            self.fit_view()
+            return
+        self.scale(target / self.zoom, target / self.zoom)
+        self.zoom = target
+        self.setDragMode(QGraphicsView.ScrollHandDrag)
+
+    def wheelEvent(self, event):
+        if event.modifiers() & Qt.ControlModifier:
+            self.zoom_by(1.2 if event.angleDelta().y() > 0 else 1 / 1.2)
+            event.accept()
+        else:
+            event.ignore()   # let the surrounding page scroll
+
+    def mouseDoubleClickEvent(self, event):
+        self.fit_view()
+        event.accept()
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key in (Qt.Key_Plus, Qt.Key_Equal):
+            self.zoom_by(1.2)
+        elif key == Qt.Key_Minus:
+            self.zoom_by(1 / 1.2)
+        elif key in (Qt.Key_0, Qt.Key_Home, Qt.Key_F):
+            self.fit_view()
+        else:
+            super().keyPressEvent(event)
+            return
+        event.accept()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+        if not self.zoomed:
+            self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)

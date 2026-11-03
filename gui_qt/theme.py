@@ -190,6 +190,8 @@ QStatusBar { background: %(sidebar)s; border-top: 1px solid %(border)s; min-heig
 QStatusBar::item { border: 0; }
 QStatusBar QLabel { font-size: %(size_caption)spx; color: %(muted)s; padding: 0 4px; }
 QStatusBar QLabel[role="error"] { color: %(danger)s; }
+QStatusBar QLabel[role="warning"] { color: %(warning)s; }
+QStatusBar QLabel[role="success"] { color: %(success)s; }
 QStatusBar QPushButton { border: 0; background: transparent; font-size: %(size_caption)spx; padding: 2px 8px; color: %(muted)s; }
 QStatusBar QPushButton:hover { background: %(hover)s; color: %(text)s; }
 QLabel#connectionIndicator { font-size: 10px; padding: 0 0 0 6px; }

@@ -148,6 +148,8 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence('Ctrl+,'), self, activated=self.show_settings)
         QShortcut(QKeySequence('Ctrl+B'),self,activated=self.toggle_sidebar)
         QShortcut(QKeySequence('Ctrl+K'),self,activated=self.focus_module_search)
+        QShortcut(QKeySequence('Ctrl+PgDown'),self,activated=lambda:self.navigate_relative(1))
+        QShortcut(QKeySequence('Ctrl+PgUp'),self,activated=lambda:self.navigate_relative(-1))
 
     def create_page(self, mode, factory):
         module, class_name = factory
@@ -158,6 +160,14 @@ class MainWindow(QMainWindow):
         page.refresh_command_icons()
         page.theme_changed()
         return page
+
+    def navigate_relative(self, step):
+        """Ctrl+PgDown / Ctrl+PgUp: next / previous module in the sidebar order (wraps)."""
+        order = [key for key in self.browser.buttons if key in self.pages]
+        if not order:
+            return
+        index = order.index(self.mode) if getattr(self, 'mode', None) in order else 0
+        self.navigate(order[(index + step) % len(order)])
 
     def toggle_sidebar(self):
         self.set_sidebar_collapsed(not self.sidebar_collapsed)
@@ -286,13 +296,14 @@ class MainWindow(QMainWindow):
 
     def page_status(self, page, text, error):
         if page is self.jobs.owner or self.stack.currentWidget() is page:
-            self.show_status(text,error)
+            self.show_status(text,error,getattr(page,'status_kind',None))
 
-    def show_status(self,text,error=False):
+    def show_status(self,text,error=False,tone=None):
+        from .components import BasePage
         text=str(text)
         self.global_status.setText((text.splitlines() or ['Hazır'])[0][:130])
         self.global_status.setToolTip(text)
-        role='error' if error else 'muted'
+        role=BasePage.status_tone(text,error,tone)
         if self.global_status.property('role')!=role:
             self.global_status.setProperty('role',role)
             self.global_status.style().unpolish(self.global_status)

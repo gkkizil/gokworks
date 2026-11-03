@@ -2,8 +2,9 @@
 
 import csv
 from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (QWidget, QFrame, QVBoxLayout, QSplitter, QTabWidget,
-    QTableView, QFileDialog, QApplication, QStackedWidget, QMenu, QSizePolicy)
+    QTableView, QFileDialog, QApplication, QStackedWidget, QMenu, QSizePolicy, QToolButton)
 from gui_qt.components import BasePage, ValueForm, label, scroll, separator, configure_view, show_details
 from gui_qt.components import Disclosure, pane  # noqa: F401  (pane re-exported)
 from gui_qt.diagrams import EngineeringDiagram
@@ -32,6 +33,8 @@ class CalculationWorkspace(QStackedWidget):
         self.addWidget(self.wide)
         self.addWidget(self.column_scroll)
         self.compact = None
+        self.saved_sizes = None   # user-dragged splitter sizes, restored in the wide layout
+        self.inputs_hidden = False  # the user hid the parameter panel; layout changes must respect it
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -55,8 +58,14 @@ class CalculationWorkspace(QStackedWidget):
             self.right_scroll.setWidget(self.result)
             self.setCurrentWidget(self.wide)
             width = event.size().width()
-            self.wide.setSizes([max(300, round(width * .36)), max(320, round(width * .64))])
-        self.inputs.show()
+            if self.saved_sizes and sum(self.saved_sizes) > 0:
+                share = self.saved_sizes[0] / sum(self.saved_sizes)
+                left = min(max(300, round(width * share)), max(300, width - 320))
+                self.wide.setSizes([left, max(320, width - left)])
+            else:
+                self.wide.setSizes([max(300, round(width * .36)), max(320, round(width * .64))])
+        self.inputs.setVisible(not self.inputs_hidden)
+        self.left_scroll.setVisible(not (self.inputs_hidden and not compact))
         self.result.show()
 
 
@@ -96,6 +105,13 @@ class CalculationPage(BasePage):
         self.diagram_tabs = QTabWidget()
         self.diagram_tabs.setDocumentMode(True)
         self.diagrams = {}
+        # One view command for every technical sketch (Ctrl+wheel zoom, drag pan are on the view).
+        self.fit_button = QToolButton()
+        self.fit_button.setText('Sığdır')
+        self.fit_button.setAutoRaise(True)
+        self.fit_button.setToolTip('Görünümü sığdır · ' + EngineeringDiagram.HINT)
+        self.fit_button.clicked.connect(self.fit_diagram)
+        self.diagram_tabs.setCornerWidget(self.fit_button, Qt.TopRightCorner)
         self.right.addWidget(self.diagram_tabs, 1)
         self.details = label()
         self.right.addWidget(self.details)
@@ -112,9 +128,19 @@ class CalculationPage(BasePage):
         self.compact_headline.setAccessibleName('Güncel hesap sonucu')
         self.layout.addWidget(self.compact_headline)
         self.splitter = self.workspace.wide
+        self.layout_key = 'layout/' + prefix
+        saved = self.settings.get(self.layout_key + 'split')
+        if isinstance(saved, list) and len(saved) == 2 and all(isinstance(v, int) and v > 0 for v in saved):
+            self.workspace.saved_sizes = saved
+        self.splitter.splitterMoved.connect(self.remember_split)
+        self.inputs_button = self.action('Parametreleri gizle', self.toggle_inputs, locked=False)
+        self.inputs_button.setToolTip('Parametre panelini gizle / göster (Ctrl+Shift+P)')
+        QShortcut(QKeySequence('Ctrl+Shift+P'), self, activated=self.toggle_inputs)
         self.left_scroll, self.right_scroll = self.workspace.left_scroll, self.workspace.right_scroll
         self.layout.addWidget(self.workspace, 1)
         self.finish_layout()
+        if self.settings.get(self.layout_key + 'inputs_hidden') is True:
+            self.set_inputs_visible(False)
         self.update_timer = QTimer(self)
         self.update_timer.setSingleShot(True)
         self.update_timer.setInterval(60)
@@ -141,6 +167,27 @@ class CalculationPage(BasePage):
         self.diagram_tabs.setMaximumHeight(max(d.maximumHeight() for d in self.diagrams.values())
                                            + self.diagram_tabs.tabBar().sizeHint().height() + 2)
         return diagram
+
+    def remember_split(self, *args):
+        sizes = self.splitter.sizes()
+        if len(sizes) == 2 and all(sizes):
+            self.workspace.saved_sizes = sizes
+            self.settings.set(self.layout_key + 'split', sizes)
+
+    def set_inputs_visible(self, visible):
+        self.workspace.inputs_hidden = not visible
+        self.input_card.setVisible(visible)
+        self.workspace.left_scroll.setVisible(visible or self.workspace.compact is True)
+        self.inputs_button.setText('Parametreleri gizle' if visible else 'Parametreleri göster')
+        self.settings.set(self.layout_key + 'inputs_hidden', not visible)
+
+    def toggle_inputs(self):
+        self.set_inputs_visible(self.input_card.isHidden())
+
+    def fit_diagram(self):
+        diagram = self.diagram_tabs.currentWidget()
+        if isinstance(diagram, EngineeringDiagram):
+            diagram.fit_view()
 
     def info_action(self,title,callback):
         return self.report_menu.addAction(title,callback)

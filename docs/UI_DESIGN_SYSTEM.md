@@ -167,3 +167,59 @@ veya tabloyu görünür alanın dışına iter.
   **Sütunları içeriğe sığdır** / **Varsayılan sütun genişlikleri**.
 - `settings=` ve `key=` verilirse kullanıcının genişlikleri
   `columns/<key>` ayarında saklanır (28–1200 px, geçersiz değer yok sayılır).
+
+## 9. Teknik çizim alanları
+
+Bütün önizlemeler `gui_qt.diagrams.EngineeringDiagram` kullanır ve aynı
+görünüm komutlarına sahiptir (araştırılan CAD yazılımlarındaki “grafik alanı
+her zaman aynı davranır” ilkesi):
+
+| Komut | Etki |
+| --- | --- |
+| Ctrl + fare tekerleği | İmlecin olduğu yere yakınlaştırır (1–16×). Düz tekerlek sayfayı kaydırmaya devam eder. |
+| Sürükleme | Yakınlaştırılmışken görünümü kaydırır (el imleci). |
+| Çift tık, `0`, `Home`, `F` | Sığdırır (görünümü sıfırlar). |
+| `+` / `−` | Klavyeyle yakınlaştırır / uzaklaştırır (çizime tıklayıp odaklayın). |
+| Sekmenin sağındaki **Sığdır** | Hesap sayfalarında etkin çizimi sığdırır. |
+
+Değerler değişip çizim yeniden üretildiğinde yakınlaştırılmış görünüm korunur;
+sığdırılmış görünüm yeniden sığdırılır.
+
+## 10. Çalışma alanı düzeni
+
+Hesap sayfaları (`CalculationPage`) parametre ve sonuç bölmelerinden oluşur:
+
+- Bölme sürüklenebilir; konum sayfa başına `layout/<önek>split` ayarında saklanır.
+- Başlıktaki **Parametreleri gizle** (Ctrl+Shift+P) parametre panelini gizler;
+  çizim ve sonuçlar bütün genişliği kullanır. Tercih `layout/<önek>inputs_hidden`
+  ayarında saklanır ve dar/geniş düzen değişiminde korunur.
+- Dar pencerede (720 px altı) iki bölme tek sütunda alt alta akar.
+
+## 11. Durum bildirimleri ve klavye
+
+`BasePage.set_status(metin, error=False, tone=None)` durum çubuğunu da günceller:
+
+| Ton | Renk | Ne zaman |
+| --- | --- | --- |
+| `error` | danger | `error=True` |
+| `warning` | warning | `tone='warning'` veya ilk satırda “kısmen, uyarı, eksik, atlandı, durduruldu” |
+| `success` | success | `tone='success'` veya ilk satırda “kaydedildi, oluşturuldu, tamamlandı, aktarıldı, okundu, eklendi, kopyalandı, güncellendi, doğrulandı” |
+| `muted` | muted | diğer bilgi mesajları |
+
+Uzun işlemler `JobManager` ile arka planda çalışır; durum çubuğunda ilerleme
+çubuğu görünür, arayüz donmaz.
+
+| Kısayol | Komut |
+| --- | --- |
+| Ctrl+K | Modül ara |
+| Ctrl+PgDown / Ctrl+PgUp | Sonraki / önceki modül (yan panel sırası, döngüsel) |
+| Ctrl+B | Yan paneli daralt / genişlet |
+| Ctrl+Shift+P | Parametre panelini gizle / göster (hesap sayfaları) |
+| Ctrl+, | Ayarlar |
+| Ctrl+F | Tablolu sayfalarda arama |
+
+## 12. Birimler
+
+Sayısal giriş alanının etiketi birimi ` · birim` biçiminde gösterir
+(`Çap · mm`, `Çekme Ft · kN`). Birim ayrı bir seçimle değişiyorsa etiket de
+güncellenir. Birimsiz büyüklükler (adet, katsayı, diş sayısı) birim taşımaz.

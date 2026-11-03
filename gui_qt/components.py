@@ -551,7 +551,26 @@ class BasePage(QWidget):
         row.addWidget(self.status_details)
         self.layout.addLayout(row)
 
-    def set_status(self, text, error=False):
+    SUCCESS_WORDS = ('kaydedildi', 'oluşturuldu', 'tamamlandı', 'dışa aktarıldı', 'aktarıldı', 'okundu',
+                     'eklendi', 'kopyalandı', 'güncellendi', 'doğrulandı')
+    WARNING_WORDS = ('kısmen', 'uyarı', 'eksik', 'atlandı', 'durduruldu')
+
+    @classmethod
+    def status_tone(cls, text, error=False, tone=None):
+        """error / warning / success / muted for the status bar; ``tone`` overrides the inference."""
+        if error:
+            return 'error'
+        if tone in ('success', 'warning', 'muted'):
+            return tone
+        first = str(text).splitlines()[0].casefold() if str(text).strip() else ''
+        if any(word in first for word in cls.WARNING_WORDS):
+            return 'warning'
+        if any(word in first for word in cls.SUCCESS_WORDS):
+            return 'success'
+        return 'muted'
+
+    def set_status(self, text, error=False, tone=None):
+        self.status_kind = self.status_tone(text, error, tone)
         self.status_text = str(text)
         self.status.setText(self.status_text)
         self.status.setVisible(bool(error))

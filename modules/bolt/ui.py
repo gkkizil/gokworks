@@ -176,6 +176,11 @@ class BoltPage(CalculationPage):
         for key in ('shear', 'section', 'planes'):
             self.form.fields[key].setEnabled(mode != 'Çekme')
         self.form.fields['tension'].setEnabled(mode != 'Kesme')
+        # The load unit is chosen separately; the force labels must still show it.
+        for key, title, tip in (('tension', 'Çekme Ft', 'Toplam çekme kuvveti'), ('shear', 'Kesme Fv', 'Toplam kesme kuvveti')):
+            caption = self.form.form.labelForField(self.form.fields[key])
+            caption.setText(f'{title} · {values["unit"]}')
+            caption.setToolTip(f'{tip} (bütün cıvatalar için) · {values["unit"]}')
         try:
             self.result = result = r.calculate(**values)
         except ValueError as error:
