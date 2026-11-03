@@ -5,28 +5,9 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (QWidget, QFrame, QVBoxLayout, QSplitter, QTabWidget,
     QTableView, QFileDialog, QApplication, QStackedWidget, QMenu, QSizePolicy)
 from gui_qt.components import BasePage, ValueForm, label, scroll, separator, configure_view, show_details
-from gui_qt.components import Disclosure
+from gui_qt.components import Disclosure, pane  # noqa: F401  (pane re-exported)
 from gui_qt.diagrams import EngineeringDiagram
 from gui_qt.models import Column, TableModel
-
-
-def pane(title=None, *, rule=False):
-    """Flat parameter/result group: semibold heading over content, no frame.
-
-    Calculation pages separate groups with spacing and optional 1 px rules
-    instead of nested cards (docs/UI_DESIGN_SYSTEM.md, "Düz yüzeyler").
-    """
-    widget = QFrame()
-    layout = QVBoxLayout(widget)
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.setSpacing(6)
-    if rule:
-        layout.addWidget(separator())
-    if title:
-        heading = label(title, 'section')
-        layout.addWidget(heading)
-        widget.heading = heading
-    return widget, layout
 
 
 class CalculationWorkspace(QStackedWidget):

@@ -4,14 +4,16 @@ import csv
 from pathlib import Path, PureWindowsPath
 
 from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent
-from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette
+from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette, QColor
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
     QFileDialog, QTableView, QTreeView, QHeaderView, QAbstractItemView,
     QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication,
-    QToolButton, QToolBar, QBoxLayout, QMenu, QSplitter, QSizePolicy, QListView)
+    QToolButton, QToolBar, QBoxLayout, QMenu, QSplitter, QSizePolicy, QListView,
+    QDoubleSpinBox, QStyledItemDelegate)
 
 from .models import Column, TableModel, FilterProxy, LABELS
+from .theme import COLORS, SPACING
 
 
 def label(text='', role=None, *, wrap=True):
@@ -605,7 +607,7 @@ class ResultsPanel(QWidget):
         self.tabs.addTab(self.table, 'Dosyalar')
         self.tabs.addTab(self.log, 'Günlük')
         self.layout.addWidget(self.tabs, 1)
-        self.counter = label('0 / 0 dosya · 0 sonuç', 'muted')
+        self.counter = label('0 / 0 dosya · 0 sonuç', 'muted', wrap=False)
         self.layout.addWidget(self.counter)
         self.search_timer = QTimer(self)
         self.search_timer.setInterval(100)
@@ -721,3 +723,108 @@ def show_details(parent, title, text):
 
 def open_folder(path):
     return QDesktopServices.openUrl(QUrl.fromLocalFile(str(Path(path).absolute())))
+
+
+# ---------------------------------------------------------------------------
+# Design-system widgets shared by several workbenches (docs/UI_DESIGN_SYSTEM.md)
+# ---------------------------------------------------------------------------
+
+def turkish_locale():
+    """tr_TR number format (decimal comma) without the ambiguous '1.500' grouping."""
+    from PySide6.QtCore import QLocale
+    locale = QLocale(QLocale.Turkish, QLocale.Turkey)
+    locale.setNumberOptions(QLocale.OmitGroupSeparator | QLocale.RejectGroupSeparator)
+    return locale
+
+
+class NumberSpinBox(QDoubleSpinBox):
+    """Engineering number field: decimal comma, right aligned, no trailing zeros.
+
+    The value still rounds to ``decimals()`` places, so precision is unchanged:
+    2.0000 is shown as 2 and 0.0125 as 0,0125.
+    """
+    def __init__(self, decimals=4, parent=None):
+        super().__init__(parent)
+        self.setLocale(turkish_locale()); self.setDecimals(decimals)
+        self.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+    def textFromValue(self, value):
+        text = self.locale().toString(float(value), 'f', self.decimals())
+        point = self.locale().decimalPoint()
+        if point in text:
+            text = text.rstrip('0').rstrip(point)
+        return '0' if text in ('-0', '') else text
+
+
+def pane(title=None, *, rule=False):
+    """Flat parameter/result group: semibold heading over content, no frame.
+
+    Calculation pages separate groups with spacing and optional 1 px rules
+    instead of nested cards (docs/UI_DESIGN_SYSTEM.md, "Düz yüzeyler").
+    """
+    widget = QFrame()
+    layout = QVBoxLayout(widget)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(6)
+    if rule:
+        layout.addWidget(separator())
+    if title:
+        heading = label(title, 'section')
+        layout.addWidget(heading)
+        widget.heading = heading
+    return widget, layout
+
+
+# Status → semantic token. Colour is used only where the state carries meaning.
+STATUS_TOKENS = {'success': 'success', 'partial': 'warning', 'skipped': 'warning', 'error': 'danger'}
+
+
+class StatusDelegate(QStyledItemDelegate):
+    """Colours only the status cell of a result row with its semantic token.
+
+    ``appearance`` is a callable so the colours follow live theme switches
+    without rebuilding the view.
+    """
+    def __init__(self, appearance, parent=None):
+        super().__init__(parent)
+        self.appearance = appearance
+
+    def initStyleOption(self, option, index):
+        super().initStyleOption(option, index)
+        row = index.data(Qt.UserRole) or {}
+        token = STATUS_TOKENS.get(row.get('status')) if isinstance(row, dict) else None
+        if token:
+            color = QColor(COLORS[self.appearance()][token])
+            for group in (QPalette.Active, QPalette.Inactive):
+                option.palette.setColor(group, QPalette.Text, color)
+                option.palette.setColor(group, QPalette.HighlightedText, color)
+
+
+class AdaptiveRow(QWidget):
+    """Compact command row that stacks only when its column is too narrow.
+
+    Its minimum width is the widest single control, so a narrow source column
+    never grows a horizontal scroll bar.
+    """
+    def __init__(self, *widgets, spacing=SPACING['s'], stretch=None):
+        super().__init__()
+        self.widgets = widgets
+        self.box = QBoxLayout(QBoxLayout.LeftToRight, self)
+        self.box.setContentsMargins(0, 0, 0, 0); self.box.setSpacing(spacing)
+        for index, widget in enumerate(widgets):
+            self.box.addWidget(widget, 1 if index == stretch else 0)
+        if stretch is None:
+            self.box.addStretch()
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+
+    def _row_width(self):
+        return sum(w.sizeHint().width() for w in self.widgets) + self.box.spacing() * (len(self.widgets) - 1)
+
+    def minimumSizeHint(self):
+        return QSize(max(w.minimumSizeHint().width() for w in self.widgets), super().minimumSizeHint().height())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        direction = QBoxLayout.LeftToRight if self.width() >= self._row_width() else QBoxLayout.TopToBottom
+        if self.box.direction() != direction:
+            self.box.setDirection(direction)

@@ -1,72 +1,17 @@
 """PDF and sheet-metal exports using the existing file-safe service engines."""
 
 from pathlib import Path
-from PySide6.QtCore import Qt, Slot, QSize
-from PySide6.QtGui import QColor, QPalette
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QBoxLayout, QSizePolicy,
-                               QStyledItemDelegate)
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtWidgets import (QWidget, QVBoxLayout)
 
 from modules.pdf.process import export_drawings
 from gui_qt import services
 from gui_qt.components import (BasePage, ValueForm, ResultsPanel, Disclosure, button, label,
                           separator, section_header, open_folder, TransferWorkspace, SourceFiles)
 from gui_qt.theme import COLORS, SPACING
+# Shared widgets now live in gui_qt.components; re-exported for existing imports.
+from gui_qt.components import STATUS_TOKENS, StatusDelegate, AdaptiveRow  # noqa: F401
 from solidworks import diagnostics
-
-# Status → semantic token. Colour is used only where the state carries meaning.
-STATUS_TOKENS = {'success': 'success', 'partial': 'warning', 'skipped': 'warning', 'error': 'danger'}
-
-
-class StatusDelegate(QStyledItemDelegate):
-    """Colours only the status cell of a result row with its semantic token.
-
-    ``appearance`` is a callable so the colours follow live theme switches
-    without rebuilding the view.
-    """
-    def __init__(self, appearance, parent=None):
-        super().__init__(parent)
-        self.appearance = appearance
-
-    def initStyleOption(self, option, index):
-        super().initStyleOption(option, index)
-        row = index.data(Qt.UserRole) or {}
-        token = STATUS_TOKENS.get(row.get('status')) if isinstance(row, dict) else None
-        if token:
-            color = QColor(COLORS[self.appearance()][token])
-            for group in (QPalette.Active, QPalette.Inactive):
-                option.palette.setColor(group, QPalette.Text, color)
-                option.palette.setColor(group, QPalette.HighlightedText, color)
-
-
-class AdaptiveRow(QWidget):
-    """Compact command row that stacks only when its column is too narrow.
-
-    Its minimum width is the widest single control, so a narrow source column
-    never grows a horizontal scroll bar.
-    """
-    def __init__(self, *widgets, spacing=SPACING['s'], stretch=None):
-        super().__init__()
-        self.widgets = widgets
-        self.box = QBoxLayout(QBoxLayout.LeftToRight, self)
-        self.box.setContentsMargins(0, 0, 0, 0); self.box.setSpacing(spacing)
-        for index, widget in enumerate(widgets):
-            self.box.addWidget(widget, 1 if index == stretch else 0)
-        if stretch is None:
-            self.box.addStretch()
-        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
-
-    def _row_width(self):
-        return sum(w.sizeHint().width() for w in self.widgets) + self.box.spacing() * (len(self.widgets) - 1)
-
-    def minimumSizeHint(self):
-        return QSize(max(w.minimumSizeHint().width() for w in self.widgets), super().minimumSizeHint().height())
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        direction = QBoxLayout.LeftToRight if self.width() >= self._row_width() else QBoxLayout.TopToBottom
-        if self.box.direction() != direction:
-            self.box.setDirection(direction)
-
 
 def outcome_text(results, appearance):
     """Rich-text outcome counter: counts in their semantic colour, zeros muted."""

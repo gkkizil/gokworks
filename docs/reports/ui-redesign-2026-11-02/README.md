@@ -64,9 +64,9 @@ iç içe yeniden boyutlandırmayı keser. Test: `tests/test_scroll_stability.py`
 
 ## 6. Kalanlar
 
-- Ortak sayı spinbox'ı (`EngineeringSpinBox`, `MeasureSpinBox`), `pane()`,
-  `StatusDelegate` ve `AdaptiveRow` henüz modül dosyalarında; `components.py`
-  dosyasına taşınmalı.
+- (Giderildi, 3 Kasım) Sayı alanı (`NumberSpinBox`), `pane()`,
+  `StatusDelegate` ve `AdaptiveRow` `gui_qt/components.py` dosyasına taşındı;
+  eski içe aktarma yolları çalışmaya devam eder.
 - Ağırlık formu tek `ValueForm` olduğu için malzeme ve kesit grupları
   ayrılmadı.
 - Nesting sayfa içi durum satırı, ana durum çubuğuyla kısmen tekrar ediyor

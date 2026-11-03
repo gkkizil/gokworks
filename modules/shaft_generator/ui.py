@@ -1,13 +1,14 @@
 """GOKWORKS BasePage: stage editor, native operations and two linked views."""
 
+from gui_qt.components import NumberSpinBox
 from copy import deepcopy
 from dataclasses import fields
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QSignalBlocker, QLocale
+from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QSplitter,
     QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QTabWidget,
-    QLineEdit,QComboBox,QDoubleSpinBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
+    QLineEdit,QComboBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
 from gui_qt.components import BasePage, label, button, scroll, separator
 from gui_qt.theme import ROW_HEIGHT
 from . import controller, storage
@@ -24,19 +25,8 @@ def num(value):
     return f'{value:g}'.replace('.',',')
 
 
-class MeasureSpinBox(QDoubleSpinBox):
-    """tr_TR decimal comma, right-aligned; full precision kept, trailing zeros hidden."""
-    def __init__(self,parent=None):
-        super().__init__(parent)
-        locale=QLocale(QLocale.Turkish,QLocale.Turkey)
-        locale.setNumberOptions(QLocale.OmitGroupSeparator|QLocale.RejectGroupSeparator)
-        self.setLocale(locale);self.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
-
-    def textFromValue(self,value):
-        text=self.locale().toString(float(value),'f',self.decimals())
-        point=self.locale().decimalPoint()
-        if point in text:text=text.rstrip('0').rstrip(point)
-        return '0' if text in ('-0','') else text
+class MeasureSpinBox(NumberSpinBox):
+    """Shaft dimension field; the shared design-system spin box (decimals set per use)."""
 
 
 TITLES = {'groove':'Segman kanalı','keyway':'Kama kanalı','chamfer':'Pah','fillet':'Radyüs','cosmetic_thread':'Kozmetik diş'}

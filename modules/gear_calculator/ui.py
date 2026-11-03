@@ -1,8 +1,8 @@
 """Turkish Qt workbench. Basic math is synchronous; CAD runs in a bounded process."""
 
-from PySide6.QtCore import Qt,QTimer,QSignalBlocker,QLocale
-from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QComboBox,QDoubleSpinBox,
-    QSpinBox,QCheckBox,QTabWidget,QStackedWidget,QTableWidget,QTableWidgetItem,
+from gui_qt.components import NumberSpinBox, turkish_locale
+from PySide6.QtCore import Qt,QTimer,QSignalBlocker
+from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QComboBox,QSpinBox,QCheckBox,QTabWidget,QStackedWidget,QTableWidget,QTableWidgetItem,
     QHeaderView,QFileDialog,QAbstractItemView)
 from gui_qt.components import BasePage,button,label,scroll
 from .models import GearSpecification,GearPairSpecification,LoadSpecification
@@ -19,29 +19,8 @@ def number(value):
     return f'{value:,.4f}'.replace(',',' ').replace('.',',').rstrip('0').rstrip(',')
 
 
-def turkish_locale():
-    """tr_TR number format (decimal comma) without the ambiguous '1.500' grouping."""
-    locale=QLocale(QLocale.Turkish,QLocale.Turkey)
-    locale.setNumberOptions(QLocale.OmitGroupSeparator|QLocale.RejectGroupSeparator)
-    return locale
-
-
-class EngineeringSpinBox(QDoubleSpinBox):
-    """Decimal comma, right-aligned; keeps full precision but hides trailing zeros.
-
-    The stored value still rounds to ``decimals()`` places, so engineering
-    precision is unchanged: 2.0000 is shown as 2 and 0.0125 as 0,0125.
-    """
-    def __init__(self,decimals=4,parent=None):
-        super().__init__(parent)
-        self.setLocale(turkish_locale());self.setDecimals(decimals)
-        self.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
-
-    def textFromValue(self,value):
-        text=self.locale().toString(float(value),'f',self.decimals())
-        point=self.locale().decimalPoint()
-        if point in text:text=text.rstrip('0').rstrip(point)
-        return '0' if text in ('-0','') else text
+class EngineeringSpinBox(NumberSpinBox):
+    """Gear form number field; the shared design-system spin box."""
 
 
 def number_box(integer=False,decimals=4):

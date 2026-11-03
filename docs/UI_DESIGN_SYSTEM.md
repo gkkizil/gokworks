@@ -75,7 +75,11 @@ kullanılmaz.
 | Sayfa komutu | `BasePage.action(title, cb, primary=)` | Başlık satırının sağında, ikonlu |
 | Ayırıcı | `separator(vertical=False)` | Kart yerine bölge ayırma |
 | Bölüm başlığı | `section_header(title, *widgets)` | Sol başlık, sağda küçük komutlar |
+| Düz grup | `pane(title, rule=False)` | Kart yerine çerçevesiz başlıklı grup; hesap ekranları |
 | Panel | `card(title)` | Yalnız gerçekten ayrı bir grup gerektiğinde |
+| Sayı alanı | `NumberSpinBox(decimals)` | Virgüllü, sağa hizalı, gereksiz sıfırsız; `turkish_locale()` |
+| Uyarlanır satır | `AdaptiveRow(*widgets)` | Dar sütunda alt alta, genişte yan yana komutlar |
+| Durum hücresi | `StatusDelegate(appearance)` | Yalnız durum hücresini anlam rengiyle boyar |
 | Form | `ValueForm.text/combo/check/path` | Değerleri ayarlara otomatik kaydeder |
 | Dosya alanı | `PathPicker` / `ValueForm.path` | Dar sütunda `stack_fields()` |
 | Tablo | `configure_view(view)` | Sola hizalı başlık, ızgarasız, sıralanabilir |
