@@ -335,25 +335,43 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
             with session.folded(model, exported_configuration) as (configuration, _):
                 if session.rebuild_pending(model) is not False:
                     raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
-                body, _ = session.body(model, request.body_ref)
-                reference = session.persistent_ref(model, body)
-                update = optional(model, 'GetUpdateStamp')
-                update = update if type(update) is int else None
-                revision = (str(Path(request.source).resolve()), before, configuration, reference, update)
-                # Update counters can restart when a document is reopened.
-                # Unsaved geometry cannot rely on file revision + counter to
-                # identify its contents across document lifetimes.
-                cache_mesh = update is not None and optional(model, 'GetSaveFlag') is False
-                mesh = cache.get(revision) if cache_mesh else None
-                cached = mesh is not None
-                mesh_started = perf_counter()
-                if mesh is None:
-                    mesh = session.triangles(body, stop)
-                timings.append(('3D', perf_counter()-mesh_started))
-                metadata_started = perf_counter()
-                info = session.metadata(model, configuration, request, reference, selected=body)
-                timings.append(('bilgiler', perf_counter()-metadata_started))
-                body = None
+                # SOLIDWORKS can advance its own update counter while a clean (saved,
+                # unmodified) document is tessellated or its cut list is read. That is
+                # not a user change: re-read once and publish only a read during which
+                # the counter stayed put. A dirty document or a changed file is refused.
+                for attempt in range(2):
+                    body, _ = session.body(model, request.body_ref)
+                    reference = session.persistent_ref(model, body)
+                    update = optional(model, 'GetUpdateStamp')
+                    update = update if type(update) is int else None
+                    revision = (str(Path(request.source).resolve()), before, configuration, reference, update)
+                    # Update counters can restart when a document is reopened.
+                    # Unsaved geometry cannot rely on file revision + counter to
+                    # identify its contents across document lifetimes.
+                    cache_mesh = update is not None and optional(model, 'GetSaveFlag') is False
+                    mesh = cache.get(revision) if cache_mesh else None
+                    cached = mesh is not None
+                    mesh_started = perf_counter()
+                    if mesh is None:
+                        mesh = session.triangles(body, stop)
+                    timings.append(('3D', perf_counter()-mesh_started))
+                    metadata_started = perf_counter()
+                    info = session.metadata(model, configuration, request, reference, selected=body)
+                    timings.append(('bilgiler', perf_counter()-metadata_started))
+                    body = None
+                    checkpoint(stop)
+                    if file_stamp(request.source) != before:
+                        raise ApiError('Kaynak dosya önizleme sırasında değişti (diskte kaydedildi); '
+                                       'eski geometri gösterilmedi. Yenileyin.')
+                    if optional(model, 'GetUpdateStamp') == update:
+                        break
+                    if attempt == 0 and optional(model, 'GetSaveFlag') is False:
+                        # Same saved file, clean document: an internal recompute. The
+                        # flat came from that same file; only 3D/metadata are re-read.
+                        continue
+                    raise ApiError('Kaynak önizleme sırasında değişti: SOLIDWORKS modeli güncellendi'
+                                   + (' (kaydedilmemiş değişiklik var)' if optional(model, 'GetSaveFlag') else '')
+                                   + '; eski geometri gösterilmedi. Yenileyin.')
                 if configuration != exported_configuration:
                     warnings.append(f'3D: türetilmiş açınımın üst konfigürasyonu {configuration}; çıktı: {exported_configuration}.')
                 if optional(model, 'GetSaveFlag', default=False):
@@ -364,9 +382,6 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                         info.append(('Açınım sınırları', f'{c-a:.2f} × {d-b:.2f} mm'))
                     if flat.cut_length is not None:
                         info.append(('DXF çizgi toplamı ≈', f'{flat.cut_length:.2f} mm · katman sınıflamasıyla'))
-                checkpoint(stop)
-                if file_stamp(request.source) != before or optional(model, 'GetUpdateStamp') != update:
-                    raise ApiError('Kaynak önizleme sırasında değişti; eski geometri gösterilmedi. Yenileyin.')
                 cache_mesh &= optional(model, 'GetSaveFlag') is False
                 payload = Payload(request.source, configuration, mesh, flat, tuple(info), revision, tuple(warnings), cached)
         finally:

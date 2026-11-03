@@ -120,6 +120,7 @@ def test_revision_change_after_early_flat_invalidates_entire_capture(native):
         original = body.GetFaces
         def faces():
             model.GetUpdateStamp = lambda: 11
+            model.GetSaveFlag = lambda: True      # a real (unsaved) edit, not an internal recompute
             return original()
         body.GetFaces = faces
     with pytest.raises(ApiError, match='sırasında değişti'):

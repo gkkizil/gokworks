@@ -112,13 +112,43 @@ def test_explicit_persistent_reference_can_select_only_the_matching_body(source)
     assert capture(source, request).mesh.triangles == 1
 
 
-def test_change_during_mesh_read_prevents_publication_and_restores_session(source):
+def test_user_edit_during_mesh_read_prevents_publication_and_restores_session(source):
     app, model, previous, body, _, _ = source
     def changed(*args):
         model.GetUpdateStamp = lambda: 11
+        model.GetSaveFlag = lambda: True          # the user edited the open part
         return (0, 0, 0, .01, 0, 0, 0, .02, 0)
     body.GetFaces = lambda: (NS(GetTessTriangles=changed),)
-    with pytest.raises(api.ApiError, match='sırasında değişti'): capture(source)
+    with pytest.raises(api.ApiError, match='sırasında değişti.*kaydedilmemiş'): capture(source)
+    assert app.ActiveDoc is previous and not app.saves
+
+
+def test_internal_counter_bump_on_a_clean_part_is_reread_and_shown(source):
+    """Regression: SOLIDWORKS advanced its own update counter while a saved, unmodified
+    multibody sheet part was tessellated; the preview refused with 'Kaynak önizleme
+    sırasında değişti'. A clean document and an unchanged file are re-read once."""
+    app, model, previous, body, _, _ = source
+    reads = []
+    def bump_once(*args):
+        reads.append(1)
+        if len(reads) == 1:
+            model.GetUpdateStamp = lambda: 11
+        return (0, 0, 0, .01, 0, 0, 0, .02, 0)
+    body.GetFaces = lambda: (NS(GetTessTriangles=bump_once),)
+    payload = capture(source)
+    assert payload.mesh.triangles == 1 and payload.revision[-1] == 11 and len(reads) == 2
+    assert app.ActiveDoc is previous and not app.saves
+
+
+def test_counter_that_keeps_changing_is_refused(source):
+    app, model, previous, body, _, _ = source
+    stamp = [10]
+    def always(*args):
+        stamp[0] += 1
+        model.GetUpdateStamp = lambda value=stamp[0]: value
+        return (0, 0, 0, .01, 0, 0, 0, .02, 0)
+    body.GetFaces = lambda: (NS(GetTessTriangles=always),)
+    with pytest.raises(api.ApiError, match='SOLIDWORKS modeli güncellendi'): capture(source)
     assert app.ActiveDoc is previous and not app.saves
 
 
