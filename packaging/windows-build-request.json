@@ -1,9 +1,9 @@
 {
-  "request_id": "20261029-192003-pdf-export-fix-exe",
-  "requested_at": "2026-10-29T19:20:03+00:00",
-  "source_commit": "9c70035cece1135b1f1586e95fedeb3573c5940e",
+  "request_id": "20261103-031500-ui-redesign-exe",
+  "requested_at": "2026-11-03T03:15:00+00:00",
+  "source_commit": "496b4efe0fd2419adeb51090b2573ef829b24799",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Update the requested Windows EXE after the reported PDF save error while manual SolidWorks export succeeds. Include the current SaveAs3/all-sheet PDF adapter, bounded legacy compatibility retry, non-hidden temporary filenames, ownership-safe cleanup and cancellation handling. Local PDF/IPC/GUI regression checks passed; the new Windows PDF export workflow checks native pywin32 variants and worker/UI behavior. Live SOLIDWORKS document export remains opt-in and was not run in CI. Retain the previously requested fast packaging profile; do not rerun the full regression suite during packaging. Keep the real onefile EXE build, all three DPI application/CAD self-checks and download integrity verification.",
+  "reason": "Build the Windows EXE with the new design system and UI redesign: token-based dark/light theme, flat shell with SolidWorks connection indicator, reworked Nesting, export, calculation and shaft/gear screens, ISO fits scroll-recursion crash fix, 150 ms page fade (can be disabled in Settings), smoother 3D DXF preview dragging and delayed OpenGL fallback. Linux full suite passed (2291 passed, 66 skipped); Windows BOM/shaft UI, Nesting, performance and shaft bridge workflows passed on main. Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
   "cancelled": false
 }
