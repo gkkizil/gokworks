@@ -319,7 +319,7 @@ namespace Gokworks.ShaftInterop
                 Report("Görünüşler oluşturuluyor");
                 var views = new Dictionary<string, IView>();
                 var viewBoxes = D(layout["views"]);
-                IView main = MainView(drawing, partPath, shaft, BoxCentre(viewBoxes, "main"));
+                IView main = MainView(drawing, part, partPath, shaft, BoxCentre(viewBoxes, "main"));
                 if (B(D(((ArrayList)plan["views"])[0]), "hidden_lines"))
                     main.SetDisplayMode4(false, (int)swDisplayMode_e.swHIDDEN_GREYED, false, true, false);
                 views["main"] = main;
@@ -336,7 +336,7 @@ namespace Gokworks.ShaftInterop
                         if (kind == "projected") created = Projected(drawing, main, at);
                         else if (kind == "section") created = Section(drawing, main, shaft, N(v, "x"), S(v, "label"), at);
                         else if (kind == "detail") created = Detail(drawing, main, shaft, v, factor, at);
-                        else if (kind == "iso") created = (IView)drawing.CreateDrawViewFromModelView3(partPath, "*Isometric", at[0], at[1], 0);
+                        else if (kind == "iso") created = ModelView(drawing, part, partPath, 7, at);
                         if (created == null) message = "SOLIDWORKS görünüşü oluşturmadı.";
                         else views[id] = created;
                     }
@@ -501,17 +501,53 @@ namespace Gokworks.ShaftInterop
             return (double[])((IMathPoint)p.MultiplyTransform(view.ModelToViewTransform)).ArrayData;
         }
 
-        private static IView MainView(IDrawingDoc drawing, string partPath, Shaft shaft, double[] at)
+        // swStandardViews_e order. A localized SOLIDWORKS names these views in its own
+        // language (Turkish "*Ön", Chinese "*前视", PT-BR "*Frontal"), and
+        // CreateDrawViewFromModelView3 silently returns null for the English name.
+        // IModelDoc2.GetModelViewNames lists them in this fixed order (index ==
+        // swStandardViews_e), so the name is read from the part itself.
+        private static readonly string[] EnglishViews = { "*Normal To", "*Front", "*Back", "*Left", "*Right", "*Top", "*Bottom", "*Isometric" };
+
+        internal static List<string> ViewNameCandidates(object modelViewNames, int standardView)
+        {
+            var candidates = new List<string>();
+            object[] names = modelViewNames as object[];
+            if (names != null && standardView < names.Length)
+            {
+                string local = names[standardView] as string;
+                if (!String.IsNullOrEmpty(local) && local.StartsWith("*")) candidates.Add(local);
+            }
+            if (!candidates.Contains(EnglishViews[standardView])) candidates.Add(EnglishViews[standardView]);
+            return candidates;
+        }
+
+        private static IView ModelView(IDrawingDoc drawing, IModelDoc2 part, string partPath, int standardView, double[] at)
+        {
+            object names = null;
+            try { names = part.GetModelViewNames(); } catch (COMException) { }
+            var tried = new List<string>();
+            foreach (string name in ViewNameCandidates(names, standardView))
+            {
+                tried.Add(name);
+                IView view = (IView)drawing.CreateDrawViewFromModelView3(partPath, name, at[0], at[1], 0);
+                if (view != null) return view;
+            }
+            throw new InvalidOperationException("Model görünüşü oluşturulamadı (denenen adlar: " + String.Join(", ", tried) + ").");
+        }
+
+        private static IView MainView(IDrawingDoc drawing, IModelDoc2 part, string partPath, Shaft shaft, double[] at)
         {
             // The viewer must look along +Normal so that +Axis is right and +Radial (keyway) is up.
-            string[] names = { "*Front", "*Back", "*Top", "*Bottom", "*Right", "*Left" };
+            // Front, Back, Top, Bottom, Right, Left as swStandardViews_e values.
+            int[] names = { 1, 2, 5, 6, 4, 3 };
             double[][] eyes = { new double[] { 0, 0, 1 }, new double[] { 0, 0, -1 }, new double[] { 0, 1, 0 },
                                 new double[] { 0, -1, 0 }, new double[] { 1, 0, 0 }, new double[] { -1, 0, 0 } };
             int best = 0; double score = -2;
             for (int i = 0; i < names.Length; i++) { double d = Shaft.Dot(eyes[i], shaft.Normal); if (d > score) { score = d; best = i; } }
             Need(score > 1 - 1e-6, "Mil profil düzlemi standart model görünüşlerine dik değil; ana görünüş yönü belirlenemedi.");
-            IView view = (IView)drawing.CreateDrawViewFromModelView3(partPath, names[best], at[0], at[1], 0);
-            Need(view != null, "Ana görünüş oluşturulamadı.");
+            IView view;
+            try { view = ModelView(drawing, part, partPath, names[best], at); }
+            catch (InvalidOperationException error) { throw new InvalidOperationException("Ana görünüş oluşturulamadı: " + error.Message); }
             view.UseSheetScale = 1;
             double[] o = ToSheet(view, shaft, 0, 0, 0), a = ToSheet(view, shaft, 100, 0, 0);
             double angle = Math.Atan2(a[1] - o[1], a[0] - o[0]);

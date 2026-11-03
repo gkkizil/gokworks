@@ -35,3 +35,19 @@ def test_reopened_part_is_saved_after_verification_and_before_success():
 def test_drawing_host_still_refuses_a_modified_part():
     # The drawing must keep binding to the saved model only; the fix is upstream.
     assert re.search(r'Need\(!part\.GetSaveFlag\(\),', DRAWING.read_text(encoding='utf-8'))
+
+
+def test_drawing_views_use_the_parts_own_localized_view_names():
+    """Turkish (or any localized) SOLIDWORKS names '*Front' differently; the English
+    name made CreateDrawViewFromModelView3 return null ('Ana görünüş oluşturulamadı').
+    Names come from IModelDoc2.GetModelViewNames (index == swStandardViews_e)."""
+    source = DRAWING.read_text(encoding='utf-8')
+    calls = re.findall(r'CreateDrawViewFromModelView3\(([^;]*)\);', source)
+    assert calls and all('"*' not in call for call in calls)          # no hard-coded view name
+    assert 'part.GetModelViewNames()' in source
+    english = re.search(r'EnglishViews = \{([^}]*)\}', source).group(1)
+    assert [name.strip().strip('"') for name in english.split(',')] == [
+        '*Normal To', '*Front', '*Back', '*Left', '*Right', '*Top', '*Bottom', '*Isometric']
+    # Front, Back, Top, Bottom, Right, Left mapped to swStandardViews_e values.
+    assert 'int[] names = { 1, 2, 5, 6, 4, 3 };' in source
+    assert 'ModelView(drawing, part, partPath, 7, at)' in source       # isometric
