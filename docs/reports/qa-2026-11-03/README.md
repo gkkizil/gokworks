@@ -6,7 +6,7 @@ ayarlar, tema, rapor yazıcıları). Test ortamı: Linux bulut kapsayıcısı, P
 koşar. **Bu ortamda SOLIDWORKS yoktur**; SOLIDWORKS testleri aşağıda
 "Çalıştırılamayan" olarak ayrı gösterilir ve başarılı sayılmamıştır.
 
-Başlangıç sürümü `bfa16ce`, bitiş sürümü `6d15c76` (ve bu rapor).
+Başlangıç sürümü `bfa16ce`, bitiş sürümü `a7ecc37` (ve bu rapor).
 
 ## A. Genel durum
 
@@ -19,7 +19,7 @@ Başlangıç sürümü `bfa16ce`, bitiş sürümü `6d15c76` (ve bu rapor).
 | Başarısız (FAIL) | **0** |
 | Çalıştırılamayan (NOT RUN) | **69**, hepsi Windows / canlı SOLIDWORKS / ODA gerektiriyor |
 | Bu çalışmada eklenen test | 64 (8 dosya) |
-| Bulunan ve düzeltilen hata | 6 (P1: 1, P2: 3, P3: 2) |
+| Bulunan ve düzeltilen hata | 7 (P1: 1, P2: 4, P3: 2) |
 
 Test sayıları `python -m pytest -q -rsfE` tam koşusundan alınmıştır. Testleri
 geçirmek için hiçbir test silinmedi, atlanmadı veya zayıflatılmadı.
@@ -55,7 +55,7 @@ geçirmek için hiçbir test silinmedi, atlanmadı veya zayıflatılmadı.
 | Tolerans yığılması | 144 | 142 | 0 | 2 | PASS (1 kusur düzeltildi) |
 | Cıvata hesabı | 18 | 18 | 0 | 0 | PASS |
 | Hızlı tork | 77 | 77 | 0 | 0 | PASS |
-| Ağırlık hesabı | 108 | 108 | 0 | 0 | PASS |
+| Ağırlık hesabı | 108 | 108 | 0 | 0 | PASS (1 hata düzeltildi) |
 | Nesting | 309 | 308 | 0 | 1 | PASS (gerçek DWG/ODA NOT RUN) |
 | Profil kesim | 120 | 119 | 0 | 1 | PASS (Weldment NOT RUN) |
 | Parametrik mil | 311 | 262 | 0 | 49 | Hesap/plan PASS · **SOLIDWORKS modelleme NOT RUN** |
@@ -67,12 +67,13 @@ geçirmek için hiçbir test silinmedi, atlanmadı veya zayıflatılmadı.
 
 | # | Öncelik | Modül | Hata | Kök neden | Düzeltme | Tekrar test |
 |---|---|---|---|---|---|---|
-| 1 | **P1** | Ortak iş yöneticisi (tüm modüllerin arka plan işleri) | Arka plan işi biterken arayüz kilitlenebiliyordu ("Yanıt vermiyor"). Tam test paketi bir profil kesim sekmesi değişiminde takılınca bulundu. | `JobWorker` kendi QThread'inde `deleteLater` ile siliniyordu. `~QObject` Qt sinyal kilidini tutarken PySide GIL istiyor; aynı anda GUI iş parçacığı GIL'i tutup `connect()` içinde aynı kilidi bekliyordu (ABBA). | Worker iş bitince GUI iş parçacığına taşınıyor; native iş parçacığı kapandıktan sonra orada siliniyor (`gui_qt/workers.py`). | Eski kod: 600 işlik stres testi kilitlendi. Yeni kod: ~7 sn'de PASS ve tüm worker'lar GUI iş parçacığında siliniyor (`tests/test_qa_job_worker_deadlock.py`). |
+| 1 | **P1** | Ortak iş yöneticisi (tüm modüllerin arka plan işleri) | Arka plan işi biterken arayüz kilitlenebiliyordu ("Yanıt vermiyor"). Tam test paketi bir profil kesim sekmesi değişiminde takılınca bulundu. | `JobWorker` kendi QThread'inde `deleteLater` ile siliniyordu. `~QObject` Qt sinyal kilidini tutarken PySide GIL istiyor; aynı anda GUI iş parçacığı GIL'i tutup `connect()` içinde aynı kilidi bekliyordu (ABBA). | Worker, native iş parçacığı kapandıktan (join) sonra GUI iş parçacığında `shiboken6.delete` ile siliniyor (`gui_qt/workers.py`). İlk denenen `moveToThread` yöntemi Windows CI'da COM işlerinde sorun çıkardığı için bırakıldı. | Eski kod: 600 işlik stres testi kilitlendi. Yeni kod: ~7 sn'de PASS ve 600 worker'ın tamamı serbest bırakılıyor (`tests/test_qa_job_worker_deadlock.py`). |
 | 2 | P2 | Ayarlar | `settings.json` içinde `NaN` varsa her çıkışta "Ayarlar kaydedilemedi" uyarısı çıkıyor, ayarlar bir daha kaydedilmiyordu. | `json.loads` NaN'ı kabul ediyor, `save_settings` ise `allow_nan=False` ile reddediyor. | NaN/Infinity içeren dosya bozuk sayılıyor: `settings.invalid-*.json` olarak yedekleniyor, temiz ayarla devam ediliyor. | `tests/test_qa_damaged_settings.py` PASS (düzeltmesiz FAIL) |
 | 3 | P2 | Geometrik toleranslar (ayrıca bağımsız dişli penceresi) | Ayar dosyasında `gdt_kind` liste/sözlük olursa sayfa açılmıyordu (`unhashable type`). | Ayar değeri tür kontrolü olmadan sözlük anahtarı olarak kullanılıyordu. | Metin olmayan değer varsayılana düşüyor. | Aynı test, 41 anahtar × 6 tür: PASS |
 | 4 | P2 | CSV raporları (hesap sayfaları, aktarım günlüğü, DXF sac listesi) | Yazma yarıda kesilirse (disk dolu, dosya kilitli) kullanıcının var olan dosyası yarım/bozuk kalıyordu. | Hedef dosyaya doğrudan `open('w')` ile yazılıyordu. | `shared/files.write_csv_atomic`: geçici dosyaya yaz, tamamlanınca yerine koy. | `tests/test_qa_atomic_reports.py` PASS: hata anında eski dosya korunuyor, geçici dosya kalmıyor. |
 | 5 | P3 | Nesting DXF içe aktarma | Boş veya bozuk DXF dosyasında kullanıcı İngilizce `is not a DXF file` görüyordu. | ezdxf'in ham hata metni olduğu gibi gösteriliyordu. | Türkçe, dosya adlı ve yönlendirici mesaj. Eksik dosya `FileNotFoundError` olarak kalıyor. | `test_dxf_open_errors.py` PASS |
 | 6 | P3 | Tolerans yığılması | "+ / −" düğme metni her ölçekte 5 px kesiliyordu. | Genişlik yalnız fonttan hesaplanıyor, tema dolgusu hesaba katılmıyordu. | Genişlik `sizeHint` ile hesaplanıyor. | `test_qa_no_clipped_text.py` PASS (düzeltmesiz FAIL); 3 çözünürlük × 3 ölçekte 0 kusur |
+| 7 | P2 | Ağırlık hesabı · Aktif CAD modelinden hesapla | SOLIDWORKS okuması başarısız olunca gösterilen hata, sonraki ilk yeniden hesaplamada siliniyordu; kullanıcı hatayı göremeyebiliyordu. Windows CI'da bulundu. | Hata yalnız etikete yazılıyordu; `update_result` → `update_cad_comparison` etiketi varsayılan metne döndürüyordu. | Hata sayfa durumu olarak tutuluyor; yeni okuma veya başarılı sonuçla temizleniyor; başarısız yeniden okuma eski model verisini de bırakıyor. | `test_weight_cad_button_reports_missing_solidworks` yeniden hesaplama sonrasını da kontrol ediyor: düzeltmesiz FAIL, düzeltmeyle PASS |
 
 Düzeltme gerektirmeyen notlar:
 
@@ -110,6 +111,8 @@ Ek ölçümler (`bfa16ce` öz denetim ve stres testi):
 | `d62894d` | `shared/files.py` (yeni), `gui_qt/calculations.py`, `gui_qt/components.py`, `modules/dxf_dwg/ui.py`, `modules/nesting/dxf_import.py`, `modules/tolerance_stack/ui.py` | Atomik CSV, Türkçe DXF hataları, kesik düğme |
 | `b324b33` | `gui_qt/workers.py` | P1 kilitlenme düzeltmesi |
 | `6d15c76` | `shared/settings.py`, `gui_qt/settings.py`, `modules/geometric_tolerances/ui.py`, `modules/gear_calculator/__main__.py` | Bozuk ayar dayanıklılığı |
+| `888a059` | `gui_qt/workers.py`, test kimlikleri | Worker'ın join sonrası eşzamanlı silinmesi; Windows çalıştırıcısının adresleyebileceği test kimlikleri (rastgele bayt içeren kimlik Windows Nesting CI'ı kırmıştı) |
+| `a7ecc37` | `modules/weight/ui.py`, `tests/test_qt_workflows.py` | CAD hata mesajının korunması |
 
 Eklenen testler:
 
