@@ -47,20 +47,33 @@ def test_every_column_is_draggable_and_the_elastic_column_fills_the_view(qtbot):
     assert view.horizontalScrollBar().maximum() == 0
 
 
-def test_dragging_a_column_keeps_the_table_inside_the_view(qtbot):
-    view, header, _ = table(qtbot, elastic=0, minimum=100)
-    header.resizeSection(1, header.sectionSize(1) + 60)
-    assert used(header) == view.viewport().width()
+def test_dragging_changes_only_that_column_like_a_spreadsheet(qtbot):
+    view, header, fitter = table(qtbot, elastic=0, minimum=100)
+    before = [header.sectionSize(c) for c in range(4)]
+    header.resizeSection(1, before[1] + 200)
+    after = [header.sectionSize(c) for c in range(4)]
+    assert after == [before[0], before[1] + 200, before[2], before[3]]
+    qtbot.waitUntil(lambda: view.horizontalScrollBar().maximum() > 0, timeout=1000)
+    assert fitter.manual
     header.resizeSection(3, 30)
-    assert used(header) == view.viewport().width() and header.sectionSize(3) == 30
+    assert header.sectionSize(0) == before[0] and header.sectionSize(1) == before[1] + 200
+    assert used(header) < view.viewport().width() + 200   # shrinking leaves empty space, nothing moves
 
 
-def test_dragging_the_elastic_edge_moves_the_boundary_with_its_neighbour(qtbot):
+def test_dragging_the_elastic_column_does_not_move_its_neighbour(qtbot):
     view, header, _ = table(qtbot, elastic=0, minimum=100)
-    before, neighbour = header.sectionSize(0), header.sectionSize(1)
-    header.resizeSection(0, before - 40)
-    assert header.sectionSize(1) == neighbour + 40
-    assert used(header) == view.viewport().width()
+    neighbour = header.sectionSize(1)
+    header.resizeSection(0, header.sectionSize(0) - 40)
+    assert header.sectionSize(1) == neighbour
+    assert used(header) == view.viewport().width() - 40
+
+
+def test_manual_widths_survive_view_resize_and_content_changes(qtbot):
+    view, header, _ = table(qtbot, elastic=0, minimum=100)
+    header.resizeSection(2, 150)
+    widths = [header.sectionSize(c) for c in range(4)]
+    view.resize(900, 240); view.model().layoutChanged.emit(); qtbot.wait(30)
+    assert [header.sectionSize(c) for c in range(4)] == widths
 
 
 def test_a_narrow_view_scrolls_instead_of_clipping_the_elastic_column(qtbot):
@@ -69,13 +82,13 @@ def test_a_narrow_view_scrolls_instead_of_clipping_the_elastic_column(qtbot):
     assert view.horizontalScrollBar().maximum() > 0
 
 
-def test_view_resize_refits_and_double_click_fits_contents(qtbot):
+def test_automatic_layout_refits_until_touched_and_double_click_fits_contents(qtbot):
     view, header, fitter = table(qtbot, elastic=3, minimum=80)
     view.resize(900, 240); qtbot.wait(20)
     assert used(header) == view.viewport().width()
+    width3 = header.sectionSize(3)
     fitter.fit_to_contents(0)
-    assert header.sectionSize(0) >= view.sizeHintForColumn(0)
-    assert used(header) == view.viewport().width()
+    assert header.sectionSize(0) >= view.sizeHintForColumn(0) and header.sectionSize(3) == width3
 
 
 def test_user_widths_persist_and_reset_restores_defaults(qtbot, tmp_path):
@@ -84,12 +97,14 @@ def test_user_widths_persist_and_reset_restores_defaults(qtbot, tmp_path):
                                  settings=settings, key='test.table')
     header.resizeSection(2, 150)
     fitter._save()
-    assert settings.get('columns/test.table') == {'2': 150}
-    again, header2, _ = table(qtbot, elastic=0, minimum=100, defaults={1: 90, 2: 90, 3: 90},
-                              settings=settings, key='test.table')
-    assert header2.sectionSize(2) == 150
+    saved = settings.get('columns/test.table')
+    assert saved['2'] == 150 and saved == {str(c): header.sectionSize(c) for c in range(4)}
+    again, header2, fitter2 = table(qtbot, elastic=0, minimum=100, defaults={1: 90, 2: 90, 3: 90},
+                                    settings=settings, key='test.table')
+    assert fitter2.manual and [header2.sectionSize(c) for c in range(4)] == [saved[str(c)] for c in range(4)]
     fitter.reset()
-    assert header.sectionSize(2) == 90 and settings.get('columns/test.table') == {}
+    assert not fitter.manual and header.sectionSize(2) == 90 and settings.get('columns/test.table') == {}
+    assert used(header) == view.viewport().width()
 
 
 def test_invalid_saved_widths_are_ignored(qtbot, tmp_path):

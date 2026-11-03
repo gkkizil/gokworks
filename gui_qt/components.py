@@ -4,11 +4,11 @@ import csv
 from pathlib import Path, PureWindowsPath
 
 from PySide6.QtCore import Qt, QTimer, Signal, QUrl, QSize, QEvent, QObject
-from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette, QColor
+from PySide6.QtGui import QCursor, QDesktopServices, QKeySequence, QShortcut, QPainter, QPalette, QColor
 from PySide6.QtWidgets import (QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
     QFormLayout, QLineEdit, QComboBox, QCheckBox, QPushButton, QScrollArea,
     QFileDialog, QTableView, QTreeView, QHeaderView, QAbstractItemView,
-    QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication,
+    QTabWidget, QPlainTextEdit, QDialog, QDialogButtonBox, QApplication, QToolTip,
     QToolButton, QToolBar, QBoxLayout, QMenu, QSplitter, QSizePolicy, QListView,
     QDoubleSpinBox, QStyledItemDelegate)
 
@@ -828,18 +828,20 @@ class AdaptiveRow(QWidget):
 
 
 class ColumnFitter(QObject):
-    """One consistent column behaviour for every table and tree in GOKWORKS.
+    """One consistent, spreadsheet-like column behaviour for every table and tree.
 
-    * Every column is draggable (Interactive); fixed columns stay fixed.
-    * One *elastic* column absorbs the free width, so the view never shows an
-      empty band or an unnecessary horizontal scroll bar. It keeps a readable
-      minimum; below that the view scrolls horizontally instead of clipping.
-    * Dragging the elastic column's own edge moves the boundary with its right
-      neighbour (splitter-like) instead of pushing the table off-screen.
-    * Columns listed in ``autofit`` follow their contents until the user
-      resizes them; double-clicking a handle fits a column to its contents.
-    * Optional ``settings``/``key`` remember user widths across sessions.
-    * Header context menu: fit all columns to contents / restore defaults.
+    Automatic layout (until the user touches a column):
+    * one *elastic* column takes the free width (never below ``minimum``;
+      a narrow view scrolls instead of clipping), other columns follow their
+      contents (``autofit``) or use ``defaults``.
+
+    Manual layout (as in Excel, from the first drag on):
+    * dragging an edge changes only that column; no other column moves.
+      Growing shows a horizontal scroll bar, shrinking leaves empty space;
+    * the width is shown next to the cursor while dragging;
+    * double-clicking an edge fits that column to its contents;
+    * widths are remembered per view (``settings``/``key``);
+    * header menu: fit all columns to contents / back to automatic layout.
     """
 
     MAX_AUTOFIT = 420
@@ -855,6 +857,7 @@ class ColumnFitter(QObject):
         self.fixed = set(fixed)
         self.settings, self.key = settings, key
         self.user = set()
+        self.manual = False
         self._guard = False
         self.header.setStretchLastSection(False)
         self.header.setCascadingSectionResizes(False)
@@ -919,7 +922,7 @@ class ColumnFitter(QObject):
                 if c != elastic and c < self.header.count() and not self.header.isSectionHidden(c)}
 
     def _autofit(self):
-        if not self.alive:
+        if not self.alive or self.manual:
             return
         columns = self._auto_columns() if self.autofit else set()
         if not columns:
@@ -979,7 +982,7 @@ class ColumnFitter(QObject):
 
     def fit(self):
         """Give the elastic column exactly the free width (or its minimum)."""
-        if not self.alive:
+        if not self.alive or self.manual:
             return
         elastic = self.elastic_column()
         if elastic is None or elastic >= self.header.count() or self.header.isSectionHidden(elastic):
@@ -994,35 +997,18 @@ class ColumnFitter(QObject):
             finally:
                 self._guard = False
 
-    def _neighbour(self, column):
-        visual = self.header.visualIndex(column)
-        for v in range(visual + 1, self.header.count()):
-            logical = self.header.logicalIndex(v)
-            if not self.header.isSectionHidden(logical) and logical not in self.fixed:
-                return logical
-        return None
-
     def _resized(self, column, old, new):
         if self._guard:
             return
         if new == 0 or old == 0:          # shown / hidden
-            self._autofit_timer.start(); return
-        if column == self.elastic_column():
-            neighbour = self._neighbour(column)
-            if neighbour is not None:
-                size = self.header.sectionSize(neighbour) - (new - old)
-                floor = max(self.header.minimumSectionSize(), 28)
-                self._guard = True
-                try:
-                    if size >= floor:
-                        self.header.resizeSection(neighbour, size); self.user.add(neighbour)
-                    else:
-                        self.header.resizeSection(column, old)
-                finally:
-                    self._guard = False
-        else:
-            self.user.add(column)
-            self.fit()
+            if not self.manual:
+                self._autofit_timer.start()
+            return
+        # Spreadsheet behaviour: only the dragged column changes.
+        self.manual = True
+        self.user.add(column)
+        if QApplication.mouseButtons() & Qt.LeftButton:
+            QToolTip.showText(QCursor.pos(), f'Genişlik: {new} piksel', self.header)
         self._save_timer.start()
 
     def detach(self):
@@ -1056,8 +1042,9 @@ class ColumnFitter(QObject):
 
     # -- commands ---------------------------------------------------------------
     def fit_to_contents(self, column=None):
-        columns = [column] if isinstance(column, int) else [c for c in range(self.header.count())
-                                                            if c != self.elastic_column() and c not in self.fixed]
+        """Excel double-click: fit to contents (all columns from the menu)."""
+        columns = [column] if isinstance(column, int) else [c for c in range(self.header.count()) if c not in self.fixed]
+        self.manual = True
         self._guard = True
         try:
             for c in columns:
@@ -1069,10 +1056,11 @@ class ColumnFitter(QObject):
                 self.user.add(c)
         finally:
             self._guard = False
-        self.fit(); self._save_timer.start()
+        self._save_timer.start()
 
     def reset(self):
-        self.user.clear()
+        """Back to the automatic layout and forget saved widths."""
+        self.user.clear(); self.manual = False
         if self.settings is not None and self.key:
             self.settings.set(self._settings_key(), {})
         self.apply_defaults()
@@ -1082,7 +1070,7 @@ class ColumnFitter(QObject):
     def _menu(self, point):
         menu = QMenu(self.header)
         menu.addAction('Sütunları içeriğe sığdır', self.fit_to_contents)
-        menu.addAction('Varsayılan sütun genişlikleri', self.reset)
+        menu.addAction('Otomatik sütun genişlikleri', self.reset)
         menu.exec(self.header.mapToGlobal(point))
 
     # -- persistence ----------------------------------------------------------
@@ -1092,9 +1080,10 @@ class ColumnFitter(QObject):
     def _save(self):
         if self.settings is None or not self.key:
             return
-        elastic = self.elastic_column()
-        widths = {str(c): self.header.sectionSize(c) for c in self.user
-                  if c != elastic and c < self.header.count() and not self.header.isSectionHidden(c)}
+        if not self.manual:
+            self.settings.set(self._settings_key(), {}); return
+        widths = {str(c): self.header.sectionSize(c) for c in range(self.header.count())
+                  if c not in self.fixed and not self.header.isSectionHidden(c) and self.header.sectionSize(c) > 0}
         self.settings.set(self._settings_key(), widths)
 
     def _restore(self):
@@ -1109,8 +1098,8 @@ class ColumnFitter(QObject):
                 if not str(text).isdigit() or type(width) is not int or not 28 <= width <= 1200:
                     continue
                 column = int(text)
-                if column < self.header.count() and column != self.elastic_column() and column not in self.fixed:
-                    self.header.resizeSection(column, width); self.user.add(column)
+                if column < self.header.count() and column not in self.fixed:
+                    self.header.resizeSection(column, width); self.user.add(column); self.manual = True
         finally:
             self._guard = False
 
