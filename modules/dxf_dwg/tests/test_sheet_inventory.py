@@ -352,8 +352,26 @@ def test_frozen_features_waiting_are_not_an_error(env, tmp_path, monkeypatch):
     assert calls == [] and rows[0]['exportable']
 
 
-def test_rebuild_that_does_not_settle_still_refuses_with_guidance(env, tmp_path, monkeypatch):
-    app, _, _ = env; m = part(app, tmp_path / 'Panel.SLDPRT'); app.ActiveDoc = m
+def test_flag_that_stays_after_full_rebuild_and_cut_list_update_is_a_warning(env, tmp_path, monkeypatch):
+    """Reported again on a 3-body part: still 'needs rebuild' after EditRebuild3. Cut lists are
+    updated and a full rebuild forced; if SOLIDWORKS keeps the flag the row is exported with a note."""
+    app, _, _ = env; m = part(app, tmp_path / 'Panel.SLDPRT', count=3); app.ActiveDoc = m
     calls = _rebuild_status(m, ['NonFrozenFeatureNeedsRebuild'], monkeypatch)
-    rows, _ = scan(env)
-    assert calls == [1] and not rows[0]['exportable'] and 'Ctrl+Q' in rows[0]['detail']
+    forced, updated = [], []
+    m.ForceRebuild3 = lambda top: forced.append(top) or True
+    for feature in m.features_by_config['Default']:
+        if feature.kind == 'CutListFolder':
+            spec = feature.GetSpecificFeature2
+            feature.GetSpecificFeature2 = lambda spec=spec, name=feature.Name: type('F', (), {
+                'GetBodies': spec().GetBodies, 'UpdateCutList': lambda self: updated.append(name) or True})()
+    rows, notes = scan(env)
+    assert calls == [1] and forced == [False] and len(updated) == 3
+    assert all(r['exportable'] for r in rows) and any('çıktıyı kontrol edin' in n for n in notes)
+
+
+def test_cut_list_update_that_clears_the_flag_is_reported(env, tmp_path, monkeypatch):
+    app, _, _ = env; m = part(app, tmp_path / 'Panel.SLDPRT', count=2); app.ActiveDoc = m
+    _rebuild_status(m, ['NonFrozenFeatureNeedsRebuild', 'NonFrozenFeatureNeedsRebuild', 'FullyRebuilt'], monkeypatch)
+    m.ForceRebuild3 = lambda top: m.EditRebuild3()   # counts as one more step of the status sequence
+    rows, notes = scan(env)
+    assert all(r['exportable'] for r in rows) and any('tam yeniden oluşturuldu' in n for n in notes)

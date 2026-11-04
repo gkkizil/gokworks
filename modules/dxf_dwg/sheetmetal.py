@@ -55,10 +55,33 @@ class Session(ReadSession):
             call(model, 'EditRebuild3')
         except Exception as error:
             return state, f'otomatik yeniden oluşturma başarısız ({error})'
-        after = self.rebuild_pending(model)
-        if after is False:
+        if self.rebuild_pending(model) is False:
             return False, 'model taramadan önce SolidWorks’te yeniden oluşturuldu (dosya kaydedilmedi).'
-        return after, ''
+        # Multibody sheet metal: cut list folders that are not updated automatically
+        # keep the model 'needs rebuild' after EditRebuild3. Update them and force a
+        # full rebuild of every feature (still nothing is saved).
+        updated = 0
+        try:
+            for feature, kind in list(self.cut_folders(model)):
+                if kind != 'CutListFolder':
+                    continue
+                folder = optional(feature, 'GetSpecificFeature2')
+                if folder is not None and optional(folder, 'UpdateCutList') is not None:
+                    updated += 1
+                folder = feature = None
+        except Exception:
+            pass
+        try:
+            call(model, 'ForceRebuild3', False)
+        except Exception as error:
+            return True, f'tam yeniden oluşturma başarısız ({error})'
+        if self.rebuild_pending(model) is False:
+            return False, (f'model ve {updated} kesim listesi taramadan önce güncellendi ' if updated else
+                           'model taramadan önce tam yeniden oluşturuldu ') + '(dosya kaydedilmedi).'
+        # SOLIDWORKS can keep the flag on multibody parts after a full rebuild; the
+        # geometry now is the rebuilt one, so continue and say so instead of refusing.
+        return False, ('tam yeniden oluşturmadan sonra da SolidWorks "yeniden oluşturma gerekli" bildiriyor; '
+                       'açınımlar yeniden oluşturulmuş modelden alındı, çıktıyı kontrol edin.')
 
     @contextmanager
     def configuration(self,model,name):
