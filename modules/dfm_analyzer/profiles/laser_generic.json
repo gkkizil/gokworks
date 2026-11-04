@@ -1,0 +1,28 @@
+{
+  "schema": "gokworks.dfm_profile",
+  "version": 1,
+  "id": "laser_generic",
+  "name": "Genel lazer kesim · örnek başlangıç profili",
+  "profile_version": "1.0",
+  "process": "laser",
+  "verified": false,
+  "note": "ÖRNEK BAŞLANGIÇ PROFİLİ — makine üreticisi tarafından doğrulanmış veri DEĞİLDİR. Sınırlar yaygın atölye pratiğidir (delik, kanal, et, köprü ve dil genişliği ≥ 1 × sac kalınlığı ve ≥ 1 mm); bir standart gereği değildir. Gerçek değerler makineye, lazer gücüne, gaza, malzemeye ve kesim parametrelerine bağlıdır. Kendi makineniz için doğrulanmış değerlerle bir kopya oluşturun.",
+  "closure_tolerance_mm": 0.05,
+  "short_segment_mm": 0.05,
+  "thickness_range_mm": [0.5, 25.0],
+  "materials": [],
+  "envelope_mm": [3000.0, 1500.0],
+  "rules": {
+    "DFM-GEO-001": {}, "DFM-GEO-002": {}, "DFM-GEO-003": {}, "DFM-GEO-004": {}, "DFM-GEO-005": {},
+    "DFM-GEO-006": {}, "DFM-GEO-007": {}, "DFM-GEO-008": {}, "DFM-GEO-009": {}, "DFM-GEO-010": {},
+    "DFM-GEO-011": {}, "DFM-GEO-012": {}, "DFM-GEO-013": {},
+    "DFM-LAS-001": {"severity": "WARNING", "factor_t": 1.0, "min_mm": 1.0, "reference": "Örnek profil: atölye pratiği ≥ 1 × t (doğrulanmamış)"},
+    "DFM-LAS-002": {"severity": "WARNING", "factor_t": 1.0, "min_mm": 1.0, "reference": "Örnek profil: atölye pratiği ≥ 1 × t (doğrulanmamış)"},
+    "DFM-LAS-003": {"severity": "WARNING", "factor_t": 1.0, "min_mm": 1.0, "reference": "Örnek profil: atölye pratiği ≥ 1 × t (doğrulanmamış)"},
+    "DFM-LAS-004": {"severity": "WARNING", "factor_t": 1.0, "min_mm": 1.0, "reference": "Örnek profil: atölye pratiği ≥ 1 × t (doğrulanmamış)"},
+    "DFM-LAS-005": {"severity": "WARNING", "factor_t": 1.0, "min_mm": 1.0, "reference": "Örnek profil: atölye pratiği ≥ 1 × t (doğrulanmamış)"},
+    "DFM-LAS-006": {"severity": "WARNING", "factor_t": 1.0, "min_mm": 1.0, "reference": "Örnek profil: atölye pratiği ≥ 1 × t (doğrulanmamış)"},
+    "DFM-LAS-007": {},
+    "DFM-LAS-008": {}
+  }
+}
