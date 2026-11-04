@@ -21,6 +21,9 @@ function fixture() {
     statuses.set(refs[branch], [{context: STATUS, state, description: description(base)}]);
   }
   const github = {rest: {
+    actions: {
+      createWorkflowDispatch: async args => { calls.push(['dispatch', args]); return {status: 204}; },
+    },
     repos: {
       getBranch: async ({branch}) => {
         if (!refs[branch]) throw Object.assign(new Error('Not found'), {status: 404});
@@ -197,6 +200,9 @@ test('successful validation merges with the exact head SHA and preserves the sou
   assert.equal(request.sha, item.head);
   assert.equal(request.merge_method, 'merge');
   assert.equal(f.refs[item.branch], item.head);
+  const followup = f.calls.find(([name]) => name === 'dispatch')[1];
+  assert.equal(followup.ref, 'main');
+  assert.equal(followup.workflow_id, 'agent-integration.yml');
 });
 
 test('merging one agent invalidates the other agents old base proof', async () => {
@@ -225,4 +231,17 @@ test('missing merge permission is reported as an error', async () => {
 test('unsupported branches are rejected even with a supplied candidate', async () => {
   const f = fixture();
   await assert.rejects(finish({...f, candidates: [{branch: 'untrusted'}]}), /Unsupported/);
+});
+
+test('no follow-up is dispatched when no PR was merged', async () => {
+  const f = fixture(), item = candidate(f);
+  await finish({...f, candidates: [item]});
+  assert.equal(f.calls.filter(([name]) => name === 'dispatch').length, 0);
+});
+
+test('scheduled scan remains a fallback when follow-up dispatch is unavailable', async () => {
+  const f = fixture(), item = candidate(f); f.status(item.branch);
+  f.github.rest.actions.createWorkflowDispatch = async () => { throw new Error('Workflow is being indexed'); };
+  assert.deepEqual(await finish({...f, candidates: [item]}), [item.pull]);
+  assert.ok(f.notices.some(message => message.includes('scheduled scan')));
 });

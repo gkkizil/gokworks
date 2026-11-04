@@ -72,6 +72,7 @@ jobs:
       PYTHONUTF8: '1'
       QT_QPA_PLATFORM: windows
       AGENT_BASE_SHA: ${{ matrix.base }}
+      AGENT_WORKFLOW_SHA: ${{ github.workflow_sha }}
     steps:
       - uses: actions/checkout@v4
         if: matrix.cached != true
@@ -107,12 +108,21 @@ jobs:
           python packaging/prepare_shaft_test_refs.py $directory
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
+      - name: Check COM probe test isolation before the long suite
+        if: matrix.cached != true
+        run: python -m pytest -q --timeout=60 tests/test_qt_diagnostics.py::test_connection_probe_releases_application_before_com_shutdown --junitxml=windows-tests.xml
       - name: Run the complete regression suite
         if: matrix.cached != true
         run: python packaging/run_windows_tests.py
       - name: Verify application startup
         if: matrix.cached != true
         run: python main.py --self-check agent-startup.json
+      - name: Report failed test identities and native crash details
+        if: always() && matrix.cached != true
+        run: |
+          $source = git show "${env:AGENT_WORKFLOW_SHA}:.github/scripts/report-agent-validation.py"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $source | python - .
       - name: Upload test evidence
         if: always() && matrix.cached != true
         uses: actions/upload-artifact@v4
@@ -145,6 +155,7 @@ jobs:
     if: always() && needs.prepare.result == 'success' && needs.prepare.outputs.has_work == 'true'
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
       pull-requests: write
       statuses: read

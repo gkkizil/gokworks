@@ -107,6 +107,17 @@ async function finish({github, context, core, candidates}) {
       core.notice(`${branch}: merge blocked (${error.message}); PR remains open.`);
     }
   }
+  if (merged.length) {
+    // A main update invalidates the other branch's proof. Explicit dispatch is
+    // supported for GITHUB_TOKEN, unlike the suppressed bot-generated push event.
+    try {
+      await github.rest.actions.createWorkflowDispatch({
+        ...repo, workflow_id: 'agent-integration.yml', ref: 'main', inputs: {retry_failed: 'false'},
+      });
+    } catch (error) {
+      core.notice(`Follow-up dispatch unavailable (${error.message}); the scheduled scan will retry.`);
+    }
+  }
   return merged;
 }
 

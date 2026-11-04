@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from queue import Queue
+import importlib
 import os
 import subprocess
 import sys
@@ -74,10 +75,18 @@ def test_connection_probe_releases_application_before_com_shutdown():
         app = Application()
         references.append(weakref.ref(app))
         return app
-    com = SimpleNamespace(CoInitialize=lambda: None,
-        CoUninitialize=lambda: released.append(references[0]() is None))
+    # Windows dependencies inspect pythoncom constants while importing. Keep
+    # the real module intact and replace only the lifecycle operations tested
+    # here; Linux has no pywin32 and uses the minimal stand-in instead.
+    try:
+        com = importlib.import_module('pythoncom')
+    except ImportError:
+        com = SimpleNamespace()
     events = Queue()
-    with patch.dict(sys.modules, pythoncom=com), patch('solidworks.connection.connect_to_solidworks', new=connect):
+    with patch.dict(sys.modules, pythoncom=com), \
+         patch.object(com, 'CoInitialize', new=lambda: None, create=True), \
+         patch.object(com, 'CoUninitialize', new=lambda: released.append(references[0]() is None), create=True), \
+         patch('solidworks.connection.connect_to_solidworks', new=connect):
         services.check_connection(events, None)
-    assert released == [True]
     assert events.get() == ('connection_done', dict(connected=True, revision='33.5.0'))
+    assert released == [True]

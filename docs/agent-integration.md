@@ -25,7 +25,15 @@ kullanılarak uzun ömürlü ajan dallarının geçmiş bağlantısı korunur.
 Başarısız aynı head/main çifti her taramada yeniden test edilmez. Yeni commit
 göndermek veya Actions → Agent integration → Run workflow → `retry_failed`
 seçeneğiyle yeniden denemek gerekir. Test kanıtları workflow artifacts alanında
-saklanır. Tüm entegrasyon işleri tek concurrency grubu kullanır.
+saklanır. Tüm entegrasyon işleri tek concurrency grubu kullanır. Bir PR
+birleşince güncel main üzerinden yeni tarama ayrıca tetiklenir; diğer ajan
+dalı zamanlanmış taramayı beklemeden yeni main ile doğrulanır.
+
+Windows hataları ayrıca test adı ve hata metniyle Actions anotasyonlarına
+yazılır. Yerel süreç çökmeleri de korunur. `[agent-diagnostics]` işaretli bir
+commit yalnız eski raporların teşhisini tetikler; doğrulama veya merge yapamaz.
+`Agent failure diagnostics` workflow'u önceki çalışmanın artifact'lerini okuyup
+aynı raporlayıcıyla incelemek için kullanılır.
 
 ## GitHub kurulumu
 
