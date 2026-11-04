@@ -78,6 +78,21 @@ def test_one_native_read_and_no_global_tree_walk_for_known_multibody(native):
     assert timings['toplam'] >= sum(v for k, v in timings.items() if k != 'toplam') >= 0
 
 
+def test_failed_rebuild_never_exports_or_publishes_preview(native):
+    app, model, calls, _, capture, _ = native
+    cache, published = MeshCache(), []
+    model.Extension.NeedsRebuild2 = 1
+    model.NeedsRebuild = True
+    model.EditRebuild3 = lambda: False
+    model.ForceRebuild3 = lambda top: False
+    before = Path(model.path).read_bytes()
+    with pytest.raises(ApiError, match='güncelliği'):
+        capture(cache=cache, on_flat=published.append)
+    assert not model.export_calls and not published and not cache.items
+    assert not calls['tessellations'] and not app.saves
+    assert Path(model.path).read_bytes() == before and model.selection == ['user selection']
+
+
 @pytest.mark.parametrize('hint', ['missing', 'other_body'])
 def test_wrong_feature_name_hints_fall_back_to_verified_persistent_identity(native, hint):
     _, _, calls, request, capture, _ = native
