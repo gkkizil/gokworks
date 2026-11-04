@@ -11,8 +11,13 @@ workflow dosyası henüz kendi dalında bulunmayan Claude/Codex değişiklikleri
 işleri yoğunlukta geciktirebilir.
 
 Her PR'ın kesin head SHA'sı ile tarama anındaki main SHA'sı, geçici Windows
-checkout'unda birleştirilir. Bütün pytest paketi mevcut sınırlı süreç çalıştırıcısı
-ile çalışır; C# test referansları ve uygulama açılış kontrolü de hazırlanır.
+checkout'unda birleştirilir. Uygulama değişikliklerinde bütün pytest paketi mevcut
+sınırlı süreç çalıştırıcısıyla çalışır; C# test referansları ve açılış kontrolü hazırlanır.
+Yalnız açıkça listelenmiş CI dosyaları değiştiyse aday kodun Node testleri,
+Windows yaşam döngüsü/raporlama/çalıştırıcı testleri ve uygulama açılışı sınanır.
+Başarılı aynı kaynak head'i korunup main yalnız CI dosyalarında ilerlediyse de
+bu odaklı kontrol yeterlidir; uygulama kodu aynı kalmıştır. Eksik/kırpılmış dosya
+listesi, uygulama değişikliği veya başarısız eski sonuç tam pakete döner.
 Gerçek SolidWorks gerektiren kabul testleri ayrıca uygun ortam ister.
 
 Başarılı sonuç yalnız aynı head/main çifti için kullanılabilir. Diğer ajanın
@@ -21,6 +26,8 @@ PR'ı main'i ilerletirse yeni birleşim yeniden test edilir. Başarısız test,
 birleştirilmez. Koruma kuralları ve gerekli onaylar GitHub tarafından uygulanır;
 workflow bunları kaldırmaz. Kaynak dallar silinmez veya sıfırlanmaz. Merge commit
 kullanılarak uzun ömürlü ajan dallarının geçmiş bağlantısı korunur.
+PR'ın açıldığı anda kayıtlı base SHA'sı güncel olmayabilir. Birleştirmede canlı
+main ve kaynak dalı referansları, başarılı testin SHA'larıyla iki kez karşılaştırılır.
 
 Başarısız aynı head/main çifti her taramada yeniden test edilmez. Yeni commit
 göndermek veya Actions → Agent integration → Run workflow → `retry_failed`

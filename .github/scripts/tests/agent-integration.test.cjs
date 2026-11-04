@@ -2,7 +2,7 @@
 
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
-const {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded} = require('../agent-integration.cjs');
+const {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded, automationOnly, validationMode} = require('../agent-integration.cjs');
 
 function fixture() {
   const context = {repo: {owner: 'owner', repo: 'gokworks'}, serverUrl: 'https://github.com', runId: 42};
@@ -177,14 +177,13 @@ for (const changed of ['main', 'agent/codex']) {
   });
 }
 
-for (const problem of ['closed', 'draft', 'wrong-base', 'advanced-base', 'wrong-head', 'advanced-head', 'fork']) {
+for (const problem of ['closed', 'draft', 'wrong-base', 'wrong-head', 'advanced-head', 'fork']) {
   test(`a ${problem} PR cannot enter the merge path`, async () => {
     const f = fixture(), item = candidate(f); f.status(item.branch);
     const p = f.pulls[0];
     if (problem === 'closed') p.state = 'closed';
     if (problem === 'draft') p.draft = true;
     if (problem === 'wrong-base') p.base.ref = 'release';
-    if (problem === 'advanced-base') p.base.sha = 'advanced';
     if (problem === 'wrong-head') p.head.ref = 'other';
     if (problem === 'advanced-head') p.head.sha = 'advanced';
     if (problem === 'fork') p.head.repo.full_name = 'someone/fork';
@@ -270,3 +269,51 @@ test('scheduled runs never cancel an in-progress validation', async () => {
   const f = fixture(); f.context.eventName = 'schedule';
   assert.deepEqual(await cancelSuperseded(f), []);
 });
+
+test('historical PR base metadata does not block a validated live main snapshot', async () => {
+  const f = fixture(), item = candidate(f); f.status(item.branch);
+  f.pulls[0].base.sha = 'base-recorded-when-pr-opened';
+  assert.deepEqual(await finish({...f, candidates: [item]}), [item.pull]);
+});
+
+test('main advancing while PR metadata is fetched still prevents merge', async () => {
+  const f = fixture(), item = candidate(f); f.status(item.branch);
+  f.github.rest.pulls.get = async () => { f.refs.main = 'advanced'; return {data: f.pulls[0]}; };
+  assert.deepEqual(await finish({...f, candidates: [item]}), []);
+  assert.equal(f.calls.filter(([name]) => name === 'merge').length, 0);
+});
+
+test('known CI-only changes select focused checks', () => {
+  assert.equal(automationOnly({files: [{filename: '.github/scripts/agent-integration.cjs'},
+    {filename: '.github/workflows/agent-integration.yml'}]}), true);
+});
+
+for (const files of [undefined, [], [{filename: 'gui_qt/app.py'}],
+  [{filename: '.github/scripts/agent-integration.cjs'}, {filename: 'gui_qt/app.py'}],
+  [{filename: '.github/scripts/agent-integration.cjs', previous_filename: 'modules/dfm_analyzer/ui.py'}],
+  Array.from({length: 300}, () => ({filename: '.github/scripts/agent-integration.cjs'}))]) {
+  test('application, missing or truncated scope needs the full suite: ' + JSON.stringify(files)?.slice(0, 80), () => {
+    assert.equal(automationOnly({files}), false);
+  });
+}
+
+test('a passed source head needs only CI checks when main changed exclusively in CI files', async () => {
+  const f = fixture(), oldBase = 'd'.repeat(40);
+  f.github.rest.repos.compareCommitsWithBasehead = async args => {
+    assert.equal(args.basehead, `${oldBase}...${f.refs.main}`);
+    return {data: {status: 'ahead', behind_by: 0, files: [{filename: '.github/scripts/agent-integration.cjs'}]}};
+  };
+  assert.equal(await validationMode(f.github, f.context.repo, {files: [{filename: 'modules/dfm_analyzer/ui.py'}]},
+    {state: 'success', description: description(oldBase)}, f.refs.main), 'automation');
+});
+
+for (const reason of ['application-change', 'failed-proof', 'diverged', 'missing-files']) {
+  test(`cross-base reuse is refused for ${reason}`, async () => {
+    const f = fixture(), oldBase = 'd'.repeat(40);
+    const delta = {status: reason === 'diverged' ? 'diverged' : 'ahead', behind_by: 0,
+      files: reason === 'missing-files' ? undefined : [{filename: reason === 'application-change' ? 'gui_qt/app.py' : '.github/scripts/agent-integration.cjs'}]};
+    f.github.rest.repos.compareCommitsWithBasehead = async () => ({data: delta});
+    assert.equal(await validationMode(f.github, f.context.repo, {},
+      {state: reason === 'failed-proof' ? 'failure' : 'success', description: description(oldBase)}, f.refs.main), 'full');
+  });
+}
