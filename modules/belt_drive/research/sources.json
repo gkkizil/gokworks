@@ -1,0 +1,237 @@
+{
+  "observed_on": "2026-11-04",
+  "scope": "Read-only source and license inspection; no runtime dependency or code reuse; no manufacturer validation.",
+  "repositories": [
+    {
+      "repository": "https://github.com/WolftheGrey/belt-calc",
+      "observed_on": "2026-11-04",
+      "head": "4f14fc4c274037a03cb0ce819cfe6853d945b656",
+      "branch": "main",
+      "head_author_date": "Wed, 20 May 2026 17:44:52 +0200",
+      "license_observation": "MIT",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/WolftheGrey/belt-calc/4f14fc4c274037a03cb0ce819cfe6853d945b656/README.md",
+          "sha256": "f5f735862740626c6c10676927bba571e041c6d02d67570540895fe8474d7db9",
+          "bytes": 7497
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://raw.githubusercontent.com/WolftheGrey/belt-calc/4f14fc4c274037a03cb0ce819cfe6853d945b656/LICENSE",
+          "sha256": "d29259a5498d36918dd87cd486e5953581f0d1bb2733d644f3743afb48ee5355",
+          "bytes": 1073
+        },
+        {
+          "path": "index.html",
+          "url": "https://raw.githubusercontent.com/WolftheGrey/belt-calc/4f14fc4c274037a03cb0ce819cfe6853d945b656/index.html",
+          "bytes": 140473,
+          "sha256": "82ee61bbfc5a52fafb4237f5e9ae8ae7aafb9a000a5beb54b58f0e894f96dbe8"
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/Temukamakh/partforge",
+      "observed_on": "2026-11-04",
+      "head": "cd995b37d5ce2403314c868381e69fc492812b9b",
+      "branch": "master",
+      "head_author_date": "Mon, 21 Sep 2026 00:42:35 +0400",
+      "license_observation": "not-established-root-license-absent",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/Temukamakh/partforge/cd995b37d5ce2403314c868381e69fc492812b9b/README.md",
+          "sha256": "510b3c419f9fa76e89864b057f59e5c664537ea2f293feb20e2c0805a0255366",
+          "bytes": 16068
+        },
+        {
+          "path": "belt_profiles.py",
+          "url": "https://raw.githubusercontent.com/Temukamakh/partforge/cd995b37d5ce2403314c868381e69fc492812b9b/belt_profiles.py",
+          "bytes": 11913,
+          "sha256": "589ff31f9bb9ce1598a8be03c97b4d6fbf07213f4bcea98c1af7755d29afa8ba"
+        },
+        {
+          "path": "core.py",
+          "url": "https://raw.githubusercontent.com/Temukamakh/partforge/cd995b37d5ce2403314c868381e69fc492812b9b/core.py",
+          "bytes": 7548,
+          "sha256": "13266c1826eb5cf3849910e52128a7ae4a1fe4f08ac249f847b36d15b78c2a2b"
+        },
+        {
+          "path": "exporters.py",
+          "url": "https://raw.githubusercontent.com/Temukamakh/partforge/cd995b37d5ce2403314c868381e69fc492812b9b/exporters.py",
+          "bytes": 1599,
+          "sha256": "af8f2ac654b8ac057a21269d4f12ad61b672469978c8ad60f1f403974423aae9"
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/looooo/FCGear",
+      "observed_on": "2026-11-04",
+      "head": "83ec154b1925347622b61812f75d2ed51e956b9f",
+      "branch": "master",
+      "head_author_date": "Tue, 15 Sep 2026 08:51:57 +0200",
+      "license_observation": "GPL-3.0 (timinggear header: GPL-3.0-or-later)",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/looooo/FCGear/83ec154b1925347622b61812f75d2ed51e956b9f/README.md",
+          "sha256": "781ee2f1b636429c2194d06e167b96655a5af406c31984c55be3cfc3b6ce6d12",
+          "bytes": 4706
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://raw.githubusercontent.com/looooo/FCGear/83ec154b1925347622b61812f75d2ed51e956b9f/LICENSE",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+          "bytes": 35149
+        },
+        {
+          "path": "freecad/gears/timinggear.py",
+          "url": "https://raw.githubusercontent.com/looooo/FCGear/83ec154b1925347622b61812f75d2ed51e956b9f/freecad/gears/timinggear.py",
+          "bytes": 12100,
+          "sha256": "069bd0970693e936b0591a7ad44af1dd1f08dd77bd9fed72904ab201fbd208ec"
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/paulius-zubavicius/pulleys-profile-generator",
+      "observed_on": "2026-11-04",
+      "head": "0c11aa0df122b2280a52c41df9cce9698dbf1b46",
+      "branch": "master",
+      "head_author_date": "Sat, 2 Jun 2018 15:58:07 +0300",
+      "license_observation": "not-established-root-license-absent",
+      "files_inspected": [
+        {
+          "path": "readme.md",
+          "url": "https://raw.githubusercontent.com/paulius-zubavicius/pulleys-profile-generator/0c11aa0df122b2280a52c41df9cce9698dbf1b46/readme.md",
+          "bytes": 1459,
+          "sha256": "efa55bedf7fbcc418fefc149e918f3997978debd2aae3a5bb0497d790b7778c2"
+        },
+        {
+          "path": "pom.xml",
+          "url": "https://raw.githubusercontent.com/paulius-zubavicius/pulleys-profile-generator/0c11aa0df122b2280a52c41df9cce9698dbf1b46/pom.xml",
+          "bytes": 852,
+          "sha256": "62c90dd559b29f84e65d82fb0b3702e6d05e170b1f3d3246465a85cade409178"
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/LukevLuijn/timing_belt_calculator",
+      "observed_on": "2026-11-04",
+      "head": "10324f55a1fdbd799eec97158a6e682fbe9118f9",
+      "branch": "main",
+      "head_author_date": "Sun, 14 Nov 2021 22:06:47 +0100",
+      "license_observation": "not-established-root-license-absent",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/LukevLuijn/timing_belt_calculator/10324f55a1fdbd799eec97158a6e682fbe9118f9/README.md",
+          "sha256": "0a290d9d2cc4e2fa5bf0a717efaea8370ede2d7c9799609f11cb1f0e7ce7fd67",
+          "bytes": 170
+        },
+        {
+          "path": "belt_calc/README.md",
+          "url": "https://raw.githubusercontent.com/LukevLuijn/timing_belt_calculator/10324f55a1fdbd799eec97158a6e682fbe9118f9/belt_calc/README.md",
+          "bytes": 21709,
+          "sha256": "b92caa27045d679511fe09ab3a39ddbf60570bdb11bef409e5de93dffa4edf53"
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/CadQuery/cadquery",
+      "observed_on": "2026-11-04",
+      "head": "8178185a24a035c9af7f4679033be14267f6a6ef",
+      "branch": "master",
+      "head_author_date": "Sat, 24 Oct 2026 11:18:33 -0400",
+      "license_observation": "Apache-2.0",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/CadQuery/cadquery/8178185a24a035c9af7f4679033be14267f6a6ef/README.md",
+          "sha256": "6b9440311a628fcbf5d52aea5c9e84097df6954e28e3f27d0c7c5c7db6a592f4",
+          "bytes": 12217
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://raw.githubusercontent.com/CadQuery/cadquery/8178185a24a035c9af7f4679033be14267f6a6ef/LICENSE",
+          "sha256": "7345486c76eb0160046e06c9c77797294979e15fc7cd1502d5c9cb650931bb84",
+          "bytes": 11485
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/gumyr/build123d",
+      "observed_on": "2026-11-04",
+      "head": "1901d71ec006bc3fcbbdbd94e15dab3a5b61466b",
+      "branch": "dev",
+      "head_author_date": null,
+      "license_observation": "Apache-2.0",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/gumyr/build123d/1901d71ec006bc3fcbbdbd94e15dab3a5b61466b/README.md",
+          "sha256": "3abc2803abe8a35a6e447e8819fdaa10d29f915273caaca9d05cdbd402e89ff0",
+          "bytes": 11849
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://raw.githubusercontent.com/gumyr/build123d/1901d71ec006bc3fcbbdbd94e15dab3a5b61466b/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "bytes": 11358
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/xarial/xcad",
+      "observed_on": "2026-11-04",
+      "head": "f9feb293f74576a6a5dbb3ffcca99502e0a257ed",
+      "branch": "master",
+      "head_author_date": null,
+      "license_observation": "MIT",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/xarial/xcad/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/README.md",
+          "sha256": "7e19a850575701a13262087b6649e37c07077bacf6808f0504c6531f6d198448",
+          "bytes": 8781
+        },
+        {
+          "path": "LICENSE.md",
+          "url": "https://raw.githubusercontent.com/xarial/xcad/f9feb293f74576a6a5dbb3ffcca99502e0a257ed/LICENSE.md",
+          "sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+          "bytes": 1075
+        }
+      ],
+      "implementation_copied": false
+    },
+    {
+      "repository": "https://github.com/xarial/codestack",
+      "observed_on": "2026-11-04",
+      "head": "0cde3849a184cdbbface61238ef431a6ebb9d530",
+      "branch": "master",
+      "head_author_date": "Thu, 7 May 2026 11:24:13 +1000",
+      "license_observation": "MIT",
+      "files_inspected": [
+        {
+          "path": "README.md",
+          "url": "https://raw.githubusercontent.com/xarial/codestack/0cde3849a184cdbbface61238ef431a6ebb9d530/README.md",
+          "sha256": "9d4b3bc4b1dc06c3fa33c4bb0e85a670447bede275b11213b6b0901c91bdb4d3",
+          "bytes": 1710
+        },
+        {
+          "path": "LICENSE.md",
+          "url": "https://raw.githubusercontent.com/xarial/codestack/0cde3849a184cdbbface61238ef431a6ebb9d530/LICENSE.md",
+          "sha256": "e0a942b6b148015e2c5af61332b5413a23487c2512273d7b4079b9a9a0bf2e93",
+          "bytes": 1075
+        }
+      ],
+      "implementation_copied": false
+    }
+  ]
+}
