@@ -24,6 +24,8 @@ concurrency:
 
 jobs:
   prepare:
+    # A diagnostic-only push reads old reports; it cannot validate or merge code.
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[agent-diagnostics]')
     runs-on: ubuntu-latest
     permissions:
       contents: read

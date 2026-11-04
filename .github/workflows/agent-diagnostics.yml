@@ -1,0 +1,40 @@
+name: Agent failure diagnostics
+
+on:
+  push:
+    branches: [agent/codex]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Failed Agent integration run to inspect
+        type: string
+        default: '41811662087'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  report:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[agent-diagnostics]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Download existing failed-run evidence
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id || '41811662087' }}
+          pattern: agent-validation-*
+          path: ${{ runner.temp }}/agent-failure-evidence
+      - name: Report original failed tests and native crash stacks
+        env:
+          EVIDENCE_DIRECTORY: ${{ runner.temp }}/agent-failure-evidence
+          PYTHONUTF8: '1'
+        run: python .github/scripts/report-agent-validation.py "$EVIDENCE_DIRECTORY"
