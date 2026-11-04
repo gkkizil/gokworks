@@ -42,3 +42,37 @@ def test_valid_file_under_a_turkish_special_character_path_still_reads(tmp_path)
     folder.mkdir()
     parts = read_dxf(_rectangle(folder / 'P1_2mm_5adet.dxf'))
     assert len(parts) == 1 and parts[0].area == pytest.approx(5000)
+
+
+def _gapped(path, gap, extra=None):
+    """100 x 50 rectangle drawn as four lines, the last one ending ``gap`` mm short."""
+    doc = ezdxf.new(); doc.units = 4; msp = doc.modelspace()
+    msp.add_line((0, 0), (100, 0)); msp.add_line((100, 0), (100, 50)); msp.add_line((100, 50), (0, 50))
+    msp.add_line((0, 50), (0, gap))
+    if extra: extra(doc, msp)
+    doc.saveas(path)
+    return path
+
+
+def test_micrometre_end_gaps_from_cad_exports_are_joined_and_reported(tmp_path):
+    """Reported 2026-11-04: SOLIDWORKS flat-pattern DXFs 'Okunamadı · Açık veya dallanan kontur'."""
+    parts = read_dxf(_gapped(tmp_path / 'p.dxf', .005))
+    assert len(parts) == 1 and parts[0].area == pytest.approx(5000, abs=1)
+    assert 'otomatik birleştirildi' in parts[0].notes[0] and parts[0].endpoint_error == pytest.approx(.005, abs=1e-6)
+
+
+def test_real_gap_is_refused_with_its_size_and_location(tmp_path):
+    with pytest.raises(ValueError) as error:
+        read_dxf(_gapped(tmp_path / 'p.dxf', 1.))
+    text = str(error.value)
+    assert 'açık uç' in text and '1.0000 mm' in text and 'x=0.000' in text
+
+
+def test_bend_line_touching_the_outline_names_its_layer_and_reads_once_excluded(tmp_path):
+    def bend(doc, msp):
+        doc.layers.add('BUKUM'); msp.add_line((40, 0), (40, 50), dxfattribs={'layer': 'BUKUM'})
+    with pytest.raises(ValueError) as error:
+        read_dxf(_gapped(tmp_path / 'p.dxf', 0., bend))
+    # It meets the outline mid-edge, so its two ends are loose: never joined automatically (50 mm apart).
+    assert 'açık uç' in str(error.value) and 'İlgili katmanlar: BUKUM' in str(error.value)
+    assert len(read_dxf(tmp_path / 'p.dxf', excluded_layers=['BUKUM'])) == 1

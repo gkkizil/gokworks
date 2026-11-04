@@ -46,6 +46,40 @@ class MissingUnits(ValueError):
     pass
 
 
+def _open_contour(ends, records):
+    """Describe where the contour is open or branches, and how far the gaps are."""
+    loose = [point for point, count in ends.items() if count == 1]
+    branches = [point for point, count in ends.items() if count > 2]
+    gap = None
+    if loose:
+        nearest = []
+        for point in loose:
+            others = [math.dist(point, other) for other in loose if other is not point]
+            nearest.append(min(others) if others else math.inf)
+        gap = max(nearest)
+    bad = set(loose) | set(branches)
+    layers = sorted({str(entity.dxf.layer) for entity, line in records
+                     if tuple(line.coords[0]) in bad or tuple(line.coords[-1]) in bad})
+    where = (branches or loose)[0]
+    parts = []
+    if branches:
+        parts.append(f'{len(branches)} noktada ikiden fazla çizgi birleşiyor (ör. x={where[0]:.3f}, y={where[1]:.3f} mm); '
+                     'üst üste binen kopya çizgiler veya kontura değen büküm/yardımcı çizgiler olabilir')
+    if loose:
+        text = f'{len(loose)} açık uç var'
+        if gap is not None and math.isfinite(gap):
+            text += f'; en büyük uç boşluğu {gap:.4f} mm'
+        if not branches:
+            text += f' (ör. x={where[0]:.3f}, y={where[1]:.3f} mm)'
+        parts.append(text)
+    message = 'Açık veya dallanan kontur: ' + '; '.join(parts) + '.'
+    if layers:
+        message += ' İlgili katmanlar: ' + ', '.join(layers) + '. Yardımcı bir katmansa dışlayın'
+        message += '; boşluk küçükse uç birleştirme toleransını artırın.' if loose else '.'
+    return OpenContour(message, gap=gap if gap is not None and math.isfinite(gap) else None,
+                       branching=bool(branches), layers=layers)
+
+
 def check_cancel(stop):
     if stop is not None and stop.is_set():
         raise InterruptedError('İşlem durduruldu.')
@@ -96,8 +130,40 @@ def _entities(entities, doc, excluded, stop, depth=0, inherited=None):
             raise ValueError(f'{e.dxftype()}: desteklenmeyen kesim objesi. Katmanı dışlayın veya DXF geometrisine dönüştürün.')
 
 
-def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
-             tolerance=.02, join_tolerance=.001, excluded_layers=None, grouped=False, stop=None):
+class OpenContour(ValueError):
+    """Open or branching ends, with what a user (or an automatic retry) needs."""
+    def __init__(self, message, *, gap, branching, layers):
+        super().__init__(message)
+        self.gap, self.branching, self.layers = gap, branching, layers
+
+
+AUTO_JOIN_LIMIT = .05   # mm: largest end gap closed automatically (well below cutting tolerances)
+
+
+def read_dxf(filename, *, join_tolerance=.001, **options):
+    """Read cut contours; tiny end gaps are closed automatically and reported.
+
+    CAD exports (e.g. SOLIDWORKS flat patterns with splines) can leave end
+    gaps of a few micrometres, above the strict 0.001 mm default. When every
+    open end has exactly one partner within AUTO_JOIN_LIMIT and nothing
+    branches, the file is read again with that join tolerance; the gap is
+    already part of the collision clearance (endpoint_error).
+    """
+    try:
+        return _read_dxf(filename, join_tolerance=join_tolerance, **options)
+    except OpenContour as error:
+        if error.branching or error.gap is None or error.gap > AUTO_JOIN_LIMIT or error.gap <= join_tolerance:
+            raise
+        widened = min(.1, max(join_tolerance, error.gap * 1.01 + 1e-6))
+        parts = _read_dxf(filename, join_tolerance=widened, **options)
+        for part in parts:
+            part.notes.insert(0, f'DXF uçlarında en çok {error.gap:.4f} mm boşluk vardı; otomatik birleştirildi '
+                                 f'(tolerans {widened:.4f} mm).')
+        return parts
+
+
+def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
+              tolerance=.02, join_tolerance=.001, excluded_layers=None, grouped=False, stop=None):
     tolerance = number(tolerance, 'Eğri toleransı', positive=True)
     join_tolerance = number(join_tolerance, 'Uç birleştirme toleransı', positive=True)
     if tolerance > 1 or join_tolerance > .1:
@@ -161,7 +227,7 @@ def read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
     if not records:
         raise ValueError('Seçilen katmanlarda kesim konturu yok.')
     if any(v != 2 for v in ends.values()):
-        raise ValueError('Açık veya dallanan kontur bulundu. DXF uçlarını kapatın ya da yardımcı katmanları dışlayın.')
+        raise _open_contour(ends, records)
     lines = [r[1] for r in records]; tree = STRtree(lines)
     for i, line in enumerate(lines):
         check_cancel(stop)
