@@ -3,6 +3,38 @@
 // Only these same-repository branches may enter the automatic integration path.
 const BRANCHES = ['agent/codex', 'agent/claude'];
 const STATUS = 'GOKWORKS agent validation';
+const AUTOMATION_FILES = new Set([
+  '.github/scripts/agent-integration.cjs', '.github/scripts/tests/agent-integration.test.cjs',
+  '.github/scripts/report-agent-validation.py', '.github/workflows/agent-integration.yml',
+  '.github/workflows/agent-diagnostics.yml', 'tests/test_agent_validation_report.py',
+  'docs/agent-integration.md',
+]);
+
+function automationOnly(comparison) {
+  const files = comparison?.files;
+  // GitHub truncates comparison file lists at 300. Unknown/truncated scope
+  // always needs the full suite, as do renames from application paths.
+  return Array.isArray(files) && files.length > 0 && files.length < 300 &&
+    files.every(file => AUTOMATION_FILES.has(file.filename) &&
+      (!file.previous_filename || AUTOMATION_FILES.has(file.previous_filename)));
+}
+
+async function validationMode(github, repo, comparison, previous, base) {
+  if (automationOnly(comparison)) return 'automation';
+  const match = /^main:([0-9a-f]{40})$/.exec(previous?.description || '');
+  if (previous?.state !== 'success' || !match || match[1] === base) return 'full';
+  try {
+    const {data: delta} = await github.rest.repos.compareCommitsWithBasehead({
+      ...repo, basehead: `${match[1]}...${base}`,
+    });
+    // The same source head passed already. An exclusively CI base change
+    // preserves application code and only needs the CI/native smoke checks.
+    if (delta.status === 'ahead' && delta.behind_by === 0 && automationOnly(delta)) return 'automation';
+  } catch (error) {
+    if (error.status !== 404) throw error;
+  }
+  return 'full';
+}
 
 const description = base => `main:${base}`;
 const runUrl = context => `${context.serverUrl || 'https://github.com'}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
@@ -48,6 +80,7 @@ async function prepare({github, context, core, retryFailed = false}) {
       core.notice(`${branch}: validation failed; waiting for a new commit/base or a manual retry.`);
       continue;
     }
+    const mode = await validationMode(github, repo, comparison, previous, base);
     if (!pull) {
       ({data: pull} = await github.rest.pulls.create({
         ...repo, base: 'main', head: branch, title: `Integrate ${branch} into main`,
@@ -64,7 +97,8 @@ async function prepare({github, context, core, retryFailed = false}) {
         ...repo, sha: head, state: 'pending', context: STATUS, description: description(base), target_url: runUrl(context),
       });
     }
-    candidates.push({branch, head, base, pull: pull.number, cached});
+    core.notice(`${branch}: ${cached ? 'cached' : mode} validation for ${head.slice(0, 7)} / main ${base.slice(0, 7)}.`);
+    candidates.push({branch, head, base, pull: pull.number, cached, mode});
   }
   return {include: candidates};
 }
@@ -87,9 +121,19 @@ async function finish({github, context, core, candidates}) {
       continue;
     }
     const {data: pull} = await github.rest.pulls.get({...repo, pull_number: number});
-    if (pull.state !== 'open' || pull.draft || pull.base.ref !== 'main' || pull.base.sha !== base || pull.head.ref !== branch ||
+    // PR.base.sha may retain the base recorded when the PR was created. The
+    // live main ref, rather than that historical metadata, identifies the base.
+    if (pull.state !== 'open' || pull.draft || pull.base.ref !== 'main' || pull.head.ref !== branch ||
         pull.head.sha !== head || pull.head.repo?.full_name !== `${repo.owner}/${repo.repo}`) {
-      core.notice(`${branch}: PR no longer matches the validated request.`);
+      core.notice(`${branch}: PR no longer matches the validated request: state=${pull.state}, draft=${pull.draft}, ` +
+        `target=${pull.base.ref}, source=${pull.head.ref}@${pull.head.sha}, repository=${pull.head.repo?.full_name}.`);
+      continue;
+    }
+    const [currentBase, currentHead] = await Promise.all([
+      branchSha(github, repo, 'main'), branchSha(github, repo, branch),
+    ]);
+    if (currentBase !== base || currentHead !== head) {
+      core.notice(`${branch}: refs changed while reading the PR; fresh validation is needed.`);
       continue;
     }
     try {
@@ -143,4 +187,4 @@ async function cancelSuperseded({github, context, core}) {
   return cancelled;
 }
 
-module.exports = {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded};
+module.exports = {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded, automationOnly, validationMode};
