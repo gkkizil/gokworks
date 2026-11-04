@@ -16,8 +16,9 @@ on:
 permissions:
   contents: read
 
-# Each run scans both branches. Replacing an older pending run loses no branch;
-# the running validation is never cancelled by another push or scheduled scan.
+# Each run scans both branches. Replacing an older pending run loses no branch.
+# Scheduled scans leave current validation running; the companion workflow only
+# cancels push runs whose source head has already been superseded.
 concurrency:
   group: gokworks-agent-integration
   cancel-in-progress: false

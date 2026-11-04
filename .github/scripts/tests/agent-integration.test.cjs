@@ -2,7 +2,7 @@
 
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
-const {BRANCHES, STATUS, description, prepare, finish} = require('../agent-integration.cjs');
+const {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded} = require('../agent-integration.cjs');
 
 function fixture() {
   const context = {repo: {owner: 'owner', repo: 'gokworks'}, serverUrl: 'https://github.com', runId: 42};
@@ -244,4 +244,29 @@ test('scheduled scan remains a fallback when follow-up dispatch is unavailable',
   f.github.rest.actions.createWorkflowDispatch = async () => { throw new Error('Workflow is being indexed'); };
   assert.deepEqual(await finish({...f, candidates: [item]}), [item.pull]);
   assert.ok(f.notices.some(message => message.includes('scheduled scan')));
+});
+
+test('a new push cancels only in-progress integration runs of its superseded head', async () => {
+  const f = fixture();
+  f.context.eventName = 'push'; f.context.ref = 'refs/heads/agent/codex'; f.context.sha = f.refs['agent/codex'];
+  const old = {id: 1, name: 'Agent integration', status: 'in_progress', event: 'push', head_branch: 'agent/codex', head_sha: 'old'};
+  f.github.rest.actions.listWorkflowRuns = async () => ({data: {workflow_runs: [old,
+    {...old, id: 2, head_sha: f.context.sha}, {...old, id: 3, head_branch: 'agent/claude'},
+    {...old, id: 4, event: 'workflow_dispatch'}, {...old, id: 5, status: 'completed'},
+    {...old, id: 6, name: 'Other workflow'}, {...old, id: 7, status: 'queued'}]}});
+  f.github.rest.actions.cancelWorkflowRun = async args => f.calls.push(['cancel', args.run_id]);
+  assert.deepEqual(await cancelSuperseded(f), [1]);
+  assert.deepEqual(f.calls, [['cancel', 1]]);
+});
+
+test('a stale push notification cannot cancel the current validation', async () => {
+  const f = fixture();
+  f.context.eventName = 'push'; f.context.ref = 'refs/heads/agent/codex'; f.context.sha = 'old';
+  assert.deepEqual(await cancelSuperseded(f), []);
+  assert.deepEqual(f.calls, []);
+});
+
+test('scheduled runs never cancel an in-progress validation', async () => {
+  const f = fixture(); f.context.eventName = 'schedule';
+  assert.deepEqual(await cancelSuperseded(f), []);
 });

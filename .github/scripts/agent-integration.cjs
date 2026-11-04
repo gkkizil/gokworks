@@ -121,4 +121,26 @@ async function finish({github, context, core, candidates}) {
   return merged;
 }
 
-module.exports = {BRANCHES, STATUS, description, prepare, finish};
+async function cancelSuperseded({github, context, core}) {
+  const branch = context.ref?.replace(/^refs\/heads\//, '');
+  if (context.eventName !== 'push' || !BRANCHES.includes(branch)) return [];
+  if (await branchSha(github, context.repo, branch) !== context.sha) return [];
+  const {data} = await github.rest.actions.listWorkflowRuns({
+    ...context.repo, workflow_id: 'agent-integration.yml', branch, event: 'push', per_page: 100,
+  });
+  const cancelled = [];
+  for (const run of data.workflow_runs) {
+    if (run.status !== 'in_progress' || run.head_sha === context.sha || run.head_branch !== branch ||
+        run.event !== 'push' || run.name !== 'Agent integration') continue;
+    try {
+      await github.rest.actions.cancelWorkflowRun({...context.repo, run_id: run.id});
+      cancelled.push(run.id);
+      core.notice(`Cancelled superseded run ${run.id}; its old head cannot be merged.`);
+    } catch (error) {
+      if (![405, 409].includes(error.status)) throw error;
+    }
+  }
+  return cancelled;
+}
+
+module.exports = {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded};

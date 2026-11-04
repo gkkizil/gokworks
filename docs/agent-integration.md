@@ -28,6 +28,9 @@ seçeneğiyle yeniden denemek gerekir. Test kanıtları workflow artifacts alan�
 saklanır. Tüm entegrasyon işleri tek concurrency grubu kullanır. Bir PR
 birleşince güncel main üzerinden yeni tarama ayrıca tetiklenir; diğer ajan
 dalı zamanlanmış taramayı beklemeden yeni main ile doğrulanır.
+Yeni Codex push'u, aynı dalın artık eski commit'ine ait çalışan entegrasyon
+işini iptal ederek son commit'in doğrulamasına yer açar. Güncel commit'in işi,
+zamanlanmış/manual işler ve başka dalların işleri bu yolla iptal edilmez.
 
 Windows hataları ayrıca test adı ve hata metniyle Actions anotasyonlarına
 yazılır. Yerel süreç çökmeleri de korunur. `[agent-diagnostics]` işaretli bir

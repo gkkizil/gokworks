@@ -25,7 +25,7 @@ def evidence(folder):
                 for item in case.findall(tag):
                     failures.append({'test': case.get('classname', '') + '::' + case.get('name', ''),
                                      'detail': item.text or item.get('message', '')})
-        reports.append({'path': str(path.relative_to(folder)), 'total': len(cases), 'skipped': skipped,
+        reports.append({'path': path.relative_to(folder).as_posix(), 'total': len(cases), 'skipped': skipped,
                         'failures': failures})
     return reports
 
@@ -36,7 +36,7 @@ def native_errors(folder):
         lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
         for index, line in enumerate(lines):
             if re.search(r'Fatal Python error|Windows fatal exception|ERROR collecting', line):
-                errors.append({'path': str(path.relative_to(folder)),
+                errors.append({'path': path.relative_to(folder).as_posix(),
                                'detail': '\n'.join(lines[max(0, index-8):index+55])})
     return errors
 
