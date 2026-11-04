@@ -1,9 +1,9 @@
 {
-  "request_id": "20261103-dxf-folder-scan-fix-exe",
-  "requested_at": "2026-11-03T15:30:00+00:00",
-  "source_commit": "9fca51e4b88c684040a54aac8dbf95bcf1efe9e9",
+  "request_id": "20261104-shaft-drawing-fixes-exe",
+  "requested_at": "2026-11-04T09:00:00+00:00",
+  "source_commit": "6d0aa5edf764883844528d18ae5132fc7c13eca3",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Build the Windows EXE with the DXF/DWG folder-scan fix (an unrelated open assembly no longer makes the folder scan return 0 silently; empty results explain why) on top of the weight, shaft drawing and workbench updates. DXF/DWG suite passed (301 passed). Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
+  "reason": "Build the Windows EXE with the shaft drawing fixes (saved part not dirty, localized Turkish view names, verified main view orientation, locked temporary files, dimension placement via the real view transform, whole-mm precision), the vectorized 3D preview and the QA fixes (job worker deadlock, damaged settings, atomic CSV). Full suite passed locally (2506 passed). Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
   "cancelled": false
 }
