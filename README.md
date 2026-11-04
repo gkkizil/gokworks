@@ -11,11 +11,11 @@ için geliştirilmiş Türkçe bir masaüstü uygulamasıdır.
 ## Başlangıç
 
 <!-- windows-release:start -->
-**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-41641347188-1/GOKWORKS.exe)
+**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-41772155308-1/GOKWORKS.exe)
 
 **GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
-Uygulama kodu: `9fca51e` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/41641347188) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+Uygulama kodu: `6d0aa5e` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/41772155308) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 <!-- windows-release:end -->
 
 1. Elinizde oluşturulmuş `GOKWORKS.exe` varsa çift tıklayarak açın. Kaynak
