@@ -875,7 +875,17 @@ namespace Gokworks.ShaftInterop
                 // decimals the value needs (tolerance digits follow the document).
                 double nominal = N(dim, "nominal_mm"); int decimals = 0;
                 while (decimals < 3 && Math.Abs(nominal * Math.Pow(10, decimals) - Math.Round(nominal * Math.Pow(10, decimals))) > 1e-6) decimals++;
-                display.SetPrecision3(decimals, -1, -1, -1);
+                // Tolerance digits are set explicitly: following a 0-decimal nominal they
+                // showed "js6 0 0" for ±0,0065.
+                int tolDecimals = -1;
+                object tolRaw; dim.TryGetValue("tolerance", out tolRaw);
+                if (tolRaw != null)
+                {
+                    var tolSpec = D(tolRaw); tolDecimals = 2;
+                    foreach (double v in new double[] { N(tolSpec, "upper_mm"), N(tolSpec, "lower_mm") })
+                        while (tolDecimals < 4 && Math.Abs(v * Math.Pow(10, tolDecimals) - Math.Round(v * Math.Pow(10, tolDecimals))) > 1e-6) tolDecimals++;
+                }
+                display.SetPrecision3(decimals, -1, tolDecimals, -1);
                 if (S(dim, "prefix") == "Ø" && display.GetType() != (int)swDimensionType_e.swDiameterDimension)
                     display.SetText((int)swDimensionTextParts_e.swDimensionTextPrefix, "<MOD-DIAM>");
                 if (B(dim, "reference")) display.ShowParenthesis = true;
@@ -925,8 +935,18 @@ namespace Gokworks.ShaftInterop
                 IView view = views[S(n, "view")];
                 Need(drawing.ActivateView(view.GetName2()), "görünüş etkinleştirilemedi");
                 model.ClearSelection2(true);
-                object entity = Resolve(shaft, view, D(n["ref"]));
-                Need(SelectIn(view, entity, false), "not hedef kenarı bulunamadı");
+                var reference = D(n["ref"]);
+                object entity = Resolve(shaft, view, reference);
+                Need(entity != null, "not hedef kenarı bulunamadı");
+                // Pick the edge at its upper end, so the leader starts there and stays short
+                // instead of crossing the shaft from an arbitrary point of the edge.
+                bool picked = false;
+                if (reference.ContainsKey("x") && reference.ContainsKey("r"))
+                {
+                    double[] pick = ToSheet(view, shaft, N(reference, "x"), N(reference, "r") * .85, 0);
+                    picked = model.Extension.SelectByID2("", "EDGE", pick[0], pick[1], 0, false, 0, null, 0);
+                }
+                if (!picked) Need(SelectIn(view, entity, false), "not hedef kenarı seçilemedi");
                 INote note = (INote)model.InsertNote(S(n, "text"));
                 Need(note != null, "SOLIDWORKS notu oluşturmadı");
                 double[] at = Place(view, shaft, viewBoxes, placements, S(n, "view"), S(n, "id"), 0);
@@ -942,11 +962,12 @@ namespace Gokworks.ShaftInterop
 
         private static bool Attached(IAnnotation annotation, object entity)
         {
+            // A drawing annotation reports the drawing-side entity (view edge/face), which is
+            // never IsSame with the model entity selected through IView.SelectEntity; any
+            // attachment after that selection is the requested one.
             object raw = annotation.GetAttachedEntities3();
-            if (raw == null) return false;
-            foreach (object o in (object[])raw)
-                if (app.IsSame(o, entity) == (int)swObjectEquality.swObjectSame) return true;
-            return false;
+            object[] attached = raw as object[];
+            return attached != null && attached.Length > 0;
         }
 
         private static Dictionary<string, object> Finish(IModelDoc2 model, IDrawingDoc drawing, Dictionary<string, IView> views,
@@ -965,8 +986,15 @@ namespace Gokworks.ShaftInterop
                 int symbol = process == "removal_required" ? (int)swSFSymType_e.swSFMachining_Req
                            : process == "removal_prohibited" ? (int)swSFSymType_e.swSFDont_Machine : (int)swSFSymType_e.swSFBasic;
                 double[] at = Place(view, shaft, viewBoxes, placements, S(f, "view"), S(f, "id"), 0);
+                var surface = D(f["surface"]); int leader = (int)swLeaderStyle_e.swSTRAIGHT;
+                if (S(surface, "type") == "cylinder" && (S(f, "view") == "main" || S(f, "view") == "top"))
+                {
+                    // ISO 1302: the symbol stands on the surface line itself; no leader across the view.
+                    at = ToSheet(view, shaft, (N(surface, "x0") + N(surface, "x1")) / 2, N(surface, "r"), 0);
+                    leader = (int)swLeaderStyle_e.swNO_LEADER;
+                }
                 string text = S(f, "text");
-                ISFSymbol sf = (ISFSymbol)model.Extension.InsertSurfaceFinishSymbol3(symbol, (int)swLeaderStyle_e.swSTRAIGHT, at[0], at[1], 0,
+                ISFSymbol sf = (ISFSymbol)model.Extension.InsertSurfaceFinishSymbol3(symbol, leader, at[0], at[1], 0,
                     Lay(S(f, "lay")), (int)swArrowStyle_e.swCLOSED_ARROWHEAD, "", "", S(f, "method"), "", text, "", "");
                 Need(sf != null, "SOLIDWORKS yüzey işaretini oluşturmadı");
                 Need(sf.GetSymbol() == symbol, "yüzey işareti türü geri okunamadı");
