@@ -210,6 +210,25 @@ class Session(ReadSession):
                 thickness = f'{self.thickness(model, selected, {k.upper():v for k,v in properties.items()}, self.features(model)):g} mm'
             except Exception:
                 pass
+            # Turkish SOLIDWORKS writes the Cut List property as 'Bükümler' (SW-Bükümler).
+            bends = field(('BENDS', 'BEND COUNT', 'BENDCOUNT', 'NUMBER OF BENDS', 'NUMBEROFBENDS', 'BÜKÜM SAYISI',
+                           'BÜKÜMLER', 'BÜKÜM ADEDİ', 'BÜKÜM'))
+            if bends == 'Okunamadı' and request.flat_pattern:
+                # No Cut List value: count the bends listed under this body's Flat-Pattern.
+                flat = sub = None
+                try:
+                    flat = call(model, 'FeatureByName', request.flat_pattern)
+                    count, sub = 0, call(flat, 'GetFirstSubFeature') if flat is not None else None
+                    while sub is not None:
+                        if str(optional(sub, 'GetTypeName2', default='')) == 'UiBend':
+                            count += 1
+                        sub = call(sub, 'GetNextSubFeature')
+                    if flat is not None:
+                        bends = f'{count} (Flat-Pattern)'
+                except Exception:
+                    pass
+                finally:
+                    flat = sub = None
             code = field(('PART NUMBER', 'PARTNO', 'KOD', 'PARÇA KODU'))
             if code == 'Okunamadı': code = Path(request.source).stem + ' (dosya adı)'
             return ([('Gövde',body_name)] if body_name else []) + ([('Cut List',cut_list_name)] if cut_list_name else []) + [('Parça kodu', code),
@@ -217,7 +236,7 @@ class Session(ReadSession):
                     ('Dosya', Path(request.source).name), ('Konfigürasyon', configuration),
                     ('Malzeme', material), ('Sac kalınlığı', thickness),
                     ('Adet', str(request.quantity) if request.quantity is not None else 'Henüz montajdan okunmadı'),
-                    ('Büküm sayısı', field(('BENDS', 'BEND COUNT', 'BENDCOUNT', 'NUMBER OF BENDS', 'NUMBEROFBENDS', 'BÜKÜM SAYISI')))]
+                    ('Büküm sayısı', bends)]
         finally:
             model = extension = manager = wrapper = selected = None
 
@@ -291,8 +310,12 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
             if not geometry_only:
                 flat_started = perf_counter()
                 with session.configuration(model, exported_configuration):
-                    if session.rebuild_pending(model) is not False:
+                    # Same rule as the scan: rebuild once in memory (nothing saved)
+                    # instead of refusing; multibody cut lists often wait for it.
+                    pending, rebuild_note = session.ensure_rebuilt(model)
+                    if pending is not False:
                         raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
+                    if rebuild_note: warnings.append(rebuild_note[0].upper() + rebuild_note[1:])
                     body, body_count = session.body(model, request.body_ref)
                     update = optional(model, 'GetUpdateStamp')
                     # Cache only native, body-specific flat geometry with a
@@ -333,7 +356,7 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                 if flat is not None and on_flat is not None:
                     on_flat(flat)
             with session.folded(model, exported_configuration) as (configuration, _):
-                if session.rebuild_pending(model) is not False:
+                if session.ensure_rebuilt(model)[0] is not False:
                     raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
                 # SOLIDWORKS can advance its own update counter while a clean (saved,
                 # unmodified) document is tessellated or its cut list is read. That is

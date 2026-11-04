@@ -30,6 +30,36 @@ class Session(ReadSession):
         try:return str(get(get(get(model,'ConfigurationManager'),'ActiveConfiguration'),'Name'))
         finally:model=None
 
+    def ensure_rebuilt(self, model):
+        """(False, note) when the model is up to date, after one in-memory rebuild if needed.
+
+        Parts opened through an assembly often report a pending rebuild. Instead of
+        asking the user, rebuild once (EditRebuild3; nothing is saved). Only frozen
+        features waiting is intentional (frozen geometry) and is not an error.
+        """
+        extension = None
+        try:
+            extension = get(model, 'Extension')
+            status = optional(extension, 'NeedsRebuild2', prop=True)
+            frozen = self.constants.get('swModelRebuildStatus_FrozenFeatureNeedsRebuild')
+            if type(status) is int and frozen is not None and status == frozen:
+                return False, ''
+        except Exception:
+            pass
+        finally:
+            extension = None
+        state = self.rebuild_pending(model)
+        if state is False:
+            return False, ''
+        try:
+            call(model, 'EditRebuild3')
+        except Exception as error:
+            return state, f'otomatik yeniden oluşturma başarısız ({error})'
+        after = self.rebuild_pending(model)
+        if after is False:
+            return False, 'model taramadan önce SolidWorks’te yeniden oluşturuldu (dosya kaydedilmedi).'
+        return after, ''
+
     @contextmanager
     def configuration(self,model,name):
         """Read a referenced configuration without activating hidden components.
@@ -236,7 +266,8 @@ class Session(ReadSession):
                 token = self.persistent_ref(model,fixed)
                 if token: flat_by_body.setdefault(token,[]).append(feature)
             property_cache = {}
-            rebuilt = self.rebuild_pending(model)
+            rebuilt, rebuild_note = self.ensure_rebuilt(model)
+            if rebuild_note: warnings.append(f'{source}: {rebuild_note}')
             for body in sheets:
                 checkpoint(stop)
                 reference = self.persistent_ref(model, body)
@@ -279,7 +310,8 @@ class Session(ReadSession):
                     if not row['flat_ref']:
                         raise ApiError('Flat-Pattern kalıcı kimliği okunamadı.')
                     if rebuilt is not False:
-                        raise ApiError('Model rebuild bekliyor veya güncelliği okunamadı; SolidWorks’te yeniden oluşturup tarayın.')
+                        raise ApiError('Model otomatik yeniden oluşturmadan sonra da güncel değil (rebuild hatası olabilir); '
+                                       'SolidWorks’te Ctrl+Q ile yeniden oluşturup hataları giderin ve tekrar tarayın.')
                 except Exception as error:
                     if isinstance(error, (Cancelled, RestoreError)):
                         raise

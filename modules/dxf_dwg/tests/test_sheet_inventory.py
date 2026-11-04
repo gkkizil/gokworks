@@ -316,3 +316,44 @@ def test_empty_scan_result_is_a_warning_with_the_reason(qtbot, tmp_path):
     assert window.global_status.property('role') == 'warning'
     page.process_events([('sheet_inventory', []), ('done', dict(state='preview', total=0, warnings=[]))])
     assert 'Alt klasörleri tara' in page.status_text
+
+
+def _rebuild_status(model, statuses, monkeypatch):
+    """NeedsRebuild2 yields the given statuses in turn (the last one repeats); EditRebuild3 is counted."""
+    from modules.cad_converter.tests.fakes import C
+    # swModelRebuildStatus_e values of the real interop.
+    for name, value in (('FullyRebuilt', 0), ('NonFrozenFeatureNeedsRebuild', 1), ('FrozenFeatureNeedsRebuild', 2)):
+        monkeypatch.setitem(C, f'swModelRebuildStatus_{name}', value)
+    values = [C[f'swModelRebuildStatus_{name}'] for name in statuses]
+    calls = []
+    class Extension(type(model.Extension)):
+        @property
+        def NeedsRebuild2(self):
+            return values[min(len(calls), len(values) - 1)]
+    model.Extension.__class__ = Extension
+    model.EditRebuild3 = lambda: calls.append(1) or True
+    return calls
+
+
+def test_pending_rebuild_is_done_once_in_memory_and_the_part_scans(env, tmp_path, monkeypatch):
+    """Reported 2026-11-04: 'Model rebuild bekliyor veya güncelliği okunamadı' for a part
+    opened through an assembly. The scan now rebuilds once (no save) instead of refusing."""
+    app, _, _ = env; m = part(app, tmp_path / 'Panel.SLDPRT'); app.ActiveDoc = m
+    calls = _rebuild_status(m, ['NonFrozenFeatureNeedsRebuild', 'FullyRebuilt'], monkeypatch)
+    rows, notes = scan(env)
+    assert calls == [1] and rows[0]['exportable'] and rows[0]['status'] == 'pending'
+    assert any('yeniden oluşturuldu' in n for n in notes) and not app.saves
+
+
+def test_frozen_features_waiting_are_not_an_error(env, tmp_path, monkeypatch):
+    app, _, _ = env; m = part(app, tmp_path / 'Panel.SLDPRT'); app.ActiveDoc = m
+    calls = _rebuild_status(m, ['FrozenFeatureNeedsRebuild'], monkeypatch)
+    rows, _ = scan(env)
+    assert calls == [] and rows[0]['exportable']
+
+
+def test_rebuild_that_does_not_settle_still_refuses_with_guidance(env, tmp_path, monkeypatch):
+    app, _, _ = env; m = part(app, tmp_path / 'Panel.SLDPRT'); app.ActiveDoc = m
+    calls = _rebuild_status(m, ['NonFrozenFeatureNeedsRebuild'], monkeypatch)
+    rows, _ = scan(env)
+    assert calls == [1] and not rows[0]['exportable'] and 'Ctrl+Q' in rows[0]['detail']

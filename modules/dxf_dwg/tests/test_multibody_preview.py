@@ -69,3 +69,40 @@ def test_scan_and_real_preview_agree_on_body_material_scope(tmp_path,monkeypatch
     assert row['exportable'] and row['material']==expected
     assert dict(result.info)['Malzeme']==(expected or 'Okunamadı')
     assert not app.saves and p.selection==['user selection']
+
+
+def _preview_info(tmp_path, monkeypatch, prepare, after_scan=lambda p:None):
+    app,Base,_=environment(monkeypatch)
+    p=part(app,tmp_path/'Multi.SLDPRT',count=2);p.GetBendState=lambda:3;app.ActiveDoc=p
+    prepare(p)
+    with Base() as session:rows,_=scan_inventory(session)
+    after_scan(p)
+    monkeypatch.setattr(sw,'interface',lambda obj,iid:obj)
+    class Session(sw.Session):
+        def __enter__(self):
+            Base.__enter__(self)
+            self.constants.update(swSMBendStateNone=0,swSMBendStateSharps=1,swSMBendStateFlattened=2,swSMBendStateFolded=3)
+            return self
+    row=rows[1]
+    result=sw.capture(Request(row['source'],row['configuration'],row['body_ref'],quantity=1,flat_ref=row['flat_ref'],
+                              body_name=row['body_name'],flat_pattern=row['flat_pattern'],cut_list=row['cut_list']),
+                      MeshCache(),session_factory=Session)
+    return dict(result.info)
+
+
+def test_bend_count_reads_the_turkish_cut_list_property(tmp_path,monkeypatch):
+    """Reported 2026-11-04: 'Büküm sayısı: Okunamadı' although the Cut List has 'Bükümler'."""
+    def prepare(p):
+        p.features_by_config['Default'][4].CustomPropertyManager.values['Bükümler']='3'
+    assert _preview_info(tmp_path,monkeypatch,prepare)['Büküm sayısı']=='3'
+
+
+def test_bend_count_falls_back_to_the_bodys_flat_pattern_bends(tmp_path,monkeypatch):
+    from types import SimpleNamespace as NS
+    def prepare(p):
+        flat=p.features_by_config['Default'][5]
+        bends=[NS(GetTypeName2=lambda kind=kind:kind) for kind in ('UiBend','UiBend','ProfileFeature','UiBend')]
+        for a,b in zip(bends,bends[1:]):a.GetNextSubFeature=lambda b=b:b
+        bends[-1].GetNextSubFeature=lambda:None
+        flat.child=bends[0]
+    assert _preview_info(tmp_path,monkeypatch,lambda p:None,prepare)['Büküm sayısı']=='3 (Flat-Pattern)'
