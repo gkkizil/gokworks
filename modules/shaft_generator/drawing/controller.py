@@ -101,17 +101,31 @@ def assess(result, plan):
     for group, title in (('views', 'görünüş'), ('dimensions', 'ölçü'), ('notes', 'not'), ('finishes', 'yüzey işareti'),
                          ('datums', 'datum'), ('frames', 'geometrik tolerans')):
         rows = result.get(group, [])
-        expected = len(plan.get(group, [])) + (0 if group != 'views' else 0)
-        failed = [r for r in rows if not r.get('created')]
-        if group != 'views' and len(rows) != expected:
+        expected = len(plan.get(group, []))
+        if not isinstance(rows, list):
+            problems.append(f'{title}: oluşturma yanıtı geçersiz.')
+            rows = []
+        failed = [r for r in rows if not isinstance(r, dict) or r.get('created') is not True]
+        if (len(rows) < expected if group == 'views' else len(rows) != expected):
             problems.append(f'{title}: {expected} planlandı, {len(rows)} yanıt alındı.')
         if failed:
             problems.append(f'{len(failed)} {title} oluşturulamadı.')
-        bad = [r for r in rows if r.get('tolerance_ok') is False]
+        bad = [r for r in rows if isinstance(r, dict) and r.get('tolerance_ok') is False]
         if bad:
             problems.append(f'{len(bad)} ölçüde tolerans doğrulanamadı.')
-    reopened = result.get('reopened') or {}
-    if not reopened.get('references_ok'):
+    reopened = result.get('reopened')
+    if not isinstance(reopened, dict):
+        reopened = {}
+    # Creation history is not proof that annotations survived save/reopen.
+    # Native counts may include template content, so require at least the plan.
+    for key, group, title in (('views', 'views', 'görünüş'), ('dimensions', 'dimensions', 'ölçü'),
+                              ('surface_symbols', 'finishes', 'yüzey işareti'), ('datums', 'datums', 'datum'),
+                              ('frames', 'frames', 'geometrik tolerans')):
+        expected = len(plan.get(group, []))
+        count = reopened.get(key)
+        if expected and (type(count) is not int or count < expected):
+            problems.append(f'Yeniden açılan teknik resimde {expected} {title} doğrulanamadı.')
+    if reopened.get('references_ok') is not True:
         problems.append('Görünüşlerin model referansı doğrulanamadı.')
     if result.get('rebuild_success') is not True:
         problems.append('Yeniden açılan teknik resmin rebuild işlemi başarısız.')
@@ -120,7 +134,9 @@ def assess(result, plan):
     if result.get('layout_conflicts'):
         problems.append(f'{len(result["layout_conflicts"])} ölçü metni çakışması çözülemedi.')
     for key in ('pdf', 'dwg'):
-        if key in result and not result[key].get('verified'):
+        proof = result.get(key)
+        if (plan.get('outputs', {}).get(key) or key in result) and (
+                not isinstance(proof, dict) or proof.get('verified') is not True):
             problems.append(f'{key.upper()} çıktısı doğrulanamadı.')
     problems += [str(i) for i in result.get('issues', [])]
     return ('complete' if not problems else 'partial'), problems
@@ -167,7 +183,10 @@ def execute(payload, *, stop=None, on_status=None):
                            operation_timeout=600)
     if isinstance(result, dict) and result.get('success') and result.get('process_id') != process_id:
         raise RuntimeError('C# yanıtındaki SOLIDWORKS işlem kimliği uyuşmuyor.')
-    state, problems = assess(result, plan)
+    # Explicit path overrides can enable/disable an export independently of
+    # saved preferences. Assess what was actually requested from the host.
+    assessment_plan = dict(plan, outputs={key: bool(payload.get(key + '_path')) for key in ('pdf', 'dwg')})
+    state, problems = assess(result, assessment_plan)
     return dict(result if isinstance(result, dict) else {}, state=state, problems=problems)
 
 

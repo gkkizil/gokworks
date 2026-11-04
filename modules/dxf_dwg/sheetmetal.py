@@ -1,7 +1,7 @@
-"""Read-only, STA-owned sheet inventory. Only plain data leaves the session.
+"""STA-owned sheet inventory. Only plain data leaves the session.
 
 File/configuration/body is the manufacturing identity, never a displayed name.
-No UpdateCutList, suppression change, geometry rebuild or native Save is used.
+Pending geometry and cut lists may be rebuilt in memory; the source is never saved.
 """
 
 from contextlib import contextmanager
@@ -31,11 +31,11 @@ class Session(ReadSession):
         finally:model=None
 
     def ensure_rebuilt(self, model):
-        """(False, note) when the model is up to date, after one in-memory rebuild if needed.
+        """(False, note) for clean geometry or a successful in-memory rebuild.
 
         Parts opened through an assembly often report a pending rebuild. Instead of
-        asking the user, rebuild once (EditRebuild3; nothing is saved). Only frozen
-        features waiting is intentional (frozen geometry) and is not an error.
+        asking the user, try EditRebuild3 then a full rebuild if needed (nothing
+        is saved). Only frozen features waiting is intentional and is not an error.
         """
         extension = None
         try:
@@ -52,10 +52,10 @@ class Session(ReadSession):
         if state is False:
             return False, ''
         try:
-            call(model, 'EditRebuild3')
+            edited = call(model, 'EditRebuild3')
         except Exception as error:
-            return state, f'otomatik yeniden oluşturma başarısız ({error})'
-        if self.rebuild_pending(model) is False:
+            return True, f'otomatik yeniden oluşturma başarısız ({error})'
+        if edited is True and self.rebuild_pending(model) is False:
             return False, 'model taramadan önce SolidWorks’te yeniden oluşturuldu (dosya kaydedilmedi).'
         # Multibody sheet metal: cut list folders that are not updated automatically
         # keep the model 'needs rebuild' after EditRebuild3. Update them and force a
@@ -66,20 +66,22 @@ class Session(ReadSession):
                 if kind != 'CutListFolder':
                     continue
                 folder = optional(feature, 'GetSpecificFeature2')
-                if folder is not None and optional(folder, 'UpdateCutList') is not None:
+                if folder is not None and optional(folder, 'UpdateCutList') is True:
                     updated += 1
                 folder = feature = None
         except Exception:
             pass
         try:
-            call(model, 'ForceRebuild3', False)
+            forced = call(model, 'ForceRebuild3', False)
         except Exception as error:
             return True, f'tam yeniden oluşturma başarısız ({error})'
+        if forced is not True:
+            return True, 'tam yeniden oluşturma başarısız veya sonucu doğrulanamadı (ForceRebuild3).'
         if self.rebuild_pending(model) is False:
             return False, (f'model ve {updated} kesim listesi taramadan önce güncellendi ' if updated else
                            'model taramadan önce tam yeniden oluşturuldu ') + '(dosya kaydedilmedi).'
-        # SOLIDWORKS can keep the flag on multibody parts after a full rebuild; the
-        # geometry now is the rebuilt one, so continue and say so instead of refusing.
+        # Only a successful full rebuild permits continuing with this warning:
+        # SOLIDWORKS can keep the flag on rebuilt multibody parts.
         return False, ('tam yeniden oluşturmadan sonra da SolidWorks "yeniden oluşturma gerekli" bildiriyor; '
                        'açınımlar yeniden oluşturulmuş modelden alındı, çıktıyı kontrol edin.')
 

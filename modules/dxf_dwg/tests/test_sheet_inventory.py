@@ -375,3 +375,52 @@ def test_cut_list_update_that_clears_the_flag_is_reported(env, tmp_path, monkeyp
     m.ForceRebuild3 = lambda top: m.EditRebuild3()   # counts as one more step of the status sequence
     rows, notes = scan(env)
     assert all(r['exportable'] for r in rows) and any('tam yeniden oluşturuldu' in n for n in notes)
+
+
+@pytest.mark.parametrize('edited', [False, None, True])
+@pytest.mark.parametrize('forced', [False, None])
+def test_failed_or_unverified_full_rebuild_blocks_sheet_inventory(env, tmp_path, monkeypatch, edited, forced):
+    app, _, _ = env
+    model = part(app, tmp_path / 'Panel.SLDPRT'); app.ActiveDoc = model
+    before = Path(model.path).read_bytes()
+    _rebuild_status(model, ['NonFrozenFeatureNeedsRebuild'], monkeypatch)
+    model.EditRebuild3 = lambda: edited
+    model.ForceRebuild3 = lambda top: forced
+    rows, notes = scan(env)
+    assert rows and all(not row['exportable'] and row['status'] == 'error' for row in rows)
+    assert notes and not model.export_calls and not app.saves
+    assert Path(model.path).read_bytes() == before
+
+
+def test_failed_edit_rebuild_can_recover_with_successful_full_rebuild(env, tmp_path, monkeypatch):
+    app, _, _ = env
+    model = part(app, tmp_path / 'Panel.SLDPRT'); app.ActiveDoc = model
+    _rebuild_status(model, ['NonFrozenFeatureNeedsRebuild'], monkeypatch)
+    model.EditRebuild3 = lambda: False
+    model.ForceRebuild3 = lambda top: True
+    rows, notes = scan(env)
+    assert all(row['exportable'] for row in rows)
+    assert any('çıktıyı kontrol edin' in note for note in notes) and not app.saves
+
+
+def test_rebuild_failure_before_export_blocks_only_the_failed_part(env, tmp_path, monkeypatch):
+    app, Session, _ = env
+    broken = part(app, tmp_path / 'Broken.SLDPRT')
+    healthy = part(app, tmp_path / 'Healthy.SLDPRT')
+    root = assembly(app, tmp_path / 'Main.SLDASM', [component(broken), component(healthy, name='Healthy')])
+    app.ActiveDoc = root
+    rows, _ = scan(env)
+    assert all(row['exportable'] for row in rows)
+    before = {model.path: Path(model.path).read_bytes() for model in (broken, healthy)}
+    _rebuild_status(broken, ['NonFrozenFeatureNeedsRebuild'], monkeypatch)
+    broken.EditRebuild3 = lambda: False
+    broken.ForceRebuild3 = lambda top: False
+    events = Queue()
+    export_selection(rows, tmp_path, tmp_path / 'out', ('dxf', 'dwg'), events, session_factory=Session)
+    summary = events.queue[-1][1]
+    assert summary['processed'] == 2 and summary['succeeded'] == summary['failed'] == 1
+    assert not broken.export_calls and len(healthy.export_calls) == 2
+    assert {path.suffix for path in (tmp_path / 'out').iterdir()} == {'.dxf', '.dwg'}
+    assert all('Healthy' in path.name for path in (tmp_path / 'out').iterdir())
+    assert app.ActiveDoc is root and not app.saves
+    assert before == {model.path: Path(model.path).read_bytes() for model in (broken, healthy)}

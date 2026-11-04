@@ -326,7 +326,9 @@ def test_existing_create_shaft_contract_is_unchanged():
 def test_host_outcome_is_partial_when_anything_is_missing():
     p = three_stage(); result_plan = plan(p)
     ok_rows = {g: [dict(id=x['id'], created=True) for x in result_plan[g]] for g in ('dimensions', 'notes', 'finishes', 'datums', 'frames')}
-    good = dict(success=True, views=[dict(id='main', created=True)], reopened=dict(references_ok=True),
+    good = dict(success=True, views=[dict(id='main', created=True)],
+                reopened=dict(references_ok=True, views=len(result_plan['views']), dimensions=len(result_plan['dimensions']),
+                              surface_symbols=0, datums=0, frames=0), pdf=dict(verified=True),
                 rebuild_success=True, part_unchanged=True, layout_conflicts=[], **ok_rows)
     assert controller.assess(good, result_plan) == ('complete', [])
     missing = dict(good, dimensions=ok_rows['dimensions'][:-1] + [dict(id='x', created=False)])
