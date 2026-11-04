@@ -1,0 +1,17 @@
+{
+  "schema": "gokworks.dfm_profile",
+  "version": 1,
+  "id": "geometry_basic",
+  "name": "Geometri kontrolü (yalnız çizim hijyeni)",
+  "profile_version": "1.0",
+  "process": "geometry",
+  "verified": true,
+  "note": "Makineden bağımsız çizim kontrolleri: açık/dallanan/kesişen kontur, kopya ve üst üste binen çizgi, sıfır uzunluk, serbest iç parça, birim makullüğü. Sınır değeri gerektirmez.",
+  "closure_tolerance_mm": 0.05,
+  "short_segment_mm": 0.05,
+  "rules": {
+    "DFM-GEO-001": {}, "DFM-GEO-002": {}, "DFM-GEO-003": {}, "DFM-GEO-004": {}, "DFM-GEO-005": {},
+    "DFM-GEO-006": {}, "DFM-GEO-007": {}, "DFM-GEO-008": {}, "DFM-GEO-009": {}, "DFM-GEO-010": {},
+    "DFM-GEO-011": {}, "DFM-GEO-012": {}, "DFM-GEO-013": {}
+  }
+}

@@ -65,6 +65,11 @@ def icon(name, color='#80B6F5'):
                               QPointF(31,16),QPointF(42,16),QPointF(42,32),QPointF(31,32),
                               QPointF(31,37),QPointF(14,37),QPointF(14,30),QPointF(5,30),QPointF(5,18)])
         painter.drawLine(3,24,45,24)
+    elif name == 'dfm_analyzer':
+        painter.drawRect(6, 8, 30, 26)
+        painter.drawEllipse(QPointF(16, 21), 4, 4)
+        painter.drawEllipse(QPointF(35, 33), 8, 8)
+        painter.drawLine(41, 39, 45, 43)
     elif name == 'weight':
         painter.drawRect(8, 15, 31, 26)
         painter.drawArc(16, 4, 15, 20, 0, 180 * 16)

@@ -37,6 +37,7 @@ PAGE_TYPES = {
     'profile_cutting': ('modules.profile_cutting.ui', 'ProfileCuttingPage'),
     'shaft_generator': ('modules.shaft_generator.ui', 'ShaftPage'),
     'gear_calculator': ('modules.gear_calculator.ui', 'GearPage'),
+    'dfm_analyzer': ('modules.dfm_analyzer.ui', 'DfmPage'),
 }
 
 
@@ -64,6 +65,7 @@ MODULES = (
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
     ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
+    ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),
     ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
 )
 
