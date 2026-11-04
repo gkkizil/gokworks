@@ -1,0 +1,22 @@
+{
+  "schema": "gokworks.belt_drive.length_catalog",
+  "version": 1,
+  "units": "mm",
+  "identifier": "synthetic-example-not-products",
+  "profile": "HTD_5M",
+  "reference_line": "pitch",
+  "source": {
+    "name": "Synthetic example; not a manufacturer stock list",
+    "manufacturer": "",
+    "series": "",
+    "revision": "",
+    "reference": "",
+    "kind": "example"
+  },
+  "lengths_mm": [],
+  "tooth_counts": [
+    108,
+    110,
+    112
+  ]
+}

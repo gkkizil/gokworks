@@ -1,0 +1,38 @@
+{
+  "schema": "gokworks.belt_drive",
+  "version": 1,
+  "units": "mm",
+  "belt": {
+    "family": "v",
+    "profile": "A",
+    "pitch_mm": null,
+    "count": 1
+  },
+  "driver": {
+    "datum_diameter_mm": 100.0,
+    "teeth": null
+  },
+  "driven": {
+    "datum_diameter_mm": 200.0,
+    "teeth": null
+  },
+  "load": {
+    "input_rpm": 1450.0,
+    "power_kw": 5.0,
+    "torque_nm": null,
+    "efficiency": null,
+    "service_factor": null
+  },
+  "center": {
+    "mode": "center",
+    "distance_mm": 400.0,
+    "length_mm": null,
+    "belt_teeth": null,
+    "driver_x_mm": 0.0,
+    "driver_y_mm": 0.0,
+    "axis_angle_deg": 0.0
+  },
+  "pretension_per_belt_n": null,
+  "rotation": "ccw",
+  "drive_type": "open"
+}

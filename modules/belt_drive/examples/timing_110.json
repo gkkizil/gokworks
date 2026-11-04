@@ -1,0 +1,38 @@
+{
+  "schema": "gokworks.belt_drive",
+  "version": 1,
+  "units": "mm",
+  "belt": {
+    "family": "timing",
+    "profile": "HTD_5M",
+    "pitch_mm": null,
+    "count": 1
+  },
+  "driver": {
+    "datum_diameter_mm": null,
+    "teeth": 20
+  },
+  "driven": {
+    "datum_diameter_mm": null,
+    "teeth": 40
+  },
+  "load": {
+    "input_rpm": 1500.0,
+    "power_kw": 1.5,
+    "torque_nm": null,
+    "efficiency": null,
+    "service_factor": null
+  },
+  "center": {
+    "mode": "length",
+    "distance_mm": null,
+    "length_mm": null,
+    "belt_teeth": 110,
+    "driver_x_mm": 0.0,
+    "driver_y_mm": 0.0,
+    "axis_angle_deg": 0.0
+  },
+  "pretension_per_belt_n": null,
+  "rotation": "ccw",
+  "drive_type": "open"
+}
