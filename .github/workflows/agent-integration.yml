@@ -1,0 +1,160 @@
+name: Agent integration
+
+on:
+  push:
+    branches: [main, agent/codex, agent/claude]
+  schedule:
+    # Also discovers agent branches which do not yet contain this workflow.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      retry_failed:
+        description: Retry a previously failed head/main pair
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Each run scans both branches. Replacing an older pending run loses no branch;
+# the running validation is never cancelled by another push or scheduled scan.
+concurrency:
+  group: gokworks-agent-integration
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node .github/scripts/tests/agent-integration.test.cjs
+      - id: plan
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {prepare} = require('./.github/scripts/agent-integration.cjs');
+            const matrix = await prepare({github, context, core,
+              retryFailed: context.eventName === 'workflow_dispatch' && context.payload.inputs?.retry_failed === 'true'});
+            core.setOutput('matrix', JSON.stringify(matrix));
+            core.setOutput('has_work', matrix.include.length > 0 ? 'true' : 'false');
+
+  validate:
+    name: Windows validation (${{ matrix.branch }})
+    needs: prepare
+    if: needs.prepare.outputs.has_work == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 55
+    permissions:
+      contents: read
+      statuses: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    defaults:
+      run:
+        working-directory: candidate
+    env:
+      PYTHONUTF8: '1'
+      QT_QPA_PLATFORM: windows
+      AGENT_BASE_SHA: ${{ matrix.base }}
+    steps:
+      - uses: actions/checkout@v4
+        if: matrix.cached != true
+        with:
+          ref: ${{ matrix.head }}
+          fetch-depth: 0
+          persist-credentials: false
+          path: candidate
+      - name: Prepare the exact head/main combination in the disposable CI checkout
+        if: matrix.cached != true
+        run: |
+          git -c user.name=github-actions[bot] -c user.email=41898282+github-actions[bot]@users.noreply.github.com merge --no-edit --no-ff $env:AGENT_BASE_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/setup-python@v5
+        if: matrix.cached != true
+        with:
+          python-version: '3.13'
+          architecture: x64
+          cache: pip
+          cache-dependency-path: |
+            candidate/requirements.txt
+            candidate/requirements-dev.txt
+      - name: Install test dependencies
+        if: matrix.cached != true
+        run: python -m pip install -r requirements-dev.txt
+      - name: Configure native Windows display
+        if: matrix.cached != true
+        run: python packaging/configure_windows_display.py
+      - name: Stage compile references, without a live SOLIDWORKS session
+        if: matrix.cached != true
+        run: |
+          $directory = Join-Path $env:RUNNER_TEMP 'agent-shaft-interop'
+          python packaging/prepare_shaft_test_refs.py $directory
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
+      - name: Run the complete regression suite
+        if: matrix.cached != true
+        run: python packaging/run_windows_tests.py
+      - name: Verify application startup
+        if: matrix.cached != true
+        run: python main.py --self-check agent-startup.json
+      - name: Upload test evidence
+        if: always() && matrix.cached != true
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-validation-${{ matrix.pull }}-${{ matrix.head }}
+          retention-days: 7
+          path: |
+            candidate/windows-tests.xml
+            candidate/windows-tests.log
+            candidate/windows-qt-native.log
+            candidate/windows-display.json
+            candidate/agent-startup.json
+      - name: Record validation of this exact head/main pair
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          VALIDATION_RESULT: ${{ job.status }}
+          VALIDATED_HEAD: ${{ matrix.head }}
+          VALIDATED_BASE: ${{ matrix.base }}
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({...context.repo,
+              sha: process.env.VALIDATED_HEAD,
+              state: process.env.VALIDATION_RESULT === 'success' ? 'success' : 'failure',
+              context: 'GOKWORKS agent validation', description: `main:${process.env.VALIDATED_BASE}`,
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`});
+
+  merge:
+    needs: [prepare, validate]
+    if: always() && needs.prepare.result == 'success' && needs.prepare.outputs.has_work == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/github-script@v7
+        env:
+          CANDIDATES: ${{ needs.prepare.outputs.matrix }}
+        with:
+          script: |
+            const {finish} = require('./.github/scripts/agent-integration.cjs');
+            await finish({github, context, core, candidates: JSON.parse(process.env.CANDIDATES).include});

@@ -41,8 +41,14 @@ ayrıca seçilmelidir.
 - Giriş noktası, modül kaydı, ortak CAD servisleri, SolidWorks bağlantıları,
   veri modelleri, bağımlılıklar ve ana pencere değişikliklerinde çağıranları
   kontrol et. Fonksiyon imzaları ve veri sözleşmelerini mümkün olduğunca koru.
-- Diğer ajanın commitlerini incelemek serbesttir. Otomatik merge yapma;
-  kullanıcı talimatı olmadan rebase veya `main` entegrasyonu yapma.
+- Diğer ajanın commitlerini incelemek serbesttir. Kullanıcı talimatı olmadan
+  rebase veya elle `main` entegrasyonu yapma.
+- Kullanıcı 4 Kasım 2026'da `agent/codex` ve `agent/claude` için PR açılmasını
+  ve testler başarılıysa otomatik birleştirilmesini açıkça istedi. Bu yetkiyi
+  `.github/workflows/agent-integration.yml` uygular: sabit head/main birleşimi
+  Windows'ta test edilir; dal veya main ilerlerse yeni doğrulama gerekir.
+  Başarısız testler, çakışmalar, taslak/kapalı PR'lar ve depo korumaları aşılmaz.
+  CI'ın geçici checkout'undaki test birleşimi canlı worktree'leri değiştirmez.
 - Başka ajanın branch'ini sıfırlama; çakışmayı tek tarafın kodunu seçerek çözme.
   Force push ve yıkıcı Git işlemleri için açık kullanıcı onayı gerekir.
 - Ortak dosyada çalışma gerekiyorsa kendi branch'inde kal ve entegrasyon
