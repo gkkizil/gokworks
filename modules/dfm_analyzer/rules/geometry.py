@@ -4,7 +4,7 @@ from .base import rule, Mark, NotEvaluated, ERROR, WARNING, INFO
 
 
 def _fmt(value):
-    return f'{value:.3f}'.rstrip('0').rstrip('.')
+    return f'{value:.3f}'.rstrip('0').rstrip('.').replace('.', ',')
 
 
 @rule('DFM-GEO-001', 'Açık kontur', 'geometry', severity=ERROR, needs_limit=False,

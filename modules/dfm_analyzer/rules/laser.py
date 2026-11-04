@@ -17,7 +17,7 @@ ACCURACY = 'Ölçüm, eğri düzleştirme doğruluğu (varsayılan 0,01 mm) kada
 
 
 def _fmt(value):
-    return f'{value:.3f}'.rstrip('0').rstrip('.')
+    return f'{value:.3f}'.rstrip('0').rstrip('.').replace('.', ',')
 
 
 def _ring(polygon):

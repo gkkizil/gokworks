@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
                                QListWidgetItem, QSplitter, QTableView, QTabWidget, QTextBrowser, QVBoxLayout,
                                QWidget, QCheckBox, QMenu)
 
-from gui_qt.components import BasePage, button, configure_view, label, pane, scroll, NumberSpinBox, section_header
+from gui_qt.components import BasePage, button, configure_view, fit_columns, label, pane, scroll, NumberSpinBox, section_header
 from gui_qt.theme import COLORS
 from . import controller, reporting
 from .models import SEVERITY_TITLES, STATUS_TITLES, ERROR, WARNING, INFO, NOT_EVALUATED, FAILED
@@ -80,18 +80,20 @@ class DfmPage(BasePage):
         form.addRow('Eğri doğruluğu · mm', self.tolerance)
         self.excluded = QLineEdit(str(self.settings.get('dfm_excluded', '') or ''))
         self.excluded.setPlaceholderText('ör. ÖLÇÜ; YAZI')
-        form.addRow('Dışlanacak katmanlar', self.excluded)
+        form.addRow('Hariç katmanlar', self.excluded)
         source_layout.addLayout(form)
         left_layout.addWidget(source)
 
         process, process_layout = pane('Profil ve malzeme', rule=True)
         pform = QFormLayout(); pform.setSpacing(6)
         self.profile = QComboBox()
+        self.profile.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.profile.setMinimumContentsLength(10)
         self.fill_profiles()
         self.profile.currentIndexChanged.connect(self.profile_changed)
         self.load_profile_button = button('Profil dosyası…', self.choose_profile)
-        prow = QHBoxLayout(); prow.addWidget(self.profile, 1); prow.addWidget(self.load_profile_button)
-        pform.addRow('Kural profili', prow)
+        pform.addRow('Kural profili', self.profile)
+        pform.addRow('', self.load_profile_button)
         self.material = QLineEdit(str(self.settings.get('dfm_material', '') or ''))
         self.material.setPlaceholderText('ör. S235JR')
         pform.addRow('Malzeme', self.material)
@@ -107,7 +109,8 @@ class DfmPage(BasePage):
 
         rules, rules_layout = pane('Analiz kuralları', rule=True)
         self.rule_list = QListWidget(); self.rule_list.setAccessibleName('Analiz kuralları')
-        self.rule_list.setMinimumHeight(160)
+        self.rule_list.setMinimumHeight(160); self.rule_list.setTextElideMode(Qt.ElideRight)
+        self.rule_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         rules_layout.addWidget(self.rule_list)
         left_layout.addWidget(rules, 1)
         self.controls += [self.path, self.browse, self.unit, self.tolerance, self.excluded, self.profile,
@@ -145,6 +148,8 @@ class DfmPage(BasePage):
         self.proxy.setFilterCaseSensitivity(Qt.CaseInsensitive); self.proxy.setFilterKeyColumn(-1)
         self.proxy.setSortRole(Qt.UserRole + 1)
         self.table = QTableView(); self.table.setModel(self.proxy); configure_view(self.table)
+        self.table.setTextElideMode(Qt.ElideRight)
+        fit_columns(self.table, elastic=2, minimum=160, autofit=(0, 1, 3, 4, 5), settings=self.settings, key='dfm_findings')
         self.table.selectionModel().selectionChanged.connect(self.finding_selected)
         self.search.textChanged.connect(self.apply_filter); self.severity.currentIndexChanged.connect(self.apply_filter)
         findings_tab = QWidget(); ft = QVBoxLayout(findings_tab); ft.setContentsMargins(0, 4, 0, 0)
@@ -155,15 +160,17 @@ class DfmPage(BasePage):
         self.outcomes = QStandardItemModel(0, 4)
         self.outcomes.setHorizontalHeaderLabels(['Durum', 'Kural', 'Sınır', 'Açıklama'])
         self.outcome_table = QTableView(); self.outcome_table.setModel(self.outcomes); configure_view(self.outcome_table)
+        fit_columns(self.outcome_table, elastic=3, minimum=180, autofit=(0, 1, 2), settings=self.settings, key='dfm_outcomes')
         self.tabs.addTab(self.outcome_table, 'Kural sonuçları')
         self.notes = QTextBrowser()
         self.tabs.addTab(self.notes, 'Kapsam ve notlar')
         right_layout.addWidget(self.tabs, 1)
 
         self.splitter = QSplitter(Qt.Horizontal)
-        self.splitter.addWidget(scroll(left)); self.splitter.addWidget(centre); self.splitter.addWidget(right)
+        left_scroll = scroll(left); left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.splitter.addWidget(left_scroll); self.splitter.addWidget(centre); self.splitter.addWidget(right)
         self.splitter.setStretchFactor(0, 0); self.splitter.setStretchFactor(1, 3); self.splitter.setStretchFactor(2, 2)
-        self.splitter.setSizes([300, 640, 460])
+        self.splitter.setSizes([320, 540, 600])
         self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
         self.profile_changed()
@@ -190,7 +197,9 @@ class DfmPage(BasePage):
             return
         self.settings.set('dfm_profile', self.profile.currentData())
         verified = 'Doğrulanmış profil.' if profile.verified else 'Doğrulanmamış örnek başlangıç profili.'
-        self.profile_note.setText(f'{verified} Sürüm {profile.profile_version}. {profile.note}')
+        first = profile.note.split('. ')[0].rstrip('.') + '.' if profile.note else ''
+        self.profile_note.setText(f'{verified} Sürüm {profile.profile_version}. {first}'.strip())
+        self.profile_note.setToolTip(profile.note)
         self.rule_list.clear()
         for rid, cfg in profile.rules.items():
             rule = REGISTRY[rid]

@@ -135,9 +135,10 @@ class DfmView(QGraphicsView):
         if bounds is None:
             return
         x0, y0, x1, y1 = bounds
-        size = max(x1 - x0, y1 - y0, 4.0)
+        # Keep some surrounding geometry in view: at least 3× the finding, never under 20 mm.
+        size = max((x1 - x0) * 3, (y1 - y0) * 3, 20.0)
         cx, cy = (x0 + x1) / 2, -(y0 + y1) / 2
-        self.fit(QRectF(cx - size * 1.6, cy - size * 1.6, size * 3.2, size * 3.2))
+        self.fit(QRectF(cx - size / 2, cy - size / 2, size, size))
 
     def wheelEvent(self, event):
         factor = 1.2 ** (event.angleDelta().y() / 120)
