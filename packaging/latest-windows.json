@@ -1,9 +1,9 @@
 {
-  "commit": "a8b814591912d532fd5dec4e2a577f28114926d9",
+  "commit": "27218f06d2ce682e166ac32b466b1632886b063e",
   "status": "success",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/41832071417",
-  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-41832071417-1/GOKWORKS.exe",
-  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/41832071417/artifacts/13324395287",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/41985929369",
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-41985929369-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/41985929369/artifacts/13395574940",
   "setup_steps": {
     "checkout": "success",
     "python": "success",
@@ -107,8 +107,8 @@
       ]
     ]
   },
-  "bytes": 132181437,
-  "sha256": "2faeaa8f6a351213f01864a9d1cbb8b4ae7c7e107f9b17a3dda4d553507906b8",
+  "bytes": 132340929,
+  "sha256": "918d380cbdad57ada14cdda72e3711a60fbffa28ae7c7749b4251da63a934b97",
   "smoke": {
     "status": "passed",
     "framework": "PySide6 / Qt Widgets",
@@ -139,7 +139,8 @@
       "profile_cutting",
       "shaft_generator",
       "gear_calculator",
-      "dfm_analyzer"
+      "dfm_analyzer",
+      "belt_drive"
     ],
     "themes": [
       "dark",
@@ -163,19 +164,19 @@
         1440
       ]
     ],
-    "startup_ms": 1001.06,
-    "navigation_median_ms": 88.38,
-    "navigation_max_ms": 1047.35,
-    "resize_median_ms": 71.68,
-    "resize_max_ms": 666.21,
-    "table_50000_load_ms": 91.64,
-    "table_50000_filter_ms": 158.87,
+    "startup_ms": 1007.15,
+    "navigation_median_ms": 62.77,
+    "navigation_max_ms": 909.42,
+    "resize_median_ms": 57.97,
+    "resize_max_ms": 645.61,
+    "table_50000_load_ms": 81.47,
+    "table_50000_filter_ms": 120.92,
     "tk_imports": [],
     "kr_assignment_engine": "embedded Python SheetMetal parameters",
     "pdf_export_engine": "isolated COM process",
     "solidworks_live_tested": false,
     "checks": [
-      "17 modules",
+      "18 modules",
       "two themes",
       "resolution matrix",
       "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
@@ -234,7 +235,8 @@
         "profile_cutting",
         "shaft_generator",
         "gear_calculator",
-        "dfm_analyzer"
+        "dfm_analyzer",
+        "belt_drive"
       ],
       "themes": [
         "dark",
@@ -258,19 +260,19 @@
           1440
         ]
       ],
-      "startup_ms": 867.89,
-      "navigation_median_ms": 105.37,
-      "navigation_max_ms": 930.01,
-      "resize_median_ms": 53.09,
-      "resize_max_ms": 661.68,
-      "table_50000_load_ms": 105.79,
-      "table_50000_filter_ms": 158.12,
+      "startup_ms": 707.78,
+      "navigation_median_ms": 79.57,
+      "navigation_max_ms": 753.77,
+      "resize_median_ms": 46.15,
+      "resize_max_ms": 147.03,
+      "table_50000_load_ms": 80.55,
+      "table_50000_filter_ms": 122.01,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
       "solidworks_live_tested": false,
       "checks": [
-        "17 modules",
+        "18 modules",
         "two themes",
         "resolution matrix",
         "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
@@ -327,7 +329,8 @@
         "profile_cutting",
         "shaft_generator",
         "gear_calculator",
-        "dfm_analyzer"
+        "dfm_analyzer",
+        "belt_drive"
       ],
       "themes": [
         "dark",
@@ -351,19 +354,19 @@
           1440
         ]
       ],
-      "startup_ms": 463.97,
-      "navigation_median_ms": 121.5,
-      "navigation_max_ms": 771.27,
-      "resize_median_ms": 61.59,
-      "resize_max_ms": 182.88,
-      "table_50000_load_ms": 107.38,
-      "table_50000_filter_ms": 200.61,
+      "startup_ms": 379.11,
+      "navigation_median_ms": 90.63,
+      "navigation_max_ms": 629.33,
+      "resize_median_ms": 59.46,
+      "resize_max_ms": 192.08,
+      "table_50000_load_ms": 91.33,
+      "table_50000_filter_ms": 119.22,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
       "solidworks_live_tested": false,
       "checks": [
-        "17 modules",
+        "18 modules",
         "two themes",
         "resolution matrix",
         "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
@@ -420,7 +423,8 @@
         "profile_cutting",
         "shaft_generator",
         "gear_calculator",
-        "dfm_analyzer"
+        "dfm_analyzer",
+        "belt_drive"
       ],
       "themes": [
         "dark",
@@ -444,19 +448,19 @@
           1440
         ]
       ],
-      "startup_ms": 1001.06,
-      "navigation_median_ms": 88.38,
-      "navigation_max_ms": 1047.35,
-      "resize_median_ms": 71.68,
-      "resize_max_ms": 666.21,
-      "table_50000_load_ms": 91.64,
-      "table_50000_filter_ms": 158.87,
+      "startup_ms": 1007.15,
+      "navigation_median_ms": 62.77,
+      "navigation_max_ms": 909.42,
+      "resize_median_ms": 57.97,
+      "resize_max_ms": 645.61,
+      "table_50000_load_ms": 81.47,
+      "table_50000_filter_ms": 120.92,
       "tk_imports": [],
       "kr_assignment_engine": "embedded Python SheetMetal parameters",
       "pdf_export_engine": "isolated COM process",
       "solidworks_live_tested": false,
       "checks": [
-        "17 modules",
+        "18 modules",
         "two themes",
         "resolution matrix",
         "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
