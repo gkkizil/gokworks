@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QFileDialog
 
 from gui_qt.app import MainWindow, create_application, MODULES
 from modules.belt_drive import controller
-from modules.belt_drive.catalog.importers import catalog_dumps, catalog_to_csv, load_catalog
+from modules.belt_drive.catalog.importers import catalog_to_csv, load_catalog
 from modules.belt_drive.design_search import search_drives
 from modules.belt_drive.design_serialization import project_loads
 from modules.belt_drive.ui_support import BUNDLED_CATALOGS
@@ -249,6 +249,76 @@ def test_invalid_request_is_reported_without_a_job(page):
     page.a_mode.setCurrentIndex(page.a_mode.findData('range'))     # range without C min/max
     page.start_search()
     assert not page.jobs.busy and 'İstek geçersiz' in page.status_text
+
+
+def test_default_general_v_sizing_works_with_no_c_and_no_catalog(page,qtbot):
+    assert page.nominal_mode() and page.a_family.currentData()=='v'
+    page.catalog=None
+    page.a_power.setValue(3.);page.a_rpm.setValue(1450.);page.a_target.setValue(400.)
+    page.a_target_c.setValue(0.)
+    page.start_search();wait(qtbot,page)
+    assert page.report is not None and page.report.search_complete and page.candidates.rowCount()>0
+    candidate=page.selected_candidate()
+    assert candidate is not None and not candidate.catalog_product
+    assert candidate.result.specification.belt.family=='v' and math.isfinite(candidate.result.length_exact_mm)
+    assert candidate.result.length_exact_mm>0 and candidate.rpm_error_percent<=1.
+    assert 'C belirtilmedi' in page.coverage.text() and 'ürün kodu aranmadı' in page.coverage.text()
+    assert 'Ld' in page.candidates.item(0,2).text() and 'mm' in page.candidates.item(0,2).text()
+    assert 'gerekli teorik boy' in page.candidate_details.toPlainText()
+    assert page.auto_canvas.result is candidate.result
+    page.add_to_compare();assert page.compare.rowCount()==1
+    page.transfer_to_manual();assert page.manual_result is not None
+    assert page.manual_result.length_exact_mm==pytest.approx(candidate.result.length_exact_mm,abs=1e-7)
+    page.a_target.setValue(410.)
+    assert page.report is None and page.compare.rowCount()==0 and not page.to_manual.isEnabled()
+
+
+def test_impossible_c_range_has_visible_actionable_error(page,qtbot):
+    page.a_mode.setCurrentIndex(page.a_mode.findData('range'))
+    page.a_cmin.setValue(1.);page.a_cmax.setValue(11.)
+    page.start_search();wait(qtbot,page)
+    assert page.report is None and page.candidates.rowCount()==0
+    assert 'C üst sınırı 11 mm çok küçük' in page.coverage.text()
+    page.a_mode.setCurrentIndex(page.a_mode.findData('auto'));page.a_target_c.setValue(0.)
+    page.start_search();wait(qtbot,page)
+    assert page.report is not None and page.candidates.rowCount()>0
+
+
+def test_general_sizing_never_depends_on_hidden_unverified_filter(page,qtbot):
+    assert not page.a_unverified.isChecked() and not page.a_unverified.isEnabled()
+    page.start_search();wait(qtbot,page)
+    assert page.candidates.rowCount()>0 and 'gizli' not in page.coverage.text()
+    page.a_family.setCurrentIndex(page.a_family.findData('timing'))
+    page.start_search();wait(qtbot,page)
+    assert page.report is not None and page.candidates.rowCount()>0
+    assert all(c.result.specification.belt.family=='timing' for c in page.report.candidates)
+    assert 'Lp' in page.candidates.item(0,2).text()
+
+
+def test_nominal_project_v3_restores_general_method_without_a_catalog(page,qtbot,tmp_path,monkeypatch):
+    page.a_target_c.setValue(0.)
+    page.start_search();wait(qtbot,page)
+    page.add_to_compare();selected=list(page.compare_ids)
+    path=tmp_path/'general.json'
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**k:(str(path),''))
+    page.save_project()
+    data=json.loads(path.read_text(encoding='utf-8'))
+    assert data['version']==3 and data['catalog'] is None and data['request']['center_target_mm'] is None
+    page.use_catalog_mode()
+    monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),''))
+    page.open_project();wait(qtbot,page)
+    assert page.nominal_mode() and page.report is not None and page.compare_ids==selected
+    assert page.a_family.currentData()=='v' and page.a_target_c.value()==0.
+    comparison=tmp_path/'comparison.json'
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**k:(str(comparison),''))
+    page.save_comparison()
+    output=json.loads(comparison.read_text(encoding='utf-8'))
+    assert output['schema']=='gokworks.belt_drive.nominal_result' and len(output['candidates'])==1
+
+
+def test_numeric_formatter_preserves_integer_trailing_zeros():
+    from modules.belt_drive.ui_support import number
+    assert number(1450.,0)=='1450' and number(100000.,0)=='100000' and number(1.5,2)=='1,5'
 
 
 @pytest.mark.parametrize('size', [(1024, 700), (1366, 768), (1920, 1080)])

@@ -12,6 +12,7 @@ from .catalog.products import ProductCatalog, sequence, text
 from .design_models import DesignRequest, DesignSearchReport
 from .serialization import read_json, to_dict, from_dict, SCHEMA
 from .models import BeltDriveSpecification
+from .nominal_design import NominalSizingOptions, NominalSizingReport
 
 REQUEST_SCHEMA = SCHEMA + '.automatic_request'
 
@@ -34,9 +35,13 @@ class DesignProject:
     catalog: ProductCatalog | None = None
     manual: BeltDriveSpecification | None = None
     selected_ids: tuple[str, ...] = ()
+    nominal_options: NominalSizingOptions | None = None
 
     def __post_init__(self):
-        if self.request is not None and (not isinstance(self.request, DesignRequest) or not isinstance(self.catalog, ProductCatalog)):
+        if self.nominal_options is not None and (not isinstance(self.nominal_options,NominalSizingOptions) or self.catalog is not None or not isinstance(self.request,DesignRequest)):
+            raise ValueError('Genel boyutlandırma projesi katalog yerine nominal seçenekler ve istek içerir.')
+        if self.request is not None and (not isinstance(self.request, DesignRequest) or
+                self.nominal_options is None and not isinstance(self.catalog, ProductCatalog)):
             raise ValueError('Otomatik proje için istek ve katalog snapshot gerekli.')
         if self.request is None and self.catalog is not None:
             raise ValueError('Katalog snapshot otomatik istek olmadan kaydedilemez.')
@@ -55,25 +60,31 @@ class DesignProject:
 def project_to_dict(project):
     if not isinstance(project, DesignProject):
         raise ValueError('DesignProject gerekli.')
-    return dict(schema=SCHEMA, version=2, units='mm',
+    result=dict(schema=SCHEMA, version=2, units='mm',
         request=request_to_dict(project.request) if project.request else None,
         catalog=catalog_to_dict(project.catalog) if project.catalog else None,
         catalog_sha256=fingerprint(project.catalog) if project.catalog else None,
         manual=to_dict(project.manual) if project.manual else None, selected_ids=project.selected_ids)
+    if project.nominal_options is not None:
+        result['version']=3;result['nominal_options']=asdict(project.nominal_options)
+    return result
 
 
 def project_from_dict(data):
     if isinstance(data, dict) and type(data.get('version')) is int and data['version'] == 1:
         return DesignProject(manual=from_dict(data))
     keys = {'schema','version','units','request','catalog','catalog_sha256','manual','selected_ids'}
-    if not isinstance(data, dict) or set(data) != keys or data['schema'] != SCHEMA or type(data['version']) is not int or data['version'] != 2 or data['units'] != 'mm':
-        raise ValueError('Proje şema v1/v2 veya birim/alanlar desteklenmiyor.')
+    if isinstance(data,dict) and type(data.get('version')) is int and data['version']==3:
+        keys=keys|{'nominal_options'}
+    if not isinstance(data, dict) or set(data) != keys or data['schema'] != SCHEMA or type(data['version']) is not int or data['version'] not in (2,3) or data['units'] != 'mm':
+        raise ValueError('Proje şema v1/v2/v3 veya birim/alanlar desteklenmiyor.')
     catalog = catalog_from_dict(data['catalog']) if data['catalog'] is not None else None
     if data['catalog_sha256'] != (fingerprint(catalog) if catalog else None):
         raise ValueError('Katalog snapshot içerik özeti uyuşmuyor; sonuçlar yeniden doğrulanmalı.')
     return DesignProject(request=request_from_dict(data['request']) if data['request'] is not None else None,
         catalog=catalog, manual=from_dict(data['manual']) if data['manual'] is not None else None,
-        selected_ids=data['selected_ids'])
+        selected_ids=data['selected_ids'],
+        nominal_options=construct(NominalSizingOptions,data['nominal_options']) if data['version']==3 else None)
 
 
 def project_dumps(project):
@@ -85,6 +96,9 @@ def project_loads(content):
 
 
 def report_to_dict(report, *, selected_ids=None):
+    if isinstance(report,NominalSizingReport):
+        from .nominal_design import report_to_dict as nominal_dict
+        return nominal_dict(report,selected_ids=selected_ids)
     if not isinstance(report, DesignSearchReport):
         raise ValueError('DesignSearchReport gerekli.')
     result = asdict(report)
@@ -108,7 +122,11 @@ def recalculate_project(project, *, stop=None):
     if project.request is None:
         from .calculation import calculate
         return calculate(project.manual, stop=stop), ()
-    report = search_drives(project.request, project.catalog, stop=stop)
+    if project.nominal_options is not None:
+        from .nominal_design import size_drive
+        report=size_drive(project.request,project.nominal_options,stop=stop)
+    else:
+        report = search_drives(project.request, project.catalog, stop=stop)
     available = {item.identifier for item in (*report.capacity_verified, *report.unverified)}
     # Stale selections are not materialized from saved numeric results.
     return report, tuple(identifier for identifier in project.selected_ids if identifier in available)
