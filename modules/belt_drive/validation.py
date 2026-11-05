@@ -59,7 +59,7 @@ def issues(spec):
             pulley = getattr(spec, name)
             number(pulley.teeth, name + '.teeth', integer)
             if pulley.datum_diameter_mm is not None:
-                error('REFERENCE_MISMATCH', 'Senkron kasnakta diş sayısı kullanın; datum çapı verilmez.', name + '.datum_diameter_mm')
+                error('REFERENCE_MISMATCH', 'Triger-senkron kasnakta diş sayısı kullanın; datum çapı verilmez.', name + '.datum_diameter_mm')
         if belt.pitch_mm is not None:
             number(belt.pitch_mm, 'belt.pitch_mm')
             if profile and belt.pitch_mm != profile.pitch_mm:
@@ -89,7 +89,7 @@ def issues(spec):
         elif belt.family == 'timing':
             number(center.belt_teeth, 'center.belt_teeth', integer)
             if center.length_mm is not None:
-                error('REFERENCE_MISMATCH', 'Senkron kayışta tam N diş verin; bölüm uzunluğu N×p hesaplanır.', 'center.length_mm')
+                error('REFERENCE_MISMATCH', 'Triger-senkron kayışta tam N diş verin; bölüm uzunluğu N×p hesaplanır.', 'center.length_mm')
     else:
         error('CENTER_MODE', 'Eksen yöntemi center veya length olmalı.', 'center.mode')
     for name in ('driver_x_mm', 'driver_y_mm', 'axis_angle_deg'):

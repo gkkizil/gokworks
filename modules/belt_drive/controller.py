@@ -22,3 +22,13 @@ def calculation_job(specification, catalog=None, *, candidate_limit=5):
         checkpoint(stop)
         events.put(('belt_result', CalculationReport(result, candidates)))
     return run
+
+
+def automatic_design_job(request, catalog):
+    """Existing JobManager protocol, without creating Qt objects or parallel pools."""
+    def run(events, stop):
+        from .design_search import search_drives
+        report = search_drives(request, catalog, stop=stop,
+            progress=lambda pairs, lengths: events.put(('belt_design_progress', (pairs, lengths))))
+        events.put(('belt_design_cancelled' if report.cancelled else 'belt_design_result', report))
+    return run

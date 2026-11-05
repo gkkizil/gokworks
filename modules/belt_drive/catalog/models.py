@@ -45,7 +45,7 @@ class LengthCatalog:
         values = self.tooth_counts if profile.family == 'timing' else self.lengths_mm
         extra = self.lengths_mm if profile.family == 'timing' else self.tooth_counts
         if not values or extra:
-            raise ValueError('Senkron katalog yalnız diş adetleri; V katalog yalnız datum uzunlukları içerir.')
+            raise ValueError('Triger-senkron katalog yalnız diş adetleri; V katalog yalnız datum uzunlukları içerir.')
         for value in values:
             (integer if profile.family == 'timing' else positive)(value, 'Katalog boyutu')
             if profile.family == 'timing':

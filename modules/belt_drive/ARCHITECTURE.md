@@ -1,5 +1,41 @@
 # Belt Drive Designer mimarisi ve aşama sınırları
 
+## 5 Kasım 2026 backend güncellemesi
+
+Kullanıcı GUI geliştirmesini kapsamdan çıkardı. Aşağıdaki eski aşama planının
+yanında artık `design_models`, `design_search`, `design_ranking`,
+`design_pairs`, `design_serialization`, `design_cli` ve ürün/rating katalog
+katmanları uygulanmıştır. Aşama 1 matematiği ve eski API'ler değiştirilmedi.
+
+```text
+DesignRequest + ProductCatalog (source/belt/pulley/rating ayrı)
+  → kaynak/seri/profil/uyumluluk grupları
+  → kayıtlı kasnak çiftleri → erken devir/çap/diş filtresi
+  → gerçek kayıtlı kayış boyutları → mevcut tam uzunluk/C çözümü
+  → bilinen boyut/sınır kontrolleri → declared-table rating
+  → sert retler / ayrı doğrulanmamış grup → deterministik sıralama
+  → kapsam/iptal/sınırlama raporu → v2 kayıt / JSON karşılaştırma
+```
+
+Resmî üretici sağlayıcıları için yeterli veri yoktur. Gates/Optibelt kaynak
+adaptörleri normalize yerel ürün sözleşmesi içindir; gerçek üretici rating
+yöntemleri uygulanmış değildir. Deneysel tablo aritmetiği `PROVISIONAL`
+kalır. `OFFICIAL_VERIFIED` bir kullanıcı girdisiyle verilemez; bu sürümde
+hiçbir ürün veya güç tablosuna resmî onay tanımlanmamıştır.
+
+Tosyalı PDF adaptörü ve 342 boyut kaydı eklendi; kaynak SHA/sayfa ve 146
+karantina kaydı korunur. Kayış/kapasite verisi olmadan 32 örnek kasnak çifti
+bulunabilir, fakat bunlar tam sürücü tasarımı değildir. Diğer üreticilerle
+çapraz uyumluluk otomatik varsayılmaz.
+
+`ProductSource.effective_status` ve `CapacityEvaluation.manufacturer_verified`
+ayrımı korunmalı. Gelecekte resmî onay için ayrı, içerik özetiyle sabitlenmiş
+inceleme kanıtı ve üreticiye özgü referans hesapları gereklidir; yalnız marka
+adına/URL'ye bakılarak onay veren bir yükleyici eklenmemelidir.
+
+UI/menü/ortak dosya değişikliği yoktur. Güncel sözleşmeler ve doğrulama
+kanıtları [AUTOMATIC_DESIGN_REPORT.md](AUTOMATIC_DESIGN_REPORT.md) içindedir.
+
 ## Uygulanan Aşama 1
 
 ```text

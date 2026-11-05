@@ -61,7 +61,7 @@ aşamalarının açık teknik gereksinimidir.
 
 | İşlev | Uygulama ve doğrulama yaklaşımı |
 | --- | --- |
-| Oran / çıkış devri | V'de datum çap oranı, senkron kayışta doğrudan tam diş oranı; ideal kaymasız sonuç |
+| Oran / çıkış devri | V'de datum çap oranı, triger-senkron kayışta doğrudan tam diş oranı; ideal kaymasız sonuç |
 | Adım / bölüm çapı | `Dₚ=z·p/π`; profil/adım/family eşleşmesi zorunlu |
 | Güç / tork | Birincil giriş yalnız biri; matematiksel `60000/(2π)` dönüşümü |
 | Verim / servis faktörü | Yalnız açık kullanıcı girdisiyle; ideal, η uygulanmış ve tasarım sonuçları ayrı |
@@ -69,7 +69,7 @@ aşamalarının açık teknik gereksinimidir.
 | Tam uzunluk / sarılma | İki ortak teğet ve iki gerçek çember yayı; sürücü büyük/küçük/eşit durumları |
 | Yaklaşık uzunluk | Klasik açık kayış yaklaşımı ve tam sonuçtan işaretli fark |
 | Uzunluktan C | Fiziksel alt sınır ve monoton bisection; eşit çapta analitik çözüm, kalan ve iptal |
-| Senkron uzunluk | `Lₚ=N·p`; kesirli teorik N korunur, seçilen N yalnız tam sayı |
+| Triger-senkron uzunluk | `Lₚ=N·p`; kesirli teorik N korunur, seçilen N yalnız tam sayı |
 | Kavrama tahmini | `z·β/(2π)`, kesin yük taşıyan diş sayısı olarak yuvarlanmaz |
 | Etkin kuvvet | `Ft=1000P/v`, toplam `F₁−F₂` farkı; nominal/tasarım ayrı |
 | İsteğe bağlı mil bileşkesi | F₀ verilirse sadeleştirilmiş F₁/F₂, eşit kayış paylaşımı ve gerçek kol vektörleri |

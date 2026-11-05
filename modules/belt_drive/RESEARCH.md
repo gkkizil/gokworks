@@ -1,5 +1,35 @@
 # Kaynak araştırması — 4 Kasım 2026
 
+## 5 Kasım eki: kullanıcının Tosyalı PDF'si
+
+Kullanıcı `a9f64a62-521a-4208-9747-49cd8338d91a.pdf` dosyasını sağladı.
+Dosya 151 sayfa; SHA-256
+`8399b6b5a123573e99e8a982afd6c7c1504e160edc845d6fc6218812461d689c`.
+Kapakta TOS/Tosyalı, `www.tosyalimakina.com` ve iletişim bilgileri bulunur.
+Bu, belge içindeki kaynak beyanıdır; bağımsız site/güncel revizyon veya
+üretim menşei doğrulaması değildir. Metadata oluşturma 10.07.2013,
+değiştirme 02.10.2023; bunlar katalog baskı/revizyon tarihi sayılmadı.
+
+Poppler ile sayfa/sütun koruyarak metin çıkarıldı; 20, 21 ve 30. PDF
+sayfaları görsel olarak da karşılaştırıldı. 522 desteklenen profil satırı
+tanındı: 342 geçerli boyut kaydı, 146 karantina, 34 desteklenmeyen burçlu
+tablo satırı. Karantinadaki 144 Dp hücresi `z×p/π` ile tablo yuvarlama
+hassasiyetinde uyuşmaz; iki satırda hücre sayısı belirsizdir. Bunlar
+düzeltilmiş veya resmî doğrulanmış ürün olarak sunulmaz.
+
+Katalogdaki HTD/AT pilot kasnak sayısal bilgileri ayrı veri sözleşmesine
+alındı. T5/T10 çelişen satırları dışarıda bırakıldı. Kayış SKU, standart
+triger-senkron kayış uzunluğu, servis veya güç tablosu bu bölümlerden
+üretilmedi. V bölümlerindeki genel seçim grafikleri triger-senkron kapasite
+tablosu yerine kullanılmadı. Tam PDF, çizimler, logo ve tam metin dağıtıma
+eklenmedi; yalnız istenen teknik ürün olguları ile kaynak/denetim metadatası
+eklendi. Tam PDF/katalog yeniden dağıtım lisansı belirlenmiş değildir.
+
+Gates/Optibelt resmî bağlantıları için ağ engeli sürmektedir. Yalnız bu
+üreticiler ve kaynak Tosyalı için yerel normalize kayıt adaptörleri hazırdır;
+gerçek Gates/Optibelt ürün ve güç tablosu eklenmemiştir. Kullanıcı onayına
+sunulan ağ taslağı canlı erişimin açıldığı anlamına gelmez.
+
 Bu belge uygulanmış hesaplarla araştırma hedeflerini ayırır. İnceleme
 kodlamadan önce salt okunur olarak yapıldı. Kaynak uygulama kodu veya
 üretici tabloları modüle kopyalanmadı. Bütün formüller kullanıcıdaki görev
@@ -44,7 +74,7 @@ kullanım izni anlamına gelmez.
 | [WolftheGrey/belt-calc](https://github.com/WolftheGrey/belt-calc) | `4f14fc4` / 20.05.2026 | MIT, LICENSE okundu | Tek HTML/JS uygulaması. README'de sürüklenen kasnaklar, uzunluk kilidi, gergi ve çok kademe; `index.html` içinde yaklaşık açık kayış uzunluğu, sarılma açısı, en yakın boyut ve aşağı yuvarlanan kavrama dişi hesabı incelendi. Burada tam uzunluk ve kesirli kavrama kullanıldı. PySide bileşeni veya güç tablosu adaptörü değildir. |
 | [Temukamakh/partforge](https://github.com/Temukamakh/partforge) | `cd995b3` / 21.09.2026 | Kök lisans tespit edilmedi | README, `belt_profiles.py`, `core.py`, `exporters.py` okundu. build123d tabanlı parametrik parça ve STEP/STL/DXF akışı. Diş verilerinin açık kaynak kökenli oluşu üretici doğrulaması değildir. Kod/veri taşınmadı. |
 | [looooo/FCGear](https://github.com/looooo/FCGear) | `83ec154` / 15.09.2026 | Kök GPLv3; timinggear başlığında GPLv3-or-later | README, LICENSE ve `freecad/gears/timinggear.py` incelendi. FreeCAD/numpy/pygears kullanan parametrik profil üretimi; bağımsız GOKWORKS motoruna doğrudan uygun bağımlılık değildir. Copyleft kodu kopyalanmadı. |
-| [paulius-zubavicius/pulleys-profile-generator](https://github.com/paulius-zubavicius/pulleys-profile-generator) | `0c11aa0` / 02.06.2018 | Kök lisans tespit edilmedi | `readme.md`, `pom.xml` incelendi. Java CLI/JAR; çeşitli senkron profil için DXF R14 polygon, baskıya yönelik diş genişliği ayarı; README nihai parça olmadığını belirtir. Üretici onaylı imalat konturu sayılmadı. JAR çalıştırılmadı. |
+| [paulius-zubavicius/pulleys-profile-generator](https://github.com/paulius-zubavicius/pulleys-profile-generator) | `0c11aa0` / 02.06.2018 | Kök lisans tespit edilmedi | `readme.md`, `pom.xml` incelendi. Java CLI/JAR; çeşitli triger-senkron profil için DXF R14 polygon, baskıya yönelik diş genişliği ayarı; README nihai parça olmadığını belirtir. Üretici onaylı imalat konturu sayılmadı. JAR çalıştırılmadı. |
 | [LukevLuijn/timing_belt_calculator](https://github.com/LukevLuijn/timing_belt_calculator) | `10324f5` / 14.11.2021 | Kök lisans tespit edilmedi | Ana README ve `belt_calc/README.md` okundu. Eğitim/tasarım hesap açıklamaları; doğrulanmış üretici güç kataloğu olarak kullanılmadı. |
 | [CadQuery/cadquery](https://github.com/CadQuery/cadquery) | `8178185` / 24.10.2026 | Apache-2.0, LICENSE okundu | README ve lisans incelendi; Python/OCCT B-Rep ve CAD aktarma için uygun olası üst katman. Mevcut OCP yeterli olduğundan yeni bağımlılık eklenmedi. Bu görevde CAD uygulaması çalıştırılmadı. |
 | [gumyr/build123d](https://github.com/gumyr/build123d) | `1901d71` / tarih alınamadı | Apache-2.0, LICENSE okundu | README/lisans; Python OCCT B-Rep yaklaşımı, README'de Python 3.11–3.14 desteği. dev HEAD incelendi; sabit sürüm kararlılığı test edilmedi. Yeni bağımlılık yok. |
@@ -65,7 +95,7 @@ uygulamasıdır. Sayısal doğrulama farklı açı formülü, bağımsız yükse
 hassasiyetli sabit referans, vektör/teğet ve moment dengeleriyle yapıldı.
 Kütüphane veya üretici programının çıktısı tek başına doğruluk kanıtı sayılmadı.
 
-V kayışı datum sistemi için ISO 4183/4184; senkron kasnak/kayış ailesi için
+V kayışı datum sistemi için ISO 4183/4184; triger-senkron kasnak/kayış ailesi için
 ISO 5294/5296 ve ISO 13050 ileride kontrol edilecek standart hedefleridir.
 Tam metinleri ve geçerli baskıları bu ortamda doğrulanmadı; **bunlara uygun
 kasnak profili veya güç kapasitesi uygulandığı iddia edilmez**. Özellikle

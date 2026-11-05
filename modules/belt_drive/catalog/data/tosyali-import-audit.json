@@ -1,0 +1,808 @@
+{
+  "document_sha256": "8399b6b5a123573e99e8a982afd6c7c1504e160edc845d6fc6218812461d689c",
+  "recognized_rows": 522,
+  "accepted_rows": 342,
+  "unsupported_rows": 34,
+  "quarantined": [
+    {
+      "pdf_page": 21,
+      "code": "T 60-5M-09-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 22,
+      "code": "T 60-5M-15-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 22,
+      "code": "T 60-5M-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 23,
+      "code": "T 60-5M-09",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 24,
+      "code": "T 60-5M-15",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 24,
+      "code": "T 60-5M-25",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 10-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 12-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 14-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 15-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 16-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 18-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 19-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 20-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 22-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 24-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 25-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 26-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 27-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 28-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 30-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 32-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 36-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 40-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 42-T5-10F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 44-T5-10-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 48-T5-10-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 29,
+      "code": "T 60-T5-10-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 10-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 12-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 14-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 15-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 16-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 18-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 19-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 20-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 22-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 24-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 25-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 26-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 27-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 28-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 30-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 32-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 36-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 40-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 42-T5-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 44-T5-16-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 48-T5-16-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 60-T5-16-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 10-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 12-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 14-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 15-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 16-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 18-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 19-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 20-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 22-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 24-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 25-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 26-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 27-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 28-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 30-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 32-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 36-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 40-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 42-T5-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 44-T5-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 48-T5-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 30,
+      "code": "T 60-T5-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 12-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 14-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 15-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 16-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 18-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 19-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 20-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 22-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 24-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 25-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 26-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 27-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 28-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 30-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 32-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 36-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 40-T10-16F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 44-T10-16-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 48-T10-16-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 31,
+      "code": "T 60-T10-16-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 12-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 14-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 15-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 16-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 18-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 19-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 20-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 22-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 24-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 25-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 26-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 27-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 28-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 30-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 32-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 36-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 40-T10-25F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 44-T10-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 48-T10-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 60-T10-25-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 18-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 19-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 20-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 22-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 24-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 25-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 26-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 27-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 28-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 30-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 32-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 36-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 40-T10-32F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 44-T10-32-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 48-T10-32-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 60-T10-32-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 18-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 19-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 20-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 22-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 24-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 25-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 26-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 27-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 28-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 30-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 32-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 36-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 40-T10-50F-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 44-T10-50-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 48-T10-50-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 32,
+      "code": "T 60-T10-50-AL",
+      "reason": "Katalog Dp, z×p/π ile 0.01 mm tablo yuvarlama hassasiyetinde uyuşmuyor; kayıt karantinaya alınmalı."
+    },
+    {
+      "pdf_page": 36,
+      "code": "T 60-AT10-32-AL",
+      "reason": "Sütun/hücre sayısı uyuşmuyor; boş hücre tahmin edilmedi."
+    },
+    {
+      "pdf_page": 36,
+      "code": "T 60-AT10-50-AL",
+      "reason": "Sütun/hücre sayısı uyuşmuyor; boş hücre tahmin edilmedi."
+    }
+  ],
+  "page_counts": [
+    [
+      19,
+      20
+    ],
+    [
+      20,
+      40
+    ],
+    [
+      21,
+      18
+    ],
+    [
+      22,
+      36
+    ],
+    [
+      23,
+      18
+    ],
+    [
+      24,
+      36
+    ],
+    [
+      25,
+      22
+    ],
+    [
+      26,
+      45
+    ],
+    [
+      34,
+      41
+    ],
+    [
+      35,
+      18
+    ],
+    [
+      36,
+      48
+    ]
+  ],
+  "complete": false,
+  "limitations": [
+    "Yalnız desteklenen metrik pilot kasnak tabloları; burçlu/imperial/14M/T20 tabloları kapsam dışıdır.",
+    "Bölüm çapı hesapta z×p/π kullanılır; basılı Dp ile >0.006 mm çelişen kayıt karantinadadır.",
+    "PDF metadata tarihi yayımlanmış katalog revizyonu sayılmadı; güncellik bağımsız doğrulanmadı.",
+    "Bu katalogda kayış SKU/standart uzunluk veya güç/servis tablosu üretilmedi.",
+    "F, nominal kayış genişliği, toplam L ve pilot delik ayrı büyüklüklerdir; imalat profili doğrulanmadı."
+  ],
+  "profile_counts": {
+    "HTD_3M": 60,
+    "HTD_5M": 108,
+    "HTD_8M": 67,
+    "AT5": 41,
+    "AT10": 66
+  },
+  "pdf_metadata": {
+    "pages": 151,
+    "creation_date_utc": "2013-07-10",
+    "modification_date_utc": "2023-10-02",
+    "published_revision": "NOT_IDENTIFIED",
+    "metadata_dates_are_not_catalogue_revisions": true
+  },
+  "review_scope": "Supported metric pilot-pulley tables extracted; visual samples PDF pages 20,21,30; no official current-revision/production/capacity approval.",
+  "redistribution_scope": "Only normalized factual product dimensions and source/quarantine metadata; original PDF, artwork and full text are not bundled."
+}
