@@ -33,7 +33,7 @@ class BeltCanvas(QWidget):
         self.animating = False
         self._started = 0.
         self.visual_scale = 1.
-        self.timer = QTimer(self); self.timer.setInterval(33); self.timer.timeout.connect(self.update)
+        self.timer = QTimer(self); self.timer.setInterval(33); self.timer.timeout.connect(self._tick)
         self.setMinimumSize(260, 220)
         self.setAccessibleName('Kayış güzergâhı 2B görünümü')
         self.setToolTip('Gerçek teğet çizgi ve yay geometrisi; ölçek otomatik sığdırılır.')
@@ -65,6 +65,17 @@ class BeltCanvas(QWidget):
             self.timer.stop()
         self.animationChanged.emit(on)
         self.update()
+
+    def _tick(self):
+        # Hidden (other tab/page): stop repainting; wall-clock time keeps the motion consistent on return.
+        if not self.isVisible():
+            self.timer.stop(); return
+        self.update()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if self.animating and not self.timer.isActive():
+            self.timer.start()
 
     def elapsed(self):
         return time.monotonic() - self._started if self.animating else 0.
