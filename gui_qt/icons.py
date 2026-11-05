@@ -65,6 +65,10 @@ def icon(name, color='#80B6F5'):
                               QPointF(31,16),QPointF(42,16),QPointF(42,32),QPointF(31,32),
                               QPointF(31,37),QPointF(14,37),QPointF(14,30),QPointF(5,30),QPointF(5,18)])
         painter.drawLine(3,24,45,24)
+    elif name == 'sheet_unfolding':
+        painter.drawPolygon([QPointF(8, 34), QPointF(18, 12), QPointF(30, 12), QPointF(40, 34)])
+        painter.drawLine(QPointF(18, 12), QPointF(14, 34)); painter.drawLine(QPointF(30, 12), QPointF(34, 34))
+        painter.drawLine(QPointF(24, 12), QPointF(24, 34))
     elif name == 'belt_drive':
         painter.drawEllipse(QPointF(14, 26), 8, 8)
         painter.drawEllipse(QPointF(34, 22), 11, 11)

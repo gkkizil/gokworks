@@ -39,6 +39,7 @@ PAGE_TYPES = {
     'gear_calculator': ('modules.gear_calculator.ui', 'GearPage'),
     'dfm_analyzer': ('modules.dfm_analyzer.ui', 'DfmPage'),
     'belt_drive': ('modules.belt_drive.ui', 'BeltDrivePage'),
+    'sheet_unfolding': ('modules.sheet_unfolding.ui', 'UnfoldPage'),
 }
 
 
@@ -67,6 +68,7 @@ MODULES = (
     ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
     ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),
+    ('sheet_unfolding', 'Sac Açınımı', 'ÜRETİM'),
     ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
     ('belt_drive', 'Kayış–Kasnak Tasarımı', 'MAKİNE ELEMANLARI'),
 )
@@ -406,6 +408,15 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         diagnostics.record(f'gui_close_requested busy={self.jobs.busy} closing={self.closing}')
+        if self.jobs.busy and getattr(self.jobs.owner, 'quiet_cancel_on_close', False):
+            # Short preview calculations (sheet unfolding) are stopped and awaited briefly;
+            # only CAD/file work keeps the confirmation dialog below.
+            import time
+            from PySide6.QtCore import QEventLoop
+            self.jobs.cancel()
+            deadline = time.monotonic() + 3
+            while self.jobs.busy and time.monotonic() < deadline:
+                QApplication.processEvents(QEventLoop.AllEvents, 20); time.sleep(.005)
         if self.jobs.busy:
             event.ignore()
             if not self.closing:
