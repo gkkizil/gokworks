@@ -38,6 +38,7 @@ PAGE_TYPES = {
     'shaft_generator': ('modules.shaft_generator.ui', 'ShaftPage'),
     'gear_calculator': ('modules.gear_calculator.ui', 'GearPage'),
     'dfm_analyzer': ('modules.dfm_analyzer.ui', 'DfmPage'),
+    'belt_drive': ('modules.belt_drive.ui', 'BeltDrivePage'),
 }
 
 
@@ -67,6 +68,7 @@ MODULES = (
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
     ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),
     ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
+    ('belt_drive', 'Kayış–Kasnak Tasarımı', 'MAKİNE ELEMANLARI'),
 )
 
 

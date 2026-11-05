@@ -58,6 +58,12 @@ def check(output):
         assert abs(torque.result.preload_kn - 25.979339412026646) < 1e-8
         assert torque.section_diagram.vector.tagged['section_torque'][0].toPlainText() == 'T ≈ 51,96 N·m'
         assert torque.section_diagram.vector.tagged['bolt_shank']
+        belt = w.pages['belt_drive']
+        # Bundled belt catalogues must be inside the package; the page computes the reference V drive.
+        assert len(belt.catalog.pulleys) == 342 and belt.quarantine.rowCount() == 146
+        assert abs(belt.manual_result.length_exact_mm - 1277.4970744746527) < 1e-9
+        belt.catalog_picker.setCurrentIndex(belt.catalog_picker.findData('synthetic'))
+        assert len(belt.catalog.belts) == 2
         torque.form.set_value('condition', 'Hafif yağlı')
         torque.update_result()
         assert torque.result.k == .15
