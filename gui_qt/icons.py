@@ -65,6 +65,11 @@ def icon(name, color='#80B6F5'):
                               QPointF(31,16),QPointF(42,16),QPointF(42,32),QPointF(31,32),
                               QPointF(31,37),QPointF(14,37),QPointF(14,30),QPointF(5,30),QPointF(5,18)])
         painter.drawLine(3,24,45,24)
+    elif name == 'belt_drive':
+        painter.drawEllipse(QPointF(14, 26), 8, 8)
+        painter.drawEllipse(QPointF(34, 22), 11, 11)
+        painter.drawLine(QPointF(13, 18), QPointF(32, 11.2))
+        painter.drawLine(QPointF(15, 34), QPointF(36, 32.8))
     elif name == 'dfm_analyzer':
         painter.drawRect(6, 8, 30, 26)
         painter.drawEllipse(QPointF(16, 21), 4, 4)

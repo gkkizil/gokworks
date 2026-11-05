@@ -347,3 +347,32 @@ sonuçlarını, uyarılarını ve arama kapsamını koruyan JSON karşılaştır
 `controller.automatic_design_job` ortak JobManager'ın `(events, stop)`
 sözleşmesini kullanır; kendi thread havuzunu veya Qt nesnesini oluşturmaz.
 İlerleme, tamamlanmış/eksik rapor ve iptal ayrı olaylarla iletilir.
+
+## Arayüz — Makine Elemanları → Kayış–Kasnak Tasarımı
+
+`ui.py` (`BeltDrivePage`), `view.py` (`BeltCanvas`) ve `ui_support.py` mevcut
+motoru kullanır; matematik veya JSON/API sözleşmesi değiştirilmedi. Kullanıcıya
+görünen metinlerde "triger-senkron kayış" kullanılır; dahili `timing`
+kimlikleri aynıdır.
+
+- **Manuel Tasarım:** V (datum çapı) veya triger-senkron (diş sayısı, profil
+  adımı). Güç veya torktan yalnız biri birincil giriştir. C'den uzunluk veya
+  seçilen uzunluk/diş adedinden C. Verim, servis faktörü ve F₀ boş
+  bırakılabilir; boş alanlara katsayı atanmaz, sonuç "değerlendirilmedi" olur.
+  Girdi değişince sonuç hemen geçersiz sayılır ve yeniden hesaplanır.
+- **Otomatik Tasarım:** `controller.automatic_design_job` JobManager üzerinden
+  çalışır; ilerleme, iptal, iş hatası, kapsam ve sonuç sınırı gösterilir.
+  Doğrulanmamış adaylar varsayılan olarak gizlidir. Seçilen tam tasarım
+  manuel ekrana aktarılır. `search_pulley_pairs()` sonuçları ayrı tabloda,
+  kayış/C/kapasite olmadan "tam aktarım değildir" uyarısıyla gösterilir.
+- **Katalog ve Kaynaklar:** Yerleşik Tosyalı verisi (342 kasnak, 146 karantina,
+  34 burçlu kapsam dışı satır) ve sentetik örnek katalog; JSON/CSV yükleme.
+  Kaynakların beyan edilen ve işlenen durumu ayrı gösterilir.
+- **Tasarım Karşılaştırma:** Güncel aramanın adayları; `report_to_dict`
+  karşılaştırma JSON'u ve v2 proje kaydı. Projeler (v1 dahil) açılırken
+  yeniden hesaplanır; eski seçimler güncel sonuçta yoksa atılır.
+
+Orta alan `BeltPath` çizgi/yaylarını doğrudan çizer. Animasyon yalnız nominal
+kinematiktir: iki kasnak aynı yönde, ω₂ = ω₁/i, zaman duvar saatiyle ölçülür ve
+görsel hız ölçeği ekranda yazar. Sürükleyerek C değiştirme, CAD, SolidWorks,
+PDF ve Excel bu sürümde yoktur. Testler: `tests/test_belt_gui.py`.
