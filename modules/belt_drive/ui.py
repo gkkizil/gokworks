@@ -179,11 +179,11 @@ class BeltDrivePage(BasePage):
         self.profile = QComboBox(); self.profile.setAccessibleName('Kayış profili')
         self.pitch_label = label('', 'muted')
         belt.addRow('Kayış ailesi', self.family); belt.addRow('Profil', self.profile); belt.addRow('', self.pitch_label)
-        self.count = whole(1, 1, 50)
+        self.count = whole(1, 1, 100000)
 
         pulley_host, pulley = form()
-        self.d1 = real(100., .1, 10000., 2); self.d2 = real(200., .1, 10000., 2)
-        self.z1 = whole(20, 1, 1000); self.z2 = whole(40, 1, 1000)
+        self.d1 = real(100., .000001, 1e7, 6); self.d2 = real(200., .000001, 1e7, 6)
+        self.z1 = whole(20, 1, 1000000); self.z2 = whole(40, 1, 1000000)
         self.d1_row = ('Sürücü datum çapı D₁ · mm', self.d1); self.d2_row = ('Sürülen datum çapı D₂ · mm', self.d2)
         for title, widget in (self.d1_row, self.d2_row, ('Sürücü diş sayısı z₁', self.z1), ('Sürülen diş sayısı z₂', self.z2)):
             pulley.addRow(title, widget)
@@ -192,10 +192,10 @@ class BeltDrivePage(BasePage):
         load_host, load = form()
         self.load_mode = QComboBox(); self.load_mode.addItem('Güç P (tork hesaplanır)', 'power')
         self.load_mode.addItem('Tork T₁ (güç hesaplanır)', 'torque'); self.load_mode.setAccessibleName('Birincil yük girdisi')
-        self.rpm = real(1450., .001, 100000., 3)
-        self.power = real(5., .0001, 1e6, 4); self.torque = real(30., .0001, 1e7, 4)
-        self.efficiency = real(0., 0., 1., 3, empty='verilmedi', step=.01)
-        self.service = real(0., 0., 10., 3, empty='verilmedi', step=.1)
+        self.rpm = real(1450., .000001, 1e7, 6)
+        self.power = real(5., .000001, 1e9, 6); self.torque = real(30., .000001, 1e10, 6)
+        self.efficiency = real(0., 0., 1., 6, empty='verilmedi', step=.01)
+        self.service = real(0., 0., 1000., 6, empty='verilmedi', step=.1)
         for title, widget in (('Giriş devri n₁ · dev/dak', self.rpm), ('Yük girişi', self.load_mode),
                               ('Giriş gücü P · kW', self.power), ('Giriş torku T₁ · N·m', self.torque)):
             load.addRow(title, widget)
@@ -206,11 +206,12 @@ class BeltDrivePage(BasePage):
         self.center_mode.addItem('Eksen mesafesi C → kayış uzunluğu', 'center')
         self.center_mode.addItem('Seçilen kayış uzunluğu → eksen mesafesi', 'length')
         self.center_mode.setAccessibleName('Eksen yöntemi')
-        self.distance = real(400., .1, 100000., 3); self.length = real(1300., .1, 1e6, 3)
-        self.belt_teeth = whole(110, 1, 100000)
-        self.angle = real(0., -360., 360., 2)
+        self.distance = real(400., .000001, 1e8, 6); self.length = real(1300., .000001, 1e9, 6)
+        self.belt_teeth = whole(110, 1, 100000000)
+        self.angle = real(0., -360., 360., 6)
+        self.origin_x = real(0., -1e8, 1e8, 6); self.origin_y = real(0., -1e8, 1e8, 6)
         self.rotation = QComboBox(); self.rotation.addItem('Saat yönünün tersi (CCW)', 'ccw'); self.rotation.addItem('Saat yönü (CW)', 'cw')
-        self.pretension = real(0., 0., 1e6, 2, empty='verilmedi')
+        self.pretension = real(0., 0., 1e10, 6, empty='verilmedi')
         for title, widget in (('Ne biliniyor?', self.center_mode), ('Eksen mesafesi C · mm', self.distance),
                               ('Datum uzunluğu Ld · mm', self.length), ('Kayış diş adedi N', self.belt_teeth)):
             center.addRow(title, widget)
@@ -219,7 +220,8 @@ class BeltDrivePage(BasePage):
         advanced_host, advanced = form()
         for title, widget in (('Kayış adedi (V, kullanıcı seçimi)', self.count), ('Verim η', self.efficiency),
                               ('Servis faktörü K', self.service), ('Kayış başına ön germe F₀ · N', self.pretension),
-                              ('Sürücü dönüş yönü', self.rotation), ('Eksen açısı · °', self.angle)):
+                              ('Sürücü dönüş yönü', self.rotation), ('Eksen açısı · °', self.angle),
+                              ('Sürücü merkezi X · mm', self.origin_x), ('Sürücü merkezi Y · mm', self.origin_y)):
             advanced.addRow(title, widget)
         self.advanced_form = advanced
         advanced_box = panel(advanced_host, label('Boş bırakılan verim, servis faktörü ve ön germe için otomatik katsayı atanmaz; '
@@ -261,7 +263,8 @@ class BeltDrivePage(BasePage):
         for widget in (self.family, self.profile, self.load_mode, self.center_mode, self.rotation):
             widget.currentIndexChanged.connect(self.manual_changed)
         for widget in (self.count, self.d1, self.d2, self.z1, self.z2, self.rpm, self.power, self.torque, self.efficiency,
-                       self.service, self.distance, self.length, self.belt_teeth, self.angle, self.pretension):
+                       self.service, self.distance, self.length, self.belt_teeth, self.angle, self.pretension,
+                       self.origin_x, self.origin_y):
             widget.valueChanged.connect(self.manual_changed)
         self.family.currentIndexChanged.connect(self.family_changed)
         self.load_mode.currentIndexChanged.connect(self.load_mode_changed)
@@ -314,14 +317,14 @@ class BeltDrivePage(BasePage):
             center=CenterSpecification('length' if by_length else 'center', None if by_length else self.distance.value(),
                                        self.length.value() if by_length and not timing else None,
                                        self.belt_teeth.value() if by_length and timing else None,
-                                       0., 0., self.angle.value()),
+                                       self.origin_x.value(), self.origin_y.value(), self.angle.value()),
             pretension_per_belt_n=optional(self.pretension), rotation=self.rotation.currentData())
 
     def set_manual_specification(self, spec):
         """Load a specification into the form (from a project or a chosen candidate)."""
         widgets = (self.family, self.profile, self.load_mode, self.center_mode, self.rotation, self.count, self.d1, self.d2,
                    self.z1, self.z2, self.rpm, self.power, self.torque, self.efficiency, self.service, self.distance,
-                   self.length, self.belt_teeth, self.angle, self.pretension)
+                   self.length, self.belt_teeth, self.angle, self.pretension, self.origin_x, self.origin_y)
         for widget in widgets:
             widget.blockSignals(True)
         try:
@@ -355,6 +358,7 @@ class BeltDrivePage(BasePage):
             if center.belt_teeth is not None:
                 self.belt_teeth.setValue(center.belt_teeth)
             self.angle.setValue(center.axis_angle_deg)
+            self.origin_x.setValue(center.driver_x_mm); self.origin_y.setValue(center.driver_y_mm)
             self.rotation.setCurrentIndex(self.rotation.findData(spec.rotation))
             self.pretension.setValue(spec.pretension_per_belt_n or 0.)
         finally:
@@ -362,6 +366,26 @@ class BeltDrivePage(BasePage):
                 widget.blockSignals(False)
         self.load_mode_changed(); self.center_mode_changed()
         self.calculate_manual()
+        shown = self.manual_specification()
+        if shown != spec:
+            # A value outside a field's range/precision must never change the design silently.
+            changed = self._differences(spec, shown)
+            self.set_status('Bazı değerler ekran alanlarına sığmadığı için değişti; kontrol edin: ' + '; '.join(changed), True)
+            return False
+        return True
+
+    @staticmethod
+    def _differences(original, shown):
+        from dataclasses import fields, is_dataclass
+        out = []
+        def walk(a, b, path):
+            if is_dataclass(a):
+                for f in fields(a):
+                    walk(getattr(a, f.name), getattr(b, f.name), path + [f.name])
+            elif a != b:
+                out.append(f'{".".join(path)}: {a} → {b}')
+        walk(original, shown, [])
+        return out[:6]
 
     def manual_changed(self, *args):
         if self.manual_result is not None:
@@ -461,10 +485,12 @@ class BeltDrivePage(BasePage):
             html.append(f'<p style="margin:0 0 4px 0"><span style="color:{colour}"><b>{SEVERITY_TITLES.get(severity, severity)}</b></span>'
                         f' · <code>{code}</code><br>{message}</p>')
         self.check_table.setHtml(''.join(html))
-        errors = sum(1 for _, _, sev in items if sev == 'ERROR')
-        self.checks_box.toggle.setText(f'Hatalar ({errors})' if errors else
-                                       f'Kontrol edilmeyen konular ({sum(1 for _, _, sev in items if sev in ("NOT_EVALUATED", "WARNING"))})')
-        if errors:
+        count = lambda severity: sum(1 for _, _, sev in items if sev == severity)
+        errors, warnings, missing = count('ERROR'), count('WARNING'), count('NOT_EVALUATED')
+        parts = ([f'Hatalar ({errors})'] if errors else []) + ([f'Uyarılar ({warnings})'] if warnings else []) \
+            + [f'Kontrol edilmeyen konular ({missing})']
+        self.checks_box.toggle.setText(' · '.join(parts))
+        if errors or warnings:
             self.checks_box.set_expanded(True)
         self.check_codes = tuple((code, severity) for code, message, severity in items)
 
@@ -617,6 +643,8 @@ class BeltDrivePage(BasePage):
         mode = self.a_mode.currentData()
         priority = self.a_priority.currentData()
         weights = tuple((k, b.value()) for k, b in self.weights.items() if b.value() > 0) if priority == 'balanced' else ()
+        if priority == 'balanced' and not weights:
+            raise ValueError('Dengeli sıralamada en az bir ağırlık 0\'dan büyük olmalı.')
         target_c = optional(self.a_target_c) if mode == 'fixed' else None
         return DesignRequest(
             power_kw=self.a_power.value(), input_rpm=self.a_rpm.value(), target_rpm=self.a_target.value(),
@@ -791,9 +819,10 @@ class BeltDrivePage(BasePage):
         c = self.selected_candidate()
         if c is None or self.report is None:
             self.set_status('Aktarmak için güncel aramadan bir tam tasarım seçin.', True); return
-        self.set_manual_specification(c.result.specification)
+        exact = self.set_manual_specification(c.result.specification)
         self.tabs.setCurrentIndex(0)
-        self.set_status(f'{c.driver.code} / {c.driven.code} / {c.belt.code} manuel ekrana aktarıldı ve yeniden hesaplandı.')
+        if exact:
+            self.set_status(f'{c.driver.code} / {c.driven.code} / {c.belt.code} manuel ekrana aktarıldı ve yeniden hesaplandı.')
 
     # ======================================================================================
     # Catalogue and sources
@@ -825,6 +854,11 @@ class BeltDrivePage(BasePage):
 
     def select_catalog(self, index):
         key = self.catalog_picker.itemData(index)
+        if key in ('project', 'file'):
+            snapshot = getattr(self, '_extra_catalogs', {}).get(key)
+            if snapshot is not None:
+                self.set_catalog(snapshot, key, self.catalog_picker.itemText(index))
+            return
         try:
             catalog = load_bundled(key)
         except (OSError, ValueError) as error:
@@ -839,8 +873,19 @@ class BeltDrivePage(BasePage):
             catalog = load_catalog(path)
         except (OSError, ValueError, UnicodeError) as error:
             self.set_status(f'Katalog okunamadı: {error}', True); return
-        self.set_catalog(catalog, 'file', f'Dosya: {Path(path).name}')
+        self.remember_catalog('file', f'Dosya: {Path(path).name}', catalog)
         self.set_status(f'Katalog okundu: {Path(path).name}')
+
+    def remember_catalog(self, key, title, catalog):
+        """Show a file/project catalogue in the picker so the picker never lies about the active data."""
+        self._extra_catalogs = getattr(self, '_extra_catalogs', {}); self._extra_catalogs[key] = catalog
+        index = self.catalog_picker.findData(key)
+        if index < 0:
+            self.catalog_picker.addItem(title, key); index = self.catalog_picker.count() - 1
+        else:
+            self.catalog_picker.setItemText(index, title)
+        self.catalog_picker.blockSignals(True); self.catalog_picker.setCurrentIndex(index); self.catalog_picker.blockSignals(False)
+        self.set_catalog(catalog, key, title)
 
     def set_catalog(self, catalog, key, title):
         self.catalog, self.catalog_key, self.catalog_title = catalog, key, title
@@ -949,15 +994,16 @@ class BeltDrivePage(BasePage):
         self.set_status(f'Karşılaştırma kaydedildi: {Path(path).name}')
 
     def save_project(self):
+        if self.manual_timer.isActive():
+            self.calculate_manual()          # the latest typed value is part of the saved design
         manual = self.manual_result.specification if self.manual_result is not None else None
-        request = None
-        try:
-            request = self.design_request() if self.catalog is not None else None
-        except (ValueError, TypeError):
-            request = None
+        # The automatic request and its catalogue snapshot are saved only after a current search.
+        request = self.request if self.report is not None or self.pairs is not None else None
         if manual is None and request is None:
-            self.set_status('Kaydedilecek geçerli manuel veya otomatik tasarım girdisi yok.', True); return
-        selected = tuple(self.compare_ids) if self.report is not None else ()
+            self.set_status('Kaydedilecek geçerli tasarım yok: manuel girdileri düzeltin veya bir arama yapın.', True); return
+        if manual is None:
+            self.set_status('Manuel tasarım geçersiz olduğu için projeye yalnız otomatik arama kaydediliyor.', tone='warning')
+        selected = tuple(self.compare_ids) if self.report is not None and request is not None else ()
         try:
             project = DesignProject(request=request, catalog=self.catalog if request is not None else None,
                                     manual=manual, selected_ids=selected)
@@ -973,7 +1019,8 @@ class BeltDrivePage(BasePage):
             write_text_atomic(path, text)
         except OSError as error:
             self.set_status(f'Proje kaydedilemedi: {error}', True); return
-        self.set_status(f'Proje kaydedildi: {Path(path).name} (sonuçlar açılışta yeniden hesaplanır).')
+        self.set_status(f'Proje kaydedildi: {Path(path).name} (' + ('manuel tasarım ve otomatik arama' if manual and request else
+                        'manuel tasarım' if manual else 'otomatik arama') + '; sonuçlar açılışta yeniden hesaplanır).')
 
     def open_project(self):
         if not self.can_start():
@@ -997,15 +1044,18 @@ class BeltDrivePage(BasePage):
         current, running = self._current()
         if not current:
             self.set_status('Proje yeniden hesaplanırken girdiler değişti; sonuç gösterilmedi.', tone='warning'); return
-        if project.manual is not None:
-            self.set_manual_specification(project.manual)
+        exact = self.set_manual_specification(project.manual) if project.manual is not None else True
         if project.request is None:
-            self.set_status('Proje açıldı; manuel tasarım güncel motorla yeniden hesaplandı.'); return
+            if exact:
+                self.set_status('Proje açıldı; manuel tasarım güncel motorla yeniden hesaplandı.')
+            return
         self.load_request(project.request, project.catalog)
         self.search_token += 1; self.running = ('search', self.search_token, project.request)
         self.search_finished('belt_design_cancelled' if outcome.cancelled else 'belt_design_result', outcome)
         self.compare_ids = list(selected); self.refresh_compare()
         dropped = len(project.selected_ids) - len(selected)
+        if not exact:
+            return
         self.set_status('Proje açıldı; arama güncel katalog snapshot\'ı ile yeniden yapıldı.'
                         + (f' {dropped} eski seçim güncel sonuçlarda bulunmadığı için atıldı.' if dropped else ''),
                         tone='warning' if dropped else None)
@@ -1049,7 +1099,7 @@ class BeltDrivePage(BasePage):
     def set_catalog_quiet(self, catalog):
         """Show a project snapshot without restarting the search invalidation chain."""
         token = self.search_token
-        self.set_catalog(catalog, 'project', 'Proje katalog snapshot\'ı')
+        self.remember_catalog('project', 'Proje katalog snapshot\'ı', catalog)
         self.search_token = token
 
     # ---- shared page hooks --------------------------------------------------------------------

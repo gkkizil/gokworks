@@ -263,3 +263,69 @@ def test_layouts_and_themes(window, page, size, theme):
     compact = page.manual_workspace.compact_mode
     assert compact == (page.manual_workspace.width() < page.manual_workspace.threshold)
     assert page.canvas.appearance == theme
+
+
+# ---- regressions from the 5 Nov scan ---------------------------------------------------------
+from dataclasses import replace as _replace
+from modules.belt_drive.models import BeltDriveSpecification, PulleySpecification
+
+
+@pytest.mark.parametrize('spec', [
+    _replace(BeltDriveSpecification(), belt=_replace(BeltDriveSpecification().belt, count=60)),
+    _replace(BeltDriveSpecification(), driven=PulleySpecification(12000.),
+             center=_replace(BeltDriveSpecification().center, distance_mm=20000.)),
+    _replace(BeltDriveSpecification(), load=_replace(BeltDriveSpecification().load, efficiency=.9575)),
+    _replace(BeltDriveSpecification(), driver=PulleySpecification(106.255)),
+    _replace(BeltDriveSpecification(), center=_replace(BeltDriveSpecification().center, driver_x_mm=50., driver_y_mm=20.)),
+])
+def test_loaded_designs_are_kept_exactly(page, spec):
+    assert page.set_manual_specification(spec) is True
+    assert page.manual_result.specification == spec
+
+
+def test_a_design_that_cannot_be_shown_exactly_is_reported(page):
+    spec = _replace(BeltDriveSpecification(), center=_replace(BeltDriveSpecification().center, axis_angle_deg=400.))
+    assert page.set_manual_specification(spec) is False
+    assert 'sığmadığı' in page.status_text and 'axis_angle_deg' in page.status_text
+
+
+def test_balanced_ranking_without_positive_weight_is_refused(page):
+    use_synthetic(page)
+    page.a_priority.setCurrentIndex(page.a_priority.findData('balanced'))
+    for box in page.weights.values():
+        box.setValue(0.)
+    page.start_search()
+    assert not page.jobs.busy and 'en az bir ağırlık' in page.status_text
+
+
+def test_warnings_are_named_and_opened(page):
+    page.service.setValue(.5); page.calculate_manual()
+    assert page.checks_box.is_expanded() and page.checks_box.toggle.text().startswith('Uyarılar (1)')
+
+
+def test_picker_shows_a_project_snapshot_and_can_go_back(page):
+    from modules.belt_drive.ui_support import load_bundled
+    page.catalog_picker.setCurrentIndex(page.catalog_picker.findData('tosyali'))
+    page.load_request(page.design_request(), load_bundled('synthetic'))
+    assert page.catalog_picker.currentData() == 'project' and page.catalog.identifier == 'synthetic-timing'
+    page.catalog_picker.setCurrentIndex(page.catalog_picker.findData('tosyali'))
+    assert page.catalog.identifier == 'tosyali-user-pdf'
+
+
+def test_animation_stops_repainting_while_hidden(window, page):
+    page.animate.setChecked(True); assert page.canvas.timer.isActive()
+    page.tabs.setCurrentIndex(2); page.canvas._tick()
+    assert page.canvas.animating and not page.canvas.timer.isActive()
+    page.tabs.setCurrentIndex(0); QCoreApplication.processEvents()
+    assert page.canvas.timer.isActive()
+
+
+def test_manual_only_project_has_no_catalogue_and_keeps_the_last_typed_value(page, tmp_path, monkeypatch):
+    target = tmp_path / 'manual.json'
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *a, **k: (str(target), ''))
+    page.distance.setValue(512.)              # saved immediately, before the debounce timer fires
+    page.save_project()
+    project = project_loads(target.read_bytes())
+    assert project.request is None and project.catalog is None
+    assert project.manual.center.distance_mm == 512.
+    assert target.stat().st_size < 5000
