@@ -317,3 +317,24 @@ for (const reason of ['application-change', 'failed-proof', 'diverged', 'missing
       {state: reason === 'failed-proof' ? 'failure' : 'success', description: description(oldBase)}, f.refs.main), 'full');
   });
 }
+
+test('a passed source head needs only CI checks when main changed only by EXE build status commits', async () => {
+  const f = fixture(), oldBase = 'd'.repeat(40);
+  f.github.rest.repos.compareCommitsWithBasehead = async () => ({data: {status: 'ahead', behind_by: 0,
+    files: [{filename: 'README.md'}, {filename: 'packaging/windows-build-status.json'}, {filename: 'packaging/latest-windows.json'}]}});
+  assert.equal(await validationMode(f.github, f.context.repo, {files: [{filename: 'modules/dfm_analyzer/ui.py'}]},
+    {state: 'success', description: description(oldBase)}, f.refs.main), 'automation');
+});
+
+test('a branch changing build status files is still tested in full', () => {
+  assert.equal(automationOnly({files: [{filename: 'README.md'}]}), false);
+  assert.equal(automationOnly({files: [{filename: 'packaging/latest-windows.json'}]}), false);
+});
+
+test('build status plus application changes on main still need the full suite', async () => {
+  const f = fixture(), oldBase = 'd'.repeat(40);
+  f.github.rest.repos.compareCommitsWithBasehead = async () => ({data: {status: 'ahead', behind_by: 0,
+    files: [{filename: 'packaging/windows-build-status.json'}, {filename: 'gui_qt/app.py'}]}});
+  assert.equal(await validationMode(f.github, f.context.repo, {},
+    {state: 'success', description: description(oldBase)}, f.refs.main), 'full');
+});
