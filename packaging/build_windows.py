@@ -76,6 +76,7 @@ def main():
             '--add-data', f'{ROOT / "assets/qt/chevron-up-dark.png"};assets/qt',
             '--add-data', f'{ROOT / "assets/qt/chevron-up-light.png"};assets/qt',
             '--add-data', f'{ROOT / "modules/iso_fits/tables.json"};modules/iso_fits',
+            '--add-data', f'{ROOT / "modules/weight/data/sections.json"};modules/weight/data',
             '--add-data', f'{ROOT / "modules/dfm_analyzer/profiles/geometry_basic.json"};modules/dfm_analyzer/profiles',
             '--add-data', f'{ROOT / "modules/dfm_analyzer/profiles/laser_generic.json"};modules/dfm_analyzer/profiles',
             '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/tosyali-user-pdf.json"};modules/belt_drive/catalog/data',
