@@ -184,8 +184,13 @@ class WeightPage(CalculationPage):
         with QSignalBlocker(profile_box):
             previous = profile_box.currentText()
             profile_box.clear()
+            titles = []
             if kind in r.STANDARD_KINDS:
-                titles = [p.title for p in r.profiles_for(kind)]
+                try:
+                    titles = [p.title for p in r.profiles_for(kind)]
+                except (OSError, ValueError, KeyError):
+                    pass  # update_result reports the missing catalogue instead of keeping the old section.
+            if titles:
                 profile_box.addItems(titles)
                 saved = str(self.settings.get('weight_profile', ''))
                 profile_box.setCurrentText(previous if previous in titles else saved if saved in titles else titles[0])
@@ -290,6 +295,10 @@ class WeightPage(CalculationPage):
                                    else f'Sabit yoğunluk: {r.MATERIALS[material]} kg/m³ · farklı değer için Özel seçin.')
         try:
             self.result = result = r.calculate(**values)
+        except (OSError, KeyError) as error:
+            self.invalid(f'Standart profil kataloğu okunamadı ({type(error).__name__}: {error}). '
+                         'Uygulama paketi eksik olabilir.')
+            return
         except ValueError as error:
             self.invalid(error)
             return

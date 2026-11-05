@@ -77,6 +77,14 @@ def check(output):
             weight.form.set_value(key,value)
         weight.update_result()
         assert weight.result.total_mass_kg == 157
+        # Standard profiles need the packaged EN section catalogue (data/sections.json).
+        weight.form.set_value('category', 'Standart profil')
+        weight.form.set_value('kind', 'HP')
+        weight.update_result()
+        assert weight.result is not None and weight.result.section_text.startswith('HP '), weight.result
+        weight.form.set_value('kind', 'UPN (NPU)')
+        weight.update_result()
+        assert weight.result.section_text.startswith('UPN '), weight.result.section_text
         assert w.pages['iso_fits'].result is not None
         assert w.pages['geometric_tolerances'].result is not None
         # Exercise the real worker command in source and frozen distributions.
