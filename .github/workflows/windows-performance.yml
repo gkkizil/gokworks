@@ -14,15 +14,6 @@ on:
       - 'packaging/hooks/hook-gui_qt.app.py'
       - 'tests/test_lazy_pages_gui.py'
       - '.github/workflows/windows-performance.yml'
-  pull_request:
-    paths:
-      - 'gui_qt/**'
-      - 'modules/tolerance_stack/**'
-      - 'modules/nesting/**'
-      - 'packaging/benchmark_performance.py'
-      - 'packaging/hooks/hook-gui_qt.app.py'
-      - 'tests/test_lazy_pages_gui.py'
-      - '.github/workflows/windows-performance.yml'
 
 permissions:
   contents: read

@@ -10,14 +10,28 @@ const AUTOMATION_FILES = new Set([
   'docs/agent-integration.md',
 ]);
 
-function automationOnly(comparison) {
+// Written to main by the Windows EXE workflow's status commits. They carry no
+// application code, so a main advance made only of these keeps a passed
+// head's proof (with the short CI checks); a branch changing them is still
+// tested in full.
+const BUILD_METADATA_FILES = new Set([
+  'README.md', 'packaging/windows-build-status.json', 'packaging/latest-windows.json',
+]);
+
+function onlyFiles(comparison, allowed) {
   const files = comparison?.files;
   // GitHub truncates comparison file lists at 300. Unknown/truncated scope
   // always needs the full suite, as do renames from application paths.
   return Array.isArray(files) && files.length > 0 && files.length < 300 &&
-    files.every(file => AUTOMATION_FILES.has(file.filename) &&
-      (!file.previous_filename || AUTOMATION_FILES.has(file.previous_filename)));
+    files.every(file => allowed.has(file.filename) &&
+      (!file.previous_filename || allowed.has(file.previous_filename)));
 }
+
+function automationOnly(comparison) {
+  return onlyFiles(comparison, AUTOMATION_FILES);
+}
+
+const BASE_ONLY_FILES = new Set([...AUTOMATION_FILES, ...BUILD_METADATA_FILES]);
 
 async function validationMode(github, repo, comparison, previous, base) {
   if (automationOnly(comparison)) return 'automation';
@@ -27,9 +41,10 @@ async function validationMode(github, repo, comparison, previous, base) {
     const {data: delta} = await github.rest.repos.compareCommitsWithBasehead({
       ...repo, basehead: `${match[1]}...${base}`,
     });
-    // The same source head passed already. An exclusively CI base change
-    // preserves application code and only needs the CI/native smoke checks.
-    if (delta.status === 'ahead' && delta.behind_by === 0 && automationOnly(delta)) return 'automation';
+    // The same source head passed already. An exclusively CI or build-status
+    // base change preserves application code and only needs the CI/native
+    // smoke checks.
+    if (delta.status === 'ahead' && delta.behind_by === 0 && onlyFiles(delta, BASE_ONLY_FILES)) return 'automation';
   } catch (error) {
     if (error.status !== 404) throw error;
   }

@@ -2,18 +2,6 @@ name: Windows gear engineering and CAD
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'modules/gear_calculator/**'
-      - 'gui_qt/app.py'
-      - 'gui_qt/workspace.py'
-      - 'gui_qt/package_check.py'
-      - 'main.py'
-      - 'requirements*.txt'
-      - 'solidworks/runtime.py'
-      - 'packaging/build_windows.py'
-      - 'packaging/licenses/gears/**'
-      - '.github/workflows/windows-gears.yml'
   push:
     branches: [main]
     paths:

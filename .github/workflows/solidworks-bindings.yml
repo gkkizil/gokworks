@@ -3,7 +3,7 @@ name: SolidWorks connection and Pack and Go bindings
 on:
   workflow_dispatch:
   push:
-    branches: [main, codex/pyside6-migration]
+    branches: [main]
     paths:
       - solidworks/connection.py
       - modules/naming/native.py

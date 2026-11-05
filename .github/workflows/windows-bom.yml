@@ -21,24 +21,6 @@ on:
       - 'modules/shaft_generator/tests/test_channel_selection.py'
       - 'modules/shaft_generator/interop/**'
       - '.github/workflows/windows-bom.yml'
-  pull_request:
-    paths:
-      - 'modules/bom/**'
-      - 'modules/cad_converter/**'
-      - 'modules/dxf_dwg/**'
-      - 'modules/profile_cutting/**'
-      - 'tests/support/solidworks.py'
-      - 'gui_qt/**'
-      - 'conftest.py'
-      - 'modules/shaft_generator/ui.py'
-      - 'modules/shaft_generator/tests/test_ui.py'
-      - 'modules/shaft_generator/tests/test_bulk_ui.py'
-      - 'modules/shaft_generator/tests/test_edge_treatments.py'
-      - 'modules/shaft_generator/edge_treatments.py'
-      - 'modules/shaft_generator/tests/native/**'
-      - 'modules/shaft_generator/tests/test_channel_selection.py'
-      - 'modules/shaft_generator/interop/**'
-      - '.github/workflows/windows-bom.yml'
 
 permissions:
   contents: read

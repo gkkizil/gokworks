@@ -10,13 +10,6 @@ on:
       - 'tests/support/pdf_worker.py'
       - 'tests/test_process_watch.py'
       - '.github/workflows/windows-pdf.yml'
-  pull_request:
-    paths:
-      - 'modules/pdf/**'
-      - 'tests/support/solidworks.py'
-      - 'tests/support/pdf_worker.py'
-      - 'tests/test_process_watch.py'
-      - '.github/workflows/windows-pdf.yml'
 
 permissions:
   contents: read

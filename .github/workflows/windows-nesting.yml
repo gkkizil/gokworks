@@ -9,12 +9,6 @@ on:
       - 'gui_qt/**'
       - 'requirements*.txt'
       - '.github/workflows/windows-nesting.yml'
-  pull_request:
-    paths:
-      - 'modules/nesting/**'
-      - 'gui_qt/**'
-      - 'requirements*.txt'
-      - '.github/workflows/windows-nesting.yml'
 
 permissions:
   contents: read

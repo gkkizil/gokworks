@@ -15,8 +15,13 @@ checkout'unda birleştirilir. Uygulama değişikliklerinde bütün pytest paketi
 sınırlı süreç çalıştırıcısıyla çalışır; C# test referansları ve açılış kontrolü hazırlanır.
 Yalnız açıkça listelenmiş CI dosyaları değiştiyse aday kodun Node testleri,
 Windows yaşam döngüsü/raporlama/çalıştırıcı testleri ve uygulama açılışı sınanır.
-Başarılı aynı kaynak head'i korunup main yalnız CI dosyalarında ilerlediyse de
-bu odaklı kontrol yeterlidir; uygulama kodu aynı kalmıştır. Eksik/kırpılmış dosya
+Başarılı aynı kaynak head'i korunup main yalnız CI dosyalarında veya Windows EXE
+derleme kayıtlarında (`README.md`, `packaging/windows-build-status.json`,
+`packaging/latest-windows.json`) ilerlediyse de bu odaklı kontrol yeterlidir;
+uygulama kodu aynı kalmıştır. Ajan dalının kendisi bu dosyaları değiştirirse
+tam paket çalışır. Modül bazlı Windows iş akışları PR'larda değil, yalnız main
+push'unda ve elle tetiklemede çalışır; ajan PR'larının tam paketi bu iş akışındadır.
+Eksik/kırpılmış dosya
 listesi, uygulama değişikliği veya başarısız eski sonuç tam pakete döner.
 Gerçek SolidWorks gerektiren kabul testleri ayrıca uygun ortam ister.
 
