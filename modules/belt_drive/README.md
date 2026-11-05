@@ -4,12 +4,55 @@ GOKWORKS için arayüzden, SolidWorks'ten ve CAD çekirdeğinden bağımsız, ik
 kasnaklı **açık kayış nominal hesap motoru**. Yalnız Python standart
 kütüphanesini kullanır. Aşama 1 nominal motorunun üzerine otomatik tasarım,
 yerel ürün katalogları ve beyan edilen tablo değerlendirmesi eklendi.
-5 Kasım talimatı doğrultusunda GUI/menü geliştirilmedi. Çizim ekranı,
-animasyon, STEP/DXF, PDF/Excel ve SolidWorks üretimi henüz eklenmedi.
+PySide6 arayüzü ve nominal 2D hareket görünümü mevcuttur. Otomatik tasarımda
+varsayılan **Genel boyutlandırma**, katalog ve C verilmeden de kayış boyu
+hesaplar. STEP/DXF, PDF/Excel ve SolidWorks üretimi henüz eklenmedi.
 
 Yeni backend kullanımına aşağıdaki **Otomatik tasarım** bölümünden;
 kaynak, kapsam ve test kanıtlarına [AUTOMATIC_DESIGN_REPORT.md](AUTOMATIC_DESIGN_REPORT.md)
 belgesinden ulaşabilirsiniz.
+
+## Katalog olmadan V kayışı ve kayış boyu hesabı
+
+**Otomatik Tasarım → Genel boyutlandırma → Hesapla ve boyutlandır** yolunu
+kullanın. V kayışı için profil/kesit görünür bir girdidir; genel hesap
+üretici veya ürün kodu aramaz. C'yi boş/otomatik bırakabilirsiniz. C
+verilirse o hedef kullanılır; aralık verilirse fiziksel olarak uygun kısmın
+ortası, hiç C verilmezse `D₁+D₂` başlangıç mesafesi alınır. Kullanılan C
+sonuçta gösterilir. 1–11 mm gibi kasnakların sığamayacağı aralık açık hata verir.
+
+V kasnaklarında R40 tercihli nominal çaplar aranır (varsayılan kapsam
+50–1000 mm; gelişmiş ayarlardan değişir). Teorik datum uzunluğu mevcut tam
+teğet formülüyle hesaplanır. **Tercihli boy seç** açıksa yakın R40 boyu için
+C yeniden çözülür; sadece L yuvarlanıp C sabit bırakılmaz. Tercihli boy C
+koşuluna uymuyorsa gerekli teorik uzunluk korunur. **Teorik boyu hesapla**
+seçeneği doğrudan verilen C'deki Ld değerini döndürür.
+
+R40, ISO 3 tercihli sayı yaklaşımıdır; bu boyların her profilde bir ISO 4184
+stok ürünü olduğu varsayılmaz. ISO 4183/4184 referans ölçü ve ürün uygunluğu,
+üretici güç kapasitesi, kesit/adet seçimi ayrı konulardır. Profil ve gerekli
+kayış adedi güç tablosundan otomatik seçilmiş sayılmaz. Triger-senkron genel
+hesapta tam kasnak dişleri ve mümkünse tam kayış diş adedi aranır; stok
+bulunabilirliği iddia edilmez.
+
+```python
+from modules.belt_drive.design_models import DesignRequest
+from modules.belt_drive.nominal_design import size_drive
+
+# Katalog yok, C yok; yalnız motor ve hedef devir.
+report = size_drive(DesignRequest(3., 1450., 400., family='v', profile='A',
+                                  rpm_error_max_percent=1.))
+candidate = report.candidates[0]
+print(candidate.required_length_mm, candidate.result.length_exact_mm,
+      candidate.result.center_mm, candidate.result.nominal_output_rpm)
+# 1982.631287... / 2000 mm / 552.047203... mm / 402.588235... rpm
+```
+
+Genel hesap sonuçları katalog doğrulama filtresiyle gizlenmez. Gerçek ürün
+kodlarıyla seçim için **Katalogdan ürün seçimi** ayrı yöntemdir; bu yöntemin
+SKU/uyumluluk ve doğrulama kuralları değiştirilmedi. Genel boyutlandırma
+projesi v3 ile saklanır; eski v1/v2 projeler aynı şekilde açılır. Ayrıntı ve
+test kanıtı: [NOMINAL_SIZING_FIX.md](NOMINAL_SIZING_FIX.md).
 
 ## Gerçekte desteklenenler
 
@@ -334,15 +377,17 @@ kontrollü hata üretir. Diğer PDF düzenleri için genel OCR varsayılmaz.
 
 ## Proje, karşılaştırma ve iş yöneticisi
 
-`design_serialization.DesignProject` v2; otomatik istek, tam katalog snapshot,
+`design_serialization.DesignProject` v2; katalog araması için otomatik istek, tam katalog snapshot,
 içerik özeti, isteğe bağlı nominal tasarım ve seçim kimliklerini saklar.
 `project_loads` eski Aşama 1 v1 dosyalarını da açar. Eski nominal JSON/API
 sözleşmesi değişmedi. `recalculate_project` güncel sonuçları yeniden üretir;
 eski seçim kimlikleri sonuç yaratamaz. Katalog özeti uyuşmazsa açılış reddedilir.
+Katalogsuz genel boyutlandırma v3'te nominal seçeneklerle saklanır; v1/v2
+veri sözleşmesi ve katalog özeti hesabı değiştirilmez.
 
 `report_to_dict(report, selected_ids=...)` seçilmiş adayların girdilerini,
 sonuçlarını, uyarılarını ve arama kapsamını koruyan JSON karşılaştırması
-üretir. GUI/PDF/Excel sunumu bu backend tesliminin dışındadır.
+üretir. PDF/Excel sunumu henüz eklenmedi.
 
 `controller.automatic_design_job` ortak JobManager'ın `(events, stop)`
 sözleşmesini kullanır; kendi thread havuzunu veya Qt nesnesini oluşturmaz.
@@ -360,9 +405,11 @@ kimlikleri aynıdır.
   seçilen uzunluk/diş adedinden C. Verim, servis faktörü ve F₀ boş
   bırakılabilir; boş alanlara katsayı atanmaz, sonuç "değerlendirilmedi" olur.
   Girdi değişince sonuç hemen geçersiz sayılır ve yeniden hesaplanır.
-- **Otomatik Tasarım:** `controller.automatic_design_job` JobManager üzerinden
+- **Otomatik Tasarım:** Genel boyutlandırma `controller.nominal_design_job`,
+  katalog seçimi `controller.automatic_design_job` ile JobManager üzerinden
   çalışır; ilerleme, iptal, iş hatası, kapsam ve sonuç sınırı gösterilir.
-  Doğrulanmamış adaylar varsayılan olarak gizlidir. Seçilen tam tasarım
+  Katalog yönteminde doğrulanmamış adaylar varsayılan olarak gizlidir.
+  Genel hesap sonuçları görünürdür. Seçilen hesap veya katalog adayı
   manuel ekrana aktarılır. `search_pulley_pairs()` sonuçları ayrı tabloda,
   kayış/C/kapasite olmadan "tam aktarım değildir" uyarısıyla gösterilir.
 - **Katalog ve Kaynaklar:** Yerleşik Tosyalı verisi (342 kasnak, 146 karantina,

@@ -32,3 +32,13 @@ def automatic_design_job(request, catalog):
             progress=lambda pairs, lengths: events.put(('belt_design_progress', (pairs, lengths))))
         events.put(('belt_design_cancelled' if report.cancelled else 'belt_design_result', report))
     return run
+
+
+def nominal_design_job(request, options=None):
+    """Catalogue-independent sizing on the same serialized JobManager."""
+    def run(events, stop):
+        from .nominal_design import size_drive
+        report=size_drive(request,options,stop=stop,
+            progress=lambda pairs,solved:events.put(('belt_nominal_progress',(pairs,solved))))
+        events.put(('belt_nominal_cancelled' if report.cancelled else 'belt_nominal_result',report))
+    return run

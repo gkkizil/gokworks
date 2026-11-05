@@ -1,5 +1,25 @@
 # Belt Drive Designer mimarisi ve aşama sınırları
 
+## Güncel ek: katalogsuz genel boyutlandırma
+
+Claude'un eklediği mevcut Qt arayüzü korunarak `nominal_design.py` ve
+`preferred_sizes.py` eklendi. Genel hesap artık `ProductCatalog` gerektirmez:
+
+```text
+DesignRequest + NominalSizingOptions
+  → V: R40 nominal çaplar / triger-senkron: tam kasnak dişleri
+  → hedef devir / referans çap / C geometrisi
+  → calculate() ile teorik L → tercihli boy / tam kayış dişi → C ters çözümü
+  → NominalSizingReport (ürün kodu ve kapasite onayı içermez)
+  → mevcut 2D görünüm / manuel aktarım / karşılaştırma / v3 proje
+```
+
+Genel hesap varsayılandır. Katalog yöntemi `search_drives` ile değişmeden
+çalışır. Nominal ölçüler `BeltProduct`/`PulleyProduct` gibi sahte ürün
+kayıtlarına çevrilmez. Eski v1/v2 kayıtlar korunur; yalnız genel hesap v3
+kaydında `nominal_options` ve katalogsuz istek saklanır. Yeni worker ortak
+JobManager üzerinden çalışır. Ayrıntı: [NOMINAL_SIZING_FIX.md](NOMINAL_SIZING_FIX.md).
+
 ## 5 Kasım 2026 backend güncellemesi
 
 Kullanıcı GUI geliştirmesini kapsamdan çıkardı. Aşağıdaki eski aşama planının

@@ -10,7 +10,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
+from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog, QFormLayout,
                                QHeaderView, QLineEdit, QSpinBox, QSplitter, QStackedWidget, QTableWidget,
                                QTableWidgetItem, QTabWidget, QTextBrowser, QVBoxLayout, QWidget)
 
@@ -26,6 +26,7 @@ from .design_models import DesignRequest
 from .design_serialization import DesignProject, project_dumps, project_loads, report_to_dict
 from .models import (BeltDriveSpecification, BeltSpecification, CenterSpecification, LoadSpecification,
                      PulleySpecification, SpecificationError)
+from .nominal_design import NominalSizingOptions, NominalSizingReport, NominalCandidate
 from .serialization import MAX_JSON_SIZE
 from .ui_support import (BUNDLED_CATALOGS, CANDIDATE_TITLES, CAPACITY_TITLES, FAMILY_TITLES, METRIC_TITLES,
                          PRIORITY_TITLES, REJECTION_TITLES, SEVERITY_TITLES, SEVERITY_TOKENS, SOURCE_TITLES,
@@ -147,6 +148,8 @@ class BeltDrivePage(BasePage):
                          'V ve triger-senkron kayışta nominal hesap, katalogdan otomatik tasarım ve karşılaştırma. '
                          'Üretim onayı vermez.')
         self.manual_result = None
+        self._ready=False
+        self.nominal_options=NominalSizingOptions()
         self.catalog = None; self.catalog_key = None; self.catalog_title = ''
         self.request = None; self.report = None; self.pairs = None
         self.compare_ids = []
@@ -165,6 +168,7 @@ class BeltDrivePage(BasePage):
         self.manual_timer.timeout.connect(self.calculate_manual)
         self.family_changed(); self.load_mode_changed(); self.center_mode_changed()
         self.select_catalog(0)
+        self._ready=True
         self.calculate_manual()
 
     # ======================================================================================
@@ -473,24 +477,34 @@ class BeltDrivePage(BasePage):
     # ======================================================================================
     def build_auto(self):
         host, f = form()
+        self.a_basis=QComboBox()
+        self.a_basis.addItem('Genel boyutlandırma · katalog gerekmez','nominal')
+        self.a_basis.addItem('Katalogdan ürün seçimi','catalog')
+        self.a_basis.setAccessibleName('Otomatik tasarım yöntemi')
+        f.addRow('Hesap yöntemi',self.a_basis)
         self.a_power = real(1.5, .0001, 1e6, 4); self.a_rpm = real(1450., .001, 100000., 3); self.a_target = real(700., .001, 100000., 3)
         self.a_family = QComboBox()
-        for key in ('timing', 'v'):
+        for key in ('v', 'timing'):
             self.a_family.addItem(FAMILY_TITLES[key], key)
         self.a_profile = QComboBox(); self.a_manufacturer = QComboBox(); self.a_series = QComboBox()
         self.a_mode = QComboBox()
         for key, title in (('auto', 'Otomatik (katalogdaki tüm seçenekler)'), ('fixed', 'Sabit C ± tolerans'), ('range', 'C aralığı')):
             self.a_mode.addItem(title, key)
-        self.a_target_c = real(0., 0., 1e6, 2, empty='verilmedi'); self.a_tolerance = real(-1., -1., 1e5, 3, empty='verilmedi')
+        self.a_target_c = real(400., 0., 1e6, 2, empty='otomatik'); self.a_tolerance = real(0., -1., 1e5, 3, empty='verilmedi')
         self.a_cmin = real(0., 0., 1e6, 2, empty='verilmedi'); self.a_cmax = real(0., 0., 1e6, 2, empty='verilmedi')
         self.a_rpm_error = real(1., -1., 100., 3, empty='sınırsız')
         for title, widget in (('Motor gücü P · kW', self.a_power), ('Giriş devri n₁ · dev/dak', self.a_rpm),
                               ('İstenen çıkış devri · dev/dak', self.a_target), ('İzin verilen devir sapması · %', self.a_rpm_error),
-                              ('Kayış ailesi', self.a_family), ('Eksen mesafesi', self.a_mode), ('C hedefi · mm', self.a_target_c),
+                              ('Kayış ailesi', self.a_family), ('Profil / kesit',self.a_profile), ('Eksen mesafesi', self.a_mode), ('C hedefi · mm', self.a_target_c),
                               ('C toleransı ± mm', self.a_tolerance), ('C en az · mm', self.a_cmin), ('C en çok · mm', self.a_cmax)):
             f.addRow(title, widget)
         self.auto_form = f
+        self.a_length_policy=QComboBox()
+        self.a_length_policy.addItem('Tercihli boy seç; C mesafesini yeniden çöz','preferred')
+        self.a_length_policy.addItem('C mesafesinden gerekli teorik boyu hesapla','required')
+        f.addRow('Kayış boyu',self.a_length_policy)
         limits_host, limits = form()
+        self.auto_limits_form=limits
         self.a_dmin = real(0., 0., 1e5, 2, empty='sınırsız'); self.a_dmax = real(0., 0., 1e5, 2, empty='sınırsız')
         self.a_odmax = real(0., 0., 1e5, 2, empty='sınırsız')
         self.a_zmin = whole(0, 0, 10000, empty='sınırsız'); self.a_zmax = whole(0, 0, 10000, empty='sınırsız')
@@ -498,7 +512,7 @@ class BeltDrivePage(BasePage):
         self.a_install = real(-1., -1., 1e5, 2, empty='bilinmiyor')
         self.a_tension = real(-1., -1., 1e5, 2, empty='bilinmiyor')
         self.a_service = real(0., 0., 10., 3, empty='verilmedi', step=.1)
-        for title, widget in (('Profil', self.a_profile), ('Üretici', self.a_manufacturer), ('Seri', self.a_series),
+        for title, widget in (('Üretici', self.a_manufacturer), ('Seri', self.a_series),
                               ('Çap en az · mm', self.a_dmin),
                               ('Çap en çok · mm', self.a_dmax), ('Dış çap en çok · mm', self.a_odmax),
                               ('Diş sayısı en az', self.a_zmin), ('Diş sayısı en çok', self.a_zmax),
@@ -530,8 +544,8 @@ class BeltDrivePage(BasePage):
         advanced = panel(label('Filtreler ve sınırlar', 'section'), limits_host, label('Sıralama ve kapsam', 'section'), rank_host,
                          label('Boş sınırlar gizli varsayılanla doldurulmaz.', 'muted'), margins=(0, 0, 0, 0))
         self.auto_advanced = Disclosure('Gelişmiş ayarlar (filtre, sınır, sıralama)', advanced)
-        inputs = panel(label('Motor gücünü ve devirleri girip "Tasarım ara"ya basın. Katalogdaki ürünlerden uygun '
-                             'kombinasyonlar listelenir.', 'muted'), self.auto_catalog_label, host,
+        inputs = panel(label('Motor gücü ve hedef devre göre kasnakları ve gerekli kayış boyunu hesaplayın. '
+                             'Ürün koduyla seçim için katalog yöntemini kullanın.', 'muted'), self.auto_catalog_label, host,
                        self.search_button, self.pairs_button, self.auto_advanced, 1)
         self.auto_inputs = inputs
         self.auto_scroll = scroll(inputs); self.auto_scroll.setMinimumWidth(260)
@@ -539,7 +553,7 @@ class BeltDrivePage(BasePage):
         self.controls += [inputs]
 
         self.coverage = label('Henüz arama yapılmadı.', 'muted')
-        self.candidates = table(['Sürücü', 'Sürülen', 'Kayış', 'Çıkış devri · dev/dak', 'Sapma %', 'C · mm',
+        self.candidates = table(['Sürücü', 'Sürülen', 'Kayış / boy', 'Çıkış devri · dev/dak', 'Sapma %', 'C · mm',
                                  'Adet / genişlik', 'Kapasite', 'Durum'])
         self.candidates.itemSelectionChanged.connect(self.candidate_selected)
         self.pair_banner = label('Kasnak çifti sonuçları tam aktarım değildir: kayış ürünü, gerçekleşen C ve kapasite seçilmedi.', 'muted')
@@ -573,21 +587,69 @@ class BeltDrivePage(BasePage):
         self.a_family.currentIndexChanged.connect(self.auto_family_changed)
         self.a_mode.currentIndexChanged.connect(self.auto_mode_changed)
         self.a_priority.currentIndexChanged.connect(self.priority_changed)
-        self.auto_family_changed(); self.auto_mode_changed(); self.priority_changed()
+        self.a_basis.currentIndexChanged.connect(self.basis_changed)
+        self.a_length_policy.currentIndexChanged.connect(self.auto_changed)
+        self.auto_family_changed(); self.basis_changed()
         return self.auto_workspace
+
+    def nominal_mode(self):
+        return self.a_basis.currentData()=='nominal'
+
+    def basis_changed(self,*args):
+        nominal=self.nominal_mode()
+        if not nominal and self.catalog is not None:
+            families={get_profile(p.profile).family for p in (*self.catalog.belts,*self.catalog.pulleys)}
+            if families and self.a_family.currentData() not in families:
+                self.a_family.setCurrentIndex(self.a_family.findData(sorted(families)[0]))
+        self.a_mode.setItemText(0,'Otomatik · C isteğe bağlı' if nominal else 'Otomatik · katalogdaki seçenekler')
+        self.auto_form.setRowVisible(self.a_length_policy,nominal)
+        for widget in (self.a_manufacturer,self.a_series,self.a_odmax,self.a_width,self.a_belts,self.a_install,self.a_tension):
+            self.auto_limits_form.setRowVisible(widget,not nominal)
+        self.a_unverified.setEnabled(not nominal)
+        self.a_unverified.setToolTip('Katalog adaylarının görünürlüğüdür; genel hesap sonuçları her zaman gösterilir.')
+        for i in range(self.a_priority.count()):
+            self.a_priority.model().item(i).setEnabled(not nominal or self.a_priority.itemData(i) not in ('capacity','fewest_belts'))
+        if nominal and self.a_priority.currentData() in ('capacity','fewest_belts'):
+            self.a_priority.setCurrentIndex(0)
+        self.search_button.setText('Hesapla ve boyutlandır' if nominal else 'Katalogdan tasarım ara')
+        self.search_button.setToolTip('Katalog olmadan çap, devir, uzunluk ve C hesaplar.' if nominal else 'Katalogdaki gerçek kayış ve kasnakları eşleştirir.')
+        self.pairs_button.setVisible(not nominal)
+        self.auto_family_changed();self.auto_mode_changed();self.priority_changed();self.auto_changed()
+        self.update_auto_hint()
+
+    def update_auto_hint(self):
+        if self.nominal_mode():
+            scope=(f'R40 çap arama kapsamı varsayılan {number(self.nominal_options.diameter_min_mm)}–{number(self.nominal_options.diameter_max_mm)} mm'
+                   if self.a_family.currentData()=='v' else
+                   f'Kasnak diş arama kapsamı varsayılan {self.nominal_options.teeth_min}–{self.nominal_options.teeth_max}')
+            self.auto_catalog_label.setText('Genel hesap; ürün kodu gerekmez. '+scope+' (gelişmiş ayarlardan değişir). '
+                'C boşsa D₁+D₂ başlangıç mesafesi kullanılır. Kesit/adet güç tablosuyla seçilmiş sayılmaz.')
+        elif self.catalog is not None:
+            self.auto_catalog_label.setText(f'Katalog: {self.catalog_title} — {len(self.catalog.pulleys)} kasnak, '
+                f'{len(self.catalog.belts)} kayış, {len(self.catalog.ratings)} kapasite tablosu.')
+
+    def use_catalog_mode(self):
+        if self.nominal_mode():self.a_basis.setCurrentIndex(self.a_basis.findData('catalog'))
+        else:self.basis_changed()
 
     def auto_family_changed(self, *args):
         family = self.a_family.currentData()
-        self.a_profile.blockSignals(True); self.a_profile.clear(); self.a_profile.addItem('Tümü', None)
+        current=self.a_profile.currentData()
+        self.a_profile.blockSignals(True); self.a_profile.clear()
+        if not self.nominal_mode():self.a_profile.addItem('Tümü',None)
         for profile in profiles(family):
             self.a_profile.addItem(profile_title(profile), profile.key)
+        index=self.a_profile.findData(current)
+        fallback='A' if family=='v' else 'HTD_5M'
+        self.a_profile.setCurrentIndex(index if index>=0 else self.a_profile.findData(fallback) if self.nominal_mode() else 0)
         self.a_profile.blockSignals(False)
         self.fill_catalog_filters()
+        self.update_auto_hint()
 
     def auto_mode_changed(self, *args):
         mode = self.a_mode.currentData()
         # Only the fields of the chosen mode are shown and sent; nothing hidden is applied.
-        self.auto_form.setRowVisible(self.a_target_c, mode == 'fixed')
+        self.auto_form.setRowVisible(self.a_target_c, mode == 'fixed' or mode=='auto' and self.nominal_mode() or self.a_priority.currentData()=='center')
         self.auto_form.setRowVisible(self.a_tolerance, mode == 'fixed')
         self.auto_form.setRowVisible(self.a_cmin, mode == 'range'); self.auto_form.setRowVisible(self.a_cmax, mode == 'range')
 
@@ -595,6 +657,9 @@ class BeltDrivePage(BasePage):
         balanced = self.a_priority.currentData() == 'balanced'
         for box in self.weights.values():
             self.rank_form.setRowVisible(box, balanced)
+        if self.nominal_mode():
+            for key,box in self.weights.items():self.rank_form.setRowVisible(box,balanced and key in ('speed','center','area'))
+        self.auto_mode_changed()
 
     def fill_catalog_filters(self):
         if not hasattr(self, 'a_manufacturer'):
@@ -616,20 +681,22 @@ class BeltDrivePage(BasePage):
     def design_request(self):
         mode = self.a_mode.currentData()
         priority = self.a_priority.currentData()
-        weights = tuple((k, b.value()) for k, b in self.weights.items() if b.value() > 0) if priority == 'balanced' else ()
-        target_c = optional(self.a_target_c) if mode == 'fixed' else None
+        nominal=self.nominal_mode()
+        weights = tuple((k,b.value()) for k,b in self.weights.items() if b.value()>0 and
+            (not nominal or k in ('speed','center','area'))) if priority=='balanced' else ()
+        target_c = optional(self.a_target_c) if mode=='fixed' or priority=='center' or nominal and mode=='auto' else None
         return DesignRequest(
             power_kw=self.a_power.value(), input_rpm=self.a_rpm.value(), target_rpm=self.a_target.value(),
             family=self.a_family.currentData(), profile=self.a_profile.currentData(),
-            manufacturer=self.a_manufacturer.currentData(), series_id=self.a_series.currentData(), mode=mode,
+            manufacturer=None if nominal else self.a_manufacturer.currentData(), series_id=None if nominal else self.a_series.currentData(), mode=mode,
             center_target_mm=target_c, center_min_mm=optional(self.a_cmin) if mode == 'range' else None,
             center_max_mm=optional(self.a_cmax) if mode == 'range' else None,
             center_tolerance_mm=optional(self.a_tolerance) if mode == 'fixed' else None,
             diameter_min_mm=optional(self.a_dmin), diameter_max_mm=optional(self.a_dmax),
-            outside_diameter_max_mm=optional(self.a_odmax), teeth_min=optional(self.a_zmin), teeth_max=optional(self.a_zmax),
-            rpm_error_max_percent=optional(self.a_rpm_error), system_width_max_mm=optional(self.a_width),
-            max_belts=optional(self.a_belts), available_installation_travel_mm=optional(self.a_install),
-            available_tensioning_travel_mm=optional(self.a_tension), service_factor=optional(self.a_service),
+            outside_diameter_max_mm=None if nominal else optional(self.a_odmax), teeth_min=optional(self.a_zmin), teeth_max=optional(self.a_zmax),
+            rpm_error_max_percent=optional(self.a_rpm_error), system_width_max_mm=None if nominal else optional(self.a_width),
+            max_belts=None if nominal else optional(self.a_belts), available_installation_travel_mm=None if nominal else optional(self.a_install),
+            available_tensioning_travel_mm=None if nominal else optional(self.a_tension), service_factor=optional(self.a_service),
             priority=priority, weights=weights, include_unverified=self.a_unverified.isChecked(),
             result_limit=self.a_result_limit.value(), work_limit=self.a_work_limit.value())
 
@@ -652,25 +719,31 @@ class BeltDrivePage(BasePage):
         self._start('search')
 
     def start_pairs(self):
+        self.use_catalog_mode()
         self._start('pairs')
 
     def _start(self, kind):
         if not self.can_start():
             return
-        if self.catalog is None:
+        nominal=kind=='search' and self.nominal_mode()
+        if not nominal and self.catalog is None:
             self.set_status('Önce bir katalog seçin.', True); return
         try:
             request = self.design_request()
+            if not nominal and not any(get_profile(p.profile).family==request.family for p in (*self.catalog.belts,*self.catalog.pulleys)):
+                raise ValueError('Seçilen katalogda bu kayış ailesi yok. Katalogsuz hesap için Genel boyutlandırma yöntemini seçin.')
             if kind == 'pairs' and request.priority != 'speed':
                 raise ValueError('Kasnak çifti araması yalnız "Devir sapması en küçük" önceliğiyle çalışır.')
         except (ValueError, TypeError) as error:
             self.set_status(f'İstek geçersiz: {error}', True); return
         if kind == 'pairs':
             request = replace(request, include_unverified=True)  # pair alternatives are listed, never "verified".
+        if nominal:kind='nominal'
         self.clear_search('Arama sürüyor…')
         self.search_token += 1; self.running = (kind, self.search_token, request)
-        self.set_status('Kasnak çiftleri aranıyor…' if kind == 'pairs' else 'Katalogdan tasarım aranıyor…')
-        operation = pulley_pairs_job(request, self.catalog) if kind == 'pairs' else controller.automatic_design_job(request, self.catalog)
+        self.set_status('Genel boyutlandırma hesaplanıyor…' if nominal else 'Kasnak çiftleri aranıyor…' if kind=='pairs' else 'Katalogdan tasarım aranıyor…')
+        operation = controller.nominal_design_job(request,self.current_nominal_options()) if nominal else \
+            pulley_pairs_job(request,self.catalog) if kind=='pairs' else controller.automatic_design_job(request,self.catalog)
         self.jobs.start(self, operation)
 
     def handle_events(self, events):
@@ -678,13 +751,18 @@ class BeltDrivePage(BasePage):
             if kind == 'belt_design_progress':
                 pairs, lengths = value
                 self.coverage.setText(f'Aranıyor… {pairs} kasnak çifti, {lengths} kayış uzunluğu değerlendirildi.')
-            elif kind in ('belt_design_result', 'belt_design_cancelled', 'belt_pairs_result', 'belt_pairs_cancelled'):
+            elif kind=='belt_nominal_progress':
+                pairs,solved=value
+                self.coverage.setText(f'Genel hesap… {pairs} çift tarandı, {solved} geometrik aday hesaplandı.')
+            elif kind in ('belt_design_result', 'belt_design_cancelled', 'belt_pairs_result', 'belt_pairs_cancelled','belt_nominal_result','belt_nominal_cancelled'):
                 self.search_finished(kind, value)
             elif kind == 'belt_project_result':
                 self.project_recalculated(*value)
             elif kind == 'job_error':
                 self.running = None
-                self.coverage.setText('Arama hata ile bitti; sonuç gösterilmiyor.')
+                message=str(value.get('error','Hesap tamamlanamadı.'))
+                self.coverage.setText('Hesaplanamadı: '+message)
+                self.auto_canvas.set_drive(None,message)
         super().handle_events(events)
 
     def _current(self):
@@ -698,6 +776,9 @@ class BeltDrivePage(BasePage):
             self.set_status('Girdiler değiştiği için arama sonucu kullanılmadı.', tone='warning')
             return
         self.request = running[2]
+        if isinstance(report,NominalSizingReport):
+            self.show_nominal_report(report)
+            return
         if kind.startswith('belt_pairs'):
             self.pairs = report; self.result_stack.setCurrentIndex(1)
             fill(self.pair_table, [(a.driver_code, a.driven_code, number(a.driver_teeth), number(a.driven_teeth),
@@ -741,9 +822,72 @@ class BeltDrivePage(BasePage):
         self.set_status(f'Tasarım araması {state}: {len(rows)} aday gösteriliyor.',
                         tone='warning' if report.cancelled or not report.search_complete else None)
 
+    def current_nominal_options(self):
+        return replace(self.nominal_options,length_policy=self.a_length_policy.currentData())
+
+    @staticmethod
+    def candidate_labels(c):
+        if not isinstance(c,NominalCandidate):return c.driver.code,c.driven.code,c.belt.code
+        r=c.result
+        timing=r.specification.belt.family=='timing'
+        driver=f'z₁={r.specification.driver.teeth}' if timing else f'Ø {number(r.driver_reference_diameter_mm,2)} datum'
+        driven=f'z₂={r.specification.driven.teeth}' if timing else f'Ø {number(r.driven_reference_diameter_mm,2)} datum'
+        kind={'required':'hesaplanan','preferred_r40':'R40 tercihli','integer_pitch':'tam dişli nominal'}[c.length_kind]
+        belt=f'{r.specification.belt.profile} · L{"p" if timing else "d"} {number(r.length_exact_mm,2)} mm · {kind}'
+        return driver,driven,belt
+
+    def show_nominal_report(self,report):
+        self.report=report;self.result_stack.setCurrentIndex(0)
+        self._row_candidates=report.candidates
+        rows=[]
+        for c in report.candidates:
+            labels=self.candidate_labels(c);r=c.result
+            rows.append((*labels,number(r.nominal_output_rpm,2),number(c.rpm_error_percent,3),number(r.center_mm,3),
+                         'Boyutlandırılmadı','Değerlendirilmedi','Geometrik hesap'))
+        fill(self.candidates,rows)
+        fill(self.rejections,[(REJECTION_TITLES.get(k,k),v) for k,v in report.rejection_counts])
+        state='iptal edildi' if report.cancelled else 'tamamlandı' if report.search_complete else 'iş sınırında durdu'
+        center=(' C belirtilmedi; başlangıç mesafesi D₁+D₂ alındı.' if report.request.center_target_mm is None and
+                report.request.center_min_mm is None and report.request.center_max_mm is None else '')
+        self.coverage.setText(f'Genel boyutlandırma {state}: {report.pairs_visited} çift tarandı, '
+            f'{report.matching_count} geometrik aday, {len(rows)} sonuç gösteriliyor. Kayış boyları hesaplandı; ürün kodu aranmadı.'+
+            center+(' Sonuç listesi sınırlandırıldı.' if report.results_limited else ''))
+        if rows:self.candidates.selectRow(0)
+        else:
+            hint='Devir sapmasına/çap veya C sınırlarına uyan aday yok; elenen nedenleri inceleyin.'
+            self.coverage.setText(self.coverage.text()+' '+hint);self.auto_canvas.set_drive(None,hint)
+        self.set_status(f'Genel boyutlandırma {state}: {len(rows)} aday, kayış boyu ve C hesaplandı.',
+                        tone='warning' if not report.search_complete else None)
+
+    def show_nominal_candidate(self,c):
+        r=c.result;labels=self.candidate_labels(c)
+        kind={'required':'C mesafesinden hesaplanan teorik boy','preferred_r40':'R40 tercihli nominal boy (stok ürünü değildir)',
+              'integer_pitch':'Tam kayış diş sayısından bölüm boyu (stok ürünü değildir)'}[c.length_kind]
+        lines=[f'<b>{labels[0]} → {labels[1]}</b>',f'Profil / kesit: {r.specification.belt.profile}',
+            'Genel geometrik hesap; üretici/katalog ürünü seçilmedi.',
+            f'İdeal çıkış devri: {number(r.nominal_output_rpm,4)} dev/dak · sapma %{number(c.rpm_error_percent,4)}',
+            f'Çap oranı: {number(r.ratio,6)}',
+            '<br><b>Kayış boyu ve eksen mesafesi</b>',
+            f'Hedef C için gerekli teorik boy: {number(c.required_length_mm,6)} mm',
+            f'Hesapta kullanılan boy: {number(r.length_exact_mm,6)} mm · {kind}',
+            f'Bu boydaki C: {number(r.center_mm,6)} mm · hedef farkı {number(c.center_deviation_mm,6)} mm',
+            f'Sürücü / sürülen referans çapı: {number(r.driver_reference_diameter_mm,4)} / {number(r.driven_reference_diameter_mm,4)} mm',
+            f'Sarılma açıları: {number(r.driver_wrap_deg,3)}° / {number(r.driven_wrap_deg,3)}°',
+            f'Kayış hızı: {number(r.speed_m_s,4)} m/s',f'Etkin kuvvet farkı Ft: {number(r.effective_force_delta_n,3)} N',
+            f'Giriş / ideal çıkış torku: {number(r.input_torque_nm,3)} / {number(r.ideal_output_torque_nm,3)} N·m',
+            '<br><b>Seçim sınırları</b>',
+            'Kesit ve gerekli adet güç tablosuyla seçilmedi; kapasite, germe, dış gövde ve ömür onayı yoktur.']
+        if r.specification.belt.family=='timing':
+            lines.extend((f'Teorik kayış diş adedi Lp/p: {number(r.theoretical_belt_teeth,6)}',
+                          f'Seçilen tam kayış diş adedi: {r.selected_belt_teeth if r.selected_belt_teeth is not None else "henüz seçilmedi"}'))
+        lines.extend(f'{SEVERITY_TITLES.get(i.severity,i.severity)} · {i.message}' for i in c.checks)
+        lines.extend(report_line for report_line in self.report.assumptions)
+        self.candidate_details.setHtml('<br>'.join(lines))
+
     @staticmethod
     def amount(c):
         """V: belt count (grooves); triger-senkron: belt width. Unknown stays unknown."""
+        if isinstance(c,NominalCandidate):return 'Adet / genişlik seçilmedi'
         if c.result.specification.belt.family == 'v':
             return f'{c.belt_count} kayış' if c.belt_count is not None else 'adet bilinmiyor'
         return f'{number(c.belt.width_mm)} mm genişlik' if c.belt.width_mm is not None else 'genişlik bilinmiyor'
@@ -760,6 +904,9 @@ class BeltDrivePage(BasePage):
         if c is None:
             self.candidate_details.clear(); return
         self.auto_canvas.set_drive(c.result)
+        if isinstance(c,NominalCandidate):
+            self.show_nominal_candidate(c)
+            return
         cap = c.capacity
         width = (f'{number(c.system_width_mm, 2)} mm (bilinen eksenel zarflardan)' if c.system_width_mm is not None else
                  'bilinmiyor' + (f' — alt sınır en az {number(c.system_width_lower_bound_mm, 2)} mm' if c.system_width_lower_bound_mm is not None else ''))
@@ -790,10 +937,11 @@ class BeltDrivePage(BasePage):
     def transfer_to_manual(self):
         c = self.selected_candidate()
         if c is None or self.report is None:
-            self.set_status('Aktarmak için güncel aramadan bir tam tasarım seçin.', True); return
+            self.set_status('Aktarmak için güncel bir hesap veya katalog adayı seçin.', True); return
         self.set_manual_specification(c.result.specification)
         self.tabs.setCurrentIndex(0)
-        self.set_status(f'{c.driver.code} / {c.driven.code} / {c.belt.code} manuel ekrana aktarıldı ve yeniden hesaplandı.')
+        self.set_status(' / '.join(self.candidate_labels(c))+' manuel ekrana aktarıldı ve yeniden hesaplandı.'+
+                        (' Adet/kapasite güçten seçilmedi.' if isinstance(c,NominalCandidate) else ''))
 
     # ======================================================================================
     # Catalogue and sources
@@ -830,6 +978,7 @@ class BeltDrivePage(BasePage):
         except (OSError, ValueError) as error:
             self.set_status(f'Katalog açılamadı: {error}', True); return
         self.set_catalog(catalog, key, self.catalog_picker.itemText(index))
+        if self._ready:self.use_catalog_mode()
 
     def open_catalog(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Kayış/kasnak kataloğu', '', 'Ürün kataloğu (*.json *.csv)')
@@ -840,6 +989,7 @@ class BeltDrivePage(BasePage):
         except (OSError, ValueError, UnicodeError) as error:
             self.set_status(f'Katalog okunamadı: {error}', True); return
         self.set_catalog(catalog, 'file', f'Dosya: {Path(path).name}')
+        self.use_catalog_mode()
         self.set_status(f'Katalog okundu: {Path(path).name}')
 
     def set_catalog(self, catalog, key, title):
@@ -881,6 +1031,7 @@ class BeltDrivePage(BasePage):
         else:
             self.audit_summary.setText('Bu katalog için içe aktarma denetim kaydı yok.')
             self.quarantine.setRowCount(0)
+        self.update_auto_hint()
 
     def filter_products(self, *args):
         needle = self.product_filter.text().strip().casefold()
@@ -913,7 +1064,7 @@ class BeltDrivePage(BasePage):
             return
         if c.identifier not in self.compare_ids:
             self.compare_ids.append(c.identifier)
-        self.refresh_compare(); self.set_status(f'Karşılaştırmaya eklendi: {c.belt.code}')
+        self.refresh_compare(); self.set_status('Karşılaştırmaya eklendi: '+self.candidate_labels(c)[2])
 
     def remove_from_compare(self):
         rows = self.compare.selectionModel().selectedRows()
@@ -929,9 +1080,9 @@ class BeltDrivePage(BasePage):
             c = known[identifier]; r = c.result
             amount = self.amount(c)
             warnings = '; '.join(f'{i.code}' for i in c.checks if i.severity in ('WARNING', 'NOT_EVALUATED'))
-            rows.append((c.driver.code, c.driven.code, c.belt.code, number(c.rpm_error_percent), number(r.center_mm, 2),
+            rows.append((*self.candidate_labels(c), number(c.rpm_error_percent), number(r.center_mm, 2),
                          number(r.length_exact_mm, 2), number(min(r.driver_wrap_deg, r.driven_wrap_deg), 2),
-                         number(r.speed_m_s, 3), amount, CAPACITY_TITLES.get(c.capacity.status, c.capacity.status), warnings))
+                         number(r.speed_m_s, 3), amount, 'Değerlendirilmedi' if isinstance(c,NominalCandidate) else CAPACITY_TITLES.get(c.capacity.status,c.capacity.status), warnings))
         fill(self.compare, rows)
         self.export_compare.setEnabled(bool(rows) and not self.busy)
 
@@ -952,15 +1103,17 @@ class BeltDrivePage(BasePage):
         manual = self.manual_result.specification if self.manual_result is not None else None
         request = None
         try:
-            request = self.design_request() if self.catalog is not None else None
+            request = self.design_request() if self.nominal_mode() or self.catalog is not None else None
         except (ValueError, TypeError):
             request = None
         if manual is None and request is None:
             self.set_status('Kaydedilecek geçerli manuel veya otomatik tasarım girdisi yok.', True); return
         selected = tuple(self.compare_ids) if self.report is not None else ()
         try:
-            project = DesignProject(request=request, catalog=self.catalog if request is not None else None,
-                                    manual=manual, selected_ids=selected)
+            nominal=request is not None and self.nominal_mode()
+            project = DesignProject(request=request, catalog=self.catalog if request is not None and not nominal else None,
+                                    manual=manual, selected_ids=selected,
+                                    nominal_options=self.current_nominal_options() if nominal else None)
             text = project_dumps(project)
         except (ValueError, TypeError) as error:
             self.set_status(f'Proje oluşturulamadı: {error}', True); return
@@ -1001,17 +1154,18 @@ class BeltDrivePage(BasePage):
             self.set_manual_specification(project.manual)
         if project.request is None:
             self.set_status('Proje açıldı; manuel tasarım güncel motorla yeniden hesaplandı.'); return
-        self.load_request(project.request, project.catalog)
+        self.load_request(project.request, project.catalog,project.nominal_options)
         self.search_token += 1; self.running = ('search', self.search_token, project.request)
         self.search_finished('belt_design_cancelled' if outcome.cancelled else 'belt_design_result', outcome)
         self.compare_ids = list(selected); self.refresh_compare()
         dropped = len(project.selected_ids) - len(selected)
-        self.set_status('Proje açıldı; arama güncel katalog snapshot\'ı ile yeniden yapıldı.'
+        self.set_status(('Proje açıldı; genel boyutlandırma güncel motorla yeniden hesaplandı.' if project.nominal_options is not None else
+                         'Proje açıldı; arama güncel katalog snapshot\'ı ile yeniden yapıldı.')
                         + (f' {dropped} eski seçim güncel sonuçlarda bulunmadığı için atıldı.' if dropped else ''),
                         tone='warning' if dropped else None)
 
-    def load_request(self, request, catalog):
-        widgets = [self.a_family, self.a_profile, self.a_manufacturer, self.a_series, self.a_mode, self.a_priority,
+    def load_request(self, request, catalog,nominal_options=None):
+        widgets = [self.a_basis,self.a_length_policy,self.a_family, self.a_profile, self.a_manufacturer, self.a_series, self.a_mode, self.a_priority,
                    self.a_power, self.a_rpm, self.a_target, self.a_target_c, self.a_tolerance, self.a_cmin, self.a_cmax,
                    self.a_rpm_error, self.a_dmin, self.a_dmax, self.a_odmax, self.a_zmin, self.a_zmax, self.a_width,
                    self.a_belts, self.a_install, self.a_tension, self.a_service, self.a_result_limit, self.a_work_limit,
@@ -1019,10 +1173,14 @@ class BeltDrivePage(BasePage):
         for w in widgets:
             w.blockSignals(True)
         try:
-            self.catalog, self.catalog_key = catalog, 'project'
+            self.a_basis.setCurrentIndex(self.a_basis.findData('nominal' if nominal_options is not None else 'catalog'))
+            if nominal_options is not None:
+                self.nominal_options=nominal_options
+                self.a_length_policy.setCurrentIndex(self.a_length_policy.findData(nominal_options.length_policy))
+            else:self.catalog, self.catalog_key = catalog, 'project'
             self.a_family.setCurrentIndex(self.a_family.findData(request.family))
             self.auto_family_changed()
-            self.set_catalog_quiet(catalog)
+            if catalog is not None:self.set_catalog_quiet(catalog)
             for box, value in ((self.a_profile, request.profile), (self.a_manufacturer, request.manufacturer),
                                (self.a_series, request.series_id), (self.a_mode, request.mode), (self.a_priority, request.priority)):
                 box.setCurrentIndex(max(box.findData(value), 0))
@@ -1044,7 +1202,7 @@ class BeltDrivePage(BasePage):
         finally:
             for w in widgets:
                 w.blockSignals(False)
-        self.auto_mode_changed(); self.priority_changed()
+        self.basis_changed()
 
     def set_catalog_quiet(self, catalog):
         """Show a project snapshot without restarting the search invalidation chain."""

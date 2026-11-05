@@ -60,7 +60,9 @@ def number(value, digits=3):
         return 'evet' if value else 'hayır'
     if isinstance(value, int):
         return str(value)
-    text = f'{value:.{digits}f}'.rstrip('0').rstrip('.')
+    text = f'{value:.{digits}f}'
+    if '.' in text:
+        text=text.rstrip('0').rstrip('.')
     return (text if text not in ('-0', '') else '0').replace('.', ',')
 
 
