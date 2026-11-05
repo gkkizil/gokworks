@@ -82,3 +82,25 @@ main'e gelen ağırlık modülü güncellemesi (PR #23) de tabana alındı; o ko
 değiştirilmedi. Menü, tema, iş yöneticisi, paketleme ve diğer motorlarda
 refactoring yapılmadı. Güçten kesit/adet/ömür onayı, CAD ve canlı SolidWorks
 bu düzeltmenin kapsamı değildir.
+
+## Claude arayüz düzeltmeleriyle entegrasyon
+
+PR #24, `c715c80` ile main'e alındıktan sonra Claude'un `bb8c4dd` commit'i
+aynı `ui.py` alanlarında çakıştı. `42012509453` numaralı Windows işi,
+üçüncü adım olan geçici head/main birleştirmesinde durdu; pytest başlamadığı
+için eksik XML/artifact mesajları oluştu. Node sürüm uyarısı bu hatanın
+nedeni değildi. Yeşil `merge` işi, başarısız doğrulamayı atlamadı.
+
+Çözüm Codex çalışma alanında iki geçmişi birleştirir. Claude'un alan
+hassasiyeti/orijin koordinatları, boş ağırlık reddi, ayrı uyarı sayısı,
+dosya/proje katalog seçimi, gizli görünümde animasyonu durdurma, güncel
+arama olmadan katalog kaydetmeme ve bekleyen manuel değişikliği kaydetme
+düzeltmeleri korunur. Katalogsuz genel hesap, isteğe bağlı C, nominal aday
+aktarımı ve v3 projeler de korunur. Ekrana sığmayan tasarımın uyarısı
+aktarım/açılış başarı mesajıyla örtülmez.
+
+Birleşik sürümde 250 mevcut kayış testi ve bu iki değişikliğin birlikte
+çalışmasını doğrulayan 3 ek GUI testi geçer. 18 sayfalık uygulama açılış
+denetimi de geçer. Bunlar Linux/Qt offscreen kontrolleridir; GitHub Windows
+doğrulaması ayrıca gereklidir. Claude'un dalı veya çalışma dosyaları
+değiştirilmez; CI kuralları gevşetilmez.
