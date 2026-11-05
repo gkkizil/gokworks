@@ -1,0 +1,40 @@
+{
+  "shape_id": "rect_to_round",
+  "variant_id": "centered_faceted",
+  "parameters": {
+    "depth": 300.0,
+    "diameter": 250.0,
+    "height": 300.0,
+    "width": 400.0
+  },
+  "schema_version": 1,
+  "request_id": "example-rect_to_round-centered_faceted",
+  "revision": 1,
+  "input_units": "mm",
+  "thickness": 0.0,
+  "dimension_reference": "mid",
+  "material": {
+    "name": "",
+    "density_kg_m3": null,
+    "unit_price": null,
+    "price_unit": "kg",
+    "currency": ""
+  },
+  "seam_options": {
+    "start_angle_deg": 0.0
+  },
+  "split_options": {
+    "count": 1
+  },
+  "joint_options": {
+    "kind": "butt",
+    "overlap": 0.0
+  },
+  "development_options": {
+    "geometry_tolerance_mm": 1e-06,
+    "chord_error_mm": 0.02,
+    "mesh_error_mm": 0.5,
+    "max_samples": 4096,
+    "kerf_mm": 0.0
+  }
+}

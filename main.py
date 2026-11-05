@@ -22,6 +22,9 @@ if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == '--gear-worker':
         from modules.gear_calculator.worker import run_worker
         raise SystemExit(run_worker(sys.argv[2]))
+    if len(sys.argv) == 3 and sys.argv[1] == '--unfold-worker':
+        from core.unfolding.cad_process import run_worker
+        raise SystemExit(run_worker(sys.argv[2]))
     if len(sys.argv) == 3 and sys.argv[1] == '--self-check':
         from gui_qt.package_check import run
         raise SystemExit(run(sys.argv[2]))

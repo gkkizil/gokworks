@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "shape_id": "cylinder",
+  "variant_id": "straight",
+  "request_id": "cylinder-reference-300-200",
+  "revision": 1,
+  "parameters": {"diameter": 300.0, "height": 200.0},
+  "input_units": "mm",
+  "thickness": 0.0,
+  "dimension_reference": "mid"
+}

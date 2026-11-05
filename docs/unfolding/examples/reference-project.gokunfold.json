@@ -1,0 +1,319 @@
+{
+  "schema": "gokworks.unfolding.project",
+  "version": 1,
+  "project": {
+    "items": [
+      {
+        "code": "cylinder-straight",
+        "request": {
+          "shape_id": "cylinder",
+          "variant_id": "straight",
+          "parameters": {
+            "diameter": 300.0,
+            "height": 200.0
+          },
+          "schema_version": 1,
+          "request_id": "example-cylinder-straight",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      },
+      {
+        "code": "cylinder-bevel",
+        "request": {
+          "shape_id": "cylinder",
+          "variant_id": "bevel",
+          "parameters": {
+            "cut_angle_deg": 30.0,
+            "diameter": 300.0,
+            "height": 200.0,
+            "plane_azimuth_deg": 0.0
+          },
+          "schema_version": 1,
+          "request_id": "example-cylinder-bevel",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      },
+      {
+        "code": "cone-full",
+        "request": {
+          "shape_id": "cone",
+          "variant_id": "full",
+          "parameters": {
+            "bottom_diameter": 300.0,
+            "height": 200.0
+          },
+          "schema_version": 1,
+          "request_id": "example-cone-full",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      },
+      {
+        "code": "cone-frustum",
+        "request": {
+          "shape_id": "cone",
+          "variant_id": "frustum",
+          "parameters": {
+            "bottom_diameter": 300.0,
+            "height": 200.0,
+            "top_diameter": 150.0
+          },
+          "schema_version": 1,
+          "request_id": "example-cone-frustum",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      },
+      {
+        "code": "rectangular_reducer-centered",
+        "request": {
+          "shape_id": "rectangular_reducer",
+          "variant_id": "centered",
+          "parameters": {
+            "bottom_depth": 300.0,
+            "bottom_width": 400.0,
+            "height": 300.0,
+            "top_depth": 150.0,
+            "top_width": 200.0
+          },
+          "schema_version": 1,
+          "request_id": "example-rectangular_reducer-centered",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      },
+      {
+        "code": "rect_to_round-centered_faceted",
+        "request": {
+          "shape_id": "rect_to_round",
+          "variant_id": "centered_faceted",
+          "parameters": {
+            "depth": 300.0,
+            "diameter": 250.0,
+            "height": 300.0,
+            "width": 400.0
+          },
+          "schema_version": 1,
+          "request_id": "example-rect_to_round-centered_faceted",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      },
+      {
+        "code": "segmented_elbow-constant_diameter",
+        "request": {
+          "shape_id": "segmented_elbow",
+          "variant_id": "constant_diameter",
+          "parameters": {
+            "center_radius": 300.0,
+            "diameter": 200.0,
+            "inlet_extension": 0.0,
+            "outlet_extension": 0.0,
+            "segments": 4,
+            "total_angle_deg": 90.0
+          },
+          "schema_version": 1,
+          "request_id": "example-segmented_elbow-constant_diameter",
+          "revision": 1,
+          "input_units": "mm",
+          "thickness": 0.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          }
+        },
+        "quantity": 1
+      }
+    ],
+    "name": "Sac açınımı referansları",
+    "code": "UNFOLD-DEMO",
+    "revision": "",
+    "quantity": 1,
+    "engine_version": "1.0.0"
+  }
+}
