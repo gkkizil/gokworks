@@ -1,0 +1,22 @@
+{
+  "python": "3.13.5",
+  "platform": "Linux",
+  "qt_platform": "offscreen",
+  "tests": {
+    "unfolding": {
+      "tests": 85,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "regression": {
+      "tests": 124,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "self_check": "passed",
+  "live_solidworks": false,
+  "live_windows_exe": false
+}

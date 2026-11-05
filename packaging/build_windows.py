@@ -58,6 +58,7 @@ def main():
             '--runtime-hook', str(ROOT/'packaging/runtime_hook.py'),
             '--additional-hooks-dir', str(ROOT/'packaging/hooks'),
             '--collect-data', 'ezdxf',
+            '--collect-submodules', 'core.unfolding',
             '--collect-all', 'shapely',
             '--collect-all', 'OCP', '--collect-all', 'cadquery_ocp_proxy',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',

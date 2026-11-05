@@ -1,0 +1,42 @@
+{
+  "shape_id": "segmented_elbow",
+  "variant_id": "constant_diameter",
+  "parameters": {
+    "center_radius": 300.0,
+    "diameter": 200.0,
+    "inlet_extension": 0.0,
+    "outlet_extension": 0.0,
+    "segments": 4,
+    "total_angle_deg": 90.0
+  },
+  "schema_version": 1,
+  "request_id": "example-segmented_elbow-constant_diameter",
+  "revision": 1,
+  "input_units": "mm",
+  "thickness": 0.0,
+  "dimension_reference": "mid",
+  "material": {
+    "name": "",
+    "density_kg_m3": null,
+    "unit_price": null,
+    "price_unit": "kg",
+    "currency": ""
+  },
+  "seam_options": {
+    "start_angle_deg": 0.0
+  },
+  "split_options": {
+    "count": 1
+  },
+  "joint_options": {
+    "kind": "butt",
+    "overlap": 0.0
+  },
+  "development_options": {
+    "geometry_tolerance_mm": 1e-06,
+    "chord_error_mm": 0.02,
+    "mesh_error_mm": 0.5,
+    "max_samples": 4096,
+    "kerf_mm": 0.0
+  }
+}
