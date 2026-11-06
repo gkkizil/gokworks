@@ -3,6 +3,13 @@
 GUI, SolidWorks, internet veya LLM bağlantısı gerektirmeyen servis.
 Başlangıç sözleşmesi: [contract_v1.md](../../docs/unfolding/contract_v1.md).
 
+6 Kasım 2026 güncel kapsam: **191 kaynak varyantı / 51 aile / 11 kategori**;
+eski yedi API varyantı geriye uyumluluk için korunur. Aşağıdaki yedi satırlı
+tablo ilk teslimin kapsamıdır. Güncel hesap/çıktı durumu ve açık kısıtlar için
+[genişleme raporu](../../docs/unfolding/EXPANSION_REPORT.md),
+[191 satırlı matris](../../docs/unfolding/source_coverage.csv) ve
+[GitHub kaynak araştırması](../../docs/unfolding/research/README.md) esas alınır.
+
 ```python
 from core.unfolding import UnfoldService, UnfoldRequest, ExportOptions
 s = UnfoldService()
@@ -43,6 +50,9 @@ faset geçişin t>0 normal offset'i v1 kapsamında değildir; bu durumlar
 reddedilir. Geometrik orta yüzeyden abkant büküm telafisi çıkarımı yapılmaz.
 `geometry.bend_allowance` bağımsız, kullanıcı K değeri gerektiren yardımcıdır;
 mevcut açınıma gizlice eklenmez.
+`bend_profiles.develop_profile/calibrate_k`, ayrıca iç/dış/teğet flanş
+boylarını ve ölçülmüş numuneden K hesabını destekler; fitting geometri
+akışına veya arayüze otomatik uygulanmaz.
 
 `geometry_tolerance_mm`, kesim `chord_error_mm` ve önizleme `mesh_error_mm`
 ayrıdır. Kalınlık sıfır veya yoğunluk eksikse kütle `None` olur. Üretici,

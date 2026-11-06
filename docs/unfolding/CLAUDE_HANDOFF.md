@@ -1,5 +1,16 @@
 # Claude entegrasyonu — motor 1.1.0
 
+Son kanıtlar: [191 satırlı kapsam](source_coverage.csv),
+[doğrulama kaydı](source_validation.json), [teknik rapor](EXPANSION_REPORT.md).
+`implementation_status=validated_example_with_restrictions` tam kaynak
+eşdeğerliği/imalat onayı değildir. Her modelin `restrictions` ve `stages`
+alanları arayüzde başarıyla çelişen eksikleri gizlememek için kullanılabilir.
+
+Ayrıca MIT uyarlaması `core.unfolding.bend_profiles` içinde bağımsız
+`develop_profile` ve `calibrate_k` vardır; ölçü türü ve kullanıcı K'sı
+açıkça gereklidir. Kaynak fitting'lerin orta yüzey hesabına otomatik telafi
+ekleme. Bu yardımcı henüz GUI kontrolüne bağlı değildir; [araştırma notu](research/README.md).
+
 Kaynak `docs/unfolding/unfoldo_inventory.json`, güncel yöntem/sınırlar
 `SOURCE_MODELS.md`, kabul örnekleri `examples/source_models.json` dosyasındadır.
 191 kaynak kimliği / 51 aile / 11 kategori ayrı izlenir. Önceki yedi API

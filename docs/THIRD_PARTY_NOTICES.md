@@ -1,5 +1,20 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Sac açınımı ve büküm matematiği · 6 Kasım 2026
+
+`hermes98761234/sheet-metal-unfold`, commit
+`2ad13f96ba83fb0e20a7b0c7f3bc201b8ef1b540`, `src/lib/bend.ts`
+matematik yordamları `core/unfolding/bend_profiles.py` içine Python olarak
+uyarlanmıştır. Copyright ©2026 Volodymyr Kopytsia, **MIT**. Tam telif/izin
+metni `packaging/licenses/unfolding/sheet-metal-unfold-MIT.txt` altında
+korunur ve lisans arşivine eklenir. Çalışma bağımlılığı kurulmaz; kaynak
+deponun genel K tabloları ve kalıp/malzeme sezgileri aktarılmaz.
+
+Diğer yedi sac açınımı deposu yalnız incelenmiştir; GPL, LGPL, MPL veya
+lisansı doğrulanmamış motor kodu bu çalışmada alınmamıştır. Unfoldo'nun
+kapalı hesap motoru veya CAD dosyaları alınmamıştır.
+[Sabit kaynaklar, dosya hash'leri ve doğrulama](unfolding/research/README.md).
+
 ## Dişli Hesaplama · 27 Ekim 2026
 
 Yeni yerel CAD bağımlılığı `cadquery-ocp-novtk` / proxy 8.0.1.1.0'dır.

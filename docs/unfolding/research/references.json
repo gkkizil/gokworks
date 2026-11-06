@@ -1,0 +1,226 @@
+{
+  "schema": "gokworks.unfolding.repository_research",
+  "version": 1,
+  "review_date": "2026-11-06",
+  "scope": "Only sheet development and bent sheet-metal unfolding; not general CAD/papercraft",
+  "checkouts_root": "/workspace/research/sheet-unfolding",
+  "network": "GitHub HTML search and HTTPS git clone; api.github.com denied by managed proxy",
+  "repositories": [
+    {
+      "repository": "https://github.com/shaise/FreeCAD_SheetMetal",
+      "checkout_name": "FreeCAD_SheetMetal",
+      "commit": "d6a60a9911e612cf7ecb593b869f658baca22cdd",
+      "commit_date": "2026-11-01T12:05:37+02:00",
+      "license": "LGPL-2.1; reviewed new unfolder header LGPL-2.0-or-later",
+      "decision": "not_adopted",
+      "reason": "Plane/cylinder B-Rep adjacency graph, spanning tree, UV unroll and user material sheets; requires FreeCAD/Part/TechDraw/NetworkX; not a fitting catalogue replacement.",
+      "reviewed_files": [
+        {
+          "path": "LICENSE",
+          "sha256": "510ccb0ba9b0a9bf99343901040a8ec42f92310704203d2068cea815cbbabb8f"
+        },
+        {
+          "path": "README.md",
+          "sha256": "7fe849f37e3c28e7a18142753a035e3c4b88c90ca756a5357b4eb1e5ba0af0fd"
+        },
+        {
+          "path": "SheetMetalNewUnfolder.py",
+          "sha256": "9811b844634021746eb39f9e6989e6b6c611e1fb6835eb00dc1bac9c7c814df2"
+        },
+        {
+          "path": "SheetMetalLookup.py",
+          "sha256": "56580ef7be9f0b9aca28ffaba3fbfab90aab963161f84419499b624492a78c20"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/alexneufeld/YouCanNotUnfold",
+      "checkout_name": "YouCanNotUnfold",
+      "commit": "747c20877a859ba8736953e7d7633d259fad0b08",
+      "commit_date": "2026-10-09T15:55:30-06:00",
+      "license": "LGPL-2.1 text; unfold.py LGPL-2.0-or-later",
+      "decision": "not_adopted",
+      "reason": "Experimental FreeCAD unfolder now integrated into SheetMetal workbench; do not count as a second independent engine.",
+      "reviewed_files": [
+        {
+          "path": "LICENSE",
+          "sha256": "9b872a8a070b8ad329c4bd380fb1bf0000f564c75023ec8e1e6803f15364b9e9"
+        },
+        {
+          "path": "README.md",
+          "sha256": "71ee6d332a8d2874bcff0ca637836bc3dd82c9beb8d07c03feb333ae49915911"
+        },
+        {
+          "path": "unfold.py",
+          "sha256": "5009ec81398a94e99d5abf2901054c9f8772ec874e63dc68788439f5d334a85d"
+        },
+        {
+          "path": "test_unfold.py",
+          "sha256": "5c1d759a44aa6d7ba188234bbce30c54e4d9926532a894a5855b99f2beda01e2"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/quirxi/SheetMetalCone",
+      "checkout_name": "SheetMetalCone",
+      "commit": "d53689ce609d8a5a6a5c8c6282f92f2c6f5b5d07",
+      "commit_date": "2020-08-26T14:51:48+02:00",
+      "license": "LGPL-3.0",
+      "decision": "not_adopted",
+      "reason": "Analytical frustum SVG extension, inkex/lxml runtime; no 191-model support and base-equals-cut singularity in calculateCone methods.",
+      "reviewed_files": [
+        {
+          "path": "LICENSE.md",
+          "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+        },
+        {
+          "path": "README.md",
+          "sha256": "18daf26d6b52d37eef23bbf1a7b05eb891ac7d0155f00c8f7128bafad503d475"
+        },
+        {
+          "path": "src/sheet_metal_conus.py",
+          "sha256": "d10b9619d51a537d6cddae8335b849187eba4ea0fd57f7b1dbe75a3f93879b40"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/ulrich1a/sheet_ufo",
+      "checkout_name": "sheet_ufo",
+      "commit": "ab981a2bb7b3726d3b8b8b8a7a540f6dc22a2656",
+      "commit_date": "2018-09-22T18:48:59+02:00",
+      "license": "GPL-2.0-or-later in sheet_ufo.py header",
+      "decision": "not_adopted",
+      "reason": "Old FreeCAD face tree and plane/cylinder unfolding; GPL source not copied or linked.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "sha256": "b62d738ee9dabf7c7145b88c713111705c8ecb1851b372af32a46250c8ae7b1a"
+        },
+        {
+          "path": "sheet_ufo.py",
+          "sha256": "df5dcccca42db3d9681a1e5287bd4ad275ec388b2e722b7981b85cedd8719425"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/neferpi/desarrolla",
+      "checkout_name": "desarrolla",
+      "commit": "771dcb1b35bef8b781dd41222be3d09e351a0ec1",
+      "commit_date": "2026-09-13T19:05:11Z",
+      "license": "MIT",
+      "decision": "not_adopted",
+      "reason": "Closest fitting workflow; MVP, fixed angular sampling, rectangular straight baseline fails preservation of all true triangle diagonal lengths. GOKWORKS keeps analytic arcs and real-length strip/fan developments.",
+      "reviewed_files": [
+        {
+          "path": "LICENSE",
+          "sha256": "2955a3797fb1e8ee94e138917d34f52881ad896136f5e22fea51a04a22448220"
+        },
+        {
+          "path": "README.md",
+          "sha256": "e8edc3ffb95ff24a43b86f2b9c074bbea3a9d82e648757e97968c8ad5828be6a"
+        },
+        {
+          "path": "src/lib/geometry/squareToRound.ts",
+          "sha256": "53e521fe1283e43e8f2a784bc3693dc86aebe0f5e80f866f9563caae9e7d6bb8"
+        },
+        {
+          "path": "src/lib/geometry/cone.ts",
+          "sha256": "8d2fd907b4b23967126de7d22c5fbb39e43c5f5f965d65625896cd48e8719705"
+        },
+        {
+          "path": "src/lib/geometry/elbow.ts",
+          "sha256": "f3d4cf0df508548643ae9ace75fa1d78c183eb6655f2d5decb4e2fd753821043"
+        },
+        {
+          "path": "src/lib/geometry/utils.ts",
+          "sha256": "1c468eeb3ab347ff7ba2173c376e041d470a2493ece0a9029749f13ad2a8f249"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/Bas-Automation-Services/gusset",
+      "checkout_name": "gusset",
+      "commit": "13b5fef11b259fc0643a01258c268627937c02d7",
+      "commit_date": "2026-11-04T12:00:00+01:00",
+      "license": "MPL-2.0",
+      "decision": "not_adopted",
+      "reason": "Feature-based solid sheet metal, bend tables and exact folded B-Rep. Rust/OpenGeometry integration is a distinct backend; no drop-in fitting catalogue. Inspected only; full cargo/CAD tests not run.",
+      "reviewed_files": [
+        {
+          "path": "LICENSE",
+          "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+        },
+        {
+          "path": "README.md",
+          "sha256": "b8578ef6fa0683d24ce02340afda8335d0051914e404fa6d6eb8fe06faffb280"
+        },
+        {
+          "path": "Cargo.toml",
+          "sha256": "6c3ef1c7d31a0f7dc68d776fb0896d7fcd8964bec9e4354c7da5202fc45b1308"
+        },
+        {
+          "path": "crates/gusset-sheet/src/spec.rs",
+          "sha256": "608d3deec3230c75a6097ea7f0907bc6c663dba9edbc124739694acb87884ade"
+        },
+        {
+          "path": "crates/gusset-sheet/src/flat.rs",
+          "sha256": "32d6ec3092758802dfb5ebb232cabfbddc5fef69a49363206ce4fa0ad75492b7"
+        },
+        {
+          "path": "crates/gusset-sheet/src/check.rs",
+          "sha256": "d7469accf7edcce987110bbc47f3eee1398db4940731e717868e8097006b6fcb"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/IgorAgarkov/unfolding_of_sheet_metal",
+      "checkout_name": "unfolding_of_sheet_metal",
+      "commit": "d5aacf8878dd05056751697d7c501630c48a1e32",
+      "commit_date": "2022-02-28T16:59:24+07:00",
+      "license": "not verified; no license file or source license header",
+      "decision": "not_adopted",
+      "reason": "One hard-coded rectangle/round layout; rounds construction coordinates to 0.001 early, assumes K=0.4. No code copied/run because reuse permission is unverified.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "sha256": "afd024365d50ac28ae2a9b203ba66bee3630ae52350e4a93af5c6f0e9e58f4e6"
+        },
+        {
+          "path": "unfolding_of_sheet_metal.py",
+          "sha256": "e943011bc08371181834b5ded80dea3ef04ac93db35d8b8494d0068c32aa50d1"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/hermes98761234/sheet-metal-unfold",
+      "checkout_name": "sheet-metal-unfold",
+      "commit": "2ad13f96ba83fb0e20a7b0c7f3bc201b8ef1b540",
+      "commit_date": "2026-10-10T08:31:03+03:00",
+      "license": "MIT",
+      "decision": "adapted",
+      "reason": "Ported explicit inside/outside/tangent bend-zone and measured single-coupon K math to core/unfolding/bend_profiles.py; immutable/per-bend/strict-domain Python adaptation. Generic tables and die heuristics excluded.",
+      "reviewed_files": [
+        {
+          "path": "LICENSE",
+          "sha256": "a1bb78489fe47d4e5dc5e297f5533bf07715f525919308bd101a792b1ffdf189"
+        },
+        {
+          "path": "README.md",
+          "sha256": "2dd9e781175530e849f2b3870094cc41a2d3a978e7df4c53c29f4a1950c52532"
+        },
+        {
+          "path": "src/lib/bend.ts",
+          "sha256": "fadeaa873857fab036a2724dd886c6cbcf784378c608280fb25ee25ddf6487c2"
+        },
+        {
+          "path": "src/lib/bend.test.ts",
+          "sha256": "de9968ad79b1b97a2272e292517bed830aca5d47ff69f73873e1a0d2f4f1fa1d"
+        },
+        {
+          "path": "src/lib/model.ts",
+          "sha256": "f1ecce9558b41cda7215749d25d3de530274658a5df95238777a1756ca9cb9b9"
+        }
+      ]
+    }
+  ]
+}
