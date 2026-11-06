@@ -2,6 +2,7 @@
 from collections import defaultdict
 from functools import lru_cache
 import json
+import math
 from pathlib import Path
 from .models import FieldSchema,FrozenMap,ShapeSchema,ShapeSummary
 
@@ -40,7 +41,7 @@ def normalize_options(request,schema,scale):
     out=dict(cut_type=cut,helper_divisions=divisions,numbering=numbering)
     for k in ('lap_top','lap_bottom','lap_left','lap_right','strip_lap'):
         v=given.get(k,0.)
-        if type(v) not in (int,float) or not 0<=v<=1e5:raise ValueError('Kenar payı 0–100000 aralığında olmalı.')
+        if type(v) not in (int,float) or not math.isfinite(v) or not 0<=v*scale<=1e5:raise ValueError('Kenar payı 0–100000 mm aralığında olmalı.')
         if flags.get('lapFields') and k in ('lap_bottom','lap_right') and v:
             raise ValueError('Kanallarda yalnız lap_top (iki uzun kenar) ve lap_left (iki duvar ucu) kullanılır.')
         out[k]=v*scale

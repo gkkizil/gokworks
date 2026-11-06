@@ -1,5 +1,9 @@
 # Sac Açınımı genişlemesi: hesap, çıktı ve GitHub kaynakları
 
+Bu genişleme raporunun 1.1.0 tarihsel sonuçlarına ek olarak güncel 1.1.1
+kod denetimi [AUDIT_FIXES.md](AUDIT_FIXES.md) içinde; yenilenmiş kanıt ve
+kapsam matrisi `source_validation.json` / `source_coverage.csv` içindedir.
+
 6 Kasım 2026. Görev dalı `agent/codex-unfolding-expansion`; geometri
 uygulaması `11c279c`. Bu rapor kayıtlı kimlik sayısını imalata uygun model
 sayısı olarak kullanmaz. **191 kaynak varyantının her biri için normal
@@ -160,8 +164,10 @@ GPL/LGPL/MPL veya lisanssız dış motor kodu bu çalışmada alınmadı.
 Bağımsız sabit formüller, tüm model normal/yanlış örnekleri, bütün 1136
 alanın etkisi, birimler, kesim parçaları, ortak 3D dikişler ve mevcut GUI
 regresyonları içerilir. Ayrıca 191 model çıktı taraması sıfır hata ile bitti.
-`source_validation.json` bu sürümün birleşik kaynak hash'ini ve dosya
-hash'lerini saklar. Sonradan eklenen bağımsız `bend_profiles.py` bu
+`b587f0a` commit'indeki tarihsel `source_validation.json` bu sürümün
+birleşik kaynak ve dosya hash'lerini saklar. Güncel dosya 1.1.1 kanıtıyla
+yenilenmiştir ve önceki kaydı `previous_validation` ile gösterir.
+Sonradan eklenen bağımsız `bend_profiles.py` bu ilk
 geometri kanıtının kapsamına geriye dönük eklenmemiştir; kendi test ve
 upstream karşılaştırma kaydı vardır.
 

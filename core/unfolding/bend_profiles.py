@@ -16,9 +16,15 @@ from .geometry import bend_allowance
 
 
 def _finite(value, name):
-    if type(value) not in (int, float) or not math.isfinite(value):
+    if type(value) not in (int, float):
         raise ValueError(f'{name}: sonlu sayı gerekli.')
-    return float(value)
+    try:
+        converted=float(value)
+    except OverflowError:
+        raise ValueError(f'{name}: sayısal aralık aşıldı.') from None
+    if not math.isfinite(converted):
+        raise ValueError(f'{name}: sonlu sayı gerekli.')
+    return converted
 
 
 @dataclass(frozen=True)
@@ -82,6 +88,8 @@ def develop_profile(lengths_mm, bends, thickness_mm, *, dimension_reference):
         tangent = math.tan(abs(math.radians(bend.angle_deg))/2)
         outer = tangent*(bend.inside_radius_mm+thickness)
         inner = tangent*bend.inside_radius_mm
+        if not all(math.isfinite(v) for v in (allowance,outer,inner,2*outer-allowance)):
+            raise ValueError('Büküm bölgesi sayısal aralığı aştı.')
         values.append((allowance, outer, inner))
     setbacks = [v[1] if dimension_reference == 'outside' else v[2]
                 if dimension_reference == 'inside' else 0. for v in values]

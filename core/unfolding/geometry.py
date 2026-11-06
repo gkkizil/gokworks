@@ -127,4 +127,6 @@ def bend_allowance(angle_deg, inside_radius_mm, thickness_mm, k_factor):
     if any(type(x) not in (int,float) or not math.isfinite(x) for x in values): raise ValueError('Sonlu sayılar gerekli.')
     if not 0<abs(angle_deg)<180 or inside_radius_mm<0 or thickness_mm<=0 or not 0<=k_factor<=1:
         raise ValueError('Açı (0,180), R≥0, t>0 ve kullanıcı K∈[0,1] gerekli.')
-    return abs(math.radians(angle_deg))*(inside_radius_mm+k_factor*thickness_mm)
+    result=abs(math.radians(angle_deg))*(inside_radius_mm+k_factor*thickness_mm)
+    if not math.isfinite(result):raise ValueError('Büküm payı sayısal aralığı aştı.')
+    return result
