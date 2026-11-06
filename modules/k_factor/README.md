@@ -12,3 +12,14 @@ GOKWORKS içindeki manuel K/R ataması ve bağımsız hesap yardımı.
 
 Test: `python -m pytest modules/k_factor/tests`.
 [Kullanım](../../docs/manual-k-radius.md) · [Algoritma ve sınırlar](../../docs/k-factor-radius.md).
+
+## Montajda doğrudan Sac-Levha K/R ataması · konfigürasyon ve yeniden oluşturma
+
+- Sac-Levha unsur verisi SolidWorks'te konfigürasyona özgü değildir. Atamadan önce
+  aktif konfigürasyonla **aynı** K/R değerlerine sahip konfigürasyonlar (ör. çizim için
+  türetilen `<konfigürasyon>SM-FLAT-PATTERN` / `SM-DÜZ-ÇOĞALTMA`) aynı K/R'yi alır ve
+  raporda "ortak" olarak listelenir. Farklı değerli bir konfigürasyon değişirse atama
+  geri alınır.
+- `EditRebuild3` başarısız dönse bile, parçada atamadan **önce** de var olan unsur
+  hataları (ör. kopuk taslak ilişkisi) atamayı engellemez; raporda not edilir. Atamayla
+  yeni hata çıkan unsurlar adı ve hata koduyla raporlanır ve değişiklik geri alınır.
