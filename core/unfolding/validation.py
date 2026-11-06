@@ -42,16 +42,19 @@ def validate(request):
                 raise ValueError(f'{f.label}: tanımlı seçeneklerden biri gerekli.')
             if f.type=='integer':p[f.id]=integer(v,f.label,int(f.minimum),int(f.maximum))
             else:
-                v=number(v,f.label,minimum=f.minimum,maximum=f.maximum)
-                p[f.id]=number(v*scale,f.label,minimum=f.minimum if source else 0.,
-                               strict=not source and f.default!=0.) if f.unit=='length' else v
+                if type(v) not in (int,float) or not math.isfinite(v):raise ValueError(f'{f.label}: sonlu sayı gerekli.')
+                # Field-schema length bounds are millimetres, including positive
+                # source minima. Applying them before conversion rejects valid inches.
+                p[f.id]=number(v*scale if f.unit=='length' else v,f.label,
+                    minimum=f.minimum,maximum=f.maximum,
+                    strict=f.unit=='length' and not source and f.default!=0.)
         active=('thickness',);t=number(number(request.thickness,'Kalınlık')*scale,'Kalınlık')
         active=('seam_options.start_angle_deg',)
         seam=number(request.seam_options.start_angle_deg,'Dikiş açısı',-360.,maximum=360.)
         active=('split_options.count',);split=integer(request.split_options.count,'Bölme adedi')
         if not d.split and (split!=1 or seam!=0):raise ValueError('Bu aile sabit panel düzeni kullanır; dikiş dönüşü/bölme v1 kapsamında değil.')
         active=('joint_options',);joint=request.joint_options
-        overlap=number(joint.overlap,'Bindirme payı')*scale
+        overlap=number(number(joint.overlap,'Bindirme payı')*scale,'Bindirme payı')
         if joint.kind not in schema.joint_kinds:raise ValueError('Bu ailede istenen birleşim türü uygulanmadı.')
         if joint.kind=='butt' and overlap or joint.kind=='lap' and overlap<=0:raise ValueError('Alın birleşimde pay 0; bindirmede pay pozitif olmalı.')
         active=('development_options',);o=request.development_options

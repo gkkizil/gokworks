@@ -3,7 +3,7 @@ import math
 from ..models import (Line2D,Arc2D,Polyline2D,Geometry2D,Mesh3D,SurfacePatch,FrozenMap,MappingPoint,to_data)
 from ..geometry import (curve_points,curve_length,contour_points,contour_area,outline,arc_point)
 from .common import finish_part,check_cancel
-from .development import polygon_part,unit,add,sub,mul,dot,cross
+from .development import polygon_part,unit,add,sub,mul,dot
 from .source_extrusions import edge_allowances
 
 
@@ -256,10 +256,10 @@ def build_variable_duct(m,n,material,options,token):
     for side in (-1,1):
         low=[(x,side*width(x)/2,height(x,False)) for x in breaks];high=[(x,side*width(x)/2,height(x,True)) for x in breaks]
         part=polygon_part(m['source_id']+f'-wall{side}',low+high[::-1],n,material,options,token)
-        # Derive which boundary points belong to each real long edge after planar projection.
-        a=low[0];xx=unit(sub(low[1],a));normal=unit(cross(xx,sub(high[0],a)));yy=cross(normal,xx)
-        def project(v):return dot(sub(v,a),xx),dot(sub(v,a),yy)
-        low2=[project(v) for v in low];high2=[project(v) for v in high]
+        # Use the authoritative projection. A downward bottom kink can make
+        # polygon_part choose the opposite normal to a low-edge/high-point basis.
+        projection={point.assembled:point.developed for point in part.mappings}
+        low2=[projection[v] for v in low];high2=[projection[v] for v in high]
         groups=dict(bottom=low2,top=high2[::-1],left=(high2[0],low2[0]),right=(low2[-1],high2[-1]))
         # polygon_part uses this same first-edge basis; reverse if its orientation was inverted.
         if contour_area(outline(low2+high2[::-1]).outer)<0:groups={k:tuple(reversed(v)) for k,v in groups.items()}

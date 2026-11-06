@@ -4,10 +4,11 @@ from dataclasses import replace
 import hashlib
 from importlib.metadata import version,PackageNotFoundError
 import json
+import math
 from pathlib import Path
 import platform
 import time
-from core.unfolding import UnfoldService,UnfoldRequest
+from core.unfolding import UnfoldService,UnfoldRequest,UnfoldProject,ProjectItem
 from core.unfolding.models import ExportOptions,Material,to_data,ENGINE_VERSION
 from core.unfolding.source_models import inventory
 from core.unfolding.nesting import to_nesting_parts
@@ -34,7 +35,7 @@ def main():
     report=dict(schema='gokworks.unfolding.source_validation',version=1,engine_version=ENGINE_VERSION,source_count=191,
         implementation_sha256=initial_digest,source_spec_sha256=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True).encode()).hexdigest(),
         examples_sha256=hashlib.sha256(example_path.read_bytes()).hexdigest(),platform=platform.system(),python=platform.python_version(),packages=packages,
-        requested_outputs=['dxf','pdf','nesting_adapter']+([] if args.skip_step else ['step_surface_when_available']),
+        requested_outputs=['dxf','pdf','json_project','nesting_adapter']+([] if args.skip_step else ['step_surface_when_available']),
         live_windows=False,live_solidworks=False,live_oda=False,complete=False,models=[])
     target=args.output/'source_validation.json'
     def save():target.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -48,7 +49,8 @@ def main():
         req=replace(UnfoldRequest(**e['request']),thickness=2.,material=Material('Demir / Çelik',7850.,30.,currency='TL'))
         r=service.calculate(req)
         row=dict(source_id=sid,request=to_data(req),calculation_status=r.status,input_hash=r.input_hash,calculation_method=r.calculation_method,
-                 validated_outputs=[],files=files,errors=errors,quality=to_data(r.quality_metrics),capabilities=to_data(r.capabilities))
+                 validated_outputs=[],files=files,errors=errors,quality=to_data(r.quality_metrics),capabilities=to_data(r.capabilities),
+                 metrics=to_data(r.metrics),part_quantities={p.id:p.quantity for p in r.parts})
         if r.status=='success':
             try:
                 for part in r.parts:
@@ -73,6 +75,15 @@ def main():
                 files.append(dict(format='pdf',path=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest(),pages=pages,rendered_first_page=True));row['validated_outputs'].append('pdf')
             except (ValueError,RuntimeError,OSError) as exc:errors.append(dict(format='pdf',error=str(exc)))
             try:
+                path=folder/(sid+'.gokunfold.json')
+                project=UnfoldProject((ProjectItem(sid,req,3),),name='Türkçe / '+sid,quantity=2)
+                service.save_project(project,path,overwrite=True)
+                if service.load_project(path)!=project:raise ValueError('JSON proje girdileri/adetleri değişti.')
+                row['json_project_roundtrip_verified']=True
+                row['validated_outputs'].append('json_project')
+                files.append(dict(format='json_project',path=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
+            except (ValueError,RuntimeError,OSError) as exc:errors.append(dict(format='json_project',error=str(exc)))
+            try:
                 nested=to_nesting_parts(r,quantity_multiplier=3)
                 if len(nested)!=len(r.parts) or any(a.quantity!=b.quantity*3 or not a.original_dxf for a,b in zip(nested,r.parts)):raise ValueError('Nesting veri/adet sözleşmesi uyuşmuyor.')
                 row['nesting_adapter_verified']=True
@@ -83,8 +94,17 @@ def main():
                     if output.status!='complete':raise ValueError(str(output.errors))
                     from core.unfolding.cad import read_step
                     _,stats=read_step(path)
+                    nominal_area=sum(part.metrics.net_area_mm2 for part in r.parts)
+                    if not math.isclose(stats['area_mm2'],nominal_area,rel_tol=1e-7,abs_tol=1e-5):
+                        raise ValueError('STEP alanı bağımsız 2D nominal parça alanıyla uyuşmuyor.')
+                    vertices=[v for part in r.parts for v in part.mesh_3d.vertices]
+                    expected_bounds=tuple(min(v[i] for v in vertices) for i in range(3))+tuple(max(v[i] for v in vertices) for i in range(3))
+                    bound_tolerance=max(req.development_options.mesh_error_mm,req.development_options.chord_error_mm)+1e-4
+                    if max(abs(a-b) for a,b in zip(stats['bounds_mm'],expected_bounds))>bound_tolerance:
+                        raise ValueError('STEP montaj sınırları bağımsız 3D model yerleşimiyle uyuşmuyor.')
                     if 'NOT VALIDATED' not in path.read_text(encoding='utf-8'):raise ValueError('STEP üretim sınırı açıklaması eksik.')
-                    files.append(dict(format='step_surface',path=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest(),stats=stats));row['validated_outputs'].append('step_surface')
+                    files.append(dict(format='step_surface',path=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest(),stats=stats,
+                        expected_nominal_area_mm2=nominal_area,expected_mesh_bounds_mm=expected_bounds,bounds_tolerance_mm=bound_tolerance));row['validated_outputs'].append('step_surface')
                 except (ValueError,RuntimeError,OSError) as exc:errors.append(dict(format='step_surface',error=str(exc)))
         else:errors.extend(to_data(r.errors))
         row['elapsed_seconds']=time.monotonic()-started;report['models'].append(row)

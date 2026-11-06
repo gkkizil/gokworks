@@ -112,9 +112,11 @@ class UnfoldPage(BasePage):
             [dict(id=name, title=name, density_kg_m3=float(density)) for name, density in MATERIALS.items()]
         self.schema = None; self.shape_id = self.variant_id = None
         self.fields = {}; self.values = {}; self.errors = {}; self.applied_text = {}
+        self.development_options = {}; self.loaded_material = None
+        self.price_unit = 'kg'; self.price_currency = 'TL'
         self.revision = 0; self.pending_request = None; self.running_request = None; self.queued = False
         self.result = None; self.result_revision = None; self.result_request = None; self.state = 'idle'
-        self.project_parts = []; self.dirty = False
+        self.project_parts = []; self.project_metadata = {}; self.dirty = False
         self.open_button = self.action('Proje aç…', self.open_project)
         self.save_button = self.action('Projeyi kaydet…', self.save_project)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
@@ -273,15 +275,15 @@ class UnfoldPage(BasePage):
         self.reference_sketch = ReferenceSketch()
         self.material = QComboBox(); self.material.setAccessibleName('Malzeme')
         for m in self.materials:
-            self.material.addItem(m['title'] + (f' · {fmt(m["density_kg_m3"], 0)} kg/m³' if m.get('density_kg_m3') else ''), m['id'])
+            self.material.addItem(self.material_caption(m), m['id'])
         self.material.setCurrentIndex(max(self.material.findData('Demir / Çelik'), 0))
-        self.material.currentIndexChanged.connect(self.input_changed)
+        self.material.currentIndexChanged.connect(self.material_changed)
         self.joint_kind = QComboBox(); self.joint_kind.setAccessibleName('Birleşim türü')
         self.joint_kind.currentIndexChanged.connect(self.joint_changed)
         self.seam_angle = self._field('seam_angle', 'Dikiş başlangıç açısı', 'θ', 'angle', 0.)
         self.split_count = self._field('split_count', 'Çevresel bölme', 'n', 'count', 1)
         self.joint = self._field('joint', 'Bindirme payı', 'b', 'length', 0.)
-        self.price = self._field('price', 'Fiyat', '₺/kg', 'price', 0.)
+        self.price = self._field('price', 'Fiyat', '₺/kg', 'price', None)
         for title, widget in (('Giriş birimi', self.unit), ('Ölçü yüzeyi', self.reference), ('', self.reference_sketch),
                               ('Malzeme', self.material), ('Birleşim', self.joint_kind)):
             self.prod_form.addRow(title, widget)
@@ -490,8 +492,14 @@ class UnfoldPage(BasePage):
         model = getattr(self, 'model', None)
         if not model:
             return {}
-        options = dict(cut_type=model['cut'].currentData(), helper_divisions=model['divisions'].currentData(),
-                       numbering=model['numbering'].isChecked())
+        # Only choices that differ from the engine defaults are sent (same request as a saved project).
+        options = {}
+        if model['cut'].currentIndex() > 0:
+            options['cut_type'] = model['cut'].currentData()
+        if model['divisions'].currentData() != 24:
+            options['helper_divisions'] = model['divisions'].currentData()
+        if model['numbering'].isChecked() != model['numbering'].isEnabled():
+            options['numbering'] = model['numbering'].isChecked()
         for key, name in model['laps'].items():
             value = self.values.get(key)
             if value:
@@ -552,6 +560,32 @@ class UnfoldPage(BasePage):
         self.fields['joint']['edit'].setToolTip('' if lap else 'Bindirme payı yalnız bindirmeli birleşimde kullanılır.')
         if recalculate:
             self.input_changed()
+
+    def material_changed(self, *args):
+        self.restore_material_caption()
+        self.loaded_material = None
+        if self.price_unit!='kg' or self.price_currency not in ('','TL'):
+            self.values['price']=None;self.fields['price']['edit'].clear();self.applied_text['price']=''
+        self.price_unit = 'kg'; self.price_currency = 'TL'
+        self.update_price_caption()
+        self.input_changed()
+
+    @staticmethod
+    def material_caption(material):
+        density=material.get('density_kg_m3')
+        return material['title']+(f' · {fmt(density,0)} kg/m³' if density is not None else '')
+
+    def restore_material_caption(self):
+        if self.loaded_material is None:return
+        name=self.loaded_material.get('name','')
+        entry=next((m for m in self.materials if m['id']==name),None)
+        if entry is not None:self.material.setItemText(self.material.findData(name),self.material_caption(entry))
+
+    def update_price_caption(self):
+        currency = '₺' if self.price_currency == 'TL' else self.price_currency
+        unit = 'm²' if self.price_unit == 'm2' else self.price_unit
+        self.fields['price']['symbol'] = f'{currency}/{unit}'
+        self.fields['price']['label'].setText(self.caption('price'))
 
     def eventFilter(self, watched, event):
         for key, info in self.fields.items():
@@ -641,18 +675,20 @@ class UnfoldPage(BasePage):
             return to_display(value, self._unit) if value is not None and self.fields[key]['kind'] == 'length' else value
         parameters = {p['id']: given(p['id']) for p in self.schema['parameters'] if self.values.get(p['id']) is not None}
         material = next((m for m in self.materials if m['id'] == self.material.currentData()), None)
+        material_data = dict(self.loaded_material) if self.loaded_material is not None else (
+            dict(name=material['id'],density_kg_m3=material.get('density_kg_m3')) if material else {})
+        material_data.update(unit_price=self.values.get('price'),price_unit=self.price_unit,currency=self.price_currency)
         model_options = self.model_options()
         enabled = lambda key: self.fields[key]['edit'].isEnabled()
         return dict(schema_version=1, request_id=str(uuid.uuid4()), revision=self.revision, shape_id=self.shape_id,
                     variant_id=self.variant_id, parameters=parameters, input_units=self._unit,
                     thickness=given('thickness') or None, dimension_reference=self.reference.currentData(),
-                    material=dict(name=material['id'], density_kg_m3=material.get('density_kg_m3'),
-                                  unit_price=self.values.get('price') or None, currency='TL') if material else None,
+                    material=material_data,
                     seam_options=dict(start_angle_deg=self.values.get('seam_angle') or 0.) if enabled('seam_angle') else {},
                     split_options=dict(count=int(self.values.get('split_count') or 1)) if enabled('split_count') else {},
                     joint_options=dict(kind=self.joint_kind.currentData() or 'butt',
                                        overlap=(given('joint') or 0.) if self.joint_kind.currentData() == 'lap' else 0.),
-                    development_options={}, model_options=model_options)
+                    development_options=dict(self.development_options), model_options=model_options)
 
     def input_changed(self, *args):
         self.revision += 1
@@ -708,11 +744,11 @@ class UnfoldPage(BasePage):
         return request['revision'] == self.revision
 
     def accept_validation(self, request, report):
+        if not self._current(request):
+            return
         for key in self.fields:
             if key not in self.errors:
                 self.show_field_error(key, None)
-        if not self._current(request):
-            return
         general = []
         for issue in report.get('issues', []):
             ids = [i for i in issue.get('field_ids', []) if i in self.fields]
@@ -920,6 +956,8 @@ class UnfoldPage(BasePage):
         message = '; '.join(e['message'] for e in result.get('errors', [])) or 'Açınım yok.'
         self.flat_view.set_parts(parts, message)
         material = (self.result_request or {}).get('material') or {}
+        currency=material.get('currency','')
+        self.part_table.horizontalHeaderItem(7).setText('Maliyet'+(' · '+('₺' if currency=='TL' else currency) if currency else ''))
         rows = []
         for part in parts:
             m = part.get('metrics', {})
@@ -1023,7 +1061,7 @@ class UnfoldPage(BasePage):
     def add_to_project(self):
         if not self.is_current():
             self.set_status('Projeye eklemek için güncel bir sonuç gerekli.', True); return
-        request = dict(self.result_request)
+        request = dict(self.result_request,request_id=uuid.uuid4().hex)
         material = next((m['title'] for m in self.materials if m['id'] == self.material.currentData()), '—')
         code = f'P{len(self.project_parts) + 1:03d}'
         self.project_parts.append(dict(code=code, name=self.shape_title.text(), request=request, revision=1, material=material,
@@ -1035,6 +1073,8 @@ class UnfoldPage(BasePage):
         if row is None:
             return
         part = dict(self.project_parts[row]); part['code'] = f'P{len(self.project_parts) + 1:03d}'; part['revision'] = 1
+        from copy import deepcopy
+        part['request']=dict(deepcopy(part['request']),request_id=uuid.uuid4().hex)
         self.project_parts.append(part); self.refresh_project(); self.mark_dirty()
 
     def remove_part(self):
@@ -1076,19 +1116,21 @@ class UnfoldPage(BasePage):
         self._unit = request['input_units']
         self.choose_shape(request['shape_id'], request['variant_id'], keep=False)
         self.apply_model_options(request.get('model_options') or {}, request['input_units'])
+        self.development_options = dict(request.get('development_options') or {})
         for key, value in request['parameters'].items():
             if key in self.fields:
                 kind = self.fields[key]['kind']
                 self.values[key] = to_mm(value, self._unit) if kind == 'length' else value
                 self.fields[key]['edit'].setText(self.display_value(key, self.values[key]))
         joint = request.get('joint_options') or {}
-        for key, value, length in (('thickness', request.get('thickness'), True), ('joint', joint.get('overlap'), True),
-                                   ('seam_angle', (request.get('seam_options') or {}).get('start_angle_deg'), False),
-                                   ('split_count', (request.get('split_options') or {}).get('count'), False),
+        for key, value, length in (('thickness', request.get('thickness'), True), ('joint', joint.get('overlap',0.), True),
+                                   ('seam_angle', (request.get('seam_options') or {}).get('start_angle_deg',0.), False),
+                                   ('split_count', (request.get('split_options') or {}).get('count',1), False),
                                    ('price', (request.get('material') or {}).get('unit_price'), False)):
-            if value is not None:
-                self.values[key] = to_mm(value, self._unit) if length else value
-                self.fields[key]['edit'].setText(self.display_value(key, self.values[key]))
+            self.values[key] = to_mm(value, self._unit) if length and value is not None else value
+            self.fields[key]['edit'].setText(self.display_value(key, self.values[key]))
+        for key,info in self.fields.items():
+            self.errors.pop(key,None);self.applied_text[key]=info['edit'].text();self.show_field_error(key,None)
         for key, info in self.fields.items():
             if info['label'] is not None:
                 info['label'].setText(self.caption(key))
@@ -1097,9 +1139,20 @@ class UnfoldPage(BasePage):
             if index >= 0:
                 box.blockSignals(True); box.setCurrentIndex(index); box.blockSignals(False)
         self.reference_sketch.set_reference(self.reference.currentData()); self.joint_changed(recalculate=False)
-        material = (request.get('material') or {}).get('name')
-        if self.material.findData(material) >= 0:
-            self.material.setCurrentIndex(self.material.findData(material))
+        material_data = dict(request.get('material') or {})
+        material = material_data.get('name','')
+        self.material.blockSignals(True)
+        self.restore_material_caption()
+        if self.material.findData(material)<0:
+            self.materials.append(dict(id=material,title=material,density_kg_m3=material_data.get('density_kg_m3')))
+            self.material.addItem(material,material)
+        self.material.setCurrentIndex(self.material.findData(material))
+        self.material.setItemText(self.material.currentIndex(),self.material_caption(
+            dict(title=material or 'Malzeme seçilmedi',density_kg_m3=material_data.get('density_kg_m3'))))
+        self.material.blockSignals(False)
+        self.loaded_material = material_data
+        self.price_unit = material_data.get('price_unit','kg');self.price_currency = material_data.get('currency','')
+        self.update_price_caption()
         self.sync_inline()
         self.input_changed()
 
@@ -1136,9 +1189,10 @@ class UnfoldPage(BasePage):
     def export_current(self, kind):
         if not self.is_current():
             self.set_status('Çıktı için güncel bir sonuç gerekli.', True); return
-        name = (self.project_name.text().strip() or 'acinim').replace(' ', '_')
+        from core.unfolding.exporting import safe_name
+        name = safe_name(self.project_name.text().strip() or 'acinim')
         suffix = {'step': 'step', 'zip': 'zip'}.get(kind, kind)
-        path, _ = QFileDialog.getSaveFileName(self, 'Çıktıyı kaydet', f'{name}_{self.shape_id}.{suffix}', EXPORT_FILTERS[kind])
+        path, _ = QFileDialog.getSaveFileName(self, 'Çıktıyı kaydet', f'{name}_{safe_name(self.shape_id)}.{suffix}', EXPORT_FILTERS[kind])
         if not path:
             return
         result, service = self.result, self.service
@@ -1148,12 +1202,14 @@ class UnfoldPage(BasePage):
                              lambda outcome: self._report_files(outcome, EXPORT_FILTERS[kind].split()[0]))
 
     def project_object(self):
-        return self.service.project(self.project_parts, self.project_name.text().strip())
+        from dataclasses import replace
+        return replace(self.service.project(self.project_parts, self.project_name.text().strip()),**self.project_metadata)
 
     def save_project(self):
         if not self.project_parts:
             self.set_status('Kaydetmek için önce "Projeye ekle" ile parça ekleyin.', True); return
-        path, _ = QFileDialog.getSaveFileName(self, 'Projeyi kaydet', f'{self.project_name.text().strip() or "proje"}.gokunfold.json',
+        from core.unfolding.exporting import safe_name
+        path, _ = QFileDialog.getSaveFileName(self, 'Projeyi kaydet', f'{safe_name(self.project_name.text().strip() or "proje")}.gokunfold.json',
                                               'Sac açınımı projesi (*.json)')
         if not path:
             return
@@ -1176,6 +1232,7 @@ class UnfoldPage(BasePage):
             project = self.service.load_project(path)
         except (OSError, ValueError, KeyError, TypeError) as error:
             self.set_status(f'Proje açılamadı: {error}', True); return
+        self.project_metadata=dict(code=project.code,revision=project.revision,quantity=project.quantity)
         self.project_parts = [dict(code=item.code, name=item.code, request=self.service.page_request(item.request), revision=1,
                                    quantity=item.quantity, material=item.request.material.name or '—', status='Yeniden hesaplanacak')
                               for item in project.items]
@@ -1189,7 +1246,8 @@ class UnfoldPage(BasePage):
     def export_project_zip(self):
         if not self.project_parts:
             return
-        path, _ = QFileDialog.getSaveFileName(self, "Projeyi ZIP'e aktar", f'{self.project_name.text().strip() or "proje"}.zip', 'ZIP (*.zip)')
+        from core.unfolding.exporting import safe_name
+        path, _ = QFileDialog.getSaveFileName(self, "Projeyi ZIP'e aktar", f'{safe_name(self.project_name.text().strip() or "proje")}.zip', 'ZIP (*.zip)')
         if not path:
             return
         project, service = self.project_object(), self.service

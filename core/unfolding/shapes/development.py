@@ -25,9 +25,19 @@ def basis(axis):
 def triangle_point(a,b,ra,rb,side=1):
     d=math.dist(a,b)
     if d<=1e-12:raise ValueError('Üçgen kenarı sıfır.')
-    x=(ra*ra-rb*rb+d*d)/(2*d);y2=ra*ra-x*x
-    if y2 < -1e-6*max(1.,ra*ra):raise ValueError('Üçgen eşitsizliği geçersiz.')
-    y=math.sqrt(max(0.,y2))*side;u=((b[0]-a[0])/d,(b[1]-a[1])/d)
+    if min(ra,rb)<0 or not all(math.isfinite(v) for v in (d,ra,rb)):raise ValueError('Üçgen kenarları sonlu ve pozitif olmalı.')
+    longest,middle,shortest=sorted((d,ra,rb),reverse=True)
+    gap=shortest-(longest-middle)
+    if gap < -16*math.ulp(longest):raise ValueError('Üçgen eşitsizliği geçersiz.')
+    # Kahan's rearrangement of Heron's formula avoids subtracting almost
+    # equal squared lengths: the old height collapsed slender rectangles
+    # into triangles and silently lost half their material area.
+    f1=longest+(middle+shortest);f2=max(0.,gap)
+    f3=shortest+(longest-middle);f4=longest+(middle-shortest)
+    y=.5*math.sqrt((f1/d)*f2)*math.sqrt((f3/d)*f4)*side
+    x=(ra-rb)*(ra+rb)/(2*d)+d/2
+    if not math.isfinite(x) or not math.isfinite(y):raise ValueError('Üçgen hesabı sayısal aralığı aştı.')
+    u=((b[0]-a[0])/d,(b[1]-a[1])/d)
     return (a[0]+x*u[0]-y*u[1],a[1]+x*u[1]+y*u[0])
 
 
@@ -209,6 +219,7 @@ def ribbon(identifier,lower,upper,n,material,options,token=None,diagonal=1):
             bends.append(Line2D(flat[a],flat[b],f'B{len(bends)+1}'))
     maps=tuple(MappingPoint(q,v,str(i)) for i,(q,v) in enumerate(zip(flat,vertices)))
     edge_error=max(abs(math.dist(vertices[a],vertices[b])-math.dist(flat[a],flat[b])) for tri in triangles for a,b in zip(tri,tri[1:]+tri[:1]))
+    if edge_error>tolerance:raise ValueError('Açınım üçgen kenarlarındaki sayısal hata geometri toleransını aşıyor.')
     part=finish_part(identifier,geometry,Mesh3D(tuple(vertices),tuple(triangles)),patches,contour_area(geometry.outer),n,material,options,
                      construction=construction,mappings=maps,lengths=lengths)
     return replace(part,bending_lines=tuple(bends)),edge_error

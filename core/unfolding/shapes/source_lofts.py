@@ -3,7 +3,7 @@ from dataclasses import replace
 import math
 from .development import adaptive,ribbon
 from .common import check_cancel
-from ..models import FrozenMap,SurfacePatch
+from ..models import FrozenMap,SurfacePatch,Arc2D
 from .source_extrusions import edge_allowances
 from .support_profiles import (round_section,oval_section,ellipse_section,polygon_section,rectangular_section,matched_profiles)
 
@@ -107,7 +107,9 @@ def build_cone(m,n,material,options,token):
         for i,part in enumerate(computed):
             if level:
                 # Analytic conical patches carry their own placement; do not silently leave at z=0.
-                patches=tuple(SurfacePatch(s.kind,FrozenMap(dict(s.data,z_offset=H*level/levels))) for s in part.surface_patches)
+                patches=tuple(SurfacePatch(s.kind,FrozenMap(
+                    dict(s.data,origin=(s.data['origin'][0],s.data['origin'][1],s.data['origin'][2]+H*level/levels))
+                    if s.kind=='cylinder' else dict(s.data,z_offset=H*level/levels))) for s in part.surface_patches)
                 part=replace(part,surface_patches=patches,mesh_3d=replace(part.mesh_3d,vertices=tuple((x,y,z+H*level/levels) for x,y,z in part.mesh_3d.vertices)),
                     mappings=tuple(replace(mp,assembled=(mp.assembled[0],mp.assembled[1],mp.assembled[2]+H*level/levels)) for mp in part.mappings),
                     true_lengths=tuple(replace(v,start=(v.start[0],v.start[1],v.start[2]+H*level/levels),end=(v.end[0],v.end[1],v.end[2]+H*level/levels)) for v in part.true_lengths))
@@ -118,10 +120,34 @@ def build_cone(m,n,material,options,token):
             # Named conic arc edges receive allowances along their actual curves.
             from ..geometry import curve_points
             low=curve_points(part.geometry_2d.outer[0],options.chord_error_mm,options.max_samples)
+            inner=None
             if r>0:
                 inner=next((v for v in part.geometry_2d.outer if getattr(v,'kind',None)=='arc' and v is not part.geometry_2d.outer[0]),None)
                 high=curve_points(inner if inner else part.geometry_2d.outer[-2],options.chord_error_mm,options.max_samples)
             else:high=(part.geometry_2d.outer[-1].start,)
+            # Source helper divisions are independent of the legacy eight
+            # generators and independent of the preview mesh sample count.
+            from .common import with_generators
+            from ..geometry import arc_point
+            bottom_radius=nn['parameters']['bottom_diameter']/2
+            top_radius=nn['parameters']['top_diameter']/2
+            z0=H*level/levels;count=n['model_options']['helper_divisions'];guides=[]
+            cylinder_limit=not isinstance(part.geometry_2d.outer[0],Arc2D)
+            theta0=math.radians(n['seam_options']['start_angle_deg'])+math.tau*i/parts
+            for j in range(count+1):
+                f=j/count;theta=theta0+math.tau*f/parts
+                if cylinder_limit:
+                    radius=(bottom_radius+top_radius)/2
+                    flat0=(radius*math.tau*f/parts,0.);flat1=(flat0[0],H/levels)
+                    rb=rt=radius
+                else:
+                    outer=part.geometry_2d.outer[0]
+                    flat0=arc_point(outer,outer.start_angle_deg+outer.sweep_deg*f)
+                    flat1=arc_point(inner,inner.start_angle_deg+inner.sweep_deg*(1-f)) if inner else high[0]
+                    rb,rt=bottom_radius,top_radius
+                guides.append((flat0,flat1,(rb*math.cos(theta),rb*math.sin(theta),z0),
+                               (rt*math.cos(theta),rt*math.sin(theta),z0+H/levels)))
+            part=with_generators(part,guides,n)
             part=edge_allowances(part,dict(bottom=low,top=high,left=(high[-1],low[0]),right=(low[-1],high[0])),n,material,options,joint_applied=True)
             out.append(part)
     return tuple(out),dict(analytic=True,slant_height_mm=math.hypot(H,R-r),level_count=levels,sector_angle_deg=360*(R-r)/math.hypot(H,R-r)/parts)

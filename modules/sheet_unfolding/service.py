@@ -281,10 +281,11 @@ class EngineService:
             request_id=request['request_id'], revision=request['revision'], input_units=request['input_units'],
             thickness=request.get('thickness') or 0., dimension_reference=request['dimension_reference'],
             material=dict(name=material.get('name', ''), density_kg_m3=material.get('density_kg_m3'),
-                          unit_price=material.get('unit_price'), price_unit='kg', currency=material.get('currency', '')),
+                          unit_price=material.get('unit_price'), price_unit=material.get('price_unit','kg'), currency=material.get('currency', '')),
             seam_options=dict(start_angle_deg=(request.get('seam_options') or {}).get('start_angle_deg', 0.)),
             split_options=dict(count=(request.get('split_options') or {}).get('count', 1)),
             joint_options=dict(kind=joint.get('kind', 'butt'), overlap=joint.get('overlap', 0.) or 0.),
+            development_options=request.get('development_options') or {},
             model_options=request.get('model_options') or {})
 
     @staticmethod
@@ -296,7 +297,7 @@ class EngineService:
                     input_units=data['input_units'], thickness=data['thickness'] or None,
                     dimension_reference=data['dimension_reference'], material=dict(data['material']),
                     seam_options=dict(data['seam_options']), split_options=dict(data['split_options']),
-                    joint_options=dict(data['joint_options']), development_options={},model_options=dict(data['model_options']))
+                    joint_options=dict(data['joint_options']), development_options=dict(data['development_options']),model_options=dict(data['model_options']))
 
     def validate(self, request):
         try:

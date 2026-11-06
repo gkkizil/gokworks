@@ -4,7 +4,7 @@ from dataclasses import dataclass, fields, field, is_dataclass
 import math
 from uuid import uuid4
 
-ENGINE_VERSION = '1.1.0'
+ENGINE_VERSION = '1.1.1'
 
 
 @dataclass(frozen=True)

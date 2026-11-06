@@ -312,7 +312,8 @@ def test_discrete_parameter_is_a_list_and_numbering_follows_the_model(page, qtbo
     page.model['divisions'].setCurrentIndex(page.model['divisions'].findData(48)); settle(qtbot, page)
     assert page.build_request()['model_options']['helper_divisions'] == 48 and page.state in ('ok', 'warning')
     page.choose_shape('unfoldo/Helezon kanat', 'helical-ramp-triangulated'); settle(qtbot, page)
-    assert not page.model['numbering'].isEnabled() and page.build_request()['model_options']['numbering'] is False
+    assert not page.model['numbering'].isEnabled() and not page.model['numbering'].isChecked()
+    assert 'numbering' not in page.build_request()['model_options']
     assert page.state in ('ok', 'warning')
 
 
@@ -335,3 +336,88 @@ def test_source_model_options_round_trip_through_a_project_part(page, qtbot):
     page.project_table.selectRow(0); settle(qtbot, page)
     assert page.shape_id == 'unfoldo/Düz kanal' and page.values['opt.lap_left'] == pytest.approx(12.)
     assert page.build_request()['model_options']['lap_left'] == pytest.approx(12.)
+
+
+def test_opening_a_zero_thickness_unpriced_part_clears_previous_production_values(page,qtbot):
+    from core.unfolding import UnfoldRequest
+    edit(page,'thickness','4');edit(page,'price','30');settle(qtbot,page)
+    edit(page,'price','hatalı')
+    req=UnfoldRequest(parameters={'diameter':200.,'height':300.},thickness=0.)
+    page.load_request(EngineService.page_request(req));settle(qtbot,page)
+    restored=EngineService.engine_request(page.build_request())
+    assert restored.thickness==0. and restored.material.density_kg_m3 is None
+    assert restored.material.unit_price is None
+    assert not page.errors and not page.fields['price']['error'].isVisible()
+    assert page.result['metrics']['mass_kg'] is None
+
+
+@pytest.mark.parametrize('name',['Özel denetim sacı','Demir / Çelik'])
+def test_project_material_and_precision_survive_editing_and_units(page,qtbot,name):
+    from core.unfolding import UnfoldRequest
+    from core.unfolding.models import Material,DevelopmentOptions
+    req=UnfoldRequest(parameters={'diameter':200.,'height':300.},thickness=1.5,
+        material=Material(name,8100.,0.,price_unit='m2',currency='EUR'),
+        development_options=DevelopmentOptions(chord_error_mm=.005,mesh_error_mm=.1,max_samples=8192))
+    page.load_request(EngineService.page_request(req));settle(qtbot,page)
+    restored=EngineService.engine_request(page.build_request())
+    assert restored.material==req.material and restored.development_options==req.development_options
+    assert '8100' in page.material.currentText()
+    assert page.result['metrics']['material_cost']==0.
+    assert 'EUR/m²' in page.fields['price']['label'].text()
+    assert 'EUR' in page.part_table.horizontalHeaderItem(7).text()
+    edit(page,'price','42');settle(qtbot,page)
+    assert page.result['metrics']['material_cost']==pytest.approx(math.pi*200*300/1e6*42)
+    page.unit.setCurrentIndex(page.unit.findData('inch'));settle(qtbot,page)
+    assert EngineService.engine_request(page.build_request()).development_options==req.development_options
+    assert page.result['metrics']['material_cost']==pytest.approx(math.pi*200*300/1e6*42)
+
+
+def test_source_options_survive_switching_away_and_back(page,qtbot):
+    from core.unfolding import UnfoldRequest
+    req=UnfoldRequest(shape_id='unfoldo/Oval boru',variant_id='oval-cylinder',
+        parameters={'L':300.,'W':200.,'H':400.},model_options={'cut_type':'2_parts_180_degrees','strip_lap':7.})
+    page.load_request(EngineService.page_request(req));settle(qtbot,page)
+    page.choose_shape('cylinder','straight');settle(qtbot,page)
+    page.choose_shape(req.shape_id,req.variant_id);settle(qtbot,page)
+    assert page.build_request()['model_options']==dict(req.model_options)
+    assert len(page.result['parts'])==2
+
+
+def test_stale_validation_does_not_clear_a_new_validation_error(page):
+    old_request=page.build_request()
+    page.revision+=1
+    current=page.build_request()
+    page.accept_validation(current,{'issues':[{'field_ids':['diameter'],'severity':'error','message':'Yeni çap hatası'}]})
+    message=page.fields['diameter']['error'].text()
+    assert message and old_request['revision']!=page.revision
+    page.accept_validation(old_request,{'issues':[]})
+    assert page.fields['diameter']['error'].text()==message
+
+
+def test_source_output_default_is_a_filename_not_a_source_id_path(page,qtbot,monkeypatch):
+    page.choose_shape('unfoldo/Silindir','cylinder');settle(qtbot,page)
+    names=[]
+    def picker(*args,**kwargs):names.append(args[2]);return ('','')
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',picker)
+    page.export_current('dxf')
+    assert len(names)==1 and '/' not in names[0] and '\\' not in names[0]
+
+
+def test_repeated_add_and_duplicate_make_distinct_valid_project_requests(page,tmp_path):
+    page.add_to_project();page.add_to_project()
+    page.project_table.selectRow(0);page.duplicate_part()
+    project=page.project_object()
+    assert len({v.request.request_id for v in project.items})==3
+    page.service.save_project(project,tmp_path/'duplicates.json')
+
+
+def test_open_save_preserves_project_quantity_code_and_revision(page,qtbot,tmp_path,monkeypatch):
+    from core.unfolding import UnfoldProject,ProjectItem,UnfoldRequest
+    project=UnfoldProject((ProjectItem('PARÇA',UnfoldRequest(parameters={'diameter':200.,'height':300.}),3),),
+        name='Toplu proje',code='İŞ-001',revision='C',quantity=7)
+    path=tmp_path/'project.json';page.service.save_project(project,path)
+    monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),''))
+    page.open_project();settle(qtbot,page)
+    again=page.project_object()
+    assert (again.code,again.revision,again.quantity)==('İŞ-001','C',7)
+    assert again.items[0].quantity==3

@@ -3,6 +3,10 @@
 GUI, SolidWorks, internet veya LLM bağlantısı gerektirmeyen servis.
 Başlangıç sözleşmesi: [contract_v1.md](../../docs/unfolding/contract_v1.md).
 
+Motor 1.1.1 kod denetimi ve düzeltmeleri:
+[AUDIT_FIXES.md](../../docs/unfolding/AUDIT_FIXES.md). Eski projeler korunur;
+sonuçlar motor sürümüne göre yeniden hesaplanır.
+
 6 Kasım 2026 güncel kapsam: **191 kaynak varyantı / 51 aile / 11 kategori**;
 eski yedi API varyantı geriye uyumluluk için korunur. Aşağıdaki yedi satırlı
 tablo ilk teslimin kapsamıdır. Güncel hesap/çıktı durumu ve açık kısıtlar için
