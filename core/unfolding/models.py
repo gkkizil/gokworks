@@ -4,7 +4,7 @@ from dataclasses import dataclass, fields, field, is_dataclass
 import math
 from uuid import uuid4
 
-ENGINE_VERSION = '1.0.0'
+ENGINE_VERSION = '1.1.0'
 
 
 @dataclass(frozen=True)
@@ -91,9 +91,11 @@ class UnfoldRequest:
     split_options: SplitOptions = field(default_factory=SplitOptions)
     joint_options: JointOptions = field(default_factory=JointOptions)
     development_options: DevelopmentOptions = field(default_factory=DevelopmentOptions)
+    model_options: FrozenMap = field(default_factory=FrozenMap)
 
     def __post_init__(self):
         object.__setattr__(self, 'parameters', FrozenMap(self.parameters))
+        object.__setattr__(self, 'model_options', FrozenMap(self.model_options))
         for name, cls in (('material', Material), ('seam_options', SeamOptions), ('split_options', SplitOptions),
                           ('joint_options', JointOptions), ('development_options', DevelopmentOptions)):
             value = getattr(self, name)
@@ -131,6 +133,9 @@ class ShapeSummary:
     label: str
     variants: tuple[str, ...]
     method: str
+    category: str = ''
+    variant_labels: FrozenMap = field(default_factory=FrozenMap)
+    source_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -145,6 +150,8 @@ class ShapeSchema:
     joint_kinds: tuple[str, ...]
     output_kinds: tuple[str, ...]
     supported_dimension_references: tuple[str, ...] = ('inner', 'mid', 'outer')
+    source_id: str = ''
+    model_options: FrozenMap = field(default_factory=FrozenMap)
 
 
 @dataclass(frozen=True)

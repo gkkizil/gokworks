@@ -111,6 +111,17 @@ def outline(points):
     return Geometry2D((Polyline2D(tuple(points),True),))
 
 
+def guide_label_points(lines):
+    """Use the less crowded end of each generator, especially at fan apices."""
+    result=[]
+    for i,line in enumerate(lines):
+        neighbours=lines[max(0,i-1):i]+lines[i+1:i+2]
+        start=min((math.dist(line.start,v.start) for v in neighbours),default=0.)
+        end=min((math.dist(line.end,v.end) for v in neighbours),default=0.)
+        result.append(line.end if end>=start else line.start)
+    return tuple(result)
+
+
 def bend_allowance(angle_deg, inside_radius_mm, thickness_mm, k_factor):
     values=(angle_deg,inside_radius_mm,thickness_mm,k_factor)
     if any(type(x) not in (int,float) or not math.isfinite(x) for x in values): raise ValueError('Sonlu sayılar gerekli.')

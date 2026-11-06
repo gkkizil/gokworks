@@ -1,6 +1,6 @@
 """Unicode vector PDF, using the existing Qt dependency only when requested."""
 from html import escape
-from .geometry import curve_points
+from .geometry import curve_points,guide_label_points
 
 _cli_application=None
 
@@ -68,11 +68,15 @@ def write_pdf(parts,path,result,options,cancel_token=None):
             box=QRectF(0,top+22,w,h-top-105)
             curves=part.geometry_2d.outer+tuple(c for hole in part.geometry_2d.holes for c in hole)
             scale,point=view(curves,box,painter)
-            for color,lines in (('#476f9e',part.construction_lines),('#3c8060',part.seams)):
-                painter.setPen(QPen(QColor(color),.6,Qt.DashLine))
-                for line in lines:
+            painter.save();painter.setFont(QFont('Arial',6))
+            for color,lines,folds in (('#476f9e',part.construction_lines,False),('#3c8060',part.seams,False),('#a7adb4',part.bending_lines,True)):
+                painter.setPen(QPen(QColor(color),.25 if folds else .6,Qt.SolidLine if folds else Qt.DashLine))
+                for line,anchor in zip(lines,guide_label_points(lines)):
                     painter.drawLine(point(line.start),point(line.end))
-                    if line.id:painter.drawText(point(line.start),line.id)
+                    # Number the independent G samples. Hundreds of physical
+                    # facet IDs at one fan apex would obscure the whole sheet.
+                    if line.id and not folds:painter.drawText(point(anchor),line.id)
+            painter.restore()
             painter.setPen(QColor('#17212b'))
             bounds=m.bounds_mm
             painter.drawText(QRectF(0,h-78,w,20),f'Ana boyutlar: {bounds[2]-bounds[0]:.6f} × {bounds[3]-bounds[1]:.6f} mm')

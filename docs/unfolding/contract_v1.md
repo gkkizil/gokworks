@@ -1,4 +1,4 @@
-# Sac Açınımı — çekirdek/UI sözleşmesi v1
+# Sac Açınımı — çekirdek/UI sözleşmesi v1 (motor 1.1.0)
 
 Çekirdek sahibi Codex; UI, controller, menü ve UI testleri Claude'a aittir.
 Bu depoda UI modül başına `modules/<modül>/ui.py` içindedir. Yeni ekran için
@@ -34,7 +34,8 @@ widget veya Qt iş parçacığı yoktur. Ağ, SolidWorks ve LLM kullanılmaz.
 İstek `schema_version=1`, `request_id`, artan `revision`, `shape_id`,
 `variant_id`, `parameters`, `input_units`, `thickness`, `dimension_reference`,
 `material`, `seam_options`, `split_options`, `joint_options`,
-`development_options` taşır. `input_units=mm|inch`; uzunluk/kalınlık/pay aynı
+`development_options` ve opsiyonel `model_options` taşır. Yeni alanın
+varsayılanı boş sözlüktür; eski v1 proje kayıtları açılır. `input_units=mm|inch`; uzunluk/kalınlık/pay aynı
 giriş birimindedir. Açılar dış sözleşmede **derece**dir. Geliştirme toleransları
 alan adlarında belirtildiği gibi her zaman mm'dir. Sonuç mm/mm²/kg'dır.
 
@@ -59,7 +60,9 @@ alın; planlanan aileleri çalışan menü öğeleri gibi göstermeyin.
 
 `status=success|error`. Hatalı sonuçta üretim konturu yoktur. Uyarı/hatalar
 `code,severity,field_ids,part_id,message` içerir. Yöntem
-`analytic_developable|faceted_developable`; şekillendirme yaklaşımı v1'de yoktur.
+`analytic_developable|sampled_developable|faceted_developable|faceted_real_length|formed_approximation`.
+Son iki yöntem düzgün yüzey/imalat onayı değildir. Güncel kaynak kapsamı,
+model seçenekleri ve sınırlar `SOURCE_MODELS.md` ve `CLAUDE_HANDOFF.md` içindedir.
 
 Her parça kimlik/montaj ilişkisi/adet, `geometry_2d.outer/holes`, `mesh_3d`,
 `surface_patches`, `drawing_views`, `dimension_annotations`, `bending_lines`,
@@ -109,3 +112,19 @@ nesting'in polygon sözleşmesine belirtilen kord hata sınırıyla çevrilir;
 orijinal DXF yayları `Part.original_dxf` metninde ayrıca korunur. Nesting
 algoritması değiştirilmez. Bu adaptör CUT konturları dışındaki çizgileri
 nesting'e taşımaz; saat yönlü bulge'ları native ARC/LINE'a kayıpsız çevirir.
+
+## 1.1.0 kaynak kataloğu eklentisi
+
+`list_source_models()` 191 kaydı ayrı kaynak kimlikleriyle döndürür.
+`ShapeSummary.category/variant_labels/source_ids` ve
+`ShapeSchema.source_id/model_options` UI metadatasıdır. Eski beş aile/yedi
+varyant korunur; kaynak sayımına eklenmez. `model_options` kesim seçimi,
+kenar/şerit payı, yardımcı örnekleme ve numaralama ayarlarını taşır.
+Yalnız `length_options` içindeki seçenekler mm/inch çevrilir.
+Kaynağın `source_features` alanı hesap desteği kanıtı değildir.
+
+`bending_lines` artık boş olmak zorunda değildir; gerçek faset/plaka
+katlama konumlarını içerir. Yön henüz değerlendirilmediği için yeni DXF
+çizgileri BEND katmanındadır. Yardımcı G çizgileri ayrı tutulur.
+STEP yüzey dosyaları analitik veya açıkça fasetli gerçek B-Rep içerir;
+NOT A SOLID / manufacturing NOT VALIDATED açıklamaları dosyaya yazılır.

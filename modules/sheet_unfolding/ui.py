@@ -10,12 +10,12 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QSize, QPointF, QEvent
 from PySide6.QtGui import QColor, QIcon, QPainter, QPen, QPixmap
-from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout,
-                               QHeaderView, QLineEdit, QListView, QListWidget, QListWidgetItem, QPushButton, QSplitter,
+from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
+                               QLineEdit, QListView, QListWidget, QListWidgetItem, QSplitter,
                                QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget, QStackedWidget, QTextBrowser)
 
 from gui_qt.components import BasePage, Disclosure, button, label, scroll, section_header
-from gui_qt.theme import COLORS, ROW_HEIGHT
+from gui_qt.theme import COLORS
 
 from .drawing import LAYERS, DevelopmentView, ReferenceSketch, SchemaSketch
 from .numbers import METHOD_TITLES, REFERENCE_TITLES, fmt, parse, to_display, to_mm
@@ -330,6 +330,8 @@ class UnfoldPage(BasePage):
         return fmt(float(shown), 6) if info['kind'] != 'count' else str(int(value))
 
     def load_schema(self, variant_id, keep=True):
+        self.source_model_options = {}
+        self.source_model_options_unit = self._unit
         try:
             schema = self.service.get_schema(self.shape_id, variant_id)
         except (ValueError, KeyError) as error:
@@ -494,6 +496,10 @@ class UnfoldPage(BasePage):
             return to_display(value, self._unit) if value is not None and self.fields[key]['kind'] == 'length' else value
         parameters = {p['id']: given(p['id']) for p in self.schema['parameters'] if self.values.get(p['id']) is not None}
         material = next((m for m in self.materials if m['id'] == self.material.currentData()), None)
+        model_options=dict(getattr(self,'source_model_options',{}))
+        for key in self.schema['options'].get('model_options',{}).get('length_options',()):
+            if key in model_options:
+                model_options[key]=to_display(to_mm(model_options[key],self.source_model_options_unit),self._unit)
         enabled = lambda key: self.fields[key]['edit'].isEnabled()
         return dict(schema_version=1, request_id=str(uuid.uuid4()), revision=self.revision, shape_id=self.shape_id,
                     variant_id=self.variant_id, parameters=parameters, input_units=self._unit,
@@ -504,7 +510,7 @@ class UnfoldPage(BasePage):
                     split_options=dict(count=int(self.values.get('split_count') or 1)) if enabled('split_count') else {},
                     joint_options=dict(kind=self.joint_kind.currentData() or 'butt',
                                        overlap=(given('joint') or 0.) if self.joint_kind.currentData() == 'lap' else 0.),
-                    development_options={})
+                    development_options={},model_options=model_options)
 
     def input_changed(self, *args):
         self.revision += 1
@@ -927,6 +933,8 @@ class UnfoldPage(BasePage):
         self.unit.blockSignals(True); self.unit.setCurrentIndex(max(self.unit.findData(request['input_units']), 0)); self.unit.blockSignals(False)
         self._unit = request['input_units']
         self.choose_shape(request['shape_id'], request['variant_id'], keep=False)
+        self.source_model_options = dict(request.get('model_options') or {})
+        self.source_model_options_unit = request['input_units']
         for key, value in request['parameters'].items():
             if key in self.fields:
                 kind = self.fields[key]['kind']

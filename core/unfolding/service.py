@@ -23,6 +23,11 @@ class UnfoldService:
         self._cache_size=cache_size;self._cache=OrderedDict();self._lock=RLock()
 
     def list_shapes(self):return tuple(d.summary for d in DEFINITIONS.values())
+    def list_source_models(self):
+        from .source_models import inventory
+        from .shapes.source_dispatch import supported,method_for
+        return tuple(FrozenMap(dict(m,calculation_available=supported(m),calculation_method=method_for(m) if supported(m) else None))
+                     for m in inventory()['models'])
     def get_schema(self,shape_id,variant_id):return definition(shape_id).schema(variant_id)
     def validate(self,request):return validate(request)
 
@@ -62,8 +67,11 @@ class UnfoldService:
             capabilities=FrozenMap(dict(dxf=importlib.util.find_spec('ezdxf') is not None,
                 pdf=importlib.util.find_spec('PySide6') is not None,step_surface=surface and importlib.util.find_spec('OCP') is not None,
                 step_solid=False,nesting=True,zip=True,json=True,production_process_verified=False))
-            result=UnfoldResult(request.request_id,request.revision,digest,ENGINE_VERSION,n,d.summary.method,'success',parts,metrics,
-                               report.warnings,capabilities=capabilities,quality_metrics=FrozenMap(quality))
+            warnings=report.warnings
+            if quality.get('approximation'):
+                warnings+=(Issue('APPROXIMATION',str(quality['approximation'])+'; düzgün yüzeyin gerinimsiz açınımı veya şekillendirme onayı değildir.','WARNING'),)
+            result=UnfoldResult(request.request_id,request.revision,digest,ENGINE_VERSION,n,quality.get('calculation_method',d.summary.method),'success',parts,metrics,
+                               warnings,capabilities=capabilities,quality_metrics=FrozenMap(quality))
             with self._lock:
                 if self._cache_size:
                     self._cache[key]=result

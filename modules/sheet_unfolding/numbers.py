@@ -5,6 +5,10 @@ import re
 
 INCH = 25.4
 METHOD_TITLES = {
+    'model_specific': 'Modele özgü hesap yöntemi',
+    'sampled_developable': 'Geliştirilebilir yüzey · örneklenmiş kesim eğrisi',
+    'faceted_real_length': 'Gerçek uzunluklarla fasetli açınım',
+    'formed_approximation': 'Şekillendirme için yaklaşık hesap',
     'analytic_developable': 'Analitik geliştirilebilir yüzey',
     'faceted': 'Fasetli / üçgenlemeli açınım',
     'faceted_developable': 'Fasetli / üçgenlemeli açınım',
