@@ -1,6 +1,5 @@
 """Sac Açınımı page on the real core.unfolding service (contract v1)."""
 
-import json
 import math
 import threading
 import zipfile
@@ -73,9 +72,9 @@ def test_menu_real_engine_and_reference_cylinder(page):
         assert page.export_buttons[key].isEnabled()
 
 
-def test_every_engine_shape_calculates_and_planned_ones_are_not_selectable(page, qtbot):
+def test_legacy_forms_calculate_and_source_catalogue_is_dynamic(page, qtbot):
     for shape in page.shapes:
-        if shape['status'] != 'implemented':
+        if shape['status'] != 'implemented' or shape.get('source_ids'):
             continue
         for variant in shape['variants']:
             page.choose_shape(shape['shape_id'], variant['variant_id']); settle(qtbot, page)
@@ -83,7 +82,10 @@ def test_every_engine_shape_calculates_and_planned_ones_are_not_selectable(page,
             assert page.part_table.rowCount() >= 1 and page.flat_view.parts
     page.shape_search.setText('pantolon')
     item = page.shape_tree.item(0)
-    assert 'Planlanan' in item.text() and not (item.flags() & Qt.ItemIsEnabled)
+    assert 'Planlanan' not in item.text() and (item.flags() & Qt.ItemIsEnabled)
+    assert sum(len(s.get('source_ids', ())) for s in page.shapes) == 191
+    page.choose_shape('unfoldo/Silindir','cylinder'); settle(qtbot,page)
+    assert page.state in ('ok','warning') and page.result['parts'][0]['metrics']['bbox_mm'][0] == pytest.approx(math.pi*200.)
     page.shape_search.setText('kurtağzı')
     assert any(page.shape_tree.item(i).data(Qt.UserRole) == 'rect_to_round' for i in range(page.shape_tree.count()))
 
@@ -250,3 +252,21 @@ def test_layouts(window, page, size, theme):
     window.set_theme(theme); window.resize(*size); QCoreApplication.processEvents()
     assert not page.grab().isNull() and page.flat_view.appearance == theme
     assert (page.view_stack.currentWidget() is page.view_tabs) == (page.width() < 1250)
+
+
+def test_source_project_options_survive_form_recalculation_and_unit_change(page,qtbot):
+    from core.unfolding import UnfoldRequest
+    from core.unfolding.models import Material
+    req=UnfoldRequest(shape_id='unfoldo/Oval boru',variant_id='oval-cylinder',parameters={'L':300.,'W':200.,'H':400.},
+        thickness=2.,material=Material('Demir / Çelik',7850.),model_options={'cut_type':'2_parts_180_degrees','strip_lap':7.})
+    page.load_request(EngineService.page_request(req));settle(qtbot,page)
+    assert page.state in ('ok','warning') and len(page.result['parts'])==2
+    area=page.result['metrics']['cutting_area_mm2']
+    assert page.build_request()['model_options']['strip_lap']==7.
+    page.unit.setCurrentIndex(page.unit.findData('inch'));settle(qtbot,page)
+    assert page.build_request()['model_options']['strip_lap']==pytest.approx(7/25.4)
+    assert page.result['metrics']['cutting_area_mm2']==pytest.approx(area)
+    page.add_to_project()
+    saved=page.service.project(page.project_parts,'Kaynak model')
+    assert saved.items[0].request.model_options['cut_type']=='2_parts_180_degrees'
+    assert saved.items[0].request.model_options['strip_lap']==pytest.approx(7/25.4)

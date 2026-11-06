@@ -1,0 +1,53 @@
+{
+  "scope": "isolated numerical probes, not upstream GUI/CAD acceptance",
+  "repositories": 8,
+  "runtime": {
+    "node": "v24.19.0"
+  },
+  "adapted_mit_bends": {
+    "cases": 128,
+    "max_length_or_bend_line_difference_mm": 2.2737367544323206e-13,
+    "independent_tests": "tests/unfolding/test_bend_profiles.py",
+    "adopted": true,
+    "excludes": [
+      "generic K tables",
+      "die suggestions",
+      "material strengths"
+    ]
+  },
+  "desarrolla_square_to_round": {
+    "input": {
+      "squareSide": 1200,
+      "diameter": 500,
+      "height": 700,
+      "segments": 24
+    },
+    "max_generator_length_residual_mm": 3.3932964242922026e-06,
+    "max_triangle_diagonal_length_residual_mm": 304.9617473575735,
+    "adopted": false
+  },
+  "freecad_scalar_lookup_probe": {
+    "radius_thickness": 5,
+    "table": [
+      [
+        1,
+        0.38
+      ],
+      [
+        3,
+        0.43
+      ],
+      [
+        99,
+        0.5
+      ]
+    ],
+    "actual": 0.48,
+    "piecewise_linear_reference": 0.43145833333333333,
+    "adopted": false,
+    "scope": "pinned scalar get_k_factor method only; no full FreeCAD test"
+  },
+  "additional_domain_checks": {
+    "python_rejects_impossible_flange": true
+  }
+}

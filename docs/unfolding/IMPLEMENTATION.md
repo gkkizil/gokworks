@@ -1,5 +1,10 @@
 # Sac Açınımı altyapısı — ilk çalışan teslim
 
+Bu belge 5 Kasım'daki ilk teslimin tarihsel kaydıdır. 6 Kasım 2026
+genişlemesi ve gerçek 191 model kanıtı için [EXPANSION_REPORT.md](EXPANSION_REPORT.md),
+[source_coverage.csv](source_coverage.csv) ve [research/README.md](research/README.md)
+esas alınmalıdır.
+
 5 Kasım 2026. Taban `ec62f5f`; görev dalı `agent/codex-sheet-unfolding`.
 
 ## İncelenen mevcut altyapı

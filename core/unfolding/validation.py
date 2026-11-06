@@ -34,13 +34,17 @@ def validate(request):
         known={f.id for f in schema.fields}
         if set(request.parameters)!=known:raise ValueError('Eksik veya tanımsız parametre: '+', '.join(sorted(known^set(request.parameters))))
         p={}
+        source=bool(schema.source_id)
         for f in schema.fields:
             active=('parameters.'+f.id,)
             v=request.parameters[f.id]
+            if f.choices and (type(v) not in (int,float,str) or v not in f.choices):
+                raise ValueError(f'{f.label}: tanımlı seçeneklerden biri gerekli.')
             if f.type=='integer':p[f.id]=integer(v,f.label,int(f.minimum),int(f.maximum))
             else:
                 v=number(v,f.label,minimum=f.minimum,maximum=f.maximum)
-                p[f.id]=number(v*scale,f.label,strict=f.default!=0.) if f.unit=='length' else v
+                p[f.id]=number(v*scale,f.label,minimum=f.minimum if source else 0.,
+                               strict=not source and f.default!=0.) if f.unit=='length' else v
         active=('thickness',);t=number(number(request.thickness,'Kalınlık')*scale,'Kalınlık')
         active=('seam_options.start_angle_deg',)
         seam=number(request.seam_options.start_angle_deg,'Dikiş açısı',-360.,maximum=360.)
@@ -71,6 +75,10 @@ def validate(request):
         n.update(dimension_reference='mid',source_dimension_reference=request.dimension_reference,
                  reference_parameters_mm=reference_parameters)
         n['joint_options']['overlap']=overlap
+        if source:
+            from .source_models import normalize_options
+            n['model_options']=normalize_options(request,schema,scale)
+        elif request.model_options:raise ValueError('Bu eski modelde model_options tanımlı değil.')
         warnings=[Issue('GEOMETRIC_MIDSURFACE','Geometrik orta yüzey açınımıdır; yaylanma, uzama ve abkant telafisi hesaplanmadı.',
                         'INFO',('dimension_reference',))]
         if not t or material.density_kg_m3 is None:
@@ -84,6 +92,8 @@ def validate(request):
         if request.shape_id=='rect_to_round':
             warnings.append(Issue('FACETED_SURFACE',f'8 ayrı paneldir; köşe yamaları en çok {o.chord_error_mm:g} mm üst çevre kord hatasıyla fasetlenir. Düzgün loft veya şekillendirme çözümü değildir.',
                                   'INFO',('development_options.chord_error_mm',)))
+        if source:
+            warnings.append(Issue('SOURCE_MODEL_SCOPE','Kaynak katalog tanımıdır; GOKWORKS geometri hesabı bağımsızdır. Üretim süreci veya kaynak hesap motoruyla eşdeğerlik onayı değildir.','INFO'))
         return ValidationReport(warnings=tuple(warnings),normalized_inputs=FrozenMap(n))
     except (ValueError,TypeError,KeyError,OverflowError) as exc:
         return ValidationReport((Issue('INVALID_INPUT',str(exc),field_ids=active),))

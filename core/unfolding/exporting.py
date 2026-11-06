@@ -42,7 +42,7 @@ def _write(result,parts,options,path,kind,cancel_token=None):
     if kind=='dxf':
         if len(parts)!=1:raise ValueError('DXF için tek parça seçin; çoklu parçada ZIP kullanın.')
         from .dxf import write_dxf
-        write_dxf(parts[0],path,result)
+        write_dxf(replace(parts[0],quantity=parts[0].quantity*options.quantity_multiplier),path,result)
     elif kind=='pdf':
         from .pdf import write_pdf
         write_pdf(parts,path,result,options,cancel_token)

@@ -1,9 +1,9 @@
 """1:1 planar DXF. Cutting wires are closed bulge polylines, annotations separate."""
 import math
 from .models import Line2D,Arc2D,Circle2D,Polyline2D
-from .geometry import arc_point
+from .geometry import arc_point,guide_label_points
 
-LAYERS=('CUT_OUTER','CUT_INNER','BEND_UP','BEND_DOWN','CONSTRUCTION','SEAM','DIMENSIONS','LABELS')
+LAYERS=('CUT_OUTER','CUT_INNER','BEND_UP','BEND_DOWN','CONSTRUCTION','SEAM','DIMENSIONS','LABELS','BEND')
 
 
 def _cut(model,contour,layer):
@@ -32,15 +32,25 @@ def write_dxf(part,path,result):
     for i,name in enumerate(LAYERS):doc.layers.new(name,dxfattribs={'color':7 if i<2 else 3+i%4})
     model=doc.modelspace();_cut(model,part.geometry_2d.outer,'CUT_OUTER')
     for h in part.geometry_2d.holes:_cut(model,h,'CUT_INNER')
-    for layer,lines in (('CONSTRUCTION',part.construction_lines),('SEAM',part.seams)):
-        for line in lines:
+    # These are real fold locations. A signed bend direction is not yet part
+    # of Line2D; putting all of them on BEND_UP would invent that direction.
+    for layer,lines in (('CONSTRUCTION',part.construction_lines),('SEAM',part.seams),('BEND',part.bending_lines)):
+        for line,anchor in zip(lines,guide_label_points(lines)):
             model.add_line((*line.start,0),(*line.end,0),dxfattribs={'layer':layer})
-            if line.id:model.add_text(line.id,dxfattribs={'layer':'LABELS','height':2.}).dxf.insert=line.start
+            if line.id and layer!='BEND':model.add_text(line.id,dxfattribs={'layer':'LABELS','height':2.}).dxf.insert=anchor
     for annotation in part.dimension_annotations:
         model.add_line((*annotation.start,0),(*annotation.end,0),dxfattribs={'layer':'DIMENSIONS'})
         model.add_text(f'{annotation.value:.6f} {annotation.unit}',dxfattribs={'layer':'DIMENSIONS','height':3.}).dxf.insert=annotation.text_position
     for text,point in part.labels:model.add_text(text,dxfattribs={'layer':'LABELS','height':4.}).dxf.insert=point
+    y=part.metrics.bounds_mm[1]-20.
+    model.add_text(f'Adet / Quantity: {part.quantity}',dxfattribs={'layer':'LABELS','height':3.}).dxf.insert=(part.metrics.bounds_mm[0],y)
+    for warning in result.warnings:
+        if warning.code=='APPROXIMATION':
+            y-=5.
+            model.add_text(warning.message,dxfattribs={'layer':'LABELS','height':2.}).dxf.insert=(part.metrics.bounds_mm[0],y)
     doc.appids.new('GOKWORKS_UNFOLD')
+    for entity,line in zip(model.query('LINE[layer=="BEND"]'),part.bending_lines):
+        entity.set_xdata('GOKWORKS_UNFOLD',[(1000,line.id),(1000,'direction=NOT_EVALUATED'),(1000,result.input_hash),(1071,result.revision)])
     for e in model.query('LWPOLYLINE CIRCLE'):
         e.set_xdata('GOKWORKS_UNFOLD',[(1000,result.input_hash),(1071,result.revision)])
     doc.saveas(path)

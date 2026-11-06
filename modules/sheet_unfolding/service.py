@@ -15,7 +15,7 @@ from core.unfolding import UnfoldService, UnfoldRequest, ExportOptions
 from core.unfolding.models import ProjectItem, UnfoldProject, to_data
 from core.unfolding.shapes.common import UnfoldCancelled
 
-UNIT_KINDS = {'length': 'length', 'deg': 'angle', 'count': 'count'}
+UNIT_KINDS = {'length': 'length', 'deg': 'angle', 'count': 'count', 'option': 'count'}
 VARIANT_TITLES = {
     'straight': 'Düz uçlu', 'bevel': 'Üstü açılı kesik', 'full': 'Tam koni', 'frustum': 'Kesik koni (redüksiyon)',
     'centered': 'Merkezli', 'centered_faceted': 'Merkezli · fasetli', 'constant_diameter': 'Sabit çaplı',
@@ -130,11 +130,15 @@ class EngineService:
         shapes = []
         for summary in self.engine.list_shapes():
             category, keywords, preview, _ = PRESENTATION.get(summary.shape_id, ('Diğer', (), [], {}))
+            if summary.category:
+                category=summary.category
+                keywords=(summary.label,*summary.variant_labels.values())
             shapes.append(dict(shape_id=summary.shape_id, title=summary.label, category=category, keywords=list(keywords),
                                status='implemented', preview=preview, method=summary.method,
-                               variants=[dict(variant_id=v, title=VARIANT_TITLES.get(v, v), status='implemented')
+                               source_ids=list(summary.source_ids),
+                               variants=[dict(variant_id=v, title=summary.variant_labels.get(v,VARIANT_TITLES.get(v, v)), status='implemented')
                                          for v in summary.variants]))
-        for shape_id, title, category, keywords in PLANNED:
+        for shape_id, title, category, keywords in (() if any(s['source_ids'] for s in shapes) else PLANNED):
             shapes.append(dict(shape_id=shape_id, title=title, category=category, keywords=list(keywords),
                                status='planned', preview=[], variants=[], method=None))
         return shapes
@@ -142,7 +146,7 @@ class EngineService:
     def get_schema(self, shape_id, variant_id):
         schema = self.engine.get_schema(shape_id, variant_id)
         lines, anchors = PRESENTATION.get(shape_id, ('', (), [], {}))[3].get(variant_id, ([], {}))
-        parameters = [dict(id=f.id, label=f.label, symbol='', kind=UNIT_KINDS.get(f.unit, 'length'), default=f.default,
+        parameters = [dict(id=f.id, label=f.label, symbol=f.dimension_id if schema.source_id else '', kind=UNIT_KINDS.get(f.unit, 'length'), default=f.default,
                            min=f.minimum, max=f.maximum, required=f.required, integer=f.type == 'integer',
                            choices=list(f.choices), description=f.description, dimension_id=f.dimension_id, group='common')
                       for f in schema.fields]
@@ -151,10 +155,11 @@ class EngineService:
             if p['dimension_id'] in anchors:
                 start, end, symbol = anchors[p['dimension_id']]
                 annotations.append(dict(parameter_id=p['id'], start=start, end=end, text=symbol))
-        return dict(shape_id=shape_id, variant_id=variant_id, title=schema.label, parameters=parameters,
+        return dict(shape_id=shape_id, variant_id=variant_id, title=schema.label, parameters=parameters,source_id=schema.source_id,
                     constraints=list(schema.constraints), sketch=lines, dimension_annotations=annotations,
                     options=dict(dimension_reference=list(schema.supported_dimension_references), default_reference='mid',
-                                 seam=schema.seam_supported, split=schema.split_supported, joint_kinds=list(schema.joint_kinds)),
+                                 seam=schema.seam_supported, split=schema.split_supported, joint_kinds=list(schema.joint_kinds),
+                                 model_options=to_data(schema.model_options)),
                     capabilities=dict(outputs=list(schema.output_kinds)))
 
     # ---- requests --------------------------------------------------------------------
@@ -171,7 +176,8 @@ class EngineService:
                           unit_price=material.get('unit_price'), price_unit='kg', currency=material.get('currency', '')),
             seam_options=dict(start_angle_deg=(request.get('seam_options') or {}).get('start_angle_deg', 0.)),
             split_options=dict(count=(request.get('split_options') or {}).get('count', 1)),
-            joint_options=dict(kind=joint.get('kind', 'butt'), overlap=joint.get('overlap', 0.) or 0.))
+            joint_options=dict(kind=joint.get('kind', 'butt'), overlap=joint.get('overlap', 0.) or 0.),
+            model_options=request.get('model_options') or {})
 
     @staticmethod
     def page_request(engine_request):
@@ -182,7 +188,7 @@ class EngineService:
                     input_units=data['input_units'], thickness=data['thickness'] or None,
                     dimension_reference=data['dimension_reference'], material=dict(data['material']),
                     seam_options=dict(data['seam_options']), split_options=dict(data['split_options']),
-                    joint_options=dict(data['joint_options']), development_options={})
+                    joint_options=dict(data['joint_options']), development_options={},model_options=dict(data['model_options']))
 
     def validate(self, request):
         try:

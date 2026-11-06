@@ -94,6 +94,8 @@ ELBOW=Definition(ShapeSummary('segmented_elbow','Segmentli dirsek',('constant_di
                                'Eksen yarıçapı boru orta yüzey yarıçapından büyük olmalı.'))
 
 DEFINITIONS={d.summary.shape_id:d for d in (CYLINDER,CONE,RECT,ROUND,ELBOW)}
+from .source_models import definitions as source_definitions
+DEFINITIONS.update({d.summary.shape_id:d for d in source_definitions()})
 
 
 def definition(shape_id):

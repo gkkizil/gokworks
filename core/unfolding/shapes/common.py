@@ -57,3 +57,27 @@ def planar_part(identifier, vertices3, points2, triangles, normalized, material,
     mappings=tuple(MappingPoint(p,q,str(i+1)) for i,(p,q) in enumerate(zip(points2,vertices3)))
     return finish_part(identifier,geometry,mesh_from_faces(vertices3,triangles),patches,contour_area(geometry.outer),
                        normalized,material,options,construction=construction,mappings=mappings,lengths=lengths)
+
+
+def with_generators(part,samples,normalized,*,clip_holes=False):
+    """Attach independent helper sampling; holes interrupt material guide lengths."""
+    from dataclasses import replace
+    from ..models import TrueLength
+    guides=[];lengths=[];maximum=len(samples)-1
+    for j,(flat0,flat1,world0,world1) in enumerate(samples):
+        if math.dist(flat0,flat1)<=1e-8:continue
+        segments=[(flat0,flat1)]
+        if clip_holes:
+            from shapely.geometry import LineString
+            from ..geometry import polygon
+            o=normalized['development_options'];line=LineString((flat0,flat1));cut=line.intersection(polygon(part.geometry_2d,o['chord_error_mm'],o['max_samples']))
+            geoms=[cut] if cut.geom_type=='LineString' else [v for v in getattr(cut,'geoms',()) if v.geom_type=='LineString']
+            segments=[(tuple(v.coords[0]),tuple(v.coords[-1])) for v in geoms if v.length>1e-7]
+        direction=sub(flat1,flat0);den=dot(direction,direction)
+        for index,(a,b) in enumerate(segments):
+            fa=dot(sub(a,flat0),direction)/den;fb=dot(sub(b,flat0),direction)/den
+            aa=add(world0,mul(sub(world1,world0),fa));bb=add(world0,mul(sub(world1,world0),fb))
+            name=f'G{j}'+(f'.{index+1}' if len(segments)>1 else '')
+            lengths.append(TrueLength(name,aa,bb,math.dist(aa,bb)))
+            if j not in (0,maximum):guides.append(Line2D(a,b,name))
+    return replace(part,construction_lines=tuple(guides),true_lengths=tuple(lengths))
