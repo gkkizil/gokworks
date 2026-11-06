@@ -1,4 +1,11 @@
-# Claude entegrasyonu — motor 1.1.0
+# Claude entegrasyonu — motor 1.1.1
+
+Son düzeltmeler [AUDIT_FIXES.md](AUDIT_FIXES.md) içindedir. Form/proje
+taşımasında `development_options`, malzemenin yoğunluk/fiyat birimi/para
+birimi ve boş/0 değerler korunur. Proje üst code/revision/quantity alanları
+ve her yeni öğenin benzersiz request_id'si kaybedilmemelidir. Aynı formun
+kesim/pay seçenekleri birim bilgisiyle birlikte saklanır. Yeni kaynak
+kimliği otomatik uygulanmış sayılmaz; dispatcher açık kimlik denetimi yapar.
 
 Son kanıtlar: [191 satırlı kapsam](source_coverage.csv),
 [doğrulama kaydı](source_validation.json), [teknik rapor](EXPANSION_REPORT.md).

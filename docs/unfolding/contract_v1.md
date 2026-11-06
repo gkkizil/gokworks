@@ -1,4 +1,9 @@
-# Sac Açınımı — çekirdek/UI sözleşmesi v1 (motor 1.1.0)
+# Sac Açınımı — çekirdek/UI sözleşmesi v1 (motor 1.1.1)
+
+1.1.1, JSON şemasını değiştirmeden geometri/proje çevrimi düzeltmeleri
+ekler; [AUDIT_FIXES.md](AUDIT_FIXES.md). Şemadaki uzunluk min/max değerleri
+mm'dir ve giriş birimi çevrildikten sonra uygulanır. GUI, kayıtlı
+DevelopmentOptions ve Material alanlarını varsayılanlarla değiştirmez.
 
 Çekirdek sahibi Codex; UI, controller, menü ve UI testleri Claude'a aittir.
 Bu depoda UI modül başına `modules/<modül>/ui.py` içindedir. Yeni ekran için
