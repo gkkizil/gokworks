@@ -873,6 +873,7 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False,
                 parameter_editor.apply()
                 changed = parameter_editor.changed
                 after = parameter_editor.after
+                notes.extend(parameter_editor.notes)
                 if save:
                     stage = "Kaydetmeden önce konfigürasyonu geri açma"
                     _show_configuration(model, original_config)

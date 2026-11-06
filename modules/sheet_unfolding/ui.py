@@ -18,6 +18,7 @@ from gui_qt.components import BasePage, Disclosure, button, label, scroll, secti
 from gui_qt.theme import COLORS
 
 from .drawing import LAYERS, DevelopmentView, ReferenceSketch, SchemaSketch
+from .service import DUCT_LAP_TITLES, LAP_TITLES
 from .numbers import METHOD_TITLES, REFERENCE_TITLES, fmt, parse, to_display, to_mm
 from .service import resolve_service
 
@@ -193,7 +194,7 @@ class UnfoldPage(BasePage):
             item = QListWidgetItem(shape['title'] + ('\nPlanlanan' if planned else ''))
             item.setData(Qt.UserRole, shape['shape_id']); item.setTextAlignment(Qt.AlignHCenter | Qt.AlignTop)
             item.setIcon(preview_icon(shape.get('preview'), colors['muted' if planned else 'accent'], fill=None if planned else colors['accent']))
-            item.setToolTip(f'{shape["category"]} · ' + ('Henüz uygulanmadı; seçilemez.' if planned else ', '.join(shape.get('keywords', ()))))
+            item.setToolTip(f'{shape["title"]}\n{shape["category"]} · ' + ('Henüz uygulanmadı; seçilemez.' if planned else ', '.join(shape.get('keywords', ()))))
             if planned:
                 item.setFlags(item.flags() & ~(Qt.ItemIsSelectable | Qt.ItemIsEnabled))
             self.shape_tree.addItem(item)
@@ -312,16 +313,32 @@ class UnfoldPage(BasePage):
         edit.installEventFilter(self)
         return edit
 
-    def _add_field_row(self, form, key):
+    def _add_field_row(self, form, key, choices=None, hint=''):
+        """Number field; with discrete ``choices`` [(value, title)] a list replaces the text box (same value path)."""
         info = self.fields[key]
         caption = label(self.caption(key), wrap=True); info['label'] = caption
         column = QWidget(); column_box = QVBoxLayout(column); column_box.setContentsMargins(0, 0, 0, 0); column_box.setSpacing(1)
-        column_box.addWidget(info['edit']); column_box.addWidget(info['error'])
+        column_box.addWidget(info['edit'])
+        if choices:
+            combo = QComboBox(); combo.setAccessibleName(info['title']); info['combo'] = combo; info['choices'] = True
+            for value, title in choices:
+                combo.addItem(str(title), value)
+            info['edit'].hide(); column_box.addWidget(combo); caption.setText(self.caption(key))
+            def chosen(*_, k=key, box=combo):
+                if box.currentData() is not None and self.fields.get(k) is info:
+                    info['edit'].setText(str(box.currentData())); self.field_edited(k)
+            def typed(text, box=combo):
+                index = box.findData(int(text)) if text.strip().lstrip('-').isdigit() else -1
+                box.blockSignals(True); box.setCurrentIndex(index); box.blockSignals(False)
+            combo.currentIndexChanged.connect(chosen); info['edit'].textChanged.connect(typed); typed(info['edit'].text())
+        if hint:
+            caption.setToolTip(hint); info['edit'].setToolTip(hint)
+        column_box.addWidget(info['error'])
         form.addRow(caption, column)
 
     def caption(self, key):
         info = self.fields[key]
-        unit = {'length': self._unit, 'angle': '°', 'count': 'adet', 'price': ''}.get(info['kind'], '')
+        unit = '' if info.get('choices') else {'length': self._unit, 'angle': '°', 'count': 'adet', 'price': ''}.get(info['kind'], '')
         return f'{info["title"]} {info["symbol"]}' + (f' · {unit}' if unit else '')
 
     def display_value(self, key, value):
@@ -339,9 +356,7 @@ class UnfoldPage(BasePage):
         previous = self.schema; old_values = {k: v for k, v in self.values.items()}
         old_key = (self.schema['shape_id'], self.schema['variant_id']) if previous else None
         if old_key in self.schema_forms:                   # remember this form's values for a later return
-            self.schema_forms[old_key]['values'] = {p['id']: self.values.get(p['id']) for p in previous['parameters']}
-            self.schema_forms[old_key]['model_options'] = dict(getattr(self,'source_model_options',{}))
-            self.schema_forms[old_key]['model_options_unit'] = getattr(self,'source_model_options_unit',self._unit)
+            self.schema_forms[old_key]['values'] = {k: self.values.get(k) for k in self.schema_forms[old_key]['fields']}
             self.schema_forms[old_key]['host'].hide()
         self.schema, self.variant_id = schema, variant_id
         for key in [k for k in self.fields if k not in PRODUCTION_FIELDS]:
@@ -354,22 +369,26 @@ class UnfoldPage(BasePage):
             common_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
             advanced_host = QWidget(); advanced_form = QFormLayout(advanced_host); advanced_form.setContentsMargins(0, 0, 0, 0)
             advanced = Disclosure('Gelişmiş şekil seçenekleri', advanced_host)
+            labels = (schema['options'].get('model_options') or {}).get('parameter_options') or {}
             for p in schema['parameters']:
                 self._field(p['id'], p['label'], p['symbol'], p['kind'], p['default'])
-                self._add_field_row(common_form if p.get('group') == 'common' else advanced_form, p['id'])
-            column.addWidget(common); column.addWidget(advanced); self.param_box.addWidget(host)
+                choices = [tuple(c) for c in labels.get(p['id'], ())] or [(c, c) for c in p.get('choices') or ()]
+                self._add_field_row(common_form if p.get('group') == 'common' else advanced_form, p['id'], choices=choices)
+            column.addWidget(common); column.addWidget(advanced)
+            model = self.build_model_options(schema, column) if schema.get('source_id') else None
+            self.param_box.addWidget(host)
             advanced.setVisible(advanced_form.rowCount() > 0)
-            entry = self.schema_forms[key] = dict(host=host, advanced=advanced, values={},
-                                                  fields={p['id']: self.fields[p['id']] for p in schema['parameters']})
+            defaults = {p['id']: p['default'] for p in schema['parameters']}
+            defaults.update({k: 0. for k in (model or {}).get('laps', {})})
+            entry = self.schema_forms[key] = dict(host=host, advanced=advanced, values={}, model=model, defaults=defaults,
+                                                  fields={k: self.fields[k] for k in defaults})
         else:
             for pid, info in entry['fields'].items():
                 self.fields[pid] = info
-                self.values[pid] = entry['values'].get(pid, next(p['default'] for p in schema['parameters'] if p['id'] == pid))
+                self.values[pid] = entry['values'].get(pid, entry['defaults'][pid])
                 info['edit'].setText(self.display_value(pid, self.values[pid])); info['label'].setText(self.caption(pid))
                 self.applied_text[pid] = info['edit'].text(); self.show_field_error(pid, None)
-        self.advanced = entry['advanced']; entry['host'].show()
-        self.source_model_options = dict(entry.get('model_options',{}))
-        self.source_model_options_unit = entry.get('model_options_unit',self._unit)
+        self.advanced = entry['advanced']; self.model = entry['model']; entry['host'].show()
         dropped = []
         old_kinds = {p['id']: p['kind'] for p in (previous or {}).get('parameters', [])}
         for p in schema['parameters']:
@@ -390,12 +409,138 @@ class UnfoldPage(BasePage):
             self.fields[key]['edit'].setToolTip('' if supported else reason)
         self.joint_changed(recalculate=False)
         self.sketch.set_schema(schema); self.sync_inline()
+        self.sketch.setVisible(bool(schema.get('sketch')))     # source models: no dimensioned sketch yet, the form has the symbols
         self.reference_sketch.set_reference(self.reference.currentData())
         shape = self.shape_by_id(self.shape_id)
         self.shape_title.setText(f'{shape["title"]} · {self.variant.currentText()}')
         if dropped:
             self.set_status('Varyant değişti; bu değerler yeni varyantta yok: ' + ', '.join(dropped), tone='warning')
         self.input_changed()
+
+    # ---- source-model options (engine 1.1.0: cut choice, edge laps, helper lines, numbering) ----
+    def build_model_options(self, schema, column):
+        """Controls for ``schema.options.model_options``, built once per schema and kept with its form."""
+        options = schema['options'].get('model_options') or {}
+        support = options.get('option_support') or {}; features = options.get('source_features') or {}
+        model = dict(laps={})
+        cut_host = QWidget(); cut_form = QFormLayout(cut_host); cut_form.setContentsMargins(0, 0, 0, 0)
+        cut_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        cut = QComboBox(); cut.setAccessibleName('Kesim / dikiş seçimi')
+        for item in options.get('cut_options') or ():
+            cut.addItem(item['label'], item['value'])
+        cut.setEnabled(cut.count() > 1)
+        cut.setToolTip('Parçanın kaç parçadan ve nereden dikişle kesileceği.' if cut.count() > 1 else 'Bu modelde tek kesim düzeni var.')
+        cut.currentIndexChanged.connect(self.input_changed); model['cut'] = cut
+        cut_form.addRow('Kesim düzeni', cut); column.addWidget(cut_host)
+
+        extra = QWidget(); extra_form = QFormLayout(extra); extra_form.setContentsMargins(0, 0, 0, 0)
+        extra_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        laps = []
+        if support.get('edge_allowances'):
+            if features.get('lapFields'):           # ducts: flange on the long wall edges and lap at the wall ends only
+                laps = [DUCT_LAP_TITLES[f['key']] for f in features['lapFields'] if f.get('key') in DUCT_LAP_TITLES]
+            else:
+                laps = [(k, LAP_TITLES[k], 'Açınımın bu kenarına eklenen kaynak/bindirme payı. 0 = yok.')
+                        for k in ('lap_top', 'lap_bottom', 'lap_left', 'lap_right')]
+        if support.get('strip_lap'):
+            laps.append(('strip_lap', LAP_TITLES['strip_lap'], 'Parçalar arası birleşim şeridinin payı. 0 = yok.'))
+        for name, title, hint in laps:
+            key = 'opt.' + name
+            self._field(key, title, '', 'length', 0.)
+            self._add_field_row(extra_form, key, hint=hint); model['laps'][key] = name
+        divisions = QComboBox(); divisions.setAccessibleName('Yardımcı çizgi bölmesi')
+        for n in options.get('helper_divisions') or (24,):
+            divisions.addItem(f'{n} bölme', n)
+        divisions.setCurrentIndex(max(divisions.findData(24), 0))
+        divisions.setToolTip('Açınımdaki yardımcı (G) çizgilerinin sayısı. Eğri hassasiyetini değiştirmez.')
+        divisions.currentIndexChanged.connect(self.input_changed); model['divisions'] = divisions
+        extra_form.addRow('Yardımcı çizgiler', divisions)
+        numbering = QCheckBox('Yardımcı çizgileri numarala'); numbering.setAccessibleName('Numaralama')
+        allowed = not features.get('noNumbers')
+        numbering.setChecked(allowed); numbering.setEnabled(allowed)
+        numbering.setToolTip('' if allowed else 'Bu modelde numaralama yok.')
+        numbering.toggled.connect(self.input_changed); model['numbering'] = numbering
+        extra_form.addRow('', numbering)
+        column.addWidget(Disclosure('Kenar payları ve yardımcı çizgiler', extra))
+
+        source = schema.get('source') or {}
+        info = QWidget(); info_box = QVBoxLayout(info); info_box.setContentsMargins(0, 0, 0, 0); info_box.setSpacing(4)
+        text = label(self.source_text(schema), 'muted', wrap=True); text.setTextFormat(Qt.RichText)
+        text.setOpenExternalLinks(True); text.setTextInteractionFlags(Qt.TextBrowserInteraction); info_box.addWidget(text)
+        example = button('Çalışan örneği yükle', lambda: self.load_example(schema.get('source_id')))
+        example.setToolTip('Bu model için doğrulanmış bir örnek ölçü setini yükler (kalınlık, malzeme ve birim aynı kalır).')
+        example.setEnabled(bool(source.get('has_example'))); info_box.addWidget(example, alignment=Qt.AlignLeft)
+        model['info'] = text; model['example'] = example
+        column.addWidget(Disclosure('Model bilgisi ve sınırlar', info))
+        return model
+
+    def source_text(self, schema):
+        source = schema.get('source') or {}
+        if not source:
+            return ''
+        method = METHOD_TITLES.get(source.get('method'), source.get('method') or '—')
+        stages = ''.join(f'<br>{"✔" if done else "✖"} {title}' for title, done in source.get('stages', ()))
+        limits = ''.join(f'<li>{text}</li>' for text in source.get('restrictions', ()))
+        url = source.get('url')
+        return (f'<b>Yöntem:</b> {method}<br><b>Durum:</b> {source.get("status", "—")}{stages}'
+                f'<br><b>Doğrulanmış çıktılar:</b> {", ".join(source.get("outputs") or ()) or "—"}'
+                + (f'<ul style="margin-left:-20px">{limits}</ul>' if limits else '')
+                + (f'Kaynak model: <a href="{url}">{url}</a>' if url else ''))
+
+    def model_options(self):
+        """Request ``model_options`` from the visible controls; lengths in the current input unit."""
+        model = getattr(self, 'model', None)
+        if not model:
+            return {}
+        # Only choices that differ from the engine defaults are sent (same request as a saved project).
+        options = {}
+        if model['cut'].currentIndex() > 0:
+            options['cut_type'] = model['cut'].currentData()
+        if model['divisions'].currentData() != 24:
+            options['helper_divisions'] = model['divisions'].currentData()
+        if model['numbering'].isChecked() != model['numbering'].isEnabled():
+            options['numbering'] = model['numbering'].isChecked()
+        for key, name in model['laps'].items():
+            value = self.values.get(key)
+            if value:
+                options[name] = to_display(value, self._unit)
+        return {k: v for k, v in options.items() if v is not None}
+
+    def apply_model_options(self, options, unit):
+        """Restore saved model options (project / example); unknown keys stay with the engine's defaults."""
+        model = getattr(self, 'model', None)
+        if not model:
+            return
+        allowed = model['numbering'].isEnabled()
+        for box, value in ((model['cut'], options.get('cut_type')), (model['divisions'], options.get('helper_divisions', 24))):
+            index = box.findData(value) if value is not None else 0
+            box.blockSignals(True); box.setCurrentIndex(max(index, 0)); box.blockSignals(False)
+        model['numbering'].blockSignals(True); model['numbering'].setChecked(bool(options.get('numbering', allowed)) and allowed)
+        model['numbering'].blockSignals(False)
+        for key, name in model['laps'].items():
+            value = options.get(name) or 0.
+            self.values[key] = to_mm(value, unit) if value else 0.
+            self.fields[key]['edit'].setText(self.display_value(key, self.values[key])); self.applied_text[key] = self.fields[key]['edit'].text()
+            self.errors.pop(key, None); self.show_field_error(key, None)
+
+    def load_example(self, source_id):
+        """Shape dimensions, seam position and model options change; thickness, material and unit are the user's."""
+        example = self.service.example_request(source_id) if source_id else None
+        if example is None or example['shape_id'] != self.shape_id or example['variant_id'] != self.variant_id:
+            self.set_status('Bu model için örnek bulunamadı.', True); return
+        unit = example.get('input_units', 'mm')
+        for key, value in example['parameters'].items():
+            if key in self.fields:
+                self.values[key] = to_mm(value, unit) if self.fields[key]['kind'] == 'length' else value
+                self.fields[key]['edit'].setText(self.display_value(key, self.values[key]))
+                self.applied_text[key] = self.fields[key]['edit'].text(); self.errors.pop(key, None); self.show_field_error(key, None)
+        seam = (example.get('seam_options') or {}).get('start_angle_deg')
+        if seam is not None and self.fields['seam_angle']['edit'].isEnabled():      # the seam position belongs to the example
+            self.values['seam_angle'] = seam; self.fields['seam_angle']['edit'].setText(self.display_value('seam_angle', seam))
+            self.applied_text['seam_angle'] = self.fields['seam_angle']['edit'].text()
+        self.apply_model_options(example.get('model_options') or {}, unit)
+        self.sync_inline(); self.set_status('Doğrulanmış örnek ölçüler yüklendi.', tone='success')
+        self.calculate_now() if self.build_request() is not None else self.input_changed()
 
     @staticmethod
     def _fill_options(box, values, titles, prefer=None):
@@ -457,7 +602,11 @@ class UnfoldPage(BasePage):
         if info:
             if not info['edit'].isVisible() and self.advanced is not None and self.advanced.isVisible():
                 self.advanced.set_expanded(True)
-            info['edit'].setFocus(); info['edit'].selectAll(); self.sketch.highlight(parameter_id)
+            target = info.get('combo') or info['edit']
+            target.setFocus()
+            if target is info['edit']:
+                info['edit'].selectAll()
+            self.sketch.highlight(parameter_id)
 
     def field_edited(self, key):
         info = self.fields[key]; text = info['edit'].text()
@@ -529,10 +678,7 @@ class UnfoldPage(BasePage):
         material_data = dict(self.loaded_material) if self.loaded_material is not None else (
             dict(name=material['id'],density_kg_m3=material.get('density_kg_m3')) if material else {})
         material_data.update(unit_price=self.values.get('price'),price_unit=self.price_unit,currency=self.price_currency)
-        model_options=dict(getattr(self,'source_model_options',{}))
-        for key in self.schema['options'].get('model_options',{}).get('length_options',()):
-            if key in model_options:
-                model_options[key]=to_display(to_mm(model_options[key],self.source_model_options_unit),self._unit)
+        model_options = self.model_options()
         enabled = lambda key: self.fields[key]['edit'].isEnabled()
         return dict(schema_version=1, request_id=str(uuid.uuid4()), revision=self.revision, shape_id=self.shape_id,
                     variant_id=self.variant_id, parameters=parameters, input_units=self._unit,
@@ -542,7 +688,7 @@ class UnfoldPage(BasePage):
                     split_options=dict(count=int(self.values.get('split_count') or 1)) if enabled('split_count') else {},
                     joint_options=dict(kind=self.joint_kind.currentData() or 'butt',
                                        overlap=(given('joint') or 0.) if self.joint_kind.currentData() == 'lap' else 0.),
-                    development_options=dict(self.development_options),model_options=model_options)
+                    development_options=dict(self.development_options), model_options=model_options)
 
     def input_changed(self, *args):
         self.revision += 1
@@ -969,8 +1115,7 @@ class UnfoldPage(BasePage):
         self.unit.blockSignals(True); self.unit.setCurrentIndex(max(self.unit.findData(request['input_units']), 0)); self.unit.blockSignals(False)
         self._unit = request['input_units']
         self.choose_shape(request['shape_id'], request['variant_id'], keep=False)
-        self.source_model_options = dict(request.get('model_options') or {})
-        self.source_model_options_unit = request['input_units']
+        self.apply_model_options(request.get('model_options') or {}, request['input_units'])
         self.development_options = dict(request.get('development_options') or {})
         for key, value in request['parameters'].items():
             if key in self.fields:

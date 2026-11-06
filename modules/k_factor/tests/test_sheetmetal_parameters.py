@@ -119,13 +119,54 @@ class DirectParameterTests(KApplyTestCase):
         self.assertEqual(self.model.config, 'Other')
         self.assertEqual(self.model.save_count, 1)
 
-    def test_cross_configuration_leak_is_rolled_back_and_not_saved(self):
-        self.model.states['Other'] = deepcopy(self.model.states['Default'])
+    def test_shared_flat_pattern_configuration_follows_the_edit(self):
+        # SolidWorks keeps Sheet-Metal data shared with the derived flat-pattern configuration.
+        self.model.states['DefaultSM-DÜZ-ÇOĞALTMA'] = deepcopy(self.model.states['Default'])
         self.model.propagate = True
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('ortak', detail)
+        self.assertIn('DefaultSM-DÜZ-ÇOĞALTMA', detail)
+        for state in self.model.states.values():
+            self.assertEqual((state['k'], state['radius']), (.274, .0015))
+        self.assertEqual(self.model.save_count, 1)
+
+    def test_cross_configuration_leak_is_rolled_back_and_not_saved(self):
+        self.model.states['Other'] = dict(deepcopy(self.model.states['Default']), k=.41, radius=.003)
+        self.model.propagate = True
+        modify = self.model.feature.ModifyDefinition
+
+        def leak_once(*args):            # the faulty write leaks; the restoring writes stay per configuration
+            done = modify(*args); self.model.propagate = False; return done
+        self.model.feature.ModifyDefinition = leak_once
         before = deepcopy(self.model.states)
         status, detail, _ = self.process(save=True)
         self.assertEqual(status, 'error')
         self.assertIn('başka konfigürasyona yayıldı', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_existing_unrelated_rebuild_error_does_not_block_assignment(self):
+        sketch = FakeFeature(name='Taslak7', kind='ProfileFeature')
+        sketch.GetErrorCode = lambda: 22
+        self.model.feature.next = sketch
+        original = self.model.EditRebuild3
+        self.model.EditRebuild3 = lambda: (original(), False)[1]     # SolidWorks reports the old error again
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertIn('Taslak7', detail)
+        self.assertEqual(self.model.states['Default']['k'], .274)
+
+    def test_new_rebuild_error_names_the_feature_and_restores(self):
+        flange = FakeFeature(name='Kenar-Flanşı3', kind='EdgeFlange')
+        flange.GetErrorCode = lambda: 41 if self.model.states['Default']['k'] == .274 else 0
+        self.model.feature.next = flange
+        self.model.EditRebuild3 = lambda: self.model.states['Default']['k'] != .274
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error')
+        self.assertIn('Kenar-Flanşı3 (kod 41)', detail)
+        self.assertIn('geri yüklendi ve kontrol edildi', detail)
         self.assertEqual(self.model.states, before)
         self.assertEqual(self.model.save_count, 0)
 

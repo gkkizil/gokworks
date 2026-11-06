@@ -114,7 +114,7 @@ def export_pdf(project,result,path,*,overwrite=False,stop=None):
         writer=QPdfWriter(str(temporary));writer.setResolution(96);writer.setPageSize(QPageSize(QPageSize.A4))
         writer.setPageMargins(QMarginsF(14,14,14,14),QPageLayout.Millimeter)
         writer.setTitle(project.name);writer.setCreator('GOKWORKS Tolerance Stack-Up 1.0')
-        document=QTextDocument();document.setDefaultStyleSheet('body {font-family: DejaVu Sans; font-size:10pt;} h1 {color:#24466C;} td {font-size:9pt;}')
+        document=QTextDocument();document.setDefaultStyleSheet('body, p, td {font-family: DejaVu Sans; font-size:10pt; color:#111111;} h1 {color:#24466C;} td {font-size:9pt;}')
         document.setHtml(''.join(html));document.setTextWidth(writer.width())
         painter=QPainter(writer)
         try:
@@ -123,7 +123,11 @@ def export_pdf(project,result,path,*,overwrite=False,stop=None):
                 check_cancel(stop)
                 if offset and not writer.newPage(): raise RuntimeError('PDF sayfası oluşturulamadı.')
                 painter.save();painter.setClipRect(QRectF(0,0,writer.width(),height));painter.translate(0,-offset)
-                document.drawContents(painter,QRectF(0,offset,writer.width(),height));painter.restore()
+                # Print colours are fixed: the app's dark-theme palette (light text) must not reach the page.
+                from PySide6.QtGui import QAbstractTextDocumentLayout,QColor,QPalette
+                context=QAbstractTextDocumentLayout.PaintContext();context.clip=QRectF(0,offset,writer.width(),height)
+                for role in (QPalette.Text,QPalette.WindowText):context.palette.setColor(role,QColor('#111111'))
+                document.documentLayout().draw(painter,context);painter.restore()
         finally:
             painter.end()
         del writer

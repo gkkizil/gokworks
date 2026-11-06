@@ -115,6 +115,49 @@ def _sheet_features(model):
             yield feature
 
 
+def feature_errors(model):
+    """{feature name: error code} of every feature (sub-features included) with a rebuild error.
+
+    Used to tell an existing, unrelated rebuild problem in the part (a dangling
+    sketch relation, a failed cosmetic feature...) from an error the K/R edit
+    caused. ``EditRebuild3`` returns False for both.
+    """
+    errors, visited = {}, set()
+    stack = [(_call(model, "FirstFeature"), False)]
+    while stack:
+        feature, sub = stack.pop()
+        if feature is None:
+            continue
+        name = _get(feature, "Name")
+        if (name, sub) in visited:
+            continue
+        visited.add((name, sub))
+        if len(visited) > 20000:
+            raise RuntimeError("Unsur hata taraması tamamlanamadı; unsur ağacı sınırı aşıldı.")
+        stack.append((_call(feature, "GetNextSubFeature" if sub else "GetNextFeature"), sub))
+        stack.append((_call(feature, "GetFirstSubFeature"), True))
+        code = _optional(feature, "GetErrorCode")
+        if code:
+            errors[name] = int(code)
+    return errors
+
+
+def rebuild(model, tolerated):
+    """Rebuild; a False result is accepted only when no feature gained an error.
+
+    Returns the names of pre-existing errors that remain (for the report).
+    """
+    if _call(model, "EditRebuild3"):
+        return []
+    errors = feature_errors(model)
+    new = {name: code for name, code in errors.items() if tolerated.get(name) != code}
+    if new or not errors:
+        detail = ", ".join(f"{name} (kod {code})" for name, code in sorted(new.items()))
+        raise RuntimeError("parça yeniden oluşturulamadı" + (f"; hata veren unsurlar: {detail}" if detail else "")
+                           + ". Yarıçap/K bu geometriye uymuyor olabilir (ör. kısa flanş, kapalı köşe, kıvrım).")
+    return sorted(errors)
+
+
 class NoSheetMetal(ValueError):
     """A regular solid part is skipped, not reported as a failed assignment."""
 
@@ -207,7 +250,7 @@ def same(left, right):
     return True
 
 
-def write(model, expected):
+def write(model, expected, tolerated=None):
     parent, sheets = discover(model)
     candidates = {_identity(item): item for item in (parent, *sheets)}
     feature = candidates.get((expected.name, expected.kind))
@@ -238,8 +281,10 @@ def write(model, expected):
     finally:
         if not committed:
             _call(definition, "ReleaseSelectionAccess")
-    if not _call(model, "EditRebuild3"):
-        raise RuntimeError(f"{expected.name}: parça yeniden oluşturulamadı.")
+    try:
+        return rebuild(model, tolerated or {})
+    except RuntimeError as error:
+        raise RuntimeError(f"{expected.name}: {error}") from None
 
 
 def target(before, calculation):
@@ -255,6 +300,8 @@ class ParameterEdit:
         self.configuration = self.active_configuration()
         self.snapshots = {}
         self.changed = False
+        self.tolerated = {}
+        self.notes = []
 
     def active_configuration(self):
         return _get(_get(_get(self.model, "ConfigurationManager"), "ActiveConfiguration"), "Name")
@@ -281,6 +328,9 @@ class ParameterEdit:
                                "Ortak ana Sac-Levha parametresine tek K/R yazılabilir; parça değiştirilmedi.")
         if _call(parent, "GetErrorCode"):
             raise RuntimeError("Ana Sac-Levha unsuru mevcut bir yeniden oluşturma hatası içeriyor.")
+        # Errors that already exist elsewhere in the part must not block the edit,
+        # but any new error after the edit still does.
+        self.tolerated = feature_errors(self.model)
         self.before = read(parent)
         self.expected = target(self.before, calculation)
         self.calculation = calculation
@@ -307,7 +357,10 @@ class ParameterEdit:
             raise RuntimeError("Sac-Levha parametreleri okuma sonrasında değişti; yeniden tarayın.")
         # A setter may mutate the document even when ModifyDefinition fails.
         self.changed = True
-        write(self.model, self.expected)
+        remaining = write(self.model, self.expected, self.tolerated)
+        if remaining:
+            self.notes.append("Parçada K/R atamasından önce de var olan yeniden oluşturma hataları sürüyor: "
+                              + ", ".join(remaining) + ". Bunlar atamadan etkilenmedi; SolidWorks'te kontrol edin.")
         after = snapshot(self.model)
         if not same((self.expected,), after[:1]):
             raise RuntimeError("Sac-Levha K/R geri okuması girilen değerlerle eşleşmedi. "
@@ -316,13 +369,25 @@ class ParameterEdit:
                 or any(not math.isclose(a.thickness, b.thickness, rel_tol=0, abs_tol=1e-10)
                        for a, b in zip(before, after))):
             raise RuntimeError("Atama sırasında sac kalınlığı veya sac unsur listesi değişti.")
+        shared = []
         for name, baseline in self.snapshots.items():
             if name == self.configuration:
                 continue
             self.show(name)
-            if not same(baseline, self._snapshot()):
-                raise RuntimeError(f"K/R değişikliği başka konfigürasyona yayıldı: {name}.")
+            current = self._snapshot()
+            if same(baseline, current):
+                continue
+            # Sheet-Metal feature data is not configuration specific in SolidWorks: a
+            # configuration that had exactly the active definition (e.g. the derived
+            # "<config>SM-FLAT-PATTERN" / "SM-DÜZ-ÇOĞALTMA") follows the edit. That is
+            # expected; a configuration with its own, different values must not change.
+            if same(baseline, before) and same(current, after):
+                shared.append(name); continue
+            raise RuntimeError(f"K/R değişikliği farklı değerli başka konfigürasyona yayıldı: {name}.")
         self.show(self.configuration)
+        if shared:
+            self.notes.append("Sac-Levha parametreleri şu konfigürasyonlarla ortak; onlar da aynı K/R'yi aldı: "
+                              + ", ".join(shared) + ".")
         if not same(after, snapshot(self.model)):
             raise RuntimeError("Konfigürasyon dönüşünde Sac-Levha parametreleri değişti.")
         parent, _ = discover(self.model)
@@ -345,7 +410,7 @@ class ParameterEdit:
                         # restoring the known parent definition before giving up.
                         actual = None
                     if actual is None or not same((state,), (actual,)):
-                        write(self.model, state)
+                        write(self.model, state, self.tolerated)
             for name, baseline in self.snapshots.items():
                 self.show(name)
                 if not same(baseline, self._snapshot()):

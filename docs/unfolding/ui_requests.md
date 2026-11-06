@@ -5,6 +5,20 @@ Arayüz `modules/sheet_unfolding/` altında, `core.unfolding.UnfoldService` ile
 Aşağıdakiler ekranın şu an yerel bir sunum tablosuyla çözdüğü veya hiç
 gösteremediği konulardır; çekirdekte bir alan olarak gelirse arayüz onu kullanır.
 
+> Motor 1.1.0 ile karşılandı: 1 (kategori/varyant etiketi; kaynak modellerde
+> `ShapeSummary.category/variant_labels`) ve 2 (eski planlanan ailelerin hepsi
+> artık çalışıyor). Arayüz yalnız kategori küçük resmi ve arama eş anlamlılarını
+> ekliyor. Açık kalan yeni istek:
+>
+> 8. **Kaynak modeller için kroki:** 191 kaynak modelin `ShapeSchema.sketch` /
+>    `dimension_id` konumları yok; arayüz kroki alanını gizleyip sembolleri form
+>    etiketinde gösteriyor. Kaynak `thumbPng` bilgisi için lisanslı/bağımsız bir
+>    küçük resim veya basit giriş krokisi gelirse ölçü üzerinde düzenleme açılır.
+> 9. **Örnek varsayılanı:** bazı kaynak varsayılanları doğrulamadan geçip hesapta
+>    hata veriyor (ör. `pipe-to-oblique-cone-vertical-trunk`); arayüz "Çalışan
+>    örneği yükle" düğmesi sunuyor. Şemada `example_available` / örnek isteği
+>    alanı olursa JSON dosya yolu yerine o kullanılır.
+
 1. **Şekil sunumu:** `ShapeSummary` içinde kategori, atölye arama adları
    (kurtağzı, pantolon…), küçük önizleme çizgileri ve varyant başlıkları
    (ör. `{"variant_id": "frustum", "label": "Kesik koni"}`). Şu an arayüzdeki

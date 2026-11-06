@@ -553,7 +553,7 @@ class BasePage(QWidget):
 
     SUCCESS_WORDS = ('kaydedildi', 'oluşturuldu', 'tamamlandı', 'dışa aktarıldı', 'aktarıldı', 'okundu',
                      'eklendi', 'kopyalandı', 'güncellendi', 'doğrulandı')
-    WARNING_WORDS = ('kısmen', 'uyarı', 'eksik', 'atlandı', 'durduruldu')
+    WARNING_WORDS = ('kısmen', 'uyarı', 'eksik', 'atlandı', 'atlanan', 'hatalı', 'durduruldu')
 
     @classmethod
     def status_tone(cls, text, error=False, tone=None):
@@ -563,6 +563,9 @@ class BasePage(QWidget):
         if tone in ('success', 'warning', 'muted'):
             return tone
         first = str(text).splitlines()[0].casefold() if str(text).strip() else ''
+        # Summary counts: "0 uyarılı, 0 atlanan, 0 hatalı" is a clean result, "2 uyarılı" is not.
+        import re
+        first = re.sub(r'(?<![\d.,])0\s+\w+', '', first)
         if any(word in first for word in cls.WARNING_WORDS):
             return 'warning'
         if any(word in first for word in cls.SUCCESS_WORDS):

@@ -12,6 +12,8 @@ REQUIRED = (
     'modules/belt_drive/catalog/data/tosyali-user-pdf.json',
     'modules/belt_drive/catalog/data/tosyali-import-audit.json',
     'modules/belt_drive/examples/automatic-synthetic-catalog.json',
+    'docs/unfolding/unfoldo_inventory.json',
+    'docs/unfolding/examples/source_models.json',
 )
 
 

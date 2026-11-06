@@ -70,6 +70,7 @@ def main():
             '--add-data', f'{ROOT / "packaging/licenses"};licenses',
             '--add-data', f'{ROOT / "docs/THIRD_PARTY_NOTICES.md"};licenses',
             '--add-data', f'{ROOT / "docs/unfolding/unfoldo_inventory.json"};docs/unfolding',
+            '--add-data', f'{ROOT / "docs/unfolding/examples/source_models.json"};docs/unfolding/examples',
             '--add-data', f'{ROOT / "assets/GOK_logo_light_UI_1024.png"};assets',
             '--add-data', f'{ROOT / "assets/GOK_logo_dark_UI_1024.png"};assets',
             '--add-data', f'{ROOT / "assets/GOK_app_windows.ico"};assets',

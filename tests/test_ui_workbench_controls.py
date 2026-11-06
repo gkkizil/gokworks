@@ -91,6 +91,11 @@ def test_status_tones_distinguish_success_warning_and_error(qtbot, tmp_path):
     assert BasePage.status_tone('Teknik resim kısmen tamamlandı') == 'warning'
     assert BasePage.status_tone('Kaydedildi', error=True) == 'error'
     assert BasePage.status_tone('Değerler güncel') == 'muted'
+    # Batch summaries: zero counts do not make a clean run look like a warning.
+    assert BasePage.status_tone('Tamamlandı · 4 başarılı, 0 uyarılı, 0 atlanan, 0 hatalı') == 'success'
+    assert BasePage.status_tone('Tamamlandı · 3 başarılı, 1 uyarılı, 0 atlanan, 0 hatalı') == 'warning'
+    assert BasePage.status_tone('Tamamlandı · 3 başarılı, 0 uyarılı, 0 atlanan, 1 hatalı') == 'warning'
+    assert BasePage.status_tone('Tamamlandı · 10 başarılı, 0 uyarılı, 2 atlanan, 0 hatalı') == 'warning'
     assert BasePage.status_tone('Değerler güncel', tone='success') == 'success'
     w = window(qtbot, tmp_path)
     w.navigate('weight')

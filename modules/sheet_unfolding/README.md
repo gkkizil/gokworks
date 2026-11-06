@@ -13,13 +13,26 @@ ve varsayılanlar `get_schema` sonucudur.
 
 ## Ekran
 
-- **Sol:** şekil galerisi (arama: kare yuvarlak, redüksiyon, kurtağzı…; kategori),
-  varyant, son kullanılanlar. Motorda olmayan aileler "Planlanan" olarak görünür, seçilemez.
+- **Sol:** şekil galerisi (arama: kare yuvarlak, redüksiyon, kurtağzı, pantolon,
+  bombe, helezon…; kategori), varyant, son kullanılanlar. Motor 1.1.0 kaynak kataloğu
+  (51 aile / 191 varyant / 11 kategori) adları, kategorileri ve varyant etiketleriyle
+  doğrudan motordan gelir; her kategorinin küçük resmi vardır. İlk beş motor ailesi
+  krokili hızlı giriş için "Temel şekiller · krokili" kategorisinde ayrı durur.
 - **Orta:** ölçülü şema — her ölçü çizim üzerinde düzenlenir ve formla eşzamanlıdır;
   ölçüler, birim (mm/inch, fiziksel parça değişmez), ölçü yüzeyi (iç/orta/dış şemasıyla),
   malzeme, birleşim (alın/bindirme + pay), dikiş başlangıç açısı, çevresel bölme, fiyat.
   "1,2" ve "1.2" kabul edilir; belirsiz binlik ayırıcı reddedilir. Enter hesaplar, Esc geri alır.
   Servisin alan hataları ilgili alanın altına yazılır.
+- **Kaynak modellerde (motor 1.1.0)** ölçü formunun altında: *Kesim düzeni*
+  (`model_options.cut_type`, ör. tek parça / iki yarım / 4 levha), *Kenar payları ve
+  yardımcı çizgiler* (üst/alt/sol/sağ kenar payı, şerit payı yalnız modelde varsa;
+  kanallarda yalnız duvar flanşı ve duvar ucu bindirmesi; yardımcı G çizgisi bölmesi
+  12–96, numaralama — numarasız modellerde kapalı), *Model bilgisi ve sınırlar*
+  (yöntem, doğrulama aşamaları, imalat onayı yok, kısıtlar Türkçe, kaynak bağlantısı)
+  ve *Çalışan örneği yükle* (`docs/unfolding/examples/source_models.json`; kalınlık,
+  malzeme ve birim korunur). Köşegen gibi ayrık parametreler açılır listedir. Kroki
+  olmayan modellerde boş kroki alanı gizlenir; semboller form etiketlerindedir.
+  Pay uzunlukları birimle çevrilir; açı/adet/seçenek çevrilmez.
 - **Sağ:** durum + özet şeridi (açınım ölçüsü, alan, kesim boyu, kütle, parça);
   3D önizleme ağı ile servisin ön/üst tel görünüşleri; açınım (gerçek çizgi/yay,
   kesim/delik/büküm/yardımcı/dikiş/ölçü katmanları, sığdır, 1:1, servis
