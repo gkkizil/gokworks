@@ -874,6 +874,9 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False,
                 changed = parameter_editor.changed
                 after = parameter_editor.after
                 notes.extend(parameter_editor.notes)
+                stage = "Önceki konfigürasyonda son geometri doğrulaması"
+                _show_configuration(model, original_config)
+                parameter_editor.verify_current_configuration()
                 if save:
                     stage = "Kaydetmeden önce konfigürasyonu geri açma"
                     _show_configuration(model, original_config)

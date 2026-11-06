@@ -149,6 +149,7 @@ class DirectParameterTests(KApplyTestCase):
     def test_existing_unrelated_rebuild_error_does_not_block_assignment(self):
         sketch = FakeFeature(name='Taslak7', kind='ProfileFeature')
         sketch.GetErrorCode = lambda: 22
+        sketch.GetParents = lambda: ()  # It is genuinely independent of the edited sheet.
         self.model.feature.next = sketch
         original = self.model.EditRebuild3
         self.model.EditRebuild3 = lambda: (original(), False)[1]     # SolidWorks reports the old error again
@@ -156,6 +157,113 @@ class DirectParameterTests(KApplyTestCase):
         self.assertEqual(status, 'success', detail)
         self.assertIn('Taslak7', detail)
         self.assertEqual(self.model.states['Default']['k'], .274)
+
+    def test_shared_configuration_new_geometry_error_is_rolled_back_not_saved(self):
+        flat='DefaultSM-DÜZ-ÇOĞALTMA'
+        self.model.states[flat]=deepcopy(self.model.states['Default']);self.model.propagate=True
+        flange=FakeFeature(name='Kenar-Flanşı3',kind='EdgeFlange')
+        flange.GetErrorCode=lambda:41 if self.model.config==flat and self.model.states[flat]['k']==.274 else 0
+        self.model.feature.next=flange;self.model.EditRebuild3=lambda:not flange.GetErrorCode()
+        before=deepcopy(self.model.states)
+        status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertIn('Kenar-Flanşı3',detail)
+        self.assertEqual(self.model.save_count,0);self.assertEqual(self.model.states,before)
+
+    def test_error_cleared_by_configuration_switch_is_not_tolerated_after_write(self):
+        self.model.states['Other']=dict(deepcopy(self.model.states['Default']),k=.41)
+        old={'present':True};sketch=FakeFeature(name='Taslak7',kind='ProfileFeature')
+        sketch.GetParents=lambda:()
+        sketch.GetErrorCode=lambda:22 if old['present'] or self.model.states['Default']['k']==.274 else 0
+        self.model.feature.next=sketch;show=self.model.ShowConfiguration2
+        def switch(name):
+            result=show(name)
+            if name=='Default':old['present']=False
+            return result
+        self.model.ShowConfiguration2=switch;self.model.EditRebuild3=lambda:not sketch.GetErrorCode()
+        before=deepcopy(self.model.states);status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertEqual(self.model.save_count,0)
+        self.assertEqual(self.model.states,before)
+
+    def test_existing_sheet_bend_error_is_not_an_unrelated_sketch_error(self):
+        flange=FakeFeature(name='Kenar-Flanşı3',kind='EdgeFlange');flange.GetErrorCode=lambda:41
+        self.model.feature.next=flange;self.model.EditRebuild3=lambda:False
+        before=deepcopy(self.model.states);status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertIn('Kenar-Flanşı3',detail)
+        self.assertEqual(self.model.feature.modify_count,0);self.assertEqual(self.model.states,before)
+        self.assertEqual(self.model.save_count,0)
+
+    def test_error_resolved_during_other_configuration_preflight_is_not_tolerated_later(self):
+        flat = 'DefaultSM-DÜZ-ÇOĞALTMA'
+        self.model.states[flat] = deepcopy(self.model.states['Default'])
+        self.model.propagate = True
+        old = {'present': True}
+        sketch = FakeFeature(name='Taslak7', kind='ProfileFeature')
+        sketch.GetParents = lambda: ()
+        sketch.GetErrorCode = lambda: 22 if self.model.config == flat and (
+            old['present'] or self.model.states[flat]['k'] == .274) else 0
+        self.model.feature.next = sketch
+
+        def rebuild():
+            if self.model.config == flat and self.model.states[flat]['k'] != .274:
+                old['present'] = False
+            return not sketch.GetErrorCode()
+
+        self.model.EditRebuild3 = rebuild
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('Taslak7', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_failed_sketch_depending_on_edited_sheet_cannot_be_tolerated(self):
+        sketch=FakeFeature(name='Taslak7',kind='ProfileFeature');sketch.GetErrorCode=lambda:22
+        sketch.GetParents=lambda:(self.model.feature,)
+        self.model.feature.next=sketch;self.model.EditRebuild3=lambda:False
+        status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertEqual(self.model.feature.modify_count,0)
+        self.assertEqual(self.model.save_count,0)
+
+    def test_return_to_original_configuration_is_verified_before_save(self):
+        self.model.states['Other']=deepcopy(self.model.states['Default']);self.model.propagate=True
+        self.model.ShowConfiguration2('Other');visits=[];show=self.model.ShowConfiguration2
+        def switch(name):
+            if name=='Other':visits.append(name)
+            return show(name)
+        self.model.ShowConfiguration2=switch
+        flange=FakeFeature(name='Son-Flanş',kind='EdgeFlange')
+        flange.GetErrorCode=lambda:41 if self.model.config=='Other' and len(visits)>=3 and self.model.states['Other']['k']==.274 else 0
+        self.model.feature.next=flange;self.model.EditRebuild3=lambda:not flange.GetErrorCode()
+        before=deepcopy(self.model.states);status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertEqual(self.model.save_count,0)
+        self.assertEqual(self.model.states,before);self.assertEqual(self.model.config,'Other')
+
+    def test_rollback_uses_each_configurations_own_existing_error_codes(self):
+        self.model.states['Other']=dict(deepcopy(self.model.states['Default']),k=.41,radius=.003)
+        sketch=FakeFeature(name='Taslak7',kind='ProfileFeature');sketch.GetParents=lambda:()
+        sketch.GetErrorCode=lambda:22 if self.model.config=='Default' else 23
+        self.model.feature.next=sketch;self.model.EditRebuild3=lambda:False
+        self.model.propagate=True;modify=self.model.feature.ModifyDefinition
+        def leak_once(*args):
+            result=modify(*args);self.model.propagate=False;return result
+        self.model.feature.ModifyDefinition=leak_once
+        before=deepcopy(self.model.states);status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertNotIn('GERİ ALMA HATASI',detail)
+        self.assertEqual(self.model.states,before);self.assertEqual(self.model.save_count,0)
+
+    def test_failed_configuration_restore_does_not_prevent_restoring_later_ones(self):
+        self.model.states['Other']=dict(deepcopy(self.model.states['Default']),k=.41)
+        self.model.states['Last']=dict(deepcopy(self.model.states['Default']),k=.42)
+        self.model.propagate=True;modify=self.model.feature.ModifyDefinition;writes=[]
+        def sometimes_fails(*args):
+            writes.append(self.model.config)
+            if self.model.config=='Other':return False
+            result=modify(*args);self.model.propagate=False;return result
+        self.model.feature.ModifyDefinition=sometimes_fails
+        before=deepcopy(self.model.states);status,detail,_=self.process(save=True)
+        self.assertEqual(status,'error',detail);self.assertIn('GERİ ALMA HATASI',detail)
+        self.assertEqual(self.model.states['Last'],before['Last'])
+        self.assertEqual(self.model.save_count,0);self.assertIn('Last',writes)
 
     def test_new_rebuild_error_names_the_feature_and_restores(self):
         flange = FakeFeature(name='Kenar-Flanşı3', kind='EdgeFlange')
@@ -168,6 +276,41 @@ class DirectParameterTests(KApplyTestCase):
         self.assertIn('Kenar-Flanşı3 (kod 41)', detail)
         self.assertIn('geri yüklendi ve kontrol edildi', detail)
         self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_successful_rebuild_return_cannot_hide_a_feature_error(self):
+        flange = FakeFeature(name='Kenar-Flanşı3', kind='EdgeFlange')
+        flange.GetErrorCode = lambda: 41 if self.model.states['Default']['k'] == .274 else 0
+        self.model.feature.next = flange
+        self.model.EditRebuild3 = lambda: True
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('Kenar-Flanşı3', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_final_target_rebuild_parameter_override_is_not_saved(self):
+        self.model.states['Other'] = dict(deepcopy(self.model.states['Default']), k=.41)
+        self.model.ShowConfiguration2('Other')
+        rebuild = self.model.EditRebuild3
+        post_write_rebuilds = []
+
+        def overridden():
+            result = rebuild()
+            if self.model.config == 'Default' and self.model.feature.modify_count:
+                post_write_rebuilds.append(True)
+                if len(post_write_rebuilds) == 2:
+                    self.model.states['Default']['k'] = .399
+            return result
+
+        self.model.EditRebuild3 = overridden
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('parametreleri değişti', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.config, 'Other')
         self.assertEqual(self.model.save_count, 0)
 
     def test_failed_rollback_is_visible_and_open_document_is_retained(self):

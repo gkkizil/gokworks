@@ -8,6 +8,7 @@ import math
 import threading
 
 import numpy as np
+import shiboken6
 from PySide6.QtCore import Qt, Signal, Slot, QObject, QRunnable, QThreadPool, QTimer
 from PySide6.QtGui import QImage, QPainter, QColor
 from PySide6.QtWidgets import QWidget, QStackedLayout, QApplication
@@ -214,7 +215,14 @@ class RenderJob(QRunnable):
             result = raster(self.mesh, *self.size, self.state, self.stop, self.background)
         except Exception:
             result = None
-        self.signals.done.emit(self.generation, result)
+        try:
+            self.signals.done.emit(self.generation, result)
+        except RuntimeError:
+            # Qt can destroy the emitter while a native render is finishing
+            # at shutdown. A live view must still receive cancelled results
+            # so it can release its running slot and draw the next frame.
+            if shiboken6.isValid(self.signals):
+                raise
 
 
 class SoftwareCanvas(QWidget):
@@ -267,7 +275,14 @@ class MeshView(QWidget):
             if canvas: canvas.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.timer = QTimer(self); self.timer.setSingleShot(True); self.timer.setInterval(35)
         self.timer.timeout.connect(self.render)
-        self.destroyed.connect(self.cancel_render)
+        # A slot bound to this QWidget is disconnected during its teardown.
+        # Capture only the stop token so cancellation happens before Qt waits
+        # for the child thread pool to finish.
+        render_state = self._render_state = [None]
+        def cancel_on_destroy(*_):
+            if render_state[0] is not None:
+                render_state[0].set()
+        self.destroyed.connect(cancel_on_destroy)
 
     def set_background(self, color):
         """Repaint both render paths on the theme's canvas colour."""
@@ -356,11 +371,13 @@ class MeshView(QWidget):
         task.signals.done.connect(self.rendered, Qt.QueuedConnection)
         task.scene_generation = self.scene_generation
         self.running = task
+        self._render_state[0] = task.stop
         self.pool.start(task)
 
     @Slot(int, object)
     def rendered(self, generation, image):
         task, self.running = self.running, None
+        self._render_state[0] = None
         same_scene = task is not None and getattr(task, 'scene_generation', None) == self.scene_generation
         if image is not None and (generation == self.generation or (self.dragging and same_scene)):
             self.software.image = image; self.software.update(); self.frameReady.emit()

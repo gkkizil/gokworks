@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComb
                                QLineEdit, QListView, QListWidget, QListWidgetItem, QSplitter,
                                QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget, QStackedWidget, QTextBrowser)
 
-from gui_qt.components import BasePage, Disclosure, button, label, scroll, section_header
+from gui_qt.components import AdaptiveRow, BasePage, Disclosure, button, label, scroll, section_header
 from gui_qt.theme import COLORS
 
 from .drawing import LAYERS, DevelopmentView, ReferenceSketch, SchemaSketch
@@ -858,14 +858,16 @@ class UnfoldPage(BasePage):
         self.focus_button = button('Yalnız seçili parça', flat=True); self.focus_button.setCheckable(True)
         self.focus_button.toggled.connect(self.flat_view.set_focus_selected)
         tools.addWidget(self.measure_button); tools.addWidget(self.focus_button); tools.addStretch(1)
-        layers = QHBoxLayout(); layers.setSpacing(8); self.layer_boxes = {}
+        layers = QVBoxLayout(); layers.setSpacing(2); self.layer_boxes = {}
         for key, title, token, style, width in LAYERS:
             box = QCheckBox(f'{title} {"━" if style == Qt.SolidLine else "╍" if style == Qt.DashLine else "┄" if style == Qt.DotLine else "─·"}')
             box.setChecked(True); box.toggled.connect(lambda on, k=key: self.flat_view.set_layer(k, on))
             box.setToolTip({'construction': 'Yardımcı doğrular (ana doğrular); abkant büküm sayısı değildir.',
                             'bend': 'Gerçek büküm çizgileri (servis bend katmanı).'}.get(key, title))
-            self.layer_boxes[key] = box; layers.addWidget(box)
-        layers.addStretch(1)
+            self.layer_boxes[key] = box
+        boxes = list(self.layer_boxes.values())
+        for start in range(0, len(boxes), 4):
+            layers.addWidget(AdaptiveRow(*boxes[start:start+4], spacing=8))
         self.measure_label = label('', 'muted')
         flat_panel = QWidget(); flat_box = QVBoxLayout(flat_panel); flat_box.setContentsMargins(0, 0, 0, 0)
         flat_box.addWidget(section_header('Açınım')); flat_box.addLayout(tools); flat_box.addLayout(layers)
