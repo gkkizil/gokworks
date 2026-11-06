@@ -1,0 +1,66 @@
+{
+  "schema": "gokworks.unfolding.project",
+  "version": 1,
+  "project": {
+    "items": [
+      {
+        "code": "Ornek-K040-uretim-onayi-yok",
+        "request": {
+          "shape_id": "bent_profile",
+          "variant_id": "double",
+          "parameters": {
+            "bend_1_deg": 90.0,
+            "bend_2_deg": -90.0,
+            "flange_1": 20.0,
+            "flange_2": 50.0,
+            "flange_3": 20.0,
+            "length_reference": 1,
+            "radius_1": 2.0,
+            "radius_2": 2.0,
+            "width": 100.0
+          },
+          "schema_version": 1,
+          "request_id": "6c8f66ec1865457f9393f2d20ae5b483",
+          "revision": 0,
+          "input_units": "mm",
+          "thickness": 2.0,
+          "dimension_reference": "mid",
+          "material": {
+            "name": "",
+            "density_kg_m3": null,
+            "unit_price": null,
+            "price_unit": "kg",
+            "currency": ""
+          },
+          "seam_options": {
+            "start_angle_deg": 0.0
+          },
+          "split_options": {
+            "count": 1
+          },
+          "joint_options": {
+            "kind": "butt",
+            "overlap": 0.0
+          },
+          "development_options": {
+            "geometry_tolerance_mm": 1e-06,
+            "chord_error_mm": 0.02,
+            "mesh_error_mm": 0.5,
+            "max_samples": 4096,
+            "kerf_mm": 0.0
+          },
+          "model_options": {},
+          "forming_options": {
+            "k_factor": 0.4
+          }
+        },
+        "quantity": 1
+      }
+    ],
+    "name": "Açık kullanıcı K girdisi örneği; malzeme doğrulaması yok",
+    "code": "",
+    "revision": "",
+    "quantity": 1,
+    "engine_version": "1.2.0"
+  }
+}

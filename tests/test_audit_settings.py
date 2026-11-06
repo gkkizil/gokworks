@@ -10,6 +10,29 @@ import pytest
 from shared.settings import save_settings
 
 
+@pytest.mark.parametrize('value',['1e309','-1e999'])
+def test_overflowing_json_number_is_backed_up_and_does_not_break_future_saves(qtbot,tmp_path,value):
+    from gui_qt.settings import SettingsStore
+    path=tmp_path/'settings.json';original='{"custom":{"mass":'+value+'}}'
+    path.write_text(original)
+    store=SettingsStore(path);store.set('appearance','light')
+    assert store.flush(),store.last_error
+    assert json.loads(path.read_text())=={'appearance':'light'}
+    backups=list(tmp_path.glob('settings.invalid-*.json'))
+    assert len(backups)==1 and backups[0].read_text()==original
+
+
+def test_deeply_nested_corrupt_settings_do_not_crash_loading_or_block_recovery(qtbot,tmp_path):
+    from gui_qt.settings import SettingsStore
+    from shared.settings import load_settings
+    path=tmp_path/'settings.json';original='{"custom":'+'['*3000+'0'+']'*3000+'}'
+    path.write_text(original)
+    assert load_settings(path)=={}
+    store=SettingsStore(path);store.set('appearance','dark');assert store.flush()
+    backups=list(tmp_path.glob('settings.invalid-*.json'))
+    assert len(backups)==1 and backups[0].read_text()==original
+
+
 def test_unique_temporary_preserves_unrelated_file_and_cleans_up_on_failure(tmp_path, monkeypatch):
     path = tmp_path/'settings.json'; path.write_text('{"old":true}')
     unrelated = path.with_suffix('.tmp'); unrelated.write_text('user data')

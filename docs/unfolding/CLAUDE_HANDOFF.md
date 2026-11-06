@@ -108,3 +108,15 @@ Kaynakla eşdeğerliği doğrulanmamış torus E/Z/X yorumu ve dış ölçülü 
 gönye varsayımı `SOURCE_MODELS.md` içinde açıkça listelenmiştir. Bunları
 üretime uygun diye yeniden etiketleme. Windows/EXE/SolidWorks/ODA canlı
 kabulü ayrıca yapılmalıdır; Linux/OCP testini bu kabulün yerine yazma.
+# Motor 1.2.0 — şekillendirme entegrasyonu (6 Kasım 2026)
+
+- Opsiyonel `forming_options` istek alanını aç/kaydet, çoğaltma ve servis DTO'larında koru.
+- `forming_report` sonuç alanı malzeme/proses kaynağını, BA/BD, yaylanma ve `NOT_EVALUATED` durumlarını taşır.
+- `nominal_part`/`nominal_geometry_2d` telafiden önceki geometriyi korur; nominal görünümü telafili diye etiketleme.
+- Çıktı `development`: `current`, `nominal`, `compensated`, `comparison`. Desteklenmeyen telafi dışa aktarımı reddedilir.
+- Yeni yerel `bent_profile` ailesi (tek/iki büküm) kaynak Unfoldo'nun 191 envanterine eklenmez.
+- GUI'deki `FormingPanel`, çıktı seçimi ve sonuç sekmesi gerçek çekirdek fonksiyonlarına bağlıdır.
+- Kıvırma ile segment birleştirme farklı proseslerdir; kaynak katalog ifadesi kaynaklı birleştirme hesabı değildir.
+- STEP nominal hedef orta yüzeydir; telafili 2D açınım veya SW feature tree diye sunulmaz.
+- DWG düğmesi yalnız ODA bulunduğunda etkin; canlı ODA testi ayrıca gerekir.
+- Ayrıntılı sözleşme, fiziksel varsayımlar ve kaynaklar: [FORMING.md](FORMING.md).

@@ -1,6 +1,7 @@
 """PDF ekranının klasör ve seçenek tercihleri."""
 
 import json
+import math
 import os
 from pathlib import Path
 from tempfile import mkstemp
@@ -30,10 +31,31 @@ def _reject_constant(name):
     raise ValueError(f'Non-finite JSON number {name} in settings')
 
 
+def _finite_float(text):
+    value = float(text)
+    if not math.isfinite(value):
+        _reject_constant(text)
+    return value
+
+
 def strict_loads(text):
-    """json.loads without NaN/Infinity: save_settings can never write those back,
-    so accepting them would make every later save fail."""
-    return json.loads(text, parse_constant=_reject_constant)
+    """Reject numbers/depths that cannot safely be saved as preferences again."""
+    try:
+        data = json.loads(text, parse_constant=_reject_constant, parse_float=_finite_float)
+    except RecursionError as error:
+        raise ValueError('Settings JSON nesting is too deep') from error
+    # Python versions differ in how deeply the decoder can recurse. Settings
+    # have only a few levels; keep the same safe limit on every platform and
+    # do not recurse while inspecting an untrusted file.
+    pending = [(data, 0)]
+    while pending:
+        value, depth = pending.pop()
+        if isinstance(value, (dict, list)):
+            if depth > 128:
+                raise ValueError('Settings JSON nesting exceeds 128 levels')
+            children = value.values() if isinstance(value, dict) else value
+            pending.extend((child, depth + 1) for child in children)
+    return data
 
 
 def load_settings(path=SETTINGS_PATH):

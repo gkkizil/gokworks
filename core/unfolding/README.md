@@ -3,6 +3,12 @@
 GUI, SolidWorks, internet veya LLM bağlantısı gerektirmeyen servis.
 Başlangıç sözleşmesi: [contract_v1.md](../../docs/unfolding/contract_v1.md).
 
+Motor **1.2.0**: opsiyonel malzeme/proses verisi, BA/BD ve K telafisi,
+analitik/ölçüm kaynaklı yaylanma, mesh metrik analizi ve nominal/telafili
+çıktı seçimi [FORMING.md](../../docs/unfolding/FORMING.md) içinde açıklanır.
+`bent_profile/single,double` yeni yerel hesaplarıdır; kaynak kataloğun 191
+sayısına dahil edilmez. Üretim verisi girilmezse nominal davranış korunur.
+
 Motor 1.1.1 kod denetimi ve düzeltmeleri:
 [AUDIT_FIXES.md](../../docs/unfolding/AUDIT_FIXES.md). Eski projeler korunur;
 sonuçlar motor sürümüne göre yeniden hesaplanır.

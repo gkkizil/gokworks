@@ -20,6 +20,7 @@ LAYERS = (  # key, title, pen token, style, width
     ('construction', 'Yardımcı', 'muted', Qt.DotLine, .8),
     ('seam', 'Dikiş', 'warning', Qt.DashDotLine, 1.4),
     ('dimension', 'Ölçü', 'muted', Qt.SolidLine, .8),
+    ('nominal', 'Nominal karşılaştırma', 'warning', Qt.DashDotLine, 1.),
 )
 LAYER_KEYS = tuple(item[0] for item in LAYERS)
 

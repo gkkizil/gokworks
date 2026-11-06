@@ -27,7 +27,7 @@ class OpenGLCanvas(QOpenGLWidget):
             self.program = QOpenGLShaderProgram(self)
             vertex = '''attribute vec3 position; attribute vec3 normal;
                 uniform mat4 mvp; uniform mat4 modelView; varying vec3 n;
-                void main(){gl_Position=mvp*vec4(position,1.0); n=mat3(modelView)*normal;}'''
+                void main(){gl_Position=mvp*vec4(position,1.0); n=(modelView*vec4(normal,0.0)).xyz;}'''
             fragment = '''#ifdef GL_ES\nprecision mediump float;\n#endif
                 varying vec3 n; uniform bool lines;
                 void main(){float l=.42+.58*abs(dot(normalize(n),normalize(vec3(.25,.45,1.))));

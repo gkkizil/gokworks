@@ -5,6 +5,7 @@ import re
 
 INCH = 25.4
 METHOD_TITLES = {
+    'explicit_bend_profile': 'Sabit yarıçaplı bükümlü profil',
     'model_specific': 'Modele özgü hesap yöntemi',
     'sampled_developable': 'Geliştirilebilir yüzey · örneklenmiş kesim eğrisi',
     'faceted_real_length': 'Gerçek uzunluklarla fasetli açınım',
@@ -16,7 +17,7 @@ METHOD_TITLES = {
     'forming_approximation': 'Şekillendirme için yaklaşık hesap',
     None: 'Yöntem bildirilmedi',
 }
-REFERENCE_TITLES = {'inner': 'İç yüzey', 'mid': 'Orta (nötr) yüzey', 'outer': 'Dış yüzey'}
+REFERENCE_TITLES = {'inner': 'İç yüzey', 'mid': 'Geometrik orta yüzey', 'outer': 'Dış yüzey'}
 
 
 def parse(text, label='Değer'):

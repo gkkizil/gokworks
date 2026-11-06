@@ -42,6 +42,7 @@ def export_project(service,project,options,*,cancel_token=None):
                                 common=dict(item_code=item.code,part_id=part.id,request_id=result.request_id,
                                     revision=result.revision,input_hash=result.input_hash,format=kind,quantity=quantity*part.quantity,
                                     calculation_method=result.calculation_method)
+                                common.update(development=options.development,forming_report=to_data(result.forming_report))
                                 try:
                                     _write(result,(part,),opts,target,kind,cancel_token)
                                     records.append(dict(common,file=target.name,status='complete',sha256=hashlib.sha256(target.read_bytes()).hexdigest()))

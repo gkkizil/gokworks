@@ -20,6 +20,19 @@ Test: `python -m pytest modules/k_factor/tests`.
   türetilen `<konfigürasyon>SM-FLAT-PATTERN` / `SM-DÜZ-ÇOĞALTMA`) aynı K/R'yi alır ve
   raporda "ortak" olarak listelenir. Farklı değerli bir konfigürasyon değişirse atama
   geri alınır.
-- `EditRebuild3` başarısız dönse bile, parçada atamadan **önce** de var olan unsur
-  hataları (ör. kopuk taslak ilişkisi) atamayı engellemez; raporda not edilir. Atamayla
-  yeni hata çıkan unsurlar adı ve hata koduyla raporlanır ve değişiklik geri alınır.
+- Atama öncesinde ve sonrasında her sac konfigürasyonu yeniden oluşturulur;
+  paylaşılan açınım konfigürasyonlarında da unsur hataları kontrol edilir.
+  Önceki konfigürasyona son dönüşten sonra parametreler ve geometri yeniden
+  doğrulanmadan başarı veya dosyaya kayıt verilmez. `EditRebuild3=True` tek başına
+  başarı kanıtı değildir.
+- Yalnız atamadan hemen önce var olan ve okunabilir `GetParents` bağımlılık
+  ağacında düzenlenen sac unsurlarına bağlı olmayan taslak hataları tolere edilir.
+  Gövde/büküm hataları ve bağımsızlığı doğrulanamayan hatalar işlemi durdurur.
+  Tolere edilen taslakların aynı hata koduyla sürdüğü raporda açıkça belirtilir;
+  bu, bütün parça geometrisinin hatasız olduğu anlamına gelmez.
+- Geri alma her konfigürasyonun kendi parametre ve hata kodu yedeğiyle yapılır.
+  Bir konfigürasyon geri yüklenemezse kalanlar yine denenir; doğrulanamayan geri
+  alma açık hata olarak raporlanır ve parça kaydedilmez.
+
+Bu kontrollerin bağımsız Python/COM sözleşme testleri canlı SolidWorks testi
+değildir. Gerçek model doğrulaması Windows + SolidWorks ortamında ayrıca gerekir.

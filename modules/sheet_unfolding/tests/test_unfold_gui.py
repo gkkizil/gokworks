@@ -276,7 +276,8 @@ def test_source_project_options_survive_form_recalculation_and_unit_change(page,
 def test_source_gallery_has_category_thumbnails_and_basic_shapes_apart(page):
     source = [s for s in page.shapes if s.get('source_ids')]
     assert source and all(s['preview'] for s in source)
-    assert {s['category'] for s in page.shapes if not s.get('source_ids')} == {'Temel şekiller · krokili'}
+    assert {s['category'] for s in page.shapes if not s.get('source_ids')} == {'Temel şekiller · krokili','Şekillendirme'}
+    assert [s['shape_id'] for s in page.shapes if s['category']=='Şekillendirme']==['bent_profile']
     page.shape_search.setText('pantolon')
     assert page.shape_tree.count() >= 2 and all(page.shape_tree.item(i).flags() & Qt.ItemIsEnabled for i in range(page.shape_tree.count()))
 
