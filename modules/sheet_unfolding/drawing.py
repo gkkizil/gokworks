@@ -12,7 +12,6 @@ from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen, QFont, QBrush
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QGraphicsSimpleTextItem, QGraphicsEllipseItem, QLineEdit, QWidget
 
 from gui_qt.theme import COLORS
-from .numbers import fmt
 
 LAYERS = (  # key, title, pen token, style, width
     ('cut', 'Dış kesim', 'text', Qt.SolidLine, 1.8),

@@ -22,6 +22,11 @@ def edge_allowances(part,groups,n,material,options,*,joint_applied=False):
         amount=opts.get('lap_'+key,0.)+(opts.get('strip_lap',0.)+joint if key=='right' else 0.)
         if not amount:continue
         line=LineString(points)
+        if key=='right' and joint_applied and n['joint_options']['kind']=='lap':
+            # The analytic cone builder has already added the joint strip.
+            # Extra edge/strip pay starts at that strip's outer seam, rather
+            # than disappearing inside the material which is already present.
+            line=line.offset_curve(-n['joint_options']['overlap'],join_style='mitre')
         shapes.append(line.buffer(-amount,single_sided=True,cap_style='flat',join_style='mitre'))
         seams.extend(Line2D(a,b) for a,b in zip(points,points[1:]) if math.dist(a,b)>options.geometry_tolerance_mm)
     combined=unary_union(shapes)
