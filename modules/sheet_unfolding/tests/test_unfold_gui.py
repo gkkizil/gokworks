@@ -270,3 +270,68 @@ def test_source_project_options_survive_form_recalculation_and_unit_change(page,
     saved=page.service.project(page.project_parts,'Kaynak model')
     assert saved.items[0].request.model_options['cut_type']=='2_parts_180_degrees'
     assert saved.items[0].request.model_options['strip_lap']==pytest.approx(7/25.4)
+
+
+# ---- engine 1.1.0 source catalogue: model options on screen ---------------------------
+def test_source_gallery_has_category_thumbnails_and_basic_shapes_apart(page):
+    source = [s for s in page.shapes if s.get('source_ids')]
+    assert source and all(s['preview'] for s in source)
+    assert {s['category'] for s in page.shapes if not s.get('source_ids')} == {'Temel şekiller · krokili'}
+    page.shape_search.setText('pantolon')
+    assert page.shape_tree.count() >= 2 and all(page.shape_tree.item(i).flags() & Qt.ItemIsEnabled for i in range(page.shape_tree.count()))
+
+
+def test_cut_choice_changes_pieces_and_is_sent_to_the_engine(page, qtbot):
+    page.choose_shape('unfoldo/Oval boru', 'oval-cylinder'); settle(qtbot, page)
+    assert not page.sketch.isVisible() and page.model['cut'].count() > 1
+    one = len(page.result['parts'])
+    page.model['cut'].setCurrentIndex(page.model['cut'].findData('2_parts_180_degrees')); settle(qtbot, page)
+    assert page.build_request()['model_options']['cut_type'] == '2_parts_180_degrees'
+    assert page.state in ('ok', 'warning') and len(page.result['parts']) == 2 != one
+
+
+def test_duct_shows_only_flange_and_end_lap_and_they_grow_the_blank(page, qtbot):
+    page.choose_shape('unfoldo/Düz kanal', 'rectangular-duct-straight'); settle(qtbot, page)
+    assert set(page.model['laps'].values()) == {'lap_top', 'lap_left'}
+    assert 'flanş' in page.fields['opt.lap_top']['title']
+    area = sum(p['metrics']['gross_area_mm2'] for p in page.result['parts'])
+    edit(page, 'opt.lap_top', '15'); settle(qtbot, page)
+    assert page.build_request()['model_options']['lap_top'] == pytest.approx(15.)
+    assert page.state in ('ok', 'warning') and sum(p['metrics']['gross_area_mm2'] for p in page.result['parts']) > area
+    page.unit.setCurrentIndex(page.unit.findData('inch')); settle(qtbot, page)
+    assert page.build_request()['model_options']['lap_top'] == pytest.approx(15 / 25.4)
+    page.unit.setCurrentIndex(page.unit.findData('mm'))
+
+
+def test_discrete_parameter_is_a_list_and_numbering_follows_the_model(page, qtbot):
+    page.choose_shape('unfoldo/Dikdörtgen redüksiyon', 'rectangle-to-rectangle-angled-top'); settle(qtbot, page)
+    combo = page.fields['diagonal']['combo']
+    assert [combo.itemText(i) for i in range(combo.count())] == ['Köşegen 1', 'Köşegen 2'] and not page.fields['diagonal']['edit'].isVisible()
+    combo.setCurrentIndex(1); settle(qtbot, page)
+    assert page.build_request()['parameters']['diagonal'] == 2 and page.state in ('ok', 'warning')
+    page.model['divisions'].setCurrentIndex(page.model['divisions'].findData(48)); settle(qtbot, page)
+    assert page.build_request()['model_options']['helper_divisions'] == 48 and page.state in ('ok', 'warning')
+    page.choose_shape('unfoldo/Helezon kanat', 'helical-ramp-triangulated'); settle(qtbot, page)
+    assert not page.model['numbering'].isEnabled() and page.build_request()['model_options']['numbering'] is False
+    assert page.state in ('ok', 'warning')
+
+
+def test_model_info_and_validated_example(page, qtbot):
+    page.choose_shape('unfoldo/Borudan eğik koniye', 'pipe-to-oblique-cone-vertical-trunk'); settle(qtbot, page)
+    text = page.model['info'].text()
+    assert 'İmalat onayı' in text and 'imalat/proses onayı değildir' in text and 'unfoldo.com' in text
+    edit(page, 'thickness', '3')
+    page.model['example'].click(); settle(qtbot, page)
+    assert page.values['Xb'] == pytest.approx(-200.) and page.values['thickness'] == pytest.approx(3.)
+    assert page.values['seam_angle'] == pytest.approx(180.)
+    assert page.state in ('ok', 'warning'), (page.result.get('errors'), page.build_request())
+
+
+def test_source_model_options_round_trip_through_a_project_part(page, qtbot):
+    page.choose_shape('unfoldo/Düz kanal', 'rectangular-duct-straight')
+    edit(page, 'opt.lap_left', '12'); settle(qtbot, page)
+    page.add_to_project()
+    page.choose_shape('unfoldo/Silindir', 'cylinder'); settle(qtbot, page)
+    page.project_table.selectRow(0); settle(qtbot, page)
+    assert page.shape_id == 'unfoldo/Düz kanal' and page.values['opt.lap_left'] == pytest.approx(12.)
+    assert page.build_request()['model_options']['lap_left'] == pytest.approx(12.)

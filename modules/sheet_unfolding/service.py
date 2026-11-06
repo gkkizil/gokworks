@@ -20,33 +20,34 @@ VARIANT_TITLES = {
     'straight': 'Düz uçlu', 'bevel': 'Üstü açılı kesik', 'full': 'Tam koni', 'frustum': 'Kesik koni (redüksiyon)',
     'centered': 'Merkezli', 'centered_faceted': 'Merkezli · fasetli', 'constant_diameter': 'Sabit çaplı',
 }
+BASIC = 'Temel şekiller · krokili'     # the first five engine families, with dimensioned sketches
 # shape_id: (category, workshop names, thumbnail 0–1, {variant: (sketch lines, {dimension_id: (start, end, symbol)})})
 PRESENTATION = {
-    'cylinder': ('Silindir ve boru', ('silindir', 'boru', 'manşon', 'yuvarlak kanal', 'gönye kesik'),
+    'cylinder': (BASIC, ('silindir', 'boru', 'manşon', 'yuvarlak kanal', 'gönye kesik'),
                  [[[.2, 0], [.8, 0], [.8, 1], [.2, 1], [.2, 0]]],
                  {'straight': ([[[-150, 0], [150, 0], [150, 200], [-150, 200], [-150, 0]]],
                                {'diameter': ([-150, -30], [150, -30], 'D'), 'height': ([185, 0], [185, 200], 'H')}),
                   'bevel': ([[[-150, 0], [150, 0], [150, 260], [-150, 140], [-150, 0]]],
                             {'diameter': ([-150, -30], [150, -30], 'D'), 'height': ([185, 0], [185, 200], 'H'),
                              'cut_angle_deg': ([-60, 240], [40, 240], 'β')})}),
-    'cone': ('Koni ve redüksiyon', ('koni', 'redüksiyon', 'konik', 'konsantrik', 'huni'),
+    'cone': (BASIC, ('koni', 'redüksiyon', 'konik', 'konsantrik', 'huni'),
              [[[0, 0], [1, 0], [.72, 1], [.28, 1], [0, 0]]],
              {'full': ([[[-150, 0], [150, 0], [0, 220], [-150, 0]]],
                        {'bottom_diameter': ([-150, -30], [150, -30], 'D'), 'height': ([185, 0], [185, 220], 'H')}),
               'frustum': ([[[-150, 0], [150, 0], [75, 200], [-75, 200], [-150, 0]]],
                           {'bottom_diameter': ([-150, -30], [150, -30], 'D'), 'top_diameter': ([-75, 230], [75, 230], 'd'),
                            'height': ([185, 0], [185, 200], 'H')})}),
-    'rectangular_reducer': ('Dikdörtgen kanal', ('dikdörtgen redüksiyon', 'kanal redüksiyonu', 'huni', 'bunker'),
+    'rectangular_reducer': (BASIC, ('dikdörtgen redüksiyon', 'kanal redüksiyonu', 'huni', 'bunker'),
                             [[[0, 0], [1, 0], [.75, 1], [.25, 1], [0, 0]]],
                             {'centered': ([[[-200, 0], [200, 0], [100, 300], [-100, 300], [-200, 0]]],
                                           {'bottom_width': ([-200, -30], [200, -30], 'A'), 'top_width': ([-100, 330], [100, 330], 'a'),
                                            'height': ([235, 0], [235, 300], 'H')})}),
-    'rect_to_round': ('Geçiş parçaları', ('kare yuvarlak', 'kurtağzı', 'dikdörtgen yuvarlak', 'geçiş'),
+    'rect_to_round': (BASIC, ('kare yuvarlak', 'kurtağzı', 'dikdörtgen yuvarlak', 'geçiş'),
                       [[[0, 0], [1, 0], [.8, 1], [.2, 1], [0, 0]], [[.2, 1], [.5, .88], [.8, 1]]],
                       {'centered_faceted': ([[[-200, 0], [200, 0], [125, 300], [-125, 300], [-200, 0]]],
                                             {'width': ([-200, -30], [200, -30], 'A'), 'diameter': ([-125, 330], [125, 330], 'D'),
                                              'height': ([235, 0], [235, 300], 'H')})}),
-    'segmented_elbow': ('Dirsekler', ('dirsek', 'segmentli dirsek', 'dilimli dirsek', 'gönye dirsek'),
+    'segmented_elbow': (BASIC, ('dirsek', 'segmentli dirsek', 'dilimli dirsek', 'gönye dirsek'),
                         [[[0, 0], [0, .45], [.2, .8], [.55, 1], [1, 1]]],
                         {'constant_diameter': ([[[0, 0], [0, 120], [60, 230], [170, 290], [300, 300]]],
                                                {'diameter': ([-60, -25], [60, -25], 'D'),
@@ -63,6 +64,71 @@ PLANNED = (
 )
 
 
+# Source catalogue (engine 1.1.0): categories, labels and parameters come from the engine; only a
+# category thumbnail and workshop synonyms for the search box are added here.
+CATEGORY_PRESENTATION = {
+    'Silindirler ve boru kesimleri': ([[[.2, 0], [.8, 0], [.8, 1], [.2, .75], [.2, 0]]], ('boru', 'manşon', 'gönye kesik', 'oval')),
+    'Koniler ve redüksiyonlar': ([[[0, 0], [1, 0], [.72, 1], [.28, 1], [0, 0]]], ('redüksiyon', 'konik', 'eksantrik', 'huni')),
+    'Geçiş parçaları': ([[[0, 0], [1, 0], [.8, 1], [.2, 1], [0, 0]], [[.2, 1], [.5, .88], [.8, 1]]],
+                        ('kurtağzı', 'kare yuvarlak', 'geçiş', 'redüksiyon')),
+    'Segmentli dirsekler': ([[[0, 0], [0, .45], [.2, .8], [.55, 1], [1, 1]], [[.3, 0], [.3, .38], [.45, .62], [.65, .72], [1, .72]]],
+                            ('dirsek', 'dilimli dirsek', 'segment')),
+    'Dirsekler': ([[[0, 0], [0, .6], [.4, 1], [1, 1]], [[.3, 0], [.3, .5], [.52, .7], [1, .7]]], ('gönye dirsek', 'dirsek', 'açılı')),
+    'Branşmanlar ve T parçalar': ([[[0, 0], [1, 0], [1, .4], [0, .4], [0, 0]], [[.35, .4], [.35, 1], [.65, 1], [.65, .4]]],
+                                  ('branşman', 't parça', 'saplama', 'kurtağzı', 'delik')),
+    'Pantolonlar ve Y parçalar': ([[[.4, 0], [.6, 0], [.6, .4], [1, .88], [.85, 1], [.5, .58], [.15, 1], [0, .88], [.4, .4], [.4, 0]]],
+                                  ('pantolon', 'y parça', 'çatal')),
+    'Huniler, bunkerler ve piramitler': ([[[0, 1], [1, 1], [.65, .25], [.35, .25], [0, 1]], [[.35, .25], [.35, 0], [.65, 0], [.65, .25]]],
+                                         ('huni', 'bunker', 'piramit', 'prizma')),
+    'Bombeler ve kapaklar': ([[[0, .2], [.05, .5], [.2, .75], [.5, .85], [.8, .75], [.95, .5], [1, .2], [0, .2]]],
+                             ('bombe', 'kapak', 'torisferik', 'eliptik', 'yarım küre')),
+    'Helezonlar': ([[[0, .1], [.25, .35], [.5, .1], [.75, .35], [1, .1]], [[0, .55], [.25, .8], [.5, .55], [.75, .8], [1, .55]],
+                    [[.5, 0], [.5, 1]]], ('helezon', 'konveyör', 'vida', 'spiral')),
+    'Dikdörtgen kanallar': ([[[0, 0], [.7, 0], [.7, .6], [0, .6], [0, 0]], [[0, .6], [.3, .9], [1, .9], [.7, .6]], [[1, .9], [1, .3], [.7, 0]]],
+                            ('kanal', 'hava kanalı', 'dikdörtgen', 'flanş')),
+}
+STATUS_TITLES = {'validated_example_with_restrictions': 'Örneklerle doğrulandı · sınırlamalı'}
+STAGE_TITLES = (('calculated', 'Hesaplanabilir'), ('normal_and_invalid_tests_passed', 'Normal ve hatalı giriş testleri geçti'),
+                ('output_readback_passed', 'Çıktılar geri okunarak doğrulandı'),
+                ('source_full_feature_parity', 'Kaynakla tam özellik eşdeğerliği'), ('production_approved', 'İmalat onayı'))
+OUTPUT_TITLES = {'dxf': 'DXF', 'pdf': 'PDF', 'step_surface': 'STEP (yüzey)', 'step_solid': 'STEP (katı)'}
+RESTRICTION_TITLES = {
+    'GOKWORKS geometry is not manufacturing/process approval.': 'Geometri imalat/proses onayı değildir.',
+    'Signed UP/DOWN fold direction is not evaluated for source fitting developments.':
+        'Büküm yönü (yukarı/aşağı) değerlendirilmez; büküm çizgileri nötr katmandadır.',
+    'Curve residual is measured sampling error, not certified manufacturing tolerance.':
+        'Eğri sapması ölçülen örnekleme hatasıdır; sertifikalı imalat toleransı değildir.',
+    'STEP is an OCCT surface B-Rep, not a solid or editable SolidWorks feature tree.':
+        'STEP bir yüzey modelidir; katı veya düzenlenebilir SolidWorks özellik ağacı değildir.',
+    'Verified trimmed B-Rep unavailable; STEP disabled for this example.': 'Doğrulanmış yüzey modeli yok; bu modelde STEP kapalı.',
+    'Only geometric mid-surface inputs; unverified inner/outer normal offsets are rejected.':
+        'Yalnız orta yüzey ölçüsü; doğrulanmamış iç/dış ölçü seçimleri kapalıdır.',
+    'piecewise_planar_ruled_surface; smooth forming strain is not solved':
+        'Fasetli (parça parça düzlem) yüzey; düzgün şekillendirme gerinimi hesaplanmaz.',
+    'two mirrored clipped ruled surfaces; faceted material, smooth forming strain not solved':
+        'Ayna simetrik iki fasetli yüzey; düzgün şekillendirme gerinimi hesaplanmaz.',
+    'faceted_gore; forming/springback/press forces not evaluated':
+        'Dilimli (gore) yaklaşık açınım; şekillendirme, geri esneme ve pres kuvveti değerlendirilmez.',
+    'triangulated_helicoid; forming strain between facets not evaluated':
+        'Üçgenlenmiş helezon; fasetler arası şekillendirme gerinimi değerlendirilmez.',
+    'outer_edge_length_matched_annular_forming_blank; not an isometric development':
+        'Dış kenar boyuna göre halka şeklinde şekillendirme taslağı; gerçek (izometrik) açınım değildir.',
+    'heel=true unsupported: source flag has no numerical heel definition; request rejected.':
+        'Topuk seçeneği desteklenmiyor (sayısal tanımı yok).',
+    'Outside-to-axis H/X conversion subtracts D; source dimension drawing equivalence not confirmed.':
+        'Dış ölçüden eksene H/X dönüşümünde D düşülür; kaynak ölçü çizimiyle eşdeğerliği doğrulanmadı.',
+    'Torus intersection validated; source E/Z/X/A dimension interpretation not confirmed. See SOURCE_MODELS.md.':
+        'Torus kesişimi doğrulandı; kaynaktaki E/Z/X/A ölçü yorumu doğrulanmadı.',
+}
+LAP_TITLES = {'lap_top': 'Üst kenar payı', 'lap_bottom': 'Alt kenar payı', 'lap_left': 'Sol kenar payı',
+              'lap_right': 'Sağ kenar payı', 'strip_lap': 'Şerit payı'}
+# Ducts: lap_top is the flange on both long wall edges, lap_left the lap at both wall ends (others rejected).
+DUCT_LAP_TITLES = {'top': ('lap_top', 'Duvar flanşı (iki uzun kenar)',
+                           'Her duvarın iki uzun kenarında, üst/alt plakaların üzerine katlanan flanş. 0 = yok.'),
+                   'left': ('lap_left', 'Duvar uçlarında bindirme',
+                            'Her duvarın iki ucunda, tam yükseklikte; komşu duvarla veya kanal ağzıyla birleşir. 0 = yok.')}
+
+
 FIELD_ALIASES = {'thickness': 'thickness', 'joint_options.overlap': 'joint', 'seam_options.start_angle_deg': 'seam_angle',
                  'split_options.count': 'split_count', 'material.unit_price': 'price'}
 
@@ -71,6 +137,8 @@ def field_id(engine_id):
     """Engine field path → page field id ('parameters.diameter' → 'diameter')."""
     if engine_id.startswith('parameters.'):
         return engine_id.split('.', 1)[1]
+    if engine_id.startswith('model_options.'):
+        return 'opt.' + engine_id.split('.', 1)[1]
     return FIELD_ALIASES.get(engine_id, engine_id)
 
 
@@ -131,8 +199,9 @@ class EngineService:
         for summary in self.engine.list_shapes():
             category, keywords, preview, _ = PRESENTATION.get(summary.shape_id, ('Diğer', (), [], {}))
             if summary.category:
-                category=summary.category
-                keywords=(summary.label,*summary.variant_labels.values())
+                category = summary.category
+                preview, synonyms = CATEGORY_PRESENTATION.get(category, ([], ()))
+                keywords = (*summary.variant_labels.values(), *synonyms)
             shapes.append(dict(shape_id=summary.shape_id, title=summary.label, category=category, keywords=list(keywords),
                                status='implemented', preview=preview, method=summary.method,
                                source_ids=list(summary.source_ids),
@@ -155,12 +224,51 @@ class EngineService:
             if p['dimension_id'] in anchors:
                 start, end, symbol = anchors[p['dimension_id']]
                 annotations.append(dict(parameter_id=p['id'], start=start, end=end, text=symbol))
-        return dict(shape_id=shape_id, variant_id=variant_id, title=schema.label, parameters=parameters,source_id=schema.source_id,
+        return dict(shape_id=shape_id, variant_id=variant_id, title=schema.label, parameters=parameters, source_id=schema.source_id,
+                    source=self.source_info(schema.source_id),
                     constraints=list(schema.constraints), sketch=lines, dimension_annotations=annotations,
                     options=dict(dimension_reference=list(schema.supported_dimension_references), default_reference='mid',
                                  seam=schema.seam_supported, split=schema.split_supported, joint_kinds=list(schema.joint_kinds),
                                  model_options=to_data(schema.model_options)),
                     capabilities=dict(outputs=list(schema.output_kinds)))
+
+    def source_info(self, source_id):
+        """Catalogue record of one source model, in Turkish where the engine text is English."""
+        if not source_id:
+            return None
+        record = next((to_data(m) for m in self.engine.list_source_models() if m['source_id'] == source_id), None)
+        if record is None:
+            return None
+        texts = list(record.get('restrictions') or ())
+        if record.get('approximation') and record['approximation'] not in texts:
+            texts.insert(0, record['approximation'])
+        return dict(source_id=source_id, url=record.get('source_url', ''), method=record.get('calculation_method'),
+                    status=STATUS_TITLES.get(record.get('implementation_status'), record.get('implementation_status') or '—'),
+                    stages=[(title, bool((record.get('stages') or {}).get(key))) for key, title in STAGE_TITLES],
+                    outputs=[OUTPUT_TITLES.get(o, o) for o in record.get('validated_outputs') or ()],
+                    restrictions=[RESTRICTION_TITLES.get(t, t) for t in texts],
+                    has_example=bool(self.example_request(source_id)))
+
+    def example_request(self, source_id):
+        """Engine-team example that is known to calculate (page dict), or None."""
+        examples = getattr(self, '_examples', None)
+        if examples is None:
+            import json
+            from pathlib import Path
+            path = Path(__file__).resolve().parents[2] / 'docs/unfolding/examples/source_models.json'
+            try:
+                data = json.loads(path.read_text(encoding='utf-8'))
+                examples = {m['source_id']: m['request'] for m in data.get('models', ())}
+            except (OSError, ValueError, KeyError, TypeError):
+                examples = {}
+            self._examples = examples
+        request = examples.get(source_id)
+        if request is None:
+            return None
+        try:
+            return self.page_request(UnfoldRequest(**request))
+        except (TypeError, ValueError):
+            return None
 
     # ---- requests --------------------------------------------------------------------
     @staticmethod
