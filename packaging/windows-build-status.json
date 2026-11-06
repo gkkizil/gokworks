@@ -1,9 +1,9 @@
 {
-  "commit": "f04fa9c4b52b7b2089a170ed83ac074a40f845aa",
-  "status": "cancelled",
-  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/42184015043",
-  "download_url": "",
-  "artifact_url": "",
+  "commit": "2cdf394006cd42f51ae9450f00123a483bede1ef",
+  "status": "success",
+  "run_url": "https://github.com/gkkizil/gokworks/actions/runs/42184045526",
+  "download_url": "https://github.com/gkkizil/gokworks/releases/download/windows-onefile-42184045526-1/GOKWORKS.exe",
+  "artifact_url": "https://github.com/gkkizil/gokworks/actions/runs/42184045526/artifacts/13486539823",
   "setup_steps": {
     "checkout": "success",
     "python": "success",
@@ -107,5 +107,389 @@
       ]
     ]
   },
-  "build_log_tail": "607 INFO: PyInstaller: 6.16.0, contrib hooks: 2026.9\n607 INFO: Python: 3.13.17\n630 INFO: Platform: Windows-2025Server-10.0.26100-SP0\n630 INFO: Python environment: C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\n631 INFO: wrote D:\\a\\gokworks\\gokworks\\build\\GOKWORKS.spec\n638 INFO: Removing temporary files and cleaning cache in C:\\Users\\runneradmin\\AppData\\Local\\pyinstaller\n1941 WARNING: Failed to collect submodules for 'OCP.TopoDS.TopoDS' because importing 'OCP.TopoDS.TopoDS' raised: ModuleNotFoundError: No module named 'OCP.TopoDS.OCP'\nVTK not installed\n5785 INFO: Module search paths (PYTHONPATH):\n['D:\\\\a\\\\gokworks\\\\gokworks',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\python313.zip',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\DLLs',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\win32',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\win32\\\\lib',\n 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\pythonwin',\n 'D:\\\\a\\\\gokworks\\\\gokworks',\n 'D:\\\\a\\\\gokworks\\\\gokworks']\n6165 INFO: Appending 'datas' from .spec\n6178 INFO: checking Analysis\n6179 INFO: Building Analysis because Analysis-00.toc is non existent\n6179 INFO: Looking for Python shared library...\n6179 INFO: Using Python shared library: C:\\hostedtoolcache\\windows\\Python\\3.13.17\\x64\\python313.dll\n6179 INFO: Running Analysis Analysis-00.toc\n6179 INFO: Target bytecode optimization level: 0\n6179 INFO: Initializing module dependency graph...\n6181 INFO: Initializing module graph hook caches...\n6191 INFO: Analyzing modules for base_library.zip ...\n6843 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n7400 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n9013 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n10508 INFO: Caching module dependency graph...\n10550 INFO: Analyzing D:\\a\\gokworks\\gokworks\\main.py\n10584 INFO: Processing standard module hook 'hook-gui_qt.app.py' from 'D:\\\\a\\\\gokworks\\\\gokworks\\\\packaging\\\\hooks'\n10595 INFO: Processing standard module hook 'hook-PySide6.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n10724 INFO: Processing standard module hook 'hook-shiboken6.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n10883 INFO: Processing standard module hook 'hook-PySide6.QtNetwork.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n12603 INFO: Processing standard module hook 'hook-PySide6.QtCore.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n13418 INFO: Processing standard module hook 'hook-PySide6.QtGui.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n14407 INFO: Processing standard module hook 'hook-PySide6.QtWidgets.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n14622 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n14657 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n14661 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n14833 INFO: Processing standard module hook 'hook-pythoncom.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\_pyinstaller_hooks_contrib\\\\stdhooks'\n14889 INFO: Processing standard module hook 'hook-pywintypes.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\_pyinstaller_hooks_contrib\\\\stdhooks'\n14933 INFO: Processing pre-safe-import-module hook 'hook-win32com.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\_pyinstaller_hooks_contrib\\\\pre_safe_import_module'\n14984 INFO: Processing standard module hook 'hook-win32com.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\_pyinstaller_hooks_contrib\\\\stdhooks'\n15637 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks\\\\pre_safe_import_module'\n15638 INFO: SetuptoolsInfo: initializing cached setuptools info...\n16404 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n16570 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n17168 INFO: Processing standard module hook 'hook-numpy.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n18704 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\\\hostedtoolcache\\\\windows\\\\Python\\\\3.13.17\\\\x64\\\\Lib\\\\site-packages\\\\PyInstaller\\\\hooks'\n"
+  "bytes": 132829680,
+  "sha256": "154e3e89a0286387246b967976cb77ec4552770545c12aea7bdfc01a4412efec",
+  "smoke": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "distribution": "onefile",
+    "external_qt_verified": false,
+    "external_cad_verified": false,
+    "pdf_exit_observer": "passed",
+    "python": "3.13.17",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "qt_platform": "windows",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "nesting",
+      "cad_converter",
+      "profile_cutting",
+      "shaft_generator",
+      "gear_calculator",
+      "dfm_analyzer",
+      "belt_drive",
+      "sheet_unfolding"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 861.47,
+    "navigation_median_ms": 99.14,
+    "navigation_max_ms": 1000.64,
+    "resize_median_ms": 79.14,
+    "resize_max_ms": 153.98,
+    "table_50000_load_ms": 63.51,
+    "table_50000_filter_ms": 168.49,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "pdf_export_engine": "isolated COM process",
+    "solidworks_live_tested": false,
+    "checks": [
+      "19 modules",
+      "two themes",
+      "resolution matrix",
+      "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+      "3D CAD converter / eight formats / queue, options and clear / no live COM",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "hole nesting / five parts on one plate / contour cut-order CSV",
+      "nesting shared parts-and-layout workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "external involute gear pair / native OCCT STEP readback / closed DXF",
+      "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+      "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "distribution": "onefile",
+  "smoke_scales": [
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "external_cad_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.17",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.25,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "nesting",
+        "cad_converter",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator",
+        "dfm_analyzer",
+        "belt_drive",
+        "sheet_unfolding"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 766.15,
+      "navigation_median_ms": 106.04,
+      "navigation_max_ms": 1032.55,
+      "resize_median_ms": 55.25,
+      "resize_max_ms": 140.92,
+      "table_50000_load_ms": 61.77,
+      "table_50000_filter_ms": 178.49,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "19 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": true,
+      "external_cad_verified": true,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.17",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.5,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "nesting",
+        "cad_converter",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator",
+        "dfm_analyzer",
+        "belt_drive",
+        "sheet_unfolding"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 452.19,
+      "navigation_median_ms": 119.0,
+      "navigation_max_ms": 935.14,
+      "resize_median_ms": 61.86,
+      "resize_max_ms": 194.82,
+      "table_50000_load_ms": 60.94,
+      "table_50000_filter_ms": 161.41,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "19 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    },
+    {
+      "status": "passed",
+      "framework": "PySide6 / Qt Widgets",
+      "pyside": "6.10.3",
+      "qt": "6.10.3",
+      "distribution": "onefile",
+      "external_qt_verified": false,
+      "external_cad_verified": false,
+      "pdf_exit_observer": "passed",
+      "python": "3.13.17",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "qt_platform": "windows",
+      "dpi_scale": 1.0,
+      "pages": [
+        "pdf",
+        "dxf_dwg",
+        "bom",
+        "naming",
+        "k_factor",
+        "bolt",
+        "bolt_torque",
+        "weight",
+        "iso_fits",
+        "geometric_tolerances",
+        "tolerance_stack",
+        "nesting",
+        "cad_converter",
+        "profile_cutting",
+        "shaft_generator",
+        "gear_calculator",
+        "dfm_analyzer",
+        "belt_drive",
+        "sheet_unfolding"
+      ],
+      "themes": [
+        "dark",
+        "light"
+      ],
+      "resolutions": [
+        [
+          1024,
+          700
+        ],
+        [
+          1366,
+          768
+        ],
+        [
+          1920,
+          1080
+        ],
+        [
+          2560,
+          1440
+        ]
+      ],
+      "startup_ms": 861.47,
+      "navigation_median_ms": 99.14,
+      "navigation_max_ms": 1000.64,
+      "resize_median_ms": 79.14,
+      "resize_max_ms": 153.98,
+      "table_50000_load_ms": 63.51,
+      "table_50000_filter_ms": 168.49,
+      "tk_imports": [],
+      "kr_assignment_engine": "embedded Python SheetMetal parameters",
+      "pdf_export_engine": "isolated COM process",
+      "solidworks_live_tested": false,
+      "checks": [
+        "19 modules",
+        "two themes",
+        "resolution matrix",
+        "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+        "3D CAD converter / eight formats / queue, options and clear / no live COM",
+        "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+        "hole nesting / five parts on one plate / contour cut-order CSV",
+        "nesting shared parts-and-layout workspace / document plate tabs",
+        "live press-brake tooling profiles and dimensions",
+        "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+        "torque joint section / live thread and preload",
+        "tolerance stack 0.20 / 0.02 / 0.38 mm",
+        "tolerance stack PDF/XLSX",
+        "vector diagrams",
+        "bolt kg/N",
+        "weight 157 kg",
+        "BOM XLSX",
+        "DXF dependency",
+        "Pack and Go interop source bundled",
+        "isolated PDF worker startup/IPC",
+        "external involute gear pair / native OCCT STEP readback / closed DXF",
+        "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+        "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+        "embedded licenses and export",
+        "no Tk runtime"
+      ]
+    }
+  ]
 }
