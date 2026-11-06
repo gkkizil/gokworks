@@ -421,3 +421,27 @@ def test_open_save_preserves_project_quantity_code_and_revision(page,qtbot,tmp_p
     again=page.project_object()
     assert (again.code,again.revision,again.quantity)==('İŞ-001','C',7)
     assert again.items[0].quantity==3
+
+
+def test_pdf_text_is_black_even_in_the_dark_theme(window, tmp_path):
+    """The printed report must not inherit the application's light-on-dark text palette."""
+    from PySide6.QtCore import QSize
+    from PySide6.QtPdf import QPdfDocument
+    from core.unfolding import UnfoldService, UnfoldRequest, ExportOptions
+    from PySide6.QtGui import QColor, QPalette
+    from PySide6.QtWidgets import QApplication
+    window.set_theme('dark')
+    palette = QApplication.palette()                     # as on Windows: light text for dark widgets
+    for role in (QPalette.Text, QPalette.WindowText):
+        palette.setColor(role, QColor('#e8e8e8'))
+    QApplication.setPalette(palette)
+    engine = UnfoldService()
+    result = engine.calculate(UnfoldRequest(shape_id='cone', variant_id='frustum',
+                                            parameters={'bottom_diameter': 300., 'top_diameter': 150., 'height': 200.}))
+    path = tmp_path / 'report.pdf'
+    assert engine.export(result, ExportOptions(path=str(path), format='pdf', overwrite=True)).status == 'complete'
+    document = QPdfDocument(); document.load(str(path))
+    image = document.render(0, QSize(600, 850))
+    header = [image.pixelColor(x, y) for y in range(0, 150) for x in range(0, 600, 2)]
+    darkest = min(c.lightness() for c in header if c.alpha() > 128)     # rendered page background is transparent
+    assert darkest < 60, f'başlık metni okunmuyor (en koyu piksel açıklığı {darkest})'

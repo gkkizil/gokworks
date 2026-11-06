@@ -53,12 +53,18 @@ def write_pdf(parts,path,result,options,cancel_token=None):
                   ('Uyarılar','; '.join(x.message for x in result.warnings)),
                   ('Yardımcı çizgiler','Numaralı gerçek boylar kesim çizgisi veya uygulanabilir abkant planı değildir.')]
             document=QTextDocument();document.setDefaultFont(QFont('Arial',9))
-            document.setDefaultStyleSheet('body {color:#17212b;font-family:Arial,sans-serif;font-size:8pt;} h1{font-size:15pt;} td{padding:2px;}')
-            document.setHtml('<h1>GOKWORKS · Sac Açınımı</h1><table>'+''.join(
-                f'<tr><td><b>{escape(a)}</b></td><td>{escape(b)}</td></tr>' for a,b in rows)+'</table>')
+            document.setDefaultStyleSheet('body {color:#000000;font-family:Arial,sans-serif;font-size:8pt;} h1{font-size:15pt;} td{padding:2px;}')
+            # Black text set inline: the app's dark-theme palette must never reach the printed page.
+            document.setHtml('<div style="color:#000000"><h1 style="color:#000000">GOKWORKS · Sac Açınımı</h1>'
+                '<table style="color:#000000">'+''.join(
+                f'<tr><td style="color:#000000"><b>{escape(a)}</b></td><td style="color:#000000">{escape(b)}</td></tr>'
+                for a,b in rows)+'</table></div>')
             document.setTextWidth(w);header_height=document.size().height()
             if header_height>h*.52:raise ValueError('PDF başlık/veri metni sayfa alanını aşıyor; daha kısa açıklama kullanın.')
-            document.drawContents(painter,QRectF(0,0,w,header_height))
+            from PySide6.QtGui import QAbstractTextDocumentLayout,QPalette
+            context=QAbstractTextDocumentLayout.PaintContext();context.palette.setColor(QPalette.Text,QColor('#000000'))
+            context.clip=QRectF(0,0,w,header_height)
+            painter.save();painter.setClipRect(context.clip);document.documentLayout().draw(painter,context);painter.restore()
             top=header_height+18;mini_h=min(120.,(h-top)*.22)
             for i,drawing in enumerate(part.drawing_views):
                 painter.drawText(QRectF(i*w/2,top,w/2,18),drawing.label)
@@ -77,7 +83,7 @@ def write_pdf(parts,path,result,options,cancel_token=None):
                     # facet IDs at one fan apex would obscure the whole sheet.
                     if line.id and not folds:painter.drawText(point(anchor),line.id)
             painter.restore()
-            painter.setPen(QColor('#17212b'))
+            painter.setPen(QColor('#000000'))
             bounds=m.bounds_mm
             painter.drawText(QRectF(0,h-78,w,20),f'Ana boyutlar: {bounds[2]-bounds[0]:.6f} × {bounds[3]-bounds[1]:.6f} mm')
             painter.drawText(QRectF(0,h-56,w,20),f'Ölçek: sayfaya sığdırıldı; 1:1 değildir (çizim ölçek çarpanı {scale*25.4/96:.6f}).')
@@ -87,7 +93,7 @@ def write_pdf(parts,path,result,options,cancel_token=None):
                 check_cancel(cancel_token)
                 if not writer.newPage():raise OSError('Gerçek boy listesi PDF sayfası oluşturulamadı.')
                 painter.fillRect(QRectF(0,0,w,h),QColor('#ffffff'))
-                painter.setPen(QColor('#17212b'));painter.setFont(QFont('Arial',10))
+                painter.setPen(QColor('#000000'));painter.setFont(QFont('Arial',10))
                 painter.drawText(QRectF(0,0,w,30),f'{part.code} · Gerçek uzunluk listesi · mm')
                 painter.drawText(QRectF(0,34,w,30),'G: ana doğru/yardımcı çizgi; abkant programı değildir.')
                 for row,record in enumerate(lengths[first:first+38]):
