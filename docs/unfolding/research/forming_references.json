@@ -1,0 +1,35 @@
+{
+  "retrieved_date": "2026-11-06",
+  "all_sources_read": true,
+  "records": [
+    {
+      "id": "autodesk-unfold",
+      "url": "https://help.autodesk.com/cloudhelp/2023/ENU/Inventor-Help/files/GUID-7B2525E4-8191-46F2-8CC3-FF422114EAE5.htm",
+      "http_status": 200,
+      "sha256": "818ed929b38eab0d3302706e78824b36fd5a4cafb3665afbae5e1e65e2d10edd",
+      "used_for": "K and BA definitions, explicit bending/open-angle table types; no default material K imported."
+    },
+    {
+      "id": "autodesk-bend-tables",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Inventor-Help/files/GUID-27FD9757-5B40-4528-B361-D9BDFDB2EA4D.htm",
+      "http_status": 200,
+      "sha256": "50af8b3e93f7340bfb008ae16b65ea8a32e1b2872292cca6310349c50bee5ba6",
+      "used_for": "Measured thickness/radius/angle tables and bounded interpolation; Autodesk fallback tolerances were not adopted."
+    },
+    {
+      "id": "ansys-bend-allowance",
+      "url": "https://ansyshelp.ansys.com/public/Views/Secured/corp/v252/en/discovery/Discovery/user_manual/sheetmetal_bendallowances.html",
+      "http_status": 200,
+      "sha256": "d948661c7ee324e35ec388b983ef5c92758f47900ddb23ce1f00d599a6851030",
+      "used_for": "Neutral-axis ratio, geometric nature of K and reverse coupon measurements; proprietary/default K curve not imported."
+    },
+    {
+      "id": "ssab-bending",
+      "url": "https://www.ssab.com/en/support/how-to-process/how-to-bend/bending/20-questions",
+      "http_status": 200,
+      "sha256": "a9472f58bd36f2a8c919f907b275225237bef2e5e9ca05923afbf238ebf2344a",
+      "used_for": "Process distinctions, elastic recovery and material/tool-specific radius limits; no generic grade constants inferred."
+    }
+  ],
+  "springback_validation": "Analytical model independently derived and numerically tested; these web pages are not experimental validation data."
+}

@@ -82,6 +82,9 @@ def validate(request):
             from .source_models import normalize_options
             n['model_options']=normalize_options(request,schema,scale)
         elif request.model_options:raise ValueError('Bu eski modelde model_options tanımlı değil.')
+        active=('forming_options',)
+        from .forming.mechanics import normalize_options
+        n['forming_options']=to_data(normalize_options(request.forming_options))
         warnings=[Issue('GEOMETRIC_MIDSURFACE','Geometrik orta yüzey açınımıdır; yaylanma, uzama ve abkant telafisi hesaplanmadı.',
                         'INFO',('dimension_reference',))]
         if not t or material.density_kg_m3 is None:

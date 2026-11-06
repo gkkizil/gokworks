@@ -4,7 +4,7 @@ Faceted developments represent piecewise planar material. They never assert
 isometry to a doubly curved smooth loft. The triangulation is authoritative,
 independent of the coarser display mesh.
 """
-from dataclasses import dataclass,replace
+from dataclasses import dataclass,replace,field
 import math
 from ..geometry import outline,contour_area
 from ..models import (Line2D,Mesh3D,FrozenMap,SurfacePatch,MappingPoint,TrueLength)
@@ -76,12 +76,14 @@ class Profile:
     breaks: tuple = ()
     flat_seams: tuple = ()
     radius_seams: tuple = ()
+    forming: FrozenMap = field(default_factory=FrozenMap)
 
 
 def circle(d):
     if d<=0:raise ValueError('Çap pozitif olmalı.')
     r=d/2;length=math.tau*r
-    return Profile(length,lambda s:(r*math.cos(s/r),r*math.sin(s/r)),tuple(length*i/4 for i in range(5)))
+    return Profile(length,lambda s:(r*math.cos(s/r),r*math.sin(s/r)),tuple(length*i/4 for i in range(5)),
+                   forming=FrozenMap(dict(kind='circle',radius_mm=r)))
 
 
 def stadium(length,width):
@@ -97,7 +99,8 @@ def stadium(length,width):
         s-=half
         return -a+s,-r
     return Profile(perimeter,point,tuple(sorted(set((0,half,half+2*a,2*half+2*a,perimeter)))),
-                   (half+a,2*half+3*a),(half/2,1.5*half+2*a))
+                   (half+a,2*half+3*a),(half/2,1.5*half+2*a),
+                   FrozenMap(dict(kind='stadium',radius_mm=r,straight_length_mm=2*a)))
 
 
 def polygon_profile(points,radius=0.):

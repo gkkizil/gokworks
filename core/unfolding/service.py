@@ -42,12 +42,15 @@ class UnfoldService:
             if cached is not None:
                 self._cache.move_to_end(key);check_cancel(cancel_token)
                 return replace(cached,request_id=request.request_id,revision=request.revision,normalized_inputs=n,
-                    parts=tuple(replace(p,assembly_id=request.request_id) for p in cached.parts))
+                    parts=tuple(replace(p,assembly_id=request.request_id,
+                        nominal_part=replace(p.nominal_part,assembly_id=request.request_id) if p.nominal_part else None) for p in cached.parts))
         d=definition(request.shape_id)
         try:
             parts,quality=d.build(n,request.material,request.development_options,cancel_token)
             check_cancel(cancel_token)
             if not parts:raise ValueError('Hesap parça üretmedi.')
+            from .forming.integration import apply_forming
+            parts,forming,forming_warnings=apply_forming(parts,n,request.material,request.development_options,cancel_token)
             from .quality import inspect_parts
             quality.update(inspect_parts(parts,request.development_options.geometry_tolerance_mm))
             if quality.get('seam_closure_error_mm',0.)>request.development_options.geometry_tolerance_mm:
@@ -64,14 +67,19 @@ class UnfoldService:
             surface=all(p.surface_patches for p in parts) and request.joint_options.kind=='butt'
             # Trimmed cylinders need a separate verified B-Rep implementation; never claim it ready.
             surface=surface and all(s.kind!='cylinder' or s.data['upper']==s.data['lower']==0 for p in parts for s in p.surface_patches)
+            from .dwg import available as dwg_available
             capabilities=FrozenMap(dict(dxf=importlib.util.find_spec('ezdxf') is not None,
+                dwg=dwg_available(),
                 pdf=importlib.util.find_spec('PySide6') is not None,step_surface=surface and importlib.util.find_spec('OCP') is not None,
-                step_solid=False,nesting=True,zip=True,json=True,production_process_verified=False))
+                step_solid=False,nesting=True,zip=True,json=True,production_process_verified=False,
+                compensated=bool(forming and forming['all_compensated'])))
             warnings=report.warnings
+            if forming:
+                warnings=tuple(w for w in warnings if w.code!='GEOMETRIC_MIDSURFACE')+forming_warnings
             if quality.get('approximation'):
                 warnings+=(Issue('APPROXIMATION',str(quality['approximation'])+'; düzgün yüzeyin gerinimsiz açınımı veya şekillendirme onayı değildir.','WARNING'),)
             result=UnfoldResult(request.request_id,request.revision,digest,ENGINE_VERSION,n,quality.get('calculation_method',d.summary.method),'success',parts,metrics,
-                               warnings,capabilities=capabilities,quality_metrics=FrozenMap(quality))
+                               warnings,capabilities=capabilities,quality_metrics=FrozenMap(quality),forming_report=forming)
             with self._lock:
                 if self._cache_size:
                     self._cache[key]=result

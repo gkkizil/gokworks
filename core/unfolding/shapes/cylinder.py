@@ -1,5 +1,6 @@
 """Analytic cylindrical development, including independent planar end cuts."""
 import math
+from dataclasses import replace
 from ..models import (Line2D, Polyline2D, Geometry2D, Mesh3D, SurfacePatch, FrozenMap,
                       MappingPoint, TrueLength)
 from ..geometry import sample_count
@@ -52,6 +53,8 @@ def shell_part(identifier, radius, length, theta0, span, lower, upper, azimuth,
         lengths.append(TrueLength(f'{identifier}.G{i}',a,b,math.dist(a,b)))
     part=finish_part(identifier,geometry,Mesh3D(tuple(vertices),tuple(triangles)),(patch,),net,n,material,options,
                      construction=construction,seams=seams,mappings=mappings,lengths=lengths)
+    if not overlap:
+        part=replace(part,forming_basis=FrozenMap(dict(kind='circle',radius_mm=radius,start_mm=theta0*radius,span_mm=width)))
     return part, amplitude*(span/count)**2/8
 
 

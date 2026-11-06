@@ -4,7 +4,7 @@ from dataclasses import dataclass, fields, field, is_dataclass
 import math
 from uuid import uuid4
 
-ENGINE_VERSION = '1.1.1'
+ENGINE_VERSION = '1.2.0'
 
 
 @dataclass(frozen=True)
@@ -92,10 +92,12 @@ class UnfoldRequest:
     joint_options: JointOptions = field(default_factory=JointOptions)
     development_options: DevelopmentOptions = field(default_factory=DevelopmentOptions)
     model_options: FrozenMap = field(default_factory=FrozenMap)
+    forming_options: FrozenMap = field(default_factory=FrozenMap)
 
     def __post_init__(self):
         object.__setattr__(self, 'parameters', FrozenMap(self.parameters))
         object.__setattr__(self, 'model_options', FrozenMap(self.model_options))
+        object.__setattr__(self, 'forming_options', FrozenMap(self.forming_options))
         for name, cls in (('material', Material), ('seam_options', SeamOptions), ('split_options', SplitOptions),
                           ('joint_options', JointOptions), ('development_options', DevelopmentOptions)):
             value = getattr(self, name)
@@ -286,6 +288,10 @@ class UnfoldPart:
     true_lengths: tuple[TrueLength, ...] = ()
     mappings: tuple[MappingPoint, ...] = ()
     metrics: PartMetrics | None = None
+    forming_basis: FrozenMap = field(default_factory=FrozenMap)
+    nominal_geometry_2d: Geometry2D | None = None
+    nominal_bending_lines: tuple = ()
+    nominal_part: 'UnfoldPart | None' = None
 
 
 @dataclass(frozen=True)
@@ -303,6 +309,7 @@ class UnfoldResult:
     errors: tuple[Issue, ...] = ()
     capabilities: FrozenMap = field(default_factory=FrozenMap)
     quality_metrics: FrozenMap = field(default_factory=FrozenMap)
+    forming_report: FrozenMap = field(default_factory=FrozenMap)
 
 
 @dataclass(frozen=True)
@@ -320,6 +327,7 @@ class ExportOptions:
     project_code: str = ''
     project_revision: str = ''
     quantity_multiplier: int = 1
+    development: str = 'current'  # current / nominal / compensated / comparison
 
 
 @dataclass(frozen=True)

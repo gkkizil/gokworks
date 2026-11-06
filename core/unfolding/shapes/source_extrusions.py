@@ -66,6 +66,8 @@ def extrude(identifier,profile,bottom,top,n,material,options,token=None,*,start=
     part=finish_part(identifier,geometry,Mesh3D(tuple(vertices),tuple(triangles)),(),contour_area(geometry.outer),n,material,options,
         construction=construction,seams=(Line2D(high[0],low[0]),Line2D(low[-1],high[-1])),mappings=maps,lengths=lengths)
     part=edge_allowances(part,dict(bottom=low,right=(low[-1],high[-1]),top=high[::-1],left=(high[0],low[0])),n,material,options)
+    if profile.forming and not any(n['model_options'].get(k,0.) for k in ('lap_top','lap_bottom','lap_left','lap_right','strip_lap')) and n['joint_options']['kind']=='butt':
+        part=replace(part,forming_basis=FrozenMap(dict(profile.forming,start_mm=start,span_mm=span)))
     return part,residual
 
 

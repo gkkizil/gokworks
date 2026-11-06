@@ -30,8 +30,8 @@ STATES = {  # key: (text, colour token)
     'error': ('Hata', 'danger'), 'cancelled': ('İptal edildi', 'muted'),
     'stale': ('Ölçüler değişti — yeniden hesaplanmalı', 'warning'), 'idle': ('Hesap bekleniyor', 'muted'),
 }
-EXPORTS = (('dxf', 'DXF'), ('pdf', 'PDF'), ('step', 'STEP (orta yüzey)'), ('zip', 'Toplu ZIP'))
-EXPORT_FILTERS = {'dxf': 'DXF (*.dxf)', 'pdf': 'PDF (*.pdf)', 'step': 'STEP (*.step *.stp)', 'zip': 'ZIP (*.zip)'}
+EXPORTS = (('dxf', 'DXF'), ('dwg','DWG'), ('pdf', 'PDF'), ('step', 'STEP (orta yüzey)'), ('zip', 'Toplu ZIP'))
+EXPORT_FILTERS = {'dxf': 'DXF (*.dxf)', 'dwg':'DWG (*.dwg)', 'pdf': 'PDF (*.pdf)', 'step': 'STEP (*.step *.stp)', 'zip': 'ZIP (*.zip)'}
 PRODUCTION_FIELDS = ('thickness', 'joint', 'seam_angle', 'split_count', 'price')
 JOINT_TITLES = {'butt': 'Alın alına', 'lap': 'Bindirmeli'}
 
@@ -290,12 +290,15 @@ class UnfoldPage(BasePage):
         for key in ('thickness', 'joint', 'seam_angle', 'split_count', 'price'):
             self._add_field_row(self.prod_form, key)
         self.calculate_button = button('Hesapla', self.calculate_now, primary=True)
+        from .forming import FormingPanel
+        self.forming=FormingPanel();self.forming.changed.connect(self.input_changed)
         self.calculate_button.setToolTip('Değişiklikler kısa bir bekleme sonrası kendiliğinden hesaplanır; Enter hemen hesaplar.')
         host = QWidget(); box = QVBoxLayout(host); box.setContentsMargins(4, 0, 4, 0); box.setSpacing(6)
         self.shape_title = label('', 'section')
         box.addWidget(self.shape_title); box.addWidget(self.sketch); box.addWidget(label('2 · Ölçüler', 'section'))
         box.addWidget(self.param_host)
-        box.addWidget(label('3 · Malzeme ve üretim', 'section')); box.addWidget(prod); box.addWidget(self.calculate_button)
+        box.addWidget(label('3 · Malzeme ve üretim', 'section')); box.addWidget(prod)
+        box.addWidget(Disclosure('Açınım ve üretim telafisi',self.forming));box.addWidget(self.calculate_button)
         self.validation_note = label('', 'muted'); box.addWidget(self.validation_note); box.addStretch(1)
         self.sketch.setMinimumHeight(230)
         area = scroll(host); area.setMinimumWidth(300); area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -680,6 +683,8 @@ class UnfoldPage(BasePage):
         material_data.update(unit_price=self.values.get('price'),price_unit=self.price_unit,currency=self.price_currency)
         model_options = self.model_options()
         enabled = lambda key: self.fields[key]['edit'].isEnabled()
+        try:forming_options=self.forming.options()
+        except ValueError:return None
         return dict(schema_version=1, request_id=str(uuid.uuid4()), revision=self.revision, shape_id=self.shape_id,
                     variant_id=self.variant_id, parameters=parameters, input_units=self._unit,
                     thickness=given('thickness') or None, dimension_reference=self.reference.currentData(),
@@ -688,7 +693,7 @@ class UnfoldPage(BasePage):
                     split_options=dict(count=int(self.values.get('split_count') or 1)) if enabled('split_count') else {},
                     joint_options=dict(kind=self.joint_kind.currentData() or 'butt',
                                        overlap=(given('joint') or 0.) if self.joint_kind.currentData() == 'lap' else 0.),
-                    development_options=dict(self.development_options), model_options=model_options)
+                    development_options=dict(self.development_options), model_options=model_options,forming_options=forming_options)
 
     def input_changed(self, *args):
         self.revision += 1
@@ -803,10 +808,13 @@ class UnfoldPage(BasePage):
         exports = set(capabilities.get('exports', ()))
         many = len((self.result or {}).get('parts', ())) > 1
         for key, widget in self.export_buttons.items():
-            enabled = key in exports and not self.busy and not (key == 'dxf' and many)
+            enabled = key in exports and not self.busy and not (key in ('dxf','dwg') and many)
+            if hasattr(self,'export_development') and self.export_development.currentData() in ('compensated','comparison'):
+                enabled=enabled and bool((self.result or {}).get('forming_report',{}).get('all_compensated')) and key!='step'
             widget.setEnabled(enabled)
             widget.setToolTip('' if enabled else 'Güncel bir sonuç yok.' if not current else
-                              'Çok parçalı sonuçta her parça ayrı DXF olur: Toplu ZIP kullanın.' if key == 'dxf' and many else
+                              'Çok parçalı sonuçta her parça ayrı çıktı olur: Toplu ZIP kullanın.' if key in ('dxf','dwg') and many else
+                              'DWG için kurulu yerel ODA File Converter gerekli.' if key=='dwg' else
                               'Bu sonuç için servis bu çıktıyı sağlamıyor (ör. eğik kesim, dirsek veya bindirmede STEP kapalı).'
                               if key == 'step' else 'Bu sonuç için servis bu çıktıyı sağlamıyor.')
         nesting = bool(capabilities.get('nesting')) and not self.busy and 'nesting' in self.context.pages
@@ -923,10 +931,16 @@ class UnfoldPage(BasePage):
         self.nesting_button = button("Nesting'e gönder", self.send_to_nesting)
         exports = QWidget(); ebox = QHBoxLayout(exports); ebox.setContentsMargins(0, 0, 0, 0); ebox.setSpacing(4)
         ebox.addWidget(label('Çıktı', 'muted'))
+        self.export_development=QComboBox();self.export_development.setAccessibleName('Açınım çıktı türü')
+        for title,value in (('Güncel açınım','current'),('Nominal açınım','nominal'),('Telafili açınım','compensated'),('Nominal / telafili karşılaştırma','comparison')):
+            self.export_development.addItem(title,value)
+        self.export_development.currentIndexChanged.connect(self.refresh_actions)
         for widget in (*self.export_buttons.values(), self.nesting_button):
             ebox.addWidget(widget)
         result_tab = QWidget(); rbox = QVBoxLayout(result_tab); rbox.setContentsMargins(0, 4, 0, 0)
         rbox.addWidget(self.part_table, 1); rbox.addWidget(self.method_label)
+        selection=QHBoxLayout();selection.addWidget(label('Açınım seçimi','muted'));selection.addWidget(self.export_development);selection.addStretch(1)
+        rbox.addLayout(selection)
         out = QHBoxLayout(); out.addStretch(1); out.addWidget(exports); rbox.addLayout(out)
         messages_tab = QWidget(); mbox = QVBoxLayout(messages_tab); mbox.setContentsMargins(0, 4, 0, 0); mbox.addWidget(self.messages)
 
@@ -948,6 +962,8 @@ class UnfoldPage(BasePage):
         self.result_tabs = QTabWidget(); self.result_tabs.setDocumentMode(True)
         self.result_tabs.addTab(result_tab, 'Parçalar'); self.result_tabs.addTab(messages_tab, 'Uyarılar')
         self.result_tabs.addTab(project_tab, 'Proje')
+        self.forming_results=QTextBrowser();self.forming_results.setAccessibleName('Şekillendirme hesap sonuçları')
+        self.result_tabs.addTab(self.forming_results,'Telafi / yaylanma')
         self.controls += [self.duplicate_button, self.remove_button]
         return self.result_tabs
 
@@ -955,6 +971,8 @@ class UnfoldPage(BasePage):
         parts = result.get('parts', [])
         message = '; '.join(e['message'] for e in result.get('errors', [])) or 'Açınım yok.'
         self.flat_view.set_parts(parts, message)
+        from core.unfolding.forming.reporting import report_lines
+        self.forming_results.setPlainText('\n'.join(report_lines(result.get('forming_report') or {})))
         material = (self.result_request or {}).get('material') or {}
         currency=material.get('currency','')
         self.part_table.horizontalHeaderItem(7).setText('Maliyet'+(' · '+('₺' if currency=='TL' else currency) if currency else ''))
@@ -1117,6 +1135,7 @@ class UnfoldPage(BasePage):
         self.choose_shape(request['shape_id'], request['variant_id'], keep=False)
         self.apply_model_options(request.get('model_options') or {}, request['input_units'])
         self.development_options = dict(request.get('development_options') or {})
+        self.forming.set_options(request.get('forming_options') or {})
         for key, value in request['parameters'].items():
             if key in self.fields:
                 kind = self.fields[key]['kind']
@@ -1197,6 +1216,7 @@ class UnfoldPage(BasePage):
             return
         result, service = self.result, self.service
         options = dict(path=path, format=kind, project_name=self.project_name.text().strip(),
+                       development=self.export_development.currentData(),
                        include_step='step' in result['capabilities'].get('exports', ()))
         self._start_file_job('Çıktı hazırlanıyor', lambda stop: service.export(result, options, cancel_token=stop),
                              lambda outcome: self._report_files(outcome, EXPORT_FILTERS[kind].split()[0]))

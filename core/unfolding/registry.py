@@ -1,7 +1,7 @@
 """Shape schemas and normal-reference conversions at fixed end measurement planes."""
 from dataclasses import dataclass
 import math
-from .models import FieldSchema,ShapeSchema,ShapeSummary
+from .models import FieldSchema,ShapeSchema,ShapeSummary,FrozenMap
 from .shapes import cylinder,cone,transitions,elbow
 
 
@@ -51,7 +51,7 @@ class Definition:
         fields=dict(self.variants).get(variant)
         if fields is None: raise ValueError('Bu şekil varyantı uygulanmadı.')
         outputs=('dxf','pdf','zip','json')
-        if self.summary.shape_id!='segmented_elbow' and not (self.summary.shape_id=='cylinder' and variant=='bevel'):
+        if self.summary.shape_id not in ('segmented_elbow','bent_profile') and not (self.summary.shape_id=='cylinder' and variant=='bevel'):
             outputs+=('step_surface',)
         return ShapeSchema(self.summary.shape_id,variant,self.summary.label,fields,self.constraints,
                            self.split,self.split,('butt','lap') if self.lap else ('butt',),
@@ -94,6 +94,25 @@ ELBOW=Definition(ShapeSummary('segmented_elbow','Segmentli dirsek',('constant_di
                                'Eksen yarıçapı boru orta yüzey yarıçapından büyük olmalı.'))
 
 DEFINITIONS={d.summary.shape_id:d for d in (CYLINDER,CONE,RECT,ROUND,ELBOW)}
+from .forming.profiles import normalize_profile,build_profile
+
+
+def _profile_fields(count):
+    return (length('width','Büküm uzunluğu / parça genişliği',100.),
+            *(length(f'flange_{i+1}',f'Flanş {i+1}',50.) for i in range(count+1)),
+            *(f for i in range(count) for f in (
+                angle(f'bend_{i+1}_deg',f'B{i+1} dönüş açısı (açık açı değil)',90.,-179.,179.),
+                length(f'radius_{i+1}',f'B{i+1} iç yarıçap',2.))),
+            FieldSchema('length_reference','Flanş ölçüsü: 1 dış / 2 iç / 3 teğet','Sanal keskin köşe veya teğet boyları.',
+                        type='integer',unit='option',default=1,minimum=1,maximum=3,choices=(1,2,3),dimension_id='length_reference'))
+
+
+DEFINITIONS['bent_profile']=Definition(
+    ShapeSummary('bent_profile','Abkant · bükümlü profil',('single','double'),'explicit_bend_profile',
+                 category='Şekillendirme',variant_labels=FrozenMap({'single':'Tek büküm','double':'İki büküm'})),
+    (('single',_profile_fields(1)),('double',_profile_fields(2))),normalize_profile,build_profile,
+    ('Pozitif kalınlık ve iç yarıçap; açılar düz sacdan işaretli dönüş açısıdır.',
+     'Üretim K/BA/BD verisi yokken yalnız geometrik orta yüzey hesaplanır.'),False,False,('mid',))
 from .source_models import definitions as source_definitions
 DEFINITIONS.update({d.summary.shape_id:d for d in source_definitions()})
 

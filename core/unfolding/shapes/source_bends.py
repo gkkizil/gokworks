@@ -59,7 +59,7 @@ def build_segmented(m,n,material,options,token):
     if 'oval' in s:
         if '-opposite-' in s:profile=stadium(p['H'],p['W']);radial_radius=p['H']/2
         else:
-            base=stadium(p['W'],p['H']);profile=Profile(base.perimeter,lambda q:(-base.point(q)[1],base.point(q)[0]),base.breaks);radial_radius=p['H']/2
+            base=stadium(p['W'],p['H']);profile=Profile(base.perimeter,lambda q:(-base.point(q)[1],base.point(q)[0]),base.breaks,forming=base.forming);radial_radius=p['H']/2
     else:profile=circle(p.get('D',p.get('D1')));radial_radius=p.get('D',p.get('D1'))/2
     if R<=radial_radius:raise ValueError('Dirsek eksen yarıçapı iç cidarı sıfır/negatif yapıyor.')
     lengths=[R*v*(1 if i in (0,count-1) else 2)+(p.get('E1',0.) if i==0 else p.get('E2',0.) if i==count-1 else 0.) for i in range(count)]

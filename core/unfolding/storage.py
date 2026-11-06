@@ -75,7 +75,9 @@ def project_to_dict(project):
 
 def save_project(project,path,*,overwrite=False):
     data=project_to_dict(project)
-    return atomic_write(path,lambda p:p.write_text(json.dumps(data,ensure_ascii=False,allow_nan=False,indent=2),encoding='utf-8'),overwrite)
+    content=json.dumps(data,ensure_ascii=False,allow_nan=False,indent=2)
+    if len(content.encode('utf-8'))>4*1024*1024:raise ValueError('Proje JSON 4 MiB okuma sınırını aşıyor; tablo/öğe sayısını azaltın.')
+    return atomic_write(path,lambda p:p.write_text(content,encoding='utf-8'),overwrite)
 
 
 def load_project(path):

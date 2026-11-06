@@ -27,7 +27,8 @@ def _snapshot(result,options):
     if not isinstance(options,ExportOptions):raise ValueError('ExportOptions gerekli.')
     if options.expected_revision is not None and options.expected_revision!=result.revision:raise ValueError('Sonuç revizyonu güncel değil.')
     if options.expected_input_hash is not None and options.expected_input_hash!=result.input_hash:raise ValueError('Sonuç giriş imzası güncel değil.')
-    if options.format not in ('dxf','pdf','step','zip','json'):raise ValueError('Çıktı biçimi desteklenmiyor.')
+    if options.format not in ('dxf','dwg','pdf','step','zip','json'):raise ValueError('Çıktı biçimi desteklenmiyor.')
+    if options.development not in ('current','nominal','compensated','comparison'):raise ValueError('Açınım çıktı seçimi geçersiz.')
     if options.page_size not in ('A4','A3'):raise ValueError('PDF sayfası A4/A3 olmalı.')
     if type(options.overwrite) is not bool or type(options.include_pdf) is not bool or type(options.include_step) is not bool:raise ValueError('Çıktı seçenekleri mantıksal değer olmalı.')
     integer(options.quantity_multiplier,'Adet çarpanı',1,1000000)
@@ -37,12 +38,25 @@ def _snapshot(result,options):
 
 def _write(result,parts,options,path,kind,cancel_token=None):
     check_cancel(cancel_token)
+    mode=options.development
+    if mode not in ('current','nominal','compensated','comparison'):raise ValueError('Açınım çıktı seçimi geçersiz.')
+    if mode in ('compensated','comparison'):
+        if kind=='step':raise ValueError('Telafili 2D açınım STEP değildir; STEP yalnız nominal hedef orta yüzeyi içerir.')
+        records=result.forming_report.get('parts',{})
+        if any(not p.nominal_part or records.get(p.id,{}).get('status')!='COMPENSATED' for p in parts):
+            raise ValueError('Seçili her parça için uygulanmış ve doğrulanmış uzunluk telafisi gerekli.')
+    if mode=='nominal':parts=tuple(p.nominal_part or p for p in parts)
+    result=replace(result,quality_metrics=type(result.quality_metrics)(dict(result.quality_metrics,export_development=mode)))
     key='step_surface' if kind=='step' else kind
     if not result.capabilities.get(key,False):raise ValueError(f'{kind.upper()} bu sonuç/ortam için desteklenmiyor.')
     if kind=='dxf':
         if len(parts)!=1:raise ValueError('DXF için tek parça seçin; çoklu parçada ZIP kullanın.')
         from .dxf import write_dxf
         write_dxf(replace(parts[0],quantity=parts[0].quantity*options.quantity_multiplier),path,result)
+    elif kind=='dwg':
+        if len(parts)!=1:raise ValueError('DWG için tek parça seçin.')
+        from .dwg import write_dwg
+        write_dwg(replace(parts[0],quantity=parts[0].quantity*options.quantity_multiplier),path,result,cancel_token)
     elif kind=='pdf':
         from .pdf import write_pdf
         write_pdf(parts,path,result,options,cancel_token)
@@ -79,6 +93,7 @@ def export_result(result,options,*,cancel_token=None):
                     manifest=dict(schema='gokworks.unfolding.export',version=1,request_id=result.request_id,revision=result.revision,
                         input_hash=result.input_hash,engine_version=result.engine_version,status='partial' if errors else 'complete',
                         calculation_method=result.calculation_method,normalized_inputs=to_data(result.normalized_inputs),
+                        development=options.development,forming_report=to_data(result.forming_report),
                         warnings=to_data(result.warnings),files=records,errors=to_data(errors))
                     (folder/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,allow_nan=False,indent=2),encoding='utf-8')
                     with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED) as z:

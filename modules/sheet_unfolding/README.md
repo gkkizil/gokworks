@@ -2,6 +2,12 @@
 
 Menü: **Üretim → Sac Açınımı**. Akış: şekil → ölçü → önizleme → açınım → çıktı.
 
+Motor 1.2.0 ile **Açınım ve üretim telafisi**, **Telafi / yaylanma** sonuç
+sekmesi ve nominal/telafili çıktı seçimi eklendi. Üretim profilleri kaynaklı
+JSON olarak açılır/kaydedilir; mekanik malzeme değerleri kalite adından
+uydurulmaz. Yeni abkant profil ailesi, 191 kaynak varyantından ayrıdır.
+[Hesaplar, destek matrisi ve üretim sınırları](../../docs/unfolding/FORMING.md).
+
 Bu klasör yalnız arayüzdür. Geometri, doğrulama, açınım, kütle/maliyet,
 DXF/PDF/STEP/ZIP, proje dosyası ve nesting dönüşümü `core.unfolding`
 servisinindir (sözleşme: [docs/unfolding/contract_v1.md](../../docs/unfolding/contract_v1.md)).

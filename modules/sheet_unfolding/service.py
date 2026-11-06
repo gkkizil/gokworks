@@ -67,6 +67,7 @@ PLANNED = (
 # Source catalogue (engine 1.1.0): categories, labels and parameters come from the engine; only a
 # category thumbnail and workshop synonyms for the search box are added here.
 CATEGORY_PRESENTATION = {
+    'Şekillendirme': ([[[.1,.85],[.1,.25],[.9,.25],[.9,.85]]],('abkant','büküm','BA','BD','K-Faktör','yaylanma','profil')),
     'Silindirler ve boru kesimleri': ([[[.2, 0], [.8, 0], [.8, 1], [.2, .75], [.2, 0]]], ('boru', 'manşon', 'gönye kesik', 'oval')),
     'Koniler ve redüksiyonlar': ([[[0, 0], [1, 0], [.72, 1], [.28, 1], [0, 0]]], ('redüksiyon', 'konik', 'eksantrik', 'huni')),
     'Geçiş parçaları': ([[[0, 0], [1, 0], [.8, 1], [.2, 1], [0, 0]], [[.2, 1], [.5, .88], [.8, 1]]],
@@ -165,6 +166,9 @@ def curve_entity(curve, layer):
 def part_view(part):
     """Engine UnfoldPart → display dict (entities by layer, mesh triangles, metrics, views)."""
     entities = [curve_entity(c, 'cut') for c in part.geometry_2d.outer]
+    if part.nominal_geometry_2d:
+        entities.extend(curve_entity(c,'nominal') for c in part.nominal_geometry_2d.outer)
+        entities.extend(curve_entity(c,'nominal') for hole in part.nominal_geometry_2d.holes for c in hole)
     for hole in part.geometry_2d.holes:
         entities += [curve_entity(c, 'hole') for c in hole]
     entities += [curve_entity(c, 'bend') for c in part.bending_lines]
@@ -286,7 +290,7 @@ class EngineService:
             split_options=dict(count=(request.get('split_options') or {}).get('count', 1)),
             joint_options=dict(kind=joint.get('kind', 'butt'), overlap=joint.get('overlap', 0.) or 0.),
             development_options=request.get('development_options') or {},
-            model_options=request.get('model_options') or {})
+            model_options=request.get('model_options') or {}, forming_options=request.get('forming_options') or {})
 
     @staticmethod
     def page_request(engine_request):
@@ -297,7 +301,8 @@ class EngineService:
                     input_units=data['input_units'], thickness=data['thickness'] or None,
                     dimension_reference=data['dimension_reference'], material=dict(data['material']),
                     seam_options=dict(data['seam_options']), split_options=dict(data['split_options']),
-                    joint_options=dict(data['joint_options']), development_options=dict(data['development_options']),model_options=dict(data['model_options']))
+                    joint_options=dict(data['joint_options']), development_options=dict(data['development_options']),model_options=dict(data['model_options']),
+                    forming_options=dict(data['forming_options']))
 
     def validate(self, request):
         try:
@@ -314,7 +319,7 @@ class EngineService:
         except UnfoldCancelled as error:
             raise InterruptedError('İptal edildi.') from error
         caps = dict(result.capabilities)
-        exports = [k for k in ('dxf', 'pdf', 'zip') if caps.get(k)] + (['step'] if caps.get('step_surface') else [])
+        exports = [k for k in ('dxf', 'dwg', 'pdf', 'zip') if caps.get(k)] + (['step'] if caps.get('step_surface') else [])
         status = 'error' if result.status != 'success' else 'warning' if result.warnings else 'ok'
         return dict(request_id=result.request_id, revision=result.revision, input_hash=result.input_hash,
                     engine_version=f'motor {result.engine_version}', status=status,
@@ -325,7 +330,7 @@ class EngineService:
                     capabilities=dict(exports=exports if status != 'error' else [],
                                       nesting=bool(caps.get('nesting')) and status != 'error',
                                       step_kind='surface', step_solid=bool(caps.get('step_solid'))),
-                    quality_metrics=to_data(result.quality_metrics),
+                    quality_metrics=to_data(result.quality_metrics), forming_report=to_data(result.forming_report),
                     engine_result=result, engine_request=engine_request)
 
     # ---- outputs, projects, nesting --------------------------------------------------
@@ -342,7 +347,7 @@ class EngineService:
                                 include_pdf=export_options.get('include_pdf', True),
                                 include_step=export_options.get('include_step', False),
                                 expected_revision=engine_result.revision, expected_input_hash=engine_result.input_hash,
-                                project_name=export_options.get('project_name', ''))
+                                project_name=export_options.get('project_name', ''),development=export_options.get('development','current'))
         try:
             return self._files(self.engine.export(engine_result, options, cancel_token=cancel_token))
         except UnfoldCancelled as error:

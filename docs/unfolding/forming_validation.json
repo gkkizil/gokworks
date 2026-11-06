@@ -1,0 +1,173 @@
+{
+  "engine_version": "1.2.0",
+  "date": "2026-11-06",
+  "base_commit": "6f75e4e3b43fc64cfa87ab4b4eff2a6b483f3153",
+  "platform": "Linux/offscreen; Python 3.13.5; Qt 6.10.3",
+  "runs": {
+    "broad_regression": {
+      "tests": 1313,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "source_and_mechanics_after_guards": {
+      "tests": 854,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "latest_mechanics": {
+      "tests": 90,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "final_gui": {
+      "tests": 40,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "counts_overlap": true,
+  "broad_collected_tests": 1153,
+  "broad_passed_tests": 1152,
+  "broad_passed_subtests": 160,
+  "live_solidworks": false,
+  "live_windows": false,
+  "live_oda": false,
+  "experimental_springback_validation": false,
+  "skipped": [
+    "Live ODA converter roundtrip; converter is not installed"
+  ],
+  "startup": {
+    "status": "passed",
+    "framework": "PySide6 / Qt Widgets",
+    "pyside": "6.10.3",
+    "qt": "6.10.3",
+    "distribution": "source",
+    "external_qt_verified": false,
+    "external_cad_verified": false,
+    "pdf_exit_observer": "not applicable",
+    "python": "3.13.5",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "qt_platform": "offscreen",
+    "dpi_scale": 1.0,
+    "pages": [
+      "pdf",
+      "dxf_dwg",
+      "bom",
+      "naming",
+      "k_factor",
+      "bolt",
+      "bolt_torque",
+      "weight",
+      "iso_fits",
+      "geometric_tolerances",
+      "tolerance_stack",
+      "nesting",
+      "cad_converter",
+      "profile_cutting",
+      "shaft_generator",
+      "gear_calculator",
+      "dfm_analyzer",
+      "belt_drive",
+      "sheet_unfolding"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "resolutions": [
+      [
+        1024,
+        700
+      ],
+      [
+        1366,
+        768
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "startup_ms": 126.42,
+    "navigation_median_ms": 50.6,
+    "navigation_max_ms": 428.35,
+    "resize_median_ms": 8.68,
+    "resize_max_ms": 54.56,
+    "table_50000_load_ms": 87.73,
+    "table_50000_filter_ms": 90.05,
+    "tk_imports": [],
+    "kr_assignment_engine": "embedded Python SheetMetal parameters",
+    "pdf_export_engine": "isolated COM process",
+    "solidworks_live_tested": false,
+    "checks": [
+      "19 modules",
+      "two themes",
+      "resolution matrix",
+      "1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM",
+      "3D CAD converter / eight formats / queue, options and clear / no live COM",
+      "NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF",
+      "hole nesting / five parts on one plate / contour cut-order CSV",
+      "nesting shared parts-and-layout workspace / document plate tabs",
+      "live press-brake tooling profiles and dimensions",
+      "quick bolt torque / 51.96 Nm / 25.98 kN / clipboard",
+      "torque joint section / live thread and preload",
+      "tolerance stack 0.20 / 0.02 / 0.38 mm",
+      "tolerance stack PDF/XLSX",
+      "vector diagrams",
+      "bolt kg/N",
+      "weight 157 kg",
+      "BOM XLSX",
+      "DXF dependency",
+      "Pack and Go interop source bundled",
+      "isolated PDF worker startup/IPC",
+      "external involute gear pair / native OCCT STEP readback / closed DXF",
+      "mechanism catalogue capabilities / rack and helical frozen-worker STEP readback",
+      "roller-chain sprockets / separate schema / real pair STEP and single exact-arc DXF",
+      "embedded licenses and export",
+      "no Tk runtime"
+    ]
+  },
+  "source_files_sha256": {
+    "core/unfolding/__main__.py": "50dd746789540417a1d6c0689f938960d66ef184ecfda13c55a61e638446ab97",
+    "core/unfolding/batch.py": "fd46a013c522de77f26d803d492458a1f963267d94f90f1f4d1e618a93dbd244",
+    "core/unfolding/dwg.py": "5606ee90ebf01985bd47350fcdcbc962172478d65d479a2208ff2bd36fc586f9",
+    "core/unfolding/dxf.py": "63a322145f64975b7cb4f1a740ec42943d88eaaf8078a92d7a40499206a02946",
+    "core/unfolding/exporting.py": "cda80a1a93e8ed092b101bc11598043d8c1b82aef5e4789131dbf398d29b9058",
+    "core/unfolding/forming/__init__.py": "0cfc3127046c874cc175dfa3283dda80781c672a83d03fca1ab285e4da3013b6",
+    "core/unfolding/forming/deformation.py": "ef55961cd6991a2136c01c4bece8e409fea3d9286b175605d317475117a323f2",
+    "core/unfolding/forming/integration.py": "f0fd26f4d6684d08d30ff14adb2b3be3121f872253783caff89f19f6c3cde389",
+    "core/unfolding/forming/mechanics.py": "13a0b16f1853a6807a75e4d1b3bca72580a73c081d96d0c49850dcbf541a463f",
+    "core/unfolding/forming/profiles.py": "1c04086b4a1a6bc26015de5c01a8c47f9037075205e2a66294528af5908f0c3f",
+    "core/unfolding/forming/reference.py": "2b36b7aaa406e4bac74763e775adc29e2f03d4c32f4ee6a2aa0aff64b1baa5bf",
+    "core/unfolding/forming/reporting.py": "30ba2110828073961f267edb4aa3581b19f4386f09252d0bc072438005cf8f74",
+    "core/unfolding/forming/storage.py": "46229e019cb7b1345d580f2ed622054c2ac7ddc0ca962a737535085435c0c8f8",
+    "core/unfolding/models.py": "1c3a75c5867b866cf2f043c8046b2d90757af26d2d100f4247c23f202679727f",
+    "core/unfolding/pdf.py": "b2502fbe6994cbbc7ec2ea0657c661eead3e8e0c2921eb1c33e1a6fda714732d",
+    "core/unfolding/registry.py": "89bc4abb2bb60383ebb49823db8c15ae5eec9b08f6dd4be883dd04730359fd6b",
+    "core/unfolding/service.py": "28cd12aecfe94a59c22cc4d9e32484cf948a86d3c2b1160341895941374e9935",
+    "core/unfolding/shapes/cylinder.py": "250a2b9a8e90aec63348c3c65eabb33410159c8a34db27258c2ffc6b547547ad",
+    "core/unfolding/shapes/development.py": "818356b263dd88c01cc0c04e0155d747258a5dd9781d104639c2dc932663862f",
+    "core/unfolding/shapes/source_bends.py": "79bda4225b8a731aa3406f93a4f8abaaff682447f7369d393377a6b7bfacaee2",
+    "core/unfolding/shapes/source_extrusions.py": "74fd66181c1ab3e98ce4194018cf26ea75e5c035117a7dba6368e239d630b4d8",
+    "core/unfolding/storage.py": "91f8c14de600613f96facbc8235eccbf9f884e5edafda18b77dd4e60bfcd1f26",
+    "core/unfolding/validation.py": "d90b62e9c1fa9e2be5154b46df7033f56ded408a9dd893f9fdbbbccf5a65d5cf",
+    "modules/sheet_unfolding/drawing.py": "dd3ae3f776e95b36d1b4a287e6c182830f183102beec0ca2898df7089a852124",
+    "modules/sheet_unfolding/forming.py": "5a1f22023ae046af4444d816b4655c27a4d6707e8206812c49d1ae0359bdd364",
+    "modules/sheet_unfolding/service.py": "0aad3d9fb61c9bb075292626b58ee248bc9ba0c261386c0ca28ab19fe85046b5",
+    "modules/sheet_unfolding/tests/test_unfold_gui.py": "418a35a6316d7790bca9e29d6547a9254e821642b61d386f6459374d24b5b0b6",
+    "modules/sheet_unfolding/ui.py": "7eea5ef700017f9830b482838f560b60100d33c5a18f6cdc0401639f521eed47",
+    "tests/unfolding/test_forming_dwg.py": "ce13fd57de996c14fb5032ececa629d09f5fc8df9936732628dad9d388b1654d",
+    "tests/unfolding/test_forming_gui.py": "a441dc47d713632cb0b057384dae06668bda2e6f08289455284cb00c4224e223",
+    "tests/unfolding/test_forming_integration.py": "b427a50e609989d022db3e76cb5d074f6ef534239001932562bbf5ec04ea7090",
+    "tests/unfolding/test_forming_mechanics.py": "62ea96c8bde7a6a7071d7860c79092c42feb25e68efdef07f97f2054a92d50f9",
+    "modules/sheet_unfolding/numbers.py": "7a30571ff740ffbb31043302c8d6b922110bb3c36e4c16843c54ed1729f8d61d"
+  }
+}
