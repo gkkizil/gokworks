@@ -7,15 +7,16 @@ from dataclasses import fields
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QSignalBlocker
-from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,QSplitter,
-    QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QTabWidget,
+from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QBoxLayout,QFormLayout,QSplitter,
+    QTableWidget,QTableWidgetItem,QAbstractItemView,QTabWidget,
     QLineEdit,QComboBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
-from gui_qt.components import BasePage, label, button, scroll, separator, toggle_button, toggle_icon
-from gui_qt.theme import ROW_HEIGHT
+from gui_qt.components import BasePage, ElidedLabel, label, button, scroll, toggle_button, toggle_icon
+from gui_qt.theme import ROW_HEIGHT, COLORS
 from . import controller, storage
 from .geometry import operation_plan
 from .models import Project, Groove, Keyway, Chamfer, Fillet, Bore, CosmeticThread
 from .preview import ShaftPreview
+from .ribbon import CommandRibbon
 from .standard_picker import ChannelStandardPicker
 from .validation import validate
 from .edge_treatments import circular_edges, plan_treatments
@@ -35,9 +36,33 @@ FIELD_TITLES = {'offset':'Kademede başlangıç · mm','width':'Kanal genişliğ
                 'angle':'Açı · °','distance':'Mesafe · mm','radius':'Radyüs · mm','pitch':'Diş adımı · mm'}
 
 
+class AdaptiveViews(QWidget):
+    """Top view and section: stacked when there is height for both, side by side otherwise."""
+    STACK_HEIGHT = 2 * 200 + 2
+
+    def __init__(self):
+        super().__init__()
+        self.box = QBoxLayout(QBoxLayout.TopToBottom, self)
+        self.box.setContentsMargins(0, 0, 0, 0); self.box.setSpacing(2)
+        self.setMinimumHeight(170)
+
+    def add(self, view):
+        self.box.addWidget(view, 1)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        direction = QBoxLayout.TopToBottom if event.size().height() >= self.STACK_HEIGHT else QBoxLayout.LeftToRight
+        if self.box.direction() != direction:
+            self.box.setDirection(direction)
+
+
+# Ribbon command → editor page (QTabWidget index); 'drawing' is resolved at runtime.
+COMMAND_PAGES = {'stages': 0, 'groove': 1, 'keyway': 2, 'chamfer': 3, 'fillet': 4, 'cosmetic_thread': 5, 'bore': 6, 'bulk': 7}
+
+
 class ShaftPage(BasePage):
     def __init__(self,context):
-        super().__init__(context,'Parametrik mil','Kademeleri ve operasyonları düzenleyin; iki görünüş aynı ölçüleri kullanır.')
+        super().__init__(context,'Parametrik mil','Üstten bölümü seçin, ölçüleri girin; mil aşağıda anında çizilir.')
         # Reserve native Windows font/frame overhead at 550×450 without
         # reducing either technical view's 170 px minimum or clipping commands.
         self.layout.setContentsMargins(10,2,10,2);self.layout.setSpacing(2)
@@ -46,63 +71,77 @@ class ShaftPage(BasePage):
         self.plan=[]; self.last_result=None; self.edge_undo=None; self.save_epoch=0
         self.open_button=self.action('Proje aç',self.open_dialog)
         self.save_button=self.action('Proje kaydet',self.save_dialog)
-        self.splitter=QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
-        self.editor=QWidget(); self.editor.setMinimumWidth(280); self.editor.setMaximumWidth(480)
-        edit=QVBoxLayout(self.editor); edit.setContentsMargins(0,0,0,0); edit.setSpacing(6)
-        # Group 1 · Part: name and the live envelope (L, Ømax) of the shaft.
-        edit.addWidget(label('Parça','section'))
-        form=QFormLayout(); form.setContentsMargins(0,0,0,0); form.setVerticalSpacing(4)
+        # Layout: command ribbon on top (category → command), the selected command's
+        # fields under it, the two shaft views below. Same widgets and logic as before.
+        self.ribbon=CommandRibbon();self.ribbon.setAttribute(Qt.WA_StyledBackground,True)
+        self.ribbon.commandChosen.connect(self.open_command)
+        ribbon_box=QVBoxLayout(self.ribbon);ribbon_box.setContentsMargins(6,2,6,4);ribbon_box.setSpacing(2)
+        top_row=QHBoxLayout();top_row.setSpacing(8);top_row.addLayout(self.ribbon.category_row)
         self.name=QLineEdit(self.project.name); self.name.setAccessibleName('Mil parça adı')
-        form.addRow('Parça adı',self.name); edit.addLayout(form)
-        self.summary=label('', 'muted'); edit.addWidget(self.summary)
-        edit.addWidget(separator())
-        # Group 2 · Parameter section: one picker for stages, channels, edges,
-        # thread and bore; the selected section's fields appear below it.
+        self.name.setPlaceholderText('Parça adı');self.name.setMaximumWidth(200);self.name.setMinimumWidth(90)
+        self.name.setToolTip('SOLIDWORKS parça ve dosya adı')
+        # Single-line facts yield their space to the commands on narrow windows (elided, full text kept).
+        self.summary=ElidedLabel('');self.summary.setProperty('role','muted');self.summary.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+        top_row.addStretch(1);top_row.addWidget(label('Parça','muted'));top_row.addWidget(self.name)
+        ribbon_box.addLayout(top_row)
+        command_row=QHBoxLayout();command_row.setSpacing(8);command_row.addLayout(self.ribbon.command_row)
+        self.selected_stage_caption=ElidedLabel('');self.selected_stage_caption.setProperty('role','muted')
+        self.selected_stage_caption.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+        command_row.addWidget(self.summary,1);command_row.addWidget(self.selected_stage_caption,1);ribbon_box.addLayout(command_row)
+        self.layout.addWidget(self.ribbon)
+        # Editor panel (scrolls when short): fields of the open command | list of added operations.
+        self.editor=QWidget();self.editor.setMinimumWidth(0)
+        self.panel_box=QBoxLayout(QBoxLayout.LeftToRight,self.editor)
+        self.panel_box.setContentsMargins(6,6,6,6);self.panel_box.setSpacing(16)
+        fields_column=QWidget();edit=QVBoxLayout(fields_column);edit.setContentsMargins(0,0,0,0);edit.setSpacing(6)
+        # Kept for keyboard users and older tests: the same sections as the ribbon, in one list.
         picker_row=QHBoxLayout(); picker_row.setSpacing(4)
         self.section_picker=QComboBox();self.section_picker.setAccessibleName('Mil parametre bölümü')
         self.section_picker.setToolTip('Düzenlenecek parametre grubu: kademeler, kanallar, kenar işlemleri, diş veya iç delik')
         self.section_picker.setMinimumWidth(0);self.section_picker.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
-        self.section_picker.setMinimumContentsLength(12);picker_row.addWidget(self.section_picker,1)
-        self.bulk_shortcut=button('Toplu pah / radyüs…',self.show_bulk_treatments)
-        self.bulk_shortcut.setToolTip('Mil uçları ve kademe omuzlarını tek işlemle düzenleyin.')
-        picker_row.addWidget(self.bulk_shortcut); edit.addLayout(picker_row)
-        self.selected_stage_caption=label('','muted');edit.addWidget(self.selected_stage_caption)
-        self.edit_mode=label('','section');edit.addWidget(self.edit_mode)
-        self.new_operation_button=button('Seçimi temizle · Yeni işlem',self.clear_operation_selection)
-        edit.addWidget(self.new_operation_button)
+        self.section_picker.setMinimumContentsLength(12);self.section_picker.hide()
+        header=QHBoxLayout();header.setSpacing(6)
+        self.edit_mode=label('','section');header.addWidget(self.edit_mode)
+        self.new_operation_button=button('Seçimi bırak · yeni ekle',self.clear_operation_selection)
+        self.new_operation_button.setToolTip('Seçili işlemden çık; aynı türden yeni bir işlem ekleyin.')
+        header.addWidget(self.new_operation_button);header.addStretch(1)
+        edit.addLayout(header)
         self.tabs=QTabWidget(); self.tabs.tabBar().hide();self.tabs.setDocumentMode(True)
         self.tabs.setMinimumWidth(0)
 
         stage_page=QWidget(); stages=QVBoxLayout(stage_page); stages.setContentsMargins(0,4,0,0); stages.setSpacing(4)
-        stages.addWidget(label('Çap ve boy hücrelerine yazın. Kademeler soldan sağa sıralanır.','muted'))
+        stages.addWidget(label('Çap ve boy hücresine çift tıklayıp yazın. Kademe çizimden de seçilir.','muted'))
         self.table=QTableWidget(0,3); self.table.setHorizontalHeaderLabels(['Kademe','Çap · mm','Boy · mm'])
         self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
-        fit_columns(self.table, elastic=0, minimum=70, defaults={1: 110, 2: 110})
+        fit_columns(self.table, elastic=2, minimum=90, defaults={0: 70, 1: 130})
         self.table.horizontalHeader().setDefaultAlignment(Qt.AlignLeft|Qt.AlignVCenter)
         self.table.horizontalHeader().setHighlightSections(False)
         self.table.verticalHeader().setDefaultSectionSize(ROW_HEIGHT); self.table.setShowGrid(False)
-        self.table.setMinimumHeight(150); self.table.setAccessibleName('Düzenlenebilir mil kademeleri')
-        stages.addWidget(self.table,1)
-        # Compact toolbar under the stage table; commands act on the selected row.
+        self.table.setMinimumHeight(120); self.table.setAccessibleName('Düzenlenebilir mil kademeleri')
+        # Compact toolbar above the stage table; commands act on the selected row.
         commands=QHBoxLayout(); commands.setSpacing(2)
         for text,callback in (('+ Kademe',lambda:self.add_stage()),('Kopyala',lambda:self.add_stage(copy=True)),
                                ('Sil',self.delete_stage),('↑',lambda:self.move_stage(-1)),('↓',lambda:self.move_stage(1))):
             control=button(text,callback); control.setMinimumWidth(0)
-            control.setAccessibleName({'+ Kademe':'Kademe ekle','↑':'Kademeyi yukarı taşı','↓':'Kademeyi aşağı taşı'}.get(text,'Kademe '+text.lower()))
-            control.setToolTip({'+ Kademe':'Sona yeni kademe ekle','Kopyala':'Seçili kademeyi kopyala','Sil':'Seçili kademeyi sil',
+            control.setAccessibleName({'+ Kademe':'Kademe ekle','↑':'Kademeyi sola taşı','↓':'Kademeyi sağa taşı'}.get(text,'Kademe '+text.lower()))
+            control.setToolTip({'+ Kademe':'Seçili kademenin sağına yeni kademe ekle','Kopyala':'Seçili kademeyi kopyala','Sil':'Seçili kademeyi sil',
                                 '↑':'Seçili kademeyi sola taşı','↓':'Seçili kademeyi sağa taşı'}[text])
-            if text in ('↑','↓'):control.setFixedWidth(32)
+            if text in ('↑','↓'):control.setFixedWidth(32);control.setText('←' if text=='↑' else '→')
             commands.addWidget(control)
         commands.addStretch(1)
-        stages.addLayout(commands); self.tabs.addTab(stage_page,'Kademeler')
+        stages.addLayout(commands); stages.addWidget(self.table,1); self.tabs.addTab(stage_page,'Kademeler')
         self.operation_fields={}; self.operation_targets={}; self.standard_pickers={}; self.loading_operation=False
         self.add_operation_buttons={};self.update_operation_buttons={};self.operation_hints={};self.operation_actions={}
         for kind,constructor in (('groove',Groove),('keyway',Keyway),('chamfer',Chamfer),('fillet',Fillet),('cosmetic_thread',CosmeticThread)):
             page=QWidget(); box=QVBoxLayout(page); box.setContentsMargins(6,6,6,6)
             self.operation_hints[kind]=label('','muted');box.addWidget(self.operation_hints[kind])
+            # Two columns keep every field of an operation visible in the ribbon panel:
+            # where (stage, standard, edge) on the left, the measures on the right.
             form=QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapLongRows)
             form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+            measures=QFormLayout(); measures.setRowWrapPolicy(QFormLayout.WrapLongRows)
+            measures.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
             target=QComboBox(); target.setAccessibleName(TITLES[kind]+' hedef kademesi')
             self.operation_targets[kind]=target; form.addRow('Uygulanacak kademe',target)
@@ -121,7 +160,7 @@ class ShaftPage(BasePage):
                     control=MeasureSpinBox();control.setDecimals(4);control.setRange(0,1_000_000)
                     control.setMinimumWidth(100);control.setKeyboardTracking(False)
                     title='Toplam boy · mm' if kind=='keyway' and key=='length' else FIELD_TITLES[key]
-                    control.setValue(getattr(prototype,key));form.addRow(title,control)
+                    control.setValue(getattr(prototype,key));measures.addRow(title,control)
                     if key=='angle':
                         # Unsupported orientations/angles cannot masquerade as working CAD.
                         control.setEnabled(False)
@@ -130,7 +169,8 @@ class ShaftPage(BasePage):
                 elif key=='length' and kind=='keyway':control.setToolTip('Yuvarlak uçlar dahil kanalın uçtan uca toplam boyu; mm.')
                 control.setAccessibleName(TITLES[kind]+' '+FIELD_TITLES.get(key,'Hedef kenar'))
                 controls[key]=control
-            self.operation_fields[kind]=controls;box.addLayout(form)
+            columns=QHBoxLayout();columns.setSpacing(16);columns.addLayout(form,1);columns.addLayout(measures,1)
+            self.operation_fields[kind]=controls;box.addLayout(columns)
             if kind=='keyway':box.addWidget(label('İki uç yarım daire: R = genişlik / 2. Boy, uçtan uca toplamdır. Açı 0°.','muted'))
             if kind in ('chamfer','fillet'):
                 box.addWidget(label('Ekle sonrası diğer kenarı seçip yeni operasyon ekleyin. Düzenlemek için listeden seçin.','muted'))
@@ -139,7 +179,10 @@ class ShaftPage(BasePage):
                 self.thread_caption=label('','muted');box.addWidget(self.thread_caption)
                 box.addWidget(label('Metrik sağ diş. Kozmetik gösterimdir; katı hacmi değişmez. Boy, pah/radyüs sonrası silindirik yüzeyden başlar.','muted'))
             action_bar=QWidget();actions=QHBoxLayout(action_bar);actions.setContentsMargins(0,0,0,0)
-            add=button('İşlemi ekle',lambda checked=False,k=kind:self.add_operation(k))
+            # The command the user looks for: accent colour and a little larger, at the top of the fields.
+            add=button('+ İşlemi ekle',lambda checked=False,k=kind:self.add_operation(k),primary=True)
+            add.setMinimumHeight(30);add.setMinimumWidth(130)
+            add.setToolTip('Alanlardaki ölçülerle bu işlemi mile ekle')
             update=button('Seçiliyi güncelle',lambda checked=False,k=kind:self.update_operation(k))
             self.add_operation_buttons[kind]=add;self.update_operation_buttons[kind]=update
             self.operation_actions[kind]=action_bar
@@ -175,33 +218,42 @@ class ShaftPage(BasePage):
         self.section_picker.addItem('Teknik resim · Tolerans ve yüzey',self.drawing_tab)
         self.section_picker.currentIndexChanged.connect(lambda:self.tabs.setCurrentIndex(self.section_picker.currentData()))
         self.tabs.currentChanged.connect(self.section_changed)
-        edit.addWidget(self.tabs,2)
-        for action_bar in self.operation_actions.values():edit.addWidget(action_bar)
-        edit.addWidget(separator())
-        self.operation_count=label('Eklenen işlemler · 0','section');edit.addWidget(self.operation_count)
+        edit.addWidget(self.tabs,1)
+        for action_bar in self.operation_actions.values():header.addWidget(action_bar)   # Ekle / Güncelle beside the title
+        edit.addStretch(0)
+        list_column=QWidget();side=QVBoxLayout(list_column);side.setContentsMargins(0,0,0,0);side.setSpacing(6)
+        self.operation_count=label('Eklenen işlemler · 0','section');side.addWidget(self.operation_count)
         self.operations=QListWidget();self.operations.setMinimumHeight(72);self.operations.setMaximumHeight(140)
         self.operations.setAlternatingRowColors(True)
-        self.operations.setToolTip('İşlemi seçin: parametrelerini düzenleyin. Tekil işlemlerin ölçü değişiklikleri anında uygulanır.')
-        self.operations.setAccessibleName('Mil operasyonları');edit.addWidget(self.operations,1)
-        self.remove_operation_button=button('Seçili operasyonu sil',self.delete_operation)
+        self.operations.setToolTip('Bir işlemi seçin: ölçüleri soldaki alanlarda açılır, değişiklik anında uygulanır.')
+        self.operations.setAccessibleName('Mil operasyonları');side.addWidget(self.operations)
+        list_actions=QHBoxLayout();list_actions.setSpacing(4)
+        self.remove_operation_button=button('Seçili işlemi sil',self.delete_operation)
         self.remove_operation_button.setToolTip('Listede seçili segman, kama, pah, radyüs veya diş işlemini kaldır')
-        edit.addWidget(self.remove_operation_button,alignment=Qt.AlignLeft)
-        # Group 4 · Manufacturing check used by validation before CAD output.
-        edit.addWidget(separator()); edit.addWidget(label('Üretim kontrolü','section'))
-        wall=QFormLayout(); wall.setContentsMargins(0,0,0,0);self.minimum_wall=MeasureSpinBox();self.minimum_wall.setDecimals(3)
+        self.bulk_shortcut=button('Tüm kenarlara pah / radyüs…',self.show_bulk_treatments)
+        self.bulk_shortcut.setToolTip('Mil uçları ve kademe omuzlarını tek işlemle düzenleyin.')
+        list_actions.addWidget(self.remove_operation_button);list_actions.addWidget(self.bulk_shortcut);list_actions.addStretch(1)
+        side.addLayout(list_actions)
+        # Manufacturing check used by validation before CAD output.
+        wall=QFormLayout(); wall.setContentsMargins(0,4,0,0);self.minimum_wall=MeasureSpinBox();self.minimum_wall.setDecimals(3)
         self.minimum_wall.setKeyboardTracking(False)
         self.minimum_wall.setRange(.001,100000);self.minimum_wall.setValue(self.project.minimum_wall)
-        self.minimum_wall.setAccessibleName('En az kalan radyal et kalınlığı');wall.addRow('En az radyal et · mm',self.minimum_wall)
-        edit.addLayout(wall)
-        self.source_scroll=scroll(self.editor);self.source_scroll.setMinimumWidth(290)
+        self.minimum_wall.setAccessibleName('En az kalan radyal et kalınlığı')
+        self.minimum_wall.setToolTip('Kanal ve delik sonrası kalan en ince et; altındaki ölçüler hata verir.')
+        wall.addRow('En az et kalınlığı · mm',self.minimum_wall);side.addLayout(wall);side.addStretch(1)
+        self.fields_column,self.list_column=fields_column,list_column
+        fields_column.setMinimumWidth(280);list_column.setMinimumWidth(240)
+        self.panel_box.addWidget(fields_column,3);self.panel_box.addWidget(list_column,2)
+        self.source_scroll=scroll(self.editor);self.source_scroll.setMinimumHeight(96)
         self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.source_scroll.setMaximumWidth(490);self.splitter.addWidget(self.source_scroll)
-        views=QWidget();view_box=QVBoxLayout(views);view_box.setContentsMargins(0,0,0,0);view_box.setSpacing(2)
+        views=AdaptiveViews();self.views=views
         self.top_view=ShaftPreview();self.section_view=ShaftPreview(section=True)
         for view in (self.top_view,self.section_view):
             view.stageSelected.connect(self.select_stage);view.operationSelected.connect(self.select_operation)
-            view_box.addWidget(view,1)
-        self.splitter.addWidget(views);self.splitter.setStretchFactor(1,1);self.splitter.setSizes([370,850])
+            views.add(view)
+        self.splitter=QSplitter(Qt.Vertical);self.splitter.setChildrenCollapsible(False)
+        self.splitter.addWidget(self.source_scroll);self.splitter.addWidget(views)
+        self.splitter.setStretchFactor(0,0);self.splitter.setStretchFactor(1,1);self.splitter.setSizes([290,600])
         self.layout.addWidget(self.splitter,1)
         self.validation_label=label('','muted');self.validation_label.setMaximumHeight(60);self.layout.addWidget(self.validation_label)
         footer=QHBoxLayout();self.create_button=button("SolidWorks’te çiz",self.create_model,primary=True)
@@ -232,6 +284,7 @@ class ShaftPage(BasePage):
                 signal=control.currentIndexChanged if isinstance(control,QComboBox) else control.valueChanged
                 signal.connect(lambda *args,k=kind:self.operation_form_changed(k))
         self.populate();self.refresh()
+        self.section_changed(self.tabs.currentIndex())
 
     def build_bulk_page(self):
         page=QWidget();box=QVBoxLayout(page);box.setContentsMargins(6,6,6,6)
@@ -261,7 +314,28 @@ class ShaftPage(BasePage):
         self.bulk_size.valueChanged.connect(self.refresh_bulk_info)
         self.bulk_replace.toggled.connect(self.refresh_bulk_info)
 
+    def page_key(self,index):
+        return 'drawing' if index==self.drawing_tab else next((k for k,v in COMMAND_PAGES.items() if v==index),None)
+
+    def open_command(self,key):
+        """Ribbon command: open its editor page (bulk edges go through the existing shortcut)."""
+        if key=='bulk':self.show_bulk_treatments()
+        else:
+            self.tabs.setCurrentIndex(self.drawing_tab if key=='drawing' else COMMAND_PAGES[key])
+            self.source_scroll.verticalScrollBar().setValue(0)
+        # Re-clicking the open command must not leave it unchecked.
+        self.ribbon.show_page(self.page_key(self.tabs.currentIndex()))
+
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        if hasattr(self,'panel_box'):
+            narrow=event.size().width()<760
+            self.panel_box.setDirection(QBoxLayout.TopToBottom if narrow else QBoxLayout.LeftToRight)
+            self.ribbon.set_compact(event.size().width()<640)
+
     def section_changed(self,index):
+        if hasattr(self,'ribbon'):
+            self.ribbon.show_page(self.page_key(index));self.ribbon.set_appearance(COLORS[self.context.appearance])
         selected=self.section_picker.findData(index)
         if selected>=0:
             with QSignalBlocker(self.section_picker):self.section_picker.setCurrentIndex(selected)
@@ -301,7 +375,7 @@ class ShaftPage(BasePage):
             self.add_operation_buttons[kind].setEnabled(not self.busy and not editing)
             self.update_operation_buttons[kind].setEnabled(not self.busy and editing)
             self.operation_hints[kind].setText('Alanlardaki değişiklikler seçili işleme anında uygulanır.' if editing
-                                              else 'Kademeyi ve ölçüleri seçin; İşlemi ekle düğmesine basın.')
+                                              else 'Kademeyi ve ölçüleri seçin, sonra + İşlemi ekle.')
         self.refresh_bulk_info()
         self.edge_undo_button.setEnabled(not self.busy and self.edge_undo is not None
                                          and self.project.to_dict()==self.edge_undo[1])
@@ -685,6 +759,7 @@ class ShaftPage(BasePage):
         super().set_busy(busy);self.refresh()
 
     def theme_changed(self):
+        if hasattr(self,'ribbon'):self.ribbon.set_appearance(COLORS[self.context.appearance])
         if hasattr(self,'auto_drawing'):self.auto_drawing.setIcon(toggle_icon(self.context.appearance))
         for picker in self.standard_pickers.values():picker.set_appearance(self.context.appearance)
         for view in (self.top_view,self.section_view):view.appearance=self.context.appearance;view.update()
