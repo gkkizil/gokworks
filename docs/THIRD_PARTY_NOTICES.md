@@ -11,7 +11,7 @@ korunur ve lisans arşivine eklenir. Çalışma bağımlılığı kurulmaz; kayn
 deponun genel K tabloları ve kalıp/malzeme sezgileri aktarılmaz.
 
 Diğer yedi sac açınımı deposu yalnız incelenmiştir; GPL, LGPL, MPL veya
-lisansı doğrulanmamış motor kodu bu çalışmada alınmamıştır. Unfoldo'nun
+lisansı doğrulanmamış motor kodu bu çalışmada alınmamıştır. Kaynak kataloğun
 kapalı hesap motoru veya CAD dosyaları alınmamıştır.
 [Sabit kaynaklar, dosya hash'leri ve doğrulama](unfolding/research/README.md).
 

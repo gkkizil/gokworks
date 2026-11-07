@@ -18,7 +18,7 @@ Ayrıca MIT uyarlaması `core.unfolding.bend_profiles` içinde bağımsız
 açıkça gereklidir. Kaynak fitting'lerin orta yüzey hesabına otomatik telafi
 ekleme. Bu yardımcı henüz GUI kontrolüne bağlı değildir; [araştırma notu](research/README.md).
 
-Kaynak `docs/unfolding/unfoldo_inventory.json`, güncel yöntem/sınırlar
+Kaynak `docs/unfolding/source_inventory.json`, güncel yöntem/sınırlar
 `SOURCE_MODELS.md`, kabul örnekleri `examples/source_models.json` dosyasındadır.
 191 kaynak kimliği / 51 aile / 11 kategori ayrı izlenir. Önceki yedi API
 varyantı eski projeleri açmak için korunur; bunları kaynak sayısına ekleme.
@@ -29,7 +29,7 @@ Yeni ekran veya ikinci hesap modülü oluşturma. Mevcut
 from core.unfolding import UnfoldService, UnfoldRequest
 engine = UnfoldService()
 catalogue = engine.list_source_models()  # 191 immutable records
-schema = engine.get_schema('unfoldo/Silindir', 'cylinder-top-angle-side')
+schema = engine.get_schema('catalog/Silindir', 'cylinder-top-angle-side')
 r = engine.calculate(UnfoldRequest(shape_id=schema.shape_id,
     variant_id=schema.variant_id,
     parameters={f.id: f.default for f in schema.fields}))
@@ -137,7 +137,7 @@ kabulü ayrıca yapılmalıdır; Linux/OCP testini bu kabulün yerine yazma.
 - `forming_report` sonuç alanı malzeme/proses kaynağını, BA/BD, yaylanma ve `NOT_EVALUATED` durumlarını taşır.
 - `nominal_part`/`nominal_geometry_2d` telafiden önceki geometriyi korur; nominal görünümü telafili diye etiketleme.
 - Çıktı `development`: `current`, `nominal`, `compensated`, `comparison`. Desteklenmeyen telafi dışa aktarımı reddedilir.
-- Yeni yerel `bent_profile` ailesi (tek/iki büküm) kaynak Unfoldo'nun 191 envanterine eklenmez.
+- Yeni yerel `bent_profile` ailesi (tek/iki büküm) kaynak Kaynak kataloğun 191 envanterine eklenmez.
 - GUI'deki `FormingPanel`, çıktı seçimi ve sonuç sekmesi gerçek çekirdek fonksiyonlarına bağlıdır.
 - Kıvırma ile segment birleştirme farklı proseslerdir; kaynak katalog ifadesi kaynaklı birleştirme hesabı değildir.
 - 1.2.0'da STEP nominal hedef orta yüzeydi; 1.3.0 katı değişikliği yukarıdadır.

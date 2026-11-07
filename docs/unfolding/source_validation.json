@@ -29,7 +29,7 @@
     {
       "source_id": "cylinder",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder",
         "parameters": {
           "D": 200,
@@ -186,7 +186,7 @@
     {
       "source_id": "cylinder-top-angle",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-top-angle",
         "parameters": {
           "A": 45,
@@ -345,7 +345,7 @@
     {
       "source_id": "cylinder-top-angle-side",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-top-angle-side",
         "parameters": {
           "A": 45,
@@ -504,7 +504,7 @@
     {
       "source_id": "cylinder-angled-top",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-angled-top",
         "parameters": {
           "D": 200,
@@ -663,7 +663,7 @@
     {
       "source_id": "cylinder-cut-both-ends",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-cut-both-ends",
         "parameters": {
           "A": 25,
@@ -824,7 +824,7 @@
     {
       "source_id": "cylinder-ridge-top",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-ridge-top",
         "parameters": {
           "A1": 25,
@@ -984,7 +984,7 @@
     {
       "source_id": "cylinder-ridge-top-offset",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-ridge-top-offset",
         "parameters": {
           "A1": 25,
@@ -1145,7 +1145,7 @@
     {
       "source_id": "cylinder-round-top",
       "request": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-round-top",
         "parameters": {
           "D": 150,
@@ -1304,7 +1304,7 @@
     {
       "source_id": "oblique-cylinder",
       "request": {
-        "shape_id": "unfoldo/Eğik silindir",
+        "shape_id": "catalog/Eğik silindir",
         "variant_id": "oblique-cylinder",
         "parameters": {
           "D": 250,
@@ -1465,7 +1465,7 @@
     {
       "source_id": "oblique-cylinder-angle",
       "request": {
-        "shape_id": "unfoldo/Eğik silindir",
+        "shape_id": "catalog/Eğik silindir",
         "variant_id": "oblique-cylinder-angle",
         "parameters": {
           "A": 60,
@@ -1626,7 +1626,7 @@
     {
       "source_id": "oval-cylinder",
       "request": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder",
         "parameters": {
           "H": 400,
@@ -1784,7 +1784,7 @@
     {
       "source_id": "oval-cylinder-top-cut",
       "request": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-cut",
         "parameters": {
           "A": 30,
@@ -1943,7 +1943,7 @@
     {
       "source_id": "oval-cylinder-top-cut-along",
       "request": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-cut-along",
         "parameters": {
           "A": 30,
@@ -2102,7 +2102,7 @@
     {
       "source_id": "oval-cylinder-top-base-cut",
       "request": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-base-cut",
         "parameters": {
           "A": 30,
@@ -2262,7 +2262,7 @@
     {
       "source_id": "oval-cylinder-top-base-cut-along",
       "request": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-base-cut-along",
         "parameters": {
           "A": 30,
@@ -2422,7 +2422,7 @@
     {
       "source_id": "oval-cylinder-top-base-cut-turned",
       "request": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-base-cut-turned",
         "parameters": {
           "A": 30,
@@ -2582,7 +2582,7 @@
     {
       "source_id": "pipe-cut-by-plate",
       "request": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "pipe-cut-by-plate",
         "parameters": {
           "D": 150,
@@ -2740,7 +2740,7 @@
     {
       "source_id": "pipe-cut-by-plate-angle",
       "request": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "pipe-cut-by-plate-angle",
         "parameters": {
           "A": 40,
@@ -2897,7 +2897,7 @@
     {
       "source_id": "plate-cut-by-pipe",
       "request": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "plate-cut-by-pipe",
         "parameters": {
           "Cx": 280,
@@ -3060,7 +3060,7 @@
     {
       "source_id": "plate-cut-by-pipe-angle",
       "request": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "plate-cut-by-pipe-angle",
         "parameters": {
           "A": 30,
@@ -3222,7 +3222,7 @@
     {
       "source_id": "two-pipes-cut-by-plate",
       "request": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "two-pipes-cut-by-plate",
         "parameters": {
           "D": 150,
@@ -3391,7 +3391,7 @@
     {
       "source_id": "two-pipes-cut-by-plate-angle",
       "request": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "two-pipes-cut-by-plate-angle",
         "parameters": {
           "A": 40,
@@ -3560,7 +3560,7 @@
     {
       "source_id": "cone-frustum",
       "request": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum",
         "parameters": {
           "D": 300,
@@ -3720,7 +3720,7 @@
     {
       "source_id": "cone",
       "request": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone",
         "parameters": {
           "D": 300,
@@ -3879,7 +3879,7 @@
     {
       "source_id": "cone-frustum-apex-height",
       "request": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum-apex-height",
         "parameters": {
           "D": 300,
@@ -4039,7 +4039,7 @@
     {
       "source_id": "cone-frustum-angle",
       "request": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum-angle",
         "parameters": {
           "A": 40,
@@ -4199,7 +4199,7 @@
     {
       "source_id": "cone-frustum-levels",
       "request": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum-levels",
         "parameters": {
           "D": 300,
@@ -4378,7 +4378,7 @@
     {
       "source_id": "cone-cut-top",
       "request": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-top",
         "parameters": {
           "A": 60,
@@ -4537,7 +4537,7 @@
     {
       "source_id": "cone-cut-top-base",
       "request": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-top-base",
         "parameters": {
           "D": 300,
@@ -4697,7 +4697,7 @@
     {
       "source_id": "cone-cut-two-planes",
       "request": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-two-planes",
         "parameters": {
           "D": 300,
@@ -4858,7 +4858,7 @@
     {
       "source_id": "cone-cut-base-two-planes",
       "request": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-base-two-planes",
         "parameters": {
           "D": 300,
@@ -5019,7 +5019,7 @@
     {
       "source_id": "cone-cut-base",
       "request": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-base",
         "parameters": {
           "D": 300,
@@ -5178,7 +5178,7 @@
     {
       "source_id": "rain-head-conical",
       "request": {
-        "shape_id": "unfoldo/Yağmur haznesi",
+        "shape_id": "catalog/Yağmur haznesi",
         "variant_id": "rain-head-conical",
         "parameters": {
           "D": 400,
@@ -5346,7 +5346,7 @@
     {
       "source_id": "oblique-cone-upright-side",
       "request": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-upright-side",
         "parameters": {
           "D": 1200,
@@ -5507,7 +5507,7 @@
     {
       "source_id": "oblique-cone-offset",
       "request": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-offset",
         "parameters": {
           "D": 900,
@@ -5669,7 +5669,7 @@
     {
       "source_id": "oblique-cone-offset-xy",
       "request": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-offset-xy",
         "parameters": {
           "D": 1200,
@@ -5832,7 +5832,7 @@
     {
       "source_id": "oblique-cone-levels",
       "request": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-levels",
         "parameters": {
           "D": 1200,
@@ -6014,7 +6014,7 @@
     {
       "source_id": "rectangle-to-round",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round",
         "parameters": {
           "D": 500,
@@ -6177,7 +6177,7 @@
     {
       "source_id": "square-to-round",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "square-to-round",
         "parameters": {
           "D": 500,
@@ -6339,7 +6339,7 @@
     {
       "source_id": "rectangle-to-round-offset",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-offset",
         "parameters": {
           "D": 500,
@@ -6504,7 +6504,7 @@
     {
       "source_id": "rectangle-to-round-angled-top",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-angled-top",
         "parameters": {
           "D": 500,
@@ -6670,7 +6670,7 @@
     {
       "source_id": "rectangle-to-round-angled-base",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-angled-base",
         "parameters": {
           "D": 500,
@@ -6836,7 +6836,7 @@
     {
       "source_id": "rectangle-to-round-one-angle",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-one-angle",
         "parameters": {
           "D": 500,
@@ -7002,7 +7002,7 @@
     {
       "source_id": "rectangle-to-round-two-angle",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-two-angle",
         "parameters": {
           "D": 500,
@@ -7169,7 +7169,7 @@
     {
       "source_id": "rectangle-to-round-levels",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-levels",
         "parameters": {
           "D": 500,
@@ -7353,7 +7353,7 @@
     {
       "source_id": "rectangle-to-rectangle",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle",
         "parameters": {
           "H": 800,
@@ -7518,7 +7518,7 @@
     {
       "source_id": "rectangle-to-rectangle-offset",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle-offset",
         "parameters": {
           "H": 800,
@@ -7685,7 +7685,7 @@
     {
       "source_id": "rectangle-to-rectangle-angled-top",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle-angled-top",
         "parameters": {
           "H": 800,
@@ -7854,7 +7854,7 @@
     {
       "source_id": "rectangle-to-rectangle-angled-top-base",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle-angled-top-base",
         "parameters": {
           "H": 800,
@@ -8024,7 +8024,7 @@
     {
       "source_id": "round-to-round-angled-top",
       "request": {
-        "shape_id": "unfoldo/Yuvarlak redüksiyon",
+        "shape_id": "catalog/Yuvarlak redüksiyon",
         "variant_id": "round-to-round-angled-top",
         "parameters": {
           "D": 1400,
@@ -8186,7 +8186,7 @@
     {
       "source_id": "round-to-round-axis-angled",
       "request": {
-        "shape_id": "unfoldo/Yuvarlak redüksiyon",
+        "shape_id": "catalog/Yuvarlak redüksiyon",
         "variant_id": "round-to-round-axis-angled",
         "parameters": {
           "D": 1400,
@@ -8349,7 +8349,7 @@
     {
       "source_id": "round-to-round-top-90",
       "request": {
-        "shape_id": "unfoldo/Yuvarlak redüksiyon",
+        "shape_id": "catalog/Yuvarlak redüksiyon",
         "variant_id": "round-to-round-top-90",
         "parameters": {
           "D": 1400,
@@ -8511,7 +8511,7 @@
     {
       "source_id": "oval-to-round",
       "request": {
-        "shape_id": "unfoldo/Ovalden yuvarlağa",
+        "shape_id": "catalog/Ovalden yuvarlağa",
         "variant_id": "oval-to-round",
         "parameters": {
           "D": 500,
@@ -8673,7 +8673,7 @@
     {
       "source_id": "oval-to-round-offset",
       "request": {
-        "shape_id": "unfoldo/Ovalden yuvarlağa",
+        "shape_id": "catalog/Ovalden yuvarlağa",
         "variant_id": "oval-to-round-offset",
         "parameters": {
           "D": 300,
@@ -8837,7 +8837,7 @@
     {
       "source_id": "oval-to-oval",
       "request": {
-        "shape_id": "unfoldo/Oval redüksiyon",
+        "shape_id": "catalog/Oval redüksiyon",
         "variant_id": "oval-to-oval",
         "parameters": {
           "H": 800,
@@ -9000,7 +9000,7 @@
     {
       "source_id": "oval-to-oval-offset",
       "request": {
-        "shape_id": "unfoldo/Oval redüksiyon",
+        "shape_id": "catalog/Oval redüksiyon",
         "variant_id": "oval-to-oval-offset",
         "parameters": {
           "H": 800,
@@ -9165,7 +9165,7 @@
     {
       "source_id": "oval-to-rectangle",
       "request": {
-        "shape_id": "unfoldo/Ovalden dikdörtgene",
+        "shape_id": "catalog/Ovalden dikdörtgene",
         "variant_id": "oval-to-rectangle",
         "parameters": {
           "H": 800,
@@ -9329,7 +9329,7 @@
     {
       "source_id": "oval-to-rectangle-offset",
       "request": {
-        "shape_id": "unfoldo/Ovalden dikdörtgene",
+        "shape_id": "catalog/Ovalden dikdörtgene",
         "variant_id": "oval-to-rectangle-offset",
         "parameters": {
           "H": 800,
@@ -9495,7 +9495,7 @@
     {
       "source_id": "ellipse-to-round",
       "request": {
-        "shape_id": "unfoldo/Elipsten yuvarlağa",
+        "shape_id": "catalog/Elipsten yuvarlağa",
         "variant_id": "ellipse-to-round",
         "parameters": {
           "D": 500,
@@ -9657,7 +9657,7 @@
     {
       "source_id": "ellipse-to-round-offset",
       "request": {
-        "shape_id": "unfoldo/Elipsten yuvarlağa",
+        "shape_id": "catalog/Elipsten yuvarlağa",
         "variant_id": "ellipse-to-round-offset",
         "parameters": {
           "D": 500,
@@ -9821,7 +9821,7 @@
     {
       "source_id": "ellipse-to-round-angled-top",
       "request": {
-        "shape_id": "unfoldo/Elipsten yuvarlağa",
+        "shape_id": "catalog/Elipsten yuvarlağa",
         "variant_id": "ellipse-to-round-angled-top",
         "parameters": {
           "D": 500,
@@ -9986,7 +9986,7 @@
     {
       "source_id": "ellipse-to-ellipse",
       "request": {
-        "shape_id": "unfoldo/Elips redüksiyon",
+        "shape_id": "catalog/Elips redüksiyon",
         "variant_id": "ellipse-to-ellipse",
         "parameters": {
           "H": 800,
@@ -10149,7 +10149,7 @@
     {
       "source_id": "ellipse-to-ellipse-offset",
       "request": {
-        "shape_id": "unfoldo/Elips redüksiyon",
+        "shape_id": "catalog/Elips redüksiyon",
         "variant_id": "ellipse-to-ellipse-offset",
         "parameters": {
           "H": 800,
@@ -10314,7 +10314,7 @@
     {
       "source_id": "ellipse-to-ellipse-angled-top",
       "request": {
-        "shape_id": "unfoldo/Elips redüksiyon",
+        "shape_id": "catalog/Elips redüksiyon",
         "variant_id": "ellipse-to-ellipse-angled-top",
         "parameters": {
           "H": 800,
@@ -10480,7 +10480,7 @@
     {
       "source_id": "ellipse-to-rectangle",
       "request": {
-        "shape_id": "unfoldo/Elipsten dikdörtgene",
+        "shape_id": "catalog/Elipsten dikdörtgene",
         "variant_id": "ellipse-to-rectangle",
         "parameters": {
           "H": 800,
@@ -10644,7 +10644,7 @@
     {
       "source_id": "ellipse-to-rectangle-offset",
       "request": {
-        "shape_id": "unfoldo/Elipsten dikdörtgene",
+        "shape_id": "catalog/Elipsten dikdörtgene",
         "variant_id": "ellipse-to-rectangle-offset",
         "parameters": {
           "H": 800,
@@ -10810,7 +10810,7 @@
     {
       "source_id": "ellipse-to-rectangle-angled-top",
       "request": {
-        "shape_id": "unfoldo/Elipsten dikdörtgene",
+        "shape_id": "catalog/Elipsten dikdörtgene",
         "variant_id": "ellipse-to-rectangle-angled-top",
         "parameters": {
           "H": 800,
@@ -10977,7 +10977,7 @@
     {
       "source_id": "hexagon-to-round",
       "request": {
-        "shape_id": "unfoldo/Altıgenden yuvarlağa",
+        "shape_id": "catalog/Altıgenden yuvarlağa",
         "variant_id": "hexagon-to-round",
         "parameters": {
           "AF": 1000,
@@ -11139,7 +11139,7 @@
     {
       "source_id": "hexagon-to-round-offset",
       "request": {
-        "shape_id": "unfoldo/Altıgenden yuvarlağa",
+        "shape_id": "catalog/Altıgenden yuvarlağa",
         "variant_id": "hexagon-to-round-offset",
         "parameters": {
           "AF": 1000,
@@ -11303,7 +11303,7 @@
     {
       "source_id": "octagon-to-round",
       "request": {
-        "shape_id": "unfoldo/Sekizgenden yuvarlağa",
+        "shape_id": "catalog/Sekizgenden yuvarlağa",
         "variant_id": "octagon-to-round",
         "parameters": {
           "AF": 1000,
@@ -11465,7 +11465,7 @@
     {
       "source_id": "octagon-to-round-offset",
       "request": {
-        "shape_id": "unfoldo/Sekizgenden yuvarlağa",
+        "shape_id": "catalog/Sekizgenden yuvarlağa",
         "variant_id": "octagon-to-round-offset",
         "parameters": {
           "AF": 1000,
@@ -11629,7 +11629,7 @@
     {
       "source_id": "segmented-bend-90",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, yuvarlak",
+        "shape_id": "catalog/Segmentli dirsek, yuvarlak",
         "variant_id": "segmented-bend-90",
         "parameters": {
           "D": 2000,
@@ -11863,7 +11863,7 @@
     {
       "source_id": "segmented-bend-angle",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, yuvarlak",
+        "shape_id": "catalog/Segmentli dirsek, yuvarlak",
         "variant_id": "segmented-bend-angle",
         "parameters": {
           "D": 500,
@@ -12098,7 +12098,7 @@
     {
       "source_id": "segmented-bend-extended",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, yuvarlak",
+        "shape_id": "catalog/Segmentli dirsek, yuvarlak",
         "variant_id": "segmented-bend-extended",
         "parameters": {
           "D": 700,
@@ -12335,7 +12335,7 @@
     {
       "source_id": "segmented-bend-oval-90",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, oval",
+        "shape_id": "catalog/Segmentli dirsek, oval",
         "variant_id": "segmented-bend-oval-90",
         "parameters": {
           "H": 500,
@@ -12587,7 +12587,7 @@
     {
       "source_id": "segmented-bend-oval-angle",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, oval",
+        "shape_id": "catalog/Segmentli dirsek, oval",
         "variant_id": "segmented-bend-oval-angle",
         "parameters": {
           "H": 400,
@@ -12840,7 +12840,7 @@
     {
       "source_id": "segmented-bend-oval-extended",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, oval",
+        "shape_id": "catalog/Segmentli dirsek, oval",
         "variant_id": "segmented-bend-oval-extended",
         "parameters": {
           "E1": 700,
@@ -13095,7 +13095,7 @@
     {
       "source_id": "segmented-bend-oval-opposite-90",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, yatık oval",
+        "shape_id": "catalog/Segmentli dirsek, yatık oval",
         "variant_id": "segmented-bend-oval-opposite-90",
         "parameters": {
           "H": 500,
@@ -13347,7 +13347,7 @@
     {
       "source_id": "segmented-bend-oval-opposite-angle",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, yatık oval",
+        "shape_id": "catalog/Segmentli dirsek, yatık oval",
         "variant_id": "segmented-bend-oval-opposite-angle",
         "parameters": {
           "H": 500,
@@ -13600,7 +13600,7 @@
     {
       "source_id": "segmented-bend-oval-opposite-extended",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, yatık oval",
+        "shape_id": "catalog/Segmentli dirsek, yatık oval",
         "variant_id": "segmented-bend-oval-opposite-extended",
         "parameters": {
           "E1": 700,
@@ -13855,7 +13855,7 @@
     {
       "source_id": "segmented-bend-tapered-90",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, redüksiyonlu",
+        "shape_id": "catalog/Segmentli dirsek, redüksiyonlu",
         "variant_id": "segmented-bend-tapered-90",
         "parameters": {
           "D1": 900,
@@ -14107,7 +14107,7 @@
     {
       "source_id": "segmented-bend-tapered-angle",
       "request": {
-        "shape_id": "unfoldo/Segmentli dirsek, redüksiyonlu",
+        "shape_id": "catalog/Segmentli dirsek, redüksiyonlu",
         "variant_id": "segmented-bend-tapered-angle",
         "parameters": {
           "D1": 800,
@@ -14343,7 +14343,7 @@
     {
       "source_id": "mitred-elbow-90",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-90",
         "parameters": {
           "D": 250,
@@ -14529,7 +14529,7 @@
     {
       "source_id": "mitred-elbow-angle",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-angle",
         "parameters": {
           "A": 65,
@@ -14716,7 +14716,7 @@
     {
       "source_id": "mitred-elbow-radius",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-radius",
         "parameters": {
           "D": 250,
@@ -14902,7 +14902,7 @@
     {
       "source_id": "mitred-elbow-double",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-double",
         "parameters": {
           "D": 200,
@@ -15108,7 +15108,7 @@
     {
       "source_id": "mitred-elbow-double-outside",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-double-outside",
         "parameters": {
           "D": 150,
@@ -15314,7 +15314,7 @@
     {
       "source_id": "mitred-elbow-double-rolled",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-double-rolled",
         "parameters": {
           "D": 150,
@@ -15521,7 +15521,7 @@
     {
       "source_id": "mitred-elbow-pipe-cone-90",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru-koni",
+        "shape_id": "catalog/Gönye dirsek, boru-koni",
         "variant_id": "mitred-elbow-pipe-cone-90",
         "parameters": {
           "D": 400,
@@ -15708,7 +15708,7 @@
     {
       "source_id": "mitred-elbow-pipe-cone-angle",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, boru-koni",
+        "shape_id": "catalog/Gönye dirsek, boru-koni",
         "variant_id": "mitred-elbow-pipe-cone-angle",
         "parameters": {
           "A": 115,
@@ -15896,7 +15896,7 @@
     {
       "source_id": "mitred-elbow-cone-cone-90",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-koni",
+        "shape_id": "catalog/Gönye dirsek, koni-koni",
         "variant_id": "mitred-elbow-cone-cone-90",
         "parameters": {
           "D": 1200,
@@ -16083,7 +16083,7 @@
     {
       "source_id": "mitred-elbow-cone-cone-angle",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-koni",
+        "shape_id": "catalog/Gönye dirsek, koni-koni",
         "variant_id": "mitred-elbow-cone-cone-angle",
         "parameters": {
           "A": 115,
@@ -16271,7 +16271,7 @@
     {
       "source_id": "mitred-elbow-cone-pipe-90",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-boru",
+        "shape_id": "catalog/Gönye dirsek, koni-boru",
         "variant_id": "mitred-elbow-cone-pipe-90",
         "parameters": {
           "D": 1100,
@@ -16458,7 +16458,7 @@
     {
       "source_id": "mitred-elbow-cone-pipe-angle",
       "request": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-boru",
+        "shape_id": "catalog/Gönye dirsek, koni-boru",
         "variant_id": "mitred-elbow-cone-pipe-angle",
         "parameters": {
           "A": 150,
@@ -16646,7 +16646,7 @@
     {
       "source_id": "breeches-3-pipes",
       "request": {
-        "shape_id": "unfoldo/Boru pantolon",
+        "shape_id": "catalog/Boru pantolon",
         "variant_id": "breeches-3-pipes",
         "parameters": {
           "A1": 110,
@@ -16823,7 +16823,7 @@
     {
       "source_id": "breeches-4-pipes",
       "request": {
-        "shape_id": "unfoldo/Boru pantolon",
+        "shape_id": "catalog/Boru pantolon",
         "variant_id": "breeches-4-pipes",
         "parameters": {
           "A1": 30,
@@ -17010,7 +17010,7 @@
     {
       "source_id": "breeches-5-pipes",
       "request": {
-        "shape_id": "unfoldo/Boru pantolon",
+        "shape_id": "catalog/Boru pantolon",
         "variant_id": "breeches-5-pipes",
         "parameters": {
           "A1": 40,
@@ -17207,7 +17207,7 @@
     {
       "source_id": "reducing-breech-angled-top",
       "request": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-angled-top",
         "parameters": {
           "A": 110,
@@ -17379,7 +17379,7 @@
     {
       "source_id": "reducing-breech-parallel-top",
       "request": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-parallel-top",
         "parameters": {
           "A": 1200,
@@ -17551,7 +17551,7 @@
     {
       "source_id": "reducing-breech-3-symmetric",
       "request": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-3-symmetric",
         "parameters": {
           "A": 110,
@@ -17785,7 +17785,7 @@
     {
       "source_id": "reducing-breech-3-equal",
       "request": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-3-equal",
         "parameters": {
           "A1": 40,
@@ -18020,7 +18020,7 @@
     {
       "source_id": "reducing-breech-3-unequal",
       "request": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-3-unequal",
         "parameters": {
           "A1": 0,
@@ -18257,7 +18257,7 @@
     {
       "source_id": "prism",
       "request": {
-        "shape_id": "unfoldo/Prizma",
+        "shape_id": "catalog/Prizma",
         "variant_id": "prism",
         "parameters": {
           "D": 800,
@@ -18415,7 +18415,7 @@
     {
       "source_id": "prism-top-cut",
       "request": {
-        "shape_id": "unfoldo/Prizma",
+        "shape_id": "catalog/Prizma",
         "variant_id": "prism-top-cut",
         "parameters": {
           "A": 25,
@@ -18574,7 +18574,7 @@
     {
       "source_id": "prism-top-base-cut",
       "request": {
-        "shape_id": "unfoldo/Prizma",
+        "shape_id": "catalog/Prizma",
         "variant_id": "prism-top-base-cut",
         "parameters": {
           "A": 25,
@@ -18734,7 +18734,7 @@
     {
       "source_id": "pyramid",
       "request": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid",
         "parameters": {
           "D": 900,
@@ -18891,7 +18891,7 @@
     {
       "source_id": "pyramid-frustum",
       "request": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid-frustum",
         "parameters": {
           "D": 900,
@@ -19050,7 +19050,7 @@
     {
       "source_id": "pyramid-frustum-apex-height",
       "request": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid-frustum-apex-height",
         "parameters": {
           "D": 800,
@@ -19209,7 +19209,7 @@
     {
       "source_id": "pyramid-top-cut",
       "request": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid-top-cut",
         "parameters": {
           "A": 25,
@@ -19369,7 +19369,7 @@
     {
       "source_id": "vessel-end-cap-hemispherical",
       "request": {
-        "shape_id": "unfoldo/Tank bombesi",
+        "shape_id": "catalog/Tank bombesi",
         "variant_id": "vessel-end-cap-hemispherical",
         "parameters": {
           "D": 1200,
@@ -19531,7 +19531,7 @@
     {
       "source_id": "vessel-end-cap-elliptical",
       "request": {
-        "shape_id": "unfoldo/Tank bombesi",
+        "shape_id": "catalog/Tank bombesi",
         "variant_id": "vessel-end-cap-elliptical",
         "parameters": {
           "D": 1200,
@@ -19694,7 +19694,7 @@
     {
       "source_id": "vessel-end-cap-torispherical",
       "request": {
-        "shape_id": "unfoldo/Tank bombesi",
+        "shape_id": "catalog/Tank bombesi",
         "variant_id": "vessel-end-cap-torispherical",
         "parameters": {
           "D": 1200,
@@ -19858,7 +19858,7 @@
     {
       "source_id": "helical-ramp-triangulated",
       "request": {
-        "shape_id": "unfoldo/Helezon kanat",
+        "shape_id": "catalog/Helezon kanat",
         "variant_id": "helical-ramp-triangulated",
         "parameters": {
           "D": 1500,
@@ -20064,7 +20064,7 @@
     {
       "source_id": "helix-angled-flight",
       "request": {
-        "shape_id": "unfoldo/Helezon kanat",
+        "shape_id": "catalog/Helezon kanat",
         "variant_id": "helix-angled-flight",
         "parameters": {
           "H": 600,
@@ -20253,7 +20253,7 @@
     {
       "source_id": "helix-tapered",
       "request": {
-        "shape_id": "unfoldo/Helezon kanat",
+        "shape_id": "catalog/Helezon kanat",
         "variant_id": "helix-tapered",
         "parameters": {
           "D": 1400,
@@ -20496,7 +20496,7 @@
     {
       "source_id": "helix-deformed",
       "request": {
-        "shape_id": "unfoldo/Helezon yaprağı",
+        "shape_id": "catalog/Helezon yaprağı",
         "variant_id": "helix-deformed",
         "parameters": {
           "D": 900,
@@ -20620,7 +20620,7 @@
     {
       "source_id": "rectangular-duct-straight",
       "request": {
-        "shape_id": "unfoldo/Düz kanal",
+        "shape_id": "catalog/Düz kanal",
         "variant_id": "rectangular-duct-straight",
         "parameters": {
           "H": 250,
@@ -20805,7 +20805,7 @@
     {
       "source_id": "rectangular-duct-reducer",
       "request": {
-        "shape_id": "unfoldo/Kanal redüksiyonu",
+        "shape_id": "catalog/Kanal redüksiyonu",
         "variant_id": "rectangular-duct-reducer",
         "parameters": {
           "E1": 200,
@@ -20993,7 +20993,7 @@
     {
       "source_id": "rectangular-duct-reducer-straight-side",
       "request": {
-        "shape_id": "unfoldo/Kanal redüksiyonu",
+        "shape_id": "catalog/Kanal redüksiyonu",
         "variant_id": "rectangular-duct-reducer-straight-side",
         "parameters": {
           "E1": 200,
@@ -21181,7 +21181,7 @@
     {
       "source_id": "rectangular-duct-reducer-offset",
       "request": {
-        "shape_id": "unfoldo/Kanal redüksiyonu",
+        "shape_id": "catalog/Kanal redüksiyonu",
         "variant_id": "rectangular-duct-reducer-offset",
         "parameters": {
           "B1": 350,
@@ -21373,7 +21373,7 @@
     {
       "source_id": "rectangular-duct-offset",
       "request": {
-        "shape_id": "unfoldo/Kanal S parçası",
+        "shape_id": "catalog/Kanal S parçası",
         "variant_id": "rectangular-duct-offset",
         "parameters": {
           "E1": 250,
@@ -21561,7 +21561,7 @@
     {
       "source_id": "rectangular-duct-offset-radius",
       "request": {
-        "shape_id": "unfoldo/Kanal S parçası",
+        "shape_id": "catalog/Kanal S parçası",
         "variant_id": "rectangular-duct-offset-radius",
         "parameters": {
           "E1": 250,
@@ -21749,7 +21749,7 @@
     {
       "source_id": "rectangular-duct-branch",
       "request": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch",
         "parameters": {
           "A1": 350,
@@ -21946,7 +21946,7 @@
     {
       "source_id": "rectangular-duct-branch-radius",
       "request": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch-radius",
         "parameters": {
           "A1": 500,
@@ -22144,7 +22144,7 @@
     {
       "source_id": "rectangular-duct-branch-angle",
       "request": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch-angle",
         "parameters": {
           "A": 40,
@@ -22342,7 +22342,7 @@
     {
       "source_id": "rectangular-duct-branch-angle-radius",
       "request": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch-angle-radius",
         "parameters": {
           "A": 40,
@@ -22541,7 +22541,7 @@
     {
       "source_id": "rectangular-duct-y",
       "request": {
-        "shape_id": "unfoldo/Kanal Y parçası",
+        "shape_id": "catalog/Kanal Y parçası",
         "variant_id": "rectangular-duct-y",
         "parameters": {
           "A": 60,
@@ -22739,7 +22739,7 @@
     {
       "source_id": "rectangular-duct-y-180",
       "request": {
-        "shape_id": "unfoldo/Kanal Y parçası",
+        "shape_id": "catalog/Kanal Y parçası",
         "variant_id": "rectangular-duct-y-180",
         "parameters": {
           "B": 1200,
@@ -22936,7 +22936,7 @@
     {
       "source_id": "rectangular-duct-y-asymmetric",
       "request": {
-        "shape_id": "unfoldo/Kanal Y parçası",
+        "shape_id": "catalog/Kanal Y parçası",
         "variant_id": "rectangular-duct-y-asymmetric",
         "parameters": {
           "A1": 40,
@@ -23137,7 +23137,7 @@
     {
       "source_id": "rectangular-duct-splitter",
       "request": {
-        "shape_id": "unfoldo/Kanal ayırıcı",
+        "shape_id": "catalog/Kanal ayırıcı",
         "variant_id": "rectangular-duct-splitter",
         "parameters": {
           "A": 40,
@@ -23345,7 +23345,7 @@
     {
       "source_id": "rectangular-duct-bend",
       "request": {
-        "shape_id": "unfoldo/Kanal dirseği",
+        "shape_id": "catalog/Kanal dirseği",
         "variant_id": "rectangular-duct-bend",
         "parameters": {
           "A": 60,
@@ -23533,7 +23533,7 @@
     {
       "source_id": "rectangular-duct-elbow",
       "request": {
-        "shape_id": "unfoldo/Kanal dirseği",
+        "shape_id": "catalog/Kanal dirseği",
         "variant_id": "rectangular-duct-elbow",
         "parameters": {
           "A": 30,
@@ -23720,7 +23720,7 @@
     {
       "source_id": "pipe-to-pipe-90-branch",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-90-branch",
         "parameters": {
           "Db": 350,
@@ -25801,7 +25801,7 @@
     {
       "source_id": "pipe-to-pipe-90-trunk",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-90-trunk",
         "parameters": {
           "Db": 350,
@@ -27983,7 +27983,7 @@
     {
       "source_id": "pipe-to-pipe-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-angle-branch",
         "parameters": {
           "A": 45,
@@ -29725,7 +29725,7 @@
     {
       "source_id": "pipe-to-pipe-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-angle-trunk",
         "parameters": {
           "A": 45,
@@ -31468,7 +31468,7 @@
     {
       "source_id": "pipe-to-pipe-two-branches",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-two-branches",
         "parameters": {
           "A": 60,
@@ -31636,7 +31636,7 @@
     {
       "source_id": "pipe-to-pipe-two-branches-angled",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-two-branches-angled",
         "parameters": {
           "A": 60,
@@ -31805,7 +31805,7 @@
     {
       "source_id": "pipe-to-pipe-two-branches-along",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-two-branches-along",
         "parameters": {
           "B1": 40,
@@ -31974,7 +31974,7 @@
     {
       "source_id": "pipe-to-pipe-four-branches",
       "request": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-four-branches",
         "parameters": {
           "A": 60,
@@ -32162,7 +32162,7 @@
     {
       "source_id": "pipe-to-cone-horizontal-trunk",
       "request": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-horizontal-trunk",
         "parameters": {
           "D": 900,
@@ -33645,7 +33645,7 @@
     {
       "source_id": "pipe-to-cone-horizontal-branch",
       "request": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-horizontal-branch",
         "parameters": {
           "D": 1200,
@@ -35729,7 +35729,7 @@
     {
       "source_id": "pipe-to-cone-vertical-trunk",
       "request": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-vertical-trunk",
         "parameters": {
           "D": 1200,
@@ -37452,7 +37452,7 @@
     {
       "source_id": "pipe-to-cone-vertical-branch",
       "request": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-vertical-branch",
         "parameters": {
           "D": 1000,
@@ -39121,7 +39121,7 @@
     {
       "source_id": "pipe-to-cone-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-angle-trunk",
         "parameters": {
           "A": 45,
@@ -40320,7 +40320,7 @@
     {
       "source_id": "pipe-to-cone-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-angle-branch",
         "parameters": {
           "A": 50,
@@ -41810,7 +41810,7 @@
     {
       "source_id": "pipe-to-oblique-cone-horizontal-trunk",
       "request": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-horizontal-trunk",
         "parameters": {
           "D": 1100,
@@ -43053,7 +43053,7 @@
     {
       "source_id": "pipe-to-oblique-cone-horizontal-branch",
       "request": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-horizontal-branch",
         "parameters": {
           "D": 1200,
@@ -44317,7 +44317,7 @@
     {
       "source_id": "pipe-to-oblique-cone-vertical-trunk",
       "request": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-vertical-trunk",
         "parameters": {
           "D": 1200,
@@ -45626,7 +45626,7 @@
     {
       "source_id": "pipe-to-oblique-cone-vertical-branch",
       "request": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-vertical-branch",
         "parameters": {
           "D": 1200,
@@ -46941,7 +46941,7 @@
     {
       "source_id": "pipe-to-oblique-cone-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-angle-trunk",
         "parameters": {
           "A": 40,
@@ -48466,7 +48466,7 @@
     {
       "source_id": "pipe-to-oblique-cone-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-angle-branch",
         "parameters": {
           "A": 40,
@@ -50017,7 +50017,7 @@
     {
       "source_id": "cone-to-cone-horizontal-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-horizontal-trunk",
         "parameters": {
           "A": 3,
@@ -52101,7 +52101,7 @@
     {
       "source_id": "cone-to-cone-horizontal-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-horizontal-branch",
         "parameters": {
           "A": 30,
@@ -54185,7 +54185,7 @@
     {
       "source_id": "cone-to-cone-vertical-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-vertical-trunk",
         "parameters": {
           "A": 3,
@@ -56219,7 +56219,7 @@
     {
       "source_id": "cone-to-cone-vertical-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-vertical-branch",
         "parameters": {
           "A": 3,
@@ -58263,7 +58263,7 @@
     {
       "source_id": "cone-to-cone-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-angle-trunk",
         "parameters": {
           "A": 3,
@@ -59388,7 +59388,7 @@
     {
       "source_id": "cone-to-cone-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-angle-branch",
         "parameters": {
           "A": 3,
@@ -60513,7 +60513,7 @@
     {
       "source_id": "cone-to-oblique-cone-horizontal-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-horizontal-trunk",
         "parameters": {
           "A": 3,
@@ -62598,7 +62598,7 @@
     {
       "source_id": "cone-to-oblique-cone-horizontal-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-horizontal-branch",
         "parameters": {
           "A": 3,
@@ -64683,7 +64683,7 @@
     {
       "source_id": "cone-to-oblique-cone-vertical-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-vertical-trunk",
         "parameters": {
           "D": 1400,
@@ -66768,7 +66768,7 @@
     {
       "source_id": "cone-to-oblique-cone-vertical-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-vertical-branch",
         "parameters": {
           "D": 2000,
@@ -68973,7 +68973,7 @@
     {
       "source_id": "cone-to-oblique-cone-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-angle-trunk",
         "parameters": {
           "A": 5,
@@ -70169,7 +70169,7 @@
     {
       "source_id": "cone-to-oblique-cone-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-angle-branch",
         "parameters": {
           "A": 3,
@@ -71295,7 +71295,7 @@
     {
       "source_id": "cone-to-pipe-90-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-90-branch",
         "parameters": {
           "A": 30,
@@ -73558,7 +73558,7 @@
     {
       "source_id": "cone-to-pipe-90-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-90-trunk",
         "parameters": {
           "A": 30,
@@ -75821,7 +75821,7 @@
     {
       "source_id": "cone-to-pipe-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-angle-branch",
         "parameters": {
           "A": 3,
@@ -78033,7 +78033,7 @@
     {
       "source_id": "cone-to-pipe-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-angle-trunk",
         "parameters": {
           "A": 3,
@@ -79617,7 +79617,7 @@
     {
       "source_id": "rectangle-to-pipe-90-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-90-branch",
         "parameters": {
           "Dt": 300,
@@ -81310,7 +81310,7 @@
     {
       "source_id": "rectangle-to-pipe-90-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-90-trunk",
         "parameters": {
           "Dt": 300,
@@ -82759,7 +82759,7 @@
     {
       "source_id": "rectangle-to-pipe-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-angle-branch",
         "parameters": {
           "A": 40,
@@ -84138,7 +84138,7 @@
     {
       "source_id": "rectangle-to-pipe-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-angle-trunk",
         "parameters": {
           "A": 40,
@@ -85218,7 +85218,7 @@
     {
       "source_id": "rectangle-to-pipe-tangent-90-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-90-branch",
         "parameters": {
           "Dt": 300,
@@ -86515,7 +86515,7 @@
     {
       "source_id": "rectangle-to-pipe-tangent-90-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-90-trunk",
         "parameters": {
           "Dt": 300,
@@ -87918,7 +87918,7 @@
     {
       "source_id": "rectangle-to-pipe-tangent-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-angle-branch",
         "parameters": {
           "A": 40,
@@ -89536,7 +89536,7 @@
     {
       "source_id": "rectangle-to-pipe-tangent-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-angle-trunk",
         "parameters": {
           "A": 40,
@@ -91115,7 +91115,7 @@
     {
       "source_id": "rectangle-to-cone-horizontal-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-horizontal-trunk",
         "parameters": {
           "D": 1400,
@@ -92235,7 +92235,7 @@
     {
       "source_id": "rectangle-to-cone-horizontal-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-horizontal-branch",
         "parameters": {
           "D": 1400,
@@ -93146,7 +93146,7 @@
     {
       "source_id": "rectangle-to-cone-vertical-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-vertical-trunk",
         "parameters": {
           "B": 150,
@@ -94291,7 +94291,7 @@
     {
       "source_id": "rectangle-to-cone-vertical-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-vertical-branch",
         "parameters": {
           "B": 150,
@@ -95727,7 +95727,7 @@
     {
       "source_id": "rectangle-to-cone-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-angle-trunk",
         "parameters": {
           "A": 40,
@@ -96813,7 +96813,7 @@
     {
       "source_id": "rectangle-to-cone-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-angle-branch",
         "parameters": {
           "A": 40,
@@ -97955,7 +97955,7 @@
     {
       "source_id": "rectangle-to-oblique-cone-horizontal-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-horizontal-trunk",
         "parameters": {
           "D": 1300,
@@ -99111,7 +99111,7 @@
     {
       "source_id": "rectangle-to-oblique-cone-horizontal-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-horizontal-branch",
         "parameters": {
           "D": 1400,
@@ -100213,7 +100213,7 @@
     {
       "source_id": "rectangle-to-oblique-cone-vertical-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-vertical-trunk",
         "parameters": {
           "D": 1200,
@@ -101809,7 +101809,7 @@
     {
       "source_id": "rectangle-to-oblique-cone-vertical-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-vertical-branch",
         "parameters": {
           "D": 1200,
@@ -103406,7 +103406,7 @@
     {
       "source_id": "rectangle-to-oblique-cone-angle-trunk",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-angle-trunk",
         "parameters": {
           "A": 40,
@@ -104578,7 +104578,7 @@
     {
       "source_id": "rectangle-to-oblique-cone-angle-branch",
       "request": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-angle-branch",
         "parameters": {
           "A": 40,
@@ -105741,7 +105741,7 @@
     {
       "source_id": "pipe-to-bend-concentric",
       "request": {
-        "shape_id": "unfoldo/Borudan dirseğe",
+        "shape_id": "catalog/Borudan dirseğe",
         "variant_id": "pipe-to-bend-concentric",
         "parameters": {
           "D": 300,
@@ -105900,7 +105900,7 @@
     {
       "source_id": "pipe-to-bend-offset",
       "request": {
-        "shape_id": "unfoldo/Borudan dirseğe",
+        "shape_id": "catalog/Borudan dirseğe",
         "variant_id": "pipe-to-bend-offset",
         "parameters": {
           "D": 400,
@@ -106061,7 +106061,7 @@
     {
       "source_id": "pipe-to-bend-angled",
       "request": {
-        "shape_id": "unfoldo/Borudan dirseğe",
+        "shape_id": "catalog/Borudan dirseğe",
         "variant_id": "pipe-to-bend-angled",
         "parameters": {
           "A": 5.0,
@@ -106225,7 +106225,7 @@
   "validation_date": "2026-11-07",
   "validation_timezone": "Europe/Istanbul",
   "source_observation_date": "2026-11-07",
-  "artifact_root": "/tmp/gokworks-unfoldo-solid-release-20261107",
+  "artifact_root": "/tmp/gokworks-kaynak katalog-solid-release-20261107",
   "output_counts": {
     "dxf": 191,
     "pdf": 191,

@@ -33,14 +33,14 @@ ve üretim onayı verilmedi.** Açık eksikler aşağıdadır.
 191 satırın tamamı: [source_coverage.csv](source_coverage.csv).
 Kaynak kimliği, iç kimlik, yöntem, hesap/2D/3D/DXF/PDF/STEP/nesting,
 testler, uygulama dosyaları ve kısıtlar ayrı sütunlardadır.
-[unfoldo_inventory.json](unfoldo_inventory.json) kaynak alanlarını ve
+[source_inventory.json](source_inventory.json) kaynak alanlarını ve
 uygulama durumunu; [source_validation.json](source_validation.json) her
 modelin isteğini, çıktı hash'lerini ve ölçüm/geri okuma kanıtını taşır.
 Tekrar üretilebilir örnekler [examples/source_models.json](examples/source_models.json)+içindedir. Tam dosyalar ve PNG'ler çalışma ortamında
 `/workspace/artifacts/unfolding-expansion-final/` altında korunur.
 
 Kaynak envanterinin HTTP/canonical/h1/sitemap doğrulaması kullanıcı tarafından
-5 Kasım'da sağlanmıştır. Unfoldo hesap motoru/CAD dosyaları elde edilmedi.
+5 Kasım'da sağlanmıştır. Kaynak katalog hesap motoru/CAD dosyaları elde edilmedi.
 Kaynağın 184 referans metadatası bir GOKWORKS kabul sayısı değildir. Dört
 yayımlanmamış başlık sayılmaz. Önceki 5 aile / 7 API varyantı eski projeleri
 açmak için korunur; yeni 191 sayısına eklenmez.
@@ -61,7 +61,7 @@ modelleridir. UI/çıktı aynı sonuç snapshot'ını kullanır; eski revizyon/h
 ve iptal kontrolleri korunur.
 
 `UnfoldRequest` şema v1'e geriye uyumlu `model_options` eklendi. Kaynak
-kimlikleri değişmeden korunur; `shape_id=unfoldo/<aile>`,
+kimlikleri değişmeden korunur; `shape_id=catalog/<aile>`,
 `variant_id=<source_id>`. Registry'nin gerçek hesap tanımları 51 aileyi
 dinamik sağlar. Açı/adet/ayrık seçenek birim dönüşümüne girmez; W/w gibi
 alanların harf farkı korunur. Katalog örnek girdileri fiziksel geçerlilik
@@ -118,7 +118,7 @@ halka dış kenarı eşleştirir, gerekli iç kenar uzamasını raporlar. Bunlar
 pres/çekme, gerinim kapasitesi veya yaylanma çözümü değildir.
 
 Yöntemlerin ayrıntıları ve ölçü yorumları [SOURCE_MODELS.md](SOURCE_MODELS.md)+içindedir. Bu geometri formülleri bir DIN/EN üretim standardı sertifikası
-veya Unfoldo ile sayısal eşdeğerlik iddiası değildir.
+veya kaynak katalog ile sayısal eşdeğerlik iddiası değildir.
 
 ## Çıktı doğrulaması
 
@@ -222,7 +222,7 @@ veya canlı COM kabulü değildir. Kanıt `application_self_check` alanındadır
   ayrıca tamamlanmalı. Dinamik 191 model metadatası ve DTO/proje/birim
   koruması hazırdır; yeni seçiciler çalışan arayüz diye sunulmaz.
 
-Bu nedenle **“Unfoldo'nun bütün özellikleri eksiksiz tamamlandı” denmez**.
+Bu nedenle **“Kaynak kataloğun bütün özellikleri eksiksiz tamamlandı” denmez**.
 Eksiksiz kayıt+hesap örnekleri ve doğrulanmış uygun çıktılar ile kaynak
 özellik/parite/proses onayı birbirinden ayrılır.
 

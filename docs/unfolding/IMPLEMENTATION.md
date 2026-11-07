@@ -107,9 +107,9 @@ iptal/süre aşımında sonlandırılır; mevcut dosya üzerine kısmi yayın ya
 
 ## Kaynaklar ve sınırlamalar
 
-Unfoldo davranış referansı, kullanıcının 5 Kasım 2026 tarihli görev
+Kaynak katalog davranış referansı, kullanıcının 5 Kasım 2026 tarihli görev
 dosyasındaki herkese açık gözlemlerdir; sunucu algoritmaları veya sayısal
-doğruluk iddiaları kullanılmadı. Bu ortamın ağ izinlerinde Unfoldo/yardım
+doğruluk iddiaları kullanılmadı. Bu ortamın ağ izinlerinde kaynak katalog/yardım
 siteleri bulunmadığından canlı site incelemesi yapılmış gibi gösterilmez.
 ezdxf'nin kurulu LWPOLYLINE bulge API'si ve OCP'nin kurulu resmi wrapper
 imzaları gerçek dosya testleriyle doğrulandı. Başlangıç kaynakları:
