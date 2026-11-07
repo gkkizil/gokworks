@@ -1,4 +1,4 @@
-# Unfoldo kaynak modellerinin bağımsız GOKWORKS karşılıkları
+# Kaynak katalog modellerinin bağımsız GOKWORKS karşılıkları
 
 7 Kasım 2026 canlı kaynak karşılaştırması ve katı STEP güncellemesi:
 [COMPLETENESS_RECHECK.md](COMPLETENESS_RECHECK.md). Güncel kabul örnekleri
@@ -6,7 +6,7 @@ ve kısıtlar [source_coverage.csv](source_coverage.csv) içindedir.
 
 Bu genişleme mevcut `core/unfolding` motorunu ve Claude arayüzünün servis
 adaptörünü kullanır. İkinci bir açınım modülü, ağdan çağrılan hesap motoru veya
-kopyalanmış Unfoldo hesap kodu yoktur. Kaynak envanteri kullanıcı tarafından
+kopyalanmış kaynak katalog hesap kodu yoktur. Kaynak envanteri kullanıcı tarafından
 5 Kasım 2026'da sağlanmıştır: 191 kimlik, 51 aile, 11 kategori, 1136 ölçü alanı,
 53 kesim kümesi. HTTP/canonical/h1/sitemap kontrolü kullanıcının kanıtıdır;
 bu ortamda yeniden yapılmış bir ağ doğrulaması değildir. Kaynağın 184 referans
@@ -14,7 +14,7 @@ sayısı uygulanan veya doğrulanan GOKWORKS model sayısı değildir.
 
 ## Dosyalar ve tekrar üretim
 
-- `unfoldo_inventory.json`: kaynak alanları, varsayılanları, işaretli/ayrık
+- `source_inventory.json`: kaynak alanları, varsayılanları, işaretli/ayrık
   türleri, kesim seçenekleri ve kaynak → iç kimlik eşlemesi. Kaynak varsayılanı
   değiştirilmez; GOKWORKS sınırları ayrı tutulur.
 - `examples/source_models.json`: her kaynak kimliği için ayrı çalıştırılabilir
@@ -123,7 +123,7 @@ başarı ancak dosya geri okuma/alan/sınır/yüzey kontrolünden sonra bildiril
 - Borudan dirseğe üç modelin E/Z/X ve yön tanımı için kaynak teknik çizimi
   gerekir. Mevcut bağımsız torus modeli: eksen Y, XZ düzleminde 0..90°,
   nominal kol yönü radyal 45°, A bunun Z etrafında dönüşü; E/Z/X dünya
-  ötelenmeleridir. Kesişim fiziksel olarak denetlenir fakat Unfoldo ölçü
+  ötelenmeleridir. Kesişim fiziksel olarak denetlenir fakat kaynak katalog ölçü
   yorumuyla birebir eşdeğerlik doğrulanmış değildir.
 - Çift gönye dış ölçü varyantında H/X dış sınırdan bir çap çıkarılarak eksen
   kaymasına dönüştürülür. Kaynak ölçü çizimiyle doğrulama ayrıca gerekir.

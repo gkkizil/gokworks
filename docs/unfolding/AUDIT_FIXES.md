@@ -25,7 +25,7 @@ AGENTS.md veya arayüz yerleşimi değiştirilmedi.
 | P2 | Negatif alt kotlu değişken kanalın kenar payı yanlış düzlem normalinde kurulup geçerli geometriyi reddediyordu | Yeniden türetilen normal yerine parçanın gerçek MappingPoint dönüşümü kullanılır |
 | P2 | Kaynak konilerin 12/48 yardımcı bölme seçimi değişmiyor, eski sekiz bölmeli çizgiler kullanılıyordu | Seçilen adede göre nominal 2D/3D G çizgileri kurulur; gerçek katlama/mesh adedi değişmez |
 | P2 | Aynı sonucu tekrar projeye eklemek veya çoğaltmak aynı request_id'yi kullanıp JSON kaydını engelliyordu | Her yeni proje öğesine benzersiz kimlik; çoğaltmada bağımsız istek kopyası |
-| P2 | `unfoldo/Silindir` kimliği varsayılan DXF/PDF/STEP adında alt klasör yolu oluşturuyordu | Model/proje isimleri mevcut safe_name ile dosya adına dönüştürülür |
+| P2 | `catalog/Silindir` kimliği varsayılan DXF/PDF/STEP adında alt klasör yolu oluşturuyordu | Model/proje isimleri mevcut safe_name ile dosya adına dönüştürülür |
 | P2 | Gecikmiş eski doğrulama cevabı yeni alan hata mesajını silebiliyordu | Revizyon kontrolü, alan mesajları değiştirilmeden önce yapılır |
 | P2 | Bilinen aileye yeni, hesaplanmamış kaynak kimliği eklemek aile algoritmasını otomatik çalışır kabul ettiriyordu | Uygulanmış 191 kimliğin açık listesi ve dispatcher'ın erken reddi; kayıt eklemek hesap yeteneği kazandırmaz |
 | P2 | Sonlu ama aşırı büyük büküm girdileri sonsuz allowance/setback içeren sonuç üretebiliyordu | Türetilen büküm değerleri de sonlu olmak zorundadır; hata açık ValueError olarak döner |

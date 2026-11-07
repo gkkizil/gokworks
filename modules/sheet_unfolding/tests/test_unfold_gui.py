@@ -85,7 +85,7 @@ def test_legacy_forms_calculate_and_source_catalogue_is_dynamic(page, qtbot):
     item = page.shape_tree.item(0)
     assert 'Planlanan' not in item.text() and (item.flags() & Qt.ItemIsEnabled)
     assert sum(len(s.get('source_ids', ())) for s in page.shapes) == 191
-    page.choose_shape('unfoldo/Silindir','cylinder'); settle(qtbot,page)
+    page.choose_shape('catalog/Silindir','cylinder'); settle(qtbot,page)
     assert page.state in ('ok','warning') and page.result['parts'][0]['metrics']['bbox_mm'][0] == pytest.approx(math.pi*200.)
     page.shape_search.setText('kurtağzı')
     assert any(page.shape_tree.item(i).data(Qt.UserRole) == 'rect_to_round' for i in range(page.shape_tree.count()))
@@ -271,7 +271,7 @@ def test_layouts(window, page, size, theme):
 def test_source_project_options_survive_form_recalculation_and_unit_change(page,qtbot):
     from core.unfolding import UnfoldRequest
     from core.unfolding.models import Material
-    req=UnfoldRequest(shape_id='unfoldo/Oval boru',variant_id='oval-cylinder',parameters={'L':300.,'W':200.,'H':400.},
+    req=UnfoldRequest(shape_id='catalog/Oval boru',variant_id='oval-cylinder',parameters={'L':300.,'W':200.,'H':400.},
         thickness=2.,material=Material('Demir / Çelik',7850.),model_options={'cut_type':'2_parts_180_degrees','strip_lap':7.})
     page.load_request(EngineService.page_request(req));settle(qtbot,page)
     assert page.state in ('ok','warning') and len(page.result['parts'])==2
@@ -303,7 +303,7 @@ def test_source_variant_search_selects_the_matching_model_instead_of_the_first(p
                       ('kenar yuksekligiyle','cylinder-top-angle-side')]:
         page.shape_search.setText(query)
         item=next(page.shape_tree.item(i) for i in range(page.shape_tree.count())
-                  if page.shape_tree.item(i).data(Qt.UserRole)=='unfoldo/Silindir')
+                  if page.shape_tree.item(i).data(Qt.UserRole)=='catalog/Silindir')
         assert '8 varyant' in item.text()
         page.shape_tree.scrollToItem(item)
         QTest.mouseClick(page.shape_tree.viewport(),Qt.LeftButton,pos=page.shape_tree.visualItemRect(item).center())
@@ -313,7 +313,7 @@ def test_source_variant_search_selects_the_matching_model_instead_of_the_first(p
 
 
 def test_cut_choice_changes_pieces_and_is_sent_to_the_engine(page, qtbot):
-    page.choose_shape('unfoldo/Oval boru', 'oval-cylinder'); settle(qtbot, page)
+    page.choose_shape('catalog/Oval boru', 'oval-cylinder'); settle(qtbot, page)
     assert not page.sketch.isVisible() and page.model['cut'].count() > 1
     one = len(page.result['parts'])
     page.model['cut'].setCurrentIndex(page.model['cut'].findData('2_parts_180_degrees')); settle(qtbot, page)
@@ -322,7 +322,7 @@ def test_cut_choice_changes_pieces_and_is_sent_to_the_engine(page, qtbot):
 
 
 def test_duct_shows_only_flange_and_end_lap_and_they_grow_the_blank(page, qtbot):
-    page.choose_shape('unfoldo/Düz kanal', 'rectangular-duct-straight'); settle(qtbot, page)
+    page.choose_shape('catalog/Düz kanal', 'rectangular-duct-straight'); settle(qtbot, page)
     assert set(page.model['laps'].values()) == {'lap_top', 'lap_left'}
     assert 'flanş' in page.fields['opt.lap_top']['title']
     area = sum(p['metrics']['gross_area_mm2'] for p in page.result['parts'])
@@ -335,23 +335,23 @@ def test_duct_shows_only_flange_and_end_lap_and_they_grow_the_blank(page, qtbot)
 
 
 def test_discrete_parameter_is_a_list_and_numbering_follows_the_model(page, qtbot):
-    page.choose_shape('unfoldo/Dikdörtgen redüksiyon', 'rectangle-to-rectangle-angled-top'); settle(qtbot, page)
+    page.choose_shape('catalog/Dikdörtgen redüksiyon', 'rectangle-to-rectangle-angled-top'); settle(qtbot, page)
     combo = page.fields['diagonal']['combo']
     assert [combo.itemText(i) for i in range(combo.count())] == ['Köşegen 1', 'Köşegen 2'] and not page.fields['diagonal']['edit'].isVisible()
     combo.setCurrentIndex(1); settle(qtbot, page)
     assert page.build_request()['parameters']['diagonal'] == 2 and page.state in ('ok', 'warning')
     page.model['divisions'].setCurrentIndex(page.model['divisions'].findData(48)); settle(qtbot, page)
     assert page.build_request()['model_options']['helper_divisions'] == 48 and page.state in ('ok', 'warning')
-    page.choose_shape('unfoldo/Helezon kanat', 'helical-ramp-triangulated'); settle(qtbot, page)
+    page.choose_shape('catalog/Helezon kanat', 'helical-ramp-triangulated'); settle(qtbot, page)
     assert not page.model['numbering'].isEnabled() and not page.model['numbering'].isChecked()
     assert 'numbering' not in page.build_request()['model_options']
     assert page.state in ('ok', 'warning')
 
 
 def test_model_info_and_validated_example(page, qtbot):
-    page.choose_shape('unfoldo/Borudan eğik koniye', 'pipe-to-oblique-cone-vertical-trunk'); settle(qtbot, page)
+    page.choose_shape('catalog/Borudan eğik koniye', 'pipe-to-oblique-cone-vertical-trunk'); settle(qtbot, page)
     text = page.model['info'].text()
-    assert 'İmalat onayı' in text and 'imalat/proses onayı değildir' in text and 'unfoldo.com' in text
+    assert 'İmalat onayı' in text and 'imalat/proses onayı değildir' in text and 'href' not in text      # no link to the source website
     edit(page, 'thickness', '3')
     page.model['example'].click(); settle(qtbot, page)
     assert page.values['Xb'] == pytest.approx(-200.) and page.values['thickness'] == pytest.approx(3.)
@@ -360,12 +360,12 @@ def test_model_info_and_validated_example(page, qtbot):
 
 
 def test_source_model_options_round_trip_through_a_project_part(page, qtbot):
-    page.choose_shape('unfoldo/Düz kanal', 'rectangular-duct-straight')
+    page.choose_shape('catalog/Düz kanal', 'rectangular-duct-straight')
     edit(page, 'opt.lap_left', '12'); settle(qtbot, page)
     page.add_to_project()
-    page.choose_shape('unfoldo/Silindir', 'cylinder'); settle(qtbot, page)
+    page.choose_shape('catalog/Silindir', 'cylinder'); settle(qtbot, page)
     page.project_table.selectRow(0); settle(qtbot, page)
-    assert page.shape_id == 'unfoldo/Düz kanal' and page.values['opt.lap_left'] == pytest.approx(12.)
+    assert page.shape_id == 'catalog/Düz kanal' and page.values['opt.lap_left'] == pytest.approx(12.)
     assert page.build_request()['model_options']['lap_left'] == pytest.approx(12.)
 
 
@@ -405,7 +405,7 @@ def test_project_material_and_precision_survive_editing_and_units(page,qtbot,nam
 
 def test_source_options_survive_switching_away_and_back(page,qtbot):
     from core.unfolding import UnfoldRequest
-    req=UnfoldRequest(shape_id='unfoldo/Oval boru',variant_id='oval-cylinder',
+    req=UnfoldRequest(shape_id='catalog/Oval boru',variant_id='oval-cylinder',
         parameters={'L':300.,'W':200.,'H':400.},model_options={'cut_type':'2_parts_180_degrees','strip_lap':7.})
     page.load_request(EngineService.page_request(req));settle(qtbot,page)
     page.choose_shape('cylinder','straight');settle(qtbot,page)
@@ -426,7 +426,7 @@ def test_stale_validation_does_not_clear_a_new_validation_error(page):
 
 
 def test_source_output_default_is_a_filename_not_a_source_id_path(page,qtbot,monkeypatch):
-    page.choose_shape('unfoldo/Silindir','cylinder');settle(qtbot,page)
+    page.choose_shape('catalog/Silindir','cylinder');settle(qtbot,page)
     names=[]
     def picker(*args,**kwargs):names.append(args[2]);return ('','')
     monkeypatch.setattr(QFileDialog,'getSaveFileName',picker)

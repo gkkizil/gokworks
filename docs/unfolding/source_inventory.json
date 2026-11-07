@@ -2,7 +2,6 @@
   "schema": "gokworks.unfolding.source_inventory",
   "version": 1,
   "source": {
-    "site": "https://unfoldo.com/tr/",
     "date": "2026-11-05",
     "version": "0.27.0",
     "commit": "c6778e1",
@@ -10,7 +9,7 @@
     "source_reference_metadata_count": 184,
     "live_recheck": {
       "date": "2026-11-07",
-      "evidence": "live_source_audit.json",
+      "evidence": "Kullanıcının sağladığı güncel envanter (7 Kasım 2026).",
       "model_count": 191,
       "field_count": 1136,
       "cut_option_count": 382,
@@ -537,7 +536,7 @@
       "family": "Silindir",
       "name": "Silindir, düz uçlu",
       "variant": "Düz uçlu",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -591,7 +590,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -667,7 +666,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü açılı kesik",
       "variant": "Üstü açılı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-acili-kesik-orta-yukseklik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -755,7 +754,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-top-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -830,7 +829,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü açılı kesik, kenar yüksekliğiyle",
       "variant": "Üstü açılı kesik, kenar yüksekliğiyle",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-acili-kesik-kisa-kenar/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -918,7 +917,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-top-angle-side"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -993,7 +992,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü açılı kesik, iki yükseklikle",
       "variant": "Üstü açılı kesik, iki yükseklikle",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-egik-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -1078,7 +1077,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -1153,7 +1152,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü ve altı açılı kesik",
       "variant": "Üstü ve altı açılı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-iki-ucu-egik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -1278,7 +1277,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-cut-both-ends"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -1353,7 +1352,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü çatı kesimli",
       "variant": "Üstü çatı kesimli",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-cati-kesimli/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -1459,7 +1458,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-ridge-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -1534,7 +1533,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü çatı kesimli, eksen dışı",
       "variant": "Üstü çatı kesimli, eksen dışı",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-cati-kesimli-eksen-disi/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -1658,7 +1657,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-ridge-top-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -1733,7 +1732,7 @@
       "family": "Silindir",
       "name": "Silindir, üstü yuvarlak kesimli",
       "variant": "Üstü yuvarlak kesimli",
-      "source_url": "https://unfoldo.com/tr/acinim/silindir-yuvarlak-kesimli/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -1818,7 +1817,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Silindir",
+        "shape_id": "catalog/Silindir",
         "variant_id": "cylinder-round-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -1893,7 +1892,7 @@
       "family": "Eğik silindir",
       "name": "Eğik silindir, yükseklik ve kaçıklıkla",
       "variant": "Yükseklik ve kaçıklıkla",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-silindir/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -1963,7 +1962,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Eğik silindir",
+        "shape_id": "catalog/Eğik silindir",
         "variant_id": "oblique-cylinder"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -2038,7 +2037,7 @@
       "family": "Eğik silindir",
       "name": "Eğik silindir, açı ve boyla",
       "variant": "Açı ve boyla",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-silindir-aci-boy/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -2111,7 +2110,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Eğik silindir",
+        "shape_id": "catalog/Eğik silindir",
         "variant_id": "oblique-cylinder-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -2186,7 +2185,7 @@
       "family": "Oval boru",
       "name": "Oval boru, düz uçlu",
       "variant": "Düz uçlu",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -2264,7 +2263,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -2340,7 +2339,7 @@
       "family": "Oval boru",
       "name": "Oval boru, üstü enine kesik",
       "variant": "Üstü enine kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-boru-enine-acili-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -2436,7 +2435,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-cut"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -2512,7 +2511,7 @@
       "family": "Oval boru",
       "name": "Oval boru, üstü boyuna kesik",
       "variant": "Üstü boyuna kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-boru-boyuna-acili-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -2608,7 +2607,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-cut-along"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -2684,7 +2683,7 @@
       "family": "Oval boru",
       "name": "Oval boru, üstü ve altı enine kesik",
       "variant": "Üstü ve altı enine kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-boru-iki-ucu-enine-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -2798,7 +2797,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-base-cut"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -2874,7 +2873,7 @@
       "family": "Oval boru",
       "name": "Oval boru, üstü ve altı boyuna kesik",
       "variant": "Üstü ve altı boyuna kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-boru-iki-ucu-boyuna-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -2988,7 +2987,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-base-cut-along"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -3064,7 +3063,7 @@
       "family": "Oval boru",
       "name": "Oval boru, üstü boyuna, altı enine kesik",
       "variant": "Üstü boyuna, altı enine kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-boru-ust-boyuna-alt-enine/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -3178,7 +3177,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval boru",
+        "shape_id": "catalog/Oval boru",
         "variant_id": "oval-cylinder-top-base-cut-turned"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -3254,7 +3253,7 @@
       "family": "Saca eğik oturan boru",
       "name": "Saca eğik oturan boru, boru ucu, kaçıklıklarla",
       "variant": "Boru ucu, kaçıklıklarla",
-      "source_url": "https://unfoldo.com/tr/acinim/sac-uzerinde-egik-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -3341,7 +3340,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "pipe-cut-by-plate"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -3415,7 +3414,7 @@
       "family": "Saca eğik oturan boru",
       "name": "Saca eğik oturan boru, boru ucu, açıyla",
       "variant": "Boru ucu, açıyla",
-      "source_url": "https://unfoldo.com/tr/acinim/sac-uzerinde-acili-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -3484,7 +3483,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "pipe-cut-by-plate-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -3558,7 +3557,7 @@
       "family": "Saca eğik oturan boru",
       "name": "Saca eğik oturan boru, sac deliği, kaçıklıklarla",
       "variant": "Sac deliği, kaçıklıklarla",
-      "source_url": "https://unfoldo.com/tr/acinim/sacda-egik-boru-deligi/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -3706,7 +3705,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "plate-cut-by-pipe"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -3780,7 +3779,7 @@
       "family": "Saca eğik oturan boru",
       "name": "Saca eğik oturan boru, sac deliği, açılarla",
       "variant": "Sac deliği, açılarla",
-      "source_url": "https://unfoldo.com/tr/acinim/sacda-acili-boru-deligi/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -3913,7 +3912,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "plate-cut-by-pipe-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -3987,7 +3986,7 @@
       "family": "Saca eğik oturan boru",
       "name": "Saca eğik oturan boru, iki boru, kaçıklıklarla",
       "variant": "İki boru, kaçıklıklarla",
-      "source_url": "https://unfoldo.com/tr/acinim/sac-uzerinde-v-iki-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -4113,7 +4112,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "two-pipes-cut-by-plate"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -4187,7 +4186,7 @@
       "family": "Saca eğik oturan boru",
       "name": "Saca eğik oturan boru, iki boru, açılarla",
       "variant": "İki boru, açılarla",
-      "source_url": "https://unfoldo.com/tr/acinim/sac-uzerinde-v-iki-boru-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -4313,7 +4312,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Saca eğik oturan boru",
+        "shape_id": "catalog/Saca eğik oturan boru",
         "variant_id": "two-pipes-cut-by-plate-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -4387,7 +4386,7 @@
       "family": "Koni",
       "name": "Koni, kesik",
       "variant": "Kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -4472,7 +4471,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -4547,7 +4546,7 @@
       "family": "Koni",
       "name": "Koni, tam koni",
       "variant": "Tam koni",
-      "source_url": "https://unfoldo.com/tr/acinim/tam-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -4614,7 +4613,7 @@
         "kind": "transition"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -4689,7 +4688,7 @@
       "family": "Koni",
       "name": "Koni, tepe yüksekliğiyle",
       "variant": "Tepe yüksekliğiyle",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-koni-tepe-yuksekligi/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -4774,7 +4773,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum-apex-height"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -4849,7 +4848,7 @@
       "family": "Koni",
       "name": "Koni, koni açısına göre",
       "variant": "Koni açısına göre",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-koni-koni-acisi/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -4937,7 +4936,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -5012,7 +5011,7 @@
       "family": "Koni",
       "name": "Koni, yatay bölümlü",
       "variant": "Yatay bölümlü",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-koni-bolumlu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -5118,7 +5117,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koni",
+        "shape_id": "catalog/Koni",
         "variant_id": "cone-frustum-levels"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -5193,7 +5192,7 @@
       "family": "Düzlemle kesilen koni",
       "name": "Düzlemle kesilen koni, üstü açılı kesik",
       "variant": "Üstü açılı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/koni-ustu-acili-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -5281,7 +5280,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -5355,7 +5354,7 @@
       "family": "Düzlemle kesilen koni",
       "name": "Düzlemle kesilen koni, üstü ve altı açılı kesik",
       "variant": "Üstü ve altı açılı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/koni-iki-ucu-acili-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -5459,7 +5458,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-top-base"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -5533,7 +5532,7 @@
       "family": "Düzlemle kesilen koni",
       "name": "Düzlemle kesilen koni, üstü çatı kesimli",
       "variant": "Üstü çatı kesimli",
-      "source_url": "https://unfoldo.com/tr/acinim/koni-cati-kesimli/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -5655,7 +5654,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-two-planes"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -5729,7 +5728,7 @@
       "family": "Düzlemle kesilen koni",
       "name": "Düzlemle kesilen koni, altı çatı kesimli",
       "variant": "Altı çatı kesimli",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-koni-alti-cati-kesimli/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -5851,7 +5850,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-base-two-planes"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -5925,7 +5924,7 @@
       "family": "Düzlemle kesilen koni",
       "name": "Düzlemle kesilen koni, altı açılı kesik",
       "variant": "Altı açılı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-koni-alti-acili-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -6010,7 +6009,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Düzlemle kesilen koni",
+        "shape_id": "catalog/Düzlemle kesilen koni",
         "variant_id": "cone-cut-base"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -6084,7 +6083,7 @@
       "family": "Yağmur haznesi",
       "name": "Yağmur haznesi, konik, duvara dayalı",
       "variant": "Konik, duvara dayalı",
-      "source_url": "https://unfoldo.com/tr/acinim/konik-yagmur-haznesi/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -6172,7 +6171,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Yağmur haznesi",
+        "shape_id": "catalog/Yağmur haznesi",
         "variant_id": "rain-head-conical"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -6247,7 +6246,7 @@
       "family": "Eğik koni",
       "name": "Eğik koni, bir kenarı dik",
       "variant": "Bir kenarı dik",
-      "source_url": "https://unfoldo.com/tr/acinim/eksantrik-reduksiyon/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -6317,7 +6316,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-upright-side"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -6393,7 +6392,7 @@
       "family": "Eğik koni",
       "name": "Eğik koni, kaçıklıkla",
       "variant": "Kaçıklıkla",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koni-kacik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -6481,7 +6480,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -6557,7 +6556,7 @@
       "family": "Eğik koni",
       "name": "Eğik koni, iki yönde kaçık",
       "variant": "İki yönde kaçık",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koni-iki-yonde-kacik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -6663,7 +6662,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-offset-xy"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -6739,7 +6738,7 @@
       "family": "Eğik koni",
       "name": "Eğik koni, yatay bölümlü",
       "variant": "Yatay bölümlü",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koni-bolumlu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -6865,7 +6864,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Eğik koni",
+        "shape_id": "catalog/Eğik koni",
         "variant_id": "oblique-cone-levels"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -6941,7 +6940,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -7051,7 +7050,7 @@
         "refs": 6
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -7127,7 +7126,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Kareden yuvarlağa, kare taban",
       "variant": "Kare taban",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-kare-taban/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -7220,7 +7219,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "square-to-round"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -7296,7 +7295,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -7441,7 +7440,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -7517,7 +7516,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, eğik üst",
       "variant": "Eğik üst",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-egik-ust/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -7681,7 +7680,7 @@
         "refs": 17
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -7758,7 +7757,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, eğik taban",
       "variant": "Eğik taban",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-egik-taban/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -7921,7 +7920,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-angled-base"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -7997,7 +7996,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, tek eğik kenar",
       "variant": "Tek eğik kenar",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-tek-egik-kenar/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -8170,7 +8169,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-one-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -8246,7 +8245,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, iki eğik kenar",
       "variant": "İki eğik kenar",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-iki-egik-kenar/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -8437,7 +8436,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-two-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -8513,7 +8512,7 @@
       "family": "Dikdörtgenden yuvarlağa",
       "name": "Dikdörtgenden yuvarlağa, yatay bölümlü",
       "variant": "Yatay bölümlü",
-      "source_url": "https://unfoldo.com/tr/acinim/kare-yuvarlak-gecis-bolumlu/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -8677,7 +8676,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden yuvarlağa",
+        "shape_id": "catalog/Dikdörtgenden yuvarlağa",
         "variant_id": "rectangle-to-round-levels"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -8753,7 +8752,7 @@
       "family": "Dikdörtgen redüksiyon",
       "name": "Dikdörtgen redüksiyon, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/dikdortgen-reduksiyon/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -8898,7 +8897,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -8974,7 +8973,7 @@
       "family": "Dikdörtgen redüksiyon",
       "name": "Dikdörtgen redüksiyon, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/dikdortgen-reduksiyon-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -9157,7 +9156,7 @@
         "refs": 6
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -9233,7 +9232,7 @@
       "family": "Dikdörtgen redüksiyon",
       "name": "Dikdörtgen redüksiyon, eğik üst",
       "variant": "Eğik üst",
-      "source_url": "https://unfoldo.com/tr/acinim/dikdortgen-reduksiyon-egik-ust/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -9466,7 +9465,7 @@
         "bendFace": "front"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -9542,7 +9541,7 @@
       "family": "Dikdörtgen redüksiyon",
       "name": "Dikdörtgen redüksiyon, eğik üst ve taban",
       "variant": "Eğik üst ve taban",
-      "source_url": "https://unfoldo.com/tr/acinim/dikdortgen-reduksiyon-egik-ust-ve-taban/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -9790,7 +9789,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgen redüksiyon",
+        "shape_id": "catalog/Dikdörtgen redüksiyon",
         "variant_id": "rectangle-to-rectangle-angled-top-base"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -9865,7 +9864,7 @@
       "family": "Yuvarlak redüksiyon",
       "name": "Yuvarlak redüksiyon, eğik üst",
       "variant": "Eğik üst",
-      "source_url": "https://unfoldo.com/tr/acinim/yuvarlak-gecis-egik-ust/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -9952,7 +9951,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Yuvarlak redüksiyon",
+        "shape_id": "catalog/Yuvarlak redüksiyon",
         "variant_id": "round-to-round-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -10027,7 +10026,7 @@
       "family": "Yuvarlak redüksiyon",
       "name": "Yuvarlak redüksiyon, eksen kaçık",
       "variant": "Eksen kaçık",
-      "source_url": "https://unfoldo.com/tr/acinim/yuvarlak-gecis-eksen-kacik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -10133,7 +10132,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Yuvarlak redüksiyon",
+        "shape_id": "catalog/Yuvarlak redüksiyon",
         "variant_id": "round-to-round-axis-angled"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -10208,7 +10207,7 @@
       "family": "Yuvarlak redüksiyon",
       "name": "Yuvarlak redüksiyon, üst 90°",
       "variant": "Üst 90°",
-      "source_url": "https://unfoldo.com/tr/acinim/yuvarlak-gecis-ust-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -10294,7 +10293,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Yuvarlak redüksiyon",
+        "shape_id": "catalog/Yuvarlak redüksiyon",
         "variant_id": "round-to-round-top-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -10369,7 +10368,7 @@
       "family": "Ovalden yuvarlağa",
       "name": "Ovalden yuvarlağa, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-yuvarlak-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -10464,7 +10463,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Ovalden yuvarlağa",
+        "shape_id": "catalog/Ovalden yuvarlağa",
         "variant_id": "oval-to-round"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -10540,7 +10539,7 @@
       "family": "Ovalden yuvarlağa",
       "name": "Ovalden yuvarlağa, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-yuvarlak-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -10673,7 +10672,7 @@
         "refs": 6
       },
       "internal_id": {
-        "shape_id": "unfoldo/Ovalden yuvarlağa",
+        "shape_id": "catalog/Ovalden yuvarlağa",
         "variant_id": "oval-to-round-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -10749,7 +10748,7 @@
       "family": "Oval redüksiyon",
       "name": "Oval redüksiyon, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-oval-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -10865,7 +10864,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval redüksiyon",
+        "shape_id": "catalog/Oval redüksiyon",
         "variant_id": "oval-to-oval"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -10941,7 +10940,7 @@
       "family": "Oval redüksiyon",
       "name": "Oval redüksiyon, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-oval-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -11095,7 +11094,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Oval redüksiyon",
+        "shape_id": "catalog/Oval redüksiyon",
         "variant_id": "oval-to-oval-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -11171,7 +11170,7 @@
       "family": "Ovalden dikdörtgene",
       "name": "Ovalden dikdörtgene, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-dikdortgen-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -11298,7 +11297,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Ovalden dikdörtgene",
+        "shape_id": "catalog/Ovalden dikdörtgene",
         "variant_id": "oval-to-rectangle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -11374,7 +11373,7 @@
       "family": "Ovalden dikdörtgene",
       "name": "Ovalden dikdörtgene, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/oval-dikdortgen-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -11539,7 +11538,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Ovalden dikdörtgene",
+        "shape_id": "catalog/Ovalden dikdörtgene",
         "variant_id": "oval-to-rectangle-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -11615,7 +11614,7 @@
       "family": "Elipsten yuvarlağa",
       "name": "Elipsten yuvarlağa, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-yuvarlak-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -11710,7 +11709,7 @@
         "refs": 6
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elipsten yuvarlağa",
+        "shape_id": "catalog/Elipsten yuvarlağa",
         "variant_id": "ellipse-to-round"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -11786,7 +11785,7 @@
       "family": "Elipsten yuvarlağa",
       "name": "Elipsten yuvarlağa, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-yuvarlak-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -11919,7 +11918,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elipsten yuvarlağa",
+        "shape_id": "catalog/Elipsten yuvarlağa",
         "variant_id": "ellipse-to-round-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -11995,7 +11994,7 @@
       "family": "Elipsten yuvarlağa",
       "name": "Elipsten yuvarlağa, eğik üst",
       "variant": "Eğik üst",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-yuvarlak-gecis-egik-ust/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -12147,7 +12146,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elipsten yuvarlağa",
+        "shape_id": "catalog/Elipsten yuvarlağa",
         "variant_id": "ellipse-to-round-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -12223,7 +12222,7 @@
       "family": "Elips redüksiyon",
       "name": "Elips redüksiyon, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-elips-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -12339,7 +12338,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elips redüksiyon",
+        "shape_id": "catalog/Elips redüksiyon",
         "variant_id": "ellipse-to-ellipse"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -12415,7 +12414,7 @@
       "family": "Elips redüksiyon",
       "name": "Elips redüksiyon, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-elips-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -12569,7 +12568,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elips redüksiyon",
+        "shape_id": "catalog/Elips redüksiyon",
         "variant_id": "ellipse-to-ellipse-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -12645,7 +12644,7 @@
       "family": "Elips redüksiyon",
       "name": "Elips redüksiyon, eğik üst",
       "variant": "Eğik üst",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-elips-gecis-egik-ust/",
+      "source_url": "",
       "source_fields": [
         [
           "L",
@@ -12818,7 +12817,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elips redüksiyon",
+        "shape_id": "catalog/Elips redüksiyon",
         "variant_id": "ellipse-to-ellipse-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -12894,7 +12893,7 @@
       "family": "Elipsten dikdörtgene",
       "name": "Elipsten dikdörtgene, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-dikdortgen-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -13021,7 +13020,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elipsten dikdörtgene",
+        "shape_id": "catalog/Elipsten dikdörtgene",
         "variant_id": "ellipse-to-rectangle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -13097,7 +13096,7 @@
       "family": "Elipsten dikdörtgene",
       "name": "Elipsten dikdörtgene, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-dikdortgen-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -13262,7 +13261,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elipsten dikdörtgene",
+        "shape_id": "catalog/Elipsten dikdörtgene",
         "variant_id": "ellipse-to-rectangle-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -13338,7 +13337,7 @@
       "family": "Elipsten dikdörtgene",
       "name": "Elipsten dikdörtgene, eğik üst",
       "variant": "Eğik üst",
-      "source_url": "https://unfoldo.com/tr/acinim/elips-dikdortgen-gecis-egik-ust/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -13522,7 +13521,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Elipsten dikdörtgene",
+        "shape_id": "catalog/Elipsten dikdörtgene",
         "variant_id": "ellipse-to-rectangle-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -13598,7 +13597,7 @@
       "family": "Altıgenden yuvarlağa",
       "name": "Altıgenden yuvarlağa, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/altigen-yuvarlak-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "AF",
@@ -13688,7 +13687,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Altıgenden yuvarlağa",
+        "shape_id": "catalog/Altıgenden yuvarlağa",
         "variant_id": "hexagon-to-round"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -13764,7 +13763,7 @@
       "family": "Altıgenden yuvarlağa",
       "name": "Altıgenden yuvarlağa, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/altigen-yuvarlak-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "AF",
@@ -13892,7 +13891,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Altıgenden yuvarlağa",
+        "shape_id": "catalog/Altıgenden yuvarlağa",
         "variant_id": "hexagon-to-round-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -13968,7 +13967,7 @@
       "family": "Sekizgenden yuvarlağa",
       "name": "Sekizgenden yuvarlağa, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/sekizgen-yuvarlak-gecis/",
+      "source_url": "",
       "source_fields": [
         [
           "AF",
@@ -14058,7 +14057,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Sekizgenden yuvarlağa",
+        "shape_id": "catalog/Sekizgenden yuvarlağa",
         "variant_id": "octagon-to-round"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -14134,7 +14133,7 @@
       "family": "Sekizgenden yuvarlağa",
       "name": "Sekizgenden yuvarlağa, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/sekizgen-yuvarlak-gecis-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "AF",
@@ -14262,7 +14261,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Sekizgenden yuvarlağa",
+        "shape_id": "catalog/Sekizgenden yuvarlağa",
         "variant_id": "octagon-to-round-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -14338,7 +14337,7 @@
       "family": "Segmentli dirsek, yuvarlak",
       "name": "Segmentli dirsek, yuvarlak, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -14432,7 +14431,7 @@
         "refs": 10
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, yuvarlak",
+        "shape_id": "catalog/Segmentli dirsek, yuvarlak",
         "variant_id": "segmented-bend-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -14507,7 +14506,7 @@
       "family": "Segmentli dirsek, yuvarlak",
       "name": "Segmentli dirsek, yuvarlak, serbest açı",
       "variant": "Serbest açı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -14620,7 +14619,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, yuvarlak",
+        "shape_id": "catalog/Segmentli dirsek, yuvarlak",
         "variant_id": "segmented-bend-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -14695,7 +14694,7 @@
       "family": "Segmentli dirsek, yuvarlak",
       "name": "Segmentli dirsek, yuvarlak, uzatmalı",
       "variant": "Uzatmalı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-uzatmali/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -14844,7 +14843,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, yuvarlak",
+        "shape_id": "catalog/Segmentli dirsek, yuvarlak",
         "variant_id": "segmented-bend-extended"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -14919,7 +14918,7 @@
       "family": "Segmentli dirsek, oval",
       "name": "Segmentli dirsek, oval, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-oval-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -15027,7 +15026,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, oval",
+        "shape_id": "catalog/Segmentli dirsek, oval",
         "variant_id": "segmented-bend-oval-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -15102,7 +15101,7 @@
       "family": "Segmentli dirsek, oval",
       "name": "Segmentli dirsek, oval, serbest açı",
       "variant": "Serbest açı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-oval-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -15229,7 +15228,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, oval",
+        "shape_id": "catalog/Segmentli dirsek, oval",
         "variant_id": "segmented-bend-oval-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -15304,7 +15303,7 @@
       "family": "Segmentli dirsek, oval",
       "name": "Segmentli dirsek, oval, uzatmalı",
       "variant": "Uzatmalı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-oval-uzatmali/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -15467,7 +15466,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, oval",
+        "shape_id": "catalog/Segmentli dirsek, oval",
         "variant_id": "segmented-bend-oval-extended"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -15542,7 +15541,7 @@
       "family": "Segmentli dirsek, yatık oval",
       "name": "Segmentli dirsek, yatık oval, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-yatik-oval-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -15650,7 +15649,7 @@
         "refs": 8
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, yatık oval",
+        "shape_id": "catalog/Segmentli dirsek, yatık oval",
         "variant_id": "segmented-bend-oval-opposite-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -15725,7 +15724,7 @@
       "family": "Segmentli dirsek, yatık oval",
       "name": "Segmentli dirsek, yatık oval, serbest açı",
       "variant": "Serbest açı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-yatik-oval-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -15851,7 +15850,7 @@
         "kind": "transition"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, yatık oval",
+        "shape_id": "catalog/Segmentli dirsek, yatık oval",
         "variant_id": "segmented-bend-oval-opposite-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -15926,7 +15925,7 @@
       "family": "Segmentli dirsek, yatık oval",
       "name": "Segmentli dirsek, yatık oval, uzatmalı",
       "variant": "Uzatmalı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-yatik-oval-uzatmali/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -16089,7 +16088,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, yatık oval",
+        "shape_id": "catalog/Segmentli dirsek, yatık oval",
         "variant_id": "segmented-bend-oval-opposite-extended"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -16164,7 +16163,7 @@
       "family": "Segmentli dirsek, redüksiyonlu",
       "name": "Segmentli dirsek, redüksiyonlu, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-reduksiyonlu-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D1",
@@ -16260,7 +16259,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, redüksiyonlu",
+        "shape_id": "catalog/Segmentli dirsek, redüksiyonlu",
         "variant_id": "segmented-bend-tapered-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -16335,7 +16334,7 @@
       "family": "Segmentli dirsek, redüksiyonlu",
       "name": "Segmentli dirsek, redüksiyonlu, serbest açı",
       "variant": "Serbest açı",
-      "source_url": "https://unfoldo.com/tr/acinim/segmentli-dirsek-reduksiyonlu-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D1",
@@ -16450,7 +16449,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Segmentli dirsek, redüksiyonlu",
+        "shape_id": "catalog/Segmentli dirsek, redüksiyonlu",
         "variant_id": "segmented-bend-tapered-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -16525,7 +16524,7 @@
       "family": "Gönye dirsek, boru",
       "name": "Gönye dirsek, boru, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -16594,7 +16593,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -16669,7 +16668,7 @@
       "family": "Gönye dirsek, boru",
       "name": "Gönye dirsek, boru, açılı",
       "variant": "Açılı",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -16756,7 +16755,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -16831,7 +16830,7 @@
       "family": "Gönye dirsek, boru",
       "name": "Gönye dirsek, boru, yarıçap ve açıyla",
       "variant": "Yarıçap ve açıyla",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-yaricap-aci/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -16904,7 +16903,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-radius"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -16979,7 +16978,7 @@
       "family": "Gönye dirsek, boru",
       "name": "Gönye dirsek, boru, çift (S kaydırma)",
       "variant": "Çift (S kaydırma)",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-cift-s-kaydirma/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -17078,7 +17077,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-double"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -17153,7 +17152,7 @@
       "family": "Gönye dirsek, boru",
       "name": "Gönye dirsek, boru, çift (S kaydırma), dış ölçülerle",
       "variant": "Çift (S kaydırma), dış ölçülerle",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-cift-s-kaydirma-dis-olcu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -17252,7 +17251,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-double-outside"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -17328,7 +17327,7 @@
       "family": "Gönye dirsek, boru",
       "name": "Gönye dirsek, boru, çift, iki yönde kaydırma",
       "variant": "Çift, iki yönde kaydırma",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-cift-iki-yonde-kaydirma/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -17442,7 +17441,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru",
+        "shape_id": "catalog/Gönye dirsek, boru",
         "variant_id": "mitred-elbow-double-rolled"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -17517,7 +17516,7 @@
       "family": "Gönye dirsek, boru-koni",
       "name": "Gönye dirsek, boru-koni, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-boru-koni-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -17601,7 +17600,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru-koni",
+        "shape_id": "catalog/Gönye dirsek, boru-koni",
         "variant_id": "mitred-elbow-pipe-cone-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -17676,7 +17675,7 @@
       "family": "Gönye dirsek, boru-koni",
       "name": "Gönye dirsek, boru-koni, açılı",
       "variant": "Açılı",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-boru-koni-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -17778,7 +17777,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, boru-koni",
+        "shape_id": "catalog/Gönye dirsek, boru-koni",
         "variant_id": "mitred-elbow-pipe-cone-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -17853,7 +17852,7 @@
       "family": "Gönye dirsek, koni-koni",
       "name": "Gönye dirsek, koni-koni, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-koni-koni-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -17937,7 +17936,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-koni",
+        "shape_id": "catalog/Gönye dirsek, koni-koni",
         "variant_id": "mitred-elbow-cone-cone-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -18012,7 +18011,7 @@
       "family": "Gönye dirsek, koni-koni",
       "name": "Gönye dirsek, koni-koni, açılı",
       "variant": "Açılı",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-koni-koni-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -18114,7 +18113,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-koni",
+        "shape_id": "catalog/Gönye dirsek, koni-koni",
         "variant_id": "mitred-elbow-cone-cone-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -18189,7 +18188,7 @@
       "family": "Gönye dirsek, koni-boru",
       "name": "Gönye dirsek, koni-boru, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-koni-boru-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -18273,7 +18272,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-boru",
+        "shape_id": "catalog/Gönye dirsek, koni-boru",
         "variant_id": "mitred-elbow-cone-pipe-90"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -18348,7 +18347,7 @@
       "family": "Gönye dirsek, koni-boru",
       "name": "Gönye dirsek, koni-boru, açılı",
       "variant": "Açılı",
-      "source_url": "https://unfoldo.com/tr/acinim/gonye-dirsek-koni-boru-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -18450,7 +18449,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Gönye dirsek, koni-boru",
+        "shape_id": "catalog/Gönye dirsek, koni-boru",
         "variant_id": "mitred-elbow-cone-pipe-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -18525,7 +18524,7 @@
       "family": "Boru pantolon",
       "name": "Boru pantolon, 3 kollu",
       "variant": "3 kollu",
-      "source_url": "https://unfoldo.com/tr/acinim/pantolon-3-borulu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -18610,7 +18609,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru pantolon",
+        "shape_id": "catalog/Boru pantolon",
         "variant_id": "breeches-3-pipes"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -18684,7 +18683,7 @@
       "family": "Boru pantolon",
       "name": "Boru pantolon, 4 kollu",
       "variant": "4 kollu",
-      "source_url": "https://unfoldo.com/tr/acinim/pantolon-4-borulu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -18787,7 +18786,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru pantolon",
+        "shape_id": "catalog/Boru pantolon",
         "variant_id": "breeches-4-pipes"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -18861,7 +18860,7 @@
       "family": "Boru pantolon",
       "name": "Boru pantolon, 5 kollu",
       "variant": "5 kollu",
-      "source_url": "https://unfoldo.com/tr/acinim/pantolon-5-borulu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -18982,7 +18981,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru pantolon",
+        "shape_id": "catalog/Boru pantolon",
         "variant_id": "breeches-5-pipes"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -19056,7 +19055,7 @@
       "family": "Redüksiyonlu pantolon",
       "name": "Redüksiyonlu pantolon, eğik ağızlı",
       "variant": "Eğik ağızlı",
-      "source_url": "https://unfoldo.com/tr/acinim/reduksiyonlu-pantolon-egik-agizli/",
+      "source_url": "",
       "source_fields": [
         [
           "D1",
@@ -19153,7 +19152,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-angled-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -19228,7 +19227,7 @@
       "family": "Redüksiyonlu pantolon",
       "name": "Redüksiyonlu pantolon, düz ağızlı",
       "variant": "Düz ağızlı",
-      "source_url": "https://unfoldo.com/tr/acinim/reduksiyonlu-pantolon-duz-agizli/",
+      "source_url": "",
       "source_fields": [
         [
           "D1",
@@ -19328,7 +19327,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-parallel-top"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -19403,7 +19402,7 @@
       "family": "Redüksiyonlu pantolon",
       "name": "Redüksiyonlu pantolon, gövdeli, simetrik",
       "variant": "Gövdeli, simetrik",
-      "source_url": "https://unfoldo.com/tr/acinim/govdeli-pantolon-simetrik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -19500,7 +19499,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-3-symmetric"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -19574,7 +19573,7 @@
       "family": "Redüksiyonlu pantolon",
       "name": "Redüksiyonlu pantolon, gövdeli, eşit uçlu",
       "variant": "Gövdeli, eşit uçlu",
-      "source_url": "https://unfoldo.com/tr/acinim/govdeli-pantolon-esit-uclu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -19689,7 +19688,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-3-equal"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -19763,7 +19762,7 @@
       "family": "Redüksiyonlu pantolon",
       "name": "Redüksiyonlu pantolon, gövdeli, farklı uçlu",
       "variant": "Gövdeli, farklı uçlu",
-      "source_url": "https://unfoldo.com/tr/acinim/govdeli-pantolon-farkli-uclu/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -19908,7 +19907,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Redüksiyonlu pantolon",
+        "shape_id": "catalog/Redüksiyonlu pantolon",
         "variant_id": "reducing-breech-3-unequal"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -19982,7 +19981,7 @@
       "family": "Prizma",
       "name": "Prizma, düz uçlu",
       "variant": "Düz uçlu",
-      "source_url": "https://unfoldo.com/tr/acinim/prizma/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -20050,7 +20049,7 @@
         "bendFace": "back"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Prizma",
+        "shape_id": "catalog/Prizma",
         "variant_id": "prism"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -20125,7 +20124,7 @@
       "family": "Prizma",
       "name": "Prizma, üstü kesik",
       "variant": "Üstü kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/prizma-ustu-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -20211,7 +20210,7 @@
         "bendFace": "back"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Prizma",
+        "shape_id": "catalog/Prizma",
         "variant_id": "prism-top-cut"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -20286,7 +20285,7 @@
       "family": "Prizma",
       "name": "Prizma, üstü ve altı kesik",
       "variant": "Üstü ve altı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/prizma-iki-ucu-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -20390,7 +20389,7 @@
         "bendFace": "back"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Prizma",
+        "shape_id": "catalog/Prizma",
         "variant_id": "prism-top-base-cut"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -20465,7 +20464,7 @@
       "family": "Piramit",
       "name": "Piramit, tam",
       "variant": "Tam",
-      "source_url": "https://unfoldo.com/tr/acinim/piramit/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -20532,7 +20531,7 @@
         "kind": "transition"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -20606,7 +20605,7 @@
       "family": "Piramit",
       "name": "Piramit, kesik, düz",
       "variant": "Kesik, düz",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-piramit/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -20689,7 +20688,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid-frustum"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -20763,7 +20762,7 @@
       "family": "Piramit",
       "name": "Piramit, kesik, düz, tepe yüksekliğiyle",
       "variant": "Kesik, düz, tepe yüksekliğiyle",
-      "source_url": "https://unfoldo.com/tr/acinim/kesik-piramit-tepe-yuksekligi/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -20852,7 +20851,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid-frustum-apex-height"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -20926,7 +20925,7 @@
       "family": "Piramit",
       "name": "Piramit, üstü açılı kesik",
       "variant": "Üstü açılı kesik",
-      "source_url": "https://unfoldo.com/tr/acinim/piramit-ustu-acili-kesik/",
+      "source_url": "",
       "source_fields": [
         [
           "n",
@@ -21033,7 +21032,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Piramit",
+        "shape_id": "catalog/Piramit",
         "variant_id": "pyramid-top-cut"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -21107,7 +21106,7 @@
       "family": "Tank bombesi",
       "name": "Tank bombesi, yarım küre",
       "variant": "Yarım küre",
-      "source_url": "https://unfoldo.com/tr/acinim/bombe-yarim-kure/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -21190,7 +21189,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Tank bombesi",
+        "shape_id": "catalog/Tank bombesi",
         "variant_id": "vessel-end-cap-hemispherical"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -21265,7 +21264,7 @@
       "family": "Tank bombesi",
       "name": "Tank bombesi, yarı elips",
       "variant": "Yarı elips",
-      "source_url": "https://unfoldo.com/tr/acinim/bombe-yari-elips/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -21366,7 +21365,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Tank bombesi",
+        "shape_id": "catalog/Tank bombesi",
         "variant_id": "vessel-end-cap-elliptical"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -21441,7 +21440,7 @@
       "family": "Tank bombesi",
       "name": "Tank bombesi, torisferik (klöpper)",
       "variant": "Torisferik (klöpper)",
-      "source_url": "https://unfoldo.com/tr/acinim/bombe-torisferik-klopper/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -21554,7 +21553,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Tank bombesi",
+        "shape_id": "catalog/Tank bombesi",
         "variant_id": "vessel-end-cap-torispherical"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -21629,7 +21628,7 @@
       "family": "Helezon kanat",
       "name": "Helezon kanat, üçgenlemeli",
       "variant": "Üçgenlemeli",
-      "source_url": "https://unfoldo.com/tr/acinim/helezon-kanat-ucgenleme/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -21708,7 +21707,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Helezon kanat",
+        "shape_id": "catalog/Helezon kanat",
         "variant_id": "helical-ramp-triangulated"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -21783,7 +21782,7 @@
       "family": "Helezon kanat",
       "name": "Helezon kanat, eğik kanat",
       "variant": "Eğik kanat",
-      "source_url": "https://unfoldo.com/tr/acinim/helezon-kanat-egik/",
+      "source_url": "",
       "source_fields": [
         [
           "d",
@@ -21877,7 +21876,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Helezon kanat",
+        "shape_id": "catalog/Helezon kanat",
         "variant_id": "helix-angled-flight"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -21952,7 +21951,7 @@
       "family": "Helezon kanat",
       "name": "Helezon kanat, konik",
       "variant": "Konik",
-      "source_url": "https://unfoldo.com/tr/acinim/helezon-kanat-konik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -22052,7 +22051,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Helezon kanat",
+        "shape_id": "catalog/Helezon kanat",
         "variant_id": "helix-tapered"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -22127,7 +22126,7 @@
       "family": "Helezon yaprağı",
       "name": "Helezon yaprağı, tur başına bir halka",
       "variant": "Tur başına bir halka",
-      "source_url": "https://unfoldo.com/tr/acinim/helezon-yapragi-halka/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -22191,7 +22190,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Helezon yaprağı",
+        "shape_id": "catalog/Helezon yaprağı",
         "variant_id": "helix-deformed"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -22260,7 +22259,7 @@
       "family": "Düz kanal",
       "name": "Düz kanal, düz uçlu",
       "variant": "Düz uçlu",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-duz/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -22335,7 +22334,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Düz kanal",
+        "shape_id": "catalog/Düz kanal",
         "variant_id": "rectangular-duct-straight"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -22409,7 +22408,7 @@
       "family": "Kanal redüksiyonu",
       "name": "Kanal redüksiyonu, merkezli",
       "variant": "Merkezli",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-reduksiyonu/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -22529,7 +22528,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal redüksiyonu",
+        "shape_id": "catalog/Kanal redüksiyonu",
         "variant_id": "rectangular-duct-reducer"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -22603,7 +22602,7 @@
       "family": "Kanal redüksiyonu",
       "name": "Kanal redüksiyonu, bir kenarı düz",
       "variant": "Bir kenarı düz",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-reduksiyonu-tek-tarafli/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -22723,7 +22722,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal redüksiyonu",
+        "shape_id": "catalog/Kanal redüksiyonu",
         "variant_id": "rectangular-duct-reducer-straight-side"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -22797,7 +22796,7 @@
       "family": "Kanal redüksiyonu",
       "name": "Kanal redüksiyonu, kaçık, değişken yükseklik",
       "variant": "Kaçık, değişken yükseklik",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-reduksiyonu-kacik/",
+      "source_url": "",
       "source_fields": [
         [
           "W1",
@@ -22980,7 +22979,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal redüksiyonu",
+        "shape_id": "catalog/Kanal redüksiyonu",
         "variant_id": "rectangular-duct-reducer-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -23054,7 +23053,7 @@
       "family": "Kanal S parçası",
       "name": "Kanal S parçası, aynı ölçü",
       "variant": "Aynı ölçü",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-s-parca/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -23174,7 +23173,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal S parçası",
+        "shape_id": "catalog/Kanal S parçası",
         "variant_id": "rectangular-duct-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -23248,7 +23247,7 @@
       "family": "Kanal S parçası",
       "name": "Kanal S parçası, aynı ölçü, radyüslü",
       "variant": "Aynı ölçü, radyüslü",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-s-parca-radyuslu/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -23368,7 +23367,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal S parçası",
+        "shape_id": "catalog/Kanal S parçası",
         "variant_id": "rectangular-duct-offset-radius"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -23442,7 +23441,7 @@
       "family": "Kanal branşmanı",
       "name": "Kanal branşmanı, 90°",
       "variant": "90°",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-bransman-90/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -23562,7 +23561,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -23636,7 +23635,7 @@
       "family": "Kanal branşmanı",
       "name": "Kanal branşmanı, 90°, yuvarlatılmış köşeler",
       "variant": "90°, yuvarlatılmış köşeler",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-bransman-90-yuvarlatilmis/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -23771,7 +23770,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch-radius"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -23845,7 +23844,7 @@
       "family": "Kanal branşmanı",
       "name": "Kanal branşmanı, açılı",
       "variant": "Açılı",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -23983,7 +23982,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch-angle"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -24057,7 +24056,7 @@
       "family": "Kanal branşmanı",
       "name": "Kanal branşmanı, açılı, yuvarlatılmış köşe",
       "variant": "Açılı, yuvarlatılmış köşe",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-bransman-acili-yuvarlatilmis/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -24210,7 +24209,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal branşmanı",
+        "shape_id": "catalog/Kanal branşmanı",
         "variant_id": "rectangular-duct-branch-angle-radius"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -24284,7 +24283,7 @@
       "family": "Kanal Y parçası",
       "name": "Kanal Y parçası, simetrik",
       "variant": "Simetrik",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-y-parca/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -24422,7 +24421,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal Y parçası",
+        "shape_id": "catalog/Kanal Y parçası",
         "variant_id": "rectangular-duct-y"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -24496,7 +24495,7 @@
       "family": "Kanal Y parçası",
       "name": "Kanal Y parçası, 180°",
       "variant": "180°",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-y-parca-180/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -24615,7 +24614,7 @@
         "kind": "transition"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal Y parçası",
+        "shape_id": "catalog/Kanal Y parçası",
         "variant_id": "rectangular-duct-y-180"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -24689,7 +24688,7 @@
       "family": "Kanal Y parçası",
       "name": "Kanal Y parçası, asimetrik",
       "variant": "Asimetrik",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-y-parca-asimetrik/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -24875,7 +24874,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal Y parçası",
+        "shape_id": "catalog/Kanal Y parçası",
         "variant_id": "rectangular-duct-y-asymmetric"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -24949,7 +24948,7 @@
       "family": "Kanal ayırıcı",
       "name": "Kanal ayırıcı, bir kolu kavisli",
       "variant": "Bir kolu kavisli",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-ayirici/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -25102,7 +25101,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal ayırıcı",
+        "shape_id": "catalog/Kanal ayırıcı",
         "variant_id": "rectangular-duct-splitter"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -25176,7 +25175,7 @@
       "family": "Kanal dirseği",
       "name": "Kanal dirseği, radyüslü, serbest açı",
       "variant": "Radyüslü, serbest açı",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-dirsegi-radyuslu/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -25299,7 +25298,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal dirseği",
+        "shape_id": "catalog/Kanal dirseği",
         "variant_id": "rectangular-duct-bend"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -25373,7 +25372,7 @@
       "family": "Kanal dirseği",
       "name": "Kanal dirseği, gönyeli, serbest açı",
       "variant": "Gönyeli, serbest açı",
-      "source_url": "https://unfoldo.com/tr/acinim/kanal-dirsegi-gonyeli/",
+      "source_url": "",
       "source_fields": [
         [
           "W",
@@ -25481,7 +25480,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Kanal dirseği",
+        "shape_id": "catalog/Kanal dirseği",
         "variant_id": "rectangular-duct-elbow"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -25555,7 +25554,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, 90°, branşman parçası",
       "variant": "90°, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-bransman-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -25635,7 +25634,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-90-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -25709,7 +25708,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, 90°, delikli ana boru",
       "variant": "90°, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-bransman-90-derece-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -25805,7 +25804,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-90-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -25879,7 +25878,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -25978,7 +25977,7 @@
         "refs": 7
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -26053,7 +26052,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, açılı, delikli ana boru",
       "variant": "Açılı, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-bransman-acili-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -26167,7 +26166,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -26241,7 +26240,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, iki branşman",
       "variant": "İki branşman",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-iki-bransman/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -26324,7 +26323,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-two-branches"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -26398,7 +26397,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, iki açılı branşman",
       "variant": "İki açılı branşman",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-iki-acili-bransman/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -26499,7 +26498,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-two-branches-angled"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -26573,7 +26572,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, ana boru boyunca iki branşman",
       "variant": "Ana boru boyunca iki branşman",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-iki-bransman-boyuna/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -26674,7 +26673,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-two-branches-along"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -26748,7 +26747,7 @@
       "family": "Boru branşmanı",
       "name": "Boru branşmanı, dört branşman",
       "variant": "Dört branşman",
-      "source_url": "https://unfoldo.com/tr/acinim/boru-dort-bransman/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -26867,7 +26866,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Boru branşmanı",
+        "shape_id": "catalog/Boru branşmanı",
         "variant_id": "pipe-to-pipe-four-branches"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -26941,7 +26940,7 @@
       "family": "Borudan koniye",
       "name": "Borudan koniye, yatay, delikli koni",
       "variant": "Yatay, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-bransman-yatay-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -27051,7 +27050,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-horizontal-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -27125,7 +27124,7 @@
       "family": "Borudan koniye",
       "name": "Borudan koniye, yatay, branşman parçası",
       "variant": "Yatay, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-bransman-yatay/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -27250,7 +27249,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-horizontal-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -27324,7 +27323,7 @@
       "family": "Borudan koniye",
       "name": "Borudan koniye, dik, delikli koni",
       "variant": "Dik, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-bransman-dik-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -27434,7 +27433,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-vertical-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -27508,7 +27507,7 @@
       "family": "Borudan koniye",
       "name": "Borudan koniye, dik, branşman parçası",
       "variant": "Dik, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-bransman-dik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -27633,7 +27632,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-vertical-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -27707,7 +27706,7 @@
       "family": "Borudan koniye",
       "name": "Borudan koniye, açılı, delikli koni",
       "variant": "Açılı, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-bransman-acili-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -27835,7 +27834,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -27909,7 +27908,7 @@
       "family": "Borudan koniye",
       "name": "Borudan koniye, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -28052,7 +28051,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan koniye",
+        "shape_id": "catalog/Borudan koniye",
         "variant_id": "pipe-to-cone-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -28126,7 +28125,7 @@
       "family": "Borudan eğik koniye",
       "name": "Borudan eğik koniye, yatay, delikli koni",
       "variant": "Yatay, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-bransman-yatay-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -28237,7 +28236,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-horizontal-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -28311,7 +28310,7 @@
       "family": "Borudan eğik koniye",
       "name": "Borudan eğik koniye, yatay, branşman parçası",
       "variant": "Yatay, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-bransman-yatay/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -28436,7 +28435,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-horizontal-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -28510,7 +28509,7 @@
       "family": "Borudan eğik koniye",
       "name": "Borudan eğik koniye, dik, delikli koni",
       "variant": "Dik, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-bransman-dik-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -28642,7 +28641,7 @@
         "refs": 1
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-vertical-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -28718,7 +28717,7 @@
       "family": "Borudan eğik koniye",
       "name": "Borudan eğik koniye, dik, branşman parçası",
       "variant": "Dik, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-bransman-dik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -28864,7 +28863,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-vertical-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -28940,7 +28939,7 @@
       "family": "Borudan eğik koniye",
       "name": "Borudan eğik koniye, açılı, delikli koni",
       "variant": "Açılı, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-bransman-acili-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -29091,7 +29090,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -29165,7 +29164,7 @@
       "family": "Borudan eğik koniye",
       "name": "Borudan eğik koniye, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -29330,7 +29329,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan eğik koniye",
+        "shape_id": "catalog/Borudan eğik koniye",
         "variant_id": "pipe-to-oblique-cone-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -29406,7 +29405,7 @@
       "family": "Koniden koniye",
       "name": "Koniden koniye, yatay, delikli ana koni",
       "variant": "Yatay, delikli ana koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-konik-bransman-yatay-ana-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -29535,7 +29534,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-horizontal-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -29609,7 +29608,7 @@
       "family": "Koniden koniye",
       "name": "Koniden koniye, yatay, branşman parçası",
       "variant": "Yatay, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-konik-bransman-yatay/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -29737,7 +29736,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-horizontal-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -29811,7 +29810,7 @@
       "family": "Koniden koniye",
       "name": "Koniden koniye, dik, delikli ana koni",
       "variant": "Dik, delikli ana koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-konik-bransman-dik-ana-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -29940,7 +29939,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-vertical-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -30014,7 +30013,7 @@
       "family": "Koniden koniye",
       "name": "Koniden koniye, dik, branşman parçası",
       "variant": "Dik, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-konik-bransman-dik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -30142,7 +30141,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-vertical-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -30216,7 +30215,7 @@
       "family": "Koniden koniye",
       "name": "Koniden koniye, açılı, delikli ana koni",
       "variant": "Açılı, delikli ana koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-konik-bransman-acili-ana-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -30363,7 +30362,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -30437,7 +30436,7 @@
       "family": "Koniden koniye",
       "name": "Koniden koniye, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-konik-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -30583,7 +30582,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden koniye",
+        "shape_id": "catalog/Koniden koniye",
         "variant_id": "cone-to-cone-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -30657,7 +30656,7 @@
       "family": "Koniden eğik koniye",
       "name": "Koniden eğik koniye, yatay, delikli koni",
       "variant": "Yatay, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-konik-bransman-yatay-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -30801,7 +30800,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-horizontal-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -30875,7 +30874,7 @@
       "family": "Koniden eğik koniye",
       "name": "Koniden eğik koniye, yatay, branşman parçası",
       "variant": "Yatay, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-konik-bransman-yatay/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -31018,7 +31017,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-horizontal-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -31092,7 +31091,7 @@
       "family": "Koniden eğik koniye",
       "name": "Koniden eğik koniye, dik, delikli koni",
       "variant": "Dik, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-konik-bransman-dik-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -31236,7 +31235,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-vertical-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -31312,7 +31311,7 @@
       "family": "Koniden eğik koniye",
       "name": "Koniden eğik koniye, dik, branşman parçası",
       "variant": "Dik, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-konik-bransman/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -31458,7 +31457,7 @@
         "refs": 5
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-vertical-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -31534,7 +31533,7 @@
       "family": "Koniden eğik koniye",
       "name": "Koniden eğik koniye, açılı, delikli koni",
       "variant": "Açılı, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-konik-bransman-acili-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -31699,7 +31698,7 @@
         "refs": 4
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -31773,7 +31772,7 @@
       "family": "Koniden eğik koniye",
       "name": "Koniden eğik koniye, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-konik-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -31937,7 +31936,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden eğik koniye",
+        "shape_id": "catalog/Koniden eğik koniye",
         "variant_id": "cone-to-oblique-cone-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -32011,7 +32010,7 @@
       "family": "Koniden boruya",
       "name": "Koniden boruya, 90°, branşman parçası",
       "variant": "90°, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-konik-bransman-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -32124,7 +32123,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-90-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -32198,7 +32197,7 @@
       "family": "Koniden boruya",
       "name": "Koniden boruya, 90°, delikli ana boru",
       "variant": "90°, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-konik-bransman-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -32312,7 +32311,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-90-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -32386,7 +32385,7 @@
       "family": "Koniden boruya",
       "name": "Koniden boruya, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-konik-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -32487,7 +32486,7 @@
         "refs": 3
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -32561,7 +32560,7 @@
       "family": "Koniden boruya",
       "name": "Koniden boruya, açılı, delikli ana boru",
       "variant": "Açılı, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-konik-bransman-acili-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -32693,7 +32692,7 @@
         "refs": 2
       },
       "internal_id": {
-        "shape_id": "unfoldo/Koniden boruya",
+        "shape_id": "catalog/Koniden boruya",
         "variant_id": "cone-to-pipe-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -32767,7 +32766,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, 90°, branşman parçası",
       "variant": "90°, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-dikdortgen-bransman-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -32880,7 +32879,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-90-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -32954,7 +32953,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, 90°, delikli ana boru",
       "variant": "90°, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-dikdortgen-bransman-90-derece-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -33083,7 +33082,7 @@
         "bendFace": "front"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-90-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -33157,7 +33156,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-dikdortgen-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -33288,7 +33287,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -33362,7 +33361,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, açılı, delikli ana boru",
       "variant": "Açılı, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-dikdortgen-bransman-acili-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -33509,7 +33508,7 @@
         "bendFace": "front"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -33583,7 +33582,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, teğet, 90°, branşman parçası",
       "variant": "Teğet, 90°, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-teget-dikdortgen-bransman-90-derece/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -33678,7 +33677,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-90-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -33752,7 +33751,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, teğet, 90°, delikli ana boru",
       "variant": "Teğet, 90°, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-teget-dikdortgen-bransman-90-derece-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -33863,7 +33862,7 @@
         "bendFace": "front"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-90-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -33937,7 +33936,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, teğet, açılı, branşman parçası",
       "variant": "Teğet, açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-teget-dikdortgen-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -34050,7 +34049,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -34124,7 +34123,7 @@
       "family": "Dikdörtgenden boruya",
       "name": "Dikdörtgenden boruya, teğet, açılı, delikli ana boru",
       "variant": "Teğet, açılı, delikli ana boru",
-      "source_url": "https://unfoldo.com/tr/acinim/boruya-teget-dikdortgen-bransman-acili-ana-boru/",
+      "source_url": "",
       "source_fields": [
         [
           "Dt",
@@ -34253,7 +34252,7 @@
         "bendFace": "front"
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden boruya",
+        "shape_id": "catalog/Dikdörtgenden boruya",
         "variant_id": "rectangle-to-pipe-tangent-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -34330,7 +34329,7 @@
       "family": "Dikdörtgenden koniye",
       "name": "Dikdörtgenden koniye, yatay, delikli koni",
       "variant": "Yatay, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-dikdortgen-bransman-yatay-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -34473,7 +34472,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-horizontal-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -34547,7 +34546,7 @@
       "family": "Dikdörtgenden koniye",
       "name": "Dikdörtgenden koniye, yatay, branşman parçası",
       "variant": "Yatay, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-dikdortgen-bransman-yatay/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -34705,7 +34704,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-horizontal-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -34779,7 +34778,7 @@
       "family": "Dikdörtgenden koniye",
       "name": "Dikdörtgenden koniye, dik, delikli koni",
       "variant": "Dik, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-dikdortgen-bransman-dik-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -34922,7 +34921,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-vertical-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -34996,7 +34995,7 @@
       "family": "Dikdörtgenden koniye",
       "name": "Dikdörtgenden koniye, dik, branşman parçası",
       "variant": "Dik, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-dikdortgen-bransman-dik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -35154,7 +35153,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-vertical-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -35228,7 +35227,7 @@
       "family": "Dikdörtgenden koniye",
       "name": "Dikdörtgenden koniye, açılı, delikli koni",
       "variant": "Açılı, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-dikdortgen-bransman-acili-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -35389,7 +35388,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -35463,7 +35462,7 @@
       "family": "Dikdörtgenden koniye",
       "name": "Dikdörtgenden koniye, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/koniye-dikdortgen-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -35639,7 +35638,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden koniye",
+        "shape_id": "catalog/Dikdörtgenden koniye",
         "variant_id": "rectangle-to-cone-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -35715,7 +35714,7 @@
       "family": "Dikdörtgenden eğik koniye",
       "name": "Dikdörtgenden eğik koniye, yatay, delikli koni",
       "variant": "Yatay, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-dikdortgen-bransman-yatay-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -35874,7 +35873,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-horizontal-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -35948,7 +35947,7 @@
       "family": "Dikdörtgenden eğik koniye",
       "name": "Dikdörtgenden eğik koniye, yatay, branşman parçası",
       "variant": "Yatay, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-dikdortgen-bransman-yatay/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -36121,7 +36120,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-horizontal-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -36195,7 +36194,7 @@
       "family": "Dikdörtgenden eğik koniye",
       "name": "Dikdörtgenden eğik koniye, dik, delikli koni",
       "variant": "Dik, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-dikdortgen-bransman-dik-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -36357,7 +36356,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-vertical-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -36435,7 +36434,7 @@
       "family": "Dikdörtgenden eğik koniye",
       "name": "Dikdörtgenden eğik koniye, dik, branşman parçası",
       "variant": "Dik, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-dikdortgen-bransman-dik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -36611,7 +36610,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-vertical-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -36689,7 +36688,7 @@
       "family": "Dikdörtgenden eğik koniye",
       "name": "Dikdörtgenden eğik koniye, açılı, delikli koni",
       "variant": "Açılı, delikli koni",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-dikdortgen-bransman-acili-koni/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -36866,7 +36865,7 @@
         "triangulate": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-angle-trunk"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -36940,7 +36939,7 @@
       "family": "Dikdörtgenden eğik koniye",
       "name": "Dikdörtgenden eğik koniye, açılı, branşman parçası",
       "variant": "Açılı, branşman parçası",
-      "source_url": "https://unfoldo.com/tr/acinim/egik-koniye-dikdortgen-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -37131,7 +37130,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Dikdörtgenden eğik koniye",
+        "shape_id": "catalog/Dikdörtgenden eğik koniye",
         "variant_id": "rectangle-to-oblique-cone-angle-branch"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -37205,7 +37204,7 @@
       "family": "Borudan dirseğe",
       "name": "Borudan dirseğe, eksende",
       "variant": "Eksende",
-      "source_url": "https://unfoldo.com/tr/acinim/dirsege-bransman-eksende/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -37285,7 +37284,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan dirseğe",
+        "shape_id": "catalog/Borudan dirseğe",
         "variant_id": "pipe-to-bend-concentric"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -37360,7 +37359,7 @@
       "family": "Borudan dirseğe",
       "name": "Borudan dirseğe, eksantrik",
       "variant": "Eksantrik",
-      "source_url": "https://unfoldo.com/tr/acinim/dirsege-bransman-eksantrik/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -37470,7 +37469,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan dirseğe",
+        "shape_id": "catalog/Borudan dirseğe",
         "variant_id": "pipe-to-bend-offset"
       },
       "implementation_status": "validated_example_with_restrictions",
@@ -37545,7 +37544,7 @@
       "family": "Borudan dirseğe",
       "name": "Borudan dirseğe, açılı",
       "variant": "Açılı",
-      "source_url": "https://unfoldo.com/tr/acinim/dirsege-bransman-acili/",
+      "source_url": "",
       "source_fields": [
         [
           "D",
@@ -37673,7 +37672,7 @@
         "thumbPng": true
       },
       "internal_id": {
-        "shape_id": "unfoldo/Borudan dirseğe",
+        "shape_id": "catalog/Borudan dirseğe",
         "variant_id": "pipe-to-bend-angled"
       },
       "implementation_status": "validated_example_with_restrictions",

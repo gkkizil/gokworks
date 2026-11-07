@@ -1,4 +1,4 @@
-# Unfoldo kapsam kontrolü ve katı STEP — 7 Kasım 2026
+# Kaynak katalog kapsam kontrolü ve katı STEP — 7 Kasım 2026
 
 Güncel kaynak karşılaştırması ve çıktı kanıtı bu dosya, `live_source_audit.json`
 ve `source_coverage.csv` ile birlikte okunmalıdır. Eski genişleme raporundaki
@@ -6,7 +6,7 @@ ve `source_coverage.csv` ile birlikte okunmalıdır. Eski genişleme raporundaki
 
 ## Canlı kaynak kontrolü
 
-Unfoldo ana sayfasındaki bütün “daha fazla” ve aile varyant listeleri tarayıcıda
+Kaynak katalog ana sayfasındaki bütün “daha fazla” ve aile varyant listeleri tarayıcıda
 açıldı. **191 model bağlantısının tamamı** GOKWORKS envanteriyle eşleşti.
 191 model sayfasının her biri HTTP 200, canonical, h1 ve sitemap ile ayrıca
 denetlendi. Sonuç: 51 aile, 11 kategori, 1.136 ölçü alanı, 382 kesim/dikiş
@@ -25,7 +25,7 @@ python -m tests.unfolding.audit_live_source --output /tmp/live-source-audit.json
 ```
 
 Bu incelemede yalnız yayımlanmış form/katalog bilgileri ve normal tarayıcı
-görünümü kullanıldı. Unfoldo'nun hesap motoru, ücretli dosyaları, görselleri
+görünümü kullanıldı. Kaynak kataloğun hesap motoru, ücretli dosyaları, görselleri
 veya üçüncü taraf algoritma kodu projeye aktarılmadı.
 
 ## Düzeltilen görünür eksikler
@@ -156,7 +156,7 @@ içindedir; yalnız `mid` kabul eden 169 model listesi de bu dosyada bulunur.
 
 ## Entegrasyon
 
-Çalışma `agent/codex-unfoldo-completeness` dalında, güncel `origin/main`
+Çalışma `agent/codex-catalogue-completeness` dalında, güncel `origin/main`
 `ae921e9` tabanında yapıldı. Diğer worktree'ler korunur. Ortak arayüzde yalnız
 arama/varyant seçimi, varyant sayısı, STEP etiketi ve sonuç yetenek bağlantısı
 değişti; Claude'un sayfa düzeni ve iş yöneticisi korunur.

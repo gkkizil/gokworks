@@ -9,7 +9,7 @@ from .models import FieldSchema,FrozenMap,ShapeSchema,ShapeSummary
 
 @lru_cache(maxsize=1)
 def inventory():
-    path=Path(__file__).resolve().parents[2]/'docs/unfolding/unfoldo_inventory.json'
+    path=Path(__file__).resolve().parents[2]/'docs/unfolding/source_inventory.json'
     data=json.loads(path.read_text(encoding='utf-8'))
     ids=[m['source_id'] for m in data['models']]
     if len(ids)!=191 or len(set(ids))!=191 or sum(len(m['fields']) for m in data['models'])!=1136:
