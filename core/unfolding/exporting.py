@@ -28,6 +28,7 @@ def _snapshot(result,options):
     if options.expected_revision is not None and options.expected_revision!=result.revision:raise ValueError('Sonuç revizyonu güncel değil.')
     if options.expected_input_hash is not None and options.expected_input_hash!=result.input_hash:raise ValueError('Sonuç giriş imzası güncel değil.')
     if options.format not in ('dxf','dwg','pdf','step','zip','json'):raise ValueError('Çıktı biçimi desteklenmiyor.')
+    if options.step_kind not in ('solid','surface'):raise ValueError('STEP tipi solid/surface olmalı.')
     if options.development not in ('current','nominal','compensated','comparison'):raise ValueError('Açınım çıktı seçimi geçersiz.')
     if options.page_size not in ('A4','A3'):raise ValueError('PDF sayfası A4/A3 olmalı.')
     if type(options.overwrite) is not bool or type(options.include_pdf) is not bool or type(options.include_step) is not bool:raise ValueError('Çıktı seçenekleri mantıksal değer olmalı.')
@@ -41,13 +42,15 @@ def _write(result,parts,options,path,kind,cancel_token=None):
     mode=options.development
     if mode not in ('current','nominal','compensated','comparison'):raise ValueError('Açınım çıktı seçimi geçersiz.')
     if mode in ('compensated','comparison'):
-        if kind=='step':raise ValueError('Telafili 2D açınım STEP değildir; STEP yalnız nominal hedef orta yüzeyi içerir.')
+        if kind=='step':raise ValueError('Telafili 2D açınım STEP değildir; STEP nominal hedef model geometrisidir.')
         records=result.forming_report.get('parts',{})
         if any(not p.nominal_part or records.get(p.id,{}).get('status')!='COMPENSATED' for p in parts):
             raise ValueError('Seçili her parça için uygulanmış ve doğrulanmış uzunluk telafisi gerekli.')
     if mode=='nominal':parts=tuple(p.nominal_part or p for p in parts)
     result=replace(result,quality_metrics=type(result.quality_metrics)(dict(result.quality_metrics,export_development=mode)))
-    key='step_surface' if kind=='step' else kind
+    key=('step_solid' if options.step_kind=='solid' else 'step_surface') if kind=='step' else kind
+    if kind=='step' and options.step_kind=='solid' and result.normalized_inputs['thickness']<=0:
+        raise ValueError('Katı STEP için sıfırdan büyük sac kalınlığı girin.')
     if not result.capabilities.get(key,False):raise ValueError(f'{kind.upper()} bu sonuç/ortam için desteklenmiyor.')
     if kind=='dxf':
         if len(parts)!=1:raise ValueError('DXF için tek parça seçin; çoklu parçada ZIP kullanın.')
@@ -62,7 +65,8 @@ def _write(result,parts,options,path,kind,cancel_token=None):
         write_pdf(parts,path,result,options,cancel_token)
     elif kind=='step':
         from .cad_process import execute
-        execute(parts,path,cancel_token=cancel_token)
+        execute(parts,path,cancel_token=cancel_token,kind=options.step_kind,
+                thickness=result.normalized_inputs['thickness'])
     else:path.write_text(json.dumps(to_data(replace(result,parts=parts)),ensure_ascii=False,allow_nan=False,indent=2),encoding='utf-8')
 
 
@@ -93,7 +97,7 @@ def export_result(result,options,*,cancel_token=None):
                     manifest=dict(schema='gokworks.unfolding.export',version=1,request_id=result.request_id,revision=result.revision,
                         input_hash=result.input_hash,engine_version=result.engine_version,status='partial' if errors else 'complete',
                         calculation_method=result.calculation_method,normalized_inputs=to_data(result.normalized_inputs),
-                        development=options.development,forming_report=to_data(result.forming_report),
+                        development=options.development,step_kind=options.step_kind,forming_report=to_data(result.forming_report),
                         warnings=to_data(result.warnings),files=records,errors=to_data(errors))
                     (folder/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,allow_nan=False,indent=2),encoding='utf-8')
                     with zipfile.ZipFile(path,'w',zipfile.ZIP_DEFLATED) as z:

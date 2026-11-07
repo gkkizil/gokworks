@@ -10,7 +10,7 @@ def test_actual_step_brep_surface_roundtrip_without_solid_or_mesh_conversion(tmp
     from core.unfolding.cad import read_step
     r=calculate(shape,variant);path=tmp_path/(shape+'.step')
     assert r.capabilities['step_surface'] and not r.capabilities['step_solid']
-    report=UnfoldService().export(r,ExportOptions(str(path),'step'))
+    report=UnfoldService().export(r,ExportOptions(str(path),'step',step_kind='surface'))
     assert report.status=='complete',report.errors
     _,stats=read_step(path)
     assert stats['solids']==0 and stats['faces']>=len(r.parts)
@@ -19,9 +19,9 @@ def test_actual_step_brep_surface_roundtrip_without_solid_or_mesh_conversion(tmp
 
 
 @pytest.mark.parametrize('shape,variant',[('cylinder','bevel'),('segmented_elbow','constant_diameter')])
-def test_unimplemented_trimmed_step_is_disabled(tmp_path,shape,variant):
+def test_trimmed_step_requires_positive_thickness_for_a_solid(tmp_path,shape,variant):
     r=calculate(shape,variant);path=tmp_path/'not-supported.step'
-    assert not r.capabilities['step_surface']
+    assert r.capabilities['step_surface'] and not r.capabilities['step_solid']
     report=UnfoldService().export(r,ExportOptions(str(path),'step'))
     assert report.status=='error' and not path.exists()
 

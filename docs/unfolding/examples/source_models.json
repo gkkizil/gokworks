@@ -1914,7 +1914,9 @@
         "model_options": {}
       },
       "source_default_overrides": {},
-      "note": "Kaynak varsayılanları değiştirilmedi; bu ayrı bir GOKWORKS geçerli örneğidir."
+      "note": "Kaynak varsayılanları değiştirilmedi; bu ayrı bir GOKWORKS geçerli örneğidir.",
+      "cad_thickness_mm": 0.5,
+      "cad_note": "Explicit t=0.5 mm CAD acceptance sample. t=2 mm exceeds the faceted normal-offset budget; user thickness is never changed automatically."
     },
     {
       "source_id": "rectangle-to-round-angled-base",
