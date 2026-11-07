@@ -1,13 +1,14 @@
 """ASME GD&T catalogue, native vector frames and measurement comparisons."""
 
 from PySide6.QtCore import Qt, QItemSelectionModel
-from PySide6.QtWidgets import QFormLayout, QWidget, QVBoxLayout, QLineEdit, QTabWidget
+from PySide6.QtWidgets import QFormLayout, QWidget, QLineEdit
 from modules.geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GUIDE, MEASUREMENT_INPUTS
 from modules.geometric_tolerances import rules as r
 from modules.geometric_tolerances.diagram import draw
 from gui_qt.calculations import CalculationPage
 from gui_qt.calculations import pane
-from gui_qt.components import Disclosure, label, scroll, show_details
+from gui_qt.diagrams import EngineeringDiagram
+from gui_qt.components import Disclosure, label, show_details
 from gui_qt.models import FilterProxy
 from modules.geometric_tolerances.catalog_view import CatalogModel, CatalogView, LEGACY_GROUP
 
@@ -84,29 +85,32 @@ class GdtPage(CalculationPage):
         for position, widget in enumerate((self.search, self.catalog, label('Tolerans çerçevesi', 'section')), 1):
             panel_layout.insertWidget(position, widget)
         self.show_kind()
-        self.add_diagram('frame', 'Tolerans çerçevesi', height=120)
+        # The feature control frame is the answer of this page: always visible, large, above the zone sketch.
+        self.frame_view = EngineeringDiagram(width=360, height=60)
+        self.frame_view.setMinimumHeight(84)
+        self.frame_view.setMaximumHeight(112)
+        self.frame_view.setAccessibleName('Tolerans çerçevesi')
+        self.frame_view.setToolTip('Tolerans çerçevesi · ' + EngineeringDiagram.HINT)
+        self.diagrams['frame'] = self.frame_view
+        self.right.insertWidget(self.right.indexOf(self.diagram_tabs), self.frame_view)
         self.add_diagram('zone', 'Tolerans bölgesi', height=300)
-        self.diagram_tabs.setCurrentIndex(1)
         self.right.removeWidget(self.details)
         self.measurement_label = label()
         self.note_label = label()
         self.assessment_label = label()
         panel, body = pane(rule=True)
-        self.explanation_tabs = QTabWidget()
-        overview = QWidget()
-        overview_body = QVBoxLayout(overview)
-        overview_body.setContentsMargins(8, 8, 8, 8)
-        overview_body.setSpacing(8)
-        for widget in (self.details, self.assessment_label):
+        body.addWidget(label('Bu tolerans ne yapar?', 'section'))
+        body.addWidget(self.details)
+        body.addWidget(label('Ölçüm değerlendirmesi', 'section'))
+        body.addWidget(self.assessment_label)
+        self.explanations = {}
+        for key, title, widget in (('measure', 'Nasıl ölçülür', self.measurement_label),
+                                   ('note', 'Üretim notu ve örnek', self.note_label),
+                                   ('size', 'Boyut ilişkisi (ASME 8.4)', self.size_rule_help)):
+            self.explanations[key] = Disclosure(title, widget)
+            body.addWidget(self.explanations[key])
+        for widget in (self.details, self.assessment_label, self.measurement_label, self.note_label, self.size_rule_help):
             widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            overview_body.addWidget(widget)
-        self.explanation_tabs.addTab(overview, 'Anlam ve kontrol')
-        for title, widget in (('Ölçüm rehberi', self.measurement_label),
-                              ('Üretim notu', self.note_label),
-                              ('Boyut ilişkisi', self.size_rule_help)):
-            widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            self.explanation_tabs.addTab(scroll(widget), title)
-        body.addWidget(self.explanation_tabs)
         self.right.insertWidget(self.right.indexOf(self.diagram_tabs) + 1, panel)
         self.update_result()
 
@@ -208,7 +212,7 @@ class GdtPage(CalculationPage):
     def update_result(self):
         item = CHARACTERISTICS[self.kind]
         f = self.form
-        self.details.setText(item.description + '\n\nTolerans bölgesi: ' + item.zone)
+        self.details.setText(item.description + '\nBölge: ' + item.zone)
         self.measurement_label.setText('Ölçüm girişinin anlamı: ' + MEASUREMENT_INPUTS.get(
             item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.') + '\n\n' + item.measurement)
         self.note_text['measured'] = MEASUREMENT_INPUTS.get(
@@ -222,8 +226,7 @@ class GdtPage(CalculationPage):
         caption = f.form.labelForField(f.fields['datum'])
         caption.setText('Referans sırası (datum)' + (' *' if item.datum == 'required' else ''))
         self.clear_field_errors()
-        self.size_rule_help.setVisible(item.group == 'Şekil')
-        self.explanation_tabs.setTabVisible(3, item.group == 'Şekil')
+        self.explanations['size'].setVisible(item.group == 'Şekil')
         f.fields['datum'].setEnabled(item.active and item.datum != 'none')
         form_kind = item.group == 'Şekil'          # the size relation (ASME 8.4) only exists for form tolerances
         self.measure_form.setRowVisible(f.fields['size_tolerance'], form_kind)
