@@ -3,6 +3,21 @@
 GOKWORKS içinde **Üretim → Parametrik mil**. Mevcut PySide6 `BasePage`, tema,
 kalıcı navigasyon ve tek CAD işi çalıştıran `JobManager` kullanılır.
 
+## Ekran düzeni
+
+- **Üstte komut şeridi** (SOLIDWORKS CommandManager / Fusion araç çubuğu gibi):
+  bölümler **Kademeler · Kanallar · Kenarlar · Diş · İç delik · Teknik resim**,
+  altında seçili bölümün komutları (ör. Kanallar → *Segman kanalı*, *Kama kanalı*;
+  Kenarlar → *Tüm kenarlara*, *Tek kenara pah*, *Tek kenara radyüs*). Sağda parça
+  adı, kademe/boy özeti ve seçili kademe görünür.
+- **Şeridin altında** seçili komutun alanları iki sütunda (yer · ölçüler) ve
+  başlık satırında **+ İşlemi ekle / Seçiliyi güncelle**; yanda eklenen işlemler,
+  silme ve en az et kalınlığı.
+- **En altta mil:** üst görünüş ve boyuna kesit. Yükseklik yetiyorsa alt alta,
+  yetmiyorsa yan yana. Ayırıcı sürüklenerek alan değiştirilir.
+- Dar pencerede (640 px altı) bölüm düğmeleri yalnız ikon olur (ipucunda adı);
+  760 px altında alanlar ile işlem listesi alt alta akar.
+
 ## Kullanım ve kapsam
 
 - Kademe tablosunda çap/boy hücrelerini düzenleyin; birim mm'dir. Kademe

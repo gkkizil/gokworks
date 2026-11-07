@@ -113,6 +113,15 @@ QPushButton[nav="true"]:focus { border: 1px solid %(focus)s; border-left: 2px so
 QToolButton[navigationGroup="true"] { background: transparent; border: 0; border-radius: 0;
     color: %(muted)s; font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 8px 2px 3px 2px; text-align: left; }
 QToolButton[navigationGroup="true"]:hover { color: %(text)s; }
+QToolButton[ribbonTab="true"] { background: transparent; border: 0; border-bottom: 2px solid transparent;
+    border-radius: 0; padding: 5px 10px; color: %(muted)s; font-weight: 600; }
+QToolButton[ribbonTab="true"]:hover { color: %(text)s; background: %(hover)s; }
+QToolButton[ribbonTab="true"]:checked { color: %(text)s; background: transparent; border-bottom-color: %(accent)s; }
+QToolButton[ribbonCommand="true"] { background: transparent; border: 1px solid transparent; border-radius: 3px;
+    padding: 3px 10px; color: %(text)s; }
+QToolButton[ribbonCommand="true"]:hover { background: %(hover)s; border-color: %(border)s; }
+QToolButton[ribbonCommand="true"]:checked { background: %(selected)s; border-color: %(accent)s; }
+QWidget#shaftRibbon { background: %(panel)s; border-bottom: 1px solid %(border)s; }
 QToolButton[disclosure="true"] { background: transparent; border: 0; padding: 3px 0; min-height: 20px;
     color: %(accent)s; text-align: left; }
 QToolButton[disclosure="true"]:hover { color: %(text)s; }
