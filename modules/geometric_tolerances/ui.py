@@ -1,13 +1,13 @@
 """ASME GD&T catalogue, native vector frames and measurement comparisons."""
 
 from PySide6.QtCore import Qt, QItemSelectionModel
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTabWidget
+from PySide6.QtWidgets import QFormLayout, QWidget, QVBoxLayout, QLineEdit, QTabWidget
 from modules.geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GUIDE, MEASUREMENT_INPUTS
 from modules.geometric_tolerances import rules as r
 from modules.geometric_tolerances.diagram import draw
 from gui_qt.calculations import CalculationPage
 from gui_qt.calculations import pane
-from gui_qt.components import label, scroll, show_details
+from gui_qt.components import Disclosure, label, scroll, show_details
 from gui_qt.models import FilterProxy
 from modules.geometric_tolerances.catalog_view import CatalogModel, CatalogView, LEGACY_GROUP
 
@@ -20,20 +20,49 @@ class GdtPage(CalculationPage):
         if not isinstance(self.kind, str) or self.kind not in CHARACTERISTICS:   # damaged settings value
             self.kind = 'cylindricity'
         f = self.form
-        f.text('size', 'Gösterim boyutu · mm', '100')
-        f.text('tolerance', 'Toplam tolerans t · mm', '0,05')
-        f.combo('datum', 'Referans sırası', r.DATUM_CHOICES, 'A')
-        f.text('size_tolerance', 'İlgili boyut toleransı · mm', '')
-        f.text('measured', 'Toplam geometrik hata · mm', '')
+        # Display labels only; the settings keys (gdt_size, gdt_tolerance, ...) stay as they were.
+        f.text('size', 'Parça boyutu (şema için) · mm', '100')
+        f.text('tolerance', 'Tolerans t · mm', '0,05')
+        f.combo('datum', 'Referans sırası (datum)', r.DATUM_CHOICES, 'A')
+        f.text('measured', 'Ölçülen sapma · mm', '')
+        f.text('size_tolerance', 'Boyut toleransı · mm', '')
         f.set_value('measured', '')
         # Measured errors describe this inspection only; never persist them.
         self.settings.values.pop('gdt_measured', None)
+        for key, hint in (('size', '100'), ('tolerance', '0,05'), ('measured', 'boş: karşılaştırma yapılmaz'),
+                          ('size_tolerance', 'boş: kontrol edilmez')):
+            f.fields[key].setPlaceholderText(hint)
+            f.fields[key].setAlignment(Qt.AlignRight | Qt.AlignVCenter)     # numbers align right, also when empty
+            f.fields[key].setClearButtonEnabled(False)
         self.datum_help = label('', 'muted')
+        self.measurement_hint = label('', 'muted')
         self.size_rule_help = label('Toplam boyut toleransı, üst ve alt ölçü sınırlarının farkıdır. '
                                     'ASME 8.4: bu yüzey örneğinde geometrik tolerans bu değerden küçük olmalıdır. '
                                     'MMC zarfı burada ölçülmez.', 'muted')
-        self.extra_layout.addWidget(self.datum_help)
         f.fields['size_tolerance'].setToolTip(self.size_rule_help.text())
+        # 3 · Ölçüm kontrolü: the optional inspection inputs, in their own collapsible group.
+        measure = QWidget()
+        self.measure_form = QFormLayout(measure)
+        self.measure_form.setContentsMargins(0, 0, 0, 0)
+        self.measure_form.setSpacing(8)
+        self.measure_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
+        self.measure_form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        for key in ('measured', 'size_tolerance'):
+            taken = f.form.takeRow(f.fields[key])
+            self.measure_form.addRow(taken.labelItem.widget(), taken.fieldItem.widget())
+        self.measure_section = Disclosure('Ölçüm kontrolü (isteğe bağlı)', measure,
+                                          expanded=bool(f.value('size_tolerance').strip()))
+        self.extra_layout.addWidget(self.measure_section)
+        # One note under every input: a short help text, or the rule message when the value is rejected.
+        self.notes = {'size': label('Yalnız şemanın ölçeğini belirler; toleransı etkilemez.', 'muted'),
+                      'tolerance': label('Çerçevedeki toplam bölge genişliği; Ø işaretli türlerde bölgenin çapı.', 'muted'),
+                      'datum': self.datum_help, 'measured': self.measurement_hint,
+                      'size_tolerance': label('Üst ve alt ölçü sınırı farkı. ASME 8.4: t bundan küçük olmalı.', 'muted')}
+        self.note_text = {key: note.text() for key, note in self.notes.items()}
+        for key, note in self.notes.items():
+            layout = f.form if key in ('size', 'tolerance', 'datum') else self.measure_form
+            row, _ = layout.getWidgetPosition(f.fields[key])
+            layout.insertRow(row + 1, note)
         # 1 · Tolerans türü: the first choice, at the top of the parameter panel.
         self.search = QLineEdit()
         self.search.setPlaceholderText('Tolerans türü ara… (ör. diklik, runout)')
@@ -60,7 +89,6 @@ class GdtPage(CalculationPage):
         self.diagram_tabs.setCurrentIndex(1)
         self.right.removeWidget(self.details)
         self.measurement_label = label()
-        self.measurement_hint = label('', 'muted')
         self.note_label = label()
         self.assessment_label = label()
         panel, body = pane(rule=True)
@@ -69,7 +97,7 @@ class GdtPage(CalculationPage):
         overview_body = QVBoxLayout(overview)
         overview_body.setContentsMargins(8, 8, 8, 8)
         overview_body.setSpacing(8)
-        for widget in (self.details, self.measurement_hint, self.assessment_label):
+        for widget in (self.details, self.assessment_label):
             widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
             overview_body.addWidget(widget)
         self.explanation_tabs.addTab(overview, 'Anlam ve kontrol')
@@ -97,6 +125,42 @@ class GdtPage(CalculationPage):
         return (relation + f'{verdict}\nHata {r.fmt(spec.measured)} mm; sınır {r.fmt(spec.tolerance)} mm.\n'
                 f'Kalan pay: {r.fmt(spec.margin)} mm.\n'
                 'Yalnızca hata ≤ t karşılaştırması; tam resim/model uygunluğu, ölçüm belirsizliği ve kalite kabulü değerlendirilmez.')
+
+    # Rule messages begin with the rule's own input name; under the field that name is redundant.
+    RULE_PREFIXES = ('Toplam tolerans t: ', 'Gösterim boyutu: ', 'İlgili boyut toleransı: ', 'Toplam geometrik hata: ')
+
+    @staticmethod
+    def _restyle(widget):
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
+
+    def clear_field_errors(self):
+        for key, note in self.notes.items():
+            note.setText(self.note_text[key])
+            note.setProperty('role', 'muted')
+            self._restyle(note)
+            field = self.form.fields[key]
+            if field.property('invalid'):
+                field.setProperty('invalid', False)
+                self._restyle(field)
+
+    def show_field_error(self, error):
+        """Put a rule message under the input it concerns and outline that input in red."""
+        key = getattr(error, 'field', None)
+        if key not in self.notes:
+            return
+        message = str(error)
+        for prefix in self.RULE_PREFIXES:
+            if message.startswith(prefix):
+                message = message[len(prefix):]
+        note, field = self.notes[key], self.form.fields[key]
+        note.setText(message)
+        note.setProperty('role', 'error')
+        self._restyle(note)
+        field.setProperty('invalid', True)
+        self._restyle(field)
+        if key in ('measured', 'size_tolerance'):
+            self.measure_section.set_expanded(True)
 
     def invalid(self, error):
         super().invalid(error)
@@ -147,18 +211,23 @@ class GdtPage(CalculationPage):
         self.details.setText(item.description + '\n\nTolerans bölgesi: ' + item.zone)
         self.measurement_label.setText('Ölçüm girişinin anlamı: ' + MEASUREMENT_INPUTS.get(
             item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.') + '\n\n' + item.measurement)
-        self.measurement_hint.setText('Ölçüm girişi: ' + MEASUREMENT_INPUTS.get(
-            item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.'))
+        self.note_text['measured'] = MEASUREMENT_INPUTS.get(
+            item.key, 'Eski işaret için güncel ölçüm karşılaştırması yapılmaz.')
         f.fields['measured'].setToolTip(self.measurement_label.text())
         self.note_label.setText(item.note + '\n\nKullanım örneği: ' + item.example)
-        self.datum_help.setText({
+        self.note_text['datum'] = {
             'none': 'Şekil toleransında referans (datum) kullanılmaz.',
-            'optional': 'Referans seçimi isteğe bağlıdır. Teorik ölçüler ve profil ayrıca tanımlanmalıdır.',
-            'required': 'Bu örnek referans gerektirir. A, B, C sırası referans önceliğini belirler.'}[item.datum])
+            'optional': 'İsteğe bağlı. Teorik ölçüler ve profil ayrıca tanımlanmalıdır.',
+            'required': '* Zorunlu. A, A | B, A | B | C sırası referans önceliğini belirler.'}[item.datum]
+        caption = f.form.labelForField(f.fields['datum'])
+        caption.setText('Referans sırası (datum)' + (' *' if item.datum == 'required' else ''))
+        self.clear_field_errors()
         self.size_rule_help.setVisible(item.group == 'Şekil')
         self.explanation_tabs.setTabVisible(3, item.group == 'Şekil')
         f.fields['datum'].setEnabled(item.active and item.datum != 'none')
-        f.show_field('size_tolerance', item.group == 'Şekil')
+        form_kind = item.group == 'Şekil'          # the size relation (ASME 8.4) only exists for form tolerances
+        self.measure_form.setRowVisible(f.fields['size_tolerance'], form_kind)
+        self.notes['size_tolerance'].setVisible(form_kind)
         for key in ('size', 'tolerance', 'measured', 'size_tolerance'):
             f.fields[key].setEnabled(item.active)
         if not item.active:
@@ -169,6 +238,7 @@ class GdtPage(CalculationPage):
             self.result = spec = r.specify(self.kind, *(f.value(key) for key in ('size', 'tolerance', 'datum', 'measured', 'size_tolerance')))
         except ValueError as error:
             self.invalid(error)
+            self.show_field_error(error)
             return
         self.headline.setText(item.name + ' · ' + ('Øt' if item.diametrical else 't') + ' = ' + r.fmt(spec.tolerance) + ' mm')
         assessment = ('Ölçüm girilmedi.' if spec.accepted is None else
