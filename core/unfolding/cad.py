@@ -5,11 +5,111 @@ from threading import RLock
 _lock=RLock()
 
 
+def _ruled_round_surface(data):
+    """Exact rational circular sections with linear axial/radial offset."""
+    from OCP.Geom import Geom_BSplineSurface
+    from OCP.collections import Array2_gp_Pnt,Array2_double,Array1_double,Array1_int
+    from OCP.gp import gp_Pnt
+    axis=data['axis'];rx=data['radial_x']
+    ry=(axis[1]*rx[2]-axis[2]*rx[1],axis[2]*rx[0]-axis[0]*rx[2],axis[0]*rx[1]-axis[1]*rx[0])
+    poles=Array2_gp_Pnt(1,9,1,2);weights=Array2_double(1,9,1,2)
+    for i in range(9):
+        angle=data['theta0']+i*math.pi/4;w=math.sqrt(.5) if i%2 else 1.
+        for j,z in enumerate((data['zmin'],data['zmax']),1):
+            r=data['radius']+data['slope']*z
+            x=data['skew'][0]*z+r*math.cos(angle)/w
+            y=data['skew'][1]*z+r*math.sin(angle)/w
+            p=tuple(data['origin'][k]+axis[k]*z+rx[k]*x+ry[k]*y for k in range(3))
+            poles.SetValue(i+1,j,gp_Pnt(*p));weights.SetValue(i+1,j,w)
+    def array(cls,values):
+        result=cls(1,len(values))
+        for i,value in enumerate(values,1):result.SetValue(i,value)
+        return result
+    return Geom_BSplineSurface(poles,weights,array(Array1_double,(0.,1.,2.,3.,4.)),
+        array(Array1_double,(data['zmin'],data['zmax'])),
+        array(Array1_int,(3,2,2,2,3)),array(Array1_int,(2,2)),2,1)
+
+
+def _trimmed_surface(surface, data):
+    """Build p-curves on an analytic surface; display triangles are not used."""
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeEdge,BRepBuilderAPI_MakeWire,BRepBuilderAPI_MakeFace
+    from OCP.Geom2d import Geom2d_BSplineCurve
+    from OCP.collections import Array1_gp_Pnt2d,Array1_double,Array1_int
+    from OCP.gp import gp_Pnt2d
+    from OCP.BRepLib import BRepLib
+    def wire(points, positive):
+        points=list(points)
+        area=sum(a[0]*b[1]-a[1]*b[0] for a,b in zip(points,points[1:]+points[:1]))
+        if (area>0)!=positive:points.reverse()
+        # Degree-one B-splines preserve every original straight UV segment.
+        # Keep monotone-U runs together: one exact piecewise-linear boundary
+        # edge avoids hundreds of unnecessary thickness wall faces.
+        groups=[];keys=[]
+        for a,b in zip(points,points[1:]+points[:1]):
+            if math.dist(a,b)<1e-12:continue
+            du=b[0]-a[0];key=0 if abs(du)<1e-12 else 1 if du>0 else -1
+            if keys and key==keys[-1]:groups[-1].append(b)
+            else:keys.append(key);groups.append([a,b])
+        if len(groups)>1 and keys[-1]==keys[0]:groups[0]=groups[-1][:-1]+groups[0];groups.pop()
+        builder=BRepBuilderAPI_MakeWire()
+        for group in groups:
+            count=len(group);poles=Array1_gp_Pnt2d(1,count);knots=Array1_double(1,count);multiplicities=Array1_int(1,count)
+            for i,q in enumerate(group,1):
+                poles.SetValue(i,gp_Pnt2d(*q));knots.SetValue(i,i-1.)
+                multiplicities.SetValue(i,2 if i in (1,count) else 1)
+            curve=Geom2d_BSplineCurve(poles,knots,multiplicities,1,False)
+            edge=BRepBuilderAPI_MakeEdge(curve,surface,0.,count-1.)
+            if not edge.IsDone():raise ValueError('Analitik yüzey sınır kenarı oluşturulamadı.')
+            builder.Add(edge.Edge())
+        if not builder.IsDone():raise ValueError('Analitik yüzey sınır teli kapatılamadı.')
+        return builder.Wire()
+    maker=BRepBuilderAPI_MakeFace(surface,wire(data['outer'],True),True)
+    for hole in data['holes']:maker.Add(wire(hole,False))
+    if not maker.IsDone():raise ValueError('Kırpılmış analitik yüzey oluşturulamadı.')
+    face=maker.Face()
+    if not BRepLib.BuildCurves3d_s(face,1e-7):raise ValueError('Yüzeyin gerçek 3D sınır eğrileri oluşturulamadı.')
+    BRepLib.SameParameter_s(face,1e-7,True)
+    return face
+
+
 def build_patch(patch):
     from OCP.BRepBuilderAPI import BRepBuilderAPI_MakePolygon,BRepBuilderAPI_MakeFace
     from OCP.gp import gp_Pnt,gp_Dir,gp_Ax3,gp_Cylinder,gp_Cone
     p=patch.data
-    if patch.kind=='triangle':
+    if patch.kind=='trimmed_ruled_round':
+        # Split rational-circle knot lines. Each basis patch is C-infinity;
+        # OCCT offsetting rejects a C0-labelled multi-quadrant BSpline even
+        # when its circular geometry is tangent-continuous at those knots.
+        from shapely.geometry import Polygon,box
+        from OCP.BRep import BRep_Builder
+        from OCP.TopoDS import TopoDS_Compound
+        result=TopoDS_Compound();builder=BRep_Builder();builder.MakeCompound(result)
+        region=Polygon(p['outer'],p['holes'])
+        for i in range(4):
+            clipped=region.intersection(box(i,p['zmin']-1,i+1,p['zmax']+1))
+            areas=(clipped,) if clipped.geom_type=='Polygon' else getattr(clipped,'geoms',())
+            for area in areas:
+                if area.geom_type!='Polygon' or area.area<=1e-12:continue
+                surface=_ruled_round_surface(p);surface.Segment(i,i+1,p['zmin'],p['zmax'])
+                data=dict(outer=list(area.exterior.coords)[:-1],holes=[list(h.coords)[:-1] for h in area.interiors])
+                builder.Add(result,_trimmed_surface(surface,data))
+        return result
+    if patch.kind in ('trimmed_cylinder','trimmed_cone'):
+        from OCP.Geom import Geom_CylindricalSurface,Geom_ConicalSurface
+        axis=gp_Ax3(gp_Pnt(*p['origin']),gp_Dir(*p['axis']),gp_Dir(*p['radial_x']))
+        surface=(Geom_CylindricalSurface(gp_Cylinder(axis,p['radius'])) if patch.kind=='trimmed_cylinder'
+                 else Geom_ConicalSurface(gp_Cone(axis,p['semi_angle'],p['radius'])))
+        return _trimmed_surface(surface,p)
+    if patch.kind=='planar_3d':
+        def wire(points):
+            builder=BRepBuilderAPI_MakePolygon()
+            for q in points:builder.Add(gp_Pnt(*q))
+            builder.Close()
+            if not builder.IsDone():raise ValueError('Düzlemsel yüzey sınırı oluşturulamadı.')
+            return builder.Wire()
+        maker=BRepBuilderAPI_MakeFace(wire(p['outer']),True)
+        for hole in p['holes']:maker.Add(wire(hole))
+    elif patch.kind=='triangle':
         wire=BRepBuilderAPI_MakePolygon()
         for v in p['vertices']:wire.Add(gp_Pnt(*v))
         wire.Close();maker=BRepBuilderAPI_MakeFace(wire.Wire(),True)
@@ -64,7 +164,7 @@ def surface_stats(shape):
         e=TopExp_Explorer(shape,kind);count=0
         while e.More():count+=1;e.Next()
         counts.append(count)
-    props=GProp_GProps();BRepGProp.SurfaceProperties_s(shape,props);area=props.Mass()
+    props=GProp_GProps();BRepGProp.SurfaceProperties_s(shape,props,1e-10);area=props.Mass()
     if counts[0]<1 or counts[1]!=0 or not math.isfinite(area) or area<=0:raise ValueError('STEP geçerli pozitif alanlı orta yüzey olmalı; solid değildir.')
     bounds=Bnd_Box();BRepBndLib.AddOptimal_s(shape,bounds,False,False)
     low,high=bounds.CornerMin(),bounds.CornerMax()
@@ -78,7 +178,13 @@ def read_step(path):
     with _lock:
         reader=STEPControl_Reader()
         if reader.ReadFile(str(path))!=IFSelect_RetDone or reader.TransferRoots()<1:raise ValueError('STEP tekrar okunamadı.')
-        shape=reader.OneShape();return shape,surface_stats(shape)
+        shape=reader.OneShape()
+        from OCP.TopAbs import TopAbs_SOLID
+        from OCP.TopExp import TopExp_Explorer
+        if TopExp_Explorer(shape,TopAbs_SOLID).More():
+            from .solid_cad import solid_stats
+            return shape,solid_stats(shape)
+        return shape,surface_stats(shape)
 
 
 def write_step(parts,path):

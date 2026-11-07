@@ -2,6 +2,17 @@
 from core.unfolding import UnfoldService
 from core.unfolding.source_models import inventory
 from modules.sheet_unfolding.service import EngineService
+
+
+def test_every_source_identifier_and_full_model_title_can_be_searched():
+    from core.unfolding.source_models import inventory
+    from modules.sheet_unfolding.service import search_text
+    shapes=EngineService().list_shapes()
+    for model in inventory()['models']:
+        shape=next(s for s in shapes if model['source_id'] in s['source_ids'])
+        keywords=search_text(' '.join(shape['keywords']))
+        assert search_text(model['source_id']) in keywords
+        assert search_text(model['name']) in keywords
 from .test_source_models import request
 
 

@@ -1,5 +1,15 @@
 # Sac Açınımı — çekirdek/UI sözleşmesi v1 (motor 1.1.1)
 
+**Motor 1.3.0 güncellemesi (7 Kasım 2026):** istek/proje şeması v1 korunur.
+STEP varsayılanı `ExportOptions.step_kind='solid'` ile kapalı, sac kalınlıklı
+katıdır. `result.capabilities.step_solid` ve `step_solid_reason` girdiye ve
+ortama göre değerlendirilir; kalınlık sıfır veya CAD uygunsuzsa düğme kapatılır.
+Eski açık `step_kind='surface'` yalnız teşhis içindir; otomatik geri dönüş değildir.
+Fasetler için nominal normal offset sapması ölçülür ve STEP başlığında belirtilir;
+imalat/proses onayı verilmez. [Güncel kabul ve sınırlar](COMPLETENESS_RECHECK.md).
+Aşağıdaki tarihsel sahiplik ifadeleri yerine güncel ajan yetkisi ve iş birliği
+kuralları depo kökündeki `AGENTS.md` tarafından belirlenir.
+
 1.1.1, JSON şemasını değiştirmeden geometri/proje çevrimi düzeltmeleri
 ekler; [AUDIT_FIXES.md](AUDIT_FIXES.md). Şemadaki uzunluk min/max değerleri
 mm'dir ve giriş birimi çevrildikten sonra uygulanır. GUI, kayıtlı

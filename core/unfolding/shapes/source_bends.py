@@ -1,6 +1,6 @@
 """Miter and segmented bends with shared joint planes and actual local surfaces."""
 import math
-from .development import circle,stadium,Profile,basis,unit,adaptive
+from .development import circle,stadium,basis,unit,adaptive,rotate_profile
 from .common import add,mul,dot
 from .source_extrusions import extrude
 from .source_intersections import mapped_part,quadratic
@@ -42,7 +42,8 @@ def cone_segment(identifier,origin,axis,rx,ry,radius,slope,length,lower,upper,st
         return lo+hi+v0+v1
     sampled,e=adaptive(curves,start,start+span,options.chord_error_mm,options.max_samples,[start+span*i/24 for i in range(25)],token)
     low=[(v[:2],v[4:7]) for t,v in sampled];high=[(v[2:4],v[7:10]) for t,v in sampled]
-    part=mapped_part(identifier,low+high[::-1],(),n,material,options,token)
+    part=mapped_part(identifier,low+high[::-1],(),n,material,options,token,
+                     surface=dict(radius=radius,slope=slope,origin=origin,axis=axis,radial_x=rx,radial_y=ry))
     from .common import with_generators
     guides=[];count=n['model_options']['helper_divisions']
     for j in range(count+1):
@@ -59,7 +60,7 @@ def build_segmented(m,n,material,options,token):
     if 'oval' in s:
         if '-opposite-' in s:profile=stadium(p['H'],p['W']);radial_radius=p['H']/2
         else:
-            base=stadium(p['W'],p['H']);profile=Profile(base.perimeter,lambda q:(-base.point(q)[1],base.point(q)[0]),base.breaks,forming=base.forming);radial_radius=p['H']/2
+            profile=rotate_profile(stadium(p['W'],p['H']),math.pi/2);radial_radius=p['H']/2
     else:profile=circle(p.get('D',p.get('D1')));radial_radius=p.get('D',p.get('D1'))/2
     if R<=radial_radius:raise ValueError('Dirsek eksen yarıçapı iç cidarı sıfır/negatif yapıyor.')
     lengths=[R*v*(1 if i in (0,count-1) else 2)+(p.get('E1',0.) if i==0 else p.get('E2',0.) if i==count-1 else 0.) for i in range(count)]

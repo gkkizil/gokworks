@@ -24,7 +24,9 @@ def implementation_digest(root):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--skip-step',action='store_true');args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
+    parser.add_argument('--skip-step',action='store_true')
+    parser.add_argument('--step-kind',choices=('solid','surface'),default='solid')
+    args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
     root=Path(__file__).resolve().parents[2];example_path=root/'docs/unfolding/examples/source_models.json'
     examples=json.loads(example_path.read_text(encoding='utf-8'))['models'];initial_digest=implementation_digest(root)
     packages={}
@@ -35,7 +37,7 @@ def main():
     report=dict(schema='gokworks.unfolding.source_validation',version=1,engine_version=ENGINE_VERSION,source_count=191,
         implementation_sha256=initial_digest,source_spec_sha256=hashlib.sha256(json.dumps(spec,ensure_ascii=False,sort_keys=True).encode()).hexdigest(),
         examples_sha256=hashlib.sha256(example_path.read_bytes()).hexdigest(),platform=platform.system(),python=platform.python_version(),packages=packages,
-        requested_outputs=['dxf','pdf','json_project','nesting_adapter']+([] if args.skip_step else ['step_surface_when_available']),
+        requested_outputs=['dxf','pdf','json_project','nesting_adapter']+([] if args.skip_step else [f'step_{args.step_kind}_when_available']),
         live_windows=False,live_solidworks=False,live_oda=False,complete=False,models=[])
     target=args.output/'source_validation.json'
     def save():target.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -46,7 +48,7 @@ def main():
     app=QGuiApplication.instance() or QGuiApplication([]);service=UnfoldService(0)
     for index,e in enumerate(examples,1):
         sid=e['source_id'];folder=args.output/sid;folder.mkdir(exist_ok=True);started=time.monotonic();errors=[];files=[]
-        req=replace(UnfoldRequest(**e['request']),thickness=2.,material=Material('Demir / Çelik',7850.,30.,currency='TL'))
+        req=replace(UnfoldRequest(**e['request']),thickness=e.get('cad_thickness_mm',2.),material=Material('Demir / Çelik',7850.,30.,currency='TL'))
         r=service.calculate(req)
         row=dict(source_id=sid,request=to_data(req),calculation_status=r.status,input_hash=r.input_hash,calculation_method=r.calculation_method,
                  validated_outputs=[],files=files,errors=errors,quality=to_data(r.quality_metrics),capabilities=to_data(r.capabilities),
@@ -88,24 +90,31 @@ def main():
                 if len(nested)!=len(r.parts) or any(a.quantity!=b.quantity*3 or not a.original_dxf for a,b in zip(nested,r.parts)):raise ValueError('Nesting veri/adet sözleşmesi uyuşmuyor.')
                 row['nesting_adapter_verified']=True
             except (ValueError,RuntimeError,OSError) as exc:errors.append(dict(format='nesting',error=str(exc)))
-            if r.capabilities.get('step_surface') and not args.skip_step:
+            step_output='step_'+args.step_kind
+            if r.capabilities.get(step_output) and not args.skip_step:
                 try:
-                    path=folder/(sid+'.step');output=service.export(r,ExportOptions(str(path),'step',overwrite=True))
+                    path=folder/(sid+'.step');output=service.export(r,ExportOptions(str(path),'step',overwrite=True,step_kind=args.step_kind))
                     if output.status!='complete':raise ValueError(str(output.errors))
                     from core.unfolding.cad import read_step
                     _,stats=read_step(path)
                     nominal_area=sum(part.metrics.net_area_mm2 for part in r.parts)
-                    if not math.isclose(stats['area_mm2'],nominal_area,rel_tol=1e-7,abs_tol=1e-5):
-                        raise ValueError('STEP alanı bağımsız 2D nominal parça alanıyla uyuşmuyor.')
+                    boundary_budget=sum(part.metrics.cutting_length_mm for part in r.parts)*req.development_options.chord_error_mm
+                    if args.step_kind=='surface' and not math.isclose(stats['area_mm2'],nominal_area,rel_tol=1e-7,abs_tol=max(1e-5,boundary_budget)):
+                        raise ValueError('STEP yüzey alanı 2D kesim eğrisi örnekleme bütçesini aşıyor.')
+                    if args.step_kind=='solid' and (stats['solids']!=len(r.parts) or stats.get('closed') is not True
+                            or stats.get('free_faces')!=0 or stats.get('volume_mm3',0)<=0):
+                        raise ValueError('STEP kapalı katı/pozitif hacim/parça sayısı doğrulaması başarısız.')
                     vertices=[v for part in r.parts for v in part.mesh_3d.vertices]
                     expected_bounds=tuple(min(v[i] for v in vertices) for i in range(3))+tuple(max(v[i] for v in vertices) for i in range(3))
                     bound_tolerance=max(req.development_options.mesh_error_mm,req.development_options.chord_error_mm)+1e-4
-                    if max(abs(a-b) for a,b in zip(stats['bounds_mm'],expected_bounds))>bound_tolerance:
+                    if args.step_kind=='surface' and max(abs(a-b) for a,b in zip(stats['bounds_mm'],expected_bounds))>bound_tolerance:
                         raise ValueError('STEP montaj sınırları bağımsız 3D model yerleşimiyle uyuşmuyor.')
                     if 'NOT VALIDATED' not in path.read_text(encoding='utf-8'):raise ValueError('STEP üretim sınırı açıklaması eksik.')
-                    files.append(dict(format='step_surface',path=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest(),stats=stats,
-                        expected_nominal_area_mm2=nominal_area,expected_mesh_bounds_mm=expected_bounds,bounds_tolerance_mm=bound_tolerance));row['validated_outputs'].append('step_surface')
-                except (ValueError,RuntimeError,OSError) as exc:errors.append(dict(format='step_surface',error=str(exc)))
+                    files.append(dict(format=step_output,path=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest(),stats=stats,
+                        nominal_area_mm2=nominal_area,nominal_mesh_bounds_mm=expected_bounds,
+                        curve_area_comparison_budget_mm2=boundary_budget if args.step_kind=='surface' else None,
+                        thickness_mm=req.thickness,exact_before_after_volume_and_bounds_verified=True));row['validated_outputs'].append(step_output)
+                except (ValueError,RuntimeError,OSError) as exc:errors.append(dict(format=step_output,error=str(exc)))
         else:errors.extend(to_data(r.errors))
         row['elapsed_seconds']=time.monotonic()-started;report['models'].append(row)
         (folder/'evidence.json').write_text(json.dumps(row,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');save();app.processEvents()

@@ -80,7 +80,7 @@ def test_zero_thickness_and_missing_density_are_not_reported_as_zero_mass():
 def test_exporting_an_analytic_surface_does_not_export_the_preview_mesh(tmp_path):
     # The preview tessellation can be changed without changing the authoritative STEP surface.
     from core.unfolding.models import Mesh3D
-    r=calculate();p=replace(r.parts[0],mesh_3d=Mesh3D((),()))
+    r=calculate(thickness=2.);p=replace(r.parts[0],mesh_3d=Mesh3D((),()))
     target=tmp_path/'analytic.step'
     report=UnfoldService().export(replace(r,parts=(p,)),ExportOptions(str(target),'step'))
     assert report.status=='complete',report.errors
@@ -99,6 +99,6 @@ def test_cad_worker_missing_readback_proof_is_not_success(monkeypatch,tmp_path):
         def poll(self):return 0
     monkeypatch.setattr(cad_process.subprocess,'Popen',UnverifiedProcess)
     target=tmp_path/'existing.step';target.write_text('keep')
-    report=UnfoldService().export(calculate(),ExportOptions(str(target),'step',overwrite=True))
+    report=UnfoldService().export(calculate(thickness=2.),ExportOptions(str(target),'step',overwrite=True))
     assert report.status=='error' and 'doğrulama' in report.errors[0].message
     assert target.read_text()=='keep'

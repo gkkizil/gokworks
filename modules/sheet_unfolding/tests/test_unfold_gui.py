@@ -68,8 +68,9 @@ def test_menu_real_engine_and_reference_cylinder(page):
     assert m['net_area_mm2'] == pytest.approx(CIRCUMFERENCE * 200.)
     assert page.metrics.values['size'].text() == '942,5 × 200 mm'
     assert 'Analitik' in page.method_label.text()
-    for key in ('dxf', 'pdf', 'step', 'zip'):
+    for key in ('dxf', 'pdf', 'zip'):
         assert page.export_buttons[key].isEnabled()
+    assert page.export_buttons['step'].isEnabled() and 'katı' in page.export_buttons['step'].text()
 
 
 def test_legacy_forms_calculate_and_source_catalogue_is_dynamic(page, qtbot):
@@ -92,10 +93,23 @@ def test_legacy_forms_calculate_and_source_catalogue_is_dynamic(page, qtbot):
 
 def test_capabilities_drive_outputs(page, qtbot):
     page.choose_shape('cylinder', 'bevel'); settle(qtbot, page)
-    assert not page.export_buttons['step'].isEnabled() and 'STEP' in page.export_buttons['step'].toolTip()
+    assert page.export_buttons['step'].isEnabled()
     page.choose_shape('rectangular_reducer', 'centered'); settle(qtbot, page)
     assert page.part_table.rowCount() == 4 and not page.export_buttons['dxf'].isEnabled()
     assert 'ZIP' in page.export_buttons['dxf'].toolTip() and page.export_buttons['zip'].isEnabled()
+
+
+def test_step_button_exports_a_thickness_solid_after_a_positive_thickness_is_entered(page,qtbot,tmp_path):
+    from core.unfolding.cad import read_step
+    edit(page,'thickness','0');settle(qtbot,page)
+    assert not page.export_buttons['step'].isEnabled() and 'kalınlığı' in page.export_buttons['step'].toolTip()
+    edit(page,'thickness','2');settle(qtbot,page)
+    assert page.export_buttons['step'].isEnabled() and 'katı' in page.export_buttons['step'].text()
+    assert page.result['capabilities']['step_kind']=='solid'
+    path=tmp_path/'from-gui.step'
+    outcome=page.service.export(page.result,dict(path=str(path),format='step'))
+    assert outcome['status']=='complete',outcome['errors']
+    assert read_step(path)[1]['solids']==1
 
 
 def test_options_follow_the_schema(page, qtbot):
@@ -280,6 +294,22 @@ def test_source_gallery_has_category_thumbnails_and_basic_shapes_apart(page):
     assert [s['shape_id'] for s in page.shapes if s['category']=='Şekillendirme']==['bent_profile']
     page.shape_search.setText('pantolon')
     assert page.shape_tree.count() >= 2 and all(page.shape_tree.item(i).flags() & Qt.ItemIsEnabled for i in range(page.shape_tree.count()))
+
+
+def test_source_variant_search_selects_the_matching_model_instead_of_the_first(page,qtbot):
+    for query,sid in [('iki yükseklikle','cylinder-angled-top'),
+                      ('cylinder-top-angle-side','cylinder-top-angle-side'),
+                      ('Silindir, üstü ve altı açılı kesik','cylinder-cut-both-ends'),
+                      ('kenar yuksekligiyle','cylinder-top-angle-side')]:
+        page.shape_search.setText(query)
+        item=next(page.shape_tree.item(i) for i in range(page.shape_tree.count())
+                  if page.shape_tree.item(i).data(Qt.UserRole)=='unfoldo/Silindir')
+        assert '8 varyant' in item.text()
+        page.shape_tree.scrollToItem(item)
+        QTest.mouseClick(page.shape_tree.viewport(),Qt.LeftButton,pos=page.shape_tree.visualItemRect(item).center())
+        assert page.variant_id==sid
+        settle(qtbot,page)
+        assert page.state in ('ok','warning') and page.schema['source_id']==sid
 
 
 def test_cut_choice_changes_pieces_and_is_sent_to_the_engine(page, qtbot):

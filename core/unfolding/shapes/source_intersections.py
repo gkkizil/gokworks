@@ -1,11 +1,12 @@
 """Cylinder/cone intersections, solved in 3D before any development mapping."""
-from dataclasses import dataclass
+from dataclasses import dataclass,replace
 import math
 from .common import add,sub,mul,dot,finish_part,check_cancel
 from .development import adaptive,basis,circle,rectangle
 from .source_extrusions import extrude,edge_allowances
 from ..models import (Geometry2D,Polyline2D,Mesh3D,MappingPoint)
 from ..geometry import outline,contour_area
+from .surface_patches import round_patches,extrusion_patches
 
 
 def quadratic(a,b,c):
@@ -90,7 +91,7 @@ class Branch:
         return rho*math.cos(psi),rho*math.sin(psi)
 
 
-def mapped_part(identifier,outer,holes,n,material,options,token):
+def mapped_part(identifier,outer,holes,n,material,options,token,*,surface=None):
     """2D polygon+holes with a one-to-one supplied 3D boundary map."""
     from shapely.geometry import Polygon
     from shapely import constrained_delaunay_triangles
@@ -110,8 +111,8 @@ def mapped_part(identifier,outer,holes,n,material,options,token):
         triangles.append(idx);area+=tri.area
     if not math.isclose(area,poly.area,rel_tol=1e-8,abs_tol=1e-5):raise ValueError('Delikli yüzey üçgenlemesi bütün alanı kapsamıyor.')
     maps=tuple(MappingPoint(q,v,str(i)) for i,(q,v) in enumerate(pairs))
-    # Smooth curved patches require trimmed analytic B-Rep; explicitly no STEP yet.
-    return finish_part(identifier,geo,Mesh3D(tuple(vertices),tuple(triangles)),(),poly.area,n,material,options,mappings=maps)
+    patches=round_patches(outer,holes,**surface) if surface else ()
+    return finish_part(identifier,geo,Mesh3D(tuple(vertices),tuple(triangles)),patches,poly.area,n,material,options,mappings=maps)
 
 
 def build_branch(m,n,material,options,token):
@@ -157,7 +158,11 @@ def build_branch(m,n,material,options,token):
     if s.endswith('-branch'):
         lower=[(v[:2],v[2:]) for t,v in samples]
         upper=[(branch.flat(t,end),branch.point(t,end)) for t,v in samples]
-        part=mapped_part(s,lower+upper[::-1],(),n,material,options,token)
+        surface=dict(radius=radius,slope=slope,origin=origin,axis=axis,radial_x=rx,radial_y=ry)
+        part=mapped_part(s,lower+upper[::-1],(),n,material,options,token,surface=None if isrect else surface)
+        if isrect:
+            part=replace(part,surface_patches=extrusion_patches(profile,part.geometry_2d,
+                         origin=origin,axis=axis,radial_x=rx,radial_y=ry))
         from .common import with_generators
         guides=[];count=n['model_options']['helper_divisions']
         for j in range(count+1):
@@ -182,7 +187,8 @@ def build_branch(m,n,material,options,token):
         return mapper(theta,0.)+mapper(theta,trunk.height)+lo+hi
     outer,e=adaptive(shell,0.,1.,options.chord_error_mm,options.max_samples,[i/16 for i in range(17)],token)
     bottom=[(v[:2],v[4:7]) for t,v in outer];top=[(v[2:4],v[7:10]) for t,v in outer]
-    part=mapped_part(s,bottom+top[::-1],[hole],n,material,options,token)
+    part=mapped_part(s,bottom+top[::-1],[hole],n,material,options,token,
+                    surface=dict(radius=trunk.radius,slope=trunk.slope,skew=(trunk.skew,0.)))
     from .common import with_generators
     count=n['model_options']['helper_divisions']
     part=with_generators(part,[(mapper(seam+math.tau*j/count,0.),mapper(seam+math.tau*j/count,trunk.height),

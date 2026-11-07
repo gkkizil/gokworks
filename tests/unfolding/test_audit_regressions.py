@@ -55,7 +55,7 @@ def test_cylinder_limit_levels_are_placed_at_their_real_step_heights(tmp_path):
         parameters={'D': 200., 'd': 200., 'H': 300., 'levels': 3}))
     assert result.status == 'success'
     path = tmp_path/'three-level-cylinder.step'
-    outcome = service.export(result, ExportOptions(str(path), 'step'))
+    outcome = service.export(result, ExportOptions(str(path), 'step',step_kind='surface'))
     assert outcome.status == 'complete', outcome.errors
     _, stats = read_step(path)
     assert stats['faces'] == 3

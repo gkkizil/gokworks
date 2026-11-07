@@ -42,6 +42,12 @@ def shell_part(identifier, radius, length, theta0, span, lower, upper, azimuth,
         if i: triangles.extend(((2*i-2,2*i,2*i+1),(2*i-2,2*i+1,2*i-1)))
     patch=SurfacePatch('cylinder',FrozenMap(dict(radius=radius,length=length,theta0=theta0,span=span,
         lower=lower,upper=upper,azimuth=azimuth,origin=origin,axis=axis,radial_x=radial_x)))
+    patches=(patch,)
+    if (lower or upper) and not overlap:
+        from .development import circle
+        from .surface_patches import extrusion_patches
+        patches=extrusion_patches(circle(2*radius),geometry,theta0*radius,
+            origin=origin,axis=axis,radial_x=radial_x,radial_y=radial_y)
     net=radius*(length*span+radius*(upper-lower)*(math.sin(theta0+span-azimuth)-math.sin(theta0-azimuth)))
     seams=(Line2D(low[0],high[0]),Line2D(low[-1],high[-1]))
     construction=tuple(Line2D((width*i/8,z(theta0+span*i/8,False)),
@@ -51,7 +57,7 @@ def shell_part(identifier, radius, length, theta0, span, lower, upper, azimuth,
         radial=add(mul(radial_x,radius*math.cos(theta)),mul(radial_y,radius*math.sin(theta)))
         a,b=(add(origin,add(radial,mul(axis,z(theta,top)))) for top in (False,True))
         lengths.append(TrueLength(f'{identifier}.G{i}',a,b,math.dist(a,b)))
-    part=finish_part(identifier,geometry,Mesh3D(tuple(vertices),tuple(triangles)),(patch,),net,n,material,options,
+    part=finish_part(identifier,geometry,Mesh3D(tuple(vertices),tuple(triangles)),patches,net,n,material,options,
                      construction=construction,seams=seams,mappings=mappings,lengths=lengths)
     if not overlap:
         part=replace(part,forming_basis=FrozenMap(dict(kind='circle',radius_mm=radius,start_mm=theta0*radius,span_mm=width)))

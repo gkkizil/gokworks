@@ -18,7 +18,7 @@ from gui_qt.components import AdaptiveRow, BasePage, Disclosure, button, label, 
 from gui_qt.theme import COLORS
 
 from .drawing import LAYERS, DevelopmentView, ReferenceSketch, SchemaSketch
-from .service import DUCT_LAP_TITLES, LAP_TITLES
+from .service import DUCT_LAP_TITLES, LAP_TITLES, search_text
 from .numbers import METHOD_TITLES, REFERENCE_TITLES, fmt, parse, to_display, to_mm
 from .service import resolve_service
 
@@ -30,7 +30,7 @@ STATES = {  # key: (text, colour token)
     'error': ('Hata', 'danger'), 'cancelled': ('İptal edildi', 'muted'),
     'stale': ('Ölçüler değişti — yeniden hesaplanmalı', 'warning'), 'idle': ('Hesap bekleniyor', 'muted'),
 }
-EXPORTS = (('dxf', 'DXF'), ('dwg','DWG'), ('pdf', 'PDF'), ('step', 'STEP (orta yüzey)'), ('zip', 'Toplu ZIP'))
+EXPORTS = (('dxf', 'DXF'), ('dwg','DWG'), ('pdf', 'PDF'), ('step', 'STEP (katı model)'), ('zip', 'Toplu ZIP'))
 EXPORT_FILTERS = {'dxf': 'DXF (*.dxf)', 'dwg':'DWG (*.dwg)', 'pdf': 'PDF (*.pdf)', 'step': 'STEP (*.step *.stp)', 'zip': 'ZIP (*.zip)'}
 PRODUCTION_FIELDS = ('thickness', 'joint', 'seam_angle', 'split_count', 'price')
 JOINT_TITLES = {'butt': 'Alın alına', 'lap': 'Bindirmeli'}
@@ -162,10 +162,12 @@ class UnfoldPage(BasePage):
             self.category_box.addItem(category, category)
         self.category_box.currentIndexChanged.connect(lambda *_: self.fill_shapes())
         self.shape_tree = QListWidget(); self.shape_tree.setViewMode(QListView.IconMode); self.shape_tree.setIconSize(QSize(64, 64))
-        self.shape_tree.setGridSize(QSize(116, 124)); self.shape_tree.setTextElideMode(Qt.ElideNone); self.shape_tree.setResizeMode(QListView.Adjust)
+        self.shape_tree.setGridSize(QSize(116, 148)); self.shape_tree.setTextElideMode(Qt.ElideNone); self.shape_tree.setResizeMode(QListView.Adjust)
         self.shape_tree.setMovement(QListView.Static); self.shape_tree.setWordWrap(True); self.shape_tree.setSpacing(4)
         self.shape_tree.setUniformItemSizes(True)
         self.shape_tree.setAccessibleName('Şekiller'); self.shape_tree.itemSelectionChanged.connect(self.shape_selected)
+        self.shape_tree.itemClicked.connect(lambda *_:self.shape_selected())
+        self.shape_tree.itemActivated.connect(lambda *_:self.shape_selected())
         self.variant = QComboBox(); self.variant.setAccessibleName('Varyant'); self.variant.currentIndexChanged.connect(self.variant_changed)
         self.recent = QComboBox(); self.recent.setAccessibleName('Son kullanılanlar'); self.recent.activated.connect(self.recent_chosen)
         host = QWidget(); box = QVBoxLayout(host); box.setContentsMargins(0, 0, 4, 0); box.setSpacing(6)
@@ -178,10 +180,10 @@ class UnfoldPage(BasePage):
         return host
 
     def visible_shapes(self):
-        needle = self.shape_search.text().strip().casefold()
+        needle = search_text(self.shape_search.text().strip())
         category = self.category_box.currentData() if hasattr(self, 'category_box') else None
         for shape in self.shapes:
-            text = ' '.join([shape['title'], shape['category'], *shape.get('keywords', ())]).casefold()
+            text = search_text(' '.join([shape['title'], shape['category'], *shape.get('keywords', ())]))
             if (not needle or needle in text) and (category is None or shape['category'] == category):
                 yield shape
 
@@ -191,7 +193,10 @@ class UnfoldPage(BasePage):
         # Implemented shapes first; planned ones follow, visibly marked and not selectable.
         for shape in sorted(self.visible_shapes(), key=lambda s: s['status'] != 'implemented'):
             planned = shape['status'] != 'implemented'
-            item = QListWidgetItem(shape['title'] + ('\nPlanlanan' if planned else ''))
+            count=len(shape['variants'])
+            suffix='\nPlanlanan' if planned else f'\n{count} varyant' if count>1 else ''
+            item = QListWidgetItem(shape['title'] + suffix)
+            item.setSizeHint(self.shape_tree.gridSize())
             item.setData(Qt.UserRole, shape['shape_id']); item.setTextAlignment(Qt.AlignHCenter | Qt.AlignTop)
             item.setIcon(preview_icon(shape.get('preview'), colors['muted' if planned else 'accent'], fill=None if planned else colors['accent']))
             item.setToolTip(f'{shape["title"]}\n{shape["category"]} · ' + ('Henüz uygulanmadı; seçilemez.' if planned else ', '.join(shape.get('keywords', ()))))
@@ -210,8 +215,12 @@ class UnfoldPage(BasePage):
         if not items or items[0].data(Qt.UserRole) is None:
             return
         shape = self.shape_by_id(items[0].data(Qt.UserRole))
-        variant = next((v['variant_id'] for v in shape['variants'] if v['status'] == 'implemented'), None)
-        if variant and shape['shape_id'] != self.shape_id:
+        variants=[v for v in shape['variants'] if v['status']=='implemented']
+        needle=search_text(self.shape_search.text().strip())
+        match=next((v for v in variants if needle and any(needle in search_text(text) for text in
+                   (v['variant_id'],v['title'],v.get('search_name',''),f'{shape["title"]}, {v["title"]}'))),None)
+        variant=(match or next(iter(variants),{})).get('variant_id')
+        if variant and (shape['shape_id'] != self.shape_id or match and variant != self.variant_id):
             self.choose_shape(shape['shape_id'], variant)
 
     def choose_shape(self, shape_id, variant_id, keep=True):
@@ -815,7 +824,7 @@ class UnfoldPage(BasePage):
             widget.setToolTip('' if enabled else 'Güncel bir sonuç yok.' if not current else
                               'Çok parçalı sonuçta her parça ayrı çıktı olur: Toplu ZIP kullanın.' if key in ('dxf','dwg') and many else
                               'DWG için kurulu yerel ODA File Converter gerekli.' if key=='dwg' else
-                              'Bu sonuç için servis bu çıktıyı sağlamıyor (ör. eğik kesim, dirsek veya bindirmede STEP kapalı).'
+                              capabilities.get('step_reason') or 'Katı STEP için pozitif sac kalınlığı ve desteklenen nominal CAD geometrisi gerekli.'
                               if key == 'step' else 'Bu sonuç için servis bu çıktıyı sağlamıyor.')
         nesting = bool(capabilities.get('nesting')) and not self.busy and 'nesting' in self.context.pages
         self.nesting_button.setEnabled(nesting)

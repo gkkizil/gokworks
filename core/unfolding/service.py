@@ -67,13 +67,27 @@ class UnfoldService:
             surface=all(p.surface_patches for p in parts) and request.joint_options.kind=='butt'
             # Trimmed cylinders need a separate verified B-Rep implementation; never claim it ready.
             surface=surface and all(s.kind!='cylinder' or s.data['upper']==s.data['lower']==0 for p in parts for s in p.surface_patches)
+            occt=importlib.util.find_spec('OCP') is not None
+            solid=surface and n['thickness']>0 and occt
+            solid_reason=('Katı STEP için sıfırdan büyük sac kalınlığı girin.' if n['thickness']<=0 else
+                          'Bu parametreler için doğrulanmış nominal CAD geometrisi yok.' if not surface else
+                          '3D CAD motoru bu ortamda kullanılamıyor.' if not occt else '')
+            if solid:
+                from .solid_facets import prepare_facets
+                try:
+                    for part in parts:
+                        if all(p.kind=='triangle' for p in part.surface_patches):prepare_facets(part.surface_patches,n['thickness'])
+                except ValueError as exc:solid=False;solid_reason=str(exc)
             from .dwg import available as dwg_available
             capabilities=FrozenMap(dict(dxf=importlib.util.find_spec('ezdxf') is not None,
                 dwg=dwg_available(),
                 pdf=importlib.util.find_spec('PySide6') is not None,step_surface=surface and importlib.util.find_spec('OCP') is not None,
-                step_solid=False,nesting=True,zip=True,json=True,production_process_verified=False,
+                step_solid=solid,step_solid_reason=solid_reason,
+                nesting=True,zip=True,json=True,production_process_verified=False,
                 compensated=bool(forming and forming['all_compensated'])))
             warnings=report.warnings
+            if surface and n['thickness']>0 and occt and not solid:
+                warnings+=(Issue('SOLID_NOT_EVALUATED',solid_reason,'NOT_EVALUATED',('thickness',)),)
             if forming:
                 warnings=tuple(w for w in warnings if w.code!='GEOMETRIC_MIDSURFACE')+forming_warnings
             if quality.get('approximation'):
