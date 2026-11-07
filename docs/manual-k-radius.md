@@ -80,10 +80,22 @@ eşleşmeli ve aynı K/R hedefini istemelidir. Farklı hedefler ortak ana parame
 zorlanmaz; parça değiştirilmeden neden bildirilir. Normal katı gövdeler işlenmez.
 
 Diğer konfigürasyonlardaki okunabilir sac parametreleri de kontrol edilir.
-K/R başka konfigürasyona yayılırsa veya SolidWorks istenen değeri reddeder /
-yeniden oluşturma sırasında geri değiştirirse işlem başarısızdır. Eski aktif
-büküm izni türü/değeri ve yarıçap geri yüklenip tekrar okunur. Geri alma
-başarısızsa **Parçayı kaydetmeyin** uyarısı gösterilir; otomatik kayıt yapılmaz.
+Başlangıçta aynı değerleri paylaşan açınım konfigürasyonları aynı K/R'yi
+alabilir; bunlar sonuçta "ortak" olarak listelenir. Farklı başlangıç değeri
+olan konfigürasyona yayılma, yeni unsur hatası veya katı/sac gövde sayısının
+değişmesi işlemi durdurur. Son konfigürasyon dönüşü kayıttan önce doğrulanır.
+
+7 Kasım 2026 kontrolleri: Hatalı bir taslağın hem sac unsurlarına bağlı
+olmadığı hem de onları beslemediği okunabilir bağımlılık ağacıyla
+doğrulanmalıdır. Yalnız aynı referans düzlemini paylaşmak işlemi engellemez.
+Katı gövde listesinin boş veya okunamaz olması da hata sayılır; gövde sayımı
+tek başına tam katı geometri geçerlilik testi değildir.
+
+SolidWorks istenen değeri reddeder / yeniden oluşturma sırasında geri
+değiştirirse veya atama sonrasında sac unsuru okunamazsa eski aktif büküm
+izni türü/değeri ve yarıçap geri yüklenip tekrar okunur. Yazma sonrası
+okuma sorunu "atlandı" olarak geçiştirilemez. Geri alma başarısızsa
+**Parçayı kaydetmeyin** uyarısı gösterilir; otomatik kayıt yapılmaz.
 
 ## Kaynaklar ve doğrulama sınırı
 

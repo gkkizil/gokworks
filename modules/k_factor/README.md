@@ -26,13 +26,23 @@ Test: `python -m pytest modules/k_factor/tests`.
   doğrulanmadan başarı veya dosyaya kayıt verilmez. `EditRebuild3=True` tek başına
   başarı kanıtı değildir.
 - Yalnız atamadan hemen önce var olan ve okunabilir `GetParents` bağımlılık
-  ağacında düzenlenen sac unsurlarına bağlı olmayan taslak hataları tolere edilir.
+  ağacında düzenlenen sac unsurlarıyla iki yönde de ilişkisi bulunmayan taslak
+  hataları tolere edilir. Sacı besleyen bir taslak da bağımsız değildir; ortak
+  referans düzlemi kullanmak ise tek başına doğrudan bağımlılık sayılmaz.
   Gövde/büküm hataları ve bağımsızlığı doğrulanamayan hatalar işlemi durdurur.
   Tolere edilen taslakların aynı hata koduyla sürdüğü raporda açıkça belirtilir;
   bu, bütün parça geometrisinin hatasız olduğu anlamına gelmez.
 - Geri alma her konfigürasyonun kendi parametre ve hata kodu yedeğiyle yapılır.
   Bir konfigürasyon geri yüklenemezse kalanlar yine denenir; doğrulanamayan geri
   alma açık hata olarak raporlanır ve parça kaydedilmez.
+- Her sac konfigürasyonunda `GetBodies2(swSolidBody, False)` ile gizli katılar
+  dahil gövdeler sayılır. Boş/okunamayan liste reddedilir; katı ve sac gövde
+  sayıları atama, son konfigürasyon kontrolü ve geri almada korunmalıdır.
+  Bu sayım, tam B-Rep geçerlilik veya dayanım testi değildir.
+- Atama başladıktan sonra sac unsuru okunamazsa sonuç `skipped` olamaz;
+  hata olarak raporlanır ve geri alma denenir.
+- Kayıtlı satır JSON'u aşırı iç içe ise menü açılmaya devam eder. İlk satır ve
+  ilgisiz ayarlar korunur; bozuk ek satır kaydı kendiliğinden değiştirilmez.
 
 Bu kontrollerin bağımsız Python/COM sözleşme testleri canlı SolidWorks testi
 değildir. Gerçek model doğrulaması Windows + SolidWorks ortamında ayrıca gerekir.

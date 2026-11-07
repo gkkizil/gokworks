@@ -13,6 +13,7 @@ from gui_qt.models import TableModel, Column
 from gui_qt.diagrams import EngineeringDiagram
 from gui_qt.calculations import pane
 from gui_qt.theme import ROW_HEIGHT
+from shared.settings import strict_loads
 from modules.k_factor.tooling_diagram import draw_tooling, PUNCH_TYPES, DIE_TYPES
 
 
@@ -75,7 +76,7 @@ class KrPage(BasePage):
         first = {key: str(self.settings.get('kr_manual_' + field, default))
                  for key, field, default in (('thickness', 'thickness', '2'), ('k', 'k', ''), ('r', 'r', ''))}
         try:
-            saved_rows = json.loads(self.settings.get('kr_manual_rows', '[]'))
+            saved_rows = strict_loads(self.settings.get('kr_manual_rows', '[]'))
         except (ValueError, TypeError):
             saved_rows = []
         rows = [first] + [{key: str(row.get(key, '')) for key in ('thickness', 'k', 'r')}
