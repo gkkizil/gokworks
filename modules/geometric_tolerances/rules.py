@@ -9,6 +9,23 @@ from modules.geometric_tolerances.catalog import CHARACTERISTICS, Characteristic
 DATUM_CHOICES = ('Yok', 'A', 'A | B', 'A | B | C')
 
 
+class FieldError(ValueError):
+    """A ValueError that also names the input it belongs to (message unchanged)."""
+
+    def __init__(self, message, field=None):
+        super().__init__(message)
+        self.field = field
+
+
+def _field(field, call, *args, **kwargs):
+    try:
+        return call(*args, **kwargs)
+    except FieldError:
+        raise
+    except ValueError as error:
+        raise FieldError(str(error), field) from None
+
+
 def number(value, label, *, zero=False, maximum=Decimal('10000')):
     text = str(value).strip().replace(',', '.')
     if isinstance(value, bool) or not re.fullmatch(r'\+?\d+(?:\.\d{1,6})?', text):
@@ -57,19 +74,19 @@ def specify(key, size, tolerance, datum='A', measured='', size_tolerance=''):
     try:
         characteristic = CHARACTERISTICS[key]
     except (KeyError, TypeError):
-        raise ValueError('Geometrik tolerans türünü seçin.') from None
+        raise FieldError('Geometrik tolerans türünü seçin.', 'kind') from None
     if not characteristic.active:
-        raise ValueError('Bu sembol ASME Y14.5-2018’de kaldırıldı; güncel çerçeve oluşturulmaz.')
+        raise FieldError('Bu sembol ASME Y14.5-2018’de kaldırıldı; güncel çerçeve oluşturulmaz.', 'kind')
     if datum not in DATUM_CHOICES:
-        raise ValueError('Geçerli, sıralı bir datum sistemi seçin.')
+        raise FieldError('Geçerli, sıralı bir datum sistemi seçin.', 'datum')
     datums = () if datum == 'Yok' or characteristic.datum == 'none' else tuple(datum.split(' | '))
     if characteristic.datum == 'required' and not datums:
-        raise ValueError('Bu örnek için datum referansı seçin (A, A | B veya A | B | C).')
-    t = number(tolerance, 'Toplam tolerans t', maximum=Decimal('1000'))
-    size_t = (number(size_tolerance, 'İlgili boyut toleransı', maximum=Decimal('1000'))
+        raise FieldError('Bu örnek için datum referansı seçin (A, A | B veya A | B | C).', 'datum')
+    t = _field('tolerance', number, tolerance, 'Toplam tolerans t', maximum=Decimal('1000'))
+    size_t = (_field('size_tolerance', number, size_tolerance, 'İlgili boyut toleransı', maximum=Decimal('1000'))
               if characteristic.group == 'Şekil' and str(size_tolerance).strip() else None)
     if size_t is not None and t >= size_t:
-        raise ValueError('ASME 8.4: normal yüzey şekil toleransı ilgili boyut toleransından küçük olmalı.')
-    return Specification(characteristic, number(size, 'Gösterim boyutu'), t,
+        raise FieldError('ASME 8.4: normal yüzey şekil toleransı ilgili boyut toleransından küçük olmalı.', 'size_tolerance')
+    return Specification(characteristic, _field('size', number, size, 'Gösterim boyutu'), t,
                          datums, None if str(measured).strip() == '' else
-                         number(measured, 'Toplam geometrik hata', zero=True, maximum=Decimal('1000')), size_t)
+                         _field('measured', number, measured, 'Toplam geometrik hata', zero=True, maximum=Decimal('1000')), size_t)

@@ -167,7 +167,7 @@ class FamilyPanel(QWidget):
         self.load_mode=QComboBox();self.load_mode.addItem('Güç → Tork','power');self.load_mode.addItem('Tork → Güç','torque')
         self.load_form.insertRow(0,'Birincil yük',self.load_mode);iv.addLayout(self.load_form)
         self.load_mode.currentIndexChanged.connect(self.changed)
-        self.derived_load=label('','muted');iv.addWidget(self.derived_load)
+        self.derived_load=label('','result');self.derived_load.setAccessibleName('Hesaplanan ikincil yük değeri');iv.addWidget(self.derived_load)
         self.explanation=label('','muted');iv.addWidget(self.explanation);iv.addStretch()
         self.input_scroll=scroll(self.input_panel);self.input_scroll.setMinimumWidth(250)
         self.viewer_panel=QWidget();v=QVBoxLayout(self.viewer_panel);v.setContentsMargins(0,0,0,0);v.setSpacing(4)
