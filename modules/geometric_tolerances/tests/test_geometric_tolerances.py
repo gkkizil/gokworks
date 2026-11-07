@@ -157,6 +157,25 @@ class GeometricRulesTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 specify(key, '100', '.05')
 
+    def test_errors_name_their_input_field_and_keep_the_message(self):
+        from modules.geometric_tolerances.rules import FieldError
+        cases = (
+            (dict(key='flatness', size='100', tolerance=''), 'tolerance', 'Toplam tolerans t:'),
+            (dict(key='flatness', size='0', tolerance='0.05'), 'size', 'Gösterim boyutu:'),
+            (dict(key='flatness', size='100', tolerance='0.05', measured='-1'), 'measured', 'Toplam geometrik hata:'),
+            (dict(key='flatness', size='100', tolerance='0.05', size_tolerance='x'), 'size_tolerance', 'İlgili boyut toleransı:'),
+            (dict(key='flatness', size='100', tolerance='0.1', size_tolerance='0.1'), 'size_tolerance', 'ASME 8.4'),
+            (dict(key='position', size='50', tolerance='0.05', datum='Yok'), 'datum', 'datum referansı'),
+            (dict(key='position', size='50', tolerance='0.05', datum='B'), 'datum', 'datum sistemi'),
+            (dict(key='symmetry', size='50', tolerance='0.05'), 'kind', 'kaldırıldı'),
+        )
+        for args, field, text in cases:
+            with self.subTest(field=field, text=text), self.assertRaises(FieldError) as caught:
+                specify(**args)
+            self.assertIsInstance(caught.exception, ValueError)
+            self.assertEqual(caught.exception.field, field)
+            self.assertIn(text, str(caught.exception))
+
     def test_limits_and_decimal_display_have_no_implicit_rounding(self):
         spec = specify('circularity', '0.000001', '+0,000001', measured='0.000001')
         self.assertEqual(fmt(spec.tolerance), '0,000001')
