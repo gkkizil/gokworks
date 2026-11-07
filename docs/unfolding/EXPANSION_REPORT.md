@@ -1,5 +1,9 @@
 # Sac Açınımı genişlemesi: hesap, çıktı ve GitHub kaynakları
 
+**7 Kasım 2026 / motor 1.3.0:** canlı katalog karşılaştırması ve katı STEP
+güncellemesi [COMPLETENESS_RECHECK.md](COMPLETENESS_RECHECK.md) içindedir.
+Aşağıdaki tarihsel yüzey sayıları güncel katı desteği yerine kullanılmamalıdır.
+
 Bu genişleme raporunun 1.1.0 tarihsel sonuçlarına ek olarak güncel 1.1.1
 kod denetimi [AUDIT_FIXES.md](AUDIT_FIXES.md) içinde; yenilenmiş kanıt ve
 kapsam matrisi `source_validation.json` / `source_coverage.csv` içindedir.

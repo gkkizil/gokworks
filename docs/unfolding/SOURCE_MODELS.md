@@ -1,5 +1,9 @@
 # Unfoldo kaynak modellerinin bağımsız GOKWORKS karşılıkları
 
+7 Kasım 2026 canlı kaynak karşılaştırması ve katı STEP güncellemesi:
+[COMPLETENESS_RECHECK.md](COMPLETENESS_RECHECK.md). Güncel kabul örnekleri
+ve kısıtlar [source_coverage.csv](source_coverage.csv) içindedir.
+
 Bu genişleme mevcut `core/unfolding` motorunu ve Claude arayüzünün servis
 adaptörünü kullanır. İkinci bir açınım modülü, ağdan çağrılan hesap motoru veya
 kopyalanmış Unfoldo hesap kodu yoktur. Kaynak envanteri kullanıcı tarafından

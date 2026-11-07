@@ -70,6 +70,19 @@ def adaptive(function,start,end,tolerance,maximum,breaks=(),token=None):
 
 
 @dataclass(frozen=True)
+class ProfileSegment:
+    """Exact planar generating curve and its arc-length interval."""
+    kind: str
+    start_mm: float
+    end_mm: float
+    start: tuple
+    end: tuple
+    center: tuple = (0., 0.)
+    radius_mm: float = 0.
+    start_angle: float = 0.
+
+
+@dataclass(frozen=True)
 class Profile:
     perimeter: float
     point: object
@@ -77,13 +90,15 @@ class Profile:
     flat_seams: tuple = ()
     radius_seams: tuple = ()
     forming: FrozenMap = field(default_factory=FrozenMap)
+    cad_segments: tuple = ()
 
 
 def circle(d):
     if d<=0:raise ValueError('Çap pozitif olmalı.')
     r=d/2;length=math.tau*r
     return Profile(length,lambda s:(r*math.cos(s/r),r*math.sin(s/r)),tuple(length*i/4 for i in range(5)),
-                   forming=FrozenMap(dict(kind='circle',radius_mm=r)))
+                   forming=FrozenMap(dict(kind='circle',radius_mm=r)),
+                   cad_segments=(ProfileSegment('arc',0.,length,(r,0.),(r,0.),radius_mm=r),))
 
 
 def stadium(length,width):
@@ -98,19 +113,26 @@ def stadium(length,width):
         if s<half:return -a+r*math.cos(math.pi/2+s/r),r*math.sin(math.pi/2+s/r)
         s-=half
         return -a+s,-r
+    segments=[ProfileSegment('arc',0.,half,(a,-r),(a,r),(a,0.),r,-math.pi/2),
+              ProfileSegment('line',half,half+2*a,(a,r),(-a,r)),
+              ProfileSegment('arc',half+2*a,2*half+2*a,(-a,r),(-a,-r),(-a,0.),r,math.pi/2),
+              ProfileSegment('line',2*half+2*a,perimeter,(-a,-r),(a,-r))]
     return Profile(perimeter,point,tuple(sorted(set((0,half,half+2*a,2*half+2*a,perimeter)))),
                    (half+a,2*half+3*a),(half/2,1.5*half+2*a),
-                   FrozenMap(dict(kind='stadium',radius_mm=r,straight_length_mm=2*a)))
+                   FrozenMap(dict(kind='stadium',radius_mm=r,straight_length_mm=2*a)),
+                   tuple(s for s in segments if s.end_mm>s.start_mm))
 
 
 def polygon_profile(points,radius=0.):
     pts=[tuple(p) for p in points]
     area=sum(a[0]*b[1]-a[1]*b[0] for a,b in zip(pts,pts[1:]+pts[:1]))/2
     if area<0:pts.reverse()
-    elements=[]
+    elements=[];curve_data=[]
     if radius<0:raise ValueError('Köşe yarıçapı negatif olamaz.')
     if not radius:
-        for a,b in zip(pts,pts[1:]+pts[:1]):elements.append((math.dist(a,b),lambda f,a=a,b=b:tuple(x+f*(y-x) for x,y in zip(a,b))))
+        for a,b in zip(pts,pts[1:]+pts[:1]):
+            elements.append((math.dist(a,b),lambda f,a=a,b=b:tuple(x+f*(y-x) for x,y in zip(a,b))))
+            curve_data.append(('line',a,b,(0.,0.),0.,0.))
     else:
         corners=[]
         for i,b in enumerate(pts):
@@ -122,8 +144,11 @@ def polygon_profile(points,radius=0.):
             corners.append((aa,bb,center,start,sweep))
         for i,(a,b,c,start,sweep) in enumerate(corners):
             elements.append((radius*sweep,lambda f,c=c,start=start,sweep=sweep:(c[0]+radius*math.cos(start+sweep*f),c[1]+radius*math.sin(start+sweep*f))))
+            curve_data.append(('arc',a,b,c,radius,start))
             e=corners[(i+1)%len(corners)][0]
-            if math.dist(b,e)>1e-8:elements.append((math.dist(b,e),lambda f,a=b,b=e:tuple(x+f*(y-x) for x,y in zip(a,b))))
+            if math.dist(b,e)>1e-8:
+                elements.append((math.dist(b,e),lambda f,a=b,b=e:tuple(x+f*(y-x) for x,y in zip(a,b))))
+                curve_data.append(('line',b,e,(0.,0.),0.,0.))
     lengths=[0.]
     for distance,_ in elements:lengths.append(lengths[-1]+distance)
     def point(s):
@@ -133,7 +158,18 @@ def polygon_profile(points,radius=0.):
         return elements[-1][1](1.)
     flats=tuple((lengths[i]+lengths[i+1])/2 for i in range(len(elements)) if not radius or i%2==1)
     radii=tuple((lengths[i]+lengths[i+1])/2 for i in range(len(elements)) if radius and i%2==0)
-    return Profile(lengths[-1],point,tuple(lengths),flats,radii)
+    segments=tuple(ProfileSegment(kind,lengths[i],lengths[i+1],a,b,c,r,angle)
+                   for i,(kind,a,b,c,r,angle) in enumerate(curve_data))
+    return Profile(lengths[-1],point,tuple(lengths),flats,radii,cad_segments=segments)
+
+
+def rotate_profile(profile, angle):
+    """Rotate the exact generating curves and the shared evaluation function."""
+    c,s=math.cos(angle),math.sin(angle)
+    def point(p):return c*p[0]-s*p[1],s*p[0]+c*p[1]
+    return replace(profile,point=lambda q:point(profile.point(q)),
+        cad_segments=tuple(replace(v,start=point(v.start),end=point(v.end),center=point(v.center),
+                                   start_angle=v.start_angle+angle) for v in profile.cad_segments))
 
 
 def rectangle(w,l,r=0):

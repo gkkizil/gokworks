@@ -78,7 +78,8 @@ def build_cut_cone(m,n,material,options,token):
         theta=seam+math.tau*t;lo,hi=bounds(theta);return mapper(theta,lo)+mapper(theta,hi)+trunk.point(theta,lo)+trunk.point(theta,hi)
     sampled,e=adaptive(curves,0.,1.,options.chord_error_mm,options.max_samples,[i/32 for i in range(33)],token)
     low=[(v[:2],v[4:7]) for t,v in sampled];high=[(v[2:4],v[7:10]) for t,v in sampled]
-    part=mapped_part(s,low+high[::-1],(),n,material,options,token)
+    part=mapped_part(s,low+high[::-1],(),n,material,options,token,
+                     surface=dict(radius=trunk.radius,slope=trunk.slope))
     from .common import with_generators
     guides=[];count=n['model_options']['helper_divisions']
     for j in range(count+1):

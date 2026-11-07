@@ -3,7 +3,12 @@
 GUI, SolidWorks, internet veya LLM bağlantısı gerektirmeyen servis.
 Başlangıç sözleşmesi: [contract_v1.md](../../docs/unfolding/contract_v1.md).
 
-Motor **1.2.0**: opsiyonel malzeme/proses verisi, BA/BD ve K telafisi,
+Motor **1.3.0**: STEP varsayılanı sac kalınlıklı kapalı katı modeldir.
+Pozitif kalınlık ve uygun geometri gerekir; katı üretilemezse yüzey dosyasına
+dönülmez. Yeni kaynak kontrolü, sayısal kabul örnekleri ve kalan sınırlar:
+[COMPLETENESS_RECHECK.md](../../docs/unfolding/COMPLETENESS_RECHECK.md).
+
+Motor 1.2.0 ile gelen opsiyonel malzeme/proses verisi, BA/BD ve K telafisi,
 analitik/ölçüm kaynaklı yaylanma, mesh metrik analizi ve nominal/telafili
 çıktı seçimi [FORMING.md](../../docs/unfolding/FORMING.md) içinde açıklanır.
 `bent_profile/single,double` yeni yerel hesaplarıdır; kaynak kataloğun 191
@@ -23,7 +28,7 @@ tablo ilk teslimin kapsamıdır. Güncel hesap/çıktı durumu ve açık kısıt
 ```python
 from core.unfolding import UnfoldService, UnfoldRequest, ExportOptions
 s = UnfoldService()
-r = s.calculate(UnfoldRequest(parameters={'diameter': 300., 'height': 200.}))
+r = s.calculate(UnfoldRequest(parameters={'diameter': 300., 'height': 200.}, thickness=2.))
 assert r.status == 'success'
 print(r.parts[0].metrics.bounds_mm)  # (0, 0, 942.4777960769379, 200)
 s.export(r, ExportOptions('silindir.zip', 'zip', include_step=True))
@@ -39,7 +44,10 @@ python packaging/run_windows_tests.py tests/unfolding
 Mevcut dosya varsayılan olarak korunur; CLI'da bilinçli üzerine yazmak için
 `--overwrite` gerekir. Çok parçalı DXF için `--part-id` seçin veya ZIP üretin.
 
-| Aile / variant_id | Gerçek uygulama | STEP orta yüzey |
+Bu tablo ilk teslimin tarihsel yüzey kapsamıdır; güncel katı kabulü yukarıdaki
+rapor ve 191 satırlı matriste bulunur.
+
+| Aile / variant_id | Gerçek uygulama | İlk teslimde STEP orta yüzey |
 |---|---|---|
 | cylinder / straight | Analitik dikdörtgen; normal referans dönüşümü | Var |
 | cylinder / bevel | Düzlem–silindir kesişimi, kord hatası sınırlı kesim | Kırpma doğrulanmadığı için kapalı |
@@ -49,9 +57,11 @@ Mevcut dosya varsayılan olarak korunur; CLI'da bilinçli üzerine yazmak için
 | rect_to_round / centered_faceted | 4 düz üçgen + 4 fasetli köşe yaması | Var, gerçek düz B-Rep fasetler |
 | segmented_elbow / constant_diameter | Serbest toplam açı, N−1 miter birleşimi | Kırpma doğrulanmadığı için kapalı |
 
-STEP yalnız orta yüzeydir, **solid veya düzenlenebilir SolidWorks özellik
-ağacı değildir**. STEP, önizleme mesh'inden üretilmez. Bindirmede 2D payı
-eklenir; 3D nominal yüzeydir ve STEP kapatılır. Gerçek yetenekler sonuç
+Güncel STEP **kapalı katıdır**; düzenlenebilir SolidWorks özellik ağacı
+değildir. STEP, önizleme mesh'inden üretilmez. Eski yüzey teşhisi için API'de
+açık `ExportOptions(step_kind='surface')` korunur; arayüz bunu sunmaz.
+Bindirmede 2D payı eklenir; doğrulanmamış kalınlık/pay geometrisinde STEP
+kapatılır. Gerçek yetenekler sonuç
 `capabilities` alanından alınmalıdır; bağımlılık yoksa ilgili çıktı açılmaz.
 
 Verilen çaplar inner/mid/outer yüzeyinde yorumlanır; normal offset sabit
@@ -82,6 +92,5 @@ istenen bir PDF/STEP başarısızken başarı taklidi yapılmaz. Çekirdek iptal
 edildiğinde son geçerli cache veya mevcut dosya değiştirilmez. STEP ayrı
 headless süreçte çalışır; iptal/süre aşımında süreç sonlandırılır.
 
-Arayüz Claude tarafından ayrıca geliştirilecektir; bu değişiklik menüye
-çalışmayan ekran eklemez. [Claude notu](../../docs/unfolding/CLAUDE_HANDOFF.md)
+Mevcut Claude arayüzü gerçek servise bağlıdır. [Claude notu](../../docs/unfolding/CLAUDE_HANDOFF.md)
 ve [teknik rapor](../../docs/unfolding/IMPLEMENTATION.md).

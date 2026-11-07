@@ -113,7 +113,9 @@ def build_three_breech(m,n,material,options,token):
         samples,e=adaptive(sample,0.,1.,options.chord_error_mm,options.max_samples,[j/48 for j in range(49)],token)
         low=[(v[:2],v[4:7]) for t,v in samples];high=[(v[2:4],v[7:10]) for t,v in samples]
         name=s+('-body' if i==0 else f'-arm{i}')
-        part=mapped_part(name,low+high[::-1],(),n,material,options,token)
+        part=mapped_part(name,low+high[::-1],(),n,material,options,token,
+                         surface=dict(radius=branch.radius,slope=branch.slope,origin=branch.origin,
+                                      axis=branch.axis,radial_x=branch.radial_x,radial_y=branch.radial_y))
         count=n['model_options']['helper_divisions'];guides=[]
         for j in range(count+1):
             v=sample(j/count);guides.append((v[:2],v[2:4],v[4:7],v[7:10]))
@@ -138,7 +140,8 @@ def build_rain_head(m,n,material,options,token):
         return mapper(theta,0.)+mapper(theta,z)+trunk.point(theta,0.)+trunk.point(theta,z)
     samples,e=adaptive(fn,0.,1.,options.chord_error_mm,options.max_samples,[i/32 for i in range(33)],token)
     low=[(v[:2],v[4:7]) for t,v in samples];high=[(v[2:4],v[7:10]) for t,v in samples]
-    cone=mapped_part(m['source_id']+'-cone',low+high[::-1],(),n,material,options,token)
+    cone=mapped_part(m['source_id']+'-cone',low+high[::-1],(),n,material,options,token,
+                     surface=dict(radius=trunk.radius,slope=trunk.slope))
     from .common import with_generators
     count=n['model_options']['helper_divisions'];guides=[]
     for j in range(count+1):

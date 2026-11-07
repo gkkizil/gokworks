@@ -4,7 +4,7 @@ from dataclasses import dataclass, fields, field, is_dataclass
 import math
 from uuid import uuid4
 
-ENGINE_VERSION = '1.2.0'
+ENGINE_VERSION = '1.3.0'
 
 
 @dataclass(frozen=True)
@@ -328,6 +328,7 @@ class ExportOptions:
     project_revision: str = ''
     quantity_multiplier: int = 1
     development: str = 'current'  # current / nominal / compensated / comparison
+    step_kind: str = 'solid'  # surface is an explicit diagnostic/legacy option, never a fallback
 
 
 @dataclass(frozen=True)

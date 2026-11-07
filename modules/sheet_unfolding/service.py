@@ -11,9 +11,17 @@ input dimension (``dimension_id``) is written on the sketch. It defines no
 parameters, limits or defaults; those always come from ``get_schema``.
 """
 
+import unicodedata
+
 from core.unfolding import UnfoldService, UnfoldRequest, ExportOptions
 from core.unfolding.models import ProjectItem, UnfoldProject, to_data
 from core.unfolding.shapes.common import UnfoldCancelled
+
+
+def search_text(value):
+    """Match Turkish dotted/dotless I and unaccented keyboard input equally."""
+    value=unicodedata.normalize('NFKD',value.casefold().replace('ı','i'))
+    return ''.join(c for c in value if not unicodedata.combining(c))
 
 UNIT_KINDS = {'length': 'length', 'deg': 'angle', 'count': 'count', 'option': 'count'}
 VARIANT_TITLES = {
@@ -101,6 +109,12 @@ RESTRICTION_TITLES = {
         'Eğri sapması ölçülen örnekleme hatasıdır; sertifikalı imalat toleransı değildir.',
     'STEP is an OCCT surface B-Rep, not a solid or editable SolidWorks feature tree.':
         'STEP bir yüzey modelidir; katı veya düzenlenebilir SolidWorks özellik ağacı değildir.',
+    'STEP is a closed thickness solid; nominal/faceted geometry is not manufacturing/process approval.':
+        'STEP kapalı ve kalınlıklı katı modeldir; nominal/fasetli geometri imalat veya proses onayı değildir.',
+    'No verified 3D target CAD for this annular forming blank; STEP disabled.':
+        'Bu halka şekillendirme taslağının doğrulanmış 3D hedef CAD geometrisi yok; STEP kapalıdır.',
+    'Solid STEP acceptance example uses 0.5 mm thickness; 2 mm exceeds the faceted corner residual budget.':
+        'Katı STEP kabul örneği 0,5 mm kalınlıktadır; 2 mm örneği faset köşesi sapma sınırını aşar.',
     'Verified trimmed B-Rep unavailable; STEP disabled for this example.': 'Doğrulanmış yüzey modeli yok; bu modelde STEP kapalı.',
     'Only geometric mid-surface inputs; unverified inner/outer normal offsets are rejected.':
         'Yalnız orta yüzey ölçüsü; doğrulanmamış iç/dış ölçü seçimleri kapalıdır.',
@@ -200,16 +214,20 @@ class EngineService:
     # ---- catalogue / schema ----------------------------------------------------------
     def list_shapes(self):
         shapes = []
+        source_names={m['source_id']:m['name'] for m in self.engine.list_source_models()}
         for summary in self.engine.list_shapes():
             category, keywords, preview, _ = PRESENTATION.get(summary.shape_id, ('Diğer', (), [], {}))
             if summary.category:
                 category = summary.category
                 preview, synonyms = CATEGORY_PRESENTATION.get(category, ([], ()))
                 keywords = (*summary.variant_labels.values(), *synonyms)
+                keywords = (*keywords, *summary.source_ids,
+                            *(source_names[v] for v in summary.source_ids))
             shapes.append(dict(shape_id=summary.shape_id, title=summary.label, category=category, keywords=list(keywords),
                                status='implemented', preview=preview, method=summary.method,
                                source_ids=list(summary.source_ids),
-                               variants=[dict(variant_id=v, title=summary.variant_labels.get(v,VARIANT_TITLES.get(v, v)), status='implemented')
+                               variants=[dict(variant_id=v, title=summary.variant_labels.get(v,VARIANT_TITLES.get(v, v)),
+                                              search_name=source_names.get(v,''),status='implemented')
                                          for v in summary.variants]))
         for shape_id, title, category, keywords in (() if any(s['source_ids'] for s in shapes) else PLANNED):
             shapes.append(dict(shape_id=shape_id, title=title, category=category, keywords=list(keywords),
@@ -319,7 +337,7 @@ class EngineService:
         except UnfoldCancelled as error:
             raise InterruptedError('İptal edildi.') from error
         caps = dict(result.capabilities)
-        exports = [k for k in ('dxf', 'dwg', 'pdf', 'zip') if caps.get(k)] + (['step'] if caps.get('step_surface') else [])
+        exports = [k for k in ('dxf', 'dwg', 'pdf', 'zip') if caps.get(k)] + (['step'] if caps.get('step_solid') else [])
         status = 'error' if result.status != 'success' else 'warning' if result.warnings else 'ok'
         return dict(request_id=result.request_id, revision=result.revision, input_hash=result.input_hash,
                     engine_version=f'motor {result.engine_version}', status=status,
@@ -329,7 +347,8 @@ class EngineService:
                     errors=[_issue(i, 'error') for i in result.errors],
                     capabilities=dict(exports=exports if status != 'error' else [],
                                       nesting=bool(caps.get('nesting')) and status != 'error',
-                                      step_kind='surface', step_solid=bool(caps.get('step_solid'))),
+                                      step_kind='solid', step_solid=bool(caps.get('step_solid')),
+                                      step_reason=caps.get('step_solid_reason','')),
                     quality_metrics=to_data(result.quality_metrics), forming_report=to_data(result.forming_report),
                     engine_result=result, engine_request=engine_request)
 
