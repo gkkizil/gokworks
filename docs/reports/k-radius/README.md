@@ -1,5 +1,9 @@
 # K/R değişikliği sonrası doğrulama
 
+Güncel Qt/PySide6 denetimi: [7 Kasım 2026 kontrolü](review-2026-11-07.md)
+ve [makine tarafından okunabilir sonuçları](review-2026-11-07.json).
+Aşağıdaki Tk kayıtları tarihsel sürüme aittir.
+
 > Eski Tk arayüzü için verilen görsel/rapor komutları tarihîdir. Bu betikler ve
 > üretilmiş görseller güncel daldan kaldırılmıştır; yeniden incelemek için
 > [temizlik öncesi sürümü](https://github.com/gkkizil/gokworks/tree/6c15dba372c5cee9e1454f28ab47d1d1852f3fc9) kullanın.

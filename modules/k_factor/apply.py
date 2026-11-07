@@ -1033,13 +1033,19 @@ def process_part(app, path, configuration, recipe, *, preview=False, save=False,
                 notes.append(f"K={calculation.k_factor:.4f} · R={calculation.radius_mm:.3f} mm · t={calculation.thickness_mm:g} mm · V={calculation.die_opening_mm:g} mm · BA({calculation.angle_deg:g}°)={calculation.ba_mm:.5f} mm")
             notes.extend(calculation.notes)
             status = "success"
-    except (NotSheetMetal, NoSheetMetal, ThicknessMismatch) as error:
-        status = "skipped"
-        notes.append(str(error))
     except Exception as error:
+        # A discovery/matching exception is a skip only before any write. A
+        # missing sheet after mutation must take the same rollback path as
+        # a failed rebuild or readback, even if its exception type is unchanged.
+        untouched = not changed and not (parameter_editor is not None and parameter_editor.changed)
+        skipped = untouched and isinstance(error, (NotSheetMetal, NoSheetMetal, ThicknessMismatch))
+        status = "skipped" if skipped else "error"
         # The table truncates long discovery notes. Show the actionable error
         # first so the user can see it without opening the complete log.
-        notes.insert(0, f"{stage}: {error}")
+        if skipped:
+            notes.append(str(error))
+        else:
+            notes.insert(0, f"{stage}: {error}")
         if parameter_editor is not None and parameter_editor.changed:
             changed = True
             try:

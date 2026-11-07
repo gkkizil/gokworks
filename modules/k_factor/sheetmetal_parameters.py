@@ -115,19 +115,13 @@ def _sheet_features(model):
             yield feature
 
 
-def _independent_sketch(feature, protected):
-    """Only tolerate a sketch with a readable dependency graph excluding the sheets.
-
-    Error name/code equality alone proves neither geometry validity nor that an
-    error is unrelated. Body/bend features and unknown parent metadata fail closed.
-    """
-    if _kind(feature) not in ('ProfileFeature', '3DProfileFeature'):
-        return False
+def _no_dependency_path(feature, blocked):
+    """Prove there is no parent path to a blocked feature; unreadable graphs fail."""
     pending, visited = [feature], set()
     while pending:
         item = pending.pop()
         identity = _identity(item)
-        if identity in protected:
+        if identity in blocked:
             return False
         if identity in visited:
             continue
@@ -145,6 +139,20 @@ def _independent_sketch(feature, protected):
     return True
 
 
+def _independent_sketch(feature, protected):
+    """Check both dependency directions, allowing shared reference planes.
+
+    A sketch that supplies the sheet is not independent of it. Traversing only
+    the failed sketch's parents misses that relationship. Read the sheet's
+    parents too, without treating common planes/origins as direct dependencies.
+    """
+    if _kind(feature) not in ('ProfileFeature', '3DProfileFeature'):
+        return False
+    return (_no_dependency_path(feature, protected)
+            and all(_no_dependency_path(sheet, {_identity(feature)})
+                    for sheet in protected.values()))
+
+
 def feature_errors(model, *, unrelated_to=None):
     """{feature name: error code} of every feature (sub-features included) with a rebuild error.
 
@@ -152,7 +160,8 @@ def feature_errors(model, *, unrelated_to=None):
     sketch relation, a failed cosmetic feature...) from an error the K/R edit
     caused. ``EditRebuild3`` returns False for both.
     """
-    errors, visited = {}, set()
+    errors, visited, protected = {}, set(), {}
+    protected_names = {name for name, _ in unrelated_to} if unrelated_to is not None else set()
     stack = [(_call(model, "FirstFeature"), False)]
     while stack:
         feature, sub = stack.pop()
@@ -166,10 +175,19 @@ def feature_errors(model, *, unrelated_to=None):
             raise RuntimeError("Unsur hata taraması tamamlanamadı; unsur ağacı sınırı aşıldı.")
         stack.append((_call(feature, "GetNextSubFeature" if sub else "GetNextFeature"), sub))
         stack.append((_call(feature, "GetFirstSubFeature"), True))
+        if name in protected_names:
+            identity = _identity(feature)
+            if identity in unrelated_to:
+                protected[identity] = feature
         code = _optional(feature, "GetErrorCode")
-        if code and (unrelated_to is None or _independent_sketch(feature, unrelated_to)):
-            errors[name] = int(code)
-    return errors
+        if code:
+            errors[name] = feature, int(code)
+    if unrelated_to is None:
+        return {name: code for name, (_, code) in errors.items()}
+    if protected.keys() != unrelated_to:
+        return {}  # Missing sheet metadata cannot establish independence.
+    return {name: code for name, (feature, code) in errors.items()
+            if _independent_sketch(feature, protected)}
 
 
 def rebuild(model, tolerated):
@@ -321,6 +339,24 @@ def target(before, calculation):
                    allowance_type=2, allowance_value=calculation.k_factor)
 
 
+def solid_body_inventory(model):
+    """Primitive counts only; COM bodies never survive a configuration switch."""
+    part = model
+    if _raw(model) is not None:
+        from modules.cad_converter.api import interface, PART_IID
+        part = interface(model, PART_IID)  # QueryInterface, without MakePy.
+    bodies = _call(part, 'GetBodies2', 0, False)  # swSolidBody, including hidden.
+    if not isinstance(bodies, (tuple, list)) or not bodies:
+        raise RuntimeError('Katı gövde bulunamadı veya gövde listesi doğrulanamadı.')
+    sheets = 0
+    for body in bodies:
+        flag = _call(body, 'IsSheetMetal')
+        if type(flag) is not bool:
+            raise RuntimeError('Gövdenin sac metal durumu doğrulanamadı.')
+        sheets += flag
+    return len(bodies), sheets
+
+
 class ParameterEdit:
     """One part/configuration transaction, restricted to its parent definition."""
 
@@ -333,6 +369,7 @@ class ParameterEdit:
         self.error_snapshots = {}
         self.tolerated_by_configuration = {}
         self.updated_snapshots = {}
+        self.body_snapshots = {}
         self.notes = []
 
     def active_configuration(self):
@@ -382,7 +419,12 @@ class ParameterEdit:
         safe = feature_errors(self.model, unrelated_to={(p.name, p.kind) for p in parameters})
         if any(key not in safe for key in remaining):
             raise RuntimeError(f'{name}: hata veren unsurun Sac-Levha bağımsızlığı doğrulanamadı.')
+        self._verify_bodies(name)
         return remaining
+
+    def _verify_bodies(self, name):
+        if solid_body_inventory(self.model) != self.body_snapshots[name]:
+            raise RuntimeError(f'{name}: katı/sac gövde sayıları atama öncesiyle eşleşmiyor.')
 
     def verify_current_configuration(self):
         """Last configuration activation can rebuild too; verify before Save3."""
@@ -405,6 +447,7 @@ class ParameterEdit:
                 self.snapshots[name] = self._snapshot()
                 self._capture_errors(name, self.snapshots[name])
                 if self.snapshots[name]:
+                    self.body_snapshots[name] = solid_body_inventory(self.model)
                     self._verify_errors(name, self.snapshots[name])
                     # Rebuild can resolve an old error. Do not exempt it if
                     # the K/R write introduces that error again later.
@@ -421,6 +464,7 @@ class ParameterEdit:
         # A setter may mutate the document even when ModifyDefinition fails.
         self.changed = True
         remaining = write(self.model, self.expected, self.tolerated)
+        self._verify_bodies(self.configuration)
         if remaining:
             self.notes.append("Parçada K/R atamasından önce de var olan yeniden oluşturma hataları sürüyor: "
                               + ", ".join(remaining) + ". Aynı hata kodları sürüyor; SolidWorks'te kontrol edin.")
@@ -490,6 +534,7 @@ class ParameterEdit:
                     self.show(name)
                     if baseline:
                         rebuild(self.model, self.error_snapshots.get(name, {}))
+                        self._verify_bodies(name)
                     if not same(baseline, self._snapshot()):
                         raise RuntimeError('Önceki parametreler geri okunamadı.')
                 except Exception as error:

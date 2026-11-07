@@ -150,6 +150,7 @@ class DirectParameterTests(KApplyTestCase):
         sketch = FakeFeature(name='Taslak7', kind='ProfileFeature')
         sketch.GetErrorCode = lambda: 22
         sketch.GetParents = lambda: ()  # It is genuinely independent of the edited sheet.
+        self.model.feature.GetParents = lambda: ()
         self.model.feature.next = sketch
         original = self.model.EditRebuild3
         self.model.EditRebuild3 = lambda: (original(), False)[1]     # SolidWorks reports the old error again
@@ -173,6 +174,7 @@ class DirectParameterTests(KApplyTestCase):
         self.model.states['Other']=dict(deepcopy(self.model.states['Default']),k=.41)
         old={'present':True};sketch=FakeFeature(name='Taslak7',kind='ProfileFeature')
         sketch.GetParents=lambda:()
+        self.model.feature.GetParents=lambda:()
         sketch.GetErrorCode=lambda:22 if old['present'] or self.model.states['Default']['k']==.274 else 0
         self.model.feature.next=sketch;show=self.model.ShowConfiguration2
         def switch(name):
@@ -199,6 +201,7 @@ class DirectParameterTests(KApplyTestCase):
         old = {'present': True}
         sketch = FakeFeature(name='Taslak7', kind='ProfileFeature')
         sketch.GetParents = lambda: ()
+        self.model.feature.GetParents = lambda: ()
         sketch.GetErrorCode = lambda: 22 if self.model.config == flat and (
             old['present'] or self.model.states[flat]['k'] == .274) else 0
         self.model.feature.next = sketch
@@ -224,6 +227,137 @@ class DirectParameterTests(KApplyTestCase):
         self.assertEqual(status,'error',detail);self.assertEqual(self.model.feature.modify_count,0)
         self.assertEqual(self.model.save_count,0)
 
+    def test_failed_sketch_used_by_the_sheet_cannot_be_tolerated(self):
+        sketch = FakeFeature(name='Taban-Taslağı', kind='ProfileFeature')
+        sketch.GetParents = lambda: ()
+        sketch.GetErrorCode = lambda: 22
+        self.model.feature.GetParents = lambda: (sketch,)
+        self.model.feature.next = sketch
+        self.model.EditRebuild3 = lambda: False
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertEqual(self.model.feature.modify_count, 0)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_vanishing_solid_body_after_write_is_rolled_back_and_not_saved(self):
+        get_bodies = self.model.GetBodies2
+        self.model.GetBodies2 = lambda *args: () if self.model.states['Default']['k'] == .274 else get_bodies(*args)
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_independent_sketch_can_share_the_sheets_reference_plane(self):
+        plane = FakeFeature(name='Ön Düzlem', kind='RefPlane')
+        plane.GetParents = lambda: ()
+        sketch = FakeFeature(name='Bağımsız-Taslak', kind='ProfileFeature')
+        sketch.GetErrorCode = lambda: 22
+        sketch.GetParents = lambda: (plane,)
+        self.model.feature.GetParents = lambda: (plane,)
+        self.model.feature.next = sketch
+        self.model.EditRebuild3 = lambda: False
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.save_count, 1)
+
+    def test_unreadable_sheet_dependencies_do_not_exempt_a_failed_sketch(self):
+        sketch = FakeFeature(name='Taslak7', kind='ProfileFeature')
+        sketch.GetErrorCode = lambda: 22
+        sketch.GetParents = lambda: ()
+        # The sheet has no GetParents metadata: upstream independence is unknown.
+        self.model.feature.next = sketch
+        self.model.EditRebuild3 = lambda: False
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertEqual(self.model.feature.modify_count, 0)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_indirect_upstream_sketch_failure_also_stops_before_writing(self):
+        sketch = FakeFeature(name='Taban-Taslağı', kind='ProfileFeature')
+        sketch.GetErrorCode = lambda: 22
+        sketch.GetParents = lambda: ()
+        flange = FakeFeature(name='Taban-Flanşı', kind='BaseFlange')
+        flange.GetParents = lambda: (sketch,)
+        self.model.feature.GetParents = lambda: (flange,)
+        self.model.feature.next = sketch
+        self.model.EditRebuild3 = lambda: False
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertEqual(self.model.feature.modify_count, 0)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_unreadable_or_empty_body_inventory_stops_before_writing(self):
+        inventories = (None, (), (SimpleNamespace(IsSheetMetal=lambda: None),))
+        for bodies in inventories:
+            with self.subTest(bodies=bodies):
+                self.model.GetBodies2 = lambda *args: bodies
+                status, detail, _ = self.process(save=True)
+                self.assertEqual(status, 'error', detail)
+                self.assertEqual(self.model.feature.modify_count, 0)
+                self.assertEqual(self.model.save_count, 0)
+
+    def test_shared_configuration_changed_body_count_is_rolled_back(self):
+        flat = 'DefaultSM-DÜZ-ÇOĞALTMA'
+        self.model.states[flat] = deepcopy(self.model.states['Default'])
+        self.model.propagate = True
+        get_bodies = self.model.GetBodies2
+        normal = SimpleNamespace(IsSheetMetal=lambda: False)
+
+        def bodies(*args):
+            result = list(get_bodies(*args))
+            if self.model.config == flat and self.model.states[flat]['k'] == .274:
+                result.append(normal)
+            return result
+
+        self.model.GetBodies2 = bodies
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('gövde sayıları', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
+    def test_body_order_and_hidden_normal_solids_do_not_block_a_valid_edit(self):
+        self.model.bodies.append(SimpleNamespace(IsSheetMetal=lambda: False))
+        get_bodies = self.model.GetBodies2
+        def bodies(*args):
+            result = get_bodies(*args)
+            return tuple(reversed(result)) if self.model.states['Default']['k'] == .274 else result
+        self.model.GetBodies2 = bodies
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'success', detail)
+        self.assertEqual(self.model.save_count, 1)
+
+    def test_rollback_must_report_a_body_that_did_not_return(self):
+        get_bodies = self.model.GetBodies2
+        self.model.GetBodies2 = lambda *args: () if self.model.feature.modify_count else get_bodies(*args)
+        before = deepcopy(self.model.states)
+        status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('GERİ ALMA HATASI', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+        self.assertFalse(self.app.closed)
+
+    def test_missing_sheet_after_write_is_an_error_and_must_roll_back(self):
+        before = deepcopy(self.model.states)
+        snapshot = sm.snapshot
+        failed_once = []
+
+        def temporarily_missing(model):
+            if model.states['Default']['k'] == .274 and not failed_once:
+                failed_once.append(True)
+                raise sm.NoSheetMetal('Atama sonrası sac unsuru okunamadı.')
+            return snapshot(model)
+
+        with patch.object(sm, 'snapshot', side_effect=temporarily_missing):
+            status, detail, _ = self.process(save=True)
+        self.assertEqual(status, 'error', detail)
+        self.assertIn('geri yüklendi ve kontrol edildi', detail)
+        self.assertEqual(self.model.states, before)
+        self.assertEqual(self.model.save_count, 0)
+
     def test_return_to_original_configuration_is_verified_before_save(self):
         self.model.states['Other']=deepcopy(self.model.states['Default']);self.model.propagate=True
         self.model.ShowConfiguration2('Other');visits=[];show=self.model.ShowConfiguration2
@@ -241,6 +375,7 @@ class DirectParameterTests(KApplyTestCase):
     def test_rollback_uses_each_configurations_own_existing_error_codes(self):
         self.model.states['Other']=dict(deepcopy(self.model.states['Default']),k=.41,radius=.003)
         sketch=FakeFeature(name='Taslak7',kind='ProfileFeature');sketch.GetParents=lambda:()
+        self.model.feature.GetParents=lambda:()
         sketch.GetErrorCode=lambda:22 if self.model.config=='Default' else 23
         self.model.feature.next=sketch;self.model.EditRebuild3=lambda:False
         self.model.propagate=True;modify=self.model.feature.ModifyDefinition
@@ -437,6 +572,23 @@ class RawOle:
 
 
 class RawDispatchTests(KApplyTestCase):
+    def test_body_inventory_queries_part_dispatch_without_type_information(self):
+        from modules.cad_converter.api import PART_IID
+        model, part = RawOle(self.model), RawOle(self.model)
+        calls = []
+        def name(lcid, member):
+            if member == 'GetBodies2':
+                raise AssertionError('GetBodies2 belongs to IPartDoc, not this model dispatch.')
+            return member
+        model.GetIDsOfNames = name
+        model.QueryInterface = lambda iid, dispatch: calls.append((iid, dispatch)) or part
+        self.com.MakeIID = lambda value: value
+        self.com.IID_IDispatch = 'IDispatch'
+        with patch.dict('sys.modules', {'pythoncom': self.com}):
+            self.assertEqual(sm.solid_body_inventory(model), (1, 1))
+        self.assertEqual(calls, [(PART_IID, 'IDispatch')])
+        self.assertIn(('GetBodies2', 1, (0, False)), part.calls)
+
     def test_native_invoke_avoids_broken_type_info_and_uses_dispatch_null(self):
         raw_model = RawOle(self.model)
         before = sm.read(RawOle(self.model.feature))
