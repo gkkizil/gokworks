@@ -10,13 +10,14 @@ SHA-256, boyut, bölüm eşleştirmeleri ve PDF sayfa indeksleri [kaynak kanıt�
 
 ## Kullanım
 
-1. Türü soldan seçin. 12 güncel tür ve **Eski işaretler** grubu vardır; seçim görünür tutulur.
-2. Gösterim boyutunu ve **toplam t (mm)** değerini girin. Gösterim boyutu örnek bağlamıdır; basic konum ölçüsü değildir ve otomatik tolerans üretmez.
-3. Gerekiyorsa örnek datum sırasını seçin: A, A | B, A | B | C. Şekilde **Gerekmez** gösterilir. Yön ve bu RFS delik konumu referans ister; profil datumsuz da kullanılabilir.
-4. Bölgeyi ve kaydırarak ölçüm/üretim açıklamalarını okuyun. İngilizce adın yanında belge bölüm numarası vardır.
-5. Normal, boyutla ilişkili yüzey şekli için istenirse **ilgili boyut toleransını** girin: üst boyut limiti − alt boyut limiti. `t < boyut toleransı` kontrol edilir.
-6. İstenirse **ölçülmüş toplam geometrik hata** girin. Doğru özellik/datum/bölgeyle değerlendirilmiş hata olmalıdır; tek çap/nokta sapması değildir.
-7. CSV/pano ile belirtimi alın; **Rehber** ASME kurallarını açıklar.
+Sol panel yukarıdan aşağı okunur: **tür → çerçeve değerleri → (isteğe bağlı) ölçüm kontrolü**.
+
+1. **Tolerans türü:** Listenin başında arama kutusu vardır. Türler Şekil, Yönelim, Konum, Salgı ve Profil gruplarındadır. Her satırda ASME sembolü, Türkçe ad ve küçük puntoyla İngilizce ad görünür; seçili satır vurgulanır. ASME Y14.5-2018'de kaldırılan eş merkezlilik ve simetri ayrı **Kaldırılmış semboller (ASME 2018)** grubunda, varsayılan olarak kapalıdır; aramada eşleşince açılır.
+2. **Tolerans çerçevesi:** **Parça boyutu (şema için)** yalnız şemanın ölçeğini belirler; basic konum ölçüsü değildir ve tolerans üretmez. **Tolerans t** çerçevedeki toplam bölge genişliğidir (Ø işaretli türlerde bölge çapı). **Referans sırası (datum)**: A, A | B, A | B | C. Datum zorunlu türlerde etiket `*` taşır; şekil toleranslarında alan pasiftir ve “Şekil toleransında referans (datum) kullanılmaz.” yazar. Profil datumsuz da kullanılabilir.
+3. **Ölçüm kontrolü (isteğe bağlı, açılır):** **Ölçülen sapma**, doğru özellik/datum/bölgeyle değerlendirilmiş toplam geometrik hatadır; tek çap/nokta sapması değildir. Şekil türlerinde **Boyut toleransı** = üst boyut limiti − alt boyut limiti; `t < boyut toleransı` (ASME 8.4) kontrol edilir.
+4. Hatalı değerde mesaj ilgili alanın altında çıkar ve alan kırmızı çerçeveyle işaretlenir; durum çubuğu da mesajı gösterir.
+5. Sağda en üstte büyük **tolerans çerçevesi**, altında **tolerans bölgesi** şeması, sonra **Bu tolerans ne yapar?** özeti ve **Ölçüm değerlendirmesi** gelir. Ayrıntılar açılır bölümlerdedir: **Nasıl ölçülür**, **Üretim notu ve örnek**, şekil türlerinde **Boyut ilişkisi (ASME 8.4)**.
+6. CSV/pano ile belirtimi alın; **Rapor / yardım → Okuma rehberi** ASME kurallarını açıklar.
 
 Tür değişince ölçüm ve ilgili boyut toleransı temizlenir. Sayfa geçişi oturum değerlerini korur. Yeniden açılış ölçümü geri yüklemez; tür, boyut, t, datum, boyut toleransı ve tema kaydedilir. Geçersiz değer/kaldırılmış sembolde çerçeve, bölge ve CSV/pano engellenir.
 
