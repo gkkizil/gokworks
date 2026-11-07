@@ -1,14 +1,15 @@
 """ASME GD&T catalogue, native vector frames and measurement comparisons."""
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeView, QLineEdit, QTabWidget
-from modules.geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GROUPS, GUIDE, MEASUREMENT_INPUTS
+from PySide6.QtCore import Qt, QItemSelectionModel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QTabWidget
+from modules.geometric_tolerances.catalog import CATALOG, CHARACTERISTICS, GUIDE, MEASUREMENT_INPUTS
 from modules.geometric_tolerances import rules as r
 from modules.geometric_tolerances.diagram import draw
 from gui_qt.calculations import CalculationPage
 from gui_qt.calculations import pane
-from gui_qt.components import label, scroll, configure_view, show_details
-from gui_qt.models import TreeModel, FilterProxy, Column
+from gui_qt.components import label, scroll, show_details
+from gui_qt.models import FilterProxy
+from modules.geometric_tolerances.catalog_view import CatalogModel, CatalogView, LEGACY_GROUP
 
 
 class GdtPage(CalculationPage):
@@ -33,24 +34,27 @@ class GdtPage(CalculationPage):
                                     'MMC zarfı burada ölçülmez.', 'muted')
         self.extra_layout.addWidget(self.datum_help)
         f.fields['size_tolerance'].setToolTip(self.size_rule_help.text())
+        # 1 · Tolerans türü: the first choice, at the top of the parameter panel.
         self.search = QLineEdit()
-        self.search.setPlaceholderText('Tolerans türü ara…')
-        self.extra_layout.addWidget(self.search)
-        self.catalog = configure_view(QTreeView())
-        self.catalog.setSortingEnabled(False)
-        self.catalog.setMinimumHeight(200)
-        self.catalog_model = TreeModel((Column('Tolerans türü', 'name'),))
-        rows = [dict(id=group, parent='', name=group) for group in GROUPS]
-        rows += [dict(id=item.key, parent=item.group, name=f'{item.name} · {item.english}' + (' (eski)' if not item.active else ''), key=item.key,
-                      example=item.example) for item in CATALOG]
-        self.catalog_model.replace(rows)
+        self.search.setPlaceholderText('Tolerans türü ara… (ör. diklik, runout)')
+        self.search.setClearButtonEnabled(True)
+        self.catalog = CatalogView()
+        self.catalog.setMinimumHeight(260)
+        self.catalog.setMaximumHeight(380)
+        self.catalog_model = CatalogModel(self)
+        self.catalog_model.set_appearance(self.appearance)
+        self.catalog.delegate.appearance = self.appearance
         self.catalog_proxy = FilterProxy(self, tree=True)
         self.catalog_proxy.setSourceModel(self.catalog_model)
         self.catalog.setModel(self.catalog_proxy)
-        self.catalog.expandAll()
-        self.catalog.clicked.connect(self.select_kind)
-        self.search.textChanged.connect(self.catalog_proxy.set_query)
-        self.extra_layout.addWidget(self.catalog)
+        self.expand_catalog()
+        self.catalog.selectionModel().currentChanged.connect(lambda index, *_: self.select_kind(index))
+        self.search.textChanged.connect(self.search_catalog)
+        panel_layout = self.input_card.layout()
+        panel_layout.itemAt(0).widget().setText('Tolerans türü')        # pane heading of CalculationPage
+        for position, widget in enumerate((self.search, self.catalog, label('Tolerans çerçevesi', 'section')), 1):
+            panel_layout.insertWidget(position, widget)
+        self.show_kind()
         self.add_diagram('frame', 'Tolerans çerçevesi', height=120)
         self.add_diagram('zone', 'Tolerans bölgesi', height=300)
         self.diagram_tabs.setCurrentIndex(1)
@@ -103,9 +107,34 @@ class GdtPage(CalculationPage):
             self.settings.values.pop('gdt_measured', None)
         super().changed(key)
 
+    def expand_catalog(self):
+        """All groups open; the deleted ASME 2018 symbols stay closed until searched for."""
+        self.catalog.expandAll()
+        legacy = self.catalog_proxy.mapFromSource(self.catalog_model.index_of(LEGACY_GROUP))
+        if legacy.isValid() and not self.search.text().strip() and self.kind not in {
+                item.key for item in CATALOG if item.group == LEGACY_GROUP}:
+            self.catalog.collapse(legacy)
+
+    def search_catalog(self, text):
+        self.catalog_proxy.set_query(text)
+        self.expand_catalog()
+        self.show_kind()
+
+    def show_kind(self):
+        index = self.catalog_proxy.mapFromSource(self.catalog_model.index_of(self.kind))
+        if index.isValid():
+            self.catalog.selectionModel().setCurrentIndex(index, QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
+            self.catalog.scrollTo(index)
+
+    def theme_changed(self):
+        self.catalog_model.set_appearance(self.appearance)
+        self.catalog.delegate.appearance = self.appearance
+        self.catalog.viewport().update()
+        super().theme_changed()
+
     def select_kind(self, index):
         row = index.data(Qt.UserRole)
-        if row and 'key' in row:
+        if row and 'key' in row and row['key'] != self.kind:
             self.kind = row['key']
             self.settings.set('gdt_kind', self.kind)
             self.form.set_value('measured', '')
