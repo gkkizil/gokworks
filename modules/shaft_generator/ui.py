@@ -7,7 +7,7 @@ from dataclasses import fields
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QSignalBlocker
-from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QBoxLayout,QFormLayout,QSplitter,
+from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QBoxLayout,QFormLayout,QSplitter,QSizePolicy,
     QTableWidget,QTableWidgetItem,QAbstractItemView,QTabWidget,
     QLineEdit,QComboBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
 from gui_qt.components import BasePage, ElidedLabel, label, button, scroll, toggle_button, toggle_icon
@@ -90,7 +90,10 @@ class ShaftPage(BasePage):
         command_row.addWidget(self.summary,1);command_row.addWidget(self.selected_stage_caption,1);ribbon_box.addLayout(command_row)
         self.layout.addWidget(self.ribbon)
         # Editor panel (scrolls when short): fields of the open command | list of added operations.
+        # One scroll area (no nested ones) and an opaque background: switching sections must
+        # repaint the whole field area, never leave the previous form's pixels behind (Windows).
         self.editor=QWidget();self.editor.setMinimumWidth(0)
+        self.editor.setObjectName('shaftEditor');self.editor.setAttribute(Qt.WA_StyledBackground,True)
         self.panel_box=QBoxLayout(QBoxLayout.LeftToRight,self.editor)
         self.panel_box.setContentsMargins(6,6,6,6);self.panel_box.setSpacing(16)
         fields_column=QWidget();edit=QVBoxLayout(fields_column);edit.setContentsMargins(0,0,0,0);edit.setSpacing(6)
@@ -188,7 +191,7 @@ class ShaftPage(BasePage):
             self.operation_actions[kind]=action_bar
             actions.addWidget(add);actions.addWidget(update)
             box.addStretch()
-            self.tabs.addTab(scroll(page),TITLES[kind])
+            self.tabs.addTab(page,TITLES[kind])
         bore_page=QWidget();bore_box=QVBoxLayout(bore_page)
         self.bore_enabled=QCheckBox('Eksenel iç delik aç');self.bore_enabled.setAccessibleName('Mil iç deliğini etkinleştir')
         bore_box.addWidget(self.bore_enabled);bore_form=QFormLayout();bore_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
@@ -204,13 +207,13 @@ class ShaftPage(BasePage):
             control.setAccessibleName('İç delik '+title);self.bore_controls[key]=control;bore_form.addRow(title,control)
         bore_box.addLayout(bore_form)
         bore_box.addWidget(label('Tek eksenli silindirik delik. Kör delik tabanı düzdür. Et kalınlığı, segman ve kama derinlikleriyle birlikte kontrol edilir.','muted'))
-        bore_box.addStretch();self.tabs.addTab(scroll(bore_page),'İç delik')
+        bore_box.addStretch();self.tabs.addTab(bore_page,'İç delik')
         self.build_bulk_page()
         advanced=label('Matkap uç konisi, iç diş, gerçek helisel diş, freze düzlüğü ve omuz boşaltması henüz desteklenmiyor.','muted')
         self.tabs.addTab(advanced,'İleri'); self.tabs.setTabEnabled(self.tabs.count()-1,False)
         from .drawing.ui import DrawingPanel
         self.drawing_panel=DrawingPanel(self);self.drawing_tab=self.tabs.count()
-        self.tabs.addTab(scroll(self.drawing_panel),'Teknik resim')
+        self.tabs.addTab(self.drawing_panel,'Teknik resim')
         # Group prefixes keep related sections together in the single picker.
         for index,title in enumerate(('Kademeler · Çap ve boy','Kanal · Segman kanalı','Kanal · Kama kanalı','Kenar · Tek kenara pah',
                                       'Kenar · Tek kenara radyüs','Diş · Kozmetik diş','Delik · Eksenel iç delik','Kenar · Toplu pah / radyüs')):
@@ -309,7 +312,7 @@ class ShaftPage(BasePage):
         self.edge_undo_button.setEnabled(False);box.addWidget(self.edge_undo_button)
         box.addWidget(label('Ölçü bir kenara sığmazsa hiçbir işlem değiştirilmez. Eş çaplı birleşimlerde fiziksel omuz yoktur.', 'muted'))
         box.addWidget(label('Katı modeli üretmek için ardından SolidWorks’te çiz düğmesini kullanın.', 'muted'))
-        box.addStretch();self.tabs.addTab(scroll(page),'Toplu pah / radyüs')
+        box.addStretch();self.tabs.addTab(page,'Toplu pah / radyüs')
         self.bulk_kind.currentIndexChanged.connect(self.refresh_bulk_info)
         self.bulk_size.valueChanged.connect(self.refresh_bulk_info)
         self.bulk_replace.toggled.connect(self.refresh_bulk_info)
@@ -333,7 +336,17 @@ class ShaftPage(BasePage):
             self.panel_box.setDirection(QBoxLayout.TopToBottom if narrow else QBoxLayout.LeftToRight)
             self.ribbon.set_compact(event.size().width()<640)
 
+    def fit_current_page(self,index):
+        """Only the open section sizes the editor; hidden sections take no height."""
+        for i in range(self.tabs.count()):
+            page=self.tabs.widget(i)
+            policy=QSizePolicy.Preferred if i==index else QSizePolicy.Ignored
+            page.setSizePolicy(policy,policy)
+        self.tabs.updateGeometry();self.editor.adjustSize()
+        if hasattr(self,'source_scroll'):self.source_scroll.viewport().update()
+
     def section_changed(self,index):
+        self.fit_current_page(index)
         if hasattr(self,'ribbon'):
             self.ribbon.show_page(self.page_key(index));self.ribbon.set_appearance(COLORS[self.context.appearance])
         selected=self.section_picker.findData(index)
