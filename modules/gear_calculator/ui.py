@@ -73,7 +73,7 @@ class GearPage(BasePage):
                                         ('power_kw','Giriş gücü P · kW',1.5,.0001,1e7),('torque_nm','Giriş torku T₁ · N·m',9.5493,.0001,1e7)):
             self.add_number(load,key,title,value,low,high)
         form_box.addLayout(load)
-        self.derived_load=label('','muted');self.derived_load.setAccessibleName('Hesaplanan ikincil yük değeri')
+        self.derived_load=label('','result');self.derived_load.setAccessibleName('Hesaplanan ikincil yük değeri')  # the computed load reads like a result, not a note
         form_box.addWidget(self.derived_load)
         form_box.addWidget(label('Varsayımlar: x₁=x₂=0 · hₐ*=1 · h𝒻*=1,25 · β=0° · sıfır diş boşluğu · paralel miller.','muted'))
         form_box.addWidget(label('K_A ve tasarım ömrü veri modelinde ayrılmıştır; bu sürümde mukavemet hesabına uygulanmaz.','muted'))
