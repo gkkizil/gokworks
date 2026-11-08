@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFileDialog
 
 from gui_qt.app import create_application
@@ -36,8 +37,8 @@ def example(page):
 
 def test_seven_tabs_and_default_project_is_calculated(page):
     assert [page.tabs.tabText(i) for i in range(page.tabs.count())] == [
-        '1 · Silindirler', '2 · Çevrim', '3 · Pompa ve motor', '4 · Hat ve yağ', '5 · Tank ve ısı',
-        '6 · Akümülatör', '7 · Sonuçlar ve rapor']
+        'Silindirler', 'Çevrim', 'Pompa / motor', 'Hat / yağ', 'Tank / ısı',
+        'Akümülatör', 'Rapor']
     assert page.result is not None and page.summary_table.rowCount() > 0
     assert page.excel_button.isEnabled() and page.json_button.isEnabled() and page.pdf_button.isEnabled()
 
@@ -64,7 +65,8 @@ def test_invalid_field_is_marked_and_results_and_reports_are_cleared(page, qtbot
     widget = page.fields['pump.displacement'][0]
     widget.setText('abc'); widget.textEdited.emit('abc')
     assert page.timer.isActive() and page.timer.interval() == DEBOUNCE_MS
-    qtbot.waitUntil(lambda: page.result is None, timeout=2000)
+    assert page.result is None and not page.pdf_button.isEnabled()  # debounce sırasında eski sonuç yayımlanmaz
+    qtbot.waitUntil(lambda: widget.property('invalid') is True, timeout=2000)
     assert widget.property('invalid') is True and widget.toolTip()
     assert page.summary_table.rowCount() == 0 and page.rows_table.rowCount() == 0 and page.issue_list.count() == 0
     assert not page.excel_button.isEnabled() and not page.json_button.isEnabled() and not page.pdf_button.isEnabled()
@@ -173,3 +175,124 @@ def test_page_opens_from_main_window(qtbot, tmp_path, monkeypatch):
     window = MainWindow(tmp_path / 'settings.json'); qtbot.addWidget(window)
     window.navigate('hydraulic_unit')
     assert isinstance(window.pages['hydraulic_unit'], HydraulicPage)
+
+
+def test_step_help_and_next_previous_buttons(page,qtbot):
+    from PySide6.QtCore import Qt
+    assert '1/7' in page.step_title.text() and 'Piston' in page.step_help.text()
+    assert not page.previous_button.isEnabled()
+    qtbot.mouseClick(page.next_button,Qt.LeftButton)
+    assert page.tabs.currentIndex() == 1 and '2/7' in page.step_title.text()
+    assert 'Her satır' in page.step_help.text()
+    page.tabs.setCurrentIndex(6)
+    assert not page.next_button.isEnabled() and 'PDF' in page.step_help.text()
+
+
+def test_advanced_settings_preserve_values_and_reveal_invalid_field(page):
+    original = page.project
+    assert not page.advanced_sections['pump'].is_expanded()
+    assert page.cylinder_table.isColumnHidden(5)
+    page.cylinder_advanced.setChecked(True)
+    assert not page.cylinder_table.isColumnHidden(5)
+    page.fields['pump.volumetric_efficiency'][0].setText('2')
+    page.recalculate()
+    assert page.result is None and page.advanced_sections['pump'].is_expanded()
+    page.fields['pump.volumetric_efficiency'][0].setText('0,95'); page.recalculate()
+    assert page.project == original
+
+
+def test_optional_accumulator_fields_are_disabled_and_ignored_until_enabled(page):
+    enabled = page.fields['accumulator.enabled'][0]
+    field = page.fields['accumulator.minimum_pressure'][0]
+    assert not field.isEnabled()
+    field.setText(''); page.recalculate()
+    assert page.result is not None
+    enabled.setChecked(True); page.recalculate()
+    assert field.isEnabled() and page.result is None and field.property('invalid')
+
+
+def test_unused_pump_control_fields_do_not_block_a_fixed_pump(page):
+    for key in ('pump.compensator_pressure','pump.power_limit'):
+        widget = page.fields[key][0]
+        assert not widget.isEnabled()
+        widget.setText('')
+    page.recalculate()
+    assert page.result is not None
+
+
+def test_accumulator_results_are_named_in_turkish_and_converted_to_litres_and_bar(page):
+    page.fields['accumulator.enabled'][0].setChecked(True); page.recalculate()
+    actual = page.result.accumulator
+    assert page.accumulator_table.item(0,0).text() == 'Gerekli gaz hacmi · L'
+    assert float(page.accumulator_table.item(0,1).text().replace(',','.')) == pytest.approx(actual['required_volume']*1000,abs=.001)
+    assert float(page.accumulator_table.item(3,1).text().replace(',','.')) == pytest.approx(100.)
+
+
+def test_warning_navigation_does_not_mark_valid_inputs_as_invalid(page):
+    from PySide6.QtCore import Qt
+    item = next(page.issue_list.item(i) for i in range(page.issue_list.count())
+                if page.issue_list.item(i).data(Qt.UserRole) == 'thermal')
+    assert '→' in item.text()
+    page.focus_issue(item)
+    assert page.tabs.currentIndex() == 4 and not page.invalid_widgets
+
+
+def test_fix_button_takes_user_to_invalid_input(page):
+    widget = page.fields['pump.displacement'][0]
+    widget.setText('bad'); page.recalculate()
+    assert page.fix_button.isVisible()
+    page.focus_first_problem()
+    assert page.tabs.currentIndex() == 2 and widget.hasFocus()
+
+
+def test_phase_time_mode_clears_speed_and_uses_core_inverse_time_calculation(page):
+    from modules.hydraulic_unit.ui import PHASE_COLUMNS
+    names = [c[0] for c in PHASE_COLUMNS]
+    page.phase_table.selectRow(0)
+    page.phase_input_method.setCurrentIndex(page.phase_input_method.findData('duration'))
+    assert page.phase_table.item(0,names.index('speed')).text() == ''
+    page.phase_table.item(0,names.index('duration')).setText('5')
+    page.recalculate()
+    assert page.result is not None
+    assert page.result.cycle['phases'][0].speed == pytest.approx(.25/5)
+
+
+def test_switching_to_hold_removes_hidden_speed_requirement(page):
+    from modules.hydraulic_unit.ui import PHASE_COLUMNS
+    names = [c[0] for c in PHASE_COLUMNS]
+    page.phase_table.selectRow(0)
+    combo = page.phase_table.cellWidget(0,names.index('kind'))
+    combo.setCurrentIndex(combo.findData('hold'))
+    assert not page.phase_input_method.isEnabled()
+    assert page.phase_table.item(0,names.index('speed')).text() == ''
+    assert not page.phase_table.item(0,names.index('stroke')).flags() & Qt.ItemIsEditable
+
+
+def test_table_commands_never_discard_unfinished_invalid_input(page):
+    from modules.hydraulic_unit.ui import PHASE_COLUMNS
+    col = [c[0] for c in PHASE_COLUMNS].index('force')
+    page.phase_table.item(0,col).setText('yanlış')
+    count = page.phase_table.rowCount()
+    page.add_phase()
+    assert page.phase_table.rowCount() == count
+    assert page.phase_table.item(0,col).text() == 'yanlış'
+    assert page.result is None
+
+
+def test_narrow_window_stacks_forms_without_cutting_numeric_inputs(page,qtbot):
+    from PySide6.QtWidgets import QBoxLayout
+    page.resize(800,700); page.tabs.setCurrentIndex(2)
+    qtbot.waitUntil(lambda: page.tabs.widget(2).widget().columns.direction() == QBoxLayout.TopToBottom)
+    assert page.fields['pump.angular_speed'][0].width() >= 100
+    assert page.fields['pump.angular_speed'][0].text() == '1450'
+
+
+def test_unused_hold_stroke_does_not_block_calculation(page):
+    from dataclasses import replace
+    from modules.hydraulic_unit.core.models import Phase
+    from modules.hydraulic_unit.ui import PHASE_COLUMNS
+    page.project = replace(page.project,phases=(Phase(kind='hold',speed=None,duration=3.),))
+    page.populate()
+    page.phase_table.item(0,[c[0] for c in PHASE_COLUMNS].index('stroke')).setText('kullanılmıyor')
+    page.recalculate()
+    assert page.result is not None

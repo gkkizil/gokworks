@@ -134,3 +134,14 @@ JSON/Excel geri okumayı, PDF metnini ve iptal sırasında dosya korumasını de
 
 Claude entegrasyonu için [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) kullanılmalıdır.
 `feasible` yalnız hesapta kritik uyarı olmamasıdır; imalat/üretici onayı değildir.
+
+## Ekranda ilerleme
+
+Sekmelerin üstündeki adım açıklamalarını izleyin. Önce silindir ölçülerini,
+sonra çevrim hareketlerini girin. Hız veya süre girişini seçili fazın üstündeki
+menüden seçebilirsiniz. Gelişmiş ayarlar değerlerini koruyarak açılıp kapanır.
+Motor, valf ve boru çapı için “Otomatik” alanını boş bırakın. Sağdaki uyarıya
+veya “İlgili ayara git” düğmesine tıklayarak düzeltilecek bölümü açın.
+Akümülatör kullanmıyorsanız kapalı bırakabilirsiniz.
+
+[Ekran kontrolleri ve değişiklikler](USABILITY.md).

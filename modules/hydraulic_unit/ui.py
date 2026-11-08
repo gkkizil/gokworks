@@ -8,9 +8,9 @@ save / Excel / JSON / PDF functions. Nothing is recalculated here.
 from dataclasses import replace
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, QPointF, QRectF, QCoreApplication
+from PySide6.QtCore import Qt, QTimer, QPointF, QRectF, QRect, QSize, QCoreApplication
 from PySide6.QtGui import QColor, QPainter, QPen, QFont
-from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
+from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QCheckBox, QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
                                QLineEdit, QSplitter, QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout,
                                QWidget, QListWidget, QListWidgetItem)
 
@@ -18,7 +18,7 @@ from gui_qt.components import BasePage, Disclosure, button, fit_columns, label, 
 from gui_qt.theme import COLORS, ROW_HEIGHT
 
 from .core import models as M
-from .core.catalogs import DEBOUNCE_MS, MOUNT_K, OIL_EXAMPLES, PUMP_LABELS
+from .core.catalogs import DEBOUNCE_MS, OIL_EXAMPLES, PUMP_LABELS
 from .core.cylinder import areas, buckling, calculate_cylinder
 from .core.piping import oil_for_grade, recommended_velocity
 from .core.pump_motor import pump_for_type
@@ -27,6 +27,7 @@ from .core.units import convert
 from .core.validation import InputError
 from .presentation import result_rows
 from . import serialization
+from .guidance import STEPS, ADVANCED, SECTION_HELP, ACTIONS
 
 # ---------------------------------------------------------------------------------------------
 # Display units (inputs follow the metric workshop units; the result table follows display_units)
@@ -139,7 +140,7 @@ FORMS = {
                     ('exponent', 'Politropik üs n', '1', 'Hızlı boşalma ≈ 1,4; yavaş ≈ 1,0.'),
                     ('atmospheric_pressure', 'Atmosfer basıncı', 'bar', '')],
 }
-CYL_COLUMNS = [('id', 'Kimlik', 'text'), ('bore', 'Piston Ø · mm', 'mm'), ('rod', 'Mil Ø · mm', 'mm'),
+CYL_COLUMNS = [('id', 'Silindir adı', 'text'), ('bore', 'Piston Ø · mm', 'mm'), ('rod', 'Mil Ø · mm', 'mm'),
                ('stroke', 'Strok · mm', 'mm'), ('initial_position', 'Başlangıç · mm', 'mm'),
                ('efficiency', 'Verim', '1'), ('effective_length', 'Burkulma boyu · mm', 'mm'),
                ('mounting', 'Bağlantı', MOUNT), ('young_modulus', 'E · GPa', 'GPa')]
@@ -191,6 +192,29 @@ class StepChart(QWidget):
         p.end()
 
 
+class FormPage(QWidget):
+    """Dar alanda ayar gruplarını alt alta dizer; sayılar kesilmez."""
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self,'columns'):
+            self.columns.setDirection(QBoxLayout.TopToBottom if self.width() < 680 else QBoxLayout.LeftToRight)
+
+
+class IssueList(QListWidget):
+    """Uyarı ve çözüm metnini dar panelde üç noktayla kesmeden sarar."""
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.reflow()
+
+    def reflow(self):
+        width = max(100,self.viewport().width()-14)
+        for row in range(self.count()):
+            item = self.item(row)
+            bounds = self.fontMetrics().boundingRect(QRect(0,0,width,10000),Qt.TextWordWrap,item.text())
+            size = QSize(width,bounds.height()+12)
+            if item.sizeHint() != size: item.setSizeHint(size)
+
+
 def _table(headers, elastic=0, defaults=None):
     table = QTableWidget(0, len(headers)); table.setHorizontalHeaderLabels(headers)
     table.verticalHeader().hide(); table.verticalHeader().setDefaultSectionSize(ROW_HEIGHT)
@@ -208,7 +232,8 @@ class HydraulicPage(BasePage):
                          'Silindirler ve çevrimden pompa, motor, hat, tank ve akümülatör ön boyutlandırması.')
         self.project = self.restore_project()
         self.result = None; self.pdf_job = None; self.loading = False; self.path = None
-        self.fields = {}; self.invalid_widgets = []
+        self.fields = {}; self.invalid_widgets = []; self.advanced_sections = {}
+        self.problem_field = None
         self.open_button = self.action('Proje aç…', self.open_project)
         self.save_button = self.action('Proje kaydet…', self.save_project)
         self.example_button = self.action('Örnek pres ünitesi', self.load_example)
@@ -226,13 +251,23 @@ class HydraulicPage(BasePage):
         self.layout.addLayout(top)
 
         self.tabs = QTabWidget(); self.tabs.setDocumentMode(True)
-        self.tabs.addTab(self.build_cylinders(), '1 · Silindirler')
-        self.tabs.addTab(self.build_phases(), '2 · Çevrim')
-        self.tabs.addTab(self.form_tab(('pump', 'Pompa'), ('project', 'Emniyet valfi ve motor'), extra=self.pump_tools()), '3 · Pompa ve motor')
-        self.tabs.addTab(self.form_tab(('pipe', 'Hat'), ('oil', 'Yağ'), extra=self.pipe_tools()), '4 · Hat ve yağ')
-        self.tabs.addTab(self.form_tab(('thermal', 'Tank ve ısı dengesi'), result_key='thermal'), '5 · Tank ve ısı')
-        self.tabs.addTab(self.form_tab(('accumulator', 'Akümülatör'), result_key='accumulator'), '6 · Akümülatör')
-        self.tabs.addTab(self.build_results(), '7 · Sonuçlar ve rapor')
+        self.tabs.addTab(self.build_cylinders(), 'Silindirler')
+        self.tabs.addTab(self.build_phases(), 'Çevrim')
+        self.tabs.addTab(self.form_tab(('pump', 'Pompa'), ('project', 'Emniyet valfi ve motor'), extra=self.pump_tools()), 'Pompa / motor')
+        self.tabs.addTab(self.form_tab(('pipe', 'Hat'), ('oil', 'Yağ'), extra=self.pipe_tools()), 'Hat / yağ')
+        self.tabs.addTab(self.form_tab(('thermal', 'Tank ve ısı dengesi'), result_key='thermal'), 'Tank / ısı')
+        self.tabs.addTab(self.form_tab(('accumulator', 'Akümülatör'), result_key='accumulator'), 'Akümülatör')
+        self.tabs.addTab(self.build_results(), 'Rapor')
+        guide = QHBoxLayout()
+        captions = QVBoxLayout(); captions.setSpacing(2)
+        self.step_title = label('', 'section'); self.step_help = label('', 'muted')
+        captions.addWidget(self.step_title); captions.addWidget(self.step_help)
+        guide.addLayout(captions, 1)
+        self.previous_button = button('← Önceki', lambda: self.tabs.setCurrentIndex(self.tabs.currentIndex()-1))
+        self.next_button = button('Sonraki →', lambda: self.tabs.setCurrentIndex(self.tabs.currentIndex()+1))
+        guide.addWidget(self.previous_button); guide.addWidget(self.next_button)
+        self.layout.addLayout(guide)
+        self.tabs.currentChanged.connect(self.update_step)
         self.splitter = QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.tabs); self.splitter.addWidget(self.build_summary())
         self.splitter.setStretchFactor(0, 3); self.splitter.setStretchFactor(1, 1); self.splitter.setSizes([900, 360])
@@ -240,11 +275,17 @@ class HydraulicPage(BasePage):
         self.finish_layout()
         self.controls += [self.tabs, self.open_button, self.save_button, self.example_button]
         self.populate(); self.recalculate()
+        self.update_step()
         app = QCoreApplication.instance()
         if app is not None:
             app.aboutToQuit.connect(self.cancel_pdf)
 
     # ----------------------------------------------------------------- building
+    def update_step(self, *args):
+        index = self.tabs.currentIndex(); title, help_ = STEPS[index]
+        self.step_title.setText(f'{index+1}/7 · {title}'); self.step_help.setText(help_)
+        self.previous_button.setEnabled(index > 0); self.next_button.setEnabled(index < 6)
+
     def field(self, key, title, unit, tip):
         if isinstance(unit, dict):
             widget = QComboBox()
@@ -256,26 +297,37 @@ class HydraulicPage(BasePage):
         else:
             widget = QLineEdit(); widget.textEdited.connect(self.changed)
             if unit not in ('text', 'list'):
+                widget.setMinimumWidth(100)
                 widget.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         widget.setAccessibleName(title); widget.setToolTip(tip)
+        if isinstance(widget, QLineEdit) and key in ('project.relief_pressure','project.selected_motor','pipe.diameter','accumulator.precharge_pressure'):
+            widget.setPlaceholderText('Otomatik')
         self.fields[key] = (widget, unit, tip)
         return widget
 
     def form_tab(self, *sections, extra=None, result_key=None):
-        page = QWidget(); box = QVBoxLayout(page); box.setContentsMargins(8, 8, 8, 8); box.setSpacing(10)
+        page = FormPage(); box = QVBoxLayout(page); box.setContentsMargins(8, 8, 8, 8); box.setSpacing(10)
         columns = QHBoxLayout(); columns.setSpacing(24)
+        page.columns = columns
         for section, title in sections:
             column = QVBoxLayout(); column.addWidget(label(title, 'section'))
+            column.addWidget(label(SECTION_HELP[section], 'muted'))
             form = QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapLongRows)
             form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+            advanced = QWidget(); advanced_form = QFormLayout(advanced)
+            advanced_form.setRowWrapPolicy(QFormLayout.WrapLongRows)
             for name, title_, unit, tip in FORMS[section]:
                 widget = self.field(f'{section}.{name}', title_, unit, tip)
+                target = advanced_form if name in ADVANCED[section] else form
                 if unit == 'bool':
-                    form.addRow(widget)
+                    target.addRow(widget)
                 else:
                     shown = '' if isinstance(unit, dict) or unit in ('1', 'text', 'list') else f' · {unit.replace("3", "³").replace("m2", "m²")}'
-                    form.addRow(title_ + shown, widget)
-            column.addLayout(form); column.addStretch(1); columns.addLayout(column, 1)
+                    target.addRow(title_ + shown, widget)
+            column.addLayout(form)
+            disclosure = Disclosure('Gelişmiş ayarlar', advanced)
+            self.advanced_sections[section] = disclosure
+            column.addWidget(disclosure); column.addStretch(1); columns.addLayout(column, 1)
         box.addLayout(columns)
         if extra is not None:
             box.addWidget(extra)
@@ -297,23 +349,29 @@ class HydraulicPage(BasePage):
         row = QWidget(); box = QHBoxLayout(row); box.setContentsMargins(0, 0, 0, 0)
         self.velocity_button = button('Önerilen hızları uygula', self.apply_recommended_velocity)
         self.velocity_button.setToolTip('Hat rolüne ve basınca göre başlangıç önerisi; yalnız siz basınca uygulanır.')
-        self.oil_button = button('Örnek yağ eğrisini uygula', self.apply_oil_grade)
+        self.oil_button = button('Örnek yağ verilerini kullan', self.apply_oil_grade)
         box.addWidget(self.velocity_button); box.addWidget(self.oil_button); box.addStretch(1)
         return row
 
     def build_cylinders(self):
         page = QWidget(); box = QVBoxLayout(page); box.setContentsMargins(8, 8, 8, 8); box.setSpacing(8)
-        box.addWidget(label('Silindirler fazlara kimlikleriyle bağlanır. Strokların toplamı silindir strokunu aşamaz.', 'muted'))
+        box.addWidget(label('Önce silindirin ölçülerini girin. Çevrimde hareketleri bu silindir adıyla seçeceksiniz. Hücreye çift tıklayarak düzenleyin.', 'muted'))
         commands = QHBoxLayout()
         self.add_cylinder_button = button('+ Silindir', self.add_cylinder)
         self.remove_cylinder_button = button('Seçiliyi sil', self.remove_cylinder)
         commands.addWidget(self.add_cylinder_button); commands.addWidget(self.remove_cylinder_button); commands.addStretch(1)
         box.addLayout(commands)
+        self.cylinder_advanced = QCheckBox('Verim ve burkulma ayarlarını göster')
+        self.cylinder_advanced.toggled.connect(self.show_cylinder_advanced)
+        box.addWidget(self.cylinder_advanced)
         self.cylinder_table = _table([title for _, title, _ in CYL_COLUMNS], elastic=7, defaults={0: 80}); self.cylinder_table.setMinimumHeight(120)
+        self.cylinder_table.setMaximumHeight(220)
+        self.show_cylinder_advanced(False)
         self.cylinder_table.cellChanged.connect(self.changed)
         self.cylinder_table.itemSelectionChanged.connect(self.update_cylinder_check)
         box.addWidget(self.cylinder_table, 1)
-        box.addWidget(label('Tek silindir kontrolü (seçili satır)', 'section'))
+        check_page = QWidget(); check_box = QVBoxLayout(check_page); check_box.setContentsMargins(0,0,0,0)
+        check_box.addWidget(label('Seçili silindiri bağımsız inceler. Buradaki hız ve kuvvet çevrim fazlarını değiştirmez.', 'muted'))
         check = QHBoxLayout(); check.setSpacing(24)
         form = QFormLayout()
         self.point = {}
@@ -327,8 +385,14 @@ class HydraulicPage(BasePage):
         self.cylinder_result = _table(['Büyüklük', 'Değer']); self.cylinder_result.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.cylinder_result.setMinimumHeight(180)
         check.addWidget(self.cylinder_result, 1)
-        box.addLayout(check)
-        return page
+        check_box.addLayout(check)
+        self.cylinder_check_section = Disclosure('Seçili silindiri ayrıca kontrol et', check_page)
+        box.addWidget(self.cylinder_check_section); box.addStretch(1)
+        return scroll(page)
+
+    def show_cylinder_advanced(self, visible):
+        for col in range(5, len(CYL_COLUMNS)):
+            self.cylinder_table.setColumnHidden(col, not visible)
 
     def build_phases(self):
         page = QWidget(); box = QVBoxLayout(page); box.setContentsMargins(8, 8, 8, 8); box.setSpacing(8)
@@ -341,8 +405,17 @@ class HydraulicPage(BasePage):
                 control.setFixedWidth(32)
             commands.addWidget(control)
         commands.addStretch(1); box.addLayout(commands)
+        entry = QHBoxLayout()
+        entry.addWidget(label('Seçili hareketi tanımlama', 'muted'))
+        self.phase_input_method = QComboBox()
+        self.phase_input_method.addItem('Hız gir — süre hesaplansın', 'speed')
+        self.phase_input_method.addItem('Süre gir — hız hesaplansın', 'duration')
+        self.phase_input_method.setAccessibleName('Seçili faz için hız veya süre girişi')
+        self.phase_input_method.currentIndexChanged.connect(self.choose_phase_input)
+        entry.addWidget(self.phase_input_method); entry.addStretch(1); box.addLayout(entry)
         self.phase_table = _table([title for _, title, _ in PHASE_COLUMNS], defaults={1: 96, 2: 170}); self.phase_table.setMinimumHeight(150)
         self.phase_table.cellChanged.connect(self.changed)
+        self.phase_table.itemSelectionChanged.connect(self.update_phase_input)
         box.addWidget(self.phase_table, 1)
         box.addWidget(label('Faz sonuçları', 'section'))
         self.phase_results = _table(['Faz', 'Konum · mm', 'Süre · s', 'Gerekli basınç · bar', 'Gerekli debi · L/min',
@@ -382,10 +455,17 @@ class HydraulicPage(BasePage):
         panel = QWidget(); box = QVBoxLayout(panel); box.setContentsMargins(8, 0, 0, 0); box.setSpacing(6)
         self.headline = label('—', 'result'); box.addWidget(self.headline)
         self.status_note = label('', 'muted'); box.addWidget(self.status_note)
+        self.status_note.setTextFormat(Qt.PlainText)
+        self.fix_button = button('İlgili ayara git →', self.focus_first_problem)
+        self.fix_button.hide(); box.addWidget(self.fix_button)
         self.summary_table = _table(['Özet', 'Değer']); self.summary_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.summary_table.setMinimumHeight(200); box.addWidget(self.summary_table)
+        fit_columns(self.summary_table,elastic=0,minimum=120,defaults={1:110},autofit=())
+        self.summary_table.setMinimumHeight(300); self.summary_table.setMaximumHeight(330)
+        box.addWidget(self.summary_table)
         box.addWidget(section_header('Uyarılar'))
-        self.issue_list = QListWidget(); self.issue_list.setWordWrap(True); self.issue_list.setAccessibleName('Hesap uyarıları')
+        self.issue_list = IssueList(); self.issue_list.setWordWrap(True); self.issue_list.setAccessibleName('Hesap uyarıları')
+        self.issue_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.issue_list.setTextElideMode(Qt.ElideNone); self.issue_list.setResizeMode(QListWidget.Adjust)
         self.issue_list.itemActivated.connect(self.focus_issue); self.issue_list.itemClicked.connect(self.focus_issue)
         box.addWidget(self.issue_list, 1)
         panel.setMinimumWidth(280)
@@ -433,6 +513,7 @@ class HydraulicPage(BasePage):
             self.fill_table(self.phase_table, PHASE_COLUMNS, p.phases)
         finally:
             self.loading = False
+        self.sync_optional_controls()
 
     def fill_table(self, table, columns, items):
         table.blockSignals(True)
@@ -453,6 +534,8 @@ class HydraulicPage(BasePage):
                         combo.addItem(text, key)
                     combo.setCurrentIndex(max(combo.findData(value), 0))
                     combo.currentIndexChanged.connect(self.changed)
+                    if table is self.phase_table and name == 'kind':
+                        combo.currentIndexChanged.connect(lambda _, row=row: self.phase_kind_changed(row))
                     table.setCellWidget(row, col, combo)
                 else:
                     text = str(value) if unit == 'text' else '' if value is None else fmt(from_si(value, unit, SI.get(name, unit)), 6)
@@ -461,6 +544,57 @@ class HydraulicPage(BasePage):
                         cell.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                     table.setItem(row, col, cell)
         table.blockSignals(False)
+        if table is self.phase_table:
+            self.configure_phase_cells()
+            self.update_phase_input()
+
+    def configure_phase_cells(self):
+        """Hız/süre ve hareket/bekleme için yalnız kullanılabilir hücreler düzenlenir."""
+        names = [c[0] for c in PHASE_COLUMNS]
+        for row in range(self.phase_table.rowCount()):
+            kind = self.phase_table.cellWidget(row,names.index('kind')).currentData()
+            moving = kind in ('extend','retract','regenerate')
+            for name in ('stroke','speed','duration','force','back_pressure'):
+                item = self.phase_table.item(row,names.index(name))
+                allowed = moving or name in ('duration','force','back_pressure') and kind == 'hold' or name == 'duration' and kind == 'idle'
+                item.setFlags(item.flags() | Qt.ItemIsEditable if allowed else item.flags() & ~Qt.ItemIsEditable)
+                item.setToolTip('Hareket boyu bu fazdaki mesafedir; toplam silindir stroku değildir.' if name == 'stroke' and moving
+                    else 'Hız veya süre girin. Seçimi yukarıdaki menüden değiştirebilirsiniz.' if name in ('speed','duration') and moving
+                    else 'Bu hareket türünde kullanılmıyor.' if not allowed else '')
+
+    def update_phase_input(self):
+        if not self.phase_table.rowCount(): return
+        row = self._phase_index()
+        names = [c[0] for c in PHASE_COLUMNS]
+        kind = self.phase_table.cellWidget(row,names.index('kind')).currentData()
+        speed = self.phase_table.item(row,names.index('speed')).text().strip()
+        self.phase_input_method.blockSignals(True)
+        self.phase_input_method.setCurrentIndex(0 if speed else 1)
+        self.phase_input_method.setEnabled(kind in ('extend','retract','regenerate'))
+        self.phase_input_method.blockSignals(False)
+
+    def choose_phase_input(self, *args):
+        if self.loading or not self.phase_table.rowCount(): return
+        row = self._phase_index(); names = [c[0] for c in PHASE_COLUMNS]
+        selected = self.phase_input_method.currentData()
+        other = 'duration' if selected == 'speed' else 'speed'
+        self.phase_table.blockSignals(True)
+        self.phase_table.item(row,names.index(other)).setText('')
+        item = self.phase_table.item(row,names.index(selected))
+        self.phase_table.setCurrentCell(row,names.index(selected))
+        self.phase_table.blockSignals(False)
+        self.phase_table.editItem(item)
+        self.changed()
+
+    def phase_kind_changed(self, row):
+        if self.loading: return
+        names = [c[0] for c in PHASE_COLUMNS]
+        kind = self.phase_table.cellWidget(row,names.index('kind')).currentData()
+        if kind in ('hold','idle'):
+            self.phase_table.item(row,names.index('speed')).setText('')
+        if kind == 'idle':
+            self.phase_table.item(row,names.index('force')).setText('0')
+        self.configure_phase_cells(); self.update_phase_input()
 
     def read_value(self, key):
         widget, unit, _ = self.fields[key]
@@ -491,8 +625,17 @@ class HydraulicPage(BasePage):
         items = []
         for row in range(table.rowCount()):
             values = {}
+            kind = table.cellWidget(row,2).currentData() if factory is M.Phase else None
             for col, (name, _, unit) in enumerate(columns):
                 key = f'{prefix}.{row}.{name}'
+                if factory is M.Phase and kind in ('hold','idle'):
+                    if name == 'speed':
+                        values[name] = None; continue
+                    if name == 'stroke':
+                        values[name] = self.project.phases[row].stroke if row < len(self.project.phases) else M.Phase().stroke
+                        continue
+                    if kind == 'idle' and name in ('force','back_pressure'):
+                        values[name] = 0.; continue
                 if isinstance(unit, dict) or unit == 'cyl':
                     values[name] = table.cellWidget(row, col).currentData(); continue
                 cell = table.item(row, col); text = cell.text() if cell else ''
@@ -514,7 +657,16 @@ class HydraulicPage(BasePage):
     def build_project(self):
         sections = {}
         for section, cls in (('pump', M.Pump), ('pipe', M.Pipe), ('oil', M.Oil), ('thermal', M.Thermal), ('accumulator', M.Accumulator)):
-            values = {name: self.read_value(f'{section}.{name}') for name, *_ in FORMS[section]}
+            if section == 'accumulator' and not self.fields['accumulator.enabled'][0].isChecked():
+                sections[section] = replace(self.project.accumulator, enabled=False)
+                continue
+            ignored = set()
+            if section == 'pump':
+                control = self.fields['pump.control'][0].currentData()
+                if control != 'pressure': ignored.add('compensator_pressure')
+                if control != 'power': ignored.add('power_limit')
+            values = {name: getattr(getattr(self.project,section),name) if name in ignored else self.read_value(f'{section}.{name}')
+                      for name, *_ in FORMS[section]}
             for name, value in values.items():
                 if value is None and name not in ('diameter', 'precharge_pressure'):
                     raise InputError(f'{section}.{name}', 'Değer gerekli.')
@@ -537,7 +689,20 @@ class HydraulicPage(BasePage):
     def changed(self, *args):
         if self.loading:
             return
+        self.sync_optional_controls()
+        self.result = None
+        self.headline.setText('Hesap güncelleniyor…')
+        self.status_note.setText('Girdiler değişti. Sonuçlar yeniden hesaplanıyor; rapor almak için tamamlanmasını bekleyin.')
+        self.refresh_actions()
         self.timer.start()
+
+    def sync_optional_controls(self):
+        control = self.fields['pump.control'][0].currentData()
+        for field, mode in (('compensator_pressure','pressure'),('power_limit','power')):
+            self.fields['pump.'+field][0].setEnabled(control == mode)
+        enabled = self.fields['accumulator.enabled'][0].isChecked()
+        for name, *_ in FORMS['accumulator']:
+            if name != 'enabled': self.fields['accumulator.'+name][0].setEnabled(enabled)
 
     def clear_invalid(self):
         for widget in self.invalid_widgets:
@@ -563,6 +728,8 @@ class HydraulicPage(BasePage):
             row = int(parts[1]); names = [c[0] for c in columns]
             col = names.index(parts[2]) if len(parts) > 2 and parts[2] in names else 0
             if row < table.rowCount():
+                if parts[0] == 'cylinders' and col >= 5:
+                    self.cylinder_advanced.setChecked(True)
                 item = table.item(row, col)
                 if item is not None:
                     item.setBackground(QColor(COLORS[self.context.appearance]['danger']).lighter(160 if self.context.appearance == 'light' else 60))
@@ -577,6 +744,10 @@ class HydraulicPage(BasePage):
             return {'pump': 2, 'pipe': 3, 'oil': 3, 'thermal': 4, 'accumulator': 5}[parts[0]]
         if key is None:
             return None
+        section, name = key.split('.',1)
+        if name in ADVANCED.get(section,set()):
+            self.advanced_sections[section].set_expanded(True)
+        if section == 'point': self.cylinder_check_section.set_expanded(True)
         self._flag(self.fields[key][0], message)
         return {'pump': 2, 'project': 2, 'pipe': 3, 'oil': 3, 'thermal': 4, 'accumulator': 5, 'point': 0}.get(key.split('.')[0])
 
@@ -603,9 +774,11 @@ class HydraulicPage(BasePage):
 
     def show_invalid(self, error):
         self.result = None
+        self.problem_field = error.field
         tab = self.mark_invalid(error.field, str(error))
         self.headline.setText('Girdileri kontrol edin')
-        self.status_note.setText(f'{error}  ({error.field})'); self.status_note.setProperty('role', 'error')
+        self.status_note.setText(f'{error}\nDüzeltilecek alanı açmak için aşağıdaki düğmeyi kullanın.'); self.status_note.setProperty('role', 'error')
+        self.fix_button.setVisible(tab is not None)
         self.status_note.style().unpolish(self.status_note); self.status_note.style().polish(self.status_note)
         for table in (self.summary_table, self.rows_table, self.phase_results, self.thermal_table, self.accumulator_table):
             table.setRowCount(0)
@@ -642,34 +815,42 @@ class HydraulicPage(BasePage):
             self.tabs.tabBar().setTabTextColor(index, QColor())
         cycle = r.cycle
         critical = [i for i in r.issues if i.severity == 'critical']
-        self.headline.setText('Ön tasarım uygun' if r.feasible else f'{len(critical)} kritik uyarı')
+        self.headline.setText('Kritik kontrol yok' if r.feasible else f'{len(critical)} konu çözülmeli')
         notes = []
         if not cycle['demand_met']:
             notes.append('Pompa bazı fazlarda ihtiyacı karşılamıyor; sonuçlar senaryodur.')
         if r.thermal.get('status') == 'scenario_only':
-            notes.append('Isı sonuçları yalnız senaryo (scenario_only).')
+            notes.append('Isı sonuçları gerçekleşmiş performans değil, varsayımsal senaryodur.')
         if p.pump.leakage_flow == 0:
             notes.append('Kaçak sıfır: bekleme ideal kabul edildi.')
         notes.append('Uygunluk üretici veya ürün onayı değildir.')
         self.status_note.setText('\n'.join(notes))
+        first = next((issue for issue in sorted(r.issues,key=lambda i: ('critical','warning','info').index(i.severity)) if issue.field),None)
+        self.problem_field = first.field if first else None
+        self.fix_button.setVisible(first is not None)
         self.status_note.setProperty('role', 'warning' if not cycle['demand_met'] or not r.feasible else 'muted')
         self.status_note.style().unpolish(self.status_note); self.status_note.style().polish(self.status_note)
         rows = result_rows(p, r)
         lookup = {label_: (value, unit) for label_, value, unit, _ in rows}
-        summary = [(name, f'{fmt(lookup[name][0], 2)} {lookup[name][1]}') for name in
+        short = {'Maksimum gerekli basınç':'Basınç ihtiyacı','Maksimum gerekli debi':'Debi ihtiyacı',
+                 'Emniyet valfi ayarı':'Valf ayarı','Seçilen motor':'Motor seçimi',
+                 'Nominal deplasman adayı':'Pompa hacmi','Gerekli soğutucu':'Soğutucu ihtiyacı'}
+        summary = [(short.get(name,name), f'{fmt(lookup[name][0], 2)} {lookup[name][1]}') for name in
                    ('Maksimum gerekli basınç', 'Maksimum gerekli debi', 'Emniyet valfi ayarı', 'Tepe mil gücü',
                     'Seçilen motor', 'Nominal deplasman adayı', 'Çevrim süresi', 'Gerekli soğutucu') if name in lookup]
-        summary.insert(0, ('İhtiyaç karşılanıyor', 'evet' if cycle['demand_met'] else 'HAYIR'))
+        summary.insert(0, ('Pompa yeterli mi?', 'evet' if cycle['demand_met'] else 'HAYIR'))
         self._rows(self.summary_table, summary)
         self._rows(self.rows_table, [(label_, value, unit) for label_, value, unit, _ in rows],
                    tips=[formula for *_, formula in rows])
         self.issue_list.clear()
         for issue in sorted(r.issues, key=lambda i: ('critical', 'warning', 'info').index(i.severity)):
             title, token = SEVERITY.get(issue.severity, ('Uyarı', 'warning'))
-            item = QListWidgetItem(f'{title} · {issue.message}'); item.setData(Qt.UserRole, issue.field)
+            action = ACTIONS.get(issue.code,'')
+            item = QListWidgetItem(f'{title} · {issue.message}' + (f'\n→ {action}' if action else '')); item.setData(Qt.UserRole, issue.field)
             item.setForeground(QColor(COLORS[self.context.appearance][token if token != 'muted' else 'muted']))
             item.setToolTip(f'{issue.code}' + (f' · {issue.field}' if issue.field else ''))
             self.issue_list.addItem(item)
+        self.issue_list.reflow()
         phase_rows = []
         for f in cycle['phases']:
             phase_rows.append((f.name, f'{fmt(f.start_position * 1000, 1)} → {fmt(f.end_position * 1000, 1)}', f.duration,
@@ -687,11 +868,15 @@ class HydraulicPage(BasePage):
             ('Isı atan yüzey · m²', t['exposed_area']), ('Ortalama ısı yükü · kW', t['average_loss'] / 1000),
             ('Soğutucusuz denge · °C', convert(t['equilibrium_temperature'], 'K', '°C')), ('Gerekli soğutucu · kW', t['cooler_power'] / 1000)])
         a = r.accumulator
-        self._rows(self.accumulator_table, [('Durum', 'kapalı')] if a.get('status') == 'disabled' else
-                   [(key.replace('_', ' '), value if not isinstance(value, float) else value) for key, value in a.items()])
+        self._rows(self.accumulator_table, [('Durum', 'Kullanılmıyor — isteğe bağlı hesap kapalı')] if a.get('status') == 'disabled' else [
+            ('Gerekli gaz hacmi · L', a['required_volume'] * 1000),
+            ('Nominal hacim adayı · L', None if a['nominal_volume'] is None else a['nominal_volume'] * 1000),
+            ('Ön dolum · bar (gösterge)', convert(a['precharge_absolute']-p.accumulator.atmospheric_pressure,'Pa','bar')),
+            ('En düşük basınç · bar (gösterge)', convert(a['minimum_absolute']-p.accumulator.atmospheric_pressure,'Pa','bar')),
+            ('En yüksek basınç · bar (gösterge)', convert(a['maximum_absolute']-p.accumulator.atmospheric_pressure,'Pa','bar'))])
         self.assumptions.setText('\n'.join('• ' + text for text in r.assumptions))
         self.refresh_actions()
-        self.set_status('Hesap güncel · ' + ('ön tasarım uygun' if r.feasible else 'kritik uyarılar var'),
+        self.set_status('Hesap güncel · ' + ('kritik kontrol yok' if r.feasible else 'kritik uyarılar var'),
                         tone='success' if r.feasible else 'warning')
 
     def update_cylinder_check(self):
@@ -728,11 +913,14 @@ class HydraulicPage(BasePage):
         """Apply the current table text to the project when it is valid (adding rows keeps edits)."""
         try:
             self.project = self.build_project()
-        except InputError:
-            pass
+            return True
+        except InputError as error:
+            self.show_invalid(error)
+            return False
 
     def add_cylinder(self):
-        self._commit(); ids = {c.id for c in self.project.cylinders}
+        if not self._commit(): return
+        ids = {c.id for c in self.project.cylinders}
         n = len(ids) + 1
         while f'C{n}' in ids:
             n += 1
@@ -743,7 +931,8 @@ class HydraulicPage(BasePage):
         rows = self.cylinder_table.selectionModel().selectedRows()
         if not rows or len(self.project.cylinders) <= 1:
             self.set_status('En az bir silindir gerekli.', True); return
-        self._commit(); index = rows[0].row()
+        if not self._commit(): return
+        index = rows[0].row()
         cylinders = tuple(c for i, c in enumerate(self.project.cylinders) if i != index)
         self.project = replace(self.project, cylinders=cylinders)
         self.populate(); self.recalculate()
@@ -753,7 +942,8 @@ class HydraulicPage(BasePage):
         return rows[0].row() if rows else len(self.project.phases) - 1
 
     def add_phase(self, copy=False):
-        self._commit(); index = self._phase_index(); phases = list(self.project.phases)
+        if not self._commit(): return
+        index = self._phase_index(); phases = list(self.project.phases)
         phase = phases[index] if copy and phases else M.Phase(cylinder_id=self.project.cylinders[0].id)
         phases.insert(index + 1, replace(phase, name=phase.name + (' (kopya)' if copy else '')) if copy else phase)
         self.project = replace(self.project, phases=tuple(phases)); self.populate(); self.recalculate()
@@ -762,12 +952,14 @@ class HydraulicPage(BasePage):
     def remove_phase(self):
         if len(self.project.phases) <= 1:
             self.set_status('En az bir faz gerekli.', True); return
-        self._commit(); index = self._phase_index()
+        if not self._commit(): return
+        index = self._phase_index()
         self.project = replace(self.project, phases=tuple(p for i, p in enumerate(self.project.phases) if i != index))
         self.populate(); self.recalculate()
 
     def move_phase(self, step):
-        self._commit(); index = self._phase_index(); target = index + step
+        if not self._commit(): return
+        index = self._phase_index(); target = index + step
         phases = list(self.project.phases)
         if not 0 <= target < len(phases):
             return
@@ -800,10 +992,35 @@ class HydraulicPage(BasePage):
         self.changed()
 
     def focus_issue(self, item):
-        field = item.data(Qt.UserRole) or ''
-        tab = self.mark_invalid(field, item.text()) if field else None
+        self.navigate_to_field(item.data(Qt.UserRole) or '')
+
+    def focus_first_problem(self):
+        self.navigate_to_field(self.problem_field or '')
+
+    def navigate_to_field(self, field):
+        """Uyarıdaki ayarı açar; geçerli girdiyi kırmızı hata olarak işaretlemez."""
+        field = field.removeprefix('project.') if field not in self.fields else field
+        parts = field.split('.')
+        tab = {'cylinders':0,'phases':1,'pump':2,'project':2,'pipe':3,'oil':3,'thermal':4,'accumulator':5,'point':0}.get(parts[0])
+        key = field if field in self.fields else next((k for k in self.fields if k == 'project.'+field),None)
+        if key:
+            section,name = key.split('.',1)
+            tab = {'pump':2,'project':2,'pipe':3,'oil':3,'thermal':4,'accumulator':5,'point':0}[section]
+            if name in ADVANCED.get(section,set()): self.advanced_sections[section].set_expanded(True)
+            if section == 'point': self.cylinder_check_section.set_expanded(True)
+            self.fields[key][0].setFocus()
+        elif parts[0] in ('cylinders','phases') and len(parts)>1 and parts[1].isdigit():
+            table = self.cylinder_table if parts[0] == 'cylinders' else self.phase_table
+            row = min(int(parts[1]),table.rowCount()-1)
+            if parts[0] == 'cylinders': self.cylinder_advanced.setChecked(True)
+            if row >= 0: table.selectRow(row); table.setFocus()
         if tab is not None:
             self.tabs.setCurrentIndex(tab)
+            if key:
+                widget = self.fields[key][0]
+                container = self.tabs.widget(tab)
+                if hasattr(container,'ensureWidgetVisible'): container.ensureWidgetVisible(widget)
+                widget.setFocus()
 
     # ----------------------------------------------------------------- files
     def open_project(self):
