@@ -40,6 +40,7 @@ PAGE_TYPES = {
     'dfm_analyzer': ('modules.dfm_analyzer.ui', 'DfmPage'),
     'belt_drive': ('modules.belt_drive.ui', 'BeltDrivePage'),
     'sheet_unfolding': ('modules.sheet_unfolding.ui', 'UnfoldPage'),
+    'hydraulic_unit': ('modules.hydraulic_unit.ui', 'HydraulicPage'),
 }
 
 
@@ -65,6 +66,7 @@ MODULES = (
     ('bolt_torque', 'Hızlı tork hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('weight', 'Ağırlık hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
+    ('hydraulic_unit', 'Hidrolik Ünite Hesaplayıcı', 'MÜHENDİSLİK HESAPLARI'),
     ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
     ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),

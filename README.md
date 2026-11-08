@@ -4,6 +4,11 @@ GOKWORKS; SolidWorks dosyalarını toplu aktarmak, montajlardan ürün ağacı
 çıkarmak, sac ve profil kesimlerini planlamak ve mühendislik hesapları yapmak
 için geliştirilmiş Türkçe bir masaüstü uygulamasıdır.
 
+**Hidrolik Ünite hesap altyapısı:** silindir, ardışık çevrim, pompa/motor,
+boru, tank/ısı ve akümülatör hesapları ile PDF/Excel/JSON raporları
+[bağımsız Python modülü](modules/hydraulic_unit/README.md) olarak kullanılabilir.
+Arayüz ve menü entegrasyonu ayrı çalışmadır; henüz masaüstü menüsünde sunulmaz.
+
 [Başlangıç](#başlangıç) · [Araç seçimi](#hangi-aracı-kullanmalıyım) ·
 [Adım adım kullanım](#adım-adım-kullanım) · [Sorun giderme](#sorun-giderme) ·
 [Kurulum ve güncelleme](#kurulum-ve-güncelleme)

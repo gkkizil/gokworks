@@ -13,7 +13,7 @@ WORKSPACES = (
     ('Aktarım', ('pdf', 'dxf_dwg', 'cad_converter')),
     ('Montaj', ('bom', 'naming')),
     ('Üretim', ('nesting', 'profile_cutting', 'k_factor', 'shaft_generator', 'dfm_analyzer', 'sheet_unfolding')),
-    ('Hesaplar', ('iso_fits', 'geometric_tolerances', 'tolerance_stack', 'bolt', 'bolt_torque', 'weight')),
+    ('Hesaplar', ('iso_fits', 'geometric_tolerances', 'tolerance_stack', 'bolt', 'bolt_torque', 'weight', 'hydraulic_unit')),
     ('Makine Elemanları', ('gear_calculator', 'belt_drive')),
 )
 

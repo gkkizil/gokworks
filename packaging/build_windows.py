@@ -85,6 +85,7 @@ def main():
             '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/tosyali-user-pdf.json"};modules/belt_drive/catalog/data',
             '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/tosyali-import-audit.json"};modules/belt_drive/catalog/data',
             '--add-data', f'{ROOT / "modules/belt_drive/examples/automatic-synthetic-catalog.json"};modules/belt_drive/examples',
+            '--add-data', f'{ROOT / "examples/ornek_pres_unitesi.gwhyd"};examples',
             '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop',
             '--add-data', f'{ROOT / "modules/shaft_generator/interop/ShaftHost.cs"};modules/shaft_generator/interop',
             '--add-data', f'{ROOT / "modules/shaft_generator/interop/ShaftDrawingHost.cs"};modules/shaft_generator/interop', str(ROOT/'main.py')]
