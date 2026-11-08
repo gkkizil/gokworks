@@ -85,7 +85,7 @@ def test_pdf_turkish_text_graphs_and_multipage_output(qapp,tmp_path):
     path = tmp_path/'rapor.pdf'; export_pdf(p,r,path,images)
     assert path.read_bytes().startswith(b'%PDF-')
     if shutil.which('pdftotext'):
-        text = unicodedata.normalize('NFKC',subprocess.check_output(['pdftotext','-layout',str(path),'-']).decode('utf-8'))
+        text = unicodedata.normalize('NFKC',subprocess.check_output(['pdftotext','-enc','UTF-8','-layout',str(path),'-']).decode('utf-8'))
         assert 'Hidrolik' in text and 'Presleme' in text and 'Geri dönüş' in text
         assert 'Girdi kaydı' in text and 'Soğutucusuz' in text
         assert text.count('\f') >= 2
