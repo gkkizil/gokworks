@@ -4,9 +4,9 @@ from pathlib import Path
 from shared.files import write_csv_atomic
 
 from PySide6.QtCore import Qt, QTimer, QEvent, Slot, QFileSystemWatcher, QObject, QSignalBlocker
-from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QCheckBox
+from PySide6.QtWidgets import QSplitter, QFileDialog, QHeaderView, QHBoxLayout, QCheckBox, QGridLayout, QVBoxLayout, QWidget
 from gui_qt.export import ExportPage, AdaptiveRow
-from gui_qt.components import label, button, ValueForm, Disclosure, fit_columns
+from gui_qt.components import label, button, ValueForm, Disclosure, fit_columns, scroll, section_header
 from modules.cad_converter.models import Cancelled
 from modules.cad_converter.api import RestoreError
 from .preview.models import Request, MeshCache, PreviewCache
@@ -31,6 +31,43 @@ class _PageEvents(QObject):
     @Slot(object)
     def accept(self, events):
         self.page.process_events(events)
+
+
+class SettingsRibbon(QWidget):
+    """Setting groups side by side under the page commands; they wrap to more rows when narrow."""
+    def __init__(self, groups, minimum=270):
+        super().__init__()
+        self.setObjectName('dxfRibbon'); self.setAttribute(Qt.WA_StyledBackground, True)
+        self.groups, self.minimum, self.columns = groups, minimum, None
+        self.grid = QGridLayout(self); self.grid.setContentsMargins(8, 6, 8, 8)
+        self.grid.setHorizontalSpacing(20); self.grid.setVerticalSpacing(12)
+        self.arrange(len(groups))
+
+    def arrange(self, columns):
+        columns = max(1, min(len(self.groups), columns))
+        if columns == self.columns:
+            return
+        self.columns = columns
+        for group in self.groups:
+            self.grid.removeWidget(group)
+        for index, group in enumerate(self.groups):
+            self.grid.addWidget(group, index // columns, index % columns, Qt.AlignTop)
+        for column in range(len(self.groups)):
+            self.grid.setColumnStretch(column, 1 if column < columns else 0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.arrange(event.size().width() // self.minimum)
+
+
+def ribbon_group(title, *widgets, trailing=()):
+    group = QWidget(); box = QVBoxLayout(group); box.setContentsMargins(0, 0, 0, 0); box.setSpacing(6)
+    box.addWidget(section_header(title, *trailing))
+    for widget in widgets:
+        box.addWidget(widget)
+    box.addStretch(1)
+    group.setMinimumWidth(240)
+    return group
 
 
 class DxfDwgPage(ExportPage):
@@ -146,7 +183,44 @@ class DxfDwgPage(ExportPage):
         self.watcher.fileChanged.connect(self.source_changed)
         self.form.changed.connect(self.preview_option_changed)
         self._capture = capture  # injectable boundary; no COM import or connection during construction
+        self.build_ribbon_layout()
         QTimer.singleShot(0, self.layout_preview)
+
+    def build_ribbon_layout(self):
+        """Settings on top in a ribbon of groups, the part list and preview below at full width.
+
+        Same widgets, values and commands as the shared transfer layout; only their
+        place changes (Kaynak · Çıktı · Aktarım seçenekleri · Sac gövdeleri).
+        """
+        old = self.splitter
+        self.options.set_expanded(True); self.options.toggle.hide()      # the group title already names it
+        self.source_files.view.setMinimumHeight(72)
+        self.source_files.setMinimumWidth(240)
+        groups = [ribbon_group('1 · Kaynak', self.form),
+                  ribbon_group('2 · Çıktı', self.output_form, trailing=(self.open_output_button,)),
+                  ribbon_group('3 · Seçenekler', self.options),
+                  self.source_files]
+        self.ribbon = SettingsRibbon(groups)
+        self.splitter = QSplitter(Qt.Vertical); self.splitter.setObjectName('dxfWorkspace')
+        self.splitter.setChildrenCollapsible(False)
+        self.source_scroll = scroll(self.ribbon); self.source_scroll.setMinimumHeight(110)
+        self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.splitter.addWidget(self.source_scroll); self.splitter.addWidget(self.results)
+        self.splitter.setStretchFactor(0, 0); self.splitter.setStretchFactor(1, 1)
+        self.splitter.setSizes([250, 650])
+        self.ribbon_height = None      # set when the user drags the divider; otherwise fitted to the window
+        self.splitter.splitterMoved.connect(lambda *_: setattr(self, 'ribbon_height', self.splitter.sizes()[0]))
+        self.layout.replaceWidget(old, self.splitter)
+        old.hide(); old.setParent(None); old.deleteLater()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, 'ribbon') and self.splitter.height() > 0:
+            # Settings take at most ~30 % of short windows so the list and preview keep their room.
+            total = self.splitter.height() - self.splitter.handleWidth()
+            fitted = max(110, min(self.ribbon.sizeHint().height() + 4, int(total * .3) if total < 760 else 280))
+            height = min(self.ribbon_height or fitted, max(110, total - 320))
+            self.splitter.setSizes([height, max(0, total - height)])
 
     def fit_sheet_columns(self):
         """Header-fitted, draggable widths: every caption stays readable and the
