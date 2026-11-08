@@ -26,7 +26,7 @@ def test_settings_ribbon_on_top_list_and_preview_below_commands_visible(window, 
     assert top(page.source_scroll, page) < top(page.results, page)
     assert page.results.width() >= page.width() - 40                  # full width below the settings
     assert page.source_scroll.height() <= max(110, page.splitter.height() * .31) + 1 or size[1] >= 900
-    assert page.results.height() >= 300
+    assert page.results.height() >= 260
     assert page.command_bar.isVisible()
     for number in range(page.actions.count()):
         control = page.actions.itemAt(number).widget()
@@ -55,3 +55,21 @@ def test_dragged_divider_is_kept_and_values_still_flow_to_the_export(window, qtb
     assert page.options.is_expanded() and not page.options.toggle.isVisible()
     page.form.set_value('format', 'DWG'); page.form.set_value('overwrite', True)
     assert page.form.values()['format'] == 'DWG' and page.form.values()['overwrite'] is True
+
+
+def test_menu_bar_mirrors_options_and_runs_the_same_commands(window, qtbot):
+    page = window.pages['dxf_dwg']; bar = page.menu_bar
+    assert [a.text().replace('&', '') for a in bar.actions()] == ['Dosya', 'Kaynak', 'Çıktı', 'Seçenekler', 'Seçim', 'Aktarım']
+    item = bar.items['Seçenekler/Üzerine yaz']
+    item.trigger()
+    assert page.form.values()['overwrite'] is item.isChecked()
+    page.form.set_value('overwrite', not item.isChecked())
+    assert item.isChecked() is page.form.values()['overwrite']
+    bar.items['Çıktı türü/DWG'].trigger()
+    assert page.form.value('format') == 'DWG'
+    page.form.set_value('format', 'DXF')
+    assert bar.items['Çıktı türü/DXF'].isChecked()
+    bar.items['Dosya adı/Malzeme'].trigger()
+    assert page.form.value('name_material') is True
+    bar.items['Dosya/Klasörü tara'].trigger()                         # no source chosen → same message as the button
+    assert 'kaynak' in page.status_text.lower()

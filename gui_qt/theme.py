@@ -219,6 +219,10 @@ QDockWidget::title { background: %(sidebar)s; padding: 6px 8px; border-bottom: 1
 QDockWidget QWidget#inspectorBody { background: %(panel)s; }
 QFrame[inspectorSection="true"] { border: 0; border-bottom: 1px solid %(border)s; border-radius: 0; }
 QToolButton[inspectorGroup="true"] { color: %(muted)s; font-size: 10px; font-weight: 600; }
+QMenuBar#pageMenuBar { background: transparent; border: 0; padding: 0; spacing: 2px; }
+QMenuBar#pageMenuBar::item { background: transparent; padding: 4px 10px; border-radius: 3px; color: %(text)s; }
+QMenuBar#pageMenuBar::item:selected { background: %(hover)s; }
+QMenuBar#pageMenuBar::item:pressed { background: %(selected)s; color: %(text)s; }
 QMenu { background: %(panel)s; border: 1px solid %(border_strong)s; padding: 3px 0; }
 QMenu::item { padding: 5px 20px 5px 12px; }
 QMenu::item:selected { background: %(selected)s; }

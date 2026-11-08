@@ -77,3 +77,18 @@ def test_ribbon_follows_the_theme(page, theme):
     for button in page.ribbon.category_buttons.values():
         assert not button.icon().isNull()
     assert not page.grab().isNull()
+
+
+def test_menu_bar_reaches_the_same_commands_and_settings(page):
+    bar = page.menu_bar
+    assert [a.text().replace('&', '') for a in bar.actions()] == ['Dosya', 'Kademe', 'Kanal', 'Kenar', 'Diş ve delik', 'Teknik resim']
+    stages = len(page.project.stages)
+    bar.items['Kademe/Kademe ekle'].trigger()
+    assert len(page.project.stages) == stages + 1
+    bar.items['Kanal/Kama kanalı ekle…'].trigger()
+    assert page.tabs.currentIndex() == 2 and page.ribbon.command_buttons['keyway'].isChecked()
+    bar.items['Diş ve delik/İç deliği aç'].trigger()
+    assert page.bore_enabled.isChecked() and page.project.bore is not None
+    page.bore_enabled.setChecked(False)
+    assert not bar.items['Diş ve delik/İç deliği aç'].isChecked()
+    assert bar.items['Dosya/SolidWorks’te çiz'].isEnabled() and bar.items['Dosya/Proje kaydet…'].isEnabled()
