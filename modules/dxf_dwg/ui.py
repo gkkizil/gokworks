@@ -212,6 +212,46 @@ class DxfDwgPage(ExportPage):
         self.splitter.splitterMoved.connect(lambda *_: setattr(self, 'ribbon_height', self.splitter.sizes()[0]))
         self.layout.replaceWidget(old, self.splitter)
         old.hide(); old.setParent(None); old.deleteLater()
+        self.build_menu()
+
+    def build_menu(self):
+        """Classic drop-down menus over the same commands and settings (nothing duplicated)."""
+        from gui_qt.page_menu import PageMenuBar
+        bar = self.menu_bar = PageMenuBar(self); f = self.form.fields
+        menu = bar.addMenu('&Dosya')
+        self.menu_commands = [
+            (bar.command(menu, 'Klasörü tara', self.scan, shortcut='Ctrl+R', tip='Kaynak klasördeki sac gövdelerini bul'), self.scan_button),
+            (bar.command(menu, 'Aktif montajı tara', self.scan_active), self.active_scan_button),
+            (bar.command(menu, 'Dosya seç ve tara…', self.scan_file, shortcut='Ctrl+O'), self.file_scan_button)]
+        menu.addSeparator()
+        self.menu_commands += [(bar.command(menu, 'Rapor kaydet…', self.results.save_dialog, shortcut='Ctrl+S'), self.results.save),
+                               (bar.command(menu, 'Günlüğü kopyala', self.results.copy_log_text), self.results.copy_log),
+                               (bar.command(menu, 'Listeyi temizle', self.results.clear), self.results.clear_button)]
+        menu = bar.addMenu('&Kaynak')
+        bar.command(menu, 'Kaynak klasör seç…', self.source.browse)
+        bar.check(menu, 'Alt klasörleri de tara', f['recursive'])
+        menu = bar.addMenu('&Çıktı')
+        bar.command(menu, 'Çıktı klasörü seç…', self.output.browse)
+        bar.command(menu, 'Çıktı klasörünü aç', self.open_output_button.click)
+        menu.addSeparator(); bar.choice(menu.addMenu('Çıktı türü'), f['format'], key='Çıktı türü')
+        menu = bar.addMenu('&Seçenekler')
+        for key, title in (('overwrite', 'Üzerine yaz'), ('bend_lines', 'Büküm çizgilerini ekle'),
+                           ('group_by_thickness', 'Kalınlığa göre klasörle'), ('preview_before_export', 'Kaydetmeden önce önizle')):
+            bar.check(menu, title, f[key])
+        naming = menu.addMenu('Dosya adına ekle')
+        for key, title in (('code', 'Parça kodu'), ('body', 'Gövde adı'), ('configuration', 'Konfigürasyon'), ('material', 'Malzeme')):
+            bar.check(naming, title, f['name_' + key], key='Dosya adı/' + title)
+        menu = bar.addMenu('S&eçim')
+        self.menu_commands += [(bar.command(menu, 'Tümünü seç', lambda: self.select_sheets(True), shortcut='Ctrl+A'), self.select_all_button),
+                               (bar.command(menu, 'Seçimi kaldır', lambda: self.select_sheets(False)), self.select_none_button)]
+        bar.check(menu, 'Özdeş parçaları grupla', self.group_instances)
+        menu = bar.addMenu('&Aktarım')
+        self.menu_commands += [(bar.command(menu, 'Önizleme', self.show_preview, shortcut='F5'), self.preview_button),
+                               (bar.command(menu, 'Seçili parçaları dışa aktar', self.start_export, shortcut='Ctrl+E'), self.start_button),
+                               (bar.command(menu, 'Durdur', self.jobs.cancel, shortcut='Esc'), self.stop_button)]
+        from PySide6.QtWidgets import QMenu
+        for menu in bar.findChildren(QMenu):
+            menu.aboutToShow.connect(lambda: bar.sync_enabled(self.menu_commands))
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

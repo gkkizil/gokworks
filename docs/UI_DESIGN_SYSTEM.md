@@ -89,6 +89,7 @@ kullanılmaz.
 | Boş durum | `ViewEmptyState` | Tablonun üstünde, filtre temizleme |
 | Ayrıntı/hata | `show_details(parent, title, text)` | Kopyalanabilir metin |
 | Açılır bölüm | `Disclosure(title, widget)` | Değerleri korur |
+| Menü çubuğu | `PageMenuBar(page)` (`gui_qt/page_menu.py`) | Başlığın altında klasik açılır menüler (Dosya · …). Yalnız sayfadaki mevcut komut ve ayarlara gider; işaretli öğeler ilgili kutuyla çift yönlü eşlenir. DXF / DWG ve Parametrik mil kullanır |
 | Kaydırma | `scroll(widget)` → `StableScrollArea` | Sarmalanan metinde döngüye girmez |
 | İş | `context.jobs.start(owner, operation)` | GUI iş parçacığında COM yok |
 

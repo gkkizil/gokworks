@@ -288,6 +288,47 @@ class ShaftPage(BasePage):
                 signal.connect(lambda *args,k=kind:self.operation_form_changed(k))
         self.populate();self.refresh()
         self.section_changed(self.tabs.currentIndex())
+        self.build_menu()
+
+    def build_menu(self):
+        """Classic drop-down menus over the page's existing commands (same methods as the buttons)."""
+        from gui_qt.page_menu import PageMenuBar
+        from PySide6.QtWidgets import QMenu
+        bar=self.menu_bar=PageMenuBar(self);open_=self.open_command
+        menu=bar.addMenu('&Dosya')
+        self.menu_commands=[(bar.command(menu,'Proje aç…',self.open_dialog,shortcut='Ctrl+O'),self.open_button),
+                            (bar.command(menu,'Proje kaydet…',self.save_dialog,shortcut='Ctrl+S'),self.save_button)]
+        menu.addSeparator()
+        self.menu_commands+=[(bar.command(menu,'SolidWorks’te çiz',self.create_model,shortcut='F5'),self.create_button),
+                             (bar.command(menu,'SLDPRT oluştur ve kaydet…',self.create_and_save,shortcut='Ctrl+Shift+S'),self.save_part_button)]
+        bar.command(menu,'Kayıtlı parçaya teknik resim…',self.drawing_from_part)
+        menu.addSeparator();self.menu_commands.append((bar.command(menu,'Durdur',self.jobs.cancel),self.stop_button))
+        menu=bar.addMenu('&Kademe')
+        bar.command(menu,'Çap ve boy tablosu',lambda:open_('stages'))
+        menu.addSeparator()
+        bar.command(menu,'Kademe ekle',lambda:self.add_stage(),shortcut='Ctrl+N')
+        bar.command(menu,'Seçili kademeyi kopyala',lambda:self.add_stage(copy=True),shortcut='Ctrl+D')
+        bar.command(menu,'Seçili kademeyi sil',self.delete_stage)
+        bar.command(menu,'Sola taşı',lambda:self.move_stage(-1),shortcut='Ctrl+Left')
+        bar.command(menu,'Sağa taşı',lambda:self.move_stage(1),shortcut='Ctrl+Right')
+        menu=bar.addMenu('Ka&nal')
+        bar.command(menu,'Segman kanalı ekle…',lambda:open_('groove'))
+        bar.command(menu,'Kama kanalı ekle…',lambda:open_('keyway'))
+        menu=bar.addMenu('K&enar')
+        bar.command(menu,'Tüm kenarlara pah / radyüs…',lambda:open_('bulk'))
+        bar.command(menu,'Tek kenara pah…',lambda:open_('chamfer'))
+        bar.command(menu,'Tek kenara radyüs…',lambda:open_('fillet'))
+        menu.addSeparator()
+        self.menu_commands.append((bar.command(menu,'Son toplu uygulamayı geri al',self.undo_bulk_treatments),self.edge_undo_button))
+        menu=bar.addMenu('Diş ve &delik')
+        bar.command(menu,'Kozmetik diş ekle…',lambda:open_('cosmetic_thread'))
+        bar.command(menu,'Eksenel iç delik…',lambda:open_('bore'))
+        bar.check(menu,'İç deliği aç',self.bore_enabled)
+        menu=bar.addMenu('&Teknik resim')
+        bar.command(menu,'Sayfa, tolerans ve yüzey ayarları…',lambda:open_('drawing'))
+        bar.check(menu,'Katı modelden sonra teknik resmi de oluştur',self.auto_drawing)
+        for menu in bar.findChildren(QMenu):
+            menu.aboutToShow.connect(lambda:bar.sync_enabled(self.menu_commands))
 
     def build_bulk_page(self):
         page=QWidget();box=QVBoxLayout(page);box.setContentsMargins(6,6,6,6)
