@@ -1,8 +1,17 @@
 # Hidrolik Ünite Hesaplayıcı — hesap ve rapor altyapısı
 
-Python 3.13 ile bağımsız çalışan HPU ön boyutlandırma motoru. Kullanıcı
-talimatıyla **arayüz ve menü kaydı Claude'a bırakıldı**; bu teslim yeni bir
-GOKWORKS ekranı açmaz. Yeni bağımlılık yoktur. Çekirdek Qt/CAD import etmez.
+Python 3.13 ile bağımsız çalışan HPU ön boyutlandırma motoru. Yeni bağımlılık
+yoktur. Çekirdek Qt/CAD import etmez.
+
+## Arayüz
+
+GOKWORKS'te **Hesaplar → Hidrolik Ünite Hesaplayıcı** (`ui.py`, `HydraulicPage`).
+Yedi sekme: Silindirler, Çevrim, Pompa ve motor, Hat ve yağ, Tank ve ısı,
+Akümülatör, Sonuçlar ve rapor. Girdiler 300 ms sonra yalnız çekirdekle
+hesaplanır; `InputError.field` ilgili alanı/hücreyi kırmızı işaretler, sonuçlar
+ve rapor düğmeleri temizlenir. Proje `.gwhyd` olarak açılır/kaydedilir;
+Excel/JSON arka plan işiyle, PDF ana iş parçacığında iptal edilebilir işle
+yazılır. Arayüz testleri: `python -m pytest modules/hydraulic_unit/tests -q`.
 
 ## Çalıştırma
 

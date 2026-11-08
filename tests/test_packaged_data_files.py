@@ -14,6 +14,7 @@ REQUIRED = (
     'modules/belt_drive/examples/automatic-synthetic-catalog.json',
     'docs/unfolding/source_inventory.json',
     'docs/unfolding/examples/source_models.json',
+    'examples/ornek_pres_unitesi.gwhyd',
 )
 
 
