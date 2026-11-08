@@ -127,7 +127,8 @@ def test_naming_multiple_found_assemblies_requires_an_explicit_selection(window)
     page.scan();assert not window.jobs.busy and 'listesinden' in page.status_text
 
 
-@pytest.mark.parametrize('mode',('pdf','dxf_dwg','bom','naming'))
+# DXF / DWG uses settings-on-top (ribbon) instead: modules/dxf_dwg/tests/test_ribbon_layout.py.
+@pytest.mark.parametrize('mode',('pdf','bom','naming'))
 def test_transfer_columns_keep_sources_left_results_right_and_commands_visible(window,qtbot,mode):
     page=window.pages[mode];window.navigate(mode)
     for width,height in ((1440,900),(820,560),(1440,900)):
