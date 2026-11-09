@@ -1,6 +1,7 @@
 # Akıllı Parça Bölme
 
 [Teslim/test/performans raporu ve örnek paket](DELIVERY.md).
+[Son kapsamlı denetim ve düzeltmeler](AUDIT.md).
 
 GOKWORKS sol menüsünde **Üretim → Nesting · Sac maliyeti → Akıllı Parça Bölme**.
 İki ayrı ekran aynı kalıcı sayfa kayıt sistemini kullanır. Yeni modül Nesting
@@ -17,6 +18,10 @@ motorunu değiştirmez; SolidWorks veya DWG dönüştürücü gerektirmez.
    DXF okuyucu parçayı sol alt sınırı (0,0) olacak şekilde mm'ye normalleştirir;
    özel merkez ve yasaklı bölgeler bu koordinat sistemindedir. Sınır kutusu
    merkezi ve alan ağırlık merkezi ayrı seçeneklerdir.
+   Birim veya eğri toleransı sonradan değişirse **Yeniden Oku** ile gerçek
+   geometri güncellenmeden bölme başlatılmaz. Yeniden okumada seçili kaynak
+   parça korunur. Nesting'den alınan geometri mevcut hassasiyetindedir; bu
+   kaynakta DXF birim/tolerans alanları pasiftir.
 3. **Parçayı Böl** eşit açısal veya kontur duyarlı hesabı çalıştırır. **Fireyi
    Optimize Et** farklı segmentasyonları gerçek NFP yerleşiminde karşılaştırır.
    Sabit segment sayısı değiştirilmez; kısmi yerleşim başarı sayılmaz.
@@ -90,6 +95,11 @@ başka doğrulanmış tam aday varsa arama devam eder. Hiç tam aday yoksa sonu�
 Her nominal segment tek ve geçerli Polygon olmalıdır. Segment sayısı, alan
 farkı, orijinalle birleşimin simetrik farkı ve çiftler arası çakışma bağımsız
 olarak kontrol edilir. Alan toleransı `max(1e-6 mm², kaynak alanı × 1e-9)`.
+Birleşmiş geometrinin tek bağlantısı, iç kontur sayısı ve dış/iç sınırların
+Hausdorff uzaklığı da denetlenir; sınır eşiği `max(1e-7 mm, en büyük ölçü × 1e-10)`.
+Paylaşılan radyal kenarlar, 360° kapanışı dahil aynı koordinatları kullanır.
+Bu kontrol alanı çok küçük olduğu halde uzun bir sayısal yarık oluşturan
+geometrinin alan testinden geçmesini önler.
 Özgün eğriden poligona yaklaşım sapması bu sayısal korunum toleransından
 ayrıdır; DXF eğri sapması varsayılan 0,05 mm'dir ve Nesting çarpışma payında
 mevcut `Part.geometry_error` sözleşmesiyle korunur.

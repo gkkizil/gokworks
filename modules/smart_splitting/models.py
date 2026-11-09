@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 import math
+from numbers import Real
 
 from shapely.geometry import shape
 from modules.nesting.models import Part, Project, Result, integer, number
@@ -34,27 +35,37 @@ class SplitSettings:
     profile: str = 'Hızlı'
 
     def validate(self):
+        def finite(value):
+            return isinstance(value,Real) and not isinstance(value,bool) and math.isfinite(value)
         for name, value, low, high in (('Segment sayısı',self.count,2,64),('Parça adedi',self.quantity,1,10000)):
             if type(value) is not int: raise ValueError(name+': tam sayı gerekli.')
             integer(value,name,minimum=low,maximum=high)
         if self.count*self.quantity>10000: raise ValueError('Toplam segment adedi 10000 sınırını aşıyor.')
         for key in ('min_width','sheet_width','sheet_height','thickness'):
+            if not finite(getattr(self,key)): raise ValueError(key+': sonlu bir sayı gerekli.')
             number(getattr(self,key),key,positive=True)
         for key in ('min_web','hole_clearance','weld_gap','allowance','gap','margin','kerf'):
+            if not finite(getattr(self,key)): raise ValueError(key+': sonlu bir sayı gerekli.')
             number(getattr(self,key),key)
+        if not math.isfinite(self.sheet_width*self.sheet_height*self.count*self.quantity):
+            raise ValueError('Levha alanı / adet çarpımı hesaplama aralığını aşıyor.')
         if self.weld_gap and self.allowance:
             raise ValueError('Kaynak boşluğu ve işleme payını bu sürümde ayrı senaryolarda kullanın.')
-        if (not math.isfinite(self.start_angle) or self.center_mode not in ('bounds','centroid')
-                or self.profile not in PROFILES or type(self.rotation) is not bool
-                or not self.angles or len(self.angles)>360 or any(not math.isfinite(a) for a in self.angles)):
+        if (not finite(self.start_angle) or self.center_mode not in ('bounds','centroid')
+                or not isinstance(self.profile,str) or self.profile not in PROFILES or type(self.rotation) is not bool
+                or not isinstance(self.angles,(tuple,list)) or not self.angles
+                or len(self.angles)>360 or any(not finite(a) for a in self.angles)):
             raise ValueError('Bölme merkezi, açı, rotasyon veya arama profili geçersiz.')
-        if self.center is not None and (len(self.center)!=2 or any(not math.isfinite(v) for v in self.center)):
+        if self.center is not None and (not isinstance(self.center,(tuple,list)) or len(self.center)!=2 or any(not finite(v) for v in self.center)):
             raise ValueError('Bölme merkezi iki sonlu mm koordinatı olmalı.')
+        if not isinstance(self.forbidden,(tuple,list)): raise ValueError('Yasaklı bölgeler poligon listesi olmalı.')
         for region in self.forbidden:
-            polygon=shape(region)
+            try: polygon=shape(region)
+            except (ValueError,TypeError,AttributeError,KeyError):
+                raise ValueError('Yasaklı bölge geçerli bir poligon olmalı.') from None
             if polygon.geom_type!='Polygon' or polygon.is_empty or not polygon.is_valid:
                 raise ValueError('Yasaklı bölge geçerli bir poligon olmalı.')
-        if self.joining not in ('Kaynak','Cıvata','Diğer') or not self.material:
+        if self.joining not in ('Kaynak','Cıvata','Diğer') or not isinstance(self.material,str) or not self.material.strip():
             raise ValueError('Birleştirme yöntemi veya malzeme geçersiz.')
 
 

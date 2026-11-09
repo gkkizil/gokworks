@@ -3,6 +3,7 @@ from dataclasses import replace
 import hashlib
 import math
 import time
+from numbers import Real
 
 from shapely import union_all
 from shapely.geometry import LineString, Point, Polygon, shape
@@ -18,13 +19,15 @@ def center_for(part, settings):
 
 
 def ray(center, angle, radius):
-    angle=math.radians(angle)
+    angle=math.radians(angle % 360)
     return LineString([center,(center[0]+radius*math.cos(angle),center[1]+radius*math.sin(angle))])
 
 
 def radius_for(g, center):
     x0,y0,x1,y1=g.bounds
-    return 4*max(math.dist(center,corner) for corner in ((x0,y0),(x1,y0),(x1,y1),(x0,y1)))+1
+    radius=4*max(math.dist(center,corner) for corner in ((x0,y0),(x1,y0),(x1,y1),(x0,y1)))+1
+    if not math.isfinite(radius): raise ValueError('Bölme merkezi / kaynak ölçüleri hesaplama aralığını aşıyor.')
+    return radius
 
 
 def equal_angles(settings):
@@ -61,23 +64,31 @@ def split(part, settings, *, mode='equal', angles=None, stop=None):
     started=time.monotonic(); settings.validate(); g=validate_source(part); check_cancel(stop)
     center=center_for(part,settings); radius=radius_for(g,center)
     if mode not in ('equal','smart'): raise ValueError('Bölme yöntemi geçersiz.')
-    angles=tuple(angles) if angles is not None else aware_angles(part,settings,stop=stop) if mode=='smart' else equal_angles(settings)
-    if len(angles)!=settings.count or any(not math.isfinite(a) for a in angles):
+    try:
+        angles=tuple(angles) if angles is not None else aware_angles(part,settings,stop=stop) if mode=='smart' else equal_angles(settings)
+    except TypeError: raise ValueError('Bölme açıları sonlu sayılardan oluşan bir liste olmalı.') from None
+    if len(angles)!=settings.count or any(not isinstance(a,Real) or isinstance(a,bool) or not math.isfinite(a) for a in angles):
         raise ValueError('Bölme açısı sayısı segment sayısıyla aynı olmalı.')
     gaps=[b-a for a,b in zip(angles,(*angles[1:],angles[0]+360))]
     if any(a<=1e-5 or a>=360 for a in gaps): raise ValueError('Bölme açıları sıralı olmalı; kesimler üst üste gelemez.')
     polygons=[]
-    for angle,sweep in zip(angles,gaps):
+    rays=[ray(center,a,radius) for a in angles]
+    for index,(angle,sweep) in enumerate(zip(angles,gaps)):
         check_cancel(stop)
         if settings.forbidden and not all(not ray(center,angle,radius).intersects(shape(r)) for r in settings.forbidden):
             raise ValueError('Bölme çizgisi yasaklı bölgeden geçiyor.')
         if (mode=='smart' or settings.hole_clearance>0) and not safe_ray(g,center,angle,settings,radius):
             raise ValueError('Bölme çizgisi kritik delik/slot yaklaşma mesafesini ihlal ediyor.')
         steps=math.ceil(sweep/60)
-        points=[center]+[ray(center,angle+sweep*i/steps,radius).coords[-1] for i in range(steps+1)]
+        # Both neighboring sectors must use the identical shared endpoint,
+        # including the 360° wrap. Re-evaluating sin/cos creates microscopic
+        # cracks reaching the center that area-only checks cannot detect.
+        points=[center,rays[index].coords[-1]]+[ray(center,angle+sweep*i/steps,radius).coords[-1]
+            for i in range(1,steps)]+[rays[(index+1)%settings.count].coords[-1]]
         polygons.append(g.intersection(Polygon(points)))
     delta,symmetric=validate_partition(g,polygons,settings.count)
-    seams={i:[] for i in range(settings.count)}; neighbors={i:[] for i in range(settings.count)}; length=0.
+    seams={i:[] for i in range(settings.count)}; cutting={i:[] for i in range(settings.count)}
+    neighbors={i:[] for i in range(settings.count)}; length=0.
     for i,angle in enumerate(angles):
         check_cancel(stop)
         j=(i-1)%settings.count
@@ -86,6 +97,7 @@ def split(part, settings, *, mode='equal', angles=None, stop=None):
         common=ray(center,angle,radius).intersection(g).difference(g.boundary.buffer(1e-8))
         if common.length>1e-6:
             seams[i].append(common); seams[j].append(common)
+            cutting[i].append(rays[i]); cutting[j].append(rays[i])
             if j+1 not in neighbors[i]: neighbors[i].append(j+1)
             if i+1 not in neighbors[j]: neighbors[j].append(i+1)
             length+=common.length
@@ -93,11 +105,12 @@ def split(part, settings, *, mode='equal', angles=None, stop=None):
     for i,p in enumerate(polygons):
         check_cancel(stop)
         edges=seams[i]; seam=union_all(edges) if edges else LineString()
+        cutting_lines=union_all(cutting[i]) if cutting[i] else LineString()
         blank=p
         if settings.weld_gap and not seam.is_empty:
-            blank=p.difference(seam.buffer(settings.weld_gap/2,cap_style=2))
+            blank=p.difference(cutting_lines.buffer(settings.weld_gap/2))
         if settings.allowance and not seam.is_empty:
-            blank=p.union(seam.buffer(settings.allowance,cap_style=2).intersection(g))
+            blank=p.union(cutting_lines.buffer(settings.allowance).intersection(g))
         if blank.geom_type!='Polygon' or blank.is_empty or not blank.is_valid:
             raise ValueError('Boşluk / işleme payı bağlantısız veya boş segment üretti.')
         minimum=validate_manufacturing(blank,settings)

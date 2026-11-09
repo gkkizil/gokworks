@@ -18,10 +18,17 @@ def validate_partition(source, segments, count):
         if g.geom_type!='Polygon' or g.is_empty or not g.is_valid or g.area<=epsilon:
             raise ValueError('Bağlantısız ada, sıfır alan veya geçersiz segment oluştu; segment sayısı korunamadı.')
     area_delta=abs(source.area-sum(g.area for g in segments))
-    symmetric=source.symmetric_difference(union_all(segments)).area
+    assembled=union_all(segments)
+    symmetric=source.symmetric_difference(assembled).area
     overlap=sum(a.intersection(b).area for a,b in combinations(segments,2))
     if max(area_delta,symmetric,overlap)>epsilon:
         raise ValueError('Alan korunumu, simetrik fark veya segment çakışma doğrulaması başarısız.')
+    x0,y0,x1,y1=source.bounds
+    contour_epsilon=max(1e-7,max(x1-x0,y1-y0)*1e-10)
+    if (assembled.geom_type!='Polygon' or not assembled.is_valid
+            or len(assembled.interiors)!=len(source.interiors)
+            or source.boundary.hausdorff_distance(assembled.boundary)>contour_epsilon):
+        raise ValueError('Bölümlerin birleşim konturunda bağlantı, yarık veya kontur sapması bulundu.')
     return area_delta,symmetric
 
 

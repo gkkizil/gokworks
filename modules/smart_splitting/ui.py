@@ -19,7 +19,9 @@ class SmartSplittingPage(BasePage):
     def __init__(self,context):
         super().__init__(context,'Akıllı Parça Bölme','Konturu koruyarak bölün, adayları aynı Nesting ayarlarıyla karşılaştırın.')
         self.sources=[]; self.source=None; self.solution=None; self.optimization=None
+        self.import_path=None; self.import_options=None; self.import_stale=False
         self.action('DXF seç',self.import_dialog)
+        self.reload_button=self.action('Yeniden Oku',self.reload_source)
         self.stop_button=self.action('Durdur',self.jobs.cancel,locked=False)
         self.action('Sıfırla',self.clear)
         self.form=ValueForm(self.settings,'smart_splitting/')
@@ -44,6 +46,7 @@ class SmartSplittingPage(BasePage):
         f.text('forbidden','Yasaklı kutular · x,y,en,boy;…','')
         f.combo('unit','DXF birimi tanımsızsa',('Seçilmedi','mm','cm','inch'))
         f.text('tolerance','DXF eğri sapması · mm',.05)
+        f.fields['tolerance'].setToolTip('Okunmuş DXF’de değişiklikten sonra Yeniden Oku gerekir. Nesting’den alınan geometri mevcut hassasiyetini korur.')
         left=QWidget(); ll=QVBoxLayout(left); ll.setContentsMargins(0,0,0,0)
         ll.addWidget(button('Nesting’den seçili parçayı al',self.from_nesting))
         self.source_picker=QComboBox(); self.source_picker.setAccessibleName('Kaynak DXF parçası')
@@ -103,7 +106,10 @@ class SmartSplittingPage(BasePage):
             center_mode='centroid' if f.value('center_mode')=='Alan ağırlık merkezi' else 'bounds',
             angles=tuple(float(a.strip().replace(',','.')) for a in f.value('angles').split(';') if a.strip()),
             rotation=f.value('rotation'),profile=f.value('profile'),material=f.value('material'),joining=f.value('joining'),forbidden=tuple(forbidden))
-        value.validate(); return value
+        value.validate()
+        if value.material not in {m.id for m in new_project().materials}:
+            raise ValueError('Özel kaynak malzemesi bu ekranın kataloğunda yok; kullanacağınız katalog malzemesini açıkça seçin.')
+        return value
 
     def invalidate(self,*args):
         self.solution=None; self.optimization=None
@@ -111,11 +117,21 @@ class SmartSplittingPage(BasePage):
         self.summary.setText('Ayarlar değişti; yeniden bölün veya optimize edin.')
         custom=self.form.value('center_mode')=='Özel merkez'
         for key in ('center_x','center_y'): self.form.fields[key].setEnabled(custom)
+        self.import_stale=False
+        if self.import_path is not None:
+            try:
+                current=(self.form.value('unit'),float(str(self.form.value('tolerance')).replace(',','.')))
+                self.import_stale=current!=self.import_options
+            except (ValueError,TypeError): self.import_stale=True
+            if self.import_stale:
+                self.set_status('DXF birimi / eğri toleransı değişti. Yeni geometri için Yeniden Oku düğmesini kullanın.',True)
         self.update_actions(); self.redraw()
 
     def update_actions(self):
-        self.split_button.setEnabled(not self.busy and self.source is not None)
-        self.optimize_button.setEnabled(not self.busy and self.source is not None)
+        ready=not self.busy and self.source is not None and not self.import_stale
+        self.split_button.setEnabled(ready)
+        self.optimize_button.setEnabled(ready)
+        self.reload_button.setEnabled(not self.busy and self.import_path is not None)
         self.transfer_button.setEnabled(not self.busy and self.solution is not None)
         self.export_button.setEnabled(not self.busy and self.solution is not None)
 
@@ -135,13 +151,20 @@ class SmartSplittingPage(BasePage):
         except ValueError as error: return self.set_status(error,True)
         def operation(sink,stop):
             parts=load_parts(path,unit=None if unit=='Seçilmedi' else unit,tolerance=tolerance,stop=stop)
-            sink.put(('split_sources',parts))
+            sink.put(('split_sources',(parts,str(path),(unit,tolerance))))
         self.jobs.start(self,operation); self.set_status('DXF konturları okunuyor…')
 
-    def set_sources(self,parts):
+    def reload_source(self):
+        if self.import_path is not None: self.load_file(self.import_path)
+
+    def set_sources(self,parts,*,import_path=None,import_options=None):
+        selected=self.source.code if self.source is not None and import_path is not None and import_path==self.import_path else None
+        self.import_path=import_path; self.import_options=import_options
         self.sources=deepcopy(parts); self.source_picker.blockSignals(True); self.source_picker.clear()
+        for key in ('unit','tolerance'): self.form.fields[key].setEnabled(import_path is not None)
         self.source_picker.addItems([p.code for p in self.sources]); self.source_picker.blockSignals(False)
-        self.select_source(0)
+        index=next((i for i,p in enumerate(self.sources) if p.code==selected),0)
+        self.source_picker.setCurrentIndex(index); self.select_source(index)
 
     def select_source(self,index):
         self.source=self.sources[index] if 0<=index<len(self.sources) else None
@@ -158,11 +181,17 @@ class SmartSplittingPage(BasePage):
         try: validate_source(part)
         except ValueError as error: return self.set_status(error,True)
         self.set_sources([part]); self.form.set_value('quantity',part.quantity); self.form.set_value('thickness',part.thickness)
-        if part.material in {m.id for m in new_project().materials}: self.form.set_value('material',part.material)
-        self.set_status('Seçili Nesting parçası kopyalandı; mevcut Nesting listesi korundu.')
+        material=self.form.fields['material']
+        if material.findText(part.material)<0: material.addItem(part.material)
+        self.form.set_value('material',part.material)
+        if part.material not in {m.id for m in new_project().materials}:
+            self.set_status('Kaynak özel malzeme: '+part.material+'. Bölmeden önce kullanacağınız katalog malzemesini açıkça seçin.',True)
+        else: self.set_status('Seçili Nesting parçası kopyalandı; mevcut Nesting listesi korundu.')
 
     def run_split(self,*,optimize=False):
         if not self.can_start() or self.source is None: return
+        if self.import_stale:
+            return self.set_status('DXF birimi / eğri toleransı değişti; önce Yeniden Oku ile geometriyi güncelleyin.',True)
         try: settings=self.settings_value()
         except (ValueError,TypeError) as error: return self.set_status(error,True)
         source=deepcopy(self.source); optimize=optimize or self.form.value('mode')=='Fire optimizasyonu'
@@ -225,7 +254,10 @@ class SmartSplittingPage(BasePage):
 
     def handle_events(self,events):
         for kind,value in events:
-            if kind=='split_sources': self.set_sources(value); self.set_status(f'{len(value)} kaynak parça okundu.')
+            if kind=='split_sources':
+                parts,path,options=value
+                self.set_sources(parts,import_path=path,import_options=options)
+                self.set_status(f'{len(parts)} kaynak parça okundu.')
             elif kind=='split_solution': self.show_solution(value)
             elif kind=='split_optimized':
                 self.optimization=value; self.show_solution(value.solution)
@@ -244,4 +276,7 @@ class SmartSplittingPage(BasePage):
     def clear(self):
         if not self.can_start(): return
         self.sources=[]; self.source=None; self.source_picker.clear(); self.invalidate()
+        self.import_path=None; self.import_options=None; self.import_stale=False
+        for key in ('unit','tolerance'): self.form.fields[key].setEnabled(True)
+        self.update_actions()
         self.info.setText('DXF seçin veya Nesting’den bir parça alın.'); self.set_status('Bölme ekranı sıfırlandı.')
