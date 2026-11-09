@@ -60,3 +60,18 @@ def test_integrated_sparrow_runs_without_engine_selection_in_the_real_workbench(
     assert page.excel_button.isEnabled()
     page.form.set_value('gap','7')
     assert page.result is None and not page.excel_button.isEnabled()
+
+
+def test_legacy_result_cost_edit_preserves_coordinates_without_engine_migration(window,qtbot,monkeypatch):
+    from modules.nesting.engine import nest
+    page=window.pages['nesting'];page.project.parts=[Part.create('Legacy',box(0,0,50,30),quantity=2)]
+    page.project.options.engine='GOKWORKS NFP';page.project.options.quality='Hızlı'
+    page.sync_forms();page.read_parameters();page.refresh();page.show_result(nest(page.project))
+    coordinates=[(p.x,p.y,p.angle) for p in page.result.placements]
+    def forbidden(*args,**kwargs): raise AssertionError('Cost edit must preserve the saved plan')
+    monkeypatch.setattr('modules.nesting.engine.nest',forbidden)
+    monkeypatch.setattr('modules.nesting.solver.nest',forbidden)
+    page.cost_form.set_value('setup','25')
+    qtbot.waitUntil(lambda:page.result is not None and not window.jobs.busy,timeout=8000)
+    assert page.project.options.engine=='GOKWORKS NFP' and page.totals['setup']==25
+    assert [(p.x,p.y,p.angle) for p in page.result.placements]==coordinates

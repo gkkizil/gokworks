@@ -758,7 +758,8 @@ class NestingPage(BasePage):
         titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği')
         o = Options(**{k:number(f.value(k),titles[k]) for k in titles},
                     rotation=f.value('rotation'), angles=angles, grain_locked=f.value('grain_locked'),
-                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1))
+                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1),
+                    engine=self.project.options.engine)
         operations = Operations(**{key:number(self.cost_form.value(key),self.cost_form.form.labelForField(self.cost_form.fields[key]).text())
                                    for key in asdict(self.project.operations)})
         self.project.options = o; self.project.operations = operations
