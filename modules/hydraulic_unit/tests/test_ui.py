@@ -24,6 +24,7 @@ def page(qtbot, tmp_path):
     create_application([])
     context = SimpleNamespace(settings=SettingsStore(tmp_path / 'settings.json'), jobs=JobManager(), appearance='dark')
     page = HydraulicPage(context); qtbot.addWidget(page); page.resize(1400, 900); page.show(); qtbot.wait(10)
+    page.open_detailed()  # mevcut ayrıntılı ekran regresyonları; kolay giriş ayrı test edilir
     yield page
     page.cancel_pdf(); page.settings.flush()
 
