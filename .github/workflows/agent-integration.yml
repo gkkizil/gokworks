@@ -50,6 +50,7 @@ jobs:
           script: |
             const {prepare} = require('./.github/scripts/agent-integration.cjs');
             const matrix = await prepare({github, context, core,
+              sleep: ms => new Promise(resolve => setTimeout(resolve, ms)),
               retryFailed: context.eventName === 'workflow_dispatch' && context.payload.inputs?.retry_failed === 'true'});
             core.setOutput('matrix', JSON.stringify(matrix));
             core.setOutput('has_work', matrix.include.length > 0 ? 'true' : 'false');

@@ -111,7 +111,7 @@ async function latestStatus(github, repo, head) {
   return data.find(status => status.context === STATUS);
 }
 
-async function prepare({github, context, core, retryFailed = false, now = Date.now()}) {
+async function prepare({github, context, core, retryFailed = false, now = Date.now(), sleep = null}) {
   const repo = context.repo;
   const base = await branchSha(github, repo, 'main');
   const candidates = [];
@@ -142,8 +142,20 @@ async function prepare({github, context, core, retryFailed = false, now = Date.n
     const mode = await validationMode(github, repo, comparison, previous, base);
     const cachedProof = sameBase && previous.state === 'success';
     if (!cachedProof && !retryFailed && context.eventName !== 'workflow_dispatch' && settling(commit, now)) {
-      core.notice(`${branch}: pushed less than ${SETTLE_MINUTES} min ago; waiting for further pushes before validating.`);
-      continue;
+      // Scheduled scans are not reliable (GitHub may delay them for hours), so wait here
+      // rather than leave the branch for a later scan. A newer push during the wait
+      // queues its own run, which validates the newer head instead.
+      if (!sleep) {
+        core.notice(`${branch}: pushed less than ${SETTLE_MINUTES} min ago; waiting for further pushes before validating.`);
+        continue;
+      }
+      const remaining = SETTLE_MINUTES * 60000 - (now - Date.parse(commit.commit.committer.date));
+      core.notice(`${branch}: pushed moments ago; waiting ${Math.ceil(remaining / 1000)} s for further pushes.`);
+      await sleep(Math.min(Math.max(remaining, 0), SETTLE_MINUTES * 60000));
+      if (await branchSha(github, repo, branch) !== head) {
+        core.notice(`${branch}: a newer push arrived while waiting; its own run validates it.`);
+        continue;
+      }
     }
     if (!pull) {
       ({data: pull} = await github.rest.pulls.create({

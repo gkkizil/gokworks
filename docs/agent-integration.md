@@ -35,8 +35,10 @@ Hızlandırmalar (9 Kasım 2026):
   birleştirilir; test edilen kod değişmemiştir. Kod veya CI dosyası eklenmişse
   yeni doğrulama gerekir.
 - **Push yığınlarını bekleme:** Ajanlar kısa sürede birkaç push yapar. Son
-  commit'i 5 dakikadan yeni olan dal bir sonraki taramaya bırakılır; elle
-  tetikleme ve `retry_failed` bu beklemeyi atlar.
+  commit'i 5 dakikadan yeni olan dal için hazırlık işi commit 5 dakikalık olana kadar
+  bekler (zamanlanmış taramalara güvenilmez; GitHub onları saatlerce geciktirebilir).
+  Bu sırada yeni push gelirse o push'un kendi çalışması yeni head'i doğrular.
+  Elle tetikleme ve `retry_failed` beklemeyi atlar.
 - **Paralel Windows işleri:** Tam paket test dosyası bazında, ağırlıkla dengelenmiş
   3 parçaya bölünür (`run_windows_tests.py --shard i/3`). Her parça
   `GOKWORKS agent validation · i/3` durumunu yazar; merge işi bunları birleştirip

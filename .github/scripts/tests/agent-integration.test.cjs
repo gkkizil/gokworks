@@ -438,3 +438,17 @@ for (const filename of ['gui_qt/app.py', '.github/workflows/agent-integration.ym
     assert.deepEqual(await finish({...f, candidates: [item]}), []);
   });
 }
+
+test('with a sleep function the push run itself waits out the burst instead of relying on schedules', async () => {
+  const f = fixture(), now = Date.parse('2026-11-09T12:00:00Z'), waits = [];
+  const getBranch = f.github.rest.repos.getBranch;
+  f.github.rest.repos.getBranch = async args => {
+    const {data} = await getBranch(args);
+    return {data: {commit: {...data.commit, commit: {committer: {date: new Date(now - 2 * 60000).toISOString()}}}}};
+  };
+  const sleep = async ms => { waits.push(ms); if (waits.length === 2) f.refs['agent/claude'] = 'e'.repeat(40); };
+  const matrix = await prepare({...f, now, sleep});
+  assert.deepEqual(waits, [3 * 60000, 3 * 60000]);
+  assert.deepEqual(branchesOf(matrix), ['agent/codex']);
+  assert.ok(f.notices.some(text => text.includes('newer push arrived')));
+});
