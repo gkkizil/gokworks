@@ -827,17 +827,22 @@ class ToleranceStackPage(BasePage):
     def watch_sources(self):
         if self.source_watcher.files():self.source_watcher.removePaths(self.source_watcher.files())
         if self.project.sources:self.source_watcher.addPaths([s.path for s in self.project.sources])
-        self._source_seen={s.path:(s.size,s.modified_ns) for s in self.project.sources}
+        # Like the watcher, report changes from now on; a project opened with missing or
+        # changed sources already says so in its own message.
+        self._source_seen={s.path:self.source_state(s.path) for s in self.project.sources}
         self.source_poll.start() if self._source_seen else self.source_poll.stop()
+
+    @staticmethod
+    def source_state(path):
+        try: state=os.stat(path); return (state.st_size,state.st_mtime_ns)
+        except OSError: return None
 
     def poll_sources(self):
         for path,stamp in list(self._source_seen.items()):
-            try: state=os.stat(path); current=(state.st_size,state.st_mtime_ns)
-            except OSError: current=None
-            if current!=stamp:
-                self._source_seen[path]=current; self.source_changed(path)
+            if self.source_state(path)!=stamp: self.source_changed(path)
 
     def source_changed(self,path):
+        if path in self._source_seen: self._source_seen[path]=self.source_state(path)   # one report per change
         self.invalidate();self.set_status('Kaynak teknik resim değişti veya silindi. Ölçüleri yeniden tarayın; eski sonuç kaldırıldı.',True)
 
     def export_report(self,kind):

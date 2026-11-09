@@ -446,10 +446,12 @@ test('with a sleep function the push run itself waits out the burst instead of r
     const {data} = await getBranch(args);
     return {data: {commit: {...data.commit, commit: {committer: {date: new Date(now - 2 * 60000).toISOString()}}}}};
   };
-  const sleep = async ms => { waits.push(ms); if (waits.length === 2) f.refs['agent/claude'] = 'e'.repeat(40); };
+  // The first branch waits 3 min and gets a newer push meanwhile; the second branch, pushed at
+  // the same moment, is 5 min old after that wait and is validated without waiting again.
+  const sleep = async ms => { waits.push(ms); f.refs['agent/codex'] = 'e'.repeat(40); };
   const matrix = await prepare({...f, now, sleep});
-  assert.deepEqual(waits, [3 * 60000, 3 * 60000]);
-  assert.deepEqual(branchesOf(matrix), ['agent/codex']);
+  assert.deepEqual(waits, [3 * 60000]);
+  assert.deepEqual(branchesOf(matrix), ['agent/claude']);
   assert.ok(f.notices.some(text => text.includes('newer push arrived')));
 });
 

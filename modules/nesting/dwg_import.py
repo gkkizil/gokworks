@@ -141,7 +141,10 @@ def _drop_invalid_handles(dxf):
     for pair in pairs:
         if pair[0].strip()==b'0' or not records:records.append([])
         records[-1].append(pair)
-    invalid=lambda record:any(code.strip() in (b'5',b'105') and value.strip()==b'0' for code,value in record)
+    # Section and table frames are never dropped: losing one would break the whole file.
+    frame={b'SECTION',b'ENDSEC',b'TABLE',b'ENDTAB',b'EOF'}
+    invalid=lambda record:(record[0][1].strip() not in frame and
+                           any(code.strip() in (b'5',b'105') and value.strip()==b'0' for code,value in record))
     kept=[record for record in records if not invalid(record)]
     if len(kept)==len(records):return None
     cleaned=dxf.with_name(dxf.stem+'-temiz.dxf')

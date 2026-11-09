@@ -130,3 +130,47 @@ def test_dwg_files_load_through_the_bundled_converter_with_names_and_quantities(
     assert 'LibreDWG' in page.sources[0].notes[-1] and drawing.read_bytes() == b'AC1032 test drawing'
     page.form.set_value('count', 2); page.run_split(); finish(window, qtbot)
     assert page.solution is not None and page.solution.settings.quantity == 6
+
+
+def test_two_files_with_the_same_short_name_stay_apart_in_nesting(window, qtbot, tmp_path):
+    from modules.smart_splitting.tests.test_geometry import circle_dxf as make
+    page = window.pages['smart_splitting']; (tmp_path/'a').mkdir()
+    first = make(tmp_path/'a'/'Flans - 3 mm - 1 adet.dxf', radius=120); second = make(tmp_path/'Flans - 2 mm - 1 adet.dxf', radius=90)
+    page.load_files([first, second]); finish(window, qtbot)
+    assert [s.code for s in page.sources] == ['Flans', 'Flans_2']
+    page.load_files([second]); finish(window, qtbot)                       # the same file again is not added twice
+    assert len(page.sources) == 2
+    page.form.set_value('count', 3); page.run_all(); finish(window, qtbot); page.transfer()
+    codes = [p.code for p in window.pages['nesting'].project.parts]
+    assert len(codes) == 6 and len(set(codes)) == 6 and 'Flans_2_SEG_001' in codes
+
+
+def test_a_failed_batch_transfer_leaves_nesting_exactly_as_it_was(window, qtbot, tmp_path, monkeypatch):
+    from modules.smart_splitting import adapter
+    from modules.smart_splitting.tests.test_geometry import circle_dxf as make
+    page = window.pages['smart_splitting']; nesting = window.pages['nesting']
+    page.load_files([make(tmp_path/'A - 1 adet.dxf', radius=80), make(tmp_path/'B - 1 adet.dxf', radius=70)]); finish(window, qtbot)
+    page.form.set_value('count', 3); page.form.set_value('gap', 7); page.run_all(); finish(window, qtbot)
+    parts = [p.id for p in nesting.project.parts]; gap = nesting.project.options.gap
+    transfers = dict(getattr(nesting, '_split_transfers', {})); real = adapter.transfer_to_nesting; calls = []
+
+    def second_fails(target, solution):
+        calls.append(solution)
+        if len(calls) == 2: raise ValueError('ikinci parça aktarılamadı')
+        return real(target, solution)
+    monkeypatch.setattr(adapter, 'transfer_to_nesting', second_fails)
+    page.transfer()
+    assert [p.id for p in nesting.project.parts] == parts and nesting.project.options.gap == gap
+    assert getattr(nesting, '_split_transfers', {}) == transfers and 'ikinci parça' in page.status_text
+
+
+def test_export_suggests_the_name_of_the_part_that_was_split(window, qtbot, tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QFileDialog
+    from modules.smart_splitting.tests.test_geometry import circle_dxf as make
+    page = window.pages['smart_splitting']
+    page.load_files([make(tmp_path/'Bir - 1 adet.dxf', radius=80), make(tmp_path/'Iki - 1 adet.dxf', radius=70)]); finish(window, qtbot)
+    page.form.set_value('count', 3); page.source_picker.setCurrentIndex(0); page.run_split(); finish(window, qtbot)
+    page.source_picker.setCurrentIndex(1); asked = []
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda parent, title, name, *rest: (asked.append(name), ('', ''))[1])
+    page.export_dialog()
+    assert asked == ['Bir_SEGMENTLER']
