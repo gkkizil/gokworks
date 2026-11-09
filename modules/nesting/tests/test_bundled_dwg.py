@@ -132,3 +132,38 @@ def test_windows_build_bundles_only_the_pinned_converter_with_its_notice():
     assert 'GPL-3.0-or-later' in notice and 'libredwg-0.13.3.tar.xz' in notice
     assert (ROOT/'packaging/licenses/GPL-3.0-only.txt').is_file()
     assert 'packaging/vendor/' in (ROOT/'.gitignore').read_text(encoding='utf-8')
+
+
+def with_placeholder_objects(path, duplicate=False):
+    """LibreDWG writes unconvertible objects (e.g. MLEADERSTYLE) with the invalid handle 0."""
+    text = path.read_text(encoding='utf-8'); at = text.rindex('  0\nENDSEC')
+    text = text[:at] + '  0\nMLEADERSTYLE\n  5\n0\n330\nC\n100\nAcDbMLeaderStyle\n' + text[at:]
+    if duplicate:                                   # a second, unrelated object reusing an existing handle
+        at = text.rindex('  0\nENDSEC')
+        text = text[:at] + '  0\nDICTIONARYVAR\n  5\nC\n330\nC\n100\nDictionaryVariables\n280\n0\n  1\nx\n' + text[at:]
+    path.write_text(text, encoding='utf-8')
+
+
+@pytest.mark.parametrize('duplicate', [False, True])
+def test_converter_placeholders_with_handle_zero_are_dropped_and_geometry_is_read(tmp_path, duplicate):
+    dxf = tmp_path/'p.dxf'; write_dxf(dxf); with_placeholder_objects(dxf, duplicate)
+    with pytest.raises(ValueError):
+        ezdxf.readfile(dxf)                          # ezdxf alone rejects the whole file, even in recover mode
+    parts = dwg_import._read_converted(dxf, None, {})
+    assert len(parts) == 1 and parts[0].polygon.area == pytest.approx(600)
+
+
+def test_a_dxf_without_placeholders_is_not_rewritten(tmp_path):
+    dxf = tmp_path/'p.dxf'; write_dxf(dxf)
+    assert dwg_import._drop_invalid_handles(dxf) is None
+
+
+def test_bundled_converter_output_with_placeholders_reads_end_to_end(tmp_path, monkeypatch, no_oda):
+    body = LIBREDWG + textwrap.dedent('''
+        text = open(out, encoding='utf-8').read(); at = text.rindex('  0\\nENDSEC')
+        open(out, 'w', encoding='utf-8').write(text[:at] + '  0\\nMLEADERSTYLE\\n  5\\n0\\n330\\nC\\n' + text[at:])
+    ''')
+    monkeypatch.setenv('GOKWORKS_LIBREDWG_DWG2DXF', str(fake_tool(tmp_path, 'dwg2dxf', body)))
+    source = tmp_path/'Kapak - 2 mm - 1 adet.dwg'; source.write_bytes(b'AC1015 x')
+    parts = read_dwg(source)
+    assert len(parts) == 1 and parts[0].polygon.area == pytest.approx(600) and source.read_bytes() == b'AC1015 x'
