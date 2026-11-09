@@ -50,3 +50,26 @@ Kod değişiklikleri: `beginner.py` (Qt'siz dönüştürme/örnek hareket),
 `beginner_view.py` (kolay giriş), `ui.py` (görünüm seçimi ve mevcut servislere bağlama).
 `tests/test_beginner_ui.py` ve kök `tests/hydraulic_unit/test_beginner_adapter.py`
 eklendi. Mevcut UI testleri ayrıntılı görünümü açıkça seçerek çalışır.
+
+## Arayüz tasarımı — 9 Kasım 2026 (Claude)
+
+Kolay görünüm aynı davranış ve veri sözleşmesiyle yeniden düzenlendi:
+
+- **Adım çubuğu:** 1 Ölçüler › 2 Hareketler › 3 Sonuç ve rapor; bulunulan adım,
+  “Adım n/3” açıklaması, altta Geri / “Devam: …” ve sağda hesap durumu
+  (Hesaplanıyor… / Hesap güncel · n kritik / Girdi hatası · hesap durdu / Rapor iptal edildi).
+  Hatalı alanın adımı “düzeltin” ile işaretlenir.
+- **Ölçüler:** her alanın yanında birim, altında “nereden bulunur” açıklaması ve örnek;
+  kesit çizimi piston çapını iç çap olarak, gövde dış çapını ayrı ve “girmeyin” notuyla,
+  mil çapını ve stroku gösterir; odaklanılan ölçü vurgulanır. Otomatik hesaplanan
+  alanlar (çekirdek `areas`) ayrıca etiketlenir.
+- **Hareketler:** tek tabloda “Ne kadar yol alsın? / Kaç saniye sürsün? / Gerekli itme–çekme
+  kuvveti” sütunları, hücre yanında birim; bekleme/boşta hücreleri neden boş olduğunu yazar.
+  Hızdan türetilen süreler eğik yazılır ve açıklanır. Konum–zaman şeridi hesap sonucundan çizilir.
+- **Sonuç:** karar başlığı (durum + konu), “Ne yapabilirsiniz” içeren uyarı satırları ve
+  “Göster →” ile ilgili alana/ayara geçiş; altı karar kartı İHTİYAÇ / MEVCUT / ÖNERİ
+  ayrımıyla; basınç ve mil gücü grafikleri eksen, birim ve faz sınırlarıyla; varsayımlar açılır bölümde.
+- **Hata:** üstte “Girdi hatası · hesap durdu” şeridi ve “Alana git →”; sonuçlar ve raporlar kapanır.
+
+Ayrıca hata işaretlemesinin tablo `cellChanged` sinyaliyle sürekli yeniden hesap
+döngüsü başlatması giderildi. Testler: `tests/test_easy_design.py`.

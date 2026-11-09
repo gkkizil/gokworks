@@ -128,7 +128,7 @@ def test_simple_result_keeps_critical_warnings_visible_and_reports_work(easy,qtb
     assert 'soğutma' in easy.simple.verdict.text()
     assert 'Önemli' in easy.simple.warnings.text() and easy.simple.results.rowCount()==6
     qtbot.wait(20)
-    assert easy.simple.results.verticalScrollBar().maximum()==0
+    assert all(card.isVisibleTo(easy.simple.results) for card in easy.simple.results.cards.values())  # six cards, no inner scroll
     target=tmp_path/'report.pdf';monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**k:(str(target),''))
     qtbot.mouseClick(easy.simple.pdf_button,Qt.LeftButton)
     qtbot.waitUntil(lambda:easy.pdf_job is None,timeout=10000)

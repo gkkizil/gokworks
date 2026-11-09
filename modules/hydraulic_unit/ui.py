@@ -30,6 +30,7 @@ from . import serialization
 from .guidance import STEPS, ADVANCED, SECTION_HELP, ACTIONS
 from .beginner import basic_cycle, simple_supported
 from .beginner_view import BeginnerView
+from .charts import StepChart
 
 # ---------------------------------------------------------------------------------------------
 # Display units (inputs follow the metric workshop units; the result table follows display_units)
@@ -151,49 +152,6 @@ PHASE_COLUMNS = [('name', 'Faz', 'text'), ('cylinder_id', 'Silindir', 'cyl'), ('
                  ('duration', 'Süre · s', 's'), ('back_pressure', 'Karşı basınç · bar', 'bar')]
 
 
-class StepChart(QWidget):
-    """Cumulative-time step curve of one phase quantity (requirement, not supply)."""
-
-    def __init__(self, title, unit):
-        super().__init__()
-        self.title, self.unit, self.points, self.appearance = title, unit, [], 'dark'
-        self.setMinimumHeight(150)
-
-    def set_values(self, durations, values):
-        self.points = list(zip(durations, values)); self.update()
-
-    def paintEvent(self, event):
-        c = COLORS[self.appearance]
-        p = QPainter(self); p.setRenderHint(QPainter.Antialiasing)
-        p.fillRect(self.rect(), QColor(c['canvas']))
-        p.setPen(QColor(c['text'])); bold = QFont(self.font()); bold.setBold(True); p.setFont(bold)
-        p.drawText(QRectF(8, 4, self.width() - 16, 18), Qt.AlignLeft, f'{self.title} · {self.unit}')
-        p.setFont(self.font())
-        left, top, right, bottom = 54, 28, self.width() - 12, self.height() - 26
-        if not self.points or right - left < 40 or bottom - top < 30:
-            p.setPen(QColor(c['muted'])); p.drawText(self.rect(), Qt.AlignCenter, 'Geçerli sonuç yok'); return
-        total = sum(d for d, _ in self.points) or 1
-        top_value = max(v for _, v in self.points) or 1
-        top_value *= 1.15
-        sx = (right - left) / total; sy = (bottom - top) / top_value
-        p.setPen(QPen(QColor(c['grid']), 1))
-        for i in range(5):
-            y = bottom - (bottom - top) * i / 4
-            p.drawLine(QPointF(left, y), QPointF(right, y))
-            p.setPen(QColor(c['muted'])); p.drawText(QRectF(0, y - 8, left - 6, 16), Qt.AlignRight | Qt.AlignVCenter, fmt(top_value * i / 4, 1))
-            p.setPen(QPen(QColor(c['grid']), 1))
-        p.setPen(QColor(c['muted']))
-        p.drawText(QRectF(left, bottom + 4, right - left, 18), Qt.AlignRight, f'Σt = {fmt(total, 2)} s')
-        pen = QPen(QColor(c['accent']), 2); p.setPen(pen)
-        t = 0.; previous = None
-        for duration, value in self.points:
-            x0, x1, y = left + t * sx, left + (t + duration) * sx, bottom - value * sy
-            if previous is not None:
-                p.drawLine(QPointF(x0, previous), QPointF(x0, y))
-            p.drawLine(QPointF(x0, y), QPointF(x1, y)); previous = y; t += duration
-        p.end()
-
-
 class FormPage(QWidget):
     """Dar alanda ayar gruplarını alt alta dizer; sayılar kesilmez."""
     def resizeEvent(self, event):
@@ -250,7 +208,10 @@ class HydraulicPage(BasePage):
         self.units.currentIndexChanged.connect(self.changed)
         top.addWidget(label('Proje', 'muted')); top.addWidget(self.name, 1); top.addStretch(1)
         self.view_mode=QComboBox();self.view_mode.addItem('Kolay kullanım',0);self.view_mode.addItem('Ayrıntılı ayarlar',1)
-        self.view_mode.setAccessibleName('Hidrolik giriş görünümü');top.addWidget(self.view_mode)
+        self.view_mode.setAccessibleName('Hidrolik giriş görünümü')
+        self.view_mode.setToolTip('Kolay kullanım: üç adımda temel hesap. Ayrıntılı ayarlar: pompa, hat, yağ, tank ve çok silindirli projeler. '
+                                  'Görünüm değişince girilen bilgiler korunur.')
+        top.addWidget(label('Görünüm', 'muted')); top.addWidget(self.view_mode)
         top.addWidget(label('Sonuç birimi', 'muted')); top.addWidget(self.units)
         self.layout.addLayout(top)
 
@@ -285,7 +246,7 @@ class HydraulicPage(BasePage):
         self.view_mode.setCurrentIndex(1 if preferred==1 or not simple_supported(self.project) else 0)
         self.input_stack.setCurrentIndex(self.view_mode.currentIndex())
         self.view_mode.currentIndexChanged.connect(self.switch_view)
-        self.statusChanged.connect(lambda text,error:self.simple.status.setText(text))
+        self.statusChanged.connect(self.simple.on_status)
         self.populate(); self.recalculate()
         self.update_step()
         self.apply_view_layout()
@@ -417,7 +378,7 @@ class HydraulicPage(BasePage):
         self.cylinder_advanced = QCheckBox('Verim ve burkulma ayarlarını göster')
         self.cylinder_advanced.toggled.connect(self.show_cylinder_advanced)
         box.addWidget(self.cylinder_advanced)
-        self.cylinder_table = _table([title for _, title, _ in CYL_COLUMNS], elastic=7, defaults={0: 80}); self.cylinder_table.setMinimumHeight(120)
+        self.cylinder_table = _table([title for _, title, _ in CYL_COLUMNS], elastic=7, defaults={0: 104}); self.cylinder_table.setMinimumHeight(120)
         self.cylinder_table.setMaximumHeight(220)
         self.show_cylinder_advanced(False)
         self.cylinder_table.cellChanged.connect(self.changed)
@@ -750,7 +711,7 @@ class HydraulicPage(BasePage):
         self.result = None
         self.headline.setText('Hesap güncelleniyor…')
         if hasattr(self,'simple'):
-            self.simple.verdict.setText('Bilgiler değişti; hesap güncelleniyor…');self.simple.results.setRowCount(0)
+            self.simple.mark_pending()
         self.status_note.setText('Girdiler değişti. Sonuçlar yeniden hesaplanıyor; rapor almak için tamamlanmasını bekleyin.')
         self.refresh_actions()
         self.timer.start()
@@ -771,11 +732,13 @@ class HydraulicPage(BasePage):
             except RuntimeError:
                 pass
         for table in (self.cylinder_table, self.phase_table):
+            blocked = table.blockSignals(True)   # marking is not an edit: no cellChanged → no recalculation loop
             for row in range(table.rowCount()):
                 for col in range(table.columnCount()):
                     item = table.item(row, col)
                     if item is not None and item.data(Qt.UserRole):
                         item.setBackground(QColor(0, 0, 0, 0)); item.setToolTip(''); item.setData(Qt.UserRole, False)
+            table.blockSignals(blocked)
         self.invalid_widgets = []
 
     def mark_invalid(self, field, message):
@@ -791,8 +754,10 @@ class HydraulicPage(BasePage):
                     self.cylinder_advanced.setChecked(True)
                 item = table.item(row, col)
                 if item is not None:
+                    blocked = table.blockSignals(True)   # colouring a cell must not count as an edit
                     item.setBackground(QColor(COLORS[self.context.appearance]['danger']).lighter(160 if self.context.appearance == 'light' else 60))
                     item.setToolTip(message); item.setData(Qt.UserRole, True)
+                    table.blockSignals(blocked)
                 widget = table.cellWidget(row, col)
                 if widget is not None:
                     self._flag(widget, message)
@@ -897,7 +862,7 @@ class HydraulicPage(BasePage):
         short = {'Maksimum gerekli basınç':'Basınç ihtiyacı','Maksimum gerekli debi':'Debi ihtiyacı',
                  'Emniyet valfi ayarı':'Valf ayarı','Seçilen motor':'Motor seçimi',
                  'Nominal deplasman adayı':'Pompa hacmi','Gerekli soğutucu':'Soğutucu ihtiyacı'}
-        summary = [(short.get(name,name), f'{fmt(lookup[name][0], 2)} {lookup[name][1]}') for name in
+        summary = [(short.get(name,name), f"{fmt(lookup[name][0], 2)} {lookup[name][1].replace('cm3/rev', 'cm³/dev')}") for name in
                    ('Maksimum gerekli basınç', 'Maksimum gerekli debi', 'Emniyet valfi ayarı', 'Tepe mil gücü',
                     'Seçilen motor', 'Nominal deplasman adayı', 'Çevrim süresi', 'Gerekli soğutucu') if name in lookup]
         summary.insert(0, ('Pompa yeterli mi?', 'evet' if cycle['demand_met'] else 'HAYIR'))
@@ -1181,6 +1146,8 @@ class HydraulicPage(BasePage):
             self.refresh_actions()
 
     def theme_changed(self):
+        if hasattr(self, 'simple'):
+            self.simple.apply_theme()
         for chart in getattr(self, 'charts', {}).values():
             chart.appearance = self.context.appearance; chart.update()
         if self.result is not None:
