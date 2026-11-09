@@ -16,11 +16,11 @@ Arayüz ve menü entegrasyonu ayrı çalışmadır; henüz masaüstü menüsünd
 ## Başlangıç
 
 <!-- windows-release:start -->
-**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-42392941147-1/GOKWORKS.exe)
+**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-42563795042-1/GOKWORKS.exe)
 
 **GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
-Uygulama kodu: `1f31d66` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/42392941147) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+Uygulama kodu: `1f31d66` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/42563795042) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 <!-- windows-release:end -->
 
 1. Elinizde oluşturulmuş `GOKWORKS.exe` varsa çift tıklayarak açın. Kaynak
