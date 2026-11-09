@@ -49,6 +49,10 @@ def icon(name, color='#80B6F5'):
         painter.drawRect(16, 20, 10, 21)
         for y in (25, 30, 35):
             painter.drawLine(16, y, 26, y - 3)
+    elif name == 'smart_splitting':
+        painter.drawEllipse(5,5,38,38)
+        painter.drawLine(24,5,24,43); painter.drawLine(5,24,43,24)
+        painter.drawEllipse(18,18,12,12)
     elif name == 'nesting':
         painter.drawRect(5, 6, 38, 35)
         painter.drawRect(10, 11, 14, 12)
