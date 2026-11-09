@@ -90,6 +90,22 @@ def test_an_arbitrary_text_bearing_or_geometry_block_is_not_discarded(tmp_path,o
     with pytest.raises(ValueError,match='Açık|dallanan'):read_dxf(path,drawing_layout=True)
 
 
+def test_nested_rotated_caption_blocks_preserve_parent_cut_geometry(tmp_path):
+    doc=ezdxf.new();doc.units=4
+    title=doc.blocks.new('caption')
+    title.add_mtext('VIEW',dxfattribs={'char_height':2})
+    title.add_attdef('LETTER',(10,0),dxfattribs={'height':2})
+    title.add_line((10,-1),(18,-1))
+    parent=doc.blocks.new('assembly-cell');cell(parent,0,0,2,hole=False)
+    parent.add_blockref('caption',(20,80)).add_auto_attribs({'LETTER':'E2'})
+    doc.modelspace().add_blockref('assembly-cell',(3200,1500),
+                                dxfattribs={'rotation':27,'xscale':2,'yscale':2})
+    path=tmp_path/'nested.dxf';doc.saveas(path)
+    part=read_dxf(path,drawing_layout=True)[0]
+    assert part.quantity==2 and part.area==pytest.approx(6000)
+    assert len(ezdxf.read(StringIO(part.original_dxf)).modelspace())==1
+
+
 def test_skew_and_endpoint_frames_with_page_border_and_caption_blocks_require_review(tmp_path):
     doc=ezdxf.new();doc.units=4;model=doc.modelspace()
     cell(model,0,0,2,hole=False);cell(model,150,0,8,hole=False)
