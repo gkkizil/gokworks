@@ -19,10 +19,12 @@ yerleşimini kullanır; SolidWorks veya DWG dönüştürücü gerektirmez.
    özel merkez ve yasaklı bölgeler bu koordinat sistemindedir. Sınır kutusu
    merkezi ve alan ağırlık merkezi ayrı seçeneklerdir.
    Birim veya eğri toleransı sonradan değişirse **Yeniden Oku** ile gerçek
-   geometri güncellenmeden bölme başlatılmaz. Yeniden okumada seçili kaynak
-   parça korunur. Nesting'den alınan geometri mevcut hassasiyetindedir; bu
-   kaynakta DXF birim/tolerans alanları pasiftir.
-3. **Parçayı Böl** eşit açısal veya kontur duyarlı hesabı çalıştırır. **Fireyi
+   geometri güncellenmeden bölme başlatılmaz. Yeniden okuma listedeki bütün
+   dosyaları okur; seçili parça korunur. Nesting'den alınan geometri mevcut
+   hassasiyetindedir; bu kaynakta DXF birim/tolerans alanları pasiftir.
+3. **Parçayı Böl** seçili parçayı, **Tümünü Böl** listedeki bütün parçaları aynı
+   ayarlarla tek işte böler (her parçanın sonucu/hatası listede görünür; bir
+   parçanın hatası diğerlerini durdurmaz). Bölme hesabı eşit açısal veya kontur duyarlıdır. **Fireyi
    Optimize Et** farklı segmentasyonları birleşik Sparrow + GOKWORKS yerleşiminde karşılaştırır.
    Sabit segment sayısı değiştirilmez; kısmi yerleşim başarı sayılmaz.
 4. Segment tablosunda nominal/imalat alanı, dış ölçüler, geometrik genişlik,

@@ -56,9 +56,18 @@ test kopyası ve kurulu ODA gerektirir. Bu ortamda ODA bulunmadığından bu can
 **DXF ekle → Çerçeveli toplu çizim · her parçanın adedini çizimden oku**
 seçeneğini açın. Dosyadaki her kapalı dikdörtgen çerçeve, içindeki tek kesim
 parçası ve adet yazısıyla eşleşir. Çerçeveler kapalı polyline veya dört LINE
-olabilir; döndürülmüş çerçeveler de desteklenir. Renk, katman adı, sıra,
+olabilir; döndürülmüş çerçeveler de desteklenir. Ayrı çizgilerdeki köşeler,
+mevcut uç birleştirme toleransı içinde yalnız çerçeve tespitinde eşleştirilir.
+Hafif kaymış, her köşesi 90°'den en fazla 1° sapan dışbükey dörtgenler de
+çizim çerçevesi olabilir; özgün sınır kullanılır, parça geometrisi düzeltilmez.
+Renk, katman adı, sıra,
 parça sayısı veya sabit bir çizim şablonu aranmaz. Bir dış sayfa çerçevesi
 ve parça çerçeveleri kesim geometrisine dahil edilmez.
+
+`VIEW` / `DETAIL` / `SCALE` başlığı, `LETTER` / `SCALE` özniteliği ve en fazla
+bir alt çizgisi olan standart görünüş başlık bloklarında alt çizgi açıklama
+sayılır. Blok adı veya katman adına göre çizgi silinmez; genel metinli bloklar
+ve kapalı kesim geometrisi bu kuralla dışlanmaz.
 
 `7 adet`, `7 AD`, `7 pcs`, `QTY: 7` ve `adet: 7` biçimindeki TEXT, MTEXT
 ve blok ATTRIB yazıları okunur. Adet yazısının yerleşim noktası çerçevenin
