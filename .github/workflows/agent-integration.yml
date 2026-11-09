@@ -50,12 +50,13 @@ jobs:
           script: |
             const {prepare} = require('./.github/scripts/agent-integration.cjs');
             const matrix = await prepare({github, context, core,
+              sleep: ms => new Promise(resolve => setTimeout(resolve, ms)),
               retryFailed: context.eventName === 'workflow_dispatch' && context.payload.inputs?.retry_failed === 'true'});
             core.setOutput('matrix', JSON.stringify(matrix));
             core.setOutput('has_work', matrix.include.length > 0 ? 'true' : 'false');
 
   validate:
-    name: Windows validation (${{ matrix.branch }})
+    name: Windows validation (${{ matrix.branch }} · ${{ matrix.mode }} ${{ matrix.shard }}/${{ matrix.shards }})
     needs: prepare
     if: needs.prepare.outputs.has_work == 'true'
     runs-on: windows-latest
@@ -74,7 +75,18 @@ jobs:
       QT_QPA_PLATFORM: windows
       AGENT_BASE_SHA: ${{ matrix.base }}
       AGENT_WORKFLOW_SHA: ${{ github.workflow_sha }}
+      # Full-suite validations run as several parallel parts; each part records its own
+      # status context and the merge job combines them into the single gate status.
+      SHARD: ${{ matrix.shard }}
+      SHARDS: ${{ matrix.shards }}
     steps:
+      - name: Load the trusted automation script that names the status contexts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: automation
+          sparse-checkout: .github/scripts
       - uses: actions/checkout@v4
         if: matrix.cached != true
         with:
@@ -110,23 +122,26 @@ jobs:
         if: matrix.cached != true
         run: python packaging/configure_windows_display.py
       - name: Stage compile references, without a live SOLIDWORKS session
-        if: matrix.cached != true && matrix.mode != 'automation'
+        if: matrix.cached != true && matrix.mode == 'full'
         run: |
           $directory = Join-Path $env:RUNNER_TEMP 'agent-shaft-interop'
           python packaging/prepare_shaft_test_refs.py $directory
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "GOKWORKS_SHAFT_TEST_INTEROP=$directory\SolidWorks.Interop.sldworks.dll" >> $env:GITHUB_ENV
       - name: Check COM probe test isolation before the long suite
-        if: matrix.cached != true
+        if: matrix.cached != true && matrix.mode != 'docs' && matrix.shard == 1
         run: python -m pytest -q --timeout=60 tests/test_qt_diagnostics.py::test_connection_probe_releases_application_before_com_shutdown --junitxml=windows-tests.xml
-      - name: Run the complete regression suite
-        if: matrix.cached != true && matrix.mode != 'automation'
-        run: python packaging/run_windows_tests.py
+      - name: Run this part of the complete regression suite
+        if: matrix.cached != true && matrix.mode == 'full'
+        run: python packaging/run_windows_tests.py --shard "${env:SHARD}/${env:SHARDS}"
       - name: Check CI reporting, native lifecycle and test runner for automation-only changes
         if: matrix.cached != true && matrix.mode == 'automation'
         run: python packaging/run_windows_tests.py tests/test_qt_diagnostics.py tests/test_windows_test_runner.py tests/test_agent_validation_report.py
+      - name: Check repository structure and packaged data for documentation-only changes
+        if: matrix.cached != true && matrix.mode == 'docs'
+        run: python packaging/run_windows_tests.py tests/test_repository_structure.py tests/test_packaged_data_files.py tests/test_agent_validation_report.py
       - name: Verify application startup
-        if: matrix.cached != true
+        if: matrix.cached != true && matrix.shard == 1
         run: python main.py --self-check agent-startup.json
       - name: Report failed test identities and native crash details
         if: always() && matrix.cached != true
@@ -138,10 +153,12 @@ jobs:
         if: always() && matrix.cached != true
         uses: actions/upload-artifact@v4
         with:
-          name: agent-validation-${{ matrix.pull }}-${{ matrix.head }}
+          name: agent-validation-${{ matrix.pull }}-${{ matrix.head }}-${{ matrix.shard }}of${{ matrix.shards }}
           retention-days: 7
+          if-no-files-found: ignore
           path: |
             candidate/windows-tests.xml
+            candidate/windows-flaky.json
             candidate/windows-tests.log
             candidate/windows-qt-native.log
             candidate/windows-display.json
@@ -155,10 +172,13 @@ jobs:
           VALIDATED_BASE: ${{ matrix.base }}
         with:
           script: |
+            const {STATUS, shardContext} = require(`${process.env.GITHUB_WORKSPACE}/automation/.github/scripts/agent-integration.cjs`);
+            const shards = Number(process.env.SHARDS || 1);
             await github.rest.repos.createCommitStatus({...context.repo,
               sha: process.env.VALIDATED_HEAD,
               state: process.env.VALIDATION_RESULT === 'success' ? 'success' : 'failure',
-              context: 'GOKWORKS agent validation', description: `main:${process.env.VALIDATED_BASE}`,
+              context: shards > 1 ? shardContext(Number(process.env.SHARD), shards) : STATUS,
+              description: `main:${process.env.VALIDATED_BASE}`,
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`});
 
   merge:
@@ -169,7 +189,8 @@ jobs:
       actions: write
       contents: write
       pull-requests: write
-      statuses: read
+      # Writes the combined gate status from the parallel parts' statuses.
+      statuses: write
     steps:
       - uses: actions/checkout@v4
         with:

@@ -23,6 +23,31 @@ tam paket çalışır. Modül bazlı Windows iş akışları PR'larda değil, ya
 push'unda ve elle tetiklemede çalışır; ajan PR'larının tam paketi bu iş akışındadır.
 Eksik/kırpılmış dosya
 listesi, uygulama değişikliği veya başarısız eski sonuç tam pakete döner.
+
+Hızlandırmalar (9 Kasım 2026):
+
+- **Yalnız belge değişikliği:** Ajan dalı yalnız Markdown, `docs/` altındaki
+  görseller veya `.gitignore` değiştirdiyse depo yapısı/paket verisi testleri ve
+  açılış kontrolü çalışır (`docs` modu). `docs/` altındaki JSON gibi çalışma
+  verileri bu kapsama girmez.
+- **Main'e yalnız belge eklenmesi:** Doğrulama bittiğinde main yalnız belgeler veya
+  EXE derleme kayıtlarıyla ilerlemişse, doğrulanmış head yeniden test edilmeden
+  birleştirilir; test edilen kod değişmemiştir. Kod veya CI dosyası eklenmişse
+  yeni doğrulama gerekir.
+- **Push yığınlarını bekleme:** Ajanlar kısa sürede birkaç push yapar. Son
+  commit'i 5 dakikadan yeni olan dal için hazırlık işi commit 5 dakikalık olana kadar
+  bekler (zamanlanmış taramalara güvenilmez; GitHub onları saatlerce geciktirebilir).
+  Bu sırada yeni push gelirse o push'un kendi çalışması yeni head'i doğrular.
+  Elle tetikleme ve `retry_failed` beklemeyi atlar.
+- **Paralel Windows işleri:** Tam paket test dosyası bazında, ağırlıkla dengelenmiş
+  3 parçaya bölünür (`run_windows_tests.py --shard i/3`). Her parça
+  `GOKWORKS agent validation · i/3` durumunu yazar; merge işi bunları birleştirip
+  ana `GOKWORKS agent validation` durumunu yazar. Bir parça eksik veya başarısızsa
+  bütün doğrulama başarısızdır. COM probu ve açılış kontrolü yalnız 1. parçada çalışır.
+- **Tek seferlik yeniden deneme:** Bir süreç grubu sıradan test hatasıyla (pytest
+  çıkış 1, rapor tam) biterse aynı grup yeni süreçte bir kez daha çalışır; en fazla
+  3 grup. Yalnız ikinci denemede geçen testler `windows-flaky.json` dosyasına ve
+  uyarı anotasyonuna yazılır ki düzeltilsin. Yerel çökmeler hiç yeniden denenmez.
 Gerçek SolidWorks gerektiren kabul testleri ayrıca uygun ortam ister.
 
 Başarılı sonuç yalnız aynı head/main çifti için kullanılabilir. Diğer ajanın

@@ -378,3 +378,15 @@ def test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_a
     with patch.object(page,'confirm_discard',return_value=True):page.new_project()
     assert page.metadata_error=='' and page.metadata_field=='' and page.project.terms==[]
     assert not page.calculate_button.isEnabled()
+
+
+def test_changed_source_is_detected_even_when_the_watcher_event_is_lost(window,qtbot,tmp_path):
+    """Windows may drop a QFileSystemWatcher event; the size/mtime poll still removes the stale result."""
+    page=window.pages['tolerance_stack'];page.load_example();compute(page,window,qtbot)
+    path=tmp_path/'part.SLDDRW';path.write_bytes(b'before')
+    from modules.tolerance_stack.storage import fingerprint
+    page.project.sources=[fingerprint(path)];page.watch_sources()
+    page.source_watcher.fileChanged.disconnect()          # simulate a lost native event
+    path.write_bytes(b'after!')
+    qtbot.waitUntil(lambda:page.result is None,timeout=5000)
+    assert 'yeniden tarayın' in page.status_text and page.source_poll.isActive()

@@ -148,10 +148,10 @@ def test_all_numeric_inputs_fail_cleanly_for_nonfinite_values(window,qtbot,tmp_p
 
 def test_file_dialog_cancel_and_real_selected_path_export(window,qtbot,tmp_path,monkeypatch):
     page=window.pages['smart_splitting']
-    monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:('',''))
+    monkeypatch.setattr(QFileDialog,'getOpenFileNames',lambda *a,**k:([],''))
     page.import_dialog(); assert page.source is None and not window.jobs.busy
     path=circle_dxf(tmp_path/'ÖLÇÜ_ÇEMBER.dxf',radius=100)
-    monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),'DXF'))
+    monkeypatch.setattr(QFileDialog,'getOpenFileNames',lambda *a,**k:([str(path)],'DXF'))
     page.import_dialog(); finish(window,qtbot)
     page.form.set_value('count',4); page.run_split(); finish(window,qtbot)
     assert page.solution is not None

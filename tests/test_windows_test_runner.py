@@ -91,3 +91,73 @@ def test_display_selection_requires_real_wide_desktop_and_avoids_extreme_modes()
     assert display.select_mode([(1024,768,32,60),(1920,1080,32,60),
         (3840,2160,32,60),(16384,8192,32,60)]) == (3840,2160,32,60)
     assert display.select_mode([(1920,1080,16,60)]) is None
+
+
+def test_a_test_failing_once_is_retried_once_and_recorded_as_unstable(tmp_path):
+    (tmp_path/'pytest.ini').write_text('[pytest]\n')
+    (tmp_path/'test_sample.py').write_text(
+        'from pathlib import Path\n'
+        'def test_steady(): assert True\n'
+        'def test_unstable():\n'
+        '    marker = Path(__file__).with_name("seen")\n'
+        '    first = not marker.exists(); marker.write_text("1")\n'
+        '    assert not first, "fails only the first time"\n')
+    assert runner.run_tests(tmp_path,[]) == 0
+    report=ET.parse(tmp_path/'windows-tests.xml').getroot()
+    assert not list(report.iter('failure')) and len(list(report.iter('testcase'))) == 2
+    import json
+    assert json.loads((tmp_path/'windows-flaky.json').read_text()) == [['test_sample.py::test_steady','test_sample.py::test_unstable']]
+    assert 'RETRY_BATCH=1' in (tmp_path/'windows-tests.log').read_text()
+
+
+def test_a_consistent_failure_still_fails_after_its_single_retry(tmp_path):
+    (tmp_path/'pytest.ini').write_text('[pytest]\n')
+    (tmp_path/'test_sample.py').write_text('def test_broken(): assert False\n')
+    assert runner.run_tests(tmp_path,[]) == 1
+    log=(tmp_path/'windows-tests.log').read_text()
+    assert log.count('RETRY_BATCH=') == 1 and len(list(ET.parse(tmp_path/'windows-tests.xml').getroot().iter('failure'))) == 1
+
+
+def test_shards_split_whole_files_deterministically_and_cover_every_test_once():
+    nodes = [f'tests/test_qt_workflows.py::test_{i}' for i in range(30)]
+    nodes += [f'modules/m{k}/tests/test_ui.py::test_{i}' for k in range(8) for i in range(12)]
+    nodes += [f'modules/m{k}/tests/test_engine.py::test_{i}' for k in range(8) for i in range(25)]
+    parts = [runner.select_shard(nodes, shard, 3) for shard in (1, 2, 3)]
+    assert sorted(node for part in parts for node in part) == sorted(nodes)
+    assert parts == [runner.select_shard(nodes, shard, 3) for shard in (1, 2, 3)]
+    for part in parts:
+        assert part == [node for node in nodes if node in part]                 # collection order kept
+    owners = {node.split('::')[0]: index for index, part in enumerate(parts) for node in part}
+    assert all(owners[node.split('::')[0]] == index for index, part in enumerate(parts) for node in part)
+    loads = [sum(runner.test_weight(node) for node in part) for part in parts]
+    assert max(loads) - min(loads) <= max(runner.test_weight(n) for n in nodes) * 30
+    assert runner.select_shard(nodes, 1, 1) == nodes
+
+
+def test_shard_arguments_are_validated():
+    assert runner.parse_shard('2/3') == (2, 3)
+    for text in ('0/3', '4/3', 'x', '1-3'):
+        try:
+            runner.parse_shard(text)
+        except ValueError:
+            continue
+        raise AssertionError(text)
+
+
+def test_runner_runs_only_its_part_and_an_empty_part_still_reports(tmp_path):
+    (tmp_path/'pytest.ini').write_text('[pytest]\n')
+    (tmp_path/'test_a.py').write_text('def test_a(): assert True\n')
+    (tmp_path/'test_b.py').write_text('def test_b1(): assert True\ndef test_b2(): assert True\n')
+    names = []
+    for shard in (1, 2, 3):
+        assert runner.run_tests(tmp_path, [], shard=(shard, 3)) == 0
+        names.append([case.get('name') for case in ET.parse(tmp_path/'windows-tests.xml').getroot().iter('testcase')])
+    assert sorted(sum(names, [])) == ['test_a', 'test_b1', 'test_b2'] and [] in names
+
+
+def test_failing_retries_also_count_towards_the_retry_limit(tmp_path):
+    (tmp_path/'pytest.ini').write_text('[pytest]\n')
+    for index in range(runner.MAX_RETRIED_BATCHES + 2):
+        (tmp_path/f'test_{index}.py').write_text('def test_broken(): assert False\n')
+    assert runner.run_tests(tmp_path, [], batch_size=1) == 1
+    assert (tmp_path/'windows-tests.log').read_text().count('RETRY_BATCH=') == runner.MAX_RETRIED_BATCHES

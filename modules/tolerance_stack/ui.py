@@ -3,6 +3,7 @@
 from dataclasses import replace
 from pathlib import Path
 
+import os
 from PySide6.QtCore import Qt,QSignalBlocker,QFileSystemWatcher,QTimer
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QSplitter,QTabWidget,QLineEdit,QComboBox,
     QTableView,QCheckBox,QFileDialog,QMessageBox,QApplication,QMenu,QDialog,QDialogButtonBox)
@@ -88,6 +89,10 @@ class ToleranceStackPage(BasePage):
         self.current_issue=None
         self.source_watcher=QFileSystemWatcher(self)
         self.source_watcher.fileChanged.connect(self.source_changed)
+        # Windows can miss or delay a watcher event (just after addPath, network drives);
+        # a cheap size/mtime check backs it up. No hashing on the GUI thread.
+        self._source_seen={}
+        self.source_poll=QTimer(self);self.source_poll.setInterval(1500);self.source_poll.timeout.connect(self.poll_sources)
         project_button=self.action('Proje',None)
         project_menu=QMenu(project_button)
         for title,callback in (('Yeni analiz',self.new_project),('Proje aç…',self.open_project),('Proje kaydet…',self.save_project),
@@ -822,6 +827,15 @@ class ToleranceStackPage(BasePage):
     def watch_sources(self):
         if self.source_watcher.files():self.source_watcher.removePaths(self.source_watcher.files())
         if self.project.sources:self.source_watcher.addPaths([s.path for s in self.project.sources])
+        self._source_seen={s.path:(s.size,s.modified_ns) for s in self.project.sources}
+        self.source_poll.start() if self._source_seen else self.source_poll.stop()
+
+    def poll_sources(self):
+        for path,stamp in list(self._source_seen.items()):
+            try: state=os.stat(path); current=(state.st_size,state.st_mtime_ns)
+            except OSError: current=None
+            if current!=stamp:
+                self._source_seen[path]=current; self.source_changed(path)
 
     def source_changed(self,path):
         self.invalidate();self.set_status('Kaynak teknik resim değişti veya silindi. Ölçüleri yeniden tarayın; eski sonuç kaldırıldı.',True)

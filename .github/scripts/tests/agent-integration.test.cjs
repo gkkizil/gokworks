@@ -2,7 +2,10 @@
 
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
-const {BRANCHES, STATUS, description, prepare, finish, cancelSuperseded, automationOnly, validationMode} = require('../agent-integration.cjs');
+const {BRANCHES, STATUS, SHARDS, description, shardContext, prepare, finish, cancelSuperseded, automationOnly, documentationOnly,
+  validationMode, settling} = require('../agent-integration.cjs');
+
+const branchesOf = matrix => [...new Set(matrix.include.map(item => item.branch))];
 
 function fixture() {
   const context = {repo: {owner: 'owner', repo: 'gokworks'}, serverUrl: 'https://github.com', runId: 42};
@@ -83,7 +86,12 @@ test('already merged ancestor branches do not create another PR', async () => {
 test('both changed branches get a PR and pending status for the exact main/head pair', async () => {
   const f = fixture();
   const matrix = await prepare(f);
-  assert.equal(matrix.include.length, 2);
+  assert.equal(branchesOf(matrix).length, 2);
+  assert.equal(matrix.include.length, 2 * SHARDS);
+  for (const branch of BRANCHES) {
+    assert.deepEqual(matrix.include.filter(item => item.branch === branch).map(item => `${item.shard}/${item.shards}`),
+      Array.from({length: SHARDS}, (_, index) => `${index + 1}/${SHARDS}`));
+  }
   assert.equal(f.calls.filter(([name]) => name === 'create').length, 2);
   for (const item of matrix.include) {
     assert.equal(item.base, f.refs.main);
@@ -112,7 +120,7 @@ test('draft and deliberately closed PRs are left alone', async () => {
 test('a new head may get a PR after an older head was closed', async () => {
   const f = fixture();
   f.pull('agent/codex', {state: 'closed'}); f.refs['agent/codex'] = 'd'.repeat(40);
-  assert.equal((await prepare(f)).include.length, 2);
+  assert.equal(branchesOf(await prepare(f)).length, 2);
 });
 
 for (const state of ['failure', 'error']) {
@@ -126,7 +134,7 @@ for (const state of ['failure', 'error']) {
 test('manual retry reruns a failed pair', async () => {
   const f = fixture(); f.status('agent/codex', 'failure'); f.status('agent/claude', 'error');
   const matrix = await prepare({...f, retryFailed: true});
-  assert.equal(matrix.include.length, 2);
+  assert.equal(branchesOf(matrix).length, 2);
   assert.ok(matrix.include.every(item => item.cached === false));
 });
 
@@ -337,4 +345,116 @@ test('build status plus application changes on main still need the full suite', 
     files: [{filename: 'packaging/windows-build-status.json'}, {filename: 'gui_qt/app.py'}]}});
   assert.equal(await validationMode(f.github, f.context.repo, {},
     {state: 'success', description: description(oldBase)}, f.refs.main), 'full');
+});
+
+test('documentation-only branches take the light docs path', async () => {
+  const docs = {files: [{filename: 'README.md'}, {filename: 'docs/readme/nesting.png'}, {filename: 'modules/x/README.md'},
+    {filename: '.gitignore'}]};
+  assert.equal(documentationOnly(docs), true);
+  for (const name of ['docs/inventory.json', 'gui_qt/app.py', 'docs/readme/script.py']) {
+    assert.equal(documentationOnly({files: [...docs.files, {filename: name}]}), false, name);
+  }
+  const f = fixture();
+  assert.equal(await validationMode(f.github, f.context.repo, docs, undefined, f.refs.main), 'docs');
+});
+
+test('docs and cached validations run as a single job; only full runs are split', async () => {
+  const f = fixture();
+  f.github.rest.repos.compareCommitsWithBasehead = async ({basehead}) => ({data: {ahead_by: 1,
+    files: [{filename: basehead.endsWith(f.refs['agent/codex']) ? 'README.md' : 'gui_qt/app.py'}]}});
+  const matrix = await prepare(f);
+  const codex = matrix.include.filter(item => item.branch === 'agent/codex');
+  assert.deepEqual(codex.map(item => [item.mode, item.shard, item.shards]), [['docs', 1, 1]]);
+  assert.equal(matrix.include.filter(item => item.branch === 'agent/claude').length, SHARDS);
+});
+
+test('a branch pushed moments ago waits for the push burst to settle', async () => {
+  const f = fixture(), now = Date.parse('2026-11-09T12:00:00Z');
+  const getBranch = f.github.rest.repos.getBranch;
+  f.github.rest.repos.getBranch = async args => {
+    const {data} = await getBranch(args);
+    const minutes = args.branch === 'agent/codex' ? 2 : 6;
+    return {data: {commit: {...data.commit, commit: {committer: {date: new Date(now - minutes * 60000).toISOString()}}}}};
+  };
+  assert.deepEqual(branchesOf(await prepare({...f, now})), ['agent/claude']);
+  assert.ok(f.notices.some(text => text.startsWith('agent/codex') && text.includes('waiting')));
+  assert.deepEqual(branchesOf(await prepare({...f, now, context: {...f.context, eventName: 'workflow_dispatch'}})).sort(),
+    [...BRANCHES].sort());
+  assert.equal(settling({commit: {committer: {date: 'garbage'}}}, now), false);
+});
+
+function shardItems(item) {
+  return Array.from({length: SHARDS}, (_, index) => ({...item, mode: 'full', shard: index + 1, shards: SHARDS}));
+}
+
+function shardStatus(f, item, states) {
+  states.forEach((state, index) => f.statuses.set(item.head, [{context: shardContext(index + 1, SHARDS), state,
+    description: description(item.base)}, ...(f.statuses.get(item.head) || [])]));
+}
+
+test('parallel parts that all passed are combined into one success and merged', async () => {
+  const f = fixture(), item = candidate(f);
+  shardStatus(f, item, Array(SHARDS).fill('success'));
+  assert.deepEqual(await finish({...f, candidates: shardItems(item)}), [item.pull]);
+  const combined = f.calls.filter(([name, args]) => name === 'status' && args.context === STATUS);
+  assert.deepEqual(combined.map(([, args]) => args.state), ['success']);
+  assert.equal(f.calls.filter(([name]) => name === 'merge').length, 1);
+});
+
+for (const states of [['success', 'failure', 'success'], ['success', 'success']]) {
+  test(`one failed or missing part fails the whole validation: ${states}`, async () => {
+    const f = fixture(), item = candidate(f);
+    shardStatus(f, item, states);
+    assert.deepEqual(await finish({...f, candidates: shardItems(item)}), []);
+    assert.equal(f.statuses.get(item.head)[0].state, 'failure');
+    assert.equal(f.calls.filter(([name]) => name === 'merge').length, 0);
+  });
+}
+
+test('a part that passed for an older main does not count', async () => {
+  const f = fixture(), item = candidate(f);
+  shardStatus(f, item, Array(SHARDS).fill('success'));
+  f.statuses.get(item.head)[0].description = description('e'.repeat(40));
+  assert.deepEqual(await finish({...f, candidates: shardItems(item)}), []);
+});
+
+test('main gaining only documents after validation still merges the validated head', async () => {
+  const f = fixture(), item = candidate(f); f.status(item.branch);
+  f.refs.main = 'f'.repeat(40);
+  f.github.rest.repos.compareCommitsWithBasehead = async ({basehead}) => {
+    assert.equal(basehead, `${item.base}...${f.refs.main}`);
+    return {data: {status: 'ahead', behind_by: 0, files: [{filename: 'README.md'}, {filename: 'docs/readme/home.png'}]}};
+  };
+  assert.deepEqual(await finish({...f, candidates: [item]}), [item.pull]);
+  assert.ok(f.notices.some(text => text.includes('only documents')));
+});
+
+for (const filename of ['gui_qt/app.py', '.github/workflows/agent-integration.yml', 'docs/inventory.json']) {
+  test(`main gaining ${filename} after validation needs a fresh validation`, async () => {
+    const f = fixture(), item = candidate(f); f.status(item.branch);
+    f.refs.main = 'f'.repeat(40);
+    f.github.rest.repos.compareCommitsWithBasehead = async () => ({data: {status: 'ahead', behind_by: 0,
+      files: [{filename: 'README.md'}, {filename}]}});
+    assert.deepEqual(await finish({...f, candidates: [item]}), []);
+  });
+}
+
+test('with a sleep function the push run itself waits out the burst instead of relying on schedules', async () => {
+  const f = fixture(), now = Date.parse('2026-11-09T12:00:00Z'), waits = [];
+  const getBranch = f.github.rest.repos.getBranch;
+  f.github.rest.repos.getBranch = async args => {
+    const {data} = await getBranch(args);
+    return {data: {commit: {...data.commit, commit: {committer: {date: new Date(now - 2 * 60000).toISOString()}}}}};
+  };
+  const sleep = async ms => { waits.push(ms); if (waits.length === 2) f.refs['agent/claude'] = 'e'.repeat(40); };
+  const matrix = await prepare({...f, now, sleep});
+  assert.deepEqual(waits, [3 * 60000, 3 * 60000]);
+  assert.deepEqual(branchesOf(matrix), ['agent/codex']);
+  assert.ok(f.notices.some(text => text.includes('newer push arrived')));
+});
+
+test('the merge job may write the combined status of the parallel parts', () => {
+  const yml = require('node:fs').readFileSync(require('node:path').join(__dirname, '../../workflows/agent-integration.yml'), 'utf8');
+  const merge = yml.slice(yml.indexOf('\n  merge:'));
+  assert.match(merge, /statuses: write/);
 });

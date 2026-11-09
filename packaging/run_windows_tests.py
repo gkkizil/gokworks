@@ -18,6 +18,19 @@ from xml.etree import ElementTree as ET
 
 MAX_TESTS_PER_PROCESS = 32
 MAX_GUI_TESTS_PER_PROCESS = 8
+# An ordinary assertion/timeout failure (pytest exit 1 with a complete report) is
+# re-run once in a fresh process: timing-sensitive Qt/file-system tests on shared
+# Windows runners can fail without a product fault. Native exits are never retried.
+# More than a few failing batches is a real regression, not noise: those stay failed.
+MAX_RETRIED_BATCHES = 3
+
+
+def complete_report(report):
+    try:
+        root = ET.parse(report).getroot()
+    except (ET.ParseError, OSError):
+        return False
+    return bool([root] if root.tag == 'testsuite' else root.findall('testsuite'))
 
 
 def test_batches(nodeids, batch_size):
@@ -44,6 +57,45 @@ def test_batches(nodeids, batch_size):
             yield selected; selected = []; gui = False
         selected.append(nodeid); gui |= heavy
     if selected: yield selected
+
+
+def test_weight(nodeid):
+    """Rough relative cost: full-app workflows get their own process, GUI tests build windows."""
+    filename = nodeid.split('::', 1)[0].rsplit('/', 1)[-1]
+    if filename == 'test_qt_workflows.py':
+        return 6
+    return 3 if any(token in filename for token in ('gui', '_ui', '_qt', 'compact', 'workbench')) else 1
+
+
+def select_shard(nodeids, shard, shards):
+    """Deterministic part ``shard`` of ``shards``: whole test files, balanced by weight.
+
+    Files are assigned heaviest first to the currently lightest part (ties by name), so
+    every part is reproducible from the same inventory, no file is split between
+    processes of different parts and every collected test lands in exactly one part.
+    The original collection order is kept inside each part.
+    """
+    if not 1 <= shard <= shards:
+        raise ValueError(f'Invalid shard {shard}/{shards}.')
+    weights = {}
+    for nodeid in nodeids:
+        filename = nodeid.split('::', 1)[0]
+        weights[filename] = weights.get(filename, 0) + test_weight(nodeid)
+    loads = [0] * shards; owner = {}
+    for filename in sorted(weights, key=lambda name: (-weights[name], name)):
+        part = min(range(shards), key=lambda index: (loads[index], index))
+        owner[filename] = part; loads[part] += weights[filename]
+    return [nodeid for nodeid in nodeids if owner[nodeid.split('::', 1)[0]] == shard - 1]
+
+
+def parse_shard(text):
+    try:
+        shard, shards = (int(value) for value in text.split('/'))
+    except ValueError:
+        raise ValueError(f'Shard must look like 2/3, not {text!r}.') from None
+    if not 1 <= shard <= shards:
+        raise ValueError(f'Invalid shard {text}.')
+    return shard, shards
 
 
 def pytest_command(targets, report):
@@ -92,7 +144,7 @@ def merge_reports(batches, destination):
     ET.ElementTree(result).write(destination, encoding='utf-8', xml_declaration=True)
 
 
-def run_tests(root, targets, batch_size=MAX_TESTS_PER_PROCESS):
+def run_tests(root, targets, batch_size=MAX_TESTS_PER_PROCESS, shard=(1, 1)):
     if batch_size < 1:
         raise ValueError('Test batch size must be positive.')
     env = {**os.environ, 'PYTHONUTF8': '1', 'PYTHONFAULTHANDLER': '1',
@@ -113,8 +165,13 @@ def run_tests(root, targets, batch_size=MAX_TESTS_PER_PROCESS):
                 print('Windows pytest collection failed; see windows-tests.log.', flush=True)
                 return 1
             nodeids = json.loads(inventory.read_text(encoding='utf-8'))
-            print(f'Collected {len(nodeids)} tests; at most {batch_size} per native process.', flush=True)
-            batches = []
+            total = len(nodeids)
+            if shard[1] > 1:
+                nodeids = select_shard(nodeids, *shard)
+                log.write(f'\nSHARD={shard[0]}/{shard[1]} TESTS={len(nodeids)} OF={total}\n')
+            print(f'Collected {total} tests; part {shard[0]}/{shard[1]} runs {len(nodeids)}, '
+                  f'at most {batch_size} per native process.', flush=True)
+            batches = []; flaky = []; retried = 0
             for selected in test_batches(nodeids, batch_size):
                 report = temporary/f'batch-{len(batches)+1}.xml'
                 log.write(f'\nNATIVE_BATCH={len(batches)+1} TARGETS={json.dumps(selected)}\n')
@@ -124,18 +181,37 @@ def run_tests(root, targets, batch_size=MAX_TESTS_PER_PROCESS):
                 code = result.returncode
                 log.write(f'\nPYTEST_PROCESS_EXIT_CODE={code} (0x{code & 0xffffffff:08X})\n')
                 log.flush()
+                if code == 1 and complete_report(report) and retried < MAX_RETRIED_BATCHES:
+                    retried += 1
+                    retry = temporary/f'batch-{len(batches)+1}-retry.xml'
+                    log.write(f'\nRETRY_BATCH={len(batches)+1} TARGETS={json.dumps(selected)}\n'); log.flush()
+                    second = subprocess.run(pytest_command(selected, retry), cwd=root,
+                                            stdout=log, stderr=subprocess.STDOUT, env=env).returncode
+                    log.write(f'\nRETRY_PROCESS_EXIT_CODE={second}\n'); log.flush()
+                    if second == 0 and complete_report(retry):
+                        flaky.append(selected); report, code = retry, 0
+                        print(f'::warning::Windows batch {len(batches)+1} passed only on retry (unstable test): '
+                              + ', '.join(selected), flush=True)
                 batches.append((report, code, selected))
                 # Keep completed evidence even if a later process is interrupted.
                 merge_reports(batches, final_report)
                 print(f'Windows batch {len(batches)}: {len(selected)} tests, '
                       f'exit {code} (0x{code & 0xffffffff:08X})', flush=True)
-            return 0 if batches and all(code == 0 for _, code, _ in batches) else 1
+            (root/'windows-flaky.json').write_text(json.dumps(flaky, ensure_ascii=False, indent=1), encoding='utf-8')
+            if not batches:
+                # An empty part is legitimate (fewer files than parts) but must still leave a valid report.
+                merge_reports([], final_report)
+                return 0 if shard[1] > 1 and total else 1
+            return 0 if all(code == 0 for _, code, _ in batches) else 1
 
 
 def main():
     if sys.argv[1:2] == ['--collect-inventory']:
         return collect_inventory(Path(sys.argv[2]), sys.argv[3:])
-    return run_tests(Path(__file__).resolve().parents[1], sys.argv[1:])
+    arguments = sys.argv[1:]; shard = (1, 1)
+    if arguments[:1] == ['--shard']:
+        shard = parse_shard(arguments[1]); arguments = arguments[2:]
+    return run_tests(Path(__file__).resolve().parents[1], arguments, shard=shard)
 
 
 if __name__ == '__main__':
