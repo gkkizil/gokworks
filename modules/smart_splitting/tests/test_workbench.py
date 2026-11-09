@@ -112,5 +112,9 @@ def test_both_themes_and_compact_workbench_keep_actions_visible(window,qtbot,tmp
             window.resize(*size); qtbot.wait(40)
             assert page.canvas.viewport().height()>=100
             assert page.transfer_button.isVisible() and page.export_button.isVisible()
-            assert page.layout.geometry().contains(page.transfer_button.geometry())
+            # QLayout.geometry() may be temporarily empty on native Windows;
+            # verify the actual rendered widget bounds in the page coordinates.
+            for action in (page.split_button,page.optimize_button,page.transfer_button,page.export_button):
+                assert page.rect().contains(action.mapTo(page,action.rect().topLeft()))
+                assert page.rect().contains(action.mapTo(page,action.rect().bottomRight()))
             assert not window.grab().isNull()

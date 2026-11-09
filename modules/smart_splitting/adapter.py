@@ -11,7 +11,13 @@ from .models import PROFILES
 
 
 def source_key(source):
-    return hashlib.sha256((source.source_sha256+source.code+source.polygon.normalize().wkb_hex).encode()).hexdigest()
+    # Identity must survive re-reading at another tolerance/unit or a new CAD
+    # revision. Tessellated coordinates and content hashes identify a snapshot,
+    # not the source job. Unsourced Nesting parts already have persistent IDs.
+    path=source.source.replace('\\','/')
+    if len(path)>1 and (path[1]==':' or path.startswith('//')): path=path.casefold()
+    identity=('file',path,source.code) if path else ('part',source.id)
+    return hashlib.sha256(repr(identity).encode()).hexdigest()
 
 
 def to_project(solution):
@@ -50,7 +56,12 @@ def transfer_to_nesting(page, solution):
     incoming=to_project(solution); candidate=deepcopy(page.project)
     transfers=deepcopy(getattr(page,'_split_transfers',{}))
     key=source_key(solution.source)
-    previous=set(transfers.get(key,[]))|{p.id for p in candidate.parts if 'Akıllı bölme kaynak kimliği: '+key in p.notes}
+    previous=set(transfers.get(key,[]))|{p.id for p in candidate.parts if
+        'Akıllı bölme kaynak kimliği: '+key in p.notes or
+        # Upgrade the original snapshot-based identity on saved projects too.
+        (solution.source.source and p.source==solution.source.source
+         and p.code.startswith(solution.source.code+'_SEG_')
+         and any(note.startswith('Akıllı bölme kaynak kimliği: ') for note in p.notes))}
     incoming_ids={p.id for p in incoming.parts}
     candidate.parts=[p for p in candidate.parts if p.id not in previous|incoming_ids]+incoming.parts
     sheet=incoming.sheets[0]

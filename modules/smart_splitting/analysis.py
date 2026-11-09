@@ -1,12 +1,14 @@
 """Source validation and explicitly approximate contour classifications."""
 from shapely.geometry import Polygon
+import math
 
 from modules.nesting.dxf_import import read_dxf
 
 
 def validate_source(part):
     g=part.polygon
-    if g.geom_type!='Polygon' or not g.is_valid or g.is_empty or g.area<=0:
+    if (g.geom_type!='Polygon' or not g.is_valid or g.is_empty or g.area<=0
+            or not math.isfinite(g.area) or any(not math.isfinite(v) for v in g.bounds)):
         raise ValueError('Tek, kapalı ve bağlantılı bir kaynak parça seçin; ada/grup geometrisi bölünemez.')
     return g
 
