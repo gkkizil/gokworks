@@ -452,3 +452,9 @@ test('with a sleep function the push run itself waits out the burst instead of r
   assert.deepEqual(branchesOf(matrix), ['agent/codex']);
   assert.ok(f.notices.some(text => text.includes('newer push arrived')));
 });
+
+test('the merge job may write the combined status of the parallel parts', () => {
+  const yml = require('node:fs').readFileSync(require('node:path').join(__dirname, '../../workflows/agent-integration.yml'), 'utf8');
+  const merge = yml.slice(yml.indexOf('\n  merge:'));
+  assert.match(merge, /statuses: write/);
+});

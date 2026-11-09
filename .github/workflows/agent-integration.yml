@@ -189,7 +189,8 @@ jobs:
       actions: write
       contents: write
       pull-requests: write
-      statuses: read
+      # Writes the combined gate status from the parallel parts' statuses.
+      statuses: write
     steps:
       - uses: actions/checkout@v4
         with:
