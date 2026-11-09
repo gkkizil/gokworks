@@ -30,7 +30,8 @@ import sys,json
 from pathlib import Path
 from gui_qt.app import create_application,MainWindow
 app=create_application([]);w=MainWindow(Path(sys.argv[1]));w.show();app.processEvents()
-assert len(w.pages)==20 and list(w.pages)==list(w.pages.keys())
+from gui_qt.app import PAGE_TYPES
+assert len(w.pages)==len(PAGE_TYPES) and list(w.pages)==list(w.pages.keys())
 assert w.mode=='pdf' and w.stack.count()==1
 assert [k for k in sys.modules if k.startswith('modules.') and k.endswith('.ui')]==['modules.pdf.ui']
 assert not any(k in sys.modules for k in ('ezdxf','numpy','shapely','OCP','pythoncom'))
