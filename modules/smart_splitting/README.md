@@ -1,5 +1,7 @@
 # Akıllı Parça Bölme
 
+[Teslim/test/performans raporu ve örnek paket](DELIVERY.md).
+
 GOKWORKS sol menüsünde **Üretim → Nesting · Sac maliyeti → Akıllı Parça Bölme**.
 İki ayrı ekran aynı kalıcı sayfa kayıt sistemini kullanır. Yeni modül Nesting
 motorunu değiştirmez; SolidWorks veya DWG dönüştürücü gerektirmez.
