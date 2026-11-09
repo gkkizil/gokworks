@@ -12,7 +12,13 @@ def validate_source(part):
 
 
 def load_parts(path, *, unit=None, tolerance=.05, stop=None):
-    parts=read_dxf(path,unit=unit,tolerance=tolerance,stop=stop)
+    """DXF directly; DWG through Nesting's converter (installed ODA, else the bundled LibreDWG)."""
+    from pathlib import Path
+    if Path(path).suffix.lower()=='.dwg':
+        from modules.nesting.dwg_import import read_dwg
+        parts=read_dwg(path,unit=unit,tolerance=tolerance,stop=stop)
+    else:
+        parts=read_dxf(path,unit=unit,tolerance=tolerance,stop=stop)
     for part in parts: validate_source(part)
     return parts
 

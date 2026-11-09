@@ -8,8 +8,15 @@ motorunu değiştirmez; SolidWorks veya DWG dönüştürücü gerektirmez.
 
 ## Kullanım
 
-1. **DXF seç** ile bir DXF yükleyin. Bir dosyada birden çok bağımsız parça
-   varsa kaynak listesinden birini seçin. Birimsiz DXF için mm/cm/inch seçin.
+1. **DXF/DWG ekle…** ile bir veya birden çok DXF/DWG seçin; eklenen her dosyadaki
+   her parça **Bölünecek parçalar** listesine girer (önceki parçalar korunur, aynı
+   kaynak iki kez eklenmez). Adet ve kalınlık Nesting'deki dosya adı kurallarıyla
+   okunur (ör. `Flanş - 3 mm - 5 adet.dwg` → parça `Flanş`, 5 adet, 3 mm); listede
+   çift tıklayıp düzeltilebilir. Dosya adında yoksa **Adet/Kalınlık (dosya adında
+   yoksa)** alanları kullanılır. Okunamayan dosya durum satırında gerekçesiyle
+   bildirilir, diğerleri yüklenir. DWG, Nesting ile aynı dönüştürücüyle okunur:
+   kuruluysa ODA File Converter, yoksa uygulama paketindeki LibreDWG (ek indirme
+   yok). Birimsiz DXF için mm/cm/inch seçin.
    Alternatif olarak Nesting'de tek parça seçip **Nesting’den seçili parçayı al**
    ile geometri, adedi ve kalınlığı kopyalayın. Özel malzemeler için bu sürümde
    bölme ekranındaki mevcut malzeme kataloğundan malzeme seçilmelidir.
@@ -17,7 +24,9 @@ motorunu değiştirmez; SolidWorks veya DWG dönüştürücü gerektirmez.
    DXF okuyucu parçayı sol alt sınırı (0,0) olacak şekilde mm'ye normalleştirir;
    özel merkez ve yasaklı bölgeler bu koordinat sistemindedir. Sınır kutusu
    merkezi ve alan ağırlık merkezi ayrı seçeneklerdir.
-3. **Parçayı Böl** eşit açısal veya kontur duyarlı hesabı çalıştırır. **Fireyi
+3. **Parçayı Böl** seçili parçayı, **Tümünü Böl** listedeki bütün parçaları aynı
+   ayarlarla tek işte böler (her parçanın sonucu/hatası listede görünür; bir
+   parçanın hatası diğerlerini durdurmaz). Bölme hesabı eşit açısal veya kontur duyarlıdır. **Fireyi
    Optimize Et** farklı segmentasyonları gerçek NFP yerleşiminde karşılaştırır.
    Sabit segment sayısı değiştirilmez; kısmi yerleşim başarı sayılmaz.
 4. Segment tablosunda nominal/imalat alanı, dış ölçüler, geometrik genişlik,
@@ -136,8 +145,11 @@ Bu sürüm radyal segmentasyon yapar; rastgele serbest çizgi ağı, genel levha
 sığdırma için otomatik segment sayısı, kaynak ağzı, otomatik slot/bağlantı
 tasarımı, adacıklı MultiPolygon kaynaklar ve üretim onayı kapsam dışıdır.
 Uygulanabilir geometri veya tam yerleşim bulunamazsa sayı değiştirilmez ve
-sonuç uydurulmaz. Sadece DXF dosyası açılır; Nesting üzerinden DWG'den daha
-önce okunmuş bir parça kopyalanabilir. DWG entegrasyonuna dokunulmaz.
+sonuç uydurulmaz. DXF doğrudan, DWG Nesting'in `dwg_import` dönüştürücüsüyle okunur.
+Birden çok parça bölündüyse **DXF Dışa Aktar** yeni klasörün içinde her parça için
+ayrı alt klasör üretir; **Nesting’e Aktar** bütün bölünmüş parçaları tek seferde
+ekler (biri başarısız olursa Nesting projesi değişmez). **Fireyi Optimize Et**
+seçili parçaya uygulanır.
 
 ## Kod ve test haritası
 
