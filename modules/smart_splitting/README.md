@@ -25,7 +25,7 @@ yerleşimini kullanır; SolidWorks veya DWG dönüştürücü gerektirmez.
 3. **Parçayı Böl** seçili parçayı, **Tümünü Böl** listedeki bütün parçaları aynı
    ayarlarla tek işte böler (her parçanın sonucu/hatası listede görünür; bir
    parçanın hatası diğerlerini durdurmaz). Bölme hesabı eşit açısal veya kontur duyarlıdır. **Fireyi
-   Optimize Et** farklı segmentasyonları birleşik Sparrow + GOKWORKS yerleşiminde karşılaştırır.
+   Optimize Et** farklı segmentasyonları gerçek NFP yerleşiminde karşılaştırır.
    Sabit segment sayısı değiştirilmez; kısmi yerleşim başarı sayılmaz.
 4. Segment tablosunda nominal/imalat alanı, dış ölçüler, geometrik genişlik,
    birleştirme uzunluğu ve komşular görünür. **Orijinal konturu göster**, zoom,
@@ -48,6 +48,9 @@ dışa aktarma mevcut JobManager üzerinde arka planda çalışır. **Durdur** a
 iptal eder; varsa yalnız daha önce doğrulanmış tam yerleşim korunur.
 
 ## Algoritmalar ve ölçümler
+
+Yerleşimde önce Sparrow başlangıç planını kurar; GOKWORKS NFP aynı planı
+kontur, delik ve levha iyileştirmeleriyle geliştirir. Motor seçimi gerekmez.
 
 - **Eşit açısal:** her dilim 360/n derecedir. Yeterince büyük radyal kırpma
   poligonlarıyla kaynak Polygon kesiştirilir. Daire, halka, delikli/slotlu ve
