@@ -140,7 +140,7 @@ class OpenContour(ValueError):
 AUTO_JOIN_LIMIT = .05   # mm: largest end gap closed automatically (well below cutting tolerances)
 
 
-def read_dxf(filename, *, join_tolerance=.001, **options):
+def read_dxf(filename, *, join_tolerance=.001, drawing_layout=False, **options):
     """Read cut contours; tiny end gaps are closed automatically and reported.
 
     CAD exports (e.g. SOLIDWORKS flat patterns with splines) can leave end
@@ -149,6 +149,9 @@ def read_dxf(filename, *, join_tolerance=.001, **options):
     branches, the file is read again with that join tolerance; the gap is
     already part of the collision clearance (endpoint_error).
     """
+    if drawing_layout:
+        from .drawing_import import read_drawing
+        return read_drawing(filename, join_tolerance=join_tolerance, **options)
     try:
         return _read_dxf(filename, join_tolerance=join_tolerance, **options)
     except OpenContour as error:
@@ -163,7 +166,8 @@ def read_dxf(filename, *, join_tolerance=.001, **options):
 
 
 def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
-              tolerance=.02, join_tolerance=.001, excluded_layers=None, grouped=False, stop=None):
+              tolerance=.02, join_tolerance=.001, excluded_layers=None, grouped=False, stop=None,
+              _document=None):
     tolerance = number(tolerance, 'Eğri toleransı', positive=True)
     join_tolerance = number(join_tolerance, 'Uç birleştirme toleransı', positive=True)
     if tolerance > 1 or join_tolerance > .1:
@@ -172,7 +176,7 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
     if filename.stat().st_size > 100*1024*1024:
         raise ValueError('DXF dosyası 100 MB sınırını aşıyor; kesim katmanlarını ayrı dosyaya aktarın.')
     before = filename.read_bytes()
-    doc = open_dxf(filename)
+    doc = _document if _document is not None else open_dxf(filename)
     code = doc.header.get('$INSUNITS', 0)
     if not code:
         if unit not in ('mm', 'cm', 'inch'):

@@ -34,11 +34,17 @@ def import_batch(entries, options, sink, stop, *, existing_quantity=0):
             if not parts:
                 raise ValueError('Kapalı kesim parçası bulunamadı.')
             code = entry.get('part_code')
-            if code:
+            if code and not file_options['drawing_layout']:
                 parts = [replace(part,code=code+(f'-{i:02d}' if len(parts)>1 else '')) for i,part in enumerate(parts,1)]
             review = dict(sha256=parts[0].source_sha256, count=len(parts), quantity=file_options['quantity'])
-            if len(parts)>1 and not file_options['grouped'] and entry.get('contour_approval') != review:
-                detail = (f"{len(parts)} bağımsız parça bulundu. Her parçaya {file_options['quantity']} adet uygulanır: "
+            if file_options['drawing_layout']:
+                review['drawing_parts'] = [dict(code=p.code,quantity=p.quantity,
+                    width=p.polygon.bounds[2]-p.polygon.bounds[0],
+                    height=p.polygon.bounds[3]-p.polygon.bounds[1]) for p in parts]
+            if (file_options['drawing_layout'] or len(parts)>1 and not file_options['grouped']) and entry.get('contour_approval') != review:
+                detail = (f"Çizimden {len(parts)} parça türü ve toplam {sum(p.quantity for p in parts)} adet okundu. "
+                          'Parça ve adet listesini kontrol edip onaylamak için çift tıklayın.' if file_options['drawing_layout'] else
+                          f"{len(parts)} bağımsız parça bulundu. Her parçaya {file_options['quantity']} adet uygulanır: "
                           f"toplam {sum(p.quantity for p in parts)} kesim parçası. Adet dağılımını onaylamak veya "
                           'konturları tek grup yapmak için çift tıklayın. Delikler bu sayıya dahil değildir.')
                 raise ContourReview(detail,review)

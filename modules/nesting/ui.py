@@ -998,12 +998,14 @@ class NestingPage(BasePage):
             f.text('tolerance','Eğri kiriş toleransı · mm',values['tolerance'])
             f.text('join_tolerance','Uç birleştirme toleransı · mm',values['join_tolerance'])
             f.text('excluded_layers','Dışlanacak katmanlar · ; ile ayırın',';'.join(values['excluded_layers']))
+            f.check('drawing_layout','Çerçeveli toplu çizim · her parçanın adedini çizimden oku',values['drawing_layout'])
             f.check('grouped','Her dosyadaki bağımsız konturları tek grup olarak tut',values['grouped'])
         def parse(f):
             return normalize_options(dict(material=self.material_value(f),thickness=f.value('thickness'),
                         quantity=f.value('quantity'),unit=None if f.value('unit') == 'Birim seçilmedi' else f.value('unit'),
                         tolerance=f.value('tolerance'),join_tolerance=f.value('join_tolerance'),
-                        excluded_layers=[s.strip() for s in f.value('excluded_layers').split(';') if s.strip()],grouped=f.value('grouped')))
+                        excluded_layers=[s.strip() for s in f.value('excluded_layers').split(';') if s.strip()],
+                        grouped=f.value('grouped'),drawing_layout=f.value('drawing_layout')))
         retained = {k:defaults[k] for k in ('thickness','quantity')} if entry else None
         dialog = ImportDialog(self,files,defaults,build,parse,retained=retained,
                               review=entry.get('contour_review') if entry else None,detail=detail)
