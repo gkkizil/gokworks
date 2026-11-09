@@ -40,6 +40,61 @@ def collect_licenses():
     (target/'dependency-inventory.json').write_text(json.dumps(inventory,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
+# GNU LibreDWG, bundled so nesting reads DWG without any extra download for the user.
+# Pinned release and checksum; only dwg2dxf.exe and its single DLL enter the package.
+LIBREDWG_VERSION = '0.13.3'
+LIBREDWG_URL = f'https://github.com/LibreDWG/libredwg/releases/download/{LIBREDWG_VERSION}/libredwg-{LIBREDWG_VERSION}-win64.zip'
+LIBREDWG_SHA256 = 'b5133f8b6bd71b7e682a06ef5f99c93b40d628a791c30a31924a80d258c87173'
+LIBREDWG_FILES = ('dwg2dxf.exe', 'libredwg-0.dll')
+LIBREDWG_TEST_FILES = ('dxf2dwg.exe',)          # build-time verification only, never packaged
+
+
+def fetch_libredwg():
+    """Download (once), verify and unpack the pinned LibreDWG converter into packaging/vendor/libredwg."""
+    import urllib.request, zipfile
+    vendor = ROOT/'packaging/vendor'; target = vendor/'libredwg'; archive = vendor/f'libredwg-{LIBREDWG_VERSION}-win64.zip'
+    vendor.mkdir(parents=True, exist_ok=True)
+    if not archive.is_file() or hashlib.sha256(archive.read_bytes()).hexdigest() != LIBREDWG_SHA256:
+        with urllib.request.urlopen(LIBREDWG_URL, timeout=180) as response:
+            archive.write_bytes(response.read())
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    if digest != LIBREDWG_SHA256:
+        archive.unlink()
+        raise SystemExit(f'LibreDWG arşivinin özeti beklenenden farklı: {digest}')
+    target.mkdir(exist_ok=True)
+    with zipfile.ZipFile(archive) as zipped:
+        for name in LIBREDWG_FILES + LIBREDWG_TEST_FILES:
+            (target/name).write_bytes(zipped.read(name))
+    return target
+
+
+def verify_libredwg(target):
+    """End-to-end on Windows: DXF → DWG (LibreDWG writer) → nesting.read_dwg via the bundled dwg2dxf."""
+    import ezdxf
+    from ezdxf import units
+    folder = Path(tempfile.mkdtemp(prefix='gokworks-libredwg-'))
+    document = ezdxf.new('R2000'); document.units = units.MM
+    space = document.modelspace()
+    space.add_lwpolyline([(0, 0), (120, 0), (120, 80), (0, 80)], close=True)
+    space.add_circle((60, 40), 15)
+    source = folder/'dogrulama.dxf'; document.saveas(source)
+    dwg = folder/'Dogrulama - 2 mm - 1 adet.dwg'
+    subprocess.run([str(target/'dxf2dwg.exe'), '--as', 'r2000', '-y', '-o', str(dwg), str(source)], check=False, cwd=target, timeout=120)
+    if not dwg.is_file():
+        raise SystemExit('LibreDWG doğrulaması: örnek DWG oluşturulamadı.')
+    os.environ['GOKWORKS_LIBREDWG_DWG2DXF'] = str(target/'dwg2dxf.exe')
+    try:
+        from modules.nesting import dwg_import
+        found = dwg_import.converters()
+        parts = dwg_import.read_dwg(dwg)
+    finally:
+        os.environ.pop('GOKWORKS_LIBREDWG_DWG2DXF', None)
+    area = 120*80 - 3.141592653589793*15**2
+    if len(parts) != 1 or abs(parts[0].polygon.area - area) > 1:
+        raise SystemExit(f'LibreDWG doğrulaması başarısız: {len(parts)} parça, {[p.polygon.area for p in parts]}')
+    print(f'LibreDWG {LIBREDWG_VERSION} doğrulandı: {[k for k, _ in found]} · alan {parts[0].polygon.area:.1f} mm² · {parts[0].notes[-1]}')
+
+
 def main():
     if sys.platform != 'win32':
         raise SystemExit('Windows EXE oluşturmak için bu betiği Windows üzerinde çalıştırın.')
@@ -48,6 +103,8 @@ def main():
     options = parser.parse_args()
     mode = 'onedir' if options.onedir else 'onefile'
     collect_licenses()
+    libredwg = fetch_libredwg()
+    verify_libredwg(libredwg)
     from shared.app_info import source_revision
     info=ROOT/'build/application-info.json';info.parent.mkdir(parents=True,exist_ok=True)
     info.write_text(json.dumps(dict(schema=1,revision=source_revision(ROOT))),encoding='utf-8')
@@ -67,6 +124,8 @@ def main():
             '--exclude-module', 'customtkinter', '--exclude-module', 'PySide6.QtQml',
             '--exclude-module', 'PySide6.QtQuick', '--exclude-module', 'PySide6.QtWebEngineCore',
             '--add-data', f'{info};build',
+            '--add-binary', f'{libredwg / "dwg2dxf.exe"};tools/libredwg',
+            '--add-binary', f'{libredwg / "libredwg-0.dll"};tools/libredwg',
             '--add-data', f'{ROOT / "packaging/licenses"};licenses',
             '--add-data', f'{ROOT / "docs/THIRD_PARTY_NOTICES.md"};licenses',
             '--add-data', f'{ROOT / "docs/unfolding/source_inventory.json"};docs/unfolding',

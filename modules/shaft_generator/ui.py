@@ -6,7 +6,7 @@ from copy import deepcopy
 from dataclasses import fields
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QSignalBlocker
+from PySide6.QtCore import Qt, QSignalBlocker, QTimer
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QBoxLayout,QFormLayout,QSplitter,QSizePolicy,
     QTableWidget,QTableWidgetItem,QAbstractItemView,QTabWidget,
     QLineEdit,QComboBox,QListWidget,QListWidgetItem,QFileDialog,QMessageBox,QCheckBox)
@@ -54,6 +54,43 @@ class AdaptiveViews(QWidget):
         direction = QBoxLayout.TopToBottom if event.size().height() >= self.STACK_HEIGHT else QBoxLayout.LeftToRight
         if self.box.direction() != direction:
             self.box.setDirection(direction)
+
+
+class SectionTabs(QTabWidget):
+    """Editor sections sized by the open section only.
+
+    QTabWidget sizes itself to the largest page (here the 1500 px drawing panel),
+    which left a large invisible scroll range under every short form. Scrolling
+    there and switching sections let Windows shift the old form's pixels under
+    the new one, so both forms appeared on top of each other.
+    """
+
+    def _current(self, hint):
+        page = self.currentWidget()
+        if page is None:
+            return super().sizeHint() if hint == 'sizeHint' else super().minimumSizeHint()
+        size = getattr(page, hint)()
+        frame = self.contentsMargins()
+        return size.grownBy(frame) if hasattr(size, 'grownBy') else size
+
+    def sizeHint(self):
+        return self._current('sizeHint')
+
+    def minimumSizeHint(self):
+        return self._current('minimumSizeHint')
+
+    def hasHeightForWidth(self):
+        page = self.currentWidget()
+        return page is not None and page.hasHeightForWidth()
+
+    def heightForWidth(self, width):
+        # QStackedLayout answers with the tallest page for this width, not the open one.
+        page = self.currentWidget()
+        if page is None:
+            return super().heightForWidth(width)
+        frame = self.contentsMargins()
+        inner = page.heightForWidth(width - frame.left() - frame.right())
+        return (inner if inner >= 0 else page.sizeHint().height()) + frame.top() + frame.bottom()
 
 
 # Ribbon command → editor page (QTabWidget index); 'drawing' is resolved at runtime.
@@ -109,7 +146,7 @@ class ShaftPage(BasePage):
         self.new_operation_button.setToolTip('Seçili işlemden çık; aynı türden yeni bir işlem ekleyin.')
         header.addWidget(self.new_operation_button);header.addStretch(1)
         edit.addLayout(header)
-        self.tabs=QTabWidget(); self.tabs.tabBar().hide();self.tabs.setDocumentMode(True)
+        self.tabs=SectionTabs(); self.tabs.tabBar().hide();self.tabs.setDocumentMode(True)
         self.tabs.setMinimumWidth(0)
 
         stage_page=QWidget(); stages=QVBoxLayout(stage_page); stages.setContentsMargins(0,4,0,0); stages.setSpacing(4)
@@ -383,8 +420,17 @@ class ShaftPage(BasePage):
             page=self.tabs.widget(i)
             policy=QSizePolicy.Preferred if i==index else QSizePolicy.Ignored
             page.setSizePolicy(policy,policy)
+            # Opaque section: a stale frame of the previous form (seen on Windows) can never show through.
+            page.setAttribute(Qt.WA_StyledBackground,True)
         self.tabs.updateGeometry();self.editor.adjustSize()
-        if hasattr(self,'source_scroll'):self.source_scroll.viewport().update()
+        if hasattr(self,'source_scroll'):
+            self.source_scroll.verticalScrollBar().setValue(0)   # a new section opens at its top
+            self.source_scroll.viewport().update()
+            QTimer.singleShot(0,self.repaint_editor)   # once more after the new size is laid out
+
+    def repaint_editor(self):
+        if hasattr(self,'source_scroll'):
+            self.editor.update();self.source_scroll.viewport().update()
 
     def section_changed(self,index):
         self.fit_current_page(index)

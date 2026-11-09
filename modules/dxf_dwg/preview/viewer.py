@@ -10,7 +10,8 @@ import threading
 import numpy as np
 import shiboken6
 from PySide6.QtCore import Qt, Signal, Slot, QObject, QRunnable, QThreadPool, QTimer
-from PySide6.QtGui import QImage, QPainter, QColor
+from PySide6.QtCore import QPointF, QRectF
+from PySide6.QtGui import QImage, QPainter, QColor, QLinearGradient, QPen, QPolygonF, QFont
 from PySide6.QtWidgets import QWidget, QStackedLayout, QApplication
 
 
@@ -18,6 +19,9 @@ from PySide6.QtWidgets import QWidget, QStackedLayout, QApplication
 VIEWS = {'İzometrik': (-45, math.degrees(math.asin(1/math.sqrt(3)))),
          'Ön': (0, 0), 'Arka': (180, 0), 'Sağ': (-90, 0),
          'Sol': (90, 0), 'Üst': (0, 90), 'Alt': (0, -90)}
+
+
+TIP = 'Sol sürükle: döndür · Sağ/orta sürükle: kaydır · Tekerlek: yakınlaştır · Küp: standart görünüm'
 
 
 # Drawing surfaces follow the theme's ``canvas`` token; this is only the value
@@ -66,6 +70,38 @@ def normalized(mesh):
     edges = (np.frombuffer(mesh.edges, dtype='<f4').reshape((-1, 3)).astype(float) - center) * scale
     normals = np.frombuffer(mesh.normals, dtype='<f4').reshape((-1, 3))
     return vertices, normals, edges
+
+
+def gradient(background):
+    """CAD-style vertical gradient (top, bottom) around the theme canvas colour.
+
+    The middle of the view stays within a few levels of the canvas token, so a
+    through hole still shows the theme background.
+    """
+    c = QColor(background) if not isinstance(background, tuple) else QColor(*background)
+    rgb = np.array([c.red(), c.green(), c.blue()])
+    if c.lightness() > 128:
+        top, bottom = rgb + (6, 6, 6), rgb - (10, 8, 4)
+    else:
+        top, bottom = rgb + (16, 18, 22), rgb - (12, 12, 12)
+    return tuple(int(v) for v in np.clip(top, 0, 255)), tuple(int(v) for v in np.clip(bottom, 0, 255))
+
+
+GRID_FADE = 2.6   # normalized units; the part fits in [-1, 1]
+
+
+def grid_lines(vertices, step=.25, extent=GRID_FADE):
+    """Floor grid just under the part (Y is up), as GL line segments."""
+    floor = float(vertices[:, 1].min()) - .002 if len(vertices) else -1.
+    ticks = np.arange(-extent, extent + 1e-9, step)
+    lines = []
+    for v in ticks:
+        lines += [(v, floor, -extent), (v, floor, extent), (-extent, floor, v), (extent, floor, v)]
+    return np.array(lines, dtype=float)
+
+
+def grid_colour(background):
+    return (0., 0., 0., .22) if QColor(background).lightness() > 128 else (1., 1., 1., .13)
 
 
 BASE_COLOUR = np.array([155, 172, 188], dtype=float)
@@ -127,7 +163,8 @@ def _fill(triangles, shade, ids, size, depth, pixels, stop):
 def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
     """True depth testing; holes remain holes, independent of triangle order.
 
-    ``background`` is the RGB canvas colour (the theme's ``canvas`` token).
+    ``background`` is the RGB canvas colour (the theme's ``canvas`` token), or a
+    (top, bottom) pair of RGB colours for a vertical gradient.
     Triangles are rasterized in vectorized batches grouped by screen size, so
     a CPU frame of a few thousand triangles takes milliseconds, not a
     Python-level loop per triangle (the old cause of a stuttering rotation
@@ -142,7 +179,13 @@ def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
     p = project(vertices)
     p[:, 0] = (p[:, 0]+1) * .5 * (width-1)
     p[:, 1] = (1-p[:, 1]) * .5 * (height-1)
-    pixels = np.empty((height, width, 3), dtype=np.uint8); pixels[:] = background
+    pixels = np.empty((height, width, 3), dtype=np.uint8)
+    if len(background) == 2:
+        top, bottom = np.array(background, dtype=float)
+        t = np.linspace(0, 1, height)[:, None]
+        pixels[:] = np.rint(top + (bottom - top) * t)[:, None, :].astype(np.uint8)
+    else:
+        pixels[:] = background
     depth = np.full((height, width), np.inf)
     light = np.array([.25, .45, 1.]); light /= np.linalg.norm(light)
     shade = .42 + .58 * np.abs((normals[::3] @ view[:3, :3].T) @ light)
@@ -233,7 +276,10 @@ class SoftwareCanvas(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.fillRect(self.rect(), self.background)
+        top, bottom = gradient(self.background)
+        fill = QLinearGradient(0, 0, 0, max(1, self.height()))
+        fill.setColorAt(0, QColor(*top)); fill.setColorAt(1, QColor(*bottom))
+        painter.fillRect(self.rect(), fill)
         if not self.image.isNull():
             painter.setRenderHint(QPainter.SmoothPixmapTransform)
             painter.drawImage(self.rect(), self.image)
@@ -245,6 +291,90 @@ def gl_canvas(parent):
     from .opengl import OpenGLCanvas
     return OpenGLCanvas(parent)
 
+CUBE_FACES = (('Ön', (0, 0, 1)), ('Arka', (0, 0, -1)), ('Sağ', (1, 0, 0)),
+              ('Sol', (-1, 0, 0)), ('Üst', (0, 1, 0)), ('Alt', (0, -1, 0)))
+AXES = (('X', (1, 0, 0), '#E5484D'), ('Y', (0, 1, 0), '#46A758'), ('Z', (0, 0, 1), '#3E7BFA'))
+
+
+def face_corners(normal):
+    n = np.array(normal, dtype=float); axis = int(np.argmax(np.abs(n)))
+    u, v = [np.eye(3)[i] for i in range(3) if i != axis]
+    if np.cross(u, v) @ n < 0:
+        u, v = v, u
+    return [n + a*u + b*v for a, b in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+
+
+class Overlay(QWidget):
+    """View cube (click a face for that standard view) and axis triad, drawn over either canvas."""
+
+    SIZE, MARGIN = 84, 10
+
+    def __init__(self, view):
+        super().__init__(view)
+        self.view = view; self.hover = None
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def rotation(self):
+        view, _ = matrices(self.view.camera.state(), 1.)
+        return view[:3, :3]
+
+    def cube_rect(self):
+        s = self.SIZE
+        return QRectF(self.width() - s - self.MARGIN, self.MARGIN, s, s)
+
+    def faces(self):
+        """Visible faces, back to front: (name, screen polygon, facing)."""
+        rotation, rect = self.rotation(), self.cube_rect()
+        centre, scale = rect.center(), rect.width() * .27
+        shown = []
+        for name, normal in CUBE_FACES:
+            facing = float((rotation @ np.array(normal, dtype=float))[2])
+            if facing <= 1e-3:
+                continue
+            points = [rotation @ corner for corner in face_corners(normal)]
+            polygon = QPolygonF([QPointF(centre.x() + p[0]*scale, centre.y() - p[1]*scale) for p in points])
+            shown.append((name, polygon, facing))
+        return sorted(shown, key=lambda face: face[2])
+
+    def face_at(self, point):
+        for name, polygon, _ in reversed(self.faces()):
+            if polygon.containsPoint(QPointF(point), Qt.OddEvenFill):
+                return name
+        return None
+
+    def set_hover(self, name):
+        if name != self.hover:
+            self.hover = name; self.update()
+
+    def paintEvent(self, event):
+        if self.view.mesh is None:
+            return
+        painter = QPainter(self); painter.setRenderHint(QPainter.Antialiasing)
+        light = self.view.background.lightness() > 128
+        ink = QColor('#2B2F36') if light else QColor('#DDE2E8')
+        fill = QColor('#F4F6F8') if light else QColor('#3A3F47')
+        accent = QColor('#3E7BFA')
+        font = QFont(self.font()); font.setPixelSize(10); font.setBold(True); painter.setFont(font)
+        for name, polygon, facing in self.faces():
+            colour = QColor(accent) if name == self.hover else QColor(fill)
+            colour.setAlphaF(.92 if name == self.hover else .78)
+            shade = QColor(colour).darker(int(100 + (1 - facing) * 45))
+            painter.setPen(QPen(ink if not light else QColor('#9AA3AE'), 1)); painter.setBrush(shade)
+            painter.drawPolygon(polygon)
+            if facing > .45:
+                painter.setPen(QColor('white') if name == self.hover else ink)
+                painter.drawText(polygon.boundingRect(), Qt.AlignCenter, name)
+        rotation = self.rotation(); origin = QPointF(30, self.height() - 30)
+        for label_, axis, colour in AXES:
+            d = rotation @ np.array(axis, dtype=float)
+            tip = QPointF(origin.x() + d[0]*22, origin.y() - d[1]*22)
+            painter.setPen(QPen(QColor(colour), 2)); painter.drawLine(origin, tip)
+            painter.setPen(QColor(colour))
+            painter.drawText(QRectF(tip.x() + d[0]*7 - 6, tip.y() - d[1]*7 - 7, 12, 14), Qt.AlignCenter, label_)
+        painter.end()
+
+
 class MeshView(QWidget):
     frameReady = Signal()
 
@@ -252,8 +382,9 @@ class MeshView(QWidget):
         super().__init__(parent)
         self.setMinimumSize(80, 80)
         self.setAccessibleName('Gerçek SolidWorks parçası · 3D görünüm')
-        self.setToolTip('Sol sürükle: döndür · Sağ/orta sürükle: kaydır · Tekerlek: yakınlaştır')
+        self.setToolTip(TIP)
         self.camera, self.mesh = Camera(), None
+        self.grid = True
         self.background = QColor(DEFAULT_CANVAS)
         self.auto_fit = True
         self.pool = QThreadPool(self); self.pool.setMaxThreadCount(1)
@@ -273,6 +404,8 @@ class MeshView(QWidget):
         # Child canvases paint only; all interaction is handled by this wrapper.
         for canvas in (self.software, self.hardware):
             if canvas: canvas.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.overlay = Overlay(self); self.overlay.raise_()
+        self.setMouseTracking(True)
         self.timer = QTimer(self); self.timer.setSingleShot(True); self.timer.setInterval(35)
         self.timer.timeout.connect(self.render)
         # A slot bound to this QWidget is disconnected during its teardown.
@@ -283,6 +416,10 @@ class MeshView(QWidget):
             if render_state[0] is not None:
                 render_state[0].set()
         self.destroyed.connect(cancel_on_destroy)
+
+    def leaveEvent(self, event):
+        self.overlay.set_hover(None)
+        super().leaveEvent(event)
 
     def set_background(self, color):
         """Repaint both render paths on the theme's canvas colour."""
@@ -303,8 +440,9 @@ class MeshView(QWidget):
     @Slot(str)
     def fallback(self, message=''):
         if message:
-            self.setToolTip('Sol sürükle: döndür · Sağ/orta sürükle: kaydır · Tekerlek: yakınlaştır\n' + message)
+            self.setToolTip(TIP + '\n' + message)
         self.stack.setCurrentWidget(self.software)
+        self.overlay.raise_()   # the stack raises its current canvas
         self.render()
 
     def set_mesh(self, mesh):
@@ -314,6 +452,7 @@ class MeshView(QWidget):
         self.generation += 1; self.scene_generation += 1
         self.software.image = QImage(); self.software.update()
         if self.hardware: self.hardware.dirty = True; self.hardware.update()
+        self.overlay.update()
         self.cancel_render()
         self.auto_fit = True
         self.fit_camera()
@@ -321,6 +460,7 @@ class MeshView(QWidget):
 
     def changed(self):
         self.generation += 1
+        self.overlay.update()
         if self.hardware: self.hardware.update()
         if self.dragging:
             # CPU fallback while dragging: let the running frame finish and
@@ -366,8 +506,7 @@ class MeshView(QWidget):
         limit = (400, 300) if self.dragging else (640, 480)
         factor = min(1., limit[0]/max(1, self.width()), limit[1]/max(1, self.height()))
         size = max(1, int(self.width()*factor)), max(1, int(self.height()*factor))
-        task = RenderJob(self.generation, self.mesh, size, self.camera.state(), threading.Event(),
-                         (self.background.red(), self.background.green(), self.background.blue()))
+        task = RenderJob(self.generation, self.mesh, size, self.camera.state(), threading.Event(), gradient(self.background))
         task.signals.done.connect(self.rendered, Qt.QueuedConnection)
         task.scene_generation = self.scene_generation
         self.running = task
@@ -386,6 +525,7 @@ class MeshView(QWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        self.overlay.setGeometry(self.rect()); self.overlay.raise_()
         if self.auto_fit: self.fit_camera()
         self.changed()
 
@@ -411,16 +551,24 @@ class MeshView(QWidget):
         self.fallback('OpenGL bağlamı oluşturulamadı; yazılımsal görüntüleyici etkin.')
 
     def mousePressEvent(self, event):
+        face = self.overlay.face_at(event.position()) if self.mesh is not None else None
+        if face and event.button() == Qt.LeftButton:
+            self.view(face); event.accept(); return
         self.last = event.position(); self.dragging = True
         event.accept()
 
     def mouseReleaseEvent(self, event):
+        if not self.dragging:
+            event.accept(); return
         self.dragging = False
         self.changed()  # one exact frame for the final camera
         event.accept()
 
     def mouseMoveEvent(self, event):
-        if not hasattr(self, 'last') or not event.buttons():
+        if not event.buttons():
+            self.overlay.set_hover(self.overlay.face_at(event.position()) if self.mesh is not None else None)
+            return
+        if not hasattr(self, 'last') or not self.dragging:
             return
         delta = event.position()-self.last; self.last = event.position()
         self.auto_fit = False

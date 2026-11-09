@@ -1,0 +1,24 @@
+GNU LibreDWG 0.13.3 — dwg2dxf.exe ve libredwg-0.dll
+====================================================
+
+GOKWORKS, Nesting modülünde DWG dosyalarını okumak için GNU LibreDWG'nin
+dwg2dxf programını ayrı bir program olarak çalıştırır (geçici DWG kopyası →
+geçici DXF). GOKWORKS kodu LibreDWG'ye bağlanmaz ve onu değiştirmez.
+
+Lisans: GNU General Public License sürüm 3 veya (tercihinize göre) daha sonraki
+herhangi bir sürüm (GPL-3.0-or-later). Lisans metni: GPL-3.0-only.txt
+(aynı klasörde; GPL sürüm 3 metnidir).
+
+Telif: Copyright (C) Free Software Foundation, Inc. ve LibreDWG katkıcıları.
+Bu programın HİÇBİR GARANTİSİ YOKTUR; ayrıntılar için GPL'ye bakın.
+
+Dağıtılan ikili dosyalar, LibreDWG projesinin resmî Windows paketinden
+değiştirilmeden alınmıştır:
+  https://github.com/LibreDWG/libredwg/releases/download/0.13.3/libredwg-0.13.3-win64.zip
+  SHA-256: b5133f8b6bd71b7e682a06ef5f99c93b40d628a791c30a31924a80d258c87173
+
+Karşılık gelen kaynak kod (GPL bölüm 6):
+  https://ftp.gnu.org/gnu/libredwg/libredwg-0.13.3.tar.xz
+Bu ikili dosyaları GOKWORKS ile birlikte alan herkes, dağıtım tarihinden sonra
+en az üç yıl boyunca aynı kaynak kodun bir kopyasını GOKWORKS dağıtıcısından
+ücretsiz isteyebilir.

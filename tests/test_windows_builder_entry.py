@@ -20,6 +20,9 @@ assert str(builder.parents[1]) not in sys.path
 namespace=runpy.run_path(str(builder))
 main=namespace['main']
 main.__globals__['collect_licenses']=lambda:None
+# The pinned LibreDWG download and its Windows end-to-end check are build steps, not entry wiring.
+main.__globals__['fetch_libredwg']=lambda:Path('vendor-libredwg')
+main.__globals__['verify_libredwg']=lambda target:None
 sys.platform='win32'
 sys.argv=[str(builder)]+(['--onedir'] if mode=='onedir' else [])
 class CapturedBuild(Exception):pass

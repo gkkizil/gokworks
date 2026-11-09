@@ -38,18 +38,23 @@ Mevcut parçalar silinmez; başarıyla eklenmiş aynı dosya ikinci kez çoğalt
 Aynı klasörde aynı adlı DXF ve DWG varsa yalnız DXF alınır; farklı alt klasördeki
 aynı adlı dosyalar ayrı kaynaktır. Tarama sırasında **Durdur** kullanılabilir.
 
-DXF doğrudan mevcut okuyucuyla okunur. DWG için ayrıca kurulu, yerel
-[ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) gerekir;
-DWG, geçici bir kopyadan DXF'ye çevrilip aynı kontur/birim doğrulamasına girer.
-Kaynak DWG değiştirilmez. Araç PATH'te, ezdxf ODA ayarında veya standart Windows
-ODA kurulum klasöründe bulunabilir. Özel konum için uygulamayı başlatmadan önce
-`GOKWORKS_ODA_FILE_CONVERTER` ortam değişkenine yürütülebilir dosya yolunu verin.
-Eksik dönüştürücü, bozuk geometri, eksik birim ve diğer hatalar ilgili dosya
-satırında raporlanır; diğer dosyalar okunmaya devam eder. Bulut servisi kullanılmaz.
+DXF doğrudan mevcut okuyucuyla okunur. DWG için kullanıcının hiçbir şey indirmesi
+gerekmez: uygulama paketinde GNU LibreDWG 0.13.3'ün `dwg2dxf` programı bulunur
+(GPL-3.0-or-later, ayrı program olarak çalıştırılır; bkz. `licenses/LibreDWG-NOTICE.txt`).
+Bilgisayarda [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter)
+kuruluysa önce o kullanılır; DXF üretemezse paketteki LibreDWG denenir. DWG, geçici bir
+kopyadan DXF'ye çevrilip aynı kontur/birim doğrulamasına girer; çeviricinin DXF'inde küçük
+yapı hataları varsa ezdxf `recover` ile onarılmış kopya okunur. Kaynak DWG değiştirilmez.
+Özel konumlar: `GOKWORKS_ODA_FILE_CONVERTER`, `GOKWORKS_LIBREDWG_DWG2DXF`.
+LibreDWG bazı ileri R2010+ nesnelerini atlayabilir; kontur eksik okunursa dosyayı CAD
+programında DXF olarak kaydedin. Eksik dönüştürücü, bozuk geometri, eksik birim ve diğer
+hatalar ilgili dosya satırında raporlanır; diğer dosyalar okunmaya devam eder. Bulut servisi kullanılmaz.
 
-Gerçek DWG kabul testi `GOKWORKS_NESTING_DWG_LIVE_SOURCE` ile açıkça seçilen bir
-test kopyası ve kurulu ODA gerektirir. Bu ortamda ODA bulunmadığından bu canlı test
-çalıştırılmadı; mock dönüştürme testleri native DWG kabulü sayılmaz.
+Windows derlemesi (`packaging/build_windows.py`) LibreDWG'yi sabit sürüm ve SHA-256 ile
+indirir, `dxf2dwg` ile ürettiği örnek DWG'yi `read_dwg` üzerinden okuyarak uçtan uca doğrular
+ve yalnız `dwg2dxf.exe` ile `libredwg-0.dll`'yi pakete ekler; paket özdenetimi gömülü
+dönüştürücüyü çalıştırır. Gerçek DWG kabul testi `GOKWORKS_NESTING_DWG_LIVE_SOURCE` ile
+açıkça seçilen bir test kopyası gerektirir.
 
 ## Tek DXF/DWG içinde çerçeveli toplu parçalar
 
@@ -83,8 +88,8 @@ ayırıcı kullanmayın. Proje genelinde 10000 kesim parçası sınırı korunur
 
 Bu seçenek çerçeveli CAD çizimleri içindir. Çerçevesiz normal parçalar için
 kapalı tutun ve mevcut bağımsız kontur/adet akışını kullanın. Ekran görüntüsü,
-taranmış PDF ve çizgiye patlatılmış yazılardan OCR yapılmaz. DWG için mevcut
-yerel ODA dönüştürücü gereksinimi geçerlidir.
+taranmış PDF ve çizgiye patlatılmış yazılardan OCR yapılmaz. DWG dosyaları da
+yukarıda anlatılan pakete gömülü dönüştürücüyle okunur.
 
 ## Çalışma alanı
 

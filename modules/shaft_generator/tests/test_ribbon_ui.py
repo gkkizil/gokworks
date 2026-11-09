@@ -92,3 +92,18 @@ def test_menu_bar_reaches_the_same_commands_and_settings(page):
     page.bore_enabled.setChecked(False)
     assert not bar.items['Diş ve delik/İç deliği aç'].isChecked()
     assert bar.items['Dosya/SolidWorks’te çiz'].isEnabled() and bar.items['Dosya/Proje kaydet…'].isEnabled()
+
+
+@pytest.mark.parametrize('command', ['stages', 'groove', 'keyway', 'chamfer', 'fillet', 'cosmetic_thread', 'bore', 'bulk'])
+def test_editor_is_as_tall_as_the_open_section_not_the_drawing_panel(page, qtbot, command):
+    """QTabWidget/QStackedLayout size to the tallest page (the drawing panel); a short form
+    then had a ~1300 px invisible scroll range, and scrolling there before switching
+    sections left the old form drawn under the new one on Windows."""
+    page.ribbon.command_buttons['drawing' if 'drawing' in page.ribbon.command_buttons else 'groove'].click(); qtbot.wait(20)
+    page.ribbon.command_buttons[command].click(); qtbot.wait(30)
+    current = page.tabs.currentWidget()
+    width = page.tabs.width()
+    expected = current.heightForWidth(width) if current.hasHeightForWidth() else current.sizeHint().height()
+    assert page.tabs.heightForWidth(width) <= max(expected, current.sizeHint().height()) + 20
+    assert page.source_scroll.verticalScrollBar().value() == 0
+    assert page.editor.height() < 700

@@ -121,6 +121,7 @@ FreeType için dağıtıma eklenen FTL koşulları esas alınır; metin lisans k
 | Pillow | 12.1.0 | MIT-CMU; mevcut bağımlılık korunur. |
 | ezdxf | 1.4.3 | MIT; geçişli bağımlılık bildirimleri de dağıtılır. |
 | openpyxl | 3.1.5 | MIT; et-xmlfile izinli lisansı. |
+| GNU LibreDWG (dwg2dxf.exe, libredwg-0.dll) | 0.13.3 | GPL-3.0-or-later. Nesting'de DWG okumak için ayrı program olarak çalıştırılır; GOKWORKS koduna bağlanmaz. Resmî Windows ikilileri değiştirilmeden dağıtılır; kaynak ve teklif `LibreDWG-NOTICE.txt` içindedir. Kuruluysa önce ODA File Converter kullanılır (ODA paketlenmez). |
 | PyInstaller | 6.16.0 | GPL v2+ ve bootloader istisnası; oluşturulan uygulamayı GPL yapmaz. |
 | pytest / pytest-qt / pytest-timeout | 9.0.2 / 4.5.0 / 2.4.0 | MIT; yalnız geliştirme/test ortamında, uygulama çalışma yolunda bulunmaz. |
 

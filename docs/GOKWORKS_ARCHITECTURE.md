@@ -60,15 +60,15 @@ docs/              Rehberler ve tarihsel doğrulama kayıtları (değiştirilmez
 | `bolt` | `modules/bolt` | `rules.py` (statik gövde kontrolü) | — |
 | `bolt_torque` | `modules/bolt_torque` | `rules.py` (T = K·F·d) | — |
 | `weight` | `modules/weight` | `rules.py`, `materials.py` | — |
-| `nesting` | `modules/nesting` | `engine.py` (NFP + çoklu başlangıç), `validation.py`, `accounting.py`, `dxf_import.py` | shapely, ezdxf; DWG için ODA |
+| `nesting` | `modules/nesting` | `engine.py` (NFP + çoklu başlangıç), `validation.py`, `accounting.py`, `dxf_import.py` | shapely, ezdxf; DWG için paketteki LibreDWG (kuruluysa ODA) |
 | `profile_cutting` | `modules/profile_cutting` | `optimizer.py` (1D best-fit + sınırlı tam arama), `scanner.py` | Weldments taraması için COM |
 | `shaft_generator` | `modules/shaft_generator` | `models.py`, `validation.py`, `geometry.py`, `bridge.py` | C# STA köprüsü |
 | `gear_calculator` | `modules/gear_calculator` | `calculation.py`, `geometry.py`, `families/`, `sprockets/` | OCP (ayrı süreç) |
 
 Hedeflenip **uygulanmamış** alanlar: genel parametrik parça oluşturma
 (yalnız mil ve dişli var), otomatik teknik resim/ölçülendirme, mil mukavemet
-hesabı (mil modülü yalnız geometri/CAD üretir), DWG'nin doğrudan okunması
-(ODA File Converter gerekir).
+hesabı (mil modülü yalnız geometri/CAD üretir). Nesting DWG'yi paketteki LibreDWG
+ile geçici DXF üzerinden okur (DWG'nin doğrudan yerel ayrıştırılması yoktur).
 
 ## 5. Çalışma mimarisi
 
