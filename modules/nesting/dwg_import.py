@@ -128,19 +128,48 @@ def convert_dwg(source, destination, stop=None, *, timeout=120):
     raise ValueError('DWG için DXF çıktısı oluşmadı: '+'; '.join(problems)+'. Dosyayı CAD programında DXF olarak kaydedip ekleyin.')
 
 
+def _drop_invalid_handles(dxf):
+    """Copy of a converter DXF without records whose handle is 0, or None when there are none.
+
+    Handle 0 is never valid in DXF; LibreDWG writes it for objects it cannot convert
+    (e.g. MLEADERSTYLE). ezdxf rejects the whole file for one such record, even in
+    recover mode, although the geometry is intact. Only these placeholder records go.
+    """
+    lines=dxf.read_bytes().splitlines(keepends=True)
+    pairs=[lines[i:i+2] for i in range(0,len(lines)-1,2)]
+    records=[]
+    for pair in pairs:
+        if pair[0].strip()==b'0' or not records:records.append([])
+        records[-1].append(pair)
+    invalid=lambda record:any(code.strip() in (b'5',b'105') and value.strip()==b'0' for code,value in record)
+    kept=[record for record in records if not invalid(record)]
+    if len(kept)==len(records):return None
+    cleaned=dxf.with_name(dxf.stem+'-temiz.dxf')
+    cleaned.write_bytes(b''.join(line for record in kept for pair in record for line in pair))
+    return cleaned
+
+
 def _read_converted(dxf, stop, options):
     try:
         return read_dxf(dxf,stop=stop,**options)
     except ValueError as error:
-        # A converter's DXF may carry small structural flaws; repair a copy and read strictly again.
+        first=error
+    # A converter's DXF may carry small structural flaws: drop placeholder records with the
+    # invalid handle 0, then repair a copy with ezdxf's recover mode and read strictly again.
+    source=_drop_invalid_handles(dxf) or dxf
+    if source is not dxf:
         try:
-            from ezdxf import recover
-            document,auditor=recover.readfile(str(dxf))
-        except Exception:
-            raise error from None
-        if auditor.has_errors:raise error from None
-        repaired=dxf.with_name(dxf.stem+'-onarildi.dxf');document.saveas(str(repaired))
-        return read_dxf(repaired,stop=stop,**options)
+            return read_dxf(source,stop=stop,**options)
+        except ValueError:
+            pass
+    try:
+        from ezdxf import recover
+        document,auditor=recover.readfile(str(source))
+    except Exception:
+        raise first from None
+    if auditor.has_errors:raise first from None
+    repaired=dxf.with_name(dxf.stem+'-onarildi.dxf');document.saveas(str(repaired))
+    return read_dxf(repaired,stop=stop,**options)
 
 
 def read_dwg(filename, *, stop=None, **options):
