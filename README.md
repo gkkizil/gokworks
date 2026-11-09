@@ -4,14 +4,42 @@ GOKWORKS; SolidWorks dosyalarını toplu aktarmak, montajlardan ürün ağacı
 çıkarmak, sac ve profil kesimlerini planlamak ve mühendislik hesapları yapmak
 için geliştirilmiş Türkçe bir masaüstü uygulamasıdır.
 
-**Hidrolik Ünite hesap altyapısı:** silindir, ardışık çevrim, pompa/motor,
-boru, tank/ısı ve akümülatör hesapları ile PDF/Excel/JSON raporları
-[bağımsız Python modülü](modules/hydraulic_unit/README.md) olarak kullanılabilir.
-Arayüz ve menü entegrasyonu ayrı çalışmadır; henüz masaüstü menüsünde sunulmaz.
+Sol menüde beş grupta 21 araç bulunur: **Aktarım** (PDF, DXF/DWG, 3D),
+**Montaj** (BOM, isimlendirme), **Üretim** (Nesting, Akıllı Parça Bölme,
+profil kesim, K faktörü, parametrik mil, DFM, sac açınımı), **Hesaplar**
+(geçme ve geometrik toleranslar, tolerans yığılması, cıvata, tork, ağırlık,
+hidrolik ünite) ve **Makine Elemanları** (dişli, kayış–kasnak).
 
-[Başlangıç](#başlangıç) · [Araç seçimi](#hangi-aracı-kullanmalıyım) ·
-[Adım adım kullanım](#adım-adım-kullanım) · [Sorun giderme](#sorun-giderme) ·
-[Kurulum ve güncelleme](#kurulum-ve-güncelleme)
+![GOKWORKS · Nesting](docs/readme/nesting.png)
+
+[Telif, lisans ve bağımlılıklar](#telif-lisans-ve-bağımlılıklar) · [Başlangıç](#başlangıç) ·
+[Araç seçimi](#hangi-aracı-kullanmalıyım) · [Adım adım kullanım](#adım-adım-kullanım) ·
+[Sorun giderme](#sorun-giderme) · [Kurulum ve güncelleme](#kurulum-ve-güncelleme) ·
+[İletişim](#geliştirici-ve-iletişim)
+
+## Telif, lisans ve bağımlılıklar
+
+**© 2026 Orhan Gökkızıl — GOKWORKS.** Uygulamayla birlikte dağıtılan üçüncü taraf
+bileşenler kendi lisanslarına tabidir. Lisans metinleri uygulama içinde
+**Hakkında** ekranından görüntülenip dışa aktarılabilir; depoda
+[`packaging/licenses/`](packaging/licenses) klasöründe ve
+[üçüncü taraf bildirimlerinde](docs/THIRD_PARTY_NOTICES.md) bulunur.
+
+| Bileşen | Sürüm | Lisans | Kullanım |
+| --- | --- | --- | --- |
+| Python | 3.13 | PSF | Çalışma zamanı (EXE içinde) |
+| PySide6 / Qt Widgets | 6.10.3 | LGPL-3.0 | Arayüz |
+| ezdxf | 1.4.3 | MIT | DXF okuma/yazma |
+| Shapely (GEOS) | 2.1.2 | BSD-3-Clause (GEOS: LGPL-2.1) | Geometri, nesting, bölme |
+| openpyxl | 3.1.5 | MIT | Excel raporları |
+| Pillow | 13.0.0 | MIT-CMU | Görseller |
+| pywin32 | 312 | PSF tarzı | SolidWorks COM bağlantısı (Windows) |
+| cadquery-ocp-novtk (OCCT 8.0.1) | 8.0.1.1.0 | Apache-2.0 (OCCT: LGPL-2.1 + istisna) | STEP ve katı model işlemleri |
+| GNU LibreDWG (`dwg2dxf`) | 0.13.3 | GPL-3.0-or-later | DWG okuma; ayrı program olarak çalışır, GOKWORKS koduna bağlanmaz ([bildirim](packaging/licenses/LibreDWG-NOTICE.txt)) |
+| PyInstaller | 6.16.0 | GPL-2.0+ ve bootloader istisnası | Yalnız EXE oluşturma; uygulamayı GPL yapmaz |
+
+SolidWorks, Microsoft Excel, ODA File Converter ve AutoCAD uygulamayla
+dağıtılmaz. SolidWorks gerektiren işlemler kullanıcının kendi lisanslı kurulumunu kullanır.
 
 ## Başlangıç
 
@@ -40,11 +68,10 @@ Uygulama kodu: `1f31d66` · [Derleme kaydı](https://github.com/gkkizil/gokworks
 | EXE'yi çalıştırma | Windows 10/11, 64 bit. EXE için Python kurulumu gerekmez. |
 | SolidWorks dosyalarını okuma veya CAD işlemi yapma | Kurulu SolidWorks ve aynı Windows kullanıcı oturumunda açık SolidWorks. |
 | Hesap araçları, manuel profil kesimi ve DXF nesting | SolidWorks bağlantısı gerekmez. |
-| Nesting'e DWG dosyası ekleme | Ayrıca yerel ODA File Converter kurulumu gerekir. DXF dosyaları doğrudan okunur. |
+| Nesting'e veya Akıllı Parça Bölme'ye DWG ekleme | Ek kurulum gerekmez: DWG, uygulamanın içindeki LibreDWG ile okunur. Bilgisayarda ODA File Converter kuruluysa önce o kullanılır. |
 
-Excel raporu oluşturmak için Microsoft Excel, DXF nesting için AutoCAD
-kurulumu gerekmez. SolidWorks'ten DWG dışa aktarma ile Nesting'e DWG içe
-aktarma farklı işlemlerdir; ODA gereksinimi Nesting'e DWG ekleme içindir.
+Excel raporu oluşturmak için Microsoft Excel, DXF/DWG nesting için AutoCAD
+kurulumu gerekmez.
 
 ## Hangi aracı kullanmalıyım?
 
@@ -56,6 +83,9 @@ aktarma farklı işlemlerdir; ODA gereksinimi Nesting'e DWG ekleme içindir.
 | Parça adedi, ürün ağacı ve Excel raporu almak | [BOM · Ürün ağacı](#bom-ve-excel) | Evet |
 | Montajı yeni dosya adlarıyla ayrı bir klasöre kopyalamak | [İsimlendirme aracı](#montaj-dosyalarını-yeniden-adlandırma) | Evet |
 | Sac parçalarını levhalara yerleştirip maliyet hesaplamak | [Nesting · Sac maliyeti](#nesting-ve-sac-maliyeti) | Hayır |
+| Levhaya sığmayan büyük parçaları segmentlere bölmek | [Akıllı Parça Bölme](#akıllı-parça-bölme) | Hayır |
+| Silindir, koni, redüksiyon, dirsek gibi sac şekillerin açınımını hesaplamak | [Sac Açınımı](#sac-açınımı) | Hayır |
+| DXF kesim geometrisini lazer kesim kurallarına göre kontrol etmek | [DFM · İmalat uygunluğu](#dfm-ve-imalat-uygunluğu) | Hayır |
 | Profil parçalarını ham çubuklara paylaştırmak | [Profil kesim](#profil-kesim) | Modelden liste almak için gerekir |
 | Kademeli mil tasarlayıp katı model oluşturmak | [Parametrik mil](#parametrik-mil) | Katı model oluşturmak için gerekir |
 | Büküm hesabı yapmak veya saclara K/R atamak | [K faktörü / yarıçap](#k-faktörü-ve-yarıçap) | Montaja atama için gerekir |
@@ -65,7 +95,9 @@ aktarma farklı işlemlerdir; ODA gereksinimi Nesting'e DWG ekleme içindir.
 | Cıvata bağlantısının statik yük kontrolünü yapmak | [Cıvata hesabı](#diğer-hesap-araçları) | Hayır |
 | Sıkma torku ve ön yük hesaplamak | [Hızlı tork hesabı](#diğer-hesap-araçları) | Hayır |
 | Kesit ve malzemeye göre ağırlık hesaplamak | [Ağırlık hesabı](#diğer-hesap-araçları) | Hayır |
+| Hidrolik ünitenin motor, pompa, hat, tank ve soğutucu ihtiyacını hesaplamak | [Hidrolik Ünite Hesaplayıcı](#hidrolik-ünite-hesaplayıcı) | Hayır |
 | Dişli hesabı, hareket görünümü ve CAD çıktısı hazırlamak | [Dişli Hesaplama](#dişli-hesaplama) | Hayır |
+| Kayış–kasnak aktarmasını boyutlandırmak | [Kayış–Kasnak Tasarımı](#kayışkasnak-tasarımı) | Hayır |
 
 ## Ekranı tanıma
 
@@ -95,6 +127,8 @@ sıfırlar; oluşturulmuş çıktı dosyaları klasörlerinde kalır.
 
 ### PDF aktarımı
 
+![PDF aktarımı](docs/readme/pdf.png)
+
 1. **PDF aktarımı** ekranında kaynak ve çıktı klasörünü seçin.
 2. Alt klasörler de okunacaksa **Alt klasörleri tara** seçeneğini açın.
 3. **Klasörü tara** ile bulunan `.SLDDRW` dosyalarını kontrol edin.
@@ -105,6 +139,8 @@ Her teknik resim için ayrı PDF oluşur. Aynı teknik resmin bütün sayfaları
 aynı PDF dosyasında yer alır.
 
 ### DXF ve DWG açınımı
+
+![DXF / DWG](docs/readme/dxf_dwg.png)
 
 1. Montaj adetleri kullanılacaksa SolidWorks'te ana montajı ve doğru
    konfigürasyonu etkinleştirin.
@@ -131,6 +167,8 @@ adetleri alınır. Ana montaj yoksa bağımsız parça dosyaları birer örnek s
 
 ### 3D dosya aktarımı
 
+![3D Dönüştürücü](docs/readme/cad_converter.png)
+
 1. **3D Dönüştürücü** ekranında **Dosyaları seç…** veya **Kaynak klasörü seç…**
    ile `.SLDPRT` ve `.SLDASM` dosyalarını ekleyin.
 2. Çıktı klasörünü seçin. STEP, Parasolid, IGES veya STL biçimlerinden
@@ -148,6 +186,8 @@ olan kullanıcı pencereleri korunur.
 
 ### BOM ve Excel
 
+![BOM · Ürün ağacı](docs/readme/bom.png)
+
 1. SolidWorks'te ürün ağacını alacağınız ana montajı etkinleştirin.
 2. **BOM · Ürün ağacı** ekranında **Okuma modu** seçin. Ad ve adet için
    **Hızlı liste · ağırlıksız**, kütle bilgisi için **Ağırlıklarla birlikte**
@@ -164,6 +204,8 @@ satırında belirtilir. Görsel tercihiniz sonraki kullanım için hatırlanır.
 
 ### Montaj dosyalarını yeniden adlandırma
 
+![İsimlendirme aracı](docs/readme/naming.png)
+
 1. **İsimlendirme aracı** ekranında montaj klasörünü seçin.
 2. **Montajları bul** ile kaynak montajı belirleyin veya
    **Aktif montajı kullan** seçeneğini kullanın.
@@ -177,7 +219,9 @@ pakettir. Paket tamamlandıktan sonra yeni klasördeki montajı açıp inceleyin
 
 ### Nesting ve sac maliyeti
 
-1. **Nesting · Sac maliyeti** ekranında **DXF ekle** ile dosyaları seçin.
+![Nesting · Sac maliyeti](docs/readme/nesting.png)
+
+1. **Nesting · Sac maliyeti** ekranında **DXF ekle** ile DXF veya DWG dosyalarını seçin.
    Bir klasörü topluca okumak için **DOSYA → Klasör ve alt klasörlerden ekle…**
    komutunu kullanın; alt klasörler de taranır.
 2. İçe aktarma tablosunda dosya adından önerilen **kalınlık ve adetleri**,
@@ -202,9 +246,39 @@ Uygun küçük parçalar için delik içi yerleşim otomatik değerlendirilir.
 DXF ile oluşturulan kesim sırası dosyasını CAM hazırlığında inceleyin;
 Nesting çıktısı doğrudan makine programı değildir.
 
+DWG dosyaları uygulamanın içindeki dönüştürücüyle geçici DXF'e çevrilip aynı
+kontrollerden geçer; kaynak DWG değiştirilmez. Çerçeveli toplu çizimlerde
+(her parça bir çerçeve içinde, yanında adet yazısı) **Çerçeveli toplu çizim**
+seçeneğiyle parçalar ve adetleri çizimden okunur.
+
 [Ayrıntılı Nesting rehberi](modules/nesting/README.md)
 
+### Akıllı parça bölme
+
+![Akıllı Parça Bölme](docs/readme/smart_splitting.png)
+
+Levhaya sığmayan büyük daire, halka veya flanş gibi parçaları konturu ve
+delikleri koruyarak segmentlere böler ve sonucu Nesting'e aktarır.
+
+1. **DXF/DWG ekle…** ile bir veya birden çok dosya seçin ya da Nesting'de bir
+   parça seçip **Nesting’den al** düğmesini kullanın. Adet ve kalınlık dosya
+   adından okunur (`Flanş - 3 mm - 5 adet.dwg`); listede çift tıklayıp düzeltebilirsiniz.
+2. **Nasıl bölünsün?** bölümünde segment sayısını, bölme yöntemini (eşit açısal
+   veya deliklerden kaçan kontur duyarlı) ve bölme merkezini seçin. Gerekirse
+   **Kısıtlar** altında delik mesafesi ve yasaklı bölgeleri girin.
+3. **Levha ve Nesting** bölümünde levha ölçüsünü, malzemeyi ve kalınlığı kontrol edin.
+4. **Parçayı Böl** seçili parçayı, **Tümünü Böl** listedeki bütün parçaları aynı
+   ayarlarla böler. **Fireyi Optimize Et** farklı bölmeleri gerçek yerleşimde
+   karşılaştırıp en az levha ve fireyi vereni gösterir.
+5. **DXF Dışa Aktar** her segmenti ayrı DXF olarak kaydeder; **Nesting’e Aktar**
+   segmentleri Nesting'e ekler.
+
+Sonuç geometrik bir ön kontroldür; kaynak/bağlantı dayanımı hesaplanmaz.
+[Ayrıntılı rehber](modules/smart_splitting/README.md)
+
 ### Profil kesim
+
+![Profil kesim](docs/readme/profile_cutting.png)
 
 1. **Profil kesim → Parçalar ve stok** bölümünde **Parça ekle** düğmesine basın.
    Profil kesitini, malzemeyi, tek parça boyunu ve kesilecek adedi girin.
@@ -227,6 +301,8 @@ Farklı profil kesitleri ve malzemeler ayrı gruplarda hesaplanır.
 
 ### Parametrik mil
 
+![Parametrik mil](docs/readme/shaft_generator.png)
+
 1. **Parametrik mil** ekranında parça adını girin; kademeleri soldan sağa
    sıralayarak her kademenin çapını ve boyunu mm cinsinden tanımlayın.
 2. **Parametre bölümü** listesinden segman, kama, pah, radyüs veya diğer
@@ -248,6 +324,8 @@ kademe omuzlarını kapsar. **Mevcut pah/radyüsleri de değiştir** seçeneği 
 
 ### K faktörü ve yarıçap
 
+![K faktörü / yarıçap](docs/readme/k_factor.png)
+
 1. **K faktörü / yarıçap** ekranında bağımsız büküm hesabı veya montaja atama
    işlemini seçin.
 2. Montaja atama için **Manuel K / R** bölümünde sac kalınlığı, K faktörü
@@ -259,6 +337,8 @@ Atama model parametrelerini değiştirir. Kaydetme seçeneği başlangıçta kap
 yalnız tanımladığınız kalınlıklarla eşleşen uygun sac parçaları işlenir.
 
 ### Tolerans yığılması
+
+![Tolerans yığılması](docs/readme/tolerance_stack.png)
 
 1. **Tolerans yığılması** ekranında manuel ölçüleri ekleyin veya
    SolidWorks teknik resimlerinden ölçü okuyun. İlk deneme için örnek analizi açabilirsiniz.
@@ -272,7 +352,57 @@ Girdi değiştirildiğinde yeniden hesaplama gerekir. Kaydedilmiş bir projeyi
 açtığınızda da zinciri doğrulayıp hesaplayın. Teknik resme analiz notu eklemek
 ayrı bir işlemdir; bu işlem öncesindeki kayıt ve kaynak seçimini kontrol edin.
 
+### Sac açınımı
+
+![Sac Açınımı](docs/readme/sheet_unfolding.png)
+
+1. **Sac Açınımı** ekranında şekli seçin (silindir, koni, redüksiyon, kare–yuvarlak
+   geçiş, dirsek, kanal ve diğer 51 aile); arama kutusunu kullanabilirsiniz.
+2. Ölçüleri şema üzerinde veya formda girin; ölçü yüzeyini (iç/orta/dış),
+   malzemeyi, sac kalınlığını ve birleşim tipini seçin.
+3. Açınım ölçüsünü, net alanı, kesim boyunu ve kütleyi inceleyin; 3D ve açınım
+   görünümlerini kontrol edin.
+4. **DXF, PDF, STEP** veya **Toplu ZIP** olarak kaydedin ya da **Nesting'e gönder**
+   ile doğrudan yerleşime aktarın. Projeyi kaydedip sonra açabilirsiniz.
+
+[Ayrıntılı rehber](modules/sheet_unfolding/README.md)
+
+### DFM ve imalat uygunluğu
+
+![DFM · İmalat uygunluğu](docs/readme/dfm_analyzer.png)
+
+1. **DFM · İmalat uygunluğu** ekranında kontrol edilecek DXF dosyasını seçin.
+2. Kural profilini (ör. lazer kesim) ve sac kalınlığını seçip analizi başlatın.
+3. Bulgular çizimin üzerinde işaretlenir; HATA / UYARI / BİLGİ önem sırasıyla
+   listeyi inceleyin ve JSON/CSV rapor alın.
+
+Bu bir 2B geometri kontrolüdür; üretime uygunluk onayı değildir. Paketteki
+lazer profili örnek başlangıç profilidir. [Ayrıntılı rehber](modules/dfm_analyzer/README.md)
+
+### Hidrolik ünite hesaplayıcı
+
+![Hidrolik Ünite Hesaplayıcı](docs/readme/hydraulic_unit.png)
+
+**Kolay kullanım** görünümünde üç adım vardır:
+
+1. **Ölçüler:** piston çapını (silindirin iç çapı), mil çapını ve stroku girin.
+   Çizim hangi ölçünün nerede olduğunu gösterir; gövde dış çapı girilmez.
+2. **Hareketler:** her hareket için “Ne kadar yol alsın?”, “Kaç saniye sürsün?”
+   ve gerekli itme/çekme kuvvetini girin. **İleri – bekle – geri örneğini kur**
+   hazır bir sıra yazar. Kuvvet kN veya ton-kuvvet olarak girilebilir.
+3. **Sonuç ve rapor:** motor gücü, pompa debisi, basınç, hat iç çapı, tank ve
+   soğutucu ihtiyacı kartlarda İHTİYAÇ / MEVCUT / ÖNERİ ayrımıyla gösterilir.
+   Uyarıların yanında ne yapılacağı ve ilgili alana giden **Göster →** düğmesi
+   vardır. **PDF raporu** veya **Excel tablosu** alın.
+
+Pompa, hat, yağ, tank, akümülatör ve çok silindirli projeler için görünümü
+**Ayrıntılı ayarlar** yapın. Projeler `.gwhyd` dosyası olarak kaydedilir;
+**Örnek pres ünitesi** ile hazır bir proje açılır. Sonuçlar ön boyutlandırmadır;
+üretici veya imalat onayı değildir. [Ayrıntılı rehber](modules/hydraulic_unit/README.md)
+
 ### Dişli hesaplama
+
+![Dişli Hesaplama](docs/readme/gear_calculator.png)
 
 1. **Dişli Hesaplama** ekranında dişli türünü seçin. Başlangıç için
    **Dış düz · Evolvent** seçeneğini kullanabilirsiniz.
@@ -282,7 +412,28 @@ ayrı bir işlemdir; bu işlem öncesindeki kayıt ve kaynak seçimini kontrol e
    **STEP kaydet** komutlarını kullanın. Diğer dişli türlerinde ekranda belirtilen
    hesap ve CAD desteğini kontrol edin.
 
+### Kayış–kasnak tasarımı
+
+![Kayış–Kasnak Tasarımı](docs/readme/belt_drive.png)
+
+1. **Kayış–Kasnak Tasarımı** ekranında kayış türünü (V, triger/senkron vb.) seçin.
+2. **Manuel** sekmesinde kasnak çaplarını, devri ve eksen mesafesini girip
+   hesaplayın; kayış boyu, sarım açıları ve hızları inceleyin.
+3. **Otomatik tasarım** sekmesinde güç ve devirlerden kasnak çapları ile kayış
+   boyunu önerir; eksen mesafesini boş bırakabilirsiniz.
+
+Ürün kataloğu ve güç tablosu değerlendirmesi ayrı seçeneklerdir; stok
+bulunabilirliği iddia edilmez. [Ayrıntılı rehber](modules/belt_drive/README.md)
+
 ### Diğer hesap araçları
+
+| ISO geçme toleransları | Geometrik toleranslar |
+| --- | --- |
+| ![ISO geçme toleransları](docs/readme/iso_fits.png) | ![Geometrik toleranslar](docs/readme/geometric_tolerances.png) |
+
+| Cıvata hesabı | Hızlı tork hesabı | Ağırlık hesabı |
+| --- | --- | --- |
+| ![Cıvata hesabı](docs/readme/bolt.png) | ![Hızlı tork hesabı](docs/readme/bolt_torque.png) | ![Ağırlık hesabı](docs/readme/weight.png) |
 
 | Araç | Nasıl kullanılır? |
 | --- | --- |
@@ -299,7 +450,7 @@ hesaplarında üretici şartnamelerini; kesim çıktılarında üretim/CAM hazı
 ## Projeler ve kaydedilen tercihler
 
 Klasör seçimleri, görünüm tercihleri ve Nesting sac tanımları otomatik
-hatırlanır. **Nesting, Profil kesim, Parametrik mil ve Tolerans yığılması**
+hatırlanır. **Nesting, Profil kesim, Parametrik mil, Tolerans yığılması, Sac Açınımı ve Hidrolik Ünite**
 çalışmalarınızı kendi proje kaydetme komutlarıyla saklayın.
 Proje dosyası düzenlemeye devam etmek, PDF/Excel/DXF/STEP gibi çıktılar
 ise sonucu paylaşmak veya sonraki işleme taşımak içindir.
@@ -317,7 +468,7 @@ Windows hata günlükleri `%LOCALAPPDATA%\GOKWORKS\logs` klasöründedir.
 | Aynı dosya yeniden aktarılmıyor | Çıktı klasöründe mevcut dosya olup olmadığını ve **Üzerine yaz** seçimini kontrol edin. |
 | Nesting'de bazı parçalar yerleşmiyor | Parça/sac malzeme ve kalınlık eşleşmesini, levha ölçülerini, stok adedini, aralık ve kenar paylarını kontrol edip yeniden yerleştirin. |
 | Nesting dışa aktarma düğmesi kapalı | Bütün parçaların yerleştiğini ve son değişiklikten sonra hesabın yenilendiğini kontrol edin. |
-| Nesting'e DWG eklenemiyor | ODA File Converter kurulumunu kontrol edin veya dosyayı DXF olarak ekleyin. |
+| DWG eklenemiyor veya kontur eksik okunuyor | Durum satırındaki dosya hatasını okuyun. Pakete gömülü okuyucu bazı yeni (R2010 sonrası) DWG nesnelerini atlayabilir; dosyayı CAD programında DXF olarak kaydedip ekleyin. |
 | BOM Excel'inde görseller yok | **Excel’e parça görsellerini ekle** seçeneğini kontrol edin. Görsel alınamayan parçanın Excel satırındaki açıklamasını okuyun. |
 | Durdur'a bastıktan sonra bekliyor | Devam eden SolidWorks çağrısının bitmesi gerekebilir. Durum çubuğunu ve günlüğü izleyin. |
 | PyCharm `python.exe` için sözdizimi hatası veriyor | Çalıştırma ayarında **Script path** alanını `main.py`, Python yorumlayıcısını `.venv\Scripts\python.exe` olarak seçin. |
@@ -385,7 +536,6 @@ koruyarak güncel kaynak paketini ayrı bir klasöre çıkarabilirsiniz.
 - **LinkedIn:** [Orhan Gökkızıl](https://www.linkedin.com/in/orhan-g%C3%B6kk%C4%B1z%C4%B1l/)
 - **GitHub:** [gkkizil/gokworks](https://github.com/gkkizil/gokworks)
 
-Bu bağlantılara uygulamanın sol altındaki **İletişim** bölümünden de ulaşabilirsiniz.
 [Ayrıntılı modül rehberleri](modules/README.md) · [Geliştirme belgeleri](docs/repository-structure.md)
 
-© 2026 Orhan Gökkızıl — GOKWORKS.
+Bu bağlantılara uygulamanın sol altındaki **İletişim** bölümünden de ulaşabilirsiniz.
