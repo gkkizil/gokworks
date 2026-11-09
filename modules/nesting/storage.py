@@ -41,21 +41,32 @@ def validate_imports(entries):
         for key in ('contour_review','contour_approval'):
             if key not in entry: continue
             review = entry[key]
-            if (not isinstance(review,dict) or set(review) != {'sha256','count','quantity'}
+            if (not isinstance(review,dict) or set(review) not in ({'sha256','count','quantity'}, {'sha256','count','quantity','drawing_parts'})
                     or not isinstance(review['sha256'],str) or len(review['sha256'])!=64
                     or any(c not in '0123456789abcdef' for c in review['sha256'])
-                    or type(review['count']) is not int or review['count']<2
+                    or type(review['count']) is not int or review['count']<(1 if 'drawing_parts' in review else 2)
                     or type(review['quantity']) is not int):
                 raise ValueError('DXF bağımsız parça onayı geçersiz.')
             integer(review['quantity'],'Adet')
+            if 'drawing_parts' in review:
+                parts = review['drawing_parts']
+                if not isinstance(parts,list) or len(parts)!=review['count'] or len(parts)>10000:
+                    raise ValueError('Toplu çizim parça listesi geçersiz.')
+                for part in parts:
+                    if (not isinstance(part,dict) or set(part)!={'code','quantity','width','height'}
+                            or not isinstance(part['code'],str) or not part['code'] or type(part['quantity']) is not int):
+                        raise ValueError('Toplu çizim parça kaydı geçersiz.')
+                    integer(part['quantity'],'Çizimdeki adet')
+                    for key in ('width','height'): number(part[key],'Çizimdeki ölçü',positive=True)
         options = entry['options']
-        if set(options)-{'material','thickness','quantity','unit','tolerance','join_tolerance','excluded_layers','grouped'}:
+        if set(options)-{'material','thickness','quantity','unit','tolerance','join_tolerance','excluded_layers','grouped','drawing_layout'}:
             raise ValueError('DXF yükleme seçenekleri desteklenmiyor.')
         for key in ('thickness','tolerance','join_tolerance'):
             if key in options: options[key] = number(options[key],key,positive=True)
         if 'quantity' in options: options['quantity'] = integer(options['quantity'],'Adet')
         if (options.get('unit') not in (None,'mm','cm','inch') or not isinstance(options.get('material','S235JR'),str)
-                or type(options.get('grouped',False)) is not bool or not isinstance(options.get('excluded_layers',[]),list)
+                or type(options.get('grouped',False)) is not bool or type(options.get('drawing_layout',False)) is not bool
+                or not isinstance(options.get('excluded_layers',[]),list)
                 or not all(isinstance(layer,str) for layer in options.get('excluded_layers',[]))):
             raise ValueError('DXF birim, malzeme veya katman seçeneği geçersiz.')
     return entries

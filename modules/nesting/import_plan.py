@@ -8,7 +8,7 @@ from .models import integer, number
 
 
 DEFAULT_OPTIONS = dict(material='S235JR', thickness=2., quantity=1, unit=None,
-                       tolerance=.02, join_tolerance=.001, excluded_layers=[], grouped=False)
+                       tolerance=.02, join_tolerance=.001, excluded_layers=[], grouped=False, drawing_layout=False)
 
 
 def normalize_options(options):
@@ -22,10 +22,12 @@ def normalize_options(options):
     if result['tolerance'] > 1 or result['join_tolerance'] > .1:
         raise ValueError('Eğri toleransı en fazla 1 mm; uç birleştirme toleransı en fazla 0,1 mm olabilir.')
     if (result['unit'] not in (None,'mm','cm','inch') or not isinstance(result['material'],str)
-            or not result['material'] or type(result['grouped']) is not bool
+            or not result['material'] or type(result['grouped']) is not bool or type(result['drawing_layout']) is not bool
             or not isinstance(result['excluded_layers'],list)
             or not all(isinstance(s,str) for s in result['excluded_layers'])):
         raise ValueError('DXF birim, malzeme veya katman seçeneği geçersiz.')
+    if result['drawing_layout'] and result['grouped']:
+        raise ValueError('Çerçeveli toplu çizimde tek grup seçimini kapatın; her çerçeve ayrı parçadır.')
     return result
 
 
@@ -43,14 +45,17 @@ class ImportDraft:
         result = deepcopy(defaults)
         if automatic:
             for key in ('thickness','quantity'):
+                if key == 'quantity' and result.get('drawing_layout'):
+                    continue
                 value = getattr(self.detected,key)
                 if value is not None: result[key] = value
         result.update(deepcopy(self.manual))
         return normalize_options(result)
 
-    def issues(self, automatic=True):
+    def issues(self, automatic=True, *, drawing_layout=False):
         return ' '.join(getattr(self.detected,key+'_issue') for key in ('thickness','quantity')
-                        if automatic and key not in self.manual and getattr(self.detected,key+'_issue'))
+                        if automatic and not (drawing_layout and key=='quantity')
+                        and key not in self.manual and getattr(self.detected,key+'_issue'))
 
     def status(self, automatic=True):
         if self.issues(automatic): return 'Kontrol gerekli'
