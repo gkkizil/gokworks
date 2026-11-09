@@ -422,3 +422,9 @@ Tam regresyon: `python packaging/run_windows_tests.py modules/nesting/tests
 Linux'ta `QT_QPA_PLATFORM=offscreen` kullanılabilir. Yerel ekran görüntüleri ve
 üretilen örnek raporlar depoya eklenmez; Windows CI aynı testleri yerel Qt
 platformunda çalıştırır. SolidWorks bu özellik için gerekli değildir.
+
+## Sparrow ve küçük parça önizlemeleri
+
+Yerleşim motoru sağdaki Özellikler → Yerleşim → Motor alanından seçilebilir.
+Sol listedeki küçük konturlar delikleri ve en/boy oranını korur.
+[Sparrow sürümü, levha uyarlaması ve doğrulama sınırları](SPARROW.md).

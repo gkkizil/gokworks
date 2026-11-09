@@ -1,5 +1,23 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Sparrow yerleşim motoru · 9 Kasım 2026
+
+Resmî `spyrrow==0.9.0` Python bağlantısı (MIT, Paul Durand-Lupinski)
+uygulama bağımlılığıdır. Bu sürümün Linux ve CPython 3.13 Windows x64
+wheel SBOM'ları **Sparrow 0.1.0**, commit
+`881cdcbdf492ca42ba5413954ea6e41889a3becd` (MIT, Jeroen Gardeyn, KU Leuven)
+ve **jagua-rs 0.7.0 (MPL-2.0, Jeroen Gardeyn)** içerdiğini doğrular.
+Güncel Sparrow 0.3.0 kullanıldığı iddia edilmez. Native kütüphaneler
+değiştirilmeden kullanılır; GOKWORKS adaptörü ayrı Python kodudur.
+
+Tam MIT/MPL metinleri, geçişli Rust telif/lisans bildirimleri, sabit kaynak
+envanteri ve özgün wheel SBOM'ları `packaging/licenses/nesting/sparrow/`
+altındadır. **jagua-rs 0.7.0'ın değiştirilmemiş kaynak arşivi aynı klasörde
+dağıtılır**; Lisanslar ekranından dışa aktarılabilir. Kaynak erişimi,
+değiştirme ve yeniden dağıtma hakları korunur.
+Kaynaklar: https://github.com/JeroenGar/sparrow,
+https://github.com/PaulDL-RS/spyrrow ve https://crates.io/crates/jagua-rs/0.7.0 .
+
 ## Sac açınımı ve büküm matematiği · 6 Kasım 2026
 
 `hermes98761234/sheet-metal-unfold`, commit

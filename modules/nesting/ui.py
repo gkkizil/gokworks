@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QEvent, QItemSelectionModel, QSignalBlocker, QSize
 from PySide6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout, QTabBar, QSplitter,
-    QTableView, QLineEdit, QFileDialog, QDialog, QMenu, QHeaderView,
+    QTableView, QLineEdit, QFileDialog, QDialog, QMenu,
     QAbstractItemView, QDialogButtonBox, QCheckBox, QApplication, QToolBar, QToolButton,
     QSizePolicy, QTreeView, QStatusBar, QTabWidget, QFrame)
 
@@ -129,8 +129,12 @@ class NestingPage(BasePage):
             Column('t · mm','thickness',lambda v:fmt(v,2)),Column('Malzeme','material'),
             Column('Durum','status',lambda s:IMPORT_LABELS.get(s,s))])
         self.part_proxy = FilterProxy(self); self.part_proxy.setSourceModel(self.part_model)
-        self.part_tree_model = PartTreeModel(self.part_proxy,self,quantity_editor=self.set_part_quantity)
+        from .thumbnails import PartThumbnails
+        self.part_thumbnails=PartThumbnails()
+        self.part_tree_model = PartTreeModel(self.part_proxy,self,quantity_editor=self.set_part_quantity,
+            thumbnail_provider=lambda key:self.part_thumbnails.icon(key,self.context.appearance,self.devicePixelRatioF()))
         self.part_table = configure_view(PartTree()); self.part_table.setModel(self.part_tree_model)
+        self.part_table.setIconSize(QSize(36,28))
         self.part_table.setItemDelegateForColumn(1,PartQuantityDelegate(self.part_table))
         self.quantity_edit_triggers = (QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed
                                        | QAbstractItemView.AnyKeyPressed)
@@ -704,6 +708,9 @@ class NestingPage(BasePage):
     def build_parameters(self):
         widget, layout = card('Yerleşim ayarları')
         self.form = f = ValueForm(Values(), '')
+        engine=f.combo('engine','Yerleşim motoru',('GOKWORKS NFP','Sparrow'),'GOKWORKS NFP')
+        engine.setAccessibleName('Yerleşim motoru')
+        layout.addWidget(label('Sparrow dış konturlarla çalışır; delik içine yerleşim için GOKWORKS NFP seçin.', 'muted'))
         f.text('gap','Parça aralığı · mm',3); f.text('margin','Kenar payı · mm',10)
         f.check('rotation','Parçalar döndürülebilsin',True)
         quality = f.combo('quality','Yerleşim kalitesi',('Hızlı','Dengeli','Yüksek'),'Dengeli')
@@ -721,7 +728,7 @@ class NestingPage(BasePage):
         seed.setAccessibleName('Deneme sırası kodu')
         self.seed_hint = label('Varsayılan 42; değiştirmeniz gerekmez. Bu kod, farklı yerleşimlerin hangi sırayla deneneceğini belirler.', 'muted')
         seed.setToolTip(self.seed_hint.text()); f.form.addRow(self.seed_hint)
-        self.advanced_note = label('Uygun delik içleri otomatik kullanılır. Aynalama kapalıdır. Delik içindeki parçalar, çevrelerindeki delik kesilmeden önce kesilmelidir. Kerf telafisi CAM tarafında yapılır. '
+        self.advanced_note = label('GOKWORKS NFP uygun delik içlerini kullanır. Sparrow yalnız dış konturları yerleştirir. Aynalama kapalıdır. Delik içindeki parçalar, çevrelerindeki delik kesilmeden önce kesilmelidir. Kerf telafisi CAM tarafında yapılır. '
                                    'Yerleşim aralığı, parça aralığı ile kerf değerinin büyüğü ve kontur hata paylarıdır.', 'muted')
         f.form.addRow(self.advanced_note)
         def advanced(visible):
@@ -754,7 +761,8 @@ class NestingPage(BasePage):
         titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği')
         o = Options(**{k:number(f.value(k),titles[k]) for k in titles},
                     rotation=f.value('rotation'), angles=angles, grain_locked=f.value('grain_locked'),
-                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1))
+                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1),
+                    engine=f.value('engine'))
         operations = Operations(**{key:number(self.cost_form.value(key),self.cost_form.form.labelForField(self.cost_form.fields[key]).text())
                                    for key in asdict(self.project.operations)})
         self.project.options = o; self.project.operations = operations
@@ -774,6 +782,7 @@ class NestingPage(BasePage):
         finally: self.loading = False
 
     def refresh(self):
+        self.part_thumbnails.set_parts(self.project.parts)
         selected_ids = {i.data(Qt.UserRole)['id'] for i in self.part_table.selectionModel().selectedRows()
                         if i.data(Qt.UserRole).get('id')}
         self._refreshing = True
@@ -1095,7 +1104,7 @@ class NestingPage(BasePage):
             self.set_status(error,True); return self.show_settings(error=error)
         self.invalidate(); self.preferred_sheet = None; snapshot = deepcopy(self.project)
         def operation(sink,stop):
-            from modules.nesting.engine import nest
+            from modules.nesting.solver import nest
             result = nest(snapshot,stop=stop,progress=lambda percent,text:sink.put(('nest_progress',(percent,100,text))))
             totals = calculate(snapshot,result,complete=False)
             sink.put(('nest_result',(result,totals)))
@@ -1195,6 +1204,7 @@ class NestingPage(BasePage):
                 name = action.property('nestingIcon')
                 if name: action.setIcon(icon(name,COLORS[self.context.appearance]['muted']))
         self.canvas.theme = self.context.appearance; self.render_sheet()
+        self.part_table.viewport().update()
 
     def style_sheet_tabs(self):
         self.sheet_tabs.setStyleSheet(plate_tabs_style(self.context.appearance))

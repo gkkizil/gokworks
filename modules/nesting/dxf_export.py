@@ -2,7 +2,6 @@
 
 from io import StringIO
 import csv
-import json
 import math
 from pathlib import Path
 import tempfile
@@ -118,8 +117,9 @@ def export_dxf(project, result, directory, *, separate=True, stop=None):
             'GOKWORKS · NOMİNAL BİTMİŞ PARÇA KONTURLARI · birim mm\n'
             'PART_OUTER/PART_INNER kesim geometrisidir. Diğer katmanlar operatör bilgisidir.\n'
             f'Kerf {project.options.kerf:g} mm: çizgiye CAM takım telafisi UYGULANMADI; tezgâhta ayarlayın.\n'
-            'Çarpışma mesafesi max(parça aralığı, kerf) + eğri hata paylarıdır. Ortak kesim yoktur.\n'
-            'Uygun delik içleri otomatik yerleşim alanı olarak değerlendirilir.\n'
+            'Çarpışma mesafesi max(parça aralığı, kerf) + eğri hata paylarıdır. Ortak kesim yoktur.\n'+
+            ('Sparrow dış konturları kullanır; delik içine başka parça yerleştirilmez.\n' if result.engine=='Sparrow' else
+             'Uygun delik içleri otomatik yerleşim alanı olarak değerlendirilir.\n')+
             'KESIM-SIRASI.csv önerilen kontur sırasıdır; DXF kesim nesneleri bu sırayla yazıldı.\n'
             'Önce delik içindeki küçük parçalar ve kendi iç konturları, sonra onları çevreleyen delik ve dış konturlar kesilir.\n'
             'Bu dosya CAM takım yolu değildir. CAM yazılımı nesneleri yeniden sıralayabilir; kontur sırasını CAM içinde uygulayın.\n'
