@@ -137,6 +137,25 @@ Claude entegrasyonu için [CLAUDE_HANDOFF.md](CLAUDE_HANDOFF.md) kullanılmalıd
 
 ## Ekranda ilerleme
 
+İlk kullanımda **Kolay kullanım** görünümü açılır. Teknik bilgi gerektiren
+ayarlarla başlamadan **Ölçüler → Hareketler → Sonuç ve rapor** adımlarını izleyin.
+Ölçü çizimi piston/mil/strok farkını gösterir. Hareketlerde mesafe, süre ve
+kuvvet girilir; süreyle tanımlanan hareketin hızı çekirdekte hesaplanır.
+Kuvvet kN veya ton-kuvvet olarak gösterilebilir; ton-kuvvet kütle değildir.
+
+Sonuçlar motor, pompa debisi, basınç, hat iç çapı, tank ve soğutma ihtiyacını
+günlük dilde açıklar. Kritik uyarılar bu görünümde de gösterilir. İleri–bekle–geri
+örneği geri alınabilir; pompa önerisi yalnız açık düğmeyle uygulanır.
+Mevcut pompa verimi, yağ, tank ve emniyet ayarları sessizce değiştirilmez.
+
+**Ayrıntılı ayarlar** seçeneği mevcut yedi sekmeli ekranı açar. Görünümler
+arasında proje ve bağımsız silindir kontrolü değerleri korunur. Birden fazla
+silindir veya 12'den fazla faz içeren dosyalar veri kaybı olmaması için
+ayrıntılı görünümde açılır. Geçersiz sayı yazılıyken görünüm değişimi girdiyi
+silmez; önce o alanın düzeltilmesini ister.
+
+### Ayrıntılı görünüm
+
 Sekmelerin üstündeki adım açıklamalarını izleyin. Önce silindir ölçülerini,
 sonra çevrim hareketlerini girin. Hız veya süre girişini seçili fazın üstündeki
 menüden seçebilirsiniz. Gelişmiş ayarlar değerlerini koruyarak açılıp kapanır.

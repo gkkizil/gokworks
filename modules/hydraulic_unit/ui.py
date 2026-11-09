@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, QTimer, QPointF, QRectF, QRect, QSize, QCoreAppli
 from PySide6.QtGui import QColor, QPainter, QPen, QFont
 from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QCheckBox, QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
                                QLineEdit, QSplitter, QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout,
-                               QWidget, QListWidget, QListWidgetItem)
+                               QWidget, QListWidget, QListWidgetItem, QStackedWidget)
 
 from gui_qt.components import BasePage, Disclosure, button, fit_columns, label, scroll, section_header
 from gui_qt.theme import COLORS, ROW_HEIGHT
@@ -28,6 +28,8 @@ from .core.validation import InputError
 from .presentation import result_rows
 from . import serialization
 from .guidance import STEPS, ADVANCED, SECTION_HELP, ACTIONS
+from .beginner import basic_cycle, simple_supported
+from .beginner_view import BeginnerView
 
 # ---------------------------------------------------------------------------------------------
 # Display units (inputs follow the metric workshop units; the result table follows display_units)
@@ -229,7 +231,7 @@ class HydraulicPage(BasePage):
 
     def __init__(self, context):
         super().__init__(context, 'Hidrolik Ünite Hesaplayıcı',
-                         'Silindirler ve çevrimden pompa, motor, hat, tank ve akümülatör ön boyutlandırması.')
+                         'Silindir ölçülerini ve yapılacak hareketleri girin; motor, pompa ve soğutma ihtiyacını öğrenin.')
         self.project = self.restore_project()
         self.result = None; self.pdf_job = None; self.loading = False; self.path = None
         self.fields = {}; self.invalid_widgets = []; self.advanced_sections = {}
@@ -247,6 +249,8 @@ class HydraulicPage(BasePage):
         self.units.setToolTip('Yalnız sonuç tablosunun birimleri; girdiler ve SI hesap değişmez.')
         self.units.currentIndexChanged.connect(self.changed)
         top.addWidget(label('Proje', 'muted')); top.addWidget(self.name, 1); top.addStretch(1)
+        self.view_mode=QComboBox();self.view_mode.addItem('Kolay kullanım',0);self.view_mode.addItem('Ayrıntılı ayarlar',1)
+        self.view_mode.setAccessibleName('Hidrolik giriş görünümü');top.addWidget(self.view_mode)
         top.addWidget(label('Sonuç birimi', 'muted')); top.addWidget(self.units)
         self.layout.addLayout(top)
 
@@ -266,21 +270,70 @@ class HydraulicPage(BasePage):
         self.previous_button = button('← Önceki', lambda: self.tabs.setCurrentIndex(self.tabs.currentIndex()-1))
         self.next_button = button('Sonraki →', lambda: self.tabs.setCurrentIndex(self.tabs.currentIndex()+1))
         guide.addWidget(self.previous_button); guide.addWidget(self.next_button)
-        self.layout.addLayout(guide)
+        self.guide_widget=QWidget();self.guide_widget.setLayout(guide);self.layout.addWidget(self.guide_widget)
         self.tabs.currentChanged.connect(self.update_step)
         self.splitter = QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
-        self.splitter.addWidget(self.tabs); self.splitter.addWidget(self.build_summary())
+        self.input_stack=QStackedWidget();self.simple=BeginnerView(self)
+        self.input_stack.addWidget(self.simple);self.input_stack.addWidget(self.tabs)
+        self.summary_panel=self.build_summary()
+        self.splitter.addWidget(self.input_stack); self.splitter.addWidget(self.summary_panel)
         self.splitter.setStretchFactor(0, 3); self.splitter.setStretchFactor(1, 1); self.splitter.setSizes([900, 360])
         self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
-        self.controls += [self.tabs, self.open_button, self.save_button, self.example_button]
+        self.controls += [self.input_stack, self.view_mode, self.open_button, self.save_button, self.example_button]
+        preferred=self.settings.get('hydraulic_view_mode',0)
+        self.view_mode.setCurrentIndex(1 if preferred==1 or not simple_supported(self.project) else 0)
+        self.input_stack.setCurrentIndex(self.view_mode.currentIndex())
+        self.view_mode.currentIndexChanged.connect(self.switch_view)
+        self.statusChanged.connect(lambda text,error:self.simple.status.setText(text))
         self.populate(); self.recalculate()
         self.update_step()
+        self.apply_view_layout()
         app = QCoreApplication.instance()
         if app is not None:
             app.aboutToQuit.connect(self.cancel_pdf)
 
     # ----------------------------------------------------------------- building
+    def apply_view_layout(self):
+        detailed=self.input_stack.currentIndex()==1
+        self.guide_widget.setVisible(detailed);self.summary_panel.setVisible(detailed)
+
+    def switch_view(self,index):
+        if self.loading:return
+        previous=self.input_stack.currentIndex()
+        try:project=self.build_project()
+        except InputError as error:
+            self.view_mode.blockSignals(True);self.view_mode.setCurrentIndex(previous);self.view_mode.blockSignals(False)
+            self.show_invalid(error);return
+        self.project=project;self.populate(reset_point=False);self.input_stack.setCurrentIndex(index)
+        self.apply_view_layout();self.settings.set('hydraulic_view_mode',index);self.recalculate()
+
+    def open_detailed(self,tab=0):
+        self.view_mode.setCurrentIndex(1)
+        if self.input_stack.currentIndex()==1:self.tabs.setCurrentIndex(tab)
+
+    def use_basic_cycle(self):
+        try:
+            project=self.build_project();new=basic_cycle(project)
+        except InputError as error:self.show_invalid(error);return
+        self.simple.previous_cycle=project
+        self.project=new;self.populate();self.recalculate()
+
+    def undo_basic_cycle(self):
+        if self.simple.previous_cycle is None:return
+        try:self.project=replace(self.build_project(),phases=self.simple.previous_cycle.phases)
+        except InputError as error:self.show_invalid(error);return
+        self.simple.previous_cycle=None
+        self.populate();self.recalculate()
+
+    def use_pump_recommendation(self):
+        if self.result is None:return
+        value=self.result.cycle['displacement']['nominal']
+        if value is None:return
+        self.project=replace(self.project,pump=replace(self.project.pump,displacement=value))
+        self.populate();self.recalculate()
+        self.set_status('Önerilen pompa hacmi uygulandı; basınç, motor ve soğutma kontrollerini yeniden inceleyin.')
+
     def update_step(self, *args):
         index = self.tabs.currentIndex(); title, help_ = STEPS[index]
         self.step_title.setText(f'{index+1}/7 · {title}'); self.step_help.setText(help_)
@@ -496,7 +549,7 @@ class HydraulicPage(BasePage):
             widget.setText('' if value is None else fmt(from_si(value, unit, SI.get(name, unit)), 6))
             widget._shown = (widget.text(), value)     # untouched text reads back the exact stored SI value
 
-    def populate(self):
+    def populate(self, *, reset_point=True):
         self.loading = True
         try:
             p = self.project
@@ -506,11 +559,13 @@ class HydraulicPage(BasePage):
                     self.set_widget(f'{section}.{name}', getattr(getattr(p, section), name))
             for name, *_ in FORMS['project']:
                 self.set_widget(f'project.{name}', getattr(p, name))
-            point = M.CylinderOperatingPoint()
-            for name in self.point:
-                self.set_widget('point.' + name, getattr(point, name))
+            if reset_point:
+                point = M.CylinderOperatingPoint()
+                for name in self.point:
+                    self.set_widget('point.' + name, getattr(point, name))
             self.fill_table(self.cylinder_table, CYL_COLUMNS, p.cylinders)
             self.fill_table(self.phase_table, PHASE_COLUMNS, p.phases)
+            if hasattr(self,'simple'):self.simple.populate(p)
         finally:
             self.loading = False
         self.sync_optional_controls()
@@ -655,6 +710,8 @@ class HydraulicPage(BasePage):
         return tuple(items)
 
     def build_project(self):
+        if hasattr(self,'simple') and self.input_stack.currentIndex()==0:
+            return replace(self.simple.read_project(self.project),name=self.name.text(),display_units=self.units.currentData())
         sections = {}
         for section, cls in (('pump', M.Pump), ('pipe', M.Pipe), ('oil', M.Oil), ('thermal', M.Thermal), ('accumulator', M.Accumulator)):
             if section == 'accumulator' and not self.fields['accumulator.enabled'][0].isChecked():
@@ -692,6 +749,8 @@ class HydraulicPage(BasePage):
         self.sync_optional_controls()
         self.result = None
         self.headline.setText('Hesap güncelleniyor…')
+        if hasattr(self,'simple'):
+            self.simple.verdict.setText('Bilgiler değişti; hesap güncelleniyor…');self.simple.results.setRowCount(0)
         self.status_note.setText('Girdiler değişti. Sonuçlar yeniden hesaplanıyor; rapor almak için tamamlanmasını bekleyin.')
         self.refresh_actions()
         self.timer.start()
@@ -774,6 +833,7 @@ class HydraulicPage(BasePage):
 
     def show_invalid(self, error):
         self.result = None
+        if hasattr(self,'simple'):self.simple.show_error(error)
         self.problem_field = error.field
         tab = self.mark_invalid(error.field, str(error))
         self.headline.setText('Girdileri kontrol edin')
@@ -797,6 +857,7 @@ class HydraulicPage(BasePage):
             widget.setEnabled(ready)
             widget.setToolTip('' if ready else 'Geçerli bir sonuç gerekli.')
         self.save_button.setEnabled(self.result is not None and not self.busy)
+        if hasattr(self,'simple'):self.simple.update_actions(self.result,self.busy,self.pdf_job is not None)
 
     def _rows(self, table, rows, tips=None):
         table.setRowCount(len(rows))
@@ -811,6 +872,7 @@ class HydraulicPage(BasePage):
 
     def show_result(self):
         r, p = self.result, self.project
+        if hasattr(self,'simple'):self.simple.show_result(p,r)
         for index in range(self.tabs.count()):
             self.tabs.tabBar().setTabTextColor(index, QColor())
         cycle = r.cycle
@@ -999,6 +1061,8 @@ class HydraulicPage(BasePage):
 
     def navigate_to_field(self, field):
         """Uyarıdaki ayarı açar; geçerli girdiyi kırmızı hata olarak işaretlemez."""
+        self.open_detailed()
+        if self.input_stack.currentIndex()!=1:return
         field = field.removeprefix('project.') if field not in self.fields else field
         parts = field.split('.')
         tab = {'cylinders':0,'phases':1,'pump':2,'project':2,'pipe':3,'oil':3,'thermal':4,'accumulator':5,'point':0}.get(parts[0])
@@ -1037,6 +1101,10 @@ class HydraulicPage(BasePage):
         except (OSError, ValueError) as error:
             self.set_status(f'Proje açılamadı: {error}', True); return
         self.project, self.path = project, Path(path)
+        self.simple.previous_cycle=None
+        if not simple_supported(project):
+            self.view_mode.blockSignals(True);self.view_mode.setCurrentIndex(1);self.view_mode.blockSignals(False)
+            self.input_stack.setCurrentIndex(1);self.apply_view_layout()
         self.populate(); self.recalculate()
         self.set_status(f'Proje açıldı: {Path(path).name}')
 
@@ -1086,6 +1154,7 @@ class HydraulicPage(BasePage):
         from .report.export import create_pdf_job
         job = create_pdf_job(self.project, self.result, path, parent=self)
         job.progress.connect(lambda page, total: self.report_status.setText(f'PDF: sayfa {page}/{total}'))
+        job.progress.connect(lambda page,total:self.simple.status.setText(f'PDF raporu hazırlanıyor: {page}/{total} sayfa'))
         job.finished.connect(self.pdf_finished); job.failed.connect(self.pdf_failed)
         self.pdf_job = job; self.cancel_pdf_button.show(); self.refresh_actions()
         self.report_status.setText('PDF hazırlanıyor…'); job.start()
