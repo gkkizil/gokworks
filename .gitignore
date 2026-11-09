@@ -73,6 +73,8 @@ packaging/licenses/installed/
 /docs/**/*.gif
 /docs/**/*.bmp
 /modules/*/examples/*.png
+# README screenshots are documentation, not generated CI output: keep them versioned.
+!/docs/readme/*.png
 /docs/**/*.log
 /docs/**/*.xml
 /docs/reports/**/*.docx
