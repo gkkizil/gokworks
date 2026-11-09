@@ -49,6 +49,12 @@ ayrıca seçilmelidir.
   Windows'ta test edilir; dal veya main ilerlerse yeni doğrulama gerekir.
   Başarısız testler, çakışmalar, taslak/kapalı PR'lar ve depo korumaları aşılmaz.
   CI'ın geçici checkout'undaki test birleşimi canlı worktree'leri değiştirmez.
+- Diğer ajanın dalını veya main'i kendi dalına yalnız gerçek bir çakışma
+  (otomasyonun "çakışma var" sonucu ya da aynı dosyada bilinen örtüşen değişiklik)
+  olduğunda birleştir. Gereksiz birleştirmeler dalın head'ini değiştirip
+  devam eden doğrulamayı geçersiz kılar ve iki dalın kuyruğunu uzatır.
+- Kısa aralıklarla çok sayıda push yapma; ilgili commitleri biriktirip tek seferde
+  gönder. Otomasyon son commit'i 5 dakikadan yeni dalı beklemeye alır.
 - Başka ajanın branch'ini sıfırlama; çakışmayı tek tarafın kodunu seçerek çözme.
   Force push ve yıkıcı Git işlemleri için açık kullanıcı onayı gerekir.
 - Ortak dosyada çalışma gerekiyorsa kendi branch'inde kal ve entegrasyon
