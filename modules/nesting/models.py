@@ -99,7 +99,7 @@ class Options:
     seconds: float | None = None  # Automatic; numeric limits remain readable in older projects.
     quality: str = 'Dengeli'
     seed: int = 42
-    engine: str = 'GOKWORKS NFP'
+    engine: str = 'Sparrow + GOKWORKS'
 
 
 @dataclass
@@ -212,8 +212,8 @@ class Project:
             if s.pricing not in ('kg', 'sheet'):
                 raise ValueError('Fiyatlandırma kg veya sheet olmalı.')
         o = self.options
-        if o.engine not in ('GOKWORKS NFP', 'Sparrow'):
-            raise ValueError('Yerleşim motoru GOKWORKS NFP veya Sparrow olmalı.')
+        if o.engine not in ('GOKWORKS NFP', 'Sparrow', 'Sparrow + GOKWORKS'):
+            raise ValueError('Yerleşim motoru kaydı desteklenmiyor.')
         if type(o.rotation) is not bool or type(o.grain_locked) is not bool:
             raise ValueError('Döndürme ve hadde kilidi doğru/yanlış olmalı.')
         for key in ('gap', 'margin', 'kerf'):

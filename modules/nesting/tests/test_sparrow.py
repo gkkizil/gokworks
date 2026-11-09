@@ -17,7 +17,7 @@ from modules.nesting.accounting import calculate
 from modules.nesting.dxf_export import export_dxf
 from modules.nesting.materials import new_project
 from modules.nesting.models import Part, Sheet, uid
-from modules.nesting.solver import nest
+from modules.nesting.sparrow import nest
 from modules.nesting.storage import save_project, load_project
 from modules.nesting.validation import validate_result
 
@@ -31,6 +31,7 @@ def project(shape=None, quantity=4, width=150, height=100):
 
 @pytest.mark.parametrize('geometry',[
     box(0,0,30,20),box(-1000,200, -970,220),
+    Polygon(list(box(0,0,30,20).exterior.coords)[::-1]),
     box(0,0,30,20).difference(Point(15,10).buffer(4)),
     Polygon([(0,0),(30,0),(30,8),(10,8),(10,20),(0,20)])])
 def test_native_contours_quantities_clearance_and_source_survive(geometry):
@@ -50,6 +51,13 @@ def test_multiple_finite_plates_and_exhausted_stock_are_explicit():
     assert len(r.placements)==2 and len(r.unplaced)==3
     assert {x.sheet_number for x in r.placements}=={1,2}
     with pytest.raises(ValueError,match='yerleşmedi'): validate_result(p,r)
+
+
+@pytest.mark.parametrize('quantity',[1,3])
+def test_sparse_small_parts_on_a_large_stock_do_not_collapse_the_native_strip(quantity):
+    p=project(Polygon([(0,0),(0,30),(50,30),(50,0)]),quantity=quantity,width=1250,height=2500)
+    result=nest(p)
+    assert len(result.placements)==quantity and validate_result(p,result)
 
 
 def test_material_thickness_and_allowed_angles_are_retained():

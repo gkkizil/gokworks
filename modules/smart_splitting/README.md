@@ -4,8 +4,8 @@
 [Son kapsamlı denetim ve düzeltmeler](AUDIT.md).
 
 GOKWORKS sol menüsünde **Üretim → Nesting · Sac maliyeti → Akıllı Parça Bölme**.
-İki ayrı ekran aynı kalıcı sayfa kayıt sistemini kullanır. Yeni modül Nesting
-motorunu değiştirmez; SolidWorks veya DWG dönüştürücü gerektirmez.
+İki ekran aynı kalıcı sayfa kayıt sistemini ve Sparrow + GOKWORKS birleşik
+yerleşimini kullanır; SolidWorks veya DWG dönüştürücü gerektirmez.
 
 ## Kullanım
 
@@ -23,7 +23,7 @@ motorunu değiştirmez; SolidWorks veya DWG dönüştürücü gerektirmez.
    parça korunur. Nesting'den alınan geometri mevcut hassasiyetindedir; bu
    kaynakta DXF birim/tolerans alanları pasiftir.
 3. **Parçayı Böl** eşit açısal veya kontur duyarlı hesabı çalıştırır. **Fireyi
-   Optimize Et** farklı segmentasyonları gerçek NFP yerleşiminde karşılaştırır.
+   Optimize Et** farklı segmentasyonları birleşik Sparrow + GOKWORKS yerleşiminde karşılaştırır.
    Sabit segment sayısı değiştirilmez; kısmi yerleşim başarı sayılmaz.
 4. Segment tablosunda nominal/imalat alanı, dış ölçüler, geometrik genişlik,
    birleştirme uzunluğu ve komşular görünür. **Orijinal konturu göster**, zoom,
@@ -63,7 +63,7 @@ iptal eder; varsa yalnız daha önce doğrulanmış tam yerleşim korunur.
   asimetrik adaylar kullanılır. Detaylı profilde otomatik merkezin X yönünde
   ±%2 sınır genişliği kadar değişmesi de denenir; özel merkez sabittir.
   Geometrik geçersizlik, levhaya sığmama, yinelenme ve yerleşmeyen adetler
-  aday tablosunda belirtilir. Gerçek NFP motorunda adaylar aynı stok, adet,
+  aday tablosunda belirtilir. Sparrow başlangıcı ve GOKWORKS iyileştirmesiyle adaylar aynı stok, adet,
   rotasyon, tolerans, aralık ve süre ayarlarıyla değerlendirilir.
 
 Sıralama: geçerli/bağlantılı geometri ve üretilebilirlik ön kontrolleri;
@@ -75,16 +75,16 @@ Fire = (brüt levha alanı − adetli imalat konturları alanı) / brüt alan.
 Birleştirme uzunluğu kaynak parça başınadır. Sonuç **bulunan en iyi çözüm**dür;
 global optimum iddiası yoktur. Aynı fireyi veren sonuç iyileşme gibi sunulmaz.
 
-| Profil | Azami aday | Her aday için NFP süresi |
+| Profil | Azami aday | Her aday için toplam yerleşim süresi |
 | --- | ---: | ---: |
 | Hızlı | 3 | 2 saniye |
 | Dengeli | 7 | 3 saniye |
 | Detaylı | 13 | 5 saniye |
 
-Bunlar NFP arama bütçeleridir; DXF, geometri, dışa aktarma ve tek GEOS işlemi
+Bunlar iki aşamanın paylaştığı toplam arama bütçeleridir; DXF, geometri, dışa aktarma ve tek GEOS işlemi
 ek süre alabilir. 10000 toplam segment örneği sınırı korunur. Sınır ölçüsüyle
-erken eleme ve aday geometri imzası tekrar hesabı azaltır. Ayrı genetik motor
-veya paralel CAD süreci eklenmez; mevcut NFP'nin kendi önbellekleri kullanılır.
+erken eleme ve aday geometri imzası tekrar hesabı azaltır. Sparrow özel native alt süreçte; GOKWORKS kontur iyileştirmesi kendi NFP
+önbellekleriyle çalışır. [Birleşik akış](../nesting/SPARROW.md).
 
 GEOS/NFP sayısal topoloji hatası üreten aday gerekçesiyle listelenip reddedilir;
 başka doğrulanmış tam aday varsa arama devam eder. Hiç tam aday yoksa sonuç
@@ -153,7 +153,7 @@ sonuç uydurulmaz. Sadece DXF dosyası açılır; Nesting üzerinden DWG'den dah
 
 `models.py`: parametreler ve sonuçlar; `analysis.py`: DXF/kontur analizi;
 `splitter.py`: radyal bölme ve adaylar; `validation.py`: bağımsız kontroller;
-`optimizer.py`: gerçek NFP karşılaştırması; `adapter.py`: adetli parça/levha
+`optimizer.py`: birleşik yerleşim karşılaştırması; `adapter.py`: adetli parça/levha
 adaptörü ve korumalı aktarım; `dxf_export.py`: atomik/doğrulanan DXF ve JSON;
 `canvas.py`: teknik 2D önizleme; `ui.py`: native ekran ve worker bağlantıları.
 

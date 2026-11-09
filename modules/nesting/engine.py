@@ -5,6 +5,8 @@ It returns the best verified heuristic solution; mathematical optimality is not 
 """
 
 from collections import Counter
+from copy import deepcopy
+from dataclasses import replace
 from datetime import datetime, timezone
 import random
 import time
@@ -17,6 +19,7 @@ from modules.nesting.geometry import footprint, minkowski, convex_parts, polygon
 from modules.nesting.models import Placement, Result
 from modules.nesting.validation import validate_result
 from modules.nesting.search_budget import for_project, meaningful_improvement, uniform_stock_floor
+from modules.nesting.layout_score import layout_score, plate_strip_area
 
 
 def _vertices(g):
@@ -50,9 +53,9 @@ class RefinementYield(Exception):
     """An expensive refinement yields so the rest of the plan can proceed."""
 
 
-def nest(project, *, stop=None, progress=None):
+def nest(project, *, stop=None, progress=None, initial=None, budget=None):
     project.validate()
-    started = time.monotonic(); budget = for_project(project,started)
+    started = time.monotonic(); budget = budget if budget is not None else for_project(project,started)
     o = project.options; rng = random.Random(o.seed)
     cache = {}; rotated_cache = {}; convex_cache = {}; fixed_cache = {}; deferred = set(); best = None; iterations = 0
     parts = {p.id:p for p in project.parts}
@@ -75,6 +78,12 @@ def nest(project, *, stop=None, progress=None):
         if key not in rotated_cache:
             rotated_cache[key] = affinity.rotate(source_shapes[part.id],angle,origin=(0,0))
         return rotated_cache[key]
+
+    def bounds(part_id, angle): return geometry(parts[part_id],angle).bounds
+
+    if initial is not None:
+        validate_result(project,initial,complete=False)
+        best = (layout_score(project,initial,bounds),deepcopy(initial))
 
     def nfp(fixed_part, fixed_angle, moving_part, moving_angle, guard):
         key = (fixed_part.id, fixed_angle, moving_part.id, moving_angle)
@@ -224,6 +233,67 @@ def nest(project, *, stop=None, progress=None):
                 break  # If coarse angles cannot fit, the remaining allowed angles are still tried.
         return winner
 
+    def improve_seed(seed, pending):
+        """Compact, fill holes, and evacuate whole plates without discarding the seed."""
+        groups = {}
+        for p in deepcopy(seed.placements):
+            groups.setdefault((p.sheet_id,p.sheet_number),[]).append(p)
+        sheets = [(project.sheet(key[0]),key[1],rows) for key,rows in groups.items()]
+        # Existing placements are real obstacles, including all original holes.
+        for sheet,number,rows in sheets:
+            for old in sorted(rows,key=lambda p:(p.y,p.x),reverse=True):
+                checkpoint()
+                previous = [p for p in rows if p is not old]
+                point = candidate(parts[old.part_id],sheet,previous,detailed=False)
+                if point:
+                    _,x,y,angle = point
+                    proposal = replace(old,x=x,y=y,angle=angle)
+                    changed = [proposal if p is old else p for p in rows]
+                    if plate_strip_area(sheet,changed,bounds)+1e-6 < plate_strip_area(sheet,rows,bounds):
+                        rows[rows.index(old)] = proposal
+        for sheet,number,rows in sheets:
+            blocked = set(); index = 0
+            while index < len(pending):
+                checkpoint(); part,instance = pending[index]
+                if part.id in blocked or part.material!=sheet.material or abs(part.thickness-sheet.thickness)>1e-7:
+                    index += 1; continue
+                point = candidate(part,sheet,rows,detailed=False)
+                if point:
+                    _,x,y,angle = point
+                    rows.append(Placement(part.id,instance,sheet.id,number,x,y,angle)); pending.pop(index)
+                else:
+                    blocked.add(part.id); index += 1
+        # A plate is removed only if every one of its copies fits earlier plates.
+        # Draft target rows are transactional, so an interrupted/failed evacuation
+        # cannot erase source parts or consume stock twice.
+        for source_index in range(len(sheets)-1,0,-1):
+            checkpoint()
+            source = sheets[source_index]
+            draft = [list(rows) for _,_,rows in sheets[:source_index]]
+            evacuated = True
+            for old in sorted(source[2],key=lambda p:outer_areas[p.part_id],reverse=True):
+                checkpoint(); part = parts[old.part_id]; destination = None
+                for index,(sheet,number,_) in enumerate(sheets[:source_index]):
+                    if part.material!=sheet.material or abs(part.thickness-sheet.thickness)>1e-7: continue
+                    point = candidate(part,sheet,draft[index],detailed=False)
+                    if point:
+                        _,x,y,angle = point
+                        destination = index,replace(old,sheet_id=sheet.id,sheet_number=number,x=x,y=y,angle=angle)
+                        break
+                if destination is None:
+                    evacuated = False; break
+                index,proposal = destination; draft[index].append(proposal)
+            if evacuated:
+                for index,rows in enumerate(draft): sheets[index][2][:] = rows
+                sheets.pop(source_index)
+        # Close numbering gaps before the normal search opens any new stock.
+        counts = Counter(); normalized = []
+        for sheet,_,rows in sheets:
+            counts[sheet.id] += 1
+            for p in rows: p.sheet_number = counts[sheet.id]
+            normalized.append((sheet,counts[sheet.id],rows))
+        return normalized,counts
+
     for trial in range(budget.max_attempts):
         trial_started = time.monotonic()
         fixed_cache.clear();deferred.clear()
@@ -248,6 +318,13 @@ def nest(project, *, stop=None, progress=None):
         interrupted = False
         try:
             pending = list(order)
+            if initial is not None and trial==0:
+                used = {(p.part_id,p.instance) for p in initial.placements}
+                pending = [(p,i) for p,i in order if (p.id,i) not in used]
+                # If refinement is cancelled mid-stage, the verified seed remains
+                # the incumbent; only a completed draft enters the search state.
+                sheets,counts = improve_seed(initial,pending)
+                placements = [p for _,_,rows in sheets for p in rows]
             while pending:
                 checkpoint()
                 part, instance = pending.pop(0)
@@ -303,10 +380,13 @@ def nest(project, *, stop=None, progress=None):
         result = Result(digest, placements, remaining, ENGINE, ENGINE_VERSION, time.monotonic()-started,
                         iterations, datetime.now(timezone.utc).isoformat(), interrupted)
         validate_result(project, result, complete=False)
-        used_area = sum(s.width*s.height for s, _, _ in sheets)
-        score = (len(remaining), len(sheets), used_area,
-                 sum(max((p.y+geometry(project.part(p.part_id), p.angle).bounds[3] for p in rows), default=0)
-                     for _, _, rows in sheets))
+        if initial is not None:
+            score = layout_score(project,result,bounds)
+        else:
+            used_area = sum(s.width*s.height for s, _, _ in sheets)
+            score = (len(remaining), len(sheets), used_area,
+                     sum(max((p.y+geometry(project.part(p.part_id), p.angle).bounds[3] for p in rows), default=0)
+                         for _, _, rows in sheets))
         improved = meaningful_improvement(score,best[0] if best else None)
         if best is None or score < best[0]:
             best = (score, result)

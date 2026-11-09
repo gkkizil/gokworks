@@ -172,7 +172,7 @@ def check(output):
         stack_pdf(stack.project,stack_result,Path(folder)/'ToleranceStack.pdf')
         from modules.nesting.materials import new_project
         from modules.nesting.dxf_import import read_dxf
-        from modules.nesting.engine import nest
+        from modules.nesting.solver import nest
         from modules.nesting.accounting import calculate as nesting_cost, mass as nesting_mass
         from modules.nesting.dxf_export import export_dxf as nesting_dxf
         from modules.nesting.report import export_excel as nesting_excel, export_pdf as nesting_pdf
@@ -322,7 +322,7 @@ def check(output):
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
                         '1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM',
                         '3D CAD converter / eight formats / queue, options and clear / no live COM',
-                      'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
+                      'Sparrow + GOKWORKS true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'hole nesting / five parts on one plate / contour cut-order CSV',
                       'nesting shared parts-and-layout workspace / document plate tabs',
                       'live press-brake tooling profiles and dimensions',

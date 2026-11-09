@@ -1,4 +1,4 @@
-"""Bounded candidate search scored only by independently validated existing NFP results."""
+"""Bounded split candidate search scored by independently verified integrated layouts."""
 import time
 
 from shapely import union_all
@@ -6,7 +6,7 @@ from shapely.errors import GEOSException
 from shapely.geometry import box
 
 from modules.nesting.dxf_import import check_cancel
-from modules.nesting.engine import nest
+from modules.nesting.solver import nest
 from modules.nesting.geometry import placed
 from modules.nesting.validation import validate_result
 from .adapter import to_project

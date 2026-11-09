@@ -708,9 +708,6 @@ class NestingPage(BasePage):
     def build_parameters(self):
         widget, layout = card('Yerleşim ayarları')
         self.form = f = ValueForm(Values(), '')
-        engine=f.combo('engine','Yerleşim motoru',('GOKWORKS NFP','Sparrow'),'GOKWORKS NFP')
-        engine.setAccessibleName('Yerleşim motoru')
-        layout.addWidget(label('Sparrow dış konturlarla çalışır; delik içine yerleşim için GOKWORKS NFP seçin.', 'muted'))
         f.text('gap','Parça aralığı · mm',3); f.text('margin','Kenar payı · mm',10)
         f.check('rotation','Parçalar döndürülebilsin',True)
         quality = f.combo('quality','Yerleşim kalitesi',('Hızlı','Dengeli','Yüksek'),'Dengeli')
@@ -728,7 +725,7 @@ class NestingPage(BasePage):
         seed.setAccessibleName('Deneme sırası kodu')
         self.seed_hint = label('Varsayılan 42; değiştirmeniz gerekmez. Bu kod, farklı yerleşimlerin hangi sırayla deneneceğini belirler.', 'muted')
         seed.setToolTip(self.seed_hint.text()); f.form.addRow(self.seed_hint)
-        self.advanced_note = label('GOKWORKS NFP uygun delik içlerini kullanır. Sparrow yalnız dış konturları yerleştirir. Aynalama kapalıdır. Delik içindeki parçalar, çevrelerindeki delik kesilmeden önce kesilmelidir. Kerf telafisi CAM tarafında yapılır. '
+        self.advanced_note = label('Uygun delik içleri otomatik kullanılır. Aynalama kapalıdır. Delik içindeki parçalar, çevrelerindeki delik kesilmeden önce kesilmelidir. Kerf telafisi CAM tarafında yapılır. '
                                    'Yerleşim aralığı, parça aralığı ile kerf değerinin büyüğü ve kontur hata paylarıdır.', 'muted')
         f.form.addRow(self.advanced_note)
         def advanced(visible):
@@ -761,8 +758,7 @@ class NestingPage(BasePage):
         titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği')
         o = Options(**{k:number(f.value(k),titles[k]) for k in titles},
                     rotation=f.value('rotation'), angles=angles, grain_locked=f.value('grain_locked'),
-                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1),
-                    engine=f.value('engine'))
+                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1))
         operations = Operations(**{key:number(self.cost_form.value(key),self.cost_form.form.labelForField(self.cost_form.fields[key]).text())
                                    for key in asdict(self.project.operations)})
         self.project.options = o; self.project.operations = operations
@@ -775,7 +771,7 @@ class NestingPage(BasePage):
         try:
             self.name.setText(self.project.name)
             for k,v in asdict(self.project.options).items():
-                if k != 'seconds': self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
+                if k not in ('seconds','engine'): self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
             self.form.set_value('angle_step','')
             for k,v in asdict(self.project.operations).items(): self.cost_form.set_value(k,v)
             self.cost_toggle.setChecked(any(asdict(self.project.operations).values()))

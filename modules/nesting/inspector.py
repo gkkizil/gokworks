@@ -72,14 +72,10 @@ class NestingInspector(QWidget):
         self.fields={};basic=QFormLayout();basic.setSpacing(6);basic.setRowWrapPolicy(QFormLayout.WrapLongRows)
         basic.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         parameters.addLayout(basic)
-        for key,title in [('engine','Motor'),('gap','Parça aralığı · mm'),('margin','Kenar payı · mm'),
+        for key,title in [('gap','Parça aralığı · mm'),('margin','Kenar payı · mm'),
                           ('rotation','Döndürme'),('quality','Kalite')]:
             basic.addRow(label(title),self.mirror(key))
         parameters.addWidget(label('Hesaplama süresi otomatik yönetilir.','muted'))
-        self.engine_hint=label('Sparrow delik içine parça yerleştirmez.','muted')
-        parameters.addWidget(self.engine_hint)
-        def engine_hint(*args): self.engine_hint.setVisible(self.fields['engine'].currentText()=='Sparrow')
-        page.form.fields['engine'].currentIndexChanged.connect(engine_hint); engine_hint()
         advanced=QWidget();extra=QFormLayout(advanced);extra.setContentsMargins(0,0,0,0)
         extra.setRowWrapPolicy(QFormLayout.WrapLongRows)
         for key,title in [('kerf','Kesim genişliği · mm'),('angles','İzinli açılar · °'),('angle_step','Açı adımı · °'),

@@ -1,0 +1,187 @@
+[
+  {
+    "case": "Çerçeve ve dört iç parça",
+    "sparrow": {
+      "placed": 5,
+      "unplaced": 0,
+      "sheets": 2,
+      "gross_area": 24200,
+      "net_area": 5700.0,
+      "waste_percent": 76.44628099173553,
+      "elapsed": 2.085706924000988,
+      "score": [
+        0,
+        2,
+        24200,
+        16636.995071291924
+      ],
+      "engine": "Sparrow",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0"
+    },
+    "integrated": {
+      "placed": 5,
+      "unplaced": 0,
+      "sheets": 1,
+      "gross_area": 12100,
+      "net_area": 5700.0,
+      "waste_percent": 52.892561983471076,
+      "elapsed": 2.122645339997689,
+      "score": [
+        0,
+        1,
+        12100,
+        10351.0
+      ],
+      "engine": "Sparrow + GOKWORKS",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 2"
+    }
+  },
+  {
+    "case": "Dairesel delik ve dört iç parça",
+    "sparrow": {
+      "placed": 5,
+      "unplaced": 0,
+      "sheets": 2,
+      "gross_area": 28800,
+      "net_area": 6728.235860159126,
+      "waste_percent": 76.63806993000303,
+      "elapsed": 1.8615064749974408,
+      "score": [
+        0,
+        2,
+        28800,
+        14431.062721252441
+      ],
+      "engine": "Sparrow",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0"
+    },
+    "integrated": {
+      "placed": 5,
+      "unplaced": 0,
+      "sheets": 1,
+      "gross_area": 14400,
+      "net_area": 6728.235860159126,
+      "waste_percent": 53.27613986000607,
+      "elapsed": 2.1127736939997703,
+      "score": [
+        0,
+        1,
+        14400,
+        12494.400000000001
+      ],
+      "engine": "Sparrow + GOKWORKS",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 2"
+    }
+  },
+  {
+    "case": "Döndürülerek yerleşen iç parça",
+    "sparrow": {
+      "placed": 1,
+      "unplaced": 1,
+      "sheets": 1,
+      "gross_area": 8625,
+      "net_area": 3600.0,
+      "waste_percent": 58.26086956521739,
+      "elapsed": 1.075833249000425,
+      "score": [
+        1,
+        1,
+        8625,
+        7375.996032893657
+      ],
+      "engine": "Sparrow",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0"
+    },
+    "integrated": {
+      "placed": 2,
+      "unplaced": 0,
+      "sheets": 1,
+      "gross_area": 8625,
+      "net_area": 4800.0,
+      "waste_percent": 44.34782608695652,
+      "elapsed": 1.06826950300092,
+      "score": [
+        0,
+        1,
+        8625,
+        7371.499999999999
+      ],
+      "engine": "Sparrow + GOKWORKS",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 1"
+    }
+  },
+  {
+    "case": "İki çerçeve sekiz iç parça",
+    "sparrow": {
+      "placed": 10,
+      "unplaced": 0,
+      "sheets": 3,
+      "gross_area": 36300,
+      "net_area": 11400.0,
+      "waste_percent": 68.59504132231405,
+      "elapsed": 3.2751348450001387,
+      "score": [
+        0,
+        3,
+        36300,
+        30071.467812538147
+      ],
+      "engine": "Sparrow",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0"
+    },
+    "integrated": {
+      "placed": 10,
+      "unplaced": 0,
+      "sheets": 2,
+      "gross_area": 24200,
+      "net_area": 11400.0,
+      "waste_percent": 52.892561983471076,
+      "elapsed": 2.247119134000968,
+      "score": [
+        0,
+        2,
+        24200,
+        20702.0
+      ],
+      "engine": "Sparrow + GOKWORKS",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 2"
+    }
+  },
+  {
+    "case": "İki aynı dolu parça",
+    "sparrow": {
+      "placed": 2,
+      "unplaced": 0,
+      "sheets": 1,
+      "gross_area": 12100,
+      "net_area": 1200.0,
+      "waste_percent": 90.08264462809917,
+      "elapsed": 0.6189719020003395,
+      "score": [
+        0,
+        1,
+        12100,
+        2651.195718407631
+      ],
+      "engine": "Sparrow",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0"
+    },
+    "integrated": {
+      "placed": 2,
+      "unplaced": 0,
+      "sheets": 1,
+      "gross_area": 12100,
+      "net_area": 1200.0,
+      "waste_percent": 90.08264462809917,
+      "elapsed": 0.6685001180012478,
+      "score": [
+        0,
+        1,
+        12100,
+        2651.0
+      ],
+      "engine": "Sparrow + GOKWORKS",
+      "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 1"
+    }
+  }
+]

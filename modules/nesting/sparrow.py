@@ -17,7 +17,8 @@ from tempfile import TemporaryDirectory
 import time
 
 from shapely import affinity
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
+from shapely.geometry.polygon import orient
 
 from modules.nesting.geometry import placed
 from modules.nesting.models import Placement, Result
@@ -30,7 +31,7 @@ def _available():
     try:
         version = metadata.version('spyrrow')
     except metadata.PackageNotFoundError:
-        raise ValueError('Sparrow kurulu değil. Uygulama bağımlılıklarını requirements.txt ile güncelleyin veya GOKWORKS NFP seçin.') from None
+        raise ValueError('Sparrow yerleşim bileşeni bulunamadı. GOKWORKS kurulumunu güncelleyin.') from None
     if version != '0.9.0':
         raise ValueError(f'Sparrow bağlantısı spyrrow 0.9.0 gerektiriyor; kurulu sürüm: {version}.')
 
@@ -118,19 +119,20 @@ def _poses(rows, specs, scale, pad, separation, sheet, sheet_number, counts):
     return accepted
 
 
-def nest(project, *, stop=None, progress=None):
+def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected=False):
     project.validate(); _available()
-    if any(p.polygon.geom_type != 'Polygon' for p in project.parts):
-        raise ValueError('Sparrow her parça için tek bağlı dış kontur gerektirir. Ayrık konturları ayırın veya GOKWORKS NFP seçin.')
+    if not allow_disconnected and any(p.polygon.geom_type != 'Polygon' for p in project.parts):
+        raise ValueError('Sparrow çekirdeği her parça için tek bağlı dış kontur gerektirir.')
     started = time.monotonic(); options = project.options
     seconds = options.seconds if options.seconds is not None else {'Hızlı':5.,'Dengeli':15.,'Yüksek':45.}[options.quality]
-    deadline = started+seconds
+    deadline = min(started+seconds,deadline) if deadline is not None else started+seconds
     counts = Counter(); stock = Counter(); placements = []; iterations = 0
     error = max(p.geometry_error for p in project.parts)
     dimension = max(max(s.width,s.height) for s in project.sheets)
     guard = max(.0001,dimension*2e-6)
     pad = options.margin+error+options.kerf/2+guard
     separation = max(options.gap,options.kerf)+2*error+2*guard
+    clearance = separation/2
     scale = 1./max(1.,dimension)
     digest = project.fingerprint()
 
@@ -154,23 +156,43 @@ def nest(project, *, stop=None, progress=None):
             specs = {}
             for part in project.parts:
                 if ended(): break
+                if part.polygon.geom_type != 'Polygon': continue
                 demand = part.quantity-counts[part.id]
                 if not demand or part.material != sheet.material or not math.isclose(part.thickness,sheet.thickness,abs_tol=1e-7): continue
                 angles = _angles(part,options,width,height,ended)
                 if not angles: continue
                 ox,oy,_,_ = part.polygon.bounds
+                # Reserve clearance in our exact geometry layer. The native
+                # separation option also deflates its initially narrow strip;
+                # sparse jobs can make that strip disappear and panic in jagua.
+                # Mitre offsets conservatively contain the Euclidean clearance.
+                footprint = Polygon(part.polygon.exterior).buffer(clearance,join_style=2)
+                if footprint.geom_type!='Polygon' or footprint.is_empty or not footprint.is_valid:
+                    raise ValueError(part.code+': kesim aralığı konturu oluşturulamadı.')
+                fitting = []
+                for angle in angles:
+                    if ended(): break
+                    a,b,c,d = affinity.rotate(footprint,angle,origin=(0,0)).bounds
+                    if c-a<=width+2*clearance and d-b<=height+2*clearance:
+                        fitting.append(angle)
+                # Acute mitres may be wider than a half-gap edge extension.
+                # Leave such exact-fit cases to the nominal-contour refinement.
+                if not fitting: continue
+                angles = fitting
                 specs[part.id] = dict(part=part,demand=demand,angles=angles,origin=(ox,oy),
-                    shape=[((x-ox)*scale,(y-oy)*scale) for x,y in list(part.polygon.exterior.coords)[:-1]])
+                    # Normalize only the private footprint; source entities and
+                    # nominal cutting contours retain their original geometry.
+                    shape=[((x-ox)*scale,(y-oy)*scale) for x,y in list(orient(footprint,sign=1.).exterior.coords)[:-1]])
             if not specs: continue
             if ended(): break
             slice_seconds = min(deadline-time.monotonic(),{'Hızlı':1.,'Dengeli':2.,'Yüksek':4.}[options.quality])
             request = dict(items=[dict(id=k,shape=s['shape'],demand=s['demand'],angles=s['angles']) for k,s in specs.items()],
-                           height=(height+2*separation)*scale, separation=separation*scale,
+                           height=(height+2*clearance)*scale, separation=None,
                            seconds=max(1,math.ceil(slice_seconds)),seed=options.seed)
             rows = _run(request,min(deadline,time.monotonic()+slice_seconds+1.),stop)
             iterations += 1
             if rows is None: continue
-            candidate = _poses(rows,specs,scale,pad,separation,sheet,stock[sheet.id]+1,counts)
+            candidate = _poses(rows,specs,scale,pad,clearance,sheet,stock[sheet.id]+1,counts)
             if not candidate: continue
             # A second, independent double-precision check uses original contours.
             trial = result(); trial.placements += candidate

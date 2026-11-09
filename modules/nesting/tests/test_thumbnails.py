@@ -48,18 +48,15 @@ def test_part_rows_show_previews_and_editing_and_selection_still_work(window,qtb
         assert not page.part_tree_model.index_for_id(part.id).data(Qt.DecorationRole).isNull()
 
 
-def test_sparrow_can_be_selected_and_run_from_the_real_workbench(window,qtbot):
+def test_integrated_sparrow_runs_without_engine_selection_in_the_real_workbench(window,qtbot):
     page=window.pages['nesting']
     page.project.parts=[Part.create('Sparrow parçası',box(0,0,70,40),quantity=3)]
-    page.refresh(); page.inspector.fields['engine'].setCurrentText('Sparrow'); page.form.set_value('quality','Hızlı')
-    assert page.form.value('engine')=='Sparrow' and page.inspector.engine_hint.isVisible()
+    page.refresh(); page.form.set_value('quality','Hızlı')
+    assert 'engine' not in page.form.fields and 'engine' not in page.inspector.fields
     page.start_nest(); assert window.jobs.owner is page
     qtbot.waitUntil(lambda:not window.jobs.busy,timeout=15000)
-    assert page.result is not None and page.result.engine=='Sparrow'
+    assert page.result is not None and page.result.engine=='Sparrow + GOKWORKS'
     assert len(page.result.placements)==3 and not page.result.unplaced
     assert page.excel_button.isEnabled()
-    page.form.set_value('engine','GOKWORKS NFP')
+    page.form.set_value('gap','7')
     assert page.result is None and not page.excel_button.isEnabled()
-    assert not page.inspector.engine_hint.isVisible()
-    page.form.set_value('engine','Sparrow')
-    assert page.inspector.fields['engine'].currentText()=='Sparrow' and page.inspector.engine_hint.isVisible()
