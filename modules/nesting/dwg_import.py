@@ -1,7 +1,13 @@
-"""Optional local DWG conversion, isolated from sources and bounded/cancellable.
+"""DWG → geçici DXF → mevcut sıkı kontur/birim okuyucusu; iptal edilebilir ve süre sınırlı.
 
-ODA File Converter is installed separately; it is never downloaded or bundled.
-The converted DXF passes the existing strict contour/unit reader unchanged.
+Dönüştürücü sırası:
+1. Kullanıcının bilgisayarında kuruluysa ODA File Converter (ayrıca kurulur; paketlenmez,
+   lisansı yeniden dağıtıma izin vermez).
+2. Uygulama paketindeki LibreDWG ``dwg2dxf`` (GNU LibreDWG 0.13.3, GPL-3.0-or-later).
+   Ayrı bir program olarak çağrılır; GOKWORKS koduna bağlanmaz. Lisans ve kaynak
+   bildirimi ``licenses/LibreDWG-NOTICE.txt`` içindedir. Kullanıcı hiçbir şey indirmez.
+
+Kaynak dosya hiçbir zaman değiştirilmez: dönüştürücü yalnız geçici kopyayı görür.
 """
 from dataclasses import replace
 import hashlib
@@ -9,13 +15,18 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 from tempfile import TemporaryDirectory
 import time
 
 from .dxf_import import read_dxf,check_cancel
 
+LIBREDWG_VERSION='0.13.3'
+LABELS={'oda':'yerel ODA File Converter','libredwg':f'paketteki LibreDWG {LIBREDWG_VERSION}'}
+
 
 def converter_path():
+    """Installed ODA File Converter, or ValueError when it is not installed."""
     explicit=os.environ.get('GOKWORKS_ODA_FILE_CONVERTER')
     if explicit:
         if Path(explicit).is_file():return str(Path(explicit).resolve())
@@ -31,22 +42,51 @@ def converter_path():
             for directory in ('ODA','Open Design Alliance'):
                 matches=sorted((root/directory).glob('*FileConverter*/ODAFileConverter.exe'),reverse=True)
                 if matches:return str(matches[0])
-    raise ValueError('DWG okumak için yerel ODA File Converter gerekli. Aracı kurun veya dosyayı DXF olarak ekleyin.')
+    raise ValueError('ODA File Converter kurulu değil.')
 
 
-def convert_dwg(source, destination, stop=None, *, timeout=120):
-    check_cancel(stop)
-    source,destination=Path(source),Path(destination)
-    command=[converter_path(),str(source.parent),str(destination.parent),'ACAD2018','DXF','0','0',source.name]
-    # External ODA owns a separate Qt runtime. Do not send GOKWORKS/PyInstaller
-    # plugin overrides to that application or mutate the parent's environment.
+def libredwg_path():
+    """Bundled LibreDWG dwg2dxf: frozen package, build cache next to the source, or PATH."""
+    explicit=os.environ.get('GOKWORKS_LIBREDWG_DWG2DXF')
+    if explicit:
+        if Path(explicit).is_file():return str(Path(explicit).resolve())
+        raise ValueError('GOKWORKS_LIBREDWG_DWG2DXF yolu bulunamadı.')
+    name='dwg2dxf.exe' if os.name=='nt' else 'dwg2dxf'
+    roots=[]
+    if getattr(sys,'frozen',False):roots.append(Path(sys._MEIPASS)/'tools'/'libredwg')
+    roots.append(Path(__file__).resolve().parents[2]/'packaging'/'vendor'/'libredwg')
+    for root in roots:
+        if (root/name).is_file():return str(root/name)
+    found=shutil.which('dwg2dxf')
+    if found:return found
+    raise ValueError('Paketteki DWG okuyucu (LibreDWG) bulunamadı; uygulamayı yeniden indirin veya dosyayı DXF olarak ekleyin.')
+
+
+def converters():
+    """Available converters in order of preference: [(kind, executable), …]."""
+    found=[]
+    for kind,locate in (('oda',converter_path),('libredwg',libredwg_path)):
+        try:found.append((kind,locate()))
+        except (ValueError,ImportError,OSError):pass
+    if not found:
+        raise ValueError('DWG okunamıyor: paketteki DWG okuyucu (LibreDWG) eksik. Uygulamayı yeniden indirin veya dosyayı DXF olarak ekleyin.')
+    return found
+
+
+def _environment():
+    # External converters own their runtime. Never send GOKWORKS/PyInstaller Qt plugin
+    # overrides to them and never mutate the parent's environment.
     environment=os.environ.copy()
     for name in ('QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH','QT_QPA_PLATFORM','QML2_IMPORT_PATH','QML_IMPORT_PATH'):
         environment.pop(name,None)
     if 'LD_LIBRARY_PATH_ORIG' in environment:
         environment['LD_LIBRARY_PATH']=environment['LD_LIBRARY_PATH_ORIG']
+    return environment
+
+
+def _run(command, stop, timeout, cwd=None):
     process=subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
-                             env=environment,
+                             env=_environment(),cwd=cwd,
                              creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
     try:
         deadline=time.monotonic()+timeout
@@ -56,13 +96,51 @@ def convert_dwg(source, destination, stop=None, *, timeout=120):
             try:process.wait(timeout=.08)
             except subprocess.TimeoutExpired:pass
         check_cancel(stop)
-        if process.returncode:raise ValueError(f'ODA File Converter dosyayı dönüştüremedi (kod {process.returncode}).')
-        candidates=[p for p in destination.parent.iterdir() if p.name.lower()==destination.name.lower()]
-        if len(candidates)!=1 or not candidates[0].is_file():raise ValueError('DWG için DXF çıktısı oluşmadı.')
-        if candidates[0]!=destination:candidates[0].rename(destination)
+        return process.returncode
     finally:
         if process.poll() is None:
             process.kill();process.wait(timeout=10)
+
+
+def _output(destination):
+    candidates=[p for p in destination.parent.iterdir() if p.name.lower()==destination.name.lower()]
+    if len(candidates)!=1 or not candidates[0].is_file() or not candidates[0].stat().st_size:return False
+    if candidates[0]!=destination:candidates[0].rename(destination)
+    return True
+
+
+def convert_dwg(source, destination, stop=None, *, timeout=120):
+    """Convert with the first converter that produces a DXF; returns its kind ('oda' or 'libredwg')."""
+    check_cancel(stop)
+    source,destination=Path(source),Path(destination)
+    problems=[]
+    for kind,executable in converters():
+        if destination.exists():destination.unlink()
+        if kind=='oda':
+            code=_run([executable,str(source.parent),str(destination.parent),'ACAD2018','DXF','0','0',source.name],stop,timeout)
+        else:
+            # LibreDWG skips a few advanced R2010+ objects and may then exit non-zero while still
+            # writing a usable DXF; the strict reader below decides whether the geometry is valid.
+            code=_run([executable,'-y','-o',str(destination),str(source)],stop,timeout,cwd=str(Path(executable).parent))
+        if _output(destination):
+            return kind
+        problems.append(f'{LABELS[kind]} dönüştüremedi (kod {code})')
+    raise ValueError('DWG için DXF çıktısı oluşmadı: '+'; '.join(problems)+'. Dosyayı CAD programında DXF olarak kaydedip ekleyin.')
+
+
+def _read_converted(dxf, stop, options):
+    try:
+        return read_dxf(dxf,stop=stop,**options)
+    except ValueError as error:
+        # A converter's DXF may carry small structural flaws; repair a copy and read strictly again.
+        try:
+            from ezdxf import recover
+            document,auditor=recover.readfile(str(dxf))
+        except Exception:
+            raise error from None
+        if auditor.has_errors:raise error from None
+        repaired=dxf.with_name(dxf.stem+'-onarildi.dxf');document.saveas(str(repaired))
+        return read_dxf(repaired,stop=stop,**options)
 
 
 def read_dwg(filename, *, stop=None, **options):
@@ -75,10 +153,10 @@ def read_dwg(filename, *, stop=None, **options):
         incoming.mkdir();outgoing.mkdir()
         copy=incoming/source.name;copy.write_bytes(before)
         dxf=outgoing/(source.stem+'.dxf')
-        convert_dwg(copy,dxf,stop)
-        parts=read_dxf(dxf,stop=stop,**options)
+        kind=convert_dwg(copy,dxf,stop) or 'oda'
+        parts=_read_converted(dxf,stop,options)
         check_cancel(stop)
         if source.read_bytes()!=before:raise ValueError('DWG okunurken değişti; yeniden yükleyin.')
         digest=hashlib.sha256(before).hexdigest()
-        return [replace(p,source=str(source),source_sha256=digest,
-                        notes=[*p.notes,'DWG yerel ODA File Converter ile geçici DXF üzerinden okundu.']) for p in parts]
+        note=f'DWG {LABELS.get(kind,kind)} ile geçici DXF üzerinden okundu.'
+        return [replace(p,source=str(source),source_sha256=digest,notes=[*p.notes,note]) for p in parts]

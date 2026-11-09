@@ -62,9 +62,14 @@ def test_windows_builder_copies_resources_to_their_actual_runtime_locations(mode
         raise CapturedBuild()
     argv=['build_windows.py']+(['--onedir'] if mode=='onedir' else [])
     with patch.object(builder.sys,'platform','win32'),patch.object(builder.sys,'argv',argv), \
-         patch.object(builder,'collect_licenses'),patch.object(builder.subprocess,'run',side_effect=capture):
+         patch.object(builder,'collect_licenses'),patch.object(builder.subprocess,'run',side_effect=capture), \
+         patch.object(builder,'fetch_libredwg',return_value=ROOT/'packaging/vendor/libredwg'), \
+         patch.object(builder,'verify_libredwg'):
         with pytest.raises(CapturedBuild):builder.main()
     command=calls[0]
+    binaries=[command[i+1].split(';',1) for i,v in enumerate(command) if v=='--add-binary']
+    assert sorted(Path(source).name for source,_ in binaries)==['dwg2dxf.exe','libredwg-0.dll']
+    assert {destination for _,destination in binaries}=={'tools/libredwg'}
     assert '--'+mode in command
     assert Path(command[command.index('--icon')+1])==ASSETS/'GOK_app_windows.ico'
     resources=[command[i+1].split(';',1) for i,v in enumerate(command) if v=='--add-data']

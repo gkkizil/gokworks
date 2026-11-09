@@ -296,6 +296,17 @@ def check(output):
                 assert module and api.GetModuleFileNameW(module, name, len(name))
                 assert Path(name.value).resolve().is_relative_to(library_root), name.value
             external_qt = True
+        bundled_dwg = 'not applicable'
+        if os.name == 'nt' and getattr(sys, 'frozen', False):
+            # Nesting DWG reading must work without any extra download: the converter ships inside.
+            import subprocess
+            from modules.nesting.dwg_import import libredwg_path, LIBREDWG_VERSION
+            converter = Path(libredwg_path()).resolve()
+            assert converter.is_relative_to(Path(sys._MEIPASS).resolve()), converter
+            version = subprocess.run([str(converter), '--version'], capture_output=True, text=True, timeout=60,
+                                     cwd=str(converter.parent), creationflags=subprocess.CREATE_NO_WINDOW)
+            assert version.returncode == 0 and LIBREDWG_VERSION in (version.stdout + version.stderr), version
+            bundled_dwg = 'passed'
         if os.name == 'nt':
             import pythoncom, win32com.client
             pythoncom.CoInitialize()
@@ -309,7 +320,7 @@ def check(output):
         distribution = ('onedir' if Path(sys._MEIPASS).resolve().is_relative_to(Path(sys.executable).resolve().parent)
                         else 'onefile') if frozen else 'source'
         report = dict(status='passed',framework='PySide6 / Qt Widgets',pyside=pyside_version,qt=qVersion(),
-                      distribution=distribution, external_qt_verified=external_qt,external_cad_verified=external_cad,pdf_exit_observer=observer,
+                      distribution=distribution, bundled_dwg_converter=bundled_dwg, external_qt_verified=external_qt,external_cad_verified=external_cad,pdf_exit_observer=observer,
                       python=platform.python_version(),platform=platform.platform(),qt_platform=app.platformName(),
                       dpi_scale=app.primaryScreen().devicePixelRatio(),pages=pages,themes=['dark','light'],
                       resolutions=[[1024,700],[1366,768],[1920,1080],[2560,1440]],
