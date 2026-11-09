@@ -428,7 +428,9 @@ class BeginnerView(QWidget):
             actions.addWidget(widget)
         actions.addStretch(1); outer.addLayout(actions)
         self.motion_chart = MotionStrip(); self.motion_chart.appearance = self.owner.context.appearance
-        outer.addWidget(self.motion_chart); outer.addStretch(1)
+        outer.addWidget(self.motion_chart)
+        self.motion_notice = label('', 'error'); self.motion_notice.setTextFormat(Qt.PlainText); self.motion_notice.hide()
+        outer.addWidget(self.motion_notice); outer.addStretch(1)
         return page
 
     # ---------------------------------------------------------------- step 3: results and report
@@ -807,6 +809,10 @@ class BeginnerView(QWidget):
         self.charts['pressure'].set_values(durations, [convert(f.pressure, 'Pa', unit) for f in phases], names)
         self.charts['shaft_power'].set_values(durations, [f.shaft_power / 1000 for f in phases], names)
         self.motion_chart.set_segments([(f.name, f.duration, f.start_position * 1000, f.end_position * 1000, f.feasible) for f in phases])
+        short = [f.name for f in phases if not f.feasible]
+        self.motion_notice.setText(f'Pompa yetişemiyor: {", ".join(short)}. Bu hareketin süresini uzatın veya sonuç adımında '
+                                   '“Önerilen pompa hacmini uygula”yı kullanın.' if short else '')
+        self.motion_notice.setVisible(bool(short))
 
     def show_error(self, error):
         self.problem = error.field
@@ -817,7 +823,7 @@ class BeginnerView(QWidget):
         self.warnings.setText('Sonuç yok: girdi hatası'); self.warnings.setProperty('role', 'error'); polish(self.warnings)
         for chart in self.charts.values():
             chart.set_values([], [])
-        self.motion_chart.set_segments([])
+        self.motion_chart.set_segments([]); self.motion_notice.hide()
         self.auto_values.setText('Ölçüler geçerli olduğunda hesaplanır.')
         key = self.input_key(error.field)
         for name, w in self.inputs.items():

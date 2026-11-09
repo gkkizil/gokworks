@@ -150,3 +150,52 @@ def test_no_step_needs_horizontal_scrolling(easy, qtbot, width):
     for index in range(3):
         easy.simple.go_to_step(index); qtbot.wait(20)
         assert easy.simple.steps.widget(index).horizontalScrollBar().maximum() == 0, index
+
+
+def test_first_time_user_completes_a_press_calculation_using_only_visible_texts(easy, qtbot, tmp_path, monkeypatch):
+    """Acceptance walkthrough: label Ø80/Ø45, stroke 400; press 4 s at 50 kN, hold 2 s, return 4 s at 2 kN."""
+    from PySide6.QtWidgets import QFileDialog, QLabel, QLineEdit, QPushButton
+
+    def visible_button(text):
+        found = [b for b in easy.findChildren(QPushButton) if b.isVisible() and b.isEnabled() and b.text().startswith(text)]
+        assert found, text
+        return found[0]
+
+    def field(text):
+        found = [l for l in easy.findChildren(QLabel) if l.isVisible() and l.text() == text and l.buddy()]
+        assert found, text
+        return found[0].buddy()
+
+    def row(title):
+        name = next(l for l in easy.findChildren(QLabel) if l.isVisible() and l.text().split('. ', 1)[-1].startswith(title))
+        cell = name.parentWidget(); top = cell.mapTo(easy, cell.rect().topLeft()).y(); bottom = top + cell.height()
+        edits = [e for e in easy.findChildren(QLineEdit) if e.isVisible() and top - 4 <= e.mapTo(easy, e.rect().center()).y() <= bottom + 4]
+        return sorted(edits, key=lambda e: e.mapTo(easy, e.rect().topLeft()).x())
+
+    def type_into(widget, text):
+        widget.setText(text); widget.textEdited.emit(text)
+
+    s = easy.simple
+    assert s.step_hint.text().startswith('Adım 1/3')
+    for text, value in (('Piston çapı', '80'), ('Mil çapı', '45'), ('Strok (toplam yol)', '400')):
+        type_into(field(text), value)
+    visible_button('Devam: Hareketler').click(); easy.recalculate()
+    visible_button('İleri – bekle – geri örneğini kur').click(); qtbot.wait(30)   # new rows are laid out
+    for title, values in (('İleri', ('400', '4', '50')), ('Bekleme', ('2', '50')), ('Geri', ('400', '4', '2'))):
+        edits = row(title); assert len(edits) == len(values), title
+        for edit_, value in zip(edits, values):
+            type_into(edit_, value)
+    easy.recalculate()
+    assert s.motion_notice.isVisible() and 'İleri hareket' in s.motion_notice.text()     # told in words, not only red
+    visible_button('Devam: Sonuç').click()
+    assert 'yetişemiyor' in s.verdict.text()
+    visible_button('Önerilen pompa hacmini uygula').click()
+    assert easy.result.cycle['demand_met'] and not s.motion_notice.isVisible()
+    assert s.results.rowCount() == 6 and all(c.value.text() not in ('', '—') for c in s.results.cards.values())
+    phases = easy.project.phases
+    assert easy.project.cylinders[0].bore == .08 and [p.force for p in phases] == [50000., 50000., 2000.]
+    target = tmp_path / 'rapor.pdf'
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *a, **k: (str(target), ''))
+    visible_button('PDF raporu al').click()
+    qtbot.waitUntil(lambda: easy.pdf_job is None, timeout=20000)
+    assert target.read_bytes().startswith(b'%PDF-') and 'kaydedildi' in s.status.text()
