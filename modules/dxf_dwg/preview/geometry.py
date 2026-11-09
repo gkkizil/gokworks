@@ -51,5 +51,37 @@ def make_mesh(coordinates, stop=None):
     lines = [point for a, b, _, count, crease in edges.values()
              if count == 1 or crease for point in (a, b)]
     checkpoint(stop)
-    return Mesh(vertices.astype('<f4').tobytes(), np.repeat(normals, 3, axis=0).astype('<f4').tobytes(),
+    smooth = smooth_normals(vertices, normals, lengths, quantum, stop)
+    return Mesh(vertices.astype('<f4').tobytes(), smooth.astype('<f4').tobytes(),
                 np.asarray(lines, dtype='<f4').tobytes(), tuple(low) + tuple(high), len(points), tuple(origin))
+
+
+CREASE = .8660254   # cos 30 deg: same limit as the drawn crease edges
+
+
+def smooth_normals(vertices, normals, weights, quantum, stop=None):
+    """Per-corner normals averaged over the faces meeting at a vertex within 30 degrees.
+
+    Curved faces (cones, cylinders, bends) shade smoothly instead of in facets,
+    while sheet edges and other creases stay sharp. Display only; area weighted.
+    """
+    corners = np.repeat(normals, 3, axis=0)
+    weighted = np.repeat(normals * weights[:, None], 3, axis=0)
+    _, group = np.unique(np.rint(vertices / quantum).astype(np.int64), axis=0, return_inverse=True)
+    group = group.ravel()
+    order = np.argsort(group, kind='stable')
+    counts = np.bincount(group); starts = np.cumsum(counts) - counts
+    sizes, first = counts[group[order]], starts[group[order]]
+    unit, area = corners[order], weighted[order]
+    by_size = np.argsort(-sizes, kind='stable'); ranked = sizes[by_size]
+    total = np.zeros_like(unit)
+    for k in range(int(ranked[0]) if len(ranked) else 0):
+        checkpoint(stop)
+        active = by_size[:int(np.count_nonzero(ranked > k))]   # corners whose vertex has more than k faces
+        other = first[active] + k
+        near = np.einsum('ij,ij->i', unit[active], unit[other]) >= CREASE
+        total[active[near]] += area[other[near]]
+    length = np.linalg.norm(total, axis=1)
+    result = np.empty_like(corners)
+    result[order] = np.where(length[:, None] > 0, total / np.maximum(length, 1e-30)[:, None], unit)
+    return result

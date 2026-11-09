@@ -123,6 +123,7 @@ QToolButton[ribbonCommand="true"]:hover { background: %(hover)s; border-color: %
 QToolButton[ribbonCommand="true"]:checked { background: %(selected)s; border-color: %(accent)s; }
 QWidget#shaftRibbon { background: %(panel)s; border-bottom: 1px solid %(border)s; }
 QWidget#shaftEditor { background: %(bg)s; }
+QWidget#shaftEditor QStackedWidget > QWidget { background: %(bg)s; }
 QWidget#dxfRibbon { background: %(panel)s; border-bottom: 1px solid %(border)s; }
 QToolButton[disclosure="true"] { background: transparent; border: 0; padding: 3px 0; min-height: 20px;
     color: %(accent)s; text-align: left; }
