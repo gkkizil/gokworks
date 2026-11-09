@@ -51,6 +51,41 @@ Gerçek DWG kabul testi `GOKWORKS_NESTING_DWG_LIVE_SOURCE` ile açıkça seçile
 test kopyası ve kurulu ODA gerektirir. Bu ortamda ODA bulunmadığından bu canlı test
 çalıştırılmadı; mock dönüştürme testleri native DWG kabulü sayılmaz.
 
+## Tek DXF/DWG içinde çerçeveli toplu parçalar
+
+**DXF ekle → Çerçeveli toplu çizim · her parçanın adedini çizimden oku**
+seçeneğini açın. Dosyadaki her kapalı dikdörtgen çerçeve, içindeki tek kesim
+parçası ve adet yazısıyla eşleşir. Çerçeveler kapalı polyline veya dört LINE
+olabilir; döndürülmüş çerçeveler de desteklenir. Renk, katman adı, sıra,
+parça sayısı veya sabit bir çizim şablonu aranmaz. Bir dış sayfa çerçevesi
+ve parça çerçeveleri kesim geometrisine dahil edilmez.
+
+`7 adet`, `7 AD`, `7 pcs`, `QTY: 7` ve `adet: 7` biçimindeki TEXT, MTEXT
+ve blok ATTRIB yazıları okunur. Adet yazısının yerleşim noktası çerçevenin
+içinde olmalıdır. Blokların dönüşümü, kaynak birimi, delikler ve özgün
+ARC/CIRCLE/SPLINE gibi kesim nesneleri korunur. Dosya adındaki veya varsayılan
+**Adet** değeri çizimde okunan adetlere çarpılmaz. Malzeme ve kalınlık mevcut
+dosya seçeneklerinden gelir; `SCALE 1:5` gibi açıklamalar geometrinin gerçek
+ölçeğini değiştirmez. Geometriyi CAD'den gerçek kesim boyutlarında kaydedin.
+
+İlk okuma sonunda dosya **Kontrol gerekli** durumuna geçer. Dosya satırına
+çift tıklayın: bulunan parça kodları, adetleri ve gerçek mm ölçüleri ayrı
+tabloda listelenir. Listeyi onaylayıp içe aktarın. Sonrasında ana parça
+tablosundan adetleri düzenleyebilirsiniz. Kaynak değişirse eski onay
+geçersiz olur. Kontrol bekleyen liste proje dosyasıyla saklanabilir.
+
+Her çerçevede **tek parça türü ve tek adet yazısı** gerekir; delikler ayrı
+parça sayılmaz. Eksik/çift adet, bir çerçevede birden fazla bağımsız parça,
+çakışan çerçeveler, çerçeve dışında kalan kesim geometrisi ve bozuk kontur
+dosyayı hata durumunda bırakır; kaynak kısmen eklenmez. Yardımcı geometri
+varsa katmanını dışlayın. Adet pozitif tam sayı olmalı; ondalık veya binlik
+ayırıcı kullanmayın. Proje genelinde 10000 kesim parçası sınırı korunur.
+
+Bu seçenek çerçeveli CAD çizimleri içindir. Çerçevesiz normal parçalar için
+kapalı tutun ve mevcut bağımsız kontur/adet akışını kullanın. Ekran görüntüsü,
+taranmış PDF ve çizgiye patlatılmış yazılardan OCR yapılmaz. DWG için mevcut
+yerel ODA dönüştürücü gereksinimi geçerlidir.
+
 ## Çalışma alanı
 
 **GOKWORKS / Nesting** çalışma alanında solda parça ağacı ve sac listesi,
