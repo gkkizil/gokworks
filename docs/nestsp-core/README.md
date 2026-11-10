@@ -97,3 +97,10 @@ Serbest dönüşle hem 12 saniye hem 15 saniye toplam bütçede 56/56 parça,
 3 plaka ve bağımsız geometrik doğrulama elde edildi. [15 saniye kaydı](actual-redry.json).
 Bu dosyada eski kaydın da 3 plaka kullandığı ve net malzeme veriminin değişmediği
 özellikle korunmalıdır; bir plaka azaltımı iddiası yoktur.
+
+Farklı malzeme/kalınlık grupları da aynı toplam bütçeyi paylaşır. Bir grubun
+başarılı başlangıcı bulunduğunda yalnız o gruba uygun alternatif saclar
+karşılaştırılır; diğer bekleyen gruplar için en az bir başlangıç dilimi ayrılır.
+Dört malzeme ve dört kalınlık grubu ayrı kontrollü saat testleriyle doğrulandı.
+Gerçek native motorla dört kalınlık grubundaki 12/12 parça, 12 saniyelik
+bütçede 11,45 saniyede dört uygun saca yerleşti ve geometri kontrolünden geçti.

@@ -12,7 +12,7 @@ from modules.nesting import engine, sparrow
 from modules.nesting.geometry import placed
 from modules.nesting.layout_score import layout_score
 from modules.nesting.materials import new_project
-from modules.nesting.models import Part, Placement, Result, Sheet
+from modules.nesting.models import Material, Part, Placement, Result, Sheet
 from modules.nesting.rotations import angle_allowed, search_angles
 from modules.nesting.search_budget import SearchBudget
 from modules.nesting.storage import load_project, save_project
@@ -110,6 +110,28 @@ def test_native_budget_is_shared_across_remaining_physical_sheets(monkeypatch):
     assert validate_result(p, result) and len(result.placements) == 3
     assert len(deadlines) == 3 and deadlines[0] <= 6
     assert {row.sheet_number for row in result.placements} == {1, 2, 3}
+
+
+@pytest.mark.parametrize('group_by', ['thickness', 'material'])
+def test_native_budget_does_not_starve_other_stock_groups(monkeypatch, group_by):
+    p = project(); p.options.rotation = False; p.options.seconds = 12
+    p.parts = [Part.create(f'Thickness {t}', box(0, 0, 30, 20), thickness=t) for t in (2, 3, 4, 5)]
+    p.sheets = [Sheet(f's{t}', f'Stock {t}', 55, 55, thickness=t, stock=1) for t in (2, 3, 4, 5)]
+    if group_by == 'material':
+        for i, (part, sheet) in enumerate(zip(p.parts, p.sheets)):
+            part.material = sheet.material = f'material-{i}'
+            part.thickness = sheet.thickness = 2
+            p.materials.append(Material(part.material, part.material, 7850))
+    clock = [0.]; deadlines = []
+    monkeypatch.setattr(sparrow.time, 'monotonic', lambda: clock[0])
+    def run(request, deadline, stop):
+        deadlines.append(deadline); clock[0] = deadline
+        return [dict(id=i['id'], x=-min(p[0] for p in i['shape']),
+                     y=-min(p[1] for p in i['shape']), angle=0) for i in request['items']]
+    monkeypatch.setattr(sparrow, '_run', run)
+    result = sparrow.nest(p)
+    assert validate_result(p, result) and len(result.placements) == 4
+    assert len(deadlines) == 4 and deadlines[0] <= 3
 
 
 def test_refinement_compacts_a_sparse_single_plate_without_changing_plate_count():
