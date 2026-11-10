@@ -18,7 +18,10 @@ def locked(times, monkeypatch):
     real = Path.read_text; calls = []
     def read_text(self, *args, **kwargs):
         if self.name == 'result.json' and len(calls) < times:
-            calls.append(1); raise PermissionError(13, 'Permission denied', str(self))
+            calls.append(1)
+            error = PermissionError(13, 'Permission denied', str(self))
+            error.winerror = 32
+            raise error
         return real(self, *args, **kwargs)
     monkeypatch.setattr(Path, 'read_text', read_text)
     monkeypatch.setattr(sparrow.subprocess, 'Popen', FakeChild)

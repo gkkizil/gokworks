@@ -163,7 +163,8 @@ class SceneView(MechanismMeshView):
 
     @Slot(str)
     def fallback(self, message=''):
+        # CPU fallback raises its canvas; preserve both annotation and view-cube layers.
         super().fallback(message)
         if hasattr(self, 'bend_annotations'):
-            self.bend_annotations.raise_()
+            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_()
             self.overlay.raise_()

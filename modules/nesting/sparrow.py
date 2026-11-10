@@ -22,7 +22,7 @@ from shapely.geometry.polygon import orient
 from modules.nesting.geometry import placed
 from modules.nesting.models import Placement, Result
 from modules.nesting.validation import validate_result
-from modules.nesting.sparrow_files import workspace
+from modules.nesting.sparrow_files import filesystem_call, workspace
 
 VERSION = 'Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0'
 
@@ -34,19 +34,6 @@ def _available():
         raise ValueError('Sparrow yerleşim bileşeni bulunamadı. GOKWORKS kurulumunu güncelleyin.') from None
     if version != '0.9.0':
         raise ValueError(f'Sparrow bağlantısı spyrrow 0.9.0 gerektiriyor; kurulu sürüm: {version}.')
-
-
-def _read_result(output, attempts=20, pause=.05):
-    """Windows can keep a just-replaced or just-killed writer's file locked for a moment."""
-    for attempt in range(attempts):
-        try:
-            if output.stat().st_size > 10*1024*1024:
-                raise ValueError('Sparrow sonucu boyut sınırını aştı.')
-            return output.read_text(encoding='utf-8')
-        except PermissionError:
-            if attempt == attempts-1:
-                raise
-            time.sleep(pause)
 
 
 def _run(request, deadline, stop):
@@ -75,16 +62,11 @@ def _run(request, deadline, stop):
             child.wait()
         output = path.with_name('result.json')
         try:
-            text = _read_result(output)
-        except FileNotFoundError:
-            if interrupted: return None
-            raise ValueError(f'Sparrow yardımcı süreci sonuç üretemedi (çıkış {child.returncode}).') from None
-        except PermissionError:
-            # A child killed at the deadline may leave its snapshot locked: no usable snapshot.
-            if interrupted: return None
-            raise ValueError('Sparrow sonuç dosyası okunamadı (dosya kilitli).') from None
-        try:
-            response = json.loads(text)
+            def read():
+                if output.stat().st_size > 10*1024*1024:
+                    raise ValueError('Sparrow sonucu boyut sınırını aştı.')
+                return output.read_text(encoding='utf-8')
+            response = json.loads(filesystem_call(read))
             if response['ok'] is not True:
                 raise ValueError('Sparrow: '+str(response.get('error','Hesaplama başarısız.')))
             if child.returncode and not interrupted:
@@ -92,6 +74,13 @@ def _run(request, deadline, stop):
             rows = response['placements']
             if not isinstance(rows,list): raise TypeError()
             return rows
+        except FileNotFoundError:
+            if interrupted: return None
+            raise ValueError(f'Sparrow yardımcı süreci sonuç üretemedi (çıkış {child.returncode}).') from None
+        except PermissionError:
+            # A child killed at the deadline may leave its snapshot locked.
+            if interrupted: return None
+            raise ValueError('Sparrow sonuç dosyası okunamadı (dosya kilitli).') from None
         except (KeyError, TypeError, json.JSONDecodeError) as error:
             raise ValueError('Sparrow sonuç biçimi geçersiz.') from error
 

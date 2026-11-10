@@ -34,7 +34,7 @@ def test_scene_mouse_leave_and_view_cube_click_do_not_break_the_bend_annotations
     """The bend overlay used to replace the viewer's view-cube overlay: leaving or clicking the scene raised."""
     p = window.pages['press_brake']; p.load_demo('L120'); finish(window, qtbot)
     v = p.viewer
-    assert v.annotations is not v.overlay and hasattr(v.overlay, 'face_at')
+    assert v.bend_annotations is not v.overlay and hasattr(v.overlay, 'face_at')
     QApplication.sendEvent(v, QEvent(QEvent.Leave))
     for point in (QPointF(v.width()-40, 40), QPointF(v.width()/2, v.height()/2)):
         for kind in (QEvent.MouseButtonPress, QEvent.MouseButtonRelease):
@@ -42,7 +42,7 @@ def test_scene_mouse_leave_and_view_cube_click_do_not_break_the_bend_annotations
                                                   Qt.LeftButton if kind == QEvent.MouseButtonPress else Qt.NoButton, Qt.NoModifier))
     move = QMouseEvent(QEvent.MouseMove, QPointF(5, 5), v.mapToGlobal(QPoint(5, 5)), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
     QApplication.sendEvent(v, move); qtbot.wait(30)
-    assert v.annotations.isVisible() and v.frame is not None
+    assert v.bend_annotations.isVisible() and v.frame is not None
 
 
 def test_step_cards_show_order_state_tool_change_and_regrip(window, qtbot):
@@ -69,8 +69,8 @@ def test_scene_read_out_follows_step_phase_angle_and_result_badge(window, qtbot)
     assert p.result.status == 'collision' and p.result_badge.text() == '✕ Çarpışma var'
     hit = next(i for i, f in enumerate(p.result.frames) if f.hits)
     p.slider.setValue(hit)
-    hud = p.viewer.annotations.hud
-    assert hud.startswith('Adım 1/1 · ') and '°' in hud and 'çarpışma' in hud and p.viewer.annotations.state == 'collision'
+    hud = p.viewer.bend_annotations.hud
+    assert hud.startswith('Adım 1/1 · ') and '°' in hud and 'çarpışma' in hud and p.viewer.bend_annotations.state == 'collision'
     assert 'ÇARPIŞMA' in p.frame_label.text()
     p.direction.setCurrentIndex(1); finish(window, qtbot)           # any change: old result void, badge back to pending
     assert p.result is None and p.result_badge.text() == '○ Kontrol bekliyor' and not p.pdf_button.isEnabled()
