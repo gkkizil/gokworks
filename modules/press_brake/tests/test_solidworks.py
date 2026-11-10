@@ -241,3 +241,27 @@ def test_unsupported_multibody_and_restore_failure_are_not_success(capture):
     capture.flat.SetSuppression2 = lambda mode, *args: False if mode == 0 else original(mode, *args)
     with pytest.raises(RestoreError, match='Flat-Pattern'):
         sw.read_active(session_factory=capture.session)
+
+
+def test_sketched_bend_definitions_are_read_like_one_bends(capture):
+    session = capture.session
+    class Sketched(session):
+        def features(self, model, stop):
+            yield capture.bend, 'SketchBend'; yield capture.flat, 'FlatPattern'
+    part = sw.read_active(session_factory=Sketched)
+    assert part.bends[0].inside_angle == pytest.approx(120) and part.bends[0].title == 'Bend-60'
+
+
+def test_missing_bends_name_the_sheet_features_that_were_found(capture):
+    session = capture.session
+    base = Feature('Base-Flange1', NS()); hidden = Feature('Bend7', NS(), True)
+    class Unknown(session):
+        def features(self, model, stop):
+            yield base, 'SMBaseFlange'; yield hidden, 'UiBend'; yield Feature('Cut-Extrude2', NS()), 'Cut'
+            yield capture.flat, 'FlatPattern'
+    with pytest.raises(ApiError) as error:
+        sw.read_active(session_factory=Unknown)
+    text = str(error.value)
+    assert 'Gövde «Sheet-body»' in text and 'Base-Flange1 (SMBaseFlange)' in text
+    assert 'Bend7 (UiBend, bastırılmış)' in text and 'Flat-Pattern (FlatPattern, bastırılmış)' in text
+    assert 'Cut-Extrude2' not in text
