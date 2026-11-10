@@ -158,9 +158,12 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
 
     while sum(counts.values()) < sum(p.quantity for p in project.parts):
         if ended(): break
-        best = None; seen = set()
+        best = None; seen = set(); active_sheet = None
         for sheet in sorted(project.sheets,key=lambda s:s.width*s.height):
             if stock[sheet.id] >= sheet.stock: continue
+            if active_sheet is not None and (sheet.material != active_sheet.material
+                    or not math.isclose(sheet.thickness,active_sheet.thickness,abs_tol=1e-7)):
+                continue
             key = (sheet.width,sheet.height,sheet.material,sheet.thickness)
             if key in seen: continue
             seen.add(key)
@@ -204,6 +207,22 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
             # its first strip. Reserve time for the remaining physical sheets.
             area = sum(s['area']*s['demand'] for s in specs.values())
             expected_sheets = max(1,math.ceil(area/((width+2*clearance)*(height+2*clearance)*.8)))
+            # Other material/thickness groups need their own physical stock.
+            # Keep at least one seed slice for every still-packable group.
+            other_groups = set()
+            for part in project.parts:
+                if ended(): break
+                group = (part.material,part.thickness)
+                if part.id in specs or group in other_groups or counts[part.id]>=part.quantity:
+                    continue
+                if part.polygon.geom_type != 'Polygon': continue
+                if any(stock[s.id]<s.stock and s.material==part.material
+                       and math.isclose(s.thickness,part.thickness,abs_tol=1e-7)
+                       and min(s.width,s.height)>2*pad
+                       and _angles(part,options,s.width-2*pad,s.height-2*pad,ended)!=[]
+                       for s in project.sheets):
+                    other_groups.add(group)
+            expected_sheets += len(other_groups)
             now = time.monotonic()
             sheet_deadline = now+(deadline-now)/expected_sheets
             axes = [0,90] if height<=width else [90,0]
@@ -230,11 +249,15 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
                 try: validate_result(project,trial,complete=False)
                 except ValueError as failure:
                     raise ValueError(f'Sparrow sonucu geometrik doğrulamayı geçemedi: {failure}') from failure
+                active_sheet = sheet
                 def bounds(part_id, angle):
                     return affinity.rotate(project.part(part_id).polygon,angle,origin=(0,0)).bounds
                 score = (-len(candidate),sheet.width*sheet.height,plate_strip_area(sheet,candidate,bounds))
                 if best is None or score < best[0]: best = (score,candidate,sheet)
-            if best is not None and len(best[1]) == sum(p.quantity-counts[p.id] for p in project.parts): break
+            compatible_demand = sum(p.quantity-counts[p.id] for p in project.parts
+                if p.polygon.geom_type=='Polygon' and p.material==sheet.material
+                and math.isclose(p.thickness,sheet.thickness,abs_tol=1e-7))
+            if best is not None and len(best[1]) == compatible_demand: break
         if best is None: break
         _,candidate,sheet = best
         placements.extend(candidate); counts.update(p.part_id for p in candidate); stock[sheet.id] += 1
