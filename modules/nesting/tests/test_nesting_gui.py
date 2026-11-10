@@ -435,14 +435,16 @@ def test_new_jobs_offer_continuous_rotation_and_saved_angles_stay_exact(window):
     page=window.pages['nesting']
     page.read_parameters()
     assert page.project.options.angles is None and page.rotation_mode.currentText()=='Serbest'
+    assert page.inspector.fields['rotation_mode'].currentText()=='Serbest'
     page.project.options.angles=[0,180]; page.sync_forms(); page.read_parameters()
     assert page.project.options.angles==[0,180] and page.rotation_mode.currentText()=='Özel açılar'
-    page.rotation_mode.setCurrentText('90° adımlı'); page.read_parameters()
+    page.inspector.fields['rotation_mode'].setCurrentText('90° adımlı'); page.read_parameters()
     assert page.project.options.angles==[0,90,180,270]
     page.rotation_mode.setCurrentText('Serbest'); page.read_parameters()
     assert page.project.options.angles is None
     page.form.set_value('angles','37;217'); page.read_parameters()
     assert page.project.options.angles==[37,217]
+    assert page.inspector.fields['rotation_mode'].currentText()=='Özel açılar'
 
 
 def test_material_library_still_edits_project_materials(window,qtbot,monkeypatch):
