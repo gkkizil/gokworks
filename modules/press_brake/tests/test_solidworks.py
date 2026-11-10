@@ -257,11 +257,59 @@ def test_missing_bends_name_the_sheet_features_that_were_found(capture):
     base = Feature('Base-Flange1', NS()); hidden = Feature('Bend7', NS(), True)
     class Unknown(session):
         def features(self, model, stop):
-            yield base, 'SMBaseFlange'; yield hidden, 'UiBend'; yield Feature('Cut-Extrude2', NS()), 'Cut'
+            yield base, 'SMBaseFlange'; yield hidden, 'SM3dBend'; yield Feature('Cut-Extrude2', NS()), 'Cut'
             yield capture.flat, 'FlatPattern'
     with pytest.raises(ApiError) as error:
         sw.read_active(session_factory=Unknown)
     text = str(error.value)
     assert 'Gövde «Sheet-body»' in text and 'Base-Flange1 (SMBaseFlange)' in text
-    assert 'Bend7 (UiBend, bastırılmış)' in text and 'Flat-Pattern (FlatPattern, bastırılmış)' in text
+    assert 'Bend7 (SM3dBend, bastırılmış)' in text and 'Flat-Pattern (FlatPattern, bastırılmış)' in text
     assert 'Cut-Extrude2' not in text
+
+
+def _bend_cylinder(ref, radius_mm, axis_origin=(0, 30, 0), span=60):
+    surface = NS(IsPlane=lambda: False, IsCylinder=lambda: True,
+                 CylinderParams=(*[v/1000 for v in axis_origin], 1, 0, 0, radius_mm/1000))
+    return NS(ref=ref, GetSurface=lambda: surface, GetUVBounds=lambda: (0, radians(span), 0, 1),
+              GetEdges=lambda: (), GetFeature=lambda: None)
+
+
+def _base_flange_part(capture, cylinders):
+    """Base-flange bends: no OneBend; the bend is a UiBend under a suppressed Flat-Pattern."""
+    folded = capture.body.GetFaces()
+    capture.body.GetFaces = lambda: tuple(folded)+tuple(cylinders)
+    flat = capture.flat
+    class FlatBend(Feature):
+        @property
+        def suppressed(self):                       # follows its Flat-Pattern, as in SOLIDWORKS
+            return flat.suppressed
+        @suppressed.setter
+        def suppressed(self, value):
+            pass
+    uibend = FlatBend('Bend1', capture.bend.definition)
+    session = capture.session
+    class BaseFlange(session):
+        def features(self, model, stop):
+            yield Feature('Base-Flange1', NS()), 'SMBaseFlange'; yield flat, 'FlatPattern'; yield uibend, 'UiBend'
+    return BaseFlange
+
+
+def test_base_flange_bends_are_read_from_the_unfolded_flat_pattern(capture):
+    reader = _base_flange_part(capture, [_bend_cylinder('inner', 2), _bend_cylinder('outer', 4)])
+    part = sw.read_active(session_factory=reader)
+    assert len(part.bends) == 1 and part.bends[0].title == 'Bend1'
+    assert part.bends[0].inside_angle == pytest.approx(120) and part.bends[0].radius == 2
+    assert capture.flat.suppressed                                         # restored after reading
+
+
+def test_base_flange_bend_without_matching_faces_or_an_extra_cylinder_is_not_guessed(capture):
+    with pytest.raises(ApiError, match='büküm yüzü bulunamadı'):
+        sw.read_active(session_factory=_base_flange_part(capture, []))
+    assert capture.flat.suppressed
+
+
+def test_unrelated_cylinder_next_to_a_base_flange_bend_is_refused(capture):
+    extra = _bend_cylinder('stray', 2, axis_origin=(0, -30, 0), span=45)
+    reader = _base_flange_part(capture, [_bend_cylinder('inner', 2), extra])
+    with pytest.raises(ApiError, match='eşleştirilemedi'):
+        sw.read_active(session_factory=reader)

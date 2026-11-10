@@ -62,7 +62,13 @@ tarafından sıfırdan çizilmiş eğitim geometrisidir; üretici eşdeğeri de�
 
 **Aktif SolidWorks Parçasını Al**, açık SLDPRT'nin gerçekten aktif konfigürasyonunu
 okur; kaynak kaydedilmez. İlk adaptör tek sabit kalınlıklı gövde, düz sabit yüz,
-`OneBend` tanımları ve ölçülebilir paralel açınım teğetlerini destekler. Kararlı
+`OneBend`/`SketchBend`/`ToroidalBend` tanımları ve ölçülebilir paralel açınım teğetlerini
+destekler. Açık profilli Base-Flange bükümleri ağaçta yalnız Flat-Pattern altında `UiBend`
+olarak bulunur (bükülü durumda bastırılmış); bunlar açınım geçici açıldığında okunur.
+Bükülü parçadaki her kısmi silindir yüzü eksenine göre gruplanır; her grup açı ve iç/dış
+R ile bir bükümle, her büküm de bir grupla eşleşmelidir. Fazla/eksik büküm hatadır,
+yalnız yarıçaptan tahmin yapılmaz. Büküm bulunamazsa hata, okunan sac unsurlarını tür ve
+bastırma durumuyla listeler. Kararlı
 kimlik persistent-reference özetinden üretilir; unsur adını değiştirmek kimliği
 değiştirmez. API metre/radyan sınırında mm/derece dönüşümü yapılır.
 
