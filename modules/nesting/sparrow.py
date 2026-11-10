@@ -1,6 +1,6 @@
 """Sparrow strip packing adapted to finite sheet stock, verified in millimetres.
 
-The official spyrrow 0.9.0 wheels bundle Sparrow 0.1.0 / jagua-rs 0.7.0.
+The pinned spyrrow 0.10.0 source bundles Sparrow 0.3.0 / jagua-rs 1.0.0.
 Only complete contours inside each physical sheet are accepted from the strip.
 Holes remain in the source/output geometry; their space is conservatively reserved.
 """
@@ -23,8 +23,10 @@ from modules.nesting.geometry import placed
 from modules.nesting.models import Placement, Result
 from modules.nesting.validation import validate_result
 from modules.nesting.sparrow_files import filesystem_call, workspace
+from modules.nesting.rotations import allowed_angles, minimum_span
+from modules.nesting.layout_score import plate_strip_area
 
-VERSION = 'Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0'
+VERSION = 'Sparrow 0.3.0 / spyrrow 0.10.0 / jagua-rs 1.0.0'
 
 
 def _available():
@@ -32,8 +34,8 @@ def _available():
         version = metadata.version('spyrrow')
     except metadata.PackageNotFoundError:
         raise ValueError('Sparrow yerleşim bileşeni bulunamadı. GOKWORKS kurulumunu güncelleyin.') from None
-    if version != '0.9.0':
-        raise ValueError(f'Sparrow bağlantısı spyrrow 0.9.0 gerektiriyor; kurulu sürüm: {version}.')
+    if version != '0.10.0':
+        raise ValueError(f'Sparrow bağlantısı spyrrow 0.10.0 gerektiriyor; kurulu sürüm: {version}.')
 
 
 def _run(request, deadline, stop):
@@ -86,9 +88,9 @@ def _run(request, deadline, stop):
 
 
 def _angles(part, options, width, height, ended=lambda:False):
-    angles = options.angles if options.rotation else [0.]
-    if options.grain_locked or part.grain_locked:
-        angles = [a for a in angles if abs(a % 180) < 1e-7]
+    angles = allowed_angles(part, options)
+    if angles is None:
+        return [] if minimum_span(part.polygon) > min(width, height) else None
     selected = []
     for angle in dict.fromkeys(a % 360 for a in angles):
         if ended(): break
@@ -97,7 +99,7 @@ def _angles(part, options, width, height, ended=lambda:False):
     return selected
 
 
-def _poses(rows, specs, scale, pad, separation, sheet, sheet_number, counts):
+def _poses(rows, specs, scale, pad, separation, sheet, sheet_number, counts, axis=0):
     """Validate the entire native strip contract before accepting a finite prefix."""
     if Counter(r.get('id') for r in rows if isinstance(r,dict)) != Counter({k:s['demand'] for k,s in specs.items()}):
         raise ValueError('Sparrow parça kimlikleri veya adetleri istekle eşleşmiyor.')
@@ -110,13 +112,18 @@ def _poses(rows, specs, scale, pad, separation, sheet, sheet_number, counts):
             x,y,angle = (row[k] for k in ('x','y','angle'))
             if any(isinstance(v,bool) or not isinstance(v,(float,int)) or not math.isfinite(v) for v in (x,y,angle)):
                 raise ValueError('Sonlu olmayan yerleşim.')
-            allowed = min(spec['angles'], key=lambda a:abs((angle-a+180)%360-180))
+            if row.get('reflected', False) is not False:
+                raise ValueError('Aynalanmış native yerleşim kabul edilmedi.')
+            angle = (angle+axis)%360
+            allowed = angle if spec['angles'] is None else min(spec['angles'], key=lambda a:abs((angle-a+180)%360-180))
             if abs((angle-allowed+180)%360-180) > 1e-4:
                 raise ValueError('İzin verilmeyen dönüş açısı.')
             # Native input uses a local origin, uniform scale, then rotate+translate.
             ox,oy = spec['origin']; radians = math.radians(allowed)
-            tx = x/scale+pad-separation-ox*math.cos(radians)+oy*math.sin(radians)
-            ty = y/scale+pad-separation-ox*math.sin(radians)-oy*math.cos(radians)
+            base_x,base_y = ((x/scale+pad-separation,y/scale+pad-separation) if axis==0
+                             else (sheet.width-pad+separation-y/scale,x/scale+pad-separation))
+            tx = base_x-ox*math.cos(radians)+oy*math.sin(radians)
+            ty = base_y-ox*math.sin(radians)-oy*math.cos(radians)
             pose = Placement(part.id,local_counts[part.id]+1,sheet.id,sheet_number,tx,ty,allowed)
             if boundary.covers(placed(part,pose)):
                 local_counts[part.id] += 1; accepted.append(pose)
@@ -151,9 +158,12 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
 
     while sum(counts.values()) < sum(p.quantity for p in project.parts):
         if ended(): break
-        best = None; seen = set()
+        best = None; seen = set(); active_sheet = None
         for sheet in sorted(project.sheets,key=lambda s:s.width*s.height):
             if stock[sheet.id] >= sheet.stock: continue
+            if active_sheet is not None and (sheet.material != active_sheet.material
+                    or not math.isclose(sheet.thickness,active_sheet.thickness,abs_tol=1e-7)):
+                continue
             key = (sheet.width,sheet.height,sheet.material,sheet.thickness)
             if key in seen: continue
             seen.add(key)
@@ -166,7 +176,7 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
                 demand = part.quantity-counts[part.id]
                 if not demand or part.material != sheet.material or not math.isclose(part.thickness,sheet.thickness,abs_tol=1e-7): continue
                 angles = _angles(part,options,width,height,ended)
-                if not angles: continue
+                if angles == []: continue
                 ox,oy,_,_ = part.polygon.bounds
                 # Reserve clearance in our exact geometry layer. The native
                 # separation option also deflates its initially narrow strip;
@@ -175,41 +185,79 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
                 footprint = Polygon(part.polygon.exterior).buffer(clearance,join_style=2)
                 if footprint.geom_type!='Polygon' or footprint.is_empty or not footprint.is_valid:
                     raise ValueError(part.code+': kesim aralığı konturu oluşturulamadı.')
-                fitting = []
-                for angle in angles:
+                if angles is None and minimum_span(footprint) > min(width,height)+2*clearance:
+                    continue
+                fitting = [] if angles is not None else None
+                for angle in angles or []:
                     if ended(): break
                     a,b,c,d = affinity.rotate(footprint,angle,origin=(0,0)).bounds
                     if c-a<=width+2*clearance and d-b<=height+2*clearance:
                         fitting.append(angle)
                 # Acute mitres may be wider than a half-gap edge extension.
                 # Leave such exact-fit cases to the nominal-contour refinement.
-                if not fitting: continue
+                if fitting == []: continue
                 angles = fitting
-                specs[part.id] = dict(part=part,demand=demand,angles=angles,origin=(ox,oy),
+                specs[part.id] = dict(part=part,demand=demand,angles=angles,origin=(ox,oy),area=footprint.area,
                     # Normalize only the private footprint; source entities and
                     # nominal cutting contours retain their original geometry.
                     shape=[((x-ox)*scale,(y-oy)*scale) for x,y in list(orient(footprint,sign=1.).exterior.coords)[:-1]])
             if not specs: continue
             if ended(): break
-            slice_seconds = min(deadline-time.monotonic(),{'Hızlı':1.,'Dengeli':2.,'Yüksek':4.}[options.quality])
-            request = dict(items=[dict(id=k,shape=s['shape'],demand=s['demand'],angles=s['angles']) for k,s in specs.items()],
-                           height=(height+2*clearance)*scale, separation=None,
-                           seconds=max(1,math.ceil(slice_seconds)),seed=options.seed)
-            rows = _run(request,min(deadline,time.monotonic()+slice_seconds+1.),stop)
-            iterations += 1
-            if rows is None: continue
-            candidate = _poses(rows,specs,scale,pad,clearance,sheet,stock[sheet.id]+1,counts)
-            if not candidate: continue
-            # A second, independent double-precision check uses original contours.
-            trial = result(); trial.placements += candidate
-            trial_counts = Counter(p.part_id for p in trial.placements)
-            trial.unplaced = [p.id for p in project.parts for _ in range(p.quantity-trial_counts[p.id])]
-            try: validate_result(project,trial,complete=False)
-            except ValueError as failure:
-                raise ValueError(f'Sparrow sonucu geometrik doğrulamayı geçemedi: {failure}') from failure
-            score = (len(candidate),-sheet.width*sheet.height)
-            if best is None or score > best[0]: best = (score,candidate,sheet)
-            if len(candidate) == sum(p.quantity-counts[p.id] for p in project.parts): break
+            # Do not spend a multi-sheet job's entire seed budget compressing
+            # its first strip. Reserve time for the remaining physical sheets.
+            area = sum(s['area']*s['demand'] for s in specs.values())
+            expected_sheets = max(1,math.ceil(area/((width+2*clearance)*(height+2*clearance)*.8)))
+            # Other material/thickness groups need their own physical stock.
+            # Keep at least one seed slice for every still-packable group.
+            other_groups = set()
+            for part in project.parts:
+                if ended(): break
+                group = (part.material,part.thickness)
+                if part.id in specs or group in other_groups or counts[part.id]>=part.quantity:
+                    continue
+                if part.polygon.geom_type != 'Polygon': continue
+                if any(stock[s.id]<s.stock and s.material==part.material
+                       and math.isclose(s.thickness,part.thickness,abs_tol=1e-7)
+                       and min(s.width,s.height)>2*pad
+                       and _angles(part,options,s.width-2*pad,s.height-2*pad,ended)!=[]
+                       for s in project.sheets):
+                    other_groups.add(group)
+            expected_sheets += len(other_groups)
+            now = time.monotonic()
+            sheet_deadline = now+(deadline-now)/expected_sheets
+            axes = [0,90] if height<=width else [90,0]
+            if sheet_deadline-now<2 or abs(width-height)<1e-7:
+                axes = axes[:1]
+            for index,axis in enumerate(axes):
+                if ended() or time.monotonic()>=sheet_deadline: break
+                slice_seconds = min((sheet_deadline-time.monotonic())/(len(axes)-index),
+                                    {'Hızlı':1.,'Dengeli':4.,'Yüksek':10.}[options.quality])
+                request = dict(items=[dict(id=k,shape=s['shape'],demand=s['demand'],
+                               angles=None if s['angles'] is None else [(a-axis)%360 for a in s['angles']]) for k,s in specs.items()],
+                               height=((height if axis==0 else width)+2*clearance)*scale, separation=None,
+                               seconds=max(1,math.ceil(slice_seconds)),seed=options.seed+index)
+                rows = _run(request,min(sheet_deadline,time.monotonic()+slice_seconds+.25),stop)
+                iterations += 1
+                if rows is None: continue
+                candidate = _poses(rows,specs,scale,pad,clearance,sheet,stock[sheet.id]+1,counts,axis)
+                if not candidate: continue
+                # Both strip orientations are measured in the original mm
+                # coordinate system and independently checked before selection.
+                trial = result(); trial.placements += candidate
+                trial_counts = Counter(p.part_id for p in trial.placements)
+                trial.unplaced = [p.id for p in project.parts for _ in range(p.quantity-trial_counts[p.id])]
+                try: validate_result(project,trial,complete=False)
+                except ValueError as failure:
+                    raise ValueError(f'Sparrow sonucu geometrik doğrulamayı geçemedi: {failure}') from failure
+                active_sheet = sheet
+                def bounds(part_id, angle):
+                    return affinity.rotate(project.part(part_id).polygon,angle,origin=(0,0)).bounds
+                score = (-len(candidate),sheet.width*sheet.height,plate_strip_area(sheet,candidate,bounds))
+                if best is None or score < best[0]: best = (score,candidate,sheet)
+            compatible_demand = sum(p.quantity-counts[p.id] for p in project.parts
+                if p.polygon.geom_type=='Polygon' and p.material==sheet.material
+                and math.isclose(p.thickness,sheet.thickness,abs_tol=1e-7))
+            if best is not None and len(best[1]) == compatible_demand: break
         if best is None: break
         _,candidate,sheet = best
         placements.extend(candidate); counts.update(p.part_id for p in candidate); stock[sheet.id] += 1

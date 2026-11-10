@@ -73,12 +73,12 @@ class NestingInspector(QWidget):
         basic.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         parameters.addLayout(basic)
         for key,title in [('gap','Parça aralığı · mm'),('margin','Kenar payı · mm'),
-                          ('rotation','Döndürme'),('quality','Kalite')]:
+                          ('rotation','Döndürme'),('rotation_mode','Dönüş biçimi'),('quality','Kalite')]:
             basic.addRow(label(title),self.mirror(key))
         parameters.addWidget(label('Hesaplama süresi otomatik yönetilir.','muted'))
         advanced=QWidget();extra=QFormLayout(advanced);extra.setContentsMargins(0,0,0,0)
         extra.setRowWrapPolicy(QFormLayout.WrapLongRows)
-        for key,title in [('kerf','Kesim genişliği · mm'),('angles','İzinli açılar · °'),('angle_step','Açı adımı · °'),
+        for key,title in [('kerf','Kesim genişliği · mm'),('angles','Özel açılar · °'),('angle_step','Özel açı adımı · °'),
                           ('grain_locked','Hadde yönü kilidi'),('seed','Deneme sırası')]:
             extra.addRow(label(title),self.mirror(key))
         parameters.addWidget(Disclosure('Gelişmiş yerleşim',advanced))
