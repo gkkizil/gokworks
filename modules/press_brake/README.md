@@ -104,7 +104,7 @@ WILA BIU-021 / OZU-313 ve Rolleri 04600 / 07500 teknik bilgi kartları da vardı
 Bunlar üreticinin açık ürün verileridir; kesitleri eksikken **DXF bekleniyor**
 olarak görünür ve gerçek kesit gibi çizilmez. **Üretici / kaynak sayfası** ilgili
 ürünü açar. WILA CAD indirmesi üretici oturumu veya e-posta bağlantısı ister.
-DXF'yi aldıktan sonra **Kendi takımım (DXF)** ile ekleyebilirsiniz. Üretici
+DXF'yi aldıktan sonra **Takım kütüphanesi** bölümünden (DXF takım ekle…) ekleyebilirsiniz. Üretici
 çizimleri EXE'ye gömülmez; çevrimiçi indirilen profiller kişisel katalogda kalır.
 
 ### Aktarım ve hesaplama düzeltmeleri
