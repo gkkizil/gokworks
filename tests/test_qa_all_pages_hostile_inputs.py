@@ -18,7 +18,7 @@ HOSTILE = ('', '-1', '0', '-0', '1e308', '1e-300', 'abc', '1.000', '1,5', '1.234
            '9' * 80, 'nan', 'inf', '  12  ')
 UNSAFE_WORDS = ('Çık', 'Kapat', 'SolidWorks', 'Aç', 'Kaydet', 'Dışa', 'Aktar', 'Seç', 'Göz', 'PDF', 'DXF',
                 'STEP', 'Excel', 'CSV', 'Rapor', 'Yazdır', 'Bağlan', 'Tara', 'Klasör', 'Dosya', 'Önizle',
-                'Başlat', 'Oluştur', 'Gönder', 'Sil')
+                'Başlat', 'Oluştur', 'Gönder', 'Sil', 'indir', 'download')
 
 
 @pytest.fixture

@@ -1,9 +1,10 @@
 """Worker-only geometry, independent collision sampling and immutable results."""
 from dataclasses import dataclass
 from math import degrees
-from .collision import check
+import numpy as np
+from .collision import check, Hit
 from .geometry import Geometry, mesh
-from .kinematics import step_angles
+from .kinematics import step_angles, station_transform
 from .motion import sample_interval
 from modules.cad_converter.models import checkpoint
 
@@ -91,12 +92,14 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
     final_angles = step_angles(plan, len(plan.steps)-1, 1)
     formed = mesh(geometry.part_bodies(final_angles), stop)
     frames, results = [], []
+    sheet_cache = {}
     for index, step in enumerate(plan.steps):
         checkpoint(stop)
         bend = next(b for b in plan.part.bends if b.id == step.bend)
         notes = step_scope(plan, step)
         first_hit, samples, checked_pairs, minimum = None, 0, set(), max_angle
         phase_cache = {}
+        collision_cache = {}
 
         def sample(phase, value):
             nonlocal samples, first_hit
@@ -107,7 +110,15 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
             fraction = value/bend.turn if phase == 'bend' else 0 if phase == 'approach' else 1
             angles = step_angles(plan, index, fraction)
             bodies, contacts = geometry.scene(index, angles, phase, value if phase != 'bend' else 0)
-            hits, near = check(bodies, contacts, near_margin=3.)
+            # Self-intersection is invariant under station placement. Keep it
+            # in the part's coordinates so unchanged flange pairs reuse their
+            # solids/results while the station rotates around the active bend.
+            self_hits, _ = check(geometry.part_bodies(angles), cache=sheet_cache)
+            station = station_transform(plan, index, angles)
+            self_hits = {h.pair: Hit(h.pair, tuple((station@np.r_[h.location, 1.])[:3]), h.volume) for h in self_hits}
+            # Retain the original station AABBs for adaptive subdivision; the
+            # sampling resolution is independent of the faster narrow phase.
+            hits, near = check(bodies, contacts, near_margin=3., cache=collision_cache, sheet_hits=self_hits)
             samples += 1
             for a in bodies:
                 for b in bodies:

@@ -102,3 +102,63 @@ def test_aabb_overlap_is_not_itself_a_solid_collision():
     assert not check([a, b])[0]
     c = body('pin', 'punch', transform(b.shape, translation(x=7)))
     assert check([a, c])[0]
+
+
+def test_tangent_solids_keep_refinement_without_expensive_boolean(monkeypatch):
+    from modules.press_brake import collision
+    a = body('left', 'sheet', prism(Region.from_polygon(box(0, 0, 10, 10)), 2))
+    b = body('right', 'sheet', prism(Region.from_polygon(box(10, 0, 20, 10)), 2))
+    monkeypatch.setattr(collision, 'intersection', lambda *args: pytest.fail('tangent boxes cannot contain collision volume'))
+    hits, near = check([a, b], near_margin=3)
+    assert not hits and near
+
+
+def test_collision_cache_retains_actual_hits_and_changes_with_contact_masks(monkeypatch):
+    from modules.press_brake import collision
+    region = Region.from_polygon(box(-.1, -.1, .1, .1))
+    sheet = body('active', 'sheet', prism(region, .2))
+    punch = body('punch:tool', 'punch', prism(region, .2))
+    cache = {}; actual = collision.intersection; calls = []
+    def count(*args):
+        calls.append(1); return actual(*args)
+    monkeypatch.setattr(collision, 'intersection', count)
+    contact = [('punch', 0, 0, .3, ('active',))]
+    assert not check([sheet, punch], contact, cache=cache)[0]
+    assert not check([sheet, punch], contact, cache=cache)[0] and len(calls) == 1
+    assert check([sheet, punch], cache=cache)[0] and len(calls) == 2
+
+
+def test_rotated_die_channel_preserves_one_body_and_physical_work_reference():
+    from shapely.affinity import rotate
+    p = load_demo('L120'); die = p.tool('demo-die')
+    raw = replace(die, section=Region.from_polygon(rotate(die.section.polygon(), -90, origin=(0, 0))),
+                  holder_section=Region.from_polygon(rotate(die.holder_section.polygon(), -90, origin=(0, 0))),
+                  channels=tuple(replace(c, rotation=90) for c in die.channels))
+    q = p.changed(tools=tuple(raw if t.id == die.id else t for t in p.tools))
+    for channel in ('V16', 'V24'):
+        a = p.changed(steps=(replace(p.steps[0], channel=channel),))
+        b = q.changed(steps=(replace(q.steps[0], channel=channel),))
+        before, _ = Geometry(a).scene(0, step_angles(a, 0, .5))
+        after, _ = Geometry(b).scene(0, step_angles(b, 0, .5))
+        actual = [s for s in after if s.kind == 'die']
+        expected = next(s for s in before if s.kind == 'die')
+        assert len(actual) == 1 and actual[0].bounds == pytest.approx(expected.bounds, abs=1e-7)
+        assert shape_stats(actual[0].shape)['volume_mm3'] == pytest.approx(shape_stats(expected.shape)['volume_mm3'])
+
+
+def test_canonical_sheet_hit_retains_volume_position_and_refinement_at_station():
+    import numpy as np
+    from modules.press_brake.collision import Hit
+    from modules.press_brake.geometry import section_rotation
+    shapes = [body('a', 'sheet', prism(Region.from_polygon(box(0, 0, 10, 10)), 2)),
+              body('b', 'sheet', prism(Region.from_polygon(box(5, 0, 15, 10)), 2))]
+    local, _ = check(shapes)
+    assert len(local) == 1 and local[0].volume == pytest.approx(100)
+    matrix = translation(5, 3, 7)@section_rotation(60)
+    world = [body(s.id, s.kind, transform(s.shape, matrix)) for s in shapes]
+    expected, expected_near = check(world, near_margin=3)
+    canonical = {h.pair: Hit(h.pair, tuple((matrix@np.r_[h.location, 1.])[:3]), h.volume) for h in local}
+    actual, near = check(world, near_margin=3, sheet_hits=canonical)
+    assert near == expected_near and actual[0].pair == expected[0].pair
+    assert actual[0].volume == pytest.approx(expected[0].volume)
+    assert actual[0].location == pytest.approx(expected[0].location, abs=1e-7)

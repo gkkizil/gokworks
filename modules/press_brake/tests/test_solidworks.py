@@ -160,9 +160,76 @@ def test_pending_rebuild_and_unmapped_partial_cylinder_cannot_skip_bends(capture
     missing = NS(ref='unmapped-bend', GetSurface=lambda: NS(IsPlane=lambda: False, IsCylinder=lambda: True),
                  GetUVBounds=lambda: (0., 1., 0., .05))
     capture.body.GetFaces = lambda: original()+(missing,)
-    with pytest.raises(ApiError, match='unmapped-bend.*atlanmadı'):
+    with pytest.raises(ApiError, match='Sheet-body / yüz #[a-f0-9]{10}.*atlanmadı'):
         sw.read_active(session_factory=capture.session)
     assert capture.flat.suppressed and not capture.flat.history
+
+
+def _cylinder_face(ref, radius, origin=(0., 0., 0.), owner=None, angle=radians(60)):
+    surface = NS(IsPlane=lambda: False, IsCylinder=lambda: True,
+                 CylinderParams=(*origin, 1., 0., 0., radius))
+    return NS(ref=ref, GetSurface=lambda: surface, GetUVBounds=lambda: (0., angle, 0., .08), GetFeature=lambda: owner)
+
+
+def test_outer_skin_of_a_measured_onebend_matches_without_equal_face_ids(capture):
+    original = capture.body.GetFaces
+    inner = _cylinder_face('inner', .002)
+    outer = _cylinder_face('outer', .004)
+    capture.bend.GetFaces = lambda: (inner,)
+    capture.body.GetFaces = lambda: original()+(inner, outer)
+    part = sw.read_active(session_factory=capture.session)
+    assert len(part.bends) == 1 and part.bends[0].radius == 2
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+
+
+def test_edge_flange_owning_feature_is_matched_with_measured_angle_and_radius(capture):
+    original = capture.body.GetFaces
+    parent = NS(ref='edge-flange', Name='Kenar-Flanş1', GetOwnerFeature=lambda: None)
+    capture.bend.GetOwnerFeature = lambda: parent
+    outer = _cylinder_face('outer', .004, owner=parent)
+    capture.body.GetFaces = lambda: original()+(outer,)
+    assert sw.read_active(session_factory=capture.session).bends[0].label == 'Bend-60'
+    outer.GetSurface().CylinderParams = (0., 0., 0., 1., 0., 0., .008)
+    with pytest.raises(ApiError, match='Kenar-Flanş1 / yüz #.*atlanmadı'):
+        sw.read_active(session_factory=capture.session)
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+
+
+def test_unrelated_cylinder_cannot_match_by_radius_and_angle_alone(capture):
+    original = capture.body.GetFaces
+    inner = _cylinder_face('inner', .002)
+    outer = _cylinder_face('persist:'+'X'*3000, .004, origin=(0., .01, 0.))
+    capture.bend.GetFaces = lambda: (inner,)
+    capture.body.GetFaces = lambda: original()+(outer,)
+    with pytest.raises(ApiError, match='atlanmadı') as caught:
+        sw.read_active(session_factory=capture.session)
+    assert len(str(caught.value)) < 250 and 'persist:' not in str(caught.value)
+    assert capture.flat.suppressed and not capture.flat.history
+
+
+def test_centreline_uses_an_actual_feature_owned_flat_face_not_an_assumed_allowance(capture):
+    from shapely.geometry import box
+    row = dict(id='measured', turn=60, radius=2)
+    width = 3*radians(60)
+    lines = [((-40, width/2), (40, width/2))]
+    band = sw._band(row, lines, [box(-40, 0, 40, width)], 2)
+    assert band['width'] == pytest.approx(width) and band['start'] == pytest.approx((-40, 0))
+    for zones in ([], [box(-40, 0, 40, 50)]):
+        with pytest.raises(ApiError, match='ölçülmüş'):
+            sw._band(row, lines, zones, 2)
+
+
+def test_rounded_contour_sidewall_is_not_an_unmapped_bend(capture):
+    original = capture.body.GetFaces
+    sidewall = _cylinder_face('rounded-corner', .006, angle=radians(90))
+    sidewall.GetSurface().CylinderParams = (0., 0., 0., 0., 0., 1., .006)
+    skins = [NS(GetSurface=lambda z=z: NS(IsPlane=lambda: True, PlaneParams=(0., 0., 1., 0., 0., z))) for z in (0., -.002)]
+    sidewall.GetEdges = lambda: (NS(GetTwoAdjacentFaces2=lambda: tuple(skins)),)
+    capture.body.GetFaces = lambda: original()+(sidewall,)
+    assert len(sw.read_active(session_factory=capture.session).bends) == 1
+    skins[1] = NS(GetSurface=lambda: NS(IsPlane=lambda: True, PlaneParams=(0., 0., 1., 0., 0., -.005)))
+    with pytest.raises(ApiError, match='atlanmadı'):
+        sw.read_active(session_factory=capture.session)
 
 
 def test_unsupported_multibody_and_restore_failure_are_not_success(capture):

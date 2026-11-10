@@ -1,7 +1,7 @@
 """Visual section-card catalogue: independent upper/lower selection per bend."""
 from dataclasses import dataclass
-from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPainterPath, QPen, QPixmap
+from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, QTimer, QUrl
+from PySide6.QtGui import QColor, QDesktopServices, QFont, QIcon, QPainter, QPainterPath, QPen, QPixmap
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QHBoxLayout,
                               QLabel, QLineEdit, QListView, QListWidget, QListWidgetItem, QPushButton,
                               QScrollArea, QSplitter, QStyle, QStyledItemDelegate, QVBoxLayout, QWidget)
@@ -17,7 +17,11 @@ def paint_profile(painter, rect, tool, colours, channel=None, dimensions=False, 
     if tool is None or tool.section is None:
         painter.setPen(QColor(colours['muted'])); painter.drawText(rect, Qt.AlignCenter, 'Kesit geometrisi eksik')
         painter.restore(); return
-    polygon = tool.section.polygon(); x0, y0, x1, y1 = polygon.bounds
+    polygon = tool.section.polygon()
+    if channel and channel.rotation:
+        from shapely.affinity import rotate
+        polygon = rotate(polygon, channel.rotation, origin=(0, 0))
+    x0, y0, x1, y1 = polygon.bounds
     margin = 30 if dimensions else 10
     available = rect.adjusted(margin, margin, -margin, -margin)
     if scale is None:
@@ -26,7 +30,7 @@ def paint_profile(painter, rect, tool, colours, channel=None, dimensions=False, 
     def point(p):
         return QPointF(available.center().x()+(p[0]-cx)*scale, available.center().y()-(p[1]-cy)*scale)
     path = QPainterPath(); path.setFillRule(Qt.OddEvenFill)
-    for ring in (tool.section.outer, *tool.section.holes):
+    for ring in (list(polygon.exterior.coords), *(list(h.coords) for h in polygon.interiors)):
         path.moveTo(point(ring[0]))
         for vertex in ring[1:]:
             path.lineTo(point(vertex))
@@ -98,7 +102,7 @@ class ToolCardDelegate(QStyledItemDelegate):
         strong = QFont(body); strong.setBold(True); painter.setFont(strong); painter.setPen(QColor(c['text']))
         painter.drawText(QRectF(text_x, y, width, 18), Qt.AlignLeft | Qt.AlignVCenter,
                          painter.fontMetrics().elidedText(spec(tool)+f' · H {tool.height:g} mm', Qt.ElideRight, int(width))); y += 23
-        tag, tone = ('DEMO · özgün eğitim geometrisi', 'warning') if tool.demo else ('DXF · kullanıcı kesiti', 'accent')
+        tag, tone = ('DEMO · özgün eğitim geometrisi', 'warning') if tool.demo else ('Katalog · DXF bekleniyor', 'muted') if tool.section is None else ('DXF · kaynak profili', 'accent') if tool.catalog_url else ('DXF · kullanıcı kesiti', 'accent')
         painter.setFont(small); tag = painter.fontMetrics().elidedText(tag, Qt.ElideRight, int(width)-12)
         pill = QRectF(text_x, y, min(width, painter.fontMetrics().horizontalAdvance(tag)+14), 18)
         painter.setPen(QPen(QColor(c[tone]), 1)); painter.setBrush(Qt.NoBrush); painter.drawRoundedRect(pill, 9, 9)
@@ -174,6 +178,8 @@ class ToolPicker(QDialog):
         right = QWidget(); right.setMinimumWidth(220); details = QVBoxLayout(right)
         self.profile = ProfileView(appearance); details.addWidget(self.profile, 1)
         self.description = QLabel(); self.description.setWordWrap(True); self.description.setTextFormat(Qt.PlainText); details.addWidget(self.description)
+        self.source_button = QPushButton('Üretici / kaynak sayfası'); self.source_button.hide(); details.addWidget(self.source_button)
+        self.source_button.clicked.connect(self.open_source)
         self.favorite = QCheckBox('★ Favorilerime ekle'); self.favorite.setToolTip('Favoriler bu bilgisayarda saklanır.'); details.addWidget(self.favorite)
         form = QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapAllRows)
         self.channel = QComboBox(); self.channel.setAccessibleName('Seçilecek alt kalıbın V kanalı')
@@ -237,7 +243,8 @@ class ToolPicker(QDialog):
 
     def card_text(self, item, tool):
         measure = f'Uç {tool.tip_angle if tool.tip_angle is not None else "?"}° · R {tool.tip_radius if tool.tip_radius is not None else "?"}' if tool.kind == 'punch' else ' / '.join(f'V{c.opening:g}' for c in tool.channels) or 'V bilinmiyor'
-        item.setText(('★ ' if tool.id in self.favorites else '')+tool.code+'\n'+tool.maker+'\n'+measure+f'\nYükseklik {tool.height:g} mm'+('\nDEMO · özgün geometri' if tool.demo else '\nDXF · kullanıcı kesiti'))
+        origin = 'DEMO · özgün geometri' if tool.demo else 'Katalog · DXF bekleniyor' if tool.section is None else 'DXF · kaynak profili' if tool.catalog_url else 'DXF · kullanıcı kesiti'
+        item.setText(('★ ' if tool.id in self.favorites else '')+tool.code+'\n'+tool.maker+'\n'+measure+f'\nYükseklik {tool.height:g} mm\n'+origin)
 
     def card_sizes(self):
         # The chosen column count, but never cards so narrow that code / size text is cut.
@@ -291,10 +298,19 @@ class ToolPicker(QDialog):
         link = 'Arayüz kodları eşleşiyor' if tool.mount.compatible else 'Takım–tutucu bağlantısı doğrulanamadı'
         holder = 'Tutucu kesiti mevcut' if tool.holder_section is not None and tool.holder_segments else 'Tutucu geometri/yerleşimi eksik'
         self.description.setText(f'{tool.code} · {tool.maker}\n{spec(tool)} · çalışma yüksekliği {tool.height:g} mm\n'
-                                 f'Aile: {tool.family}\nMontaj referansı: {tool.mount_reference}\nHat yükü: {load}\n{link}\n{holder}\n'
-                                 +('DEMO · GOKWORKS özgün eğitim geometrisi' if tool.demo else 'Kaynak: '+tool.source))
+                                 f'Aile: {tool.family}\nMontaj referansı: {"bilinmiyor" if tool.catalog_url else tool.mount_reference}\nHat yükü: {load}\n{link}\n{holder}\n'
+                                 +('DEMO · GOKWORKS özgün eğitim geometrisi' if tool.demo else 'Kaynak: '+(tool.maker+' / '+tool.code if tool.catalog_url else tool.source))
+                                 + ('\n'+tool.catalog_note if tool.catalog_note else '')
+                                 + ('\nKaynak örnek segmentleri: '+', '.join(f'{length:g}×{count}' for length, count in tool.catalog_segments) if tool.catalog_segments else ''))
+        self.source_button.setVisible(bool(tool.catalog_url))
+        self.source_button.setToolTip(tool.catalog_url)
         self.error.clear(); self.channel_changed(); self.summarize_segments()
         self.use_button.setText(('Seçili bıçağı kullan' if self.kind == 'punch' else 'Seçili kalıbı kullan')+f' · {tool.code}')
+
+    def open_source(self):
+        tool = self.current_tool()
+        if tool and tool.catalog_url and QUrl(tool.catalog_url).scheme() == 'https':
+            QDesktopServices.openUrl(QUrl(tool.catalog_url))
 
     def channel_changed(self, *_):
         tool = self.current_tool()
