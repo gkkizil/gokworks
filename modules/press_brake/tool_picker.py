@@ -58,6 +58,10 @@ def spec(tool):
     return (' · '.join(f'V{c.opening:g}' for c in tool.channels) or 'V bilinmiyor').replace('.', ',')
 
 
+def card_spec(tool):
+    return spec(tool)+f' · H {tool.height:g} mm'.replace('.', ',')
+
+
 class ToolCardDelegate(QStyledItemDelegate):
     """Section card: large drawing at the catalogue's common scale, code, maker, key size, origin."""
     DRAWING = 150
@@ -78,13 +82,14 @@ class ToolCardDelegate(QStyledItemDelegate):
         drawing = QRectF(rect.left()+8, rect.top()+8, rect.width()-16, self.DRAWING)
         painter.setPen(Qt.NoPen); painter.setBrush(QColor(c['canvas'])); painter.drawRoundedRect(drawing, 5, 5)
         paint_profile(painter, drawing, tool, c, scale=picker.common_scale(drawing), background=False)
-        # Scale bar: the same length on every card of this catalogue.
-        bar = picker.scale_bar_mm(); px = bar*picker.common_scale(drawing)
-        painter.setPen(QPen(QColor(c['muted']), 1.5))
-        y = drawing.bottom()-10; x = drawing.left()+10
-        painter.drawLine(QPointF(x, y), QPointF(x+px, y)); painter.drawLine(QPointF(x, y-4), QPointF(x, y+1)); painter.drawLine(QPointF(x+px, y-4), QPointF(x+px, y+1))
         small = QFont(option.font); small.setPixelSize(11); painter.setFont(small)
-        painter.drawText(QRectF(x+px+6, y-9, 60, 14), Qt.AlignLeft | Qt.AlignVCenter, f'{bar:g} mm')
+        if tool.section is not None:   # a scale bar only where something is drawn to scale
+            # Scale bar: the same length on every card of this catalogue.
+            bar = picker.scale_bar_mm(); px = bar*picker.common_scale(drawing)
+            painter.setPen(QPen(QColor(c['muted']), 1.5))
+            y = drawing.bottom()-10; x = drawing.left()+10
+            painter.drawLine(QPointF(x, y), QPointF(x+px, y)); painter.drawLine(QPointF(x, y-4), QPointF(x, y+1)); painter.drawLine(QPointF(x+px, y-4), QPointF(x+px, y+1))
+            painter.drawText(QRectF(x+px+6, y-9, 60, 14), Qt.AlignLeft | Qt.AlignVCenter, f'{bar:g} mm')
         if tool.id in picker.favorites:
             star = QFont(option.font); star.setPixelSize(18); painter.setFont(star); painter.setPen(QColor(c['warning']))
             painter.drawText(QRectF(drawing.right()-28, drawing.top()+4, 24, 24), Qt.AlignCenter, '★')
@@ -101,7 +106,7 @@ class ToolCardDelegate(QStyledItemDelegate):
         painter.drawText(QRectF(text_x, y, width, 17), Qt.AlignLeft | Qt.AlignVCenter, metrics.elidedText(tool.maker, Qt.ElideRight, int(width))); y += 18
         strong = QFont(body); strong.setBold(True); painter.setFont(strong); painter.setPen(QColor(c['text']))
         painter.drawText(QRectF(text_x, y, width, 18), Qt.AlignLeft | Qt.AlignVCenter,
-                         painter.fontMetrics().elidedText(spec(tool)+f' · H {tool.height:g} mm', Qt.ElideRight, int(width))); y += 23
+                         painter.fontMetrics().elidedText(card_spec(tool), Qt.ElideRight, int(width))); y += 23
         tag, tone = ('DEMO · özgün eğitim geometrisi', 'warning') if tool.demo else ('Katalog · DXF bekleniyor', 'muted') if tool.section is None else ('DXF · kaynak profili', 'accent') if tool.catalog_url else ('DXF · kullanıcı kesiti', 'accent')
         painter.setFont(small); tag = painter.fontMetrics().elidedText(tag, Qt.ElideRight, int(width)-12)
         pill = QRectF(text_x, y, min(width, painter.fontMetrics().horizontalAdvance(tag)+14), 18)
