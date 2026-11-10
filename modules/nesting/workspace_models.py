@@ -7,9 +7,9 @@ model remains the source of truth; tree leaves map back to those exact rows.
 from gui_qt.components import fit_columns
 from dataclasses import dataclass, field
 
-from PySide6.QtCore import QAbstractProxyModel, QModelIndex, Qt, Signal, QItemSelectionModel
+from PySide6.QtCore import QAbstractProxyModel, QModelIndex, Qt, Signal, QItemSelectionModel, QSize
 from PySide6.QtGui import QFont, QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import (QTreeView, QAbstractItemView, QHeaderView,
+from PySide6.QtWidgets import (QTreeView, QAbstractItemView,
                               QStyledItemDelegate, QSpinBox, QAbstractSpinBox)
 
 
@@ -27,9 +27,10 @@ class Node:
 
 class PartTreeModel(QAbstractProxyModel):
     """Group filtered parts by actual material and thickness, without copying them."""
-    def __init__(self, source, parent=None, *, quantity_editor=None):
+    def __init__(self, source, parent=None, *, quantity_editor=None,thumbnail_provider=None):
         super().__init__(parent)
         self.quantity_editor = quantity_editor
+        self.thumbnail_provider=thumbnail_provider
         self.groups = []; self.by_source_row = {}; self.by_id = {}
         self.setSourceModel(source)
         for signal in (source.modelReset, source.layoutChanged, source.rowsInserted,
@@ -91,6 +92,10 @@ class PartTreeModel(QAbstractProxyModel):
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid(): return None
         node = index.internalPointer()
+        if self.thumbnail_provider is not None:
+            if role==Qt.SizeHintRole: return QSize(0,34)
+            if role==Qt.DecorationRole and index.column()==0 and node.is_part:
+                return self.thumbnail_provider(node.identifier)
         if node.source_row >= 0: return self.sourceModel().data(self.mapToSource(index), role)
         if role == Qt.DisplayRole:
             return node.title if index.column() == 0 else node.count if index.column() == 1 and node.count else None

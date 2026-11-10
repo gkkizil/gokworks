@@ -41,6 +41,7 @@ PAGE_TYPES = {
     'dfm_analyzer': ('modules.dfm_analyzer.ui', 'DfmPage'),
     'belt_drive': ('modules.belt_drive.ui', 'BeltDrivePage'),
     'sheet_unfolding': ('modules.sheet_unfolding.ui', 'UnfoldPage'),
+    'press_brake': ('modules.press_brake.ui', 'PressBrakePage'),
     'hydraulic_unit': ('modules.hydraulic_unit.ui', 'HydraulicPage'),
 }
 
@@ -73,6 +74,7 @@ MODULES = (
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
     ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),
     ('sheet_unfolding', 'Sac Açınımı', 'ÜRETİM'),
+    ('press_brake', 'Abkant Simülasyonu', 'ÜRETİM'),
     ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
     ('belt_drive', 'Kayış–Kasnak Tasarımı', 'MAKİNE ELEMANLARI'),
 )

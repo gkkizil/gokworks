@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QEvent, QItemSelectionModel, QSignalBlocker, QSize
 from PySide6.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout, QTabBar, QSplitter,
-    QTableView, QLineEdit, QFileDialog, QDialog, QMenu, QHeaderView,
+    QTableView, QLineEdit, QFileDialog, QDialog, QMenu,
     QAbstractItemView, QDialogButtonBox, QCheckBox, QApplication, QToolBar, QToolButton,
     QSizePolicy, QTreeView, QStatusBar, QTabWidget, QFrame)
 
@@ -129,8 +129,12 @@ class NestingPage(BasePage):
             Column('t · mm','thickness',lambda v:fmt(v,2)),Column('Malzeme','material'),
             Column('Durum','status',lambda s:IMPORT_LABELS.get(s,s))])
         self.part_proxy = FilterProxy(self); self.part_proxy.setSourceModel(self.part_model)
-        self.part_tree_model = PartTreeModel(self.part_proxy,self,quantity_editor=self.set_part_quantity)
+        from .thumbnails import PartThumbnails
+        self.part_thumbnails=PartThumbnails()
+        self.part_tree_model = PartTreeModel(self.part_proxy,self,quantity_editor=self.set_part_quantity,
+            thumbnail_provider=lambda key:self.part_thumbnails.icon(key,self.context.appearance,self.devicePixelRatioF()))
         self.part_table = configure_view(PartTree()); self.part_table.setModel(self.part_tree_model)
+        self.part_table.setIconSize(QSize(36,28))
         self.part_table.setItemDelegateForColumn(1,PartQuantityDelegate(self.part_table))
         self.quantity_edit_triggers = (QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed
                                        | QAbstractItemView.AnyKeyPressed)
@@ -754,7 +758,8 @@ class NestingPage(BasePage):
         titles = dict(gap='Parça aralığı',margin='Kenar payı',kerf='Kesim genişliği')
         o = Options(**{k:number(f.value(k),titles[k]) for k in titles},
                     rotation=f.value('rotation'), angles=angles, grain_locked=f.value('grain_locked'),
-                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1))
+                    quality=f.value('quality'),seed=integer(f.value('seed'),'Deneme sırası kodu',minimum=0,maximum=2**32-1),
+                    engine=self.project.options.engine)
         operations = Operations(**{key:number(self.cost_form.value(key),self.cost_form.form.labelForField(self.cost_form.fields[key]).text())
                                    for key in asdict(self.project.operations)})
         self.project.options = o; self.project.operations = operations
@@ -767,13 +772,14 @@ class NestingPage(BasePage):
         try:
             self.name.setText(self.project.name)
             for k,v in asdict(self.project.options).items():
-                if k != 'seconds': self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
+                if k not in ('seconds','engine'): self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
             self.form.set_value('angle_step','')
             for k,v in asdict(self.project.operations).items(): self.cost_form.set_value(k,v)
             self.cost_toggle.setChecked(any(asdict(self.project.operations).values()))
         finally: self.loading = False
 
     def refresh(self):
+        self.part_thumbnails.set_parts(self.project.parts)
         selected_ids = {i.data(Qt.UserRole)['id'] for i in self.part_table.selectionModel().selectedRows()
                         if i.data(Qt.UserRole).get('id')}
         self._refreshing = True
@@ -1095,7 +1101,7 @@ class NestingPage(BasePage):
             self.set_status(error,True); return self.show_settings(error=error)
         self.invalidate(); self.preferred_sheet = None; snapshot = deepcopy(self.project)
         def operation(sink,stop):
-            from modules.nesting.engine import nest
+            from modules.nesting.solver import nest
             result = nest(snapshot,stop=stop,progress=lambda percent,text:sink.put(('nest_progress',(percent,100,text))))
             totals = calculate(snapshot,result,complete=False)
             sink.put(('nest_result',(result,totals)))
@@ -1195,6 +1201,7 @@ class NestingPage(BasePage):
                 name = action.property('nestingIcon')
                 if name: action.setIcon(icon(name,COLORS[self.context.appearance]['muted']))
         self.canvas.theme = self.context.appearance; self.render_sheet()
+        self.part_table.viewport().update()
 
     def style_sheet_tabs(self):
         self.sheet_tabs.setStyleSheet(plate_tabs_style(self.context.appearance))

@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "theme": "dark",
+      "width": 1366,
+      "icons": 2,
+      "horizontal_scroll": 0
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "icons": 2,
+      "horizontal_scroll": 0
+    },
+    {
+      "theme": "dark",
+      "width": 820,
+      "icons": 2,
+      "horizontal_scroll": 0
+    },
+    {
+      "theme": "light",
+      "width": 1366,
+      "icons": 2,
+      "horizontal_scroll": 0
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "icons": 2,
+      "horizontal_scroll": 0
+    },
+    {
+      "theme": "light",
+      "width": 820,
+      "icons": 2,
+      "horizontal_scroll": 0
+    }
+  ],
+  "engine": "Sparrow + GOKWORKS",
+  "version": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 1",
+  "placements": 5,
+  "elapsed": 1.284613576997799
+}

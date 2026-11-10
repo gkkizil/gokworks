@@ -1,0 +1,26 @@
+Sparrow / spyrrow · GOKWORKS, 9 Kasım 2026
+
+spyrrow 0.9.0 (MIT) resmî Python bağlantısı:
+https://pypi.org/project/spyrrow/0.9.0/
+https://github.com/PaulDL-RS/spyrrow
+Özgün MIT metni: spyrrow-MIT.txt (Paul Durand-Lupinski).
+
+Bu wheel Sparrow 0.1.0 içerir; güncel 0.3.0 olarak sunulmaz.
+Kaynak: https://github.com/JeroenGar/sparrow/tree/881cdcbdf492ca42ba5413954ea6e41889a3becd
+MIT: sparrow-MIT.txt (Jeroen Gardeyn, KU Leuven).
+
+jagua-rs 0.7.0, MPL-2.0 · Jeroen Gardeyn.
+Değiştirilmemiş kaynak kodu jagua-rs-0.7.0-source.crate içinde bu dağıtımla
+sağlanır (gzip tar arşivi). MPL, bu dosyaların kaynak biçimine erişim ve
+bunları değiştirme/yeniden dağıtma haklarını korur. Tam lisans metni:
+rust-notices/jagua-rs-0.7.0/LICENSE.txt .
+Kaynak SHA256: 793f9477d88804ae70b0b980997dedace99a7397fc7274f8790e9a4156cd9936
+https://crates.io/crates/jagua-rs/0.7.0
+https://github.com/JeroenGar/jagua-rs/tree/816e6a65f14f9417726a06abdef058238e3edecc
+
+Diğer Rust bağımlılıklarının özgün lisans/telif bildirimleri rust-notices/
+altında saklanır. source-inventory.json sabit sürümleri, kaynak URL'lerini ve
+arşiv SHA256 değerlerini; spyrrow-0.9.0.cyclonedx.json wheel'in özgün SBOM'unu
+içerir. Bu lisans hakları GOKWORKS dağıtım koşullarıyla sınırlandırılmaz.
+Geliştirme ortamında yerel wheel envanteri kullanılmıştır; Windows build
+adımı dağıtılan wheel'in SBOM'unu ayrıca installed/ klasörüne kopyalar.
