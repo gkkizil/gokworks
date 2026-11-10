@@ -11,23 +11,25 @@ deniapapusha, MIT. Tam izin ve sorumluluk metni
 aktarma, açık kaynakta yayımlanan teknik profilleri kişisel kataloğa kaydeder;
 üretici varlıklarının koşulları kodun MIT lisansından ayrıdır.
 
-## Sparrow yerleşim motoru · 9 Kasım 2026
+## Sparrow yerleşim motoru · 10 Kasım 2026
 
-Resmî `spyrrow==0.9.0` Python bağlantısı (MIT, Paul Durand-Lupinski)
-uygulama bağımlılığıdır. Bu sürümün Linux ve CPython 3.13 Windows x64
-wheel SBOM'ları **Sparrow 0.1.0**, commit
-`881cdcbdf492ca42ba5413954ea6e41889a3becd` (MIT, Jeroen Gardeyn, KU Leuven)
-ve **jagua-rs 0.7.0 (MPL-2.0, Jeroen Gardeyn)** içerdiğini doğrular.
-Güncel Sparrow 0.3.0 kullanıldığı iddia edilmez. Native kütüphaneler
-değiştirilmeden kullanılır; GOKWORKS adaptörü ayrı Python kodudur.
+Açık kaynak `spyrrow 0.10.0` Python bağlantısı (MIT, Paul Durand-Lupinski),
+`f6345979e5f6cf88e9e2e3775750fcce899334fd` revizyonundan derlenir. Henüz
+PyPI wheel'i yayımlanmadığından requirements.txt bu değişmez kaynağı ve
+Cargo.lock kullanımını sabitler. İçerdiği çekirdekler **Sparrow 0.3.0**,
+commit `3be915856b543d18c9cb7d4664fe7c53901fe1fd`
+(MIT, Jeroen Gardeyn, KU Leuven) ve **jagua-rs 1.0.0 (MPL-2.0, Jeroen Gardeyn)**
+olarak kilitlidir. Native kütüphaneler değiştirilmeden derlenir;
+GOKWORKS adaptörü ayrı Python kodudur.
 
 Tam MIT/MPL metinleri, geçişli Rust telif/lisans bildirimleri, sabit kaynak
-envanteri ve özgün wheel SBOM'ları `packaging/licenses/nesting/sparrow/`
-altındadır. **jagua-rs 0.7.0'ın değiştirilmemiş kaynak arşivi aynı klasörde
+envanteri, Cargo.lock ve doğrulama wheel'inin özgün SBOM'u
+`packaging/licenses/nesting/sparrow/` altındadır. Windows build adımı ayrıca
+dağıtılan wheel'in SBOM'unu saklar. **jagua-rs 1.0.0'ın değiştirilmemiş kaynak arşivi aynı klasörde
 dağıtılır**; Lisanslar ekranından dışa aktarılabilir. Kaynak erişimi,
 değiştirme ve yeniden dağıtma hakları korunur.
 Kaynaklar: https://github.com/JeroenGar/sparrow,
-https://github.com/PaulDL-RS/spyrrow ve https://crates.io/crates/jagua-rs/0.7.0 .
+https://github.com/PaulDL-RS/spyrrow ve https://crates.io/crates/jagua-rs/1.0.0 .
 
 ## Sac açınımı ve büküm matematiği · 6 Kasım 2026
 
