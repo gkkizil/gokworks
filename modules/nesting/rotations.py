@@ -7,15 +7,28 @@ def minimum_span(geometry):
 
     A convex hull supplies the support directions; cutting geometry is untouched.
     """
-    points = list(geometry.convex_hull.exterior.coords)
+    points = list(geometry.convex_hull.exterior.coords)[:-1]
+    count = len(points); opposite = 1
     best = float('inf')
-    for a, b in zip(points, points[1:]):
+    # The antipodal support vertex advances monotonically around the hull.
+    # Rotating calipers avoids projecting every vertex for every edge (O(n²)).
+    for index, a in enumerate(points):
+        b = points[(index+1) % count]
         dx, dy = b[0]-a[0], b[1]-a[1]
         length = hypot(dx, dy)
         if not length:
             continue
-        projections = [(dy*x-dx*y)/length for x, y in points[:-1]]
-        best = min(best, max(projections)-min(projections))
+        def area(vertex):
+            x,y = points[vertex]
+            return abs(dx*(y-a[1])-dy*(x-a[0]))
+        support = area(opposite)
+        for _ in range(count):
+            following = (opposite+1) % count
+            next_support = area(following)
+            if next_support <= support:
+                break
+            opposite, support = following, next_support
+        best = min(best, support/length)
     return best
 
 

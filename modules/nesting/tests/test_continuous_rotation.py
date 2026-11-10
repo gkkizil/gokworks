@@ -3,17 +3,18 @@ from collections import Counter
 from copy import deepcopy
 from dataclasses import asdict
 import time
+from random import Random
 
 import pytest
 from shapely import affinity
-from shapely.geometry import Polygon, box
+from shapely.geometry import MultiPoint, Point, Polygon, box
 
 from modules.nesting import engine, sparrow
 from modules.nesting.geometry import placed
 from modules.nesting.layout_score import layout_score
 from modules.nesting.materials import new_project
 from modules.nesting.models import Material, Part, Placement, Result, Sheet
-from modules.nesting.rotations import angle_allowed, search_angles
+from modules.nesting.rotations import angle_allowed, minimum_span, search_angles
 from modules.nesting.search_budget import SearchBudget
 from modules.nesting.storage import load_project, save_project
 from modules.nesting.validation import validate_result
@@ -26,6 +27,28 @@ def project():
     p.options.angles = None
     p.options.seconds = 3
     return p
+
+
+def test_caliper_width_matches_independent_full_projection_oracle():
+    random = Random(411)
+    shapes = [Point(0,0).buffer(500,quad_segs=1000), box(-1000,200,-970,220)]
+    shapes += [MultiPoint([(random.uniform(-1000,1000),random.uniform(-1000,1000))
+                          for _ in range(40)]).convex_hull for _ in range(40)]
+    for shape in shapes:
+        points = list(shape.convex_hull.exterior.coords)
+        # A slow, full projection at every support edge is the independent
+        # reference for small hulls. The dense regular polygon has a known width.
+        if len(points)>1000:
+            from math import cos, pi
+            expected = 1000*cos(pi/4000)
+        else:
+            widths = []
+            for a,b in zip(points,points[1:]):
+                dx,dy = b[0]-a[0],b[1]-a[1]
+                projected = [dy*x-dx*y for x,y in points[:-1]]
+                widths.append((max(projected)-min(projected))/(dx*dx+dy*dy)**.5)
+            expected = min(widths)
+        assert minimum_span(shape)==pytest.approx(expected,abs=1e-7,rel=1e-10)
 
 
 def test_continuous_proposals_follow_contours_without_expanding_saved_restrictions():
