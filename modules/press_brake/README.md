@@ -112,7 +112,11 @@ olarak kullanılır ve GOKWORKS bunlardan kendi sade kesitini çizer (üretici �
 
 SolidWorks'ten alınan parça bu takımlarla başlar: 88° bıçak ve 8 × t kuralına en yakın V.
 Adımda segment girilmemişse istasyon büküm boyundan, setin en az parçasıyla kurulur
-(ör. 80 mm → 50+20+10). Genel ara tutucu ve alt tabla yaklaşık bloktur. Bu takımlarla
+(ör. 80 mm → 50+20+10). Genel ara tutucu (13 mm dil yuvası, pahlı gövde, ön sıkma plakası
+ve cıvatası) ile kalıp rayı (dil yuvası, yan cıvatalar, taban flanşı) GOKWORKS'ün yaklaşık
+profilidir ve istasyonla aynı boyda kurulur. Tutucu ile tuttuğu takım tek rijit montaj sayılır;
+kesitleri birbirine giriyorsa adım "Kontrol edilemedi" olur. Sac–tutucu teması her zaman
+kontrol edilir. Bu takımlarla
 kontrol çalışır ve her adımın notunda "Genel standart ölçülü takım: üretici kesiti değil"
 yazar; gerçek tedarikçi kesiti DXF ile eklendiğinde o kullanılmalıdır.
 

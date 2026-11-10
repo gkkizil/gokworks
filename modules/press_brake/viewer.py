@@ -12,7 +12,7 @@ from .geometry import SCENE_COLOURS
 AXIS, HIT = '#e7ad35', '#f14d4d'
 PUNCH, DIE = SCENE_COLOURS['punch'], SCENE_COLOURS['die']
 # Colour is never the only signal: every swatch carries its name (and the scene repeats it).
-LEGEND = (('Parça', SCENE_COLOURS['sheet']), ('Üst takım', PUNCH), ('Alt takım', DIE), ('Tezgâh · görsel', SCENE_COLOURS['machine']),
+LEGEND = (('Parça', SCENE_COLOURS['sheet']), ('Üst takım', PUNCH), ('Alt takım', DIE), ('Tutucu', SCENE_COLOURS['holder']), ('Tezgâh · görsel', SCENE_COLOURS['machine']),
           ('Büküm ekseni', AXIS), ('Çarpışma', HIT))
 
 
