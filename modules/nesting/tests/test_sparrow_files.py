@@ -15,6 +15,7 @@ def sharing_error(code=32):
 
 
 def test_transient_windows_lock_is_bounded_and_other_failures_are_not_retried(monkeypatch):
+    monkeypatch.setattr(sparrow_files, 'platform', 'linux')
     pauses = []; monkeypatch.setattr(sparrow_files.time, 'sleep', pauses.append)
     attempts = []
     def locked():
@@ -55,7 +56,9 @@ def test_cleanup_retries_a_locked_result_without_discarding_success(monkeypatch,
     assert len(calls) == 3 and not location.exists()
 
 
-def test_parent_reaps_one_worker_then_reads_locked_snapshot_without_resolving_again(monkeypatch):
+@pytest.mark.parametrize('with_winerror', [True, False])
+def test_parent_reaps_one_worker_then_reads_locked_snapshot_without_resolving_again(monkeypatch, with_winerror):
+    monkeypatch.setattr(sparrow_files, 'platform', 'win32')
     popen = subprocess.Popen; children = []; reads = []
     def child(command, **kwargs):
         code = "import sys;from pathlib import Path;Path(sys.argv[1]).with_name('result.json').write_text('{\"ok\":true,\"placements\":[]}',encoding='utf-8')"
@@ -66,10 +69,20 @@ def test_parent_reaps_one_worker_then_reads_locked_snapshot_without_resolving_ag
         if path.name == 'result.json':
             reads.append(True)
             if len(reads) < 3:
-                raise sharing_error()
+                raise sharing_error() if with_winerror else PermissionError(13, 'Permission denied')
         return read(path, *args, **kwargs)
     monkeypatch.setattr(sparrow.subprocess, 'Popen', child)
     monkeypatch.setattr(Path, 'read_text', locked)
     monkeypatch.setattr(sparrow_files.time, 'sleep', lambda _: None)
     assert sparrow._run({}, time.monotonic()+5, None) == []
     assert len(children) == 1 and children[0].poll() == 0 and len(reads) == 3
+
+
+def test_persistent_windows_crt_permission_error_still_has_a_bounded_failure(monkeypatch):
+    monkeypatch.setattr(sparrow_files, 'platform', 'win32')
+    pauses = []
+    monkeypatch.setattr(sparrow_files.time, 'sleep', pauses.append)
+    error = PermissionError(13, 'Permission denied')
+    with pytest.raises(PermissionError) as raised:
+        sparrow_files.filesystem_call(lambda: (_ for _ in ()).throw(error))
+    assert raised.value is error and sum(pauses) == pytest.approx(.25) and len(pauses) == 5

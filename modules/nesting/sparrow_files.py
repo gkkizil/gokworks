@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from sys import platform
 import time
 
 
@@ -17,7 +18,11 @@ def filesystem_call(operation):
         try:
             return operation()
         except OSError as error:
-            if getattr(error, 'winerror', None) not in (5, 32, 33) or attempt == len(delays):
+            # CPython's CRT-backed open/read may expose only errno=EACCES,
+            # without winerror. Path/stat and WinAPI operations carry winerror.
+            sharing_lock = (getattr(error, 'winerror', None) in (5, 32, 33)
+                            or (platform == 'win32' and isinstance(error, PermissionError)))
+            if not sharing_lock or attempt == len(delays):
                 raise
             time.sleep(delays[attempt])
 
