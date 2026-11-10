@@ -1,13 +1,13 @@
 """Existing native mesh viewer plus projected bend/collision annotations."""
 import numpy as np
-from PySide6.QtCore import QPointF, Qt
+from PySide6.QtCore import QPointF, Qt, Slot
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 from modules.gear_calculator.families.mesh_view import MechanismMeshView
 from modules.dxf_dwg.preview.viewer import matrices
 
 
-class Overlay(QWidget):
+class BendAnnotations(QWidget):
     def __init__(self, viewer):
         super().__init__(viewer); self.viewer = viewer
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
@@ -50,20 +50,29 @@ class Overlay(QWidget):
 
 class SceneView(MechanismMeshView):
     def __init__(self):
-        super().__init__(); self.frame = None; self.overlay = Overlay(self)
+        super().__init__(); self.frame = None
+        # MeshView owns `overlay` for its interactive view cube. Replacing it
+        # breaks inherited leave/move/click handlers when branches are combined.
+        self.bend_annotations = BendAnnotations(self)
         self.setAccessibleName('Sac, büküm ekseni ve atanmış takımların 3B sahnesi')
-        self.frameReady.connect(self.overlay.update)
+        self.frameReady.connect(self.bend_annotations.update)
 
     def set_frame(self, frame):
         self.frame = frame
-        self.set_mesh(frame.mesh); self.overlay.update()
+        self.set_mesh(frame.mesh); self.bend_annotations.update()
 
     def changed(self):
         super().changed()
-        if hasattr(self, 'overlay'):
-            self.overlay.update()
+        if hasattr(self, 'bend_annotations'):
+            self.bend_annotations.update()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if hasattr(self, 'overlay'):
-            self.overlay.setGeometry(self.rect()); self.overlay.raise_()
+        if hasattr(self, 'bend_annotations'):
+            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_()
+
+    @Slot(str)
+    def fallback(self, message=''):
+        super().fallback(message)
+        if hasattr(self, 'bend_annotations'):
+            self.bend_annotations.raise_()
