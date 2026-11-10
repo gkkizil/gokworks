@@ -83,3 +83,16 @@ Temel karşılaştırma: agent/codex `0b9d3b2`, spyrrow 0.9.0. Ölçümler Linux
 x86_64 üzerinde yapıldı; native CPU araması farklı makinelerde aynı koordinatları
 üretmek zorunda değildir. Gerçek PLATFORM işi için aynı parçalar, adetler,
 malzeme/kalınlık, sac, aralık ve süreyle ayrıca karşılaştırma gerekir.
+
+## Kullanıcının gerçek çerçeveli çizimi
+
+Daha önce yüklenen `Redry_Support_5mm_2adet.dxf` içe aktarma kaydıyla ayrıca
+14 parça türü / 56 adet denendi. Çok plakalı bir işte başlangıç bütçesinin
+ilk şeritte tükenmesini önlemek için kalan dış kontur alanından tahmini plaka
+sayısı hesaplanır ve süre kalan fiziksel plakalara paylaştırılır. Bu tahmin
+bir sığma kararı değildir; yalnız arama süresini dağıtır.
+
+Serbest dönüşle hem 12 saniye hem 15 saniye toplam bütçede 56/56 parça,
+3 plaka ve bağımsız geometrik doğrulama elde edildi. [15 saniye kaydı](actual-redry.json).
+Bu dosyada eski kaydın da 3 plaka kullandığı ve net malzeme veriminin değişmediği
+özellikle korunmalıdır; bir plaka azaltımı iddiası yoktur.

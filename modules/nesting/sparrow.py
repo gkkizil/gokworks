@@ -194,24 +194,30 @@ def nest(project, *, stop=None, progress=None, deadline=None, allow_disconnected
                 # Leave such exact-fit cases to the nominal-contour refinement.
                 if fitting == []: continue
                 angles = fitting
-                specs[part.id] = dict(part=part,demand=demand,angles=angles,origin=(ox,oy),
+                specs[part.id] = dict(part=part,demand=demand,angles=angles,origin=(ox,oy),area=footprint.area,
                     # Normalize only the private footprint; source entities and
                     # nominal cutting contours retain their original geometry.
                     shape=[((x-ox)*scale,(y-oy)*scale) for x,y in list(orient(footprint,sign=1.).exterior.coords)[:-1]])
             if not specs: continue
             if ended(): break
+            # Do not spend a multi-sheet job's entire seed budget compressing
+            # its first strip. Reserve time for the remaining physical sheets.
+            area = sum(s['area']*s['demand'] for s in specs.values())
+            expected_sheets = max(1,math.ceil(area/((width+2*clearance)*(height+2*clearance)*.8)))
+            now = time.monotonic()
+            sheet_deadline = now+(deadline-now)/expected_sheets
             axes = [0,90] if height<=width else [90,0]
-            if deadline-time.monotonic()<2 or abs(width-height)<1e-7:
+            if sheet_deadline-now<2 or abs(width-height)<1e-7:
                 axes = axes[:1]
             for index,axis in enumerate(axes):
-                if ended(): break
-                slice_seconds = min((deadline-time.monotonic())/(len(axes)-index),
+                if ended() or time.monotonic()>=sheet_deadline: break
+                slice_seconds = min((sheet_deadline-time.monotonic())/(len(axes)-index),
                                     {'Hızlı':1.,'Dengeli':4.,'Yüksek':10.}[options.quality])
                 request = dict(items=[dict(id=k,shape=s['shape'],demand=s['demand'],
                                angles=None if s['angles'] is None else [(a-axis)%360 for a in s['angles']]) for k,s in specs.items()],
                                height=((height if axis==0 else width)+2*clearance)*scale, separation=None,
                                seconds=max(1,math.ceil(slice_seconds)),seed=options.seed+index)
-                rows = _run(request,min(deadline,time.monotonic()+slice_seconds+.25),stop)
+                rows = _run(request,min(sheet_deadline,time.monotonic()+slice_seconds+.25),stop)
                 iterations += 1
                 if rows is None: continue
                 candidate = _poses(rows,specs,scale,pad,clearance,sheet,stock[sheet.id]+1,counts,axis)
