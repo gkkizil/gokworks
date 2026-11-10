@@ -75,6 +75,11 @@ def icon(name, color='#80B6F5'):
         painter.drawLine(QPointF(14, 18), QPointF(14, 30))             # piston
         painter.drawLine(QPointF(9, 18), QPointF(9, 10)); painter.drawLine(QPointF(9, 10), QPointF(26, 10))
         painter.drawLine(QPointF(26, 10), QPointF(26, 18))             # supply / return lines
+    elif name == 'press_brake':
+        painter.drawLine(8, 5, 40, 5)
+        painter.drawPolygon([QPointF(16, 8), QPointF(32, 8), QPointF(24, 23)])
+        painter.drawPolyline([QPointF(7, 26), QPointF(24, 35), QPointF(41, 26)])
+        painter.drawPolyline([QPointF(7, 39), QPointF(17, 39), QPointF(24, 46), QPointF(31, 39), QPointF(41, 39)])
     elif name == 'sheet_unfolding':
         painter.drawPolygon([QPointF(8, 34), QPointF(18, 12), QPointF(30, 12), QPointF(40, 34)])
         painter.drawLine(QPointF(18, 12), QPointF(14, 34)); painter.drawLine(QPointF(30, 12), QPointF(34, 34))
