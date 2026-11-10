@@ -40,17 +40,26 @@ def test_station_is_built_from_sectioned_pieces_and_covers_the_bend(length):
         station(836)
 
 
-def test_a_demo_part_bent_with_generic_tools_is_checked_and_says_what_the_tools_are():
-    plan = load_demo('U'); tools = standard_tools()
+def test_a_demo_part_bent_with_generic_tools_is_checkable_and_says_what_the_tools_are():
+    """Placement + one solid check per pose; the full sweep is covered by the service tests (too slow here)."""
+    from modules.press_brake.collision import check
+    from modules.press_brake.geometry import Geometry
+    from modules.press_brake.kinematics import step_angles
+    from modules.press_brake.service import plan_notes, step_scope
+    plan = load_demo('L120'); tools = standard_tools()
     punch, die = straight_punch(), single_v_die(recommended_v(plan.part.thickness))
     plan = replace(plan, tools=plan.tools+tools,
                    steps=tuple(replace(s, punch=punch.id, die=die.id, channel=die.channels[0].id, punch_segments=None, die_segments=None)
                                for s in plan.steps)).validate()
-    bend = plan.bend(plan.steps[0].bend)
+    step = plan.steps[0]; bend = plan.bend(step.bend)
     assert sum(s.length for s in default_segments(punch, bend)) >= bend.length
-    result = run(plan, threading.Event())
-    assert result.status in ('clear', 'collision')                          # placed and checked, not "unknown"
-    assert all(NOTE in s.notes for s in result.steps)
+    assert step_scope(plan, step) == []                                   # nothing missing: the result can be clear or collision
+    assert NOTE in plan_notes(plan, step)
+    bodies, contacts = Geometry(plan).scene(0, step_angles(plan, 0, 1), 'bend', 0)
+    kinds = {b.kind for b in bodies}
+    assert {'sheet', 'punch', 'die', 'holder'} <= kinds
+    hits, _ = check(bodies, contacts, near_margin=3.)
+    assert not hits                                                       # a 90° air bend with 88° tools and V16 fits
 
 
 def test_generic_holders_clamp_the_13_mm_tang_without_cutting_into_the_tool():
