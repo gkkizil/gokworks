@@ -1,9 +1,9 @@
 """Normal GOKWORKS entry: manual sequence → native 3D sweep → operator PDF."""
 from dataclasses import replace
 from pathlib import Path
-from PySide6.QtCore import Qt, QTimer, QStandardPaths, QSize
+from PySide6.QtCore import Qt, QTimer, QStandardPaths, QSize, QLocale
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFormLayout, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
-                              QListView, QListWidget, QScrollArea, QSlider, QSplitter, QTextBrowser, QVBoxLayout, QWidget)
+                              QAbstractItemView, QDoubleSpinBox, QListView, QListWidget, QListWidgetItem, QScrollArea, QSlider, QSplitter, QTextBrowser, QVBoxLayout, QWidget)
 from gui_qt.components import AdaptiveRow, BasePage, Disclosure, ElidedLabel, button, card, label, separator
 from gui_qt.theme import COLORS
 from .dialogs import ToolDialog, format_segments, segments
@@ -11,10 +11,11 @@ from .models import Plan, Step
 from .service import PHASES, STATUS
 from .viewer import SceneView
 from .tool_picker import ToolPicker, profile_icon
-from .cards import CARD, STATES, StepCardDelegate
+from .flat_plan import FlatPlan
+from .cards import CARD, PROGRESS, STATES, StepCardDelegate
 
-SCOPE = ('Kapsam: sac / atanmış takım katıları / varsa tutucular. Tezgâh, arka dayama, adımlar arası tutuş '
-         've çıkarma rotası kapsam dışı. CNC strok hesabı ve üretim uygunluğu onayı değildir.')
+SCOPE = ('Kapsam: sac / atanmış takım katıları / varsa tutucular. Tezgâh (sahnedeki üst kiriş ve alt ray yalnız görsel), '
+         'arka dayama, adımlar arası tutuş ve çıkarma rotası kapsam dışı. CNC strok hesabı ve üretim uygunluğu onayı değildir.')
 
 
 class PressBrakePage(BasePage):
@@ -28,6 +29,9 @@ class PressBrakePage(BasePage):
         self.library = ()
         self.check_button = self.action('Hareketi kontrol et', self.calculate, primary=True)
         self.pdf_button = self.action('Büküm Föyü PDF', self.pdf_dialog)
+        self.video_button = self.action('Video MP4', self.video_dialog)
+        self.video_button.setToolTip('Kontrol edilen hareketi, sahnedeki bakış açısıyla MP4 video olarak kaydeder (oynatma hızı kare hızıdır).')
+        self.video_writer = None
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         # Source bar: where the part comes from, and a one-line part summary.
         row = QHBoxLayout(); row.setSpacing(8)
@@ -49,11 +53,15 @@ class PressBrakePage(BasePage):
         self.bends.setWordWrap(True); self.bends.setTextElideMode(Qt.ElideNone); self.bends.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.bends.setResizeMode(QListView.Adjust); self.bends.setSpacing(0); self.bends.setUniformItemSizes(False)
         self.step_cards = StepCardDelegate(self.bends, context.appearance); self.bends.setItemDelegate(self.step_cards)
+        self.step_cards.toggled.connect(self.toggle_step)
+        # Drag a card to reorder (↑/↓ stay for keyboard use); the plan follows the list order.
+        self.bends.setDragDropMode(QAbstractItemView.InternalMove); self.bends.setDefaultDropAction(Qt.MoveAction)
+        self.bends.model().rowsMoved.connect(lambda *_: QTimer.singleShot(0, self.dropped))
         left_body.addWidget(self.bends, 1)
         order = QHBoxLayout(); order.setSpacing(8)
         self.up = button('↑ Yukarı', lambda: self.reorder(-1)); self.down = button('↓ Aşağı', lambda: self.reorder(1))
         self.up.setAccessibleName('Bükümü yukarı taşı'); self.down.setAccessibleName('Bükümü aşağı taşı')
-        self.up.setToolTip('Seçili bükümü sırada bir önceye alır; önceki kontrol sonucu geçersiz olur.')
+        self.up.setToolTip('Seçili bükümü sırada bir önceye alır (kartı sürükleyerek de taşıyabilirsiniz); önceki kontrol sonucu geçersiz olur.')
         self.down.setToolTip('Seçili bükümü sırada bir sonraya alır; önceki kontrol sonucu geçersiz olur.')
         order.addWidget(self.up); order.addWidget(self.down); left_body.addLayout(order)
         self.catalog_button = button('Takım kataloğu indir', self.download_catalog)
@@ -74,6 +82,9 @@ class PressBrakePage(BasePage):
 
         # Right: selected step → tools → positioning; optional details collapse.
         right = QWidget(); right.setMinimumWidth(210); side = QVBoxLayout(right); side.setContentsMargins(0, 0, 6, 0); side.setSpacing(10)
+        side.addWidget(label('AÇINIM PLANI', 'section', wrap=False))
+        self.flat_plan = FlatPlan(context.appearance); side.addWidget(self.flat_plan)
+        self.flat_plan.stepClicked.connect(self.bends.setCurrentRow)
         side.addWidget(label('SEÇİLİ ADIM', 'section', wrap=False))
         self.bend_label = QLabel('Adım seçin'); self.bend_label.setProperty('role', 'title'); self.bend_label.setWordWrap(True); side.addWidget(self.bend_label)
         values = QGridLayout(); values.setHorizontalSpacing(8); values.setVerticalSpacing(6); self.values = {}
@@ -83,6 +94,21 @@ class PressBrakePage(BasePage):
             self.values[key] = value; values.addWidget(tile, i//2, i % 2)
         self.value_grid = values; self.value_tiles = [values.itemAt(i).widget() for i in range(values.count())]
         side.addLayout(values)
+        # Target inside angle (− value +): geometry, check and PDF follow; CAD value stays one click away.
+        target = QHBoxLayout(); target.setSpacing(6)
+        target_title = label('Hedef iç açı', 'muted', wrap=False); side.addWidget(target_title)
+        self.target_minus = button('−', lambda: self.nudge_target(-1)); self.target_plus = button('+', lambda: self.nudge_target(1))
+        self.target = QDoubleSpinBox(); self.target.setRange(1, 179); self.target.setDecimals(1); self.target.setSingleStep(1)
+        self.target.setSuffix('°'); self.target.setKeyboardTracking(False); self.target.setButtonSymbols(QDoubleSpinBox.NoButtons)
+        self.target.setLocale(QLocale(QLocale.Turkish, QLocale.Turkey)); self.target.setAlignment(Qt.AlignCenter)
+        self.target.setAccessibleName('Hedef iç açı'); self.target_minus.setAccessibleName('Hedef açıyı 1° azalt'); self.target_plus.setAccessibleName('Hedef açıyı 1° artır')
+        self.target.setToolTip('Bu adımın bükülecek iç açısı. CAD büküm bölgesi korunur; sahne, çarpışma kontrolü ve PDF bu açıyı kullanır. Geri yaylanma hesabı değildir.')
+        self.target_cad = button('CAD', self.reset_target); self.target_cad.setToolTip('Hedefi CAD iç açısına döndürür.')
+        for w in (self.target_minus, self.target_plus):
+            w.setFixedWidth(34)
+        target.addWidget(self.target_minus); target.addWidget(self.target, 1); target.addWidget(self.target_plus); target.addWidget(self.target_cad)
+        self.target.valueChanged.connect(self.set_target)
+        side.addLayout(target)
         side.addWidget(separator()); side.addWidget(label('TAKIMLAR', 'section', wrap=False))
         tools = QFormLayout(); tools.setRowWrapPolicy(QFormLayout.WrapAllRows); tools.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.punch = QComboBox(); self.die = QComboBox(); self.channel = QComboBox()
@@ -156,7 +182,7 @@ class PressBrakePage(BasePage):
             field.currentIndexChanged.connect(self.assignment_changed)
         self.slider.valueChanged.connect(self.show_frame)
         self.controls += [self.sw_button, self.demo_button, self.demo_picker, self.bends, self.up, self.down, self.import_tool,
-                          self.punch, self.die, self.punch_button, self.die_button, self.channel, self.fixed, self.orientation, self.direction, self.punch_segments, self.die_segments, self.apply_segments]
+                          self.punch, self.die, self.punch_button, self.die_button, self.target, self.target_minus, self.target_plus, self.flat_plan, self.channel, self.fixed, self.orientation, self.direction, self.punch_segments, self.die_segments, self.apply_segments]
         self.theme_changed(); self.refresh_actions()
 
     def resizeEvent(self, event):
@@ -175,17 +201,21 @@ class PressBrakePage(BasePage):
         if hasattr(self, 'viewer'):
             self.viewer.set_background(COLORS[self.context.appearance]['canvas'])
             self.step_cards.appearance = self.context.appearance; self.bends.viewport().update()
+            self.flat_plan.appearance = self.context.appearance; self.flat_plan.update()
         if getattr(self, 'plan', None):
             self.refresh_tool_buttons()
 
     def refresh_actions(self):
         ready = self.plan is not None and not self.busy
         self.check_button.setEnabled(ready); self.pdf_button.setEnabled(ready and self.result is not None)
+        self.video_button.setEnabled(ready and bool(self.result and self.result.frames) and self.video_writer is None)
         for control in (self.play, self.slider, self.previous, self.next):
             control.setEnabled(ready and bool(self.result and self.result.frames))
         self.flat_button.setEnabled(ready and self.flat_mesh is not None); self.formed_button.setEnabled(ready and self.formed_mesh is not None)
         self.punch_button.setEnabled(ready); self.die_button.setEnabled(ready)
         self.catalog_button.setEnabled(not self.busy)
+        row = self.bends.currentRow()
+        self.target_cad.setEnabled(ready and 0 <= row < len(self.plan.steps) and self.plan.steps[row].target is not None)
 
     def set_busy(self, busy):
         super().set_busy(busy)
@@ -234,7 +264,12 @@ class PressBrakePage(BasePage):
     def read_sw(self):
         from .solidworks import read_active
         from .demo import tools
-        self.load_plan(lambda stop: (lambda part: Plan(part, tuple(Step(b.id) for b in part.bends), tools()))(read_active(stop)))
+        from .standard import recommended_v, standard_tools, straight_punch, single_v_die
+        def plan(part):
+            # A real part starts on generic market-standard tools: 88° punch, V from the 8 × t rule.
+            punch, die = straight_punch(), single_v_die(recommended_v(part.thickness))
+            return Plan(part, tuple(Step(b.id, punch.id, die.id, die.channels[0].id) for b in part.bends), tools()+standard_tools())
+        self.load_plan(lambda stop: plan(read_active(stop)))
 
     def load_plan(self, factory):
         def operation(sink, stop):
@@ -242,10 +277,11 @@ class PressBrakePage(BasePage):
             from .kinematics import step_angles
             from .tooling import load_catalog
             from .sources import manufacturer_tools, merged_catalog
+            from .standard import standard_tools
             from modules.cad_converter.models import checkpoint
             plan = factory(stop); checkpoint(stop)
             library = load_catalog(self.library_path)
-            plan = replace(plan, tools=merged_catalog(plan.tools, merged_catalog(library, manufacturer_tools())))
+            plan = replace(plan, tools=merged_catalog(plan.tools, merged_catalog(standard_tools(), merged_catalog(library, manufacturer_tools()))))
             plan.validate(); geometry = Geometry(plan)
             flat = mesh(geometry.part_bodies({}), stop); formed = mesh(geometry.part_bodies(step_angles(plan, len(plan.steps)-1, 1)), stop)
             sink.put(('press_plan', (plan, flat, formed, library)))
@@ -255,7 +291,7 @@ class PressBrakePage(BasePage):
         self.generation += 1; self.plan, self.result = plan, None
         self.flat_mesh, self.formed_mesh, self.library = flat, formed, library
         self.loading = True
-        self.bends.clear(); self.bends.addItems([s.bend for s in plan.steps])
+        self.fill_steps(plan.steps)
         for picker, kind in ((self.punch, 'punch'), (self.die, 'die')):
             picker.clear()
             for tool in plan.tools:
@@ -278,8 +314,10 @@ class PressBrakePage(BasePage):
             self.pause()
         self.loading = True
         step = self.plan.steps[index]; bend = next(b for b in self.plan.part.bends if b.id == step.bend)
-        self.bend_label.setText(f'Adım {index+1} / {len(self.plan.steps)} · {bend.title}')
-        for key, text in (('inside', f'{bend.inside_angle:g}°'), ('turn', f'{bend.turn:g}°'), ('radius', f'{bend.radius:g} mm'),
+        self.bend_label.setText(f'Adım {index+1} / {len(self.plan.steps)} · {bend.title}'); self.flat_plan.set_current(index)
+        self.target.blockSignals(True); self.target.setValue(self.plan.inside(step)); self.target.blockSignals(False)
+        self.target_cad.setText(f'CAD {bend.inside_angle:g}°'.replace('.', ',')); self.refresh_actions()
+        for key, text in (('inside', f'{self.plan.inside(step):g}°'), ('turn', f'{self.plan.turn(step):g}°'), ('radius', f'{bend.radius:g} mm'),
                           ('length', f'{bend.length:.2f} mm')):
             self.values[key].setText(text.replace('.', ','))
         for picker, value in ((self.punch, step.punch), (self.die, step.die), (self.fixed, step.fixed_side), (self.orientation, step.orientation), (self.direction, step.reverse)):
@@ -289,8 +327,9 @@ class PressBrakePage(BasePage):
             self.channel.addItem(f'{channel.id} · V{channel.opening:g} / {channel.angle:g}°'.replace('.', ','), channel.id)
         self.channel.setCurrentIndex(self.channel.findData(step.channel))
         punch = self.plan.tool(step.punch)
-        self.punch_segments.setText(format_segments(step.punch_segments if step.punch_segments is not None else punch.segments))
-        self.die_segments.setText(format_segments(step.die_segments if step.die_segments is not None else die.segments))
+        from .standard import default_segments
+        self.punch_segments.setText(format_segments(step.punch_segments if step.punch_segments is not None else default_segments(punch, bend)))
+        self.die_segments.setText(format_segments(step.die_segments if step.die_segments is not None else default_segments(die, bend)))
         self.tool_info.setText(f'{punch.code}: {punch.maker}\n{die.code}: {die.maker}\nHat yükü: '+(' / '.join(f'{t.line_load} {t.line_load_unit}' if t.line_load is not None else 'bilinmiyor' for t in (punch, die)))+'\nProses iç R tahmini: bilinmiyor')
         self.loading = False; self.show_details(index)
         self.refresh_tool_buttons()
@@ -321,7 +360,7 @@ class PressBrakePage(BasePage):
         chosen_segments = old.punch_segments if kind == 'punch' else old.die_segments
         picker = ToolPicker(self.plan.tools, kind, current, channel=old.channel,
                             assigned_segments=chosen_segments, appearance=self.context.appearance,
-                            settings=self.settings, parent=self)
+                            settings=self.settings, parent=self, bend_length=self.plan.bend(old.bend).length)
         accepted = picker.exec()
         if picker.import_requested:
             self.tool_dialog()
@@ -342,15 +381,21 @@ class PressBrakePage(BasePage):
             previous = self.plan.steps[i-1] if i else None
             change = previous and (step.punch, step.die, step.channel) != (previous.punch, previous.die, previous.channel)
             status = self.result.steps[i].status if self.result else None
+            playing = self.result.frames[min(self.frame_index, len(self.result.frames)-1)].step if self.result and self.result.frames else None
+            progress = None if playing is None else 'done' if i < playing else 'current' if i == playing else 'todo'
             item = self.bends.item(i)
             # Plain text stays for search, tests and assistive technology; the card paints the same facts.
             item.setText(f'{i+1}. {bend.title}'+('\n'+STATUS[status] if status else '')+('\nTakım değişimi' if change else '')
-                         +('\nYeniden tutuş' if i else '')+(' · Çevir 180°' if step.orientation else ''))
+                         +('\nYeniden tutuş' if i else '')+(' · Çevir 180°' if step.orientation else '')
+                         +(' · Yön ters' if step.reverse else '')+(f' · {PROGRESS[progress]}' if progress else ''))
             item.setData(CARD, dict(number=i+1, title=bend.title,
-                                    detail=f'{bend.inside_angle:g}° iç · R {bend.radius:g} · {bend.length:.1f} mm'.replace('.', ','),
-                                    status=status, change=bool(change), regrip=bool(i), flip=bool(step.orientation)))
+                                    detail=(f'{self.plan.inside(step):g}° iç' + (f' (CAD {bend.inside_angle:g}°)' if self.plan.inside(step) != bend.inside_angle else '')
+                                            + f' · R {bend.radius:g} · {bend.length:.1f} mm').replace('.', ','),
+                                    status=status, change=bool(change), regrip=bool(i), flip=bool(step.orientation),
+                                    reverse=bool(step.reverse), progress=progress))
             item.setToolTip(item.text())
         self.sequence_title.setText(f'BÜKÜM SIRASI · {len(self.plan.steps)}')
+        self.flat_plan.set_plan(self.plan, self.bends.currentRow())
 
     def preview(self):
         if not self.preview_pending or not self.plan or self.result or self.view_mode != 'step':
@@ -364,13 +409,13 @@ class PressBrakePage(BasePage):
             return
         self.preview_key = key; plan = self.plan
         def operation(sink, stop):
-            from .geometry import Geometry, mesh
+            from .geometry import Geometry, scene_mesh
             from .kinematics import step_angles
             from .service import Frame
             geometry = Geometry(plan)
             bodies, _ = geometry.scene(index, step_angles(plan, index, 0))
             bend = next(b for b in plan.part.bends if b.id == plan.steps[index].bend)
-            frame = Frame(index, 'approach', 0, mesh(bodies, stop),
+            frame = Frame(index, 'approach', 0, scene_mesh(bodies, stop),
                           ((-bend.length/2, 0, 0), (bend.length/2, 0, 0)), (),
                           tuple((b.id, b.bounds) for b in bodies if b.kind != 'sheet'))
             sink.put(('press_preview', (key, frame)))
@@ -410,6 +455,34 @@ class PressBrakePage(BasePage):
         steps = list(self.plan.steps); steps[index] = step
         self.invalidate(self.plan.changed(steps=tuple(steps)))
 
+    def nudge_target(self, delta):
+        self.target.setValue(round(self.target.value())+delta)
+
+    def reset_target(self):
+        if self.plan and self.bends.currentRow() >= 0:
+            self.set_target(None)
+
+    def set_target(self, value):
+        """Planned inside angle of the selected step; the CAD angle means 'no target'."""
+        if self.loading or not self.plan:
+            return
+        index = self.bends.currentRow()
+        if index < 0:
+            return
+        old = self.plan.steps[index]; bend = self.plan.bend(old.bend)
+        target = None if value is None or abs(value-bend.inside_angle) < 1e-9 else round(float(value), 1)
+        if target == old.target:
+            return
+        steps = list(self.plan.steps); steps[index] = replace(old, target=target)
+        plan = self.plan.changed(steps=tuple(steps))
+        try:
+            plan.validate()
+        except ValueError as error:
+            self.set_status(str(error), True)
+            self.target.blockSignals(True); self.target.setValue(self.plan.inside(old)); self.target.blockSignals(False)
+            return
+        self.invalidate(plan)
+
     def update_segments(self):
         if not self.plan:
             return
@@ -427,7 +500,40 @@ class PressBrakePage(BasePage):
         if i < 0 or not 0 <= j < len(self.plan.steps):
             return
         steps = list(self.plan.steps); steps[i], steps[j] = steps[j], steps[i]
-        self.loading = True; self.bends.clear(); self.bends.addItems([s.bend for s in steps]); self.bends.setCurrentRow(j); self.loading = False
+        self.apply_order(steps, j)
+
+    def fill_steps(self, steps, current=None):
+        self.bends.clear()
+        for step in steps:
+            item = QListWidgetItem(step.bend); item.setData(Qt.UserRole, step.bend)
+            item.setFlags(item.flags() | Qt.ItemIsDragEnabled); self.bends.addItem(item)
+        if current is not None:
+            self.bends.setCurrentRow(current)
+
+    def apply_order(self, steps, current):
+        self.loading = True; self.fill_steps(steps, current); self.loading = False
+        self.invalidate(self.plan.changed(steps=tuple(steps)))
+
+    def dropped(self):
+        """A card was dragged to a new place: same steps, new order."""
+        if not self.plan:
+            return
+        order = [self.bends.item(i).data(Qt.UserRole) for i in range(self.bends.count())]
+        if order == [s.bend for s in self.plan.steps] or sorted(order) != sorted(s.bend for s in self.plan.steps):
+            return
+        by_bend = {s.bend: s for s in self.plan.steps}; moved = self.bends.currentItem()
+        current = self.bends.row(moved) if moved else 0
+        self.apply_order([by_bend[b] for b in order], current)
+
+    def toggle_step(self, row, field):
+        """In-card ⇄ Yön / ↻ 180° buttons: same plan fields as the right panel's combos."""
+        if self.loading or not self.plan or not 0 <= row < len(self.plan.steps):
+            return
+        old = self.plan.steps[row]
+        step = replace(old, reverse=not old.reverse) if field == 'reverse' else replace(old, orientation=0 if old.orientation else 180)
+        steps = list(self.plan.steps); steps[row] = step
+        if self.bends.currentRow() != row:
+            self.loading = True; self.bends.setCurrentRow(row); self.loading = False
         self.invalidate(self.plan.changed(steps=tuple(steps)))
 
     def calculate(self):
@@ -463,6 +569,9 @@ class PressBrakePage(BasePage):
         if self.bends.currentRow() != frame.step:
             self.loading = True; self.bends.setCurrentRow(frame.step); self.loading = False
             self.select(frame.step, seek=False)
+        if any(self.bends.item(i).data(CARD).get('progress') != ('done' if i < frame.step else 'current' if i == frame.step else 'todo')
+               for i in range(self.bends.count()) if self.bends.item(i).data(CARD)):
+            self.loading = True; self.refresh_steps(); self.loading = False
         self.viewer.set_frame(frame)
         where = f'Adım {frame.step+1}/{len(self.plan.steps)} · {PHASES[frame.phase]} · dönüş {frame.angle:.2f}°'.replace('.', ',')
         self.show_state(where+(' · ÇARPIŞMA: '+'; '.join(' ↔ '.join(h.pair) for h in frame.hits) if frame.hits else ''),
@@ -502,6 +611,50 @@ class PressBrakePage(BasePage):
         path, _ = QFileDialog.getSaveFileName(self, 'Büküm Föyü PDF', 'Bukum-Foyu.pdf', 'PDF (*.pdf)')
         if path:
             self.export_pdf(path, overwrite=True)
+
+    def video_dialog(self):
+        if not self.result:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, 'Büküm animasyonu', 'Bukum-Animasyonu.mp4', 'MP4 video (*.mp4)')
+        if path:
+            self.export_video(path if path.lower().endswith('.mp4') else path+'.mp4')
+
+    def export_video(self, path):
+        """Render the checked frames in the worker, then encode them here (Qt Multimedia lives on the GUI thread)."""
+        if not self.plan or not self.result or self.video_writer is not None:
+            return
+        try:
+            from .video import video_codec
+            available = video_codec() is not None
+        except ImportError:
+            available = False
+        if not available:   # say so before spending time on frames
+            self.set_status('Bu kurulumda MP4 video kodlayıcısı yok (Qt Multimedia); video kaydedilemiyor.', True); return
+        plan, result, state = self.plan, self.result, self.viewer.camera.state()
+        fps = max(1, round(1000/(self.speed.currentData() or 83)))
+        def operation(sink, stop):
+            from .video import render_frames
+            last = [0]
+            def progress(done, total):
+                if done == total or done-last[0] >= max(1, total//20):
+                    last[0] = done; sink.put(('press_video_progress', f'Video kareleri çiziliyor · {done}/{total}'))
+            sink.put(('press_video_frames', (plan.revision, path, fps, render_frames(plan, result, state, stop, progress))))
+        self.start(operation)
+
+    def encode_video(self, revision, path, fps, frames):
+        from .video import VideoWriter
+        if not self.plan or revision != self.plan.revision:
+            self.set_status('Plan değiştiği için video kaydı iptal edildi; yeniden kontrol edip tekrar deneyin.', True); return
+        try:
+            writer = VideoWriter(frames, path, fps, self)
+        except (ValueError, ImportError) as error:
+            self.set_status(str(error), True); return
+        def done(message, error=False):
+            self.video_writer = None; writer.deleteLater(); self.set_status(message, error); self.refresh_actions()
+        writer.finished.connect(lambda output: done(f'Video kaydedildi: {output} · {len(frames)} kare · {fps} kare/s'))
+        writer.failed.connect(lambda message: done('Video kaydedilemedi: '+message, True))
+        self.video_writer = writer; self.refresh_actions(); self.set_status(f'Video yazılıyor… {len(frames)} kare')
+        writer.start()
 
     def export_pdf(self, path, overwrite=False):
         if not self.plan or not self.result:
@@ -560,6 +713,9 @@ class PressBrakePage(BasePage):
                 else:
                     tool_with_holder = tool
                 tool_with_holder.validate(); g = Geometry()
+                from .service import holder_overlap
+                if holder_overlap(tool_with_holder):
+                    raise ValueError(f'Tutucu kesiti takım kesitine {holder_overlap(tool_with_holder):.3g} mm² giriyor; ortak bağlama referansını kontrol edin.')
                 for segment in tool_with_holder.segments:
                     g.tool_shape(tool_with_holder, segment)
                 if tool_with_holder.holder_section is not None:
@@ -590,6 +746,10 @@ class PressBrakePage(BasePage):
                     self.viewer.set_frame(frame)
                     self.show_state(f'Adım {frame.step+1} · atanmış takımlar ve aktif eksen · KONTROL BEKLİYOR',
                                     f'Adım {frame.step+1}/{len(self.plan.steps)} · kontrol bekliyor')
+            elif kind == 'press_video_progress':
+                self.set_status(value)
+            elif kind == 'press_video_frames':
+                self.encode_video(*value)
             elif kind == 'press_pdf':
                 self.set_status('Büküm föyü oluşturuldu: '+value)
             elif kind == 'press_cancelled':

@@ -33,3 +33,26 @@ def test_cancel_before_geometry_and_during_native_sweep_returns_no_result():
 def test_invalid_sampling_intervals_rejected(a, b):
     with pytest.raises(ValueError):
         run(load_demo('L120'), max_angle=a, min_angle=b)
+
+
+def test_target_angle_drives_the_motion_and_keeps_the_cad_bend_zone():
+    from math import degrees
+    from modules.press_brake.kinematics import step_angles
+    plan = load_demo('L120'); bend = plan.part.bends[0]
+    assert plan.inside(plan.steps[0]) == bend.inside_angle and plan.steps[0].target is None
+    target = replace(plan, steps=(replace(plan.steps[0], target=bend.inside_angle+10),)+plan.steps[1:])
+    assert target.validate() and target.turn(target.steps[0]) == bend.turn-10
+    assert abs(abs(degrees(step_angles(target, 0, 1)[bend.id]))-(bend.turn-10)) < 1e-9
+    assert target.part is plan.part                                  # CAD data untouched
+    result = run(target, threading.Event())
+    bending = [f for f in result.frames if f.step == 0 and f.phase == 'bend']
+    assert abs(max(f.angle for f in bending)-(bend.turn-10)) < 1e-6
+    assert any('Hedef iç açı' in note for note in result.steps[0].notes)
+
+
+@pytest.mark.parametrize('value', [0, 180, float('nan')])
+def test_target_angle_outside_the_supported_range_is_rejected(value):
+    plan = load_demo('L120')
+    bad = replace(plan, steps=(replace(plan.steps[0], target=value),)+plan.steps[1:])
+    with pytest.raises(ValueError, match='hedef'):
+        bad.validate()

@@ -162,3 +162,21 @@ def test_canonical_sheet_hit_retains_volume_position_and_refinement_at_station()
     assert near == expected_near and actual[0].pair == expected[0].pair
     assert actual[0].volume == pytest.approx(expected[0].volume)
     assert actual[0].location == pytest.approx(expected[0].location, abs=1e-7)
+
+
+def test_scene_colours_bodies_by_kind_and_machine_stays_out_of_the_checked_bodies():
+    import numpy as np
+    from modules.press_brake.geometry import SCENE_COLOURS, machine_bodies, mesh, rgb, scene_mesh
+    p = load_demo('L120'); g = Geometry(p)
+    bodies, _ = g.scene(0, step_angles(p, 0, 0))
+    assert not any(b.kind == 'machine' for b in bodies)          # collision input unchanged
+    machine = machine_bodies(bodies)
+    assert {b.id for b in machine} == {'machine:beam', 'machine:rail'}
+    punch_top = max(b.bounds[5] for b in bodies if b.kind == 'punch')
+    die_bottom = min(b.bounds[2] for b in bodies if b.kind == 'die')
+    beam, rail = sorted(machine, key=lambda b: -b.bounds[2])
+    assert beam.bounds[2] >= punch_top-1e-6 and rail.bounds[5] <= die_bottom+1e-6   # never inside the tools
+    colours = {tuple(c) for c in np.frombuffer(scene_mesh(bodies).colours, np.uint8).reshape(-1, 3)}
+    assert {rgb(SCENE_COLOURS[k]) for k in ('sheet', 'punch', 'die', 'machine')} <= colours
+    flat = mesh(g.part_bodies({}))
+    assert {tuple(c) for c in np.frombuffer(flat.colours, np.uint8).reshape(-1, 3)} == {rgb(SCENE_COLOURS['sheet'])}

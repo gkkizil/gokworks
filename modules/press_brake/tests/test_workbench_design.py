@@ -120,3 +120,111 @@ def test_catalogue_cards_use_turkish_decimals_and_no_scale_bar_without_a_drawing
     from modules.press_brake.tool_picker import card_spec
     rolleri = next(t for t in manufacturer_tools() if t.code == '04600')
     assert rolleri.section is None and card_spec(rolleri).endswith('H 104,91 mm') and '.' not in card_spec(rolleri)
+
+
+def click_card_button(p, row, field):
+    from modules.press_brake.cards import CARD as _C
+    option = QStyleOptionViewItem(); option.font = p.bends.font(); option.rect = p.bends.visualItemRect(p.bends.item(row))
+    card = p.bends.item(row).data(_C); rect = p.step_cards.card_rect(option)
+    box = next(b for kind, b, f in p.step_cards.layout(card, rect.width(), option.font)[0] if kind == 'button' and f == field)
+    point = box.translated(rect.left(), rect.top()).center().toPoint()
+    from PySide6.QtTest import QTest
+    QTest.mouseClick(p.bends.viewport(), Qt.LeftButton, Qt.NoModifier, point)
+
+
+def test_in_card_direction_and_flip_buttons_change_the_plan_like_the_side_panel(window, qtbot):
+    p = window.pages['press_brake']; p.load_demo('U'); finish(window, qtbot)
+    revision = p.plan.revision
+    click_card_button(p, 1, 'reverse'); finish(window, qtbot)
+    assert p.plan.steps[1].reverse and not p.plan.steps[0].reverse and p.plan.revision == revision+1
+    assert p.bends.currentRow() == 1 and p.direction.currentData() is True and p.result is None
+    click_card_button(p, 1, 'flip'); finish(window, qtbot)
+    assert p.plan.steps[1].orientation == 180 and p.orientation.currentData() == 180
+    card = p.bends.item(1).data(CARD)
+    assert card['reverse'] and card['flip'] and 'Yön ters' in p.bends.item(1).text()
+    click_card_button(p, 1, 'flip'); finish(window, qtbot)
+    assert p.plan.steps[1].orientation == 0
+
+
+def test_dragging_a_card_reorders_the_plan(window, qtbot):
+    p = window.pages['press_brake']; p.load_demo('U'); finish(window, qtbot)
+    before = [s.bend for s in p.plan.steps]
+    p.bends.setCurrentRow(1)
+    p.bends.model().moveRow(p.bends.rootIndex(), 1, p.bends.rootIndex(), 0)   # what an internal drop does
+    qtbot.waitUntil(lambda: [s.bend for s in p.plan.steps] == before[::-1], timeout=5000); finish(window, qtbot)
+    assert p.result is None and [p.bends.item(i).data(Qt.UserRole) for i in range(2)] == before[::-1]
+    assert p.bends.dragDropMode() == p.bends.DragDropMode.InternalMove
+
+
+@pytest.mark.timeout(240)
+def test_step_badges_follow_the_playback_position(window, qtbot):
+    p = window.pages['press_brake']; p.load_demo('U'); finish(window, qtbot)
+    assert all(p.bends.item(i).data(CARD)['progress'] is None for i in range(2))   # nothing played before a check
+    p.calculate(); finish(window, qtbot, 200000)
+    second = next(i for i, f in enumerate(p.result.frames) if f.step == 1)
+    p.slider.setValue(0)
+    assert [p.bends.item(i).data(CARD)['progress'] for i in range(2)] == ['current', 'todo']
+    p.slider.setValue(second)
+    assert [p.bends.item(i).data(CARD)['progress'] for i in range(2)] == ['done', 'current']
+    assert 'oynatıldı' in p.bends.item(0).text()
+
+
+def test_target_angle_controls_change_the_step_and_reset_to_cad(window, qtbot):
+    p = window.pages['press_brake']; p.load_demo('U'); finish(window, qtbot)
+    bend = p.plan.bend(p.plan.steps[0].bend); p.bends.setCurrentRow(0); finish(window, qtbot)
+    assert p.target.value() == bend.inside_angle and not p.target_cad.isEnabled()
+    p.target_plus.click(); finish(window, qtbot)
+    assert p.plan.steps[0].target == bend.inside_angle+1 and p.result is None
+    assert p.values['inside'].text() == f'{bend.inside_angle+1:g}°' and p.target_cad.isEnabled()
+    assert f'(CAD {bend.inside_angle:g}°)' in p.bends.item(0).data(CARD)['detail']
+    p.target.setValue(0.5)                                          # below range: clamped to 1°, still valid
+    finish(window, qtbot)
+    p.target_cad.click(); finish(window, qtbot)
+    assert p.plan.steps[0].target is None and p.target.value() == bend.inside_angle
+
+
+def test_flat_plan_numbers_bend_lines_in_order_and_click_selects_the_step(window, qtbot):
+    from PySide6.QtTest import QTest
+    p = window.pages['press_brake']; p.load_demo('U'); finish(window, qtbot)
+    p.flat_plan.parentWidget().parentWidget().parentWidget().ensureWidgetVisible(p.flat_plan); qtbot.wait(30)
+    lines = p.flat_plan.lines()
+    assert [i for i, _, _ in lines] == [0, 1] and [b.id for _, b, _ in lines] == [s.bend for s in p.plan.steps]
+    to = p.flat_plan.mapping(); _, _, (a, b) = lines[1]
+    on_line = ((to(a)+to(b))/2+QPointF(25, 0) if abs(to(a).y()-to(b).y()) < 1 else (to(a)+to(b))/2+QPointF(0, 25)).toPoint()
+    assert p.flat_plan.step_at(QPointF(on_line)) == 1
+    QTest.mouseClick(p.flat_plan, Qt.LeftButton, Qt.NoModifier, on_line); finish(window, qtbot)
+    assert p.bends.currentRow() == 1 and p.flat_plan.current == 1
+    p.down.setFocus(); p.bends.setCurrentRow(0); p.down.click(); finish(window, qtbot)   # order follows the plan
+    assert [b.id for _, b, _ in p.flat_plan.lines()] == [s.bend for s in p.plan.steps]
+    assert p.flat_plan.step_at(QPointF(2, 2)) is None
+
+
+@pytest.mark.timeout(300)
+def test_checked_motion_exports_as_an_mp4_video(window, qtbot, tmp_path):
+    from modules.press_brake.video import video_codec
+    p = window.pages['press_brake']; p.load_demo('L120'); finish(window, qtbot)
+    assert not p.video_button.isEnabled()                         # nothing checked yet
+    p.calculate(); finish(window, qtbot, 200000)
+    assert p.video_button.isEnabled()
+    if video_codec() is None:
+        pytest.skip('Qt Multimedia has no MP4 encoder on this machine')
+    target = tmp_path/'animasyon.mp4'; target.write_bytes(b'old')    # replaced only when the recording finished
+    p.speed.setCurrentIndex(2); p.export_video(str(target))
+    qtbot.waitUntil(lambda: p.status_text.startswith(('Video kaydedildi', 'Video kaydedilemedi')), timeout=200000)
+    assert p.status_text.startswith('Video kaydedildi'), p.status_text
+    data = target.read_bytes()
+    assert data[4:8] == b'ftyp' and len(data) > 10000 and '24 kare/s' in p.status_text
+    assert not list(tmp_path.glob('.*kayit.mp4')) and p.video_button.isEnabled()
+
+
+def test_video_frames_carry_the_step_read_out_and_scope():
+    import threading
+    from modules.press_brake.demo import load_demo
+    from modules.press_brake.service import run
+    from modules.press_brake.video import WIDTH, HEIGHT, caption, render_frame
+    from modules.dxf_dwg.preview.viewer import Camera
+    plan = load_demo('L120'); result = run(plan, threading.Event())
+    frame = result.frames[len(result.frames)//2]
+    image = render_frame(plan, result, frame, Camera().state(), threading.Event())
+    assert (image.width(), image.height()) == (WIDTH, HEIGHT)
+    assert caption(plan, frame).startswith('Adım 1/1 · ') and '°' in caption(plan, frame)
