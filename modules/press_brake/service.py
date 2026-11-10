@@ -87,6 +87,18 @@ def step_scope(plan, step):
     return notes
 
 
+def plan_notes(plan, step):
+    """Informational notes on what the step was checked with (they do not make it uncheckable)."""
+    from .standard import NOTE, is_generic
+    notes, bend = [], plan.bend(step.bend)
+    if any(is_generic(plan.tool(t)) for t in (step.punch, step.die)):
+        notes.append(NOTE)
+    if step.target is not None and step.target != bend.inside_angle:
+        notes.append(f'Hedef iç açı {step.target:g}° (CAD {bend.inside_angle:g}°): CAD büküm bölgesi korunarak bu açıya '
+                     'bükülmüş nominal geometri; geri yaylanma hesabı değildir.')
+    return notes
+
+
 def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_step=2.):
     """Sample approach/bend/retract independently of playback FPS.
 
@@ -108,12 +120,7 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
         checkpoint(stop)
         bend = next(b for b in plan.part.bends if b.id == step.bend)
         turn = plan.turn(step)
-        notes = step_scope(plan, step)
-        from .standard import NOTE, is_generic
-        if any(is_generic(plan.tool(t)) for t in (step.punch, step.die)):
-            notes.append(NOTE)
-        if step.target is not None and step.target != bend.inside_angle:
-            notes.append(f'Hedef iç açı {step.target:g}° (CAD {bend.inside_angle:g}°): CAD büküm bölgesi korunarak bu açıya bükülmüş nominal geometri; geri yaylanma hesabı değildir.')
+        notes = step_scope(plan, step)+plan_notes(plan, step)
         first_hit, samples, checked_pairs, minimum = None, 0, set(), max_angle
         phase_cache = {}
         collision_cache = {}
