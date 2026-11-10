@@ -69,6 +69,26 @@ def partition(name, configuration, material, thickness, outline, bands, fixed_po
                 tuple(bends), fixed_face, source).validate()
 
 
+# IOneBendFeatureData owners: OneBend (base/edge flange bends) and SketchBend (sketched bend).
+BEND_KINDS = ('OneBend', 'SketchBend')
+SHEET_KINDS = ('Bend', 'Flange', 'Flat', 'Hem', 'Jog', 'SheetMetal', 'SM')
+
+
+def feature_inventory(session, features, limit=24):
+    """'Name (TypeName2[, bastırılmış])' for the sheet-metal features seen, for a diagnosable error."""
+    rows = []
+    for feature, kind in features:
+        if not any(token.casefold() in kind.casefold() for token in SHEET_KINDS):
+            continue
+        try:
+            off = ', bastırılmış' if _suppressed(session, feature) else ''
+        except Exception:
+            off = ', durum okunamadı'
+        rows.append(f'{get(feature, "Name")} ({kind}{off})')
+    shown = '; '.join(rows[:limit]) + (f'; … +{len(rows)-limit}' if len(rows) > limit else '')
+    return shown or 'sac unsuru bulunamadı'
+
+
 def _suppressed(session, feature):
     try:
         state = values(call(feature, 'IsSuppressed2', session.c('swThisConfiguration'), variant(0, None)))
@@ -298,7 +318,7 @@ class Capture(Session):
             rows, covered, bend_faces = [], set(), []
             for feature, kind in active:
                 checkpoint(stop)
-                if kind != 'OneBend':
+                if kind not in BEND_KINDS:
                     continue
                 label = str(get(feature, 'Name'))
                 definition = call(feature, 'GetDefinition')
@@ -330,7 +350,8 @@ class Capture(Session):
                 except Exception as error:
                     raise ApiError(f'{body_name} / {label}: açı, iç R veya yön okunamadı: {error}') from error
             if not rows:
-                raise ApiError(body_name+': OneBend doğrusal büküm verisi bulunamadı. Bu unsur türü henüz desteklenmiyor; açı/radyüs uydurulmadı.')
+                raise ApiError(f'Gövde «{body_name}»: etkin doğrusal büküm unsuru (OneBend/SketchBend) bulunamadı; '
+                               f'açı/radyüs uydurulmadı. Okunan sac unsurları: {feature_inventory(self, features)}')
             # Every partial cylindrical face must belong to an imported bend.
             # Full cylinders can be through-hole walls. Other curved surfaces
             # require recognition that this first version does not provide.
