@@ -4,5 +4,7 @@ pywin32==312; sys_platform == 'win32'
 ezdxf==1.4.3
 openpyxl==3.1.5
 shapely==2.1.2
-spyrrow==0.9.0
+# Public Sparrow 0.3.0 / jagua-rs 1.0.0; immutable source and Cargo.lock.
+# Building this native dependency requires Rust 1.90+ (bundled into the EXE).
+spyrrow @ git+https://github.com/PaulDL-RS/spyrrow.git@f6345979e5f6cf88e9e2e3775750fcce899334fd --config-settings=build-args=--locked
 cadquery-ocp-novtk==8.0.1.1.0

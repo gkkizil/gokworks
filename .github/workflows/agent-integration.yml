@@ -115,6 +115,12 @@ jobs:
       - name: Test the actual candidate automation code
         if: matrix.cached != true
         run: node .github/scripts/tests/agent-integration.test.cjs
+      - name: Prepare pinned Rust for Sparrow
+        if: matrix.cached != true
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "RUSTUP_TOOLCHAIN=1.90.0" >> $env:GITHUB_ENV
       - name: Install test dependencies
         if: matrix.cached != true
         run: python -m pip install -r requirements-dev.txt

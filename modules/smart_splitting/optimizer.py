@@ -33,12 +33,13 @@ def metrics(project, result):
 
 
 def fits(project):
+    from modules.nesting.rotations import search_angles
     sheet=project.sheets[0]; o=project.options
     for part in project.parts:
         from shapely import affinity
         guard=2*(o.margin+part.geometry_error+o.kerf/2)
         if not any((lambda b:b[2]-b[0]+guard<=sheet.width+1e-7 and b[3]-b[1]+guard<=sheet.height+1e-7)(
-                affinity.rotate(part.polygon,a,origin=(0,0)).bounds) for a in (o.angles if o.rotation else [0])):
+                affinity.rotate(part.polygon,a,origin=(0,0)).bounds) for a in search_angles(part,o)):
             return False
     return True
 

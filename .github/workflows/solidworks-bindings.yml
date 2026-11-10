@@ -32,6 +32,11 @@ jobs:
           architecture: x64
           cache: pip
           cache-dependency-path: requirements-dev.txt
+      - name: Prepare pinned Rust for Sparrow
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "RUSTUP_TOOLCHAIN=1.90.0" >> $env:GITHUB_ENV
       - name: Install existing test dependencies
         run: python -m pip install -r requirements-dev.txt
       - name: Record binding check start
