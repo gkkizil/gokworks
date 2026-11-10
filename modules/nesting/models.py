@@ -99,6 +99,7 @@ class Options:
     seconds: float | None = None  # Automatic; numeric limits remain readable in older projects.
     quality: str = 'Dengeli'
     seed: int = 42
+    engine: str = 'Sparrow + GOKWORKS'
 
 
 @dataclass
@@ -146,12 +147,16 @@ class Project:
     operations: Operations = field(default_factory=Operations)
 
     def fingerprint(self):
-        return hashlib.sha256(json.dumps(asdict(self), ensure_ascii=False, sort_keys=True,
+        data = asdict(self)
+        # Preserve hashes of existing version-1 projects and their verified results.
+        if self.options.engine == 'GOKWORKS NFP': data['options'].pop('engine')
+        return hashlib.sha256(json.dumps(data, ensure_ascii=False, sort_keys=True,
                                          allow_nan=False).encode()).hexdigest()
 
     def placement_fingerprint(self):
         """Costs, labels and densities do not change where contours may be placed."""
         data = asdict(self)
+        if self.options.engine == 'GOKWORKS NFP': data['options'].pop('engine')
         data.pop('name'); data.pop('operations'); data['materials'] = [m.id for m in self.materials]
         for part in data['parts']:
             for key in ('code','description','notes','source','source_sha256','source_unit'):
@@ -207,6 +212,8 @@ class Project:
             if s.pricing not in ('kg', 'sheet'):
                 raise ValueError('Fiyatlandırma kg veya sheet olmalı.')
         o = self.options
+        if o.engine not in ('GOKWORKS NFP', 'Sparrow', 'Sparrow + GOKWORKS'):
+            raise ValueError('Yerleşim motoru kaydı desteklenmiyor.')
         if type(o.rotation) is not bool or type(o.grain_locked) is not bool:
             raise ValueError('Döndürme ve hadde kilidi doğru/yanlış olmalı.')
         for key in ('gap', 'margin', 'kerf'):

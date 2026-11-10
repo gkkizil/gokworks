@@ -59,8 +59,15 @@ ve birleşme durumu [PR #48](https://github.com/gkkizil/gokworks/pull/48) üzeri
 
 Önceki `d526467` Windows koşusunda rapor: **4305 vaka, 1 başarısızlık, 54 atlanan**.
 Tek başarısızlık yukarıda açıklanan arayüz testinin QLayout.geometry() kontrolüdür;
-başarısızlık atlanmadı ve birleşme koruması aşılmadı. Yeni başlık normal Windows
-akışında yeniden test edilir. Eski koşunun başarısı yeni başlığa mal edilmez.
+başarısızlık atlanmadı ve birleşme koruması aşılmadı.
+
+Düzeltilmiş **9922966**, sabit **934fca0** main ile Windows'ta yeniden test edildi:
+**4340 vaka, 0 başarısızlık/hata, 54 atlanan**; uygulama açılış kontrolü de geçti.
+[Windows kanıtı, 42599520773](https://github.com/gkkizil/gokworks/actions/runs/42599520773).
+PR #48, 9 Kasım 2026 10:54 UTC'de **c743c8c** ile otomatik birleşti.
+Aynı birleşim ağacının Linux'taki tam süreçli koşusunda 4340 node kimliği,
+XML'de alt testlerle birlikte **5163 kayıt, 0 hata/başarısızlık, 71 atlanan** görüldü.
+Bu platformların sayıları veya örtüşen test kümeleri toplanmaz.
 
 Son yerel/geçici birleşim test sayıları, coverage ve yeni Windows durumu PR
 açıklamasında kaydedilir; örtüşen test kümeleri toplanmaz. Kapsama oranı test

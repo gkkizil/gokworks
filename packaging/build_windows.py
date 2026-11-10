@@ -29,6 +29,8 @@ def collect_licenses():
                               license=distribution.metadata.get('License-Expression') or distribution.metadata.get('License'),
                               homepage=distribution.metadata.get('Home-page')))
         for file in distribution.files or ():
+            if name.lower()=='spyrrow' and file.name.endswith('.cyclonedx.json'):
+                shutil.copy2(distribution.locate_file(file), target/('spyrrow-'+distribution.version+'-wheel-sbom.json'))
             if any(term in file.name.lower() for term in ('license', 'licence', 'copying', 'notice')) and file.suffix.lower() in ('', '.txt', '.md', '.rst'):
                 source = distribution.locate_file(file)
                 if source.is_file():
@@ -120,6 +122,7 @@ def main():
             '--collect-data', 'ezdxf',
             '--collect-submodules', 'core.unfolding',
             '--collect-all', 'shapely',
+            '--collect-all', 'spyrrow', '--copy-metadata', 'spyrrow',
             '--collect-all', 'OCP', '--collect-all', 'cadquery_ocp_proxy',
             '--hidden-import', 'win32timezone', '--hidden-import', 'pythoncom',
             '--hidden-import', 'pywintypes', '--hidden-import', 'win32com.client',
@@ -186,6 +189,15 @@ def main():
             if not options.onedir and list(deploy.iterdir()) != [runnable]:
                 raise RuntimeError('Tek EXE dağıtımında yan dosya oluştu.')
             reports.append(result)
+    # Exercise the actual bundled Rust extension via the frozen headless entry point.
+    with tempfile.TemporaryDirectory(prefix='gokworks-sparrow-smoke-') as folder:
+        request=Path(folder)/'request.json'
+        request.write_text(json.dumps(dict(items=[dict(id='check',shape=[[0,0],[30,0],[30,20],[0,20]],
+                           demand=2,angles=[0,90])],height=100,separation=3,seconds=1,seed=42)),encoding='utf-8')
+        subprocess.run([str(exe),'--sparrow-worker',str(request)],check=True,timeout=30)
+        native=json.loads(request.with_name('result.json').read_text(encoding='utf-8'))
+        if native.get('ok') is not True or len(native.get('placements',[]))!=2:
+            raise RuntimeError('Paketlenmiş Sparrow yerleşim kontrolü başarısız.')
     digest = hashlib.sha256(exe.read_bytes()).hexdigest()
     (ROOT/'dist/SHA256.txt').write_text(f'{digest}  {exe.relative_to(ROOT/"dist").as_posix()}\n', encoding='utf-8')
     (ROOT/'dist/OKU.txt').write_text(

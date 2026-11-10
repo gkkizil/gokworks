@@ -172,7 +172,7 @@ def check(output):
         stack_pdf(stack.project,stack_result,Path(folder)/'ToleranceStack.pdf')
         from modules.nesting.materials import new_project
         from modules.nesting.dxf_import import read_dxf
-        from modules.nesting.engine import nest
+        from modules.nesting.solver import nest
         from modules.nesting.accounting import calculate as nesting_cost, mass as nesting_mass
         from modules.nesting.dxf_export import export_dxf as nesting_dxf
         from modules.nesting.report import export_excel as nesting_excel, export_pdf as nesting_pdf
@@ -311,6 +311,25 @@ def check(output):
             import pythoncom, win32com.client
             pythoncom.CoInitialize()
             pythoncom.CoUninitialize()
+        # The actual packaged workbench runs its normal worker pipeline with
+        # original demo data. No SolidWorks or manufacturer catalogue is used.
+        press = w.pages['press_brake']
+        press.library_path = Path(folder)/'press-brake-tools.json'
+        w.navigate('press_brake')
+        def wait_press():
+            deadline = time.monotonic()+120
+            while w.jobs.busy or press.preview_pending:
+                assert time.monotonic() < deadline, 'Abkant demo işi zaman sınırını aştı.'
+                app.processEvents(); time.sleep(.01)
+        press.load_demo('L120'); wait_press()
+        assert press.plan and press.plan.part.demo and press.viewer.mesh
+        press.calculate(); wait_press()
+        assert press.result and press.result.status == 'clear', press.status_text
+        assert press.plan.part.bends[0].inside_angle == 120
+        assert {f.phase for f in press.result.frames} == {'approach','bend','retract'}
+        press_pdf = Path(folder)/'press-brake-demo.pdf'
+        press.export_pdf(press_pdf); wait_press()
+        assert press_pdf.read_bytes().startswith(b'%PDF') and press_pdf.stat().st_size>10000
         w.navigate('bolt')
         w.resize(1360,900)
         app.processEvents()
@@ -333,10 +352,11 @@ def check(output):
                       solidworks_live_tested=False,checks=[f'{len(pages)} modules','two themes','resolution matrix',
                         '1D profile stock / quantities, grouping, duplicate-safe import, JSON and CSV / no live COM',
                         '3D CAD converter / eight formats / queue, options and clear / no live COM',
-                      'NFP true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
+                      'Sparrow + GOKWORKS true-contour nesting / 49.0625 kg / DXF-XLSX-PDF',
                       'hole nesting / five parts on one plate / contour cut-order CSV',
                       'nesting shared parts-and-layout workspace / document plate tabs',
                       'live press-brake tooling profiles and dimensions',
+                      'press-brake workbench / native 2 mm holed L / 120 inside to 60 turn / three phases / operator PDF / no live COM',
                       'quick bolt torque / 51.96 Nm / 25.98 kN / clipboard',
                       'torque joint section / live thread and preload',
                       'tolerance stack 0.20 / 0.02 / 0.38 mm','tolerance stack PDF/XLSX',

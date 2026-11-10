@@ -83,8 +83,11 @@ def load_project(path, *, with_imports=False):
         if data.get('format') != 'GOKWORKS-NESTING' or type(data.get('version')) is not int or data['version'] != 1 or data.get('unit') != 'mm':
             raise ValueError('Nesting proje biçimi veya sürümü desteklenmiyor.')
         raw = data['project']
+        options = dict(raw['options'])
+        # Missing metadata in old files means the old NFP hash contract.
+        options.setdefault('engine','GOKWORKS NFP')
         project = Project(raw['name'], [Material(**m) for m in raw['materials']], [Part(**p) for p in raw['parts']],
-                          [Sheet(**s) for s in raw['sheets']], Options(**raw['options']), Operations(**raw['operations']))
+                          [Sheet(**s) for s in raw['sheets']], Options(**options), Operations(**raw['operations']))
         project.validate(require_work=False)
         result = None
         if data.get('result'):

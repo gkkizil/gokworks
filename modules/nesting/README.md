@@ -61,9 +61,18 @@ açıkça seçilen bir test kopyası gerektirir.
 **DXF ekle → Çerçeveli toplu çizim · her parçanın adedini çizimden oku**
 seçeneğini açın. Dosyadaki her kapalı dikdörtgen çerçeve, içindeki tek kesim
 parçası ve adet yazısıyla eşleşir. Çerçeveler kapalı polyline veya dört LINE
-olabilir; döndürülmüş çerçeveler de desteklenir. Renk, katman adı, sıra,
+olabilir; döndürülmüş çerçeveler de desteklenir. Ayrı çizgilerdeki köşeler,
+mevcut uç birleştirme toleransı içinde yalnız çerçeve tespitinde eşleştirilir.
+Hafif kaymış, her köşesi 90°'den en fazla 1° sapan dışbükey dörtgenler de
+çizim çerçevesi olabilir; özgün sınır kullanılır, parça geometrisi düzeltilmez.
+Renk, katman adı, sıra,
 parça sayısı veya sabit bir çizim şablonu aranmaz. Bir dış sayfa çerçevesi
 ve parça çerçeveleri kesim geometrisine dahil edilmez.
+
+`VIEW` / `DETAIL` / `SCALE` başlığı, `LETTER` / `SCALE` özniteliği ve en fazla
+bir alt çizgisi olan standart görünüş başlık bloklarında alt çizgi açıklama
+sayılır. Blok adı veya katman adına göre çizgi silinmez; genel metinli bloklar
+ve kapalı kesim geometrisi bu kuralla dışlanmaz.
 
 `7 adet`, `7 AD`, `7 pcs`, `QTY: 7` ve `adet: 7` biçimindeki TEXT, MTEXT
 ve blok ATTRIB yazıları okunur. Adet yazısının yerleşim noktası çerçevenin
@@ -188,8 +197,10 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 
 ## Hesap ve algoritma
 
-Motor adı **GOKWORKS NFP 1.4**. Önce hızlı ve doğrulanmış bir başlangıç
-yerleşimi oluşturulur; kalan sürede NFP aramasıyla iyileştirilir. Ayrıntılı
+Motor adı **Sparrow + GOKWORKS**. Sparrow başlangıç planını oluşturur;
+bizim GOKWORKS NFP 1.5 katmanı bu planı sıkıştırır, delikleri doldurur ve
+bütün parçaları taşınabilen fazla levhaları kaldırır. Kalan sürede kontur
+ve parça sırası araması sürer. Motor seçimi gerekmez. Ayrıntılı
 konturun hesabı süreyi tüketirse önceki en iyi yerleşim korunur. Kenar ve
 köşe adayları gerçek konturlar, aralıklar ve kenar paylarıyla denetlenir;
 parça geometrisi sınır dikdörtgeniyle değiştirilmez.
@@ -209,8 +220,9 @@ yol uygulanmaz.
 
 Kontur dönüşümleri ve yerleşmiş geometriler yeniden kullanılır. Dışbükey
 ayrıştırmada yalnız ortak kenarlı komşular birleştirilir; her birleşimin
-gerçek geometriye eşit ve dışbükey olması gerekir. Delikler ve konturlar
-basitleştirilmez; son çakışma/mesafe/kenar doğrulaması aynen uygulanır.
+gerçek geometriye eşit ve dışbükey olması gerekir. NFP ve son doğrulayıcı
+özgün delik/konturları kullanır; Sparrow için özel muhafazakâr ofset kopyası
+hazırlanır. Son çakışma/mesafe/kenar kontrolü özgün geometriyledir.
 Kaliteye göre otomatik üst sınırlar Hızlı 15, Dengeli 45, Yüksek 90 saniyedir;
 bunlar bekleme hedefi değildir. Geometri işlemleri işbirlikli kontrol
 noktalarında durur; bağımsız sonuç doğrulaması ayrıca tamamlanır.
@@ -242,8 +254,8 @@ Alan/boyut sıralamaları, tekrarlanabilir rastgele sıra değişimleri,
 izinli dönüşler ve farklı levha boyutu seçimleri denenir.
 Her fiziksel plaka, kalan uygun parçalarla doldurulduktan sonra sonraki
 plaka açılır. Ekrandaki ve rapordaki numaralar 1 → 2 → 3 olarak ilerler.
-Skor sırasıyla yerleşmeyen adet, kullanılan levha adedi, satın alınan alan
-ve yerleşimin yüksekliğidir. Başlangıç yerleşimine ek olarak Hızlı/Dengeli/Yüksek
+Birleşik skor sırasıyla yerleşmeyen adet, kullanılan levha adedi, satın alınan
+alan ve yatay/dikey kullanılan kenar şeritlerinden küçüğüdür. Başlangıç yerleşimine ek olarak Hızlı/Dengeli/Yüksek
 en fazla 3/12/40 iyileştirme denemesi yapar; zaman sınırı daha erken durdurabilir. Genetik algoritma
 veya kanıtlanmış matematiksel optimum olduğu iddia edilmez.
 
@@ -427,3 +439,9 @@ Tam regresyon: `python packaging/run_windows_tests.py modules/nesting/tests
 Linux'ta `QT_QPA_PLATFORM=offscreen` kullanılabilir. Yerel ekran görüntüleri ve
 üretilen örnek raporlar depoya eklenmez; Windows CI aynı testleri yerel Qt
 platformunda çalıştırır. SolidWorks bu özellik için gerekli değildir.
+
+## Sparrow ve küçük parça önizlemeleri
+
+Sparrow başlangıcı ve GOKWORKS kontur iyileştirmesi otomatik birlikte çalışır.
+Sol listedeki küçük konturlar delikleri ve en/boy oranını korur.
+[Sparrow sürümü, levha uyarlaması ve doğrulama sınırları](SPARROW.md).

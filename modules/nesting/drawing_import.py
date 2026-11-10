@@ -7,6 +7,8 @@ quietly omit a part. The strict DXF reader still validates every extracted cell.
 """
 
 from dataclasses import replace
+from collections import defaultdict
+import math
 from pathlib import Path
 import re
 
@@ -25,6 +27,24 @@ QUANTITY = re.compile(r'(?<![\w.,/])([+-]?\d+(?:[.,]\d+)?)\s*(?:adet|ad\.?|pcs?|
 PREFIX_QUANTITY = re.compile(r'(?<!\w)(?:qty|adet)\s*[:=]\s*([+-]?\d+(?:[.,]\d+)?)(?![\w.,])', re.I)
 
 
+def _view_heading(insert):
+    """Recognize a CAD view caption, never a general block containing text.
+
+    A standard VIEW/DETAIL/SCALE heading has a LETTER/SCALE attribute and
+    at most one straight underline. Closed contours and arbitrary attribute
+    tags cannot be discarded by this rule. Names, colors and layers vary.
+    """
+    block = insert.block()
+    if block is None: return False
+    entities = list(block)
+    if any(e.dxftype() not in {'LINE','TEXT','MTEXT','ATTDEF','ATTRIB'} for e in entities): return False
+    if sum(e.dxftype()=='LINE' for e in entities)>1: return False
+    tags = {e.dxf.tag.upper() for e in [*entities,*insert.attribs] if e.dxftype() in ('ATTDEF','ATTRIB')}
+    if not tags or not tags <= {'LETTER','SCALE'}: return False
+    return any(re.fullmatch(r'\s*(?:VIEW|DETAIL|SCALE)\s*',e.plain_text(),re.I)
+               for e in entities if e.dxftype() in ('TEXT','MTEXT'))
+
+
 def _entities(entities, excluded, stop, depth=0, inherited=None):
     if depth > 20:
         raise ValueError('İç içe BLOCK derinliği 20 sınırını aşıyor.')
@@ -39,6 +59,8 @@ def _entities(entities, excluded, stop, depth=0, inherited=None):
                 virtual = list(insert.virtual_entities(skipped_entity_callback=lambda e, reason: skipped.append(reason)))
                 if skipped:
                     raise ValueError('BLOCK dönüşümü okunamadı: ' + '; '.join(skipped))
+                if _view_heading(insert):
+                    virtual = [e for e in virtual if e.dxftype()!='LINE']
                 yield from _entities([*virtual, *insert.attribs], excluded, stop, depth+1, layer)
         elif entity.dxftype() in SUPPORTED | ANNOTATIONS:
             copy = entity.copy()
@@ -68,6 +90,49 @@ def _quantity(entity):
         _, first, second = entity.get_placement()
         position = (first + second) / 2 if second is not None else first
     return quantity, Point(position.x, position.y), text
+
+
+def _frame_lines(lines, epsilon, stop):
+    """Join only endpoint copies, within the configured physical tolerance.
+
+    These lines are for discovering annotation frames, not manufacturing
+    contours. Never node crossings or rewrite the source cut geometry.
+    """
+    buckets = defaultdict(list)
+    def endpoint(point):
+        key = tuple(math.floor(v/epsilon) for v in point)
+        nearby = [p for i in (-1,0,1) for j in (-1,0,1)
+                  for p in buckets[(key[0]+i,key[1]+j)]
+                  # Unit conversion has finite precision (including inch/mm).
+                  if math.dist(point,p)<=epsilon or math.isclose(math.dist(point,p),epsilon,rel_tol=1e-10,abs_tol=0.)]
+        if nearby: return min(nearby,key=lambda p:(math.dist(point,p),p))
+        buckets[key].append(point)
+        return point
+    result = []
+    for line in lines:
+        check_cancel(stop)
+        coords = list(line.coords)
+        coords[0] = endpoint(coords[0]); coords[-1] = endpoint(coords[-1])
+        joined = LineString(coords)
+        if joined.length>epsilon and joined.is_simple: result.append(joined)
+    return result
+
+
+def _is_frame(polygon, epsilon):
+    if polygon.is_empty or not polygon.is_valid or polygon.area<=0: return False
+    rectangle = polygon.minimum_rotated_rectangle
+    if polygon.boundary.hausdorff_distance(rectangle.boundary)<=epsilon: return True
+    # CAD drawing borders may be slightly sheared four-sided cells. This is
+    # an annotation-only rule: retain the actual border, do not square parts.
+    corners = list(polygon.simplify(epsilon,preserve_topology=True).exterior.coords)[:-1]
+    if len(corners)!=4 or not polygon.equals(polygon.convex_hull): return False
+    for i,point in enumerate(corners):
+        a = tuple(x-y for x,y in zip(corners[i-1],point))
+        b = tuple(x-y for x,y in zip(corners[(i+1)%4],point))
+        product = math.hypot(*a)*math.hypot(*b)
+        if product==0 or abs(sum(x*y for x,y in zip(a,b)))/product>math.sin(math.radians(1)):
+            return False
+    return True
 
 
 def read_drawing(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
@@ -125,14 +190,13 @@ def read_drawing(filename, *, material='S235JR', thickness=2, quantity=1, unit=N
         raise ValueError('Toplu çizimde adet yazısı bulunamadı. TEXT/MTEXT/ATTRIB olarak ör. “7 adet” yazın; '
                          'normal parçalar için çerçeveli toplu çizim seçimini kapatın.')
     # Polygonization does not node crossing helper lines into invented rectangles.
-    faces, _, _, _ = polygonize_full(straight)
+    faces, _, _, _ = polygonize_full(_frame_lines(straight,epsilon,stop))
     rectangles = {}
     for face in faces.geoms:
         check_cancel(stop)
         for ring in [face.exterior, *face.interiors]:
             polygon = Polygon(ring)
-            rectangle = polygon.minimum_rotated_rectangle
-            if polygon.area > 0 and polygon.boundary.hausdorff_distance(rectangle.boundary) <= epsilon:
+            if _is_frame(polygon,epsilon):
                 rectangles[polygon.normalize().wkb] = polygon
     frames = list(rectangles.values())
     frame_tree = STRtree(frames)
