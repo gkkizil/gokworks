@@ -77,6 +77,10 @@ def _run(request, deadline, stop):
         except FileNotFoundError:
             if interrupted: return None
             raise ValueError(f'Sparrow yardımcı süreci sonuç üretemedi (çıkış {child.returncode}).') from None
+        except PermissionError:
+            # A child killed at the deadline may leave its snapshot locked.
+            if interrupted: return None
+            raise ValueError('Sparrow sonuç dosyası okunamadı (dosya kilitli).') from None
         except (KeyError, TypeError, json.JSONDecodeError) as error:
             raise ValueError('Sparrow sonuç biçimi geçersiz.') from error
 

@@ -125,7 +125,10 @@ class BendAnnotations(QWidget):
 
 class SceneView(MechanismMeshView):
     def __init__(self):
-        super().__init__(); self.frame = None; self.bend_annotations = BendAnnotations(self)
+        super().__init__(); self.frame = None
+        # MeshView owns `overlay` for its interactive view cube. Replacing it
+        # breaks inherited leave/move/click handlers when branches are combined.
+        self.bend_annotations = BendAnnotations(self)
         self.setAccessibleName('Sac, büküm ekseni ve atanmış takımların 3B sahnesi')
         self.frameReady.connect(self.bend_annotations.update)
 
@@ -133,14 +136,17 @@ class SceneView(MechanismMeshView):
         self.frame = frame
         self.set_mesh(frame.mesh); self.bend_annotations.update()
 
+    @property
+    def annotations(self):
+        """Keep the UI's HUD accessor without replacing MeshView.overlay."""
+        return self.bend_annotations
+
     @Slot(int, object)
     def rendered(self, generation, image):
-        # A software frame finishing after the page/window was destroyed has nowhere to go.
         if shiboken6.isValid(self):
             super().rendered(generation, image)
 
     def set_hud(self, text, state=None):
-        """Current step / phase / angle read-out drawn inside the scene."""
         self.bend_annotations.hud, self.bend_annotations.state = text, state
         self.setAccessibleDescription(text); self.bend_annotations.update()
 
@@ -152,12 +158,13 @@ class SceneView(MechanismMeshView):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         if hasattr(self, 'bend_annotations'):
-            # Below the base overlay, so the view cube stays clickable and on top.
-            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_(); self.overlay.raise_()
+            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_()
+            self.overlay.raise_()
 
     @Slot(str)
     def fallback(self, message=''):
-        # The CPU canvas is raised by the switch; keep annotations and the view cube above it.
+        # CPU fallback raises its canvas; preserve both annotation and view-cube layers.
         super().fallback(message)
         if hasattr(self, 'bend_annotations'):
-            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_(); self.overlay.raise_()
+            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_()
+            self.overlay.raise_()
