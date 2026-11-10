@@ -136,3 +136,36 @@ def test_api_scan_failure_cannot_leave_previous_assembly_ready_to_save(page, qtb
     assert p.snapshot is None and not p.entries and not visible_sources(p)
     assert not p.valid_plan and not p.save_button.isEnabled()
     assert 'GetDocumentNames' in p.plan_message.text() and 'GetDocumentNames' in p.status_text
+
+
+def test_typing_a_prefix_waits_for_a_pause_and_never_locks_the_field(page, qtbot, tmp_path):
+    """Letter by letter: no preview per key; the plan follows once the user pauses (or presses Enter)."""
+    from modules.naming.ui import TYPING_DELAY_MS
+    p, w = page
+    p.destination.setText(str(tmp_path/'new')); p.load_snapshot(snapshot_at(tmp_path/'source'))
+    qtbot.waitUntil(lambda: not w.jobs.busy and p.valid_plan)
+    prefix = p.form.fields['prefix']; prefix.setFocus(); prefix.clear(); qtbot.wait(20)
+    started = []; real = p.update_preview
+    p.update_preview = lambda: (started.append(prefix.text()), real())[1]
+    for letter in 'HALİÇ':
+        prefix.insert(letter); qtbot.wait(TYPING_DELAY_MS // 3)
+        assert prefix.isEnabled() and p.rules_panel.isEnabled()
+    assert started == []                                       # still typing: nothing rebuilt yet
+    qtbot.waitUntil(lambda: started == ['HALİÇ'], timeout=TYPING_DELAY_MS * 3)
+    assert prefix.isEnabled()                                  # the running preview does not lock the field
+    qtbot.waitUntil(lambda: not w.jobs.busy and p.valid_plan)
+    assert all(PureWindowsPath(e.destination).name.startswith('HALİÇ') for e in p.entries)
+    prefix.insert('-'); qtbot.keyClick(prefix, Qt.Key_Return)
+    assert started[-1] == 'HALİÇ-'                             # Enter applies at once
+    qtbot.waitUntil(lambda: not w.jobs.busy and p.valid_plan)
+    assert all(PureWindowsPath(e.destination).name.startswith('HALİÇ-') for e in p.entries)
+
+
+def test_scan_still_locks_the_rules(page, qtbot, tmp_path, monkeypatch):
+    p, w = page
+    import threading
+    release = threading.Event()
+    monkeypatch.setattr('modules.naming.ui.engine.worker', lambda sink, stop, **kw: release.wait(5))
+    p.read_active(); qtbot.waitUntil(lambda: w.jobs.busy)
+    assert not p.rules_panel.isEnabled()
+    release.set(); qtbot.waitUntil(lambda: not w.jobs.busy)

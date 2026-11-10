@@ -89,9 +89,12 @@ def verify_libredwg(target):
         parts = dwg_import.read_dwg(dwg)
     finally:
         os.environ.pop('GOKWORKS_LIBREDWG_DWG2DXF', None)
-    area = 120*80 - 3.141592653589793*15**2
-    if len(parts) != 1 or abs(parts[0].polygon.area - area) > 1:
-        raise SystemExit(f'LibreDWG doğrulaması başarısız: {len(parts)} parça, {[p.polygon.area for p in parts]}')
+    # The DWG path must give exactly what the DXF reader gives for the original drawing
+    # (arcs are polygonised the same way, so compare with that, not with the exact circle).
+    from modules.nesting.dxf_import import read_dxf
+    area = read_dxf(source)[0].polygon.area
+    if len(parts) != 1 or abs(parts[0].polygon.area - area) > 0.01:
+        raise SystemExit(f'LibreDWG doğrulaması başarısız: {len(parts)} parça, {[p.polygon.area for p in parts]} (DXF: {area})')
     print(f'LibreDWG {LIBREDWG_VERSION} doğrulandı: {[k for k, _ in found]} · alan {parts[0].polygon.area:.1f} mm² · {parts[0].notes[-1]}')
 
 

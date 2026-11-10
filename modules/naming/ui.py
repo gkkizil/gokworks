@@ -4,7 +4,7 @@ from gui_qt.components import fit_columns
 from pathlib import Path, PureWindowsPath
 from collections import Counter
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (QHBoxLayout, QComboBox, QTreeView, QInputDialog,
+from PySide6.QtWidgets import (QHBoxLayout, QComboBox, QTreeView, QInputDialog, QLineEdit,
                               QVBoxLayout, QWidget, QToolButton, QMenu, QHeaderView)
 
 from modules.naming import exporter as engine
@@ -24,6 +24,12 @@ def flat_pane(right_margin=0):
     return widget, layout
 
 
+# Typing a prefix letter by letter must not rebuild the plan after every key: wait until the
+# user pauses. Choices (method combo) still update at once; Enter or leaving the field applies now.
+TYPING_DELAY_MS = 700
+CHOICE_DELAY_MS = 150
+
+
 class NamingPage(BasePage):
     def __init__(self, context):
         super().__init__(context, 'İsimlendirme aracı', 'Montaj ve teknik resim bağlantılarını koruyarak yeni bir paket oluşturun.')
@@ -34,6 +40,7 @@ class NamingPage(BasePage):
         self.valid_plan = False
         self.last_report = None
         self.preview_pending = False
+        self.previewing = False
         self.plan_signature = None
         self.scan_button = self.action('Dosyaları oku', self.scan, primary=True)
         self.save_button = self.action('Paketi oluştur', self.save)
@@ -78,7 +85,7 @@ class NamingPage(BasePage):
         body.addWidget(self.destination_form)
         body.addWidget(separator())
 
-        rules = QWidget()
+        rules = self.rules_panel = QWidget()
         rules_layout = QVBoxLayout(rules)
         rules_layout.setContentsMargins(0, 0, 0, 0)
         rules_layout.setSpacing(8)
@@ -144,8 +151,10 @@ class NamingPage(BasePage):
                               self.discover_button, self.active_button, self.edit_button))
         self.preview_timer = QTimer(self)
         self.preview_timer.setSingleShot(True)
-        self.preview_timer.setInterval(150)
+        self.preview_timer.setInterval(CHOICE_DELAY_MS)
         self.preview_timer.timeout.connect(self.update_preview)
+        for entry in (*self.rules_panel.findChildren(QLineEdit), *self.destination_form.findChildren(QLineEdit)):
+            entry.editingFinished.connect(self.apply_typed_now)
         self.form.changed.connect(self.form_changed)
         self.rules_form.changed.connect(lambda key: self.update_rule_fields() if key == 'mode' else None)
         self.update_rule_fields()
@@ -155,6 +164,12 @@ class NamingPage(BasePage):
 
     def set_busy(self, busy):
         super().set_busy(busy)
+        if not busy:
+            self.previewing = False
+        elif self.previewing:
+            # A preview only reads; a result for older values is discarded by its signature.
+            # Keep the rule and target fields usable, so typing is never interrupted.
+            self.rules_panel.setEnabled(True); self.destination_form.setEnabled(True)
         self.save_button.setEnabled(not busy and self.valid_plan)
         self.reset_action.setEnabled(not busy)
 
@@ -179,7 +194,12 @@ class NamingPage(BasePage):
         else:
             self.valid_plan = False
             self.save_button.setEnabled(False)
-            self.preview_timer.start()
+            typed = isinstance(self.form.fields.get(key), QLineEdit) or key == 'destination'
+            self.preview_timer.start(TYPING_DELAY_MS if typed else CHOICE_DELAY_MS)
+
+    def apply_typed_now(self):
+        if self.preview_timer.isActive():
+            self.update_preview()
 
     def discover(self):
         if not self.can_start():
@@ -248,6 +268,7 @@ class NamingPage(BasePage):
         values = self.form.values()
         snapshot, overrides = self.snapshot, dict(self.overrides)
         signature = (id(snapshot), dict(values), dict(overrides))
+        self.previewing = True
         self.jobs.start(self, lambda sink, stop: self.prepare_plan(snapshot, values, overrides, signature, sink, stop))
 
     @staticmethod

@@ -423,10 +423,17 @@ class SmartSplittingPage(BasePage):
             self.import_options=options
         for key in ('unit','tolerance'): self.form.fields[key].setEnabled(paths is not None)
         if replace: self.sources,self.meta=[],[]
-        known={(p.source_sha256,p.code) for p in self.sources}
+        # The same file added twice is skipped; two different files with the same short name
+        # (“Flanş - 3 mm”, “Flanş - 2 mm”) get distinct codes, so their segments stay apart in Nesting.
+        known={(p.source_sha256,m.get('code',p.code)) for p,m in zip(self.sources,self.meta)}
+        used={p.code.casefold() for p in self.sources}
         for part,meta in zip(deepcopy(parts),metas):
             if (part.source_sha256,part.code) in known and part.source_sha256: continue
-            self.sources.append(part); self.meta.append(dict(meta)); known.add((part.source_sha256,part.code))
+            known.add((part.source_sha256,part.code)); meta=dict(meta,code=part.code)
+            code,n=part.code,2
+            while code.casefold() in used: code=f'{part.code}_{n}'; n+=1
+            part.code=code; used.add(code.casefold())
+            self.sources.append(part); self.meta.append(meta)
         self.solutions={}; self.part_errors={}; self.import_stale=False
         keep=next((i for i,p in enumerate(self.sources) if p.code==selected),None) if replace else None
         self.refresh_sources(); self.select_source(keep if keep is not None else 0 if replace or self.current<0 else self.current)
@@ -598,11 +605,14 @@ class SmartSplittingPage(BasePage):
         solutions=self.ready_solutions()
         if not self.can_start() or not solutions: return
         from .adapter import transfer_to_nesting
-        nesting=self.context.pages['nesting']; snapshot=deepcopy(nesting.project)
+        nesting=self.context.pages['nesting']
+        snapshot=deepcopy(nesting.project); transfers=deepcopy(getattr(nesting,'_split_transfers',{}))
         try:
             for solution in solutions: transfer_to_nesting(nesting,solution)
-        except ValueError as error:
-            nesting.project=snapshot; nesting.refresh()   # all or nothing
+        except Exception as error:
+            # All or nothing: project, transfer registry and the Nesting forms as before.
+            nesting.project=snapshot; nesting._split_transfers=transfers; nesting.sync_forms(); nesting.refresh()
+            if not isinstance(error,ValueError): raise
             return self.set_status(error,True)
         if len(solutions)>1:
             nesting.set_status(f'{len(solutions)} parçanın segmentleri Nesting’e aktarıldı.')
@@ -611,7 +621,7 @@ class SmartSplittingPage(BasePage):
     def export_dialog(self):
         solutions=self.ready_solutions()
         if not self.can_start() or not solutions: return
-        name=self.source.code+'_SEGMENTLER' if len(solutions)==1 else 'BOLUNMUS_PARCALAR'
+        name=solutions[0].source.code+'_SEGMENTLER' if len(solutions)==1 else 'BOLUNMUS_PARCALAR'
         path,_=QFileDialog.getSaveFileName(self,'Yeni DXF çıktı klasörü adı',name,'Tüm dosyalar (*)')
         if path: self.export_to(path)
 

@@ -63,6 +63,7 @@ cover/
 # Django stuff:
 *.log
 windows-tests.xml
+windows-flaky.json
 packaging/licenses/installed/
 # Generated UI captures and raw verification output belong in CI artifacts.
 # Runtime images in assets/ and technical input fixtures remain versioned.

@@ -390,3 +390,18 @@ def test_changed_source_is_detected_even_when_the_watcher_event_is_lost(window,q
     path.write_bytes(b'after!')
     qtbot.waitUntil(lambda:page.result is None,timeout=5000)
     assert 'yeniden tarayın' in page.status_text and page.source_poll.isActive()
+
+
+def test_a_project_opened_without_its_drawings_keeps_its_own_message(window,qtbot,tmp_path):
+    """Watching starts from the files as they are now: missing or older sources are not reported again."""
+    page=window.pages['tolerance_stack'];page.load_example()
+    path=tmp_path/'moved.SLDDRW';path.write_bytes(b'drawing')
+    from modules.tolerance_stack.storage import fingerprint
+    stamp=fingerprint(path);path.unlink()
+    page.project.sources=[stamp];page.set_status('Proje açıldı. moved.SLDDRW: kaynak dosya bulunamadı.',True);page.watch_sources()
+    qtbot.wait(1800)
+    assert page.status_text.startswith('Proje açıldı')
+    path.write_bytes(b'drawing again')                     # appearing later is a change
+    qtbot.waitUntil(lambda:'yeniden tarayın' in page.status_text,timeout=5000)
+    calls=[];page.invalidate=lambda *a,**k:calls.append(1)
+    qtbot.wait(1800);assert calls==[]                       # one report per change, not one per poll

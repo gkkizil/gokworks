@@ -151,7 +151,9 @@ async function prepare({github, context, core, retryFailed = false, now = Date.n
       }
       const remaining = SETTLE_MINUTES * 60000 - (now - Date.parse(commit.commit.committer.date));
       core.notice(`${branch}: pushed moments ago; waiting ${Math.ceil(remaining / 1000)} s for further pushes.`);
-      await sleep(Math.min(Math.max(remaining, 0), SETTLE_MINUTES * 60000));
+      const waited = Math.min(Math.max(remaining, 0), SETTLE_MINUTES * 60000);
+      await sleep(waited);
+      now += waited;   // the next branch is judged at the time after this wait, not before it
       if (await branchSha(github, repo, branch) !== head) {
         core.notice(`${branch}: a newer push arrived while waiting; its own run validates it.`);
         continue;

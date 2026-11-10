@@ -167,3 +167,11 @@ def test_bundled_converter_output_with_placeholders_reads_end_to_end(tmp_path, m
     source = tmp_path/'Kapak - 2 mm - 1 adet.dwg'; source.write_bytes(b'AC1015 x')
     parts = read_dwg(source)
     assert len(parts) == 1 and parts[0].polygon.area == pytest.approx(600) and source.read_bytes() == b'AC1015 x'
+
+
+def test_section_frames_are_kept_even_if_a_header_value_looks_like_handle_zero(tmp_path):
+    dxf = tmp_path/'p.dxf'; write_dxf(dxf); with_placeholder_objects(dxf)
+    text = dxf.read_text(encoding='utf-8').replace('$ACADVER\n  1\n', '$ACADVER\n  5\n0\n  1\n', 1)
+    dxf.write_text(text, encoding='utf-8')
+    cleaned = dwg_import._drop_invalid_handles(dxf).read_text(encoding='utf-8')
+    assert '$ACADVER' in cleaned and 'MLEADERSTYLE\n  5\n0\n' not in cleaned and cleaned.rstrip().endswith('EOF')
