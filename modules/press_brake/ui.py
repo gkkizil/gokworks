@@ -2,15 +2,19 @@
 from dataclasses import replace
 from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, QStandardPaths, QSize
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-                              QListWidget, QScrollArea, QSlider, QSplitter, QTextBrowser, QVBoxLayout, QWidget)
-from gui_qt.components import BasePage, button, label
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFormLayout, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+                              QListView, QListWidget, QScrollArea, QSlider, QSplitter, QTextBrowser, QVBoxLayout, QWidget)
+from gui_qt.components import AdaptiveRow, BasePage, Disclosure, ElidedLabel, button, card, label, separator
 from gui_qt.theme import COLORS
 from .dialogs import ToolDialog, format_segments, segments
 from .models import Plan, Step
 from .service import PHASES, STATUS
 from .viewer import SceneView
 from .tool_picker import ToolPicker, profile_icon
+from .cards import CARD, STATES, StepCardDelegate
+
+SCOPE = ('Kapsam: sac / atanmış takım katıları / varsa tutucular. Tezgâh, arka dayama, adımlar arası tutuş '
+         've çıkarma rotası kapsam dışı. CNC strok hesabı ve üretim uygunluğu onayı değildir.')
 
 
 class PressBrakePage(BasePage):
@@ -25,69 +29,121 @@ class PressBrakePage(BasePage):
         self.check_button = self.action('Hareketi kontrol et', self.calculate, primary=True)
         self.pdf_button = self.action('Büküm Föyü PDF', self.pdf_dialog)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
-        row = QHBoxLayout()
+        # Source bar: where the part comes from, and a one-line part summary.
+        row = QHBoxLayout(); row.setSpacing(8)
         self.sw_button = button('Aktif SolidWorks Parçasını Al', self.read_sw); row.addWidget(self.sw_button)
         self.demo_picker = QComboBox(); self.demo_picker.addItem('DEMO · Delikli kutu / 2 mm', 'box')
         self.demo_picker.addItem('DEMO · U / 2 mm', 'U'); self.demo_picker.addItem('DEMO · L / 120°', 'L120')
-        self.demo_picker.setMinimumContentsLength(14); self.demo_picker.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
-        self.demo_picker.setAccessibleName('Özgün demo parçası'); row.addWidget(self.demo_picker, 1)
+        self.demo_picker.setMinimumContentsLength(22); self.demo_picker.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.demo_picker.setAccessibleName('Özgün demo parçası'); row.addWidget(self.demo_picker)
         self.demo_button = button('Demoyu aç', lambda: self.load_demo(self.demo_picker.currentData())); row.addWidget(self.demo_button)
+        self.part_label = ElidedLabel('Bir SolidWorks sac parçasını alın veya özgün demo açın.'); self.part_label.setProperty('role', 'muted')
+        row.addWidget(self.part_label, 1)
         self.layout.addLayout(row)
-        self.part_label = label('Bir SolidWorks sac parçasını alın veya özgün demo açın.', 'muted'); self.part_label.setWordWrap(True); self.layout.addWidget(self.part_label)
         self.splitter = QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
-        left = QWidget(); left.setMinimumWidth(130); left_body = QVBoxLayout(left); left_body.setContentsMargins(0, 0, 0, 0)
-        left_body.addWidget(label('BÜKÜM SIRASI', 'muted')); self.bends = QListWidget(); self.bends.setAccessibleName('Büküm sırası')
+
+        # Left: bend sequence as step cards.
+        left = QWidget(); left.setMinimumWidth(150); left_body = QVBoxLayout(left); left_body.setContentsMargins(0, 0, 0, 0); left_body.setSpacing(6)
+        self.sequence_title = label('BÜKÜM SIRASI', 'section', wrap=False); left_body.addWidget(self.sequence_title)
+        self.bends = QListWidget(); self.bends.setAccessibleName('Büküm sırası')
         self.bends.setWordWrap(True); self.bends.setTextElideMode(Qt.ElideNone); self.bends.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.bends.setResizeMode(QListView.Adjust); self.bends.setSpacing(0); self.bends.setUniformItemSizes(False)
+        self.step_cards = StepCardDelegate(self.bends, context.appearance); self.bends.setItemDelegate(self.step_cards)
         left_body.addWidget(self.bends, 1)
-        order = QHBoxLayout(); self.up = button('↑', lambda: self.reorder(-1)); self.down = button('↓', lambda: self.reorder(1))
+        order = QHBoxLayout(); order.setSpacing(8)
+        self.up = button('↑ Yukarı', lambda: self.reorder(-1)); self.down = button('↓ Aşağı', lambda: self.reorder(1))
         self.up.setAccessibleName('Bükümü yukarı taşı'); self.down.setAccessibleName('Bükümü aşağı taşı')
+        self.up.setToolTip('Seçili bükümü sırada bir önceye alır; önceki kontrol sonucu geçersiz olur.')
+        self.down.setToolTip('Seçili bükümü sırada bir sonraya alır; önceki kontrol sonucu geçersiz olur.')
         order.addWidget(self.up); order.addWidget(self.down); left_body.addLayout(order)
-        self.import_tool = button('DXF takım ekle…', self.tool_dialog); left_body.addWidget(self.import_tool)
-        self.unitless = QCheckBox('Birimsiz DXF = mm'); self.unitless.setToolTip('1 çizim birimi = 1 mm. Yalnız çizimin mm ölçekte olduğunu biliyorsanız seçin.'); left_body.addWidget(self.unitless)
+        dxf = QWidget(); dxf_body = QVBoxLayout(dxf); dxf_body.setContentsMargins(0, 0, 0, 0); dxf_body.setSpacing(6)
+        self.import_tool = button('DXF takım ekle…', self.tool_dialog); dxf_body.addWidget(self.import_tool)
+        self.unitless = QCheckBox('Birimsiz DXF = mm'); self.unitless.setToolTip('1 çizim birimi = 1 mm. Yalnız çizimin mm ölçekte olduğunu biliyorsanız seçin.'); dxf_body.addWidget(self.unitless)
+        self.dxf_section = Disclosure('Kendi takımım (DXF)', dxf); left_body.addWidget(self.dxf_section)
         self.splitter.addWidget(left)
-        center = QWidget(); center.setMinimumWidth(140); center_body = QVBoxLayout(center); center_body.setContentsMargins(0, 0, 0, 0)
+
+        # Center: the 3D scene takes all remaining room; step/phase/angle and the legend live inside it.
+        center = QWidget(); center.setMinimumWidth(180); center_body = QVBoxLayout(center); center_body.setContentsMargins(0, 0, 0, 0); center_body.setSpacing(6)
         self.viewer = SceneView(); center_body.addWidget(self.viewer, 1)
-        views = QHBoxLayout()
-        self.flat_button = button('Açınım', lambda: self.show_shape(False)); self.formed_button = button('Bitmiş form', lambda: self.show_shape(True))
-        self.fit_button = button('Sığdır', self.viewer.fit)
-        for w in (self.flat_button, self.formed_button, self.fit_button):
-            views.addWidget(w)
-        center_body.addLayout(views)
-        legend = label('Sarı: aktif eksen · Mavi: üst · Yeşil: alt · Kırmızı: çarpışma', 'muted'); legend.setWordWrap(True); center_body.addWidget(legend)
         self.splitter.addWidget(center)
-        right = QWidget(); right.setMinimumWidth(200); form = QFormLayout(right); form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow); form.setRowWrapPolicy(QFormLayout.WrapAllRows)
-        self.bend_label = QLabel('Adım seçin'); self.bend_label.setWordWrap(True); form.addRow(self.bend_label)
+
+        # Right: selected step → tools → positioning; optional details collapse.
+        right = QWidget(); right.setMinimumWidth(210); side = QVBoxLayout(right); side.setContentsMargins(0, 0, 6, 0); side.setSpacing(10)
+        side.addWidget(label('SEÇİLİ ADIM', 'section', wrap=False))
+        self.bend_label = QLabel('Adım seçin'); self.bend_label.setProperty('role', 'title'); self.bend_label.setWordWrap(True); side.addWidget(self.bend_label)
+        values = QGridLayout(); values.setHorizontalSpacing(8); values.setVerticalSpacing(6); self.values = {}
+        for i, (key, title) in enumerate((('inside', 'İç açı'), ('turn', 'Dönüş'), ('radius', 'İç R'), ('length', 'Etkin boy'))):
+            tile, tile_body = card(); tile_body.setContentsMargins(8, 5, 8, 5); tile_body.setSpacing(0)
+            tile_body.addWidget(label(title, 'muted', wrap=False)); value = label('—', 'result', wrap=False); tile_body.addWidget(value)
+            self.values[key] = value; values.addWidget(tile, i//2, i % 2)
+        self.value_grid = values; self.value_tiles = [values.itemAt(i).widget() for i in range(values.count())]
+        side.addLayout(values)
+        side.addWidget(separator()); side.addWidget(label('TAKIMLAR', 'section', wrap=False))
+        tools = QFormLayout(); tools.setRowWrapPolicy(QFormLayout.WrapAllRows); tools.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.punch = QComboBox(); self.die = QComboBox(); self.channel = QComboBox()
         self.punch_button = button('Üst bıçak seç…', lambda: self.choose_tool('punch'))
         self.die_button = button('Alt kalıp seç…', lambda: self.choose_tool('die'))
-        for title, field in (('Üst bıçak · görsel kütüphane', self.punch_button), ('Alt kalıp · görsel kütüphane', self.die_button)):
-            field.setMinimumHeight(60); field.setIconSize(QSize(42, 46)); form.addRow(title, field)
+        for title, field in (('Üst bıçak', self.punch_button), ('Alt kalıp', self.die_button)):
+            field.setMinimumHeight(64); field.setIconSize(QSize(48, 52)); field.setStyleSheet('text-align: left; padding-left: 8px;')
+            tools.addRow(title, field)
         # Keep the selection models/API for existing tests and saved page state;
         # the operator selects from section cards, not these hidden widgets.
         for picker in (self.punch, self.die):
             picker.setParent(self); picker.hide()
-        for title, field in (('V kanalı', self.channel),):
-            field.setMinimumContentsLength(10); field.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
-            field.setAccessibleName(title); form.addRow(title, field)
+        self.channel.setMinimumContentsLength(10); self.channel.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.channel.setAccessibleName('V kanalı'); tools.addRow('V kanalı', self.channel)
+        side.addLayout(tools)
+        side.addWidget(separator()); side.addWidget(label('KONUMLANDIRMA', 'section', wrap=False))
+        form = QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapAllRows); form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.fixed = QComboBox(); self.fixed.addItem('Ana flanş sabit', 'parent'); self.fixed.addItem('Karşı taraf sabit', 'child'); form.addRow('Tutuş', self.fixed)
         self.orientation = QComboBox(); self.orientation.addItem('0°', 0); self.orientation.addItem('180° · yeniden konumlandır', 180); form.addRow('Parça yönü', self.orientation)
-        self.direction = QComboBox(); self.direction.addItem('CAD büküm yönü', False); self.direction.addItem('Büküm yönünü ters çevir', True); form.addRow('Yön', self.direction)
+        self.direction = QComboBox(); self.direction.addItem('CAD büküm yönü', False); self.direction.addItem('Büküm yönünü ters çevir', True); form.addRow('Büküm yönü', self.direction)
+        side.addLayout(form)
+        side.addWidget(separator())
+        segment_box = QWidget(); segment_form = QFormLayout(segment_box); segment_form.setContentsMargins(0, 0, 0, 0)
+        segment_form.setRowWrapPolicy(QFormLayout.WrapAllRows); segment_form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.punch_segments = QLineEdit(); self.die_segments = QLineEdit()
         for title, field in (('Üst segmentler · x:L (mm)', self.punch_segments), ('Alt segmentler · x:L (mm)', self.die_segments)):
-            field.setAccessibleName(title); form.addRow(title, field)
-        self.apply_segments = button('Segment yerleşimini uygula', self.update_segments); form.addRow(self.apply_segments)
-        self.tool_info = QLabel(); self.tool_info.setWordWrap(True); form.addRow(self.tool_info)
-        self.details = QTextBrowser(); self.details.setMinimumHeight(100); self.details.setOpenExternalLinks(False); form.addRow(self.details)
-        self.right_scroll = QScrollArea(); self.right_scroll.setWidgetResizable(True); self.right_scroll.setWidget(right); self.right_scroll.setMinimumWidth(200)
-        self.splitter.addWidget(self.right_scroll); self.splitter.setStretchFactor(1, 1); self.splitter.setSizes([180, 700, 280]); self.layout.addWidget(self.splitter, 1)
-        playback = QHBoxLayout(); self.previous = button('◀ Adım', lambda: self.select_step(-1)); self.play = button('Oynat', self.toggle_play); self.next = button('Adım ▶', lambda: self.select_step(1))
-        self.slider = QSlider(Qt.Horizontal); self.slider.setRange(0, 0); self.slider.setAccessibleName('Hareket konumu')
+            field.setAccessibleName(title); field.setPlaceholderText('ör. -40:30; 5:35'); segment_form.addRow(title, field)
+        self.apply_segments = button('Segment yerleşimini uygula', self.update_segments); segment_form.addRow(self.apply_segments)
+        self.segment_section = Disclosure('Segment yerleşimi', segment_box); side.addWidget(self.segment_section)
+        self.tool_info = QLabel(); self.tool_info.setWordWrap(True); self.tool_info.setTextFormat(Qt.PlainText)
+        self.tool_section = Disclosure('Takım verisi', self.tool_info); side.addWidget(self.tool_section)
+        details = QWidget(); details_body = QVBoxLayout(details); details_body.setContentsMargins(0, 0, 0, 0)
+        self.details = QTextBrowser(); self.details.setMinimumHeight(110); self.details.setOpenExternalLinks(False); details_body.addWidget(self.details)
+        scope = label(SCOPE, 'muted'); details_body.addWidget(scope)
+        self.details_section = Disclosure('Kontrol ayrıntıları ve kapsam', details); side.addWidget(self.details_section)
+        side.addStretch(1)
+        self.right_scroll = QScrollArea(); self.right_scroll.setWidgetResizable(True); self.right_scroll.setWidget(right); self.right_scroll.setMinimumWidth(220)
+        self.right_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff); self.right_scroll.setFrameShape(QScrollArea.NoFrame)
+        self.splitter.addWidget(self.right_scroll); self.splitter.setStretchFactor(1, 1); self.splitter.setSizes([210, 760, 290]); self.layout.addWidget(self.splitter, 1)
+        self.splitter.splitterMoved.connect(self.reflow_values)
+
+        # Transport: playback on the left, view shortcuts on the right; stacks on narrow windows.
+        transport = QWidget(); playback = QHBoxLayout(transport); playback.setContentsMargins(0, 0, 0, 0); playback.setSpacing(8)
+        self.previous = button('◀ Önceki', lambda: self.select_step(-1)); self.play = button('▶ Oynat', self.toggle_play, primary=True)
+        self.next = button('Sonraki ▶', lambda: self.select_step(1))
+        self.previous.setToolTip('Önceki büküm adımı'); self.next.setToolTip('Sonraki büküm adımı')
+        self.play.setToolTip('Kontrol edilen hareketi oynatır; çarpışan karede durur.')
+        self.slider = QSlider(Qt.Horizontal); self.slider.setRange(0, 0); self.slider.setAccessibleName('Hareket konumu'); self.slider.setMinimumWidth(80)
         self.speed = QComboBox(); self.speed.addItem('5 kare/s', 200); self.speed.addItem('12 kare/s', 83); self.speed.addItem('24 kare/s', 42); self.speed.setCurrentIndex(1); self.speed.setAccessibleName('Oynatma hızı; kontrol çözünürlüğünü değiştirmez')
+        self.speed.setToolTip('Yalnız oynatma hızı; kontrol çözünürlüğünü değiştirmez.')
         for w in (self.previous, self.play, self.next, self.slider, self.speed):
             playback.addWidget(w, 1 if w is self.slider else 0)
-        self.layout.addLayout(playback)
-        self.frame_label = label('Hareket kontrolü henüz çalıştırılmadı.', 'muted'); self.frame_label.setWordWrap(True); self.layout.addWidget(self.frame_label)
-        scope = label('Kapsam: sac / atanmış takım katıları / varsa tutucular. Tezgâh, arka dayama, adımlar arası tutuş ve çıkarma rotası kapsam dışı. CNC strok hesabı değildir.', 'muted'); scope.setWordWrap(True); self.layout.addWidget(scope)
+        views = QWidget(); view_row = QHBoxLayout(views); view_row.setContentsMargins(0, 0, 0, 0); view_row.setSpacing(8)
+        self.flat_button = button('Açınım', lambda: self.show_shape(False)); self.formed_button = button('Bitmiş form', lambda: self.show_shape(True))
+        self.fit_button = button('Sığdır', self.viewer.fit)
+        self.flat_button.setToolTip('Gerçek açınım; delikler ve rahatlatmalar korunur.')
+        self.formed_button.setToolTip('Nominal bitmiş form; takım ve konumlandırma hareketi içermez.')
+        self.fit_button.setToolTip('Sahneyi pencereye sığdırır.')
+        for w in (self.flat_button, self.formed_button, self.fit_button):
+            view_row.addWidget(w)
+        self.transport = AdaptiveRow(transport, views, stretch=0); self.layout.addWidget(self.transport)
+        status = QHBoxLayout(); status.setSpacing(10)
+        self.result_badge = label('○ Kontrol bekliyor', 'muted', wrap=False); status.addWidget(self.result_badge)
+        self.frame_label = ElidedLabel('Hareket kontrolü henüz çalıştırılmadı.'); self.frame_label.setProperty('role', 'muted')
+        self.frame_label.setToolTip(SCOPE); status.addWidget(self.frame_label, 1)
+        self.layout.addLayout(status)
         self.finish_layout()
         self.timer = QTimer(self); self.timer.timeout.connect(self.advance)
         self.bends.currentRowChanged.connect(self.select)
@@ -98,9 +154,22 @@ class PressBrakePage(BasePage):
                           self.punch, self.die, self.punch_button, self.die_button, self.channel, self.fixed, self.orientation, self.direction, self.punch_segments, self.die_segments, self.apply_segments]
         self.theme_changed(); self.refresh_actions()
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event); self.reflow_values()
+
+    def reflow_values(self, *_):
+        if hasattr(self, 'value_grid'):
+            # Two value tiles per row while they fit, one per row in a narrow side panel.
+            columns = 2 if self.right_scroll.viewport().width() >= 250 else 1
+            for i, tile in enumerate(self.value_tiles):
+                position = (i//columns, i % columns)
+                if self.value_grid.getItemPosition(self.value_grid.indexOf(tile))[:2] != position:
+                    self.value_grid.addWidget(tile, *position)
+
     def theme_changed(self):
         if hasattr(self, 'viewer'):
             self.viewer.set_background(COLORS[self.context.appearance]['canvas'])
+            self.step_cards.appearance = self.context.appearance; self.bends.viewport().update()
         if getattr(self, 'plan', None):
             self.refresh_tool_buttons()
 
@@ -124,7 +193,20 @@ class PressBrakePage(BasePage):
             self.preview()
 
     def pause(self):
-        self.timer.stop(); self.play.setText('Oynat')
+        self.timer.stop(); self.play.setText('▶ Oynat')
+
+    def show_state(self, text, hud=None):
+        """One read-out below the scene and a compact one inside it (step · phase · angle)."""
+        self.frame_label.setText(text)
+        state = self.result.status if self.result else None
+        self.viewer.set_hud(hud if hud is not None else text, state)
+
+    def show_result_badge(self):
+        status = self.result.status if self.result else None
+        symbol, text, tone = STATES[status]
+        self.result_badge.setText(f'{symbol} {text}')
+        self.result_badge.setProperty('role', {'danger': 'error', 'muted': 'muted'}.get(tone, tone))
+        self.result_badge.style().unpolish(self.result_badge); self.result_badge.style().polish(self.result_badge)
 
     def start(self, operation):
         if not self.can_start():
@@ -175,9 +257,11 @@ class PressBrakePage(BasePage):
         self.loading = False; self.bends.setCurrentRow(0)
         self.refresh_steps()
         p = plan.part
-        self.part_label.setText(f'{"DEMO · " if p.demo else ""}{p.name} · {p.configuration} · {p.thickness:g} mm · {p.material} · {len(p.bends)} büküm')
-        self.viewer.frame = None; self.viewer.set_mesh(flat)
-        self.frame_label.setText('Açınım yüklendi. Sırayı ve takımları atayıp hareketi kontrol edin.')
+        fields = [p.name, p.configuration, f'{p.thickness:g} mm', p.material, f'{len(p.bends)} büküm']
+        text = ' · '.join(dict.fromkeys(f for f in fields if f))
+        self.part_label.setText(('DEMO · ' if p.demo and 'DEMO' not in text else '')+text); self.part_label.setToolTip(self.part_label.text())
+        self.viewer.frame = None; self.viewer.set_mesh(flat); self.show_result_badge()
+        self.show_state('Açınım yüklendi. Sırayı ve takımları atayıp hareketi kontrol edin.', 'Açınım')
         self.set_status('Parça okundu; hareket kontrolü bekleniyor.'); self.refresh_actions()
 
     def select(self, index, seek=True):
@@ -187,12 +271,15 @@ class PressBrakePage(BasePage):
             self.pause()
         self.loading = True
         step = self.plan.steps[index]; bend = next(b for b in self.plan.part.bends if b.id == step.bend)
-        self.bend_label.setText(f'Adım {index+1} · {bend.title}\nİç açı {bend.inside_angle:g}° / dönüş {bend.turn:g}°\nİç R {bend.radius:g} mm · etkin boy {bend.length:.2f} mm')
+        self.bend_label.setText(f'Adım {index+1} / {len(self.plan.steps)} · {bend.title}')
+        for key, text in (('inside', f'{bend.inside_angle:g}°'), ('turn', f'{bend.turn:g}°'), ('radius', f'{bend.radius:g} mm'),
+                          ('length', f'{bend.length:.2f} mm')):
+            self.values[key].setText(text.replace('.', ','))
         for picker, value in ((self.punch, step.punch), (self.die, step.die), (self.fixed, step.fixed_side), (self.orientation, step.orientation), (self.direction, step.reverse)):
             picker.setCurrentIndex(picker.findData(value))
         die = self.plan.tool(step.die); self.channel.clear()
         for channel in die.channels:
-            self.channel.addItem(f'{channel.id} · V{channel.opening:g} / {channel.angle:g}°', channel.id)
+            self.channel.addItem(f'{channel.id} · V{channel.opening:g} / {channel.angle:g}°'.replace('.', ','), channel.id)
         self.channel.setCurrentIndex(self.channel.findData(step.channel))
         punch = self.plan.tool(step.punch)
         self.punch_segments.setText(format_segments(step.punch_segments if step.punch_segments is not None else punch.segments))
@@ -215,8 +302,8 @@ class PressBrakePage(BasePage):
         step = self.plan.steps[self.bends.currentRow()]
         for widget, id in ((self.punch_button, step.punch), (self.die_button, step.die)):
             tool = self.plan.tool(id)
-            widget.setText(tool.code+'\nDeğiştir…')
-            widget.setIcon(profile_icon(tool, self.context.appearance, QSize(42, 46)))
+            widget.setText(tool.code+'\n'+('DEMO · ' if tool.demo else '')+'Değiştir…')
+            widget.setIcon(profile_icon(tool, self.context.appearance, QSize(48, 52)))
             widget.setToolTip(f'{tool.maker} / {tool.code}\nKesit kartlarından seçmek için tıklayın.')
 
     def choose_tool(self, kind):
@@ -247,8 +334,16 @@ class PressBrakePage(BasePage):
             bend = next(b for b in self.plan.part.bends if b.id == step.bend)
             previous = self.plan.steps[i-1] if i else None
             change = previous and (step.punch, step.die, step.channel) != (previous.punch, previous.die, previous.channel)
-            status = '\n'+STATUS[self.result.steps[i].status] if self.result else ''
-            self.bends.item(i).setText(f'{i+1}. {bend.title}'+status+('\nTakım değişimi' if change else '')+('\nYeniden tutuş' if i else '')+(' · Çevir 180°' if step.orientation else ''))
+            status = self.result.steps[i].status if self.result else None
+            item = self.bends.item(i)
+            # Plain text stays for search, tests and assistive technology; the card paints the same facts.
+            item.setText(f'{i+1}. {bend.title}'+('\n'+STATUS[status] if status else '')+('\nTakım değişimi' if change else '')
+                         +('\nYeniden tutuş' if i else '')+(' · Çevir 180°' if step.orientation else ''))
+            item.setData(CARD, dict(number=i+1, title=bend.title,
+                                    detail=f'{bend.inside_angle:g}° iç · R {bend.radius:g} · {bend.length:.1f} mm'.replace('.', ','),
+                                    status=status, change=bool(change), regrip=bool(i), flip=bool(step.orientation)))
+            item.setToolTip(item.text())
+        self.sequence_title.setText(f'BÜKÜM SIRASI · {len(self.plan.steps)}')
 
     def preview(self):
         if not self.preview_pending or not self.plan or self.result or self.view_mode != 'step':
@@ -288,8 +383,8 @@ class PressBrakePage(BasePage):
     def invalidate(self, plan):
         self.pause(); self.plan = plan; self.result = None; self.generation += 1
         self.formed_mesh = None
-        self.viewer.frame = None; self.viewer.set_mesh(self.flat_mesh); self.viewer.bend_annotations.update()
-        self.frame_label.setText('Plan değişti · önceki hareket kontrolü geçersiz. Yeniden kontrol edin.')
+        self.viewer.frame = None; self.viewer.set_mesh(self.flat_mesh); self.viewer.bend_annotations.update(); self.show_result_badge()
+        self.show_state('Plan değişti · önceki hareket kontrolü geçersiz. Yeniden kontrol edin.', 'Plan değişti · kontrol bekliyor')
         self.refresh_steps(); self.select(self.bends.currentRow()); self.refresh_actions()
 
     def assignment_changed(self):
@@ -351,6 +446,7 @@ class PressBrakePage(BasePage):
         self.loading = True; self.preview_pending = False
         self.refresh_steps()
         self.loading = False; self.slider.setRange(0, max(0, len(result.frames)-1)); self.slider.setValue(0)
+        self.show_result_badge()
         self.select(max(0, self.bends.currentRow())); self.set_status(STATUS[result.status]); self.refresh_actions()
 
     def show_frame(self, index):
@@ -361,7 +457,9 @@ class PressBrakePage(BasePage):
             self.loading = True; self.bends.setCurrentRow(frame.step); self.loading = False
             self.select(frame.step, seek=False)
         self.viewer.set_frame(frame)
-        self.frame_label.setText(f'Adım {frame.step+1} · {PHASES[frame.phase]} · dönüş {frame.angle:.2f}°'+(' · ÇARPIŞMA: '+'; '.join(' ↔ '.join(h.pair) for h in frame.hits) if frame.hits else ''))
+        where = f'Adım {frame.step+1}/{len(self.plan.steps)} · {PHASES[frame.phase]} · dönüş {frame.angle:.2f}°'.replace('.', ',')
+        self.show_state(where+(' · ÇARPIŞMA: '+'; '.join(' ↔ '.join(h.pair) for h in frame.hits) if frame.hits else ''),
+                        where+(' · ✕ çarpışma' if frame.hits else ''))
         if frame.hits:
             self.pause()
 
@@ -374,7 +472,7 @@ class PressBrakePage(BasePage):
                 return
             if self.frame_index >= len(self.result.frames)-1:
                 self.slider.setValue(0)
-            self.timer.start(self.speed.currentData()); self.play.setText('Duraklat')
+            self.timer.start(self.speed.currentData()); self.play.setText('❚❚ Duraklat')
 
     def advance(self):
         if not self.result or self.frame_index >= len(self.result.frames)-1:
@@ -388,7 +486,8 @@ class PressBrakePage(BasePage):
     def show_shape(self, formed):
         self.view_mode = 'formed' if formed else 'flat'; self.preview_pending = False
         self.pause(); self.viewer.frame = None; self.viewer.set_mesh(self.formed_mesh if formed else self.flat_mesh); self.viewer.bend_annotations.update()
-        self.frame_label.setText('Nominal bitmiş form · takım/konumlandırma hareketi içermez' if formed else 'Gerçek açınım · delikler ve rahatlatmalar korunur')
+        self.show_state('Nominal bitmiş form · takım/konumlandırma hareketi içermez' if formed else 'Gerçek açınım · delikler ve rahatlatmalar korunur',
+                        'Bitmiş form · nominal' if formed else 'Açınım')
 
     def pdf_dialog(self):
         if not self.result:
@@ -469,7 +568,8 @@ class PressBrakePage(BasePage):
                 key, frame = value
                 if self.plan and key == (self.generation, self.bends.currentRow()) and self.view_mode == 'step' and not self.result:
                     self.viewer.set_frame(frame)
-                    self.frame_label.setText(f'Adım {frame.step+1} · atanmış takımlar ve aktif eksen · KONTROL BEKLİYOR')
+                    self.show_state(f'Adım {frame.step+1} · atanmış takımlar ve aktif eksen · KONTROL BEKLİYOR',
+                                    f'Adım {frame.step+1}/{len(self.plan.steps)} · kontrol bekliyor')
             elif kind == 'press_pdf':
                 self.set_status('Büküm föyü oluşturuldu: '+value)
             elif kind == 'press_cancelled':
