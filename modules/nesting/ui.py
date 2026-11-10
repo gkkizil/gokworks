@@ -644,10 +644,14 @@ class NestingPage(BasePage):
 
     def fresh_stock_project(self):
         self.stock_load_error=''
-        try:return self.stock_library.new_project()
+        try:project = self.stock_library.new_project()
         except ValueError as error:
             self.stock_load_error=str(error)+' Kayıt korundu; geçici varsayılan stok gösteriliyor.'
-            return new_project()
+            project = new_project()
+        # A new GUI job explicitly starts in continuous mode. Opening a saved
+        # project still restores its original angle restrictions verbatim.
+        project.options.angles = None
+        return project
 
     def persist_stock(self,**change):
         try:self.stock_library.remember(self.project,**change)
@@ -710,6 +714,7 @@ class NestingPage(BasePage):
         self.form = f = ValueForm(Values(), '')
         f.text('gap','Parça aralığı · mm',3); f.text('margin','Kenar payı · mm',10)
         f.check('rotation','Parçalar döndürülebilsin',True)
+        self.rotation_mode = f.combo('rotation_mode','Dönüş biçimi',('Serbest','90° adımlı','Özel açılar'),'Serbest')
         quality = f.combo('quality','Yerleşim kalitesi',('Hızlı','Dengeli','Yüksek'),'Dengeli')
         quality.setToolTip('Hızlı daha az, Yüksek daha fazla iyileştirme dener. Hesaplama süresi otomatik yönetilir; sonuç iyileşmediğinde arama erken tamamlanır.')
         quality.setAccessibleName('Yerleşim kalitesi')
@@ -718,8 +723,12 @@ class NestingPage(BasePage):
         self.advanced_button.setCheckable(True)
         f.form.addRow(self.advanced_button)
         f.text('kerf','Kesim genişliği (kerf) · mm',.2)
-        f.text('angles','İzinli açılar · ; ile ayırın','0;90;180;270')
-        f.text('angle_step','Serbest açı adımı · ° (boşsa yukarıdaki liste)','')
+        angles_field = f.text('angles','Özel açılar · ; ile ayırın','0;90;180;270')
+        step_field = f.text('angle_step','Özel açı adımı · ° (boşsa liste)','')
+        def custom_rotation(*_):
+            if not self.loading:
+                self.rotation_mode.setCurrentText('Özel açılar')
+        angles_field.textChanged.connect(custom_rotation); step_field.textChanged.connect(custom_rotation)
         f.check('grain_locked','Hadde yönünü koru · yalnız 0° / 180°',False)
         seed = f.text('seed','Deneme sırası kodu',42)
         seed.setAccessibleName('Deneme sırası kodu')
@@ -748,7 +757,11 @@ class NestingPage(BasePage):
     def read_parameters(self):
         f = self.form
         step = f.value('angle_step').strip()
-        if step:
+        if f.value('rotation_mode') == 'Serbest':
+            angles = None
+        elif f.value('rotation_mode') == '90° adımlı':
+            angles = [0.,90.,180.,270.]
+        elif step:
             step = number(step,'Açı adımı',positive=True)
             if step < 1 or step > 360: raise ValueError('Açı adımı 1–360° arasında olmalı.')
             angles = [i*step for i in range(int(359.999999/step)+1)]
@@ -772,7 +785,9 @@ class NestingPage(BasePage):
         try:
             self.name.setText(self.project.name)
             for k,v in asdict(self.project.options).items():
-                if k not in ('seconds','engine'): self.form.set_value(k,';'.join(map(str,v)) if k == 'angles' else v)
+                if k not in ('seconds','engine'): self.form.set_value(k,('0;90;180;270' if v is None else ';'.join(map(str,v))) if k == 'angles' else v)
+            angles = self.project.options.angles
+            self.rotation_mode.setCurrentText('Serbest' if angles is None else '90° adımlı' if angles == [0,90,180,270] else 'Özel açılar')
             self.form.set_value('angle_step','')
             for k,v in asdict(self.project.operations).items(): self.cost_form.set_value(k,v)
             self.cost_toggle.setChecked(any(asdict(self.project.operations).values()))

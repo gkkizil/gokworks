@@ -1,0 +1,19 @@
+{
+  "elapsed": 8.155858838988934,
+  "score": [
+    0,
+    1,
+    3125000,
+    821082.5260877609
+  ],
+  "iterations": 3,
+  "placements": 12,
+  "bbox_area": 732946.773574698,
+  "angles": [
+    0,
+    90,
+    180,
+    270
+  ],
+  "engine": "Sparrow 0.1.0 / spyrrow 0.9.0 / jagua-rs 0.7.0; GOKWORKS NFP 1.5; Sparrow denemeleri 1"
+}

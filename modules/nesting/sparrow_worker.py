@@ -4,6 +4,7 @@ from collections import Counter
 import json
 from pathlib import Path
 from threading import Thread
+import os
 from .sparrow_files import filesystem_call
 
 
@@ -25,11 +26,12 @@ def run_worker(request_path):
         items = [spyrrow.Item(i['id'], [tuple(p) for p in i['shape']], i['demand'], i['angles']) for i in request['items']]
         instance = spyrrow.StripPackingInstance('GOKWORKS', request['height'], items)
         config = spyrrow.StripPackingConfig(total_computation_time=request['seconds'],
-                    seed=request['seed'], num_workers=1, min_items_separation=request['separation'])
+                    seed=request['seed'], num_workers=min(4,os.cpu_count() or 1),
+                    min_items_separation=request['separation'], poly_simpl_tolerance=None)
         expected = Counter({i['id']: i['demand'] for i in request['items']})
 
         def save(solution):
-            rows = [dict(id=i.id, x=i.translation[0], y=i.translation[1], angle=i.rotation)
+            rows = [dict(id=i.id, x=i.translation[0], y=i.translation[1], angle=i.rotation,reflected=i.reflected)
                     for i in solution.placed_items]
             if Counter(i['id'] for i in rows) == expected:
                 write(dict(ok=True, placements=rows))

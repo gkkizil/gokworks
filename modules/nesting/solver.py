@@ -28,8 +28,8 @@ def nest(project, *, stop=None, progress=None):
     else:
         # Both stages share the original project/hash and one project-wide budget.
         # Reserve contour refinement time even when strip optimization is difficult.
-        cap = {'Hızlı':2.,'Dengeli':6.,'Yüksek':12.}[project.options.quality]
-        first_deadline = min(budget.hard_deadline,started+min(cap,.45*(budget.deadline-started)))
+        cap = {'Hızlı':3.,'Dengeli':12.,'Yüksek':30.}[project.options.quality]
+        first_deadline = min(budget.hard_deadline,started+min(cap,.7*(budget.deadline-started)))
         seed = sparrow.nest(project,stop=stop,progress=report('İlk yerleşim',0,40),
                             deadline=first_deadline,allow_disconnected=True)
         validate_result(project,seed,complete=False)

@@ -30,6 +30,11 @@ jobs:
           cache-dependency-path: |
             requirements.txt
             requirements-dev.txt
+      - name: Prepare pinned Rust for Sparrow
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "RUSTUP_TOOLCHAIN=1.90.0" >> $env:GITHUB_ENV
       - run: python -m pip install -r requirements-dev.txt
       - name: Configure a real Windows desktop
         run: python packaging/configure_windows_display.py
