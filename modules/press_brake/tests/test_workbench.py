@@ -20,6 +20,23 @@ def finish(w, qtbot, timeout=60000):
     qtbot.waitUntil(lambda: not w.jobs.busy and not w.pages['press_brake'].preview_pending, timeout=timeout)
 
 
+def test_source_catalog_download_is_saved_and_does_not_recalculate_a_solved_plan(window, qtbot, monkeypatch):
+    from modules.press_brake import sources
+    from modules.press_brake.tooling import load_catalog
+    from modules.press_brake.tests.test_sources import catalog
+    import json
+    page = window.pages['press_brake']; page.load_demo('L120'); finish(window, qtbot)
+    page.calculate(); finish(window, qtbot)
+    solved, revision = page.result, page.plan.revision
+    assert solved is not None
+    monkeypatch.setattr(sources, 'download_starter', lambda stop: sources.parse_starter(json.dumps(catalog()), stop))
+    page.catalog_button.click(); finish(window, qtbot)
+    saved = load_catalog(page.library_path)
+    assert len(saved) == 5 and any(t.code == 'GOK-TEST-R1' for t in saved)
+    assert page.plan.tool('source:original-test').section is not None
+    assert page.result is solved and page.plan.revision == revision and page.pdf_button.isEnabled()
+
+
 def test_navigation_demo_reorder_assignment_and_compact_themes(window, qtbot):
     w = window; p = w.pages['press_brake']
     assert 'press_brake' in dict(WORKSPACES)['Üretim']

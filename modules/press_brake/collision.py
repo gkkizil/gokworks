@@ -1,7 +1,7 @@
 """AABB broad phase, OCCT solid narrow phase, bounded local contact masks."""
 from dataclasses import dataclass
 from itertools import combinations
-from math import sqrt
+from math import prod, sqrt
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,17 @@ def volume(shape):
 
 def intersection(a, b):
     from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
-    operation = BRepAlgoAPI_Common(a, b)
+    try:
+        from OCP.TopTools import TopTools_ListOfShape
+    except ImportError:  # OCCT 8 bindings use the concrete collection name.
+        from OCP.collections import List_TopoDS_Shape as TopTools_ListOfShape
+    # The two-shape constructor already builds. Set the options first and build
+    # once, while keeping cached source topology unchanged.
+    operation = BRepAlgoAPI_Common()
+    arguments, tools = TopTools_ListOfShape(), TopTools_ListOfShape()
+    arguments.Append(a); tools.Append(b)
+    operation.SetArguments(arguments); operation.SetTools(tools)
+    operation.SetNonDestructive(True)
     operation.SetFuzzyValue(1e-7); operation.Build()
     if not operation.IsDone():
         raise ValueError('Katı kesişim hesabı tamamlanamadı; kontrol geçerli değil.')
@@ -52,7 +62,7 @@ def remove_contacts(shape, body_a, body_b, contacts):
     return shape
 
 
-def check(bodies, contacts=(), *, near_margin=0):
+def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None):
     """Return all colliding pairs plus proximity needing denser angle sampling."""
     hits, near = [], False
     for a, b in combinations(bodies, 2):
@@ -68,14 +78,32 @@ def check(bodies, contacts=(), *, near_margin=0):
         if distance > 1e-7:
             near = True
             continue
-        common = intersection(a.shape, b.shape)
-        mass, _ = volume(common)
-        if mass > 1e-5:
-            common = remove_contacts(common, a, b, contacts)
-            mass, location = volume(common)
-            if mass > .001:
-                hits.append(Hit((a.id, b.id), tuple(location), mass))
-                continue
+        # Intersection volume cannot exceed the boxes' common volume. This
+        # also eliminates exact tangent/edge contact without an OCCT boolean.
+        box_volume = prod(max(0., min(a.bounds[i+3], b.bounds[i+3])-max(a.bounds[i], b.bounds[i])) for i in range(3))
+        if box_volume <= .001:
+            near |= bool(near_margin)
+            continue
+        key = (a.id, a.kind, a.shape, b.id, b.kind, b.shape, tuple(contacts))
+        if sheet_hits is not None and a.kind == b.kind == 'sheet':
+            hit = sheet_hits.get((a.id, b.id))
+        elif cache is not None and key in cache:
+            hit = cache[key]
+        else:
+            common = intersection(a.shape, b.shape)
+            mass, _ = volume(common); hit = None
+            if mass > 1e-5:
+                common = remove_contacts(common, a, b, contacts)
+                mass, location = volume(common)
+                if mass > .001:
+                    hit = Hit((a.id, b.id), tuple(location), mass)
+            if cache is not None:
+                if len(cache) >= 2048:
+                    cache.clear()
+                cache[key] = hit
+        if hit is not None:
+            hits.append(hit)
+            continue
         if near_margin:
             # Conservative AABB proximity refines even a near miss through a
             # hole. Every actual overlap above still uses solid intersection.

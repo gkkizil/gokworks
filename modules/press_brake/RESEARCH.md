@@ -1,9 +1,27 @@
 # Kaynak incelemesi — 10 Kasım 2026
 
 Bu modülün Python kodu ve demo geometri/verileri GOKWORKS için yazılmıştır.
-Aşağıdaki depolardan kaynak kodu, takım kataloğu veya çizim kopyalanmamıştır.
+İlk sürümde aşağıdaki depolardan kaynak kodu, takım kataloğu veya çizim
+kopyalanmamıştı. Sonraki kaynak aktarımı ve kod atfı aşağıda belirtilmiştir.
 Araştırma dosyaları çalışma alanındaki `work/press-brake` altında saklanmıştır;
 uygulama bu sayfalara bağlanarak çalışmaz.
+
+10 Kasım düzeltmesi: kullanıcı isteğiyle `sources.py`, sabit `37e30d51` sürümündeki
+yedi gerçek takımın açık kaynaktan kişisel kütüphaneye indirilmesini destekler.
+DXF varlıkları dağıtım paketine alınmaz. Kaynak `docs/licensing.md`, üretici
+profillerinin MIT kod lisansından ayrı kaldığını açıkça belirtiyor. Çalışma ucu /
+omuz geometrisi tanıma matematiği `src/core/ToolGeometry.cpp` referansıyla
+uyarlanmıştır; MIT metni `packaging/licenses/press-brake` altında dağıtılır.
+WILA ve Rolleri'nin dört ürününün açık teknik ölçüleri kaynak URL'leriyle bilgi
+kartına alınmıştır. WILA indirmeleri oturum/e-posta ister; Rolleri otomatik
+doğrudan erişiminde 403 döndürdü. Eksik CAD için geometri üretilmemiştir.
+
+SolidWorks düzeltmesinde yayımlanmış `IFeature.GetOwnerFeature`,
+`IFace2.GetFeature`, `ISurface.CylinderParams`, `IEdge.GetTwoAdjacentFaces2`
+ve gerçek açınım yüzleri kullanılır. Aynı yarıçap ve açı tek başına eşleştirme
+kanıtı değildir. Eş eksenlilik veya unsur sahipliği; kenar yan yüzlerinde de
+komşu düzlemlerin doğrulanmış kalınlık ayrımı gerekir. Canlı SolidWorks testi
+bu Linux ortamında yapılamaz; kontrollü API sözleşmeleri ayrı test edilir.
 
 | Kaynak | İncelenen konu / uygulanan sınır |
 | --- | --- |
