@@ -108,7 +108,16 @@ BASE_COLOUR = np.array([155, 172, 188], dtype=float)
 EDGE_COLOUR = (63, 77, 91)
 
 
-def _fill(triangles, shade, ids, size, depth, pixels, stop):
+def triangle_colours(mesh):
+    """RGB (0-255, float) per triangle: the mesh's own colours, else BASE_COLOUR everywhere."""
+    count = len(mesh.positions)//36
+    colours = getattr(mesh, 'colours', b'')
+    if colours and len(colours) == count*3:
+        return np.frombuffer(colours, dtype=np.uint8).reshape((-1, 3)).astype(float)
+    return np.broadcast_to(BASE_COLOUR, (count, 3))
+
+
+def _fill(triangles, shade, ids, size, depth, pixels, stop, base=None):
     """Rasterize triangles whose screen bounding box fits in size = (columns, rows), all at once.
 
     Every candidate sample gets barycentric coordinates and a depth; the
@@ -156,7 +165,9 @@ def _fill(triangles, shade, ids, size, depth, pixels, stop):
         before = flat_depth[index]
         np.minimum.at(flat_depth, index, z)
         won = (z == flat_depth[index]) & (z < before)
-        flat_pixels[index[won]] = (BASE_COLOUR[None, :] * shade[chunk[triangle[won]]][:, None]).astype(np.uint8)
+        winner = chunk[triangle[won]]
+        colour = BASE_COLOUR[None, :] if base is None else base[winner]
+        flat_pixels[index[won]] = (colour * shade[winner][:, None]).astype(np.uint8)
     return True
 
 
@@ -189,6 +200,7 @@ def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
     depth = np.full((height, width), np.inf)
     light = np.array([.25, .45, 1.]); light /= np.linalg.norm(light)
     shade = .42 + .58 * np.abs((normals[::3] @ view[:3, :3].T) @ light)
+    base = triangle_colours(mesh) if getattr(mesh, 'colours', b'') else None
     triangles = p.reshape((-1, 3, 3))
     low, high = triangles[:, :, :2].min(axis=1), triangles[:, :, :2].max(axis=1)
     keep = ((triangles[:, :, 2].max(axis=1) >= -1) & (triangles[:, :, 2].min(axis=1) <= 1)
@@ -200,7 +212,7 @@ def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
     large = keep & (bucket.max(axis=1) >= len(limits))
     for bx, by in sorted(set(map(tuple, bucket[keep & ~large]))):
         ids = np.nonzero(keep & ~large & (bucket[:, 0] == bx) & (bucket[:, 1] == by))[0]
-        if not _fill(triangles, shade, ids, (limits[bx], limits[by]), depth, pixels, stop):
+        if not _fill(triangles, shade, ids, (limits[bx], limits[by]), depth, pixels, stop, base):
             return None
     for i in np.nonzero(large)[0]:   # rare very large triangles
         if stop.is_set():
@@ -219,7 +231,7 @@ def raster(mesh, width, height, state, stop, background=(248, 248, 248)):
         old = depth[y0:y1+1, x0:x1+1]
         mask = (u >= -1e-8) & (v >= -1e-8) & (w >= -1e-8) & (z < old) & (z >= -1) & (z <= 1)
         old[mask] = z[mask]
-        pixels[y0:y1+1, x0:x1+1][mask] = BASE_COLOUR * shade[i]
+        pixels[y0:y1+1, x0:x1+1][mask] = (BASE_COLOUR if base is None else base[i]) * shade[i]
     if state[-1] and len(edges):
         if stop.is_set():
             return None

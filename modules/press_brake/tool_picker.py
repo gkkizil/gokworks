@@ -107,7 +107,8 @@ class ToolCardDelegate(QStyledItemDelegate):
         strong = QFont(body); strong.setBold(True); painter.setFont(strong); painter.setPen(QColor(c['text']))
         painter.drawText(QRectF(text_x, y, width, 18), Qt.AlignLeft | Qt.AlignVCenter,
                          painter.fontMetrics().elidedText(card_spec(tool), Qt.ElideRight, int(width))); y += 23
-        tag, tone = ('DEMO · özgün eğitim geometrisi', 'warning') if tool.demo else ('Katalog · DXF bekleniyor', 'muted') if tool.section is None else ('DXF · kaynak profili', 'accent') if tool.catalog_url else ('DXF · kullanıcı kesiti', 'accent')
+        from .standard import is_generic
+        tag, tone = ('DEMO · özgün eğitim geometrisi', 'warning') if tool.demo else ('GENEL · piyasa standardı ölçü', 'success') if is_generic(tool) else ('Katalog · DXF bekleniyor', 'muted') if tool.section is None else ('DXF · kaynak profili', 'accent') if tool.catalog_url else ('DXF · kullanıcı kesiti', 'accent')
         painter.setFont(small); tag = painter.fontMetrics().elidedText(tag, Qt.ElideRight, int(width)-12)
         pill = QRectF(text_x, y, min(width, painter.fontMetrics().horizontalAdvance(tag)+14), 18)
         painter.setPen(QPen(QColor(c[tone]), 1)); painter.setBrush(Qt.NoBrush); painter.drawRoundedRect(pill, 9, 9)
@@ -145,7 +146,8 @@ class Selection:
 
 
 class ToolPicker(QDialog):
-    def __init__(self, tools, kind, current, *, channel='', assigned_segments=None, appearance='dark', settings=None, parent=None):
+    def __init__(self, tools, kind, current, *, channel='', assigned_segments=None, appearance='dark', settings=None, parent=None, bend_length=None):
+        self.bend_length = bend_length   # generic tools propose a station built from the bend length
         super().__init__(parent)
         self.tools = tuple(t for t in tools if t.kind == kind)
         self.kind, self.appearance, self.settings = kind, appearance, settings
@@ -248,7 +250,8 @@ class ToolPicker(QDialog):
 
     def card_text(self, item, tool):
         measure = f'Uç {tool.tip_angle if tool.tip_angle is not None else "?"}° · R {tool.tip_radius if tool.tip_radius is not None else "?"}' if tool.kind == 'punch' else ' / '.join(f'V{c.opening:g}' for c in tool.channels) or 'V bilinmiyor'
-        origin = 'DEMO · özgün geometri' if tool.demo else 'Katalog · DXF bekleniyor' if tool.section is None else 'DXF · kaynak profili' if tool.catalog_url else 'DXF · kullanıcı kesiti'
+        from .standard import is_generic
+        origin = 'DEMO · özgün geometri' if tool.demo else 'GENEL · piyasa standardı ölçü' if is_generic(tool) else 'Katalog · DXF bekleniyor' if tool.section is None else 'DXF · kaynak profili' if tool.catalog_url else 'DXF · kullanıcı kesiti'
         item.setText(('★ ' if tool.id in self.favorites else '')+tool.code+'\n'+tool.maker+'\n'+measure+f'\nYükseklik {tool.height:g} mm\n'+origin)
 
     def card_sizes(self):
@@ -298,7 +301,9 @@ class ToolPicker(QDialog):
         for c in tool.channels:
             self.channel.addItem(f'{c.id} · V{c.opening:g} / {c.angle:g}°'.replace('.', ','), c.id)
         self.favorite.setChecked(tool.id in self.favorites)
-        self.segment_edit.setText(format_segments(tool.segments)); self.changing = False
+        from .standard import is_generic, station
+        proposed = station(self.bend_length) if is_generic(tool) and self.bend_length else tool.segments
+        self.segment_edit.setText(format_segments(proposed)); self.changing = False
         load = f'{tool.line_load:g} {tool.line_load_unit}' if tool.line_load is not None else 'bilinmiyor'
         link = 'Arayüz kodları eşleşiyor' if tool.mount.compatible else 'Takım–tutucu bağlantısı doğrulanamadı'
         holder = 'Tutucu kesiti mevcut' if tool.holder_section is not None and tool.holder_segments else 'Tutucu geometri/yerleşimi eksik'
