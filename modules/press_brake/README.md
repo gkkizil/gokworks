@@ -31,6 +31,22 @@ flanş delikleri, taban deliği ve 1,5 mm köşe rahatlatmaları geometrinin par
 etkin boya uygun segmentler ilgili çarpışmayı kaldırır. Takım/tutucular GOKWORKS
 tarafından sıfırdan çizilmiş eğitim geometrisidir; üretici eşdeğeri değildir.
 
+## Ekran düzeni
+
+- **Sol · Büküm sırası:** her adım bir karttır: sıra numarası, büküm, iç açı/R/boy, kontrol
+  sonucu (✓ kontrol edilen hareketlerde çarpışma yok · ✕ çarpışma var · ? kontrol edilemedi ·
+  ○ kontrol bekliyor) ve *Takım değişimi*, *Yeniden tutuş*, *Çevir 180°* etiketleri. Sonuç renkle
+  birlikte simge ve yazıyla da verilir. ↑ Yukarı / ↓ Aşağı sırayı değiştirir.
+- **Orta · 3B sahne:** sol üstte geçerli adım · hareket fazı · dönüş açısı, sağ altta renk
+  açıklaması. Üst/alt takım, büküm ekseni ve çarpışma noktası sahnede adıyla etiketlidir.
+  Görünüm küpü (sağ üst) tıklanabilir.
+- **Sağ · Seçili adım:** iç açı, dönüş, iç R ve etkin boy; ardından takımlar (kesit resimli
+  kartlar ve V kanalı) ve konumlandırma. Segment yerleşimi, takım verisi ve kontrol
+  ayrıntıları/kapsamı açılır bölümlerdedir.
+- **Alt:** önceki/oynat/sonraki, konum sürgüsü, oynatma hızı, Açınım, Bitmiş form, Sığdır ve
+  tek satırlık sonuç. Takım kütüphanesinde bütün kesitler aynı ölçekte çizilir; ölçek çubuğu,
+  DEMO/DXF etiketi, favori yıldızı ve seçili kart işareti kartın üzerindedir.
+
 ## SolidWorks
 
 **Aktif SolidWorks Parçasını Al**, açık SLDPRT'nin gerçekten aktif konfigürasyonunu
