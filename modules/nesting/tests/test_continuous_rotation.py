@@ -91,6 +91,27 @@ def test_timed_out_native_axes_leave_a_valid_partial_result(monkeypatch):
     assert validate_result(p, result, complete=False)
 
 
+def test_native_budget_is_shared_across_remaining_physical_sheets(monkeypatch):
+    p = project(); p.sheets[0].width = p.sheets[0].height = 55; p.sheets[0].stock = 3
+    p.parts = [Part.create('One per sheet', box(0, 0, 30, 20), quantity=3)]
+    p.options.rotation = False; p.options.seconds = 12
+    clock = [0.]; deadlines = []
+    monkeypatch.setattr(sparrow.time, 'monotonic', lambda: clock[0])
+    def run(request, deadline, stop):
+        deadlines.append(deadline)
+        clock[0] = deadline
+        item = request['items'][0]
+        x = -min(p[0] for p in item['shape']); y = -min(p[1] for p in item['shape'])
+        # The complete strip has one part inside the physical sheet; the
+        # remaining parts must be retried on subsequent finite sheets.
+        return [dict(id=item['id'], x=x+i*10, y=y, angle=0) for i in range(item['demand'])]
+    monkeypatch.setattr(sparrow, '_run', run)
+    result = sparrow.nest(p)
+    assert validate_result(p, result) and len(result.placements) == 3
+    assert len(deadlines) == 3 and deadlines[0] <= 6
+    assert {row.sheet_number for row in result.placements} == {1, 2, 3}
+
+
 def test_refinement_compacts_a_sparse_single_plate_without_changing_plate_count():
     p = project(); p.options.angles = [0]; p.options.rotation = False
     p.parts = [Part.create('Rectangle', box(0, 0, 30, 20), quantity=3)]
