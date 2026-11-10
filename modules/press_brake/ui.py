@@ -56,6 +56,9 @@ class PressBrakePage(BasePage):
         self.up.setToolTip('Seçili bükümü sırada bir önceye alır; önceki kontrol sonucu geçersiz olur.')
         self.down.setToolTip('Seçili bükümü sırada bir sonraya alır; önceki kontrol sonucu geçersiz olur.')
         order.addWidget(self.up); order.addWidget(self.down); left_body.addLayout(order)
+        self.catalog_button = button('Takım kataloğu indir', self.download_catalog)
+        self.catalog_button.setToolTip('Kaynak depodaki 7 gerçek DXF profilini ve WILA/Rolleri ürün kartlarını kişisel kütüphaneye indirir. Mevcut takımlar korunur.')
+        left_body.addWidget(self.catalog_button)
         dxf = QWidget(); dxf_body = QVBoxLayout(dxf); dxf_body.setContentsMargins(0, 0, 0, 0); dxf_body.setSpacing(6)
         self.import_tool = button('DXF takım ekle…', self.tool_dialog); dxf_body.addWidget(self.import_tool)
         self.unitless = QCheckBox('Birimsiz DXF = mm'); self.unitless.setToolTip('1 çizim birimi = 1 mm. Yalnız çizimin mm ölçekte olduğunu biliyorsanız seçin.'); dxf_body.addWidget(self.unitless)
@@ -180,6 +183,7 @@ class PressBrakePage(BasePage):
             control.setEnabled(ready and bool(self.result and self.result.frames))
         self.flat_button.setEnabled(ready and self.flat_mesh is not None); self.formed_button.setEnabled(ready and self.formed_mesh is not None)
         self.punch_button.setEnabled(ready); self.die_button.setEnabled(ready)
+        self.catalog_button.setEnabled(not self.busy)
 
     def set_busy(self, busy):
         super().set_busy(busy)
@@ -235,10 +239,11 @@ class PressBrakePage(BasePage):
             from .geometry import Geometry, mesh
             from .kinematics import step_angles
             from .tooling import load_catalog
+            from .sources import manufacturer_tools, merged_catalog
             from modules.cad_converter.models import checkpoint
             plan = factory(stop); checkpoint(stop)
             library = load_catalog(self.library_path)
-            plan = replace(plan, tools=plan.tools+library)
+            plan = replace(plan, tools=merged_catalog(plan.tools, merged_catalog(library, manufacturer_tools())))
             plan.validate(); geometry = Geometry(plan)
             flat = mesh(geometry.part_bodies({}), stop); formed = mesh(geometry.part_bodies(step_angles(plan, len(plan.steps)-1, 1)), stop)
             sink.put(('press_plan', (plan, flat, formed, library)))
@@ -511,6 +516,19 @@ class PressBrakePage(BasePage):
         if path:
             self.load_tool_dxf(path, self.unitless.isChecked())
 
+    def download_catalog(self):
+        def operation(sink, stop):
+            from .sources import download_starter, manufacturer_tools, merged_catalog
+            from .tooling import load_catalog, save_catalog
+            from modules.cad_converter.models import checkpoint
+            existing = load_catalog(self.library_path)
+            incoming = download_starter(stop)+manufacturer_tools()
+            library = merged_catalog(existing, incoming)
+            checkpoint(stop); save_catalog(library, self.library_path)
+            sink.put(('press_catalog', library))
+        if self.start(operation):
+            self.set_status('Kaynak takım profilleri indiriliyor…')
+
     def load_tool_dxf(self, path, accept_unitless=False):
         def operation(sink, stop):
             from .tooling import read_sections
@@ -589,6 +607,22 @@ class PressBrakePage(BasePage):
                         picker.addItem(item.code, item.id)
                     self.loading = False
                 self.set_status('Takım kütüphaneye eklendi: '+tool.code)
+            elif kind == 'press_catalog':
+                from .sources import merged_catalog
+                self.library = value
+                if self.plan:
+                    present = {t.id for t in self.plan.tools}
+                    added = tuple(t for t in value if t.id not in present)
+                    # Adding unassigned profiles does not invalidate a solved
+                    # bend plan or trigger another expensive movement check.
+                    self.plan = replace(self.plan, tools=merged_catalog(self.plan.tools, value))
+                    self.loading = True
+                    for tool in added:
+                        picker = self.punch if tool.kind == 'punch' else self.die
+                        picker.addItem(tool.code, tool.id)
+                    self.loading = False
+                self.set_status(f'Kütüphane hazır: {sum(t.section is not None for t in value)} gerçek kesit, '
+                                f'{sum(t.section is None for t in value)} üretici bilgi kartı. Takımları kesit kartlarından seçin.')
 
     def hideEvent(self, event):
         self.pause(); super().hideEvent(event)

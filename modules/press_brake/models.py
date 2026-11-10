@@ -115,6 +115,7 @@ class Channel:
     angle: float
     center: Point  # section y,z in mm
     shoulder_radius: float | None = None
+    rotation: float = 0.  # section rotation about the station X axis, degrees
 
 
 @dataclass(frozen=True)
@@ -169,6 +170,9 @@ class Tool:
     demo: bool = False
     holder_segments: tuple[Segment, ...] = ()
     holder_dxf: str = ''
+    catalog_url: str = ''
+    catalog_note: str = ''
+    catalog_segments: tuple[tuple[float, int], ...] = ()
 
     def validate(self):
         numbers = [self.height, *self.mount_reference]
@@ -180,13 +184,17 @@ class Tool:
             if segment.length <= 0:
                 raise ValueError(self.code+': pozitif segment boyu gerekli.')
         for channel in self.channels:
-            numbers.extend((channel.opening, channel.angle, *channel.center))
+            numbers.extend((channel.opening, channel.angle, channel.rotation, *channel.center))
             if channel.shoulder_radius is not None:
                 numbers.append(channel.shoulder_radius)
                 if channel.shoulder_radius < 0:
                     raise ValueError(self.code+': omuz R negatif olamaz.')
             if channel.opening <= 0 or not 0 < channel.angle < 180:
                 raise ValueError(self.code+': V kanalı ölçüleri geçersiz.')
+        for length, quantity in self.catalog_segments:
+            numbers.append(length)
+            if length <= 0 or type(quantity) is not int or quantity < 0:
+                raise ValueError(self.code+': katalog segment boyu/adedi geçersiz.')
         if not all(isfinite(v) for v in numbers) or self.height <= 0:
             raise ValueError(self.code+': sonlu ölçüler ve pozitif çalışma yüksekliği gerekli.')
         if not self.id or not self.code or self.kind not in ('punch', 'die'):

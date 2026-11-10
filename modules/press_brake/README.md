@@ -88,6 +88,41 @@ yerleşimiyle verilir. Eksik geometri veya bağlantı başarılı kontrol sayıl
 Kullanıcı kataloğu işletim sisteminin GOKWORKS uygulama veri klasöründe atomik
 `press-brake-tools-v1.json` dosyasıdır; başka projenin kataloğu gömülü değildir.
 
+### Kaynak takım kataloğu
+
+Soldaki **Takım kataloğu indir** düğmesi, açık kaynak referans deposundaki yedi
+gerçek profili kişisel kütüphaneye indirir: ST3408S, ST3412S, ST1405S, ST1701S,
+2067-1, TOP.205.85.R08 ve 1063. Çizgiler ve dairesel yaylar 1:1 mm korunur;
+uç / V çalışma referansları kesitte doğrulanır. Dört taraflı 2067-1 tek gövdedir;
+V16/V22/V35/V50 seçimi gövdeyi çalışma yönüne çevirir. Kaynaktaki segment
+boyları/adetleri örnek settir; fiziksel stok olarak doğrulanmış sayılmaz.
+Var olan ve düzenlenmiş kayıtlar korunur, tekrar indirme kopya oluşturmaz.
+İndirme/okuma hatasında eski kütüphane değişmez. Katalog eklemek mevcut çözülmüş
+planı yeniden hesaplatmaz; atamayı değiştirmek eski kontrolü geçersiz kılar.
+
+WILA BIU-021 / OZU-313 ve Rolleri 04600 / 07500 teknik bilgi kartları da vardır.
+Bunlar üreticinin açık ürün verileridir; kesitleri eksikken **DXF bekleniyor**
+olarak görünür ve gerçek kesit gibi çizilmez. **Üretici / kaynak sayfası** ilgili
+ürünü açar. WILA CAD indirmesi üretici oturumu veya e-posta bağlantısı ister.
+DXF'yi aldıktan sonra **Kendi takımım (DXF)** ile ekleyebilirsiniz. Üretici
+çizimleri EXE'ye gömülmez; çevrimiçi indirilen profiller kişisel katalogda kalır.
+
+### Aktarım ve hesaplama düzeltmeleri
+
+Kenar flanşlarında OneBend alt unsurunun yalnız iç yüzü listelemesi, dış yüzün
+yanlışlıkla eksik büküm sayılmasına yol açıyordu. Dış yüz eşleştirmesi artık
+ölçülen eksen, iç/dış R, açı veya sahip unsur bağı üzerinden doğrulanır.
+Yuvarlatılmış sac konturu yan yüzleri, iki komşu sac düzlemi ve gerçek kalınlık
+ile bükümden ayrılır. Merkez çizgisi tek başınaysa genişlik yalnız unsurla
+eşleşen gerçek açınım yüzünden ölçülür. Hatalarda uzun COM referansları yerine
+unsur adı ve kısa yüz kimliği gösterilir. Tanınmayan gerçek bükümler atlanmaz.
+
+Katı kesişimi aynı çift için iki kez başlatılmaz. Sabit geometri, yerleşim ve
+sonuçlar işlem içinde tekrar kullanılır; sacın kendiyle çarpışması istasyon
+dönüşümünden bağımsız parça koordinatlarında kontrol edilir. Adaptif tarama
+istasyon kutularını ve aynı çözünürlüğü korur. Geometri/önbellekler işçiye aittir;
+SolidWorks COM nesneleri veya canlı UI nesneleri önbelleğe taşınmaz.
+
 ## Hesap kapsamı
 
 - Flanş ağacı ve ölçülen büküm bölgeleri birlikte taşınır. Dikdörtgen büküm

@@ -163,7 +163,10 @@ def load_catalog(path):
         row['holder_section'] = Region(tuple(map(tuple, row['holder_section']['outer'])), tuple(tuple(map(tuple, h)) for h in row['holder_section']['holes'])) if row['holder_section'] else None
         row['segments'] = tuple(Segment(**s) for s in row['segments'])
         row['holder_segments'] = tuple(Segment(**s) for s in row.get('holder_segments', ()))
-        row['channels'] = tuple(Channel(**s) for s in row['channels'])
+        row['mount_reference'] = tuple(row['mount_reference'])
+        row['tip'] = tuple(row['tip']) if row.get('tip') is not None else None
+        row['channels'] = tuple(Channel(**dict(s, center=tuple(s['center']))) for s in row['channels'])
+        row['catalog_segments'] = tuple(tuple(s) for s in row.get('catalog_segments', ()))
         row['mount'] = Mount(**row['mount'])
         tools.append(Tool(**row).validate())
     return tuple(tools)

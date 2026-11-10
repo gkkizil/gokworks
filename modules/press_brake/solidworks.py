@@ -135,7 +135,112 @@ def _xyz(obj):
         obj = None
 
 
+def _cylinder(surface):
+    """Published ISurface.CylinderParams: origin/axis/radius, metres to mm."""
+    try:
+        if not call(surface, 'IsCylinder'):
+            return None
+        data = np.asarray(get(surface, 'CylinderParams'), float)
+        if data.size != 7 or not np.isfinite(data).all() or data[6] <= 0:
+            return None
+        length = np.linalg.norm(data[3:6])
+        if length < 1e-12:
+            return None
+        return data[:3]*1000, data[3:6]/length, data[6]*1000
+    except Exception:
+        return None
+
+
+def _coaxial(a, b):
+    return (np.linalg.norm(np.cross(a[1], b[1])) < 1e-6
+            and np.linalg.norm(np.cross(a[0]-b[0], b[1])) < .01)
+
+
+def _sheet_sidewall(face, cylinder, thickness):
+    """Rounded contour/hole walls join two parallel sheet skins, not a bend.
+
+    Their cylinder axis is normal to both adjacent planar skins and the
+    measured separation is the sheet thickness. A bend axis is tangent to
+    its neighbouring flange planes and cannot pass this test.
+    """
+    if cylinder is None:
+        return False
+    try:
+        offsets = []
+        for edge in values(call(face, 'GetEdges')):
+            for adjacent in values(call(edge, 'GetTwoAdjacentFaces2')):
+                surface = call(adjacent, 'GetSurface')
+                if not call(surface, 'IsPlane'):
+                    continue
+                plane = np.asarray(get(surface, 'PlaneParams'), float)
+                if plane.size == 6 and np.isfinite(plane).all():
+                    normal = plane[:3]/np.linalg.norm(plane[:3])
+                    if abs(normal@cylinder[1]) > 1-1e-6:
+                        offsets.append(float(plane[3:]@cylinder[1])*1000)
+        return any(abs(abs(a-b)-thickness) <= .01 for a in offsets for b in offsets)
+    except Exception:
+        return False
+
+
+def _band(row, lines, zones, thickness):
+    """Measure tangents, or a feature-owned flat bend face around a centreline."""
+    base = np.array(lines[0][1])-lines[0][0]; length = np.linalg.norm(base)
+    if length <= .001:
+        raise ApiError(row['id']+': sıfır boylu büküm ekseni.')
+    u = base/length; n = np.array([-u[1], u[0]])
+    if any(abs(np.dot(np.array(b)-a, n)) > .001 for a, b in lines):
+        raise ApiError(row['id']+': paralel doğrusal büküm teğetleri bulunamadı.')
+    offsets = [float(np.dot(a, n)) for a, _ in lines]
+    low, high = min(offsets), max(offsets)
+    points = [p for line in lines for p in line]
+    if high-low <= .001:
+        # A visible bend centreline is not itself the developed width. Read
+        # the actual, feature-associated face; never infer width from K-factor.
+        measured = []
+        for zone in zones:
+            vertices = np.asarray(zone.exterior.coords)
+            lo, hi = min(vertices@n), max(vertices@n)
+            if (row['radius']*row['turn']*pi/180-.001 <= hi-lo
+                    <= (row['radius']+thickness)*row['turn']*pi/180+.001
+                    and lo-.001 <= offsets[0] <= hi+.001):
+                measured.append(zone)
+        zone = unary_union(measured)
+        if zone.is_empty or zone.geom_type != 'Polygon':
+            raise ApiError(row['id']+': yalnız merkez çizgisi var; ölçülmüş büküm bölgesi genişliği eksik.')
+        points = list(zone.exterior.coords)
+        low, high = min(np.asarray(points)@n), max(np.asarray(points)@n)
+    lo = min(np.dot(p, u) for p in points); hi = max(np.dot(p, u) for p in points)
+    return dict(row, start=tuple(u*lo+n*low), end=tuple(u*hi+n*low), width=float(high-low))
+
+
 class Capture(Session):
+    def owners(self, model, feature):
+        result = set()
+        for _ in range(16):
+            if feature is None:
+                break
+            ref = self.persistent_ref(model, feature)
+            if not ref or ref in result:
+                break
+            result.add(ref)
+            try:
+                feature = call(feature, 'GetOwnerFeature')
+            except Exception:
+                break
+        return result
+
+    def face_label(self, model, face, reference):
+        owner = None
+        try:
+            owner = call(face, 'GetFeature')
+            label = str(get(owner, 'Name')) if owner is not None else ''
+        except Exception:
+            label = ''
+        finally:
+            owner = None
+        short = sha256(reference.encode('utf-8')).hexdigest()[:10] if reference else 'referans-yok'
+        return (label+' / ' if label else '')+'yüz #'+short
+
     def one_body(self, model):
         bodies = values(call(self.part(model), 'GetBodies2', self.c('swSolidBody'), False))
         if len(bodies) != 1 or not call(bodies[0], 'IsSheetMetal'):
@@ -190,7 +295,7 @@ class Capture(Session):
             props = self.document_properties(model, configuration)
             thickness = self.thickness(model, body, props, features)
             material = self.material(model, body, configuration, props)
-            rows, covered = [], set()
+            rows, covered, bend_faces = [], set(), []
             for feature, kind in active:
                 checkpoint(stop)
                 if kind != 'OneBend':
@@ -210,7 +315,16 @@ class Capture(Session):
                     faces_for_bend = values(call(feature, 'GetFaces'))
                     if not faces_for_bend:
                         raise ValueError('Büküm yüzleri / unsur eşleşmesi yok.')
-                    covered.update(self.persistent_ref(model, f) for f in faces_for_bend)
+                    covered.update(face_reference for f in faces_for_bend if (face_reference := self.persistent_ref(model, f)))
+                    cylinders = []
+                    for face in faces_for_bend:
+                        try:
+                            cylinder = _cylinder(call(face, 'GetSurface'))
+                        except Exception:
+                            cylinder = None
+                        if cylinder is not None:
+                            cylinders.append(cylinder)
+                    bend_faces.append((radius, turn, self.owners(model, feature), cylinders))
                     rows.append((feature, {'id': 'SWB-'+sha256(ref.encode('ascii')).hexdigest()[:16], 'label': label,
                                            'turn': turn, 'radius': radius, 'direction': 1 if direction == up else -1}))
                 except Exception as error:
@@ -225,13 +339,35 @@ class Capture(Session):
                 if call(surface, 'IsPlane'):
                     continue
                 reference = self.persistent_ref(model, face)
+                face_label = self.face_label(model, face, reference)
                 if not call(surface, 'IsCylinder'):
-                    raise ApiError(f'{body_name} / yüz {reference}: doğrusal silindirik büküm dışı eğrisel yüz desteklenmiyor.')
+                    raise ApiError(f'{body_name} / {face_label}: doğrusal silindirik büküm dışı eğrisel yüz desteklenmiyor.')
                 uv = values(call(face, 'GetUVBounds'))
                 if len(uv) != 4:
-                    raise ApiError(f'{body_name} / yüz {reference}: silindir açı sınırları okunamadı.')
+                    raise ApiError(f'{body_name} / {face_label}: silindir açı sınırları okunamadı.')
                 if abs(abs(uv[1]-uv[0])-2*pi) > 1e-5 and reference not in covered:
-                    raise ApiError(f'{body_name} / yüz {reference}: büküm unsuruyla eşleştirilemedi; büküm atlanmadı.')
+                    cylinder = _cylinder(surface)
+                    if _sheet_sidewall(face, cylinder, thickness):
+                        continue
+                    # EdgeFlange owns faces which its OneBend subfeature may
+                    # expose only on the inner skin. Verify the measured outer
+                    # cylinder, or the owning feature, rather than equating two
+                    # different persistent references.
+                    owner = None
+                    try:
+                        owner = call(face, 'GetFeature')
+                        owner_ref = self.persistent_ref(model, owner) if owner is not None else ''
+                    except Exception:
+                        owner_ref = ''
+                    finally:
+                        owner = None
+                    matches = cylinder is not None and any(
+                        min(abs(cylinder[2]-r), abs(cylinder[2]-r-thickness)) <= .01
+                        and abs(degrees(abs(uv[1]-uv[0]))-turn) <= .01
+                        and (any(_coaxial(cylinder, c) for c in cylinders) or owner_ref in owners)
+                        for r, turn, owners, cylinders in bend_faces)
+                    if not matches:
+                        raise ApiError(f'{body_name} / {face_label}: büküm unsuruyla eşleştirilemedi; büküm atlanmadı.')
             with flattened(self, model, flat, features, stop):
                 body = self.one_body(model)
                 definition = call(flat, 'GetDefinition'); fixed = get(definition, 'FixedFace2')
@@ -245,7 +381,7 @@ class Capture(Session):
                 def project(p):
                     p = np.asarray(p)-origin
                     return (float(p@u), float(p@v))
-                regions = []
+                regions, face_regions = [], []
                 fixed_point = None
                 fixed_match = self.persistent_ref(model, fixed)
                 for face in values(call(body, 'GetFaces')):
@@ -278,7 +414,9 @@ class Capture(Session):
                         raise ApiError(body_name+': yüz dış konturu belirsiz.')
                     polygon = Polygon(outers[0].exterior.coords, [p.exterior.coords for outer, p in loops if not outer])
                     regions.append(polygon)
-                    if self.persistent_ref(model, face) == fixed_match:
+                    flat_reference = self.persistent_ref(model, face)
+                    face_regions.append((flat_reference, polygon))
+                    if flat_reference == fixed_match:
                         fixed_point = tuple(polygon.representative_point().coords[0])
                 union = unary_union(regions)
                 if union.geom_type != 'Polygon' or fixed_point is None:
@@ -291,19 +429,15 @@ class Capture(Session):
                     if not segments:
                         raise ApiError(row['id']+': büküm teğetleri / eksenleri eksik.')
                     lines = [tuple(project(p) for p in self.line(s)) for s in segments]
-                    base = np.array(lines[0][1])-lines[0][0]; length = np.linalg.norm(base)
-                    if length <= .001:
-                        raise ApiError(row['id']+': sıfır boylu büküm ekseni.')
-                    u2 = base/length; n2 = np.array([-u2[1], u2[0]])
-                    if any(abs(np.dot(np.array(b)-a, n2)) > .001 for a, b in lines):
-                        raise ApiError(row['id']+': paralel doğrusal büküm teğetleri bulunamadı.')
-                    offsets = [float(np.dot(a, n2)) for a, _ in lines]
-                    low, high = min(offsets), max(offsets)
-                    width = high-low
-                    if width <= .001:
-                        raise ApiError(row['id']+': yalnız merkez çizgisi var; ölçülmüş büküm bölgesi genişliği eksik.')
-                    lo = min(np.dot(p, u2) for line in lines for p in line); hi = max(np.dot(p, u2) for line in lines for p in line)
-                    bands.append(dict(row, start=tuple(u2*lo+n2*low), end=tuple(u2*hi+n2*low), width=width))
+                    try:
+                        flat_refs = {self.persistent_ref(model, f) for f in values(call(feature, 'GetFaces'))}
+                    except Exception:
+                        # Some SW releases hide the subfeature faces after
+                        # flattening. Measured tangent pairs remain sufficient;
+                        # a centreline alone still fails unless its face exists.
+                        flat_refs = set()
+                    zones = [polygon for ref, polygon in face_regions if ref and ref in flat_refs]
+                    bands.append(_band(row, lines, zones, thickness))
                 snapshot = partition(str(call(model, 'GetTitle')), configuration, material, thickness, Region.from_polygon(union), bands,
                                      fixed_point, fixed_ref, source or 'Kaydedilmemiş aktif SLDPRT')
             if stamp and (Path(source).stat().st_size, Path(source).stat().st_mtime_ns) != stamp:

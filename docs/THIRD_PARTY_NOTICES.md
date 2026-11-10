@@ -1,5 +1,16 @@
 # GOKWORKS Qt sürümü — üçüncü taraf lisansları
 
+## Abkant takım kaynakları · 10 Kasım 2026
+
+Çalışma ucu ve V omzu tanıma matematiği, `DenisPapushaJava/3d-bending-simulator`
+deposunun `37e30d51ef842ea9ba2b2518ecb88a7736cf9872` sürümündeki
+`src/core/ToolGeometry.cpp` referans alınarak uyarlanmıştır. Copyright ©2026
+deniapapusha, MIT. Tam izin ve sorumluluk metni
+`packaging/licenses/press-brake/3d-bending-simulator-MIT.txt` altında dağıtılır.
+Üretici CAD dosyaları pakete gömülmez. Kullanıcının başlattığı çevrimiçi içe
+aktarma, açık kaynakta yayımlanan teknik profilleri kişisel kataloğa kaydeder;
+üretici varlıklarının koşulları kodun MIT lisansından ayrıdır.
+
 ## Sparrow yerleşim motoru · 9 Kasım 2026
 
 Resmî `spyrrow==0.9.0` Python bağlantısı (MIT, Paul Durand-Lupinski)

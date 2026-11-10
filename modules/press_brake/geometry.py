@@ -1,6 +1,6 @@
 """B-Rep bodies used by BOTH collision service and tessellated scene (mm)."""
 from dataclasses import dataclass
-from math import sin, cos, pi
+from math import sin, cos, pi, tan
 import numpy as np
 from .kinematics import arc_parameters, basis, poses, station_transform
 from .models import Region
@@ -32,11 +32,20 @@ def transform(shape, matrix):
     from OCP.gp import gp_Trsf
     from OCP.BRepBuilderAPI import BRepBuilderAPI_Transform
     tr = gp_Trsf(); tr.SetValues(*map(float, np.asarray(matrix)[:3].reshape(-1)))
-    return BRepBuilderAPI_Transform(shape, tr, True).Shape()
+    # Rigid placement can share the original B-Rep and its triangulation.
+    # OCCT copies automatically if a transform cannot be represented by location.
+    return BRepBuilderAPI_Transform(shape, tr, False).Shape()
 
 
 def translation(x=0, y=0, z=0):
     result = np.eye(4); result[:3, 3] = x, y, z
+    return result
+
+
+def section_rotation(degrees):
+    phi = degrees*pi/180
+    result = np.eye(4)
+    result[1:3, 1:3] = ((cos(phi), -sin(phi)), (sin(phi), cos(phi)))
     return result
 
 
@@ -159,6 +168,15 @@ class Geometry:
         self.flat = {f.id: prism(f.region, plan.part.thickness) for f in plan.part.flanges} if plan is not None else {}
         self.tools = {}
         self.bend_cache = {}
+        self.placed_cache = {}
+
+    def placed_body(self, id, kind, shape, matrix):
+        key = (id, kind, shape, tuple(np.asarray(matrix).ravel()))
+        if key not in self.placed_cache:
+            if len(self.placed_cache) >= 1024:
+                self.placed_cache.clear()
+            self.placed_cache[key] = body(id, kind, transform(shape, matrix))
+        return self.placed_cache[key]
 
     def part_bodies(self, angles, station=None):
         p = self.plan.part
@@ -166,7 +184,7 @@ class Geometry:
         result = []
         global_t = np.eye(4) if station is None else station
         for flange in p.flanges:
-            result.append(body(flange.id, 'sheet', transform(self.flat[flange.id], global_t@transforms[flange.id])))
+            result.append(self.placed_body(flange.id, 'sheet', self.flat[flange.id], global_t@transforms[flange.id]))
         for bend in p.bends:
             angle = angles.get(bend.id, 0)
             key = (bend.id, round(angle, 9))
@@ -174,7 +192,7 @@ class Geometry:
                 self.bend_cache[key] = bend_shape(bend, p.thickness, angle)
                 from modules.gear_calculator.cad import shape_stats
                 shape_stats(self.bend_cache[key])
-            result.append(body(bend.id, 'sheet', transform(self.bend_cache[key], global_t@transforms[bend.parent])))
+            result.append(self.placed_body(bend.id, 'sheet', self.bend_cache[key], global_t@transforms[bend.parent]))
         return result
 
     def tool_shape(self, tool, segment):
@@ -186,7 +204,18 @@ class Geometry:
         from OCP.gp import gp_Pnt, gp_Vec
         from OCP.GC import GC_MakeArcOfCircle
         def wire(edges):
+            from OCP.BRep import BRep_Builder
+            from OCP.TopExp import TopExp
             maker = BRepBuilderAPI_MakeWire()
+            builder = BRep_Builder()
+            def add(edge):
+                # The DXF reader joins endpoints within 1e-6 mm. Carry the
+                # same tolerance into OCCT without moving lines or arcs.
+                for vertex in (TopExp.FirstVertex_s(edge), TopExp.LastVertex_s(edge)):
+                    builder.UpdateVertex(vertex, 1e-6)
+                maker.Add(edge)
+                if not maker.IsDone():
+                    raise ValueError('Takım kesiti kenarları kapalı tele bağlanamadı.')
             for edge in edges:
                 a = gp_Pnt(segment.start, *edge.start); b = gp_Pnt(segment.start, *edge.end)
                 if edge.center:
@@ -197,12 +226,12 @@ class Geometry:
                         half = Edge(edge.start, opposite, edge.center, edge.radius, edge.a0, edge.sweep/2)
                         for e in (half, Edge(half.end, half.start, edge.center, edge.radius, edge.a0+edge.sweep/2, edge.sweep/2)):
                             mid = gp_Pnt(segment.start, edge.center[0]+edge.radius*cos(e.a0+e.sweep/2), edge.center[1]+edge.radius*sin(e.a0+e.sweep/2))
-                            maker.Add(BRepBuilderAPI_MakeEdge(GC_MakeArcOfCircle(gp_Pnt(segment.start, *e.start), mid, gp_Pnt(segment.start, *e.end)).Value()).Edge())
+                            add(BRepBuilderAPI_MakeEdge(GC_MakeArcOfCircle(gp_Pnt(segment.start, *e.start), mid, gp_Pnt(segment.start, *e.end)).Value()).Edge())
                         continue
                     mid = gp_Pnt(segment.start, edge.center[0]+edge.radius*cos(edge.a0+edge.sweep/2), edge.center[1]+edge.radius*sin(edge.a0+edge.sweep/2))
-                    maker.Add(BRepBuilderAPI_MakeEdge(GC_MakeArcOfCircle(a, mid, b).Value()).Edge())
+                    add(BRepBuilderAPI_MakeEdge(GC_MakeArcOfCircle(a, mid, b).Value()).Edge())
                 else:
-                    maker.Add(BRepBuilderAPI_MakeEdge(a, b).Edge())
+                    add(BRepBuilderAPI_MakeEdge(a, b).Edge())
             return maker.Wire()
         if tool.section_dxf:
             from .tooling import sections
@@ -243,33 +272,41 @@ class Geometry:
         # Active tangents symmetric to V. Place die shoulders on lower sheet
         # surface at ±V/2; punch tip follows the upper centre surface.
         die_z = -t/2
+        shoulder = (channel.shoulder_radius or 0.) if channel else 0.
+        lip_angle = (pi-channel.angle*pi/180)/2 if channel else 0.
+        contact_y = channel.opening/2+shoulder*tan(lip_angle/2) if channel else 0.
+        contact_z = die_z
         if channel and phi > 1e-8:
             r = arc_parameters(bend, t, phi)
             half = phi/2
             tangent_y = (r+t/2)*sin(half)
             tangent_z = (r+t/2)*(1-cos(half))-t/2
-            if channel.opening/2 < tangent_y:
+            if shoulder and half > lip_angle+1e-7:
+                raise ValueError(f'{bend.id}: hedef büküm V kanalının açısını aşıyor; omuz teması çözülemedi.')
+            contact_y = channel.opening/2+shoulder*tan(lip_angle/2)-shoulder*sin(half)
+            if contact_y < tangent_y:
                 raise ValueError(f'{bend.id}: V açıklığı hedef büküm bölgesinden dar; destek temas geometrisi çözülemedi.')
-            die_z = tangent_z+(channel.opening/2-tangent_y)*sin(half)/cos(half)
+            contact_z = tangent_z+(contact_y-tangent_y)*sin(half)/cos(half)
+            die_z = contact_z+shoulder*(1-cos(half))
         placements = ((punch, step.punch_segments, translation(y=-(punch.tip or (0, 0))[0], z=t/2-(punch.tip or (0, 0))[1]+travel)),
-                      (die, step.die_segments, translation(y=-channel.center[0], z=die_z-channel.center[1]) if channel else np.eye(4)))
+                      (die, step.die_segments, translation(y=-channel.center[0], z=die_z-channel.center[1])@section_rotation(channel.rotation) if channel else np.eye(4)))
         for tool, chosen_segments, tr in placements:
             if tool.section is None:
                 continue
             for j, segment in enumerate(chosen_segments if chosen_segments is not None else tool.segments):
                 if segment.length <= 0:
                     raise ValueError(f'{tool.code}: segment boyu pozitif olmalı.')
-                result.append(body(f'{tool.kind}:{tool.code}:{j+1}', tool.kind, transform(self.tool_shape(tool, segment), tr)))
+                result.append(self.placed_body(f'{tool.kind}:{tool.code}:{j+1}', tool.kind, self.tool_shape(tool, segment), tr))
             if tool.holder_section is not None:
                 from dataclasses import replace
                 holder = replace(tool, id=tool.id+':holder', section=tool.holder_section, section_dxf=tool.holder_dxf, contour_index=0)
                 for j, holder_segment in enumerate(tool.holder_segments):
-                    result.append(body(f'holder:{tool.kind}:{j+1}', 'holder', transform(self.tool_shape(holder, holder_segment), tr)))
+                    result.append(self.placed_body(f'holder:{tool.kind}:{j+1}', 'holder', self.tool_shape(holder, holder_segment), tr))
         adjacent = (bend.id, bend.parent, bend.child)
         contacts = [('punch', 0., t/2, .3, adjacent)] if phase == 'bend' or travel <= .2 else []
         # Local contact cylinders only. A whole active flange is NEVER exempt.
         if channel:
-            contacts += [('die', -channel.opening/2, die_z, .3, adjacent), ('die', channel.opening/2, die_z, .3, adjacent)]
+            contacts += [('die', -contact_y, contact_z, .3, adjacent), ('die', contact_y, contact_z, .3, adjacent)]
         return result, contacts
 
 
