@@ -104,3 +104,10 @@ karşılaştırılır; diğer bekleyen gruplar için en az bir başlangıç dili
 Dört malzeme ve dört kalınlık grubu ayrı kontrollü saat testleriyle doğrulandı.
 Gerçek native motorla dört kalınlık grubundaki 12/12 parça, 12 saniyelik
 bütçede 11,45 saniyede dört uygun saca yerleşti ve geometri kontrolünden geçti.
+
+Minimum kaliper genişliği, her kenarda bütün noktaları tekrar yansıtan karesel
+bir döngü yerine dönen kaliperlerle hesaplanır. 4.000 noktalı daire örneğinde
+aynı genişlik 0,741 saniye yerine 0,00364 saniyede elde edildi. Bu yalnız motor
+öncesi boyut kontrolünün ölçümüdür; tüm yerleşimin 200 kat hızlandığı anlamına
+gelmez. Rastgele dışbükey konturlar, negatif başlangıç koordinatları ve yoğun
+bir düzenli çokgen bağımsız genişlik hesabıyla karşılaştırılır.
