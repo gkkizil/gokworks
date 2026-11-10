@@ -61,11 +61,11 @@ def default_segments(tool, bend):
     return station(bend.length) if is_generic(tool) else tool.segments
 
 
-def rounded(polygon, radius):
+def rounded(polygon, radius, quad_segs=24):
     """Round convex corners (tips, shoulders) by ``radius``; concave corners stay sharp."""
     if radius <= 0:
         return polygon
-    return polygon.buffer(-radius, quad_segs=24, join_style='round').buffer(radius, quad_segs=24, join_style='round')
+    return polygon.buffer(-radius, quad_segs=quad_segs, join_style='round').buffer(radius, quad_segs=quad_segs, join_style='round')
 
 
 def recommended_v(thickness):
@@ -77,14 +77,51 @@ def shoulder_radius(opening):
     return max(.5, round(opening*.08*2)/2)
 
 
+TANG, CLEAR = 6.5, .05     # half-width of the 13 mm tang; slot clearance so a seated tool never overlaps its holder
+
+
+def _bolt(y, z, radius=4.):
+    from shapely.geometry import Point
+    return Point(y, z).buffer(radius, quad_segs=4)   # 16-sided: reads as a bolt, keeps the mesh and check light
+
+
+def punch_holder(height):
+    """Intermediate clamp seated on the punch shoulder (z = height-20), tang slot below, beam tang on top.
+
+    Generic Promecam-type proportions drawn by GOKWORKS: chamfered body, front
+    clamp plate with its clamping bolt, rear body; not a supplier holder.
+    """
+    from shapely.geometry import box
+    base = height-20
+    body = Polygon([(-16, base), (16, base), (16, base+5), (24, base+13), (24, base+52), (20, base+58),
+                    (11, base+58), (11, base+78), (-11, base+78), (-11, base+58), (-22, base+58), (-26, base+52),
+                    (-26, base+13), (-16, base+5)])
+    slot = box(-TANG-CLEAR, base-1, TANG+CLEAR, height+CLEAR)                     # holds the tool's 13 mm tang
+    split = box(9, base+20, 9.8, base+58)                                         # gap between clamp plate and body
+    shape = body.difference(slot).difference(split).difference(_bolt(17, base+36)).difference(_bolt(-19, base+36, 3))
+    return Region.from_polygon(rounded(shape, .8, 2))   # edge breaks, not working surfaces
+
+
+def die_rail(height):
+    """Lower rail under the die (die body seats at z = 8-height), tang slot, side clamping bolts, base flange."""
+    from shapely.geometry import box
+    top = -height+8
+    body = Polygon([(-30, top), (30, top), (30, top-28), (40, top-36), (40, top-50), (-40, top-50), (-40, top-36),
+                    (-30, top-28)])
+    slot = box(-TANG-CLEAR, top-8-CLEAR, TANG+CLEAR, top+1)
+    shape = body.difference(slot).difference(_bolt(-19, top-15, 3.5)).difference(_bolt(19, top-15, 3.5))
+    shape = shape.difference(box(-41, top-43, -36, top-41)).difference(box(36, top-43, 41, top-41))   # T-slot grooves
+    return Region.from_polygon(rounded(shape, .8, 2))   # edge breaks, not working surfaces
+
+
 def _punch(id, code, polygon, tip_angle, tip_radius, height):
     polygon = rounded(polygon, tip_radius)
     low = polygon.bounds[1]
     region = Region.from_polygon(polygon)
-    holder = Region(((-15, height), (15, height), (15, height+25), (-15, height+25)))   # generic intermediate clamp
+    holder = punch_holder(height)
     return Tool(f'std:{id}', MAKER, code, 'punch', FAMILY, height, (0, height), region, SOURCE, sectioned_set(),
                 Mount(INTERFACE, INTERFACE), tip_angle, tip_radius, (0, low),
-                holder_section=holder, holder_source='Genel ara tutucu (yaklaşık blok)', holder_segments=sectioned_set())
+                holder_section=holder, holder_source='Genel ara tutucu · Avrupa tipi profil (yaklaşık)', holder_segments=sectioned_set())
 
 
 def straight_punch(angle=88, radius=.8, height=95):
@@ -123,11 +160,11 @@ def single_v_die(opening, angle=88, height=60):
                  (6.5, -height+8), (6.5, -height), (-6.5, -height), (-6.5, -height+8), (-width/2, -height+8)])
     r = shoulder_radius(opening)
     p = rounded(p, r)
-    holder = Region(((-max(width/2, 30), -height-30), (max(width/2, 30), -height-30), (max(width/2, 30), -height), (-max(width/2, 30), -height)))
+    holder = die_rail(height)
     return Tool(f'std:die-v{opening}-{angle}', MAKER, f'GS-V{opening}-{angle}', 'die', FAMILY, height, (0, -height),
                 Region.from_polygon(p), SOURCE, sectioned_set(), Mount(INTERFACE, INTERFACE),
                 channels=(Channel(f'V{opening}', opening, angle, (0, 0), r),),
-                holder_section=holder, holder_source='Genel alt tabla (yaklaşık blok)', holder_segments=sectioned_set())
+                holder_section=holder, holder_source='Genel kalıp rayı · Avrupa tipi profil (yaklaşık)', holder_segments=sectioned_set())
 
 
 def standard_tools():

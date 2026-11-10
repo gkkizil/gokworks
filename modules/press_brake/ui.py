@@ -713,6 +713,9 @@ class PressBrakePage(BasePage):
                 else:
                     tool_with_holder = tool
                 tool_with_holder.validate(); g = Geometry()
+                from .service import holder_overlap
+                if holder_overlap(tool_with_holder):
+                    raise ValueError(f'Tutucu kesiti takım kesitine {holder_overlap(tool_with_holder):.3g} mm² giriyor; ortak bağlama referansını kontrol edin.')
                 for segment in tool_with_holder.segments:
                     g.tool_shape(tool_with_holder, segment)
                 if tool_with_holder.holder_section is not None:

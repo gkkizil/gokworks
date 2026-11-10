@@ -314,7 +314,7 @@ class Geometry:
 
 
 # Display colours per body kind (scene, legend, labels and PDF share them).
-SCENE_COLOURS = {'sheet': '#4A86D4', 'punch': '#C9D0D8', 'die': '#8E99A6', 'holder': '#6E7884', 'machine': '#6B7580'}
+SCENE_COLOURS = {'sheet': '#4A86D4', 'punch': '#C9D0D8', 'die': '#8E99A6', 'holder': '#5E7A96', 'machine': '#6B7580'}
 
 
 def rgb(colour):

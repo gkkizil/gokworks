@@ -50,12 +50,22 @@ class Result:
         return 'collision' if any(s.status == 'collision' for s in self.steps) else 'unknown' if any(s.status == 'unknown' for s in self.steps) else 'clear'
 
 
+def holder_overlap(tool, tolerance=1e-3):
+    """Area (mm²) where the holder section cuts into the tool section; both share the mounting datum."""
+    if tool.section is None or tool.holder_section is None:
+        return 0.
+    area = tool.section.polygon().intersection(tool.holder_section.polygon()).area
+    return area if area > tolerance else 0.
+
+
 def step_scope(plan, step):
     notes = []
     die = plan.tool(step.die)
     for tool, segments in ((plan.tool(step.punch), step.punch_segments), (die, step.die_segments)):
         if tool.section is None:
             notes.append(f'{tool.code}: gerçek ölçekli kesit eksik')
+        if holder_overlap(tool):
+            notes.append(f'{tool.code}: tutucu kesiti takım kesitine {holder_overlap(tool):.3g} mm² giriyor; montaj geçersiz')
         if not tool.mount.compatible:
             notes.append(f'{tool.code}: takım–tutucu–adaptör bağlantısı doğrulanamadı')
         if tool.holder_section is None:

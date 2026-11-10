@@ -51,3 +51,22 @@ def test_a_demo_part_bent_with_generic_tools_is_checked_and_says_what_the_tools_
     result = run(plan, threading.Event())
     assert result.status in ('clear', 'collision')                          # placed and checked, not "unknown"
     assert all(NOTE in s.notes for s in result.steps)
+
+
+def test_generic_holders_clamp_the_13_mm_tang_without_cutting_into_the_tool():
+    from modules.press_brake.service import holder_overlap
+    for tool in standard_tools():
+        holder = tool.holder_section.polygon(); section = tool.section.polygon()
+        assert holder_overlap(tool) == 0 and len(holder.interiors) >= 2          # bolt holes / clamp split are real voids
+        seat = section.bounds[3] if tool.kind == 'punch' else section.bounds[1]
+        assert (holder.bounds[1] <= seat-20+1e-6) if tool.kind == 'punch' else (holder.bounds[3] >= seat+8-1e-6)   # wraps the tang
+
+
+def test_a_holder_cutting_into_its_tool_makes_the_step_uncheckable():
+    from modules.press_brake.models import Region
+    from modules.press_brake.service import holder_overlap, step_scope
+    plan = load_demo('L120'); punch = plan.tool(plan.steps[0].punch)
+    bad = replace(punch, holder_section=Region(((-8, 70), (8, 70), (8, 90), (-8, 90))))      # 10 mm into the body
+    assert holder_overlap(bad) >= 100
+    plan = replace(plan, tools=tuple(bad if t.id == punch.id else t for t in plan.tools))
+    assert any('tutucu kesiti takım kesitine' in n for n in step_scope(plan, plan.steps[0]))
