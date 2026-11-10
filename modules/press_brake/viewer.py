@@ -7,9 +7,26 @@ from PySide6.QtWidgets import QWidget
 from modules.gear_calculator.families.mesh_view import MechanismMeshView
 from modules.dxf_dwg.preview.viewer import matrices
 
-AXIS, PUNCH, DIE, HIT = '#e7ad35', '#5aa2e6', '#4fbf8f', '#f14d4d'
+from .geometry import SCENE_COLOURS
+
+AXIS, HIT = '#e7ad35', '#f14d4d'
+PUNCH, DIE = SCENE_COLOURS['punch'], SCENE_COLOURS['die']
 # Colour is never the only signal: every swatch carries its name (and the scene repeats it).
-LEGEND = (('Parça', None), ('Üst takım', PUNCH), ('Alt takım', DIE), ('Büküm ekseni', AXIS), ('Çarpışma', HIT))
+LEGEND = (('Parça', SCENE_COLOURS['sheet']), ('Üst takım', PUNCH), ('Alt takım', DIE), ('Tezgâh · görsel', SCENE_COLOURS['machine']),
+          ('Büküm ekseni', AXIS), ('Çarpışma', HIT))
+
+
+def projector(mesh, state, width, height):
+    """Station mm (Z up) -> widget/image pixels for ``mesh`` seen with camera ``state``."""
+    low, high = np.array(mesh.bounds[:3]), np.array(mesh.bounds[3:])
+    center = (low+high)/2; scale = 2/max(high-low)
+    _, mvp = matrices(state, max(1, width)/max(1, height))
+    def project(xyz):
+        xyz = np.asarray(xyz)[[0, 2, 1]]*np.array([1., 1., -1.])
+        normalized = (xyz-np.array(mesh.origin)-center)*scale
+        p = mvp@np.r_[normalized, 1.]; p = p[:3]/p[3]
+        return QPointF((p[0]+1)*width/2, (1-p[1])*height/2)
+    return project
 
 
 def pill(painter, rect, text, ink, fill, bounds=None, taken=()):
@@ -44,14 +61,7 @@ class BendAnnotations(QWidget):
         v = self.viewer
         if v.mesh is None:
             return
-        low, high = np.array(v.mesh.bounds[:3]), np.array(v.mesh.bounds[3:])
-        center = (low+high)/2; scale = 2/max(high-low)
-        _, mvp = matrices(v.camera.state(), max(1, v.width())/max(1, v.height()))
-        def project(xyz):
-            xyz = np.asarray(xyz)[[0, 2, 1]]*np.array([1., 1., -1.])
-            normalized = (xyz-np.array(v.mesh.origin)-center)*scale
-            p = mvp@np.r_[normalized, 1.]; p = p[:3]/p[3]
-            return QPointF((p[0]+1)*self.width()/2, (1-p[1])*self.height()/2)
+        project = projector(v.mesh, v.camera.state(), self.width(), self.height())
         painter = QPainter(self); painter.setRenderHint(QPainter.Antialiasing)
         ink, plate = self.colours()
         font = QFont(self.font()); font.setPixelSize(11); font.setBold(True); painter.setFont(font)
@@ -117,8 +127,7 @@ class BendAnnotations(QWidget):
 
     def paint_legend(self, painter, ink, plate):
         font = QFont(self.font()); font.setPixelSize(11); painter.setFont(font); metrics = painter.fontMetrics()
-        part = QColor('#8A929C' if self.viewer.background.lightness() > 128 else '#B5BBC4')
-        items = [(text, QColor(colour) if colour else part) for text, colour in LEGEND]
+        items = [(text, QColor(colour)) for text, colour in LEGEND]
         widths = [metrics.horizontalAdvance(t)+24 for t, _ in items]
         if sum(widths)+110 > self.width():          # narrow scene: the read-out and markers matter more
             return

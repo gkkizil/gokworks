@@ -54,7 +54,8 @@ def poses(part, angles):
 
 def step_angles(plan, index, fraction):
     bends = {b.id: b for b in plan.part.bends}
-    return {s.bend: radians(bends[s.bend].turn)*bends[s.bend].direction*(-1 if s.reverse else 1)*(fraction if i == index else 1)
+    # Planned angle per step (target or CAD); the CAD bend zone itself never changes.
+    return {s.bend: radians(plan.turn(s))*bends[s.bend].direction*(-1 if s.reverse else 1)*(fraction if i == index else 1)
             for i, s in enumerate(plan.steps) if i <= index}
 
 

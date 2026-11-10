@@ -46,12 +46,13 @@ def export_pdf(plan, result, path, *, overwrite=False, stop=None):
                 text(('DEMO · ÖZGÜN ÖRNEK GEOMETRİ · ' if p.demo else '')+f'{p.name} / {p.configuration}', 11, space=48)
                 text(f'Malzeme: {p.material}    Sac: {p.thickness:g} mm    Kaynak: {p.source}', space=52)
                 text(f'Adım {i+1} / {len(plan.steps)} · {bend.id}', 13, space=44)
-                text(f'İç açı: {bend.inside_angle:g}°  |  Dönüş: {bend.turn:g}°  |  Yön: {bend.direction*(-1 if step.reverse else 1):+d}  |  İç R: {bend.radius:g} mm', space=34)
+                text(f'İç açı: {plan.inside(step):g}°'+(f' (hedef · CAD {bend.inside_angle:g}°)' if step.target is not None and step.target != bend.inside_angle else '')+f'  |  Dönüş: {plan.turn(step):g}°  |  Yön: {bend.direction*(-1 if step.reverse else 1):+d}  |  İç R: {bend.radius:g} mm', space=34)
                 text(f'Eksen: {bend.start} → {bend.end} mm · Etkin boy: {bend.length:.2f} mm', space=40)
                 text(f'Üst bıçak: {punch.maker} / {punch.code} · Uç R: {punch.tip_radius if punch.tip_radius is not None else "bilinmiyor"} mm', space=38)
                 text(f'Alt kalıp: {die.maker} / {die.code} · Kanal: {step.channel} · V: {channel.opening if channel else "bilinmiyor"} mm · Çalışma referansı: {channel.center if channel else "bilinmiyor"}', space=44)
                 for tool, chosen in ((punch, step.punch_segments), (die, step.die_segments)):
-                    segments = tool.segments if chosen is None else chosen
+                    from .standard import default_segments
+                    segments = default_segments(tool, bend) if chosen is None else chosen
                     desc = '; '.join(f'x={s.start:g}, L={s.length:g}' for s in segments) or 'atanmamış'
                     load = f'{tool.line_load:g} {tool.line_load_unit} (üretici beyanı)' if tool.line_load is not None else 'bilinmiyor'
                     text(f'{tool.code} segmentleri (mm): {desc} · Hat yükü: {load}', space=40)
