@@ -223,6 +223,7 @@ class Step:
     orientation: int = 0  # 0/180 about station vertical; recorded reposition
     punch_segments: tuple[Segment, ...] | None = None
     die_segments: tuple[Segment, ...] | None = None
+    target: float | None = None  # planned inside angle, degrees; None = the CAD angle
 
 
 @dataclass(frozen=True)
@@ -251,4 +252,23 @@ class Plan:
                 raise ValueError('Desteklenmeyen tutuş yönü.')
             if self.tool(step.punch).kind != 'punch' or self.tool(step.die).kind != 'die':
                 raise ValueError('Üst ve alt takım tipleri yanlış.')
+            if step.target is not None:
+                bend = self.bend(step.bend)
+                if not 1 <= step.target <= 179:
+                    raise ValueError(f'{bend.title}: hedef iç açı 1° ile 179° arasında olmalı.')
+                # The CAD bend zone (measured width, neutral factor) stays; a different
+                # target angle changes the radius it implies. It must stay positive.
+                k = (bend.width/radians(bend.turn)-bend.radius)/self.part.thickness
+                if bend.width/radians(180-step.target)+(.5-k)*self.part.thickness <= 0:
+                    raise ValueError(f'{bend.title}: {step.target:g}° hedef açı bu büküm bölgesiyle oluşturulamaz (iç R sıfırın altına düşer).')
         return self
+
+    def bend(self, id):
+        return next(b for b in self.part.bends if b.id == id)
+
+    def inside(self, step):
+        """Planned inside angle of a step: its target, else the CAD angle."""
+        return self.bend(step.bend).inside_angle if step.target is None else step.target
+
+    def turn(self, step):
+        return 180.0-self.inside(step)

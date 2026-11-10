@@ -30,10 +30,11 @@ class Mesh:
     bounds: tuple
     triangles: int
     origin: tuple = (0., 0., 0.)
+    colours: bytes = b''  # optional uint8 RGB per triangle; empty = the viewer's single base colour
 
     @property
     def size(self):
-        return len(self.positions) + len(self.normals) + len(self.edges)
+        return len(self.positions) + len(self.normals) + len(self.edges) + len(self.colours)
 
 
 @dataclass(frozen=True)

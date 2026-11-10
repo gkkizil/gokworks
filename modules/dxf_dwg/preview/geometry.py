@@ -8,7 +8,8 @@ from .models import Mesh
 MAX_TRIANGLES = 120000
 
 
-def make_mesh(coordinates, stop=None):
+def make_mesh(coordinates, stop=None, colours=None):
+    """``colours``: optional RGB (0-255) per input triangle, kept for the triangles that survive."""
     checkpoint(stop)
     points = np.asarray(coordinates, dtype=np.float64)
     if points.size == 0 or points.size % 9 or points.size > MAX_TRIANGLES * 9:
@@ -20,6 +21,11 @@ def make_mesh(coordinates, stop=None):
     lengths = np.linalg.norm(normals, axis=1)
     valid = lengths > 1e-12
     points, normals, lengths = points[valid], normals[valid], lengths[valid]
+    if colours is not None:
+        colours = np.asarray(colours, dtype=np.uint8).reshape((-1, 3))
+        if len(colours) != len(valid):
+            raise ValueError('Üçgen renk sayısı üçgen sayısıyla eşleşmiyor.')
+        colours = colours[valid]
     if not len(points):
         raise ValueError('Görüntülenebilir yüzey üçgeni bulunamadı.')
     normals /= lengths[:, None]
@@ -53,7 +59,8 @@ def make_mesh(coordinates, stop=None):
     checkpoint(stop)
     smooth = smooth_normals(vertices, normals, lengths, quantum, stop)
     return Mesh(vertices.astype('<f4').tobytes(), smooth.astype('<f4').tobytes(),
-                np.asarray(lines, dtype='<f4').tobytes(), tuple(low) + tuple(high), len(points), tuple(origin))
+                np.asarray(lines, dtype='<f4').tobytes(), tuple(low) + tuple(high), len(points), tuple(origin),
+                colours.tobytes() if colours is not None else b'')
 
 
 CREASE = .8660254   # cos 30 deg: same limit as the drawn crease edges

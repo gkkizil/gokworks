@@ -72,6 +72,13 @@ def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None):
             continue
         if a.kind == b.kind == 'holder' and a.id.split(':')[1] == b.id.split(':')[1]:
             continue
+        # A holder and the tool it clamps are one rigid assembly too. Their fit is a
+        # section check (service.holder_overlap -> "Kontrol edilemedi"), not motion.
+        if 'holder' in (a.kind, b.kind) and a.kind != b.kind:
+            holder, other = (a, b) if a.kind == 'holder' else (b, a)
+            parts = holder.id.split(':')            # 'holder:<tool kind>:<n>'
+            if len(parts) > 1 and other.kind == parts[1]:
+                continue
         distance = box_distance(a.bounds, b.bounds)
         if distance > near_margin:
             continue

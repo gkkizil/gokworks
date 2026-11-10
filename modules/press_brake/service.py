@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from math import degrees
 import numpy as np
 from .collision import check, Hit
-from .geometry import Geometry, mesh
+from .geometry import Geometry, mesh, scene_mesh
 from .kinematics import step_angles, station_transform
 from .motion import sample_interval
 from modules.cad_converter.models import checkpoint
@@ -50,19 +50,30 @@ class Result:
         return 'collision' if any(s.status == 'collision' for s in self.steps) else 'unknown' if any(s.status == 'unknown' for s in self.steps) else 'clear'
 
 
+def holder_overlap(tool, tolerance=1e-3):
+    """Area (mm²) where the holder section cuts into the tool section; both share the mounting datum."""
+    if tool.section is None or tool.holder_section is None:
+        return 0.
+    area = tool.section.polygon().intersection(tool.holder_section.polygon()).area
+    return area if area > tolerance else 0.
+
+
 def step_scope(plan, step):
     notes = []
     die = plan.tool(step.die)
     for tool, segments in ((plan.tool(step.punch), step.punch_segments), (die, step.die_segments)):
         if tool.section is None:
             notes.append(f'{tool.code}: gerçek ölçekli kesit eksik')
+        if holder_overlap(tool):
+            notes.append(f'{tool.code}: tutucu kesiti takım kesitine {holder_overlap(tool):.3g} mm² giriyor; montaj geçersiz')
         if not tool.mount.compatible:
             notes.append(f'{tool.code}: takım–tutucu–adaptör bağlantısı doğrulanamadı')
         if tool.holder_section is None:
             notes.append(f'{tool.code}: tutucu geometrisi eksik')
         elif not tool.holder_segments:
             notes.append(f'{tool.code}: tutucu boyuna yerleşimi eksik')
-        segments = tool.segments if segments is None else segments
+        from .standard import default_segments
+        segments = default_segments(tool, plan.bend(step.bend)) if segments is None else segments
         if not segments:
             notes.append(f'{tool.code}: segment atanmamış')
         ordered = sorted(segments, key=lambda s: s.start)
@@ -73,6 +84,18 @@ def step_scope(plan, step):
         notes.append(f'{punch.code}: uç çalışma referansı, uç R veya açı eksik')
     if not any(c.id == step.channel for c in die.channels):
         notes.append(f'{die.code}: seçili V kanalı bulunamadı')
+    return notes
+
+
+def plan_notes(plan, step):
+    """Informational notes on what the step was checked with (they do not make it uncheckable)."""
+    from .standard import NOTE, is_generic
+    notes, bend = [], plan.bend(step.bend)
+    if any(is_generic(plan.tool(t)) for t in (step.punch, step.die)):
+        notes.append(NOTE)
+    if step.target is not None and step.target != bend.inside_angle:
+        notes.append(f'Hedef iç açı {step.target:g}° (CAD {bend.inside_angle:g}°): CAD büküm bölgesi korunarak bu açıya '
+                     'bükülmüş nominal geometri; geri yaylanma hesabı değildir.')
     return notes
 
 
@@ -96,7 +119,8 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
     for index, step in enumerate(plan.steps):
         checkpoint(stop)
         bend = next(b for b in plan.part.bends if b.id == step.bend)
-        notes = step_scope(plan, step)
+        turn = plan.turn(step)
+        notes = step_scope(plan, step)+plan_notes(plan, step)
         first_hit, samples, checked_pairs, minimum = None, 0, set(), max_angle
         phase_cache = {}
         collision_cache = {}
@@ -107,7 +131,7 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
             if key in phase_cache:
                 return phase_cache[key]
             checkpoint(stop)
-            fraction = value/bend.turn if phase == 'bend' else 0 if phase == 'approach' else 1
+            fraction = value/turn if phase == 'bend' else 0 if phase == 'approach' else 1
             angles = step_angles(plan, index, fraction)
             bodies, contacts = geometry.scene(index, angles, phase, value if phase != 'bend' else 0)
             # Self-intersection is invariant under station placement. Keep it
@@ -127,7 +151,7 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
             checked_pairs.add('sac–sac')
             angle = degrees(angles.get(bend.id, 0))
             # Axis in the station is X, centre at origin by construction.
-            frame = Frame(index, phase, angle, mesh(bodies, stop),
+            frame = Frame(index, phase, angle, scene_mesh(bodies, stop),
                           ((-bend.length/2, 0, 0), (bend.length/2, 0, 0)), hits,
                           tuple((b.id, b.bounds) for b in bodies if b.kind != 'sheet'))
             phase_cache[key] = (frame, near)
@@ -137,7 +161,7 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
 
         try:
             step_frames = []
-            for phase, a, b, limit in (('approach', 15., 0., travel_step), ('bend', 0., bend.turn, max_angle), ('retract', 0., 15., travel_step)):
+            for phase, a, b, limit in (('approach', 15., 0., travel_step), ('bend', 0., turn, max_angle), ('retract', 0., 15., travel_step)):
                 sampled = sample_interval(lambda value: sample(phase, value), a, b, maximum=limit, minimum=min_angle if phase == 'bend' else .5)
                 if phase == 'bend':
                     minimum = min(abs(b.angle-a.angle) for a, b in zip(sampled, sampled[1:]))

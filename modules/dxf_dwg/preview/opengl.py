@@ -11,19 +11,19 @@ from PySide6.QtGui import QMatrix4x4, QVector4D, QSurfaceFormat
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtOpenGL import QOpenGLBuffer, QOpenGLShader, QOpenGLShaderProgram
 
-from .viewer import GRID_FADE, normalized, matrices, gradient, grid_lines, grid_colour
+from .viewer import GRID_FADE, normalized, matrices, gradient, grid_lines, grid_colour, triangle_colours
 
 HEADER = '#ifdef GL_ES\nprecision mediump float;\n#endif\n'
-MESH_VERTEX = '''attribute vec3 position; attribute vec3 normal;
-    uniform mat4 mvp; uniform mat4 modelView; varying vec3 n;
-    void main(){gl_Position=mvp*vec4(position,1.0); n=(modelView*vec4(normal,0.0)).xyz;}'''
-MESH_FRAGMENT = HEADER + '''varying vec3 n;
+MESH_VERTEX = '''attribute vec3 position; attribute vec3 normal; attribute vec3 colour;
+    uniform mat4 mvp; uniform mat4 modelView; varying vec3 n; varying vec3 c;
+    void main(){gl_Position=mvp*vec4(position,1.0); n=(modelView*vec4(normal,0.0)).xyz; c=colour;}'''
+MESH_FRAGMENT = HEADER + '''varying vec3 n; varying vec3 c;
     void main(){
         vec3 m=normalize(n); if(m.z<0.0) m=-m;            // two-sided: shade the side facing the viewer
         vec3 key=normalize(vec3(.35,.55,1.)), fill=normalize(vec3(-.65,-.25,.55));
         float light=.30+.58*max(dot(m,key),0.)+.20*max(dot(m,fill),0.)+.08*(m.y*.5+.5);
         float shine=pow(max(dot(m,normalize(key+vec3(0.,0.,1.))),0.),40.)*.28;
-        gl_FragColor=vec4(vec3(.70,.745,.79)*light+shine,1.);
+        gl_FragColor=vec4(c*light+shine,1.);
     }'''
 LINE_VERTEX = '''attribute vec3 position; uniform mat4 mvp; varying vec3 p;
     void main(){gl_Position=mvp*vec4(position,1.0); p=position;}'''
@@ -34,6 +34,14 @@ BACK_VERTEX = '''attribute vec2 position; attribute vec3 colour; varying vec3 c;
 BACK_FRAGMENT = HEADER + 'varying vec3 c; void main(){gl_FragColor=vec4(c,1.);}'
 
 EDGE = (.11, .13, .16, .9)
+SURFACE = (.70, .745, .79)   # single-colour meshes (all modules but press brake scenes)
+
+
+def vertex_colours(mesh):
+    if not getattr(mesh, 'colours', b''):
+        return np.broadcast_to(np.array(SURFACE), (len(mesh.positions)//12, 3))
+    # Shader light peaks above 1; scale the same as SURFACE relates to BASE_COLOUR.
+    return np.repeat(triangle_colours(mesh)/255*np.array(SURFACE)/(np.array([155, 172, 188])/255), 3, axis=0)
 
 
 def program(parent, vertex, fragment):
@@ -118,7 +126,7 @@ class OpenGLCanvas(QOpenGLWidget):
             if self.dirty:
                 vertices, normals, edges = normalized(parent.mesh)
                 self.count, self.edge_count = len(vertices), len(edges)
-                self.upload('mesh', np.c_[vertices, normals]); self.upload('edges', edges)
+                self.upload('mesh', np.c_[vertices, normals, vertex_colours(parent.mesh)]); self.upload('edges', edges)
                 grid = grid_lines(vertices); self.grid_count = len(grid); self.upload('grid', grid)
                 self.dirty = False
             view, mvp = matrices(parent.camera.state(), max(1, self.width())/max(1, self.height()))
@@ -131,13 +139,14 @@ class OpenGLCanvas(QOpenGLWidget):
                 f.glDepthMask(True)
             p = self.programs['mesh']; p.bind(); self.buffers['mesh'].bind()
             p.setUniformValue('mvp', mvp); p.setUniformValue('modelView', view)
-            p.enableAttributeArray('position'); p.enableAttributeArray('normal')
-            p.setAttributeBuffer('position', 0x1406, 0, 3, 24)
-            p.setAttributeBuffer('normal', 0x1406, 12, 3, 24)
+            p.enableAttributeArray('position'); p.enableAttributeArray('normal'); p.enableAttributeArray('colour')
+            p.setAttributeBuffer('position', 0x1406, 0, 3, 36)
+            p.setAttributeBuffer('normal', 0x1406, 12, 3, 36)
+            p.setAttributeBuffer('colour', 0x1406, 24, 3, 36)
             f.glEnable(0x8037); f.glPolygonOffset(1., 1.)   # GL_POLYGON_OFFSET_FILL: edges stay on top
             f.glDrawArrays(0x0004, 0, self.count)
             f.glDisable(0x8037)
-            p.disableAttributeArray('position'); p.disableAttributeArray('normal'); self.buffers['mesh'].release(); p.release()
+            p.disableAttributeArray('position'); p.disableAttributeArray('normal'); p.disableAttributeArray('colour'); self.buffers['mesh'].release(); p.release()
             if parent.camera.edges and self.edge_count:
                 self.draw_lines('edges', self.edge_count, mvp, EDGE)
             f.glDisable(0x0BE2)

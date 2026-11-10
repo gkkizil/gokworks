@@ -35,16 +35,27 @@ tarafından sıfırdan çizilmiş eğitim geometrisidir; üretici eşdeğeri de�
 
 - **Sol · Büküm sırası:** her adım bir karttır: sıra numarası, büküm, iç açı/R/boy, kontrol
   sonucu (✓ kontrol edilen hareketlerde çarpışma yok · ✕ çarpışma var · ? kontrol edilemedi ·
-  ○ kontrol bekliyor) ve *Takım değişimi*, *Yeniden tutuş*, *Çevir 180°* etiketleri. Sonuç renkle
-  birlikte simge ve yazıyla da verilir. ↑ Yukarı / ↓ Aşağı sırayı değiştirir.
-- **Orta · 3B sahne:** sol üstte geçerli adım · hareket fazı · dönüş açısı, sağ altta renk
-  açıklaması. Üst/alt takım, büküm ekseni ve çarpışma noktası sahnede adıyla etiketlidir.
+  ○ kontrol bekliyor) ve *Takım değişimi*, *Yeniden tutuş* etiketleri. Sonuç renkle
+  birlikte simge ve yazıyla da verilir. Kartı sürükleyip bırakmak veya ↑ Yukarı / ↓ Aşağı
+  sırayı değiştirir. Kart içindeki **⇄ Yön** büküm yönünü, **↻ 180°** parçanın çevrilmesini
+  açıp kapatır (sağ paneldeki alanlarla aynı plan verisi). Oynatırken numara rozeti konumu
+  gösterir: dolu vurgu = oynatılan adım, gri = oynatıldı, halka = sırada.
+- **Orta · 3B sahne:** sac mavi, üst takım açık gri, alt takım orta gri; üst kiriş ve alt ray
+  koyu gri ve **yalnız görseldir** (çarpışma kontrolüne girmez). Sol üstte geçerli adım ·
+  hareket fazı · dönüş açısı, sağ altta renk açıklaması. Üst/alt takım, büküm ekseni ve çarpışma noktası sahnede adıyla etiketlidir.
   Görünüm küpü (sağ üst) tıklanabilir.
-- **Sağ · Seçili adım:** iç açı, dönüş, iç R ve etkin boy; ardından takımlar (kesit resimli
+- **Sağ · Açınım planı:** düz açınımda büküm çizgileri sıra numarasıyla ve adım başına
+  ayrı renkle çizilir; bir çizgiye tıklamak o adımı seçer.
+- **Sağ · Seçili adım:** iç açı, dönüş, iç R ve etkin boy; **Hedef iç açı** (− değer +, CAD
+  düğmesi CAD açısına döndürür) sahneyi, çarpışma kontrolünü ve PDF'i bu açıya göre
+  yapar. CAD'den ölçülen büküm bölgesi (açınım boyu, nötr eksen) korunur, yani aynı
+  açınım farklı açıya bükülür; geri yaylanma hesabı değildir. Ardından takımlar (kesit resimli
   kartlar ve V kanalı) ve konumlandırma. Segment yerleşimi, takım verisi ve kontrol
   ayrıntıları/kapsamı açılır bölümlerdedir.
 - **Alt:** önceki/oynat/sonraki, konum sürgüsü, oynatma hızı, Açınım, Bitmiş form, Sığdır ve
-  tek satırlık sonuç. Takım kütüphanesinde bütün kesitler aynı ölçekte çizilir; ölçek çubuğu,
+  tek satırlık sonuç. Üst çubuktaki **Video MP4**, kontrol edilmiş hareketi sahnedeki bakış
+  açısıyla 1280×720 video olarak kaydeder; kare hızı seçili oynatma hızıdır. Kodlama Qt
+  Multimedia ile yapılır (varsa H.264, yoksa MPEG-4); ek program gerekmez. Takım kütüphanesinde bütün kesitler aynı ölçekte çizilir; ölçek çubuğu,
   DEMO/DXF etiketi, favori yıldızı ve seçili kart işareti kartın üzerindedir.
 
 ## SolidWorks
@@ -87,6 +98,27 @@ eşleşmelidir. Tutucu/adapter DXF'si aynı montaj datumunda ve kendi boyuna
 yerleşimiyle verilir. Eksik geometri veya bağlantı başarılı kontrol sayılmaz.
 Kullanıcı kataloğu işletim sisteminin GOKWORKS uygulama veri klasöründe atomik
 `press-brake-tools-v1.json` dosyasıdır; başka projenin kataloğu gömülü değildir.
+
+### Genel standart takımlar (piyasa ölçüsü)
+
+Abkant takım **kesitleri için DIN/ISO standardı yoktur**. DIN EN 12622 makine güvenliğini,
+DIN ISO 16367 başka pres kalıbı parçalarını kapsar. Piyasada ortak olan ölçüler parametre
+olarak kullanılır ve GOKWORKS bunlardan kendi sade kesitini çizer (üretici çizimi değildir):
+
+- Avrupa tipi (Promecam) bağlantı, 13 mm dil; 835 mm bölünmüş set (10+15+20+40+50+100+200+400).
+- Üst bıçak: 88° ve 86° R 0,8; 30° keskin R 0,6; 88° kaz boynu; çalışma yüksekliği 95 mm.
+- Alt kalıp: 88° tek V, V6…V50 serisi ve V16 30°; omuz R ≈ 0,08 × V.
+- V seçimi: V ≈ 8 × t (yumuşak çelik, 6–12 × t aralığı); hava bükümünde iç R ≈ 0,16 × V.
+
+SolidWorks'ten alınan parça bu takımlarla başlar: 88° bıçak ve 8 × t kuralına en yakın V.
+Adımda segment girilmemişse istasyon büküm boyundan, setin en az parçasıyla kurulur
+(ör. 80 mm → 50+20+10). Genel ara tutucu (13 mm dil yuvası, pahlı gövde, ön sıkma plakası
+ve cıvatası) ile kalıp rayı (dil yuvası, yan cıvatalar, taban flanşı) GOKWORKS'ün yaklaşık
+profilidir ve istasyonla aynı boyda kurulur. Tutucu ile tuttuğu takım tek rijit montaj sayılır;
+kesitleri birbirine giriyorsa adım "Kontrol edilemedi" olur. Sac–tutucu teması her zaman
+kontrol edilir. Bu takımlarla
+kontrol çalışır ve her adımın notunda "Genel standart ölçülü takım: üretici kesiti değil"
+yazar; gerçek tedarikçi kesiti DXF ile eklendiğinde o kullanılmalıdır.
 
 ### Kaynak takım kataloğu
 
@@ -151,7 +183,9 @@ SolidWorks COM nesneleri veya canlı UI nesneleri önbelleğe taşınmaz.
 `geometry.py`: gerçek katılar/yerleşim; `tooling.py`: analitik DXF ve katalog;
 `motion.py`, `collision.py`, `service.py`: örnekleme/çarpışma/işçi;
 `solidworks.py`: STA CAD adaptörü; `demo.py`: özgün veriler;
-`ui.py`, `dialogs.py`, `tool_picker.py`, `viewer.py`: Qt ve görsel takım kütüphanesi; `report.py`: PDF.
+`standard.py`: genel piyasa standardı takımlar;
+`ui.py`, `dialogs.py`, `tool_picker.py`, `viewer.py`, `cards.py`, `flat_plan.py`: Qt ve görsel takım
+kütüphanesi; `report.py`: PDF; `video.py`: MP4.
 
 ```sh
 QT_QPA_PLATFORM=offscreen python -m pytest modules/press_brake/tests -q

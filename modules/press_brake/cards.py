@@ -1,7 +1,7 @@
 """Painted step cards for the bend sequence list (display only; data stays in the plan)."""
-from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtCore import QEvent, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QFont, QPen
-from PySide6.QtWidgets import QStyle, QStyledItemDelegate
+from PySide6.QtWidgets import QStyle, QStyledItemDelegate, QToolTip
 from gui_qt.theme import COLORS
 
 CARD = Qt.UserRole + 1
@@ -10,15 +10,21 @@ STATES = {'clear': ('✓', 'Kontrol edilen hareketlerde çarpışma yok', 'succe
           'collision': ('✕', 'Çarpışma var', 'danger'),
           'unknown': ('?', 'Kontrol edilemedi', 'warning'),
           None: ('○', 'Kontrol bekliyor', 'muted')}
-PAD, BADGE, CHIP_H = 10, 24, 20
+PAD, BADGE, CHIP_H, BUTTON_H = 10, 24, 20, 24
+# In-card toggles: (field, label, tooltip). Same plan fields as the right panel's combos.
+BUTTONS = (('reverse', '⇄ Yön', 'Büküm yönünü ters çevirir (CAD yönü ↔ ters). Önceki kontrol sonucu geçersiz olur.'),
+           ('flip', '↻ 180°', 'Parçayı bu adımda 180° çevirip yeniden konumlandırır. Önceki kontrol sonucu geçersiz olur.'))
+# Playback position: what the badge shows besides the step number.
+PROGRESS = {'done': 'oynatıldı', 'current': 'oynatılıyor', 'todo': 'sırada'}
 
 
 def chips_of(card):
-    return [text for text, on in (('Takım değişimi', card.get('change')), ('Yeniden tutuş', card.get('regrip')),
-                                  ('Çevir 180°', card.get('flip'))) if on]
+    return [text for text, on in (('Takım değişimi', card.get('change')), ('Yeniden tutuş', card.get('regrip'))) if on]
 
 
 class StepCardDelegate(QStyledItemDelegate):
+    toggled = Signal(int, str)   # row, 'reverse' | 'flip'
+
     def __init__(self, view, appearance):
         super().__init__(view); self.view = view; self.appearance = appearance
 
@@ -49,8 +55,44 @@ class StepCardDelegate(QStyledItemDelegate):
                 x = left; y += CHIP_H+4
             rows.append(('chip', QRectF(x, y, w, CHIP_H), chip)); x += w+6
         if chips_of(card):
-            y += CHIP_H
+            y += CHIP_H+6
+        x = left
+        for field, text, _ in BUTTONS:
+            w = metrics.horizontalAdvance(text)+18
+            if x > left and x+w > left+text_w:
+                x = left; y += BUTTON_H+4
+            rows.append(('button', QRectF(x, y, w, BUTTON_H), field)); x += w+6
+        y += BUTTON_H
         return rows, y+PAD
+
+    def card_rect(self, option):
+        return QRectF(option.rect).adjusted(2, 3, -2, -3)
+
+    def button_at(self, option, index, position):
+        card = index.data(CARD)
+        if not card:
+            return None
+        rect = self.card_rect(option)
+        for kind, box, field in self.layout(card, rect.width(), option.font)[0]:
+            if kind == 'button' and box.translated(rect.left(), rect.top()).contains(position):
+                return field
+        return None
+
+    def editorEvent(self, event, model, option, index):
+        if event.type() in (QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick) \
+                and event.button() == Qt.LeftButton:
+            field = self.button_at(option, index, event.position())
+            if field:
+                if event.type() == QEvent.MouseButtonRelease:
+                    self.toggled.emit(index.row(), field)
+                return True   # a button click neither selects nor starts a drag
+        return super().editorEvent(event, model, option, index)
+
+    def helpEvent(self, event, view, option, index):
+        field = self.button_at(option, index, event.pos())
+        if field:
+            QToolTip.showText(event.globalPos(), next(tip for f, _, tip in BUTTONS if f == field), view); return True
+        return super().helpEvent(event, view, option, index)
 
     def sizeHint(self, option, index):
         card = index.data(CARD)
@@ -73,9 +115,17 @@ class StepCardDelegate(QStyledItemDelegate):
             painter.drawRoundedRect(QRectF(rect.left(), rect.top()+6, 4, rect.height()-12), 2, 2)
         title, small = self.fonts(option.font)
         badge = QRectF(rect.left()+PAD-2, rect.top()+PAD-2, BADGE, BADGE)
-        painter.setPen(Qt.NoPen); painter.setBrush(QColor(c['accent'] if selected else c['input']))
-        painter.drawEllipse(badge)
-        painter.setPen(QColor(c['on_accent'] if selected else c['text'])); painter.setFont(title)
+        progress = card.get('progress')
+        # Badge = playback position (accent: playing, grey fill: played, outline: ahead).
+        # Neutral on purpose: the check result keeps its own ✓/✕/? line below.
+        if progress == 'todo':
+            painter.setPen(QPen(QColor(c['muted']), 1.4)); painter.setBrush(Qt.NoBrush)
+        else:
+            fill = c['accent'] if selected or progress == 'current' else c['muted'] if progress == 'done' else c['input']
+            painter.setPen(Qt.NoPen); painter.setBrush(QColor(fill))
+        painter.drawEllipse(badge.adjusted(.7, .7, -.7, -.7))
+        ink = c['on_accent'] if selected or progress == 'current' else c['panel'] if progress == 'done' else c['text']
+        painter.setPen(QColor(ink)); painter.setFont(title)
         painter.drawText(badge, Qt.AlignCenter, str(card['number']))
         rows, _ = self.layout(card, rect.width(), option.font)
         symbol, _, tone = STATES[card.get('status')]
@@ -87,6 +137,12 @@ class StepCardDelegate(QStyledItemDelegate):
             elif kind == 'status':
                 painter.setFont(title); painter.setPen(QColor(c[tone])); painter.drawText(QRectF(box.left(), box.top(), 14, box.height()), Qt.AlignLeft | Qt.AlignTop, symbol)
                 painter.setFont(small); painter.drawText(box.adjusted(16, 0, 0, 0), Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap, text)
+            elif kind == 'button':
+                on = bool(card.get(text)); label = next(l for f, l, _ in BUTTONS if f == text)
+                painter.setPen(QPen(QColor(c['accent'] if on else c['border']), 1.2))
+                painter.setBrush(QColor(c['accent'] if on else c['input'])); painter.drawRoundedRect(box, 5, 5)
+                painter.setFont(small); painter.setPen(QColor(c['on_accent'] if on else c['text']))
+                painter.drawText(box, Qt.AlignCenter, label)
             else:
                 change = text == 'Takım değişimi'; colour = QColor(c['warning'] if change else c['muted'])
                 painter.setPen(QPen(colour, 1)); painter.setBrush(Qt.NoBrush); painter.drawRoundedRect(box, 9, 9)

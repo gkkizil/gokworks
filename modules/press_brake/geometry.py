@@ -293,14 +293,17 @@ class Geometry:
         for tool, chosen_segments, tr in placements:
             if tool.section is None:
                 continue
-            for j, segment in enumerate(chosen_segments if chosen_segments is not None else tool.segments):
+            from .standard import default_segments, is_generic
+            for j, segment in enumerate(chosen_segments if chosen_segments is not None else default_segments(tool, bend)):
                 if segment.length <= 0:
                     raise ValueError(f'{tool.code}: segment boyu pozitif olmalı.')
                 result.append(self.placed_body(f'{tool.kind}:{tool.code}:{j+1}', tool.kind, self.tool_shape(tool, segment), tr))
             if tool.holder_section is not None:
                 from dataclasses import replace
                 holder = replace(tool, id=tool.id+':holder', section=tool.holder_section, section_dxf=tool.holder_dxf, contour_index=0)
-                for j, holder_segment in enumerate(tool.holder_segments):
+                # A generic clamp follows the station it holds; supplier holders keep their own layout.
+                holder_segments = (chosen_segments if chosen_segments is not None else default_segments(tool, bend)) if is_generic(tool) else tool.holder_segments
+                for j, holder_segment in enumerate(holder_segments):
                     result.append(self.placed_body(f'holder:{tool.kind}:{j+1}', 'holder', self.tool_shape(holder, holder_segment), tr))
         adjacent = (bend.id, bend.parent, bend.child)
         contacts = [('punch', 0., t/2, .3, adjacent)] if phase == 'bend' or travel <= .2 else []
@@ -310,10 +313,64 @@ class Geometry:
         return result, contacts
 
 
+# Display colours per body kind (scene, legend, labels and PDF share them).
+SCENE_COLOURS = {'sheet': '#4A86D4', 'punch': '#C9D0D8', 'die': '#8E99A6', 'holder': '#5E7A96', 'machine': '#6B7580'}
+
+
+def rgb(colour):
+    return tuple(int(colour[i:i+2], 16) for i in (1, 3, 5))
+
+
+MACHINE_NOTE = 'Üst kiriş ve alt ray yalnız görseldir; çarpışma kontrolüne dahil değildir.'
+
+
+def machine_bodies(bodies):
+    """Schematic upper beam above the punch stack and lower rail below the die stack (mm).
+
+    Display only: never passed to the collision check, never in reports' hit lists.
+    Generic proportions, not a specific machine model.
+    """
+    from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox
+    from OCP.gp import gp_Pnt
+    tools = [b for b in bodies if b.kind in ('punch', 'die', 'holder')]
+    if not tools:
+        return []
+    x0 = min(b.bounds[0] for b in bodies)-15; x1 = max(b.bounds[3] for b in bodies)+15
+    def box(id, y, z0, z1):
+        return Body(id, 'machine', BRepPrimAPI_MakeBox(gp_Pnt(x0, -y, z0), gp_Pnt(x1, y, z1)).Shape(), (x0, -y, z0, x1, y, z1))
+    result = []
+    upper = [b for b in tools if b.kind == 'punch' or b.id.startswith('holder:punch')]
+    lower = [b for b in tools if b.kind == 'die' or b.id.startswith('holder:die')]
+    if upper:
+        top = max(b.bounds[5] for b in upper); result.append(box('machine:beam', 14, top, top+28))
+    if lower:
+        bottom = min(b.bounds[2] for b in lower); result.append(box('machine:rail', 24, bottom-22, bottom))
+    return result
+
+
+def scene_mesh(bodies, stop=None):
+    """Scene for one pose: the checked bodies plus the display-only machine."""
+    return mesh(list(bodies)+machine_bodies(bodies), stop)
+
+
 def mesh(bodies, stop=None):
     # Existing native viewer boundary expects source coordinates in metres.
-    coordinates = np.asarray(triangulate([b.shape for b in bodies], .08)).reshape(-1, 3)
+    chunks, colours = [], []
+    for b in bodies:   # one body at a time so every triangle keeps its body's colour
+        try:
+            points = np.asarray(triangulate([b.shape], .08)).reshape(-1, 3)
+        except ValueError as error:   # a body without faces adds nothing, as in one combined call
+            if 'üretilemedi' not in str(error):
+                raise
+            continue
+        chunks.append(points)
+        colours.append(np.tile(rgb(SCENE_COLOURS.get(b.kind, SCENE_COLOURS['sheet'])), (len(points)//3, 1)))
+    if not chunks:
+        raise ValueError('Katıdan görüntülenebilir üçgen üretilemedi.')
+    coordinates = np.concatenate(chunks)
+    if len(coordinates) > 120000*3:
+        raise ValueError('3D önizleme 120.000 üçgen sınırını aşıyor; 2D/STEP kullanın.')
     # Station Z-up -> existing CAD viewer Y-up. Collision/report coordinates
     # remain station mm; this is a display-only rigid change of basis.
     coordinates = coordinates[:, [0, 2, 1]]*np.array([1., 1., -1.])/1000
-    return make_mesh(coordinates, stop)
+    return make_mesh(coordinates, stop, np.concatenate(colours))
