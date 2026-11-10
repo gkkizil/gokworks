@@ -1,0 +1,15 @@
+{
+  "source": "Redry_Support_5mm_2adet.dxf",
+  "part_types": 14,
+  "requested": 56,
+  "placed": 56,
+  "score": [
+    0,
+    3,
+    9375000,
+    6793940.035905588
+  ],
+  "elapsed": 15.04273962599109,
+  "engine": "Sparrow 0.3.0 / spyrrow 0.10.0 / jagua-rs 1.0.0; GOKWORKS NFP 1.6; Sparrow denemeleri 6",
+  "geometry_validation": true
+}

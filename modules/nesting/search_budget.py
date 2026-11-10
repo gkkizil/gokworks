@@ -107,9 +107,9 @@ def for_project(project, started):
         vertices = sum(len(p.exterior.coords)+sum(len(r.coords) for r in p.interiors)
                        for p in polygons(part.polygon))
         unique_vertices += vertices
-        angles = [0] if not options.rotation else options.angles
-        if options.grain_locked or part.grain_locked:
-            angles = [a for a in angles if abs(a % 180) < 1e-7]
-        work += part.quantity*math.sqrt(max(1,len(set(angles))))*(1+math.log2(1+vertices/8))
+        from .rotations import allowed_angles
+        angles = allowed_angles(part, options)
+        count = 64 if angles is None else len(set(angles))
+        work += part.quantity*math.sqrt(max(1,count))*(1+math.log2(1+vertices/8))
     initial = min(ceiling,floor+.025*work+.0008*unique_vertices)
     return SearchBudget(started,started+initial,started+ceiling,attempts,minimum,patience)

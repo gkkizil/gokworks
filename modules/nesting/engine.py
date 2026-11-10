@@ -20,6 +20,7 @@ from modules.nesting.models import Placement, Result
 from modules.nesting.validation import validate_result
 from modules.nesting.search_budget import for_project, meaningful_improvement, uniform_stock_floor
 from modules.nesting.layout_score import layout_score, plate_strip_area
+from modules.nesting.rotations import search_angles
 
 
 def _vertices(g):
@@ -60,6 +61,7 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
     cache = {}; rotated_cache = {}; convex_cache = {}; fixed_cache = {}; deferred = set(); best = None; iterations = 0
     parts = {p.id:p for p in project.parts}
     source_shapes = {p.id:p.polygon for p in project.parts}
+    part_angles = {p.id:search_angles(p,o) for p in project.parts}
     outer_areas = {key:footprint(shape).area for key,shape in source_shapes.items()}
     net_areas = {key:shape.area for key,shape in source_shapes.items()}
     extents = {key:max(shape.bounds[2:]) for key,shape in source_shapes.items()}
@@ -103,9 +105,7 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
         return cache[key]
 
     def candidate(part, sheet, previous, *, detailed, angle_limit=None, detail_slice=None):
-        angles = [0] if not o.rotation else o.angles
-        if o.grain_locked or part.grain_locked:
-            angles = [a for a in angles if abs(a % 180) < 1e-7]
+        angles = part_angles[part.id]
         fixed = []
         for old in previous:
             key = (old.part_id,old.angle,old.x,old.y)
@@ -116,6 +116,10 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
             shape,bounds,inner = fixed_cache[key]
             fixed.append((old,shape,max(o.gap,o.kerf)+part.geometry_error+parts[old.part_id].geometry_error,bounds,inner))
         holes = [(hole,distance) for _,_,distance,_,inner in fixed for hole in inner]
+        used_right = max((bounds[2] for _,_,_,bounds,_ in fixed), default=0.)
+        used_top = max((bounds[3] for _,_,_,bounds,_ in fixed), default=0.)
+        used_left = min((bounds[0] for _,_,_,bounds,_ in fixed), default=o.margin)
+        used_bottom = min((bounds[1] for _,_,_,bounds,_ in fixed), default=o.margin)
         # Test simple edge/corner placements for every rotation before paying
         # for an NFP. Bounds generate candidates; exact contours approve them.
         # The first complete pass never waits on convex decomposition, so one
@@ -206,7 +210,13 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
                         after,before = c+clearance-x0,a-clearance-x1
                         points.update((x,y) for x in (left,right,a-x0,c-x1) for y in (above,below))
                         points.update((x,y) for x in (after,before) for y in (bottom,top,b-y0,d-y1))
-                ordered = sorted(points,key=lambda xy:(xy[1],xy[0]))
+                def compact_key(xy):
+                    x,y = xy
+                    right_extent,top_extent = max(used_right,x+x1),max(used_top,y+y1)
+                    return (min(sheet.height*right_extent,sheet.width*top_extent),
+                            (right_extent-min(used_left,x+x0))*(top_extent-min(used_bottom,y+y0)),
+                            top_extent,right_extent)
+                ordered = sorted(points,key=compact_key)
                 for want_hole in ((True,False) if usable_holes else (False,)):
                     found = False
                     for x,y in ordered:
@@ -222,7 +232,7 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
                                and (translated.intersection(shape).area>1e-6 or translated.distance(shape)+1e-6<distance)
                                for _,shape,distance,old_bounds,_ in fixed):
                             continue
-                        score = (0 if inside else 1,y+y1,x+x1,angle)
+                        score = (0 if inside else 1,*compact_key((x,y)),angle)
                         if winner is None or score<winner[0]:
                             winner = (score,x,y,angle)
                         found = True
@@ -380,23 +390,17 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
         result = Result(digest, placements, remaining, ENGINE, ENGINE_VERSION, time.monotonic()-started,
                         iterations, datetime.now(timezone.utc).isoformat(), interrupted)
         validate_result(project, result, complete=False)
-        if initial is not None:
-            score = layout_score(project,result,bounds)
-        else:
-            used_area = sum(s.width*s.height for s, _, _ in sheets)
-            score = (len(remaining), len(sheets), used_area,
-                     sum(max((p.y+geometry(project.part(p.part_id), p.angle).bounds[3] for p in rows), default=0)
-                         for _, _, rows in sheets))
+        score = layout_score(project,result,bounds)
         improved = meaningful_improvement(score,best[0] if best else None)
         if best is None or score < best[0]:
             best = (score, result)
         if interrupted:
             break
-        if (trial>0 and stock_floor is not None and best[0][0]==0
+        if (initial is None and trial>0 and stock_floor is not None and best[0][0]==0
                 and best[0][1]==stock_floor[0] and abs(best[0][2]-stock_floor[1])<1e-6):
             break  # No fewer/smaller stocks can improve material waste in this case.
         now = time.monotonic()
-        refining = (angle_limit is not None and o.rotation and len(set(o.angles))>angle_limit
+        refining = (angle_limit is not None and o.rotation and max(map(len,part_angles.values()),default=0)>angle_limit
                     and any(not (o.grain_locked or p.grain_locked) for p in project.parts))
         if not budget.continue_after_trial(now,now-trial_started,improved or refining):
             budget_exhausted = budget.exhausted(now)

@@ -38,7 +38,7 @@ def test_native_contours_quantities_clearance_and_source_survive(geometry):
     p=project(geometry); before=deepcopy(asdict(p)); reports=[]
     r=nest(p,progress=lambda *args:reports.append(args))
     assert validate_result(p,r) and len(r.placements)==4
-    assert r.engine=='Sparrow' and 'spyrrow 0.9.0' in r.engine_version
+    assert r.engine=='Sparrow' and 'spyrrow 0.10.0' in r.engine_version
     assert asdict(p)==before and reports
     assert calculate(p,r)['part_count']==4
 

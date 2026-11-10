@@ -1,26 +1,30 @@
-Sparrow / spyrrow · GOKWORKS, 9 Kasım 2026
+Sparrow / spyrrow · GOKWORKS, 10 Kasım 2026
 
-spyrrow 0.9.0 (MIT) resmî Python bağlantısı:
-https://pypi.org/project/spyrrow/0.9.0/
-https://github.com/PaulDL-RS/spyrrow
+spyrrow 0.10.0 (MIT), değişmez açık kaynak revizyonundan derlenir:
+https://github.com/PaulDL-RS/spyrrow/tree/f6345979e5f6cf88e9e2e3775750fcce899334fd
 Özgün MIT metni: spyrrow-MIT.txt (Paul Durand-Lupinski).
+Bu sürüm henüz PyPI wheel'i olmadığı için requirements.txt kaynağı sabitler.
+Pip/maturin --locked kullanır; özgün Cargo.lock bu klasördedir.
 
-Bu wheel Sparrow 0.1.0 içerir; güncel 0.3.0 olarak sunulmaz.
-Kaynak: https://github.com/JeroenGar/sparrow/tree/881cdcbdf492ca42ba5413954ea6e41889a3becd
+Sparrow 0.3.0 (MIT), Cargo.lock içindeki değişmez revizyon:
+https://github.com/JeroenGar/sparrow/tree/3be915856b543d18c9cb7d4664fe7c53901fe1fd
 MIT: sparrow-MIT.txt (Jeroen Gardeyn, KU Leuven).
 
-jagua-rs 0.7.0, MPL-2.0 · Jeroen Gardeyn.
-Değiştirilmemiş kaynak kodu jagua-rs-0.7.0-source.crate içinde bu dağıtımla
-sağlanır (gzip tar arşivi). MPL, bu dosyaların kaynak biçimine erişim ve
-bunları değiştirme/yeniden dağıtma haklarını korur. Tam lisans metni:
-rust-notices/jagua-rs-0.7.0/LICENSE.txt .
-Kaynak SHA256: 793f9477d88804ae70b0b980997dedace99a7397fc7274f8790e9a4156cd9936
-https://crates.io/crates/jagua-rs/0.7.0
-https://github.com/JeroenGar/jagua-rs/tree/816e6a65f14f9417726a06abdef058238e3edecc
+jagua-rs 1.0.0, MPL-2.0 · Jeroen Gardeyn.
+Değiştirilmemiş kaynak kodu jagua-rs-1.0.0-source.crate içinde sağlanır
+(gzip tar arşivi); SHA256 source-inventory.json içindedir.
+MPL, bu dosyaların kaynak biçimine erişim ve bunları değiştirme/yeniden
+dağıtma haklarını korur. Tam metin: rust-notices/jagua-rs-1.0.0/LICENSE.txt
+https://crates.io/crates/jagua-rs/1.0.0
+https://github.com/JeroenGar/jagua-rs/tree/23e3f2737065cbb4dbc8f400b622976490b2d8cd
 
 Diğer Rust bağımlılıklarının özgün lisans/telif bildirimleri rust-notices/
-altında saklanır. source-inventory.json sabit sürümleri, kaynak URL'lerini ve
-arşiv SHA256 değerlerini; spyrrow-0.9.0.cyclonedx.json wheel'in özgün SBOM'unu
-içerir. Bu lisans hakları GOKWORKS dağıtım koşullarıyla sınırlandırılmaz.
-Geliştirme ortamında yerel wheel envanteri kullanılmıştır; Windows build
-adımı dağıtılan wheel'in SBOM'unu ayrıca installed/ klasörüne kopyalar.
+altındadır. source-inventory.json tüm kilitli sürümleri, kaynak URL'lerini,
+arşiv SHA256 ve bildirim yollarını içerir. spyrrow-0.10.0.cyclonedx.json,
+Linux doğrulama wheel'inin özgün SBOM'udur. Windows build adımı dağıtılan
+wheel'in SBOM'unu ayrıca installed/ klasörüne kopyalar.
+Bu lisans hakları GOKWORKS dağıtım koşullarıyla sınırlandırılmaz.
+
+Kullanıcının sağladığı nestsp.exe dağıtıma eklenmez; yalnızca yukarıda
+belirtilen açık kaynak çekirdekleri kullanılır. Üçüncü taraf uygulamaya özel
+kaynak kodu veya lisans denetimi bu entegrasyonun parçası değildir.

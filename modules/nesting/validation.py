@@ -7,6 +7,7 @@ from shapely.geometry import box
 from shapely.strtree import STRtree
 
 from modules.nesting.geometry import placed
+from modules.nesting.rotations import angle_allowed
 
 EPS = 1e-6
 
@@ -34,10 +35,7 @@ def validate_result(project, result, *, complete=True, stop=None):
             raise ValueError('Sonlu olmayan yerleşim koordinatı.')
         if part.material != sheet.material or not math.isclose(part.thickness, sheet.thickness, abs_tol=1e-7):
             raise ValueError('Parça malzemesi veya kalınlığı sacla eşleşmiyor.')
-        allowed = [0] if not project.options.rotation else project.options.angles
-        if project.options.grain_locked or part.grain_locked:
-            allowed = [a for a in allowed if math.isclose(a % 180, 0, abs_tol=1e-7)]
-        if not any(abs((p.angle-a+180) % 360-180) < EPS for a in allowed):
+        if not angle_allowed(part, project.options, p.angle):
             raise ValueError('İzin verilmeyen dönüş açısı / hadde yönü.')
         if type(p.instance) is not int or not 1 <= p.instance <= part.quantity or (part.id, p.instance) in instances:
             raise ValueError('Yinelenmiş veya geçersiz parça örneği.')
