@@ -55,7 +55,12 @@ class BendAnnotations(QWidget):
         painter = QPainter(self); painter.setRenderHint(QPainter.Antialiasing)
         ink, plate = self.colours()
         font = QFont(self.font()); font.setPixelSize(11); font.setBold(True); painter.setFont(font)
-        bounds = QRectF(6, 46, self.width()-12, self.height()-82); taken = []
+        font = QFont(self.font()); font.setPixelSize(13); font.setBold(True)
+        from PySide6.QtGui import QFontMetrics
+        narrow = bool(self.hud) and QFontMetrics(font).horizontalAdvance(self.hud)+24 > self.width()-120
+        top = 130 if narrow else 46   # labels stay below the read-out wherever it is drawn
+        bounds = QRectF(6, top, self.width()-12, self.height()-top-36); taken = []
+        font = QFont(self.font()); font.setPixelSize(11); font.setBold(True); painter.setFont(font)
         if v.frame is not None:
             a, b = project(v.frame.axis[0]), project(v.frame.axis[1])
             painter.setPen(QPen(QColor(AXIS), 3, Qt.DashLine)); painter.drawLine(a, b)
@@ -99,8 +104,11 @@ class BendAnnotations(QWidget):
         if not self.hud:
             return
         font = QFont(self.font()); font.setPixelSize(13); font.setBold(True); painter.setFont(font)
-        metrics = painter.fontMetrics(); width = max(60, min(self.width()-120, metrics.horizontalAdvance(self.hud)+24))   # room for the view cube
-        rect = QRectF(10, 10, width, 28)   # top left: the view cube owns the top right corner
+        metrics = painter.fontMetrics(); needed = metrics.horizontalAdvance(self.hud)+24
+        if needed <= self.width()-120:
+            rect = QRectF(10, 10, needed, 28)   # top left: the view cube owns the top right corner
+        else:                                    # narrow scene: below the view cube, full width
+            rect = QRectF(10, 96, max(60, min(needed, self.width()-20)), 28)
         accent = {'collision': QColor(HIT), 'clear': QColor('#56C08D'), 'unknown': QColor(AXIS)}.get(self.state, QColor('#9DA2AB'))
         painter.setPen(QPen(accent, 1.5)); painter.setBrush(plate); painter.drawRoundedRect(rect, 5, 5)
         painter.setPen(ink)

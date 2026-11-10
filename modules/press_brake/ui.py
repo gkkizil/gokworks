@@ -58,11 +58,13 @@ class PressBrakePage(BasePage):
         order.addWidget(self.up); order.addWidget(self.down); left_body.addLayout(order)
         self.catalog_button = button('Takım kataloğu indir', self.download_catalog)
         self.catalog_button.setToolTip('Kaynak depodaki 7 gerçek DXF profilini ve WILA/Rolleri ürün kartlarını kişisel kütüphaneye indirir. Mevcut takımlar korunur.')
-        left_body.addWidget(self.catalog_button)
+        # Library actions are occasional: they share one collapsed section so the bend
+        # cards keep their height in small windows.
         dxf = QWidget(); dxf_body = QVBoxLayout(dxf); dxf_body.setContentsMargins(0, 0, 0, 0); dxf_body.setSpacing(6)
+        dxf_body.addWidget(self.catalog_button)
         self.import_tool = button('DXF takım ekle…', self.tool_dialog); dxf_body.addWidget(self.import_tool)
         self.unitless = QCheckBox('Birimsiz DXF = mm'); self.unitless.setToolTip('1 çizim birimi = 1 mm. Yalnız çizimin mm ölçekte olduğunu biliyorsanız seçin.'); dxf_body.addWidget(self.unitless)
-        self.dxf_section = Disclosure('Kendi takımım (DXF)', dxf); left_body.addWidget(self.dxf_section)
+        self.dxf_section = Disclosure('Takım kütüphanesi', dxf); left_body.addWidget(self.dxf_section)
         self.splitter.addWidget(left)
 
         # Center: the 3D scene takes all remaining room; step/phase/angle and the legend live inside it.

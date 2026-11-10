@@ -103,3 +103,20 @@ def test_controls_fit_without_clipping_in_both_themes(window, qtbot, size):
         for tile in p.value_tiles:
             value = tile.findChildren(type(p.values['length']))[-1]
             assert value.width() >= value.fontMetrics().horizontalAdvance(value.text()) - 1, (theme, size, value.text())
+
+
+def test_library_actions_share_a_collapsed_section_so_step_cards_keep_their_height(window, qtbot):
+    p = window.pages['press_brake']; p.load_demo('U'); finish(window, qtbot)
+    window.resize(820, 560); qtbot.wait(60)
+    assert not p.dxf_section.is_expanded() and not p.catalog_button.isVisible() and not p.import_tool.isVisible()
+    first = p.bends.visualItemRect(p.bends.item(0))
+    assert first.height() > 60 and p.bends.viewport().height() >= first.height()+40   # more than one card in view
+    p.dxf_section.set_expanded(True); qtbot.wait(20)
+    assert p.catalog_button.isVisible() and p.catalog_button.isEnabled() and p.import_tool.isVisible()
+
+
+def test_catalogue_cards_use_turkish_decimals_and_no_scale_bar_without_a_drawing():
+    from modules.press_brake.sources import manufacturer_tools
+    from modules.press_brake.tool_picker import card_spec
+    rolleri = next(t for t in manufacturer_tools() if t.code == '04600')
+    assert rolleri.section is None and card_spec(rolleri).endswith('H 104,91 mm') and '.' not in card_spec(rolleri)
