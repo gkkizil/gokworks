@@ -36,6 +36,19 @@ def _available():
         raise ValueError(f'Sparrow bağlantısı spyrrow 0.9.0 gerektiriyor; kurulu sürüm: {version}.')
 
 
+def _read_result(output, attempts=20, pause=.05):
+    """Windows can keep a just-replaced or just-killed writer's file locked for a moment."""
+    for attempt in range(attempts):
+        try:
+            if output.stat().st_size > 10*1024*1024:
+                raise ValueError('Sparrow sonucu boyut sınırını aştı.')
+            return output.read_text(encoding='utf-8')
+        except PermissionError:
+            if attempt == attempts-1:
+                raise
+            time.sleep(pause)
+
+
 def _run(request, deadline, stop):
     """Kill/reap only our child on cancel/timeout; retain its last feasible snapshot."""
     with TemporaryDirectory(prefix='gokworks-sparrow-') as directory:
@@ -64,10 +77,14 @@ def _run(request, deadline, stop):
         if not output.exists():
             if interrupted: return None
             raise ValueError(f'Sparrow yardımcı süreci sonuç üretemedi (çıkış {child.returncode}).')
-        if output.stat().st_size > 10*1024*1024:
-            raise ValueError('Sparrow sonucu boyut sınırını aştı.')
         try:
-            response = json.loads(output.read_text(encoding='utf-8'))
+            text = _read_result(output)
+        except PermissionError:
+            # A child killed at the deadline may leave its snapshot locked: no usable snapshot.
+            if interrupted: return None
+            raise ValueError('Sparrow sonuç dosyası okunamadı (dosya kilitli).') from None
+        try:
+            response = json.loads(text)
             if response['ok'] is not True:
                 raise ValueError('Sparrow: '+str(response.get('error','Hesaplama başarısız.')))
             if child.returncode and not interrupted:
