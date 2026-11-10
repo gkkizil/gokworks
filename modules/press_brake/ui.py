@@ -383,7 +383,7 @@ class PressBrakePage(BasePage):
     def invalidate(self, plan):
         self.pause(); self.plan = plan; self.result = None; self.generation += 1
         self.formed_mesh = None
-        self.viewer.frame = None; self.viewer.set_mesh(self.flat_mesh); self.viewer.annotations.update(); self.show_result_badge()
+        self.viewer.frame = None; self.viewer.set_mesh(self.flat_mesh); self.viewer.bend_annotations.update(); self.show_result_badge()
         self.show_state('Plan değişti · önceki hareket kontrolü geçersiz. Yeniden kontrol edin.', 'Plan değişti · kontrol bekliyor')
         self.refresh_steps(); self.select(self.bends.currentRow()); self.refresh_actions()
 
@@ -485,7 +485,7 @@ class PressBrakePage(BasePage):
 
     def show_shape(self, formed):
         self.view_mode = 'formed' if formed else 'flat'; self.preview_pending = False
-        self.pause(); self.viewer.frame = None; self.viewer.set_mesh(self.formed_mesh if formed else self.flat_mesh); self.viewer.annotations.update()
+        self.pause(); self.viewer.frame = None; self.viewer.set_mesh(self.formed_mesh if formed else self.flat_mesh); self.viewer.bend_annotations.update()
         self.show_state('Nominal bitmiş form · takım/konumlandırma hareketi içermez' if formed else 'Gerçek açınım · delikler ve rahatlatmalar korunur',
                         'Bitmiş form · nominal' if formed else 'Açınım')
 

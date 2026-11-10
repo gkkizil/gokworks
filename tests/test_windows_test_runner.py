@@ -34,6 +34,13 @@ def test_full_application_workflows_each_get_a_fresh_process():
     assert batches == [[before], *[[node] for node in workflows], [after]]
 
 
+def test_full_catalog_qa_and_workbench_cases_never_share_native_window_state():
+    files = ('test_fusion_workbench.py', 'test_qa_all_pages_hostile_inputs.py',
+             'test_qa_damaged_settings.py', 'test_qa_no_clipped_text.py', 'test_compact_workspaces_gui.py')
+    nodes = [f'tests/{file}::test_window[{i}]' for file in files for i in range(3)]
+    assert list(runner.test_batches(nodes, 32)) == [[node] for node in nodes]
+
+
 def test_reports_retain_passes_failures_and_missing_native_batch(tmp_path):
     passed = tmp_path/'pass.xml'
     passed.write_text('<testsuites><testsuite tests="1" failures="0">'

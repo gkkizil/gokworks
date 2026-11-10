@@ -8,7 +8,7 @@ invalidates every shown result as soon as an input changes.
 from dataclasses import replace
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Slot
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog, QFormLayout,
                                QHeaderView, QLineEdit, QSpinBox, QSplitter, QStackedWidget, QTableWidget,
@@ -244,8 +244,7 @@ class BeltDrivePage(BasePage):
         self.canvas = BeltCanvas()
         self.animate = button('Nominal hareketi göster')
         self.animate.setCheckable(True); self.animate.toggled.connect(self.canvas.set_animating)
-        self.canvas.animationChanged.connect(lambda on: (self.animate.blockSignals(True), self.animate.setChecked(on),
-                                                         self.animate.blockSignals(False)))
+        self.canvas.animationChanged.connect(self.sync_animation_button)
         viewer = panel(section_header('Kayış güzergâhı', self.animate), self.canvas,
                        label('Animasyon yalnız nominal kinematiktir: kaymasız, rijit; iki kasnak aynı yönde, ω₂ = ω₁/i.', 'muted'))
         viewer.layout().setStretch(1, 1)
@@ -274,6 +273,16 @@ class BeltDrivePage(BasePage):
         self.load_mode.currentIndexChanged.connect(self.load_mode_changed)
         self.center_mode.currentIndexChanged.connect(self.center_mode_changed)
         return self.manual_workspace
+
+    @Slot(bool)
+    def sync_animation_button(self, on):
+        # A QObject-bound slot is disconnected when the page is destroyed;
+        # an anonymous closure retained the page through canvas teardown.
+        blocked = self.animate.blockSignals(True)
+        try:
+            self.animate.setChecked(on)
+        finally:
+            self.animate.blockSignals(blocked)
 
     def _row_visible(self, layout, widget, visible):
         layout.setRowVisible(widget, visible)

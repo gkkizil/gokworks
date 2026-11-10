@@ -43,10 +43,14 @@ def test_batches(nodeids, batch_size):
     accumulating state from unrelated full-app workflow cases;
     native exits still fail the gate and are never retried or ignored.
     """
+    full_app_files = {
+        'test_qt_workflows.py', 'test_fusion_workbench.py', 'test_compact_workspaces_gui.py',
+        'test_qa_all_pages_hostile_inputs.py', 'test_qa_damaged_settings.py', 'test_qa_no_clipped_text.py',
+    }
     selected = []; gui = False
     for nodeid in nodeids:
         filename = nodeid.split('::', 1)[0].rsplit('/', 1)[-1]
-        if filename == 'test_qt_workflows.py':
+        if filename in full_app_files:
             if selected:
                 yield selected; selected = []; gui = False
             yield [nodeid]

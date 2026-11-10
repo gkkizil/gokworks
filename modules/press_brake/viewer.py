@@ -23,7 +23,7 @@ def pill(painter, rect, text, ink, fill, bounds=None, taken=()):
     painter.setPen(ink); painter.drawText(rect, Qt.AlignCenter, text)
 
 
-class Overlay(QWidget):
+class BendAnnotations(QWidget):
     """Bend axis, assigned tool outlines, collision markers, step read-out and legend.
 
     Kept separate from the base viewer's own overlay (view cube): that one handles
@@ -125,13 +125,13 @@ class Overlay(QWidget):
 
 class SceneView(MechanismMeshView):
     def __init__(self):
-        super().__init__(); self.frame = None; self.annotations = Overlay(self)
+        super().__init__(); self.frame = None; self.bend_annotations = BendAnnotations(self)
         self.setAccessibleName('Sac, büküm ekseni ve atanmış takımların 3B sahnesi')
-        self.frameReady.connect(self.annotations.update)
+        self.frameReady.connect(self.bend_annotations.update)
 
     def set_frame(self, frame):
         self.frame = frame
-        self.set_mesh(frame.mesh); self.annotations.update()
+        self.set_mesh(frame.mesh); self.bend_annotations.update()
 
     @Slot(int, object)
     def rendered(self, generation, image):
@@ -141,16 +141,23 @@ class SceneView(MechanismMeshView):
 
     def set_hud(self, text, state=None):
         """Current step / phase / angle read-out drawn inside the scene."""
-        self.annotations.hud, self.annotations.state = text, state
-        self.setAccessibleDescription(text); self.annotations.update()
+        self.bend_annotations.hud, self.bend_annotations.state = text, state
+        self.setAccessibleDescription(text); self.bend_annotations.update()
 
     def changed(self):
         super().changed()
-        if hasattr(self, 'annotations'):
-            self.annotations.update()
+        if hasattr(self, 'bend_annotations'):
+            self.bend_annotations.update()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if hasattr(self, 'annotations'):
+        if hasattr(self, 'bend_annotations'):
             # Below the base overlay, so the view cube stays clickable and on top.
-            self.annotations.setGeometry(self.rect()); self.annotations.raise_(); self.overlay.raise_()
+            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_(); self.overlay.raise_()
+
+    @Slot(str)
+    def fallback(self, message=''):
+        # The CPU canvas is raised by the switch; keep annotations and the view cube above it.
+        super().fallback(message)
+        if hasattr(self, 'bend_annotations'):
+            self.bend_annotations.setGeometry(self.rect()); self.bend_annotations.raise_(); self.overlay.raise_()

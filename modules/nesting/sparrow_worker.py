@@ -4,6 +4,7 @@ from collections import Counter
 import json
 from pathlib import Path
 from threading import Thread
+from .sparrow_files import filesystem_call
 
 
 def run_worker(request_path):
@@ -12,8 +13,11 @@ def run_worker(request_path):
 
     def write(data):
         temporary = output.with_suffix('.tmp')
-        temporary.write_text(json.dumps(data, allow_nan=False), encoding='utf-8')
-        temporary.replace(output)
+        payload = json.dumps(data, allow_nan=False)
+        def publish():
+            temporary.write_text(payload, encoding='utf-8')
+            temporary.replace(output)
+        filesystem_call(publish)
 
     try:
         import spyrrow
