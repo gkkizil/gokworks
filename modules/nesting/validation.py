@@ -43,7 +43,11 @@ def validate_result(project, result, *, complete=True, stop=None):
         stocks[sheet.id].add(p.sheet_number)
         geometry = placed(part, p)
         margin = project.options.margin+part.geometry_error+project.options.kerf/2
-        if not box(margin-EPS, margin-EPS, sheet.width-margin+EPS, sheet.height-margin+EPS).covers(geometry):
+        left, bottom = margin-EPS, margin-EPS
+        right, top = sheet.width-margin+EPS, sheet.height-margin+EPS
+        # GEOS box() normalizes reversed endpoints. An impossible edge allowance
+        # must remain empty instead of turning into a false pocket at the centre.
+        if right<left or top<bottom or not box(left,bottom,right,top).covers(geometry):
             raise ValueError(part.code + ': sac kenar payı aşıldı.')
         collision = geometry
         groups[(sheet.id, p.sheet_number)].append((collision, part))

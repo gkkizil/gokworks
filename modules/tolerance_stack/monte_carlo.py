@@ -31,6 +31,16 @@ def simulate(project, *, parameters=None, stop=None, progress=None):
             samplers.append(lambda a=low, b=high, c=mode: rng.triangular(a,b,c))
         elif not project.truncate_normal:
             samplers.append(lambda m=mean, s=sigma: rng.gauss(m,s))
+        elif low <= mean <= high and (high-low)/sigma <= .1:
+            # Inverse-CDF quantization can move draws outside a narrow band.
+            # Uniform-proposal rejection samples the conditional normal exactly;
+            # acceptance is >= exp(-.005), so no long tail of rejection work.
+            def sample(a=low,b=high,m=mean,s=sigma):
+                while True:
+                    value = rng.uniform(a,b)
+                    if rng.random() <= math.exp(-.5*((value-m)/s)**2):
+                        return value
+            samplers.append(sample)
         else:
             a, b = normal.cdf((low-mean)/sigma), normal.cdf((high-mean)/sigma)
             if b-a <= 1e-14:

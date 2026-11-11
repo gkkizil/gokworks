@@ -71,10 +71,15 @@ def _finite(value):
 def k_from_bend_allowance(thickness, radius, measured_ba, angle=90):
     """K=(BA/θ−R)/t. BA ayrı bir numuneden ölçülmelidir."""
     t, r, a = _geometry(thickness, radius, angle)
-    k = (number(measured_ba, "Ölçülmüş BA") / a - r) / t
-    if not math.isfinite(k) or not 0 <= k <= 1:
+    ba = number(measured_ba, "Ölçülmüş BA")
+    minimum, maximum = _finite(a*r), _finite(a*(r+t))
+    if minimum == maximum:
+        raise ValueError('Ölçüm hassasiyeti K faktörünü ayırmaya yetmiyor; sac kalınlığı ve yarıçapı kontrol edin.')
+    if not minimum <= ba <= maximum:
         raise ValueError("Ölçümden hesaplanan K faktörü 0–1 aralığının dışında. Açıyı, iç yarıçapı, sac kalınlığını ve büküm payını kontrol edin.")
-    return k
+    # Verify physical bounds before compensating inverse round-off. A BA one
+    # representable value outside the model is still rejected, never clamped.
+    return min(1.,max(0.,_finite((ba/a-r)/t)))
 
 
 def bend_deduction(thickness, radius, k_factor, angle=90):

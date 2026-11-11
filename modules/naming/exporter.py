@@ -42,7 +42,7 @@ def valid_stem(value):
     value = str(value)
     if not value or value != value.strip() or value.endswith('.') or re.search(r'[<>:"/\\|?*\x00-\x1f]', value):
         raise ValueError('Dosya adı boş olamaz; geçersiz karakter, başta/sonda boşluk veya sonda nokta kullanılamaz.')
-    if value in ('.', '..') or re.match(r'^(CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)', value, re.I):
+    if value in ('.', '..') or re.match(r'^(CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[1-9¹²³]|LPT[1-9¹²³]) *(?:\.|$)', value, re.I):
         raise ValueError(f'Windows bu dosya adını kullanamaz: {value}')
     return value
 
