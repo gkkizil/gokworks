@@ -8,9 +8,9 @@ from pathlib import Path
 
 import ezdxf
 from ezdxf import units
-from ezdxf.math import Matrix44
+from ezdxf.math import Matrix44, Vec3, arc_angle_span_deg, arc_segment_count
 from shapely import affinity, union_all
-from shapely.geometry import LineString, Polygon, MultiPolygon
+from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import polygonize_full
 from shapely.strtree import STRtree
 from shapely.validation import explain_validity
@@ -19,25 +19,81 @@ from modules.nesting.models import Part, number
 
 SUPPORTED = {'LINE', 'ARC', 'CIRCLE', 'LWPOLYLINE', 'POLYLINE', 'SPLINE', 'ELLIPSE'}
 ANNOTATIONS = {'TEXT', 'MTEXT', 'DIMENSION', 'LEADER', 'MLEADER', 'POINT', 'HATCH', 'SOLID', 'ATTDEF', 'ATTRIB'}
+POINT_LIMIT = 20000
 
 
-def flatten_entity(entity, tolerance):
+def _point_limit():
+    return ValueError('DXF, 20000 kontur noktası sınırını aşıyor. Eğri toleransını gözden geçirin.')
+
+
+def flatten_entity(entity, tolerance, *, stop=None):
     """Use native circular/elliptic evaluators: cubic Beziers add their own error."""
     kind = entity.dxftype()
+    check_cancel(stop)
+    # Reject nonfinite curve parameters before entering adaptive subdivision,
+    # which cannot converge on NaN control points.
+    def finite(values):
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError('DXF sonlu olmayan koordinat veya eğri parametresi içeriyor.')
+    for value in entity.dxf.all_existing_dxf_attribs().values():
+        if isinstance(value, (int, float)):
+            finite((value,))
+        elif isinstance(value, Vec3):
+            finite(value)
+    if kind == 'SPLINE':
+        for vertices in (entity.control_points, entity.fit_points):
+            if len(vertices) > POINT_LIMIT:
+                raise _point_limit()
+            for vertex in vertices:
+                check_cancel(stop); finite(vertex)
+        finite(entity.knots); finite(entity.weights)
+    elif kind == 'POLYLINE':
+        if len(entity.vertices) > POINT_LIMIT:
+            raise _point_limit()
+        for vertex in entity.vertices:
+            finite(vertex.dxf.location)
+            finite((vertex.dxf.bulge, vertex.dxf.start_width, vertex.dxf.end_width))
+    elif kind == 'LWPOLYLINE':
+        if len(entity) > POINT_LIMIT:
+            raise _point_limit()
+        for vertex in entity:
+            finite(vertex)
+    def collect(vertices):
+        result = []
+        for vertex in vertices:
+            check_cancel(stop)
+            if not all(math.isfinite(value) for value in vertex):
+                raise ValueError('DXF sonlu olmayan koordinat içeriyor.')
+            result.append(vertex)
+            if len(result) > POINT_LIMIT:
+                raise _point_limit()
+        return result
     if kind == 'LINE':
-        return [entity.dxf.start, entity.dxf.end], False, False
+        return collect((entity.dxf.start, entity.dxf.end)), False, False
     if kind in ('CIRCLE','ARC'):
-        return list(entity.flattening(tolerance)), kind == 'CIRCLE', True
+        radius = entity.dxf.radius
+        if not math.isfinite(radius) or radius <= 0:
+            raise ValueError('DXF geçersiz yay/daire yarıçapı içeriyor.')
+        span = 360 if kind == 'CIRCLE' else arc_angle_span_deg(entity.dxf.start_angle, entity.dxf.end_angle)
+        if not math.isfinite(span):
+            raise ValueError('DXF sonlu olmayan yay açısı içeriyor.')
+        # ezdxf's circular evaluator allocates numpy.linspace(count+1) before
+        # yielding a point. Reject the count before that allocation happens.
+        if arc_segment_count(radius, math.radians(span), tolerance)+1 > POINT_LIMIT:
+            raise _point_limit()
+        return collect(entity.flattening(tolerance)), kind == 'CIRCLE', True
     if kind == 'ELLIPSE':
         closed = abs((entity.dxf.end_param-entity.dxf.start_param)-2*math.pi) < 1e-8
-        return list(entity.flattening(tolerance, segments=8)), closed, True
+        return collect(entity.flattening(tolerance, segments=8)), closed, True
     if kind == 'SPLINE':
-        return list(entity.flattening(tolerance, segments=8)), entity.closed, True
+        return collect(entity.flattening(tolerance, segments=8)), entity.closed, True
     if kind in ('LWPOLYLINE','POLYLINE'):
         points = []; curved = False
         for child in entity.virtual_entities():
-            vertices, _, child_curved = flatten_entity(child,tolerance)
+            vertices, _, child_curved = flatten_entity(child,tolerance,stop=stop)
             points.extend(vertices if not points else vertices[1:]); curved |= child_curved
+            if len(points) > POINT_LIMIT:
+                raise _point_limit()
         return points, entity.closed if kind == 'LWPOLYLINE' else entity.is_closed, curved
     raise ValueError('Desteklenmeyen DXF konturu: '+kind)
 
@@ -46,17 +102,22 @@ class MissingUnits(ValueError):
     pass
 
 
-def _open_contour(ends, records):
+def _open_contour(ends, records, stop=None):
     """Describe where the contour is open or branches, and how far the gaps are."""
     loose = [point for point, count in ends.items() if count == 1]
     branches = [point for point, count in ends.items() if count > 2]
     gap = None
     if loose:
-        nearest = []
-        for point in loose:
-            others = [math.dist(point, other) for other in loose if other is not point]
-            nearest.append(min(others) if others else math.inf)
-        gap = max(nearest)
+        check_cancel(stop)
+        if len(loose) == 1:
+            gap = math.inf
+        else:
+            tree = STRtree([Point(p) for p in loose])
+            pairs = tree.query_nearest(tree.geometries, exclusive=True, all_matches=False)
+            # Keep the diagnostic's original Euclidean distance calculation;
+            # only candidate discovery changes from O(n²) to an indexed query.
+            gap = max(math.dist(loose[int(i)], loose[int(j)]) for i,j in pairs.T)
+        check_cancel(stop)
     bad = set(loose) | set(branches)
     layers = sorted({str(entity.dxf.layer) for entity, line in records
                      if tuple(line.coords[0]) in bad or tuple(line.coords[-1]) in bad})
@@ -108,22 +169,30 @@ def layers(path):
     return [(layer.dxf.name, not layer.is_off() and not layer.is_frozen()) for layer in doc.layers]
 
 
-def _entities(entities, doc, excluded, stop, depth=0, inherited=None):
+def _entities(entities, doc, excluded, stop, depth=0, inherited=None, _budget=None):
+    budget = [0] if _budget is None else _budget
+    if depth == 0:
+        excluded = {str(name).casefold() for name in excluded}
     if depth > 20:
         raise ValueError('İç içe BLOCK derinliği 20 sınırını aşıyor.')
     for e in entities:
         check_cancel(stop)
+        budget[0] += 1
+        if budget[0] > 200000:
+            raise ValueError('DXF 200.000 öğe sınırını aşıyor.')
         layer = inherited if e.dxf.layer == '0' and inherited else e.dxf.layer
-        if layer in excluded:
+        if layer.casefold() in excluded:
             continue
         if e.dxftype() == 'INSERT':
+            if e.mcount > 1000:
+                raise ValueError('DXF BLOCK tekrar sınırı aşıldı (1000).')
             skipped = []
             inserts = e.multi_insert() if e.mcount > 1 else [e]
             for insert in inserts:
-                virtual = list(insert.virtual_entities(skipped_entity_callback=lambda entity, reason: skipped.append(reason)))
+                virtual = insert.virtual_entities(skipped_entity_callback=lambda entity, reason: skipped.append(reason))
+                yield from _entities(virtual, doc, excluded, stop, depth+1, layer, budget)
                 if skipped:
                     raise ValueError('BLOCK dönüşümü okunamadı: ' + '; '.join(skipped))
-                yield from _entities(virtual, doc, excluded, stop, depth+1, layer)
         elif e.dxftype() in SUPPORTED:
             yield e
         elif e.dxftype() not in ANNOTATIONS:
@@ -168,6 +237,7 @@ def read_dxf(filename, *, join_tolerance=.001, drawing_layout=False, **options):
 def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None,
               tolerance=.02, join_tolerance=.001, excluded_layers=None, grouped=False, stop=None,
               _document=None):
+    check_cancel(stop)
     tolerance = number(tolerance, 'Eğri toleransı', positive=True)
     join_tolerance = number(join_tolerance, 'Uç birleştirme toleransı', positive=True)
     if tolerance > 1 or join_tolerance > .1:
@@ -207,7 +277,9 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
         entity = entity.copy()
         entity.transform(Matrix44.scale(scale))
         try:
-            vertices, closed, has_curves = flatten_entity(entity,tolerance)
+            vertices, closed, has_curves = flatten_entity(entity,tolerance,stop=stop)
+        except InterruptedError:
+            raise
         except Exception as error:
             raise ValueError(f'{entity.dxftype()} geometrisi okunamadı: {error}') from error
         if not vertices:
@@ -231,7 +303,7 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
     if not records:
         raise ValueError('Seçilen katmanlarda kesim konturu yok.')
     if any(v != 2 for v in ends.values()):
-        raise _open_contour(ends, records)
+        raise _open_contour(ends, records, stop)
     lines = [r[1] for r in records]; tree = STRtree(lines)
     for i, line in enumerate(lines):
         check_cancel(stop)
@@ -278,6 +350,7 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
     if grouped:
         components = [union_all(components)]
     result = []
+    source_sha256 = hashlib.sha256(before).hexdigest()
     short_records = {i for i,line in enumerate(lines) if line.length <= join_tolerance*2}
     for index, g in enumerate(components):
         check_cancel(stop)
@@ -298,7 +371,7 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
         stream = StringIO(); original.write(stream)
         result.append(Part.create(filename.stem + (f'-{index+1:02d}' if len(components) > 1 else ''), normalized,
                                  material, thickness, quantity=quantity, source=str(filename.resolve()),
-                                 source_sha256=hashlib.sha256(before).hexdigest(), source_unit=source_unit,
+                                 source_sha256=source_sha256, source_unit=source_unit,
                                  curve_tolerance=tolerance if curved else 0, join_tolerance=join_tolerance,
                                  endpoint_error=endpoint_error,
                                  original_dxf=stream.getvalue(), notes=[

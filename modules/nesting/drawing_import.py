@@ -8,6 +8,7 @@ quietly omit a part. The strict DXF reader still validates every extracted cell.
 
 from dataclasses import replace
 from collections import defaultdict
+from itertools import chain
 import math
 from pathlib import Path
 import re
@@ -45,23 +46,31 @@ def _view_heading(insert):
                for e in entities if e.dxftype() in ('TEXT','MTEXT'))
 
 
-def _entities(entities, excluded, stop, depth=0, inherited=None):
+def _entities(entities, excluded, stop, depth=0, inherited=None, _budget=None):
+    budget = [0] if _budget is None else _budget
+    if depth == 0:
+        excluded = {str(name).casefold() for name in excluded}
     if depth > 20:
         raise ValueError('İç içe BLOCK derinliği 20 sınırını aşıyor.')
     for entity in entities:
         check_cancel(stop)
+        budget[0] += 1
+        if budget[0] > 200000:
+            raise ValueError('DXF 200.000 öğe sınırını aşıyor.')
         layer = inherited if entity.dxf.layer == '0' and inherited else entity.dxf.layer
-        if layer in excluded:
+        if layer.casefold() in excluded:
             continue
         if entity.dxftype() == 'INSERT':
+            if entity.mcount > 1000:
+                raise ValueError('DXF BLOCK tekrar sınırı aşıldı (1000).')
             for insert in entity.multi_insert() if entity.mcount > 1 else [entity]:
                 skipped = []
-                virtual = list(insert.virtual_entities(skipped_entity_callback=lambda e, reason: skipped.append(reason)))
-                if skipped:
-                    raise ValueError('BLOCK dönüşümü okunamadı: ' + '; '.join(skipped))
+                virtual = insert.virtual_entities(skipped_entity_callback=lambda e, reason: skipped.append(reason))
                 if _view_heading(insert):
                     virtual = [e for e in virtual if e.dxftype()!='LINE']
-                yield from _entities([*virtual, *insert.attribs], excluded, stop, depth+1, layer)
+                yield from _entities(chain(virtual, insert.attribs), excluded, stop, depth+1, layer, budget)
+                if skipped:
+                    raise ValueError('BLOCK dönüşümü okunamadı: ' + '; '.join(skipped))
         elif entity.dxftype() in SUPPORTED | ANNOTATIONS:
             copy = entity.copy()
             copy.dxf.layer = layer
@@ -169,7 +178,7 @@ def read_drawing(filename, *, material='S235JR', thickness=2, quantity=1, unit=N
             if label is not None:
                 labels.append(label)
             continue
-        vertices, closed, curved = flatten_entity(entity, tolerance / scale)
+        vertices, closed, curved = flatten_entity(entity, tolerance / scale, stop=stop)
         if not vertices:
             continue
         if any(abs(v.z) > epsilon for v in vertices):

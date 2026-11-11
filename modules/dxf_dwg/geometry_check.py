@@ -51,8 +51,34 @@ def validate_flat_geometry(path, stop=None):
                 elevation=float(entity.dxf.elevation)
                 if not math.isfinite(elevation):raise ValueError('DXF sonlu olmayan polyline yüksekliği içeriyor.')
                 geometry=(points,bool(entity.closed),elevation,point(entity.dxf.extrusion))
+            elif kind=='POLYLINE':
+                point(entity.dxf.elevation);point(entity.dxf.extrusion)
+                vertices=entity.vertices
+                for vertex in vertices:
+                    point(vertex.dxf.location)
+                    point((vertex.dxf.bulge,vertex.dxf.start_width,vertex.dxf.end_width))
+                # Mesh/polyface flags and topology differ from a 2D contour;
+                # validate their coordinates without equating their geometry.
+                if entity.is_2d_polyline:
+                    if len(vertices)<2:raise ValueError('DXF geçersiz polyline içeriyor.')
+                    geometry=(tuple((point(v.dxf.location),v.dxf.bulge,v.dxf.start_width,v.dxf.end_width)
+                                    for v in vertices),entity.dxf.flags,point(entity.dxf.elevation),point(entity.dxf.extrusion))
+            elif kind=='ELLIPSE':
+                center=point(entity.dxf.center);major=point(entity.dxf.major_axis)
+                extrusion=point(entity.dxf.extrusion)
+                ratio,start,end=point((entity.dxf.ratio,entity.dxf.start_param,entity.dxf.end_param))
+                if not any(entity.dxf.major_axis) or not 0<entity.dxf.ratio<=1:
+                    raise ValueError('DXF geçersiz elips içeriyor.')
+                geometry=(center,major,extrusion,ratio,start,end)
+            elif kind=='SPLINE':
+                for vertex in entity.control_points:point(vertex)
+                for vertex in entity.fit_points:point(vertex)
+                point(entity.knots);point(entity.weights)
+                for name in ('start_tangent','end_tangent','extrusion'):
+                    value=entity.dxf.get(name)
+                    if value is not None:point(value)
             if geometry is not None:
-                token=(kind,layer,geometry)
+                token=(kind,layer.casefold(),geometry)
                 if token in seen:raise ValueError('DXF aynı katmanda mükerrer kesim geometrisi içeriyor; çıktı yayımlanmadı.')
                 seen.add(token)
     visit(document.modelspace())
