@@ -181,8 +181,8 @@ class Tool:
             numbers.extend(self.tip)
         for segment in (*self.segments, *self.holder_segments):
             numbers.extend((segment.start, segment.length))
-            if segment.length <= 0:
-                raise ValueError(self.code+': pozitif segment boyu gerekli.')
+            if segment.length <= 0 or not isfinite(segment.start+segment.length):
+                raise ValueError(self.code+': sonlu segment uçları ve pozitif boy gerekli.')
         for channel in self.channels:
             numbers.extend((channel.opening, channel.angle, channel.rotation, *channel.center))
             if channel.shoulder_radius is not None:
@@ -250,6 +250,17 @@ class Plan:
         for step in self.steps:
             if step.fixed_side not in ('parent', 'child') or step.orientation not in (0, 180):
                 raise ValueError('Desteklenmeyen tutuş yönü.')
+            for segments in (step.punch_segments, step.die_segments):
+                for segment in segments or ():
+                    try:
+                        valid = (isinstance(segment, Segment)
+                                 and all(not isinstance(v, bool) and isfinite(v) for v in (segment.start, segment.length))
+                                 and isfinite(segment.start+segment.length)
+                                 and segment.length > 0)
+                    except (TypeError, ValueError, OverflowError):
+                        valid = False
+                    if not valid:
+                        raise ValueError('Adım segmentleri sonlu başlangıç ve pozitif sonlu boy içermeli.')
             if self.tool(step.punch).kind != 'punch' or self.tool(step.die).kind != 'die':
                 raise ValueError('Üst ve alt takım tipleri yanlış.')
             if step.target is not None:
@@ -259,7 +270,7 @@ class Plan:
                 # The CAD bend zone (measured width, neutral factor) stays; a different
                 # target angle changes the radius it implies. It must stay positive.
                 k = (bend.width/radians(bend.turn)-bend.radius)/self.part.thickness
-                if bend.width/radians(180-step.target)+(.5-k)*self.part.thickness <= 0:
+                if bend.width/radians(180-step.target)-k*self.part.thickness <= 0:
                     raise ValueError(f'{bend.title}: {step.target:g}° hedef açı bu büküm bölgesiyle oluşturulamaz (iç R sıfırın altına düşer).')
         return self
 

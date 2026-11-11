@@ -19,6 +19,7 @@ def publish(path, writer, stop):
 def save(project, scan, path, *, stop=None):
     checkpoint(stop)
     project.validate()
+    if scan is not None: validate_scan(scan)
     data = dict(format='GOKWORKS-PROFILE-CUTTING', version=1, unit='mm',
                 project=asdict(project), scan=asdict(scan) if scan else None)
     text = json.dumps(data, ensure_ascii=False, allow_nan=False, indent=2)
@@ -63,11 +64,15 @@ def validate_scan(scan):
     for key in ('scanned_parts', 'weldments', 'unscanned'):
         if type(getattr(scan, key)) is not int or not 0 <= getattr(scan, key) <= 10000000:
             raise ValueError('Tarama sayıları geçersiz.')
+    row_ids = set()
     for row in scan.rows:
         for key in ('id', 'source', 'configuration', 'folder', 'profile', 'material', 'length',
                     'angle1', 'angle2', 'thickness', 'standard', 'stock_code', 'length_source',
                     'freshness', 'allowance', 'review_note', 'display_unit'):
             if not isinstance(getattr(row, key), str): raise ValueError('Tarama metin alanı geçersiz.')
+        if not row.id.strip() or row.id in row_ids:
+            raise ValueError('Tarama satırı kimlikleri boş olamaz ve benzersiz olmalı.')
+        row_ids.add(row.id)
         for key in ('excluded', 'geometry_verified', 'reviewed'):
             if type(getattr(row, key)) is not bool: raise ValueError('Tarama doğrulama alanı geçersiz.')
         if type(row.count) is not int or not 0 <= row.count <= 100000:
