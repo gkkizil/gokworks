@@ -20,6 +20,7 @@ from .core.cylinder import areas, buckling
 from .core.units import convert
 from .core.validation import InputError
 from .presentation import result_rows
+from .schematic import Node, UnitSchematic
 
 MOVEMENTS = {'extend': 'İleri itme', 'retract': 'Geri çekme', 'regenerate': 'Hızlı ileri hareket (yağ geri kazanımlı)',
              'hold': 'Yerinde basınçla bekleme', 'idle': 'Makine boşta bekliyor'}
@@ -53,6 +54,13 @@ TOPIC = {'HOT_OIL': 'yağ soğutması', 'COOLER': 'yağ soğutması', 'BUCKLING'
          'CYCLE_NOT_CLOSED': 'hareket sırası', 'TANK_VOLUME': 'tank hacmi'}
 PUMP_TIP = 'Pompa hacmini nominal öneriyle değiştirir; basınç sınırı ve verimler değişmez. Sonuç yeniden hesaplanır.'
 ISSUE_STEP = {'BUCKLING': 0, 'CYCLE_NOT_CLOSED': 1}
+# Which element of the unit schematic an issue belongs to, and where a click on that element leads
+# (a step of this view, or a tab of the detailed view).
+ISSUE_NODE = {'HOT_OIL': 'cooler', 'COOLER': 'cooler', 'BUCKLING': 'cylinder', 'VELOCITY': 'pipe', 'CAPACITY': 'pump',
+              'RELIEF_LIMIT': 'relief', 'MOTOR_SMALL': 'motor', 'CYCLE_NOT_CLOSED': 'cylinder', 'TANK_VOLUME': 'tank',
+              'ACC_SERIES': 'accumulator'}
+NODE_TARGET = {'cylinder': ('step', 0), 'motor': ('tab', 2), 'pump': ('tab', 2), 'relief': ('tab', 2), 'pipe': ('tab', 3),
+               'tank': ('tab', 4), 'cooler': ('tab', 4), 'accumulator': ('tab', 5)}
 
 
 def text_number(value, digits=3):
@@ -454,6 +462,11 @@ class BeginnerView(QWidget):
         top.addLayout(reports)
         b.addLayout(top); outer.addWidget(banner)
 
+        outer.addWidget(label('Ünite şeması', 'section'))
+        outer.addWidget(label('✓ uygun · ! kontrol edin · ✕ kritik. Bir elemana tıklayınca ayarı açılır. Ölçekli veya üretim şeması değildir.', 'muted'))
+        self.schematic = UnitSchematic(self.owner.context.appearance); self.schematic.nodeClicked.connect(self.open_node)
+        outer.addWidget(self.schematic)
+
         issues_box, issues = panel()
         self.warnings = label('', 'section'); self.warnings.setTextFormat(Qt.PlainText); issues.addWidget(self.warnings)
         self.issue_rows = QVBoxLayout(); self.issue_rows.setSpacing(4); issues.addLayout(self.issue_rows)
@@ -543,7 +556,8 @@ class BeginnerView(QWidget):
             QFrame[issue="warning"] {{ border-left: 3px solid {c['warning']}; background: {c['panel']}; }}
             QLineEdit[derived="true"] {{ font-style: italic; color: {c['muted']}; }}
         ''')
-        for widget in (getattr(self, 'diagram', None), getattr(self, 'motion_chart', None), *getattr(self, 'charts', {}).values()):
+        for widget in (getattr(self, 'diagram', None), getattr(self, 'motion_chart', None), getattr(self, 'schematic', None),
+                       *getattr(self, 'charts', {}).values()):
             if widget is not None:
                 widget.appearance = self.owner.context.appearance; widget.update()
 
@@ -800,6 +814,46 @@ class BeginnerView(QWidget):
                              tip('Gerekli soğutucu', 'Soğutucusuz denge', 'Çevrim ortalama ısı yükü'),
                              ('warning', 'Varsayımsal: pompa yetersizken hesaplandı') if scenario else None)
         self.results.shown(6)
+        worst = {}
+        for issue in result.issues:
+            node = ISSUE_NODE.get(issue.code)
+            if node and issue.severity in ('critical', 'warning'):
+                state = 'error' if issue.severity == 'critical' else 'warning'
+                worst[node] = 'error' if 'error' in (state, worst.get(node)) else state
+        if not cycle['demand_met']:
+            worst['pump'] = 'error'
+        if not enough:
+            worst['tank'] = 'error'
+        state = lambda key: worst.get(key, 'success')
+        why = lambda key: '\n'.join(PLAIN_ISSUES.get(i.code, (i.message,))[0] for i in result.issues
+                                     if ISSUE_NODE.get(i.code) == key and i.severity in ('critical', 'warning'))
+        hint = lambda key, text: (why(key) + '\n' if why(key) else '') + text + '\nTıklayınca ayarı açılır.'
+        cylinder = project.cylinders[0]
+        nodes = {
+            'cylinder': Node(f'Ø{show(cylinder.bore * 1000)} / Ø{show(cylinder.rod * 1000)} · {show(cylinder.stroke * 1000, "mm")}',
+                             '', state('cylinder'), hint('cylinder', 'Girdiğiniz silindir ölçüleri.')),
+            'pump': Node(v('Maksimum gerekli debi'), 'gereken', state('pump'),
+                         hint('pump', f'Gereken pompa hacmi: {v("Gerekli deplasman")} · mevcut: {show(project.pump.displacement * 1e6, "cm³/dev")}')),
+            'motor': Node(v('Seçilen motor'), 'sizin' if own_motor else 'öneri', state('motor'),
+                          hint('motor', f'En yüksek mil gücü: {v("Tepe mil gücü")} · RMS: {v("RMS mil gücü")}')),
+            'relief': Node(v('Emniyet valfi ayarı'), 'öneri' if project.relief_pressure is None else 'sizin', state('relief'),
+                           hint('relief', f'En yüksek gerekli basınç: {v("Maksimum gerekli basınç")}')),
+            'pipe': Node(f'Ø{v("Boru/hortum iç çapı")} iç', 'sizin' if user_pipe else 'öneri', state('pipe'),
+                         hint('pipe', f'Yağ hızı: {v("Gerçek hat hızı")} · basınç kaybı: {v("Hat basınç kaybı")}')),
+            'cooler': Node(v('Gerekli soğutucu'), 'senaryo' if scenario else '', state('cooler'),
+                           hint('cooler', f'Soğutucusuz yağ sıcaklığı: {v("Soğutucusuz denge")} · hedef: {show(target, "°C")}')),
+            'tank': Node(f'{v("Gerekli kullanılabilir tank")} gerekli', f'{v("Mevcut kullanılabilir tank")} mevcut', state('tank'),
+                         hint('tank', 'Kullanılabilir yağ hacmi; tankın dış (brüt) hacmi değildir.')),
+            'accumulator': Node(v('Nominal akümülatör') if 'Nominal akümülatör' in rows and rows['Nominal akümülatör'][0] is not None
+                                else v('Gerekli akümülatör'), 'ön boyut', worst.get('accumulator'),
+                                hint('accumulator', 'Bağımsız ön boyutlandırma; pompa boyutunu kendiliğinden küçültmez.'),
+                                present=result.accumulator.get('status') == 'calculated'),
+        }
+        self.schematic.set_nodes(nodes)
+
+    def open_node(self, key):
+        kind, index = NODE_TARGET[key]
+        self.go_to_step(index) if kind == 'step' else self.owner.open_detailed(index)
 
     def fill_charts(self, project, result):
         phases = result.cycle['phases']
@@ -820,6 +874,7 @@ class BeginnerView(QWidget):
         self.verdict.setText('Önce girilen bilgileri düzeltin'); self.verdict.setProperty('role', 'error'); polish(self.verdict)
         self.explanation.setText(str(error))
         self.results.setRowCount(0); self.show_issues([], [])
+        self.schematic.clear('Girdi hatası düzeltilince değerler burada görünür.')
         self.warnings.setText('Sonuç yok: girdi hatası'); self.warnings.setProperty('role', 'error'); polish(self.warnings)
         for chart in self.charts.values():
             chart.set_values([], [])
