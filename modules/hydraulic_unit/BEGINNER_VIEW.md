@@ -73,3 +73,17 @@ Kolay görünüm aynı davranış ve veri sözleşmesiyle yeniden düzenlendi:
 
 Ayrıca hata işaretlemesinin tablo `cellChanged` sinyaliyle sürekli yeniden hesap
 döngüsü başlatması giderildi. Testler: `tests/test_easy_design.py`.
+
+## Ünite şeması — 11 Kasım 2026 (Claude)
+
+Sonuç adımının başında ünitenin devre şeması durur (`schematic.py`, `UnitSchematic`):
+tank, motor, pompa, emniyet valfi, basınç hattı, yön valfi, silindir, soğutucu ve
+projede varsa akümülatör. Her elemanın yanında hesaplanan değer (kartlarla aynı
+kaynak: `presentation.result_rows`) ve durumu vardır: ✓ uygun · ! kontrol edin ·
+✕ kritik. Durum, çekirdeğin uyarı kodlarından gelir (`ISSUE_NODE`); renk tek işaret
+değildir. Elemana tıklamak (veya ok tuşları + Enter) ilgili ayarı açar: silindir →
+Ölçüler adımı, diğerleri → Ayrıntılı görünümde ilgili sekme. Fareyle üzerine gelince
+uyarının nedeni ve ek değerler görünür. Girdi hatasında devre kalır, sayılar silinir.
+Basınç hattı düz mavi, dönüş hatları kesikli gridir; açıklaması şemadadır. Şema
+ölçekli değildir, üretim şeması değildir; hesap yapmaz. Kartlar, uyarı listesi ve
+grafikler şemanın altında aynen durur. Testler: `tests/test_schematic.py`.
