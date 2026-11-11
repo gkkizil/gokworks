@@ -74,6 +74,15 @@ QFrame[separator="true"] { background: %(border)s; border: 0; max-height: 1px; m
 QFrame#sidebar { background: %(sidebar)s; border: 0; border-right: 1px solid %(border)s; }
 QFrame[card="true"] { background: %(panel)s; border: 1px solid %(border)s; border-radius: %(panel_radius)spx; }
 
+/* PDF workspace: presentation scoped to this module. */
+QFrame[pdfBlock="true"], QFrame#pdfSummary { background: %(panel)s; border: 1px solid %(border)s; border-radius: 6px; }
+QLabel[pdfStep="true"] { color: %(accent)s; font-weight: 600; font-size: 11px; }
+QLabel#pdfPageIcon { background: %(selected)s; border-radius: 7px; }
+QFrame#pdfSummary QLabel[pdfTone="success"] { color: %(success)s; }
+QFrame#pdfSummary QLabel[pdfTone="danger"] { color: %(danger)s; }
+QFrame#pdfSummary QLabel[pdfTone="muted"] { color: %(muted)s; }
+QLabel[pdfFormat="true"] { font-size: 10px; color: %(muted)s; }
+
 /* ---- Buttons: secondary (default), primary, destructive, flat ---------- */
 QPushButton, QToolButton { background: %(input)s; border: 1px solid %(border)s;
     border-radius: %(radius)spx; padding: 3px 10px; min-height: 18px; }
