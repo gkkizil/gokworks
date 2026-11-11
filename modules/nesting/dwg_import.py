@@ -183,6 +183,10 @@ def _drop_invalid_handles(dxf):
 
 
 def _read_converted(dxf, stop, options):
+    check_cancel(stop)
+    # Keep the DXF size rejection outside the recovery branch too.
+    if dxf.stat().st_size>100*1024*1024:
+        raise ValueError('DWG dönüşümünün DXF çıktısı 100 MB sınırını aşıyor; kesim katmanlarını ayrı dosyaya aktarın.')
     try:
         return read_dxf(dxf,stop=stop,**options)
     except ValueError as error:
