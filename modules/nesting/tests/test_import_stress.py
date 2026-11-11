@@ -235,3 +235,13 @@ def test_indexed_gap_diagnostic_matches_an_independent_exhaustive_oracle():
     expected = max(min(math.dist(a, b) for b in points if a != b) for a in points)
     diagnostic = dxf_import._open_contour(Counter(dict.fromkeys(points, 1)), [])
     assert diagnostic.gap == pytest.approx(expected, abs=1e-12)
+
+
+def test_oversized_converted_dxf_cannot_bypass_the_limit_via_recovery(tmp_path, monkeypatch):
+    path = tmp_path/'large-converted.dxf'
+    with path.open('wb') as stream:
+        stream.truncate(100*1024*1024+1)
+    monkeypatch.setattr(dwg_import, '_drop_invalid_handles', lambda *args: pytest.fail('oversized recovery scan'))
+    monkeypatch.setattr(dwg_import, 'read_dxf', lambda *args, **kwargs: pytest.fail('oversized parser'))
+    with pytest.raises(ValueError, match='100 MB'):
+        dwg_import._read_converted(path, None, {})

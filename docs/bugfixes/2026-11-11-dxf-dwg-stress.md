@@ -27,6 +27,8 @@ okuyucusu birlikte incelendi. PDF aktarım motoruna dokunulmadı.
 - Başlatılamayan ODA işlemi kullanılabilir LibreDWG yedeğini engellemez.
   İptal ve zaman aşımı yedek işlem başlatmaz; çalışan süreç öldürülüp beklenir.
   Geçersiz DWG başlığı dönüştürücü başlamadan reddedilir.
+- DWG dönüşümünden çıkan DXF'in 100 MB sınırı kurtarma dalından önce de
+  kontrol edilir; onarımın ham kayıt taraması dosya boyutu sınırını aşamaz.
 - Açık uç tanısı bütün uç çiftlerini karşılaştırıyordu. Aynı Öklid uzaklığı
   tanımı korunarak STRtree en yakın komşu sorgusu kullanılır. Kaynak SHA256
   değeri de her parça için yeniden hesaplanmak yerine dosya başına hesaplanır.
@@ -58,7 +60,7 @@ penceresinde takıldı; yığın izi alınıp süreç sonlandırıldı. Bu denem
 başarılı sayılmadı. Temiz denemeler deponun sınırlı süreç çalıştırıcısıyla
 tekrarlandı: DXF/DWG, nesting ve CAD dönüştürücü birlikte **1.068 geçti,
 8 atlandı, 0 hata, 0 tekrar** (54 süreç). Son eklenen açık-uç vakaları dahil
-odak regresyonları ayrıca **105/105** geçti. Kesin Windows sonuçları PR ve
+odak regresyonları ayrıca **106/106** geçti. Kesin Windows sonuçları PR ve
 CI raporundadır.
 
 Canlı SolidWorks ve kurulu ODA bu Linux ortamında denenmedi. SolidWorks
