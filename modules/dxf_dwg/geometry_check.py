@@ -48,7 +48,9 @@ def validate_flat_geometry(path, stop=None):
             elif kind=='LWPOLYLINE':
                 points=tuple(point(p) for p in entity.get_points('xyseb'))
                 if len(points)<2:raise ValueError('DXF geçersiz polyline içeriyor.')
-                geometry=(points,bool(entity.closed),float(entity.dxf.elevation),point(entity.dxf.extrusion))
+                elevation=float(entity.dxf.elevation)
+                if not math.isfinite(elevation):raise ValueError('DXF sonlu olmayan polyline yüksekliği içeriyor.')
+                geometry=(points,bool(entity.closed),elevation,point(entity.dxf.extrusion))
             if geometry is not None:
                 token=(kind,layer,geometry)
                 if token in seen:raise ValueError('DXF aynı katmanda mükerrer kesim geometrisi içeriyor; çıktı yayımlanmadı.')

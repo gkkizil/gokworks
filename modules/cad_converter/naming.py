@@ -12,7 +12,12 @@ from .scanner import path_key
 def safe_name(value):
     value = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', unicodedata.normalize('NFC', str(value)))
     value = value.strip().rstrip('. ') or 'Adsiz'
-    if value.split('.')[0].upper() in {'CON', 'PRN', 'AUX', 'NUL', *(f'COM{i}' for i in range(1, 10)), *(f'LPT{i}' for i in range(1, 10))}:
+    # Win32 recognizes the device name before an extension, including spaces
+    # before that dot and the ISO-8859-1 superscript digits 1, 2 and 3.
+    devices = {'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$',
+               *('COM'+digit for digit in '123456789¹²³'),
+               *('LPT'+digit for digit in '123456789¹²³')}
+    if value.split('.')[0].rstrip(' ').upper() in devices:
         value = '_' + value
     if len(value) > 100:
         value = value[:85] + '_' + hashlib.sha256(value.encode()).hexdigest()[:10]

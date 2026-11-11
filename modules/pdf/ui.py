@@ -78,7 +78,6 @@ class PdfPage(ExportPage):
         self.results.refresh_icons()
 
     def refresh_outcome(self,*args):
-        super().refresh_outcome(*args)
         # The PDF summary already presents the same outcome counts above the
         # list. Keep the footer for filtered/total rows without a duplicate line.
         self.outcome.hide()

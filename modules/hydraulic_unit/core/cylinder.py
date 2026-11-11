@@ -18,7 +18,7 @@ def areas(c: Cylinder) -> tuple[float, float, float]:
     if c.initial_position > c.stroke:
         raise InputError('initial_position', 'Başlangıç konumu strok aralığında olmalı.')
     a1 = math.pi * c.bore**2 / 4
-    a2 = math.pi * (c.bore**2 - c.rod**2) / 4
+    a2 = math.pi * (c.bore-c.rod) * (c.bore+c.rod) / 4
     return a1, a2, a1 / a2
 
 
@@ -26,7 +26,9 @@ def effective_area(c: Cylinder, kind: str) -> tuple[float, float]:
     a1, a2, _ = areas(c)
     choice(kind, ('extend','retract','regenerate','hold'), 'movement')
     if kind == 'regenerate':
-        return a1 - a2, 0.
+        # The regenerative effective area is the rod area itself. Subtracting
+        # piston and annular areas erases a small but valid rod's contribution.
+        return math.pi*c.rod**2/4, 0.
     return (a2, a1) if kind == 'retract' else (a1, a2)
 
 
