@@ -69,6 +69,29 @@ def partition(name, configuration, material, thickness, outline, bands, fixed_po
                 tuple(bends), fixed_face, source).validate()
 
 
+# IOneBendFeatureData owners: OneBend (base/edge flange bends) and SketchBend (sketched bend).
+BEND_KINDS = ('OneBend', 'SketchBend', 'ToroidalBend')
+# Bends a base flange's open profile creates are listed under Flat-Pattern as UiBend:
+# suppressed while folded, readable (IOneBendFeatureData) once the pattern is unfolded.
+FLAT_BEND = 'UiBend'
+SHEET_KINDS = ('Bend', 'Flange', 'Flat', 'Hem', 'Jog', 'SheetMetal', 'SM')
+
+
+def feature_inventory(session, features, limit=24):
+    """'Name (TypeName2[, bastırılmış])' for the sheet-metal features seen, for a diagnosable error."""
+    rows = []
+    for feature, kind in features:
+        if not any(token.casefold() in kind.casefold() for token in SHEET_KINDS):
+            continue
+        try:
+            off = ', bastırılmış' if _suppressed(session, feature) else ''
+        except Exception:
+            off = ', durum okunamadı'
+        rows.append(f'{get(feature, "Name")} ({kind}{off})')
+    shown = '; '.join(rows[:limit]) + (f'; … +{len(rows)-limit}' if len(rows) > limit else '')
+    return shown or 'sac unsuru bulunamadı'
+
+
 def _suppressed(session, feature):
     try:
         state = values(call(feature, 'IsSuppressed2', session.c('swThisConfiguration'), variant(0, None)))
@@ -241,6 +264,42 @@ class Capture(Session):
         short = sha256(reference.encode('utf-8')).hexdigest()[:10] if reference else 'referans-yok'
         return (label+' / ' if label else '')+'yüz #'+short
 
+    def unfolded_bends(self, model, flat_bends, bend_row, pending, thickness, body_name, stop=None):
+        """Read UiBend data while unfolded; every folded bend cylinder must belong to one of them.
+
+        Partial cylinders are grouped by axis (inner/outer skins and cut pieces of one
+        bend are coaxial). Each group needs a bend with its radius (inner or outer) and
+        angle, and each bend needs a group: an extra or missing bend is an error, never
+        a guess by radius alone.
+        """
+        rows = []
+        for feature in flat_bends:
+            checkpoint(stop)
+            label = str(get(feature, 'Name'))
+            if _suppressed(self, feature):
+                raise ApiError(f'{body_name} / {label}: açınım bükümü Flat-Pattern açıkken de bastırılmış; okunamadı.')
+            try:
+                rows.append((feature, bend_row(feature, label)))
+            except Exception as error:
+                raise ApiError(f'{body_name} / {label}: açı, iç R veya yön okunamadı: {error}') from error
+        groups = []
+        for cylinder, span, label in pending:
+            for group in groups:
+                if _coaxial(group[0][0], cylinder):
+                    group.append((cylinder, span, label)); break
+            else:
+                groups.append([(cylinder, span, label)])
+        def fits(group, row):
+            return all(min(abs(c[2]-row['radius']), abs(c[2]-row['radius']-thickness)) <= .01
+                       and abs(span-row['turn']) <= .01 for c, span, _ in group)
+        for group in groups:
+            if not any(fits(group, row) for _, row in rows):
+                raise ApiError(f'{body_name} / {group[0][2]}: büküm unsuruyla eşleştirilemedi; büküm atlanmadı.')
+        for _, row in rows:
+            if not any(fits(group, row) for group in groups):
+                raise ApiError(f'{body_name} / {row["label"]}: büküm yüzü bulunamadı; açınım bükümü doğrulanamadı.')
+        return rows
+
     def one_body(self, model):
         bodies = values(call(self.part(model), 'GetBodies2', self.c('swSolidBody'), False))
         if len(bodies) != 1 or not call(bodies[0], 'IsSheetMetal'):
@@ -296,22 +355,26 @@ class Capture(Session):
             thickness = self.thickness(model, body, props, features)
             material = self.material(model, body, configuration, props)
             rows, covered, bend_faces = [], set(), []
+            def bend_row(feature, label):
+                definition = call(feature, 'GetDefinition')
+                turn = abs(degrees(float(get(definition, 'BendAngle'))))
+                radius = float(get(definition, 'BendRadius'))*1000
+                direction = int(get(definition, 'BendDirection'))
+                up, down = self.c('swBendDirection_UP'), self.c('swBendDirection_DOWN')
+                if direction not in (up, down) or not 0 < turn < 180 or not isfinite(radius) or radius <= 0:
+                    raise ValueError('Doğrusal büküm açısı/iç R/yön geçersiz.')
+                ref = self.persistent_ref(model, feature)
+                if not ref:
+                    raise ValueError('Kararlı unsur referansı yok.')
+                return {'id': 'SWB-'+sha256(ref.encode('ascii')).hexdigest()[:16], 'label': label,
+                        'turn': turn, 'radius': radius, 'direction': 1 if direction == up else -1}
             for feature, kind in active:
                 checkpoint(stop)
-                if kind != 'OneBend':
+                if kind not in BEND_KINDS:
                     continue
                 label = str(get(feature, 'Name'))
-                definition = call(feature, 'GetDefinition')
                 try:
-                    turn = abs(degrees(float(get(definition, 'BendAngle'))))
-                    radius = float(get(definition, 'BendRadius'))*1000
-                    direction = int(get(definition, 'BendDirection'))
-                    up, down = self.c('swBendDirection_UP'), self.c('swBendDirection_DOWN')
-                    if direction not in (up, down) or not 0 < turn < 180 or not isfinite(radius) or radius <= 0:
-                        raise ValueError('Doğrusal büküm açısı/iç R/yön geçersiz.')
-                    ref = self.persistent_ref(model, feature)
-                    if not ref:
-                        raise ValueError('Kararlı unsur referansı yok.')
+                    row = bend_row(feature, label); radius, turn = row['radius'], row['turn']
                     faces_for_bend = values(call(feature, 'GetFaces'))
                     if not faces_for_bend:
                         raise ValueError('Büküm yüzleri / unsur eşleşmesi yok.')
@@ -325,12 +388,14 @@ class Capture(Session):
                         if cylinder is not None:
                             cylinders.append(cylinder)
                     bend_faces.append((radius, turn, self.owners(model, feature), cylinders))
-                    rows.append((feature, {'id': 'SWB-'+sha256(ref.encode('ascii')).hexdigest()[:16], 'label': label,
-                                           'turn': turn, 'radius': radius, 'direction': 1 if direction == up else -1}))
+                    rows.append((feature, row))
                 except Exception as error:
                     raise ApiError(f'{body_name} / {label}: açı, iç R veya yön okunamadı: {error}') from error
-            if not rows:
-                raise ApiError(body_name+': OneBend doğrusal büküm verisi bulunamadı. Bu unsur türü henüz desteklenmiyor; açı/radyüs uydurulmadı.')
+            flat_bends = [f for f, k in features if k == FLAT_BEND] if not rows else []
+            pending = []   # folded partial cylinders, matched to UiBend data once unfolded
+            if not rows and not flat_bends:
+                raise ApiError(f'Gövde «{body_name}»: etkin doğrusal büküm unsuru (OneBend/SketchBend) bulunamadı; '
+                               f'açı/radyüs uydurulmadı. Okunan sac unsurları: {feature_inventory(self, features)}')
             # Every partial cylindrical face must belong to an imported bend.
             # Full cylinders can be through-hole walls. Other curved surfaces
             # require recognition that this first version does not provide.
@@ -348,6 +413,11 @@ class Capture(Session):
                 if abs(abs(uv[1]-uv[0])-2*pi) > 1e-5 and reference not in covered:
                     cylinder = _cylinder(surface)
                     if _sheet_sidewall(face, cylinder, thickness):
+                        continue
+                    if flat_bends:
+                        if cylinder is None:
+                            raise ApiError(f'{body_name} / {face_label}: silindir ekseni okunamadı; büküm atlanmadı.')
+                        pending.append((cylinder, degrees(abs(uv[1]-uv[0])), face_label))
                         continue
                     # EdgeFlange owns faces which its OneBend subfeature may
                     # expose only on the inner skin. Verify the measured outer
@@ -421,6 +491,8 @@ class Capture(Session):
                 union = unary_union(regions)
                 if union.geom_type != 'Polygon' or fixed_point is None:
                     raise ApiError(body_name+': gerçek açınım veya sabit yüz eşleştirmesi başarısız.')
+                if flat_bends:
+                    rows = self.unfolded_bends(model, flat_bends, bend_row, pending, thickness, body_name, stop)
                 bands = []
                 for feature, row in rows:
                     checkpoint(stop)
