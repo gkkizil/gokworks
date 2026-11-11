@@ -1,8 +1,9 @@
 """Read active native sheet metal in one STA; restore flattening in finally.
 
 Only published OneBend + FlatPattern APIs are accepted. Unsupported recognition
-is an explicit error, never a fabricated 90-degree bend or radius. No Save or
-ModifyDefinition is called. All COM references die before the worker returns.
+is an explicit error, never a fabricated 90-degree bend or radius. MergeFace
+is temporarily disabled to expose measured tangents and restored in finally.
+No Save is called. All COM references die before the worker returns.
 """
 from contextlib import contextmanager
 from math import degrees, isfinite, pi
@@ -102,13 +103,67 @@ def _suppressed(session, feature):
         feature = None
 
 
+def _merge_faces(flat):
+    definition = None
+    try:
+        definition = call(flat, 'GetDefinition')
+        try:
+            value = get(definition, 'MergeFace')
+        except Exception as error:
+            if isinstance(error, AttributeError) or getattr(error, 'hresult', None) in (-2147352573, -2147352570):
+                return None
+            raise
+        if type(value) not in (bool, int) or value not in (False, True, -1):
+            raise ApiError('Flat-Pattern yüz birleştirme ayarı okunamadı.')
+        return bool(value)
+    finally:
+        definition = flat = None
+
+
+def _put_merge_faces(definition, value):
+    dispatch = member = None
+    try:
+        dispatch = getattr(definition, '_oleobj_', definition)
+        if hasattr(dispatch, 'Invoke') and hasattr(dispatch, 'GetIDsOfNames'):
+            member = dispatch.GetIDsOfNames(0, 'MergeFace')
+            dispatch.Invoke(member, 0, 4, False, value)  # IDispatch PROPERTYPUT
+        else:
+            setattr(definition, 'MergeFace', value)
+    finally:
+        definition = dispatch = member = None
+
+
+def _set_merge_faces(flat, model, value):
+    """Modify only MergeFace; always release a failed feature edit's rollback."""
+    definition = component = None
+    accessed = committed = False
+    try:
+        definition = call(flat, 'GetDefinition')
+        component = variant(9, None)  # VT_DISPATCH null component, for a part.
+        if not call(definition, 'AccessSelections', model, component):
+            raise ApiError('Flat-Pattern yüz ayarı için seçim erişimi alınamadı.')
+        accessed = True
+        _put_merge_faces(definition, value)
+        if not call(flat, 'ModifyDefinition', definition, model, component):
+            raise ApiError('Flat-Pattern yüz birleştirme değişikliği kabul edilmedi.')
+        committed = True  # ModifyDefinition releases AccessSelections on success.
+        if _merge_faces(flat) is not value:
+            raise ApiError('Flat-Pattern yüz birleştirme ayarı doğrulanamadı.')
+    finally:
+        try:
+            if accessed and not committed:
+                call(definition, 'ReleaseSelectionAccess')
+        finally:
+            definition = component = flat = model = None
+
+
 @contextmanager
 def flattened(session, model, flat, features, stop=None):
     """Snapshot/restore exact active config, selection list and feature states."""
     configuration = session.active_configuration(model)
     before = [(f, _suppressed(session, f), str(get(f, 'Name'))) for f, _ in features]
     manager = get(model, 'SelectionManager')
-    suspended = False
+    suspended = False; merge_before = None; merge_attempted = False
     try:
         call(manager, 'SuspendSelectionList'); suspended = True
         checkpoint(stop)
@@ -116,6 +171,14 @@ def flattened(session, model, flat, features, stop=None):
             raise ApiError('Flat-Pattern açılamadı; kaynak parça kaydedilmedi.')
         if not call(model, 'EditRebuild3'):
             raise ApiError('Geçici açınım yeniden oluşturulamadı.')
+        merge_before = _merge_faces(flat)
+        if merge_before is True:
+            # SW normally merges the bend band into its neighbouring flange.
+            # Expose the actual face boundaries instead of inventing a width.
+            merge_attempted = True
+            _set_merge_faces(flat, model, False)
+            if not call(model, 'EditRebuild3'):
+                raise ApiError('Büküm teğetleri için açınım yeniden oluşturulamadı.')
         checkpoint(stop)
         yield
     finally:
@@ -124,6 +187,12 @@ def flattened(session, model, flat, features, stop=None):
             if session.active_configuration(model) != configuration:
                 if not call(model, 'ShowConfiguration2', configuration):
                     raise RestoreError('Aktif konfigürasyon geri getirilemedi.')
+            if merge_attempted:
+                try:
+                    if _merge_faces(flat) is not merge_before:
+                        _set_merge_faces(flat, model, merge_before)
+                except Exception as error:
+                    failures.append('yüz birleştirme: '+str(error))
             # First restore FlatPattern; dependencies normally restore with it.
             ordered = sorted(before, key=lambda item: 0 if item[0] is flat else 1)
             for feature, state, label in ordered:
@@ -138,6 +207,8 @@ def flattened(session, model, flat, features, stop=None):
                     failures.append(label)
             if session.active_configuration(model) != configuration:
                 failures.append('aktif konfigürasyon')
+            if merge_attempted and _merge_faces(flat) is not merge_before:
+                failures.append('yüz birleştirme doğrulaması')
         except Exception as error:
             failures.append(str(error))
         finally:
@@ -205,7 +276,7 @@ def _sheet_sidewall(face, cylinder, thickness):
         return False
 
 
-def _band(row, lines, zones, thickness):
+def _band(row, lines, zones, thickness, *, candidates=()):
     """Measure tangents, or a feature-owned flat bend face around a centreline."""
     base = np.array(lines[0][1])-lines[0][0]; length = np.linalg.norm(base)
     if length <= .001:
@@ -219,17 +290,28 @@ def _band(row, lines, zones, thickness):
     if high-low <= .001:
         # A visible bend centreline is not itself the developed width. Read
         # the actual, feature-associated face; never infer width from K-factor.
-        measured = []
-        for zone in zones:
-            vertices = np.asarray(zone.exterior.coords)
-            lo, hi = min(vertices@n), max(vertices@n)
-            if (row['radius']*row['turn']*pi/180-.001 <= hi-lo
-                    <= (row['radius']+thickness)*row['turn']*pi/180+.001
-                    and lo-.001 <= offsets[0] <= hi+.001):
-                measured.append(zone)
+        def matching(regions):
+            measured = []
+            centreline = LineString(lines[0])
+            for zone in regions:
+                vertices = np.asarray(zone.exterior.coords)
+                lo, hi = min(vertices@n), max(vertices@n)
+                if (row['radius']*row['turn']*pi/180-.001 <= hi-lo
+                        <= (row['radius']+thickness)*row['turn']*pi/180+.001
+                        and lo-.001 <= offsets[0] <= hi+.001
+                        and zone.intersection(centreline).length > .001):
+                    measured.append(zone)
+            return measured
+        measured = matching(zones)
+        if not measured:
+            # UiBend may not own the split face returned after a rebuild. Use
+            # the actual coplanar band only when its location is unambiguous.
+            measured = matching(candidates)
+            if len(measured) > 1:
+                raise ApiError(row.get('label', row['id'])+': merkez çizgisine birden fazla açınım yüzü uyuyor; büküm genişliği belirsiz.')
         zone = unary_union(measured)
         if zone.is_empty or zone.geom_type != 'Polygon':
-            raise ApiError(row['id']+': yalnız merkez çizgisi var; ölçülmüş büküm bölgesi genişliği eksik.')
+            raise ApiError(row.get('label', row['id'])+': yalnız merkez çizgisi var; ölçülmüş büküm bölgesi genişliği eksik.')
         points = list(zone.exterior.coords)
         low, high = min(np.asarray(points)@n), max(np.asarray(points)@n)
     lo = min(np.dot(p, u) for p in points); hi = max(np.dot(p, u) for p in points)
@@ -366,7 +448,7 @@ class Capture(Session):
                 ref = self.persistent_ref(model, feature)
                 if not ref:
                     raise ValueError('Kararlı unsur referansı yok.')
-                return {'id': 'SWB-'+sha256(ref.encode('ascii')).hexdigest()[:16], 'label': label,
+                return {'id': 'SWB-'+sha256(ref.encode('ascii')).hexdigest()[:16], 'label': label, 'feature_ref': ref,
                         'turn': turn, 'radius': radius, 'direction': 1 if direction == up else -1}
             for feature, kind in active:
                 checkpoint(stop)
@@ -392,6 +474,7 @@ class Capture(Session):
                 except Exception as error:
                     raise ApiError(f'{body_name} / {label}: açı, iç R veya yön okunamadı: {error}') from error
             flat_bends = [f for f, k in features if k == FLAT_BEND] if not rows else []
+            flat_bend_refs = [self.persistent_ref(model, f) for f in flat_bends]
             pending = []   # folded partial cylinders, matched to UiBend data once unfolded
             if not rows and not flat_bends:
                 raise ApiError(f'Gövde «{body_name}»: etkin doğrusal büküm unsuru (OneBend/SketchBend) bulunamadı; '
@@ -491,11 +574,21 @@ class Capture(Session):
                 union = unary_union(regions)
                 if union.geom_type != 'Polygon' or fixed_point is None:
                     raise ApiError(body_name+': gerçek açınım veya sabit yüz eşleştirmesi başarısız.')
+                # Suppression and MergeFace rebuild the flat geometry. Resolve
+                # bend features again instead of retaining stale child proxies.
+                current_bends = {self.persistent_ref(model, f): f for f, kind in self.features(model, stop)
+                                 if kind in (*BEND_KINDS, FLAT_BEND)}
                 if flat_bends:
+                    if any(not ref or ref not in current_bends for ref in flat_bend_refs):
+                        raise ApiError(body_name+': açınımdan sonra UiBend unsuru yeniden bulunamadı.')
+                    flat_bends = [current_bends[ref] for ref in flat_bend_refs]
                     rows = self.unfolded_bends(model, flat_bends, bend_row, pending, thickness, body_name, stop)
                 bands = []
                 for feature, row in rows:
                     checkpoint(stop)
+                    feature = current_bends.get(row['feature_ref'])
+                    if feature is None:
+                        raise ApiError(row['label']+': açınımdan sonra büküm unsuru yeniden bulunamadı.')
                     definition = call(feature, 'GetDefinition')
                     segments = values(get(definition, 'FlatPatternSketchSegments2'))
                     if not segments:
@@ -509,7 +602,7 @@ class Capture(Session):
                         # a centreline alone still fails unless its face exists.
                         flat_refs = set()
                     zones = [polygon for ref, polygon in face_regions if ref and ref in flat_refs]
-                    bands.append(_band(row, lines, zones, thickness))
+                    bands.append(_band(row, lines, zones, thickness, candidates=regions))
                 snapshot = partition(str(call(model, 'GetTitle')), configuration, material, thickness, Region.from_polygon(union), bands,
                                      fixed_point, fixed_ref, source or 'Kaydedilmemiş aktif SLDPRT')
             if stamp and (Path(source).stat().st_size, Path(source).stat().st_mtime_ns) != stamp:
@@ -517,7 +610,7 @@ class Capture(Session):
             checkpoint(stop)
             return snapshot
         finally:
-            rows = []; active = []; features = []
+            rows = []; active = []; features = []; current_bends = {}; flat_bends = []
             body = flat = fixed = definition = model = feature = face = surface = loop = edge = curve = cp = None
             flats = []; segments = []
             faces_for_bend = []

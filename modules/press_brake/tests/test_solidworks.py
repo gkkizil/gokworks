@@ -313,3 +313,161 @@ def test_unrelated_cylinder_next_to_a_base_flange_bend_is_refused(capture):
     reader = _base_flange_part(capture, [_bend_cylinder('inner', 2), extra])
     with pytest.raises(ApiError, match='eşleştirilemedi'):
         sw.read_active(session_factory=reader)
+
+
+def _merged_flat(capture, enabled=True):
+    """Feature data is a fresh copy; failed commits may still change the model."""
+    state = NS(merged=enabled, edits=[], access=0, released=0, rolled_back=False,
+               reject=False, reject_after_write=False, reject_restore=False)
+    fixed = capture.flat.definition.FixedFace2
+    split = capture.body.GetFaces()
+    merged = _face(Region.from_polygon(unary_union([f.region.polygon() for f in load_demo('L120').part.flanges]
+                         +[b.region.polygon() for b in load_demo('L120').part.bends])), 'merged-face')
+    capture.body.GetFaces = lambda: (merged,) if not capture.flat.suppressed and state.merged else split
+    def definition():
+        def access(model, component):
+            assert model is capture.model and component.varianttype == 9
+            state.access += 1; state.rolled_back = True; return True
+        def release():
+            state.released += 1; state.rolled_back = False
+        return NS(FixedFace2=fixed, MergeFace=state.merged, AccessSelections=access, ReleaseSelectionAccess=release)
+    capture.flat.GetDefinition = definition
+    def modify(data, model, component):
+        assert model is capture.model and component.varianttype == 9 and state.rolled_back
+        state.edits.append(data.MergeFace)
+        if state.reject_restore and data.MergeFace:
+            return False
+        if state.reject:
+            if state.reject_after_write:
+                state.merged = data.MergeFace
+            state.reject = False
+            return False
+        state.merged = data.MergeFace; state.rolled_back = False
+        return True
+    capture.flat.ModifyDefinition = modify
+    # Real flat-pattern APIs can return only the centreline, and UiBend's faces
+    # need not own the newly exposed flat band. Its measured face still exists.
+    original_line = capture.bend.definition.FlatPatternSketchSegments2[0]
+    start, end = original_line.GetStartPoint2(), original_line.GetEndPoint2()
+    width = load_demo('L120').part.bends[0].width/1000
+    centre = NS(GetType=original_line.GetType, GetSketch=original_line.GetSketch,
+                GetStartPoint2=lambda: NS(X=start.X, Y=start.Y+width/2, Z=0.),
+                GetEndPoint2=lambda: NS(X=end.X, Y=end.Y+width/2, Z=0.))
+    capture.bend.definition.FlatPatternSketchSegments2 = (centre,)
+    return state
+
+
+def test_merged_flat_pattern_reads_actual_band_and_restores_setting(capture):
+    state = _merged_flat(capture)
+    before = capture.path.read_bytes()
+    part = sw.read_active(session_factory=capture.session)
+    assert part.bends[0].width == pytest.approx(load_demo('L120').part.bends[0].width)
+    assert state.edits == [False, True] and state.merged is True
+    assert not state.rolled_back and state.access == 2 and state.released == 0
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+    assert capture.path.read_bytes() == before
+
+
+def test_already_split_faces_need_no_definition_edit(capture):
+    state = _merged_flat(capture, False)
+    part = sw.read_active(session_factory=capture.session)
+    assert len(part.bends) == 1 and state.edits == [] and state.merged is False
+    assert state.access == 0 and capture.flat.suppressed
+
+
+@pytest.mark.parametrize('failure', ['geometry', 'cancel'])
+def test_merge_faces_restored_after_capture_error_or_cancel(capture, failure):
+    state = _merged_flat(capture); stop = threading.Event()
+    original = capture.body.GetFaces
+    def faces():
+        if not capture.flat.suppressed and not state.merged:
+            if failure == 'cancel':
+                stop.set(); raise Cancelled()
+            raise RuntimeError('flat geometry unavailable')
+        return original()
+    capture.body.GetFaces = faces
+    with pytest.raises(Cancelled if failure == 'cancel' else RuntimeError):
+        sw.read_active(stop, session_factory=capture.session)
+    assert state.merged and state.edits == [False, True] and not state.rolled_back
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+
+
+@pytest.mark.parametrize('changed', [False, True])
+def test_failed_merge_edit_releases_rollback_and_repairs_partial_change(capture, changed):
+    state = _merged_flat(capture); state.reject = True; state.reject_after_write = changed
+    with pytest.raises(ApiError, match='kabul edilmedi'):
+        sw.read_active(session_factory=capture.session)
+    assert state.merged and not state.rolled_back and state.released == 1
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+    assert state.edits == ([False, True] if changed else [False])
+
+
+def test_merge_restore_failure_is_explicit_even_if_suppression_restores(capture):
+    state = _merged_flat(capture); state.reject_restore = True
+    with pytest.raises(RestoreError, match='yüz birleştirme'):
+        sw.read_active(session_factory=capture.session)
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+    assert not state.rolled_back and state.released == 1
+
+
+def test_unowned_band_needs_unique_real_geometry_and_centreline_overlap():
+    from shapely.geometry import box
+    row = dict(id='measured', label='Bend1', turn=60, radius=2)
+    width = 3*radians(60); line = [((-40,width/2),(40,width/2))]
+    zone = box(-40,0,40,width)
+    band = sw._band(row,line,[],2,candidates=[box(-40,-40,40,0),zone,box(-40,width,40,40)])
+    assert band['width'] == pytest.approx(width)
+    with pytest.raises(ApiError, match='birden fazla'):
+        sw._band(row,line,[],2,candidates=[zone,box(-40,.1,40,width+.1)])
+    with pytest.raises(ApiError, match='ölçülmüş'):
+        sw._band(row,line,[],2,candidates=[box(100,0,180,width)])
+
+
+def test_merge_face_property_write_uses_raw_dispatch_without_type_info():
+    class Dispatch:
+        def GetIDsOfNames(self, locale, name):
+            assert locale == 0 and name == 'MergeFace'; return 77
+        def Invoke(self, member, locale, flags, want_result, value):
+            assert (member,locale,flags,want_result,value) == (77,0,4,False,False)
+    sw._put_merge_faces(Dispatch(), False)
+
+
+def test_base_flange_uibend_reads_centreline_with_merged_flat_faces(capture):
+    reader = _base_flange_part(capture, [_bend_cylinder('inner', 2), _bend_cylinder('outer', 4)])
+    state = _merged_flat(capture)
+    part = sw.read_active(session_factory=reader)
+    assert part.bends[0].title == 'Bend1' and part.bends[0].width == pytest.approx(load_demo('L120').part.bends[0].width)
+    assert state.merged and state.edits == [False, True] and capture.flat.suppressed
+
+
+def test_bend_features_are_resolved_again_after_the_flat_rebuild(capture):
+    state = _merged_flat(capture)
+    original = capture.bend
+    session = capture.session
+    class Reader(session):
+        def features(self, model, stop):
+            fresh = Feature(original.Name, original.definition)
+            fresh.ref = original.ref
+            revision = len(state.edits)
+            def definition():
+                if revision != len(state.edits):
+                    raise RuntimeError('stale feature proxy after rebuild')
+                return original.definition
+            fresh.GetDefinition = definition
+            yield fresh, 'OneBend'; yield capture.flat, 'FlatPattern'
+    part = sw.read_active(session_factory=Reader)
+    assert part.bends[0].width == pytest.approx(load_demo('L120').part.bends[0].width)
+    assert state.merged and capture.flat.suppressed
+
+
+def test_unowned_measured_band_preserves_a_hole_crossing_the_centreline():
+    from shapely.geometry import Point, box
+    row = dict(id='B1', turn=90, radius=2)
+    width = 3*radians(90)
+    zone = box(0,0,80,width).difference(Point(40,width/2).buffer(1))
+    band = sw._band(row,[((0,width/2),(80,width/2))],[],2,candidates=[zone])
+    assert band['width'] == pytest.approx(width)
+    p = load_demo('L120').part
+    outline = Region.from_polygon(box(0,-30,80,width+30).difference(Point(40,width/2).buffer(1)))
+    part = sw.partition(p.name,p.configuration,p.material,2,outline,[dict(band,direction=1)],(10,-20),'root','source')
+    assert len(part.bends[0].region.holes) == 1
