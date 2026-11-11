@@ -1,5 +1,17 @@
 # PDF aktarımı
 
+## Aktarım ekranı
+
+Kaynak ve çıktı klasörleri ayrı alanlarda düzenlenir. Üst özet, teknik resim,
+aktarılan, atlanan ve hatalı dosya sayılarını aynı sonuç modelinden gösterir.
+İlerleme çubuğu mevcut işçinin ilerleme olaylarını kullanır. Dosya listesinde
+kısa ad görünür; tam kaynak yolu aramada, ipucunda, ayrıntıda ve CSV'de korunur.
+Kaynak envanteri açılır bölümde, rapor ve günlük komutları tek menüdedir.
+Koyu/açık tema ve 820 × 560 dar pencere desteklenir.
+
+Bu düzen yalnız sunum katmanındadır. PDF motoru, süreç protokolü, tarama ve
+aktarım parametreleri, iptal, dosya güvenliği ve kayıt davranışı değiştirilmez.
+
 Qt ekranı `pdf.process.export_drawings` ile bir yardımcı süreç başlatır. Kaynak
 koddan `main.py --pdf-export-worker <istek.json>`, Windows paketinde aynı EXE'nin
 özel çalışma biçimi kullanılır. Yardımcı süreç arayüz açmaz; ek kurulum gerektirmez.

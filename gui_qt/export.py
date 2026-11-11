@@ -88,7 +88,7 @@ class ExportPage(BasePage):
         body.addWidget(self.options)
         body.addWidget(separator())
         self.controls.extend((self.form, self.output_form, self.options_form))
-        self.results = ResultsPanel(empty_hint='Kaynak klasörü seçin, ardından “Klasörü tara” veya aktarım komutunu kullanın.')
+        self.results = self.create_results()
         self.results.cleared.connect(lambda:self.set_status('Dosya listesi ve işlem günlüğü temizlendi.'))
         self.status_delegate = StatusDelegate(lambda: self.context.appearance, self.results.table)
         self.results.table.setItemDelegateForColumn(1, self.status_delegate)
@@ -105,6 +105,9 @@ class ExportPage(BasePage):
         self.source_scroll = self.splitter.source_scroll
         self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
+
+    def create_results(self):
+        return ResultsPanel(empty_hint='Kaynak klasörü seçin, ardından “Klasörü tara” veya aktarım komutunu kullanın.')
 
     def _dock_outcome(self):
         """Put the coloured outcome counter on the results counter row."""
