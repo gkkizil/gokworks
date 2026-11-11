@@ -39,7 +39,10 @@ def safe_name(value):
     result = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', str(value)).strip(' .')
     if not result:
         raise ValueError('Çıktı adı boş olamaz.')
-    if result.upper().split('.')[0] in {'CON', 'PRN', 'AUX', 'NUL', *(f'COM{i}' for i in range(1,10)), *(f'LPT{i}' for i in range(1,10))}:
+    devices = {'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$',
+               *('COM'+digit for digit in '123456789¹²³'),
+               *('LPT'+digit for digit in '123456789¹²³')}
+    if result.split('.')[0].rstrip(' ').upper() in devices:
         result = '_'+result
     return result
 
