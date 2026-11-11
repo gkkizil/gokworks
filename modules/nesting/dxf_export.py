@@ -61,7 +61,7 @@ def export_dxf(project, result, directory, *, separate=True, stop=None):
                     for entity in entities:
                         if entity.dxftype() not in ('LINE','ARC','CIRCLE','LWPOLYLINE','POLYLINE','SPLINE','ELLIPSE'):
                             raise ValueError('Saklanan DXF içinde kesim dışı nesne var.')
-                        vertices,_,_ = flatten_entity(entity,max(part.curve_tolerance,.001))
+                        vertices,_,_ = flatten_entity(entity,max(part.curve_tolerance,.001),stop=stop)
                         points = [(v.x, v.y) for v in vertices]
                         curve = LineString(points)
                         outlines.append(curve)

@@ -13,6 +13,7 @@ from dataclasses import replace
 import hashlib
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -116,12 +117,18 @@ def convert_dwg(source, destination, stop=None, *, timeout=120):
     problems=[]
     for kind,executable in converters():
         if destination.exists():destination.unlink()
-        if kind=='oda':
-            code=_run([executable,str(source.parent),str(destination.parent),'ACAD2018','DXF','0','0',source.name],stop,timeout)
-        else:
-            # LibreDWG skips a few advanced R2010+ objects and may then exit non-zero while still
-            # writing a usable DXF; the strict reader below decides whether the geometry is valid.
-            code=_run([executable,'-y','-o',str(destination),str(source)],stop,timeout,cwd=str(Path(executable).parent))
+        try:
+            if kind=='oda':
+                code=_run([executable,str(source.parent),str(destination.parent),'ACAD2018','DXF','0','0',source.name],stop,timeout)
+            else:
+                # LibreDWG skips a few advanced R2010+ objects and may then exit non-zero while still
+                # writing a usable DXF; the strict reader below decides whether the geometry is valid.
+                code=_run([executable,'-y','-o',str(destination),str(source)],stop,timeout,cwd=str(Path(executable).parent))
+        except (InterruptedError,TimeoutError):
+            raise
+        except OSError as error:
+            problems.append(f'{LABELS[kind]} başlatılamadı ({error})')
+            continue
         if _output(destination):
             return kind
         problems.append(f'{LABELS[kind]} dönüştüremedi (kod {code})')
@@ -129,11 +136,12 @@ def convert_dwg(source, destination, stop=None, *, timeout=120):
 
 
 def _drop_invalid_handles(dxf):
-    """Copy of a converter DXF without records whose handle is 0, or None when there are none.
+    """Repair converter metadata with handle 0; never remove a cut record.
 
     Handle 0 is never valid in DXF; LibreDWG writes it for objects it cannot convert
     (e.g. MLEADERSTYLE). ezdxf rejects the whole file for one such record, even in
-    recover mode, although the geometry is intact. Only these placeholder records go.
+    recover mode, although the geometry is intact. OBJECTS placeholders may go;
+    an ENDBLK closing record gets a fresh handle and stays in place.
     """
     lines=dxf.read_bytes().splitlines(keepends=True)
     pairs=[lines[i:i+2] for i in range(0,len(lines)-1,2)]
@@ -145,8 +153,30 @@ def _drop_invalid_handles(dxf):
     frame={b'SECTION',b'ENDSEC',b'TABLE',b'ENDTAB',b'EOF'}
     invalid=lambda record:(record[0][1].strip() not in frame and
                            any(code.strip() in (b'5',b'105') and value.strip()==b'0' for code,value in record))
-    kept=[record for record in records if not invalid(record)]
-    if len(kept)==len(records):return None
+    # Only OBJECTS metadata may be discarded. A handle-zero CIRCLE (a hole),
+    # LINE or BLOCK member must never disappear from manufacturing geometry.
+    kept=[];section=None;changed=False
+    handles={value.strip().upper().lstrip(b'0') or b'0'
+             for record in records for code,value in record if code.strip() in (b'5',b'105')}
+    next_handle=1
+    for record in records:
+        kind=record[0][1].strip()
+        if kind==b'SECTION':
+            section=next((value.strip() for code,value in record if code.strip()==b'2'),None)
+        if invalid(record):
+            changed=True
+            if kind==b'ENDBLK' and section==b'BLOCKS':
+                while f'{next_handle:X}'.encode() in handles:next_handle+=1
+                handle=f'{next_handle:X}'.encode();handles.add(handle)
+                repaired=[[code,handle+b'\n' if code.strip()==b'5' else value] for code,value in record]
+                kept.append(repaired)
+            elif section!=b'OBJECTS':
+                raise ValueError('DWG dönüşümünde geçersiz geometri kaydı (handle 0) bulundu; '
+                                 'kesim konturu silinerek onarılamaz. Dosyayı CAD programında yeniden DXF kaydedin.')
+        else:
+            kept.append(record)
+        if kind==b'ENDSEC':section=None
+    if not changed:return None
     cleaned=dxf.with_name(dxf.stem+'-temiz.dxf')
     cleaned.write_bytes(b''.join(line for record in kept for pair in record for line in pair))
     return cleaned
@@ -170,7 +200,14 @@ def _read_converted(dxf, stop, options):
         document,auditor=recover.readfile(str(source))
     except Exception:
         raise first from None
-    if auditor.has_errors:raise first from None
+    # Recovery may report "fixed" after removing a cut entity. Permit only
+    # the known dictionary bookkeeping repair; every other fix needs review
+    # in CAD rather than silently altering a manufactured part.
+    from ezdxf.audit import AuditError
+    safe_codes={AuditError.INVALID_OWNER_HANDLE,AuditError.REMOVED_INVALID_DXF_OBJECT}
+    if auditor.has_errors or any(fix.code not in safe_codes or 'DICTIONARYVAR(' not in fix.message
+                                 for fix in auditor.fixes):
+        raise first from None
     repaired=dxf.with_name(dxf.stem+'-onarildi.dxf');document.saveas(str(repaired))
     return read_dxf(repaired,stop=stop,**options)
 
@@ -179,7 +216,7 @@ def read_dwg(filename, *, stop=None, **options):
     source=Path(filename).resolve();check_cancel(stop)
     if source.stat().st_size>100*1024*1024:raise ValueError('DWG dosyası 100 MB sınırını aşıyor.')
     before=source.read_bytes()
-    if not before.startswith(b'AC10'):raise ValueError('Geçersiz DWG dosya başlığı.')
+    if not re.match(rb'AC10\d{2}',before):raise ValueError('Geçersiz DWG dosya başlığı.')
     with TemporaryDirectory(prefix='gokworks-dwg-') as folder:
         folder=Path(folder);incoming=folder/'input';outgoing=folder/'output'
         incoming.mkdir();outgoing.mkdir()
