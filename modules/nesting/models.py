@@ -197,9 +197,13 @@ class Project:
                 raise ValueError(p.code + ': geçerli kapalı kontur gerekli.')
             if any(not math.isfinite(v) for v in g.bounds):
                 raise ValueError('Sonlu olmayan geometri.')
+            if not math.isfinite(g.area) or not math.isfinite(g.length):
+                raise ValueError(p.code + ': kontur alanı veya uzunluğu hesaplama aralığını aşıyor.')
             number(p.curve_tolerance, 'Kontur toleransı')
             number(p.join_tolerance, 'Birleştirme toleransı', positive=True)
             number(p.endpoint_error,'Uç birleştirme hata payı')
+            if not math.isfinite(p.geometry_error):
+                raise ValueError(p.code + ': toplam kontur hata payı hesaplama aralığını aşıyor.')
         if sum(p.quantity for p in self.parts) > 10000:
             raise ValueError('Bir projede en fazla 10000 parça örneği desteklenir.')
         for s in self.sheets:
@@ -207,6 +211,8 @@ class Project:
                 raise ValueError('Sac stok adedi tam sayı olmalı.')
             for name in ('width', 'height'):
                 number(getattr(s, name), 'Sac ölçüsü', positive=True)
+            if not math.isfinite(s.width*s.height):
+                raise ValueError('Sac alanı hesaplama aralığını aşıyor.')
             integer(s.stock, 'Stok adedi', minimum=0)
             number(s.price_kg, 'TL/kg'); number(s.price_sheet, 'TL/levha')
             if s.pricing not in ('kg', 'sheet'):

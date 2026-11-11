@@ -52,6 +52,21 @@ def test_translated_geometry_and_large_start_angle_are_equivalent():
         assert first.nominal.symmetric_difference(restored).area<1e-6
 
 
+def test_circle_classification_has_no_overflow_for_finite_large_area_and_perimeter():
+    from modules.smart_splitting.analysis import analyze
+    normal=Part.create('Normal circle',Point(0,0).buffer(5,quad_segs=32))
+    large=Part.create('Large circle',Point(0,0).buffer(5e153,quad_segs=32))
+    assert analyze(normal)['kind']==analyze(large)['kind']=='Daire'
+
+
+def test_source_with_finite_area_but_overflowed_perimeter_is_rejected():
+    import numpy as np
+    from modules.smart_splitting.analysis import analyze
+    with np.errstate(over='ignore',invalid='ignore'):
+        with pytest.raises(ValueError,match='kaynak parça'):
+            analyze(Part.create('Too long',box(0,0,1e200,1)))
+
+
 @pytest.mark.parametrize('count',[2,3,4,6,8])
 def test_weld_gap_removes_only_material_near_actual_joining_edges(count):
     original=Point(0,0).buffer(250,quad_segs=64)

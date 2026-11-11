@@ -108,8 +108,10 @@ class PdfResultsPanel(ResultsPanel):
             count = values.get(key,0); widget.setText(str(count))
             widget.setAccessibleName(f'{widget.property("metricTitle")}: {count}')
             tone = 'success' if key=='success' else 'danger' if key=='error' else 'text'
-            widget.setProperty('pdfTone',tone if count else 'muted')
-            widget.style().unpolish(widget); widget.style().polish(widget)
+            tone = tone if count else 'muted'
+            if widget.property('pdfTone') != tone:
+                widget.setProperty('pdfTone',tone)
+                widget.style().unpolish(widget); widget.style().polish(widget)
         processed = sum(counts[k] for k in ('success','partial','skipped','error'))
         total = self.model.rowCount()
         self.stage.setText('İşlem sürüyor…' if self.busy else f'{processed} / {total} dosya işlendi' if processed
