@@ -198,8 +198,13 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 ## Hesap ve algoritma
 
 Motor adı **Sparrow + GOKWORKS**. Sparrow başlangıç planını oluşturur;
-bizim GOKWORKS NFP 1.5 katmanı bu planı sıkıştırır, delikleri doldurur ve
-bütün parçaları taşınabilen fazla levhaları kaldırır. Kalan sürede kontur
+bizim GOKWORKS NFP 1.7 katmanı bu planı sıkıştırır, delikleri doldurur ve
+bütün parçaları taşınabilen fazla levhaları her iki yönde kaldırır. Sabit
+yerleşim engel olursa aynı örnekleri yeniden dizmeyi ve gerçek içbükey
+boşlukları dener. Tam planı stoktaki daha küçük uyumlu saca aktarabilir;
+stok adedi, malzeme/kalınlık, kenar payı ve hadde yönü korunur. Yalnız tam
+taslaklar kabul edilir; sonraki denemede iptal veya süre sonu, tamamlanmış
+iyileştirmeyi silmez. Yerleşmemiş adetler önce tamamlanır. Kalan sürede kontur
 ve parça sırası araması sürer. Motor seçimi gerekmez. Ayrıntılı
 konturun hesabı süreyi tüketirse önceki en iyi yerleşim korunur. Kenar ve
 köşe adayları gerçek konturlar, aralıklar ve kenar paylarıyla denetlenir;

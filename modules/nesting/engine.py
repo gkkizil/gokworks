@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import random
 import time
 
+from numpy import asarray, flatnonzero
 from shapely import affinity, union_all
 from shapely.geometry import box, Point, Polygon
 
@@ -21,6 +22,7 @@ from modules.nesting.validation import validate_result
 from modules.nesting.search_budget import for_project, meaningful_improvement, uniform_stock_floor
 from modules.nesting.layout_score import layout_score, plate_strip_area
 from modules.nesting.rotations import search_angles
+from modules.nesting.stock_refinement import refine_stock
 
 
 def _vertices(g):
@@ -116,6 +118,10 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
             shape,bounds,inner = fixed_cache[key]
             fixed.append((old,shape,max(o.gap,o.kerf)+part.geometry_error+parts[old.part_id].geometry_error,bounds,inner))
         holes = [(hole,distance) for _,_,distance,_,inner in fixed for hole in inner]
+        # Broad phase only: every nearby pair still uses the original material
+        # intersection and Euclidean clearance, including holes and error bounds.
+        limits = asarray([(b[0]-d-1e-6,b[1]-d-1e-6,b[2]+d+1e-6,b[3]+d+1e-6)
+                          for _,_,d,b,_ in fixed]).T if len(fixed)>=64 else None
         used_right = max((bounds[2] for _,_,_,bounds,_ in fixed), default=0.)
         used_top = max((bounds[3] for _,_,_,bounds,_ in fixed), default=0.)
         used_left = min((bounds[0] for _,_,_,bounds,_ in fixed), default=o.margin)
@@ -227,10 +233,13 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
                         inside = any(hole.covers(translated) for hole in usable_holes)
                         if inside != want_hole:
                             continue
-                        bounds = translated.bounds
-                        if any(not _bounds_separate(bounds,old_bounds,distance)
+                        translated_bounds = (x+x0,y+y0,x+x1,y+y1)
+                        nearby = fixed if limits is None else (fixed[i] for i in flatnonzero(
+                            (limits[0]<=translated_bounds[2]) & (limits[2]>=translated_bounds[0])
+                            & (limits[1]<=translated_bounds[3]) & (limits[3]>=translated_bounds[1])))
+                        if any(not _bounds_separate(translated_bounds,old_bounds,distance)
                                and (translated.intersection(shape).area>1e-6 or translated.distance(shape)+1e-6<distance)
-                               for _,shape,distance,old_bounds,_ in fixed):
+                               for _,shape,distance,old_bounds,_ in nearby):
                             continue
                         score = (0 if inside else 1,*compact_key((x,y)),angle)
                         if winner is None or score<winner[0]:
@@ -273,36 +282,37 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
                     rows.append(Placement(part.id,instance,sheet.id,number,x,y,angle)); pending.pop(index)
                 else:
                     blocked.add(part.id); index += 1
-        # A plate is removed only if every one of its copies fits earlier plates.
-        # Draft target rows are transactional, so an interrupted/failed evacuation
-        # cannot erase source parts or consume stock twice.
-        for source_index in range(len(sheets)-1,0,-1):
-            checkpoint()
-            source = sheets[source_index]
-            draft = [list(rows) for _,_,rows in sheets[:source_index]]
-            evacuated = True
-            for old in sorted(source[2],key=lambda p:outer_areas[p.part_id],reverse=True):
-                checkpoint(); part = parts[old.part_id]; destination = None
-                for index,(sheet,number,_) in enumerate(sheets[:source_index]):
-                    if part.material!=sheet.material or abs(part.thickness-sheet.thickness)>1e-7: continue
-                    point = candidate(part,sheet,draft[index],detailed=False)
-                    if point:
-                        _,x,y,angle = point
-                        destination = index,replace(old,sheet_id=sheet.id,sheet_number=number,x=x,y=y,angle=angle)
-                        break
-                if destination is None:
-                    evacuated = False; break
-                index,proposal = destination; draft[index].append(proposal)
-            if evacuated:
-                for index,rows in enumerate(draft): sheets[index][2][:] = rows
-                sheets.pop(source_index)
-        # Close numbering gaps before the normal search opens any new stock.
-        counts = Counter(); normalized = []
-        for sheet,_,rows in sheets:
-            counts[sheet.id] += 1
-            for p in rows: p.sheet_number = counts[sheet.id]
-            normalized.append((sheet,counts[sheet.id],rows))
-        return normalized,counts
+        def remember(plates):
+            nonlocal best
+            draft = Result(digest,[p for _,_,rows in plates for p in rows],[p.id for p,_ in pending],
+                           ENGINE,ENGINE_VERSION,0.,0,datetime.now(timezone.utc).isoformat())
+            score = layout_score(project,draft,bounds)
+            if score<best[0]:
+                validate_result(project,draft,complete=False)
+                best = (score,deepcopy(draft))
+                if progress:
+                    progress(budget.percent(time.monotonic()),
+                             f'Stok iyileştirildi · {len(plates)} plaka · {len(draft.placements)} parça')
+
+        def place(part,sheet,rows,precise):
+            point = candidate(part,sheet,rows,detailed=False)
+            if point is None and precise and rows:
+                point = candidate(part,sheet,rows,detailed=True,angle_limit=16,
+                                  detail_slice={'Hızlı':.05,'Dengeli':.2,'Yüksek':.6}[o.quality])
+            return point[1:] if point is not None else None
+
+        # Retain each complete improvement before starting another repair. A
+        # timeout/cancel during the next draft cannot lose an already saved win.
+        remember(sheets)
+        if pending:
+            # Completing demand outranks stock/strip improvements. Do not spend
+            # the remaining budget rebuilding plates while copies need stock.
+            counts = Counter(); normalized = []
+            for sheet,_,rows in sheets:
+                counts[sheet.id] += 1; number = counts[sheet.id]
+                normalized.append((sheet,number,[replace(p,sheet_number=number) for p in rows]))
+            return normalized,counts
+        return refine_stock(project,sheets,place,bounds,checkpoint,remember)
 
     for trial in range(budget.max_attempts):
         trial_started = time.monotonic()
