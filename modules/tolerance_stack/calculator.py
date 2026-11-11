@@ -48,6 +48,24 @@ def moments(parameters, truncated):
     kind, low, high, mean, sigma, mode = parameters
     if kind != 'normal' or not truncated or sigma == 0:
         return mean, sigma*sigma
+    if low <= mean <= high and (high-low)/sigma <= .1:
+        # CDF subtraction and 1 + (...) cancel when the retained interval is
+        # tiny compared with sigma. Integrate on [-1,1] instead; the density
+        # varies by at most exp(.005), and centred moments retain the width.
+        middle, half = (low+high)/2, (high-low)/2
+        sums = [[],[],[]]
+        # Eight-point Gauss-Legendre: exact through polynomial degree 15.
+        for node,weight in ((.9602898564975363,.1012285362903763),
+                            (.7966664774136267,.2223810344533745),
+                            (.5255324099163290,.3137066458778873),
+                            (.1834346424956498,.3626837833783620)):
+            for t in (-node,node):
+                density = weight*math.exp(-.5*((middle-mean)/sigma+(half/sigma)*t)**2)
+                for power, values in enumerate(sums):
+                    values.append(density*t**power)
+        mass, first, second = map(math.fsum,sums)
+        center = first/mass
+        return middle+half*center, half*half*(second/mass-center*center)
     normal = NormalDist()
     a, b = (low-mean)/sigma, (high-mean)/sigma
     mass = normal.cdf(b)-normal.cdf(a)

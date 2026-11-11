@@ -3,6 +3,7 @@
 import threading
 import time
 import traceback
+from collections import deque
 
 from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot, Qt
 import shiboken6
@@ -98,6 +99,11 @@ class JobManager(QObject):
         self.owner = None
         self.stop = None
         self._joining = False
+        self._events = deque()
+        self.delivery_timer = QTimer(self)
+        self.delivery_timer.setSingleShot(True)
+        self.delivery_timer.setInterval(1)
+        self.delivery_timer.timeout.connect(self._deliver)
         self.join_timer = QTimer(self)
         self.join_timer.setSingleShot(True)
         self.join_timer.setInterval(5)
@@ -118,13 +124,31 @@ class JobManager(QObject):
         self.worker = JobWorker(operation, self.stop)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
-        self.worker.batch.connect(owner.handle_events, Qt.QueuedConnection)
+        self.worker.batch.connect(self._enqueue, Qt.QueuedConnection)
         self.worker.completed.connect(self.thread.quit)
         self.thread.finished.connect(self._finished)
         owner.set_busy(True)
         self.busyChanged.emit(True)
         self.thread.start()
         return True
+
+    @Slot(object)
+    def _enqueue(self, values):
+        self._events.extend(values)
+        if not self.delivery_timer.isActive():
+            self.delivery_timer.start()
+
+    @Slot()
+    def _deliver(self):
+        # Small GUI slices let paint, input and cancellation run even when a
+        # fast worker has already posted thousands of ordered result events.
+        values = [self._events.popleft() for _ in range(min(8,len(self._events)))]
+        try:
+            if self.owner is not None and values:
+                self.owner.handle_events(values)
+        finally:
+            if self._events:
+                self.delivery_timer.start()
 
     def cancel(self):
         if self.stop is not None:
@@ -149,6 +173,10 @@ class JobManager(QObject):
             self.join_timer.start()
             return
         self.join_timer.stop()
+        if self._events or self.delivery_timer.isActive():
+            self._joining = True
+            self.join_timer.start()
+            return
         self._joining = False
         diagnostics.record('qt_job_native_joined')
         owner, worker = self.owner, self.worker
