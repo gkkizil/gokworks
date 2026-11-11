@@ -11,9 +11,14 @@ küçük kontur önizlemeleri korunur.
    parçalar alınır; sınırı geçen parçalar kesilmez. Malzeme ve kalınlık eşleşir.
 2. **GOKWORKS kontur iyileştirmesi:** doğrulanmış Sparrow planı doğrudan başlangıç
    olarak alınır. Parçalar levha içinde sıkıştırılır; henüz yerleşmeyen parçalar
-   uygun deliklere ve boşluklara eklenir. Sonraki levhanın bütün parçaları önceki
-   levhalara taşınabiliyorsa o levha kaldırılır. Taşıma işlemseldir; başarısızlık
-   veya iptalde kaynak parçalar ve stok kaybolmaz.
+   uygun deliklere ve boşluklara eklenir. Az dolu levhaların parçaları diğer
+   levhalara her iki yönde taşınır. Sabit yerleşimler engel olursa aynı parça
+   örnekleri alan ve uzun kenar sıralarıyla yeniden dizilir; gerekirse gerçek
+   NFP ile içbükey boşluklar denenir. Tamamen boşaltılan levhalar kaldırılır.
+   Sonra aynı plan, stokta bulunan daha küçük uyumlu saclarda denenir.
+   İşlemler taslak üzerinde yapılır; yalnız tamamı yerleşen değişiklik kabul edilir.
+   Tamamlanmış iyileştirme sonraki taslakta süre dolsa veya iptal gelse de korunur.
+   Henüz yerleşmeyen adet varsa pahalı stok onarımından önce bu adetler tamamlanır.
 3. **NFP ayrıntı araması:** aynı plan en iyi aday olarak korunurken mevcut
    kontur, açı ve parça sırası aramaları diğer adayları dener. Yeni aday önceki
    iyi planı bozmaz. Ayrık MultiPolygon parçaları aynen bu katmanda işlenir;
@@ -42,8 +47,11 @@ ve bağımsız doğrulayıcıda uygulanır; levha sınırı gevşetilmez.
 
 İki aşama aynı proje/hash ve ortak bütçeyi kullanır. Otomatik bütçe gerçek
 kontur, adet ve açılara göre hesaplanır; Hızlı/Dengeli/Yüksek üst sınırları
-15/45/90 saniyedir. İlk tahminin en fazla %45'i Sparrow'a verilir; aşama üst
-sınırları 2/6/12 saniyedir. Kalan süre kontur iyileştirmesine ayrılır. Sayısal
+15/45/90 saniyedir. İlk tahminin en fazla %70'i Sparrow'a verilir; aşama üst
+sınırları 3/12/30 saniyedir. Bu süre kalan fiziksel levhalar ve malzeme/kalınlık
+grupları arasında paylaştırılır. Uzun ve kısa eksende sıkıştırma denenir;
+serbest dönüş ve kayıtlı ayrık açılar ayrı sözleşmelerle korunur.
+Kalan süre kontur iyileştirmesine ayrılır. Sayısal
 `seconds` sınırı olan eski projeler ve Akıllı Parça Bölme'nin 2/3/5 saniyelik
 aday bütçeleri iki aşama arasında paylaşılır; iki kez uygulanmaz. Tek GEOS
 çağrısı, veri doğrulama ve süreç temizliği ek duvar saati alabilir.
@@ -61,17 +69,43 @@ NFP dosyaları eski hash ile doğrulanır. Kullanıcıya seçim veya veri geçi�
 sorulmaz. Sonuç motoru `Sparrow + GOKWORKS`; metadata'sı kullanılan Sparrow,
 NFP ve native deneme bilgisini taşır.
 
-Resmî `spyrrow==0.9.0` Python bağlantısının Linux ve CPython 3.13 Windows x64
-hazır wheel'leri kullanılır. Özgün SBOM'lar Sparrow **0.1.0** /
-`881cdcbdf492ca42ba5413954ea6e41889a3becd`, jagua-rs **0.7.0** bildirir.
-Güncel Sparrow 0.3.0 kullanıldığı iddia edilmez. Son kullanıcıya Rust/Cargo,
-Node veya ek servis kurulmaz. PyInstaller native uzantı/metadata toplar;
+`spyrrow 0.10.0`, `f6345979e5f6cf88e9e2e3775750fcce899334fd` açık kaynak
+revizyonundan özgün `Cargo.lock` ile derlenir. Bağlı çekirdek Sparrow **0.3.0** /
+`3be915856b543d18c9cb7d4664fe7c53901fe1fd`, jagua-rs **1.0.0**'dır.
+Rust hesabı Python'a taşınmaz; Python fiziksel stok ve doğrulanmış planın
+iyileştirmesini yönetir. Derleme ortamında Rust 1.90+ gerekir; son kullanıcıya
+Rust/Cargo, Node veya ek servis kurulmaz. PyInstaller native uzantı/metadata toplar;
 Windows build adımı gerçek paketlenmiş EXE'nin headless worker'ını sınar.
 Bu adım çalışmadan Linux testi Windows EXE başarısı olarak sunulmaz.
 
-MIT/MPL bildirimleri, iki wheel'in SBOM'ları, 108 Linux/Windows Rust bileşeninin
-bildirimleri ve değiştirilmemiş jagua-rs kaynak arşivi
+MIT/MPL bildirimleri, SBOM'lar, kilitli Rust bileşenlerinin özgün
+bildirimleri ve değiştirilmemiş jagua-rs 1.0.0 kaynak arşivi
 `packaging/licenses/nesting/sparrow/` altında dağıtılır; Lisanslar'dan dışa aktarılır.
+
+## Üretim stoku iyileştirmesi · 11 Kasım 2026
+
+GOKWORKS NFP 1.7, Sparrow başlangıcını fiziksel stokla iyileştirir.
+Sparrow'un güncel `main` kaynağı da incelendi: 7 Kasım'daki `ca4ee65` değişikliği
+jagua-rs 2.0.0'a geçmiştir. Python bağlantısının yayımlanmış kaynağı hâlâ
+1.0.0'ı sabitler; bu çalışmada bu çekirdekler yükseltilmedi.
+Python iyileştirmesinde 64 ve üstü sabit parça için muhafazakâr sınır kutusu
+filtrelemesi kullanılır; kesin malzeme kesişimi ve mesafe kontrolü aynen sürer.
+Hız kazanımı işin geometrisine bağlıdır; evrensel hızlanma iddiası yoktur.
+
+Aynı geçerli başlangıç ve tek iyileştirme turunda sentetik ölçümler:
+
+| Örnek | NFP 1.6 | NFP 1.7 |
+| --- | --- | --- |
+| Önce küçük artık, sonra büyük levha | 2 levha, 13.000 mm² | 1 levha, 10.000 mm² |
+| İçbükey C parçası ve iç parça | 2 levha, 20.000 mm² | 1 levha, 10.000 mm² |
+| Gerçek Sparrow başlangıcı: çerçeve ve 4 iç parça | 1 levha, 40.000 mm² | 1 levha, 10.000 mm² |
+
+Üç örnekte de tüm adetler yerleşmiştir. Son örnekte net malzeme 5.700 mm²
+korunur; fire 34.300 → 4.300 mm² olur. İlk iki başlangıç kontrollü geçerli
+yerleşimlerdir; üçüncüsü gerçek native Sparrow çıktısıdır. Aynı çıktı eski ve
+yeni katmana verilmiştir. Bunlar müşteri DXF'leri veya tezgâh kabulü değildir.
+[Stok regresyonları](tests/test_stock_refinement.py) küçük stok, boş hedef
+levha rezervasyonu, adet/kimlik koruma, iptal/süre ve gerçek boşlukları kapsar.
 
 ## Küçük 2D önizlemeler
 

@@ -127,4 +127,4 @@ def test_integrated_result_saves_and_loads_with_its_provenance(tmp_path):
     save_project(p,path,result);loaded,saved=load_project(path)
     assert loaded.options.engine=='Sparrow + GOKWORKS'
     assert saved==result and validate_result(loaded,saved)
-    assert 'Sparrow 0.3.0' in saved.engine_version and 'GOKWORKS NFP 1.6' in saved.engine_version
+    assert 'Sparrow 0.3.0' in saved.engine_version and 'GOKWORKS NFP 1.7' in saved.engine_version
