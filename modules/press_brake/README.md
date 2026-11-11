@@ -72,9 +72,17 @@ bastırma durumuyla listeler. Kararlı
 kimlik persistent-reference özetinden üretilir; unsur adını değiştirmek kimliği
 değiştirmez. API metre/radyan sınırında mm/derece dönüşümü yapılır.
 
-Geçici Flat-Pattern bastırma durumu, diğer unsur durumları, aktif konfigürasyon
+Flat-Pattern'in `MergeFace` ayarı açıksa okuma sırasında geçici kapatılır;
+büküm bandı genişliği gerçek ayrılmış açınım yüzlerinden ölçülür. Unsur sahipliği
+yeniden oluşturmada değişmişse merkez çizgisiyle kesişen ve ölçülen R/açı/kalınlık
+sınırlarını sağlayan tek bir düz yüz eşleştirilir. Birden fazla aday reddedilir;
+K faktöründen varsayılan genişlik üretilmez. Büküm unsurları yeniden oluşturma
+sonrası kalıcı referanslarıyla yeniden bulunur.
+
+Geçici `MergeFace` ayarı, Flat-Pattern bastırma durumu, diğer unsur durumları, aktif konfigürasyon
 ve seçim listesi başarı, hata ve iptalde geri yüklenip doğrulanır. COM yalnız
-işçinin STA oturumunda yaşar. Eksik açı/R, yalnız merkez çizgisi, belirsiz sabit
+işçinin STA oturumunda yaşar. Eksik açı/R, merkez çizgisinden gerçek büküm
+bölgesinin ölçülememesi, belirsiz sabit
 yüz, eşleşmeyen silindirik büküm, çok gövde, eğrisel veya döngülü topoloji
 gerekçesiyle reddedilir; varsayılan büküm üretilmez. Genel STEP tanıma yoktur.
 Geçici açınım SolidWorks'ün bellek içi yeniden oluşturma/dirty göstergesini
