@@ -181,8 +181,8 @@ class Tool:
             numbers.extend(self.tip)
         for segment in (*self.segments, *self.holder_segments):
             numbers.extend((segment.start, segment.length))
-            if segment.length <= 0:
-                raise ValueError(self.code+': pozitif segment boyu gerekli.')
+            if segment.length <= 0 or not isfinite(segment.start+segment.length):
+                raise ValueError(self.code+': sonlu segment uçları ve pozitif boy gerekli.')
         for channel in self.channels:
             numbers.extend((channel.opening, channel.angle, channel.rotation, *channel.center))
             if channel.shoulder_radius is not None:
@@ -255,6 +255,7 @@ class Plan:
                     try:
                         valid = (isinstance(segment, Segment)
                                  and all(not isinstance(v, bool) and isfinite(v) for v in (segment.start, segment.length))
+                                 and isfinite(segment.start+segment.length)
                                  and segment.length > 0)
                     except (TypeError, ValueError, OverflowError):
                         valid = False

@@ -42,7 +42,8 @@ def test_target_with_positive_inner_radius_keeps_measured_developed_width(target
 @pytest.mark.parametrize('segment',[Segment(float('nan'),10),Segment(float('inf'),10),
                                     Segment(0,float('nan')),Segment(0,float('inf')),
                                     Segment(0,0),Segment(0,-1),Segment(None,10),
-                                    Segment(0,'bad'),Segment(10**1000,10),Segment(False,10)])
+                                    Segment(0,'bad'),Segment(10**1000,10),Segment(False,10),
+                                    Segment(1e308,1e308)])
 def test_nonfinite_or_nonpositive_override_segments_are_rejected_before_geometry(field,segment):
     p=load_demo('L120')
     with pytest.raises(ValueError,match='segment'):
@@ -52,3 +53,10 @@ def test_nonfinite_or_nonpositive_override_segments_are_rejected_before_geometry
 def test_empty_segment_override_remains_a_diagnosable_missing_assignment():
     p=load_demo('L120')
     replace(p,steps=(replace(p.steps[0],punch_segments=()),)).validate()
+
+
+@pytest.mark.parametrize('field',['segments','holder_segments'])
+def test_tool_segment_end_must_stay_finite(field):
+    p=load_demo('L120')
+    with pytest.raises(ValueError,match='segment'):
+        replace(p.tools[0],**{field:(Segment(1e308,1e308),)}).validate()
