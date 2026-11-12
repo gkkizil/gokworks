@@ -26,7 +26,7 @@ class BeltSpecification:
     family: str = 'v'
     profile: str = 'A'
     pitch_mm: float | None = None
-    count: int = 1  # Explicit user choice, never a capacity-based recommendation.
+    count: int = 1  # Explicit manual count or a source-specific sizing result.
 
 
 @dataclass(frozen=True, slots=True)

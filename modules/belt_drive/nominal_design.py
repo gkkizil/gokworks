@@ -30,6 +30,7 @@ class NominalSizingOptions:
     teeth_min: int=12
     teeth_max: int=160
     length_policy: str='preferred'  # preferred / required
+    pulley_source: str='nominal'  # nominal / tosyali_v_sk2018
 
     def __post_init__(self):
         positive(self.diameter_min_mm,'Nominal çap alt sınırı');positive(self.diameter_max_mm,'Nominal çap üst sınırı')
@@ -40,6 +41,8 @@ class NominalSizingOptions:
             raise ValueError('Diş aralığı ters veya 2000 adım sınırından büyük.')
         if self.length_policy not in ('preferred','required'):
             raise ValueError('Boy politikası preferred/required olmalı.')
+        if self.pulley_source not in ('nominal','tosyali_v_sk2018'):
+            raise ValueError('Bilinmeyen kasnak/kayış referans yöntemi.')
 
 
 @dataclass(frozen=True,slots=True)
@@ -130,6 +133,9 @@ def size_drive(request,options=None,*,stop=None,progress=None):
     if not isinstance(request,DesignRequest):raise ValueError('DesignRequest gerekli.')
     options=options or NominalSizingOptions()
     if not isinstance(options,NominalSizingOptions):raise ValueError('NominalSizingOptions gerekli.')
+    if options.pulley_source=='tosyali_v_sk2018':
+        from .tosyali_design import size_tosyali_drive
+        return size_tosyali_drive(request,options,stop=stop,progress=progress)
     if request.manufacturer is not None or request.series_id is not None:
         raise ValueError('Genel boyutlandırma üretici/seri filtrelemez; katalog yöntemini kullanın.')
     if any(getattr(request,k) is not None for k in ('outside_diameter_max_mm','system_width_max_mm','max_belts',
