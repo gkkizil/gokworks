@@ -44,6 +44,9 @@ class DesignRequest:
     include_unverified: bool = False
     result_limit: int = 200
     work_limit: int = 50000  # pair visits + length evaluations; computational, not physical.
+    minimum_wrap_deg: float | None = None
+    maximum_belt_speed_m_s: float | None = None
+    minimum_engaged_teeth: float | None = None
 
     def __post_init__(self):
         for name in ('power_kw', 'input_rpm', 'target_rpm'):
@@ -64,6 +67,13 @@ class DesignRequest:
                 positive(getattr(self, name), name)
         if self.daily_hours is not None and self.daily_hours > 24:
             raise ValueError('Günlük süre 24 saati aşamaz.')
+        for name in ('minimum_wrap_deg', 'maximum_belt_speed_m_s', 'minimum_engaged_teeth'):
+            if getattr(self, name) is not None:
+                positive(getattr(self, name), name)
+        if self.minimum_wrap_deg is not None and self.minimum_wrap_deg > 180:
+            raise ValueError('İki kasnakta küçük sarılma açısı en çok 180° olabilir.')
+        if self.minimum_engaged_teeth is not None and self.family != 'timing':
+            raise ValueError('Kavrama dişi sınırı yalnız triger-senkron kayış içindir.')
         for name in ('center_tolerance_mm', 'rpm_error_max_percent', 'available_installation_travel_mm', 'available_tensioning_travel_mm'):
             if getattr(self, name) is not None and finite(getattr(self, name), name) < 0:
                 raise ValueError(name + ': negatif olamaz.')

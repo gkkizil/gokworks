@@ -1,5 +1,10 @@
 # Kaynak araştırması — 4 Kasım 2026
 
+**12 Kasım 2026 güncellemesi:** Bu dosya 4–5 Kasım koşullarının tarihsel
+kaydıdır. Güncel standart baskıları, resmî Gates tasarım kılavuzu ve seçim
+motoru düzeltmeleri [mühendislik incelemesinde](ENGINEERING_REVIEW_20261112.md)
+belgelendi. Eski ağ erişimi ve doğrulama durumları bugünkü durum sayılmamalıdır.
+
 ## 5 Kasım eki: kullanıcının Tosyalı PDF'si
 
 Kullanıcı `a9f64a62-521a-4208-9747-49cd8338d91a.pdf` dosyasını sağladı.

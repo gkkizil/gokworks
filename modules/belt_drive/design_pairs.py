@@ -7,7 +7,8 @@ actual installation center or capacity is inferred from a pulley catalogue.
 from dataclasses import dataclass, field
 from math import isclose
 from .catalog.importers import fingerprint
-from .design_search import outside, _fits_product
+from .design_search import outside, _fits_product, compatibility_group
+from .engineering.kinematics import belt_speed_m_s
 from .models import Issue
 
 
@@ -55,7 +56,7 @@ def search_pulley_pairs(request, catalog, *, stop=None):
             continue
         if request.family=='timing' and outside(pulley.teeth,request.teeth_min,request.teeth_max):
             continue
-        key=(catalog.source(pulley.source_id).manufacturer.casefold(),pulley.series_id,pulley.profile,pulley.compatibility_id)
+        key=compatibility_group(catalog,pulley)
         groups.setdefault(key,[]).append(pulley)
     count=visited=0; complete=True; cancelled=False; results=[]
     for key in sorted(groups):
@@ -67,6 +68,8 @@ def search_pulley_pairs(request, catalog, *, stop=None):
                 if visited>=request.work_limit:
                     complete=False;break
                 visited+=1
+                if outside(belt_speed_m_s(driver.diameter_mm,request.input_rpm),None,request.maximum_belt_speed_m_s):
+                    continue
                 ratio=driven.teeth/driver.teeth if request.family=='timing' else driven.diameter_mm/driver.diameter_mm
                 rpm=request.input_rpm/ratio
                 error=100*abs(rpm-request.target_rpm)/request.target_rpm
