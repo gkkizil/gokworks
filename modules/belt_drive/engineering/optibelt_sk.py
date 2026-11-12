@@ -77,8 +77,12 @@ def rate(profile, result):
     addition = 0. if ratio < 1.01 else linear(
         [(rows[i]['rpm'], rows[i]['additional_kw'][band]) for i in sorted({nl, nh})], rpm)
     wrap = linear(data['wrap_factors'], abs(d2-d1)/result.center_mm)
-    length = linear(table['length_factors'], result.length_exact_mm)
-    flex = 2000*result.speed_m_s/result.length_exact_mm
+    # A length-mode solve retains the exact catalogue Ld. Its reconstructed
+    # tangent-path length differs by numerical solver tolerance; using that
+    # residual here would reject the genuine first/last table entries.
+    datum_length = result.selected_length_mm if result.selected_length_mm is not None else result.length_exact_mm
+    length = linear(table['length_factors'], datum_length)
+    flex = 2000*result.speed_m_s/datum_length
     if result.speed_m_s > 42. or flex > 100.:
         raise ValueError('Optibelt SK hız veya bükülme frekansı sınırı aşıldı (42 m/s, 100 s⁻¹).')
     per_belt = positive((base+addition)*wrap*length, 'Düzeltilmiş kayış gücü')

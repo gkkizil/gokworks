@@ -52,6 +52,18 @@ def test_transcribed_reference_table_points(profile,d,base,add,length):
     assert p.length_factor==pytest.approx(1.)
 
 
+@pytest.mark.parametrize('profile,d,length,factor',[
+    ('SPZ',63,630,.83),('SPA',90,800,.81),('SPB',140,1250,.83),('SPC',224,2000,.85),
+    ('SPZ',63,4500,1.19),('SPA',90,6000,1.15),('SPB',140,10000,1.17),('SPC',224,15000,1.15)])
+def test_exact_selected_length_table_endpoints_survive_geometry_solver_roundoff(profile,d,length,factor):
+    r=result(profile,d,2*d,1450,1,1.2,length)
+    assert r.selected_length_mm==length
+    assert rate(profile,r).length_factor==factor
+    # Genuine values outside the table still fail; this is no extrapolation.
+    beyond=length-.01 if factor<1 else length+.01
+    with pytest.raises(ValueError):rate(profile,result(profile,d,2*d,1450,1,1.2,beyond))
+
+
 def test_faster_driven_pulley_uses_its_own_rpm_not_input_rpm():
     normal=rate('SPB',result())
     reverse=rate('SPB',result(d1=500,d2=280,rpm=1485*280/500))
