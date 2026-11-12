@@ -85,7 +85,12 @@ düğümlerini kullanır: C≈1383.012614 mm, Ptemel=20.636 kW,
 Farklı kesitler, hızlı sürülen kasnak, boş tablo hücreleri, 7→8 kanal,
 sınırlar, iptal, proje ve arayüz akışı regresyon testleriyle kapsanır.
 
-Yerel doğrulama: kayış modülünün 304 testi geçti (277 mevcut + 27 yeni).
+Boy katsayısında seçilen katalog Ld'si kullanılır. Geometrik çözümün çok küçük
+boy kalıntısı, tablonun ilk/son geçerli boyunu kapsam dışına itemez;
+gerçek kapsam dışı boylar yine reddedilir. Sekiz uç nokta regresyonla kapsanır.
+
+Yerel doğrulama: kayış modülünün 312 testi geçti (277 mevcut + 35 yeni;
+sekizi boy tablosunun uç noktalarını kontrol eder).
 Paket verisi/yapı ve arayüz kontrolleri ayrıca çalıştırıldı. Ruff F ve
 `git diff --check` temiz. Windows entegrasyonu PR üzerindeki sabit head/main
 doğrulamasıyla takip edilir; yerel Qt kontrolü canlı SolidWorks testi değildir.
