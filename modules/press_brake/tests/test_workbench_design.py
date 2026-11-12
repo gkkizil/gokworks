@@ -217,7 +217,8 @@ def test_checked_motion_exports_as_an_mp4_video(window, qtbot, tmp_path):
     assert not list(tmp_path.glob('.*kayit.mp4')) and p.video_button.isEnabled()
 
 
-def test_video_frames_carry_the_step_read_out_and_scope():
+def test_video_frames_carry_the_step_read_out_and_scope(qapp):
+    # QPainter text needs an application even in a fresh, standalone batch.
     import threading
     from modules.press_brake.demo import load_demo
     from modules.press_brake.service import run
