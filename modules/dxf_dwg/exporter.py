@@ -84,7 +84,7 @@ def save_modified_documents(app, *, extra=()):
 
     Parts can dirty their parent assemblies when saved. Re-read the flags
     until all documents are clean; preflight all dirty files before writing.
-    Preview code never calls this function.
+    Preview calls it only with its explicit native-autosave policy enabled.
     """
     saved, notes = [], []
     try:
@@ -138,6 +138,11 @@ def save_modified_documents(app, *, extra=()):
         raise
     except Exception as error:
         raise SaveDocumentsError(f'SolidWorks otomatik kayıt API hatası: {error}') from error
+    finally:
+        # Failed saves can retain traceback frames beyond the owning STA.
+        # Keep paths/messages, never document pointers, in those frames.
+        app = model = documents = dirty = None
+        extra = ()
 
 
 def _part_api(model):
@@ -651,7 +656,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             if output_identity is not None:
                 output_identity['native_save_error'] = '; '.join(notes)
             notes.append('Kayıt başarısız olduğu için açık belgeler kapatılmadı; aktarım durduruldu.')
-        if visibility_changed and not opened_here and model is not None:
+        if visibility_changed and not opened_here and model is not None and not save_failed:
             try:
                 model.Visible = False
                 if _value(model, 'Visible'):
