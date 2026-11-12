@@ -46,6 +46,25 @@ Yeni tip sac için Flat-Pattern bastırma/geri alma yolu seçildi;
 Canlı COM yerine yayımlanmış çağrı biçimlerini uygulayan kontrollü doubles ile
 birim, kimlik, aktif konfigürasyon ve geri alma testleri yapılır; bu canlı SW testi değildir.
 
+12 Kasım · açınım kenarı okuma: düz kenarlar `ICurve.IsLine` ve
+`ICurveParamData.StartPoint/EndPoint` ile doğrudan okunur; tessellation boşluğu
+ve kısa parça filtresi bunları elemez. Dairesel kenarlarda `ICurve.CircleParams`
+metre cinsinden merkez/eksen/R verir. Gerçek `UMinValue/UMaxValue` aralığı ve
+`Sense` kullanılır; ters yönde aralık değiştirilip işaretleri çevrilir. Başlangıç
+ve teğet ile çeyrek aralıktaki `ICurve.Evaluate2` noktası yönü doğrular. Noktalar
+mevcut 0,02 mm kiriş toleransıyla hesaplanır; tam daire, büyük yay ve parametre
+dikişinden geçen yay ayrı korunur. Nokta sayısından bağımsız iki eğri değerlendirme
+çağrısı yapılır. Diğer eğriler gerçek `GetTessPts` sonucunu kullanır; boşsa kısa
+parça filtresi sıfırlanarak bir kez denenir. Eksik eğri düz kirişle değiştirilmez.
+Uçlar, sonlu koordinatlar, sabit yüz düzlemi ve nokta sınırı doğrulanır. Kontrollü
+aktif-parça testleri deliklerin ve başarı/hata/iptalde kaynak durumunun korunmasını
+kapsar; kullanıcının SLDPRT dosyasında canlı SolidWorks doğrulaması yapılmamıştır.
+
+- [GetTessPts · toleranslar ve dizi biçimi](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.interop.sldworks~SolidWorks.interop.sldworks.ICurve~GetTessPts.html)
+- [CircleParams · merkez/eksen/yarıçap ve metre birimi](https://help.solidworks.com/2021/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICurve~CircleParams.html)
+- [UMinValue · ters yön ve tam periyot](https://help.solidworks.com/2012/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICurveParamData~UMinValue.html)
+- [Evaluate2 · nokta ve türevler](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.icurve~evaluate2.html)
+
 Video erişimi için `cloud-desktop` becerisi de incelendi. Çalışan ortam
 `ccarenv_b64_Y2NhcmVudl9kNDFkYmNmZDZmYWM4MTkxOWQ3ZDg2MDlkZTMyYTUwNQ`;
 desktop yeteneği enabled/unknown olarak raporlandı, ancak `cua_repl.js` /
