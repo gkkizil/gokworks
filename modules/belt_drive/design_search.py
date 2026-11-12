@@ -7,7 +7,7 @@ opt-in group. Search coverage and returned-result limits are independent.
 from bisect import insort
 from collections import Counter, defaultdict
 import json
-from math import isclose
+from math import isclose, cos, radians, inf
 
 from ._numbers import positive
 from .calculation import calculate
@@ -40,6 +40,43 @@ def _fits_product(request, catalog, product):
         (request.profile is None or product.profile == request.profile) and \
         (request.series_id is None or product.series_id == request.series_id) and \
         (request.manufacturer is None or catalog.source(product.source_id).manufacturer.casefold() == request.manufacturer.casefold())
+
+
+def compatibility_group(catalog, product):
+    """Explicit compatibility is separate from a commercial belt/pulley series.
+
+    A common pitch alone never establishes compatibility. Cross-manufacturer
+    combinations remain outside this search's declared compatibility contract.
+    """
+    return (catalog.source(product.source_id).manufacturer.casefold(),
+            product.profile, product.compatibility_id)
+
+
+def operating_limit_failure(request, result):
+    if outside(result.speed_m_s, None, request.maximum_belt_speed_m_s):
+        return 'BELT_SPEED_LIMIT'
+    if outside(min(result.driver_wrap_deg, result.driven_wrap_deg), request.minimum_wrap_deg, None):
+        return 'MINIMUM_WRAP'
+    if request.minimum_engaged_teeth is not None and outside(
+            min(result.engaged_driver_teeth_estimate, result.engaged_driven_teeth_estimate),
+            request.minimum_engaged_teeth, None):
+        return 'MINIMUM_ENGAGED_TEETH'
+    return None
+
+
+def minimum_center_for_limits(request, d1, d2, z1=None, z2=None):
+    """Invert the small-pulley wrap constraint, without an assumed default.
+
+    beta = pi - 2 asin(|D2-D1|/(2C)); engaged teeth = z*beta/(2pi).
+    """
+    wrap = request.minimum_wrap_deg or 0.
+    if request.minimum_engaged_teeth is not None:
+        wrap = max(wrap, 360.*request.minimum_engaged_teeth/min(z1,z2))
+    if wrap > 180 or wrap == 180 and d1 != d2:
+        return inf
+    if d1 == d2:
+        return 0.
+    return abs(d2-d1)/2/cos(radians(wrap/2))
 
 
 def candidate_specification(request, driver, driven, belt, count):
@@ -94,8 +131,7 @@ def search_drives(request, catalog, *, stop=None, progress=None):
         if not _fits_product(request, catalog, product):
             excluded += 1
             continue
-        manufacturer = catalog.source(product.source_id).manufacturer
-        key = manufacturer.casefold(), product.series_id, product.profile, product.compatibility_id
+        key = compatibility_group(catalog, product)
         groups[key][0 if hasattr(product, 'length_mm') else 1].append(product)
     provider = TabulatedRatingProvider()
     tables = {(item.series_id, item.profile): item for item in catalog.ratings}
@@ -146,7 +182,6 @@ def search_drives(request, catalog, *, stop=None, progress=None):
                         if request.center_target_mm is not None and request.center_target_mm > physical_min else None
                 except (ValueError, OverflowError, ZeroDivisionError) as caught:
                     reject(driver, driven, None, 'PAIR_GEOMETRY', str(caught)); continue
-                table = tables.get((group[1], group[2]))
                 count = 1 if request.family == 'timing' else driver.grooves if driver.grooves == driven.grooves else None
                 if request.family == 'v' and driver.grooves is not None and driven.grooves is not None and driver.grooves != driven.grooves:
                     reject(driver, driven, None, 'GROOVE_COMPATIBILITY'); continue
@@ -156,6 +191,8 @@ def search_drives(request, catalog, *, stop=None, progress=None):
                     if stopped():
                         break
                     work += 1; evaluated += 1
+                    # Ratings belong to the BELT series, never the pulley series.
+                    table = tables.get((belt.series_id, belt.profile))
                     if progress is not None and work % 100 == 0:
                         progress(pairs, evaluated)
                     if outside(belt.length_mm, min_length, max_length):
@@ -183,6 +220,9 @@ def search_drives(request, catalog, *, stop=None, progress=None):
                                 reject(driver,driven,belt,'SYSTEM_WIDTH');continue
                         result = calculate(candidate_specification(request, driver, driven, belt, count), stop=stop)
                         solved += 1
+                        failed_limit = operating_limit_failure(request, result)
+                        if failed_limit:
+                            reject(driver, driven, belt, failed_limit); continue
                         if outside(result.center_mm, lower, upper):
                             reject(driver, driven, belt, 'CENTER_BOUNDS'); continue
                         outer = (driver.outside_diameter_mm, driven.outside_diameter_mm)
@@ -210,7 +250,7 @@ def search_drives(request, catalog, *, stop=None, progress=None):
                             source_ids.add(capacity.source_id)
                         sources = tuple(catalog.source(x) for x in sorted(source_ids))
                         statuses = tuple(x.effective_status for x in sources)
-                        checks = [Issue('CATALOG_COMPATIBILITY', 'Ürünler aynı üretici/seri/profil/uyumluluk kimliğinde beyan edildi; ürün uygunluğu bağımsız doğrulanmadı.', severity='NOT_EVALUATED'),
+                        checks = [Issue('CATALOG_COMPATIBILITY', 'Ürünler aynı üretici, profil ve açık uyumluluk kimliğinde beyan edildi; ticari seri adı ürün uygunluğu onayı değildir.', severity='NOT_EVALUATED'),
                                   Issue('TENSION', 'Germe prosedürü, gerçek mil/yatak yükleri ve tasarım ömrü doğrulanmadı.', severity='NOT_EVALUATED')]
                         for missing, code, message in (
                             (width is None, 'SYSTEM_WIDTH', 'Toplam eksenel genişlik bilinmiyor.'),
@@ -226,11 +266,20 @@ def search_drives(request, catalog, *, stop=None, progress=None):
                         if request.family == 'v':
                             checks.append(Issue('SLIP', 'Çıkış devri idealdir; V kayışında kayma/sürünme bilinmiyor.', severity='NOT_EVALUATED'))
                         checks.extend(capacity.checks)
+                        legacy_group = (group[0], belt.series_id, belt.profile, belt.compatibility_id)
+                        identity = (legacy_group, driver.code, driven.code, belt.code)
+                        identifiers = (group[0], belt.series_id, driver.code, driven.code, belt.code)
+                        if driver.series_id != belt.series_id or driven.series_id != belt.series_id:
+                            identity += (driver.series_id, driven.series_id)
+                            identifiers += (driver.series_id, driven.series_id)
                         key = ranking_key(request, error=error, center_deviation=offset, area=area, count=count, width=width,
                             margin=capacity.capacity_margin, source_statuses=statuses,
-                            identifiers=(group[0], group[1], driver.code, driven.code, belt.code))
+                            identifiers=identifiers)
+                        # An evaluated sufficient capacity takes precedence over
+                        # an unknown capacity; neither is manufacturer approval.
+                        key = (0 if capacity.meets_declared_demand is True else 1, *key)
                         power_verified = capacity.manufacturer_verified and all(x.officially_verified for x in sources)
-                        candidate = DesignCandidate(json.dumps((group, driver.code, driven.code, belt.code), ensure_ascii=False),
+                        candidate = DesignCandidate(json.dumps(identity, ensure_ascii=False),
                             catalog.source(belt.source_id).manufacturer, belt.series_id, driver, driven, belt, result,
                             deviation, error, target_length, offset, count, width, area, capacity, statuses, tuple(checks),
                             'CAPACITY_VERIFIED' if power_verified else 'UNVERIFIED', key,

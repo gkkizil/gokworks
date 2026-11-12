@@ -49,6 +49,10 @@ REJECTION_TITLES = {
     'OUTER_BODY_CLEARANCE': 'Kasnak dış gövdeleri çakışıyor', 'DECLARED_MINIMUM_PULLEY': 'Beyan edilen minimum kasnak altında',
     'DECLARED_SPEED_LIMIT': 'Beyan edilen hız sınırı aşıldı', 'DECLARED_INSUFFICIENT_CAPACITY': 'Beyan edilen kapasite yetersiz',
     'ADJUSTMENT_TRAVEL': 'Ayar mesafesi yetersiz', 'CALCULATION': 'Hesap hatası',
+    'BELT_SPEED_LIMIT':'Kayış hızı kullanıcı sınırını aşıyor',
+    'MINIMUM_WRAP':'Sarılma açısı kullanıcı sınırının altında',
+    'MINIMUM_ENGAGED_TEETH':'Kavrama dişi kullanıcı sınırının altında',
+    'OPERATING_CENTER_BOUNDS':'Sarılma/kavrama için gereken C izin verilen aralık dışında',
 }
 
 

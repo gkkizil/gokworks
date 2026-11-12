@@ -15,7 +15,7 @@ from ._numbers import positive, integer, finite
 from .calculation import calculate
 from .catalog.profiles import get_profile
 from .design_models import DesignRequest
-from .design_search import outside
+from .design_search import outside, operating_limit_failure, minimum_center_for_limits
 from .models import (BeltDriveSpecification,BeltSpecification,PulleySpecification,
                      CenterSpecification,LoadSpecification,Issue,BeltDriveResult)
 from .preferred_sizes import preferred_sizes,REFERENCE_MIN_DATUM_MM
@@ -117,6 +117,7 @@ def _chosen_spec(spec,request,options,low,high,target,stop):
             if outside(c,low,high):continue
             center=CenterSpecification('length',None,None if timing else length,count)
             selected=calculate(BeltDriveSpecification(spec.belt,spec.driver,spec.driven,spec.load,center),stop=stop)
+            if operating_limit_failure(request,selected):continue
             choices.append((abs(c-target),length,selected))
         except ValueError:
             continue
@@ -164,13 +165,22 @@ def size_drive(request,options=None,*,stop=None,progress=None):
                 error=finite(100*abs(request.input_rpm/ratio-request.target_rpm)/request.target_rpm,'Devir sapması')
                 if outside(error,None,request.rpm_error_max_percent):counts['RPM_TOLERANCE']+=1;continue
                 low,high,target=_bounds_and_target(request,d1,d2)
-                if target<=d1/2+d2/2:counts['CENTER_GEOMETRY']+=1;continue
+                physical=d1/2+d2/2
+                limit_center=minimum_center_for_limits(request,d1,d2,z1,z2)
+                if not math.isfinite(limit_center):
+                    counts['MINIMUM_ENGAGED_TEETH' if request.minimum_engaged_teeth is not None else 'MINIMUM_WRAP']+=1;continue
+                feasible=max(low or 0.,math.nextafter(physical,math.inf),limit_center)
+                if high is not None and feasible>high:
+                    counts['CENTER_GEOMETRY' if high<=physical else 'OPERATING_CENTER_BOUNDS']+=1;continue
+                trial=max(target,feasible)
                 spec=BeltDriveSpecification(BeltSpecification(request.family,profile.key),
                     PulleySpecification(None,z1) if z1 is not None else PulleySpecification(d1),
                     PulleySpecification(None,z2) if z2 is not None else PulleySpecification(d2),
                     LoadSpecification(request.input_rpm,request.power_kw,service_factor=request.service_factor),
-                    CenterSpecification(distance_mm=target))
-                result,kind,required=_chosen_spec(spec,request,options,low,high,target,stop)
+                    CenterSpecification(distance_mm=trial))
+                result,kind,required=_chosen_spec(spec,request,options,feasible,high,target,stop)
+                failed_limit=operating_limit_failure(request,result)
+                if failed_limit:counts[failed_limit]+=1;continue
                 area=positive((result.center_mm+d1/2+d2/2)*max(d1,d2),'Referans alanı')
                 offset=result.center_mm-target
                 if request.priority=='balanced':
@@ -183,7 +193,13 @@ def size_drive(request,options=None,*,stop=None,progress=None):
                 checks=(Issue('NOMINAL_DIMENSIONS','Kasnak ve kayış değerleri nominal tasarım ölçüleridir; ürün kodu/standart stok uygunluğu onaylanmaz.',severity='INFO'),
                     Issue('SECTION_AND_COUNT','Profil seçimi güç tablosundan yapılmadı; gerekli kayış adedi/genişliği üretici verisiyle boyutlandırılmalı.',severity='NOT_EVALUATED'),
                     Issue('CAPACITY','Güç/ömür/germe ve gerçek dış gövde zarfı doğrulanmadı.',severity='NOT_EVALUATED'))
-                key=(score,error,area,abs(offset),identity)
+                if trial!=target:
+                    checks+=(Issue('TARGET_CENTER_ADJUSTED',f'Hedef C={target:g} mm uygulanamıyor; izin verilen aralıktaki ilk geometrik çözüm C={trial:g} mm üzerinden boy seçildi.',severity='WARNING'),)
+                if kind=='required' and request.family=='timing':
+                    checks+=(Issue('TIMING_LENGTH_UNSELECTED','Bu sonuç teorik bölüm boyudur; kullanılacak kapalı kayış için tam diş sayısı ve buna uygun C seçilmelidir.',severity='WARNING'),)
+                # In preferred mode retain theoretical fallbacks, but never let
+                # them hide a candidate with a selected discrete belt length.
+                key=(int(options.length_policy=='preferred' and kind=='required'),score,error,area,abs(offset),identity)
                 candidate=NominalCandidate(identity,result,error,offset,required,kind,area,checks,key)
             except CalculationCancelled:cancelled=True;break
             except (ValueError,OverflowError,ZeroDivisionError):counts['CALCULATION']+=1;continue
