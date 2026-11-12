@@ -149,6 +149,8 @@ def main():
             '--add-data', f'{ROOT / "modules/dfm_analyzer/profiles/laser_generic.json"};modules/dfm_analyzer/profiles',
             '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/tosyali-user-pdf.json"};modules/belt_drive/catalog/data',
             '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/tosyali-import-audit.json"};modules/belt_drive/catalog/data',
+            '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/tosyali-v-reference.json"};modules/belt_drive/catalog/data',
+            '--add-data', f'{ROOT / "modules/belt_drive/catalog/data/optibelt-sk-reference-2018.json"};modules/belt_drive/catalog/data',
             '--add-data', f'{ROOT / "modules/belt_drive/examples/automatic-synthetic-catalog.json"};modules/belt_drive/examples',
             '--add-data', f'{ROOT / "examples/ornek_pres_unitesi.gwhyd"};examples',
             '--add-data', f'{ROOT / "modules/naming/interop/PackAndGoHost.cs"};modules/naming/interop',

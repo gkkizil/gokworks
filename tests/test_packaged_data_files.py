@@ -11,6 +11,8 @@ REQUIRED = (
     'modules/dfm_analyzer/profiles/laser_generic.json',
     'modules/belt_drive/catalog/data/tosyali-user-pdf.json',
     'modules/belt_drive/catalog/data/tosyali-import-audit.json',
+    'modules/belt_drive/catalog/data/tosyali-v-reference.json',
+    'modules/belt_drive/catalog/data/optibelt-sk-reference-2018.json',
     'modules/belt_drive/examples/automatic-synthetic-catalog.json',
     'docs/unfolding/source_inventory.json',
     'docs/unfolding/examples/source_models.json',
