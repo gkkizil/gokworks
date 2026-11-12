@@ -107,3 +107,9 @@ Modül ile kompakt pencere/metin kontrolleri ayrıca 33 sınırlı süreçte
 **294/294**, son eklenen hassasiyet kontrolleriyle seçim ve arayüz grubu
 **62/62** geçti. Bu kümeler örtüşür; sayıları toplanmaz. Yerel hata/atlama/
 tekrar yoktur. Son Windows doğrulaması PR'da tutulur.
+
+İlk tam Windows koşusunda kayıştan ayrı bir video testi taze süreçte Qt
+uygulaması olmadan yazı çizerken yerel Qt çöküşü üretti. Aynı hata tek
+testle Linux'ta da tekrarlandı. Teste açık `qapp` bağımlılığı eklendi;
+abkant üretim kodu, test kapsamı ve kapı kuralları değiştirilmedi. Bu ilk
+koşu başarılı sayılmadı; son commit yeniden doğrulanır.
