@@ -62,8 +62,30 @@ def remove_contacts(shape, body_a, body_b, contacts):
     return shape
 
 
-def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None):
-    """Return all colliding pairs plus proximity needing denser angle sampling."""
+def separation(a, b):
+    """Lower bound of the distance between two bodies (mm); 0 when it cannot rule out contact.
+
+    Axis-aligned boxes first, then the bodies' convex containers projected on
+    their own face normals (separating axes). A positive value is a proof of
+    clearance by at least that much; zero only means a solid check is needed.
+    """
+    distance = box_distance(a.bounds, b.bounds)
+    hull_a, hull_b = getattr(a, 'hull', None), getattr(b, 'hull', None)
+    if hull_a is None or hull_b is None:
+        return distance
+    import numpy as np
+    axes = np.concatenate((hull_a[1], hull_b[1]))
+    pa, pb = hull_a[0]@axes.T, hull_b[0]@axes.T
+    gap = np.maximum(pb.min(axis=0)-pa.max(axis=0), pa.min(axis=0)-pb.max(axis=0)).max()
+    return max(distance, float(gap))
+
+
+def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None, still=None):
+    """Return all colliding pairs plus proximity needing denser sampling.
+
+    ``still(a, b)``: the pair has no relative motion in the sampled phase; it is
+    still tested for overlap in every pose but cannot ask for denser samples.
+    """
     hits, near = [], False
     for a, b in combinations(bodies, 2):
         # Bodies are stationary relative to each other within one tool assembly.
@@ -79,17 +101,18 @@ def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None):
             parts = holder.id.split(':')            # 'holder:<tool kind>:<n>'
             if len(parts) > 1 and other.kind == parts[1]:
                 continue
-        distance = box_distance(a.bounds, b.bounds)
+        distance = separation(a, b)
         if distance > near_margin:
             continue
+        fixed = still is not None and still(a, b)
         if distance > 1e-7:
-            near = True
+            near |= not fixed
             continue
         # Intersection volume cannot exceed the boxes' common volume. This
         # also eliminates exact tangent/edge contact without an OCCT boolean.
         box_volume = prod(max(0., min(a.bounds[i+3], b.bounds[i+3])-max(a.bounds[i], b.bounds[i])) for i in range(3))
         if box_volume <= .001:
-            near |= bool(near_margin)
+            near |= bool(near_margin) and not fixed
             continue
         key = (a.id, a.kind, a.shape, b.id, b.kind, b.shape, tuple(contacts))
         if sheet_hits is not None and a.kind == b.kind == 'sheet':
@@ -111,8 +134,8 @@ def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None):
         if hit is not None:
             hits.append(hit)
             continue
-        if near_margin:
-            # Conservative AABB proximity refines even a near miss through a
+        if near_margin and not fixed:
+            # Containers that cannot be separated refine even a near miss through a
             # hole. Every actual overlap above still uses solid intersection.
             # No distance-based continuous-clearance certificate is claimed.
             near = True

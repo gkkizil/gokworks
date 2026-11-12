@@ -228,3 +228,23 @@ def test_video_frames_carry_the_step_read_out_and_scope():
     image = render_frame(plan, result, frame, Camera().state(), threading.Event())
     assert (image.width(), image.height()) == (WIDTH, HEIGHT)
     assert caption(plan, frame).startswith('Adım 1/1 · ') and '°' in caption(plan, frame)
+
+
+@pytest.mark.timeout(240)
+def test_clicking_the_selected_card_after_flat_view_returns_to_the_step(window, qtbot):
+    from PySide6.QtTest import QTest
+    p = window.pages['press_brake']; p.load_demo('L120'); finish(window, qtbot)
+    def click_card():
+        rect = p.bends.visualItemRect(p.bends.item(0))
+        QTest.mouseClick(p.bends.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(rect.center().x(), rect.top()+12))
+    p.flat_button.click(); finish(window, qtbot)
+    assert p.viewer.frame is None and p.view_mode == 'flat'
+    click_card(); finish(window, qtbot)                                  # before a check: the step preview comes back
+    assert p.view_mode == 'step' and p.viewer.frame is not None
+    p.calculate(); finish(window, qtbot, 200000)
+    p.formed_button.click(); finish(window, qtbot)
+    assert p.viewer.frame is None
+    click_card(); finish(window, qtbot)                                  # after a check: the checked frames come back
+    assert p.viewer.frame is not None and p.viewer.frame.step == 0
+    p.flat_button.click(); p.slider.setValue(3)                          # the slider leaves the flat view too
+    assert p.view_mode == 'step' and p.viewer.frame is p.result.frames[3]

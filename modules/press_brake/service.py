@@ -87,6 +87,11 @@ def step_scope(plan, step):
     return notes
 
 
+def upper(body):
+    """The assembly that travels in approach/retract: the punch and its holder."""
+    return body.kind == 'punch' or body.id.startswith('holder:punch')
+
+
 def plan_notes(plan, step):
     """Informational notes on what the step was checked with (they do not make it uncheckable)."""
     from .standard import NOTE, is_generic
@@ -111,9 +116,9 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
         raise ValueError('Geçersiz hareket örnekleme aralığı.')
     plan.validate(); checkpoint(stop)
     geometry = Geometry(plan)
-    flat = mesh(geometry.part_bodies({}), stop)
+    flat = mesh(geometry.part_bodies({}), stop, geometry.mesh_cache)
     final_angles = step_angles(plan, len(plan.steps)-1, 1)
-    formed = mesh(geometry.part_bodies(final_angles), stop)
+    formed = mesh(geometry.part_bodies(final_angles), stop, geometry.mesh_cache)
     frames, results = [], []
     sheet_cache = {}
     for index, step in enumerate(plan.steps):
@@ -142,7 +147,12 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
             self_hits = {h.pair: Hit(h.pair, tuple((station@np.r_[h.location, 1.])[:3]), h.volume) for h in self_hits}
             # Retain the original station AABBs for adaptive subdivision; the
             # sampling resolution is independent of the faster narrow phase.
-            hits, near = check(bodies, contacts, near_margin=3., cache=collision_cache, sheet_hits=self_hits)
+            # Approach and retract only translate the upper assembly. Pairs on the same side of that
+            # motion keep their distance, so they are still checked for overlap in every pose but do
+            # not ask for denser travel samples.
+            travelling = phase != 'bend'
+            hits, near = check(bodies, contacts, near_margin=3., cache=collision_cache, sheet_hits=self_hits,
+                               still=(lambda a, b: upper(a) == upper(b)) if travelling else None)
             samples += 1
             for a in bodies:
                 for b in bodies:
@@ -151,7 +161,7 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
             checked_pairs.add('sac–sac')
             angle = degrees(angles.get(bend.id, 0))
             # Axis in the station is X, centre at origin by construction.
-            frame = Frame(index, phase, angle, scene_mesh(bodies, stop),
+            frame = Frame(index, phase, angle, scene_mesh(bodies, stop, geometry.mesh_cache),
                           ((-bend.length/2, 0, 0), (bend.length/2, 0, 0)), hits,
                           tuple((b.id, b.bounds) for b in bodies if b.kind != 'sheet'))
             phase_cache[key] = (frame, near)

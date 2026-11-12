@@ -61,7 +61,7 @@ def default_segments(tool, bend):
     return station(bend.length) if is_generic(tool) else tool.segments
 
 
-def rounded(polygon, radius, quad_segs=24):
+def rounded(polygon, radius, quad_segs=8):   # chord error < 0.02 mm at R4; far fewer faces to intersect
     """Round convex corners (tips, shoulders) by ``radius``; concave corners stay sharp."""
     if radius <= 0:
         return polygon

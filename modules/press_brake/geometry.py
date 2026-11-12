@@ -5,7 +5,6 @@ import numpy as np
 from .kinematics import arc_parameters, basis, poses, station_transform
 from .models import Region
 from modules.gear_calculator.cad import compound, triangulate
-from modules.dxf_dwg.preview.geometry import make_mesh
 
 
 @dataclass
@@ -14,6 +13,9 @@ class Body:
     kind: str
     shape: object
     bounds: tuple
+    base: object = None     # unplaced source solid (shared between poses) and its rigid placement;
+    matrix: object = None   # lets the display mesh be built once per solid, not once per pose
+    hull: object = None     # (points, unit axes) of a convex volume containing the solid, station mm
 
 
 def bounds(shape):
@@ -35,6 +37,22 @@ def transform(shape, matrix):
     # Rigid placement can share the original B-Rep and its triangulation.
     # OCCT copies automatically if a transform cannot be represented by location.
     return BRepBuilderAPI_Transform(shape, tr, False).Shape()
+
+
+def joined(segments):
+    """Abutting segments of one tool as single solids (same section end to end: the same volume).
+
+    Fewer, simpler solids for the check and the scene; segments with a gap stay
+    separate. A joined run keeps the number of its first segment in body ids.
+    """
+    from .models import Segment
+    result = []
+    for segment in sorted(segments, key=lambda s: s.start):
+        if result and segment.length > 0 and result[-1].length > 0 and abs(result[-1].start+result[-1].length-segment.start) <= 1e-6:
+            result[-1] = Segment(result[-1].start, result[-1].length+segment.length)
+        else:
+            result.append(segment)
+    return result
 
 
 def translation(x=0, y=0, z=0):
@@ -169,14 +187,45 @@ class Geometry:
         self.tools = {}
         self.bend_cache = {}
         self.placed_cache = {}
+        self.mesh_cache = {}    # display triangles per source solid; see mesh()
+        self.hulls = {}         # convex container per source solid; see local_hull()
 
     def placed_body(self, id, kind, shape, matrix):
         key = (id, kind, shape, tuple(np.asarray(matrix).ravel()))
         if key not in self.placed_cache:
             if len(self.placed_cache) >= 1024:
                 self.placed_cache.clear()
-            self.placed_cache[key] = body(id, kind, transform(shape, matrix))
+            placed = body(id, kind, transform(shape, matrix))
+            placed.base, placed.matrix = shape, np.array(matrix, dtype=float)
+            points, axes = self.local_hull(shape); rotation = placed.matrix[:3, :3]
+            placed.hull = (points@rotation.T+placed.matrix[:3, 3], axes@rotation.T)
+            self.placed_cache[key] = placed
         return self.placed_cache[key]
+
+    def local_hull(self, shape, section=None, span=None):
+        """Convex container of a source solid in its own coordinates: (corner points, face normals).
+
+        Extruded tools register the convex hull of their section; every other solid
+        uses its bounding box (tight for a flat flange). Two solids whose containers
+        are apart along any of these normals cannot touch, whatever their detail.
+        """
+        entry = self.hulls.get(id(shape))
+        if entry is not None and entry[0] is shape:
+            return entry[1], entry[2]
+        if section is not None:
+            ring = np.asarray(section.convex_hull.exterior.coords)[:-1]
+            points = np.array([(x, y, z) for x in span for y, z in ring])
+            edges = np.roll(ring, -1, axis=0)-ring
+            normals = np.c_[np.zeros(len(edges)), edges[:, 1], -edges[:, 0]]
+            normals = normals[np.linalg.norm(normals, axis=1) > 1e-9]
+            axes = np.r_[[[1., 0, 0]], normals/np.linalg.norm(normals, axis=1)[:, None]]
+        else:
+            x0, y0, z0, x1, y1, z1 = bounds(shape)
+            points = np.array([(x, y, z) for x in (x0, x1) for y in (y0, y1) for z in (z0, z1)]); axes = np.eye(3)
+        if len(self.hulls) >= 1024:
+            self.hulls.clear()
+        self.hulls[id(shape)] = (shape, points, axes)
+        return points, axes
 
     def part_bodies(self, angles, station=None):
         p = self.plan.part
@@ -259,6 +308,8 @@ class Geometry:
         from modules.gear_calculator.cad import shape_stats
         shape_stats(shape)
         self.tools[key] = shape
+        outline = region.polygon() if tool.section_dxf else tool.section.polygon()
+        self.local_hull(shape, outline, (segment.start, segment.start+segment.length))
         return shape
 
     def scene(self, index, angles, phase='bend', travel=0):
@@ -294,7 +345,7 @@ class Geometry:
             if tool.section is None:
                 continue
             from .standard import default_segments, is_generic
-            for j, segment in enumerate(chosen_segments if chosen_segments is not None else default_segments(tool, bend)):
+            for j, segment in enumerate(joined(chosen_segments if chosen_segments is not None else default_segments(tool, bend))):
                 if segment.length <= 0:
                     raise ValueError(f'{tool.code}: segment boyu pozitif olmalı.')
                 result.append(self.placed_body(f'{tool.kind}:{tool.code}:{j+1}', tool.kind, self.tool_shape(tool, segment), tr))
@@ -303,7 +354,7 @@ class Geometry:
                 holder = replace(tool, id=tool.id+':holder', section=tool.holder_section, section_dxf=tool.holder_dxf, contour_index=0)
                 # A generic clamp follows the station it holds; supplier holders keep their own layout.
                 holder_segments = (chosen_segments if chosen_segments is not None else default_segments(tool, bend)) if is_generic(tool) else tool.holder_segments
-                for j, holder_segment in enumerate(holder_segments):
+                for j, holder_segment in enumerate(joined(holder_segments)):
                     result.append(self.placed_body(f'holder:{tool.kind}:{j+1}', 'holder', self.tool_shape(holder, holder_segment), tr))
         adjacent = (bend.id, bend.parent, bend.child)
         contacts = [('punch', 0., t/2, .3, adjacent)] if phase == 'bend' or travel <= .2 else []
@@ -348,29 +399,82 @@ def machine_bodies(bodies):
     return result
 
 
-def scene_mesh(bodies, stop=None):
+def scene_mesh(bodies, stop=None, cache=None):
     """Scene for one pose: the checked bodies plus the display-only machine."""
-    return mesh(list(bodies)+machine_bodies(bodies), stop)
+    return mesh(list(bodies)+machine_bodies(bodies), stop, cache)
 
 
-def mesh(bodies, stop=None):
-    # Existing native viewer boundary expects source coordinates in metres.
-    chunks, colours = [], []
-    for b in bodies:   # one body at a time so every triangle keeps its body's colour
-        try:
-            points = np.asarray(triangulate([b.shape], .08)).reshape(-1, 3)
-        except ValueError as error:   # a body without faces adds nothing, as in one combined call
-            if 'üretilemedi' not in str(error):
-                raise
+DISPLAY = np.array([[1., 0, 0], [0, 0, 1.], [0, -1., 0]])   # station Z-up -> viewer Y-up (rigid, display only)
+CREASE = .8660254                                           # cos 30 deg, as in the shared preview mesh
+
+
+def solid_part(shape, stop=None):
+    """Display triangles of one solid in its own coordinates: corners, smooth normals, crease/boundary edges."""
+    from modules.cad_converter.models import checkpoint
+    from modules.dxf_dwg.preview.geometry import smooth_normals
+    checkpoint(stop)
+    try:
+        points = np.asarray(triangulate([shape], .08), dtype=float).reshape(-1, 3, 3)
+    except ValueError as error:   # a solid without faces adds nothing
+        if 'üretilemedi' not in str(error):
+            raise
+        return None
+    normals = np.cross(points[:, 1]-points[:, 0], points[:, 2]-points[:, 0])
+    lengths = np.linalg.norm(normals, axis=1)
+    valid = lengths > 1e-12
+    points, normals, lengths = points[valid], normals[valid]/np.maximum(lengths[valid], 1e-300)[:, None], lengths[valid]
+    if not len(points):
+        return None
+    vertices = points.reshape(-1, 3)
+    quantum = max(float(np.max(vertices.max(axis=0)-vertices.min(axis=0)))*1e-8, 1e-7)
+    # Edges: keep boundaries and >= 30 degree creases, not every triangle diagonal.
+    _, ids = np.unique(np.rint(vertices/quantum).astype(np.int64), axis=0, return_inverse=True)
+    ids = ids.ravel().reshape(-1, 3)
+    a, b = ids[:, [0, 1, 2]].ravel(), ids[:, [1, 2, 0]].ravel()
+    keys = np.minimum(a, b)*(int(ids.max())+1)+np.maximum(a, b)
+    _, first, inverse, counts = np.unique(keys, return_index=True, return_inverse=True, return_counts=True)
+    triangle = np.repeat(np.arange(len(points)), 3)
+    smooth_with_first = np.einsum('ij,ij->i', normals[triangle[first][inverse.ravel()]], normals[triangle]) >= CREASE
+    crease = np.zeros(len(first), dtype=bool); np.logical_or.at(crease, inverse.ravel(), ~smooth_with_first)
+    keep = first[(counts == 1) | crease]
+    corner = keep % 3; row = keep//3
+    lines = np.stack([points[row, corner], points[row, (corner+1) % 3]], axis=1).reshape(-1, 3)
+    return vertices, smooth_normals(vertices, normals, lengths, quantum, stop), lines
+
+
+def mesh(bodies, stop=None, cache=None):
+    """One coloured display mesh for the bodies of a pose.
+
+    ``cache`` (a dict kept by the caller for one calculation) stores each source
+    solid's triangles once; a pose then only applies the rigid placements. Without
+    it every body is triangulated as placed. Display only: collision uses the solids.
+    """
+    from modules.dxf_dwg.preview.models import Mesh
+    vertices, normals, lines, colours = [], [], [], []
+    for b in bodies:
+        if cache is not None and b.base is not None:
+            entry = cache.get(id(b.base))
+            if entry is None or entry[0] is not b.base:
+                if len(cache) >= 512:
+                    cache.clear()
+                entry = cache[id(b.base)] = (b.base, solid_part(b.base, stop))   # keeps the solid alive: ids stay unique
+            part, rotation, shift = entry[1], b.matrix[:3, :3], b.matrix[:3, 3]
+        else:
+            part, rotation, shift = solid_part(b.shape, stop), np.eye(3), np.zeros(3)
+        if part is None:
             continue
-        chunks.append(points)
-        colours.append(np.tile(rgb(SCENE_COLOURS.get(b.kind, SCENE_COLOURS['sheet'])), (len(points)//3, 1)))
-    if not chunks:
+        turn = DISPLAY@rotation
+        vertices.append(part[0]@turn.T+DISPLAY@shift); normals.append(part[1]@turn.T); lines.append(part[2]@turn.T+DISPLAY@shift)
+        colours.append(np.tile(np.array(rgb(SCENE_COLOURS.get(b.kind, SCENE_COLOURS['sheet'])), dtype=np.uint8), (len(part[0])//3, 1)))
+    if not vertices:
         raise ValueError('Katıdan görüntülenebilir üçgen üretilemedi.')
-    coordinates = np.concatenate(chunks)
-    if len(coordinates) > 120000*3:
+    vertices = np.concatenate(vertices)
+    if len(vertices) > 120000*3:
         raise ValueError('3D önizleme 120.000 üçgen sınırını aşıyor; 2D/STEP kullanın.')
-    # Station Z-up -> existing CAD viewer Y-up. Collision/report coordinates
-    # remain station mm; this is a display-only rigid change of basis.
-    coordinates = coordinates[:, [0, 2, 1]]*np.array([1., 1., -1.])/1000
-    return make_mesh(coordinates, stop, np.concatenate(colours))
+    low, high = vertices.min(axis=0), vertices.max(axis=0)
+    if np.max(high-low) <= 0 or not np.isfinite(vertices).all():
+        raise ValueError('3D parça sınırları geçersiz.')
+    origin = (low+high)/2   # keeps float32 precision for a small part far from the origin
+    return Mesh((vertices-origin).astype('<f4').tobytes(), np.concatenate(normals).astype('<f4').tobytes(),
+                (np.concatenate(lines)-origin).astype('<f4').tobytes(), tuple(low-origin)+tuple(high-origin),
+                len(vertices)//3, tuple(origin), np.concatenate(colours).tobytes())
