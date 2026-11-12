@@ -16,8 +16,10 @@ def display_rows(inventory, selected, grouped=True):
             row = dict(item, row_id=item['sheet_id'] if grouped else item['sheet_id']+'|'+group[0],
                        quantity=len(group), instances=group,
                        selected=True if count == len(group) else None if count else False)
-            row['source_label'] = item.get('code') or Path(item['source']).stem
-            if item.get('body_count', 1) > 1:
+            indexed = item.get('body_count',1)>1 and type(item.get('body_index')) is int and item['body_index']>0
+            row['source_label'] = (f"{Path(item['source']).stem}-{item['body_index']:02d}" if indexed
+                                   else item.get('code') or Path(item['source']).stem)
+            if item.get('body_count', 1) > 1 and not indexed:
                 row['source_label'] += ' · '+item['body_name']
             row['source_label'] += ' ['+item['configuration']+']'
             if not grouped:
@@ -50,7 +52,8 @@ def safe_name(value):
 def plan_destinations(items, source, output, formats, group_by_thickness=False, naming=()):
     """Keep legacy single-part names and mm/adet tokens consumed by Nesting.
 
-    Bodies/configurations are mandatory disambiguators when needed. A digest
+    Multi-body stems use their full-inventory persistent-ID ordinal, never the
+    position in the selected subset. Configurations remain disambiguators. A digest
     resolves sanitization and same-basename/external-path collisions even when
     overwrite is enabled. One body identity is never exported twice.
     """
@@ -73,7 +76,9 @@ def plan_destinations(items, source, output, formats, group_by_thickness=False, 
             relative = Path(part.name)
             outside=True
         chunks = [safe_name(item.get('code') or part.stem) if 'code' in naming else safe_name(part.stem)]
-        if item.get('body_count', 1) > 1 or 'body' in naming:
+        indexed = item.get('body_count',1)>1 and type(item.get('body_index')) is int and item['body_index']>0
+        if indexed:chunks[0] += f"-{item['body_index']:02d}"
+        if item.get('body_count', 1) > 1 and not indexed or 'body' in naming:
             chunks.append(safe_name(item['body_name']))
         multiple_configs = max(item.get('configuration_count',1),len(by_source[str(item['source']).lower()]))>1
         if multiple_configs or 'configuration' in naming:
@@ -85,7 +90,7 @@ def plan_destinations(items, source, output, formats, group_by_thickness=False, 
         stem = full_stem[:140].rstrip(' .')
         # Explicit names and truncation can hide the source filename. Keep
         # these identities stable even when each body is exported separately.
-        if item.get('body_count',1)>1 or multiple_configs or outside or naming or stem != full_stem:
+        if item.get('body_count',1)>1 and not indexed or multiple_configs or outside or naming or stem != full_stem or item.get('numbered_name_collision'):
             stem=stem[:126].rstrip(' .')+' - '+identifier[:10]
         synthetic = Path(source) / relative.parent / (stem + '.sldprt')
         targets = named_destinations(synthetic, source, output, formats, item['thickness_mm'],

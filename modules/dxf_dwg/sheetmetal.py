@@ -5,6 +5,7 @@ Pending geometry and cut lists may be rebuilt in memory; the source is never sav
 """
 
 from contextlib import contextmanager
+from collections import Counter
 from hashlib import sha256
 from pathlib import Path
 import math
@@ -170,6 +171,53 @@ class Session(ReadSession):
         finally:
             feature = definition = entity = None
 
+    def flat_body_reference(self, model, feature):
+        """Read the fixed body's persistent ID, releasing any definition access.
+
+        Some multi-body flat patterns expose FixedFace2 only after the API's
+        AccessSelections step. That scope can roll the model back/rebuild its
+        bodies, so never carry its body pointer across ReleaseSelectionAccess.
+        """
+        definition = entity = body = manager = None
+        accessed = suspended = False
+        try:
+            try:
+                body = self.flat_body(feature)
+                reference = self.persistent_ref(model, body)
+                if reference:return reference
+            except (Cancelled, RestoreError):raise
+            except Exception:pass
+            body = None
+            definition = call(feature, 'GetDefinition')
+            if definition is None:raise ApiError('Flat-Pattern tanımı okunamadı.')
+            manager = get(model, 'SelectionManager')
+            call(manager, 'SuspendSelectionList'); suspended = True
+            from modules.cad_converter.api import null_dispatch
+            try:
+                granted = call(definition, 'AccessSelections', model, null_dispatch())
+            except Exception as error:
+                raise RestoreError('Flat-Pattern tanım erişiminde kaynak durumu doğrulanamadı: '+str(error)) from error
+            if granted is not True:
+                raise ApiError('Flat-Pattern sabit yüz seçimine erişilemedi.')
+            accessed = True
+            entity = get(definition, 'FixedFace2')
+            if entity is None:raise ApiError('Flat-Pattern sabit yüzü/kenarı bulunamadı.')
+            body = call(entity, 'GetBody')
+            reference = self.persistent_ref(model, body)
+            if not reference:raise ApiError('Flat-Pattern gövdesinin kalıcı kimliği okunamadı.')
+            return reference
+        finally:
+            failures=[]
+            body = entity = None
+            try:
+                if accessed:call(definition, 'ReleaseSelectionAccess')
+            except Exception as error:failures.append('Flat-Pattern tanım erişimi kapatılamadı: '+str(error))
+            try:
+                if suspended:call(manager, 'ResumeSelectionList2', False)
+            except Exception as error:failures.append('Seçim listesi geri alınamadı: '+str(error))
+            model = feature = definition = manager = None
+            if failures:raise RestoreError(' '.join(failures))
+
     def resolved(self, owner):
         return {name.upper(): p.evaluated for name, p in self.properties(owner).items()
                 if p.resolved and p.evaluated}
@@ -243,25 +291,32 @@ class Session(ReadSession):
     def describe(self, model, source, configuration, stop=None, *, body_ref=''):
         """Classify with IsSheetMetal first. Mechanical parts get no feature scan."""
         bodies = sheets = features = folders = flats = None
-        body = feature = folder = fixed = None
+        body = feature = folder = None
         rows, warnings = [], []
         folder_by_body,flat_by_body,property_cache = {},{},{}
         matches = patterns = members = ()
-        try:
-            bodies = values(call(self.part(model), 'GetBodies2', self.c('swSolidBody'), False))
-            sheets = []
-            for body in bodies:
+        def sheet_bodies(candidates):
+            result=[]
+            for candidate in candidates:
                 checkpoint(stop)
                 try:
-                    if call(body, 'IsSheetMetal'):
-                        sheets.append(body)
+                    if call(candidate, 'IsSheetMetal'):result.append(candidate)
+                except (Cancelled, RestoreError):raise
                 except Exception as error:
                     warnings.append(f'{source} [{configuration}]: gövdenin sac durumu doğrulanamadı: {error}')
+            return result
+        try:
+            bodies = values(call(self.part(model), 'GetBodies2', self.c('swSolidBody'), False))
+            sheets = sheet_bodies(bodies)
             sheet_count = len(sheets)
-            if body_ref:
-                sheets = [body for body in sheets if self.persistent_ref(model, body) == body_ref]
             if not sheets:
                 return rows, warnings
+            # Rebuild and Cut List updates can invalidate every IBody2/IFace2
+            # obtained earlier. Classify cheaply first, then release those
+            # pointers and read the actual manufacturing identities afterwards.
+            body = None; bodies = sheets = ()
+            rebuilt, rebuild_note = self.ensure_rebuilt(model)
+            if rebuild_note:warnings.append(f'{source}: {rebuild_note}')
             try:
                 features = list(self.features(model, stop))
             except (Cancelled,RestoreError):
@@ -275,29 +330,40 @@ class Session(ReadSession):
                 try:
                     if kind == 'CutListFolder':
                         folder = call(feature, 'GetSpecificFeature2')
-                        folders.append((feature, values(call(folder, 'GetBodies'))))
+                        folders.append((feature, tuple(self.persistent_ref(model, member)
+                            for member in values(call(folder, 'GetBodies')))))
                     elif kind == 'FlatPattern':
-                        fixed = self.flat_body(feature)
-                        flats.append((feature, fixed))
+                        flats.append((feature, self.flat_body_reference(model, feature)))
+                except (Cancelled, RestoreError):raise
                 except Exception as error:
-                    warnings.append(f'{source} · {get(feature, "Name")}: {error}')
+                    name = optional(feature, 'Name', prop=True, default='Sac unsuru')
+                    warnings.append(f'{source} · {name}: {error}')
             document_props = self.document_properties(model, configuration)
             folder_by_body, flat_by_body = {}, {}
             for feature,members in folders:
-                for member in members:
-                    token = self.persistent_ref(model,member)
+                for token in members:
                     if token: folder_by_body.setdefault(token,[]).append(feature)
-            for feature,fixed in flats:
-                token = self.persistent_ref(model,fixed)
+            for feature,token in flats:
                 if token: flat_by_body.setdefault(token,[]).append(feature)
             property_cache = {}
-            rebuilt, rebuild_note = self.ensure_rebuilt(model)
-            if rebuild_note: warnings.append(f'{source}: {rebuild_note}')
+            # Definition access above may also regenerate bodies. Reacquire
+            # them after all such scopes have restored the model.
+            bodies = values(call(self.part(model), 'GetBodies2', self.c('swSolidBody'), False))
+            sheets = sheet_bodies(bodies)
+            sheet_count = len(sheets)
+            if not sheets:
+                warnings.append(f'{source} [{configuration}]: yeniden oluşturma sonrasında sac gövdesi bulunamadı.')
+                return rows, warnings
+            references = [self.persistent_ref(model, body) for body in sheets]
+            reference_counts = Counter(references)
+            numbers = {reference:i for i,reference in enumerate(sorted(set(references)-{''}),1)}
             for body in sheets:
                 checkpoint(stop)
                 reference = self.persistent_ref(model, body)
+                if body_ref and reference != body_ref:continue
                 row = dict(source=source, configuration=configuration, body_ref=reference,
                            body_name=str(optional(body, 'Name', prop=True, default='') or 'Adsız sac gövdesi'),
+                           body_index=numbers.get(reference),
                            body_count=len(bodies), sheet_count=sheet_count, material='', thickness_mm=None,
                            flat_ref='', flat_pattern='', cut_list='', code=Path(source).stem,
                            status='pending', detail='', exportable=True)
@@ -307,6 +373,8 @@ class Session(ReadSession):
                 try:
                     if not reference:
                         raise ApiError('Kalıcı gövde kimliği okunamadı; isimle tahmin edilmedi.')
+                    if reference_counts[reference] != 1:
+                        raise ApiError('Birden fazla gövde aynı kalıcı kimlikle döndü; eşleşme belirsiz.')
                     matches = folder_by_body.get(reference,[])
                     props = dict(document_props)
                     body_props = {}
@@ -349,14 +417,14 @@ class Session(ReadSession):
             return rows, warnings
         finally:
             model = bodies = sheets = features = folders = flats = None
-            body = feature = folder = fixed = None
+            body = feature = folder = None
             folder_by_body.clear();flat_by_body.clear();property_cache.clear()
             matches = patterns = members = ()
 
     @contextmanager
     def selected_flat(self, model, body_ref, flat_ref, stop=None, *, feature_name=''):
         """Re-resolve both persistent IDs, verify ownership, isolate and restore selection."""
-        manager = feature = body = None
+        manager = feature = None
         suspended = False
         try:
             checkpoint(stop)
@@ -364,7 +432,6 @@ class Session(ReadSession):
             matching = [b for b in bodies if self.persistent_ref(model, b) == body_ref]
             if len(matching) != 1 or not call(matching[0], 'IsSheetMetal'):
                 raise ApiError('Seçilen sac gövdesi artık bulunamıyor; yeniden tarayın.')
-            body = matching[0]
             patterns=[]
             if feature_name:
                 try:
@@ -376,7 +443,7 @@ class Session(ReadSession):
             if not patterns:
                 patterns = [f for f, kind in self.features(model, stop)
                             if kind == 'FlatPattern' and self.persistent_ref(model, f) == flat_ref]
-            if len(patterns) != 1 or not self.same(model, body, self.flat_body(patterns[0])):
+            if len(patterns) != 1 or self.flat_body_reference(model, patterns[0]) != body_ref:
                 raise ApiError('Flat-Pattern seçilen gövdeye ait değil; aktarım yapılmadı.')
             feature = patterns[0]
             checkpoint(stop)
@@ -394,7 +461,7 @@ class Session(ReadSession):
             except Exception as error:
                 raise RestoreError('Önceki seçim listesi geri alınamadı; kaynak kaydedilmedi.') from error
             finally:
-                model = manager = feature = body = None
+                model = manager = feature = None
                 bodies = matching = patterns = ()
 
 
@@ -585,6 +652,19 @@ def scan_inventory(session, source=None, recursive=True, stop=None, *, mode='act
             configurations.setdefault(key(path)[0],set()).add(conf)
         for row in rows.values():
             row['configuration_count'] = len(configurations[key(row['source'])[0]])
+        # Preserve collision knowledge from the whole scan even when the user
+        # later exports a single row. ORHAN's body 01 can otherwise overwrite a
+        # distinct, single-body ORHAN-01.SLDPRT in a later selected-subset export.
+        names={}
+        for row in rows.values():
+            stem=Path(row['source']).stem
+            if row.get('body_count',1)>1 and type(row.get('body_index')) is int:
+                stem+=f"-{row['body_index']:02d}"
+            token=(key(str(Path(row['source']).parent))[0],stem.casefold())
+            names.setdefault(token,[]).append(row)
+        for matches in names.values():
+            if len(matches)>1:
+                for row in matches:row['numbered_name_collision']=True
         return list(rows.values()), warnings
     finally:
         model = virtual_model = None
