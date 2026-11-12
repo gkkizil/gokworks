@@ -513,7 +513,7 @@ class BeltDrivePage(BasePage):
     def build_auto(self):
         host, f = form()
         self.a_basis=QComboBox()
-        self.a_basis.addItem('Genel boyutlandırma · katalog gerekmez','nominal')
+        self.a_basis.addItem('Genel geometrik ön boyutlandırma · katalog gerekmez','nominal')
         self.a_basis.addItem('Katalogdan ürün seçimi','catalog')
         self.a_basis.setAccessibleName('Otomatik tasarım yöntemi')
         f.addRow('Hesap yöntemi',self.a_basis)
@@ -547,13 +547,20 @@ class BeltDrivePage(BasePage):
         self.a_install = real(-1., -1., 1e5, 2, empty='bilinmiyor')
         self.a_tension = real(-1., -1., 1e5, 2, empty='bilinmiyor')
         self.a_service = real(0., 0., 10., 3, empty='verilmedi', step=.1)
+        self.a_wrap = real(0., 0., 180., 3, empty='verilmedi')
+        self.a_speed_limit = real(0., 0., 1000., 3, empty='verilmedi')
+        self.a_engaged = real(0., 0., 5000., 3, empty='verilmedi')
+        for box in (self.a_wrap,self.a_speed_limit,self.a_engaged):
+            box.setToolTip('Üretici/uygulama sınırı; boşsa evrensel bir sınır varsayılmaz. Güç tablosunun yerine geçmez.')
         for title, widget in (('Üretici', self.a_manufacturer), ('Seri', self.a_series),
                               ('Çap en az · mm', self.a_dmin),
                               ('Çap en çok · mm', self.a_dmax), ('Dış çap en çok · mm', self.a_odmax),
                               ('Diş sayısı en az', self.a_zmin), ('Diş sayısı en çok', self.a_zmax),
                               ('Toplam eksenel genişlik en çok · mm', self.a_width), ('Kayış adedi en çok', self.a_belts),
                               ('Kurulum ayar mesafesi · mm', self.a_install), ('Germe ayar mesafesi · mm', self.a_tension),
-                              ('Servis faktörü (isteğe bağlı)', self.a_service)):
+                              ('Servis faktörü (isteğe bağlı)', self.a_service),
+                              ('Sarılma en az · °', self.a_wrap), ('Kayış hızı en çok · m/s', self.a_speed_limit),
+                              ('Kavrama dişi en az', self.a_engaged)):
             limits.addRow(title, widget)
         rank_host, rank = form()
         self.a_priority = QComboBox()
@@ -579,8 +586,8 @@ class BeltDrivePage(BasePage):
         advanced = panel(label('Filtreler ve sınırlar', 'section'), limits_host, label('Sıralama ve kapsam', 'section'), rank_host,
                          label('Boş sınırlar gizli varsayılanla doldurulmaz.', 'muted'), margins=(0, 0, 0, 0))
         self.auto_advanced = Disclosure('Gelişmiş ayarlar (filtre, sınır, sıralama)', advanced)
-        inputs = panel(label('Motor gücü ve hedef devre göre kasnakları ve gerekli kayış boyunu hesaplayın. '
-                             'Ürün koduyla seçim için katalog yöntemini kullanın.', 'muted'), self.auto_catalog_label, host,
+        inputs = panel(label('Hedef devir ve geometrik sınırlara göre kasnak ve kayış boyunu hesaplayın. '
+                             'Güçten kesit ve adet seçimi için üretici kapasite verisi gerekir.', 'muted'), self.auto_catalog_label, host,
                        self.search_button, self.pairs_button, self.auto_advanced, 1)
         self.auto_inputs = inputs
         self.auto_scroll = scroll(inputs); self.auto_scroll.setMinimumWidth(260)
@@ -616,6 +623,7 @@ class BeltDrivePage(BasePage):
         for widget in (self.a_power, self.a_rpm, self.a_target, self.a_target_c, self.a_tolerance, self.a_cmin, self.a_cmax,
                        self.a_rpm_error, self.a_dmin, self.a_dmax, self.a_odmax, self.a_zmin, self.a_zmax, self.a_width,
                        self.a_belts, self.a_install, self.a_tension, self.a_service, self.a_result_limit, self.a_work_limit,
+                       self.a_wrap,self.a_speed_limit,self.a_engaged,
                        *self.weights.values()):
             widget.valueChanged.connect(self.auto_changed)
         self.a_unverified.toggled.connect(self.auto_changed)
@@ -669,6 +677,7 @@ class BeltDrivePage(BasePage):
 
     def auto_family_changed(self, *args):
         family = self.a_family.currentData()
+        self.auto_limits_form.setRowVisible(self.a_engaged,family=='timing')
         current=self.a_profile.currentData()
         self.a_profile.blockSignals(True); self.a_profile.clear()
         if not self.nominal_mode():self.a_profile.addItem('Tümü',None)
@@ -735,7 +744,9 @@ class BeltDrivePage(BasePage):
             max_belts=None if nominal else optional(self.a_belts), available_installation_travel_mm=None if nominal else optional(self.a_install),
             available_tensioning_travel_mm=None if nominal else optional(self.a_tension), service_factor=optional(self.a_service),
             priority=priority, weights=weights, include_unverified=self.a_unverified.isChecked(),
-            result_limit=self.a_result_limit.value(), work_limit=self.a_work_limit.value())
+            result_limit=self.a_result_limit.value(), work_limit=self.a_work_limit.value(),
+            minimum_wrap_deg=optional(self.a_wrap),maximum_belt_speed_m_s=optional(self.a_speed_limit),
+            minimum_engaged_teeth=optional(self.a_engaged) if self.a_family.currentData()=='timing' else None)
 
     def auto_changed(self, *args):
         """Any request change makes the shown search obsolete, including a running one."""
@@ -905,12 +916,13 @@ class BeltDrivePage(BasePage):
             f'İdeal çıkış devri: {number(r.nominal_output_rpm,4)} dev/dak · sapma %{number(c.rpm_error_percent,4)}',
             f'Çap oranı: {number(r.ratio,6)}',
             '<br><b>Kayış boyu ve eksen mesafesi</b>',
-            f'Hedef C için gerekli teorik boy: {number(c.required_length_mm,6)} mm',
+            f'İlk geometrik çözüm için gerekli teorik boy: {number(c.required_length_mm,6)} mm',
             f'Hesapta kullanılan boy: {number(r.length_exact_mm,6)} mm · {kind}',
             f'Bu boydaki C: {number(r.center_mm,6)} mm · hedef farkı {number(c.center_deviation_mm,6)} mm',
             f'Sürücü / sürülen referans çapı: {number(r.driver_reference_diameter_mm,4)} / {number(r.driven_reference_diameter_mm,4)} mm',
             f'Sarılma açıları: {number(r.driver_wrap_deg,3)}° / {number(r.driven_wrap_deg,3)}°',
             f'Kayış hızı: {number(r.speed_m_s,4)} m/s',f'Etkin kuvvet farkı Ft: {number(r.effective_force_delta_n,3)} N',
+            f'Giriş gücü: {number(r.input_power_kw,4)} kW · tasarım gücü: {number(r.design_power_kw,4) if r.design_power_kw is not None else "servis faktörü verilmedi"}',
             f'Giriş / ideal çıkış torku: {number(r.input_torque_nm,3)} / {number(r.ideal_output_torque_nm,3)} N·m',
             '<br><b>Seçim sınırları</b>',
             'Kesit ve gerekli adet güç tablosuyla seçilmedi; kapasite, germe, dış gövde ve ömür onayı yoktur.']
@@ -948,7 +960,7 @@ class BeltDrivePage(BasePage):
         width = (f'{number(c.system_width_mm, 2)} mm (bilinen eksenel zarflardan)' if c.system_width_mm is not None else
                  'bilinmiyor' + (f' — alt sınır en az {number(c.system_width_lower_bound_mm, 2)} mm' if c.system_width_lower_bound_mm is not None else ''))
         def pulley(p):
-            return (f'{p.code}: {"z = " + str(p.teeth) if p.teeth else "Ø datum " + number(p.datum_diameter_mm)}; '
+            return (f'{p.code} · seri {p.series_id}: {"z = " + str(p.teeth) if p.teeth else "Ø datum " + number(p.datum_diameter_mm)}; '
                     f'nominal kayış genişliği {number(p.nominal_belt_width_mm)} mm; F {number(p.catalog_face_dimension_f_mm)} mm; '
                     f'toplam L {number(p.overall_width_mm)} mm; pilot delik {number(p.pilot_bore_mm)} mm (bitmiş mil deliği değildir); '
                     f'dış zarf Ø {number(p.outside_diameter_mm)} mm')
@@ -1212,7 +1224,8 @@ class BeltDrivePage(BasePage):
             if exact:
                 self.set_status('Proje açıldı; manuel tasarım güncel motorla yeniden hesaplandı.')
             return
-        self.load_request(project.request, project.catalog,project.nominal_options)
+        if self.load_request(project.request, project.catalog,project.nominal_options) is False:
+            return
         self.search_token += 1; self.running = ('search', self.search_token, project.request)
         self.search_finished('belt_design_cancelled' if outcome.cancelled else 'belt_design_result', outcome)
         self.compare_ids = list(selected); self.refresh_compare()
@@ -1229,6 +1242,7 @@ class BeltDrivePage(BasePage):
                    self.a_power, self.a_rpm, self.a_target, self.a_target_c, self.a_tolerance, self.a_cmin, self.a_cmax,
                    self.a_rpm_error, self.a_dmin, self.a_dmax, self.a_odmax, self.a_zmin, self.a_zmax, self.a_width,
                    self.a_belts, self.a_install, self.a_tension, self.a_service, self.a_result_limit, self.a_work_limit,
+                   self.a_wrap,self.a_speed_limit,self.a_engaged,
                    self.a_unverified, self.catalog_picker, *self.weights.values()]
         for w in widgets:
             w.blockSignals(True)
@@ -1248,6 +1262,8 @@ class BeltDrivePage(BasePage):
                 box.setValue(value)
             for box, value in ((self.a_target_c, request.center_target_mm), (self.a_tolerance, request.center_tolerance_mm),
                                (self.a_cmin, request.center_min_mm), (self.a_cmax, request.center_max_mm),
+                               (self.a_wrap, request.minimum_wrap_deg), (self.a_speed_limit, request.maximum_belt_speed_m_s),
+                               (self.a_engaged, request.minimum_engaged_teeth),
                                (self.a_rpm_error, request.rpm_error_max_percent), (self.a_dmin, request.diameter_min_mm),
                                (self.a_dmax, request.diameter_max_mm), (self.a_odmax, request.outside_diameter_max_mm),
                                (self.a_zmin, request.teeth_min), (self.a_zmax, request.teeth_max),
@@ -1263,6 +1279,16 @@ class BeltDrivePage(BasePage):
             for w in widgets:
                 w.blockSignals(False)
         self.basis_changed()
+        changed=[]
+        for value,box,title in ((request.minimum_wrap_deg,self.a_wrap,'Sarılma'),
+                                (request.maximum_belt_speed_m_s,self.a_speed_limit,'Kayış hızı'),
+                                (request.minimum_engaged_teeth,self.a_engaged,'Kavrama dişi')):
+            if value!=optional(box):changed.append(f'{title}: {value} → {optional(box)}')
+        if changed:
+            self.clear_search('Proje sınırları ekran aralığına/hassasiyetine sığmıyor; önceki çözüm gösterilmedi.')
+            self.set_status('Sınırlar ekrana aktarılırken değişti; kontrol edip yeniden hesaplayın: '+'; '.join(changed),True)
+            return False
+        return True
 
     def set_catalog_quiet(self, catalog):
         """Show a project snapshot without restarting the search invalidation chain."""

@@ -96,9 +96,9 @@ def test_driving_larger_and_equal_pulleys():
     assert equal.result.driver_wrap_deg == 180.
 
 
-def test_same_pitch_different_profile_or_series_not_automatically_compatible():
+def test_same_pitch_different_profile_or_compatibility_id_not_automatically_compatible():
     cat = timing_catalog()
-    for belts in ((replace(cat.belts[0], profile='T5'),), (replace(cat.belts[0], series_id='other'),),
+    for belts in ((replace(cat.belts[0], profile='T5'),),
                   (replace(cat.belts[0], compatibility_id='other'),)):
         report = search_drives(request(), replace(cat, belts=belts))
         assert not report.unverified and report.excluded_products > 0
