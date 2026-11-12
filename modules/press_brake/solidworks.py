@@ -6,7 +6,7 @@ is temporarily disabled to expose measured tangents and restored in finally.
 No Save is called. All COM references die before the worker returns.
 """
 from contextlib import contextmanager
-from math import degrees, isfinite, pi
+from math import asin, ceil, degrees, isfinite, pi, sqrt
 from pathlib import Path
 from hashlib import sha256
 import numpy as np
@@ -14,7 +14,7 @@ from shapely.geometry import Polygon, LineString
 from shapely.ops import unary_union, polygonize
 from .models import Bend, Flange, Part, Region
 from modules.cad_converter.api import ApiError, RestoreError, call, get
-from modules.cad_converter.models import checkpoint
+from modules.cad_converter.models import Cancelled, checkpoint
 from modules.dxf_dwg.sheetmetal import Session
 from modules.profile_cutting.solidworks import values
 from modules.tolerance_stack.com import variant
@@ -227,6 +227,132 @@ def _xyz(obj):
         return np.array([float(get(obj, axis)) for axis in ('X', 'Y', 'Z')])
     finally:
         obj = None
+
+
+_CHORD_TOLERANCE = .00002  # API metres: existing 0.02 mm contour tolerance.
+_END_TOLERANCE = 1e-8
+_MAX_EDGE_POINTS = 100000
+
+
+def _circle_points(curve, parameters):
+    """Sample the measured circle's actual trim, including reversed/closed edges.
+
+    GetTessPts can be empty when both endpoints coincide. Use CircleParams and
+    the edge's U interval instead; Evaluate2 verifies the origin, tangent and
+    parameter direction. Two COM evaluations suffice, regardless of point count.
+    """
+    try:
+        data = np.asarray(get(curve, 'CircleParams'), float)
+        if data.shape != (7,) or not np.isfinite(data).all() or data[6] <= 0:
+            raise ApiError('Dairesel kenarın merkez/eksen/yarıçap verisi geçersiz.')
+        center, axis, radius = data[:3], data[3:6], data[6]
+        axis_length = np.linalg.norm(axis)
+        if not isfinite(axis_length) or axis_length <= 0:
+            raise ApiError('Dairesel kenarın ekseni geçersiz.')
+        axis = axis/axis_length
+        low, high = float(get(parameters, 'UMinValue')), float(get(parameters, 'UMaxValue'))
+        sense = get(parameters, 'Sense')
+        if type(sense) not in (bool, int) or sense not in (False, True, -1):
+            raise ApiError('Dairesel kenarın parametre yönü okunamadı.')
+        if not sense:
+            low, high = -high, -low  # ICurveParamData's reversed-edge convention.
+        span = high-low
+        if not all(isfinite(x) for x in (low, high, span)) or not 0 < span <= 2*pi+1e-10:
+            raise ApiError('Dairesel kenarın gerçek yay aralığı okunamadı.')
+        evaluated = np.asarray(call(curve, 'Evaluate2', low, 1), float)
+        quarter = np.asarray(call(curve, 'Evaluate2', low+span/4, 0), float)
+        if evaluated.shape != (6,) or quarter.shape != (3,) or not np.isfinite(evaluated).all() or not np.isfinite(quarter).all():
+            raise ApiError('Dairesel kenarın eğri değerlendirmesi eksik/geçersiz.')
+        radial, tangent = evaluated[:3]-center, evaluated[3:]
+        tangent_length = np.linalg.norm(tangent)
+        if (abs(np.linalg.norm(radial)-radius) > _END_TOLERANCE or not isfinite(tangent_length) or tangent_length <= 0
+                or abs(radial@axis) > _END_TOLERANCE):
+            raise ApiError('Dairesel kenarın başlangıcı merkez/yarıçapıyla uyuşmuyor.')
+        u, v = radial/radius, tangent/tangent_length
+        if abs(u@v) > 1e-6 or abs(v@axis) > 1e-6:
+            raise ApiError('Dairesel kenarın teğeti doğrulanamadı.')
+        predicted = center+radius*(np.cos(span/4)*u+np.sin(span/4)*v)
+        if np.linalg.norm(predicted-quarter) > _END_TOLERANCE:
+            raise ApiError('Dairesel kenarın yay yönü/aralığı doğrulanamadı.')
+        step = min(pi/2, 4*asin(sqrt(min(1., _CHORD_TOLERANCE/(2*radius)))))
+        if step <= 0 or span/step >= _MAX_EDGE_POINTS:
+            raise ApiError('Dairesel kenar 100.000 nokta sınırını aşıyor.')
+        count = ceil(span/step)+1
+        if count > _MAX_EDGE_POINTS:
+            raise ApiError('Dairesel kenar 100.000 nokta sınırını aşıyor.')
+        angles = np.linspace(0., span, count)
+        points = center+radius*(np.cos(angles)[:, None]*u+np.sin(angles)[:, None]*v)
+        if abs(span-2*pi) <= 1e-10:
+            points[-1] = points[0]
+        return points
+    finally:
+        curve = parameters = None
+
+
+def _edge_points(edge, stop=None):
+    """Read exact line ends, analytic circles, or validated native tessellation.
+
+    Return mm coordinates. A missing curved contour is never replaced by its
+    chord; missing/invalid trims remain errors rather than filled-in holes.
+    """
+    curve = parameters = None
+    try:
+        checkpoint(stop)
+        curve = call(edge, 'GetCurve')
+        parameters = call(edge, 'GetCurveParams3')
+        ends = np.asarray([get(parameters, 'StartPoint'), get(parameters, 'EndPoint')], float)
+        if ends.shape != (2, 3) or not np.isfinite(ends).all():
+            raise ApiError('Kenarın gerçek uç noktaları eksik/geçersiz.')
+        if call(curve, 'IsLine'):
+            if not np.any(ends[0] != ends[1]):
+                raise ApiError('Doğrusal açınım kenarı sıfır uzunlukta.')
+            return ends*1000
+        closed = bool(np.array_equal(ends[0], ends[1]))
+        if call(curve, 'IsCircle'):
+            points = _circle_points(curve, parameters)
+            closed = bool(np.array_equal(points[0], points[-1]))
+        else:
+            points = None
+            for length_tolerance in (1e-8, 0.):
+                checkpoint(stop)
+                try:
+                    xyz = values(call(curve, 'GetTessPts', _CHORD_TOLERANCE, length_tolerance,
+                                      variant(0x2005, list(ends[0])), variant(0x2005, list(ends[1]))))
+                except (Cancelled, RestoreError):
+                    raise
+                except Exception:
+                    continue
+                if len(xyz) >= 6 and not len(xyz) % 3:
+                    if len(xyz) > _MAX_EDGE_POINTS*3:
+                        raise ApiError('Eğrisel kenar 100.000 nokta sınırını aşıyor.')
+                    points = np.asarray(xyz, float).reshape(-1, 3)
+                    break
+            if points is None:
+                raise ApiError('Eğrisel kenarın tessellation verisi eksik; kontur atlanmadı. '
+                               'SolidWorks’te Ctrl+Q ile yeniden oluşturup tekrar alın.')
+        checkpoint(stop)
+        if not np.isfinite(points).all() or not np.any(np.linalg.norm(points-points[0], axis=1) > 0):
+            raise ApiError('Kenarın örnek noktaları geçersiz veya sıfır uzunlukta.')
+        def fits(candidate):
+            return np.all(np.linalg.norm(candidate-ends, axis=1) <= _END_TOLERANCE)
+        if fits(points[[0, -1]]):
+            points = points.copy()
+        elif fits(points[[-1, 0]]):
+            points = points[::-1].copy()
+        else:
+            raise ApiError('Kenarın örnekleri gerçek uç noktalarıyla uyuşmuyor.')
+        points[0], points[-1] = ends
+        if closed:
+            if len(points) < 4:
+                raise ApiError('Kapalı eğrisel kenarın konturu eksik.')
+            points[-1] = points[0]
+        return points*1000
+    except (ApiError, Cancelled, RestoreError):
+        raise
+    except Exception as error:
+        raise ApiError('Kenarın gerçek eğri verisi okunamadı: '+str(error)) from error
+    finally:
+        edge = curve = parameters = None
 
 
 def _cylinder(surface):
@@ -548,14 +674,13 @@ class Capture(Session):
                     loops = []
                     for loop in values(call(face, 'GetLoops')):
                         lines = []
-                        for edge in values(call(loop, 'GetEdges')):
-                            curve = call(edge, 'GetCurve')
-                            cp = call(edge, 'GetCurveParams3')
-                            start, end = get(cp, 'StartPoint'), get(cp, 'EndPoint')
-                            xyz = values(call(curve, 'GetTessPts', .00002, .00000001, variant(0x2005, start), variant(0x2005, end)))
-                            if len(xyz) < 6 or len(xyz) % 3:
-                                raise ApiError(body_name+': açınım kenarı tessellation verisi eksik.')
-                            points = np.asarray(xyz, float).reshape(-1, 3)*1000
+                        for edge_number, edge in enumerate(values(call(loop, 'GetEdges')), 1):
+                            try:
+                                points = _edge_points(edge, stop)
+                            except ApiError as error:
+                                raise ApiError(f'{body_name}: açınım kenarı {edge_number}: {error}') from error
+                            if np.max(np.abs((points-origin)@normal)) > .001:
+                                raise ApiError(body_name+': açınım kenarı sabit yüz düzleminde değil.')
                             lines.extend(LineString([project(a), project(b)]) for a, b in zip(points, points[1:]))
                         from shapely import set_precision
                         rings = list(polygonize(unary_union([set_precision(line, 1e-6) for line in lines])))
@@ -611,7 +736,7 @@ class Capture(Session):
             return snapshot
         finally:
             rows = []; active = []; features = []; current_bends = {}; flat_bends = []
-            body = flat = fixed = definition = model = feature = face = surface = loop = edge = curve = cp = None
+            body = flat = fixed = definition = model = feature = face = surface = loop = edge = None
             flats = []; segments = []
             faces_for_bend = []
 

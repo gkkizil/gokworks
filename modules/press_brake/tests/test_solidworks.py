@@ -1,5 +1,5 @@
 """Published API doubles, not a live SolidWorks qualification."""
-from math import radians
+from math import pi, radians
 from types import SimpleNamespace as NS
 import threading
 import numpy as np
@@ -49,7 +49,8 @@ def _face(region, id):
         edges = []
         for a, b in zip(points, points[1:]+points[:1]):
             a, b = (*[v/1000 for v in a], 0.), (*[v/1000 for v in b], 0.)
-            curve = NS(GetTessPts=lambda tol, length_tol, start, end, a=a, b=b: a+b)
+            curve = NS(IsLine=lambda: True, IsCircle=lambda: False,
+                       GetTessPts=lambda tol, length_tol, start, end, a=a, b=b: a+b)
             cp = NS(StartPoint=a, EndPoint=b)
             edges.append(NS(GetCurve=lambda curve=curve: curve, GetCurveParams3=lambda cp=cp: cp))
         return NS(GetEdges=lambda: tuple(edges), IsOuter=lambda: outer)
@@ -127,6 +128,164 @@ def test_persistent_bend_id_survives_feature_rename(capture):
     second = sw.read_active(session_factory=capture.session)
     assert first.bends[0].id == second.bends[0].id
     assert first.bends[0].title != second.bends[0].title
+
+
+def test_active_part_with_empty_line_tessellation_retains_contours_and_holes(capture):
+    capture.body.Name = 'Kes-Ekstrüzyon2'
+    expected = load_demo('L120').part
+    for face in capture.body.GetFaces():
+        for loop in face.GetLoops():
+            for edge in loop.GetEdges():
+                edge.GetCurve().GetTessPts = lambda *args: None
+    part = sw.read_active(session_factory=capture.session)
+    assert sum(len(f.region.holes) for f in part.flanges) == 2
+    assert sum(f.region.polygon().area for f in part.flanges) == pytest.approx(
+        sum(f.region.polygon().area for f in expected.flanges), abs=.001)
+    assert part.bends[0].inside_angle == pytest.approx(120)
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+    assert capture.path.read_bytes() == b'unchanged native source'
+
+
+def _circular_edge(low=0., span=2*pi, reverse=False, tilted=False, radius=.008):
+    """Real API layout: circle metres, signed edge U range, ICurve derivatives."""
+    center = np.array([0., 0., 0.])
+    u = np.array([.6, 0., .8]) if tilted else np.array([1., 0., 0.])
+    v = np.array([0., 1., 0.]); high = low+span
+    def point(t):
+        return center+radius*(np.cos(t)*u+np.sin(t)*v)
+    evaluated = []
+    def evaluate(t, derivatives):
+        evaluated.append((t, derivatives))
+        assert derivatives in (0, 1)
+        p = tuple(point(t))
+        return p+tuple(radius*(-np.sin(t)*u+np.cos(t)*v)) if derivatives else p
+    def tessellate(*args):
+        raise AssertionError('Analytic circle must not depend on tessellation.')
+    parameters = NS(StartPoint=tuple(point(low)), EndPoint=tuple(point(high)),
+                    UMinValue=-high if reverse else low, UMaxValue=-low if reverse else high,
+                    Sense=not reverse)
+    if span == 2*pi:
+        parameters.EndPoint = parameters.StartPoint
+    curve = NS(IsLine=lambda: False, IsCircle=lambda: True, CircleParams=(*center, *np.cross(u, v), radius),
+               Evaluate2=evaluate, GetTessPts=tessellate)
+    return NS(GetCurve=lambda: curve, GetCurveParams3=lambda: parameters,
+              curve=curve, parameters=parameters, evaluated=evaluated, point=point, center=center)
+
+
+@pytest.mark.parametrize('low,span,reverse,tilted', [
+    (0., 2*pi, False, False), (.4, pi/2, False, True), (5.7, 3*pi/2, True, True),
+    (-4., .7, True, False), (.4, 2*pi, True, False), (.3, 1e-7, False, False),
+])
+def test_circle_sampling_keeps_native_trim_direction_units_and_chord_tolerance(low, span, reverse, tilted):
+    edge = _circular_edge(low, span, reverse, tilted)
+    points = sw._edge_points(edge)
+    assert len(edge.evaluated) == 2
+    expected = np.array([edge.point(t) for t in np.linspace(low, low+span, len(points))])*1000
+    assert np.allclose(points, expected, rtol=0., atol=1e-10)
+    assert points[0] == pytest.approx(np.asarray(edge.parameters.StartPoint)*1000)
+    assert points[-1] == pytest.approx(np.asarray(edge.parameters.EndPoint)*1000)
+    radii = np.linalg.norm((points[:-1]+points[1:])/2-edge.center*1000, axis=1)
+    assert np.max(8.-radii) <= .02000001
+    if span == 2*pi:
+        assert np.array_equal(points[0], points[-1]) and len(points) >= 5
+    else:
+        assert not np.array_equal(points[0], points[-1])
+
+
+def test_active_part_retains_single_edge_circular_hole_without_tessellation(capture):
+    circle = _circular_edge(reverse=True)
+    face = capture.body.GetFaces()[0]
+    outer = face.GetLoops()[0]
+    hole = NS(GetEdges=lambda: (circle,), IsOuter=lambda: False)
+    face.GetLoops = lambda: (outer, hole)
+    state = _merged_flat(capture)
+    part = sw.read_active(session_factory=capture.session)
+    holes = [h for f in part.flanges for h in f.region.polygon().interiors]
+    assert len(holes) == 2
+    from shapely.geometry import Polygon
+    assert min(abs(Polygon(h).area-pi*8**2) for h in holes) < 1.
+    assert len(circle.evaluated) == 2
+    assert state.merged and state.edits == [False, True]
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+    assert capture.path.read_bytes() == b'unchanged native source'
+
+
+def test_native_short_line_uses_exact_ends_without_segment_length_filter():
+    def no_tessellation(*args):
+        raise AssertionError('Native line must not require tessellation.')
+    curve = NS(IsLine=lambda: True, GetTessPts=no_tessellation)
+    parameters = NS(StartPoint=(0., 0., 0.), EndPoint=(3e-9, 0., 0.))
+    edge = NS(GetCurve=lambda: curve, GetCurveParams3=lambda: parameters)
+    assert np.array_equal(sw._edge_points(edge), np.array([[0., 0., 0.], [3e-6, 0., 0.]]))
+
+
+@pytest.mark.parametrize('bad', ['radius', 'axis', 'range', 'direction', 'quarter', 'endpoint', 'budget'])
+def test_bad_circle_data_is_not_guessed_or_replaced_by_a_chord(bad):
+    edge = _circular_edge(span=1.)
+    if bad == 'radius':
+        edge.curve.CircleParams = (0., 0., 0., 0., 0., 1., -1.)
+    elif bad == 'axis':
+        edge.curve.CircleParams = (0., 0., 0., 0., 0., 0., .008)
+    elif bad == 'range':
+        edge.parameters.UMaxValue = float('nan')
+    elif bad == 'direction':
+        edge.parameters.Sense = None
+    elif bad == 'quarter':
+        evaluate = edge.curve.Evaluate2
+        edge.curve.Evaluate2 = lambda t, n: evaluate(t, n) if n else (0., 0., 0.)
+    elif bad == 'endpoint':
+        edge.parameters.EndPoint = (0., 0., 0.)
+    else:
+        edge = _circular_edge(radius=1e9)
+    with pytest.raises(ApiError):
+        sw._edge_points(edge)
+
+
+def _spline_edge(tessellate):
+    parameters = NS(StartPoint=(0., 0., 0.), EndPoint=(.01, .02, 0.))
+    curve = NS(IsLine=lambda: False, IsCircle=lambda: False, GetTessPts=tessellate)
+    return NS(GetCurve=lambda: curve, GetCurveParams3=lambda: parameters, parameters=parameters)
+
+
+def test_native_curved_tessellation_retries_without_short_segment_filter():
+    calls = []
+    coordinates = (.01, .02, 0., .003, .008, 0., 0., 0., 0.)  # native reverse order
+    def tessellate(chord, length, start, end):
+        calls.append((chord, length))
+        assert start.varianttype == end.varianttype == 0x2005
+        assert list(start.value) == [0., 0., 0.] and list(end.value) == [.01, .02, 0.]
+        return None if length else coordinates
+    points = sw._edge_points(_spline_edge(tessellate))
+    assert np.array_equal(points, [[0., 0., 0.], [3., 8., 0.], [10., 20., 0.]])
+    assert calls == [(2e-5, 1e-8), (2e-5, 0.)]
+
+
+@pytest.mark.parametrize('coordinates', [None, (), (0., 1., 2., 3.),
+    (0., 0., 0., float('nan'), 0., 0.), (0., 0., 0., .1, .1, 0.)])
+def test_missing_nonfinite_or_mismatched_curve_points_do_not_become_straight_edges(coordinates):
+    with pytest.raises(ApiError):
+        sw._edge_points(_spline_edge(lambda *args: coordinates))
+
+
+@pytest.mark.parametrize('cancel', [False, True])
+def test_failed_curve_read_restores_merged_flat_selection_and_source(capture, cancel):
+    stop = threading.Event()
+    edge = capture.body.GetFaces()[0].GetLoops()[0].GetEdges()[0]
+    curve = edge.GetCurve()
+    curve.IsLine = curve.IsCircle = lambda: False
+    def unavailable(*args):
+        if cancel:stop.set()
+        return None
+    curve.GetTessPts = unavailable
+    state = _merged_flat(capture)
+    with pytest.raises(Cancelled if cancel else ApiError) as error:
+        sw.read_active(stop, session_factory=capture.session)
+    if not cancel:
+        assert 'Sheet-body: açınım kenarı 1:' in str(error.value) and 'kontur atlanmadı' in str(error.value)
+    assert state.merged and state.edits == [False, True]
+    assert capture.flat.suppressed and capture.manager.suspended == 0
+    assert capture.state.entered == capture.state.exited
+    assert capture.path.read_bytes() == b'unchanged native source'
 
 
 @pytest.mark.parametrize('failure', ['exception', 'cancel'])
