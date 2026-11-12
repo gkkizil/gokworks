@@ -1,9 +1,14 @@
 {
-  "request_id": "20261104-dxf-nesting-drawing-fixes-exe",
-  "requested_at": "2026-11-04T09:30:00+00:00",
-  "source_commit": "1f31d66edf8855bc3a1803ea06cde8bcb30afedb",
+  "request_id": "20261112-main-tosyali-v-538af1e-exe",
+  "requested_at": "2026-11-12T05:47:51+00:00",
+  "source_commit": "538af1e80bbefb96809327835afbd76c9d715900",
   "validation_profile": "package-only",
   "skip_full_tests": true,
-  "reason": "Build the Windows EXE with the shaft drawing annotation fixes (tolerance digits, attachment check, chamfer note leader, Ra on the surface), DXF/DWG multibody rebuild and Turkish bend count, and nesting automatic micrometre end-gap joining with clear open-contour messages. Module suites passed locally. Use the fast packaging profile; keep the real onefile build, three DPI self-checks and download verification.",
+  "validation_runs": [
+    43160467950
+  ],
+  "validated_agent_head": "167ce4313c898a089decf555cbefbcfd2137312d",
+  "validated_base_commit": "7014d8e2ce80a6168be5b1eee08e56129eb91e1c",
+  "reason": "User requests a Windows EXE from current main after PR 70 is merged. Main 538af1e contains the exact head/base combination validated successfully in all three full Windows integration shards of run 43160467950. Belt suite: 312 passed locally. Application source is unchanged by this build-request-only commit. Reuse that complete Windows evidence; build the real onefile EXE and run all three DPI frozen-package self-checks, verify embedded Tosyali/Optibelt data and the public EXE checksum.",
   "cancelled": false
 }
