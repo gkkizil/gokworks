@@ -85,11 +85,24 @@ kontrol edilir. `SuspendSelectionList` ile seçim saklanır; yalnız ilgili
 ## Adlandırma ve geometri kontrolü
 
 Tek gövdede eski ad korunur: `BRAKET - 1.5 mm - 12 adet.dxf`.
-Çok gövdede gövde adı ve sabit kimlik; birden fazla kullanılan konfigürasyonda
-konfigürasyon ayrımı eklenir. Kod/gövde/malzeme/konfigürasyon adlandırma seçenekleri
+Çok gövdede dosya köküne iki haneli sac gövdesi numarası eklenir:
+`ORHAN-01 - 2 mm - 1 adet.dxf`, `ORHAN-02 - 2 mm - 1 adet.dxf`,
+`ORHAN-03 - 3 mm - 1 adet.dxf`. Aynı kural DWG için de geçerlidir.
+Numaralar tam konfigürasyondaki kalıcı sac gövdesi kimliklerine göre belirlenir;
+mekanik gövdeler numara tüketmez. Yalnız ikinci gövde seçilirse adı `ORHAN-02`
+kalır; seçime göre tekrar `01` verilmez. Tek gövdeli dosyanın mevcut adı korunur.
+Birden fazla kullanılan konfigürasyonda konfigürasyon ayrımı eklenir.
+Kod/gövde/malzeme/konfigürasyon adlandırma seçenekleri
 vardır. `mm` ve `adet` alanları Nesting okuyucusuyla uyumludur. Kalınlık klasöründe
 virgül, dosya adında nokta kullanılır. Hedef çakışmaları kimlik ekiyle ayrılır.
 Mevcut dosya varsayılan atlanır; üzerine yazmada önce geçici çıktı doğrulanır.
+
+Tarama, rebuild/Cut List güncellemesinden **sonra** gövdeleri ve özellikleri
+yeniden okur. Bazı çok gövdeli Flat-Pattern tanımlarında sabit yüz yalnız
+`AccessSelections` ile alınabilir; bu erişim `ReleaseSelectionAccess` ile
+kapatılır ve kullanıcının seçimi geri getirilir. Rollback kapsamından ham
+gövde işaretçisi taşınmaz; eşleştirmede kalıcı kimlik kullanılır. Belirsiz veya
+eksik bir açınım başka gövdenin açınımıyla doldurulmaz.
 
 DXF yapı/audit, geçerli geometri ve yaygın çizgi/yay/daire/polyline türlerinin
 aynı katmandaki kesin mükerrerleri denetlenir; layer'lar yeniden yazılmaz.
