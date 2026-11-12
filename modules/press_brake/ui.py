@@ -178,6 +178,7 @@ class PressBrakePage(BasePage):
         self.finish_layout()
         self.timer = QTimer(self); self.timer.timeout.connect(self.advance)
         self.bends.currentRowChanged.connect(self.select)
+        self.bends.itemClicked.connect(self.return_to_step)
         for field in (self.punch, self.die, self.channel, self.fixed, self.orientation, self.direction):
             field.currentIndexChanged.connect(self.assignment_changed)
         self.slider.valueChanged.connect(self.show_frame)
@@ -341,6 +342,11 @@ class PressBrakePage(BasePage):
         elif not self.result:
             self.preview_pending = True
             self.preview()
+
+    def return_to_step(self, item):
+        """Clicking the already selected card after Açınım / Bitmiş form shows that step again."""
+        if self.view_mode != 'step' and self.plan and not self.loading:
+            self.select(self.bends.row(item))
 
     def refresh_tool_buttons(self):
         if not self.plan or self.bends.currentRow() < 0:
@@ -565,7 +571,7 @@ class PressBrakePage(BasePage):
     def show_frame(self, index):
         if not self.result or not 0 <= index < len(self.result.frames):
             return
-        self.frame_index = index; frame = self.result.frames[index]
+        self.frame_index = index; frame = self.result.frames[index]; self.view_mode = 'step'
         if self.bends.currentRow() != frame.step:
             self.loading = True; self.bends.setCurrentRow(frame.step); self.loading = False
             self.select(frame.step, seek=False)
@@ -601,6 +607,7 @@ class PressBrakePage(BasePage):
 
     def show_shape(self, formed):
         self.view_mode = 'formed' if formed else 'flat'; self.preview_pending = False
+        self.preview_key = None   # the step preview was replaced on screen: draw it again when the step is shown
         self.pause(); self.viewer.frame = None; self.viewer.set_mesh(self.formed_mesh if formed else self.flat_mesh); self.viewer.bend_annotations.update()
         self.show_state('Nominal bitmiş form · takım/konumlandırma hareketi içermez' if formed else 'Gerçek açınım · delikler ve rahatlatmalar korunur',
                         'Bitmiş form · nominal' if formed else 'Açınım')
