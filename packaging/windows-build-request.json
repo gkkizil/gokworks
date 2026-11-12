@@ -1,14 +1,14 @@
 {
-  "request_id": "20261112-preview-autosave-ae743fe-exe",
-  "requested_at": "2026-11-12T09:32:31+00:00",
-  "source_commit": "ae743fefdf533e18d6512c26e5747d23ca3de515",
+  "request_id": "20261112-multibody-numbered-df44a28-exe",
+  "requested_at": "2026-11-12T10:47:00+00:00",
+  "source_commit": "df44a28dbdd069dbf918ce69761422869b797575",
   "validation_profile": "package-only",
   "skip_full_tests": true,
   "validation_runs": [
-    43188946470
+    43199712447
   ],
-  "validated_agent_head": "a14fe2744b3acce4d41d3aa673d84aaa2e06f63f",
-  "validated_base_commit": "609d2a182d253011108eb135cbf37346407bfa8b",
-  "reason": "Build the requested current-main EXE with PR 71's DXF/DWG preview native autosave. All three full Windows integration shards passed for this exact source head/base pair in run 43188946470. Local DXF/DWG, CAD conversion and profile-cutting regression: 681 passed, 8 platform/live skips, 44 subtests. This request changes only build metadata, so reuse that complete Windows regression proof and run the real onefile build plus three DPI frozen EXE smoke checks. Verify embedded preview autosave code, source revision and public binary SHA-256. Licensed live SolidWorks acceptance is separate; no UI click/SendKeys automation is used.",
+  "validated_agent_head": "d7836693f94ec2cbd0915009476f5eea2cd53cf6",
+  "validated_base_commit": "aaaef1e169f08d8ff18d9e76cae830403288a0e7",
+  "reason": "Build the requested current-main EXE after PR 72: refreshed multi-body sheet-metal/FlatPattern identities and stable ORHAN-01/02/03 DXF/DWG names. All three complete Windows integration shards passed this exact head/base pair in run 43199712447: 4905 records, 4851 passed, 54 skipped, zero failures or flaky retries. Local DXF/DWG, CAD converter and profile-cutting regression: 689 passed, 8 platform/live skips, 44 subtests. This request changes only build metadata; reuse that complete fresh Windows regression evidence and run the real onefile build plus three DPI frozen EXE smoke checks. Verify embedded multi-body refresh/naming and preserved preview autosave, source revision and public binary SHA-256. The user's actual native SLDPRT and licensed live SolidWorks are not available in this environment; automated tests are not live SolidWorks acceptance.",
   "cancelled": false
 }
