@@ -124,6 +124,15 @@ def test_stock_bound_does_not_certify_mixed_size_or_ambiguous_groups():
     assert uniform_stock_floor(p) is None
 
 
+def test_large_material_areas_require_distinct_usable_plates_without_rectangle_assumptions():
+    p=project(20);p.parts[0]=Part.create('Large',box(0,0,35,35),quantity=20)
+    p.sheets[0].width=p.sheets[0].height=60
+    assert uniform_stock_floor(p)==(20,20*3600)
+    # A perforated frame reserves its real material, not its full bounding box.
+    p.parts[0]=Part.create('Frame',box(0,0,35,35).difference(box(1,1,34,34)),quantity=2)
+    assert uniform_stock_floor(p)==(1,3600)
+
+
 def test_smallest_stock_is_still_tried_before_early_completion():
     p=project(1);p.sheets.append(Sheet(uid(),'Small',50,50))
     r=engine.nest(p)

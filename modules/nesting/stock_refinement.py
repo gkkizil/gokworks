@@ -6,6 +6,7 @@ Only complete drafts are committed; the caller owns geometry and time limits.
 """
 from collections import Counter
 from dataclasses import replace
+import time
 
 
 def refine_stock(project, plates, place, bounds, checkpoint, commit):
@@ -21,6 +22,10 @@ def refine_stock(project, plates, place, bounds, checkpoint, commit):
         return metrics[row.part_id]
 
     def area(plate): return plate[0].width*plate[0].height
+    def capacity(plate):
+        # A relaxed usable area: geometry error/pair gaps can only reduce it.
+        edge = project.options.margin+project.options.kerf/2
+        return max(0.,plate[0].width-2*edge+2e-6)*max(0.,plate[0].height-2*edge+2e-6)
     def net(rows): return sum(metric(p)[1] for p in rows)
     def compatible(row, sheet):
         p = parts[row.part_id]
@@ -40,16 +45,17 @@ def refine_stock(project, plates, place, bounds, checkpoint, commit):
         plates = normalize(draft)
         commit(plates)
 
-    def insert(rows, targets, precise):
+    def insert(rows, targets, precise, guard=checkpoint):
         draft = [(s,n,list(previous)) for s,n,previous in targets]
         for old in rows:
-            checkpoint()
+            guard()
             # More free material area is only a search order, never a fit test.
             choices = sorted(range(len(draft)),key=lambda i:area(draft[i])-net(draft[i][2]),reverse=True)
             for i in choices:
                 sheet,number,previous = draft[i]
                 if not compatible(old,sheet): continue
                 point = place(parts[old.part_id],sheet,previous,precise)
+                guard()
                 if point is not None:
                     x,y,angle = point
                     previous.append(replace(old,sheet_id=sheet.id,sheet_number=number,x=x,y=y,angle=angle))
@@ -57,6 +63,45 @@ def refine_stock(project, plates, place, bounds, checkpoint, commit):
             else:
                 return None
         return draft
+
+    def exchange(rows, targets):
+        """Move a few small blockers out, insert the tail, then reinsert all.
+
+        Keep the other placements fixed. This explores a different basin from a
+        greedy full rebuild, without removing any instance from the final job.
+        """
+        if len(rows)>12: return None
+        deadline = time.monotonic()+{'Hızlı':.03,'Dengeli':.1,'Yüksek':.25}[project.options.quality]
+        limit = {'Hızlı':2,'Dengeli':6,'Yüksek':10}[project.options.quality]
+        class YieldExchange(Exception):
+            pass
+        def guard():
+            checkpoint()  # Never swallow the caller's cancellation/deadline.
+            if time.monotonic()>=deadline: raise YieldExchange()
+        tried = 0
+        try:
+            for index,(_,_,previous) in enumerate(targets):
+                guard()
+                if not previous or len(previous)>128: continue
+                movable = sorted(previous,key=metric)[:max(4,limit-2)]
+                groups = [tuple(movable[:n]) for n in (2,3,4) if len(movable)>=n]
+                # Reserve attempts for pairs/groups as well as single blockers.
+                batches = [(p,) for p in movable[:max(1,limit-min(3,len(groups)))]]
+                batches = (batches+groups[:max(0,limit-1)])[:limit]
+                for displaced in batches:
+                    guard()
+                    if tried>=limit: return None
+                    tried += 1
+                    identities = {(p.part_id,p.instance) for p in displaced}
+                    cleared = [(s,n,[p for p in old if (p.part_id,p.instance) not in identities]
+                                if i==index else list(old)) for i,(s,n,old) in enumerate(targets)]
+                    draft = insert(rows,cleared,False,guard)
+                    if draft is not None:
+                        draft = insert(displaced,draft,False,guard)
+                        if draft is not None: return draft
+        except YieldExchange:
+            return None
+        return None
 
     def rebuild(rows, targets):
         orders = [sorted(rows,key=lambda p:(metric(p)[0],metric(p)[1]),reverse=True),
@@ -88,7 +133,14 @@ def refine_stock(project, plates, place, bounds, checkpoint, commit):
             # An admissible area rejection; holes remain subtracted, not filled.
             if not targets or net(pool)>sum(area(p) for p in targets)+1e-6:
                 failed.add(source_index); continue
-            draft = insert(sorted(source[2],key=metric,reverse=True),targets,False)
+            rooms = [capacity(p) for p in targets]
+            half_largest = max(rooms)/2+1e-6
+            if (net(pool)>sum(rooms)+len(pool)*1e-6
+                    or sum(metric(p)[1]>half_largest for p in pool)>len(targets)):
+                failed.add(source_index); continue
+            moving = sorted(source[2],key=metric,reverse=True)
+            draft = insert(moving,targets,False)
+            if draft is None: draft = exchange(moving,targets)
             if draft is None: draft = rebuild(pool,targets)
             if draft is None:
                 failed.add(source_index); continue

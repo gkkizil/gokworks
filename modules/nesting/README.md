@@ -198,7 +198,7 @@ yerleşim payları değişirse eski sonuç kapatılır ve yeniden yerleşim iste
 ## Hesap ve algoritma
 
 Motor adı **Sparrow + GOKWORKS**. Sparrow başlangıç planını oluşturur;
-bizim GOKWORKS NFP 1.7 katmanı bu planı sıkıştırır, delikleri doldurur ve
+bizim GOKWORKS NFP 1.8 katmanı bu planı sıkıştırır, delikleri doldurur ve
 bütün parçaları taşınabilen fazla levhaları her iki yönde kaldırır. Sabit
 yerleşim engel olursa aynı örnekleri yeniden dizmeyi ve gerçek içbükey
 boşlukları dener. Tam planı stoktaki daha küçük uyumlu saca aktarabilir;
@@ -209,6 +209,24 @@ ve parça sırası araması sürer. Motor seçimi gerekmez. Ayrıntılı
 konturun hesabı süreyi tüketirse önceki en iyi yerleşim korunur. Kenar ve
 köşe adayları gerçek konturlar, aralıklar ve kenar paylarıyla denetlenir;
 parça geometrisi sınır dikdörtgeniyle değiştirilmez.
+
+Sparrow başlangıcı kısa bir **MaxRects taslak portföyü** ile karşılaştırılır.
+Alan/uzun/kısa kenar sırası, en kısa kalan kenar/en az boş alan/alt köşe
+yerleştirmesi, iki eksen ve büyük/küçük stok önceliği farklı adaylar üretir.
+Kaliteye göre en fazla 4/6/8 taslak denenir; aşama ortak süreden yalnız
+0,25/0,6/1,2 saniyeye kadar ve kalan başlangıç bütçesinin dörtte birini alır.
+Tekrarlanan parçaların dönüş/sınır kutusu hesabı tekrar kullanılabilir.
+Dikdörtgenler yalnız muhafazakâr yer önerileridir; delik veya içbükey kontur
+kapatılmaz, sığmama sonucu kesin olanaksızlık sayılmaz. Kazanan bütün özgün
+konturlar ve mevcut izinlerle bağımsız doğrulanır; daha iyi Sparrow planı korunur.
+
+Son plaka doğrudan boşaltılamıyorsa kısa bir takas araması yapılır: hedefteki
+birkaç küçük engelleyici geçici çıkarılır, son plakadakiler yerleştirilir ve
+çıkarılanların **tamamı** tekrar yerleştirilir. En fazla 2/6/10 yerel taslak ve
+0,03/0,1/0,25 saniyelik ek arama denenir; ortak süre ve iptal önceliklidir.
+Yeniden yerleşemeyen parça, iptal veya yerel süre sonu bütün taslağı geri alır.
+Bu, diğer büyük parçaların iyi konumlarını koruyarak tüm havuzu yeniden
+dizmenin bulamadığı çözümü bulabilir. [Kaynak eşlemesi ve sınırlar](STRATEGIES.md).
 
 Süre bütçesi parça adedi, gerçek kontur köşe sayısı, izinli dönüş açıları ve
 kalite seviyesine göre başlatılır. Ölçülen deneme maliyeti sonraki aramaya
