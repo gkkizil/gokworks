@@ -1,4 +1,4 @@
-"""Read the exact source in one STA; no Save, feature suppression or new SW instance."""
+"""Exact-source STA preview; native autosave is an explicit caller policy."""
 
 from contextlib import contextmanager, ExitStack
 from dataclasses import replace
@@ -16,6 +16,10 @@ from .geometry import make_mesh, MAX_TRIANGLES
 from .models import Payload
 
 
+class _SavedSourceChanged(ApiError):
+    """Save rebuilt the live model; discard the snapshot and read it again."""
+
+
 def file_stamp(path):
     try:
         info = Path(path).stat()
@@ -25,6 +29,68 @@ def file_stamp(path):
 
 
 class Session(ReadSession):
+    save_modified = False
+
+    def save_pending(self, *, extra=()):
+        if not self.save_modified:
+            return [], []
+        try:
+            return exporter.save_modified_documents(exporter._late_bound(self.app), extra=extra)
+        except exporter.SaveDocumentsError as error:
+            self._save_failure = str(error)
+            raise ApiError(str(error) + ' Belgeler açık bırakılacak; önizleme tamamlanmadı.') from error
+        finally:
+            extra = ()
+
+    def document(self, path=None):
+        # Inventory and programmatic read-only callers retain their old policy.
+        # A preview explicitly allowed to save must not open its own source with
+        # ReadOnly: rebuild/export can dirty even an initially clean part.
+        if self.save_modified and path is not None:
+            from modules.cad_converter import api
+            path = str(Path(path).resolve())
+            if not Path(path).is_file():
+                raise FileNotFoundError('Kaynak model bulunamadı: ' + Path(path).name)
+            model = call(self.app, 'GetOpenDocumentByName', path)
+            if model is None:
+                errors, warnings = api.out_int(), api.out_int()
+                options = self.c('swOpenDocOptions_Silent') | self.c('swOpenDocOptions_OverrideDefaultLoadLightweight')
+                model = call(self.app, 'OpenDoc6', path, self.c('swDocPART'), options, '', errors, warnings)
+                key = api.path_key(path)
+                self.load_warnings[key] = int(warnings.value)
+                if model is not None and not warnings.value & self.c('swFileLoadWarning_AlreadyOpen'):
+                    self.owned[key] = call(model, 'GetTitle')
+                    if not hasattr(self, '_document_paths'): self._document_paths = {}
+                    self._document_paths[key] = path
+                if model is None or errors.value:
+                    raise ApiError(f'Model açılamadı; SolidWorks kodu {errors.value}.', errors.value, warnings.value)
+            model = None
+        return super().document(path)
+
+    def _close_document(self, path, *, window_only=False):
+        if self.save_modified:
+            # On failure/cancellation never enter CloseDoc with dirty documents:
+            # it can open the modal "Save Modified Documents" dialog. Do not
+            # force-discard or save a model whose configuration failed to restore.
+            try:
+                app = exporter._late_bound(self.app)
+                if getattr(self, '_save_failure', ''):
+                    raise ApiError(self._save_failure)
+                if hasattr(app, '_FlagAsMethod'): app._FlagAsMethod('GetDocuments')
+                for model in exporter._value(app, 'GetDocuments') or ():
+                    if exporter._value(model, 'GetSaveFlag'):
+                        raise ApiError('Kaydedilmemiş SolidWorks belgesi var.')
+            except Exception as error:
+                raise RestoreError(f'{error} Kayıt penceresi açılmaması için belgeler açık bırakıldı.') from error
+            finally:
+                app = model = None
+        return super()._close_document(path, window_only=window_only)
+
+    def __exit__(self, kind, error, tb):
+        if self.save_modified and isinstance(error, (RestoreError, exporter.SourceRestoreError)):
+            self._save_failure = str(error)
+        return super().__exit__(kind, error, tb)
+
     @contextmanager
     def folded(self, model, requested):
         """Only follow an actual derived-config parent; never guess from names."""
@@ -246,13 +312,15 @@ def source_changes(request, before, update):
             or request.update_stamp is not None and update != request.update_stamp)
 
 
-def flat_for_source(session, model, request, before, update, body_count, stop):
+def flat_for_source(session, model, request, before, update, body_count, stop, *, save_identity=None):
     """Work in the exported configuration, before taking the folded snapshot."""
     warnings = []
     changed = source_changes(request, before, update)
     output = Path(request.output) if request.output else None
     if output and output.suffix.casefold() == '.dxf' and not changed and output.is_file():
         flat = read_flat(output, 'Oluşturulmuş DXF çıktısı', stop)
+        if save_identity is not None:
+            save_identity['source_stamp'] = before
         if request.output_status == 'skipped':
             warnings.append('Mevcut DXF yeniden oluşturulmadı; kaynakla güncelliği doğrulanmadı.')
     else:
@@ -262,12 +330,13 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
             raise ApiError('Çok gövdeli kaynak için güvenilir açınım önizlemesi yok; gövdeye özel çıktı gerekli.')
         checkpoint(stop)
         # Same source/configuration and native export path. Never an inferred
-        # DXF->3D model, never save a native source or replace the user's output.
+        # DXF->3D model and never replace the user's production output.
         with TemporaryDirectory(prefix='gokworks-flat-preview-') as folder:
             temporary = Path(folder) / 'preview.dxf'
             try:
                 status, detail = exporter.export_one_part(session.app, request.source, [temporary],
                     bend_lines=request.bend_lines, stop_event=stop,
+                    save_modified=bool(session.save_modified), output_identity=save_identity,
                     sheet=dict(configuration=request.configuration, body_ref=request.body_ref,
                                flat_ref=request.flat_ref, flat_pattern=request.flat_pattern) if request.flat_ref else None,
                     selection_session=session if request.flat_ref else None)
@@ -283,7 +352,24 @@ def flat_for_source(session, model, request, before, update, body_count, stop):
     return flat, warnings
 
 
-def capture(request, cache, stop=None, *, session_factory=Session, geometry_only=False, on_flat=None):
+def capture(request, cache, stop=None, *, session_factory=Session, geometry_only=False, on_flat=None,
+            save_modified=False):
+    """UI explicitly enables native autosave; legacy/API callers stay read-only."""
+    if type(save_modified) is not bool:
+        raise ValueError('save_modified bool olmalı.')
+    for attempt in range(2):
+        try:
+            return _capture_once(request, cache, stop, session_factory=session_factory,
+                                 geometry_only=geometry_only, on_flat=on_flat, save_modified=save_modified)
+        except _SavedSourceChanged as error:
+            cache.clear()
+            if attempt:
+                raise ApiError('SolidWorks kayıttan sonra modeli tekrar güncelliyor; eski önizleme gösterilmedi. '
+                               'SolidWorks’te yeniden oluşturup Yenile’ye basın.') from error
+
+
+def _capture_once(request, cache, stop=None, *, session_factory=Session, geometry_only=False, on_flat=None,
+                  save_modified=False):
     """One native read; final payload is published only after state restoration.
 
     on_flat receives immutable, provisional geometry after flat-export/config
@@ -297,12 +383,20 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
     started, timings = perf_counter(), []
     flat_cache_key = None
     with session_factory() as session:
+        session.save_modified = save_modified
         model = body = None
         try:
             checkpoint(stop)
+            if save_modified:
+                saved, notes = session.save_pending()
+                warnings.extend(notes)
+                if saved: warnings.append(f'SolidWorks: {len(saved)} belge önizlemeden önce otomatik kaydedildi.')
             model = session.document(request.source)
             if call(model, 'GetType') != session.c('swDocPART'):
                 raise ApiError('Önizleme kaynağı parça değil.')
+            if save_modified:
+                # Own saves are a new source revision, not an external edit.
+                before = file_stamp(request.source)
             # Do not take the mesh stamp before a temporary native flat export:
             # ShowConfiguration2 may itself advance SW's update counter.
             exported_configuration = request.configuration or session.active_configuration(model)
@@ -315,7 +409,10 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                     pending, rebuild_note = session.ensure_rebuilt(model)
                     if pending is not False:
                         raise ApiError('Modelin güncelliği doğrulanamadı. SolidWorks’te yeniden oluşturup Yenile’ye basın.')
-                    if rebuild_note: warnings.append(rebuild_note[0].upper() + rebuild_note[1:])
+                    if rebuild_note:
+                        if save_modified:
+                            rebuild_note = rebuild_note.replace('(dosya kaydedilmedi)', '(değişiklikler otomatik kaydedilir)')
+                        warnings.append(rebuild_note[0].upper() + rebuild_note[1:])
                     body, body_count = session.body(model, request.body_ref)
                     update = optional(model, 'GetUpdateStamp')
                     # Cache only native, body-specific flat geometry with a
@@ -332,7 +429,20 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                     try:
                         flat = cache.get_flat(flat_key(update)) if cache_flat else None
                         if flat is None:
-                            flat, notes = flat_for_source(session, model, request, before, update, body_count, stop)
+                            if save_modified:
+                                identity = {}
+                                flat, notes = flat_for_source(session, model, request, before, update, body_count, stop,
+                                                             save_identity=identity)
+                                # ExportToDWG2 can request Save Modified Documents
+                                # itself, so its own silent-save path must run too.
+                                # The restored export reports the exact revision
+                                # it saved; do not mistake that for an outside edit.
+                                saved_stamp = identity.get('source_stamp')
+                                if saved_stamp is None or tuple(saved_stamp) != file_stamp(request.source):
+                                    raise ApiError('Önizleme kaydının kaynak sürümü doğrulanamadı.')
+                                before = tuple(saved_stamp)
+                            else:
+                                flat, notes = flat_for_source(session, model, request, before, update, body_count, stop)
                         else:
                             with session.selected_flat(model, request.body_ref, request.flat_ref, stop,
                                                        feature_name=request.flat_pattern):
@@ -407,6 +517,27 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
                         info.append(('DXF çizgi toplamı ≈', f'{flat.cut_length:.2f} mm · katman sınıflamasıyla'))
                 cache_mesh &= optional(model, 'GetSaveFlag') is False
                 payload = Payload(request.source, configuration, mesh, flat, tuple(info), revision, tuple(warnings), cached)
+            if save_modified:
+                # Both exported and folded configuration contexts have restored
+                # before persisting anything. Never save a temporary flat state.
+                checkpoint(stop)
+                if file_stamp(request.source) != before:
+                    raise ApiError('Kaynak dosya önizleme sırasında değişti; otomatik kayıt yapılmadı. Yenileyin.')
+                prior_save_update = optional(model, 'GetUpdateStamp')
+                saved, notes = session.save_pending(extra=(model,))
+                after_save_update = optional(model, 'GetUpdateStamp')
+                if saved:
+                    if type(prior_save_update) is int and type(after_save_update) is int and prior_save_update != after_save_update:
+                        raise _SavedSourceChanged('Kayıt sırasında model güncellendi.')
+                    # Save can alter file/configuration counters. Do not retain a
+                    # mesh/flat cache stamped before it. Review gets the new disk
+                    # revision; old DXFs still retain their original provenance.
+                    before = file_stamp(request.source)
+                    revision = (revision[0], before, revision[2], revision[3], None)
+                    cache_mesh = False; flat_cache_key = None
+                    notes = [*notes, f'SolidWorks: {len(saved)} belge önizleme sonunda otomatik kaydedildi.']
+                prior_notes = tuple(w for w in payload.warnings if w != 'SolidWorks oturumundaki kaydedilmemiş güncel geometri gösteriliyor.')
+                payload = replace(payload, revision=revision, warnings=(*prior_notes, *notes))
         finally:
             # Drop all CAD pointers while still inside the owning STA.
             model = body = None
@@ -418,6 +549,6 @@ def capture(request, cache, stop=None, *, session_factory=Session, geometry_only
     return replace(payload, timings=tuple(timings) + (('toplam', perf_counter()-started),))
 
 
-def capture_geometry(request, cache, stop=None, *, session_factory=Session):
+def capture_geometry(request, cache, stop=None, *, session_factory=Session, save_modified=False):
     """Publish a restored 3D snapshot without waiting for temporary DXF export."""
-    return capture(request, cache, stop, session_factory=session_factory, geometry_only=True)
+    return capture(request, cache, stop, session_factory=session_factory, geometry_only=True, save_modified=save_modified)

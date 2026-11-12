@@ -137,6 +137,7 @@ class DxfDwgPage(ExportPage):
         self._events = _PageEvents(self)
         self.handle_events = self._events.accept
         self.preview = PreviewPanel()
+        self.preview.refresh_button.setToolTip('Önizlemeyi yeniler; değiştirilmiş SolidWorks belgeleri sessizce otomatik kaydedilir.')
         self.preview_cache = MeshCache()
         self.preview_snapshots = PreviewCache()
         self.preview_snapshot_cached = False
@@ -594,6 +595,18 @@ class DxfDwgPage(ExportPage):
         if self._preview_cancelled:
             return
         if self.preview_request and path == self.preview_request.source:
+            # Native autosave can replace the file while this worker owns the
+            # preview. Its live/disk validation decides whether the snapshot is
+            # current; restarting here would create a save -> refresh loop.
+            if Path(path).is_file() and path not in self.watcher.files():
+                self.watcher.addPath(path)
+            if self.preview_running:
+                return
+            try:
+                if self.preview_payload and self.preview_payload.revision[1] == file_stamp(path):
+                    return  # A delayed notification for the revision just read.
+            except RuntimeError:
+                pass
             self.refresh_preview()
 
     def resume_preview(self):
@@ -710,7 +723,7 @@ class DxfDwgPage(ExportPage):
         self.preview_pending = None; self.preview_force = False
         self.preview_running = True
         self.preview.flat_label.setText('Açınım · okunuyor…')
-        self.set_status('Seçili gövdenin açınımı okunuyor…')
+        self.set_status('SolidWorks belgeleri otomatik kaydediliyor; seçili gövdenin açınımı okunuyor…')
         def operation(sink, stop):
             try:
                 if force: self.preview_cache.clear()
@@ -719,7 +732,7 @@ class DxfDwgPage(ExportPage):
                         def flat_ready(flat):
                             sink.put(('dxf_preview_flat', (generation, flat)))
                             sink.flush()
-                        payload = capture(request, self.preview_cache, stop, on_flat=flat_ready)
+                        payload = capture(request, self.preview_cache, stop, on_flat=flat_ready, save_modified=True)
                     else:
                         # Optional injected readers retain their staged contract.
                         if self._capture_geometry is not None:
@@ -799,13 +812,26 @@ class DxfDwgPage(ExportPage):
                         self._reveal_preview()
                         self.preview.focus_flat()
                 elif kind in ('dxf_preview_geometry', 'dxf_preview'):
+                    if kind == 'dxf_preview':
+                        try:
+                            current_stamp = file_stamp(self.preview_request.source)
+                        except RuntimeError:
+                            current_stamp = None
+                        if result.revision[1] != current_stamp:
+                            self.preview_payload = None
+                            self.preview.clear('Kaynak dosya önizleme tamamlanırken değişti. Yenile’ye basın.')
+                            self.set_status('Kaynak değişti; eski önizleme gösterilmedi.', True)
+                            continue
+                        if self.preview_request.source not in self.watcher.files():
+                            self.watcher.addPath(self.preview_request.source)
                     self._preview_restore_failed = False
                     self.preview_payload = result
                     self.preview_snapshot_cached = False
-                    if (kind=='dxf_preview' and self.preview_snapshot_key is not None
-                            and self.snapshot_key(self.preview_request)==self.preview_snapshot_key
-                            and result.revision[1]==self.preview_snapshot_key[1]):
-                        self.preview_snapshots.put(self.preview_snapshot_key,result)
+                    if kind=='dxf_preview':
+                        current_key = self.snapshot_key(self.preview_request)
+                        if current_key is not None and result.revision[1] == current_key[1]:
+                            self.preview_snapshot_key = current_key
+                            self.preview_snapshots.put(current_key,result)
                     self.preview.show_payload(result)
                     if kind == 'dxf_preview' and result.timings:
                         self.results.append_log('Önizleme · ' + Path(result.source).name + ' · '

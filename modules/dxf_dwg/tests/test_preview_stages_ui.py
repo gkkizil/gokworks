@@ -6,7 +6,7 @@ import pytest
 
 from modules.cad_converter.api import ApiError, RestoreError
 from modules.cad_converter.models import Cancelled
-from .test_preview_ui import page, payload, select  # noqa: F401
+from .test_preview_ui import page as page, payload, select
 
 
 @pytest.mark.parametrize('outcome', ['success', 'error', 'cancel', 'restore_error'])
@@ -14,7 +14,8 @@ def test_default_reader_shows_flat_while_mesh_waits_and_clears_it_on_failure(pag
     from modules.dxf_dwg import ui
     p, window, files = page
     release, calls, threads = threading.Event(), [], []
-    def reader(request, cache, stop, *, on_flat):
+    def reader(request, cache, stop, *, on_flat, save_modified=False):
+        assert save_modified is True
         calls.append(request)
         result = payload(request.source)
         on_flat(result.flat)
@@ -54,7 +55,8 @@ def test_stop_button_clears_provisional_flat_after_native_cleanup_and_does_not_r
     from modules.dxf_dwg import ui
     p, window, _ = page
     calls = []
-    def reader(request, cache, stop, *, on_flat):
+    def reader(request, cache, stop, *, on_flat, save_modified=False):
+        assert save_modified is True
         calls.append(request)
         on_flat(payload(request.source).flat)
         assert stop.wait(5)
