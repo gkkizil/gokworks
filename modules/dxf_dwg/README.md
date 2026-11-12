@@ -30,12 +30,24 @@ kalır; diğer hazır sacların aktarımını engellemez.
 
 ## Kaynak güvenliği ve durdurma
 
-Yeni envanterden tarama, önizleme ve aktarım, kaynaklara `Save3`/`SaveAs`
-uygulamaz; kaydedilmemiş kullanıcı çalışması da otomatik kaydedilmez.
-Konfigürasyon, seçili nesneler, görünürlük ve aktif belge geri alınır.
-Geometri, suppression, otomatik Cut List ve layer ayarları değiştirilmez.
-Araç yalnız kendisinin açtığı belgeleri kapatır. Cut List yenilenmez, rebuild
-yapılmaz. Güncellik doğrulanamıyorsa SolidWorks'te rebuild yapıp yeniden tarayın.
+Yeni envanterden tarama ve üretim aktarımı kaynaklara `Save3`/`SaveAs`
+uygulamaz. **Qt DXF/DWG önizlemesi**, kullanıcının 12 Kasım 2026 talimatıyla,
+değiştirilmiş açık SolidWorks belgelerini `Save3(Silent | SaveReferenced)`
+ile otomatik kaydeder. Bu, montajın değiştirilmiş parçalarını da kapsar;
+kayıt penceresini tıklamaz veya global SolidWorks uyarı ayarlarını değiştirmez.
+Kayıt önizleme başında, geçici açınım aktarımının kendi güvenli kayıt yolunda
+ve asıl konfigürasyon geri alındıktan sonra yapılır. Geçici native açınım
+durumu geri alınmadan kayıt yapılmaz. Salt okunur, henüz ad verilmemiş veya
+kaydı başarısız belgede işlem açıklamayla durur; belge kapatılarak değişiklik
+kaybettirilmez. Kayıt modeli güncellerse önizleme bir kez yeniden okunur;
+durmadan değişen modelden eski görüntü yayımlanmaz.
+Programatik `capture(...)` / `capture_geometry(...)` varsayılanları hâlâ
+kaydetmez; aynı davranış için açıkça `save_modified=True` verilir.
+Başarılı işlemde konfigürasyon, seçili nesneler, görünürlük ve aktif belge geri
+alınır. Büküm parametreleri, suppression ve layer ayarları değiştirilmez.
+Mevcut yeniden oluşturma/kesim listesi güncellemesi, bekleyen sac geometrisini
+okumaya hazırlar. Araç yalnız kendisinin açtığı belgeleri kapatır. Kayıt/geri
+alma hatasında değiştirilmiş belge açık ve kurtarılabilir bırakılır.
 
 **Durdur**, sonraki gövde/biçimi ve geçici çıktının yayımlanmasını engeller.
 Tarama STA'sında bekleyen okunur COM çağrısına iptal istenir; büyük montajın
@@ -46,7 +58,7 @@ hatası iptal/başarı gibi gizlenmez.
 
 Eski scriptlerin `export_parts(..., items=None)` ve `export_one_part` çağrı
 sözleşmeleri korunur. Eski script yolu tek etkin gövde sınırını ve daha önce
-istenmiş Save All politikasını taşır; normal yeni Qt akışı `items` gönderir
+istenmiş Save All politikasını taşır; normal yeni Qt üretim aktarımı `items` gönderir
 ve kaynak kaydetmez. Kimlik verilmeden çok gövdeli aktarım yapılmaz.
 
 ## Gövde eşleşmesi, adet ve performans
