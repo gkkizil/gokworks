@@ -191,6 +191,28 @@ SolidWorks COM nesneleri veya canlı UI nesneleri önbelleğe taşınmaz.
 - Proses kuvveti, yaylanma, CNC strok ve üretim uygunluğu hesaplanmaz. Nominal
   katı kontrolü gerçek tezgâh ve operatör kurulum doğrulamasının yerini almaz.
 
+## Hesap hızı (12 Kasım 2026)
+
+Kontrolün kuralları değişmeden gereksiz iş kaldırıldı:
+
+- **Dışbükey zarf ayrımı.** Her gövdenin dışbükey bir zarfı vardır (takımda kesitin dışbükey
+  kabuğu, sacda kendi eksenindeki kutu). İki zarf, yüz normallerinden biri boyunca ayrıksa
+  katılar değemez; bu çiftlerde katı kesişimi hesaplanmaz ve aradaki boşluk örneklemeyi
+  sıklaştırmak için alt sınır olarak kullanılır. Ayrılamayan her çift eskisi gibi OCCT katı
+  kesişimiyle kontrol edilir.
+- **Birbirine göre durağan çiftler.** Yaklaşma ve geri çekilmede yalnız üst takım grubu hareket
+  eder. Aynı tarafta kalan çiftler (ör. sac–alt kalıp) her pozda çarpışma için kontrol edilir
+  ama 0,5 mm'lik sık örnekleme istemez.
+- **Bitişik segmentler tek katı.** Aynı kesitli, uç uca segmentler tek prizma olarak kurulur;
+  aralıklı segmentler ayrı kalır. Çarpışma kaydında birleşen grup ilk segmentin numarasını taşır.
+- **Görüntü ağı önbelleği.** Her kaynak katının üçgenleri bir kez üretilir; pozlarda yalnız
+  rijit yerleşim uygulanır.
+- Genel takımların yuvarlatmaları daha az yüzeyle çizilir (kiriş hatası < 0,02 mm).
+
+Ölçüm (aynı makine, tam örnekleme): tek büküm genel takımlarla ~100 sn → ~5 sn, DEMO
+takımlarla 9,7 → 4,3 sn; U parçası 31 → 15 sn; dört bükümlü kutu genel takımlarla ~35 sn.
+39 demo × takım × seçenek kombinasyonu taranarak sonuçların tutarlı kaldığı kontrol edildi.
+
 ## Kaynak dosyaları ve doğrulama
 
 `models.py`: değişmez veri sözleşmeleri; `kinematics.py`: ağaç dönüşümleri;

@@ -180,3 +180,51 @@ def test_scene_colours_bodies_by_kind_and_machine_stays_out_of_the_checked_bodie
     assert {rgb(SCENE_COLOURS[k]) for k in ('sheet', 'punch', 'die', 'machine')} <= colours
     flat = mesh(g.part_bodies({}))
     assert {tuple(c) for c in np.frombuffer(flat.colours, np.uint8).reshape(-1, 3)} == {rgb(SCENE_COLOURS['sheet'])}
+
+
+def test_separation_is_a_true_lower_bound_and_never_hides_an_overlap():
+    """The convex-container shortcut may only skip pairs that really are apart."""
+    from itertools import combinations
+    from OCP.BRepExtrema import BRepExtrema_DistShapeShape
+    from modules.press_brake.collision import intersection, separation, volume
+    plan = load_demo('U'); plan = replace(plan, steps=tuple(replace(s, punch='demo-wide') for s in plan.steps))   # known collision
+    g = Geometry(plan); checked = positive = overlapping = 0
+    for index, fraction, phase, travel in ((1, 1., 'retract', 6.), (1, .7, 'bend', 0)):
+        bodies, _ = g.scene(index, step_angles(plan, index, fraction), phase, travel)
+        assert all(b.hull is not None for b in bodies)
+        for a, b in combinations(bodies, 2):
+            if a.kind == b.kind != 'sheet' or 'holder' in (a.kind, b.kind):
+                continue
+            bound = separation(a, b); checked += 1
+            if bound > 1e-7:
+                positive += 1
+                measure = BRepExtrema_DistShapeShape(a.shape, b.shape)
+                assert measure.IsDone() and measure.Value() >= bound-1e-6, (a.id, b.id, bound, measure.Value())
+            elif volume(intersection(a.shape, b.shape))[0] > .001:
+                overlapping += 1
+    assert checked >= 10 and positive >= 3 and overlapping >= 1          # both branches really exercised
+
+
+def test_abutting_segments_become_one_solid_and_gapped_ones_stay_apart():
+    from modules.press_brake.geometry import joined
+    one = joined([Segment(-40, 50), Segment(30, 10), Segment(10, 20)])
+    assert [(s.start, s.length) for s in one] == [(-40, 80)]
+    two = joined([Segment(-40, 30), Segment(5, 35)])
+    assert [(s.start, s.length) for s in two] == [(-40, 30), (5, 35)]
+    plan = load_demo('L120'); step = replace(plan.steps[0], punch_segments=(Segment(-40, 40), Segment(0, 40)), die_segments=(Segment(-40, 30), Segment(5, 35)))
+    plan = replace(plan, steps=(step,))
+    ids = [b.id for b in Geometry(plan).scene(0, step_angles(plan, 0, 0))[0]]
+    assert ids.count('punch:DEMO-NARROW:1') == 1 and 'punch:DEMO-NARROW:2' not in ids
+    assert 'die:DEMO-2V:1' in ids and 'die:DEMO-2V:2' in ids
+
+
+def test_cached_display_mesh_equals_the_uncached_one():
+    import numpy as np
+    from modules.press_brake.geometry import mesh
+    plan = load_demo('U'); g = Geometry(plan)
+    bodies, _ = g.scene(1, step_angles(plan, 1, .6), 'bend', 0)
+    cached, again, direct = mesh(bodies, None, g.mesh_cache), mesh(bodies, None, g.mesh_cache), mesh(bodies)
+    assert cached == again and cached.triangles == direct.triangles and cached.colours == direct.colours
+    assert np.allclose(cached.bounds, direct.bounds, atol=1e-4) and np.allclose(cached.origin, direct.origin, atol=1e-4)
+    a, b = (np.sort(np.frombuffer(m.positions, '<f4').reshape(-1, 3), axis=0) for m in (cached, direct))
+    assert np.allclose(a, b, atol=2e-3)                                   # same triangles, placed numerically vs by OCCT
