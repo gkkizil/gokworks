@@ -69,11 +69,13 @@ def meaningful_improvement(score, previous):
 
 def uniform_stock_floor(project):
     """An admissible count/area bound only for unambiguous equal-area stocks."""
-    groups = {}
+    groups = {}; demands = {}
     for part in project.parts:
         key = (part.material,part.thickness)
         area,count = groups.get(key,(0.,0))
-        groups[key] = (area+part.area*part.quantity,count+part.quantity)
+        part_area = part.area
+        groups[key] = (area+part_area*part.quantity,count+part.quantity)
+        demands.setdefault(key,[]).append((part_area,part.quantity))
     count = 0; area = 0.
     for (material,thickness),(net,quantity) in groups.items():
         # Nearly equal but distinct thickness groups can share a stock under
@@ -85,7 +87,14 @@ def uniform_stock_floor(project):
         areas = {s.width*s.height for s in choices}
         if len(areas)!=1:return None
         sheet_area = next(iter(areas))
-        minimum = max(1,math.ceil((net-quantity*1e-6)/sheet_area))
+        # Ignore geometry error and pair gaps here to keep the bound relaxed.
+        # Every material polygon must still lie inside the usable edge rectangle.
+        edge = project.options.margin+project.options.kerf/2
+        usable = max(max(0.,s.width-2*edge+2e-6)*max(0.,s.height-2*edge+2e-6) for s in choices)
+        if usable <= 0:return None
+        large = sum(q for area,q in demands[(material,thickness)] if area>usable/2+1e-6)
+        minimum = max(1,large,math.ceil((net-quantity*1e-6)/sheet_area),
+                      math.ceil((net-quantity*1e-6)/usable))
         count += minimum;area += minimum*sheet_area
     return count,area
 

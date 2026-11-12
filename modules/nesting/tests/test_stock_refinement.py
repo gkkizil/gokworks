@@ -50,6 +50,64 @@ def test_an_earlier_small_offcut_can_evacuate_into_a_later_large_plate():
     assert asdict(p)==source and asdict(initial)==before
 
 
+def test_small_blocker_relocation_removes_the_tail_plate_without_rebuilding_the_large_parts():
+    sizes = [(6,4),(3,6),(2,5),(6,2),(4,2)]
+    p = project([Part.create(str(i),box(0,0,w,h)) for i,(w,h) in enumerate(sizes)],
+                [Sheet('s','Plate',10,10,stock=2)])
+    p.options.margin = p.options.gap = p.options.kerf = 0
+    initial = seed(p,[(0,1,0,1,0,0,0),(1,1,0,1,6,0,0),
+                      (3,1,0,1,0,4,0),(4,1,0,1,5,6,0),(2,1,0,2,0,0,0)])
+    before = deepcopy(asdict(initial)); source = deepcopy(asdict(p))
+    result = refine(p,initial)
+    assert validate_result(p,result) and len({r.sheet_number for r in result.placements}) == 1
+    assert asdict(initial) == before and asdict(p) == source
+    # The expensive large poses stay fixed; moving one small blocker is enough.
+    for index in (0,1):
+        assert next(r for r in result.placements if r.part_id==p.parts[index].id) == initial.placements[index]
+    assert {(r.part_id,r.instance) for r in result.placements} == {(r.part_id,r.instance) for r in initial.placements}
+
+
+def test_material_area_proves_twenty_large_copies_cannot_evacuate_without_search():
+    from modules.nesting.stock_refinement import refine_stock
+    p = project([Part.create('Large',box(0,0,35,35),quantity=20)],
+                [Sheet('s','Plate',60,60,stock=20)])
+    p.options.margin=10
+    initial = seed(p,[(0,i,0,i,10.1,10.1,0) for i in range(1,21)])
+    plates = [(p.sheets[0],r.sheet_number,[r]) for r in initial.placements]
+    def forbidden(*args):raise AssertionError('Impossible consolidation must be rejected before geometric work')
+    result,counts = refine_stock(p,plates,forbidden,lambda *args:(0,0,35,35),lambda:None,forbidden)
+    assert result==plates and counts=={'s':20}
+
+
+@pytest.mark.parametrize('interruption', ['failed-reinsert','cancel','local-deadline'])
+def test_exchange_drafts_cannot_lose_displaced_instances_or_mutate_the_input(monkeypatch,interruption):
+    from modules.nesting import stock_refinement
+    p = project([Part.create('Small',box(0,0,20,20)),Part.create('Tail',box(0,0,60,60))],
+                [Sheet('small','Plate A',100,100,stock=1),Sheet('big','Plate B',100,100,stock=1)])
+    initial = seed(p,[(0,1,0,1,20,20,0),(1,1,1,1,1.1,1.1,0)])
+    plates = [(p.sheets[0],1,[initial.placements[0]]),(p.sheets[1],1,[initial.placements[1]])]
+    before = deepcopy(plates); completed = []; inserted = []; cancelled = [False]; clock = [0.]
+    monkeypatch.setattr(stock_refinement,'time',SimpleNamespace(monotonic=lambda:clock[0]))
+    def checkpoint():
+        if cancelled[0]: raise InterruptedError('Caller cancelled')
+    def place(part,sheet,previous,precise):
+        if part.id==p.parts[1].id and sheet.id=='small' and not previous:
+            inserted.append(part.id)
+            if interruption=='cancel':cancelled[0]=True
+            if interruption=='local-deadline':clock[0]+=10
+            return (1.1,1.1,0)
+        return None  # Small blocker cannot be reinserted: never drop it.
+    def run():
+        return stock_refinement.refine_stock(p,plates,place,lambda *args:(0,0,20,20),
+                                            checkpoint,lambda rows:completed.append(deepcopy(rows)))
+    if interruption=='cancel':
+        with pytest.raises(InterruptedError,match='Caller cancelled'):run()
+    else:
+        unchanged,counts = run()
+        assert unchanged == plates and counts == {'small':1,'big':1}
+    assert inserted and plates == before and completed == []
+
+
 def test_exact_concave_repair_removes_a_plate_when_corner_moves_cannot():
     bracket=Polygon([(0,0),(100,0),(100,20),(20,20),(20,80),(100,80),(100,100),(0,100)])
     p=project([Part.create('C bracket',bracket),Part.create('Insert',box(0,0,50,40))],

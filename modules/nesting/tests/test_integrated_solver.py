@@ -8,6 +8,7 @@ import pytest
 from shapely.geometry import box, MultiPolygon, Polygon
 
 from modules.nesting import engine, sparrow, solver
+from modules.nesting import ENGINE_VERSION
 from modules.nesting.layout_score import layout_score
 from modules.nesting.models import Part, Placement, Result
 from modules.nesting.search_budget import SearchBudget
@@ -127,4 +128,4 @@ def test_integrated_result_saves_and_loads_with_its_provenance(tmp_path):
     save_project(p,path,result);loaded,saved=load_project(path)
     assert loaded.options.engine=='Sparrow + GOKWORKS'
     assert saved==result and validate_result(loaded,saved)
-    assert 'Sparrow 0.3.0' in saved.engine_version and 'GOKWORKS NFP 1.7' in saved.engine_version
+    assert 'Sparrow 0.3.0' in saved.engine_version and f'GOKWORKS NFP {ENGINE_VERSION}' in saved.engine_version
