@@ -1,0 +1,5690 @@
+{
+  "schema": "gokworks.tosyali_v_reference",
+  "version": 1,
+  "document_sha256": "8399b6b5a123573e99e8a982afd6c7c1504e160edc845d6fc6218812461d689c",
+  "document": "Tosyalı Teknik Bilgi Kataloğu — kullanıcı PDF, tarihsiz",
+  "pulleys": [
+    {
+      "code": "T SPZ 056-1",
+      "profile": "SPZ",
+      "datum_mm": 56.0,
+      "outside_mm": 60.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 060-1",
+      "profile": "SPZ",
+      "datum_mm": 60.0,
+      "outside_mm": 64.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 063-1",
+      "profile": "SPZ",
+      "datum_mm": 63.0,
+      "outside_mm": 67.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 067-1",
+      "profile": "SPZ",
+      "datum_mm": 67.0,
+      "outside_mm": 71.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 071-1",
+      "profile": "SPZ",
+      "datum_mm": 71.0,
+      "outside_mm": 75.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 075-1",
+      "profile": "SPZ",
+      "datum_mm": 75.0,
+      "outside_mm": 79.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 080-1",
+      "profile": "SPZ",
+      "datum_mm": 80.0,
+      "outside_mm": 84.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 085-1",
+      "profile": "SPZ",
+      "datum_mm": 85.0,
+      "outside_mm": 89.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 090-1",
+      "profile": "SPZ",
+      "datum_mm": 90.0,
+      "outside_mm": 94.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 095-1",
+      "profile": "SPZ",
+      "datum_mm": 95.0,
+      "outside_mm": 99.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 100-1",
+      "profile": "SPZ",
+      "datum_mm": 100.0,
+      "outside_mm": 104.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 106-1",
+      "profile": "SPZ",
+      "datum_mm": 106.0,
+      "outside_mm": 110.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 112-1",
+      "profile": "SPZ",
+      "datum_mm": 112.0,
+      "outside_mm": 116.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 118-1",
+      "profile": "SPZ",
+      "datum_mm": 118.0,
+      "outside_mm": 122.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 125-1",
+      "profile": "SPZ",
+      "datum_mm": 125.0,
+      "outside_mm": 129.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 132-1",
+      "profile": "SPZ",
+      "datum_mm": 132.0,
+      "outside_mm": 136.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 140-1",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 150-1",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 160-1",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 170-1",
+      "profile": "SPZ",
+      "datum_mm": 170.0,
+      "outside_mm": 174.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 180-1",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 190-1",
+      "profile": "SPZ",
+      "datum_mm": 190.0,
+      "outside_mm": 194.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 200-1",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 224-1",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 250-1",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 280-1",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 315-1",
+      "profile": "SPZ",
+      "datum_mm": 315.0,
+      "outside_mm": 319.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 355-1",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 400-1",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 450-1",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 1,
+      "pdf_page": 48
+    },
+    {
+      "code": "T SPZ 056-2",
+      "profile": "SPZ",
+      "datum_mm": 56.0,
+      "outside_mm": 60.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 060-2",
+      "profile": "SPZ",
+      "datum_mm": 60.0,
+      "outside_mm": 64.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 063-2",
+      "profile": "SPZ",
+      "datum_mm": 63.0,
+      "outside_mm": 67.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 067-2",
+      "profile": "SPZ",
+      "datum_mm": 67.0,
+      "outside_mm": 71.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 071-2",
+      "profile": "SPZ",
+      "datum_mm": 71.0,
+      "outside_mm": 75.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 075-2",
+      "profile": "SPZ",
+      "datum_mm": 75.0,
+      "outside_mm": 79.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 080-2",
+      "profile": "SPZ",
+      "datum_mm": 80.0,
+      "outside_mm": 84.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 085-2",
+      "profile": "SPZ",
+      "datum_mm": 85.0,
+      "outside_mm": 89.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 090-2",
+      "profile": "SPZ",
+      "datum_mm": 90.0,
+      "outside_mm": 94.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 095-2",
+      "profile": "SPZ",
+      "datum_mm": 95.0,
+      "outside_mm": 99.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 100-2",
+      "profile": "SPZ",
+      "datum_mm": 100.0,
+      "outside_mm": 104.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 106-2",
+      "profile": "SPZ",
+      "datum_mm": 106.0,
+      "outside_mm": 110.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 112-2",
+      "profile": "SPZ",
+      "datum_mm": 112.0,
+      "outside_mm": 116.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 118-2",
+      "profile": "SPZ",
+      "datum_mm": 118.0,
+      "outside_mm": 122.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 125-2",
+      "profile": "SPZ",
+      "datum_mm": 125.0,
+      "outside_mm": 129.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 132-2",
+      "profile": "SPZ",
+      "datum_mm": 132.0,
+      "outside_mm": 136.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 140-2",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 150-2",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 160-2",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 170-2",
+      "profile": "SPZ",
+      "datum_mm": 170.0,
+      "outside_mm": 174.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 180-2",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 190-2",
+      "profile": "SPZ",
+      "datum_mm": 190.0,
+      "outside_mm": 194.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 200-2",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 224-2",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 250-2",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 280-2",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 315-2",
+      "profile": "SPZ",
+      "datum_mm": 315.0,
+      "outside_mm": 319.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 355-2",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 400-2",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 450-2",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 500-2",
+      "profile": "SPZ",
+      "datum_mm": 500.0,
+      "outside_mm": 504.0,
+      "grooves": 2,
+      "pdf_page": 49
+    },
+    {
+      "code": "T SPZ 063-3",
+      "profile": "SPZ",
+      "datum_mm": 63.0,
+      "outside_mm": 67.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 067-3",
+      "profile": "SPZ",
+      "datum_mm": 67.0,
+      "outside_mm": 71.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 071-3",
+      "profile": "SPZ",
+      "datum_mm": 71.0,
+      "outside_mm": 75.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 075-3",
+      "profile": "SPZ",
+      "datum_mm": 75.0,
+      "outside_mm": 79.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 080-3",
+      "profile": "SPZ",
+      "datum_mm": 80.0,
+      "outside_mm": 84.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 085-3",
+      "profile": "SPZ",
+      "datum_mm": 85.0,
+      "outside_mm": 89.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 090-3",
+      "profile": "SPZ",
+      "datum_mm": 90.0,
+      "outside_mm": 94.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 095-3",
+      "profile": "SPZ",
+      "datum_mm": 95.0,
+      "outside_mm": 99.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 100-3",
+      "profile": "SPZ",
+      "datum_mm": 100.0,
+      "outside_mm": 104.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 106-3",
+      "profile": "SPZ",
+      "datum_mm": 106.0,
+      "outside_mm": 110.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 112-3",
+      "profile": "SPZ",
+      "datum_mm": 112.0,
+      "outside_mm": 116.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 118-3",
+      "profile": "SPZ",
+      "datum_mm": 118.0,
+      "outside_mm": 122.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 125-3",
+      "profile": "SPZ",
+      "datum_mm": 125.0,
+      "outside_mm": 129.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 132-3",
+      "profile": "SPZ",
+      "datum_mm": 132.0,
+      "outside_mm": 136.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 140-3",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 150-3",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 160-3",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 170-3",
+      "profile": "SPZ",
+      "datum_mm": 170.0,
+      "outside_mm": 174.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 180-3",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 190-3",
+      "profile": "SPZ",
+      "datum_mm": 190.0,
+      "outside_mm": 194.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 200-3",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 224-3",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 250-3",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 280-3",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 315-3",
+      "profile": "SPZ",
+      "datum_mm": 315.0,
+      "outside_mm": 319.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 355-3",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 400-3",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 450-3",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 500-3",
+      "profile": "SPZ",
+      "datum_mm": 500.0,
+      "outside_mm": 504.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 630-3",
+      "profile": "SPZ",
+      "datum_mm": 630.0,
+      "outside_mm": 634.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 800-3",
+      "profile": "SPZ",
+      "datum_mm": 800.0,
+      "outside_mm": 804.0,
+      "grooves": 3,
+      "pdf_page": 50
+    },
+    {
+      "code": "T SPZ 080-4",
+      "profile": "SPZ",
+      "datum_mm": 80.0,
+      "outside_mm": 84.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 085-4",
+      "profile": "SPZ",
+      "datum_mm": 85.0,
+      "outside_mm": 89.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 090-4",
+      "profile": "SPZ",
+      "datum_mm": 90.0,
+      "outside_mm": 94.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 095-4",
+      "profile": "SPZ",
+      "datum_mm": 95.0,
+      "outside_mm": 99.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 100-4",
+      "profile": "SPZ",
+      "datum_mm": 100.0,
+      "outside_mm": 104.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 106-4",
+      "profile": "SPZ",
+      "datum_mm": 106.0,
+      "outside_mm": 110.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 112-4",
+      "profile": "SPZ",
+      "datum_mm": 112.0,
+      "outside_mm": 116.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 118-4",
+      "profile": "SPZ",
+      "datum_mm": 118.0,
+      "outside_mm": 122.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 125-4",
+      "profile": "SPZ",
+      "datum_mm": 125.0,
+      "outside_mm": 129.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 132-4",
+      "profile": "SPZ",
+      "datum_mm": 132.0,
+      "outside_mm": 136.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 140-4",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 150-4",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 160-4",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 170-4",
+      "profile": "SPZ",
+      "datum_mm": 170.0,
+      "outside_mm": 174.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 180-4",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 190-4",
+      "profile": "SPZ",
+      "datum_mm": 190.0,
+      "outside_mm": 194.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 200-4",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 224-4",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 250-4",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 280-4",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 315-4",
+      "profile": "SPZ",
+      "datum_mm": 315.0,
+      "outside_mm": 319.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 355-4",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 400-4",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 450-4",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 500-4",
+      "profile": "SPZ",
+      "datum_mm": 500.0,
+      "outside_mm": 504.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 630-4",
+      "profile": "SPZ",
+      "datum_mm": 630.0,
+      "outside_mm": 634.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 800-4",
+      "profile": "SPZ",
+      "datum_mm": 800.0,
+      "outside_mm": 804.0,
+      "grooves": 4,
+      "pdf_page": 51
+    },
+    {
+      "code": "T SPZ 085-5",
+      "profile": "SPZ",
+      "datum_mm": 85.0,
+      "outside_mm": 89.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 090-5",
+      "profile": "SPZ",
+      "datum_mm": 90.0,
+      "outside_mm": 94.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 095-5",
+      "profile": "SPZ",
+      "datum_mm": 95.0,
+      "outside_mm": 99.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 100-5",
+      "profile": "SPZ",
+      "datum_mm": 100.0,
+      "outside_mm": 104.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 106-5",
+      "profile": "SPZ",
+      "datum_mm": 106.0,
+      "outside_mm": 110.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 112-5",
+      "profile": "SPZ",
+      "datum_mm": 112.0,
+      "outside_mm": 116.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 118-5",
+      "profile": "SPZ",
+      "datum_mm": 118.0,
+      "outside_mm": 122.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 125-5",
+      "profile": "SPZ",
+      "datum_mm": 125.0,
+      "outside_mm": 129.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 132-5",
+      "profile": "SPZ",
+      "datum_mm": 132.0,
+      "outside_mm": 136.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 140-5",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 150-5",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 160-5",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 170-5",
+      "profile": "SPZ",
+      "datum_mm": 170.0,
+      "outside_mm": 174.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 180-5",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 190-5",
+      "profile": "SPZ",
+      "datum_mm": 190.0,
+      "outside_mm": 194.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 200-5",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 224-5",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 250-5",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 280-5",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 315-5",
+      "profile": "SPZ",
+      "datum_mm": 315.0,
+      "outside_mm": 319.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 355-5",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 400-5",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 450-5",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 500-5",
+      "profile": "SPZ",
+      "datum_mm": 500.0,
+      "outside_mm": 504.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 630-5",
+      "profile": "SPZ",
+      "datum_mm": 630.0,
+      "outside_mm": 634.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 800-5",
+      "profile": "SPZ",
+      "datum_mm": 800.0,
+      "outside_mm": 804.0,
+      "grooves": 5,
+      "pdf_page": 52
+    },
+    {
+      "code": "T SPZ 090-6",
+      "profile": "SPZ",
+      "datum_mm": 90.0,
+      "outside_mm": 94.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 095-6",
+      "profile": "SPZ",
+      "datum_mm": 95.0,
+      "outside_mm": 99.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 100-6",
+      "profile": "SPZ",
+      "datum_mm": 100.0,
+      "outside_mm": 104.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 106-6",
+      "profile": "SPZ",
+      "datum_mm": 106.0,
+      "outside_mm": 110.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 112-6",
+      "profile": "SPZ",
+      "datum_mm": 112.0,
+      "outside_mm": 116.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 118-6",
+      "profile": "SPZ",
+      "datum_mm": 118.0,
+      "outside_mm": 122.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 125-6",
+      "profile": "SPZ",
+      "datum_mm": 125.0,
+      "outside_mm": 129.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 132-6",
+      "profile": "SPZ",
+      "datum_mm": 132.0,
+      "outside_mm": 136.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 140-6",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 150-6",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 160-6",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 170-6",
+      "profile": "SPZ",
+      "datum_mm": 170.0,
+      "outside_mm": 174.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 180-6",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 190-6",
+      "profile": "SPZ",
+      "datum_mm": 190.0,
+      "outside_mm": 194.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 200-6",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 224-6",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 250-6",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 280-6",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 315-6",
+      "profile": "SPZ",
+      "datum_mm": 315.0,
+      "outside_mm": 319.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 355-6",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 400-6",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 450-6",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 500-6",
+      "profile": "SPZ",
+      "datum_mm": 500.0,
+      "outside_mm": 504.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 630-6",
+      "profile": "SPZ",
+      "datum_mm": 630.0,
+      "outside_mm": 634.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 800-6",
+      "profile": "SPZ",
+      "datum_mm": 800.0,
+      "outside_mm": 804.0,
+      "grooves": 6,
+      "pdf_page": 53
+    },
+    {
+      "code": "T SPZ 140-8",
+      "profile": "SPZ",
+      "datum_mm": 140.0,
+      "outside_mm": 144.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 150-8",
+      "profile": "SPZ",
+      "datum_mm": 150.0,
+      "outside_mm": 154.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 160-8",
+      "profile": "SPZ",
+      "datum_mm": 160.0,
+      "outside_mm": 164.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 180-8",
+      "profile": "SPZ",
+      "datum_mm": 180.0,
+      "outside_mm": 184.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 200-8",
+      "profile": "SPZ",
+      "datum_mm": 200.0,
+      "outside_mm": 204.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 224-8",
+      "profile": "SPZ",
+      "datum_mm": 224.0,
+      "outside_mm": 228.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 250-8",
+      "profile": "SPZ",
+      "datum_mm": 250.0,
+      "outside_mm": 254.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 280-8",
+      "profile": "SPZ",
+      "datum_mm": 280.0,
+      "outside_mm": 284.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 355-8",
+      "profile": "SPZ",
+      "datum_mm": 355.0,
+      "outside_mm": 359.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 400-8",
+      "profile": "SPZ",
+      "datum_mm": 400.0,
+      "outside_mm": 404.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPZ 450-8",
+      "profile": "SPZ",
+      "datum_mm": 450.0,
+      "outside_mm": 454.0,
+      "grooves": 8,
+      "pdf_page": 54
+    },
+    {
+      "code": "T SPA 063-1",
+      "profile": "SPA",
+      "datum_mm": 63.0,
+      "outside_mm": 68.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 067-1",
+      "profile": "SPA",
+      "datum_mm": 67.0,
+      "outside_mm": 72.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 071-1",
+      "profile": "SPA",
+      "datum_mm": 71.0,
+      "outside_mm": 76.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 075-1",
+      "profile": "SPA",
+      "datum_mm": 75.0,
+      "outside_mm": 80.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 080-1",
+      "profile": "SPA",
+      "datum_mm": 80.0,
+      "outside_mm": 85.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 085-1",
+      "profile": "SPA",
+      "datum_mm": 85.0,
+      "outside_mm": 90.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 090-1",
+      "profile": "SPA",
+      "datum_mm": 90.0,
+      "outside_mm": 95.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 095-1",
+      "profile": "SPA",
+      "datum_mm": 95.0,
+      "outside_mm": 100.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 100-1",
+      "profile": "SPA",
+      "datum_mm": 100.0,
+      "outside_mm": 105.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 106-1",
+      "profile": "SPA",
+      "datum_mm": 106.0,
+      "outside_mm": 111.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 112-1",
+      "profile": "SPA",
+      "datum_mm": 112.0,
+      "outside_mm": 117.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 118-1",
+      "profile": "SPA",
+      "datum_mm": 118.0,
+      "outside_mm": 123.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 125-1",
+      "profile": "SPA",
+      "datum_mm": 125.0,
+      "outside_mm": 130.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 132-1",
+      "profile": "SPA",
+      "datum_mm": 132.0,
+      "outside_mm": 137.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 140-1",
+      "profile": "SPA",
+      "datum_mm": 140.0,
+      "outside_mm": 145.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 150-1",
+      "profile": "SPA",
+      "datum_mm": 150.0,
+      "outside_mm": 155.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 160-1",
+      "profile": "SPA",
+      "datum_mm": 160.0,
+      "outside_mm": 165.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 170-1",
+      "profile": "SPA",
+      "datum_mm": 170.0,
+      "outside_mm": 175.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 180-1",
+      "profile": "SPA",
+      "datum_mm": 180.0,
+      "outside_mm": 185.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 190-1",
+      "profile": "SPA",
+      "datum_mm": 190.0,
+      "outside_mm": 195.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 200-1",
+      "profile": "SPA",
+      "datum_mm": 200.0,
+      "outside_mm": 205.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 212-1",
+      "profile": "SPA",
+      "datum_mm": 212.0,
+      "outside_mm": 217.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 224-1",
+      "profile": "SPA",
+      "datum_mm": 224.0,
+      "outside_mm": 229.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 236-1",
+      "profile": "SPA",
+      "datum_mm": 236.0,
+      "outside_mm": 241.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 250-1",
+      "profile": "SPA",
+      "datum_mm": 250.0,
+      "outside_mm": 255.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 280-1",
+      "profile": "SPA",
+      "datum_mm": 280.0,
+      "outside_mm": 285.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 300-1",
+      "profile": "SPA",
+      "datum_mm": 300.0,
+      "outside_mm": 305.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 315-1",
+      "profile": "SPA",
+      "datum_mm": 315.0,
+      "outside_mm": 320.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 355-1",
+      "profile": "SPA",
+      "datum_mm": 355.0,
+      "outside_mm": 360.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 400-1",
+      "profile": "SPA",
+      "datum_mm": 400.0,
+      "outside_mm": 405.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 450-1",
+      "profile": "SPA",
+      "datum_mm": 450.0,
+      "outside_mm": 455.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 500-1",
+      "profile": "SPA",
+      "datum_mm": 500.0,
+      "outside_mm": 505.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 560-1",
+      "profile": "SPA",
+      "datum_mm": 560.0,
+      "outside_mm": 565.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 630-1",
+      "profile": "SPA",
+      "datum_mm": 630.0,
+      "outside_mm": 635.5,
+      "grooves": 1,
+      "pdf_page": 55
+    },
+    {
+      "code": "T SPA 063-2",
+      "profile": "SPA",
+      "datum_mm": 63.0,
+      "outside_mm": 68.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 067-2",
+      "profile": "SPA",
+      "datum_mm": 67.0,
+      "outside_mm": 72.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 071-2",
+      "profile": "SPA",
+      "datum_mm": 71.0,
+      "outside_mm": 76.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 075-2",
+      "profile": "SPA",
+      "datum_mm": 75.0,
+      "outside_mm": 80.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 080-2",
+      "profile": "SPA",
+      "datum_mm": 80.0,
+      "outside_mm": 85.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 085-2",
+      "profile": "SPA",
+      "datum_mm": 85.0,
+      "outside_mm": 90.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 090-2",
+      "profile": "SPA",
+      "datum_mm": 90.0,
+      "outside_mm": 95.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 095-2",
+      "profile": "SPA",
+      "datum_mm": 95.0,
+      "outside_mm": 100.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 100-2",
+      "profile": "SPA",
+      "datum_mm": 100.0,
+      "outside_mm": 105.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 106-2",
+      "profile": "SPA",
+      "datum_mm": 106.0,
+      "outside_mm": 111.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 112-2",
+      "profile": "SPA",
+      "datum_mm": 112.0,
+      "outside_mm": 117.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 118-2",
+      "profile": "SPA",
+      "datum_mm": 118.0,
+      "outside_mm": 123.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 125-2",
+      "profile": "SPA",
+      "datum_mm": 125.0,
+      "outside_mm": 130.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 132-2",
+      "profile": "SPA",
+      "datum_mm": 132.0,
+      "outside_mm": 137.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 140-2",
+      "profile": "SPA",
+      "datum_mm": 140.0,
+      "outside_mm": 145.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 150-2",
+      "profile": "SPA",
+      "datum_mm": 150.0,
+      "outside_mm": 155.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 160-2",
+      "profile": "SPA",
+      "datum_mm": 160.0,
+      "outside_mm": 165.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 170-2",
+      "profile": "SPA",
+      "datum_mm": 170.0,
+      "outside_mm": 175.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 180-2",
+      "profile": "SPA",
+      "datum_mm": 180.0,
+      "outside_mm": 185.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 190-2",
+      "profile": "SPA",
+      "datum_mm": 190.0,
+      "outside_mm": 195.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 200-2",
+      "profile": "SPA",
+      "datum_mm": 200.0,
+      "outside_mm": 205.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 212-2",
+      "profile": "SPA",
+      "datum_mm": 212.0,
+      "outside_mm": 217.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 224-2",
+      "profile": "SPA",
+      "datum_mm": 224.0,
+      "outside_mm": 229.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 236-2",
+      "profile": "SPA",
+      "datum_mm": 236.0,
+      "outside_mm": 241.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 250-2",
+      "profile": "SPA",
+      "datum_mm": 250.0,
+      "outside_mm": 255.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 280-2",
+      "profile": "SPA",
+      "datum_mm": 280.0,
+      "outside_mm": 285.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 300-2",
+      "profile": "SPA",
+      "datum_mm": 300.0,
+      "outside_mm": 305.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 315-2",
+      "profile": "SPA",
+      "datum_mm": 315.0,
+      "outside_mm": 320.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 355-2",
+      "profile": "SPA",
+      "datum_mm": 355.0,
+      "outside_mm": 360.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 400-2",
+      "profile": "SPA",
+      "datum_mm": 400.0,
+      "outside_mm": 405.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 450-2",
+      "profile": "SPA",
+      "datum_mm": 450.0,
+      "outside_mm": 455.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 500-2",
+      "profile": "SPA",
+      "datum_mm": 500.0,
+      "outside_mm": 505.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 560-2",
+      "profile": "SPA",
+      "datum_mm": 560.0,
+      "outside_mm": 565.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 630-2",
+      "profile": "SPA",
+      "datum_mm": 630.0,
+      "outside_mm": 635.5,
+      "grooves": 2,
+      "pdf_page": 56
+    },
+    {
+      "code": "T SPA 071-3",
+      "profile": "SPA",
+      "datum_mm": 71.0,
+      "outside_mm": 76.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 075-3",
+      "profile": "SPA",
+      "datum_mm": 75.0,
+      "outside_mm": 80.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 080-3",
+      "profile": "SPA",
+      "datum_mm": 80.0,
+      "outside_mm": 85.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 085-3",
+      "profile": "SPA",
+      "datum_mm": 85.0,
+      "outside_mm": 90.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 090-3",
+      "profile": "SPA",
+      "datum_mm": 90.0,
+      "outside_mm": 95.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 095-3",
+      "profile": "SPA",
+      "datum_mm": 95.0,
+      "outside_mm": 100.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 100-3",
+      "profile": "SPA",
+      "datum_mm": 100.0,
+      "outside_mm": 105.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 106-3",
+      "profile": "SPA",
+      "datum_mm": 106.0,
+      "outside_mm": 111.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 112-3",
+      "profile": "SPA",
+      "datum_mm": 112.0,
+      "outside_mm": 117.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 118-3",
+      "profile": "SPA",
+      "datum_mm": 118.0,
+      "outside_mm": 123.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 125-3",
+      "profile": "SPA",
+      "datum_mm": 125.0,
+      "outside_mm": 130.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 132-3",
+      "profile": "SPA",
+      "datum_mm": 132.0,
+      "outside_mm": 137.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 140-3",
+      "profile": "SPA",
+      "datum_mm": 140.0,
+      "outside_mm": 145.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 150-3",
+      "profile": "SPA",
+      "datum_mm": 150.0,
+      "outside_mm": 155.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 160-3",
+      "profile": "SPA",
+      "datum_mm": 160.0,
+      "outside_mm": 165.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 170-3",
+      "profile": "SPA",
+      "datum_mm": 170.0,
+      "outside_mm": 175.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 180-3",
+      "profile": "SPA",
+      "datum_mm": 180.0,
+      "outside_mm": 185.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 190-3",
+      "profile": "SPA",
+      "datum_mm": 190.0,
+      "outside_mm": 195.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 200-3",
+      "profile": "SPA",
+      "datum_mm": 200.0,
+      "outside_mm": 205.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 212-3",
+      "profile": "SPA",
+      "datum_mm": 212.0,
+      "outside_mm": 217.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 224-3",
+      "profile": "SPA",
+      "datum_mm": 224.0,
+      "outside_mm": 229.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 236-3",
+      "profile": "SPA",
+      "datum_mm": 236.0,
+      "outside_mm": 241.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 250-3",
+      "profile": "SPA",
+      "datum_mm": 250.0,
+      "outside_mm": 255.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 280-3",
+      "profile": "SPA",
+      "datum_mm": 280.0,
+      "outside_mm": 285.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 300-3",
+      "profile": "SPA",
+      "datum_mm": 300.0,
+      "outside_mm": 305.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 315-3",
+      "profile": "SPA",
+      "datum_mm": 315.0,
+      "outside_mm": 320.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 355-3",
+      "profile": "SPA",
+      "datum_mm": 355.0,
+      "outside_mm": 360.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 400-3",
+      "profile": "SPA",
+      "datum_mm": 400.0,
+      "outside_mm": 405.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 450-3",
+      "profile": "SPA",
+      "datum_mm": 450.0,
+      "outside_mm": 455.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 500-3",
+      "profile": "SPA",
+      "datum_mm": 500.0,
+      "outside_mm": 505.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 560-3",
+      "profile": "SPA",
+      "datum_mm": 560.0,
+      "outside_mm": 565.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 630-3",
+      "profile": "SPA",
+      "datum_mm": 630.0,
+      "outside_mm": 635.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 800-3",
+      "profile": "SPA",
+      "datum_mm": 800.0,
+      "outside_mm": 805.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 900-3",
+      "profile": "SPA",
+      "datum_mm": 900.0,
+      "outside_mm": 905.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 1000-3",
+      "profile": "SPA",
+      "datum_mm": 1000.0,
+      "outside_mm": 1005.5,
+      "grooves": 3,
+      "pdf_page": 57
+    },
+    {
+      "code": "T SPA 080-4",
+      "profile": "SPA",
+      "datum_mm": 80.0,
+      "outside_mm": 85.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 085-4",
+      "profile": "SPA",
+      "datum_mm": 85.0,
+      "outside_mm": 90.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 090-4",
+      "profile": "SPA",
+      "datum_mm": 90.0,
+      "outside_mm": 95.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 095-4",
+      "profile": "SPA",
+      "datum_mm": 95.0,
+      "outside_mm": 100.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 100-4",
+      "profile": "SPA",
+      "datum_mm": 100.0,
+      "outside_mm": 105.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 106-4",
+      "profile": "SPA",
+      "datum_mm": 106.0,
+      "outside_mm": 111.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 112-4",
+      "profile": "SPA",
+      "datum_mm": 112.0,
+      "outside_mm": 117.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 118-4",
+      "profile": "SPA",
+      "datum_mm": 118.0,
+      "outside_mm": 123.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 125-4",
+      "profile": "SPA",
+      "datum_mm": 125.0,
+      "outside_mm": 130.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 132-4",
+      "profile": "SPA",
+      "datum_mm": 132.0,
+      "outside_mm": 137.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 140-4",
+      "profile": "SPA",
+      "datum_mm": 140.0,
+      "outside_mm": 145.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 150-4",
+      "profile": "SPA",
+      "datum_mm": 150.0,
+      "outside_mm": 155.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 160-4",
+      "profile": "SPA",
+      "datum_mm": 160.0,
+      "outside_mm": 165.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 170-4",
+      "profile": "SPA",
+      "datum_mm": 170.0,
+      "outside_mm": 175.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 180-4",
+      "profile": "SPA",
+      "datum_mm": 180.0,
+      "outside_mm": 185.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 190-4",
+      "profile": "SPA",
+      "datum_mm": 190.0,
+      "outside_mm": 195.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 200-4",
+      "profile": "SPA",
+      "datum_mm": 200.0,
+      "outside_mm": 205.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 212-4",
+      "profile": "SPA",
+      "datum_mm": 212.0,
+      "outside_mm": 217.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 224-4",
+      "profile": "SPA",
+      "datum_mm": 224.0,
+      "outside_mm": 229.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 236-4",
+      "profile": "SPA",
+      "datum_mm": 236.0,
+      "outside_mm": 241.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 250-4",
+      "profile": "SPA",
+      "datum_mm": 250.0,
+      "outside_mm": 255.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 280-4",
+      "profile": "SPA",
+      "datum_mm": 280.0,
+      "outside_mm": 285.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 300-4",
+      "profile": "SPA",
+      "datum_mm": 300.0,
+      "outside_mm": 305.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 315-4",
+      "profile": "SPA",
+      "datum_mm": 315.0,
+      "outside_mm": 320.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 355-4",
+      "profile": "SPA",
+      "datum_mm": 355.0,
+      "outside_mm": 360.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 400-4",
+      "profile": "SPA",
+      "datum_mm": 400.0,
+      "outside_mm": 405.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 450-4",
+      "profile": "SPA",
+      "datum_mm": 450.0,
+      "outside_mm": 455.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 500-4",
+      "profile": "SPA",
+      "datum_mm": 500.0,
+      "outside_mm": 505.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 560-4",
+      "profile": "SPA",
+      "datum_mm": 560.0,
+      "outside_mm": 565.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 630-4",
+      "profile": "SPA",
+      "datum_mm": 630.0,
+      "outside_mm": 635.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 800-4",
+      "profile": "SPA",
+      "datum_mm": 800.0,
+      "outside_mm": 805.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 900-4",
+      "profile": "SPA",
+      "datum_mm": 900.0,
+      "outside_mm": 905.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 1000-4",
+      "profile": "SPA",
+      "datum_mm": 1000.0,
+      "outside_mm": 1005.5,
+      "grooves": 4,
+      "pdf_page": 58
+    },
+    {
+      "code": "T SPA 100-5",
+      "profile": "SPA",
+      "datum_mm": 100.0,
+      "outside_mm": 105.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 106-5",
+      "profile": "SPA",
+      "datum_mm": 106.0,
+      "outside_mm": 111.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 112-5",
+      "profile": "SPA",
+      "datum_mm": 112.0,
+      "outside_mm": 117.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 118-5",
+      "profile": "SPA",
+      "datum_mm": 118.0,
+      "outside_mm": 123.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 125-5",
+      "profile": "SPA",
+      "datum_mm": 125.0,
+      "outside_mm": 130.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 132-5",
+      "profile": "SPA",
+      "datum_mm": 132.0,
+      "outside_mm": 137.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 140-5",
+      "profile": "SPA",
+      "datum_mm": 140.0,
+      "outside_mm": 145.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 150-5",
+      "profile": "SPA",
+      "datum_mm": 150.0,
+      "outside_mm": 155.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 160-5",
+      "profile": "SPA",
+      "datum_mm": 160.0,
+      "outside_mm": 165.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 170-5",
+      "profile": "SPA",
+      "datum_mm": 170.0,
+      "outside_mm": 175.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 180-5",
+      "profile": "SPA",
+      "datum_mm": 180.0,
+      "outside_mm": 185.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 190-5",
+      "profile": "SPA",
+      "datum_mm": 190.0,
+      "outside_mm": 195.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 200-5",
+      "profile": "SPA",
+      "datum_mm": 200.0,
+      "outside_mm": 205.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 212-5",
+      "profile": "SPA",
+      "datum_mm": 212.0,
+      "outside_mm": 217.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 224-5",
+      "profile": "SPA",
+      "datum_mm": 224.0,
+      "outside_mm": 229.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 236-5",
+      "profile": "SPA",
+      "datum_mm": 236.0,
+      "outside_mm": 241.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 250-5",
+      "profile": "SPA",
+      "datum_mm": 250.0,
+      "outside_mm": 255.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 280-5",
+      "profile": "SPA",
+      "datum_mm": 280.0,
+      "outside_mm": 285.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 300-5",
+      "profile": "SPA",
+      "datum_mm": 300.0,
+      "outside_mm": 305.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 315-5",
+      "profile": "SPA",
+      "datum_mm": 315.0,
+      "outside_mm": 320.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 355-5",
+      "profile": "SPA",
+      "datum_mm": 355.0,
+      "outside_mm": 360.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 400-5",
+      "profile": "SPA",
+      "datum_mm": 400.0,
+      "outside_mm": 405.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 450-5",
+      "profile": "SPA",
+      "datum_mm": 450.0,
+      "outside_mm": 455.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 500-5",
+      "profile": "SPA",
+      "datum_mm": 500.0,
+      "outside_mm": 505.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 560-5",
+      "profile": "SPA",
+      "datum_mm": 560.0,
+      "outside_mm": 565.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 630-5",
+      "profile": "SPA",
+      "datum_mm": 630.0,
+      "outside_mm": 635.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 800-5",
+      "profile": "SPA",
+      "datum_mm": 800.0,
+      "outside_mm": 805.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 1000-5",
+      "profile": "SPA",
+      "datum_mm": 1000.0,
+      "outside_mm": 1005.5,
+      "grooves": 5,
+      "pdf_page": 59
+    },
+    {
+      "code": "T SPA 100-6",
+      "profile": "SPA",
+      "datum_mm": 100.0,
+      "outside_mm": 105.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 106-6",
+      "profile": "SPA",
+      "datum_mm": 106.0,
+      "outside_mm": 111.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 112-6",
+      "profile": "SPA",
+      "datum_mm": 112.0,
+      "outside_mm": 117.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 118-6",
+      "profile": "SPA",
+      "datum_mm": 118.0,
+      "outside_mm": 123.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 125-6",
+      "profile": "SPA",
+      "datum_mm": 125.0,
+      "outside_mm": 130.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 132-6",
+      "profile": "SPA",
+      "datum_mm": 132.0,
+      "outside_mm": 137.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 140-6",
+      "profile": "SPA",
+      "datum_mm": 140.0,
+      "outside_mm": 145.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 150-6",
+      "profile": "SPA",
+      "datum_mm": 150.0,
+      "outside_mm": 155.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 160-6",
+      "profile": "SPA",
+      "datum_mm": 160.0,
+      "outside_mm": 165.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 180-6",
+      "profile": "SPA",
+      "datum_mm": 180.0,
+      "outside_mm": 185.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 200-6",
+      "profile": "SPA",
+      "datum_mm": 200.0,
+      "outside_mm": 205.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 224-6",
+      "profile": "SPA",
+      "datum_mm": 224.0,
+      "outside_mm": 229.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 236-6",
+      "profile": "SPA",
+      "datum_mm": 236.0,
+      "outside_mm": 241.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 250-6",
+      "profile": "SPA",
+      "datum_mm": 250.0,
+      "outside_mm": 255.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 280-6",
+      "profile": "SPA",
+      "datum_mm": 280.0,
+      "outside_mm": 285.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 300-6",
+      "profile": "SPA",
+      "datum_mm": 300.0,
+      "outside_mm": 305.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 315-6",
+      "profile": "SPA",
+      "datum_mm": 315.0,
+      "outside_mm": 320.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 355-6",
+      "profile": "SPA",
+      "datum_mm": 355.0,
+      "outside_mm": 360.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 400-6",
+      "profile": "SPA",
+      "datum_mm": 400.0,
+      "outside_mm": 405.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 450-6",
+      "profile": "SPA",
+      "datum_mm": 450.0,
+      "outside_mm": 455.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 500-6",
+      "profile": "SPA",
+      "datum_mm": 500.0,
+      "outside_mm": 505.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 560-6",
+      "profile": "SPA",
+      "datum_mm": 560.0,
+      "outside_mm": 565.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 630-6",
+      "profile": "SPA",
+      "datum_mm": 630.0,
+      "outside_mm": 635.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 800-6",
+      "profile": "SPA",
+      "datum_mm": 800.0,
+      "outside_mm": 805.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPA 1000-6",
+      "profile": "SPA",
+      "datum_mm": 1000.0,
+      "outside_mm": 1005.5,
+      "grooves": 6,
+      "pdf_page": 60
+    },
+    {
+      "code": "T SPB 100-1",
+      "profile": "SPB",
+      "datum_mm": 100.0,
+      "outside_mm": 107.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 106-1",
+      "profile": "SPB",
+      "datum_mm": 106.0,
+      "outside_mm": 113.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 112-1",
+      "profile": "SPB",
+      "datum_mm": 112.0,
+      "outside_mm": 119.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 118-1",
+      "profile": "SPB",
+      "datum_mm": 118.0,
+      "outside_mm": 125.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 125-1",
+      "profile": "SPB",
+      "datum_mm": 125.0,
+      "outside_mm": 132.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 132-1",
+      "profile": "SPB",
+      "datum_mm": 132.0,
+      "outside_mm": 139.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 140-1",
+      "profile": "SPB",
+      "datum_mm": 140.0,
+      "outside_mm": 147.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 150-1",
+      "profile": "SPB",
+      "datum_mm": 150.0,
+      "outside_mm": 157.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 160-1",
+      "profile": "SPB",
+      "datum_mm": 160.0,
+      "outside_mm": 167.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 170-1",
+      "profile": "SPB",
+      "datum_mm": 170.0,
+      "outside_mm": 177.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 180-1",
+      "profile": "SPB",
+      "datum_mm": 180.0,
+      "outside_mm": 187.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 190-1",
+      "profile": "SPB",
+      "datum_mm": 190.0,
+      "outside_mm": 197.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 200-1",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 212-1",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 224-1",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 236-1",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 250-1",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 280-1",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 300-1",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 315-1",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 1,
+      "pdf_page": 61
+    },
+    {
+      "code": "T SPB 100-2",
+      "profile": "SPB",
+      "datum_mm": 100.0,
+      "outside_mm": 107.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 106-2",
+      "profile": "SPB",
+      "datum_mm": 106.0,
+      "outside_mm": 113.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 112-2",
+      "profile": "SPB",
+      "datum_mm": 112.0,
+      "outside_mm": 119.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 118-2",
+      "profile": "SPB",
+      "datum_mm": 118.0,
+      "outside_mm": 125.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 125-2",
+      "profile": "SPB",
+      "datum_mm": 125.0,
+      "outside_mm": 132.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 132-2",
+      "profile": "SPB",
+      "datum_mm": 132.0,
+      "outside_mm": 139.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 140-2",
+      "profile": "SPB",
+      "datum_mm": 140.0,
+      "outside_mm": 147.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 150-2",
+      "profile": "SPB",
+      "datum_mm": 150.0,
+      "outside_mm": 157.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 160-2",
+      "profile": "SPB",
+      "datum_mm": 160.0,
+      "outside_mm": 167.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 170-2",
+      "profile": "SPB",
+      "datum_mm": 170.0,
+      "outside_mm": 177.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 180-2",
+      "profile": "SPB",
+      "datum_mm": 180.0,
+      "outside_mm": 187.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 190-2",
+      "profile": "SPB",
+      "datum_mm": 190.0,
+      "outside_mm": 197.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 200-2",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 212-2",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 224-2",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 236-2",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 250-2",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 280-2",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 300-2",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 315-2",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 335-2",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 355-2",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 400-2",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 450-2",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 500-2",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 630-2",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 2,
+      "pdf_page": 62
+    },
+    {
+      "code": "T SPB 100-3",
+      "profile": "SPB",
+      "datum_mm": 100.0,
+      "outside_mm": 107.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 106-3",
+      "profile": "SPB",
+      "datum_mm": 106.0,
+      "outside_mm": 113.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 112-3",
+      "profile": "SPB",
+      "datum_mm": 112.0,
+      "outside_mm": 119.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 118-3",
+      "profile": "SPB",
+      "datum_mm": 118.0,
+      "outside_mm": 125.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 125-3",
+      "profile": "SPB",
+      "datum_mm": 125.0,
+      "outside_mm": 132.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 132-3",
+      "profile": "SPB",
+      "datum_mm": 132.0,
+      "outside_mm": 139.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 140-3",
+      "profile": "SPB",
+      "datum_mm": 140.0,
+      "outside_mm": 147.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 150-3",
+      "profile": "SPB",
+      "datum_mm": 150.0,
+      "outside_mm": 157.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 160-3",
+      "profile": "SPB",
+      "datum_mm": 160.0,
+      "outside_mm": 167.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 170-3",
+      "profile": "SPB",
+      "datum_mm": 170.0,
+      "outside_mm": 177.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 180-3",
+      "profile": "SPB",
+      "datum_mm": 180.0,
+      "outside_mm": 187.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 190-3",
+      "profile": "SPB",
+      "datum_mm": 190.0,
+      "outside_mm": 197.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 200-3",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 212-3",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 224-3",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 236-3",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 250-3",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 280-3",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 300-3",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 315-3",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 335-3",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 355-3",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 400-3",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 450-3",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 500-3",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 560-3",
+      "profile": "SPB",
+      "datum_mm": 560.0,
+      "outside_mm": 567.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 630-3",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 710-3",
+      "profile": "SPB",
+      "datum_mm": 710.0,
+      "outside_mm": 717.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 800-3",
+      "profile": "SPB",
+      "datum_mm": 800.0,
+      "outside_mm": 807.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 900-3",
+      "profile": "SPB",
+      "datum_mm": 900.0,
+      "outside_mm": 907.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 1000-3",
+      "profile": "SPB",
+      "datum_mm": 1000.0,
+      "outside_mm": 1007.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 1250-3",
+      "profile": "SPB",
+      "datum_mm": 1250.0,
+      "outside_mm": 1257.0,
+      "grooves": 3,
+      "pdf_page": 63
+    },
+    {
+      "code": "T SPB 100-4",
+      "profile": "SPB",
+      "datum_mm": 100.0,
+      "outside_mm": 107.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 106-4",
+      "profile": "SPB",
+      "datum_mm": 106.0,
+      "outside_mm": 113.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 112-4",
+      "profile": "SPB",
+      "datum_mm": 112.0,
+      "outside_mm": 119.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 118-4",
+      "profile": "SPB",
+      "datum_mm": 118.0,
+      "outside_mm": 125.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 125-4",
+      "profile": "SPB",
+      "datum_mm": 125.0,
+      "outside_mm": 132.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 132-4",
+      "profile": "SPB",
+      "datum_mm": 132.0,
+      "outside_mm": 139.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 140-4",
+      "profile": "SPB",
+      "datum_mm": 140.0,
+      "outside_mm": 147.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 150-4",
+      "profile": "SPB",
+      "datum_mm": 150.0,
+      "outside_mm": 157.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 160-4",
+      "profile": "SPB",
+      "datum_mm": 160.0,
+      "outside_mm": 167.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 170-4",
+      "profile": "SPB",
+      "datum_mm": 170.0,
+      "outside_mm": 177.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 180-4",
+      "profile": "SPB",
+      "datum_mm": 180.0,
+      "outside_mm": 187.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 190-4",
+      "profile": "SPB",
+      "datum_mm": 190.0,
+      "outside_mm": 197.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 200-4",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 212-4",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 224-4",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 236-4",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 250-4",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 280-4",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 300-4",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 315-4",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 335-4",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 355-4",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 400-4",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 450-4",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 500-4",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 560-4",
+      "profile": "SPB",
+      "datum_mm": 560.0,
+      "outside_mm": 567.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 630-4",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 710-4",
+      "profile": "SPB",
+      "datum_mm": 710.0,
+      "outside_mm": 717.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 800-4",
+      "profile": "SPB",
+      "datum_mm": 800.0,
+      "outside_mm": 807.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 900-4",
+      "profile": "SPB",
+      "datum_mm": 900.0,
+      "outside_mm": 907.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 1000-4",
+      "profile": "SPB",
+      "datum_mm": 1000.0,
+      "outside_mm": 1007.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 1250-4",
+      "profile": "SPB",
+      "datum_mm": 1250.0,
+      "outside_mm": 1257.0,
+      "grooves": 4,
+      "pdf_page": 64
+    },
+    {
+      "code": "T SPB 125-5",
+      "profile": "SPB",
+      "datum_mm": 125.0,
+      "outside_mm": 132.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 132-5",
+      "profile": "SPB",
+      "datum_mm": 132.0,
+      "outside_mm": 139.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 140-5",
+      "profile": "SPB",
+      "datum_mm": 140.0,
+      "outside_mm": 147.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 150-5",
+      "profile": "SPB",
+      "datum_mm": 150.0,
+      "outside_mm": 157.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 160-5",
+      "profile": "SPB",
+      "datum_mm": 160.0,
+      "outside_mm": 167.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 170-5",
+      "profile": "SPB",
+      "datum_mm": 170.0,
+      "outside_mm": 177.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 180-5",
+      "profile": "SPB",
+      "datum_mm": 180.0,
+      "outside_mm": 187.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 190-5",
+      "profile": "SPB",
+      "datum_mm": 190.0,
+      "outside_mm": 197.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 200-5",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 212-5",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 224-5",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 236-5",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 250-5",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 280-5",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 300-5",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 315-5",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 335-5",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 355-5",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 400-5",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 450-5",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 500-5",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 560-5",
+      "profile": "SPB",
+      "datum_mm": 560.0,
+      "outside_mm": 567.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 630-5",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 710-5",
+      "profile": "SPB",
+      "datum_mm": 710.0,
+      "outside_mm": 717.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 800-5",
+      "profile": "SPB",
+      "datum_mm": 800.0,
+      "outside_mm": 807.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 900-5",
+      "profile": "SPB",
+      "datum_mm": 900.0,
+      "outside_mm": 907.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 1000-5",
+      "profile": "SPB",
+      "datum_mm": 1000.0,
+      "outside_mm": 1007.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 1250-5",
+      "profile": "SPB",
+      "datum_mm": 1250.0,
+      "outside_mm": 1257.0,
+      "grooves": 5,
+      "pdf_page": 65
+    },
+    {
+      "code": "T SPB 125-6",
+      "profile": "SPB",
+      "datum_mm": 125.0,
+      "outside_mm": 132.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 132-6",
+      "profile": "SPB",
+      "datum_mm": 132.0,
+      "outside_mm": 139.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 140-6",
+      "profile": "SPB",
+      "datum_mm": 140.0,
+      "outside_mm": 147.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 150-6",
+      "profile": "SPB",
+      "datum_mm": 150.0,
+      "outside_mm": 157.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 160-6",
+      "profile": "SPB",
+      "datum_mm": 160.0,
+      "outside_mm": 167.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 170-6",
+      "profile": "SPB",
+      "datum_mm": 170.0,
+      "outside_mm": 177.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 180-6",
+      "profile": "SPB",
+      "datum_mm": 180.0,
+      "outside_mm": 187.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 190-6",
+      "profile": "SPB",
+      "datum_mm": 190.0,
+      "outside_mm": 197.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 200-6",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 212-6",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 224-6",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 236-6",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 250-6",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 280-6",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 300-6",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 315-6",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 335-6",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 355-6",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 400-6",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 450-6",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 500-6",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 560-6",
+      "profile": "SPB",
+      "datum_mm": 560.0,
+      "outside_mm": 567.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 630-6",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 710-6",
+      "profile": "SPB",
+      "datum_mm": 710.0,
+      "outside_mm": 717.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 800-6",
+      "profile": "SPB",
+      "datum_mm": 800.0,
+      "outside_mm": 807.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 900-6",
+      "profile": "SPB",
+      "datum_mm": 900.0,
+      "outside_mm": 907.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 1000-6",
+      "profile": "SPB",
+      "datum_mm": 1000.0,
+      "outside_mm": 1007.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 1250-6",
+      "profile": "SPB",
+      "datum_mm": 1250.0,
+      "outside_mm": 1257.0,
+      "grooves": 6,
+      "pdf_page": 66
+    },
+    {
+      "code": "T SPB 200-8",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 212-8",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 224-8",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 236-8",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 250-8",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 280-8",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 300-8",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 315-8",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 335-8",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 355-8",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 400-8",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 450-8",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 500-8",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 560-8",
+      "profile": "SPB",
+      "datum_mm": 560.0,
+      "outside_mm": 567.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 630-8",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 710-8",
+      "profile": "SPB",
+      "datum_mm": 710.0,
+      "outside_mm": 717.0,
+      "grooves": 8,
+      "pdf_page": 67
+    },
+    {
+      "code": "T SPB 200-10",
+      "profile": "SPB",
+      "datum_mm": 200.0,
+      "outside_mm": 207.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 212-10",
+      "profile": "SPB",
+      "datum_mm": 212.0,
+      "outside_mm": 219.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 224-10",
+      "profile": "SPB",
+      "datum_mm": 224.0,
+      "outside_mm": 231.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 236-10",
+      "profile": "SPB",
+      "datum_mm": 236.0,
+      "outside_mm": 243.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 250-10",
+      "profile": "SPB",
+      "datum_mm": 250.0,
+      "outside_mm": 257.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 280-10",
+      "profile": "SPB",
+      "datum_mm": 280.0,
+      "outside_mm": 287.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 300-10",
+      "profile": "SPB",
+      "datum_mm": 300.0,
+      "outside_mm": 307.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 315-10",
+      "profile": "SPB",
+      "datum_mm": 315.0,
+      "outside_mm": 322.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 335-10",
+      "profile": "SPB",
+      "datum_mm": 335.0,
+      "outside_mm": 342.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 355-10",
+      "profile": "SPB",
+      "datum_mm": 355.0,
+      "outside_mm": 362.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 400-10",
+      "profile": "SPB",
+      "datum_mm": 400.0,
+      "outside_mm": 407.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 450-10",
+      "profile": "SPB",
+      "datum_mm": 450.0,
+      "outside_mm": 457.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 500-10",
+      "profile": "SPB",
+      "datum_mm": 500.0,
+      "outside_mm": 507.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 560-10",
+      "profile": "SPB",
+      "datum_mm": 560.0,
+      "outside_mm": 567.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 630-10",
+      "profile": "SPB",
+      "datum_mm": 630.0,
+      "outside_mm": 637.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPB 710-10",
+      "profile": "SPB",
+      "datum_mm": 710.0,
+      "outside_mm": 717.0,
+      "grooves": 10,
+      "pdf_page": 68
+    },
+    {
+      "code": "T SPC 200-3",
+      "profile": "SPC",
+      "datum_mm": 200.0,
+      "outside_mm": 209.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 212-3",
+      "profile": "SPC",
+      "datum_mm": 212.0,
+      "outside_mm": 221.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 224-3",
+      "profile": "SPC",
+      "datum_mm": 224.0,
+      "outside_mm": 233.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 236-3",
+      "profile": "SPC",
+      "datum_mm": 236.0,
+      "outside_mm": 245.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 250-3",
+      "profile": "SPC",
+      "datum_mm": 250.0,
+      "outside_mm": 259.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 265-3",
+      "profile": "SPC",
+      "datum_mm": 265.0,
+      "outside_mm": 274.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 280-3",
+      "profile": "SPC",
+      "datum_mm": 280.0,
+      "outside_mm": 289.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 300-3",
+      "profile": "SPC",
+      "datum_mm": 300.0,
+      "outside_mm": 309.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 315-3",
+      "profile": "SPC",
+      "datum_mm": 315.0,
+      "outside_mm": 324.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 335-3",
+      "profile": "SPC",
+      "datum_mm": 335.0,
+      "outside_mm": 344.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 355-3",
+      "profile": "SPC",
+      "datum_mm": 355.0,
+      "outside_mm": 364.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 375-3",
+      "profile": "SPC",
+      "datum_mm": 375.0,
+      "outside_mm": 384.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 400-3",
+      "profile": "SPC",
+      "datum_mm": 400.0,
+      "outside_mm": 409.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 425-3",
+      "profile": "SPC",
+      "datum_mm": 425.0,
+      "outside_mm": 434.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 450-3",
+      "profile": "SPC",
+      "datum_mm": 450.0,
+      "outside_mm": 459.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 475-3",
+      "profile": "SPC",
+      "datum_mm": 475.0,
+      "outside_mm": 484.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 500-3",
+      "profile": "SPC",
+      "datum_mm": 500.0,
+      "outside_mm": 509.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 530-3",
+      "profile": "SPC",
+      "datum_mm": 530.0,
+      "outside_mm": 539.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 560-3",
+      "profile": "SPC",
+      "datum_mm": 560.0,
+      "outside_mm": 569.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 630-3",
+      "profile": "SPC",
+      "datum_mm": 630.0,
+      "outside_mm": 639.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 710-3",
+      "profile": "SPC",
+      "datum_mm": 710.0,
+      "outside_mm": 719.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 800-3",
+      "profile": "SPC",
+      "datum_mm": 800.0,
+      "outside_mm": 809.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 1000-3",
+      "profile": "SPC",
+      "datum_mm": 1000.0,
+      "outside_mm": 1009.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 1250-3",
+      "profile": "SPC",
+      "datum_mm": 1250.0,
+      "outside_mm": 1259.6,
+      "grooves": 3,
+      "pdf_page": 69
+    },
+    {
+      "code": "T SPC 200-4",
+      "profile": "SPC",
+      "datum_mm": 200.0,
+      "outside_mm": 209.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 212-4",
+      "profile": "SPC",
+      "datum_mm": 212.0,
+      "outside_mm": 221.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 224-4",
+      "profile": "SPC",
+      "datum_mm": 224.0,
+      "outside_mm": 233.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 236-4",
+      "profile": "SPC",
+      "datum_mm": 236.0,
+      "outside_mm": 245.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 250-4",
+      "profile": "SPC",
+      "datum_mm": 250.0,
+      "outside_mm": 259.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 265-4",
+      "profile": "SPC",
+      "datum_mm": 265.0,
+      "outside_mm": 274.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 280-4",
+      "profile": "SPC",
+      "datum_mm": 280.0,
+      "outside_mm": 289.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 300-4",
+      "profile": "SPC",
+      "datum_mm": 300.0,
+      "outside_mm": 309.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 315-4",
+      "profile": "SPC",
+      "datum_mm": 315.0,
+      "outside_mm": 324.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 335-4",
+      "profile": "SPC",
+      "datum_mm": 335.0,
+      "outside_mm": 344.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 355-4",
+      "profile": "SPC",
+      "datum_mm": 355.0,
+      "outside_mm": 364.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 375-4",
+      "profile": "SPC",
+      "datum_mm": 375.0,
+      "outside_mm": 384.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 400-4",
+      "profile": "SPC",
+      "datum_mm": 400.0,
+      "outside_mm": 409.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 425-4",
+      "profile": "SPC",
+      "datum_mm": 425.0,
+      "outside_mm": 434.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 450-4",
+      "profile": "SPC",
+      "datum_mm": 450.0,
+      "outside_mm": 459.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 475-4",
+      "profile": "SPC",
+      "datum_mm": 475.0,
+      "outside_mm": 484.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 500-4",
+      "profile": "SPC",
+      "datum_mm": 500.0,
+      "outside_mm": 509.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 530-4",
+      "profile": "SPC",
+      "datum_mm": 530.0,
+      "outside_mm": 539.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 560-4",
+      "profile": "SPC",
+      "datum_mm": 560.0,
+      "outside_mm": 569.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 630-4",
+      "profile": "SPC",
+      "datum_mm": 630.0,
+      "outside_mm": 639.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 710-4",
+      "profile": "SPC",
+      "datum_mm": 710.0,
+      "outside_mm": 719.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 800-4",
+      "profile": "SPC",
+      "datum_mm": 800.0,
+      "outside_mm": 809.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 1000-4",
+      "profile": "SPC",
+      "datum_mm": 1000.0,
+      "outside_mm": 1009.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 1250-4",
+      "profile": "SPC",
+      "datum_mm": 1250.0,
+      "outside_mm": 1259.6,
+      "grooves": 4,
+      "pdf_page": 70
+    },
+    {
+      "code": "T SPC 200-5",
+      "profile": "SPC",
+      "datum_mm": 200.0,
+      "outside_mm": 209.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 212-5",
+      "profile": "SPC",
+      "datum_mm": 212.0,
+      "outside_mm": 221.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 224-5",
+      "profile": "SPC",
+      "datum_mm": 224.0,
+      "outside_mm": 233.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 236-5",
+      "profile": "SPC",
+      "datum_mm": 236.0,
+      "outside_mm": 245.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 250-5",
+      "profile": "SPC",
+      "datum_mm": 250.0,
+      "outside_mm": 259.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 265-5",
+      "profile": "SPC",
+      "datum_mm": 265.0,
+      "outside_mm": 274.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 280-5",
+      "profile": "SPC",
+      "datum_mm": 280.0,
+      "outside_mm": 289.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 300-5",
+      "profile": "SPC",
+      "datum_mm": 300.0,
+      "outside_mm": 309.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 315-5",
+      "profile": "SPC",
+      "datum_mm": 315.0,
+      "outside_mm": 324.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 335-5",
+      "profile": "SPC",
+      "datum_mm": 335.0,
+      "outside_mm": 344.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 355-5",
+      "profile": "SPC",
+      "datum_mm": 355.0,
+      "outside_mm": 364.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 375-5",
+      "profile": "SPC",
+      "datum_mm": 375.0,
+      "outside_mm": 384.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 400-5",
+      "profile": "SPC",
+      "datum_mm": 400.0,
+      "outside_mm": 409.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 425-5",
+      "profile": "SPC",
+      "datum_mm": 425.0,
+      "outside_mm": 434.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 450-5",
+      "profile": "SPC",
+      "datum_mm": 450.0,
+      "outside_mm": 459.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 475-5",
+      "profile": "SPC",
+      "datum_mm": 475.0,
+      "outside_mm": 484.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 500-5",
+      "profile": "SPC",
+      "datum_mm": 500.0,
+      "outside_mm": 509.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 530-5",
+      "profile": "SPC",
+      "datum_mm": 530.0,
+      "outside_mm": 539.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 560-5",
+      "profile": "SPC",
+      "datum_mm": 560.0,
+      "outside_mm": 569.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 630-5",
+      "profile": "SPC",
+      "datum_mm": 630.0,
+      "outside_mm": 639.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 710-5",
+      "profile": "SPC",
+      "datum_mm": 710.0,
+      "outside_mm": 719.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 800-5",
+      "profile": "SPC",
+      "datum_mm": 800.0,
+      "outside_mm": 809.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 1000-5",
+      "profile": "SPC",
+      "datum_mm": 1000.0,
+      "outside_mm": 1009.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 1250-5",
+      "profile": "SPC",
+      "datum_mm": 1250.0,
+      "outside_mm": 1259.6,
+      "grooves": 5,
+      "pdf_page": 71
+    },
+    {
+      "code": "T SPC 200-6",
+      "profile": "SPC",
+      "datum_mm": 200.0,
+      "outside_mm": 209.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 212-6",
+      "profile": "SPC",
+      "datum_mm": 212.0,
+      "outside_mm": 221.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 224-6",
+      "profile": "SPC",
+      "datum_mm": 224.0,
+      "outside_mm": 233.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 236-6",
+      "profile": "SPC",
+      "datum_mm": 236.0,
+      "outside_mm": 245.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 250-6",
+      "profile": "SPC",
+      "datum_mm": 250.0,
+      "outside_mm": 259.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 265-6",
+      "profile": "SPC",
+      "datum_mm": 265.0,
+      "outside_mm": 274.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 280-6",
+      "profile": "SPC",
+      "datum_mm": 280.0,
+      "outside_mm": 289.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 300-6",
+      "profile": "SPC",
+      "datum_mm": 300.0,
+      "outside_mm": 309.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 315-6",
+      "profile": "SPC",
+      "datum_mm": 315.0,
+      "outside_mm": 324.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 335-6",
+      "profile": "SPC",
+      "datum_mm": 335.0,
+      "outside_mm": 344.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 355-6",
+      "profile": "SPC",
+      "datum_mm": 355.0,
+      "outside_mm": 364.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 375-6",
+      "profile": "SPC",
+      "datum_mm": 375.0,
+      "outside_mm": 384.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 400-6",
+      "profile": "SPC",
+      "datum_mm": 400.0,
+      "outside_mm": 409.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 425-6",
+      "profile": "SPC",
+      "datum_mm": 425.0,
+      "outside_mm": 434.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 450-6",
+      "profile": "SPC",
+      "datum_mm": 450.0,
+      "outside_mm": 459.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 475-6",
+      "profile": "SPC",
+      "datum_mm": 475.0,
+      "outside_mm": 484.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 500-6",
+      "profile": "SPC",
+      "datum_mm": 500.0,
+      "outside_mm": 509.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 530-6",
+      "profile": "SPC",
+      "datum_mm": 530.0,
+      "outside_mm": 539.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 560-6",
+      "profile": "SPC",
+      "datum_mm": 560.0,
+      "outside_mm": 569.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 630-6",
+      "profile": "SPC",
+      "datum_mm": 630.0,
+      "outside_mm": 639.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 710-6",
+      "profile": "SPC",
+      "datum_mm": 710.0,
+      "outside_mm": 719.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 800-6",
+      "profile": "SPC",
+      "datum_mm": 800.0,
+      "outside_mm": 809.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 1000-6",
+      "profile": "SPC",
+      "datum_mm": 1000.0,
+      "outside_mm": 1009.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 1250-6",
+      "profile": "SPC",
+      "datum_mm": 1250.0,
+      "outside_mm": 1259.6,
+      "grooves": 6,
+      "pdf_page": 72
+    },
+    {
+      "code": "T SPC 200-8",
+      "profile": "SPC",
+      "datum_mm": 200.0,
+      "outside_mm": 209.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 212-8",
+      "profile": "SPC",
+      "datum_mm": 212.0,
+      "outside_mm": 221.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 224-8",
+      "profile": "SPC",
+      "datum_mm": 224.0,
+      "outside_mm": 233.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 236-8",
+      "profile": "SPC",
+      "datum_mm": 236.0,
+      "outside_mm": 245.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 250-8",
+      "profile": "SPC",
+      "datum_mm": 250.0,
+      "outside_mm": 259.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 265-8",
+      "profile": "SPC",
+      "datum_mm": 265.0,
+      "outside_mm": 274.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 280-8",
+      "profile": "SPC",
+      "datum_mm": 280.0,
+      "outside_mm": 289.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 300-8",
+      "profile": "SPC",
+      "datum_mm": 300.0,
+      "outside_mm": 309.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 315-8",
+      "profile": "SPC",
+      "datum_mm": 315.0,
+      "outside_mm": 324.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 335-8",
+      "profile": "SPC",
+      "datum_mm": 335.0,
+      "outside_mm": 344.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 355-8",
+      "profile": "SPC",
+      "datum_mm": 355.0,
+      "outside_mm": 364.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 375-8",
+      "profile": "SPC",
+      "datum_mm": 375.0,
+      "outside_mm": 384.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 400-8",
+      "profile": "SPC",
+      "datum_mm": 400.0,
+      "outside_mm": 409.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 425-8",
+      "profile": "SPC",
+      "datum_mm": 425.0,
+      "outside_mm": 434.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 450-8",
+      "profile": "SPC",
+      "datum_mm": 450.0,
+      "outside_mm": 459.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 475-8",
+      "profile": "SPC",
+      "datum_mm": 475.0,
+      "outside_mm": 484.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 500-8",
+      "profile": "SPC",
+      "datum_mm": 500.0,
+      "outside_mm": 509.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 530-8",
+      "profile": "SPC",
+      "datum_mm": 530.0,
+      "outside_mm": 539.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 560-8",
+      "profile": "SPC",
+      "datum_mm": 560.0,
+      "outside_mm": 569.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 630-8",
+      "profile": "SPC",
+      "datum_mm": 630.0,
+      "outside_mm": 639.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 710-8",
+      "profile": "SPC",
+      "datum_mm": 710.0,
+      "outside_mm": 719.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 800-8",
+      "profile": "SPC",
+      "datum_mm": 800.0,
+      "outside_mm": 809.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 1000-8",
+      "profile": "SPC",
+      "datum_mm": 1000.0,
+      "outside_mm": 1009.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 1250-8",
+      "profile": "SPC",
+      "datum_mm": 1250.0,
+      "outside_mm": 1259.6,
+      "grooves": 8,
+      "pdf_page": 73
+    },
+    {
+      "code": "T SPC 250-10",
+      "profile": "SPC",
+      "datum_mm": 250.0,
+      "outside_mm": 259.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 265-10",
+      "profile": "SPC",
+      "datum_mm": 265.0,
+      "outside_mm": 274.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 280-10",
+      "profile": "SPC",
+      "datum_mm": 280.0,
+      "outside_mm": 289.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 300-10",
+      "profile": "SPC",
+      "datum_mm": 300.0,
+      "outside_mm": 309.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 315-10",
+      "profile": "SPC",
+      "datum_mm": 315.0,
+      "outside_mm": 324.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 335-10",
+      "profile": "SPC",
+      "datum_mm": 335.0,
+      "outside_mm": 344.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 355-10",
+      "profile": "SPC",
+      "datum_mm": 355.0,
+      "outside_mm": 364.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 375-10",
+      "profile": "SPC",
+      "datum_mm": 375.0,
+      "outside_mm": 384.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 400-10",
+      "profile": "SPC",
+      "datum_mm": 400.0,
+      "outside_mm": 409.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 425-10",
+      "profile": "SPC",
+      "datum_mm": 425.0,
+      "outside_mm": 434.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 450-10",
+      "profile": "SPC",
+      "datum_mm": 450.0,
+      "outside_mm": 459.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 475-10",
+      "profile": "SPC",
+      "datum_mm": 475.0,
+      "outside_mm": 484.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 500-10",
+      "profile": "SPC",
+      "datum_mm": 500.0,
+      "outside_mm": 509.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 530-10",
+      "profile": "SPC",
+      "datum_mm": 530.0,
+      "outside_mm": 539.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 560-10",
+      "profile": "SPC",
+      "datum_mm": 560.0,
+      "outside_mm": 569.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 630-10",
+      "profile": "SPC",
+      "datum_mm": 630.0,
+      "outside_mm": 639.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 710-10",
+      "profile": "SPC",
+      "datum_mm": 710.0,
+      "outside_mm": 719.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 800-10",
+      "profile": "SPC",
+      "datum_mm": 800.0,
+      "outside_mm": 809.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 1000-10",
+      "profile": "SPC",
+      "datum_mm": 1000.0,
+      "outside_mm": 1009.6,
+      "grooves": 10,
+      "pdf_page": 74
+    },
+    {
+      "code": "T SPC 1250-10",
+      "profile": "SPC",
+      "datum_mm": 1250.0,
+      "outside_mm": 1259.6,
+      "grooves": 10,
+      "pdf_page": 74
+    }
+  ],
+  "quarantined": [
+    {
+      "code": "T SPB 565-2",
+      "pdf_page": 62,
+      "reason": "Ürün kodu ile datum/kanal hücresi çelişiyor."
+    }
+  ],
+  "counts": {
+    "SPZ": 181,
+    "SPA": 189,
+    "SPB": 198,
+    "SPC": 140
+  },
+  "notes": [
+    "PDF sayfa 48–74 / basılı 46–72; yalnız P, O ve kanal adedi.",
+    "PDF 47 / basılı 45: kasnak çevresel hızı en çok 35 m/s.",
+    "Kayış, güç tablosu, mil deliği ve toplam gövde genişliği bu veri kümesinde yoktur."
+  ]
+}

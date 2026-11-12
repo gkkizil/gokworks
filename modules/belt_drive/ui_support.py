@@ -39,6 +39,11 @@ METRIC_TITLES = (
     ('width', 'Toplam genişlik'), ('capacity', 'Kapasite (1/oran)'), ('source', 'Kaynak durumu'),
 )
 REJECTION_TITLES = {
+    'NO_COMMON_GROOVES':'İki kasnakta ortak kanal sayısı yok',
+    'NO_LISTED_LENGTH_IN_CENTER_BOUNDS':'Listelenen kayış boyu C aralığına uymuyor',
+    'SK_REFERENCE_RANGE':'Optibelt SK güç/boy/sarılma tablosu veya bükülme sınırı dışında',
+    'INSUFFICIENT_CATALOG_GROOVES':'Katalogdaki ortak kanal sayısı veya adet sınırı yetersiz',
+    'MAXIMUM_BELT_SPEED':'Tosyalı 35 m/s veya kullanıcı hız sınırı aşıldı',
     'PULLEY_DIAMETER': 'Kasnak çapı sınır dışında', 'OUTSIDE_DIAMETER': 'Dış çap sınır dışında',
     'PULLEY_TEETH': 'Diş sayısı sınır dışında', 'PAIR_CALCULATION': 'Çift hesaplanamadı',
     'RPM_TOLERANCE': 'Devir sapması sınırı aşıldı', 'CENTER_GEOMETRY': 'C üst sınırı kasnaklar için çok küçük',
