@@ -1,13 +1,13 @@
 {
-  "request_id": "20261113-main-4f7f2b3-selected-autosave-exe",
-  "requested_at": "2026-11-13T07:30:41+00:00",
-  "source_commit": "4f7f2b373dbdbd4101905f276c1960ec45992bf5",
+  "request_id": "20261113-main-47338e9-dxf-audit-exe",
+  "requested_at": "2026-11-13T08:48:05+00:00",
+  "source_commit": "47338e96b69fe44ba285989ab906feda508e9922",
   "validation_profile": "package-only",
   "skip_full_tests": true,
   "validation_runs": [
-    43378606902
+    43393138799
   ],
-  "validated_agent_head": "fad46f5ea33052d50b93f4f892fc9ae969501004",
-  "reason": "User explicitly requested building the EXE from current main without creating a separate build branch. Main 4f7f2b3 merges PR 76 and includes selected-body DXF/DWG native autosave, restored source configurations, stable numbered multibody outputs and SolidWorks circular-edge/activation-warning fixes. Windows agent integration 43378606902 completed successfully for the integrated agent head. Reuse that completed Windows integration instead of repeating the entire suite; run the unmodified main Windows onefile packaging, bundled native converters, Sparrow worker and frozen EXE DPI/opening checks. Local final selected-autosave regression: 544 passed, 6 platform/live skips, zero failures or retries. This request changes build metadata only. No separate branch, application source edits or EXE from an agent branch. Licensed live SolidWorks and the user's native part are not available in this environment.",
+  "validated_agent_head": "755b4cc100d3ef0d3555d005f1c6af5c28fb39ce",
+  "reason": "User explicitly requested the EXE only after integration finishes and from main, without a separate build branch. All three full Windows integration shards in run 43393138799 completed successfully, and PR 78 was merged as main 47338e9 at 2026-11-13T08:47:37Z. Verified main contains head 755b4cc. Include the prior raw PyIDispatch document autosave fix and the audited DXF/DWG fixes: revalidate manufacturing metadata before publication, reject annotation-only DXF cuts, stop and preserve partial outputs after native document close failures. Local comprehensive audit: 849 passed, 8 platform/live skips, 44 subchecks, zero failures or retries; 180 valid DXF, 96 truncated DXF rejected, 12 DWG geometry readbacks with existing LibreDWG cleanup. Reuse the just-completed full Windows integration; run the shipping main onefile build, native converter, Sparrow worker and packaged EXE DPI/opening checks. Only build-request metadata changes on main; no application or workflow edits, no build branch. No live licensed SolidWorks acceptance is claimed.",
   "cancelled": false
 }
