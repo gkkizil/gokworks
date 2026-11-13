@@ -444,6 +444,23 @@ def preview_identity(model, body):
     return identity
 
 
+def _verify_sheet_source(session, model, sheet, stop):
+    """Compare live body metadata with the identity used to name this output."""
+    from modules.cad_converter.api import RestoreError
+    try:
+        fresh, _ = session.describe(model, sheet['source'], sheet['configuration'], stop,
+                                    body_ref=sheet['body_ref'])
+    except RestoreError as error:
+        raise SourceRestoreError(str(error)) from error
+    match = [row for row in fresh if row['body_ref'] == sheet['body_ref']]
+    if len(match) != 1 or not match[0]['exportable'] or match[0]['flat_ref'] != sheet['flat_ref']:
+        raise ValueError('Sac/Flat-Pattern eşleşmesi değişmiş; yeniden tarayın.')
+    if not math.isclose(match[0]['thickness_mm'], sheet['thickness_mm'], abs_tol=1e-6, rel_tol=1e-9):
+        raise ValueError('Sac kalınlığı taramadan sonra değişmiş; yeniden tarayın.')
+    if match[0].get('material', '') != sheet.get('material', ''):
+        raise ValueError('Gövdenin malzemesi taramadan sonra değişmiş; yeniden tarayın.')
+
+
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     target_builder=None, output_paths=None, output_results=None, output_identity=None,
                     save_modified=False, stop_event=None, sheet=None, selection_session=None):
@@ -619,9 +636,13 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 if not _success(exported):
                     raise RuntimeError("SolidWorks açınımı aktaramadı. Sac metal/açınım unsurunu kontrol edin.")
                 _validate_output(temporary)
-                if sheet and target.suffix.lower()=='.dxf':
+                if target.suffix.lower()=='.dxf':
                     from .geometry_check import validate_flat_geometry
                     validate_flat_geometry(temporary,stop_event)
+                if sheet and save_modified and sheet.get('source') and 'thickness_mm' in sheet:
+                    # Save3 / native export can update Cut List metadata after
+                    # the queue's initial validation. Never publish stale tags.
+                    _verify_sheet_source(selection_session, model, sheet, stop_event)
                 checkpoint()
                 try:
                     _publish(temporary, target, overwrite)
@@ -694,9 +715,15 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 restore_failed = '; '.join(filter(None, (restore_failed, message)))
         if opened_here and model is not None and not save_failed:
             try:
+                closed_path = _value(model, 'GetPathName')
                 app.CloseDoc(_value(model, "GetTitle"))
+                remaining = app.GetOpenDocumentByName(closed_path)
+                if remaining is not None and _value(remaining, 'Visible'):
+                    raise RuntimeError('SolidWorks belge penceresini açık bıraktı.')
             except Exception as error:
-                notes.append(f"Parça kapatılamadı: {error}")
+                message = f"Parça kapatılamadı: {error}"
+                notes.append(message)
+                restore_failed = '; '.join(filter(None, (restore_failed, message)))
         if previous_name and (opened_here or activated_here) and not save_failed:
             try:
                 errors = _out_integer()
@@ -713,7 +740,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 restore_failed = '; '.join(filter(None, (restore_failed, message)))
         # Release child dispatch wrappers before a fatal restoration exception
         # can retain this frame past the owning STA's CoUninitialize.
-        model = part_api = previous = active = activated = restored = selected_body = app = None
+        model = part_api = previous = active = activated = restored = selected_body = remaining = app = None
         bodies = matches = ()
         if restore_failed:
             raise SourceRestoreError(restore_failed)
@@ -732,6 +759,8 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": [],
                "unexported_configurations": 0}
     initialized = False
+    active_part = None
+    targets, metadata, outputs = [], {}, []
     try:
         formats = normalize_formats(formats)
         source = Path(source_folder).resolve()
@@ -780,6 +809,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                 summary["state"] = "cancelled"
                 break
             targets, metadata, outputs = [], {}, []
+            active_part = part
             events.put(("current", part))
             def build_targets(model, configuration):
                 quantity = quantities.get(_part_key(part, configuration), 0)
@@ -813,6 +843,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
                                     "status": status, "detail": detail, **metadata}))
             events.put(("counts", dict(summary)))
             events.put(("progress", (index, len(parts))))
+            active_part = None
             if metadata.get('native_save_error'):
                 raise SaveDocumentsError(metadata['native_save_error'])
             if stop_event is not None and stop_event.is_set():
@@ -828,6 +859,15 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
         summary['state'] = 'error'
         summary['error'] = str(error)
         summary['native_restore_failed'] = True
+        if active_part is not None:
+            status = 'partial' if any(item['status'] == 'success' for item in outputs) else 'error'
+            summary['partial' if status == 'partial' else 'failed'] += 1
+            summary['processed'] += 1
+            available = [item['path'] for item in outputs if item['status'] in ('success', 'skipped')]
+            events.put(('result', dict(source=active_part, output=' | '.join(available), outputs=outputs,
+                                      status=status, detail=str(error), **metadata)))
+            events.put(('counts', dict(summary)))
+            events.put(('progress', (summary['processed'], len(parts))))
         events.put(('log', f'İşlem durdu: {error}'))
     except Exception as error:
         summary["state"] = "error"
@@ -891,15 +931,7 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
                         with session.configuration(model, item['configuration']):
                             # Material/property edits need not advance the geometry
                             # stamp. Refresh only this body, immediately before use.
-                            fresh, _ = session.describe(model, item['source'], item['configuration'], stop,
-                                                        body_ref=item['body_ref'])
-                            match = [row for row in fresh if row['body_ref']==item['body_ref']]
-                            if len(match)!=1 or not match[0]['exportable'] or match[0]['flat_ref']!=item['flat_ref']:
-                                raise ValueError('Sac/Flat-Pattern eşleşmesi değişmiş; yeniden tarayın.')
-                            if not math.isclose(match[0]['thickness_mm'],item['thickness_mm'],abs_tol=1e-6,rel_tol=1e-9):
-                                raise ValueError('Sac kalınlığı taramadan sonra değişmiş; yeniden tarayın.')
-                            if match[0].get('material','')!=item.get('material',''):
-                                raise ValueError('Gövdenin malzemesi taramadan sonra değişmiş; yeniden tarayın.')
+                            _verify_sheet_source(session, model, item, stop)
                             source_validated = True
                             status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
                                 overwrite, bend_lines, output_results=outputs, output_identity=metadata,
