@@ -288,6 +288,55 @@ class Session(ReadSession):
         except Exception:
             return ''
 
+    def manufacturing_metadata(self, model, sheet, checked_update, stop=None):
+        """Re-read manufacturing values without a whole-tree walk on stable geometry.
+
+        Names are hints: verify body/FlatPattern ownership on fresh native
+        objects. Missing hints, a changed/unknown stamp or pending rebuild use
+        describe() instead. Never cache material, thickness or COM objects.
+        """
+        body = flat = cut = folder = None
+        bodies = matches = members = ()
+        try:
+            checkpoint(stop)
+            current_update = optional(model,'GetUpdateStamp')
+            if (type(checked_update) is not int or type(current_update) is not int or current_update != checked_update
+                    or self.rebuild_pending(model) is not False or not sheet.get('flat_pattern')
+                    or not sheet.get('cut_list') or self.active_configuration(model) != sheet['configuration']):
+                return None
+            flat = call(model,'FeatureByName',sheet['flat_pattern'])
+            if (flat is None or call(flat,'GetTypeName2')!='FlatPattern'
+                    or self.persistent_ref(model,flat)!=sheet['flat_ref']
+                    or self.flat_body_reference(model,flat)!=sheet['body_ref']):
+                return None
+            flat = None
+            # Definition access above can roll back/recreate native bodies.
+            # Reacquire them after that scope, never retain the old IBody2.
+            bodies = values(call(self.part(model),'GetBodies2',self.c('swSolidBody'),False))
+            matches = [b for b in bodies if self.persistent_ref(model,b)==sheet['body_ref']]
+            if len(matches)!=1 or call(matches[0],'IsSheetMetal') is not True:
+                return None
+            body = matches[0]
+            cut = call(model,'FeatureByName',sheet['cut_list'])
+            if cut is None or call(cut,'GetTypeName2')!='CutListFolder':return None
+            folder = call(cut,'GetSpecificFeature2')
+            members = values(call(folder,'GetBodies'))
+            if not any(self.persistent_ref(model,member)==sheet['body_ref'] for member in members):return None
+            body_props = {n.upper():p.evaluated for n,p in self.properties(cut).items() if p.resolved and p.evaluated}
+            props = self.document_properties(model,sheet['configuration']);props.update(body_props)
+            thickness = self.thickness(model,body,props,())
+            material = self.material(model,body,sheet['configuration'],props,body_props=body_props)
+            checkpoint(stop)
+            current_update = optional(model,'GetUpdateStamp')
+            if type(current_update) is not int or current_update!=checked_update:return None
+            return dict(body_ref=sheet['body_ref'],flat_ref=sheet['flat_ref'],exportable=True,
+                        thickness_mm=thickness,material=material)
+        except (Cancelled,RestoreError):raise
+        except Exception:return None
+        finally:
+            model = body = flat = cut = folder = None
+            bodies = matches = members = ()
+
     def describe(self, model, source, configuration, stop=None, *, body_ref=''):
         """Classify with IsSheetMetal first. Mechanical parts get no feature scan."""
         bodies = sheets = features = folders = flats = None
@@ -357,9 +406,10 @@ class Session(ReadSession):
             references = [self.persistent_ref(model, body) for body in sheets]
             reference_counts = Counter(references)
             numbers = {reference:i for i,reference in enumerate(sorted(set(references)-{''}),1)}
-            for body in sheets:
+            from .exporter import preview_identity
+            document_identity = preview_identity(model,None)
+            for body,reference in zip(sheets,references):
                 checkpoint(stop)
-                reference = self.persistent_ref(model, body)
                 if body_ref and reference != body_ref:continue
                 row = dict(source=source, configuration=configuration, body_ref=reference,
                            body_name=str(optional(body, 'Name', prop=True, default='') or 'Adsız sac gövdesi'),
@@ -367,8 +417,7 @@ class Session(ReadSession):
                            body_count=len(bodies), sheet_count=sheet_count, material='', thickness_mm=None,
                            flat_ref='', flat_pattern='', cut_list='', code=Path(source).stem,
                            status='pending', detail='', exportable=True)
-                from .exporter import preview_identity
-                row.update(preview_identity(model,body))
+                row.update(document_identity)
                 notes = []
                 try:
                     if not reference:

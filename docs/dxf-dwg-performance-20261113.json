@@ -1,0 +1,179 @@
+{
+  "scope": "Controlled COM/test-double workload; not live SolidWorks timing. Each revision runs in an isolated process; historical exporter and sheetmetal code loaded with git show, common test fixtures and CAD adapter retained. Counters begin after inventory.",
+  "comparison_head": "755b4cc100d3ef0d3555d005f1c6af5c28fb39ce",
+  "benchmarks": [
+    {
+      "revision": "d783669",
+      "dirty_native_export": false,
+      "configuration_switches": false,
+      "bodies": 20,
+      "other_open_docs": 100,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.3714728089980781,
+      "succeeded": 20,
+      "failed": 0,
+      "calls": {
+        "describe": 20,
+        "save_sweeps": 0,
+        "GetPathName": 202,
+        "Save3": 0
+      }
+    },
+    {
+      "revision": "fad46f5",
+      "dirty_native_export": false,
+      "configuration_switches": false,
+      "bodies": 20,
+      "other_open_docs": 100,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.3876313469991146,
+      "succeeded": 20,
+      "failed": 0,
+      "calls": {
+        "describe": 20,
+        "save_sweeps": 121,
+        "GetPathName": 12684,
+        "Save3": 0
+      }
+    },
+    {
+      "revision": "755b4cc",
+      "dirty_native_export": false,
+      "configuration_switches": false,
+      "bodies": 20,
+      "other_open_docs": 100,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.46127537800202845,
+      "succeeded": 20,
+      "failed": 0,
+      "calls": {
+        "describe": 60,
+        "save_sweeps": 121,
+        "GetPathName": 12724,
+        "Save3": 0
+      }
+    },
+    {
+      "revision": "worktree",
+      "dirty_native_export": false,
+      "configuration_switches": false,
+      "bodies": 20,
+      "other_open_docs": 100,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.29503203299827874,
+      "succeeded": 20,
+      "failed": 0,
+      "calls": {
+        "describe": 20,
+        "save_sweeps": 61,
+        "GetPathName": 222,
+        "Save3": 0
+      }
+    },
+    {
+      "revision": "fad46f5",
+      "dirty_native_export": true,
+      "configuration_switches": true,
+      "bodies": 8,
+      "other_open_docs": 30,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.14707910400102264,
+      "succeeded": 8,
+      "failed": 0,
+      "calls": {
+        "describe": 8,
+        "save_sweeps": 49,
+        "GetPathName": 3930,
+        "Save3": 64
+      }
+    },
+    {
+      "revision": "755b4cc",
+      "dirty_native_export": true,
+      "configuration_switches": true,
+      "bodies": 8,
+      "other_open_docs": 30,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.1742687490004755,
+      "succeeded": 8,
+      "failed": 0,
+      "calls": {
+        "describe": 24,
+        "save_sweeps": 49,
+        "GetPathName": 3946,
+        "Save3": 64
+      }
+    },
+    {
+      "revision": "worktree",
+      "dirty_native_export": true,
+      "configuration_switches": true,
+      "bodies": 8,
+      "other_open_docs": 30,
+      "formats": [
+        "dxf",
+        "dwg"
+      ],
+      "seconds": 0.11888459599867929,
+      "succeeded": 8,
+      "failed": 0,
+      "calls": {
+        "describe": 8,
+        "save_sweeps": 25,
+        "GetPathName": 258,
+        "Save3": 48
+      }
+    }
+  ],
+  "notes": [
+    "Clean scenario: native exporter leaves files clean; 20 selected bodies, 100 other open documents, DXF and DWG.",
+    "Configuration scenario: native exporter dirties source, source save dirties parent, A to B to A per body; 8 bodies, 30 other open documents, DXF and DWG.",
+    "GetPathName counts instrument native test-double methods, not a sum of layered API counters.",
+    "Synthetic elapsed seconds include Python fixtures and DXF parsing, exclude real COM, rebuild, disk/network and native export costs. They are diagnostic samples, not a real application speed guarantee.",
+    "Missing/changed update stamp, renamed feature hints, pending rebuild, missing Cut List or uncertain ownership fall back to full validation.",
+    "Metadata is re-read even if update stamp is unchanged; no persistent COM pointer or material/thickness cache."
+  ],
+  "validation": {
+    "environment": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "collected": 875,
+    "passed": 867,
+    "skipped": 8,
+    "failed": 0,
+    "errors": 0,
+    "processes": 42,
+    "retries": 0,
+    "new_performance_regressions": 17,
+    "targets": [
+      "modules/dxf_dwg/tests",
+      "modules/cad_converter/tests",
+      "modules/profile_cutting/tests",
+      "modules/press_brake/tests/test_solidworks.py",
+      "tests/test_compact_workspaces_gui.py::test_visible_transfer_options_are_used_and_retained[dxf_dwg]",
+      "tests/test_compact_workspaces_gui.py::test_source_inventory_selection_filters_and_clear_share_the_export_model[dxf_dwg]"
+    ],
+    "runner": "packaging/run_windows_tests.py::run_tests; MAX_RETRIED_BATCHES=0; QT_QPA_PLATFORM=offscreen",
+    "junit_sha256": "fcf315e69fbc9da79c706399747bbae9330a81aed4cbe413eff18ca1f8ecc185",
+    "ruff_f": "passed",
+    "git_diff_check": "passed",
+    "live_solidworks": false
+  }
+}

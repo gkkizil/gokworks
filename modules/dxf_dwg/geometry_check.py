@@ -4,13 +4,14 @@ import ezdxf
 from modules.cad_converter.models import checkpoint
 
 
-def validate_flat_geometry(path, stop=None):
+def validate_flat_geometry(path, stop=None, *, document=None):
     """Reject nonfinite/degenerate and exactly repeated common curve entities.
 
     Checks are layer-aware so bend and cut semantics stay intact. This is not
     a full CAM/self-intersection proof, nor a binary DWG geometry validator.
     """
-    document = ezdxf.readfile(path)
+    if document is None:
+        document = ezdxf.readfile(path)
     seen = set()
     def point(p):
         values = tuple(float(v) for v in p)
