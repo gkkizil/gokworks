@@ -111,13 +111,13 @@ def save_modified_documents(app, *, extra=()):
                 if model is None:
                     continue
                 model = _wrap_raw(model)
+                if not _value(model, 'GetSaveFlag'):
+                    continue  # Clean documents need no path/type/read-only COM calls.
                 path = _value(model, 'GetPathName')
                 key = _part_key(path, '')[0] if path else ('unsaved', _value(model, 'GetTitle'))
                 documents.setdefault(key, model)
             dirty = []
             for model in documents.values():
-                if not _value(model, 'GetSaveFlag'):
-                    continue
                 path = _value(model, 'GetPathName')
                 title = path or _value(model, 'GetTitle')
                 if not path or Path(path).suffix.lower() not in ('.sldprt', '.sldasm', '.slddrw'):
@@ -381,6 +381,7 @@ def _validate_output(path):
         raise RuntimeError("DXF dosyası yapı hatası içeriyor veya onarım gerektiriyor; çıktı yayımlanmadı.")
     if not document.modelspace():
         raise RuntimeError("DXF dosyasında açınım geometrisi bulunamadı.")
+    return document
 
 
 def _publish(temporary, destination, overwrite):
@@ -444,12 +445,18 @@ def preview_identity(model, body):
     return identity
 
 
-def _verify_sheet_source(session, model, sheet, stop):
+def _verify_sheet_source(session, model, sheet, stop, checked_update=None):
     """Compare live body metadata with the identity used to name this output."""
     from modules.cad_converter.api import RestoreError
+    from modules.profile_cutting.solidworks import optional
     try:
-        fresh, _ = session.describe(model, sheet['source'], sheet['configuration'], stop,
-                                    body_ref=sheet['body_ref'])
+        fast = getattr(session, 'manufacturing_metadata', None)
+        row = fast(model, sheet, checked_update, stop) if fast is not None and type(checked_update) is int else None
+        if row is not None:
+            fresh = [row]
+        else:
+            fresh, _ = session.describe(model, sheet['source'], sheet['configuration'], stop,
+                                        body_ref=sheet['body_ref'])
     except RestoreError as error:
         raise SourceRestoreError(str(error)) from error
     match = [row for row in fresh if row['body_ref'] == sheet['body_ref']]
@@ -459,11 +466,13 @@ def _verify_sheet_source(session, model, sheet, stop):
         raise ValueError('Sac kalınlığı taramadan sonra değişmiş; yeniden tarayın.')
     if match[0].get('material', '') != sheet.get('material', ''):
         raise ValueError('Gövdenin malzemesi taramadan sonra değişmiş; yeniden tarayın.')
+    return optional(model, 'GetUpdateStamp')
 
 
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     target_builder=None, output_paths=None, output_results=None, output_identity=None,
-                    save_modified=False, stop_event=None, sheet=None, selection_session=None):
+                    save_modified=False, stop_event=None, sheet=None, selection_session=None,
+                    session_managed_save=False, checked_update=None):
     """Açınımı aktar; yalnızca bu çağrının açtığı belgeyi kapat.
 
     Normal toplu aktarım save_modified=True ile sessiz Tümünü Kaydet uygular.
@@ -496,6 +505,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     original_config = None
     restore_failed = ''
     source_validated = False
+    managed_save = save_modified and session_managed_save and selection_session is not None
     notes, outcomes = [], []
     def checkpoint():
         if stop_event is not None and stop_event.is_set():
@@ -508,7 +518,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         previous = _value(app, "ActiveDoc")
         if previous is not None:
             previous_name = _document_name(previous)
-        if save_modified:
+        if save_modified and not managed_save:
             saved, warnings = save_modified_documents(app)
             notes.extend(warnings)
             if saved:
@@ -589,11 +599,6 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             if active is None or _part_key(_value(active, "GetPathName"), "") != _part_key(model_path, ""):
                 raise RuntimeError("Aktif SolidWorks belgesi kaynak parça değil; aktarım yapılmadı.")
         options = FLAT_GEOMETRY | (BEND_LINES if bend_lines else 0)
-        if pending and save_modified:
-            saved, warnings = save_modified_documents(app, extra=(model,))
-            notes.extend(warnings)
-            if saved:
-                notes.append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
         # Default orientation; no selection, suppression or preference changes.
         alignment = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
         views = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
@@ -635,14 +640,14 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 checkpoint()
                 if not _success(exported):
                     raise RuntimeError("SolidWorks açınımı aktaramadı. Sac metal/açınım unsurunu kontrol edin.")
-                _validate_output(temporary)
+                validated_document = _validate_output(temporary)
                 if target.suffix.lower()=='.dxf':
                     from .geometry_check import validate_flat_geometry
-                    validate_flat_geometry(temporary,stop_event)
+                    validate_flat_geometry(temporary,stop_event,document=validated_document)
                 if sheet and save_modified and sheet.get('source') and 'thickness_mm' in sheet:
                     # Save3 / native export can update Cut List metadata after
                     # the queue's initial validation. Never publish stale tags.
-                    _verify_sheet_source(selection_session, model, sheet, stop_event)
+                    checked_update = _verify_sheet_source(selection_session, model, sheet, stop_event, checked_update)
                 checkpoint()
                 try:
                     _publish(temporary, target, overwrite)
@@ -665,6 +670,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 notes.append(f"{kind}: {error}")
                 record(target, "error", str(error))
             finally:
+                validated_document = None
                 try:
                     temporary.unlink(missing_ok=True)
                 except OSError as error:
@@ -688,7 +694,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 restore_failed = f'Açınım sonrası kaynak konfigürasyon geri getirilemedi; belge kaydedilmedi veya kapatılmadı: {error}'
                 save_failed = True
                 notes.append(restore_failed)
-        if save_modified and model is not None and source_validated and not save_failed:
+        if save_modified and model is not None and source_validated and not save_failed and (not managed_save or opened_here):
             try:
                 saved, warnings = save_modified_documents(app, extra=(model,))
                 notes.extend(warnings)
@@ -931,11 +937,12 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
                         with session.configuration(model, item['configuration']):
                             # Material/property edits need not advance the geometry
                             # stamp. Refresh only this body, immediately before use.
-                            _verify_sheet_source(session, model, item, stop)
+                            checked_update = _verify_sheet_source(session, model, item, stop)
                             source_validated = True
                             status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
                                 overwrite, bend_lines, output_results=outputs, output_identity=metadata,
-                                stop_event=stop, sheet=item, selection_session=session, save_modified=save_modified)
+                                stop_event=stop, sheet=item, selection_session=session, save_modified=save_modified,
+                                session_managed_save=save_modified, checked_update=checked_update)
                     except (RestoreError, SourceRestoreError) as error:
                         if save_modified: session._save_failure = str(error)
                         raise

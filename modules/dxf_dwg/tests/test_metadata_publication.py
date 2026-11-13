@@ -27,14 +27,20 @@ def test_metadata_changes_during_native_operations_cannot_publish_a_stale_filena
     assert c.model.active=='Default' and c.model.selection==['user selection']
 
 
-def test_metadata_validation_restore_error_stops_before_any_output_is_published(case):
+@pytest.mark.parametrize('path',['full','direct'])
+def test_metadata_validation_restore_error_stops_before_any_output_is_published(case,path):
     from modules.cad_converter.api import RestoreError
     c=case;describe=c.session.describe;calls=[]
     def check(session,*args,**kwargs):
         calls.append(True)
         if len(calls)==2:raise RestoreError('final validation restore refused')
         return describe(session,*args,**kwargs)
-    c.session.describe=check
+    if path=='full':
+        c.model.GetUpdateStamp=lambda:None
+        c.session.describe=check
+    else:
+        def failed(*args):raise RestoreError('final validation restore refused')
+        c.session.manufacturing_metadata=failed
     result=run(c,formats=('dxf','dwg'))
     assert result['state']=='error' and result['native_restore_failed']
     assert len(c.model.export_calls)==1 and not list(c.output.rglob('*.dxf'))
