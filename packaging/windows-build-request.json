@@ -1,14 +1,13 @@
 {
-  "request_id": "20261112-multibody-numbered-df44a28-exe",
-  "requested_at": "2026-11-12T10:47:00+00:00",
-  "source_commit": "df44a28dbdd069dbf918ce69761422869b797575",
+  "request_id": "20261113-main-4f7f2b3-selected-autosave-exe",
+  "requested_at": "2026-11-13T07:30:41+00:00",
+  "source_commit": "4f7f2b373dbdbd4101905f276c1960ec45992bf5",
   "validation_profile": "package-only",
   "skip_full_tests": true,
   "validation_runs": [
-    43199712447
+    43378606902
   ],
-  "validated_agent_head": "d7836693f94ec2cbd0915009476f5eea2cd53cf6",
-  "validated_base_commit": "aaaef1e169f08d8ff18d9e76cae830403288a0e7",
-  "reason": "Build the requested current-main EXE after PR 72: refreshed multi-body sheet-metal/FlatPattern identities and stable ORHAN-01/02/03 DXF/DWG names. All three complete Windows integration shards passed this exact head/base pair in run 43199712447: 4905 records, 4851 passed, 54 skipped, zero failures or flaky retries. Local DXF/DWG, CAD converter and profile-cutting regression: 689 passed, 8 platform/live skips, 44 subtests. This request changes only build metadata; reuse that complete fresh Windows regression evidence and run the real onefile build plus three DPI frozen EXE smoke checks. Verify embedded multi-body refresh/naming and preserved preview autosave, source revision and public binary SHA-256. The user's actual native SLDPRT and licensed live SolidWorks are not available in this environment; automated tests are not live SolidWorks acceptance.",
+  "validated_agent_head": "fad46f5ea33052d50b93f4f892fc9ae969501004",
+  "reason": "User explicitly requested building the EXE from current main without creating a separate build branch. Main 4f7f2b3 merges PR 76 and includes selected-body DXF/DWG native autosave, restored source configurations, stable numbered multibody outputs and SolidWorks circular-edge/activation-warning fixes. Windows agent integration 43378606902 completed successfully for the integrated agent head. Reuse that completed Windows integration instead of repeating the entire suite; run the unmodified main Windows onefile packaging, bundled native converters, Sparrow worker and frozen EXE DPI/opening checks. Local final selected-autosave regression: 544 passed, 6 platform/live skips, zero failures or retries. This request changes build metadata only. No separate branch, application source edits or EXE from an agent branch. Licensed live SolidWorks and the user's native part are not available in this environment.",
   "cancelled": false
 }
