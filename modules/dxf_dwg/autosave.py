@@ -56,6 +56,7 @@ class Session(ReadSession):
                     raise ApiError(self._save_failure)
                 if hasattr(app, '_FlagAsMethod'): app._FlagAsMethod('GetDocuments')
                 for model in exporter._value(app, 'GetDocuments') or ():
+                    model = exporter._wrap_raw(model)
                     if exporter._value(model, 'GetSaveFlag'):
                         raise ApiError('Kaydedilmemiş SolidWorks belgesi var.')
             except Exception as error:
