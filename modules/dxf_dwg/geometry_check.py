@@ -17,9 +17,9 @@ def validate_flat_geometry(path, stop=None):
         if not all(math.isfinite(v) for v in values):
             raise ValueError('DXF sonlu olmayan koordinat içeriyor.')
         return tuple(round(v,9) for v in values)
-    count = 0
+    count = geometric = 0
     def visit(entities,depth=0,parent_layer=None):
-        nonlocal count
+        nonlocal count, geometric
         if depth>16:
             raise ValueError('DXF BLOCK derinliği sınırı aşıldı.')
         for entity in entities:
@@ -27,6 +27,8 @@ def validate_flat_geometry(path, stop=None):
             if count>200000:
                 raise ValueError('DXF geometri denetimi 200.000 öğe sınırını aştı.')
             kind = entity.dxftype(); layer=entity.dxf.layer
+            if kind in ('LINE','CIRCLE','ARC','LWPOLYLINE','POLYLINE','ELLIPSE','SPLINE'):
+                geometric += 1
             if layer=='0' and parent_layer:layer=parent_layer
             geometry = None
             if kind=='INSERT':
@@ -82,3 +84,5 @@ def validate_flat_geometry(path, stop=None):
                 if token in seen:raise ValueError('DXF aynı katmanda mükerrer kesim geometrisi içeriyor; çıktı yayımlanmadı.')
                 seen.add(token)
     visit(document.modelspace())
+    if not geometric:
+        raise ValueError('DXF kesim çizgisi veya eğrisi içermiyor; çıktı yayımlanmadı.')
