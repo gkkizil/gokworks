@@ -6,6 +6,7 @@ from types import SimpleNamespace as NS
 
 import pytest
 
+from modules.cad_converter import api
 from modules.cad_converter.tests.fakes import C
 from modules.dxf_dwg import exporter as ex
 from modules.dxf_dwg.autosave import Session as SavingSession
@@ -41,7 +42,7 @@ def case(monkeypatch, tmp_path):
     app.GetDocuments = lambda: tuple(d for d in app.models.values() if d.opened or d.keep_loaded)
     export = model.ExportToDWG2
     def native(*args):
-        assert not any(d.dirty for d in app.GetDocuments()), 'MODAL_SAVE_DIALOG'
+        assert not any(api.call(d,'GetSaveFlag') for d in app.GetDocuments()), 'MODAL_SAVE_DIALOG'
         result = export(*args)
         model.dirty = True
         return result
@@ -55,7 +56,7 @@ def case(monkeypatch, tmp_path):
     model.ShowConfiguration2 = change
     close = app.CloseDoc
     def close_clean(title):
-        assert not any(d.dirty for d in app.GetDocuments()), 'MODAL_SAVE_DIALOG'
+        assert not any(api.call(d,'GetSaveFlag') for d in app.GetDocuments()), 'MODAL_SAVE_DIALOG'
         close(title)
     app.CloseDoc = close_clean
     return NS(app=app, model=model, root=root, rows=rows, session=Session, calls=calls, install=install,

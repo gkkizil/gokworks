@@ -57,6 +57,19 @@ def _late_bound(app):
     return app
 
 
+def _wrap_raw(value):
+    """Wrap raw child IDispatch pointers before Python attribute access.
+
+    GetDocuments and an explicit source can mix raw and wrapped documents.
+    Keep existing wrappers, including their registered method metadata.
+    """
+    if not hasattr(value, '_oleobj_') and (
+        callable(getattr(value, 'Invoke', None)) and callable(getattr(value, 'GetIDsOfNames', None))
+    ):
+        return _late_bound(value)
+    return value
+
+
 def _value(obj, name):
     value = getattr(obj, name)
     # pywin32 CDispatch objects are callable too: calling ActiveDoc would
@@ -89,6 +102,7 @@ def save_modified_documents(app, *, extra=()):
     """
     saved, notes = [], []
     try:
+        app = _wrap_raw(app)
         if hasattr(app, '_FlagAsMethod'):
             app._FlagAsMethod('GetDocuments')
         for attempt in range(128):
@@ -96,6 +110,7 @@ def save_modified_documents(app, *, extra=()):
             for model in (*(_value(app, 'GetDocuments') or ()), *extra):
                 if model is None:
                     continue
+                model = _wrap_raw(model)
                 path = _value(model, 'GetPathName')
                 key = _part_key(path, '')[0] if path else ('unsaved', _value(model, 'GetTitle'))
                 documents.setdefault(key, model)
@@ -408,6 +423,7 @@ def preview_identity(model, body):
     """Optional read-only provenance for the preview; never gates an export."""
     identity = {}
     try:
+        model = _wrap_raw(model)
         path = _value(model, 'GetPathName')
         stamp = Path(path).stat()
         identity['source_stamp'] = (stamp.st_size, stamp.st_mtime_ns)
