@@ -1,0 +1,160 @@
+{
+  "date": "2026-11-13",
+  "baseline_commit": "a1d402b9033f2f11d55956e16d308a30752ee42c",
+  "platform": "Linux; Qt offscreen; controlled COM contracts, no licensed live SolidWorks",
+  "suite": {
+    "collected": 857,
+    "passed": 849,
+    "skipped": 8,
+    "failures": 0,
+    "errors": 0,
+    "retried_batches": [],
+    "native_processes": 42,
+    "subchecks_passed": 44,
+    "live_solidworks_verified": false
+  },
+  "new_regression_cases": 27,
+  "file_matrix": {
+    "valid_dxf": 180,
+    "truncated_dxf_rejected": 96,
+    "real_libredwg_roundtrips": 12,
+    "source_bytes_preserved": true,
+    "seconds": 3.95,
+    "live_solidworks": false,
+    "dwg_validation_scope": "application header check plus LibreDWG R2000 write and GOKWORKS DWG-import readback with analytic outline/hole checks. Existing importer cleanup is required for LibreDWG metadata; not strict standalone DXF readback or full binary-corruption certification"
+  },
+  "file_matrix_seed": 20261113,
+  "coverage": {
+    "modules/dxf_dwg/exporter.py": {
+      "covered_lines": 741,
+      "num_statements": 789,
+      "percent_covered": 92.29406554472985,
+      "percent_covered_display": "92",
+      "missing_lines": 48,
+      "excluded_lines": 0,
+      "percent_statements_covered": 93.91634980988593,
+      "percent_statements_covered_display": "94",
+      "num_branches": 340,
+      "num_partial_branches": 33,
+      "covered_branches": 301,
+      "missing_branches": 39,
+      "percent_branches_covered": 88.52941176470588,
+      "percent_branches_covered_display": "89"
+    },
+    "modules/dxf_dwg/autosave.py": {
+      "covered_lines": 51,
+      "num_statements": 55,
+      "percent_covered": 88.31168831168831,
+      "percent_covered_display": "88",
+      "missing_lines": 4,
+      "excluded_lines": 0,
+      "percent_statements_covered": 92.72727272727273,
+      "percent_statements_covered_display": "93",
+      "num_branches": 22,
+      "num_partial_branches": 5,
+      "covered_branches": 17,
+      "missing_branches": 5,
+      "percent_branches_covered": 77.27272727272727,
+      "percent_branches_covered_display": "77"
+    },
+    "modules/dxf_dwg/geometry_check.py": {
+      "covered_lines": 72,
+      "num_statements": 76,
+      "percent_covered": 90.0,
+      "percent_covered_display": "90",
+      "missing_lines": 4,
+      "excluded_lines": 0,
+      "percent_statements_covered": 94.73684210526316,
+      "percent_statements_covered_display": "95",
+      "num_branches": 54,
+      "num_partial_branches": 9,
+      "covered_branches": 45,
+      "missing_branches": 9,
+      "percent_branches_covered": 83.33333333333333,
+      "percent_branches_covered_display": "83"
+    },
+    "modules/dxf_dwg/inventory.py": {
+      "covered_lines": 80,
+      "num_statements": 85,
+      "percent_covered": 92.0,
+      "percent_covered_display": "92",
+      "missing_lines": 5,
+      "excluded_lines": 0,
+      "percent_statements_covered": 94.11764705882354,
+      "percent_statements_covered_display": "94",
+      "num_branches": 40,
+      "num_partial_branches": 5,
+      "covered_branches": 35,
+      "missing_branches": 5,
+      "percent_branches_covered": 87.5,
+      "percent_branches_covered_display": "88"
+    },
+    "modules/dxf_dwg/sheetmetal.py": {
+      "covered_lines": 488,
+      "num_statements": 571,
+      "percent_covered": 83.05732484076434,
+      "percent_covered_display": "83",
+      "missing_lines": 83,
+      "excluded_lines": 0,
+      "percent_statements_covered": 85.46409807355516,
+      "percent_statements_covered_display": "85",
+      "num_branches": 214,
+      "num_partial_branches": 42,
+      "covered_branches": 164,
+      "missing_branches": 50,
+      "percent_branches_covered": 76.6355140186916,
+      "percent_branches_covered_display": "77"
+    },
+    "modules/dxf_dwg/preview/solidworks.py": {
+      "covered_lines": 345,
+      "num_statements": 377,
+      "percent_covered": 88.45437616387338,
+      "percent_covered_display": "88",
+      "missing_lines": 32,
+      "excluded_lines": 0,
+      "percent_statements_covered": 91.51193633952255,
+      "percent_statements_covered_display": "92",
+      "num_branches": 160,
+      "num_partial_branches": 30,
+      "covered_branches": 130,
+      "missing_branches": 30,
+      "percent_branches_covered": 81.25,
+      "percent_branches_covered_display": "81"
+    }
+  },
+  "source_sha256": {
+    "modules/dxf_dwg/exporter.py": "88193fbe74e282b782b44fa0d10b54f7a97f062de8b3e207d25c899fdf410fcf",
+    "modules/dxf_dwg/autosave.py": "47db1ed8299dd0b4bc165e36d8773eb2354371ca4e5a9260a7d702e1b1275049",
+    "modules/dxf_dwg/geometry_check.py": "a27a437f333317b5204a54bced39bd7d4f11167ad2376c3a6b343619467af995",
+    "modules/dxf_dwg/inventory.py": "a923eda9a9d884d58ecee0cea13bc42825f5e5eeb3970cf8a331600c9568a54a",
+    "modules/dxf_dwg/sheetmetal.py": "64f93525575b0dafa6eea888cd8b4cc2f3c4b97625554b3384ca5a743fab6036",
+    "modules/dxf_dwg/preview/solidworks.py": "46a43013588d377b7ca2b87700b4e5eb08039846a2b61705688b08fbc0632c87"
+  },
+  "suite_by_component": {
+    "dxf_dwg": {
+      "total": 458,
+      "passed": 452,
+      "skipped": 6
+    },
+    "cad_converter": {
+      "total": 195,
+      "passed": 194,
+      "skipped": 1
+    },
+    "profile_cutting": {
+      "total": 126,
+      "passed": 125,
+      "skipped": 1
+    },
+    "press_brake": {
+      "total": 76,
+      "passed": 76,
+      "skipped": 0
+    },
+    "application_gui": {
+      "total": 2,
+      "passed": 2,
+      "skipped": 0
+    }
+  }
+}
