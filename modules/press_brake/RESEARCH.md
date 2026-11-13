@@ -46,24 +46,51 @@ Yeni tip sac için Flat-Pattern bastırma/geri alma yolu seçildi;
 Canlı COM yerine yayımlanmış çağrı biçimlerini uygulayan kontrollü doubles ile
 birim, kimlik, aktif konfigürasyon ve geri alma testleri yapılır; bu canlı SW testi değildir.
 
-12 Kasım · açınım kenarı okuma: düz kenarlar `ICurve.IsLine` ve
-`ICurveParamData.StartPoint/EndPoint` ile doğrudan okunur; tessellation boşluğu
-ve kısa parça filtresi bunları elemez. Dairesel kenarlarda `ICurve.CircleParams`
-metre cinsinden merkez/eksen/R verir. Gerçek `UMinValue/UMaxValue` aralığı ve
-`Sense` kullanılır; ters yönde aralık değiştirilip işaretleri çevrilir. Başlangıç
-ve teğet ile çeyrek aralıktaki `ICurve.Evaluate2` noktası yönü doğrular. Noktalar
-mevcut 0,02 mm kiriş toleransıyla hesaplanır; tam daire, büyük yay ve parametre
-dikişinden geçen yay ayrı korunur. Nokta sayısından bağımsız iki eğri değerlendirme
-çağrısı yapılır. Diğer eğriler gerçek `GetTessPts` sonucunu kullanır; boşsa kısa
-parça filtresi sıfırlanarak bir kez denenir. Eksik eğri düz kirişle değiştirilmez.
-Uçlar, sonlu koordinatlar, sabit yüz düzlemi ve nokta sınırı doğrulanır. Kontrollü
-aktif-parça testleri deliklerin ve başarı/hata/iptalde kaynak durumunun korunmasını
-kapsar; kullanıcının SLDPRT dosyasında canlı SolidWorks doğrulaması yapılmamıştır.
+13 Kasım · açınım kenarı okuma: 12 Kasım'daki daire okuyucusunun zorunlu
+`ICurve.Evaluate2` ve sabit dizi boyutu bağımlılığı kaldırıldı. Düz kenarlar
+`ICurve.IsLine` ve gerçek uçlardan, daireler `CircleParams` merkez/eksen/R,
+gerçek uçlar ve `abs(UMaxValue-UMinValue)` yay açıklığından okunur. `Sense`
+üzerinden parametre işareti tahmin edilmez. Uçların verdiği iki yön belirsizse
+(özellikle yarım daire), gerçek kırpılmış `IEdge.GetClosestPointOn` izdüşümleri
+doğrulanır; bu API'nin beşinci değeri kullanılmayan alandır. Alternatif
+`IEdge.Evaluate2` çağrısında kenarın ham U aralığı ve son double içindeki
+paketlenmiş başarı kodu kullanılır; `ICurve.Evaluate2` ile aynı sözleşme değildir.
+Yön doğrulanamazsa yay uydurulmaz. Delikler, büyük yaylar, ters kenarlar, eğik
+çember düzlemleri, 0,02 mm kiriş toleransı ve 100.000 nokta sınırı korunur.
+Diğer eğriler gerçek `GetTessPts` sonucunu kullanır; boşsa kısa parça filtresi
+sıfırlanarak bir kez denenir. Eksik eğri düz kirişle değiştirilmez.
+
+`Radyus4 / açınım kenarı 2` ve boş eğri değerlendirmesi kontrollü aktif-parça
+örneğinde önce eski hatayı verdi, ardından aynı örnek yeni okuyucuyla geçti.
+Bu, kullanıcının SLDPRT dosyasında canlı SolidWorks doğrulaması değildir.
+Kontrollü testler delikleri, gerçek yay tarafını ve başarı/hata/iptalde
+konfigürasyon, unsur ve seçim durumlarının geri yüklenmesini de kapsar.
+
+Aynı incelemede ortak CAD oturumunun ve DXF dışa aktarıcının önceki belgeye
+`ActivateDoc3` ile dönerken `swDocNeedsRebuildWarning=2` değerini ölümcül hata
+saydığı yeniden üretildi. Resmî `swActivateDocError_e` bit maskesine göre belge
+bu uyarıda etkinleştirilmiştir; yalnız 0 veya 2 kabul edilir. 1, birleşik 3 ve
+bilinmeyen bitler reddedilir. Dönen belge ve gerçek `ActiveDoc` kimlikleri ayrıca
+önceki belgeyle eşleştirilir. Bu uyarı tek başına önceki montajda zorla yeniden
+oluşturma veya ek kayıt başlatmaz.
+Gerçek geri yükleme hatası aktarımı engeller ve ilk hata arayüz günlüğünde ve
+Ayrıntı metninde korunur. Kullanıcı ekranının ilk yerel hata nedeni ayrıca
+alınamadığı için bu kontrol örneği canlı hatanın kesin teşhisi sayılmaz.
+
+Yerel regresyon doğrulaması: abkant, DXF/DWG, ortak CAD dönüştürücü ve profil
+kesim paketlerinde 932 test düğümü; **924 geçti, 8 atlandı**, ayrıca 44 unittest
+alt kontrolü geçti. 44 ayrı süreçte hata/çökme/yeniden deneme olmadı. Atlananlar
+Windows COM/yerel pencere veya lisanslı canlı SolidWorks ve açık test kopyası
+ister. Bu sonuçlar üretim ortamında canlı parçanın alındığı anlamına gelmez.
 
 - [GetTessPts · toleranslar ve dizi biçimi](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.interop.sldworks~SolidWorks.interop.sldworks.ICurve~GetTessPts.html)
 - [CircleParams · merkez/eksen/yarıçap ve metre birimi](https://help.solidworks.com/2021/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICurve~CircleParams.html)
-- [UMinValue · ters yön ve tam periyot](https://help.solidworks.com/2012/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICurveParamData~UMinValue.html)
-- [Evaluate2 · nokta ve türevler](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.icurve~evaluate2.html)
+- [UMaxValue · kenar parametre aralığı](https://help.solidworks.com/2026/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.ICurveParamData~UMaxValue.html)
+- [Sense · kenar ve eğri yönü](https://help.solidworks.com/2023/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.ICurveParamData~Sense.html)
+- [ICurve.Evaluate2 · eğri noktası ve türevleri](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.icurve~evaluate2.html)
+- [IEdge.GetClosestPointOn · kırpılmış kenara izdüşüm](https://help.solidworks.com/2024/english/api/sldworksapi/solidworks.interop.sldworks~solidworks.interop.sldworks.iedge~getclosestpointon.html)
+- [IEdge.Evaluate2 · kenar parametresi ve paketlenmiş durum](https://help.solidworks.com/2016/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IEdge~Evaluate2.html)
+- [swActivateDocError_e · uyarı ve hata bitleri](https://help.solidworks.com/2026/english/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swActivateDocError_e.html)
 
 Video erişimi için `cloud-desktop` becerisi de incelendi. Çalışan ortam
 `ccarenv_b64_Y2NhcmVudl9kNDFkYmNmZDZmYWM4MTkxOWQ3ZDg2MDlkZTMyYTUwNQ`;

@@ -155,8 +155,12 @@ def test_known_restore_failure_blocks_export_until_a_verified_refresh(page, qtbo
     p.start_export()
     assert not called and not w.jobs.busy
     assert 'aktarım başlatılmadı' in p.status_text
+    assert 'source configuration not restored' in p.status_text
+    assert p._preview_restore_detail == 'source configuration not restored'
+    assert 'source configuration not restored' in p.results.log.toPlainText()
     select(p, qtbot)
     assert not p._preview_restore_failed
+    assert not p._preview_restore_detail
 
 
 def test_connection_error_clears_stale_preview_and_refresh_can_recover(page, qtbot):

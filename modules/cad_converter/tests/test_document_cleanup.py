@@ -10,7 +10,7 @@ from modules.cad_converter import api
 from modules.cad_converter.formats import FORMATS
 from modules.cad_converter.models import Source
 from .fakes import Component, FakeSession
-from .test_converter import setup, run  # noqa: F401
+from .test_converter import setup as setup, run
 
 
 @pytest.mark.parametrize('fmt', FORMATS, ids=lambda fmt: fmt.key)
@@ -186,3 +186,28 @@ def test_an_empty_document_title_never_sends_close_active_document(setup, monkey
 
     assert events.summary['state'] == 'error' and 'başlığı okunamadı' in events.summary['error']
     assert not app.closed and model.opened
+
+
+@pytest.mark.parametrize('code', [0, 2, 1, 3, 4, -1])
+@pytest.mark.parametrize('fault', ['', 'active', 'return'])
+def test_restoring_previous_document_requires_its_identity_and_no_error_bits(setup, tmp_path, monkeypatch, code, fault):
+    app, model, _, _ = setup
+    previous = app.add(tmp_path/'User.SLDASM', opened=True)
+    app.ActiveDoc = previous
+    activate = app.ActivateDoc3
+    def restore(name, preferences, option, errors):
+        result = activate(name, preferences, option, errors)
+        errors.value = code
+        if fault == 'active': app.ActiveDoc = model
+        return model if fault == 'return' else result
+    monkeypatch.setattr(app, 'ActivateDoc3', restore)
+    session = FakeSession(app)
+    session.__enter__()
+    app.ActiveDoc = model
+    if code in (0, 2) and not fault:
+        session.__exit__(None, None, None)
+        assert app.ActiveDoc is previous and previous.opened
+    else:
+        with pytest.raises(api.RestoreError, match='Önceki aktif belge'):
+            session.__exit__(None, None, None)
+    assert session.app is None
