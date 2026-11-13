@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from math import asin, ceil, degrees, isfinite, pi, sqrt
 from pathlib import Path
 from hashlib import sha256
+import struct
 import numpy as np
 from shapely.geometry import Polygon, LineString
 from shapely.ops import unary_union, polygonize
@@ -234,12 +235,73 @@ _END_TOLERANCE = 1e-8
 _MAX_EDGE_POINTS = 100000
 
 
-def _circle_points(curve, parameters):
-    """Sample the measured circle's actual trim, including reversed/closed edges.
+def _finite_xyz(value):
+    """Read only XYZ; native arrays may also carry derivatives/unused values."""
+    try:
+        raw = values(value)
+        if len(raw)==1 and isinstance(raw[0],(tuple,list,np.ndarray)):
+            raw = tuple(raw[0])
+        if raw and isinstance(raw[0],(tuple,list,np.ndarray)):
+            raw = tuple(raw[0])
+        point = np.asarray(raw[:3],float)
+        return point if point.shape==(3,) and np.isfinite(point).all() else None
+    except (TypeError,ValueError,OverflowError):
+        return None
 
-    GetTessPts can be empty when both endpoints coincide. Use CircleParams and
-    the edge's U interval instead; Evaluate2 verifies the origin, tangent and
-    parameter direction. Two COM evaluations suffice, regardless of point count.
+
+def _circle_direction(edge, center, radius, u, v, span, low, high, ends, stop):
+    """Resolve ambiguous trims on IEdge, not the untrimmed ICurve domain.
+
+    GetClosestPointOn returns XYZ, U and an unused fifth value. Edge Evaluate2
+    has a *packed status double*, unlike Curve Evaluate2. Never treat an error
+    point or a projection onto the whole underlying circle as trim evidence.
+    """
+    try:
+        mids = {sign:center+radius*(np.cos(span/2)*u+sign*np.sin(span/2)*v) for sign in (1,-1)}
+        matching = []; valid = 0
+        for sign,point in mids.items():
+            checkpoint(stop)
+            try:
+                nearest = _finite_xyz(call(edge,'GetClosestPointOn',*[float(x) for x in point]))
+            except (Cancelled,RestoreError):raise
+            except Exception:nearest = None
+            if nearest is not None:
+                distance = np.linalg.norm(nearest-point)
+                # Some failed point APIs return zeros. A real closest point
+                # cannot be farther away than either known edge endpoint.
+                if (abs(np.linalg.norm(nearest-center)-radius)<=_END_TOLERANCE
+                        and abs((nearest-center)@np.cross(u,v))<=_END_TOLERANCE
+                        and distance<=min(np.linalg.norm(ends-point,axis=1))+_END_TOLERANCE):
+                    valid += 1
+                    if distance<=_END_TOLERANCE:matching.append(sign)
+        if valid==2 and len(matching)==1:return matching[0]
+        # Published IEdge.Evaluate2 uses the edge's raw U range, including its
+        # signed parameter convention. Curve.Evaluate2 does not share that range.
+        for derivatives in (1,0):
+            checkpoint(stop)
+            try:
+                data = np.asarray(values(call(edge,'Evaluate2',(low+high)/2,derivatives)),float).reshape(-1)
+                if data.size<4 or (data.size-1)%3 or not isfinite(float(data[-1])):
+                    continue
+                status = struct.unpack('<ii',struct.pack('<d',float(data[-1])))[0]
+                point = _finite_xyz(data)
+                if status!=1 or point is None:continue
+                matching = [sign for sign,mid in mids.items() if np.linalg.norm(mid-point)<=_END_TOLERANCE]
+                if len(matching)==1:return matching[0]
+            except (Cancelled,RestoreError):raise
+            except Exception:continue
+        raise ApiError('Dairesel kenarın gerçek yay yönü kenar API’sinden doğrulanamadı; yay tahmin edilmedi.')
+    finally:
+        edge = None
+
+
+def _circle_points(curve, parameters, edge=None, stop=None, *, ends=None):
+    """Sample native circle geometry without requiring ICurve.Evaluate2.
+
+    A circle's endpoints and measured U span determine the arc except for a
+    semicircle. Full circles have no geometric direction ambiguity; semicircles
+    are resolved against the trimmed native edge. Sense affects traversal, not
+    the material locus, and must not blindly negate an ICurve parameter range.
     """
     try:
         data = np.asarray(get(curve, 'CircleParams'), float)
@@ -250,30 +312,39 @@ def _circle_points(curve, parameters):
         if not isfinite(axis_length) or axis_length <= 0:
             raise ApiError('Dairesel kenarın ekseni geçersiz.')
         axis = axis/axis_length
+        if ends is None:ends = [get(parameters,'StartPoint'),get(parameters,'EndPoint')]
+        ends = np.asarray(ends,float)
+        if ends.shape!=(2,3) or not np.isfinite(ends).all():
+            raise ApiError('Dairesel kenarın gerçek uç noktaları eksik/geçersiz.')
         low, high = float(get(parameters, 'UMinValue')), float(get(parameters, 'UMaxValue'))
-        sense = get(parameters, 'Sense')
-        if type(sense) not in (bool, int) or sense not in (False, True, -1):
-            raise ApiError('Dairesel kenarın parametre yönü okunamadı.')
-        if not sense:
-            low, high = -high, -low  # ICurveParamData's reversed-edge convention.
-        span = high-low
+        span = abs(high-low)
         if not all(isfinite(x) for x in (low, high, span)) or not 0 < span <= 2*pi+1e-10:
             raise ApiError('Dairesel kenarın gerçek yay aralığı okunamadı.')
-        evaluated = np.asarray(call(curve, 'Evaluate2', low, 1), float)
-        quarter = np.asarray(call(curve, 'Evaluate2', low+span/4, 0), float)
-        if evaluated.shape != (6,) or quarter.shape != (3,) or not np.isfinite(evaluated).all() or not np.isfinite(quarter).all():
-            raise ApiError('Dairesel kenarın eğri değerlendirmesi eksik/geçersiz.')
-        radial, tangent = evaluated[:3]-center, evaluated[3:]
-        tangent_length = np.linalg.norm(tangent)
-        if (abs(np.linalg.norm(radial)-radius) > _END_TOLERANCE or not isfinite(tangent_length) or tangent_length <= 0
-                or abs(radial@axis) > _END_TOLERANCE):
-            raise ApiError('Dairesel kenarın başlangıcı merkez/yarıçapıyla uyuşmuyor.')
-        u, v = radial/radius, tangent/tangent_length
-        if abs(u@v) > 1e-6 or abs(v@axis) > 1e-6:
-            raise ApiError('Dairesel kenarın teğeti doğrulanamadı.')
-        predicted = center+radius*(np.cos(span/4)*u+np.sin(span/4)*v)
-        if np.linalg.norm(predicted-quarter) > _END_TOLERANCE:
-            raise ApiError('Dairesel kenarın yay yönü/aralığı doğrulanamadı.')
+        radial = ends-center
+        lengths = np.linalg.norm(radial,axis=1)
+        if np.max(np.abs(lengths-radius))>_END_TOLERANCE or np.max(np.abs(radial@axis))>_END_TOLERANCE:
+            raise ApiError('Dairesel kenarın uçları merkez/yarıçap/düzlemiyle uyuşmuyor.')
+        u = radial[0]/lengths[0]
+        v = np.cross(axis,u);v /= np.linalg.norm(v)
+        closed = abs(span-2*pi)<=1e-10
+        if closed:
+            if np.linalg.norm(ends[0]-ends[1])>_END_TOLERANCE:
+                raise ApiError('Tam daire kenarının başlangıç ve bitişi uyuşmuyor.')
+            sign = 1
+        else:
+            errors = {sign:np.linalg.norm(center+radius*(np.cos(span)*u+sign*np.sin(span)*v)-ends[1])
+                      for sign in (1,-1)}
+            matching = [sign for sign,error in errors.items() if error<=_END_TOLERANCE]
+            if not matching:
+                raise ApiError('Dairesel kenarın uçları gerçek yay aralığıyla uyuşmuyor.')
+            # Tiny open arcs need not be mistaken for closed rings merely
+            # because both endpoint candidates fall within the joining tolerance.
+            if len(matching)>1:
+                strict = min(_END_TOLERANCE,max(1e-13,radius*abs(np.sin(span))*.1))
+                certain = [sign for sign in matching if errors[sign]<=strict]
+                if len(certain)==1:matching = certain
+            sign = matching[0] if len(matching)==1 else _circle_direction(
+                edge,center,radius,u,v,span,low,high,ends,stop)
         step = min(pi/2, 4*asin(sqrt(min(1., _CHORD_TOLERANCE/(2*radius)))))
         if step <= 0 or span/step >= _MAX_EDGE_POINTS:
             raise ApiError('Dairesel kenar 100.000 nokta sınırını aşıyor.')
@@ -281,12 +352,11 @@ def _circle_points(curve, parameters):
         if count > _MAX_EDGE_POINTS:
             raise ApiError('Dairesel kenar 100.000 nokta sınırını aşıyor.')
         angles = np.linspace(0., span, count)
-        points = center+radius*(np.cos(angles)[:, None]*u+np.sin(angles)[:, None]*v)
-        if abs(span-2*pi) <= 1e-10:
-            points[-1] = points[0]
+        points = center+radius*(np.cos(angles)[:, None]*u+sign*np.sin(angles)[:, None]*v)
+        if closed:points[-1] = points[0]
         return points
     finally:
-        curve = parameters = None
+        curve = parameters = edge = None
 
 
 def _edge_points(edge, stop=None):
@@ -309,7 +379,7 @@ def _edge_points(edge, stop=None):
             return ends*1000
         closed = bool(np.array_equal(ends[0], ends[1]))
         if call(curve, 'IsCircle'):
-            points = _circle_points(curve, parameters)
+            points = _circle_points(curve, parameters, edge, stop, ends=ends)
             closed = bool(np.array_equal(points[0], points[-1]))
         else:
             points = None

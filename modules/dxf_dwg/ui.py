@@ -148,6 +148,7 @@ class DxfDwgPage(ExportPage):
         self._preview_cancelled = False
         self._stop_message_pending = False
         self._preview_restore_failed = False
+        self._preview_restore_detail = ''
         self._capture_geometry = None
         self.preview_force = False
         self._export_after_preview = False
@@ -675,7 +676,10 @@ class DxfDwgPage(ExportPage):
             self.set_status('Önce sac listesini kontrol edin; sonra işaretli gövdeleri dışa aktarın.')
             return
         if self._preview_restore_failed and not self.preview_running:
-            self.set_status('Kaynak durumu geri alınamadığı için aktarım başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.', True)
+            message = 'Kaynak durumu geri alınamadığı için aktarım başlatılmadı. SolidWorks’te kaynağı kontrol edip Yenile ile tekrar doğrulayın.'
+            if self._preview_restore_detail:
+                message += '\nAsıl hata: ' + self._preview_restore_detail
+            self.set_status(message, True)
             return
         if self.preview_before_export.isChecked() and self.preview_snapshot_cached:
             self.refresh_preview()
@@ -788,10 +792,13 @@ class DxfDwgPage(ExportPage):
                 self._preview_after_scan |= self.preview_before_export.isChecked()
             if kind == 'done' and value.get('native_restore_failed'):
                 self._preview_restore_failed = True
+                self._preview_restore_detail = value.get('error', '') or self._preview_restore_detail
                 self._export_after_preview = False
                 self.preview_pending = None
             if kind == 'dxf_preview_restore_error':
                 self._preview_restore_failed = True
+                self._preview_restore_detail = value[1]
+                self.results.append_log('SolidWorks oturum durumu geri alınamadı: ' + value[1])
                 self._export_after_preview = False
                 self.preview_pending = None
                 self.preview_timer.stop()
@@ -825,6 +832,7 @@ class DxfDwgPage(ExportPage):
                         if self.preview_request.source not in self.watcher.files():
                             self.watcher.addPath(self.preview_request.source)
                     self._preview_restore_failed = False
+                    self._preview_restore_detail = ''
                     self.preview_payload = result
                     self.preview_snapshot_cached = False
                     if kind=='dxf_preview':

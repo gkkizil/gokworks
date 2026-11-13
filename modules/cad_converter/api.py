@@ -60,6 +60,12 @@ def out_int():
     return VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
 
 
+def activation_failed(code):
+    # swActivateDocError_e is a bitmask: 2 means activated, needs rebuild.
+    # Accept only that warning alone; 1|2 and unknown bits remain failures.
+    return code not in (0, 2)
+
+
 def null_dispatch():
     import pythoncom
     from win32com.client import VARIANT
@@ -433,10 +439,15 @@ class Session:
                 try:
                     errors = out_int()
                     restored = call(self.app, 'ActivateDoc3', self.previous, False, self.c('swDontRebuildActiveDoc'), errors)
-                    if restored is None or errors.value: raise RestoreError()
-                    restored = None
-                except Exception: failures.append('Önceki aktif belge geri getirilemedi.')
-                finally: restored = None
+                    if restored is None or activation_failed(errors.value):
+                        raise RestoreError(f'SolidWorks etkinleştirme kodu: {errors.value}.')
+                    active = get(self.app, 'ActiveDoc')
+                    for document in (restored, active):
+                        if document is None or path_key(call(document, 'GetPathName') or call(document, 'GetTitle')) != path_key(self.previous):
+                            raise RestoreError('Önceki aktif belge kimliği doğrulanamadı.')
+                except Exception as restore_error:
+                    failures.append(f'Önceki aktif belge geri getirilemedi: {restore_error}')
+                finally: restored = active = document = None
         finally:
             self.app = None
             self.pythoncom.CoUninitialize()
