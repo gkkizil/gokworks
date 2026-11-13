@@ -2,6 +2,7 @@
 from math import pi, radians
 from types import SimpleNamespace as NS
 import threading
+import struct
 import numpy as np
 import pytest
 from shapely.ops import unary_union
@@ -146,9 +147,9 @@ def test_active_part_with_empty_line_tessellation_retains_contours_and_holes(cap
     assert capture.path.read_bytes() == b'unchanged native source'
 
 
-def _circular_edge(low=0., span=2*pi, reverse=False, tilted=False, radius=.008):
+def _circular_edge(low=0., span=2*pi, reverse=False, tilted=False, radius=.008, center=(0.,0.,0.)):
     """Real API layout: circle metres, signed edge U range, ICurve derivatives."""
-    center = np.array([0., 0., 0.])
+    center = np.array(center)
     u = np.array([.6, 0., .8]) if tilted else np.array([1., 0., 0.])
     v = np.array([0., 1., 0.]); high = low+span
     def point(t):
@@ -168,18 +169,65 @@ def _circular_edge(low=0., span=2*pi, reverse=False, tilted=False, radius=.008):
         parameters.EndPoint = parameters.StartPoint
     curve = NS(IsLine=lambda: False, IsCircle=lambda: True, CircleParams=(*center, *np.cross(u, v), radius),
                Evaluate2=evaluate, GetTessPts=tessellate)
+    def closest(x,y,z):
+        query=np.array([x,y,z]);radial=query-center
+        angle=np.arctan2(radial@v,radial@u)
+        candidates=[(point(low),low),(point(high),high)]
+        for k in range(int(np.floor((low-angle)/(2*pi)))-1,int(np.ceil((high-angle)/(2*pi)))+2):
+            t=angle+2*pi*k
+            if low<=t<=high:candidates.append((point(t),t))
+        nearest,t=min(candidates,key=lambda item:np.linalg.norm(item[0]-query))
+        return (*nearest,t,float('nan'))  # Native fifth value is unused.
     return NS(GetCurve=lambda: curve, GetCurveParams3=lambda: parameters,
-              curve=curve, parameters=parameters, evaluated=evaluated, point=point, center=center)
+              GetClosestPointOn=closest,curve=curve, parameters=parameters, evaluated=evaluated, point=point, center=center)
+
+
+@pytest.mark.parametrize('response', ['null','zero-order-null','extra-derivatives','nested'])
+def test_circle_import_does_not_depend_on_curve_evaluate_return_shape(response):
+    edge = _circular_edge(.3,1.,reverse=True)
+    evaluate = edge.curve.Evaluate2
+    def native(t,derivatives):
+        if response=='null' or response=='zero-order-null' and derivatives==0:return None
+        result = evaluate(t,1)
+        if response=='extra-derivatives':return (*result,0.,0.,0.)
+        if response=='nested':return (result[:3],result[3:])
+        return result
+    edge.curve.Evaluate2 = native
+    result = sw._edge_points(edge)
+    assert result[0] == pytest.approx(np.asarray(edge.parameters.StartPoint)*1000)
+    assert result[-1] == pytest.approx(np.asarray(edge.parameters.EndPoint)*1000)
+    assert all(np.linalg.norm(p-edge.center*1000)==pytest.approx(8.) for p in result)
+
+
+def test_active_radyus_body_second_rounded_edge_reads_without_curve_evaluation(capture):
+    capture.body.Name = 'Radyus4'
+    arc = _circular_edge(-pi/2,pi/2,radius=.01,center=(.03,-.02,0.))
+    arc.curve.Evaluate2 = lambda *args:None
+    def line(a,b):
+        curve = NS(IsLine=lambda:True)
+        return NS(GetCurve=lambda:curve,GetCurveParams3=lambda:NS(StartPoint=a,EndPoint=b))
+    face = capture.body.GetFaces()[0]; hole = face.GetLoops()[1]
+    edges = (line((-.04,-.03,0.),(.03,-.03,0.)),arc,
+             line((.04,-.02,0.),(.04,.03,0.)),line((.04,.03,0.),(-.04,.03,0.)),
+             line((-.04,.03,0.),(-.04,-.03,0.)))
+    face.GetLoops = lambda:(NS(GetEdges=lambda:edges,IsOuter=lambda:True),hole)
+    state = _merged_flat(capture)
+    part = sw.read_active(session_factory=capture.session)
+    assert part.validate() and len(part.bends)==1
+    assert sum(len(f.region.holes) for f in part.flanges)==2
+    assert capture.flat.suppressed and state.merged and capture.manager.suspended==0
+    assert capture.path.read_bytes()==b'unchanged native source'
 
 
 @pytest.mark.parametrize('low,span,reverse,tilted', [
     (0., 2*pi, False, False), (.4, pi/2, False, True), (5.7, 3*pi/2, True, True),
     (-4., .7, True, False), (.4, 2*pi, True, False), (.3, 1e-7, False, False),
+    (.8, pi, True, True), (-.2,pi,False,False),
 ])
 def test_circle_sampling_keeps_native_trim_direction_units_and_chord_tolerance(low, span, reverse, tilted):
     edge = _circular_edge(low, span, reverse, tilted)
     points = sw._edge_points(edge)
-    assert len(edge.evaluated) == 2
+    assert edge.evaluated == []  # ICurve's signed U range/return shape is irrelevant.
     expected = np.array([edge.point(t) for t in np.linspace(low, low+span, len(points))])*1000
     assert np.allclose(points, expected, rtol=0., atol=1e-10)
     assert points[0] == pytest.approx(np.asarray(edge.parameters.StartPoint)*1000)
@@ -204,7 +252,7 @@ def test_active_part_retains_single_edge_circular_hole_without_tessellation(capt
     assert len(holes) == 2
     from shapely.geometry import Polygon
     assert min(abs(Polygon(h).area-pi*8**2) for h in holes) < 1.
-    assert len(circle.evaluated) == 2
+    assert circle.evaluated == []
     assert state.merged and state.edits == [False, True]
     assert capture.flat.suppressed and capture.manager.suspended == 0
     assert capture.path.read_bytes() == b'unchanged native source'
@@ -219,7 +267,7 @@ def test_native_short_line_uses_exact_ends_without_segment_length_filter():
     assert np.array_equal(sw._edge_points(edge), np.array([[0., 0., 0.], [3e-6, 0., 0.]]))
 
 
-@pytest.mark.parametrize('bad', ['radius', 'axis', 'range', 'direction', 'quarter', 'endpoint', 'budget'])
+@pytest.mark.parametrize('bad', ['radius', 'axis', 'range', 'endpoint', 'budget'])
 def test_bad_circle_data_is_not_guessed_or_replaced_by_a_chord(bad):
     edge = _circular_edge(span=1.)
     if bad == 'radius':
@@ -228,17 +276,100 @@ def test_bad_circle_data_is_not_guessed_or_replaced_by_a_chord(bad):
         edge.curve.CircleParams = (0., 0., 0., 0., 0., 0., .008)
     elif bad == 'range':
         edge.parameters.UMaxValue = float('nan')
-    elif bad == 'direction':
-        edge.parameters.Sense = None
-    elif bad == 'quarter':
-        evaluate = edge.curve.Evaluate2
-        edge.curve.Evaluate2 = lambda t, n: evaluate(t, n) if n else (0., 0., 0.)
     elif bad == 'endpoint':
         edge.parameters.EndPoint = (0., 0., 0.)
     else:
         edge = _circular_edge(radius=1e9)
     with pytest.raises(ApiError):
         sw._edge_points(edge)
+
+
+@pytest.mark.parametrize('sense', [False,True,None])
+@pytest.mark.parametrize('signed_range', [False,True])
+def test_circle_locus_is_independent_of_traversal_sense_and_signed_u_convention(sense,signed_range):
+    edge=_circular_edge(.2,3*pi/2,reverse=signed_range,tilted=True)
+    edge.parameters.Sense=sense
+    edge.curve.Evaluate2=lambda *args:None
+    points=sw._edge_points(edge)
+    expected=np.array([edge.point(t) for t in np.linspace(.2,.2+3*pi/2,len(points))])*1000
+    assert np.allclose(points,expected,rtol=0,atol=1e-10)
+
+
+@pytest.mark.parametrize('sign', [1.,-1.])
+def test_semicircle_uses_actual_edge_not_the_other_half_of_its_underlying_circle(sign):
+    edge=_circular_edge(sign*.3,pi,tilted=True)
+    # Axis sign can change while the physical trimmed edge stays the same.
+    if sign<0:
+        params=edge.curve.CircleParams;edge.curve.CircleParams=(*params[:3],*[-v for v in params[3:6]],params[6])
+    edge.curve.Evaluate2=lambda *args:None
+    points=sw._edge_points(edge)
+    expected=np.array([edge.point(t) for t in np.linspace(sign*.3,sign*.3+pi,len(points))])*1000
+    assert np.allclose(points,expected,rtol=0,atol=1e-10)
+
+
+@pytest.mark.parametrize('status', [0,1])
+@pytest.mark.parametrize('signed_range', [False,True])
+def test_semicircle_edge_evaluation_requires_real_packed_success_status(status,signed_range):
+    edge=_circular_edge(.3,pi,reverse=signed_range)
+    edge.GetClosestPointOn=lambda *args:None
+    edge.curve.Evaluate2=lambda *args:None
+    calls=[];packed=struct.unpack('<d',struct.pack('<ii',status,0))[0]
+    def native(parameter,derivatives):
+        calls.append((parameter,derivatives))
+        t=-parameter if signed_range else parameter
+        return (*edge.point(t),float('nan'),float('nan'),float('nan'),packed)
+    edge.Evaluate2=native
+    if status==0:
+        with pytest.raises(ApiError,match='yay yönü'):sw._edge_points(edge)
+    else:
+        points=sw._edge_points(edge)
+        expected=np.array([edge.point(t) for t in np.linspace(.3,.3+pi,len(points))])*1000
+        assert np.allclose(points,expected,rtol=0,atol=1e-10)
+        assert len(calls)==1
+    assert all((edge.parameters.UMinValue+edge.parameters.UMaxValue)/2==p for p,_ in calls)
+
+
+def test_untrimmed_projection_cannot_prove_either_semicircle_without_native_edge_evidence():
+    edge=_circular_edge(.3,pi)
+    edge.GetClosestPointOn=lambda x,y,z:(x,y,z,0.,float('nan'))  # Broken: projects to the whole circle.
+    edge.Evaluate2=lambda *args:None
+    with pytest.raises(ApiError,match='yay yönü'):sw._edge_points(edge)
+
+
+def test_failed_closest_point_zero_cannot_select_the_wrong_half_circle():
+    edge=_circular_edge(pi/2,pi,center=(-.008,0.,0.))
+    # The origin happens to lie on the wrong half of the underlying circle.
+    edge.GetClosestPointOn=lambda *args:(0.,0.,0.,0.,0.)
+    edge.Evaluate2=lambda *args:None
+    with pytest.raises(ApiError,match='yay yönü'):sw._edge_points(edge)
+
+
+def test_semicircle_cancellation_during_native_trim_probe_is_restored(capture):
+    stop=threading.Event();arc=_circular_edge(0.,pi)
+    original=arc.GetClosestPointOn
+    def cancel(*args):
+        stop.set();return original(*args)
+    arc.GetClosestPointOn=cancel
+    with pytest.raises(Cancelled):sw._edge_points(arc,stop)
+
+
+def test_raw_dispatch_edge_circle_protocol_never_calls_curve_evaluation():
+    edge=_circular_edge(.3,pi,reverse=True,tilted=True)
+    calls=[]
+    class Dispatch:
+        def __init__(self,wrapped):self.wrapped=wrapped
+        def GetIDsOfNames(self,locale,name):return name
+        def Invoke(self,name,locale,flags,ret,*args):
+            calls.append((name,flags))
+            value=getattr(self.wrapped,name)
+            return value(*args) if flags==1 else value
+    curve=NS(_oleobj_=Dispatch(edge.curve));parameters=NS(_oleobj_=Dispatch(edge.parameters))
+    wrapped=NS(GetCurve=lambda:curve,GetCurveParams3=lambda:parameters,
+               GetClosestPointOn=edge.GetClosestPointOn)
+    points=sw._edge_points(NS(_oleobj_=Dispatch(wrapped)))
+    assert len(points)>3 and not edge.evaluated
+    assert ('GetCurve',1) in calls and ('CircleParams',2) in calls
+    assert ('GetClosestPointOn',1) in calls and not any(name=='Evaluate2' for name,_ in calls)
 
 
 def _spline_edge(tessellate):

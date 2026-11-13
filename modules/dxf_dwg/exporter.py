@@ -23,6 +23,7 @@ except ImportError:
     win32com = None
 
 from solidworks.connection import connect_to_solidworks
+from modules.cad_converter.api import activation_failed
 
 PART, SILENT, SOLID_BODY = 1, 1, 0
 SHEET_METAL, FLAT_GEOMETRY, BEND_LINES = 1, 1, 4
@@ -674,7 +675,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             try:
                 errors = _out_integer()
                 restored = app.ActivateDoc3(previous_name, False, DONT_REBUILD, errors)
-                if restored is None or errors.value:
+                if restored is None or activation_failed(errors.value):
                     raise RuntimeError(f"SolidWorks hata kodu: {errors.value}")
                 active = _value(app, 'ActiveDoc')
                 if (active is None or _part_key(_document_name(active), '') != _part_key(previous_name, '')
