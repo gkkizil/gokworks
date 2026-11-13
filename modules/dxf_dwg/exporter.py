@@ -419,6 +419,7 @@ def preview_identity(model, body):
     except Exception:
         pass
     try:
+        if body is None: return identity
         data = model.Extension.GetPersistReference3(body)
         if data:
             identity['body_ref'] = 'persist:' + base64.b64encode(bytes(int(v) & 255 for v in data)).decode('ascii')
@@ -576,6 +577,12 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             temporary = target.with_name(f".gokworks-{uuid4().hex}{target.suffix}")
             try:
                 target.parent.mkdir(parents=True, exist_ok=True)
+                # The previous format can dirty the part and its assembly.
+                # Save only after its selection/configuration scopes restored.
+                if save_modified:
+                    saved, warnings = save_modified_documents(app, extra=(model,))
+                    notes.extend(warnings)
+                    if saved: notes.append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
                 # Resolve the exact body and FlatPattern again for EACH format.
                 # ExportToDWG2 must see one selected FlatPattern, never all bodies.
                 guard = (selection_session.selected_flat(model, sheet['body_ref'], sheet['flat_ref'], stop_event,
@@ -611,6 +618,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     record(target, "skipped", "Aktarım sırasında hedef oluştu; üzerine yazılmadı.")
             except (CountCancelled, SourceRestoreError):
                 raise
+            except SaveDocumentsError as error:
+                record(target, 'error', str(error))
+                raise
             except Exception as error:
                 from modules.cad_converter.models import Cancelled
                 if isinstance(error,Cancelled):raise CountCancelled() from error
@@ -628,7 +638,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
         status = 'partial' if 'success' in outcomes else 'skipped'
         notes.append('Durduruldu; devam eden geçici çıktı yayımlanmadı, sonraki biçimlere geçilmedi.')
     except Exception as error:
-        status = "error"
+        status = 'partial' if 'success' in outcomes else 'error'
         notes.append(str(error))
         save_failed = isinstance(error, (SaveDocumentsError, SourceRestoreError))
         if isinstance(error, SourceRestoreError):
@@ -648,7 +658,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                 if saved:
                     notes.append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
                 if output_identity is not None:
-                    output_identity.update(preview_identity(model, bodies[0]) if 'bodies' in locals() and bodies else {})
+                    output_identity.update(preview_identity(model, None))
             except SaveDocumentsError as error:
                 save_failed = True
                 status = 'partial' if any(item == 'success' for item in outcomes) else 'error'
@@ -701,7 +711,7 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
     if items is not None:
         return export_selection(items, source_folder, output_folder, formats, events, stop_event,
                                 overwrite=overwrite_existing, bend_lines=bend_lines,
-                                group_by_thickness=group_by_thickness, naming=naming)
+                                group_by_thickness=group_by_thickness, naming=naming, save_modified=True)
     summary = {"state": "completed", "total": 0, "processed": 0,
                "succeeded": 0, "partial": 0, "skipped": 0, "failed": 0, "error": "", "warnings": [],
                "unexported_configurations": 0}
@@ -820,20 +830,25 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
 
 
 def export_selection(items, source, output, formats, events, stop=None, *, overwrite=False,
-                     bend_lines=False, group_by_thickness=False, naming=(), session_factory=None):
-    """One worker STA, body-specific exports, no source saves or implicit rescans.
+                     bend_lines=False, group_by_thickness=False, naming=(), session_factory=None, save_modified=False):
+    """Body-specific exports; production callers explicitly enable native saves.
 
     Preserve the old callable export_parts signature for script callers. The
     DXF workbench passes its checked sheet inventory through `items` instead.
     """
-    from .sheetmetal import Session
+    from .autosave import Session
     from .inventory import plan_destinations
     from modules.cad_converter.api import RestoreError
     from modules.cad_converter.models import checkpoint, Cancelled
     summary = dict(state='completed', total=len(items), processed=0, succeeded=0,
                    partial=0, skipped=0, failed=0, warnings=[], error='')
     active_item=None;outputs=[];metadata={}
+    def save_pending(session, model=None):
+        saved, warnings = session.save_pending(extra=(model,) if model is not None else ())
+        summary['warnings'].extend(warnings)
+        if saved: summary['warnings'].append(f'SolidWorks: {len(saved)} belge otomatik kaydedildi.')
     try:
+        if type(save_modified) is not bool: raise ValueError('save_modified bool olmalı.')
         checkpoint(stop)
         if any(not item.get('exportable') or not item.get('body_ref') or not item.get('flat_ref') for item in items):
             raise ValueError('Seçimde doğrulanmamış bir sac gövdesi var; yeniden tarayın.')
@@ -843,34 +858,54 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
             summary['state'] = 'empty'
             return
         with (session_factory or Session)() as session:
+            session.save_modified = save_modified
+            if save_modified: save_pending(session)
             for item in items:
                 checkpoint(stop)
                 active_item=item
                 model = None
+                source_validated = False
                 outputs, metadata = [], {}
                 events.put(('sheet_current', item['sheet_id']))
                 try:
-                    # Open missing documents read-only, in the owning STA. The
-                    # legacy single-export primitive sees an already-open doc.
+                    # The saving session opens its own sources writable; scanners
+                    # and read-only API callers retain the old policy.
                     model = session.document(item['source'])
-                    with session.configuration(model, item['configuration']):
-                        # Material/property edits need not advance the geometry
-                        # stamp. Refresh only this body, immediately before use.
-                        fresh, _ = session.describe(model, item['source'], item['configuration'], stop,
-                                                    body_ref=item['body_ref'])
-                        match = [row for row in fresh if row['body_ref']==item['body_ref']]
-                        if len(match)!=1 or not match[0]['exportable'] or match[0]['flat_ref']!=item['flat_ref']:
-                            raise ValueError('Sac/Flat-Pattern eşleşmesi değişmiş; yeniden tarayın.')
-                        if not math.isclose(match[0]['thickness_mm'],item['thickness_mm'],abs_tol=1e-6,rel_tol=1e-9):
-                            raise ValueError('Sac kalınlığı taramadan sonra değişmiş; yeniden tarayın.')
-                        if match[0].get('material','')!=item.get('material',''):
-                            raise ValueError('Gövdenin malzemesi taramadan sonra değişmiş; yeniden tarayın.')
-                        status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
-                            overwrite, bend_lines, output_results=outputs, output_identity=metadata,
-                            stop_event=stop, sheet=item, selection_session=session)
-                except (Cancelled, RestoreError, SourceRestoreError):
+                    try:
+                        with session.configuration(model, item['configuration']):
+                            # Material/property edits need not advance the geometry
+                            # stamp. Refresh only this body, immediately before use.
+                            fresh, _ = session.describe(model, item['source'], item['configuration'], stop,
+                                                        body_ref=item['body_ref'])
+                            match = [row for row in fresh if row['body_ref']==item['body_ref']]
+                            if len(match)!=1 or not match[0]['exportable'] or match[0]['flat_ref']!=item['flat_ref']:
+                                raise ValueError('Sac/Flat-Pattern eşleşmesi değişmiş; yeniden tarayın.')
+                            if not math.isclose(match[0]['thickness_mm'],item['thickness_mm'],abs_tol=1e-6,rel_tol=1e-9):
+                                raise ValueError('Sac kalınlığı taramadan sonra değişmiş; yeniden tarayın.')
+                            if match[0].get('material','')!=item.get('material',''):
+                                raise ValueError('Gövdenin malzemesi taramadan sonra değişmiş; yeniden tarayın.')
+                            source_validated = True
+                            status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
+                                overwrite, bend_lines, output_results=outputs, output_identity=metadata,
+                                stop_event=stop, sheet=item, selection_session=session, save_modified=save_modified)
+                    except (RestoreError, SourceRestoreError) as error:
+                        if save_modified: session._save_failure = str(error)
+                        raise
+                    finally:
+                        # configuration() has restored the original context now.
+                        # Never persist a failed rollback or retry a failed Save3.
+                        if save_modified and source_validated and not getattr(session, '_save_failure', '') and not metadata.get('native_save_error'):
+                            save_pending(session, model)
+                    if save_modified and metadata.get('native_save_error'):
+                        session._save_failure = metadata['native_save_error']
+                        raise SaveDocumentsError(metadata['native_save_error'])
+                    if save_modified:
+                        metadata.update(preview_identity(model, None))
+                except (Cancelled, RestoreError, SourceRestoreError, SaveDocumentsError):
                     raise
                 except Exception as error:
+                    if save_modified and getattr(session, '_save_failure', ''):
+                        raise SaveDocumentsError(str(error)) from error
                     status, detail = 'error', str(error)
                 finally:
                     model = None
@@ -893,8 +928,8 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
                        detail='İşlem durduruldu; tamamlanmış çıktılar korundu.' if state=='partial' else 'İşlem durduruldu; yeni çıktı oluşturulmadı.',
                        outputs=outputs,output=' | '.join(available))))
             events.put(('progress',(summary['processed'],len(items))))
-    except (RestoreError, SourceRestoreError) as error:
-        summary.update(state='error', error=str(error), native_restore_failed=True)
+    except (RestoreError, SourceRestoreError, SaveDocumentsError) as error:
+        summary.update(state='error', error=str(error), native_restore_failed=not isinstance(error, SaveDocumentsError))
         if active_item is not None:
             available=[r['path'] for r in outputs if r['status'] in ('success','skipped')]
             state='partial' if any(r['status']=='success' for r in outputs) else 'error'
