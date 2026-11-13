@@ -30,19 +30,26 @@ kalır; diğer hazır sacların aktarımını engellemez.
 
 ## Kaynak güvenliği ve durdurma
 
-Yeni envanterden tarama ve üretim aktarımı kaynaklara `Save3`/`SaveAs`
-uygulamaz. **Qt DXF/DWG önizlemesi**, kullanıcının 12 Kasım 2026 talimatıyla,
+Envanter taraması kaynaklara `Save3`/`SaveAs` uygulamaz. **Qt DXF/DWG
+önizlemesi ve seçili gövdelerin üretim aktarımı**, kullanıcının talimatıyla,
 değiştirilmiş açık SolidWorks belgelerini `Save3(Silent | SaveReferenced)`
 ile otomatik kaydeder. Bu, montajın değiştirilmiş parçalarını da kapsar;
 kayıt penceresini tıklamaz veya global SolidWorks uyarı ayarlarını değiştirmez.
-Kayıt önizleme başında, geçici açınım aktarımının kendi güvenli kayıt yolunda
-ve asıl konfigürasyon geri alındıktan sonra yapılır. Geçici native açınım
+Kayıt işlem başında, geçici açınım aktarımının kendi güvenli kayıt yolunda
+ve asıl konfigürasyon geri alındıktan sonra yapılır. DXF ve DWG birlikte
+istenirse önceki biçimin değiştirdiği belgeler sonraki biçimden önce de
+kaydedilir. Aktarımın açtığı kaynaklar yazılabilir açılır. Kayıt hatasında
+sonraki gövdeye geçilmez; daha önce tamamlanmış çıktılar kısmi sonuç olarak
+korunur. Son kayıttan sonra dosya revizyonu güncellenir; seçili gövdenin kimliği
+ilk gövdenin kimliğiyle değiştirilmez. Geçici native açınım
 durumu geri alınmadan kayıt yapılmaz. Salt okunur, henüz ad verilmemiş veya
 kaydı başarısız belgede işlem açıklamayla durur; belge kapatılarak değişiklik
 kaybettirilmez. Kayıt modeli güncellerse önizleme bir kez yeniden okunur;
 durmadan değişen modelden eski görüntü yayımlanmaz.
 Programatik `capture(...)` / `capture_geometry(...)` varsayılanları hâlâ
-kaydetmez; aynı davranış için açıkça `save_modified=True` verilir.
+kaydetmez; aynı davranış için açıkça `save_modified=True` verilir. Doğrudan
+`export_selection(...)` çağrısının varsayılanı da kaynak kaydetmez; normal
+`export_parts(..., items=...)` üretim yolu otomatik kaydı açıkça etkinleştirir.
 Başarılı işlemde konfigürasyon, seçili nesneler, görünürlük ve aktif belge geri
 alınır. Büküm parametreleri, suppression ve layer ayarları değiştirilmez.
 Mevcut yeniden oluşturma/kesim listesi güncellemesi, bekleyen sac geometrisini
@@ -59,7 +66,7 @@ hatası iptal/başarı gibi gizlenmez.
 Eski scriptlerin `export_parts(..., items=None)` ve `export_one_part` çağrı
 sözleşmeleri korunur. Eski script yolu tek etkin gövde sınırını ve daha önce
 istenmiş Save All politikasını taşır; normal yeni Qt üretim aktarımı `items` gönderir
-ve kaynak kaydetmez. Kimlik verilmeden çok gövdeli aktarım yapılmaz.
+ve otomatik kayıt uygular. Kimlik verilmeden çok gövdeli aktarım yapılmaz.
 
 ## Gövde eşleşmesi, adet ve performans
 
@@ -115,9 +122,10 @@ katman eşdeğerliği lisanslı Windows kabul testi gerektirir.
 Mevcut sağ 3D / açınım / bilgi paneli korunur. İstek/önbellek dosya,
 konfigürasyon, kalıcı gövde ve revizyonla ayrılır. Aynı dosyanın ikinci gövdesi
 birincinin görüntüsünü kullanmaz. Açınım seçilen Flat-Pattern üzerinden geçici
-DXF ile okunur; DWG dosyası okunmuş gibi sunulmaz. Önizleme üretim çıktısını
-ve kaynak CAD'ı kaydetmez. İlk tıklama görsel kontrolü açar, kayıt kendiliğinden
-başlamaz. Bu, bütün gövdeler için imalat geometri sertifikası değildir.
+DXF ile okunur; DWG dosyası okunmuş gibi sunulmaz. Önizleme üretim çıktı
+dosyalarını oluşturmaz. Kaynak CAD belgeleri yukarıdaki otomatik kayıt
+politikasına göre kaydedilir. İlk tıklama görsel kontrolü açar; üretim çıktısı
+kendiliğinden oluşturulmaz. Bu, bütün gövdeler için imalat geometri sertifikası değildir.
 
 Satır seçimi sağdaki önizlemeyi otomatik gösterir. Başarılı 3D + açınım
 görüntüleri, kaynak/çıktı dosyası revizyonu ve tam gövde/konfigürasyon isteğiyle
@@ -151,6 +159,8 @@ oluşturmaz. `tests/test_window_lifecycle.py`, üretim başlangıcını ayrı s�
 açar ve sekme geçişlerinde gerçek Windows pencere kimliğinin sabit kaldığını
 kontrol eder; SolidWorks oturumu gerektirmez.
 
-Yeni testler: `tests/test_sheet_inventory*.py`, `test_flat_checks.py`.
+Yeni testler: `tests/test_sheet_inventory*.py`, `test_flat_checks.py`,
+`test_selection_autosave.py` (önizlemesiz kayıt, iki biçim, gövde kimliği,
+konfigürasyon geri dönüşü, kayıt hatası ve iptal).
 Gerçek SolidWorks kabulü: `tests/test_multibody_live.py`.
 [Ayrıntılı rapor, sınırlamalar ve test komutları](../../MULTIBODY_DXF_DWG_RAPORU.md).
