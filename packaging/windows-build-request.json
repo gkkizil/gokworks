@@ -1,7 +1,14 @@
 {
-  "request_id": "20261114-await-new-main-exe",
-  "source_commit": "cad860ef612ac162521d2cd4534f6126cc33c26f",
-  "validation_profile": "full",
-  "cancelled": true,
-  "reason": "Previous executable publications were withdrawn during repository maintenance. Await an explicit new build request from current main."
+  "request_id": "20261114-main-ec1c59b-fast-exe",
+  "requested_at": "2026-11-14T14:52:39+00:00",
+  "source_commit": "ec1c59bccb5c13430615560616d9e52e2c373cee",
+  "validation_profile": "package-only",
+  "skip_full_tests": true,
+  "validation_runs": [
+    43594235647,
+    43595664742
+  ],
+  "validated_agent_head": "b9bff3009651b3f4018fdacf23bcc1dd5198805b",
+  "reason": "User explicitly requested a quick Windows EXE directly from current main, without a build branch. PR 80 merged as main ec1c59b and current main integration succeeded. Reuse the completed Windows integration validation; build and smoke-check the shipping onefile EXE with packaged native converter and Sparrow selfchecks. Includes practical hydraulic entry plus restored visible interactive unit schematic, earlier DXF/DWG performance fixes and cleaned explanatory notices. The VBA macro was analyzed only; its proposed optimizations were not implemented. Only build-request metadata changes on main, no application edits. Keep DPI/opening smoke checks and release SHA256 verification.",
+  "cancelled": false
 }
