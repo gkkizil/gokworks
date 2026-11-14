@@ -63,3 +63,25 @@ yalnız pratik şemanın eski değerleri temizlenir. Fare/klavye ile seçim, tem
 özel proje koruma ve yatay taşma kontrolleri dahil **181 test geçti**; bunun
 7 durumu yeni şema regresyonlarıdır. Test tekrarları kapalıdır. Açık/koyu
 temada 790/1130/1366/1690 piksel genişlikler ayrıca görsel olarak kontrol edildi.
+
+## Modern görünüm — 14 Kasım 2026 (Claude)
+
+Pratik hesabın davranışı, proje dönüşümü ve testleri aynen korunarak görünüm yenilendi
+(`practical_view.py`):
+
+- **Üst satır:** başlık ve sağda durum etiketi: *Örnek değerler / Değişti · hesaplayın /
+  Girdi hatası / n kritik / n kontrol / Uygun*.
+- **Girdi kartları:** numaralı başlık, alanlar kutu hâlinde: başlık (girişin etiketi), birim
+  kutunun içinde, altında kısa ipucu. Genişlik yettikçe silindirde üç, harekette iki sütun.
+  Kuvvet birimi kartın başlığında.
+- **Çevrim şeridi:** ileri / uçta bekle / geri süreleri yazıldıkça oranlı çubuk olarak çizilir,
+  toplam süreyle; yarım veya hatalı değer şeridi bozmaz.
+- **Gösterge kutuları:** motor, pompa debisi, çalışma basıncı (emniyet valfi ayarıyla) ve tank
+  kaydırmadan görünür; sol kenar rengi şemadaki durumla aynıdır, ÖNERİ/GEREKEN değerin altında
+  yazar. Dar alanda 2×2, geniş alanda tek sıra; 3+1 dizilmez.
+- **Sonuç paneli:** rapor düğmeleri başlıkta; kritik uyarılar kutuların hemen altında; ünite
+  şeması, ayrıntılar ve hareket planı bağlantısı aşağıda.
+- 1366 px pencerede (sayfa ~1130 px) form ve sonuçlar yan yana; 1024 px'te alt alta.
+
+Hesap motoru, `.gwhyd` şeması ve raporlar değişmedi. Testler: `tests/test_practical_layout.py`
+(4 yeni); hidrolik modülü 111, kök hidrolik + sayfa geçişi + dar/geniş pencere 107 test geçti.

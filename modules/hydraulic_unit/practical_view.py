@@ -2,16 +2,115 @@
 from dataclasses import replace
 import math
 
-from PySide6.QtCore import Qt, QPoint, QTimer
-from PySide6.QtWidgets import QCheckBox, QComboBox, QGridLayout, QHBoxLayout, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, QPoint, QRectF, QSize, QTimer
+from PySide6.QtGui import QColor, QFont, QPainter, QPen
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLineEdit, QSizePolicy,
+                               QVBoxLayout, QWidget)
 
 from gui_qt.components import Disclosure, button, label, scroll
+from gui_qt.theme import COLORS
 from .beginner import FORCE_FACTORS
 from .beginner_view import CylinderDiagram, IssueRow, PLAIN_ISSUES, Responsive, ResultCard, panel, polish, show, text_number
 from .core.validation import InputError
 from .practical import PracticalInputs, TITLES, practical_project, practical_values
 from .presentation import result_rows
 from .schematic import UnitSchematic
+
+
+class Reflow(QWidget):
+    """Children in as many equal columns as fit (``min_width`` each), re-laid out on resize."""
+
+    def __init__(self, min_width, spacing=10, max_columns=4, allowed=None):
+        super().__init__(); self.min_width, self.max_columns = min_width, max_columns
+        self.allowed = allowed or tuple(range(max_columns, 0, -1))   # e.g. (4, 2, 1): never a 3 + 1 layout
+        self.grid = QGridLayout(self); self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid.setHorizontalSpacing(spacing); self.grid.setVerticalSpacing(spacing)
+        self.items = []; self.columns = 0
+
+    def add(self, widget):
+        self.items.append(widget); self.columns = 0; self.reflow()
+
+    def reflow(self):
+        fit = max(1, min(self.max_columns, len(self.items) or 1, self.width() // self.min_width if self.width() else 1))
+        columns = next((n for n in self.allowed if n <= fit), 1)
+        if columns == self.columns:
+            return
+        self.columns = columns
+        for widget in self.items:
+            self.grid.removeWidget(widget)
+        for i, widget in enumerate(self.items):
+            self.grid.addWidget(widget, i // columns, i % columns)
+        for col in range(self.max_columns):
+            self.grid.setColumnStretch(col, 1 if col < columns else 0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event); self.reflow()
+
+
+class CycleStrip(QWidget):
+    """İleri / uçta bekle / geri, sürelerine oranlı; toplam süre ve tekrar eden çevrim işareti."""
+
+    def __init__(self, appearance):
+        super().__init__(); self.appearance = appearance; self.parts = []
+        self.setMinimumHeight(54); self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setAccessibleName('Çevrim süreleri')
+
+    def sizeHint(self):
+        return QSize(400, 54)
+
+    def set_parts(self, parts):
+        """``parts``: (name, seconds or None) in order; None draws a hatched 'unknown' segment."""
+        self.parts = parts
+        known = [s for _, s in parts if s]
+        total = sum(known)
+        self.setAccessibleDescription(' → '.join(f'{n} {s:g} s' if s else f'{n} ?' for n, s in parts)
+                                      + (f' · toplam {total:g} s' if known else ''))
+        self.update()
+
+    def paintEvent(self, event):
+        c = COLORS[self.appearance]; p = QPainter(self); p.setRenderHint(QPainter.Antialiasing)
+        colours = {'İleri': QColor(c['accent']), 'Bekle': QColor(c['warning']), 'Geri': QColor(c['success'])}
+        widths = [s if s and s > 0 else 0 for _, s in self.parts]
+        total = sum(widths); bar = QRectF(0, 20, self.width(), 14)
+        small = QFont(self.font()); small.setPixelSize(11)
+        if not self.parts or total <= 0:
+            p.setPen(Qt.NoPen); p.setBrush(QColor(c['input'])); p.drawRoundedRect(bar, 7, 7); p.end(); return
+        x = 0.
+        for (name, seconds), width in zip(self.parts, widths):
+            if width <= 0:
+                continue
+            span = bar.width() * width / total; part = QRectF(x, bar.top(), span, bar.height())
+            colour = colours.get(name, QColor(c['muted']))
+            p.setPen(Qt.NoPen); p.setBrush(colour); p.drawRoundedRect(part.adjusted(1, 0, -1, 0), 4, 4)
+            p.setFont(small); p.setPen(QColor(c['text']))
+            text = f'{name} · {seconds:g} s'.replace('.', ',')
+            if p.fontMetrics().horizontalAdvance(text) + 8 > span:
+                text = f'{seconds:g} s'.replace('.', ',')
+            p.drawText(QRectF(x, 0, span, 18), Qt.AlignHCenter | Qt.AlignBottom, text)
+            x += span
+        p.setPen(QColor(c['muted']))
+        p.drawText(QRectF(0, 36, self.width(), 18), Qt.AlignRight | Qt.AlignVCenter,
+                   f'toplam {total:g} s · başlangıca döner'.replace('.', ','))
+        p.end()
+
+
+class Metric(ResultCard):
+    """Compact KPI tile: small caps title, large value, one-line note; accent bar shows the state."""
+
+    def __init__(self, title):
+        super().__init__(title)
+        self.setProperty('metric', True)
+        self.title.setProperty('role', 'muted'); self.title.setProperty('kicker', True)
+        self.value.setProperty('metricValue', True); self.lines.hide()
+        self.note.setWordWrap(True)
+        # Tag on its own line under the value: the title keeps the full width.
+        box = self.layout(); box.removeWidget(self.tag); self.tag.setParent(self)
+        box.insertWidget(box.indexOf(self.value)+1, self.tag)
+        self.setMinimumWidth(150)
+
+    def fill(self, tag, value, lines, note, tip='', state=None):
+        super().fill(tag, value, lines, note, tip, None)
+        self.setProperty('state', state or ''); polish(self)
 
 
 class PracticalView(QWidget):
@@ -22,8 +121,14 @@ class PracticalView(QWidget):
         self.reveal_timer.timeout.connect(self.reveal_result)
         self.fresh = not owner.settings.get('hydraulic_unit_project')
         outer = QVBoxLayout(self); outer.setContentsMargins(0, 0, 0, 0); outer.setSpacing(8)
-        outer.addWidget(label('Ölçüleri girin. Hareketi tarif edin. Ünite ihtiyacını görün.', 'section'))
-        outer.addWidget(label('Tek silindir için: mil dışarı çıkar, isterseniz uçta bekler ve aynı mesafeyi geri döner.', 'muted'))
+        head = QHBoxLayout(); head.setSpacing(12)
+        words = QVBoxLayout(); words.setSpacing(1)
+        words.addWidget(label('Ölçüleri girin. Hareketi tarif edin. Ünite ihtiyacını görün.', 'section'))
+        words.addWidget(label('Tek silindir: mil dışarı çıkar, isterseniz uçta bekler ve aynı mesafeyi geri döner.', 'muted'))
+        head.addLayout(words, 1)
+        self.chip = label('Taslak', 'muted', wrap=False); self.chip.setProperty('chip', True)
+        self.chip.setAccessibleName('Hesap durumu'); head.addWidget(self.chip, 0, Qt.AlignTop)
+        outer.addLayout(head)
         body = QWidget(); box = QVBoxLayout(body); box.setContentsMargins(2, 2, 8, 4)
         self.existing, existing = panel()
         self.existing_note = label('', 'muted'); existing.addWidget(self.existing_note)
@@ -32,34 +137,37 @@ class PracticalView(QWidget):
         self.new_button = button('Yeni basit çevrim oluştur', self.start_new)
         actions.addWidget(self.new_button); actions.addStretch(1); existing.addLayout(actions)
         box.addWidget(self.existing)
-        split = Responsive(1180, 16)
+        split = Responsive(1040, 16)   # side by side from a 1366 px window (page ~1130 px)
         self.form = QWidget(); form = QVBoxLayout(self.form); form.setContentsMargins(0, 0, 0, 0); form.setSpacing(12)
-        sizes, contents = panel(); contents.addWidget(label('1  Silindirin ölçüleri', 'section'))
-        grid = QGridLayout(); grid.setColumnStretch(0, 1); grid.setHorizontalSpacing(12); grid.setVerticalSpacing(8)
-        for row, (key, title, hint, example) in enumerate((
-                ('bore', 'Silindirin iç çapı', 'Gövdenin dışı değil; etiketteki piston çapı (ØD).', '63'),
-                ('rod', 'Parlak milin çapı', 'Dışarı çıkan mil; kumpasla bu kısmı ölçebilirsiniz.', '36'),
-                ('stroke', 'Gideceği yol (strok)', 'Milin tamamen içeriden tamamen dışarıya gideceği mesafe.', '300'))):
-            self.field(grid, row, key, title, 'mm', hint, example)
-        contents.addLayout(grid)
+        self.form.setMinimumWidth(330)
+        sizes, contents = panel(); contents.setSpacing(10)
+        contents.addLayout(self.card_head('1', 'Silindirin ölçüleri', 'Etiketten veya teknik resimden; milimetre.'))
+        grid = Reflow(170, 12, 3)
+        for key, title, hint, example in (
+                ('bore', 'Silindirin iç çapı', 'Etiketteki piston çapı (ØD); gövdenin dışı değil.', '63'),
+                ('rod', 'Parlak milin çapı', 'Dışarı çıkan mil; kumpasla ölçülebilir.', '36'),
+                ('stroke', 'Gideceği yol (strok)', 'Tamamen içeriden tamamen dışarıya.', '300')):
+            grid.add(self.field(key, title, 'mm', hint, example))
+        contents.addWidget(grid)
         self.diagram = CylinderDiagram(owner.context)
         contents.addWidget(Disclosure('Bu ölçüler silindirin neresinde?', self.diagram))
         form.addWidget(sizes)
-        motions, contents = panel(); contents.addWidget(label('2  Nasıl çalışsın?', 'section'))
-        unit = QHBoxLayout(); unit.addWidget(label('İtme kuvvetini hangi birimle biliyorsunuz?', 'muted'), 1)
+        motions, contents = panel(); contents.setSpacing(10)
+        top = self.card_head('2', 'Nasıl çalışsın?', 'İleri gider, isterseniz bekler, aynı yoldan döner.')
         self.force_unit = QComboBox(); self.force_unit.addItem('Ton-kuvvet', 'tonf'); self.force_unit.addItem('kN', 'kN')
-        self.force_unit.setAccessibleName('Pratik hesap kuvvet birimi'); unit.addWidget(self.force_unit); contents.addLayout(unit)
-        grid = QGridLayout(); grid.setColumnStretch(0, 1); grid.setHorizontalSpacing(12); grid.setVerticalSpacing(8)
-        self.field(grid, 0, 'force', 'İleri ne kadar kuvvet uygulasın?', 'tonf', 'Presin / silindirin uygulayacağı itme kuvveti.', '3')
-        self.field(grid, 1, 'extend_time', 'İleri kaç saniyede gitsin?', 's', 'Tam stroku tamamlayacağı süre.', '5')
-        self.field(grid, 2, 'return_time', 'Geri kaç saniyede dönsün?', 's', 'Aynı mesafeyi başlangıca geri gelir.', '5')
-        self.field(grid, 3, 'hold_time', 'Uçta kaç saniye beklesin?', 's', 'Bekleme yoksa 0 yazın; varsa itme kuvveti korunur.', '0')
-        contents.addLayout(grid)
+        self.force_unit.setAccessibleName('Pratik hesap kuvvet birimi')
+        self.force_unit.setToolTip('İtme kuvvetini hangi birimle biliyorsunuz?')
+        top.addWidget(self.force_unit, 0, Qt.AlignTop); contents.addLayout(top)
+        grid = Reflow(170, 12, 2)
+        grid.add(self.field('force', 'İleri ne kadar kuvvet uygulasın?', 'tonf', 'Presin / silindirin itme kuvveti.', '3'))
+        grid.add(self.field('extend_time', 'İleri kaç saniyede gitsin?', 's', 'Tam stroku tamamlama süresi.', '5'))
+        grid.add(self.field('return_time', 'Geri kaç saniyede dönsün?', 's', 'Aynı yoldan başlangıca döner.', '5'))
+        grid.add(self.field('hold_time', 'Uçta kaç saniye beklesin?', 's', 'Yoksa 0; beklerken itme sürer.', '0'))
+        contents.addWidget(grid)
+        self.strip = CycleStrip(owner.context.appearance); contents.addWidget(self.strip)
         extra = QWidget(); e = QVBoxLayout(extra); e.setContentsMargins(0, 4, 0, 0)
-        grid = QGridLayout(); grid.setColumnStretch(0, 1)
-        self.field(grid, 0, 'return_force', 'Geri dönüşte gereken çekme kuvveti', 'tonf',
-                   'Yüksüz dönüş için 0. Dönüşte direnç varsa gereken kuvveti girin.', '0')
-        e.addLayout(grid)
+        e.addWidget(self.field('return_force', 'Geri dönüşte gereken çekme kuvveti', 'tonf',
+                               'Yüksüz dönüş için 0. Dönüşte direnç varsa gereken kuvveti girin.', '0'))
         e.addWidget(label('Ton-kuvvet bir kuvvettir; yükün ton cinsinden kütlesiyle her mekanizmada aynı değildir. '
                           'Sürtünme, eğim ve mekanizma oranı gereken kuvveti değiştirir.', 'muted'))
         self.return_section = Disclosure('Geri dönüşte yük varsa / kuvvet birimi hakkında', extra)
@@ -74,26 +182,29 @@ class PracticalView(QWidget):
         self.calculate_button.setMinimumHeight(38)
         self.draft_note = label('', 'muted'); form.addStretch(1)
         split.box.addWidget(self.form, 3)
-        result, output = panel(); output.addWidget(label('Hangi ünite gerekir?', 'section'))
+        result, output = panel(); output.setSpacing(10)
         self.output_panel = result
+        head = QHBoxLayout(); head.setSpacing(8)
+        head.addWidget(label('Hangi ünite gerekir?', 'section'), 1)
+        self.report_row = QWidget(); reports = QHBoxLayout(self.report_row); reports.setContentsMargins(0, 0, 0, 0); reports.setSpacing(6)
+        self.pdf_button = button('PDF raporu…', owner.export_pdf)
+        self.excel_button = button('Excel…', lambda: owner.export('excel'))
+        self.cancel_pdf_button = button('Raporu durdur', owner.cancel_pdf, destructive=True); self.cancel_pdf_button.hide()
+        reports.addWidget(self.pdf_button); reports.addWidget(self.excel_button); reports.addWidget(self.cancel_pdf_button)
+        head.addWidget(self.report_row, 0, Qt.AlignTop); output.addLayout(head)
         self.state = label('Ölçüleri ve hareket sürelerini girip hesaplayın.', 'muted'); output.addWidget(self.state)
         self.cycle = label('', 'muted'); output.addWidget(self.cycle)
+        self.metrics = Reflow(176, 10, 4, (4, 2, 1)); self.cards = {}
+        for key, title in (('motor', 'ELEKTRİK MOTORU'), ('pump', 'YAĞ POMPASI'), ('pressure', 'ÇALIŞMA BASINCI'), ('tank', 'YAĞ TANKI')):
+            card = Metric(title); self.metrics.add(card); self.cards[key] = card
+        output.addWidget(self.metrics)
+        self.issue_box = QVBoxLayout(); self.issue_box.setSpacing(6); output.addLayout(self.issue_box)
         output.addWidget(label('Ünite şeması', 'section'))
-        output.addWidget(label('Elemanlara tıklayarak ölçüleri veya ilgili ayarı açabilirsiniz.', 'muted'))
+        output.addWidget(label('Elemana tıklayınca ölçüsü veya ayarı açılır. ✓ uygun · ! kontrol · ✕ kritik.', 'muted'))
         self.schematic = UnitSchematic(owner.context.appearance)
         self.schematic.nodeClicked.connect(self.open_node); output.addWidget(self.schematic)
-        self.cards = {}
-        for key, title in (('motor', 'Elektrik motoru'), ('pump', 'Yağ pompası'), ('tank', 'Yağ tankı')):
-            card = ResultCard(title); output.addWidget(card); self.cards[key] = card
         self.technical = label('', 'muted'); self.technical.setTextFormat(Qt.PlainText)
         output.addWidget(Disclosure('Basınç, soğutma ve diğer hesap ayrıntıları', self.technical))
-        self.issue_box = QVBoxLayout(); output.addLayout(self.issue_box)
-        self.report_row = QWidget(); reports = QHBoxLayout(self.report_row); reports.setContentsMargins(0, 4, 0, 0)
-        self.pdf_button = button('PDF raporu al…', owner.export_pdf)
-        self.excel_button = button('Excel al…', lambda: owner.export('excel'))
-        self.cancel_pdf_button = button('Raporu durdur', owner.cancel_pdf, destructive=True); self.cancel_pdf_button.hide()
-        reports.addWidget(self.pdf_button); reports.addWidget(self.excel_button); reports.addWidget(self.cancel_pdf_button); reports.addStretch(1)
-        output.addWidget(self.report_row)
         self.status = label('', 'muted'); self.status.setTextFormat(Qt.PlainText); output.addWidget(self.status)
         output.addWidget(button('Hareket planı ve tüm sonuçlar →', self.open_plan, flat=True))
         output.addStretch(1); split.box.addWidget(result, 5)
@@ -107,14 +218,29 @@ class PracticalView(QWidget):
         self.force_unit.currentIndexChanged.connect(self.change_force_unit)
         self.clear_result()
 
-    def field(self, grid, row, key, title, unit, hint, example):
-        text = QWidget(); box = QVBoxLayout(text); box.setContentsMargins(0, 0, 0, 0); box.setSpacing(2)
-        heading = label(title); box.addWidget(heading); box.addWidget(label(hint, 'muted'))
-        edit = QLineEdit(); edit.setFixedWidth(100); edit.setMinimumHeight(30)
-        edit.setAlignment(Qt.AlignRight); edit.setPlaceholderText(example); edit.setAccessibleName(title)
-        heading.setBuddy(edit); self.inputs[key] = edit
+    def card_head(self, number, title, hint):
+        row = QHBoxLayout(); row.setSpacing(10)
+        badge = label(number, None, wrap=False); badge.setProperty('stepBadge', True); badge.setAlignment(Qt.AlignCenter)
+        badge.setFixedSize(26, 26); row.addWidget(badge, 0, Qt.AlignTop)
+        words = QVBoxLayout(); words.setSpacing(0)
+        words.addWidget(label(title, 'section')); words.addWidget(label(hint, 'muted')); row.addLayout(words, 1)
+        return row
+
+    def field(self, key, title, unit, hint, example):
+        """Title (buddy of the input), the input with its unit inside one frame, and a short hint."""
+        tile = QWidget(); box = QVBoxLayout(tile); box.setContentsMargins(0, 0, 0, 0); box.setSpacing(4)
+        heading = label(title); heading.setProperty('fieldTitle', True); box.addWidget(heading)
+        frame = QFrame(); frame.setProperty('unitField', True)
+        inner = QHBoxLayout(frame); inner.setContentsMargins(0, 0, 10, 0); inner.setSpacing(4)
+        edit = QLineEdit(); edit.setMinimumHeight(34); edit.setMinimumWidth(70); edit.setFrame(False)
+        edit.setAlignment(Qt.AlignRight | Qt.AlignVCenter); edit.setPlaceholderText(example); edit.setAccessibleName(title)
+        edit.setProperty('inUnitField', True)
         unit_label = label(unit, 'muted', wrap=False); edit._unit_label = unit_label
-        grid.addWidget(text, row, 0); grid.addWidget(edit, row, 1); grid.addWidget(unit_label, row, 2)
+        inner.addWidget(edit, 1); inner.addWidget(unit_label)
+        box.addWidget(frame)
+        tip = label(hint, 'muted'); tip.setProperty('hint', True); box.addWidget(tip)
+        heading.setBuddy(edit); self.inputs[key] = edit
+        return tile
 
     def set_number(self, key, value):
         edit = self.inputs[key]; edit.setText(text_number(value)); edit._shown = (edit.text(), value)
@@ -159,6 +285,7 @@ class PracticalView(QWidget):
         self.state.setText('Ölçüleri ve hareket sürelerini girip hesaplayın.' if self.allowed else
                            'Mevcut özel planınız korunuyor; basit hesap henüz oluşturulmadı.')
         self.state.setProperty('role','muted'); polish(self.state)
+        self.set_chip('muted', 'Örnek değerler' if self.fresh else 'Hesaplanmadı')
 
     def start_new(self):
         self.allowed = True; self.form.setEnabled(True); self.existing.hide(); self.fresh = False
@@ -186,7 +313,7 @@ class PracticalView(QWidget):
     def mark_pending(self, *args):
         self.pending = True; self.ready = False; self.error.hide()
         for edit in self.inputs.values():edit.setProperty('invalid', False); polish(edit)
-        self.clear_result(); self.state.setText('Bilgiler değişti. Sonucu görmek için hesaplayın.')
+        self.clear_result(); self.state.setText('Bilgiler değişti. Sonucu görmek için hesaplayın.'); self.set_chip('muted', 'Değişti · hesaplayın')
         self.state.setProperty('role','muted'); polish(self.state); self.status.clear()
         self.owner.result = None; self.owner.timer.stop(); self.owner.refresh_actions(); self.update_diagram()
 
@@ -222,6 +349,16 @@ class PracticalView(QWidget):
             try:values[key] = self.number(key)
             except InputError:pass
         self.diagram.set_values(values)
+        seconds = {}
+        for key in ('extend_time', 'hold_time', 'return_time'):
+            try:
+                value = self.number(key); seconds[key] = value if value >= 0 else None
+            except InputError:
+                seconds[key] = None
+        parts = [('İleri', seconds['extend_time'])]
+        if seconds['hold_time']:
+            parts.append(('Bekle', seconds['hold_time']))
+        self.strip.set_parts(parts + [('Geri', seconds['return_time'])])
         self.return_note.setText(f'Geri dönüş yükü: {self.inputs["return_force"].text()} {self._force_unit} · '
                                  'değiştirmek için üstteki bölümü açın.')
 
@@ -236,7 +373,7 @@ class PracticalView(QWidget):
 
     def show_error(self, error):
         self.ready = False; self.clear_result(); self.error.setText(str(error)); self.error.show()
-        self.state.setText('Hesap yapılmadı; işaretli bilgiyi düzeltin.')
+        self.state.setText('Hesap yapılmadı; işaretli bilgiyi düzeltin.'); self.set_chip('error', 'Girdi hatası')
         key = error.field.removeprefix('practical.')
         if key in self.inputs:
             if key == 'return_force':self.return_section.set_expanded(True)
@@ -259,15 +396,25 @@ class PracticalView(QWidget):
         critical = [i for i in result.issues if i.severity == 'critical']
         self.state.setText('Ön seçim hazır · aşağıdaki kritik konular çözülmeli' if critical else 'Ön seçim hazır')
         self.state.setProperty('role', 'error' if critical else 'success'); polish(self.state)
+        warning = [i for i in result.issues if i.severity == 'warning']
+        self.set_chip('error' if critical else 'warning' if warning else 'success',
+                      f'{len(critical)} kritik' if critical else f'{len(warning)} kontrol' if warning else 'Uygun')
         self.cycle.setText('İleri → ' + ('uçta bekle → ' if len(project.phases) == 3 else '') +
                            f'geri · toplam {show(cycle["duration"], "s")} · başlangıç konumuna döner')
+        nodes = self.owner.simple.schematic.nodes
         self.cards['motor'].fill('ÖNERİ' if project.selected_motor is None else 'MEVCUT', rows['Seçilen motor'], [],
-                                 'Motorun etiket gücü. Üretici görev sınıfı ayrıca doğrulanır.')
+                                 'Etiket gücü; görev sınıfını üreticiyle doğrulayın.',
+                                 'Motorun etiket gücü. Üretici görev sınıfı ayrıca doğrulanır.', nodes['motor'].state)
         self.cards['pump'].fill('GEREKEN', rows['Maksimum gerekli debi'],
                                 ['Yağı, istediğiniz hareket süresine yetiştirecek debi.'],
-                                'Debi yeterli olsa da pompanın basınç sınırı ayrıca karşılanmalı.')
+                                'Süreye yetişecek debi; basınç sınırı ayrıca karşılanmalı.',
+                                'Debi yeterli olsa da pompanın basınç sınırı ayrıca karşılanmalı.', nodes['pump'].state)
+        self.cards['pressure'].fill('GEREKEN', rows['Maksimum gerekli basınç'], [],
+                                    f'Emniyet valfi: {rows["Emniyet valfi ayarı"]}',
+                                    'Yükü hareket ettirmek için hattaki en yüksek basınç (hat kayıpları dahil).', nodes['relief'].state)
         self.cards['tank'].fill('GEREKEN', rows['Gerekli kullanılabilir tank'], [],
-                                'Tankta bulunması gereken kullanılabilir yağ; tankın dış hacmi değildir.')
+                                'Kullanılabilir yağ; tankın dış hacmi değildir.',
+                                'Tankta bulunması gereken kullanılabilir yağ; tankın dış hacmi değildir.', nodes['tank'].state)
         for card in self.cards.values():card.show()
         self.technical.setText('\n'.join(f'{name}: {rows[name]}' for name in (
             'Maksimum gerekli basınç', 'Emniyet valfi ayarı', 'Nominal deplasman adayı',
@@ -314,6 +461,29 @@ class PracticalView(QWidget):
         else:
             self.owner.simple.open_node(node)
 
+    def set_chip(self, role, text):
+        self.chip.setText(text); self.chip.setProperty('role', role); polish(self.chip)
+
     def apply_theme(self):
-        self.diagram.update()
-        self.schematic.appearance = self.owner.context.appearance; self.schematic.update()
+        appearance = self.owner.context.appearance; c = COLORS[appearance]
+        self.diagram.update(); self.strip.appearance = appearance; self.strip.update()
+        self.schematic.appearance = appearance; self.schematic.update()
+        self.setStyleSheet(f'''
+            QLabel[chip="true"] {{ border: 1px solid {c['border']}; border-radius: 11px; padding: 3px 12px; font-weight: 600; }}
+            QLabel[chip="true"][role="success"] {{ border-color: {c['success']}; }}
+            QLabel[chip="true"][role="warning"] {{ border-color: {c['warning']}; }}
+            QLabel[chip="true"][role="error"] {{ border-color: {c['danger']}; }}
+            QLabel[stepBadge="true"] {{ background: {c['accent']}; color: {c['on_accent']}; border-radius: 13px; font-weight: 700; }}
+            QLabel[fieldTitle="true"] {{ font-weight: 600; }}
+            QLabel[hint="true"] {{ font-size: 11px; }}
+            QFrame[unitField="true"] {{ background: {c['input']}; border: 1px solid {c['border']}; border-radius: 6px; }}
+            QFrame[unitField="true"]:hover {{ border-color: {c['border_strong']}; }}
+            QLineEdit[inUnitField="true"] {{ background: transparent; border: none; font-size: 15px; font-weight: 600; padding: 0 2px 0 8px; }}
+            QLineEdit[inUnitField="true"][invalid="true"] {{ color: {c['danger']}; }}
+            QFrame[metric="true"] {{ border-left: 4px solid {c['border_strong']}; }}
+            QFrame[metric="true"][state="success"] {{ border-left-color: {c['success']}; }}
+            QFrame[metric="true"][state="warning"] {{ border-left-color: {c['warning']}; }}
+            QFrame[metric="true"][state="error"] {{ border-left-color: {c['danger']}; }}
+            QLabel[kicker="true"] {{ font-size: 11px; font-weight: 700; letter-spacing: 0.6px; }}
+            QLabel[metricValue="true"] {{ font-size: 22px; font-weight: 700; }}
+        ''')
