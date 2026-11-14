@@ -17,6 +17,7 @@ from modules.hydraulic_unit.ui import HydraulicPage
 def easy(qtbot,tmp_path):
     create_application([])
     context=SimpleNamespace(settings=SettingsStore(tmp_path/'settings.json'),jobs=JobManager(),appearance='dark')
+    context.settings.set('hydraulic_view_mode',0);context.settings.set('hydraulic_practical_intro',True)
     page=HydraulicPage(context);qtbot.addWidget(page);page.resize(1366,900);page.show();qtbot.wait(10)
     yield page
     page.cancel_pdf();page.settings.flush()
@@ -26,8 +27,8 @@ def edit(widget,text):
     widget.setText(text);widget.textEdited.emit(text)
 
 
-def test_new_users_start_with_three_plain_language_steps(easy):
-    assert easy.view_mode.currentText()=='Kolay kullanım'
+def test_three_step_plan_remains_available_with_original_project(easy):
+    assert easy.view_mode.currentText()=='Hareket planı (3 adım)'
     assert easy.simple.steps.count()==3
     assert not easy.summary_panel.isVisible() and not easy.guide_widget.isVisible()
     assert easy.result.input_fingerprint==calculate_project(Project()).input_fingerprint

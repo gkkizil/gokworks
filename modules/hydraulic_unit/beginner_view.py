@@ -9,7 +9,7 @@ import math
 
 from PySide6.QtCore import Qt, QEvent, QPointF, QRectF, QTimer
 from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
-from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLineEdit,
                                QPushButton, QSizePolicy, QTabWidget, QVBoxLayout, QWidget)
 
 from gui_qt.components import Disclosure, button, label, scroll
@@ -462,10 +462,12 @@ class BeginnerView(QWidget):
         top.addLayout(reports)
         b.addLayout(top); outer.addWidget(banner)
 
-        outer.addWidget(label('Ünite şeması', 'section'))
-        outer.addWidget(label('✓ uygun · ! kontrol edin · ✕ kritik. Bir elemana tıklayınca ayarı açılır. Ölçekli veya üretim şeması değildir.', 'muted'))
+        schematic_box = QWidget(); schematic_layout = QVBoxLayout(schematic_box); schematic_layout.setContentsMargins(0, 0, 0, 0)
+        schematic_layout.addWidget(label('✓ uygun · ! kontrol edin · ✕ kritik. Bir elemana tıklayınca ayarı açılır. Ölçekli veya üretim şeması değildir.', 'muted'))
         self.schematic = UnitSchematic(self.owner.context.appearance); self.schematic.nodeClicked.connect(self.open_node)
-        outer.addWidget(self.schematic)
+        schematic_layout.addWidget(self.schematic)
+        self.schematic_section = Disclosure('Ünite şemasını göster', schematic_box)
+        outer.addWidget(self.schematic_section)
 
         issues_box, issues = panel()
         self.warnings = label('', 'section'); self.warnings.setTextFormat(Qt.PlainText); issues.addWidget(self.warnings)

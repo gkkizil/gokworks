@@ -1,6 +1,5 @@
 """Ünite şeması: sonuç değerleri eleman üzerinde, durum işaretli; tıklama ilgili ayarı açar."""
 from types import SimpleNamespace
-from dataclasses import replace
 
 import pytest
 from PySide6.QtCore import Qt
@@ -17,9 +16,10 @@ from modules.hydraulic_unit.ui import HydraulicPage
 def page(qtbot, tmp_path):
     create_application([])
     context = SimpleNamespace(settings=SettingsStore(tmp_path / 'settings.json'), jobs=JobManager(), appearance='dark')
+    context.settings.set('hydraulic_view_mode',0);context.settings.set('hydraulic_practical_intro',True)
     page = HydraulicPage(context); qtbot.addWidget(page); page.resize(1366, 800); page.show()
     qtbot.waitUntil(lambda: page.result is not None, timeout=5000)
-    page.simple.go_to_step(2); qtbot.wait(30)
+    page.simple.go_to_step(2);page.simple.schematic_section.set_expanded(True); qtbot.wait(30)
     yield page
     page.cancel_pdf(); page.settings.flush()
 
