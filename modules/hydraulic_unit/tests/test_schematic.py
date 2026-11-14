@@ -74,3 +74,21 @@ def test_labels_do_not_overlap_each_other_or_leave_the_canvas(qtbot):
     for width in (560, 760, 1100):
         w.resize(width, 10); w.show(); qtbot.wait(10)
         assert w.height() == w.heightForWidth(width) and w.grab().height() == w.height()
+
+
+def test_keyboard_selection_survives_the_pointer_leaving_or_moving_over_empty_space(qtbot):
+    """Scrolling under a resting cursor makes Windows send leave/move events; focus selection must stay."""
+    from PySide6.QtCore import QEvent, QPointF
+    from PySide6.QtGui import QMouseEvent
+    from PySide6.QtWidgets import QApplication
+    create_application([])
+    w = UnitSchematic('dark'); qtbot.addWidget(w); w.resize(900, 400); w.show()
+    w.set_nodes({key: Node('1', '', 'success') for key in NODES if key != 'accumulator'})
+    w.setFocus(); qtbot.waitUntil(w.hasFocus, timeout=2000)
+    assert w.hover == 'cylinder'
+    empty = QPointF(5, w.height()-5)
+    QApplication.sendEvent(w, QMouseEvent(QEvent.MouseMove, empty, w.mapToGlobal(empty.toPoint()), Qt.NoButton, Qt.NoButton, Qt.NoModifier))
+    QApplication.sendEvent(w, QEvent(QEvent.Leave))
+    assert w.hover == 'cylinder'
+    w.clearFocus(); qtbot.waitUntil(lambda: not w.hasFocus(), timeout=2000)
+    assert w.hover is None                                                # without focus, pointer rules again

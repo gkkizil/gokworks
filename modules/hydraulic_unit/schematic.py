@@ -115,13 +115,18 @@ class UnitSchematic(QWidget):
     # ------------------------------------------------------------------ interaction
     def mouseMoveEvent(self, event):
         key = self.node_at(event.position())
-        if key != self.hover:
-            self.hover = key; self.setCursor(Qt.PointingHandCursor if key else Qt.ArrowCursor); self.update()
+        self.setCursor(Qt.PointingHandCursor if key else Qt.ArrowCursor)
+        # With keyboard focus the selection only moves to another element; empty space keeps it
+        # (scrolling under a resting cursor sends such moves on Windows).
+        if key != self.hover and (key is not None or not self.hasFocus()):
+            self.hover = key; self.update()
         if key and self.nodes[key].tip:
             QToolTip.showText(event.globalPosition().toPoint(), self.nodes[key].tip, self)
 
     def leaveEvent(self, event):
-        self.hover = None; self.setCursor(Qt.ArrowCursor); self.update()
+        self.setCursor(Qt.ArrowCursor)
+        if not self.hasFocus():
+            self.hover = None; self.update()
 
     def mouseReleaseEvent(self, event):
         key = self.node_at(event.position()) if event.button() == Qt.LeftButton else None
