@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import time
 
 import pytest
-from PySide6.QtCore import QCoreApplication, Qt
+from PySide6.QtCore import QCoreApplication
 
 from gui_qt.app import create_application
 from gui_qt.settings import SettingsStore
@@ -17,6 +17,7 @@ from modules.hydraulic_unit.ui import HydraulicPage
 def easy(qtbot, tmp_path):
     create_application([])
     context = SimpleNamespace(settings=SettingsStore(tmp_path / 'settings.json'), jobs=JobManager(), appearance='dark')
+    context.settings.set('hydraulic_view_mode',0);context.settings.set('hydraulic_practical_intro',True)
     page = HydraulicPage(context); qtbot.addWidget(page); page.resize(1366, 800); page.show(); qtbot.wait(10)
     yield page
     page.cancel_pdf(); page.settings.flush()

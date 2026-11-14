@@ -9,7 +9,7 @@ import math
 
 from PySide6.QtCore import Qt, QEvent, QPointF, QRectF, QTimer
 from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
-from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLineEdit,
                                QPushButton, QSizePolicy, QTabWidget, QVBoxLayout, QWidget)
 
 from gui_qt.components import Disclosure, button, label, scroll
