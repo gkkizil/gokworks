@@ -44,11 +44,8 @@ dağıtılmaz. SolidWorks gerektiren işlemler kullanıcının kendi lisanslı k
 ## Başlangıç
 
 <!-- windows-release:start -->
-**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-43416262335-1/GOKWORKS.exe)
-
-**GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
-
-Uygulama kodu: `c798d88` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/43416262335) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+Önceki Windows EXE yayınları depo bakımı sırasında kaldırıldı.
+Yeni Windows paketi henüz yayımlanmadı; yeni bir EXE derlemesi ayrıca başlatılacaktır.
 <!-- windows-release:end -->
 
 1. Elinizde oluşturulmuş `GOKWORKS.exe` varsa çift tıklayarak açın. Kaynak

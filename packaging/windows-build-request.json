@@ -1,14 +1,7 @@
 {
-  "request_id": "20261113-main-c798d88-dxf-performance-exe",
-  "requested_at": "2026-11-13T11:20:00+00:00",
-  "source_commit": "c798d88da35c7ecd609916bdca77a3beb28b8b6d",
-  "validation_profile": "package-only",
-  "skip_full_tests": true,
-  "validation_runs": [
-    43412308235,
-    43416081325
-  ],
-  "validated_agent_head": "9254481083643a88726e9c0617d550c0499ed5d6",
-  "reason": "User explicitly requested a Windows EXE from current main, without a separate build branch. PR 79 was automatically merged into main c798d88 after all three full Windows integration shards in run 43412308235 passed; cached-proof run 43416081325 completed the merge. Verified main contains agent head 9254481. Include the DXF/DWG performance fixes: reduce repeated whole-feature scans with live manufacturing metadata checks and safe full-validation fallbacks; consolidate redundant autosave sweeps and save original configuration once; skip path queries for clean documents; parse each DXF once; share inventory document revision reads. Local focused regression suite: 867 passed, 8 skipped, zero failures/retries. Reuse completed full Windows validation; perform the shipping main onefile build, native converter and Sparrow worker selfchecks, frozen EXE opening and DPI checks. Only build request metadata changes on main; no application or workflow edits and no new build branch. No live licensed SolidWorks validation is claimed.",
-  "cancelled": false
+  "request_id": "20261114-await-new-main-exe",
+  "source_commit": "cad860ef612ac162521d2cd4534f6126cc33c26f",
+  "validation_profile": "full",
+  "cancelled": true,
+  "reason": "Previous executable publications were withdrawn during repository maintenance. Await an explicit new build request from current main."
 }
