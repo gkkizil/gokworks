@@ -11,6 +11,7 @@ from .beginner_view import CylinderDiagram, IssueRow, PLAIN_ISSUES, Responsive, 
 from .core.validation import InputError
 from .practical import PracticalInputs, TITLES, practical_project, practical_values
 from .presentation import result_rows
+from .schematic import UnitSchematic
 
 
 class PracticalView(QWidget):
@@ -31,7 +32,7 @@ class PracticalView(QWidget):
         self.new_button = button('Yeni basit çevrim oluştur', self.start_new)
         actions.addWidget(self.new_button); actions.addStretch(1); existing.addLayout(actions)
         box.addWidget(self.existing)
-        split = Responsive(980, 16)
+        split = Responsive(1180, 16)
         self.form = QWidget(); form = QVBoxLayout(self.form); form.setContentsMargins(0, 0, 0, 0); form.setSpacing(12)
         sizes, contents = panel(); contents.addWidget(label('1  Silindirin ölçüleri', 'section'))
         grid = QGridLayout(); grid.setColumnStretch(0, 1); grid.setHorizontalSpacing(12); grid.setVerticalSpacing(8)
@@ -72,11 +73,15 @@ class PracticalView(QWidget):
         self.calculate_button = button('Ünite ihtiyacını hesapla', self.calculate, primary=True)
         self.calculate_button.setMinimumHeight(38)
         self.draft_note = label('', 'muted'); form.addStretch(1)
-        split.box.addWidget(self.form, 1)
+        split.box.addWidget(self.form, 3)
         result, output = panel(); output.addWidget(label('Hangi ünite gerekir?', 'section'))
         self.output_panel = result
         self.state = label('Ölçüleri ve hareket sürelerini girip hesaplayın.', 'muted'); output.addWidget(self.state)
         self.cycle = label('', 'muted'); output.addWidget(self.cycle)
+        output.addWidget(label('Ünite şeması', 'section'))
+        output.addWidget(label('Elemanlara tıklayarak ölçüleri veya ilgili ayarı açabilirsiniz.', 'muted'))
+        self.schematic = UnitSchematic(owner.context.appearance)
+        self.schematic.nodeClicked.connect(self.open_node); output.addWidget(self.schematic)
         self.cards = {}
         for key, title in (('motor', 'Elektrik motoru'), ('pump', 'Yağ pompası'), ('tank', 'Yağ tankı')):
             card = ResultCard(title); output.addWidget(card); self.cards[key] = card
@@ -91,7 +96,7 @@ class PracticalView(QWidget):
         output.addWidget(self.report_row)
         self.status = label('', 'muted'); self.status.setTextFormat(Qt.PlainText); output.addWidget(self.status)
         output.addWidget(button('Hareket planı ve tüm sonuçlar →', self.open_plan, flat=True))
-        output.addStretch(1); split.box.addWidget(result, 1)
+        output.addStretch(1); split.box.addWidget(result, 5)
         box.addWidget(split); self.workspace = scroll(body); outer.addWidget(self.workspace, 1)
         footer = QHBoxLayout(); footer.setSpacing(16); footer.addWidget(self.draft_note,1)
         footer.addWidget(self.calculate_button); outer.addLayout(footer)
@@ -221,6 +226,7 @@ class PracticalView(QWidget):
                                  'değiştirmek için üstteki bölümü açın.')
 
     def clear_result(self):
+        self.schematic.clear('Güncel değerleri görmek için hesaplayın.')
         for card in self.cards.values():card.hide()
         while self.issue_box.count():
             item = self.issue_box.takeAt(0); widget = item.widget()
@@ -240,8 +246,12 @@ class PracticalView(QWidget):
 
     def show_result(self, project, result):
         if practical_values(project) is None or not self.allowed:
-            self.ready = False; self.clear_result(); return
+            self.ready = False; self.clear_result()
+            if not self.fresh and not self.pending:
+                self.schematic.set_nodes(self.owner.simple.schematic.nodes)
+            return
         self.pending = False; self.ready = True; self.fresh = False; self.error.hide(); self.clear_result()
+        self.schematic.set_nodes(self.owner.simple.schematic.nodes)
         self.draft_note.setText('Sonuç, girdiğiniz ölçü ve süreler içindir. Bir değeri değiştirirseniz yeniden hesaplayın.')
         for edit in self.inputs.values():edit.setProperty('invalid', False); polish(edit)
         rows = {name: show(value, unit) for name, value, unit, _ in result_rows(project, result)}
@@ -295,5 +305,15 @@ class PracticalView(QWidget):
     def open_plan(self):
         self.owner.view_mode.setCurrentIndex(0)
 
+    def open_node(self, node):
+        if node == 'cylinder':
+            if self.allowed:
+                edit = self.inputs['bore']; self.workspace.ensureWidgetVisible(edit); edit.setFocus()
+            else:
+                self.owner.open_detailed(0)
+        else:
+            self.owner.simple.open_node(node)
+
     def apply_theme(self):
         self.diagram.update()
+        self.schematic.appearance = self.owner.context.appearance; self.schematic.update()

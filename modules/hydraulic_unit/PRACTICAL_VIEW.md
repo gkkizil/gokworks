@@ -17,8 +17,11 @@ değiştirerek kaybedilemez. Düzenlenmemiş SI değerleri ve kuvvetler korunur.
 Sonuçta motor, gereken pompa debisi ve kullanılabilir yağ tankı hacmi öndedir.
 Basınç, pompa hacmi, hat ve soğutma ayrıntıları açılır bölümdedir. Kritik
 uyarılar görünürdür; soğutma gücü ilgili kritik uyarıda da yazılıdır. Diğer
-kontroller ayrıca açılır. Şema mevcut hareket planında korunur ve açılır
-bölüme taşınmıştır.
+kontroller ayrıca açılır. Claude'un ünite şeması Pratik hesap ekranında ve
+üç adımlı hareket planının sonuç sayfasında doğrudan görünür; açılır bölümde
+gizlenmez. Hesaplanan değerler ve elemanlara tıklayarak ilgili ayara gitme
+davranışı korunur. Taslak veya hatalı girişte devre görünür kalır, eski sayısal
+değerler temizlenir. Şema ölçekli veya üretime hazır hidrolik devre değildir.
 
 Yeni bir hesapta **Pompayı bu harekete göre boyutlandır** açıktır. Kullanıcı
 hesaplayınca hesap motorunun ürettiği nominal pompa hacmi adayı projeye uygulanır
@@ -53,3 +56,10 @@ başarısız test tekrarı kapalıydı. Bu sayılar çakışan testleri içerir,
 Ruff F ve `git diff --check` geçti. Açık/koyu temada 790 ve 1366 piksel
 genişliklerde görünüm yakalanıp incelendi; yatay kaydırma yok, hesap düğmesi
 ekranda kalıyor, dar görünüm hesap sonrasında sonuç bölümünün başına gidiyor.
+
+Şema görünürlüğü düzeltmesi: Pratik hesap ve üç adımlı sonuç sayfasındaki
+şemalar doğrudan görünür. Aynı hesaplanan düğüm değerleri kullanılır; taslakta
+yalnız pratik şemanın eski değerleri temizlenir. Fare/klavye ile seçim, tema,
+özel proje koruma ve yatay taşma kontrolleri dahil **181 test geçti**; bunun
+7 durumu yeni şema regresyonlarıdır. Test tekrarları kapalıdır. Açık/koyu
+temada 790/1130/1366/1690 piksel genişlikler ayrıca görsel olarak kontrol edildi.

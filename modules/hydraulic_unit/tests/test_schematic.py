@@ -19,7 +19,7 @@ def page(qtbot, tmp_path):
     context.settings.set('hydraulic_view_mode',0);context.settings.set('hydraulic_practical_intro',True)
     page = HydraulicPage(context); qtbot.addWidget(page); page.resize(1366, 800); page.show()
     qtbot.waitUntil(lambda: page.result is not None, timeout=5000)
-    page.simple.go_to_step(2);page.simple.schematic_section.set_expanded(True); qtbot.wait(30)
+    page.simple.go_to_step(2); qtbot.wait(30)
     yield page
     page.cancel_pdf(); page.settings.flush()
 
