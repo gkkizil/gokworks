@@ -1,0 +1,33 @@
+GOKWORKS Otomatik Teknik Resim — PDF preview
+
+The preview uses the existing PySide6 6.10.3 distribution's Qt PDF and
+Qt PDF Widgets libraries. No Qt or PDFium source was modified.
+
+Qt PDF source copyright:
+Copyright (C) 2020 The Qt Company Ltd.
+SPDX-License-Identifier:
+LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+
+GOKWORKS uses the LGPL-3.0-only alternative, as for its existing shared
+Qt libraries. The documented GOKWORKS_LIBRARY_DIR replacement mechanism
+also applies to a compatible external PySide6/Qt PDF installation.
+
+Qt 6.10.3 source:
+https://github.com/qt/qtwebengine/tree/6.10.3/src/pdf
+https://github.com/qt/qtwebengine/tree/6.10.3/src/pdfwidgets
+The binding sources are part of pyside/pyside-setup tag 6.10.3.
+
+The matching PDFium source is in Qt's pinned Chromium submodule:
+qt/qtwebengine-chromium
+commit b09162cfb22f1cce78638818e5ebc7cc778a7e43
+directory chromium/third_party/pdfium
+
+The complete PDFium LICENSE file is reproduced unchanged as
+QtPdf-PDFium-LICENSE.txt. Additional third-party notices for the matched
+snapshot are included alongside it: Chromium, Abseil, ICU, FreeType (FTL),
+fast_float, libjpeg-turbo (including README.ijg), libpng, zlib, AGG 2.3,
+LCMS, OpenJPEG and TIFF. See source-inventory.json for exact source URLs.
+Original:
+https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/LICENSE
+
+The existing packaging includes this directory under licenses.

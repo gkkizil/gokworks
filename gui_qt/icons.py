@@ -25,7 +25,7 @@ def icon(name, color='#80B6F5'):
     pen = QPen(QColor(color), 2.8, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
     painter.setPen(pen)
     painter.setBrush(Qt.NoBrush)
-    if name in ('pdf', 'dxf_dwg'):
+    if name in ('pdf', 'dxf_dwg', 'automatic_drawing'):
         painter.drawRoundedRect(QRectF(11, 5, 27, 36), 3, 3)
         for y in (18, 25, 32):
             painter.drawLine(17, y, 31, y)

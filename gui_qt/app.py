@@ -43,6 +43,7 @@ PAGE_TYPES = {
     'sheet_unfolding': ('modules.sheet_unfolding.ui', 'UnfoldPage'),
     'press_brake': ('modules.press_brake.ui', 'PressBrakePage'),
     'hydraulic_unit': ('modules.hydraulic_unit.ui', 'HydraulicPage'),
+    'automatic_drawing': ('modules.automatic_drawing.ui', 'AutoDrawingPage'),
 }
 
 
@@ -75,6 +76,7 @@ MODULES = (
     ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),
     ('sheet_unfolding', 'Sac Açınımı', 'ÜRETİM'),
     ('press_brake', 'Abkant Simülasyonu', 'ÜRETİM'),
+    ('automatic_drawing', 'Otomatik Teknik Resim', 'ÜRETİM'),
     ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
     ('belt_drive', 'Kayış–Kasnak Tasarımı', 'MAKİNE ELEMANLARI'),
 )

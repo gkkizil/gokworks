@@ -1,0 +1,75 @@
+{
+  "qt_version": "6.10.3",
+  "qt_license_choice": "LGPL-3.0-only",
+  "chromium_commit": "b09162cfb22f1cce78638818e5ebc7cc778a7e43",
+  "notices": [
+    {
+      "file": "Abseil-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/abseil-cpp/LICENSE"
+    },
+    {
+      "file": "Abseil-AUTHORS.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/abseil-cpp/AUTHORS"
+    },
+    {
+      "file": "ICU-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/icu/LICENSE"
+    },
+    {
+      "file": "libjpeg-turbo-LICENSE.md",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/libjpeg_turbo/LICENSE.md"
+    },
+    {
+      "file": "libjpeg-turbo-README.ijg",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/libjpeg_turbo/README.ijg"
+    },
+    {
+      "file": "libpng-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/libpng/LICENSE"
+    },
+    {
+      "file": "zlib-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/zlib/LICENSE"
+    },
+    {
+      "file": "AGG-2.3-COPYING.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/third_party/agg23/copying"
+    },
+    {
+      "file": "LCMS-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/third_party/lcms/LICENSE"
+    },
+    {
+      "file": "OpenJPEG-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/third_party/libopenjpeg/LICENSE"
+    },
+    {
+      "file": "TIFF-LICENSE.md",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/third_party/libtiff/LICENSE.md"
+    },
+    {
+      "file": "FreeType-FTL.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/third_party/freetype/FTL.TXT"
+    },
+    {
+      "file": "fast_float-MIT.txt",
+      "url": "https://raw.githubusercontent.com/fastfloat/fast_float/d7417618f93d2c47e9bbde561510f9fc8bafe003/LICENSE-MIT"
+    },
+    {
+      "file": "Qt-LGPL-3.0.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine/6.10.3/LICENSES/LGPL-3.0-only.txt"
+    },
+    {
+      "file": "Qt-GPL-3.0.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine/6.10.3/LICENSES/GPL-3.0-only.txt"
+    },
+    {
+      "file": "Chromium-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine/6.10.3/LICENSE.Chromium"
+    },
+    {
+      "file": "QtPdf-PDFium-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/qt/qtwebengine-chromium/b09162cfb22f1cce78638818e5ebc7cc778a7e43/chromium/third_party/pdfium/LICENSE"
+    }
+  ]
+}
