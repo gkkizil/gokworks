@@ -77,17 +77,29 @@ class UnitSchematic(QWidget):
     def heightForWidth(self, width):
         return int(HEIGHT * self.factor(width)) + 8
 
+    SETTLE = 40   # px of width change before the height follows (a scroll bar is ~10-17 px)
+
     def resizeEvent(self, event):
         # Scroll-area layouts do not ask heightForWidth; keep the whole circuit visible ourselves.
-        height = self.heightForWidth(self.width())
-        if height != self.height():
-            self.setFixedHeight(height)
+        # Only a real width change moves the height: otherwise a scroll bar appearing for the taller
+        # circuit narrows it, the shorter circuit hides the bar, and the page shakes without end.
+        sized = getattr(self, '_sized_width', None)
+        if sized is None or abs(self.width()-sized) > self.SETTLE:
+            self._sized_width = self.width()
+            height = self.heightForWidth(self.width())
+            if height != self.height():
+                self.setFixedHeight(height)
+        self.update()
 
     def sizeHint(self):
         return QSize(900, self.heightForWidth(900))
 
     def factor(self, width=None):
-        return max(.52, min(1., (width or self.width()) / WIDTH))
+        """Drawing scale: from a given width (to size the widget), else fitting the current box both ways."""
+        scale = max(.52, min(1., (width or self.width()) / WIDTH))
+        if width is None and self.height() > 8:
+            scale = min(scale, (self.height()-8) / HEIGHT)
+        return scale
 
     def origin(self):
         return QPointF((self.width() - WIDTH * self.factor()) / 2, 4)

@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from itertools import combinations
 from math import prod, sqrt
+import numpy as np
 
 
 @dataclass(frozen=True)
@@ -80,6 +81,68 @@ def separation(a, b):
     return max(distance, float(gap))
 
 
+CLEAR_VOLUME = 1e-6   # mm³: an overlap bound this small proves "no hit" (a hit needs > 0,001 mm³)
+
+
+def _pieces_in_slab(pieces, x0, x1):
+    """Corner points of each convex piece cut to x0 <= x <= x1, projected on YZ (piece index per point)."""
+    from itertools import combinations
+    k = pieces.shape[1]; pairs = np.array(list(combinations(range(k), 2)))
+    a, b = pieces[:, pairs[:, 0]], pieces[:, pairs[:, 1]]
+    groups = [(pieces, (pieces[..., 0] >= x0-1e-9) & (pieces[..., 0] <= x1+1e-9))]
+    for plane in (x0, x1):
+        da, db = a[..., 0]-plane, b[..., 0]-plane
+        crossing = da*db < 0
+        with np.errstate(divide='ignore', invalid='ignore'):
+            s = np.where(crossing, da/(da-db), 0.)
+        groups.append((a+s[..., None]*(b-a), crossing))
+    points = np.concatenate([g for g, _ in groups], axis=1)[..., 1:]
+    mask = np.concatenate([m for _, m in groups], axis=1)
+    index = np.broadcast_to(np.arange(len(pieces))[:, None], mask.shape)
+    return points[mask], index[mask]
+
+
+def prism_clear(a, b, contacts=()):
+    """True when an extruded tool provably does not overlap the other body (no OCCT boolean needed).
+
+    A tool is its exact YZ section × [x0, x1]. A sheet body is covered by convex
+    pieces; each piece cut to the tool's span and projected on YZ is a convex
+    polygon. If those polygons and the section (minus the allowed contact
+    cylinders, which are discs in YZ) share no area, the solids share no volume.
+    False only means "not proven here": the solid intersection decides.
+    """
+    import shapely
+    pa, pb = getattr(a, 'prism', None), getattr(b, 'prism', None)
+    if pa is not None and pb is not None:
+        span = min(pa[2], pb[2])-max(pa[1], pb[1])
+        return span <= 0 or shapely.area(shapely.intersection(pa[0], pb[0]))*span <= CLEAR_VOLUME
+    if pa is None:
+        a, b, pa = b, a, pb
+    if pa is None or b.kind != 'sheet' or getattr(b, 'pieces', None) is None:
+        return False
+    region = pa[0]
+    discs = [shapely.Point(y, z).buffer(r, quad_segs=16) for kind, y, z, r, ids in contacts if kind == a.kind and b.id in ids]
+    if discs:   # the inscribed polygon removes slightly less than the cylinder: still a safe bound
+        region = region.difference(shapely.union_all(discs))
+    if region.is_empty:
+        return True
+    x0, x1 = pa[1], pa[2]
+    pieces = b.pieces
+    lo, hi = pieces[..., 0].min(axis=1), pieces[..., 0].max(axis=1)
+    y0, z0, y1, z1 = region.bounds
+    pieces = pieces[(hi > x0) & (lo < x1) & (pieces[..., 1].max(axis=1) > y0) & (pieces[..., 1].min(axis=1) < y1)
+                    & (pieces[..., 2].max(axis=1) > z0) & (pieces[..., 2].min(axis=1) < z1)]
+    if not len(pieces):
+        return True
+    span = np.minimum(pieces[..., 0].max(axis=1), x1)-np.maximum(pieces[..., 0].min(axis=1), x0)
+    points, index = _pieces_in_slab(pieces, x0, x1)
+    hulls = shapely.convex_hull(shapely.multipoints(points, indices=index))
+    used = np.unique(index)
+    shapely.prepare(region)
+    areas = shapely.area(shapely.intersection(hulls, region))
+    return float(np.dot(areas, span[used])) <= CLEAR_VOLUME
+
+
 def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None, still=None):
     """Return all colliding pairs plus proximity needing denser sampling.
 
@@ -119,6 +182,8 @@ def check(bodies, contacts=(), *, near_margin=0, cache=None, sheet_hits=None, st
             hit = sheet_hits.get((a.id, b.id))
         elif cache is not None and key in cache:
             hit = cache[key]
+        elif prism_clear(a, b, contacts):
+            hit = None      # proven apart on the tools' exact sections: the boolean would find nothing
         else:
             common = intersection(a.shape, b.shape)
             mass, _ = volume(common); hit = None

@@ -16,10 +16,14 @@ PDF yazıcısı kullanılır. Yeni bir Python bağımlılığı yoktur.
    Ana panelde tutuş/yön ve V kanalı ayrıca değiştirilebilir. Segmentler `başlangıç:boy; …` biçiminde
    mm girilir; örneğin `-40:30; 5:35` gerçek bir 15 mm boşluk bırakır.
 3. **Hareketi kontrol et**: yaklaşma, büküm ve geri çekilmenin ara katıları
-   arka planda incelenir. Oynatma kare/s seçimi kontrol çözünürlüğünü değiştirmez.
+   arka planda incelenir. Oynatma hızı (0,25× · 0,5× · 1× · 1,5× · 2× · 4×) kontrol
+   çözünürlüğünü değiştirmez.
 4. **Oynat**, ileri/geri adım, konum sürgüsü, **Açınım**, **Bitmiş form** ve
    3B fareyle döndürme/yakınlaştırma kullanılabilir. Çarpışma konumu kırmızı
-   işaretlenir; oynatma ilk çarpışan karede durur.
+   işaretlenir; oynatma ilk çarpışan karede durur. Sonuç gelince ara pozlar arka planda
+   hazırlanır ve oynatma gerçek zamanlı, 60 fps akar (1×: yaklaşma/geri çekilme 30 mm/s,
+   büküm 30°/s). Ara pozlar yalnız görseldir; çarpışma sonucu kontrol edilen pozlardan gelir.
+   Hazırlanana kadar kontrol edilen kareler 12 kare/s × hız ile oynar.
 5. **Büküm Föyü PDF** her adımın gerçek 3B katı görüntüsünü, açılarını,
    takımlarını, V kanalını, segmentlerini, ilk çarpışmasını ve kontrol kapsamını
    yazar. Plan değişince önceki sonuç ve PDF komutu geçersiz olur.
@@ -54,7 +58,8 @@ tarafından sıfırdan çizilmiş eğitim geometrisidir; üretici eşdeğeri de�
   ayrıntıları/kapsamı açılır bölümlerdedir.
 - **Alt:** önceki/oynat/sonraki, konum sürgüsü, oynatma hızı, Açınım, Bitmiş form, Sığdır ve
   tek satırlık sonuç. Üst çubuktaki **Video MP4**, kontrol edilmiş hareketi sahnedeki bakış
-  açısıyla 1280×720 video olarak kaydeder; kare hızı seçili oynatma hızıdır. Kodlama Qt
+  açısıyla 1280×720 video olarak kaydeder; kontrol edilen kareler 1×'te 12 kare/s,
+  seçili hız katıyla (en çok 60 kare/s) yazılır. Kodlama Qt
   Multimedia ile yapılır (varsa H.264, yoksa MPEG-4); ek program gerekmez. Takım kütüphanesinde bütün kesitler aynı ölçekte çizilir; ölçek çubuğu,
   DEMO/DXF etiketi, favori yıldızı ve seçili kart işareti kartın üzerindedir.
 
@@ -200,6 +205,14 @@ Kontrolün kuralları değişmeden gereksiz iş kaldırıldı:
   katılar değemez; bu çiftlerde katı kesişimi hesaplanmaz ve aradaki boşluk örneklemeyi
   sıklaştırmak için alt sınır olarak kullanılır. Ayrılamayan her çift eskisi gibi OCCT katı
   kesişimiyle kontrol edilir.
+- **Takım kesitinde kesin ayrım.** Takım ve tutucu, YZ kesitinin X boyunca uzatılmasıdır; izin
+  verilen temas silindirleri de X eksenlidir (YZ'de daire). Sac, katıyı tamamen içine alan dışbükey
+  parçalarla örtülür (flanş: bölge üçgenleri × kalınlık; büküm: ≤5° dilimlerin iç kiriş uçları ve
+  dış yayın teğet çokgeni). Her parça takımın X aralığına kırpılıp YZ'ye izdüşürülür. Bunların
+  kesitle (temas daireleri çıkarılmış) ortak alanı × boyu ≤ 1e-6 mm³ ise ortak hacim yoktur ve
+  OCCT kesişimi hesaplanmaz. Bu yalnız "değmiyor" kanıtıdır; geri kalan her çift ve her çarpışma
+  kararı OCCT katı kesişiminden gelir. Örnek demolarda takım–sac kesişimlerinin tamamı bu yolla
+  kalktı (kutu: 24 s → 10 s); 16 senaryoda (5'i çarpışmalı) sonuçlar kare kare aynı kaldı.
 - **Birbirine göre durağan çiftler.** Yaklaşma ve geri çekilmede yalnız üst takım grubu hareket
   eder. Aynı tarafta kalan çiftler (ör. sac–alt kalıp) her pozda çarpışma için kontrol edilir
   ama 0,5 mm'lik sık örnekleme istemez.
@@ -221,7 +234,7 @@ takımlarla 9,7 → 4,3 sn; U parçası 31 → 15 sn; dört bükümlü kutu gene
 `solidworks.py`: STA CAD adaptörü; `demo.py`: özgün veriler;
 `standard.py`: genel piyasa standardı takımlar;
 `ui.py`, `dialogs.py`, `tool_picker.py`, `viewer.py`, `cards.py`, `flat_plan.py`: Qt ve görsel takım
-kütüphanesi; `report.py`: PDF; `video.py`: MP4.
+kütüphanesi; `report.py`: PDF; `video.py`: MP4; `animation.py`: 60 fps akıcı oynatma.
 
 ```sh
 QT_QPA_PLATFORM=offscreen python -m pytest modules/press_brake/tests -q

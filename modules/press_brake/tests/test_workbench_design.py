@@ -209,7 +209,7 @@ def test_checked_motion_exports_as_an_mp4_video(window, qtbot, tmp_path):
     if video_codec() is None:
         pytest.skip('Qt Multimedia has no MP4 encoder on this machine')
     target = tmp_path/'animasyon.mp4'; target.write_bytes(b'old')    # replaced only when the recording finished
-    p.speed.setCurrentIndex(2); p.export_video(str(target))
+    p.speed.setCurrentIndex(p.speed.findData(2.)); p.export_video(str(target))
     qtbot.waitUntil(lambda: p.status_text.startswith(('Video kaydedildi', 'Video kaydedilemedi')), timeout=200000)
     assert p.status_text.startswith('Video kaydedildi'), p.status_text
     data = target.read_bytes()

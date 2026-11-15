@@ -1,6 +1,6 @@
 """B-Rep bodies used by BOTH collision service and tessellated scene (mm)."""
 from dataclasses import dataclass
-from math import sin, cos, pi, tan
+from math import ceil, cos, floor, pi, sin, tan
 import numpy as np
 from .kinematics import arc_parameters, basis, poses, station_transform
 from .models import Region
@@ -16,6 +16,8 @@ class Body:
     base: object = None     # unplaced source solid (shared between poses) and its rigid placement;
     matrix: object = None   # lets the display mesh be built once per solid, not once per pose
     hull: object = None     # (points, unit axes) of a convex volume containing the solid, station mm
+    prism: object = None    # extruded tool: (YZ section polygon, x0, x1) in station mm; see collision.prism_clear
+    pieces: object = None   # sheet: (n, k, 3) corner points of convex pieces whose union contains the solid
 
 
 def bounds(shape):
@@ -180,6 +182,46 @@ def _faceted_bend(region, bend, t, phi):
     return compound(solids)
 
 
+def plate_pieces(polygon, thickness):
+    """Exact convex cover of prism(region, t): one triangular prism per triangle of the region."""
+    from shapely import constrained_delaunay_triangles
+    pieces = []
+    for tri in constrained_delaunay_triangles(polygon).geoms:
+        xy = np.asarray(tri.exterior.coords)[:3]
+        pieces.append(np.r_[np.c_[xy, np.full(3, -thickness/2)], np.c_[xy, np.full(3, thickness/2)]])
+    return np.array(pieces).reshape(-1, 6, 3)
+
+
+def bend_pieces(bend, thickness, phi, step=5.):
+    """Convex pieces containing bend_shape(bend, thickness, phi) (exact arcs and the ≤2° faceted band).
+
+    Each angular slice is covered by its inner chord ends and the outer arc's tangent
+    polygon over the band's whole axial span (holes and reliefs counted as material).
+    """
+    from math import radians
+    if abs(phi) < 1e-9:
+        return plate_pieces(bend.region.polygon(), thickness)
+    from shapely.ops import transform as shapely_transform
+    inv = np.linalg.inv(basis(bend))
+    def local(x, y, z=None):
+        return inv[0, 0]*np.asarray(x)+inv[0, 1]*np.asarray(y)+inv[0, 3], inv[1, 0]*np.asarray(x)+inv[1, 1]*np.asarray(y)+inv[1, 3]
+    xmin, _, xmax, _ = shapely_transform(local, bend.region.polygon()).bounds
+    r, sign, a = arc_parameters(bend, thickness, phi), float(np.sign(phi)), abs(phi)
+    facet = a/(int(a*180/pi/2)+1)                   # chord span of the faceted band (_faceted_bend)
+    inner, outer = (r-thickness/2)*cos(facet/2), r+thickness/2
+    count = max(1, ceil(a/radians(step))); delta = a/count
+    def yz(rho, angle):
+        return rho*sin(angle), sign*r-sign*rho*cos(angle)
+    pieces = []
+    for i in range(count):
+        t0, t1 = delta*i, delta*(i+1)
+        ring = [yz(inner, t0), yz(inner, t1), yz(outer, t0), yz(outer, t1), yz(outer/cos(delta/2), (t0+t1)/2)]
+        pieces.append([(x, y, z) for x in (xmin, xmax) for y, z in ring])
+    local_points = np.array(pieces, dtype=float)
+    m = basis(bend)
+    return local_points@m[:3, :3].T+m[:3, 3]
+
+
 class Geometry:
     def __init__(self, plan=None):
         self.plan = plan
@@ -189,16 +231,30 @@ class Geometry:
         self.placed_cache = {}
         self.mesh_cache = {}    # display triangles per source solid; see mesh()
         self.hulls = {}         # convex container per source solid; see local_hull()
+        self.outlines = {}      # id(tool solid) -> (solid, YZ section, x0, x1): exact extrusion
+        self.covers = {}        # id(sheet solid) -> (solid, convex pieces); see plate_pieces / bend_pieces
+        if plan is not None:
+            for f in plan.part.flanges:
+                self.covers[id(self.flat[f.id])] = (self.flat[f.id], plate_pieces(f.region.polygon(), plan.part.thickness))
 
-    def placed_body(self, id, kind, shape, matrix):
-        key = (id, kind, shape, tuple(np.asarray(matrix).ravel()))
+    def placed_body(self, name, kind, shape, matrix):
+        key = (name, kind, shape, tuple(np.asarray(matrix).ravel()))
         if key not in self.placed_cache:
             if len(self.placed_cache) >= 1024:
                 self.placed_cache.clear()
-            placed = body(id, kind, transform(shape, matrix))
+            placed = body(name, kind, transform(shape, matrix))
             placed.base, placed.matrix = shape, np.array(matrix, dtype=float)
             points, axes = self.local_hull(shape); rotation = placed.matrix[:3, :3]
             placed.hull = (points@rotation.T+placed.matrix[:3, 3], axes@rotation.T)
+            m = placed.matrix
+            outline = self.outlines.get(id(shape))
+            if outline is not None and outline[0] is shape and abs(m[0, 0]-1) < 1e-12 and not np.any(np.abs(m[[0, 0, 1, 2], [1, 2, 0, 0]]) > 1e-12):
+                from shapely.affinity import affine_transform
+                placed.prism = (affine_transform(outline[1], (m[1, 1], m[1, 2], m[2, 1], m[2, 2], m[1, 3], m[2, 3])),
+                                outline[2]+m[0, 3], outline[3]+m[0, 3])
+            cover = self.covers.get(id(shape))
+            if cover is not None and cover[0] is shape:
+                placed.pieces = cover[1]@rotation.T+m[:3, 3]
             self.placed_cache[key] = placed
         return self.placed_cache[key]
 
@@ -239,6 +295,7 @@ class Geometry:
             key = (bend.id, round(angle, 9))
             if key not in self.bend_cache:
                 self.bend_cache[key] = bend_shape(bend, p.thickness, angle)
+                self.covers[id(self.bend_cache[key])] = (self.bend_cache[key], bend_pieces(bend, p.thickness, angle))
                 from modules.gear_calculator.cad import shape_stats
                 shape_stats(self.bend_cache[key])
             result.append(self.placed_body(bend.id, 'sheet', self.bend_cache[key], global_t@transforms[bend.parent]))
@@ -310,6 +367,10 @@ class Geometry:
         self.tools[key] = shape
         outline = region.polygon() if tool.section_dxf else tool.section.polygon()
         self.local_hull(shape, outline, (segment.start, segment.start+segment.length))
+        # Exact YZ section of the extrusion. DXF arcs are sampled (sagitta < 0,00025 mm): grown by 0,001 mm.
+        from shapely.geometry import Polygon
+        exact = outline.buffer(1e-3, join_style='mitre') if tool.section_dxf else Polygon(r.outer, r.holes)
+        self.outlines[id(shape)] = (shape, exact, segment.start, segment.start+segment.length)
         return shape
 
     def scene(self, index, angles, phase='bend', travel=0):
@@ -381,14 +442,15 @@ def machine_bodies(bodies):
     Display only: never passed to the collision check, never in reports' hit lists.
     Generic proportions, not a specific machine model.
     """
-    from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox
-    from OCP.gp import gp_Pnt
     tools = [b for b in bodies if b.kind in ('punch', 'die', 'holder')]
     if not tools:
         return []
-    x0 = min(b.bounds[0] for b in bodies)-15; x1 = max(b.bounds[3] for b in bodies)+15
+    # Extents rounded out to 5 mm: the same few unplaced boxes serve every pose (one display mesh
+    # each, see mesh()); only their placement changes as the punch travels.
+    x0 = floor((min(b.bounds[0] for b in bodies)-15)/5)*5; x1 = ceil((max(b.bounds[3] for b in bodies)+15)/5)*5
     def box(id, y, z0, z1):
-        return Body(id, 'machine', BRepPrimAPI_MakeBox(gp_Pnt(x0, -y, z0), gp_Pnt(x1, y, z1)).Shape(), (x0, -y, z0, x1, y, z1))
+        base = _machine_box(x1-x0, 2*y, z1-z0); matrix = translation(x0, -y, z0)
+        return Body(id, 'machine', transform(base, matrix), (x0, -y, z0, x1, y, z1), base, matrix)
     result = []
     upper = [b for b in tools if b.kind == 'punch' or b.id.startswith('holder:punch')]
     lower = [b for b in tools if b.kind == 'die' or b.id.startswith('holder:die')]
@@ -397,6 +459,19 @@ def machine_bodies(bodies):
     if lower:
         bottom = min(b.bounds[2] for b in lower); result.append(box('machine:rail', 24, bottom-22, bottom))
     return result
+
+
+_MACHINE_BOXES = {}
+
+
+def _machine_box(dx, dy, dz):
+    from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox
+    key = (round(dx, 3), round(dy, 3), round(dz, 3))
+    if key not in _MACHINE_BOXES:
+        if len(_MACHINE_BOXES) >= 256:
+            _MACHINE_BOXES.clear()
+        _MACHINE_BOXES[key] = BRepPrimAPI_MakeBox(*key).Shape()
+    return _MACHINE_BOXES[key]
 
 
 def scene_mesh(bodies, stop=None, cache=None):
@@ -442,7 +517,7 @@ def solid_part(shape, stop=None):
     return vertices, smooth_normals(vertices, normals, lengths, quantum, stop), lines
 
 
-def mesh(bodies, stop=None, cache=None):
+def mesh(bodies, stop=None, cache=None, limit=512):
     """One coloured display mesh for the bodies of a pose.
 
     ``cache`` (a dict kept by the caller for one calculation) stores each source
@@ -455,7 +530,7 @@ def mesh(bodies, stop=None, cache=None):
         if cache is not None and b.base is not None:
             entry = cache.get(id(b.base))
             if entry is None or entry[0] is not b.base:
-                if len(cache) >= 512:
+                if limit and len(cache) >= limit:
                     cache.clear()
                 entry = cache[id(b.base)] = (b.base, solid_part(b.base, stop))   # keeps the solid alive: ids stay unique
             part, rotation, shift = entry[1], b.matrix[:3, :3], b.matrix[:3, 3]
