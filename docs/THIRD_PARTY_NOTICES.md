@@ -147,6 +147,7 @@ FreeType için dağıtıma eklenen FTL koşulları esas alınır; metin lisans k
 |---|---|---|
 | PySide6, Shiboken6 | 6.10.3 | LGPL-3.0-only veya GPL seçenekleri / ticari Qt lisansı. Bu paket LGPL yolunu kullanır. |
 | Qt Core, Gui, Widgets | 6.10.3 | LGPL v3 seçeneği. QML, Quick, WebEngine, Charts kullanılmaz. |
+| Qt PDF, PDF Widgets | 6.10.3 | Otomatik Teknik Resim’in gerçek PDF önizlemesi; LGPL v3 seçeneği. PDFium ve geçişli bileşenlerin bildirimleri licenses/automatic-drawing dizininde, tam kaynak URL’leri source-inventory.json içinde korunur. |
 | Python | 3.13 | PSF lisansı; paketleyicinin Python çalışma zamanı dahildir. |
 | pywin32 | 312 | BSD tarzı izinli lisans; kaynak başına ek bildirimler olabilir. |
 | Pillow | 12.1.0 | MIT-CMU; mevcut bağımlılık korunur. |
