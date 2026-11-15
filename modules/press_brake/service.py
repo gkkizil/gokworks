@@ -23,6 +23,7 @@ class Frame:
     axis: tuple
     hits: tuple = ()
     tool_bounds: tuple = ()
+    travel: float = 0.   # mm of the upper assembly above its working point (approach/retract)
 
 
 @dataclass(frozen=True)
@@ -163,7 +164,7 @@ def run(plan, stop=None, progress=None, *, max_angle=6., min_angle=2., travel_st
             # Axis in the station is X, centre at origin by construction.
             frame = Frame(index, phase, angle, scene_mesh(bodies, stop, geometry.mesh_cache),
                           ((-bend.length/2, 0, 0), (bend.length/2, 0, 0)), hits,
-                          tuple((b.id, b.bounds) for b in bodies if b.kind != 'sheet'))
+                          tuple((b.id, b.bounds) for b in bodies if b.kind != 'sheet'), value if phase != 'bend' else 0.)
             phase_cache[key] = (frame, near)
             if progress:
                 progress(index, phase, value)

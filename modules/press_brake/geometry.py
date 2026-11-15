@@ -1,6 +1,6 @@
 """B-Rep bodies used by BOTH collision service and tessellated scene (mm)."""
 from dataclasses import dataclass
-from math import sin, cos, pi, tan
+from math import ceil, cos, floor, pi, sin, tan
 import numpy as np
 from .kinematics import arc_parameters, basis, poses, station_transform
 from .models import Region
@@ -381,14 +381,15 @@ def machine_bodies(bodies):
     Display only: never passed to the collision check, never in reports' hit lists.
     Generic proportions, not a specific machine model.
     """
-    from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox
-    from OCP.gp import gp_Pnt
     tools = [b for b in bodies if b.kind in ('punch', 'die', 'holder')]
     if not tools:
         return []
-    x0 = min(b.bounds[0] for b in bodies)-15; x1 = max(b.bounds[3] for b in bodies)+15
+    # Extents rounded out to 5 mm: the same few unplaced boxes serve every pose (one display mesh
+    # each, see mesh()); only their placement changes as the punch travels.
+    x0 = floor((min(b.bounds[0] for b in bodies)-15)/5)*5; x1 = ceil((max(b.bounds[3] for b in bodies)+15)/5)*5
     def box(id, y, z0, z1):
-        return Body(id, 'machine', BRepPrimAPI_MakeBox(gp_Pnt(x0, -y, z0), gp_Pnt(x1, y, z1)).Shape(), (x0, -y, z0, x1, y, z1))
+        base = _machine_box(x1-x0, 2*y, z1-z0); matrix = translation(x0, -y, z0)
+        return Body(id, 'machine', transform(base, matrix), (x0, -y, z0, x1, y, z1), base, matrix)
     result = []
     upper = [b for b in tools if b.kind == 'punch' or b.id.startswith('holder:punch')]
     lower = [b for b in tools if b.kind == 'die' or b.id.startswith('holder:die')]
@@ -397,6 +398,19 @@ def machine_bodies(bodies):
     if lower:
         bottom = min(b.bounds[2] for b in lower); result.append(box('machine:rail', 24, bottom-22, bottom))
     return result
+
+
+_MACHINE_BOXES = {}
+
+
+def _machine_box(dx, dy, dz):
+    from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox
+    key = (round(dx, 3), round(dy, 3), round(dz, 3))
+    if key not in _MACHINE_BOXES:
+        if len(_MACHINE_BOXES) >= 256:
+            _MACHINE_BOXES.clear()
+        _MACHINE_BOXES[key] = BRepPrimAPI_MakeBox(*key).Shape()
+    return _MACHINE_BOXES[key]
 
 
 def scene_mesh(bodies, stop=None, cache=None):
@@ -442,7 +456,7 @@ def solid_part(shape, stop=None):
     return vertices, smooth_normals(vertices, normals, lengths, quantum, stop), lines
 
 
-def mesh(bodies, stop=None, cache=None):
+def mesh(bodies, stop=None, cache=None, limit=512):
     """One coloured display mesh for the bodies of a pose.
 
     ``cache`` (a dict kept by the caller for one calculation) stores each source
@@ -455,7 +469,7 @@ def mesh(bodies, stop=None, cache=None):
         if cache is not None and b.base is not None:
             entry = cache.get(id(b.base))
             if entry is None or entry[0] is not b.base:
-                if len(cache) >= 512:
+                if limit and len(cache) >= limit:
                     cache.clear()
                 entry = cache[id(b.base)] = (b.base, solid_part(b.base, stop))   # keeps the solid alive: ids stay unique
             part, rotation, shift = entry[1], b.matrix[:3, :3], b.matrix[:3, 3]

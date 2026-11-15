@@ -1,7 +1,7 @@
 """Normal GOKWORKS entry: manual sequence → native 3D sweep → operator PDF."""
 from dataclasses import replace
 from pathlib import Path
-from PySide6.QtCore import Qt, QTimer, QStandardPaths, QSize, QLocale
+from PySide6.QtCore import Qt, QTimer, QStandardPaths, QSize, QLocale, QElapsedTimer, Signal
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFormLayout, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                               QAbstractItemView, QDoubleSpinBox, QListView, QListWidget, QListWidgetItem, QScrollArea, QSlider, QSplitter, QTextBrowser, QVBoxLayout, QWidget)
 from gui_qt.components import AdaptiveRow, BasePage, Disclosure, ElidedLabel, button, card, label, separator
@@ -19,6 +19,8 @@ SCOPE = ('Kapsam: sac / atanmış takım katıları / varsa tutucular. Tezgâh (
 
 
 class PressBrakePage(BasePage):
+    timelineReady = Signal(object)   # (result, Timeline) from the animation builder thread
+
     def __init__(self, context):
         super().__init__(context, 'Abkant Simülasyonu', 'Hava bükümü · manuel sıra ve takım planı · geometrik hareket kontrolü')
         self.plan = self.result = None
@@ -157,8 +159,12 @@ class PressBrakePage(BasePage):
         self.previous.setToolTip('Önceki büküm adımı'); self.next.setToolTip('Sonraki büküm adımı')
         self.play.setToolTip('Kontrol edilen hareketi oynatır; çarpışan karede durur.')
         self.slider = QSlider(Qt.Horizontal); self.slider.setRange(0, 0); self.slider.setAccessibleName('Hareket konumu'); self.slider.setMinimumWidth(80)
-        self.speed = QComboBox(); self.speed.addItem('5 kare/s', 200); self.speed.addItem('12 kare/s', 83); self.speed.addItem('24 kare/s', 42); self.speed.setCurrentIndex(1); self.speed.setAccessibleName('Oynatma hızı; kontrol çözünürlüğünü değiştirmez')
-        self.speed.setToolTip('Yalnız oynatma hızı; kontrol çözünürlüğünü değiştirmez.')
+        from .animation import SPEEDS
+        self.speed = QComboBox()
+        for factor in SPEEDS:
+            self.speed.addItem(f'{factor:g}×'.replace('.', ','), factor)
+        self.speed.setCurrentIndex(self.speed.findData(1.)); self.speed.setAccessibleName('Oynatma hızı; kontrol çözünürlüğünü değiştirmez')
+        self.speed.setToolTip('Oynatma hızı. 1×: yaklaşma/geri çekilme 30 mm/s, büküm 30°/s. Kontrol çözünürlüğünü değiştirmez.')
         for w in (self.previous, self.play, self.next, self.slider, self.speed):
             playback.addWidget(w, 1 if w is self.slider else 0)
         views = QWidget(); view_row = QHBoxLayout(views); view_row.setContentsMargins(0, 0, 0, 0); view_row.setSpacing(8)
@@ -176,7 +182,11 @@ class PressBrakePage(BasePage):
         self.frame_label.setToolTip(SCOPE); status.addWidget(self.frame_label, 1)
         self.layout.addLayout(status)
         self.finish_layout()
-        self.timer = QTimer(self); self.timer.timeout.connect(self.advance)
+        # Real-time playback: a ~60 Hz tick moves a clock; the shown pose follows the clock.
+        self.timer = QTimer(self); self.timer.setTimerType(Qt.PreciseTimer); self.timer.setInterval(16)
+        self.timer.timeout.connect(self.tick)
+        self.clock = QElapsedTimer(); self.play_time = 0.; self.timeline = None; self.builder = None
+        self.timelineReady.connect(self.accept_timeline)
         self.bends.currentRowChanged.connect(self.select)
         self.bends.itemClicked.connect(self.return_to_step)
         for field in (self.punch, self.die, self.channel, self.fixed, self.orientation, self.direction):
@@ -439,7 +449,7 @@ class PressBrakePage(BasePage):
         self.details.setPlainText(text)
 
     def invalidate(self, plan):
-        self.pause(); self.plan = plan; self.result = None; self.generation += 1
+        self.pause(); self.stop_timeline(); self.plan = plan; self.result = None; self.generation += 1
         self.formed_mesh = None
         self.viewer.frame = None; self.viewer.set_mesh(self.flat_mesh); self.viewer.bend_annotations.update(); self.show_result_badge()
         self.show_state('Plan değişti · önceki hareket kontrolü geçersiz. Yeniden kontrol edin.', 'Plan değişti · kontrol bekliyor')
@@ -567,23 +577,59 @@ class PressBrakePage(BasePage):
         self.loading = False; self.slider.setRange(0, max(0, len(result.frames)-1)); self.slider.setValue(0)
         self.show_result_badge()
         self.select(max(0, self.bends.currentRow())); self.set_status(STATUS[result.status]); self.refresh_actions()
+        self.start_timeline(self.plan, result)
+
+    def start_timeline(self, plan, result):
+        """Display-only in-between poses for 60 fps playback, built off the GUI thread."""
+        from .animation import Builder
+        self.stop_timeline()
+        def post(timeline):
+            try:
+                self.timelineReady.emit((result, timeline))
+            except RuntimeError:     # page already closed
+                pass
+        self.builder = Builder(plan, result, post)
+        self.play.setToolTip('Kontrol edilen hareketi oynatır; çarpışan karede durur. Akıcı (60 fps) oynatma hazırlanıyor…')
+
+    def stop_timeline(self):
+        if self.builder is not None:
+            self.builder.cancel(); self.builder = None
+        self.timeline = None
+
+    def accept_timeline(self, payload):
+        result, timeline = payload
+        if result is not self.result:
+            return
+        self.timeline = timeline; self.builder = None
+        if 0 <= self.frame_index < len(timeline.frame_times):
+            self.play_time = timeline.frame_times[self.frame_index]
+        self.play.setToolTip('Hareketi gerçek zamanlı ve akıcı (60 fps) oynatır; çarpışan kontrol pozunda durur. '
+                             'Kontrol edilen pozların arası yalnız görseldir; çarpışma sonucu kontrol edilen pozlardan gelir.')
 
     def show_frame(self, index):
         if not self.result or not 0 <= index < len(self.result.frames):
             return
         self.frame_index = index; frame = self.result.frames[index]; self.view_mode = 'step'
-        if self.bends.currentRow() != frame.step:
-            self.loading = True; self.bends.setCurrentRow(frame.step); self.loading = False
-            self.select(frame.step, seek=False)
-        if any(self.bends.item(i).data(CARD).get('progress') != ('done' if i < frame.step else 'current' if i == frame.step else 'todo')
-               for i in range(self.bends.count()) if self.bends.item(i).data(CARD)):
-            self.loading = True; self.refresh_steps(); self.loading = False
+        if self.timeline is not None and not self.ticking:
+            self.play_time = self.timeline.frame_times[index]
+        self.sync_step(frame.step)
         self.viewer.set_frame(frame)
         where = f'Adım {frame.step+1}/{len(self.plan.steps)} · {PHASES[frame.phase]} · dönüş {frame.angle:.2f}°'.replace('.', ',')
         self.show_state(where+(' · ÇARPIŞMA: '+'; '.join(' ↔ '.join(h.pair) for h in frame.hits) if frame.hits else ''),
                         where+(' · ✕ çarpışma' if frame.hits else ''))
         if frame.hits:
             self.pause()
+
+    ticking = False   # True while a tick moves the slider (it must not reset the clock)
+
+    def sync_step(self, step):
+        """Selected card and progress badges follow the step being shown."""
+        if self.bends.currentRow() != step:
+            self.loading = True; self.bends.setCurrentRow(step); self.loading = False
+            self.select(step, seek=False)
+        if any(self.bends.item(i).data(CARD).get('progress') != ('done' if i < step else 'current' if i == step else 'todo')
+               for i in range(self.bends.count()) if self.bends.item(i).data(CARD)):
+            self.loading = True; self.refresh_steps(); self.loading = False
 
     def toggle_play(self):
         if self.timer.isActive():
@@ -594,7 +640,47 @@ class PressBrakePage(BasePage):
                 return
             if self.frame_index >= len(self.result.frames)-1:
                 self.slider.setValue(0)
-            self.timer.start(self.speed.currentData()); self.play.setText('❚❚ Duraklat')
+                if self.timeline is not None:
+                    self.play_time = 0.
+            self.clock.start(); self.play_time = self.timeline.frame_times[self.frame_index] if self.timeline else 0.
+            self.timer.start(); self.play.setText('❚❚ Duraklat')
+
+    def tick(self):
+        """Advance the playback clock by the real elapsed time x speed."""
+        if not self.result or not self.result.frames:
+            self.pause(); return
+        speed = float(self.speed.currentData() or 1.)
+        elapsed = self.clock.restart()/1000.*speed
+        if self.timeline is None:
+            # In-between poses not ready yet: step through the checked frames at 12 per second x speed.
+            self.play_time += elapsed
+            while self.play_time >= 1/12 and self.timer.isActive():
+                self.play_time -= 1/12; self.advance()
+            return
+        start, end = self.play_time, self.play_time+elapsed
+        hit = self.timeline.hit_between(self.result.frames, start, end)
+        if hit is not None:                       # stop exactly on the checked collision pose
+            self.slider.setValue(hit); self.show_frame(hit); self.pause(); return
+        if end >= self.timeline.duration:
+            last = len(self.result.frames)-1; self.slider.setValue(last); self.show_frame(last); self.pause(); return
+        self.play_time = end
+        self.show_pose(self.timeline.pose_at(end))
+        index = self.timeline.frame_at(end)
+        if index != self.frame_index:
+            self.ticking = True
+            try:
+                self.frame_index = index; self.slider.blockSignals(True); self.slider.setValue(index); self.slider.blockSignals(False)
+            finally:
+                self.ticking = False
+
+    def show_pose(self, pose):
+        """An in-between pose: drawn, never reported (no hits; the checked frames carry the result)."""
+        from .animation import pose_mesh
+        from .service import Frame
+        self.view_mode = 'step'; self.sync_step(pose.step)
+        self.viewer.set_frame(Frame(pose.step, pose.phase, pose.angle, pose_mesh(pose, self.timeline.cache), pose.axis, (), pose.tool_bounds))
+        where = f'Adım {pose.step+1}/{len(self.plan.steps)} · {PHASES[pose.phase]} · dönüş {pose.angle:.1f}°'.replace('.', ',')
+        self.show_state(where, where)
 
     def advance(self):
         if not self.result or self.frame_index >= len(self.result.frames)-1:
@@ -638,7 +724,7 @@ class PressBrakePage(BasePage):
         if not available:   # say so before spending time on frames
             self.set_status('Bu kurulumda MP4 video kodlayıcısı yok (Qt Multimedia); video kaydedilemiyor.', True); return
         plan, result, state = self.plan, self.result, self.viewer.camera.state()
-        fps = max(1, round(1000/(self.speed.currentData() or 83)))
+        fps = max(1, min(60, round(12*float(self.speed.currentData() or 1.))))   # checked frames, 12 per second at 1x
         def operation(sink, stop):
             from .video import render_frames
             last = [0]

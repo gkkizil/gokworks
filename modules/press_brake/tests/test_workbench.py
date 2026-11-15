@@ -140,3 +140,38 @@ def test_dxf_tool_card_and_library_add_before_loading_part_preserves_existing_ca
     imported = next(t for t in loaded if t.code == 'TEST-IMPORT')
     assert imported.section_dxf and imported.tip_radius == .2 and imported.mount.compatible
     assert imported.line_load is None and p.plan is None
+
+
+@pytest.mark.timeout(240)
+def test_smooth_playback_follows_real_time_at_the_chosen_speed_and_stops_on_a_checked_hit(window, qtbot):
+    p = window.pages['press_brake']; p.load_demo('L120'); finish(window, qtbot)
+    p.channel.setCurrentIndex(p.channel.findData('V24')); finish(window, qtbot)
+    p.calculate(); finish(window, qtbot, 150000)
+    assert p.result.status == 'clear'
+    qtbot.waitUntil(lambda: p.timeline is not None, timeout=60000)
+    assert [p.speed.itemData(i) for i in range(p.speed.count())] == [.25, .5, 1., 1.5, 2., 4.]
+    assert p.speed.currentData() == 1. and p.speed.itemText(p.speed.findData(1.5)) == '1,5×'
+    assert p.timer.interval() == 16
+    rates = {}
+    for speed in (1., 2.):
+        p.speed.setCurrentIndex(p.speed.findData(speed)); p.slider.setValue(0)
+        p.toggle_play(); start = p.play_time; qtbot.wait(600); p.pause()
+        rates[speed] = (p.play_time-start)/.6
+        assert p.viewer.frame is not None and not p.viewer.frame.hits   # an in-between pose: drawn, not reported
+    assert rates[1.] > .3 and 1.4 < rates[2.]/rates[1.] < 2.8       # 2x moves the clock about twice as fast
+    p.speed.setCurrentIndex(p.speed.findData(4.)); p.slider.setValue(0); p.toggle_play()
+    qtbot.waitUntil(lambda: not p.timer.isActive(), timeout=15000)
+    assert p.frame_index == len(p.result.frames)-1 and p.play.text() == '▶ Oynat'
+    # A collision: playback stops exactly on the first checked frame with hits.
+    p.punch.setCurrentIndex(p.punch.findData('demo-wide')); finish(window, qtbot)
+    assert p.timeline is None
+    p.calculate(); finish(window, qtbot, 150000)
+    assert p.result.status == 'collision'
+    qtbot.waitUntil(lambda: p.timeline is not None, timeout=60000)
+    first = next(i for i, f in enumerate(p.result.frames) if f.hits)
+    p.slider.setValue(0); p.toggle_play()
+    qtbot.waitUntil(lambda: not p.timer.isActive(), timeout=15000)
+    assert p.frame_index == first and p.viewer.frame.hits
+    # Without the in-between poses the checked frames still play.
+    p.timeline = None; p.slider.setValue(0); p.toggle_play()
+    before = p.frame_index; qtbot.waitUntil(lambda: p.frame_index > before, timeout=5000); p.pause()
