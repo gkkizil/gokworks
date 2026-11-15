@@ -92,3 +92,14 @@ def test_keyboard_selection_survives_the_pointer_leaving_or_moving_over_empty_sp
     assert w.hover == 'cylinder'
     w.clearFocus(); qtbot.waitUntil(lambda: not w.hasFocus(), timeout=2000)
     assert w.hover is None                                                # without focus, pointer rules again
+
+
+def test_a_scroll_bar_sized_width_change_does_not_move_the_height(qtbot):
+    """A ~15 px narrowing (a scroll bar) must not change the height, or a page at the limit shakes."""
+    create_application([])
+    w = UnitSchematic('dark'); qtbot.addWidget(w); w.show()
+    w.resize(900, 10); qtbot.wait(5); first = w.height()
+    w.resize(885, first); qtbot.wait(5); assert w.height() == first
+    w.resize(900, first); qtbot.wait(5); assert w.height() == first
+    assert w.factor()*356 <= w.height()-8+1e-6                            # the drawing still fits the box
+    w.resize(700, first); qtbot.wait(5); assert w.height() == w.heightForWidth(700) < first   # real resizes follow
