@@ -16,6 +16,8 @@ class Body:
     base: object = None     # unplaced source solid (shared between poses) and its rigid placement;
     matrix: object = None   # lets the display mesh be built once per solid, not once per pose
     hull: object = None     # (points, unit axes) of a convex volume containing the solid, station mm
+    prism: object = None    # extruded tool: (YZ section polygon, x0, x1) in station mm; see collision.prism_clear
+    pieces: object = None   # sheet: (n, k, 3) corner points of convex pieces whose union contains the solid
 
 
 def bounds(shape):
@@ -180,6 +182,46 @@ def _faceted_bend(region, bend, t, phi):
     return compound(solids)
 
 
+def plate_pieces(polygon, thickness):
+    """Exact convex cover of prism(region, t): one triangular prism per triangle of the region."""
+    from shapely import constrained_delaunay_triangles
+    pieces = []
+    for tri in constrained_delaunay_triangles(polygon).geoms:
+        xy = np.asarray(tri.exterior.coords)[:3]
+        pieces.append(np.r_[np.c_[xy, np.full(3, -thickness/2)], np.c_[xy, np.full(3, thickness/2)]])
+    return np.array(pieces).reshape(-1, 6, 3)
+
+
+def bend_pieces(bend, thickness, phi, step=5.):
+    """Convex pieces containing bend_shape(bend, thickness, phi) (exact arcs and the ≤2° faceted band).
+
+    Each angular slice is covered by its inner chord ends and the outer arc's tangent
+    polygon over the band's whole axial span (holes and reliefs counted as material).
+    """
+    from math import radians
+    if abs(phi) < 1e-9:
+        return plate_pieces(bend.region.polygon(), thickness)
+    from shapely.ops import transform as shapely_transform
+    inv = np.linalg.inv(basis(bend))
+    def local(x, y, z=None):
+        return inv[0, 0]*np.asarray(x)+inv[0, 1]*np.asarray(y)+inv[0, 3], inv[1, 0]*np.asarray(x)+inv[1, 1]*np.asarray(y)+inv[1, 3]
+    xmin, _, xmax, _ = shapely_transform(local, bend.region.polygon()).bounds
+    r, sign, a = arc_parameters(bend, thickness, phi), float(np.sign(phi)), abs(phi)
+    facet = a/(int(a*180/pi/2)+1)                   # chord span of the faceted band (_faceted_bend)
+    inner, outer = (r-thickness/2)*cos(facet/2), r+thickness/2
+    count = max(1, ceil(a/radians(step))); delta = a/count
+    def yz(rho, angle):
+        return rho*sin(angle), sign*r-sign*rho*cos(angle)
+    pieces = []
+    for i in range(count):
+        t0, t1 = delta*i, delta*(i+1)
+        ring = [yz(inner, t0), yz(inner, t1), yz(outer, t0), yz(outer, t1), yz(outer/cos(delta/2), (t0+t1)/2)]
+        pieces.append([(x, y, z) for x in (xmin, xmax) for y, z in ring])
+    local_points = np.array(pieces, dtype=float)
+    m = basis(bend)
+    return local_points@m[:3, :3].T+m[:3, 3]
+
+
 class Geometry:
     def __init__(self, plan=None):
         self.plan = plan
@@ -189,16 +231,30 @@ class Geometry:
         self.placed_cache = {}
         self.mesh_cache = {}    # display triangles per source solid; see mesh()
         self.hulls = {}         # convex container per source solid; see local_hull()
+        self.outlines = {}      # id(tool solid) -> (solid, YZ section, x0, x1): exact extrusion
+        self.covers = {}        # id(sheet solid) -> (solid, convex pieces); see plate_pieces / bend_pieces
+        if plan is not None:
+            for f in plan.part.flanges:
+                self.covers[id(self.flat[f.id])] = (self.flat[f.id], plate_pieces(f.region.polygon(), plan.part.thickness))
 
-    def placed_body(self, id, kind, shape, matrix):
-        key = (id, kind, shape, tuple(np.asarray(matrix).ravel()))
+    def placed_body(self, name, kind, shape, matrix):
+        key = (name, kind, shape, tuple(np.asarray(matrix).ravel()))
         if key not in self.placed_cache:
             if len(self.placed_cache) >= 1024:
                 self.placed_cache.clear()
-            placed = body(id, kind, transform(shape, matrix))
+            placed = body(name, kind, transform(shape, matrix))
             placed.base, placed.matrix = shape, np.array(matrix, dtype=float)
             points, axes = self.local_hull(shape); rotation = placed.matrix[:3, :3]
             placed.hull = (points@rotation.T+placed.matrix[:3, 3], axes@rotation.T)
+            m = placed.matrix
+            outline = self.outlines.get(id(shape))
+            if outline is not None and outline[0] is shape and abs(m[0, 0]-1) < 1e-12 and not np.any(np.abs(m[[0, 0, 1, 2], [1, 2, 0, 0]]) > 1e-12):
+                from shapely.affinity import affine_transform
+                placed.prism = (affine_transform(outline[1], (m[1, 1], m[1, 2], m[2, 1], m[2, 2], m[1, 3], m[2, 3])),
+                                outline[2]+m[0, 3], outline[3]+m[0, 3])
+            cover = self.covers.get(id(shape))
+            if cover is not None and cover[0] is shape:
+                placed.pieces = cover[1]@rotation.T+m[:3, 3]
             self.placed_cache[key] = placed
         return self.placed_cache[key]
 
@@ -239,6 +295,7 @@ class Geometry:
             key = (bend.id, round(angle, 9))
             if key not in self.bend_cache:
                 self.bend_cache[key] = bend_shape(bend, p.thickness, angle)
+                self.covers[id(self.bend_cache[key])] = (self.bend_cache[key], bend_pieces(bend, p.thickness, angle))
                 from modules.gear_calculator.cad import shape_stats
                 shape_stats(self.bend_cache[key])
             result.append(self.placed_body(bend.id, 'sheet', self.bend_cache[key], global_t@transforms[bend.parent]))
@@ -310,6 +367,10 @@ class Geometry:
         self.tools[key] = shape
         outline = region.polygon() if tool.section_dxf else tool.section.polygon()
         self.local_hull(shape, outline, (segment.start, segment.start+segment.length))
+        # Exact YZ section of the extrusion. DXF arcs are sampled (sagitta < 0,00025 mm): grown by 0,001 mm.
+        from shapely.geometry import Polygon
+        exact = outline.buffer(1e-3, join_style='mitre') if tool.section_dxf else Polygon(r.outer, r.holes)
+        self.outlines[id(shape)] = (shape, exact, segment.start, segment.start+segment.length)
         return shape
 
     def scene(self, index, angles, phase='bend', travel=0):

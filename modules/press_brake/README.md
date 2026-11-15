@@ -205,6 +205,14 @@ Kontrolün kuralları değişmeden gereksiz iş kaldırıldı:
   katılar değemez; bu çiftlerde katı kesişimi hesaplanmaz ve aradaki boşluk örneklemeyi
   sıklaştırmak için alt sınır olarak kullanılır. Ayrılamayan her çift eskisi gibi OCCT katı
   kesişimiyle kontrol edilir.
+- **Takım kesitinde kesin ayrım.** Takım ve tutucu, YZ kesitinin X boyunca uzatılmasıdır; izin
+  verilen temas silindirleri de X eksenlidir (YZ'de daire). Sac, katıyı tamamen içine alan dışbükey
+  parçalarla örtülür (flanş: bölge üçgenleri × kalınlık; büküm: ≤5° dilimlerin iç kiriş uçları ve
+  dış yayın teğet çokgeni). Her parça takımın X aralığına kırpılıp YZ'ye izdüşürülür. Bunların
+  kesitle (temas daireleri çıkarılmış) ortak alanı × boyu ≤ 1e-6 mm³ ise ortak hacim yoktur ve
+  OCCT kesişimi hesaplanmaz. Bu yalnız "değmiyor" kanıtıdır; geri kalan her çift ve her çarpışma
+  kararı OCCT katı kesişiminden gelir. Örnek demolarda takım–sac kesişimlerinin tamamı bu yolla
+  kalktı (kutu: 24 s → 10 s); 16 senaryoda (5'i çarpışmalı) sonuçlar kare kare aynı kaldı.
 - **Birbirine göre durağan çiftler.** Yaklaşma ve geri çekilmede yalnız üst takım grubu hareket
   eder. Aynı tarafta kalan çiftler (ör. sac–alt kalıp) her pozda çarpışma için kontrol edilir
   ama 0,5 mm'lik sık örnekleme istemez.
