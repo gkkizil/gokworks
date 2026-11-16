@@ -35,6 +35,11 @@ için ayrıca native sayfa oluşturulur.
 İlk kutu hesabı yeterli sayılmaz. Gerçek GetOutline ve anotasyon metin
 sınırları okunup yerleşim tekrar yapılır. Geometri ölçeklenirken ölçü metni
 yüksekliği küçültülmez. Okunamayan veya sığdırılamayan alanlar raporlanır.
+Ölçü metniyle birleşik kutunun merkezi, native görünüş konumu yerine
+kullanılmaz: kutular IView.Position'a göre hesaplanır ve izdüşümler bu
+konumlarla hizalanır. Ölçek adayları native olarak uygulanıp tekrar ölçülür;
+sabit boyutlu yazı kutuları ölçek oranıyla çarpılarak aday elenmez.
+Taşıma sonrasında ölçü kutuları ve ayrılmış boşluk da yeniden kontrol edilir.
 
 ## Ölçüler
 
@@ -46,6 +51,9 @@ SolidWorks native tekrar eleme seçeneği etkinleştirilir. İlave tekrar
 denetiminde model, konfigürasyon, gerçek ölçü kimliği ve türü kullanılır;
 iki ayrı deliğin aynı çapta olması tekrar sebebi değildir. Modelden
 aktarılmış ölçünün değeri veya toleransı yeniden yazılmaz.
+Sayısal değer ve tekrar kimliği görünüşün kendi ReferencedConfiguration
+bilgisini kullanır; farklı açınım konfigürasyonuna ana modelin konfigürasyonu
+atanmaz. Ölçek, modeldeki nominal ölçü değerini değiştirmez.
 
 AutoDimension isteğe bağlıdır ve ana görünüşle sınırlıdır. Bunlar native
 referans ölçüleridir; datum / tolerans / işlevsel tasarım ölçüsü olarak

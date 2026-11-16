@@ -250,6 +250,7 @@ class NativeDrawing:
         for role, view in page['views'].items():
             if roles is not None and role not in roles:
                 continue
+            configuration = str(get(view, 'ReferencedConfiguration') or '')
             display = call(view, 'GetFirstDisplayDimension5')
             seen = set()
             while display is not None:
@@ -267,7 +268,7 @@ class NativeDrawing:
                 kind = DIMENSION_TYPES.get(get(display, 'Type2'), 'unknown')
                 value, box, estimated = None, None, False
                 try:
-                    raw_value = float(nominal_value(dimension, self.info.source.configuration, reference))
+                    raw_value = float(nominal_value(dimension, configuration, reference))
                     value = degrees(raw_value) if kind == 'angle' else to_mm(raw_value)
                 except Exception:
                     pass  # validator explicitly reports unreadable numbers
@@ -281,7 +282,8 @@ class NativeDrawing:
                 self.annotations[key] = annotation
                 result.append(dict(key=key, name=selection, owner=role, box=box, estimated=estimated,
                     value=value, kind=kind, reference=reference, dangling=dangling,
-                    model_identity=(self.info.source.key, model_name, kind, reference) if model_name else None,
+                    model_identity=(identity(self.info.source.path, configuration), model_name, kind, reference)
+                                   if model_name else None,
                     position=tuple(float(v) for v in position)))
                 display = call(display, 'GetNext5')
         return result
@@ -364,42 +366,33 @@ class NativeDrawing:
     def fit(self, name, *, include_dimensions=False):
         """Refit measured native outlines, preserving projected view links."""
         page, options = self.pages[name], self.options
-        original_scale = self.sheet_state(name)['scale']
-        actual = self.actual_views(name)
-        records = self.dimensions(name) if include_dimensions else []
-        sizes = {v['role']: union([v['outline']]+[r['box'] for r in records
-                 if r['owner'] == v['role'] and r['box'] is not None]) for v in actual}
         scales = ((options.manual_scale,) if options.manual_scale is not None else
                   tuple(sorted(set(options.scales), reverse=True)))
         for scale in scales:
             checkpoint(self.stop)
-            predicted = {role: Box(0, 0, box.width*scale/original_scale,
-                                   box.height*scale/original_scale) for role, box in sizes.items()}
-            if arrange(page['plan'].views, scale, page['plan'].usable, options, measured=predicted) is None:
-                continue
+            # SetScale scales annotation positions, but keeps paper-space text
+            # size fixed. Scaling a geometry+text union can reject a valid scale.
             self.set_scale(name, scale)
             for attempt in range(3):
                 actual = self.actual_views(name)
                 records = self.dimensions(name) if include_dimensions else []
                 measured = {v['role']: union([v['outline']]+[r['box'] for r in records
                             if r['owner'] == v['role'] and r['box'] is not None]) for v in actual}
-                planned = arrange(page['plan'].views, scale, page['plan'].usable, options, measured=measured)
+                planned = arrange(page['plan'].views, scale, page['plan'].usable, options,
+                                  measured=measured, positions={v['role']: v['position'] for v in actual})
                 if planned is None:
                     break
-                for target in planned:  # Move parent first; remeasure children after it moves.
-                    current = self.actual_views(name, roles=(target.role,))[0]
-                    dimensions = self.dimensions(name, roles=(target.role,)) if include_dimensions else []
-                    bounds = union([current['outline']]+[r['box'] for r in dimensions
-                                   if r['owner'] == target.role and r['box'] is not None])
-                    dx, dy = target.center[0]-bounds.center[0], target.center[1]-bounds.center[1]
+                for target in planned:  # Absolute native origins; parent precedes its children.
                     view = page['views'][target.role]
-                    position = view_position(view)
-                    put(view, 'Position', variant(0x2005, (float(position[0])+to_m(dx),
-                        float(position[1])+to_m(dy))))
+                    put(view, 'Position', variant(0x2005, tuple(to_m(v) for v in target.center)))
                 self.rebuild()
                 actual = self.actual_views(name)
-                if all(page['plan'].usable.contains(v['outline']) for v in actual) and not any(
-                        a['outline'].overlaps(b['outline']) for i, a in enumerate(actual) for b in actual[i+1:]):
+                records = self.dimensions(name) if include_dimensions else []
+                bounds = [union([v['outline']]+[r['box'] for r in records
+                          if r['owner'] == v['role'] and r['box'] is not None]).grow(options.annotation_padding_mm)
+                          for v in actual]
+                if all(page['plan'].usable.contains(b) for b in bounds) and not any(
+                        a.overlaps(b) for i, a in enumerate(bounds) for b in bounds[i+1:]):
                     page['plan'].views = planned
                     return
         raise ApiError('Gerçek görünüş / ölçü sınırları paftaya sığdırılamadı; dosya başarılı sayılmadı.')

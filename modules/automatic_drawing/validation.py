@@ -55,6 +55,12 @@ def validate_views(sheet, actual, source, *, flat_configurations=(), projection=
             if abs(view['position'][axis]-main_position[axis]) > .05:
                 findings.append(Finding('FAIL', 'projection_alignment', 'İzdüşüm ana görünüşle aynı eksende değil.',
                                         sheet['name'], label))
+            method = projection or sheet.get('projection')
+            if method in ('first', 'third'):
+                direction = view['position'][1-axis]-main_position[1-axis]
+                if direction*(-1 if method == 'first' else 1) <= 0:
+                    findings.append(Finding('FAIL', 'projection_direction',
+                        'İzdüşüm seçilen birinci/üçüncü açı yöntemine göre yanlış tarafta.', sheet['name'], label))
     for first, second in combinations(actual, 2):
         a, b = first.get('outline'), second.get('outline')
         if a is not None and b is not None and a.overlaps(b):
