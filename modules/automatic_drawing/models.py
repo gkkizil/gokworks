@@ -246,6 +246,7 @@ class SheetPlan:
     scale: float
     views: list
     usable: Box
+    view_scales: dict = field(default_factory=dict)   # role -> own scale (isometric only), else sheet scale
 
 
 @dataclass

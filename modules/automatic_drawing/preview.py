@@ -65,7 +65,8 @@ class SheetPreview(QWidget):
             return self.message
         first = self.plans[0]
         return (f'{len(self.plans)} pafta · {first.paper} · ölçek {scale_text(first.scale)} · '
-                + ', '.join(ROLE_TITLES.get(v.role, v.role) for p in self.plans for v in p.views))
+                + ', '.join(ROLE_TITLES.get(v.role, v.role)+(f' {scale_text(p.view_scales[v.role])}' if v.role in p.view_scales else '')
+                            for p in self.plans for v in p.views))
 
     # ------------------------------------------------------------------ paint
     def _layout(self):
@@ -141,7 +142,8 @@ class SheetPreview(QWidget):
         # Views: planned extents (footprint × scale) around their planned centres.
         accent = QColor(c['accent']); fill = QColor(c['accent']); fill.setAlpha(28)
         for view in plan.views:
-            w, h = view.footprint[0]*plan.scale, view.footprint[1]*plan.scale
+            own = plan.view_scales.get(view.role)
+            w, h = (view.footprint[0]*(own or plan.scale), view.footprint[1]*(own or plan.scale))
             area = box(view.center[0]-w/2, view.center[1]-h/2, w, h)
             pen = QPen(accent, 1.4)
             if view.role == 'isometric':
@@ -151,8 +153,8 @@ class SheetPreview(QWidget):
             if view.role == 'main':
                 direction = VIEW_NAMES.get(view.model_view, '')
                 caption += f' · {DIRECTION_TITLES.get(direction, direction)}'
-            if view.role == 'isometric':
-                caption += ' (yaklaşık)'
+            if own:
+                caption += f' · {scale_text(own)}'
             painter.setPen(QColor(c['text']))
             label = area.adjusted(4, 3, -4, -3)
             metrics = painter.fontMetrics()

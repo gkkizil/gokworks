@@ -57,10 +57,9 @@ def test_turning_feature_and_axis_choose_longitudinal_main_view():
 def test_paper_fit_has_real_margins_title_clearance_and_projected_alignment(projection, size):
     options = Options(projection=projection)
     plan = plan_sheet(plan_views(plate(size), options), options)
-    boxes = {v.role: Box(v.center[0]-v.footprint[0]*plan.scale/2,
-                        v.center[1]-v.footprint[1]*plan.scale/2,
-                        v.footprint[0]*plan.scale, v.footprint[1]*plan.scale)
-             for v in plan.views}
+    boxes = {v.role: Box(v.center[0]-v.footprint[0]*k/2, v.center[1]-v.footprint[1]*k/2,
+                        v.footprint[0]*k, v.footprint[1]*k)
+             for v in plan.views for k in (plan.view_scales.get(v.role, plan.scale),)}
     assert all(plan.usable.contains(box) for box in boxes.values())
     assert all(not a.overlaps(b) for i, a in enumerate(boxes.values()) for b in list(boxes.values())[i+1:])
     main, top, side = (next(v for v in plan.views if v.role == r) for r in ('main', 'top', 'side'))
@@ -74,8 +73,11 @@ def test_auto_paper_and_custom_scale_do_not_silently_replace_user_choices():
     info = plate((600., 400., 20.))
     options = Options(paper='auto', manual_scale=1.)
     plans = plan_sheets(plan_views(info, options), options)
-    assert len(plans) == 2 and all(plan.scale == 1. for plan in plans)
+    # The user's 1:1 holds for every orthographic view; only the isometric may take its own
+    # smaller scale (at most 5x) or its own sheet.
+    assert all(plan.scale == 1. for plan in plans)
     assert all(plan.paper in ('A1', 'A0') for plan in plans)
+    assert all(1/5 <= scale < 1. for plan in plans for scale in plan.view_scales.values())
     with pytest.raises(ValueError, match='sığmıyor'):
         plan_sheet(plan_views(info, options), replace(options, paper='A4'))
     custom = replace(options, paper='custom', custom_width_mm=2000., custom_height_mm=1500.)
@@ -158,3 +160,37 @@ def test_missing_bounds_and_dangling_or_zero_dimensions_cannot_pass_silently():
     codes = {f.code for f in validate_annotations(records, {}, Box(10, 50, 400, 237))}
     assert {'dangling_dimension', 'zero_dimension', 'dimension_bounds', 'dimension_outside',
             'duplicate_dimension'} <= codes
+
+
+
+def info_of(size, kind='part'):
+    from modules.automatic_drawing.models import ModelInfo, Source
+    return ModelInfo(Source('C:/x.SLDPRT', 'Default'), kind, 'x', size)
+
+
+def test_isometric_bound_is_the_projected_bounding_box_not_the_diagonal_square():
+    import math
+    iso = next(v for v in plan_views(info_of((420., 30., 30.)), Options()) if v.role == 'isometric')
+    assert iso.footprint == pytest.approx((450/math.sqrt(2), 510/math.sqrt(6)))
+    # Any point of the box projects inside it (view along (1, 1, 1), Y up).
+    u = lambda x, y, z: (x-z)/math.sqrt(2); v = lambda x, y, z: (-x+2*y-z)/math.sqrt(6)
+    corners = [(x, y, z) for x in (0, 420) for y in (0, 30) for z in (0, 30)]
+    assert max(u(*c) for c in corners)-min(u(*c) for c in corners) == pytest.approx(iso.footprint[0])
+    assert max(v(*c) for c in corners)-min(v(*c) for c in corners) == pytest.approx(iso.footprint[1])
+
+
+def test_the_isometric_no_longer_shrinks_the_orthographic_views():
+    options = Options()
+    plan = plan_sheet(plan_views(info_of((420., 30., 30.)), options), options)
+    assert plan.scale == .5 and plan.view_scales == {'isometric': .2}     # was 1:5 for every view
+    alone = plan_sheet(plan_views(info_of((420., 30., 30.)), replace(options, isometric=False)), options)
+    assert alone.scale == plan.scale                                       # same as without an isometric
+
+
+def test_automatic_paper_picks_a_sheet_the_main_view_fills_and_never_enlarges_onto_a_big_sheet():
+    from modules.automatic_drawing.layout import FILL, fill
+    auto = Options(paper='auto')
+    plate_plan = plan_sheet(plan_views(info_of((600., 400., 20.)), auto), auto)
+    assert fill(plate_plan) >= FILL and plate_plan.paper == 'A2' and plate_plan.scale == .5
+    pin = plan_sheet(plan_views(info_of((12., 12., 30.)), auto), auto)
+    assert pin.paper in ('A4', 'A3') and pin.scale >= 1.

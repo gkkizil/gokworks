@@ -178,7 +178,8 @@ def test_draft_sheet_preview_uses_the_generation_plan_and_follows_the_settings(w
     expected = plan_sheets(plan_views(info, page.options()), page.options())
     assert [(p.paper, p.scale, [(v.role, v.center) for v in p.views]) for p in preview.plans] == \
         [(p.paper, p.scale, [(v.role, v.center) for v in p.views]) for p in expected]
-    assert preview.plans[0].scale == .2                     # the conservative isometric box sets 1:5
+    assert preview.plans[0].scale == .5 and preview.plans[0].view_scales == {'isometric': .2}
+    assert 'İzometrik 1:5' in page.preview_caption.text()
     page.fields['isometric'].setChecked(False)
     assert preview.plans[0].scale == .5 and 'isometric' not in {v.role for v in preview.plans[0].views}
     page.fields['manual_scale_text'].setText('5:1')        # cannot fit: said, not drawn

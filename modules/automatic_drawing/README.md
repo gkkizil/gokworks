@@ -32,9 +32,16 @@ Bu geliştirme ortamında lisanslı SolidWorks bulunmadığından gerçek CAD
    inceleyin. Önizleme, SolidWorks’ten dışa aktarılan gerçek PDF’i gösterir.
    Önizleme › **Taslak pafta**, analizden hemen sonra ve oluşturmadan önce oluşturucunun aynı
    planını çizer: pafta, ölçek, izdüşüm yönüne göre görünüş yerleri, antet alanı ve gerekirse
-   ikinci pafta. Görünüşler model dış ölçüsü × ölçek kutularıdır (izometrik kutu bilerek büyük
-   tutulur); çizgiler, ölçüler, açınım ve BOM paftaları oluşturulunca gelir. SolidWorks çağrısı
-   yoktur, ayar değişikliği anında yansır (plan ≈ 0,1 ms).
+   ikinci pafta. Görünüşler model dış ölçüsü × ölçek kutularıdır; çizgiler, ölçüler, açınım ve
+   BOM paftaları oluşturulunca gelir. SolidWorks çağrısı yoktur, ayar değişikliği anında
+   yansır (plan ≈ 0,1 ms).
+
+   **Ölçek ve pafta seçimi.** Ön/üst/yan görünüşler listedeki sığan en büyük ölçeği alır.
+   İzometrik görünüş bunları küçültecekse kendi, en çok 5 kat küçük ölçeğine iner (SolidWorks
+   ayrı görünüş ölçeğini kabul etmezse pafta ölçeği kullanılır ve uyarı yazılır); o da
+   sığmazsa ayrı paftaya geçer. İzometrik yer ayırımı modelin dış kutusunun izometrik
+   izdüşümüdür. Otomatik pafta: ana görünüşün paftanın en az %40'ını kapladığı en küçük
+   pafta; A3'ten büyük pafta küçük parçayı büyütmek (ölçek > 1:1) için seçilmez.
    Her başarılı pakette SLDDRW ve JSON raporu; seçilmişse PDF / DXF vardır.
 
 PASS yalnız temel yapısal denetimlerin geçtiğini belirtir; imalat serbest
