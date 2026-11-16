@@ -351,3 +351,31 @@ def test_created_drawing_close_is_owned_and_verified_without_closing_user_docume
     else:
         session.close_created(model)
         assert not session.created
+
+
+def test_isometric_with_its_own_scale_leaves_the_sheet_scale_and_reads_back(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    plan.view_scales = {'isometric': plan.scale/2}
+    create = case.drawing.methods['CreateDrawViewFromModelView3']
+    def with_ratio(path, model_view, *args):
+        view = create(path, model_view, *args)
+        view.properties.setdefault('ScaleRatio', (1., 1.))
+        return view
+    case.drawing.methods['CreateDrawViewFromModelView3'] = with_ratio
+    case.native.create('fake.drwdot', plan); case.native.create_views(plan)
+    views = case.native.pages[plan.name]['views']
+    iso = views['isometric']
+    assert iso.properties['UseSheetScale'] is False
+    ratio = iso.properties['ScaleRatio']; assert ratio[0]/ratio[1] == pytest.approx(plan.scale/2)
+    assert all(views[r].properties['UseSheetScale'] is True for r in ('main', 'top', 'side'))
+    assert case.native.sheet_state(plan.name)['scale'] == pytest.approx(plan.scale)
+    assert not [f for f in case.result.findings if f.code == 'view_scale']
+
+
+def test_rejected_view_scale_falls_back_to_the_sheet_scale_with_a_warning(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    plan.view_scales = {'isometric': plan.scale/2}          # the mock view has no ScaleRatio: SolidWorks refuses
+    case.native.create('fake.drwdot', plan); case.native.create_views(plan)
+    iso = case.native.pages[plan.name]['views']['isometric']
+    assert iso.properties['UseSheetScale'] is True and plan.view_scales == {}
+    assert [f.severity for f in case.result.findings if f.code == 'view_scale'] == ['WARNING']

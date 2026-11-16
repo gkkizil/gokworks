@@ -145,6 +145,25 @@ class NativeDrawing:
             put(view, 'UseSheetScale', True)
             page['views'][view_plan.role] = view
         self.set_scale(plan.name, plan.scale)
+        for role, scale in list(plan.view_scales.items()):
+            self.set_view_scale(plan, role, scale)
+
+    def set_view_scale(self, plan, role, scale):
+        """Own scale for one view (the isometric), so it does not shrink the orthographic views."""
+        view = self.pages[plan.name]['views'].get(role)
+        ratio = (scale, 1.) if scale >= 1 else (1., 1/scale)
+        try:
+            put(view, 'UseSheetScale', False)
+            put(view, 'ScaleRatio', variant(0x2005, ratio))
+            self.rebuild()
+            actual = values(get(view, 'ScaleRatio'))
+            if len(actual) < 2 or not math.isclose(float(actual[0])/float(actual[1]), scale, rel_tol=1e-6):
+                raise ApiError('görünüş ölçeği okunamadı')
+        except Exception as error:      # keep the drawing valid: fall back to the sheet scale
+            put(view, 'UseSheetScale', True); self.rebuild()
+            plan.view_scales.pop(role, None)
+            self.result.warn('view_scale', f'{role} görünüşüne ayrı ölçek uygulanamadı; pafta ölçeği kullanıldı ({error}).',
+                             plan.name)
 
     def set_scale(self, name, scale):
         call(self.drawing, 'ActivateSheet', name)

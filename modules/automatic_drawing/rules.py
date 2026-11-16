@@ -95,9 +95,11 @@ def plan_views(info, options):
     if options.side:
         views.append(ViewPlan('side', '', (d, h), parent='main'))
     if options.isometric:
-        # A conservative bound only. Native GetOutline replaces it after creation.
-        diagonal = math.sqrt(sum(x*x for x in info.size_mm))
-        views.append(ViewPlan('isometric', MODEL_VIEWS['isometric'], (diagonal, diagonal)))
+        # Exact isometric projection of the model's bounding box (view along (±1, ±1, ±1), Y up):
+        # the part lies inside its box, so this still bounds it. Native GetOutline replaces it after creation.
+        x, y, z = info.size_mm
+        views.append(ViewPlan('isometric', MODEL_VIEWS['isometric'],
+                              ((x+z)/math.sqrt(2), (x+2*y+z)/math.sqrt(6))))
     return views
 
 

@@ -80,24 +80,57 @@ def arrange(views, scale, area, options, *, measured=None, positions=None):
             for view in views]
 
 
-def plan_sheet(views, options, name='Genel görünüşler'):
-    options.validate()
-    scales = (options.manual_scale,) if options.manual_scale is not None else tuple(
-        sorted(set(float(v) for v in options.scales), reverse=True))
-    papers = tuple(PAPERS) if options.paper == 'auto' else (options.paper,)
-    for paper in papers:
-        width, height = ((options.custom_width_mm, options.custom_height_mm)
-                         if paper == 'custom' else PAPERS[paper])
-        try:
-            area = usable_area(width, height, options)
-        except ValueError:
-            if options.paper == 'auto':
-                continue
-            raise
-        for scale in scales:
-            arranged = arrange(views, scale, area, options)
+ISO_STEP = 5.  # an isometric on its own scale is at most 5 × smaller than the sheet; else its own sheet
+FILL = .4     # automatic paper: the smallest sheet whose main view spans at least 40 % of its width or height
+OFFICE = ('A4', 'A3')   # when no sheet reaches FILL (small parts), stay on these rather than a big sheet
+
+
+def fill(plan):
+    """Share of the usable width or height (the larger) the main view takes at its scale."""
+    main = next((v for v in plan.views if v.role == 'main'), plan.views[0])
+    scale = plan.view_scales.get(main.role, plan.scale)
+    return max(main.footprint[0]*scale/plan.usable.width, main.footprint[1]*scale/plan.usable.height)
+
+
+def _best_on(views, options, paper, name):
+    """Largest sheet scale for the orthographic views on ``paper``; the isometric may step down on its own."""
+    width, height = ((options.custom_width_mm, options.custom_height_mm)
+                     if paper == 'custom' else PAPERS[paper])
+    try:
+        area = usable_area(width, height, options)
+    except ValueError:      # margins + title leave no room on this sheet (Codex, e54f50b)
+        if options.paper == 'auto':
+            return None
+        raise
+    preferred = tuple(sorted(set(float(v) for v in options.scales), reverse=True))
+    scales = (options.manual_scale,) if options.manual_scale is not None else preferred
+    isometric = any(v.role == 'isometric' for v in views) and len(views) > 1
+    for scale in scales:
+        own = [scale]+([s for s in preferred if scale/ISO_STEP-1e-12 <= s < scale] if isometric else [])
+        for iso in own:
+            measured = {v.role: Box(0, 0, v.footprint[0]*(iso if v.role == 'isometric' else scale),
+                                    v.footprint[1]*(iso if v.role == 'isometric' else scale)) for v in views}
+            arranged = arrange(views, scale, area, options, measured=measured)
             if arranged is not None:
-                return SheetPlan(name, paper, width, height, scale, arranged, area)
+                return SheetPlan(name, paper, width, height, scale, arranged, area,
+                                 {'isometric': iso} if iso != scale else {})
+    return None
+
+
+def plan_sheet(views, options, name='Genel görünüşler'):
+    """Orthographic views at the largest scale that fits; an isometric that would pull them down
+    gets its own, smaller scale instead. Automatic paper: the smallest sheet whose main view is large enough (FILL)."""
+    options.validate()
+    papers = tuple(PAPERS) if options.paper == 'auto' else (options.paper,)
+    plans = [plan for paper in papers for plan in (_best_on(views, options, paper, name),) if plan is not None]
+    if plans:
+        # Sheets above A3 are for large parts: never to enlarge a small one (scale > 1:1).
+        plans = [plan for plan in plans if plan.paper in OFFICE or plan.scale <= 1.] or plans
+        enough = next((plan for plan in plans if fill(plan) >= FILL), None)
+        if enough is not None:
+            return enough
+        office = [plan for plan in plans if plan.paper in OFFICE] or plans
+        return max(office, key=fill)
     raise LayoutError('Görünüşler seçilen pafta ve ölçeklere okunaklı biçimde sığmıyor. '
                      'Daha büyük pafta seçin, ek görünüşleri azaltın veya ölçek listesini genişletin.')
 
