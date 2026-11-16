@@ -2,18 +2,27 @@
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog,
-    QFormLayout, QHBoxLayout, QLineEdit, QPlainTextEdit, QProgressBar, QSplitter,
-    QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtCore import QEvent, QSize, Qt
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog, QFormLayout, QFrame,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QSizePolicy, QSplitter,
+    QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
+    QVBoxLayout, QWidget)
 
 from gui_qt.components import (BasePage, AdaptiveRow, Disclosure, NumberSpinBox, button,
-    configure_view, fit_columns, label, pane, scroll)
+    configure_view, fit_columns, label, scroll)
+from gui_qt.theme import COLORS
 from .models import Options, PAPERS, STAGES, Source
 from .pipeline import worker
 from .outputs import write_batch_report
 from .rules import CLASS_TITLES
+
+SOURCE_SUFFIXES = ('.sldprt', '.sldasm')
+STATUS_TEXT = {'PASS': 'Başarılı', 'WARNING': 'Uyarılı', 'FAIL': 'Hatalı', 'CANCELLED': 'İptal', 'SKIPPED': 'Atlandı'}
+STATUS_TONE = {'PASS': 'success', 'WARNING': 'warning', 'FAIL': 'danger', 'Hazır': 'success',
+               'Analiz edildi': 'accent', 'Bekliyor': 'muted', 'Bastırılmış': 'muted'}
+# The 18 pipeline stages read as three phases on the progress strip.
+PHASES = (('Hazırlık', 0, 6), ('Resim', 6, 13), ('Doğrulama ve kayıt', 13, len(STAGES)))
 
 
 def parse_scales(text):
@@ -29,9 +38,149 @@ def parse_scales(text):
     return tuple(result)
 
 
+def polish(widget):
+    widget.style().unpolish(widget); widget.style().polish(widget)
+
+
 class ConfigurationDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         return super().createEditor(parent, option, index) if index.column() == 1 else None
+
+
+class Overlay(QWidget):
+    """Centred empty-state message over a view's viewport; the view itself stays in place."""
+
+    def __init__(self, view, title, detail, *actions, glyph=None):
+        super().__init__(view.viewport()); self.view = view
+        layout = QVBoxLayout(self); layout.setContentsMargins(20, 16, 20, 16); layout.setSpacing(8)
+        layout.addStretch()
+        if glyph is not None:
+            self.glyph = QLabel(); self.glyph.setAlignment(Qt.AlignCenter); layout.addWidget(self.glyph)
+        self.title = label(title, 'section'); self.detail = label(detail, 'muted')
+        for caption in (self.title, self.detail):
+            caption.setAlignment(Qt.AlignCenter); layout.addWidget(caption)
+        if actions:
+            row = QHBoxLayout(); row.addStretch()
+            for action in actions:
+                row.addWidget(action)
+            row.addStretch(); layout.addLayout(row)
+        layout.addStretch()
+        self.icon_name = glyph
+        view.viewport().installEventFilter(self); self.setGeometry(view.viewport().rect())
+
+    def set_colour(self, colour):
+        if self.icon_name:
+            from gui_qt.icons import icon
+            self.glyph.setPixmap(icon(self.icon_name, colour).pixmap(QSize(44, 44)))
+
+    def eventFilter(self, watched, event):
+        if event.type() == QEvent.Resize:
+            self.setGeometry(self.view.viewport().rect())
+        return super().eventFilter(watched, event)
+
+
+class FlowRow(QWidget):
+    """Chips left to right, wrapping onto new lines instead of clipping."""
+
+    def __init__(self, spacing=6):
+        super().__init__(); self.spacing = spacing; self.chips = []
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+    def add(self, widget):
+        widget.setParent(self); self.chips.append(widget); self.relayout()
+
+    def _place(self, width, apply=False):
+        x = y = line = 0
+        for chip in self.chips:
+            if chip.isHidden():
+                continue
+            size = chip.sizeHint()
+            if x and x+size.width() > width:
+                x, y, line = 0, y+line+self.spacing, 0
+            if apply:
+                chip.setGeometry(x, y, size.width(), size.height())
+            x += size.width()+self.spacing; line = max(line, size.height())
+        return y+line
+
+    def relayout(self):
+        self.updateGeometry(); self._place(self.width(), True)
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width):
+        return self._place(width)
+
+    def sizeHint(self):
+        return QSize(400, self._place(max(self.width(), 400)))
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event); self._place(self.width(), True)
+
+
+class Reflow(QWidget):
+    """Cards in as many equal columns as fit (``min_width`` each); ``wide`` cards span the row."""
+
+    def __init__(self, min_width, max_columns=2, spacing=12):
+        super().__init__(); self.min_width, self.max_columns = min_width, max_columns
+        self.grid = QGridLayout(self); self.grid.setContentsMargins(0, 0, 0, 0); self.grid.setSpacing(spacing)
+        self.items = []; self.columns = 0
+
+    def add(self, widget, wide=False):
+        self.items.append((widget, wide)); self.columns = 0; self.reflow()
+
+    def reflow(self):
+        columns = max(1, min(self.max_columns, self.width()//self.min_width if self.width() else 1))
+        if columns == self.columns:
+            return
+        self.columns = columns
+        for widget, _ in self.items:
+            self.grid.removeWidget(widget)
+        row = col = 0
+        for widget, wide in self.items:
+            if wide and col:
+                row, col = row+1, 0
+            self.grid.addWidget(widget, row, col, 1, columns if wide else 1, Qt.AlignTop)
+            col = 0 if wide else col+1
+            if wide or col >= columns:
+                row, col = row+1, 0
+        for c in range(self.max_columns):
+            self.grid.setColumnStretch(c, 1 if c < columns else 0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event); self.reflow()
+
+
+class PhaseStrip(QWidget):
+    """Three phase segments (Hazırlık · Resim · Doğrulama ve kayıt) filled from the stage count."""
+
+    def __init__(self):
+        super().__init__(); self.completed = 0; self.active = False; self.colours = COLORS['dark']
+        self.setMinimumHeight(30); self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setAccessibleName('Teknik resim aşamaları')
+
+    def sizeHint(self):
+        return QSize(400, 30)
+
+    def set_state(self, completed, active):
+        self.completed, self.active = completed, active; self.update()
+
+    def paintEvent(self, event):
+        from PySide6.QtGui import QPainter
+        painter = QPainter(self); painter.setRenderHint(QPainter.Antialiasing)
+        c = self.colours; gap = 6; width = (self.width()-gap*(len(PHASES)-1))/len(PHASES)
+        for i, (title, first, last) in enumerate(PHASES):
+            x = i*(width+gap); done = max(0, min(last, self.completed)-first)/(last-first)
+            painter.setPen(Qt.NoPen); painter.setBrush(QColor(c['border']))
+            painter.drawRoundedRect(x, 0, width, 5, 2.5, 2.5)
+            if done:
+                painter.setBrush(QColor(c['success'] if done >= 1 else c['accent']))
+                painter.drawRoundedRect(x, 0, width*done, 5, 2.5, 2.5)
+            current = self.active and first <= self.completed < last
+            painter.setPen(QColor(c['text'] if current or done >= 1 else c['muted']))
+            font = painter.font(); font.setBold(current); painter.setFont(font)
+            painter.drawText(int(x), 9, int(width), self.height()-9, Qt.AlignLeft | Qt.AlignVCenter,
+                             ('✓ ' if done >= 1 else '')+title)
 
 
 class AutoDrawingPage(BasePage):
@@ -41,6 +190,8 @@ class AutoDrawingPage(BasePage):
         self.results = []
         self.batch_notice = ''
         self.source_items = {}
+        self.browse = {}
+        self.option_rows = {}
         self.saved = self.settings.get('automatic_drawing', {})
         if not isinstance(self.saved, dict):
             self.saved = {}
@@ -50,44 +201,65 @@ class AutoDrawingPage(BasePage):
         self.report_button = self.action('Rapor kaydet', self.save_report)
         self.controls.remove(self.report_button)
         self.report_button.setEnabled(False)
+        self.setAcceptDrops(True)
 
-        left = QWidget(); left.setMinimumWidth(0)
-        ll = QVBoxLayout(left); ll.setContentsMargins(0, 0, 4, 0)
-        ll.addWidget(label('Dosya ve montaj ağacı', 'section'))
+        # ------------------------------------------------------------- sources
+        left = QFrame(); left.setObjectName('drawingSources'); left.setProperty('card', True); left.setMinimumWidth(0)
+        ll = QVBoxLayout(left); ll.setContentsMargins(12, 10, 12, 10); ll.setSpacing(8)
+        head = QHBoxLayout(); head.setSpacing(8)
+        head.addWidget(label('Kaynaklar', 'section', wrap=False)); head.addStretch()
+        self.source_count = label('', 'muted', wrap=False); self.source_count.setProperty('chip', True)
+        head.addWidget(self.source_count); ll.addLayout(head)
         self.add_file_button = button('Dosya ekle…', self.choose_files)
         self.add_folder_button = button('Klasör ekle…', self.choose_folder)
         self.active_button = button('Aktif dosyayı al', self.use_active)
-        self.remove_button = button('Seçilileri kaldır', self.remove_sources)
-        ll.addWidget(AdaptiveRow(self.add_file_button, self.add_folder_button))
-        ll.addWidget(AdaptiveRow(self.active_button, self.remove_button))
+        self.remove_button = button('Seçilileri kaldır', self.remove_sources, flat=True)
+        ll.addWidget(AdaptiveRow(self.add_file_button, self.add_folder_button, self.active_button))
         self.tree = QTreeWidget()
         self.tree.setHeaderLabels(['Dosya / bileşen', 'Konfigürasyon', 'Durum'])
         self.tree.setAccessibleName('Teknik resim kaynakları ve montaj hiyerarşisi')
         self.tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.tree.setItemDelegate(ConfigurationDelegate(self.tree))
         self.tree.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed)
-        self.tree.setMinimumWidth(0)
+        self.tree.setMinimumWidth(0); self.tree.setUniformRowHeights(True); self.tree.setIndentation(16)
+        self.tree.setFrameShape(QFrame.NoFrame)
         fit_columns(self.tree, elastic=0, minimum=120, autofit=(1, 2),
                     settings=self.settings, key='automatic_drawing_sources')
         self.tree.itemSelectionChanged.connect(self.show_analysis)
+        self.tree.itemChanged.connect(lambda *_: self.refresh_sources())
+        self.empty_add = button('Dosya ekle…', self.choose_files, primary=True)
+        self.empty_active = button('Aktif dosyayı al', self.use_active)
+        self.tree_empty = Overlay(self.tree, 'Parça veya montaj ekleyin',
+                                  'SLDPRT / SLDASM dosyalarını buraya sürükleyin ya da SolidWorks’te açık modeli alın.',
+                                  self.empty_add, self.empty_active, glyph='automatic_drawing')
         ll.addWidget(self.tree, 1)
-        ll.addWidget(label('Kutuları işaretleyin. Konfigürasyonu değiştirmek için hücreye çift tıklayın.',
-                           'muted'))
+        foot = QHBoxLayout(); foot.setSpacing(8)
+        self.tree_hint = label('İşaretliler oluşturulur · konfigürasyon: çift tık', 'muted')
+        foot.addWidget(self.tree_hint, 1); foot.addWidget(self.remove_button, 0, Qt.AlignTop)
+        ll.addLayout(foot)
         self.controls += [self.add_file_button, self.add_folder_button, self.active_button,
-                          self.remove_button, self.tree]
+                          self.remove_button, self.tree, self.empty_add, self.empty_active]
+        self.source_card = left
 
-        self.tabs = QTabWidget(); self.tabs.setMinimumWidth(0)
+        # ------------------------------------------------------------- settings
+        self.tabs = QTabWidget(); self.tabs.setMinimumWidth(0); self.tabs.setDocumentMode(True)
         settings_widget = QWidget()
-        settings_layout = QVBoxLayout(settings_widget); settings_layout.setContentsMargins(8, 8, 8, 8)
+        settings_layout = QVBoxLayout(settings_widget); settings_layout.setContentsMargins(4, 10, 8, 10)
+        settings_layout.setSpacing(12)
+        self.summary = FlowRow(); self.summary_chips = []
+        settings_layout.addWidget(self.summary)
         self.fields = {}
-        self._build_options(settings_layout)
+        self.cards = Reflow(430)
+        self._build_options()
+        settings_layout.addWidget(self.cards)
         settings_layout.addStretch()
         settings_scroll = scroll(settings_widget)
         settings_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        settings_scroll.setFrameShape(QFrame.NoFrame)
         self.tabs.addTab(settings_scroll, 'Ayarlar')
 
         # This is the PDF exported by SolidWorks from the actual native drawing.
-        preview = QWidget(); pv = QVBoxLayout(preview); pv.setContentsMargins(8, 8, 8, 8)
+        preview = QWidget(); pv = QVBoxLayout(preview); pv.setContentsMargins(4, 10, 4, 4)
         self.preview_caption = label('Oluşturulan gerçek PDF burada gösterilecek.', 'muted')
         pv.addWidget(self.preview_caption)
         from PySide6.QtPdf import QPdfDocument
@@ -98,10 +270,38 @@ class AutoDrawingPage(BasePage):
         self.pdf_view.setZoomMode(QPdfView.ZoomMode.FitInView)
         self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
         pv.addWidget(self.pdf_view, 1)
+        self.preview_empty = Overlay(self.pdf_view, 'Önizleme yok',
+                                     'Resimler oluşturulduktan sonra Sonuçlar listesinden bir satır seçin; '
+                                     'SolidWorks’ün dışa aktardığı gerçek PDF burada açılır.', glyph='pdf')
         self.tabs.addTab(preview, 'Önizleme')
+
+        analysis = QWidget(); av = QVBoxLayout(analysis); av.setContentsMargins(4, 10, 4, 4); av.setSpacing(10)
+        self.facts = {}
+        facts = QGridLayout(); facts.setSpacing(8)
+        for i, (key, title) in enumerate((('class', 'Parça sınıfı'), ('size', 'Dış ölçüler · mm'),
+                                          ('bodies', 'Gövdeler'), ('config', 'Konfigürasyon'))):
+            tile = QFrame(); tile.setProperty('card', True); tile.setProperty('fact', True)
+            tl = QVBoxLayout(tile); tl.setContentsMargins(12, 8, 12, 8); tl.setSpacing(2)
+            kicker = label(title.upper(), 'muted', wrap=False); kicker.setProperty('kicker', True)
+            value = label('—', None); value.setProperty('factValue', True)
+            value.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            tl.addWidget(kicker); tl.addWidget(value); self.facts[key] = value
+            facts.addWidget(tile, i//2, i % 2)
+        av.addLayout(facts)
         self.analysis_text = QPlainTextEdit(); self.analysis_text.setReadOnly(True)
         self.analysis_text.setPlainText('Bir kaynak seçip “Analiz et” komutunu kullanın.')
-        self.tabs.addTab(self.analysis_text, 'Analiz')
+        av.addWidget(self.analysis_text, 1)
+        self.tabs.addTab(analysis, 'Analiz')
+
+        results = QWidget(); rv = QVBoxLayout(results); rv.setContentsMargins(4, 10, 4, 4); rv.setSpacing(10)
+        tiles = QHBoxLayout(); tiles.setSpacing(8); self.tiles = {}
+        for key, title in (('PASS', 'Başarılı'), ('WARNING', 'Uyarılı'), ('FAIL', 'Hatalı'), ('sheets', 'Pafta')):
+            tile = QFrame(); tile.setProperty('card', True); tile.setProperty('tile', key)
+            tl = QVBoxLayout(tile); tl.setContentsMargins(12, 8, 12, 8); tl.setSpacing(0)
+            kicker = label(title.upper(), 'muted', wrap=False); kicker.setProperty('kicker', True)
+            value = label('0', None, wrap=False); value.setProperty('tileValue', True)
+            tl.addWidget(kicker); tl.addWidget(value); self.tiles[key] = value; tiles.addWidget(tile, 1)
+        rv.addLayout(tiles)
         self.result_table = QTableWidget(0, 5)
         self.result_table.setHorizontalHeaderLabels(['Dosya', 'Konfigürasyon', 'Durum', 'Pafta', 'Açıklama'])
         configure_view(self.result_table)
@@ -109,34 +309,54 @@ class AutoDrawingPage(BasePage):
         self.result_table.itemSelectionChanged.connect(self.select_result)
         fit_columns(self.result_table, elastic=4, minimum=160, autofit=(0, 1, 2, 3),
                     settings=self.settings, key='automatic_drawing_results')
-        self.tabs.addTab(self.result_table, 'Sonuçlar')
+        rv.addWidget(self.result_table, 1)
+        self.results_empty = Overlay(self.result_table, 'Henüz sonuç yok',
+                                     'Kaynakları işaretleyip “Resimleri oluştur” komutunu çalıştırın. '
+                                     'Her dosya için SLDDRW, PDF ve doğrulama bulguları burada listelenir.')
+        self.tabs.addTab(results, 'Sonuçlar')
 
         self.splitter = QSplitter(Qt.Horizontal)
-        self.splitter.setChildrenCollapsible(False)
+        self.splitter.setChildrenCollapsible(False); self.splitter.setHandleWidth(10)
         self.splitter.addWidget(left); self.splitter.addWidget(self.tabs)
         self.splitter.setStretchFactor(0, 1); self.splitter.setStretchFactor(1, 3)
-        self.splitter.setSizes([290, 800])
+        self.splitter.setSizes([380, 900])
         self.layout.addWidget(self.splitter, 1)
+
+        # ------------------------------------------------------------- progress
+        progress = QFrame(); progress.setProperty('card', True); progress.setObjectName('drawingProgress')
+        pl = QVBoxLayout(progress); pl.setContentsMargins(12, 8, 12, 8); pl.setSpacing(6)
+        top = QHBoxLayout()
         self.progress_label = label('SolidWorks bağlantısı analiz / oluşturma sırasında kontrol edilir.', 'muted')
-        self.layout.addWidget(self.progress_label)
+        top.addWidget(self.progress_label, 1)
+        self.stage_count = label('', 'muted', wrap=False); top.addWidget(self.stage_count)
+        pl.addLayout(top)
+        self.phases = PhaseStrip(); pl.addWidget(self.phases)
         self.stage_progress = QProgressBar()
         self.stage_progress.setRange(0, len(STAGES)); self.stage_progress.setValue(0)
-        self.stage_progress.setTextVisible(False)
-        self.layout.addWidget(self.stage_progress)
+        self.stage_progress.setTextVisible(False); self.stage_progress.hide()   # the phase strip draws it
+        pl.addWidget(self.stage_progress)
+        self.layout.addWidget(progress)
         self.log = QPlainTextEdit(); self.log.setReadOnly(True); self.log.setMaximumBlockCount(2000)
-        self.log.setMaximumHeight(100)
+        self.log.setMaximumHeight(120)
         self.layout.addWidget(Disclosure('İşlem günlüğü', self.log))
         self.finish_layout()
+        for field in self.fields.values():
+            signal = (field.toggled if isinstance(field, QCheckBox) else field.currentIndexChanged
+                      if isinstance(field, QComboBox) else field.valueChanged if isinstance(field, NumberSpinBox)
+                      else field.textChanged)
+            signal.connect(self.refresh_options)
+        self.refresh_options(); self.refresh_sources(); self.refresh_results(); self.theme_changed()
 
+    # ------------------------------------------------------------------ options
     def _saved(self, key, default):
         value = self.saved.get(key, default)
         if isinstance(default, bool):
             return value if isinstance(value, bool) else default
         return value if isinstance(value, type(default)) and not isinstance(value, bool) else default
 
-    def _line(self, form, key, title, default=''):
+    def _line(self, form, key, title, default='', placeholder=''):
         widget = QLineEdit(self._saved(key, default)); widget.setClearButtonEnabled(True)
-        widget.setMinimumWidth(0); widget.setAccessibleName(title)
+        widget.setMinimumWidth(0); widget.setAccessibleName(title); widget.setPlaceholderText(placeholder)
         form.addRow(title, widget); self.fields[key] = widget; self.controls.append(widget)
         return widget
 
@@ -148,32 +368,45 @@ class AutoDrawingPage(BasePage):
         form.addRow(title, widget); self.fields[key] = widget; self.controls.append(widget)
         return widget
 
-    def _check(self, form, key, title, default):
+    def _check(self, form, key, title, default, hint=''):
         widget = QCheckBox(title); widget.setChecked(self._saved(key, default))
-        form.addRow(widget); self.fields[key] = widget; self.controls.append(widget)
+        if hint:
+            row = QWidget(); box = QVBoxLayout(row); box.setContentsMargins(0, 0, 0, 2); box.setSpacing(0)
+            box.addWidget(widget)
+            note = label(hint, 'muted'); note.setProperty('optionHint', True); box.addWidget(note)
+            widget.setToolTip(hint); form.addRow(row); self.option_rows[key] = row
+        else:
+            form.addRow(widget)
+        self.fields[key] = widget; self.controls.append(widget)
         return widget
 
-    def _path(self, form, key, title, file_filter=None):
+    def _path(self, form, key, title, file_filter=None, placeholder=''):
         widget = QLineEdit(self._saved(key, '')); widget.setClearButtonEnabled(True)
-        widget.setMinimumWidth(0); widget.setAccessibleName(title)
+        widget.setMinimumWidth(0); widget.setAccessibleName(title); widget.setPlaceholderText(placeholder)
         self.fields[key] = widget; self.controls.append(widget)
         browse = button('Seç…', lambda: self.choose_path(widget, title, file_filter))
-        row = QWidget(); layout = QHBoxLayout(row); layout.setContentsMargins(0, 0, 0, 0)
+        row = QWidget(); layout = QHBoxLayout(row); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(6)
         layout.addWidget(widget, 1); layout.addWidget(browse)
-        form.addRow(title, row); self.controls.append(browse)
+        form.addRow(title, row); self.controls.append(browse); self.browse[key] = browse
 
-    def _form(self, layout, title):
-        section, body = pane(title)
+    def _form(self, title, detail, wide=False):
+        section = QFrame(); section.setProperty('card', True); section.setProperty('settingsCard', True)
+        body = QVBoxLayout(section); body.setContentsMargins(14, 12, 14, 12); body.setSpacing(8)
+        body.addWidget(label(title, 'section'))
+        if detail:
+            body.addWidget(label(detail, 'muted'))
         form = QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapAllRows)
         form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
-        body.addLayout(form); layout.addWidget(section)
+        form.setVerticalSpacing(8); form.setContentsMargins(0, 4, 0, 0)
+        body.addLayout(form); self.cards.add(section, wide)
         return form
 
-    def _build_options(self, layout):
-        general = self._form(layout, 'Pafta ve şablon')
-        self._path(general, 'template', 'Drawing şablonu · DRWDOT', 'SolidWorks Drawing şablonu (*.drwdot *.DRWDOT)')
+    def _build_options(self):
+        general = self._form('Pafta ve şablon', 'Resim şablonu, pafta boyutu, izdüşüm ve ölçek seçimi.')
+        self._path(general, 'template', 'Drawing şablonu · DRWDOT', 'SolidWorks Drawing şablonu (*.drwdot *.DRWDOT)',
+                   'SolidWorks varsayılan şablonu')
         self._path(general, 'sheet_format', 'Firma anteti · SLDDRT (isteğe bağlı)',
-                   'SolidWorks sayfa biçimi (*.slddrt *.SLDDRT)')
+                   'SolidWorks sayfa biçimi (*.slddrt *.SLDDRT)', 'Şablondaki antet')
         self._combo(general, 'paper', 'Pafta boyutu', [('A3 yatay', 'A3'), ('Otomatik', 'auto'),
                     *[(p+' yatay', p) for p in PAPERS if p != 'A3'], ('Özel', 'custom')], 'A3')
         for key, title, default in (('custom_width_mm', 'Özel en · mm', 420.),
@@ -193,26 +426,31 @@ class AutoDrawingPage(BasePage):
                                                      ('Üçüncü açı', 'third')], 'first')
         self._line(general, 'scales_text', 'Tercih edilen ölçekler',
                    '5:1;2:1;1:1;1:2;1:2,5;1:5;1:10;1:20;1:50;1:100')
-        self._line(general, 'manual_scale_text', 'Manuel ölçek · boşsa otomatik')
-        views = self._form(layout, 'Görünüş ve ölçüler')
+        self._line(general, 'manual_scale_text', 'Manuel ölçek', placeholder='Boş: listeden otomatik · ör. 1:2')
+
+        views = self._form('Görünüşler', 'Ana görünüş ve izdüşümler; parça sınıfı yerleşimi belirler.')
         self._combo(views, 'main_view', 'Ana görünüş', [('Akıllı seçim', 'auto'), ('Ön', 'front'),
                     ('Arka', 'back'), ('Üst', 'top'), ('Alt', 'bottom'), ('Sağ', 'right'), ('Sol', 'left')], 'auto')
         self._combo(views, 'classification', 'Parça sınıfı', [('Otomatik', 'auto')]+[
             (title, key) for key, title in CLASS_TITLES.items() if key != 'assembly'], 'auto')
-        for key, title, default in (
-            ('top', 'Üst izdüşüm', True), ('side', 'Yan izdüşüm', True),
-            ('isometric', 'İzometrik görünüş', True),
-            ('model_dimensions', 'Resme işaretli model ölçüleri', True),
-            ('include_unmarked', 'İşaretsiz ölçüleri de aktar', False),
-            ('geometry_dimensions', 'Geometriden referans ölçüleri', False),
-            ('arrange_dimensions', 'Ölçüleri düzenle ve denetle', True),
-            ('center_marks', 'Delik merkez işaretleri', True),
-            ('flat_pattern', 'Mevcut sac açınımını ekle', True),
-            ('bend_lines', 'Açınım büküm çizgileri', True)):
+        for key, title, default in (('top', 'Üst izdüşüm', True), ('side', 'Yan izdüşüm', True),
+                                    ('isometric', 'İzometrik görünüş', True)):
             self._check(views, key, title, default)
         views.addRow(label('Kesit / detay gereksinimleri analiz raporunda önerilir; bu sürümde otomatik oluşturulmaz.',
                            'muted'))
-        assembly = self._form(layout, 'Montaj')
+
+        dims = self._form('Ölçüler ve ayrıntılar', 'Modelden aktarılan ölçüler, düzenleme ve sac ayrıntıları.')
+        for key, title, default, hint in (
+            ('model_dimensions', 'Resme işaretli model ölçüleri', True, 'Modelde “resme aktar” işaretli ölçüler.'),
+            ('include_unmarked', 'İşaretsiz ölçüleri de aktar', False, 'Kalabalık resim üretebilir.'),
+            ('geometry_dimensions', 'Geometriden referans ölçüleri', False, 'Dış ölçüler ve delik konumları; referans olarak.'),
+            ('arrange_dimensions', 'Ölçüleri düzenle ve denetle', True, 'Çakışan ve görünüş dışına taşan ölçüler raporlanır.'),
+            ('center_marks', 'Delik merkez işaretleri', True, ''),
+            ('flat_pattern', 'Mevcut sac açınımını ekle', True, 'Modelde açınım varsa ayrı görünüş olarak.'),
+            ('bend_lines', 'Açınım büküm çizgileri', True, '')):
+            self._check(dims, key, title, default, hint)
+
+        assembly = self._form('Montaj ve BOM', 'Montaj resmi kapsamı, malzeme listesi ve balonlar.')
         self._combo(assembly, 'assembly_scope', 'Oluşturulacak resimler',
                     [('Yalnız seçili dosyalar / montaj', 'assembly'),
                      ('Montaj ve benzersiz parçalar', 'parts'),
@@ -221,16 +459,17 @@ class AutoDrawingPage(BasePage):
         self._combo(assembly, 'bom_type', 'BOM kapsamı', [('Yalnız parçalar', 'parts'),
                     ('Üst seviye', 'top'), ('Girintili', 'indented')], 'parts')
         self._path(assembly, 'bom_template', 'BOM şablonu (isteğe bağlı)',
-                   'SolidWorks BOM şablonu (*.sldbomtbt *.SLDBOMTBT)')
+                   'SolidWorks BOM şablonu (*.sldbomtbt *.SLDBOMTBT)', 'SolidWorks varsayılanı')
         self._check(assembly, 'balloons', 'BOM’a bağlı otomatik balonlar', False)
-        output = self._form(layout, 'Çıktı')
-        self._path(output, 'output_dir', 'Çıktı klasörü · boşsa kaynak klasör')
+
+        output = self._form('Çıktı', 'Düzenlenebilir SLDDRW her zaman üretilir; PDF ve DXF isteğe bağlıdır.')
+        self._path(output, 'output_dir', 'Çıktı klasörü', placeholder='Boş: kaynak dosyanın klasörü')
         self._line(output, 'naming', 'Dosya adı şablonu', '{name}-{configuration}')
         self._combo(output, 'existing', 'Mevcut dosya', [('Yeni ad üret', 'unique'), ('Atla', 'skip')], 'unique')
-        output.addRow(label('Düzenlenebilir SLDDRW her zaman üretilir.', 'muted'))
         self._check(output, 'pdf', 'Tüm paftalar PDF / önizleme', True)
         self._check(output, 'dxf', 'Tek pafta için DXF', False)
-        mapping = self._form(layout, 'Antet · model özelliği → resim özelliği')
+
+        mapping = self._form('Antet eşlemesi', 'Model özelliği → resim özelliği. Antetteki alanlar bu eşlemeyle dolar.')
         raw_map = self.saved.get('property_map')
         saved_map = raw_map if isinstance(raw_map, list) and 0 < len(raw_map) <= 50 and all(
             isinstance(p, (list, tuple)) and len(p) == 2 and all(isinstance(s, str) for s in p)
@@ -241,9 +480,121 @@ class AutoDrawingPage(BasePage):
             left.setPlaceholderText('Model özelliği'); right.setPlaceholderText('Resim özelliği')
             left.setAccessibleName(f'Antet {index+1} kaynak model özelliği')
             right.setAccessibleName(f'Antet {index+1} hedef resim özelliği')
-            row = QWidget(); fields = QHBoxLayout(row); fields.setContentsMargins(0, 0, 0, 0)
-            fields.addWidget(left, 1); fields.addWidget(label('→', wrap=False)); fields.addWidget(right, 1)
+            row = QWidget(); fields = QHBoxLayout(row); fields.setContentsMargins(0, 0, 0, 0); fields.setSpacing(6)
+            arrow = label('→', 'muted', wrap=False)
+            fields.addWidget(left, 1); fields.addWidget(arrow); fields.addWidget(right, 1)
             mapping.addRow(row); self.mapping_fields.append((left, right)); self.controls += [left, right]
+
+    DEPENDENT = {'include_unmarked': 'model_dimensions', 'bend_lines': 'flat_pattern',
+                 'bom_type': 'bom', 'bom_template': 'bom', 'balloons': 'bom'}
+
+    def refresh_options(self, *_):
+        """Dependent options follow their parent; the summary chips follow every change."""
+        for key, parent in self.DEPENDENT.items():
+            on = self.fields[parent].isChecked() and not self.busy
+            self.fields[key].setEnabled(on)
+            if key in self.browse:
+                self.browse[key].setEnabled(on)
+        f = self.fields
+        paper = f['paper'].currentText() if f['paper'].currentData() != 'custom' else \
+            f"{f['custom_width_mm'].value():g} × {f['custom_height_mm'].value():g} mm"
+        scale = f['manual_scale_text'].text().strip()
+        outputs = ['SLDDRW']+(['PDF'] if f['pdf'].isChecked() else [])+(['DXF'] if f['dxf'].isChecked() else [])
+        views = [n for k, n in (('top', 'üst'), ('side', 'yan'), ('isometric', 'izometrik')) if f[k].isChecked()]
+        chips = [paper, f['projection'].currentText(), 'Ölçek '+(scale if scale else 'otomatik'),
+                 'Görünüş: ön'+(', '+', '.join(views) if views else ''), ' + '.join(outputs)]
+        if f['bom'].isChecked():
+            chips.append('BOM · '+f['bom_type'].currentText().lower())
+        while len(self.summary_chips) < len(chips):
+            chip = label('', None, wrap=False); chip.setProperty('chip', True)
+            self.summary.add(chip); self.summary_chips.append(chip)
+        for i, chip in enumerate(self.summary_chips):
+            chip.setVisible(i < len(chips))
+            if i < len(chips):
+                chip.setText(chips[i])
+        self.summary.relayout()
+
+    def set_busy(self, busy):
+        super().set_busy(busy)
+        self.refresh_options()
+
+    # ------------------------------------------------------------------ sources
+    def refresh_sources(self):
+        files = self.tree.topLevelItemCount()
+        checked = len(self.selected_sources()) if files else 0
+        self.source_count.setText(f'{files} dosya · {checked} seçili' if files else 'Boş')
+        self.tree_empty.setVisible(files == 0)
+        self.tree.header().setVisible(files > 0)
+
+    def _tint(self, item):
+        status = item.text(2)
+        colour = COLORS[self.context.appearance].get(STATUS_TONE.get(status, 'muted'))
+        if colour:
+            item.setForeground(2, QColor(colour))
+
+    def dragEnterEvent(self, event):
+        urls = [u.toLocalFile() for u in event.mimeData().urls() if u.isLocalFile()]
+        if not self.busy and any(Path(u).suffix.lower() in SOURCE_SUFFIXES or Path(u).is_dir() for u in urls):
+            event.acceptProposedAction(); self._set_dropping(True)
+
+    def dragLeaveEvent(self, event):
+        self._set_dropping(False)
+
+    def dropEvent(self, event):
+        self._set_dropping(False)
+        paths = [Path(u.toLocalFile()) for u in event.mimeData().urls() if u.isLocalFile()]
+        files = [p for p in paths if p.suffix.lower() in SOURCE_SUFFIXES and p.is_file()]
+        self.add_sources(Source(str(p.resolve())) for p in files)
+        folders = [p for p in paths if p.is_dir()]
+        if folders and self.can_start():
+            self.jobs.start(self, worker('folder', folder=str(folders[0])))
+        event.acceptProposedAction()
+
+    def _set_dropping(self, on):
+        self.source_card.setProperty('dropping', on); polish(self.source_card)
+
+    # ------------------------------------------------------------------ theme
+    def theme_changed(self):
+        c = COLORS[self.context.appearance]
+        for overlay in (self.tree_empty, self.preview_empty):
+            overlay.set_colour(c['muted'])
+        self.phases.colours = c; self.phases.update()
+        for item in self._all_items():
+            self._tint(item)
+        self.refresh_results()
+        self.setStyleSheet(f"""
+            QFrame#drawingSources[dropping="true"] {{ border: 2px dashed {c['accent']}; }}
+            QLabel[chip="true"] {{ border: 1px solid {c['border']}; border-radius: 11px; padding: 2px 10px;
+                                   background: {c['input']}; }}
+            QLabel[kicker="true"] {{ font-size: 10px; font-weight: 700; letter-spacing: 0.6px; }}
+            QLabel[factValue="true"] {{ font-size: 15px; font-weight: 600; }}
+            QLabel[tileValue="true"] {{ font-size: 22px; font-weight: 700; }}
+            QFrame[tile] {{ border-left: 4px solid {c['border_strong']}; }}
+            QFrame[tile="PASS"] {{ border-left-color: {c['success']}; }}
+            QFrame[tile="WARNING"] {{ border-left-color: {c['warning']}; }}
+            QFrame[tile="FAIL"] {{ border-left-color: {c['danger']}; }}
+            QFrame[tile="sheets"] {{ border-left-color: {c['accent']}; }}
+            QLabel[optionHint="true"] {{ font-size: 11px; padding-left: 24px; }}
+            QFrame[settingsCard="true"] QLineEdit, QFrame[settingsCard="true"] QComboBox {{ min-height: 24px; }}
+        """)
+
+    def _all_items(self):
+        pending = [self.tree.topLevelItem(i) for i in range(self.tree.topLevelItemCount())]
+        while pending:
+            item = pending.pop()
+            pending.extend(item.child(i) for i in range(item.childCount()))
+            yield item
+
+    # ------------------------------------------------------------------ results
+    def refresh_results(self):
+        counts = {key: sum(r.status == key for r in self.results) for key in ('PASS', 'WARNING', 'FAIL')}
+        for key, value in counts.items():
+            self.tiles[key].setText(str(value))
+        self.tiles['sheets'].setText(str(sum(len(r.sheets) for r in self.results)))
+        self.results_empty.setVisible(not self.results)
+        self.result_table.horizontalHeader().setVisible(bool(self.results))
+        self.tabs.setTabText(3, f'Sonuçlar · {len(self.results)}' if self.results else 'Sonuçlar')
+        self.preview_empty.setVisible(self.pdf_document.pageCount() == 0)
 
     def choose_path(self, field, title, file_filter):
         if file_filter:
@@ -288,14 +639,19 @@ class AutoDrawingPage(BasePage):
 
     def add_sources(self, sources):
         if self.busy: return
-        for source in sources:
-            if source.key in self.source_items:
-                continue
-            item = QTreeWidgetItem([Path(source.path).name, source.configuration, 'Bekliyor'])
-            item.setData(0, Qt.UserRole, source); item.setToolTip(0, source.path)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEditable)
-            item.setCheckState(0, Qt.Checked)
-            self.tree.addTopLevelItem(item); self.source_items[source.key] = item
+        self.tree.blockSignals(True)
+        try:
+            for source in sources:
+                if source.key in self.source_items:
+                    continue
+                item = QTreeWidgetItem([Path(source.path).name, source.configuration, 'Bekliyor'])
+                item.setData(0, Qt.UserRole, source); item.setToolTip(0, source.path)
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEditable)
+                item.setCheckState(0, Qt.Checked); self._tint(item)
+                self.tree.addTopLevelItem(item); self.source_items[source.key] = item
+        finally:
+            self.tree.blockSignals(False)
+        self.refresh_sources()
 
     def selected_sources(self):
         sources = {}
@@ -318,6 +674,7 @@ class AutoDrawingPage(BasePage):
             self.tree.takeTopLevelItem(self.tree.indexOfTopLevelItem(item))
         self.source_items = {key: item for key, item in self.source_items.items()
                              if item.treeWidget() is self.tree}
+        self.refresh_sources()
 
     def analyze(self):
         if not self.can_start(): return
@@ -334,7 +691,7 @@ class AutoDrawingPage(BasePage):
             if not sources:
                 raise ValueError('Teknik resmi oluşturulacak dosyaları işaretleyin.')
             self.pdf_document.close()
-            self.results.clear(); self.result_table.setRowCount(0)
+            self.results.clear(); self.result_table.setRowCount(0); self.refresh_results()
             self.report_button.setEnabled(False)
             self.stage_progress.setValue(0); self.log.clear()
             self.batch_notice = ''
@@ -343,6 +700,14 @@ class AutoDrawingPage(BasePage):
             self.set_status(str(error), True)
 
     def _analysis_item(self, info):
+        self.tree.blockSignals(True)
+        try:
+            self._fill_analysis_item(info)
+        finally:
+            self.tree.blockSignals(False)
+        self.refresh_sources(); self.show_analysis()
+
+    def _fill_analysis_item(self, info):
         item = self.source_items.get(info.source.key) or self.source_items.pop((info.source.key[0], ''), None)
         if item is None:
             item = next((candidate for candidate in self.source_items.values()
@@ -356,7 +721,7 @@ class AutoDrawingPage(BasePage):
             item.setCheckState(0, Qt.Checked); self.tree.addTopLevelItem(item)
         self.source_items[info.source.key] = item
         item.setText(0, Path(info.source.path).name); item.setText(1, info.source.configuration)
-        item.setText(2, 'Analiz edildi'); item.setToolTip(0, info.source.path)
+        item.setText(2, 'Analiz edildi'); item.setToolTip(0, info.source.path); self._tint(item)
         item.setData(0, Qt.UserRole, info.source); item.setData(0, Qt.UserRole+1, info)
         item.takeChildren()
         pending = [(item, info.tree.children if info.tree else ())]
@@ -370,10 +735,10 @@ class AutoDrawingPage(BasePage):
                 child.setCheckState(0, Qt.Unchecked)
                 if node.state not in ('ready', 'hidden'):
                     child.setFlags(child.flags() & ~Qt.ItemIsEnabled)
+                self._tint(child)
                 parent.addChild(child); pending.append((child, node.children))
         item.setExpanded(True)
         self.tree.setCurrentItem(item)
-        self.show_analysis()
 
     def show_analysis(self):
         item = self.tree.currentItem()
@@ -396,24 +761,40 @@ class AutoDrawingPage(BasePage):
                              ' · Açınım: '+(', '.join(row.configurations) if row.ready else 'Doğrulanamadı'))
         lines += ['', *info.warnings]
         self.analysis_text.setPlainText('\n'.join(lines))
+        self.facts['class'].setText(CLASS_TITLES.get(info.classification, info.classification))
+        self.facts['size'].setText(' × '.join(f'{v:g}' for v in info.size_mm) or '—')
+        self.facts['bodies'].setText(f'{info.body_count} katı · {info.sheet_body_count} sac')
+        self.facts['config'].setText(info.source.configuration or '—')
+        for value in self.facts.values():
+            value.setToolTip(value.text())
 
     def show_result(self, result):
         self.results = [r for r in self.results if r.source.key != result.source.key]+[result]
+        sorting = self.result_table.isSortingEnabled()
+        self.result_table.setSortingEnabled(False)     # rows must not move while they are filled
         self.result_table.setRowCount(len(self.results))
         for row, value in enumerate(self.results):
             detail = '\n'.join(f.text for f in value.findings) or 'Temel yapısal doğrulamalar geçti.'
             for col, text in enumerate((Path(value.source.path).name, value.source.configuration,
-                                        value.status, str(len(value.sheets)), detail)):
+                                        STATUS_TEXT.get(value.status, value.status), str(len(value.sheets)), detail)):
                 cell = QTableWidgetItem(text); cell.setToolTip(text)
+                if col == 2:
+                    colour = COLORS[self.context.appearance].get(STATUS_TONE.get(value.status, ''))
+                    if colour:
+                        cell.setForeground(QColor(colour))
+                cell.setData(Qt.UserRole, row)
                 self.result_table.setItem(row, col, cell)
+        self.result_table.setSortingEnabled(sorting)
+        self.refresh_results()
         if result.analysis:
             self._analysis_item(result.analysis)
         self.log.appendPlainText(f'{result.status} · {result.source.path} · {result.stage}')
         for finding in result.findings: self.log.appendPlainText(f'{finding.severity}: {finding.text}')
 
     def select_result(self):
-        row = self.result_table.currentRow()
-        if not 0 <= row < len(self.results): return
+        cell = self.result_table.item(self.result_table.currentRow(), 0)
+        row = cell.data(Qt.UserRole) if cell is not None else None
+        if not isinstance(row, int) or not 0 <= row < len(self.results): return
         result = self.results[row]
         self.pdf_document.close()
         path = result.outputs.get('pdf')
@@ -422,6 +803,7 @@ class AutoDrawingPage(BasePage):
             self.preview_caption.setText(Path(path).name+' · SolidWorks’ten alınan PDF')
         else:
             self.preview_caption.setText('Bu sonuç için PDF oluşturulmadı. SLDDRW / rapor ayrıntılarını kontrol edin.')
+        self.refresh_results()
 
     def save_report(self):
         if not self.results: return
@@ -448,8 +830,9 @@ class AutoDrawingPage(BasePage):
                 self.set_status(value['error'], True); self.log.appendPlainText(value['error'])
             elif kind == 'drawing_progress':
                 self.stage_progress.setValue(value['completed'])
-                self.progress_label.setText(f"{value['completed']} / {value['total']} aşama · "+
-                                            Path(value['source'].path).name+' · '+value['stage'])
+                self.phases.set_state(value['completed'], True)
+                self.stage_count.setText(f"{value['completed']} / {value['total']} aşama")
+                self.progress_label.setText(Path(value['source'].path).name+' · '+value['stage'])
                 self.progressChanged.emit(value['completed'], value['total'])
             elif kind == 'drawing_result':
                 self.show_result(value)
@@ -461,6 +844,7 @@ class AutoDrawingPage(BasePage):
                 counts = {status: sum(r.status == status for r in value)
                           for status in ('PASS', 'WARNING', 'FAIL', 'CANCELLED', 'SKIPPED')}
                 summary = ' · '.join(f'{count} {name}' for name, count in counts.items())
+                self.phases.set_state(self.stage_progress.value(), False)
                 self.set_status(summary+('\n'+self.batch_notice if self.batch_notice else ''),
                                 error=bool(counts['FAIL'] or self.batch_notice))
                 self.tabs.setCurrentIndex(3)

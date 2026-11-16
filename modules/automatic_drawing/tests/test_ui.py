@@ -124,3 +124,57 @@ def test_corrupt_module_settings_still_open_without_com(qtbot, tmp_path, raw):
     assert page.fields['pdf'].isChecked()
     assert not w.jobs.busy
     w.close()
+
+
+def test_sorted_result_rows_keep_their_own_status_and_open_their_own_pdf(window, tmp_path):
+    from modules.automatic_drawing.models import DrawingResult, Finding
+    page = window.pages['automatic_drawing']
+    results = [DrawingResult(Source(str(tmp_path/'Zeta.SLDPRT'), 'Default'), 'PASS', sheets=['1']),
+               DrawingResult(Source(str(tmp_path/'Alfa.SLDPRT'), 'Default'), 'WARNING',
+                             findings=[Finding('WARNING', 'w', 'Alfa uyarısı')]),
+               DrawingResult(Source(str(tmp_path/'Beta.SLDPRT'), 'Uzun'), 'FAIL',
+                             findings=[Finding('FAIL', 'f', 'Beta hatası')])]
+    for result in results:
+        page.show_result(result)
+    table = page.result_table
+    rows = {table.item(r, 0).text(): (table.item(r, 2).text(), table.item(r, 4).text()) for r in range(3)}
+    assert rows == {'Zeta.SLDPRT': ('Başarılı', 'Temel yapısal doğrulamalar geçti.'),
+                    'Alfa.SLDPRT': ('Uyarılı', 'Alfa uyarısı'), 'Beta.SLDPRT': ('Hatalı', 'Beta hatası')}
+    opened = []
+    page.pdf_document.load = opened.append
+    for r in range(3):
+        name = table.item(r, 0).text()
+        target = tmp_path/(name+'.pdf'); target.write_bytes(b'%PDF-1.4')
+        next(x for x in results if x.source.path.endswith(name)).outputs['pdf'] = str(target)
+        table.setCurrentCell(r, 0); page.select_result()
+        assert opened[-1] == str(target)
+    assert [page.tiles[k].text() for k in ('PASS', 'WARNING', 'FAIL', 'sheets')] == ['1', '1', '1', '1']
+    assert page.tabs.tabText(3) == 'Sonuçlar · 3' and not page.results_empty.isVisible()
+
+
+def test_dependent_options_follow_their_parent_and_the_summary_follows_the_options(window):
+    page = window.pages['automatic_drawing']; f = page.fields
+    assert page.tree_empty.isVisible() and page.source_count.text() == 'Boş'
+    f['bom'].setChecked(False)
+    assert not f['bom_type'].isEnabled() and not f['balloons'].isEnabled() and not page.browse['bom_template'].isEnabled()
+    f['bom'].setChecked(True)
+    assert f['bom_type'].isEnabled() and page.browse['bom_template'].isEnabled()
+    f['flat_pattern'].setChecked(False); assert not f['bend_lines'].isEnabled()
+    page.set_busy(True); page.set_busy(False)
+    assert not f['bend_lines'].isEnabled()           # busy end must not re-enable a dependent option
+    f['dxf'].setChecked(True); f['manual_scale_text'].setText('1:2')
+    chips = [c.text() for c in page.summary_chips if not c.isHidden()]
+    assert 'SLDDRW + PDF + DXF' in chips and 'Ölçek 1:2' in chips and 'A3 yatay' in chips
+    page.options()                                   # dependent values still validate and save
+
+
+def test_dropped_solidworks_files_are_added_and_other_files_ignored(window, tmp_path):
+    from PySide6.QtCore import QMimeData, QPointF, QUrl
+    from PySide6.QtGui import QDropEvent
+    page = window.pages['automatic_drawing']
+    part, note = tmp_path/'Flans.SLDPRT', tmp_path/'not.txt'
+    part.write_bytes(b''); note.write_text('x')
+    data = QMimeData(); data.setUrls([QUrl.fromLocalFile(str(part)), QUrl.fromLocalFile(str(note))])
+    page.dropEvent(QDropEvent(QPointF(5, 5), Qt.CopyAction, data, Qt.LeftButton, Qt.NoModifier))
+    assert page.tree.topLevelItemCount() == 1 and page.tree.topLevelItem(0).text(0) == 'Flans.SLDPRT'
+    assert not page.tree_empty.isVisible() and page.source_count.text() == '1 dosya · 1 seçili'
