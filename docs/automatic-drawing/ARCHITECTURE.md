@@ -24,6 +24,7 @@ mevcut CAD oturumu kullanılır ve COM initialization / cleanup dengelenir.
 | layout.py | Pafta / ölçek seçimi, bağlı izdüşüm yerleşimi, ölçü metni alanları |
 | native.py | Gerçek Drawing / View / Dimension nesneleri, kayıt ve tekrar açma |
 | manufacturing.py | Native BOM / balonlar ve koşullu açınım paftası |
+| sheetmetal.py | Gövde–Cut List–FlatPattern kanıtı, mevcut konfigürasyon ve üretim özelliklerini yeniden denetleme |
 | validation.py | Gerçek model bağlantısı, konfigürasyon, pafta / ölçü denetimleri |
 | outputs.py | Aynı klasörde geçici paket, üzerine yazmayan yayın, rapor |
 | pipeline.py | Sıralı kuyruk, hata izolasyonu, iptal ve aşama raporu |
@@ -40,6 +41,13 @@ Kaynak yalnız okunur açılır. Zaten açık belgeler sahiplenilip kapatılmaz.
 Önceki konfigürasyon ve seçim listesi hata / iptalde de geri yüklenir.
 Kaynak Save3, SaveAll veya SaveAs çağrısı yoktur. Dirty / rebuild bekleyen
 kaynak üretimden önce kullanıcıya döndürülür.
+
+Çok gövdeli sac analizi yalnız SheetBody düz kayıtlarını taşır; native
+gövde / unsur pointer’ları cache veya UI’ya girmez. GetPersistReference3
+bağlantı hataları kayıp kimlik gibi yutulmaz. Gövde kimliği başlığı
+AttachAnnotation ile paftaya bağlanır; görünüş ölçeklenince başlık değişmez.
+Başlık, tek gövde kapsamı ve üretim özellikleri SLDDRW yeniden açılınca
+tekrar denetlenir. Analiz / rapor şeması yeni gövde kanıtları için v2’dir.
 
 IModelDoc2 ve IDrawingDoc dual arayüzleri ayrı işlenir. BOM tablosunun
 ITableAnnotation arayüz kimliği çalışan SolidWorks tür kitaplığından alınır.

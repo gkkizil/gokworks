@@ -9,6 +9,7 @@ from tempfile import mkstemp
 import uuid
 
 from shared.files import write_text_atomic
+from .models import SCHEMA_VERSION
 
 
 class ExistingOutput(RuntimeError):
@@ -190,7 +191,7 @@ def check_file(path, kind):
 
 
 def write_batch_report(path, results):
-    payload = {'schema_version': 1, 'results': [r.as_dict() for r in results],
+    payload = {'schema_version': SCHEMA_VERSION, 'results': [r.as_dict() for r in results],
                'summary': dict((status, sum(r.status == status for r in results))
                                for status in ('PASS', 'WARNING', 'FAIL', 'CANCELLED', 'SKIPPED')),
                'scope': 'PASS temel yapısal doğrulamadır; imalata serbest bırakma onayı değildir.'}

@@ -103,3 +103,32 @@ IGetBodies / IGetComponents2 gibi in-process unmanaged C++ yöntemleri
 kullanılmaz. Aynı isimli eski veya farklı owner’daki overload’lar
 çağrılmamıştır. Firma şablonu ve kurulu SolidWorks sürümüyle canlı test
 gereksinimi KNOWN_LIMITATIONS belgesinde açıkça belirtilmiştir.
+
+## 16 Kasım — gövde bazlı sac paftaları
+
+| API | Doğrulanan sözleşme |
+|---|---|
+| GetPersistReference3 | Gövde ve unsur için kalıcı kimlik; görünen ad üretim kimliği değildir |
+| IFlatPatternFeatureData.FixedFace2 / AccessSelections / ReleaseSelectionAccess | Sabit yüzün GetBody ilişkisi; tanım erişiminin geçici rollback kapsamı mutlaka kapatılır |
+| IFeature.IsSuppressed2 | İki argüman; swSpecifyConfiguration ve BSTR SAFEARRAY; her adayın gerçek durumu okunur |
+| IBodyFolder.GetBodies / IBody2.GetBodyBox | Cut List üyeliği ve gövde dış ölçüleri; kalınlık kutudan tahmin edilmez |
+| IView.Bodies / GetBodiesCount | IDispatch SAFEARRAY ile tek hedef gövde; kapsam kayıt sonrası tekrar okunur |
+| IModelDoc2.InsertNote / INote.GetName / GetText | Gerçek, düzenlenebilir pafta başlığı ve kalınlık / malzeme metni |
+| IAnnotation.Select3 / IDrawingDoc.AttachAnnotation | Seçilen başlık swAttachAnnotationOption_Sheet ile paftaya bağlanır |
+| ITextFormat.CharHeight / SetTextFormat | Metre cinsinden 3 mm yazı; gerçek display-data sınırları kontrol edilir |
+| IView.GetNotes | Kayıtlı paftanın kendi başlıkları gerçek sheet-view üzerinden okunur |
+
+[FixedFace2](https://help.solidworks.com/2016/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFlatPatternFeatureData~FixedFace2.html) ·
+[Resmi sabit yüz / AccessSelections örneği](https://help.solidworks.com/2021/English/api/sldworksapi/Get_Fixed_Face_of_Flat-Pattern_Feature_Example_VB.htm) ·
+[IsSuppressed2](https://help.solidworks.com/2016/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFeature~IsSuppressed2.html) ·
+[Bodies](https://help.solidworks.com/2023/English/api/sldworksapi/SolidWorks.interop.sldworks~SolidWorks.interop.sldworks.IView~Bodies.html) ·
+[Resmi tek gövde gösterme örneği](https://help.solidworks.com/2019/english/api/sldworksapi/Set_Body_for_View_Example_VB.htm) ·
+[InsertNote](https://help.solidworks.com/2024/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDoc2~InsertNote.html) ·
+[AttachAnnotation](https://help.solidworks.com/2016/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~AttachAnnotation.html) ·
+[CharHeight](https://help.solidworks.com/2015/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ITextFormat~CharHeight.html) ·
+[GetNotes](https://help.solidworks.com/2017/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IView~GetNotes.html).
+
+ActivateView bir paftayı etkinleştirmek için kullanılmaz; bu durumda false
+döndürebildiği resmi açıklamada belirtilir. Başlık için ActivateSheet ve
+açık annotation attachment kullanılmıştır. Bu ek API araştırması canlı
+SolidWorks testi değildir.

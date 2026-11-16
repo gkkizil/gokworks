@@ -1,6 +1,6 @@
 # Otomatik Teknik Resim — Test raporu
 
-Tarih: 15 Kasım 2026.
+Tarih: 15–16 Kasım 2026.
 
 Ortam: Linux, Python 3.12, PySide6 6.10.3, pytest 9.0.2.
 Gerçek SolidWorks / Windows / pywin32 COM sunucusu bu ortamda yoktur.
@@ -21,6 +21,51 @@ onayı değildir.
 Canlı test varsayılan ortamda SKIP’tir. Modelin yeniden açılabilir gerçek
 SLDDRW / PDF ürettiği ancak bu test gerçekten çalıştırılıp örnek resimler
 SolidWorks’te incelendikten sonra kabul edilebilir.
+
+## 16 Kasım — Gövde bazlı sac paftaları
+
+**231 benzersiz test geçti, 2 canlı kabul testi atlandı.** Bu turun
+çalıştırmaları `/workspace/work/drawing-dev-20261116/` altındadır;
+önceki turun 748 testi tekrar çalıştırılmış gibi sayılmamıştır.
+
+| Çalıştırma | Sonuç |
+|---|---|
+| Otomatik teknik resim modülü + repository structure + lazy pages + single file distribution | 151 geçti, 2 atlandı |
+| DXF/DWG sheet inventory + multibody refresh/names + autosave raw dispatch; profile cutting API; packaged data; job event/deadlock | 77 geçti |
+| Son tam modül kontrolü | 135 geçti, 2 atlandı; tekrarlar toplamda yeniden sayılmadı |
+| Son gövde / native pafta sınırı kontrolü (`test_sheetmetal.py` + `test_native_boundary.py`) | 55 geçti; önceki çalıştırmadaki tekrarlar toplamda yeniden sayılmadı |
+
+Kapsanan yeni durumlar:
+
+- Aynı görünen ada sahip üç gövdenin farklı kalıcı kimlikleri, ayrı
+  kalınlık / malzemeleri ve ORHAN-01/02/03 pafta başlıkları.
+- GetBodies2 sırası değişince üretim kimliklerinin korunması; belirsiz
+  FlatPattern eşleşmesinin veya birden çok açınım adayının atlanması.
+- Türkçe yeniden adlandırılmış konfigürasyonu native özellik durumu ve
+  parent ilişkisiyle tanıma; İngilizce SM-FLAT-PATTERN adına bağımlı olmama.
+- AccessSelections / ReleaseSelectionAccess dengesinin korunması ve
+  rollback sonrasında eski gövde pointer’larının kullanılmaması.
+- IView.Bodies için IDispatch SAFEARRAY, tek gövde kapsamı, yedi argümanlı
+  native açınım çağrısı, kaynak konfigürasyonu geri alma ve ayrı paftalar.
+- Gerçek not API sözleşmesi, paftaya AttachAnnotation, 3 mm font ve
+  ayrılmış başlık alanı; boş ActivateView ile pafta etkinleştirmeye çalışmama.
+- Yeniden açma sınırında yanlış gövde / konfigürasyon, kayıp veya değişmiş
+  başlık, bastırılmış FlatPattern, değişmiş Cut List üyeliği / kalınlık /
+  malzemenin reddedilmesi.
+- Yeni kaynak konfigürasyonu oluşunca durma, kopan COM bağlantısını
+  eksik metadata gibi yutmama, iptal ve yalnız düz veri içeren cache.
+- Eksik gövde kalınlığı / malzemesini modelin ortak değeriyle doldurmama;
+  analiz ekranında gövde bazlı bilgilerin aynı kaynak ağacında gösterilmesi.
+- Özellik okuması sırasında konfigürasyon değişirse durma ve kaynak
+  kapsamını geri alma; farklı çözülmüş belgeye konfigürasyon / seçim
+  işlemi uygulamadan kimlik hatasını bildirme.
+
+Bu gövde / native pafta senaryoları açıkça raw COM **fakes** ile çalışır;
+gerçek sac açınımı üretildiği anlamına gelmez. Windows’taki opt-in
+çok gövde kabulü `GOKWORKS_DRAWING_LIVE_MULTIBODY_SOURCE` ve
+`GOKWORKS_DRAWING_LIVE_TEMPLATE` değişkenleriyle etkinleştirilir; bu
+ortamda çalıştırılmadı. Mevcut kaynakta doğru açınım konfigürasyonları
+hazır olmalıdır.
 
 ## Talep senaryoları ile eşleştirme
 
@@ -44,7 +89,7 @@ iptal, restore hatasında bütün kuyruğu durdurma, kaynak üzerinde Save
 dosya adı / mevcut dosya / yayın yarışı, bozuk ayarlar, iki tema ve
 820×560 / 1024×700 / 1440×900 pencereler.
 
-## Çalıştırmalar
+## 15 Kasım — İlk sürümün çalıştırmaları
 
 Birleştirilmiş sonuç: **748 benzersiz test geçti, 5 test atlandı**;
 ayrıca 5 subtest geçti. Aşağıdaki tekrar çalıştırmalar bu toplamda

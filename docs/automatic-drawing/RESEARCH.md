@@ -70,8 +70,10 @@ Lisans MIT; kaynak kodu aktarılmadı.
 
 GetChildren ile örnek ağacı ve dosya / konfigürasyon kimliğini ayırma;
 FlatPattern’in FixedFace2 gövdesiyle CutList’i eşleştirme mekanizması
-incelendi. Çok gövdeli açınım için bu eşleştirmeyi uygulamadan destek
-varmış gibi davranılmadı. Mevcut GOKWORKS servisleri yeniden kullanıldı.
+incelendi. 16 Kasım geliştirmesinde bu ilişki kalıcı native kimliklerle
+uygulandı; geçici tanım erişiminden sonra gövde pointer’ları yeniden
+alınır. Mevcut konfigürasyon / feature durumu ve kayıt sonrası IView.Bodies
+geri okuması ayrıca denetlenir. Mevcut GOKWORKS servisleri yeniden kullanıldı.
 MIT bildirimi mevcut proje bildirimleriyle birlikte korunur.
 
 ## 5. SolidWorks-Automation-Tool

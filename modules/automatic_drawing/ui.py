@@ -387,6 +387,13 @@ class AutoDrawingPage(BasePage):
                  'Kaynak birim: '+info.source_unit, '', 'Model özellikleri:']
         lines += [f'{key}: {value}' for key, value in info.properties.items()]
         lines += ['', 'Unsur türleri:']+[f'{key}: {value}' for key, value in info.feature_types.items()]
+        if info.sheet_bodies:
+            lines += ['', 'Sac gövdeleri / açınım eşleşmeleri:']
+            for row in info.sheet_bodies:
+                thickness = f'{row.thickness_mm:g} mm' if row.thickness_mm is not None else 'Kalınlık okunamadı'
+                lines.append(f'{row.label} · {row.name} · {thickness} · {row.material or "Malzeme okunamadı"}')
+                lines.append('  Cut List: '+(row.cut_list or 'Doğrulanamadı')+
+                             ' · Açınım: '+(', '.join(row.configurations) if row.ready else 'Doğrulanamadı'))
         lines += ['', *info.warnings]
         self.analysis_text.setPlainText('\n'.join(lines))
 

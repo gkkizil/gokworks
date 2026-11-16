@@ -39,6 +39,11 @@ def validate_views(sheet, actual, source, *, flat_configurations=(), projection=
             if config not in flat_configurations or not view.get('flat'):
                 findings.append(Finding('FAIL', 'flat_link', 'Açınımın konfigürasyonu / FlatPattern durumu doğrulanamadı.',
                                         sheet['name'], label))
+            if view.get('expected_body') and (
+                    tuple(view.get('body_references', ())) != (view['expected_body'],) or
+                    view.get('body_count') != 1 or config != view.get('expected_flat_configuration')):
+                findings.append(Finding('FAIL', 'flat_body', 'Açınım görünüşü istenen tek sac gövdesine bağlı değil.',
+                                        sheet['name'], label))
         elif config != source.configuration:
             findings.append(Finding('FAIL', 'configuration', 'Görünüş yanlış konfigürasyona bağlı.',
                                     sheet['name'], label))
