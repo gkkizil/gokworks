@@ -16,8 +16,9 @@ yapılmadan bu özellik üretim için doğrulanmış sayılmaz.
 - Tam delik / diş / havşa / PCD tanıma ve tüm geometriler için eksiksiz
   imalat ölçülendirmesi. Hole Wizard model ölçüleri native import edilir;
   yeni diş veya tolerans açıklaması tahmin edilmez.
-- Çok gövdeli sac için gövdeye bağlı açınım sayfaları. Yanlış gövdeyi
-  açmak yerine açınım atlanır ve WARNING verilir.
+- Çok gövdeli sac için yeni açınım konfigürasyonlarını otomatik hazırlama.
+  Gövde bazlı paftalar yalnız mevcut ve doğrulanmış bir konfigürasyonla
+  üretilir; eksik veya birden fazla adayda o gövde atlanır ve WARNING verilir.
 - Kaynakta hiç açınım konfigürasyonu yokken yeni konfigürasyon oluşturma.
   Mevcut konfigürasyonla sınırlı çalışma kaynak değişikliği riskini azaltır.
 - Genel görünüşleri keyfi sayıda sayfaya bölen optimizasyon; şu an bağlı
@@ -55,6 +56,23 @@ davranışı canlı kabul edilmelidir. Başarılı şablon seçimi ISO 128, 129,
 Bir native açınım çağrısı beklenmedik kaynak konfigürasyonu oluşturursa
 dosya kaydedilmez, kuyruk durur ve kontrol mesajı verilir. Kullanıcıya ait
 olabilecek konfigürasyonlar otomatik silinmez.
+
+Gövde kimliği, Cut List üyeliği, bastırılmamış FlatPattern ve görünüşün
+tek gövde kapsamı birlikte kontrol edilir. Sadece görünüş adının veya
+SM-FLAT-PATTERN metninin bulunması destek kanıtı sayılmaz. Yeniden
+adlandırılmış Türkçe konfigürasyonlar da özellik durumuyla değerlendirilir.
+Kalınlık / malzeme kesin okunamıyorsa ortak model değeri gövdeye atanmaz.
+Paftaya yazılmış bir değer işlem sırasında değişirse paket yayımlanmaz.
+Gövde kimliği, kalınlığı ve malzemesi ek pafta başlığındadır. Firma anteti
+ortak model / drawing property bağlantılarını kullanabilir; farklı malzemeli
+gövdelerde ortak antet malzemesi ayrıca kontrol edilmeli veya şablon
+uyarlanmalıdır. Bu durum çalışma raporunda WARNING olarak belirtilir.
+
+Sac envanteri bir kaynakta en fazla 256 sac gövdesi ve 128 konfigürasyon
+tarar. Cut List otomatik güncellenmez; kaynak hazır olmalıdır. Tanım erişimi
+geçici rollback gerektirirse mutlaka kapatılır, eski gövde pointer’ları tekrar
+kullanılmaz. Bu davranışın kaynak dirty / rebuild bayrakları üzerindeki
+etkisi firma modelleriyle gerçek SolidWorks’te ayrıca kabul edilmelidir.
 
 Girintili BOM, terfi / gizleme ve özel adet birimi kurallarında satır
 miktarları basit örnek toplamı gibi onaylanmaz. Balonların tablo bağlantısı

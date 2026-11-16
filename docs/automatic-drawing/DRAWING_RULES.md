@@ -66,9 +66,24 @@ Delik / iç boşluk / küçük pah ve radyüs bilgileri kesit / detay kontrol
 önerisi doğurabilir. Kesit çizgisi ve kesit / detay görünüşünün otomatik
 oluşturulması bu sürümün tamamlanmış özelliği değildir.
 
-Sac açınımı yalnız tek sac gövdesi ve doğru üst konfigürasyona bağlı mevcut
-tek açınım konfigürasyonuyla denenir. Yeni kaynak konfigürasyonu
-oluşursa veya native FlatPattern kimliği eşleşmezse işlem başarılı sayılmaz.
+Sac gövdeleri kalıcı API kimlikleriyle sıralanır; görüntülenen ad veya
+GetBodies2 sırası üretim kimliği sayılmaz. Cut List üyeliği ve FlatPattern
+sabit yüzünün gövdesi aynı kimlikle eşleştirilir. Tanım erişimi geçici
+rollback gerektirirse ReleaseSelectionAccess sonrasında gövdeler yeniden
+okunur.
+
+Her gövde için kaynak konfigürasyona bağlı, FlatPattern’in bastırılmadığı
+tek bir mevcut konfigürasyon aranır. İngilizce konfigürasyon adı zorunlu
+değildir. Belirsiz / eksik aday atlanır. Aynı SLDDRW içinde her doğrulanmış
+gövdeye ayrı pafta açılır; ORHAN-01 gibi kimlik ve doğrulanmışsa gövde
+kalınlığı / malzemesi görünüşten ayrı başlık alanına yazılır.
+
+IView.Bodies ile yalnız hedef gövde gösterilir. Kayıt sonrası gerçek
+gövde kimliği, gövde sayısı, konfigürasyon ve pafta başlığı tekrar okunur;
+Cut List üyeliği, kalınlık veya malzeme değişmişse çıktı başarılı sayılmaz.
+Yeni kaynak konfigürasyonu oluşursa kuyruk durdurulur. Gövde kalınlığı
+için bağlı SheetMetal tanımı ve o gövdenin Cut List’i kullanılır; ortak
+model kalınlığıyla boşluk doldurulmaz.
 
 BOM’da örnek sayısı ile benzersiz çizim sayısı farklıdır: 12 aynı cıvata
 bir teknik resim, BOM satırında 12 adet demektir. Adet sütunu başlığı dile

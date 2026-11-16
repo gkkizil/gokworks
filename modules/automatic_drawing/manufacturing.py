@@ -1,11 +1,11 @@
-"""Native BOM/balloons and existing single-body flat-pattern drawing pages."""
+"""Native BOM/balloons and body-verified existing flat-pattern drawing pages."""
 
 from collections import Counter
 from dataclasses import replace
 import re
 
 from modules.cad_converter.api import ApiError, RestoreError
-from .solidworks import call, get, put, prop, values, variant, out_int
+from .solidworks import call, get, put, prop, values, variant, out_int, as_interface
 from .models import Box, ViewPlan, checkpoint, identity, to_mm, to_m
 from .layout import plan_sheet
 from .rules import quantities
@@ -53,9 +53,11 @@ def flat_page(native, source_model):
     info, options, result = native.info, native.options, native.result
     if not options.flat_pattern or not info.sheet_body_count:
         return
+    if info.sheet_bodies:
+        return body_flat_pages(native, source_model)
     if info.body_count != 1 or info.sheet_body_count != 1:
-        result.warn('multibody_flat', 'Çok gövdeli sac için güvenilir gövde / açınım eşleştirmesi '
-                    'bu modülde henüz uygulanmadı; karışık açınım üretilmedi.')
+        result.warn('multibody_flat', 'Sac gövdelerinin kalıcı kimlikleri / açınım eşleştirmeleri eksik; '
+                    'yeniden analiz edin. Gövde adı veya sırası ile açınım tahmin edilmedi.')
         return
     matching = []
     for name in info.flat_configurations:
@@ -91,6 +93,73 @@ def flat_page(native, source_model):
         'bend_lines_requested': options.bend_lines, 'thickness_mm': info.thickness_mm}
     result.warn('bend_notes', 'Açınım native görünüş olarak eklendi. Büküm çizgileri / yönleri ve büküm notlarının '
                 'tamlığı SolidWorks’te kontrol edilmeli; eksik K faktörü veya büküm açısı tahmin edilmedi.', plan.name)
+
+
+def body_flat_pages(native, source_model):
+    """One existing flat configuration and one verified body per native page."""
+    from modules.cad_converter.api import PART_IID
+    from .sheetmetal import verify_unfolded
+    info, options, session = native.info, native.options, native.session
+    before = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
+    delivered = []
+    for row in info.sheet_bodies:
+        checkpoint(native.stop)
+        if not row.ready:
+            native.result.warn('body_flat_unavailable', row.label+': gövdeye bağlı tek bir mevcut açınım '
+                               'konfigürasyonu doğrulanamadı; bu gövdenin açınımı atlandı.')
+            continue
+        configuration = row.configurations[0]
+        verify_unfolded(session, source_model, row, configuration)
+        single = replace(options, top=False, side=False, isometric=False)
+        # The folded box is only an initial estimate; native.fit uses the actual
+        # unfolded geometry. Reserve a separate header outside the view region.
+        diagonal = sum(x*x for x in (row.size_mm or info.size_mm))**.5
+        plan = plan_sheet([ViewPlan('flat', '', (diagonal, diagonal))], single,
+                          f'Sac açınımı {row.index:02d}')
+        whole = plan.usable
+        header = Box(whole.x, whole.top-18., whole.width, 18.)
+        plan.usable = Box(whole.x, whole.y, whole.width, whole.height-22.)
+        plan.views = [replace(plan.views[0], center=plan.usable.center)]
+        native.setup(plan, new=True)
+        page = native.pages[plan.name]
+        page['flat_body'] = row
+        x, y = (to_m(v) for v in plan.views[0].center)
+        # Explicitly request the already existing unfolded configuration.
+        # The source is never switched to a newly created/suppressed state.
+        view = call(native.drawing, 'CreateFlatPatternViewFromModelView3', info.source.path,
+                    configuration, x, y, 0., not options.bend_lines, False)
+        after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
+        if set(after) != set(before):
+            raise RestoreError('Açınım oluşturulurken kaynak konfigürasyonları değişti; kaynak kaydedilmedi.')
+        if view is None or str(get(view, 'ReferencedConfiguration')) != configuration or not call(view, 'IsFlatPatternView'):
+            raise ApiError(row.label+': istenen native açınım görünüşü doğrulanamadı.')
+        # Select through IView.Bodies rather than names or the first body's index.
+        # Source handles are reacquired AFTER any definition/rollback access.
+        with session.configuration(source_model, configuration):
+            part = as_interface(source_model, PART_IID)
+            candidates = values(call(part, 'GetBodies2', session.c('swSolidBody'), False))
+            matches = [body for body in candidates if session.persistent_ref(source_model, body) == row.body_ref]
+            if len(matches) != 1 or not call(matches[0], 'IsSheetMetal'):
+                raise ApiError(row.label+': açınım konfigürasyonunda aynı sac gövdesi bulunamadı.')
+            put(view, 'Bodies', variant(0x2009, (matches[0],)))
+            candidates = matches = (); part = None
+            native.rebuild()
+        put(view, 'UseSheetScale', True)
+        page['views']['flat'] = view
+        native.set_scale(plan.name, plan.scale)
+        native.fit(plan.name)
+        actual = native.actual_views(plan.name)[0]
+        if actual.get('body_references') != (row.body_ref,) or actual.get('body_count') != 1:
+            raise ApiError(row.label+': native açınım başka veya birden fazla gövde gösteriyor.')
+        native.body_heading(plan.name, row, header)
+        delivered.append({'label': row.label, 'body_ref': row.body_ref, 'configuration': configuration,
+                          'flat_ref': row.flat_ref, 'cut_list': row.cut_list, 'cut_list_quantity': row.cut_list_quantity,
+                          'thickness_mm': row.thickness_mm, 'material': row.material, 'sheet': plan.name})
+    if delivered:
+        native.result.measurements['flat_pattern'] = {'bodies': delivered, 'body_count': len(delivered),
+                                                     'bend_lines_requested': options.bend_lines}
+        native.result.warn('bend_notes', 'Gövde bazlı açınımlar mevcut konfigürasyonlardan oluşturuldu. '
+                           'Büküm çizgileri, yönleri ve notlarının tamlığını SolidWorks’te kontrol edin.')
 
 
 def bom_page(native):
