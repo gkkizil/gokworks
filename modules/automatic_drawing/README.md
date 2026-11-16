@@ -30,6 +30,11 @@ Bu geliştirme ortamında lisanslı SolidWorks bulunmadığından gerçek CAD
    Mevcut dosya atlanır veya benzersiz ad üretilir; üzerine yazılmaz.
 7. Sonuçlar sekmesinden PASS / WARNING / FAIL ve dosya bazlı bulguları
    inceleyin. Önizleme, SolidWorks’ten dışa aktarılan gerçek PDF’i gösterir.
+   Önizleme › **Taslak pafta**, analizden hemen sonra ve oluşturmadan önce oluşturucunun aynı
+   planını çizer: pafta, ölçek, izdüşüm yönüne göre görünüş yerleri, antet alanı ve gerekirse
+   ikinci pafta. Görünüşler model dış ölçüsü × ölçek kutularıdır (izometrik kutu bilerek büyük
+   tutulur); çizgiler, ölçüler, açınım ve BOM paftaları oluşturulunca gelir. SolidWorks çağrısı
+   yoktur, ayar değişikliği anında yansır (plan ≈ 0,1 ms).
    Her başarılı pakette SLDDRW ve JSON raporu; seçilmişse PDF / DXF vardır.
 
 PASS yalnız temel yapısal denetimlerin geçtiğini belirtir; imalat serbest

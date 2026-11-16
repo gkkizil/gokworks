@@ -4,8 +4,9 @@ from pathlib import Path
 
 from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QFileDialog, QFormLayout, QFrame,
-    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QSizePolicy, QSplitter,
+from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout,
+    QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QSizePolicy, QSplitter,
+    QStackedWidget,
     QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
 
@@ -16,6 +17,7 @@ from .models import Options, PAPERS, STAGES, Source
 from .pipeline import worker
 from .outputs import write_batch_report
 from .rules import CLASS_TITLES
+from .preview import SheetPreview
 
 SOURCE_SUFFIXES = ('.sldprt', '.sldasm')
 STATUS_TEXT = {'PASS': 'Başarılı', 'WARNING': 'Uyarılı', 'FAIL': 'Hatalı', 'CANCELLED': 'İptal', 'SKIPPED': 'Atlandı'}
@@ -259,9 +261,32 @@ class AutoDrawingPage(BasePage):
         self.tabs.addTab(settings_scroll, 'Ayarlar')
 
         # This is the PDF exported by SolidWorks from the actual native drawing.
-        preview = QWidget(); pv = QVBoxLayout(preview); pv.setContentsMargins(4, 10, 4, 4)
+        preview = QWidget(); pv = QVBoxLayout(preview); pv.setContentsMargins(4, 10, 4, 4); pv.setSpacing(8)
+        mode = QHBoxLayout(); mode.setSpacing(4)
+        self.draft_button = button('Taslak pafta'); self.pdf_button = button('SolidWorks PDF')
+        self.preview_modes = QButtonGroup(self)
+        for index, widget in enumerate((self.draft_button, self.pdf_button)):
+            widget.setCheckable(True); widget.setProperty('segment', True)
+            self.preview_modes.addButton(widget, index); mode.addWidget(widget)
+        self.draft_button.setToolTip('Analiz sonucundan ve ayarlardan, oluşturmadan önce: pafta, ölçek ve görünüş yerleri.')
+        self.pdf_button.setToolTip('Oluşturulan resmin SolidWorks’ten dışa aktarılan gerçek PDF’i.')
+        self.preview_modes.idClicked.connect(self.set_preview_mode)
+        mode.addSpacing(8)
         self.preview_caption = label('Oluşturulan gerçek PDF burada gösterilecek.', 'muted')
-        pv.addWidget(self.preview_caption)
+        mode.addWidget(self.preview_caption, 1)
+        pv.addLayout(mode)
+        self.preview_stack = QStackedWidget()
+        draft = QWidget(); dv = QVBoxLayout(draft); dv.setContentsMargins(0, 0, 0, 0); dv.setSpacing(6)
+        self.sheet_preview = SheetPreview()
+        self.sheet_preview.show_message('Bir kaynak seçip “Analiz et” komutunu kullanın; '
+                                        'pafta, ölçek ve görünüş yerleri burada, oluşturmadan önce görünür.')
+        dv.addWidget(self.sheet_preview, 1)
+        self.draft_note = label('Taslak: görünüşler modelin dış ölçüsü × ölçek kutularıdır; çizgiler, ölçüler, '
+                                'sac açınımı ve BOM paftaları resim oluşturulunca gelir. Ayar değişikliği anında yansır.',
+                                'muted')
+        dv.addWidget(self.draft_note)
+        self.preview_stack.addWidget(draft)
+        pdf = QWidget(); pdv = QVBoxLayout(pdf); pdv.setContentsMargins(0, 0, 0, 0)
         from PySide6.QtPdf import QPdfDocument
         from PySide6.QtPdfWidgets import QPdfView
         self.pdf_document = QPdfDocument(self)
@@ -269,7 +294,9 @@ class AutoDrawingPage(BasePage):
         self.pdf_view.setDocument(self.pdf_document)
         self.pdf_view.setZoomMode(QPdfView.ZoomMode.FitInView)
         self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
-        pv.addWidget(self.pdf_view, 1)
+        pdv.addWidget(self.pdf_view, 1)
+        self.preview_stack.addWidget(pdf)
+        pv.addWidget(self.preview_stack, 1)
         self.preview_empty = Overlay(self.pdf_view, 'Önizleme yok',
                                      'Resimler oluşturulduktan sonra Sonuçlar listesinden bir satır seçin; '
                                      'SolidWorks’ün dışa aktardığı gerçek PDF burada açılır.', glyph='pdf')
@@ -346,6 +373,7 @@ class AutoDrawingPage(BasePage):
                       else field.textChanged)
             signal.connect(self.refresh_options)
         self.refresh_options(); self.refresh_sources(); self.refresh_results(); self.theme_changed()
+        self.set_preview_mode(0)
 
     # ------------------------------------------------------------------ options
     def _saved(self, key, default):
@@ -513,6 +541,43 @@ class AutoDrawingPage(BasePage):
             if i < len(chips):
                 chip.setText(chips[i])
         self.summary.relayout()
+        self.refresh_draft()
+
+    # ------------------------------------------------------------------ draft preview
+    def set_preview_mode(self, index):
+        self.preview_stack.setCurrentIndex(index)
+        (self.draft_button if index == 0 else self.pdf_button).setChecked(True)
+        self.preview_empty.setVisible(index == 1 and self.pdf_document.pageCount() == 0)
+        if index == 0:
+            self.refresh_draft()
+
+    def current_info(self):
+        item = self.tree.currentItem()
+        while item is not None and item.data(0, Qt.UserRole+1) is None:
+            item = item.parent()
+        if item is not None:
+            return item.data(0, Qt.UserRole+1)
+        return next((i.data(0, Qt.UserRole+1) for i in self._all_items() if i.data(0, Qt.UserRole+1) is not None), None)
+
+    def refresh_draft(self):
+        if not hasattr(self, 'sheet_preview'):
+            return
+        info = self.current_info()
+        if info is None:
+            self.sheet_preview.show_message('Bir kaynak seçip “Analiz et” komutunu kullanın; pafta, ölçek ve '
+                                            'görünüş yerleri burada, oluşturmadan önce görünür.')
+            caption = 'Taslak için önce analiz gerekir (SolidWorks yalnız okunur, resim oluşturulmaz).'
+        else:
+            try:
+                options = self.collect_options(save=False)
+            except (ValueError, TypeError) as error:
+                self.sheet_preview.show_message('Ayarlar geçersiz: '+str(error)); caption = 'Ayarları düzeltin.'
+            else:
+                self.sheet_preview.show_plan(info, options)
+                caption = (Path(info.source.path).name+' · '+info.source.configuration+' · '
+                           + (self.sheet_preview.summary() if self.sheet_preview.plans else 'sığmıyor'))
+        if self.preview_stack.currentIndex() == 0:
+            self.preview_caption.setText(caption)
 
     def set_busy(self, busy):
         super().set_busy(busy)
@@ -559,6 +624,7 @@ class AutoDrawingPage(BasePage):
         for overlay in (self.tree_empty, self.preview_empty):
             overlay.set_colour(c['muted'])
         self.phases.colours = c; self.phases.update()
+        self.sheet_preview.colours = c; self.sheet_preview.update()
         for item in self._all_items():
             self._tint(item)
         self.refresh_results()
@@ -574,6 +640,8 @@ class AutoDrawingPage(BasePage):
             QFrame[tile="WARNING"] {{ border-left-color: {c['warning']}; }}
             QFrame[tile="FAIL"] {{ border-left-color: {c['danger']}; }}
             QFrame[tile="sheets"] {{ border-left-color: {c['accent']}; }}
+            QPushButton[segment="true"] {{ padding: 4px 12px; }}
+            QPushButton[segment="true"]:checked {{ background: {c['selected']}; border-color: {c['accent']}; color: {c['text']}; }}
             QLabel[optionHint="true"] {{ font-size: 11px; padding-left: 24px; }}
             QFrame[settingsCard="true"] QLineEdit, QFrame[settingsCard="true"] QComboBox {{ min-height: 24px; }}
         """)
@@ -594,7 +662,7 @@ class AutoDrawingPage(BasePage):
         self.results_empty.setVisible(not self.results)
         self.result_table.horizontalHeader().setVisible(bool(self.results))
         self.tabs.setTabText(3, f'Sonuçlar · {len(self.results)}' if self.results else 'Sonuçlar')
-        self.preview_empty.setVisible(self.pdf_document.pageCount() == 0)
+        self.preview_empty.setVisible(self.preview_stack.currentIndex() == 1 and self.pdf_document.pageCount() == 0)
 
     def choose_path(self, field, title, file_filter):
         if file_filter:
@@ -604,6 +672,9 @@ class AutoDrawingPage(BasePage):
         if path: field.setText(path)
 
     def options(self):
+        return self.collect_options(save=True)
+
+    def collect_options(self, save=True):
         data, saved = {}, {}
         for key, field in self.fields.items():
             value = (field.isChecked() if isinstance(field, QCheckBox) else field.currentData()
@@ -620,7 +691,8 @@ class AutoDrawingPage(BasePage):
         data['property_map'] = tuple((left.text().strip(), right.text().strip()) for left, right in self.mapping_fields)
         saved['property_map'] = list(data['property_map'])
         options = Options(**data).validate()
-        self.settings.set('automatic_drawing', saved)
+        if save:
+            self.settings.set('automatic_drawing', saved)
         return options
 
     def choose_files(self):
@@ -742,9 +814,9 @@ class AutoDrawingPage(BasePage):
 
     def show_analysis(self):
         item = self.tree.currentItem()
-        if item is None: return
-        info = item.data(0, Qt.UserRole+1)
-        if info is None: return
+        info = item.data(0, Qt.UserRole+1) if item is not None else None
+        if info is None:
+            self.refresh_draft(); return
         lines = [info.title, info.source.path, 'Konfigürasyon: '+info.source.configuration,
                  'SolidWorks API: '+info.revision, 'Sınıf: '+CLASS_TITLES.get(info.classification, info.classification),
                  info.classification_reason, 'Dış ölçüler · mm: '+' × '.join(f'{v:g}' for v in info.size_mm),
@@ -767,6 +839,7 @@ class AutoDrawingPage(BasePage):
         self.facts['config'].setText(info.source.configuration or '—')
         for value in self.facts.values():
             value.setToolTip(value.text())
+        self.refresh_draft()
 
     def show_result(self, result):
         self.results = [r for r in self.results if r.source.key != result.source.key]+[result]
@@ -798,6 +871,7 @@ class AutoDrawingPage(BasePage):
         result = self.results[row]
         self.pdf_document.close()
         path = result.outputs.get('pdf')
+        self.set_preview_mode(1)
         if path and Path(path).is_file():
             self.pdf_document.load(path)
             self.preview_caption.setText(Path(path).name+' · SolidWorks’ten alınan PDF')

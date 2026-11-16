@@ -178,3 +178,42 @@ def test_dropped_solidworks_files_are_added_and_other_files_ignored(window, tmp_
     page.dropEvent(QDropEvent(QPointF(5, 5), Qt.CopyAction, data, Qt.LeftButton, Qt.NoModifier))
     assert page.tree.topLevelItemCount() == 1 and page.tree.topLevelItem(0).text(0) == 'Flans.SLDPRT'
     assert not page.tree_empty.isVisible() and page.source_count.text() == '1 dosya · 1 seçili'
+
+
+def test_draft_sheet_preview_uses_the_generation_plan_and_follows_the_settings(window, tmp_path):
+    from modules.automatic_drawing.layout import plan_sheets
+    from modules.automatic_drawing.rules import plan_views
+    page = window.pages['automatic_drawing']
+    assert page.preview_stack.currentIndex() == 0 and not page.sheet_preview.plans
+    info = ModelInfo(Source(str(tmp_path/'Mil.SLDPRT'), 'Default'), 'part', 'Mil', (420, 30, 30),
+                     classification='shaft')
+    page._analysis_item(info)
+    preview = page.sheet_preview
+    expected = plan_sheets(plan_views(info, page.options()), page.options())
+    assert [(p.paper, p.scale, [(v.role, v.center) for v in p.views]) for p in preview.plans] == \
+        [(p.paper, p.scale, [(v.role, v.center) for v in p.views]) for p in expected]
+    assert preview.plans[0].scale == .2                     # the conservative isometric box sets 1:5
+    page.fields['isometric'].setChecked(False)
+    assert preview.plans[0].scale == .5 and 'isometric' not in {v.role for v in preview.plans[0].views}
+    page.fields['manual_scale_text'].setText('5:1')        # cannot fit: said, not drawn
+    assert not preview.plans and preview.error and 'sığmıyor' in page.preview_caption.text()
+    page.fields['manual_scale_text'].setText('1:0')
+    assert 'Ayarlar geçersiz' in preview.message
+    page.fields['manual_scale_text'].setText('')
+    assert preview.plans and 'ölçek 1:2' in page.preview_caption.text()
+    window.grab()                                            # paints in the current theme without error
+
+
+def test_draft_preview_does_not_save_settings_and_a_result_switches_to_the_pdf(window, tmp_path):
+    from modules.automatic_drawing.models import DrawingResult
+    page = window.pages['automatic_drawing']
+    before = window.settings.get('automatic_drawing', None)
+    page._analysis_item(ModelInfo(Source(str(tmp_path/'P.SLDPRT'), 'Default'), 'part', 'P', (100, 50, 10)))
+    page.fields['paper'].setCurrentIndex(page.fields['paper'].findData('A2'))
+    assert page.sheet_preview.plans[0].paper == 'A2'
+    assert window.settings.get('automatic_drawing', None) == before   # only Generate saves options
+    page.show_result(DrawingResult(Source(str(tmp_path/'P.SLDPRT'), 'Default'), 'PASS'))
+    page.result_table.setCurrentCell(0, 0); page.select_result()
+    assert page.preview_stack.currentIndex() == 1 and page.pdf_button.isChecked()
+    page.draft_button.click()
+    assert page.preview_stack.currentIndex() == 0 and not page.preview_empty.isVisible()
