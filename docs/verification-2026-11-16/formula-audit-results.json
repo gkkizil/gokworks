@@ -1,0 +1,130 @@
+{
+  "recorded_at": "2026-11-16T09:21:35+03:00",
+  "timezone": "Europe/Istanbul",
+  "base_revision": "c724bae8fa05e9fd0773eb16b54ffac140e3f0c3",
+  "branch": "agent/codex",
+  "platform": "Linux",
+  "python": "3.12",
+  "pytest": "9.0.2",
+  "environment": {
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "run_command_prefix": [
+    "python",
+    "-m",
+    "pytest"
+  ],
+  "run_command_suffix": [
+    "-q",
+    "--tb=short"
+  ],
+  "unique_tests_passed": 1581,
+  "subtests_passed": 237,
+  "new_tests": 40,
+  "pre_fix_new_regression_failures": 13,
+  "groups": [
+    {
+      "id": "baseline",
+      "test_paths": [
+        "tests/test_audit_engineering_oracles.py",
+        "tests/hydraulic_unit/test_core.py",
+        "modules/hydraulic_unit/tests/test_area_limits.py",
+        "modules/bolt/tests/test_bolt.py",
+        "modules/bolt_torque/tests/test_bolt_torque.py",
+        "modules/weight/tests/test_weight.py",
+        "modules/k_factor/tests/test_k_factor.py",
+        "modules/k_factor/tests/test_ba_inverse_boundaries.py",
+        "modules/iso_fits/tests/test_iso_tolerance_audit.py",
+        "modules/tolerance_stack/tests/test_tolerance_stack_math.py",
+        "modules/belt_drive/tests/test_calculation.py",
+        "modules/belt_drive/tests/test_tosyali_v_design.py",
+        "modules/gear_calculator/tests/test_calculation.py",
+        "modules/gear_calculator/tests/test_math_audit.py",
+        "modules/gear_calculator/tests/test_families.py",
+        "modules/gear_calculator/tests/test_sprockets.py"
+      ],
+      "passed": 563,
+      "subtests_passed": 124,
+      "new_unique_cases": 563,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 10.743
+    },
+    {
+      "id": "geometry",
+      "test_paths": [
+        "tests/unfolding/test_calculation.py",
+        "tests/unfolding/test_bend_profiles.py",
+        "tests/unfolding/test_forming_mechanics.py",
+        "tests/unfolding/test_forming_integration.py",
+        "tests/unfolding/test_audit_regressions.py",
+        "tests/unfolding/test_source_models.py"
+      ],
+      "passed": 891,
+      "subtests_passed": 0,
+      "new_unique_cases": 891,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 256.929
+    },
+    {
+      "id": "regressions-after",
+      "test_paths": [
+        "modules/hydraulic_unit/tests/test_accumulator_precision.py",
+        "modules/weight/tests/test_section_radius_domains.py",
+        "tests/hydraulic_unit/test_core.py",
+        "modules/hydraulic_unit/tests/test_area_limits.py",
+        "modules/weight/tests/test_weight.py"
+      ],
+      "passed": 179,
+      "subtests_passed": 0,
+      "new_unique_cases": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.424
+    },
+    {
+      "id": "additional",
+      "test_paths": [
+        "tests/hydraulic_unit/test_beginner_adapter.py",
+        "tests/hydraulic_unit/test_storage_reports.py",
+        "modules/weight/tests/test_worklist_export_cad.py",
+        "modules/geometric_tolerances/tests/test_geometric_tolerances.py",
+        "modules/tolerance_stack/tests/test_narrow_truncated_normal.py",
+        "modules/profile_cutting/tests/test_geometry.py",
+        "modules/profile_cutting/tests/test_optimizer_exhaustive_oracle.py",
+        "modules/nesting/tests/test_audit_geometry_limits.py",
+        "modules/nesting/tests/test_nesting.py::test_weight_example_and_conservation",
+        "modules/nesting/tests/test_nesting.py::test_costs_allocated_exactly_and_optional_operations_separate"
+      ],
+      "passed": 87,
+      "subtests_passed": 113,
+      "new_unique_cases": 87,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.663
+    },
+    {
+      "id": "source-examples",
+      "test_paths": [
+        "tests/test_formula_source_examples.py"
+      ],
+      "passed": 22,
+      "subtests_passed": 0,
+      "new_unique_cases": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.057
+    }
+  ],
+  "limitations": [
+    "Not the full application suite",
+    "No live Windows/SolidWorks session",
+    "Manufacturer examples and model equations, not full standards certification"
+  ]
+}
