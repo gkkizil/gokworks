@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QTreeWidget
 
 from gui_qt.app import MODULES, PAGE_TYPES, MainWindow, create_application
 from modules.automatic_drawing import ui
-from modules.automatic_drawing.models import ModelInfo, Node, Source
+from modules.automatic_drawing.models import ModelInfo, Node, SheetBody, Source
 
 
 @pytest.fixture
@@ -69,6 +69,20 @@ def test_manual_configuration_edit_is_not_replaced_by_the_active_model_configura
     assert page.selected_sources() == (Source(source.path, 'Machined'),)
     page._analysis_item(ModelInfo(Source(source.path, 'Machined'), 'part', 'Part', (100, 50, 10)))
     assert page.tree.topLevelItemCount() == 1
+
+
+def test_analysis_shows_individual_sheet_thickness_material_and_unavailable_flat_without_extra_tree(window, tmp_path):
+    page = window.pages['automatic_drawing']
+    source = Source(str(tmp_path/'ORHAN.SLDPRT'), 'Default')
+    rows = [SheetBody(1, 'ORHAN-01', 'Sheet A', 'body-a', thickness_mm=1.2, material='STEEL-A',
+                      flat_ref='flat-a', configurations=('Flat-A',)),
+            SheetBody(2, 'ORHAN-02', 'Sheet B', 'body-b')]
+    page._analysis_item(ModelInfo(source, 'part', 'ORHAN', (100, 50, 20),
+                                  body_count=2, sheet_body_count=2, sheet_bodies=rows))
+    text = page.analysis_text.toPlainText()
+    assert 'ORHAN-01' in text and '1.2 mm' in text and 'STEEL-A' in text and 'Flat-A' in text
+    assert 'ORHAN-02' in text and 'Kalınlık okunamadı' in text and 'Doğrulanamadı' in text
+    assert len(page.findChildren(QTreeWidget)) == 1 and not window.jobs.busy
 
 
 def test_options_validation_reports_bad_scale_without_starting_a_com_job(window):

@@ -1,7 +1,9 @@
 """Polytropik pVⁿ=sabit gaz akümülatörü; bütün basınçlar içeride mutlak."""
-from .models import Accumulator
+import math
+
 from .catalogs import ACCUMULATORS_L, select_up
-from .validation import number, InputError
+from .models import Accumulator
+from .validation import InputError, number
 
 
 def accumulator_result(a: Accumulator) -> dict:
@@ -16,7 +18,11 @@ def accumulator_result(a: Accumulator) -> dict:
     p0 = .9 * p1 if a.precharge_pressure is None else a.precharge_pressure + a.atmospheric_pressure
     if not a.atmospheric_pressure < p0 < p1 < p2:
         raise InputError('accumulator.precharge_pressure', 'Mutlak basınçlarda atmosfer < p0 < p1 < p2 gerekli.')
-    required = a.delivery_volume / ((p0 / p1)**(1 / a.exponent) - (p0 / p2)**(1 / a.exponent))
+    # V1/V0 * (1 - (p1/p2)**(1/n)), factored to avoid subtracting
+    # almost equal gas volumes. log1p also preserves a small pressure rise.
+    volume_at_minimum = (p0 / p1)**(1 / a.exponent)
+    release_fraction = -math.expm1(-math.log1p((p2-p1)/p1) / a.exponent)
+    required = a.delivery_volume / (volume_at_minimum * release_fraction)
     nominal = select_up(required * 1000, ACCUMULATORS_L)
     return dict(status='calculated', required_volume=required,
                 nominal_volume=None if nominal is None else nominal / 1000,

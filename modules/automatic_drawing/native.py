@@ -9,7 +9,7 @@ import math
 from modules.cad_converter.api import ApiError, MODEL_IID
 from modules.tolerance_stack.solidworks_reader import nominal_value, DIMENSION_TYPES
 from .solidworks import call, get, put, prop, optional, values, variant, out_int, null_dispatch, as_interface
-from .models import Box, checkpoint, to_mm, to_m, degrees
+from .models import Box, Finding, checkpoint, to_mm, to_m, degrees, identity
 from .layout import arrange, place_texts, text_box, union
 from .validation import validate_views, validate_annotations
 
@@ -93,7 +93,7 @@ class NativeDrawing:
         if not call(self.drawing, 'SetupSheet6', *prefix, False, *zones):
             raise ApiError('Pafta / şablon ayarı SolidWorks tarafından reddedildi.')
         self.rebuild()
-        self.pages[plan.name] = {'plan': plan, 'views': {}, 'format': template_name, 'tables': []}
+        self.pages[plan.name] = {'plan': plan, 'views': {}, 'format': template_name, 'tables': [], 'notes': []}
         actual = self.sheet_state(plan.name)
         if abs(actual['width_mm']-plan.width_mm) > .05 or abs(actual['height_mm']-plan.height_mm) > .05:
             raise ApiError('Şablon seçilen pafta boyutunu uygulamadı; farklı boyutta çıktı üretilmedi.')
@@ -188,15 +188,79 @@ class NativeDrawing:
             parent = call(view, 'GetBaseView') if role in ('top', 'side') else None
             referenced = get(view, 'ReferencedDocument')
             referenced = as_interface(referenced, MODEL_IID) if referenced is not None else None
-            result.append(dict(role=role, name=str(call(view, 'GetName2')), outline=outline(view),
+            record = dict(role=role, name=str(call(view, 'GetName2')), outline=outline(view),
                 path=str(call(view, 'GetReferencedModelName') or ''),
                 model_available=referenced is not None,
                 resolved_path=str(call(referenced, 'GetPathName') or '') if referenced is not None else '',
                 configuration=str(get(view, 'ReferencedConfiguration') or ''),
                 parent=str(call(parent, 'GetName2')) if parent is not None else '',
                 main_name=main, flat=bool(call(view, 'IsFlatPatternView')) if role == 'flat' else False,
-                position=tuple(to_mm(v) for v in view_position(view))))
+                position=tuple(to_mm(v) for v in view_position(view)))
+            target = page.get('flat_body') if role == 'flat' else None
+            if target is not None:
+                from .sheetmetal import verify_unfolded
+                if referenced is None:
+                    raise ApiError('Gövde açınımının kaynak belgesi çözümlenemedi.')
+                verify_unfolded(self.session, referenced, target, target.configurations[0])
+                bodies = values(get(view, 'Bodies'))
+                record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
+                    body_references=tuple(self.session.persistent_ref(referenced, body) for body in bodies)
+                                    if referenced is not None else (),
+                    body_count=int(call(view, 'GetBodiesCount')), body_label=target.label)
+                bodies = ()
+            result.append(record)
         return result
+
+    def body_heading(self, name, row, area):
+        self.session.activate(self.model)
+        if not call(self.drawing, 'ActivateSheet', name):
+            raise ApiError('Gövde kimliği için pafta etkinleştirilemedi.')
+        call(self.model, 'ClearSelection2', True)
+        text = row.label
+        if row.thickness_mm is not None:
+            text += f'\nt = {row.thickness_mm:g} mm'
+        if row.material:
+            text += '\n'+row.material
+        note = call(self.model, 'InsertNote', text)
+        if note is None:
+            raise ApiError('Açınım paftasına gövde kimliği yazılamadı.')
+        annotation = call(note, 'GetAnnotation')
+        # ActivateView cannot activate a sheet. Attach the selected native note
+        # explicitly to the SHEET so it cannot follow/scale with a body view.
+        if not call(annotation, 'Select3', False, null_dispatch()) or not call(
+                self.drawing, 'AttachAnnotation', self.session.c('swAttachAnnotationOption_Sheet')):
+            raise ApiError('Gövde kimliği görünüş yerine paftaya bağlanamadı.')
+        call(self.model, 'ClearSelection2', True)
+        text_format = call(annotation, 'GetTextFormat', 0)
+        if text_format is None:
+            raise ApiError('Gövde kimliği yazı biçimi okunamadı.')
+        put(text_format, 'CharHeight', .003)
+        if not call(annotation, 'SetTextFormat', 0, False, text_format):
+            raise ApiError('Gövde kimliği yazı boyutu uygulanamadı.')
+        if not call(annotation, 'SetPosition2', to_m(area.x+1.), to_m(area.top-4.), 0.):
+            raise ApiError('Gövde kimliği ayrılan alana yerleştirilemedi.')
+        note_name = str(call(note, 'GetName') or '')
+        if not note_name:
+            raise ApiError('Gövde kimliği anotasyonunun native adı okunamadı.')
+        self.pages[name]['notes'].append(dict(handle=note, name=note_name, text=text, area=area))
+
+    def notes(self, name):
+        records, findings = [], []
+        for target in self.pages[name].get('notes', ()):
+            note = target['handle']
+            text = str(call(note, 'GetText') or '').replace('\r\n', '\n').replace('\r', '\n')
+            if text != target['text']:
+                findings.append(Finding('FAIL', 'body_heading', 'Gövde kimliği / kalınlık notu değişmiş.', name))
+            annotation = call(note, 'GetAnnotation')
+            box, estimated = annotation_box(annotation)
+            if box is None:
+                findings.append(self._warning('heading_bounds', 'Gövde kimliği metin sınırları okunamadı.', name))
+            elif not target['area'].contains(box):
+                findings.append(Finding('FAIL', 'heading_outside', 'Gövde kimliği ayrılan başlık alanına sığmıyor.', name))
+            if estimated:
+                findings.append(self._warning('heading_estimate', 'Gövde kimliği metin genişliği tahmin içeriyor.', name))
+            records.append(dict(name=target['name'], text=text, box=box, area=target['area']))
+        return records, findings
 
     def dimensions(self, name, roles=None):
         page = self.pages[name]
@@ -205,6 +269,7 @@ class NativeDrawing:
         for role, view in page['views'].items():
             if roles is not None and role not in roles:
                 continue
+            configuration = str(get(view, 'ReferencedConfiguration') or '')
             display = call(view, 'GetFirstDisplayDimension5')
             seen = set()
             while display is not None:
@@ -222,7 +287,7 @@ class NativeDrawing:
                 kind = DIMENSION_TYPES.get(get(display, 'Type2'), 'unknown')
                 value, box, estimated = None, None, False
                 try:
-                    raw_value = float(nominal_value(dimension, self.info.source.configuration, reference))
+                    raw_value = float(nominal_value(dimension, configuration, reference))
                     value = degrees(raw_value) if kind == 'angle' else to_mm(raw_value)
                 except Exception:
                     pass  # validator explicitly reports unreadable numbers
@@ -236,7 +301,8 @@ class NativeDrawing:
                 self.annotations[key] = annotation
                 result.append(dict(key=key, name=selection, owner=role, box=box, estimated=estimated,
                     value=value, kind=kind, reference=reference, dangling=dangling,
-                    model_identity=(self.info.source.key, model_name, kind, reference) if model_name else None,
+                    model_identity=(identity(self.info.source.path, configuration), model_name, kind, reference)
+                                   if model_name else None,
                     position=tuple(float(v) for v in position)))
                 display = call(display, 'GetNext5')
         return result
@@ -319,43 +385,33 @@ class NativeDrawing:
     def fit(self, name, *, include_dimensions=False):
         """Refit measured native outlines, preserving projected view links."""
         page, options = self.pages[name], self.options
-        original_scale = self.sheet_state(name)['scale']
-        actual = self.actual_views(name)
-        records = self.dimensions(name) if include_dimensions else []
-        sizes = {v['role']: union([v['outline']]+[r['box'] for r in records
-                 if r['owner'] == v['role'] and r['box'] is not None]) for v in actual}
         scales = ((options.manual_scale,) if options.manual_scale is not None else
                   tuple(sorted(set(options.scales), reverse=True)))
         for scale in scales:
             checkpoint(self.stop)
-            own = page['plan'].view_scales      # views with their own scale keep their size
-            predicted = {role: box if role in own else Box(0, 0, box.width*scale/original_scale,
-                                   box.height*scale/original_scale) for role, box in sizes.items()}
-            if arrange(page['plan'].views, scale, page['plan'].usable, options, measured=predicted) is None:
-                continue
+            # SetScale scales annotation positions, but keeps paper-space text
+            # size fixed. Scaling a geometry+text union can reject a valid scale.
             self.set_scale(name, scale)
             for attempt in range(3):
                 actual = self.actual_views(name)
                 records = self.dimensions(name) if include_dimensions else []
                 measured = {v['role']: union([v['outline']]+[r['box'] for r in records
                             if r['owner'] == v['role'] and r['box'] is not None]) for v in actual}
-                planned = arrange(page['plan'].views, scale, page['plan'].usable, options, measured=measured)
+                planned = arrange(page['plan'].views, scale, page['plan'].usable, options,
+                                  measured=measured, positions={v['role']: v['position'] for v in actual})
                 if planned is None:
                     break
-                for target in planned:  # Move parent first; remeasure children after it moves.
-                    current = self.actual_views(name, roles=(target.role,))[0]
-                    dimensions = self.dimensions(name, roles=(target.role,)) if include_dimensions else []
-                    bounds = union([current['outline']]+[r['box'] for r in dimensions
-                                   if r['owner'] == target.role and r['box'] is not None])
-                    dx, dy = target.center[0]-bounds.center[0], target.center[1]-bounds.center[1]
+                for target in planned:  # Absolute native origins; parent precedes its children.
                     view = page['views'][target.role]
-                    position = view_position(view)
-                    put(view, 'Position', variant(0x2005, (float(position[0])+to_m(dx),
-                        float(position[1])+to_m(dy))))
+                    put(view, 'Position', variant(0x2005, tuple(to_m(v) for v in target.center)))
                 self.rebuild()
                 actual = self.actual_views(name)
-                if all(page['plan'].usable.contains(v['outline']) for v in actual) and not any(
-                        a['outline'].overlaps(b['outline']) for i, a in enumerate(actual) for b in actual[i+1:]):
+                records = self.dimensions(name) if include_dimensions else []
+                bounds = [union([v['outline']]+[r['box'] for r in records
+                          if r['owner'] == v['role'] and r['box'] is not None]).grow(options.annotation_padding_mm)
+                          for v in actual]
+                if all(page['plan'].usable.contains(b) for b in bounds) and not any(
+                        a.overlaps(b) for i, a in enumerate(bounds) for b in bounds[i+1:]):
                     page['plan'].views = planned
                     return
         raise ApiError('Gerçek görünüş / ölçü sınırları paftaya sığdırılamadı; dosya başarılı sayılmadı.')
@@ -401,6 +457,15 @@ class NativeDrawing:
     def validate(self):
         findings, snapshots = [], []
         for name, page in self.pages.items():
+            if page.get('flat_body') is not None:
+                from .sheetmetal import verify_metadata
+                source = get(page['views']['flat'], 'ReferencedDocument')
+                if source is not None:
+                    source = as_interface(source, MODEL_IID)
+                    if identity(call(source, 'GetPathName'))[0] != self.info.source.key[0]:
+                        raise ApiError('Açınımın kaynak belge kimliği eşleşmedi; farklı belgeye işlem uygulanmadı.')
+                    verify_metadata(self.session, source, page['flat_body'], self.info)
+                source = None
             state = self.sheet_state(name)
             state.update(expected=[v.role for v in page['plan'].views],
                          usable=page.get('validation_area', page['plan'].usable))
@@ -422,7 +487,9 @@ class NativeDrawing:
                     raise ApiError('BOM tablosu pafta / antet güvenli alanı dışında.')
                 if any(table.overlaps(v['outline']) for v in actual):
                     raise ApiError('BOM tablosu görünüşle çakışıyor.')
-            snapshots.append(dict(**state, views=actual, dimensions=records))
+            notes, note_findings = self.notes(name)
+            findings.extend(note_findings)
+            snapshots.append(dict(**state, views=actual, dimensions=records, notes=notes))
         return findings, snapshots
 
     def verify_saved(self, path, snapshots):
@@ -441,6 +508,10 @@ class NativeDrawing:
                     raise ApiError('Kaydedilen pafta açılamadı: '+name)
                 expected = {v['name']: v['role'] for v in state['views']}
                 view = call(drawing, 'GetFirstView')  # The first entry is the sheet itself.
+                note_handles = {}
+                if state.get('notes'):
+                    for note in values(call(view, 'GetNotes')):
+                        note_handles[str(call(note, 'GetName'))] = note
                 view = call(view, 'GetNextView') if view is not None else None
                 handles, tables = {}, []
                 while view is not None:
@@ -471,7 +542,12 @@ class NativeDrawing:
                 if len(tables) != len(original['tables']):
                     raise ApiError('BOM tablosu kaydedilen teknik resimde bulunamadı veya tekrarlı.')
                 check.pages[name] = dict(plan=original['plan'], views=handles, tables=tables,
-                    format=original['format'], validation_area=state['usable'])
+                    format=original['format'], validation_area=state['usable'], flat_body=original.get('flat_body'),
+                    notes=[])
+                for target in state.get('notes', ()):
+                    if target['name'] not in note_handles:
+                        raise ApiError('Gövde kimliği / kalınlık notu kaydedilen teknik resimde bulunamadı.')
+                    check.pages[name]['notes'].append(dict(target, handle=note_handles[target['name']]))
                 actual_state = check.sheet_state(name)
                 for key in ('width_mm', 'height_mm', 'scale'):
                     if not math.isclose(actual_state[key], state[key], rel_tol=1e-7, abs_tol=.001):
@@ -518,6 +594,7 @@ class NativeDrawing:
         self.annotations.clear()
         for page in self.pages.values():
             page['views'].clear()
+            page.get('notes', []).clear()
         self.drawing = None
         if self.model is not None:
             model, self.model = self.model, None

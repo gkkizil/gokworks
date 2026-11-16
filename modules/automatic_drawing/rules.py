@@ -64,8 +64,8 @@ def score_views(info):
     """
     size = info.size_mm
     diagonal = max(math.sqrt(sum(x*x for x in size)), 1e-9)
-    total_planar = max(sum(f.area_mm2 for f in info.faces if f.kind == 'plane'), 1.)
-    total_cyl = max(sum(f.area_mm2 for f in info.faces if f.kind == 'cylinder'), 1.)
+    total_planar = sum(f.area_mm2 for f in info.faces if f.kind == 'plane') or 1.
+    total_cyl = sum(f.area_mm2 for f in info.faces if f.kind == 'cylinder') or 1.
     scores = []
     for name, (a, b, normal) in VIEW_AXES.items():
         area = size[a]*size[b] / diagonal**2

@@ -100,7 +100,10 @@ def angle(d):
     b, h, t, r1 = d['b'], d.get('h', d['b']), d['t'], d.get('r1', 0.0)
     _require(t < min(b, h), 'Köşebent kalınlığı iki kol ölçüsünden de küçük olmalı.')
     r2 = r1 / 2
-    _require(r1 <= min(b, h) - t, 'Kök yarıçapı kol iç uzunluğundan büyük olamaz.')
+    # Each 90° arc consumes its radius along both adjacent straight edges.
+    # The toe must fit within t, and root+toe must fit on each inner leg.
+    _require(r2 <= t, 'Uç yarıçapı r₂ = r₁/2 kol kalınlığından büyük olamaz.')
+    _require(r1+r2 <= min(b, h)-t, 'Kök ve uç yarıçapları aynı kol üzerinde çakışıyor.')
     notes = [f'Kök yarıçapı r₁ = {r1:g} mm, uç yarıçapı r₂ = r₁/2 = {r2:g} mm'] if r1 else []
     return t * (b + h - t) + (1 - math.pi / 4) * (r1 ** 2 - 2 * r2 ** 2), notes
 

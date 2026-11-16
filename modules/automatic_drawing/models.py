@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 import math
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SCALES = (5., 2., 1., .5, .4, .2, .1, .05, .02, .01)
 PAPERS = {'A4': (297., 210.), 'A3': (420., 297.), 'A2': (594., 420.),
           'A1': (841., 594.), 'A0': (1189., 841.)}
@@ -84,6 +84,29 @@ class FaceEvidence:
 
 
 @dataclass
+class SheetBody:
+    """Plain manufacturing evidence; names are labels, persistent IDs are identity."""
+    index: int
+    label: str
+    name: str
+    body_ref: str
+    size_mm: tuple = ()
+    cut_list: str = ''
+    cut_list_ref: str = ''
+    cut_list_quantity: int | None = None
+    flat_ref: str = ''
+    flat_feature: str = ''
+    configurations: tuple = ()
+    thickness_mm: float | None = None
+    material: str = ''
+    warnings: list = field(default_factory=list)
+
+    @property
+    def ready(self):
+        return bool(self.body_ref and self.flat_ref and len(self.configurations) == 1)
+
+
+@dataclass
 class ModelInfo:
     source: Source
     kind: str
@@ -107,6 +130,7 @@ class ModelInfo:
     revision: str = ''
     fingerprint: tuple = ()
     memory_stamp: int | None = None
+    sheet_bodies: list = field(default_factory=list)
 
 
 @dataclass(frozen=True)

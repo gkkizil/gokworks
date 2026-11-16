@@ -18,7 +18,7 @@ from modules.profile_cutting.solidworks import Session as ReadSession, values
 from modules.tolerance_stack.com import call as _call, get as _get, invoke, variant, out_int
 from modules.tolerance_stack.com import put as put, null_dispatch as null_dispatch
 
-from .models import (FaceEvidence, ModelInfo, Node, Source, checkpoint, finite, identity, to_mm)
+from .models import (SCHEMA_VERSION, FaceEvidence, ModelInfo, Node, Source, checkpoint, finite, identity, to_mm)
 from .outputs import fingerprint
 from .rules import classify
 
@@ -229,6 +229,29 @@ class Session(ReadSession):
         value = optional(model, 'GetUpdateStamp')
         return int(value) if type(value) is int else None
 
+    def persistent_ref(self, model, obj):
+        # Preserve RPC/busy failures; the general read adapter's optional helper
+        # treats every exception as missing data, which is unsafe for identity.
+        import base64
+        data = optional(get(model, 'Extension'), 'GetPersistReference3', obj, default=())
+        if not data:
+            return ''
+        return 'persist:'+base64.b64encode(bytes(int(v) & 255 for v in data)).decode('ascii')
+
+    def property_values(self, manager):
+        result = {}
+        for name in values(call(manager, 'GetNames')):
+            raw, resolved = variant(0x4008, ''), variant(0x4008, '')
+            good, linked = variant(0x400B, False), variant(0x400B, False)
+            status = call(manager, 'Get6', str(name), False, raw, resolved, good, linked)
+            if isinstance(status, (tuple, list)):
+                if len(status) != 5:
+                    raise ApiError('Custom Property Get6 çıktı sözleşmesi geçersiz.')
+                status, raw.value, resolved.value, good.value, linked.value = status
+            if status == self.c('swCustomInfoGetResult_ResolvedValue') and good.value:
+                result[str(name)] = str(resolved.value or raw.value or '')
+        return result
+
     def properties(self, model, configuration):
         result = {}
         extension = manager = None
@@ -236,16 +259,7 @@ class Session(ReadSession):
             extension = get(model, 'Extension')
             for config in ('', configuration):
                 manager = prop(extension, 'CustomPropertyManager', config)
-                for name in values(call(manager, 'GetNames')):
-                    raw, resolved = variant(0x4008, ''), variant(0x4008, '')
-                    good, linked = variant(0x400B, False), variant(0x400B, False)
-                    status = call(manager, 'Get6', str(name), False, raw, resolved, good, linked)
-                    if isinstance(status, (tuple, list)):
-                        if len(status) != 5:
-                            raise ApiError('Custom Property Get6 çıktı sözleşmesi geçersiz.')
-                        status, raw.value, resolved.value, good.value, linked.value = status
-                    if status == self.c('swCustomInfoGetResult_ResolvedValue') and good.value:
-                        result[str(name)] = str(resolved.value or raw.value or '')
+                result.update(self.property_values(manager))
             return result
         finally:
             extension = manager = model = None
@@ -314,7 +328,7 @@ class Session(ReadSession):
         stamp = fingerprint(path)
         memory = self.memory_stamp(model)
         clean = call(model, 'GetSaveFlag') is False
-        key = source.key, stamp, memory, self.revision, 1
+        key = source.key, stamp, memory, self.revision, SCHEMA_VERSION
         if clean and memory is not None and key in self.analysis_cache:
             return copy.deepcopy(self.analysis_cache[key])
         assembly = call(model, 'GetType') == self.c('swDocASSEMBLY')
@@ -338,11 +352,14 @@ class Session(ReadSession):
         info.source_unit = self.display_unit(model)
         kinds, names, thicknesses = Counter(), set(), set()
         feature = definition = None
+        sheet_features = []
         try:
             for feature, name, kind in feature_tree(model, stop):
                 if (name, kind) in names:
                     continue
                 names.add((name, kind)); kinds[kind] += 1
+                if kind in ('FlatPattern', 'CutListFolder'):
+                    sheet_features.append((name, kind, self.persistent_ref(model, feature)))
                 if 'sheetmetal' in kind.casefold():
                     definition = call(feature, 'GetDefinition')
                     thickness = optional(definition, 'Thickness', property=True)
@@ -392,6 +409,16 @@ class Session(ReadSession):
             material = optional(specific, 'GetMaterialPropertyName2', configuration, database)
             if material and isinstance(material, str):
                 info.properties.setdefault('Material', material)
+            if info.sheet_body_count:
+                from .sheetmetal import inspect_bodies
+                info.sheet_bodies = inspect_bodies(self, model, info, sheet_features, stop)
+                info.flat_configurations = tuple(sorted({name for row in info.sheet_bodies
+                                                         for name in row.configurations}))
+                for row in info.sheet_bodies:
+                    info.warnings.extend(row.label+': '+text for text in row.warnings)
+                if len({row.material for row in info.sheet_bodies if row.material}) > 1:
+                    info.warnings.append('Sac gövdeleri farklı malzemelerde. Gövde başlıkları ayrı yazılır; '
+                                         'firma antetindeki ortak model malzemesini kontrol edin.')
         mass = optional(get(model, 'Extension'), 'CreateMassProperty')
         if mass is not None:
             m, v = optional(mass, 'Mass', property=True), optional(mass, 'Volume', property=True)

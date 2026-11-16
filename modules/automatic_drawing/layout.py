@@ -12,52 +12,63 @@ class LayoutError(ValueError):
 
 def usable_area(width, height, options):
     margin, title = options.margin_mm, options.title_height_mm
-    area = Box(margin, margin+title, width-2*margin, height-2*margin-title)
-    if area.width <= 0 or area.height <= 0:
+    usable_width, usable_height = width-2*margin, height-2*margin-title
+    if usable_width <= 0 or usable_height <= 0:
         raise ValueError('Kenar boşluğu ve antet paftada görünüş alanı bırakmıyor.')
-    return area
+    return Box(margin, margin+title, usable_width, usable_height)
 
 
-def arrange(views, scale, area, options, *, measured=None):
+def arrange(views, scale, area, options, *, measured=None, positions=None):
     """Aligned 2x2 orthographic group, with native anchor offsets when available.
 
     First angle: top BELOW main, right-side view LEFT of main.
     Third angle: top ABOVE main, right-side view RIGHT of main.
     """
     roles = {v.role: v for v in views}
-    if len(views) == 1:
-        view = views[0]
-        size = ((measured[view.role].width, measured[view.role].height)
-                if measured and view.role in measured else
-                (view.footprint[0]*scale, view.footprint[1]*scale))
-        pad = options.annotation_padding_mm
-        if size[0]+2*pad <= area.width and size[1]+2*pad <= area.height:
-            return [replace(view, center=area.center)]
-        return None
-    if 'main' not in roles:
+    if not views or len(roles) != len(views):
+        raise ValueError('Yerleşim için benzersiz görünüşler gerekli.')
+    if len(views) > 1 and 'main' not in roles:
         raise ValueError('Ana görünüş olmadan izdüşüm yerleşimi yapılamaz.')
     pad, gap = options.annotation_padding_mm, options.gap_mm
-    sizes = {role: ((measured[role].width, measured[role].height)
-                    if measured and role in measured else
-                    (view.footprint[0]*scale, view.footprint[1]*scale))
-             for role, view in roles.items()}
-    centers = {'main': (0., 0.)}
-    if 'side' in roles:
-        distance = (sizes['main'][0]+sizes['side'][0])/2 + 2*pad + gap
-        centers['side'] = ((-1 if options.projection == 'first' else 1)*distance, 0.)
-    if 'top' in roles:
-        distance = (sizes['main'][1]+sizes['top'][1])/2 + 2*pad + gap
-        centers['top'] = (0., (-1 if options.projection == 'first' else 1)*distance)
-    if 'isometric' in roles:
-        dx = max((sizes['main'][0]+sizes['isometric'][0])/2+2*pad+gap,
-                 abs(centers.get('side', (0., 0.))[0]))
-        dy = max((sizes['main'][1]+sizes['isometric'][1])/2+2*pad+gap,
-                 abs(centers.get('top', (0., 0.))[1]))
-        centers['isometric'] = ((-1 if options.projection == 'first' else 1)*dx,
-                                (-1 if options.projection == 'first' else 1)*dy)
-    boxes = {r: Box(c[0]-sizes[r][0]/2-pad, c[1]-sizes[r][1]/2-pad,
-                    sizes[r][0]+2*pad, sizes[r][1]+2*pad)
-             for r, c in centers.items()}
+    local = {}
+    for role, view in roles.items():
+        if measured and role in measured:
+            box = measured[role]
+            # Text can extend on only one side of a view. Its union's centre
+            # is not the native IView.Position used for projection alignment.
+            origin = positions[role] if positions is not None else box.center
+            box = box.shifted(-origin[0], -origin[1])
+        else:
+            width, height = (v*scale for v in view.footprint)
+            box = Box(-width/2, -height/2, width, height)
+        local[role] = box.grow(pad)
+    centers = {views[0].role if len(views) == 1 else 'main': (0., 0.)}
+    sign = -1 if options.projection == 'first' else 1
+
+    def separation(first, second, axis):
+        if axis == 0:
+            return first.right-second.x+gap if sign > 0 else first.x-second.right-gap
+        return first.top-second.y+gap if sign > 0 else first.y-second.top-gap
+
+    if len(views) > 1 and 'side' in roles:
+        centers['side'] = (separation(local['main'], local['side'], 0), 0.)
+    if len(views) > 1 and 'top' in roles:
+        distance = separation(local['main'], local['top'], 1)
+        if 'side' in centers:
+            side = local['side'].shifted(*centers['side'])
+            if side.overlaps(local['top'].shifted(0., distance), gap):
+                distance = sign*max(sign*distance, sign*separation(side, local['top'], 1))
+        centers['top'] = (0., distance)
+    if len(views) > 1 and 'isometric' in roles:
+        iso = local['isometric']
+        dx = sign*max([sign*centers.get('side', (0., 0.))[0]]+
+                      [sign*separation(local[r].shifted(*centers[r]), iso, 0)
+                       for r in ('main', 'top') if r in centers])
+        dy = sign*max([sign*centers.get('top', (0., 0.))[1]]+
+                      [sign*separation(local[r].shifted(*centers[r]), iso, 1)
+                       for r in ('main', 'side') if r in centers])
+        centers['isometric'] = (dx, dy)
+    boxes = {r: local[r].shifted(*c) for r, c in centers.items()}
     left, right = min(b.x for b in boxes.values()), max(b.right for b in boxes.values())
     bottom, top = min(b.y for b in boxes.values()), max(b.top for b in boxes.values())
     if right-left > area.width+.001 or top-bottom > area.height+.001:
@@ -85,7 +96,12 @@ def _best_on(views, options, paper, name):
     """Largest sheet scale for the orthographic views on ``paper``; the isometric may step down on its own."""
     width, height = ((options.custom_width_mm, options.custom_height_mm)
                      if paper == 'custom' else PAPERS[paper])
-    area = usable_area(width, height, options)
+    try:
+        area = usable_area(width, height, options)
+    except ValueError:      # margins + title leave no room on this sheet (Codex, e54f50b)
+        if options.paper == 'auto':
+            return None
+        raise
     preferred = tuple(sorted(set(float(v) for v in options.scales), reverse=True))
     scales = (options.manual_scale,) if options.manual_scale is not None else preferred
     isometric = any(v.role == 'isometric' for v in views) and len(views) > 1

@@ -57,13 +57,19 @@ bırakma onayı değildir. Belirsiz veya eksik imalat bilgileri raporlanır.
   ölçü metni yerleşimi ve kayıt sonrası yeniden denetim.
 - Üç BOM tipi; gerçek bileşen kimlikleri, örnek adetleri ve görünen adet
   sütunu karşılaştırması. BOM’a bağlı balonlar seçilebilir.
-- Tek gövdeli sac için mevcut, doğru üst konfigürasyona bağlı açınım
-  konfigürasyonu varsa ek pafta. Çok gövdeli sac açınımı henüz desteklenmez.
+- Tek / çok gövdeli sac için gövde–Cut List–FlatPattern kimliklerini okuma;
+  doğrulanmış mevcut açınım konfigürasyonlarıyla her gövdeye ayrı pafta.
+  Üç gövdeli ORHAN parçasında pafta üzerindeki kimlikler ORHAN-01,
+  ORHAN-02, ORHAN-03 olur. Bunlar aynı SLDDRW / PDF’in ayrı paftalarıdır.
+- Gövdeye ait kalınlık / malzeme ve görünüşte gerçekten tek doğru gövdenin
+  bulunduğunu kayıt sonrası yeniden denetleme. Eksik / belirsiz eşleşmede
+  o gövdenin açınımı atlanır; kaynakta yeni konfigürasyon oluşturulmaz.
 - Kaynak ve açık belgeleri koruma; iptal, başarısız dosyayı ayırma,
   benzersiz dosya / konfigürasyon kuyruğu ve aşama raporu.
 
-Kesit / detay oluşturma, tam delik / diş / PCD tanıma, çok gövdeli sac
-eşleştirmesi ve tüm geometriye üretim ölçüsü oluşturma tamamlanmış değildir.
+Kesit / detay oluşturma, tam delik / diş / PCD tanıma ve tüm geometriye
+üretim ölçüsü oluşturma tamamlanmış değildir. Çok gövdeli açınımın canlı
+SolidWorks kabulü ayrıca gereklidir.
 Bkz. [bilinen sınırlar](../../docs/automatic-drawing/KNOWN_LIMITATIONS.md).
 
 ## Testler
@@ -77,6 +83,14 @@ Gerçek Windows / SolidWorks kabul testi ayrıca etkinleştirilir:
 ~~~powershell
 $env:GOKWORKS_DRAWING_LIVE_SOURCE = 'C:\fixtures\Plate.SLDPRT'
 $env:GOKWORKS_DRAWING_LIVE_TEMPLATE = 'C:\templates\Company-A3.drwdot'
+python -m pytest modules/automatic_drawing/tests/test_live_solidworks.py -v
+~~~
+
+Çok gövdeli sac kabulü için ayrıca mevcut gövde açınım konfigürasyonları
+hazır bir fixture seçilir:
+
+~~~powershell
+$env:GOKWORKS_DRAWING_LIVE_MULTIBODY_SOURCE = 'C:\fixtures\ORHAN.SLDPRT'
 python -m pytest modules/automatic_drawing/tests/test_live_solidworks.py -v
 ~~~
 

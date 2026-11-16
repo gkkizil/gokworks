@@ -39,6 +39,11 @@ def validate_views(sheet, actual, source, *, flat_configurations=(), projection=
             if config not in flat_configurations or not view.get('flat'):
                 findings.append(Finding('FAIL', 'flat_link', 'Açınımın konfigürasyonu / FlatPattern durumu doğrulanamadı.',
                                         sheet['name'], label))
+            if view.get('expected_body') and (
+                    tuple(view.get('body_references', ())) != (view['expected_body'],) or
+                    view.get('body_count') != 1 or config != view.get('expected_flat_configuration')):
+                findings.append(Finding('FAIL', 'flat_body', 'Açınım görünüşü istenen tek sac gövdesine bağlı değil.',
+                                        sheet['name'], label))
         elif config != source.configuration:
             findings.append(Finding('FAIL', 'configuration', 'Görünüş yanlış konfigürasyona bağlı.',
                                     sheet['name'], label))
@@ -50,6 +55,12 @@ def validate_views(sheet, actual, source, *, flat_configurations=(), projection=
             if abs(view['position'][axis]-main_position[axis]) > .05:
                 findings.append(Finding('FAIL', 'projection_alignment', 'İzdüşüm ana görünüşle aynı eksende değil.',
                                         sheet['name'], label))
+            method = projection or sheet.get('projection')
+            if method in ('first', 'third'):
+                direction = view['position'][1-axis]-main_position[1-axis]
+                if direction*(-1 if method == 'first' else 1) <= 0:
+                    findings.append(Finding('FAIL', 'projection_direction',
+                        'İzdüşüm seçilen birinci/üçüncü açı yöntemine göre yanlış tarafta.', sheet['name'], label))
     for first, second in combinations(actual, 2):
         a, b = first.get('outline'), second.get('outline')
         if a is not None and b is not None and a.overlaps(b):
