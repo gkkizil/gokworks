@@ -192,7 +192,7 @@ class NativeDrawing:
                     raise ApiError('İzdüşüm ana görünüşün konfigürasyonunu devralmadı.')
             else:
                 put(view, 'ReferencedConfiguration', self.info.source.configuration)
-            put(view, 'UseSheetScale', True)
+            put(view, 'UseSheetScale', 1)
             page['views'][view_plan.role] = view
         self.set_scale(plan.name, plan.scale)
         for role, scale in list(plan.view_scales.items()):
@@ -235,14 +235,14 @@ class NativeDrawing:
         view = self.pages[plan.name]['views'].get(role)
         ratio = (scale, 1.) if scale >= 1 else (1., 1/scale)
         try:
-            put(view, 'UseSheetScale', False)
+            put(view, 'UseSheetScale', 0)
             put(view, 'ScaleRatio', variant(0x2005, ratio))
             self.rebuild()
             actual = values(get(view, 'ScaleRatio'))
             if len(actual) < 2 or not math.isclose(float(actual[0])/float(actual[1]), scale, rel_tol=1e-6):
                 raise ApiError('görünüş ölçeği okunamadı')
         except Exception as error:      # keep the drawing valid: fall back to the sheet scale
-            put(view, 'UseSheetScale', True); self.rebuild()
+            put(view, 'UseSheetScale', 1); self.rebuild()
             plan.view_scales.pop(role, None)
             self.result.warn('view_scale', f'{role} görünüşüne ayrı ölçek uygulanamadı; pafta ölçeği kullanıldı ({error}).',
                              plan.name)
@@ -532,7 +532,8 @@ class NativeDrawing:
                 continue
             self.select_view(view)
             call(view, 'AutoInsertCenterMarks2', mask, 0, True, True, True, 0., 0., False, True, 0.)
-            count += int(call(view, 'GetCenterMarkCount2', out_int()))   # out Size: array size, not the count
+            marks = call(view, 'GetCenterMarkCount2', out_int())   # [out] Size is unused; the result is the count
+            count += int(marks[0] if isinstance(marks, tuple) else marks)
         self.result.measurements.setdefault('center_marks', {})[name] = count
         call(self.model, 'ClearSelection2', True)
 
