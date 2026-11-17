@@ -379,3 +379,40 @@ def test_rejected_view_scale_falls_back_to_the_sheet_scale_with_a_warning(case):
     iso = case.native.pages[plan.name]['views']['isometric']
     assert iso.properties['UseSheetScale'] is True and plan.view_scales == {}
     assert [f.severity for f in case.result.findings if f.code == 'view_scale'] == ['WARNING']
+
+
+def test_sheet_scale_is_sent_as_the_whole_number_ratio_solidworks_stores():
+    from modules.automatic_drawing.native import scale_ratio
+    assert scale_ratio(.5) == (1., 2.) and scale_ratio(.4) == (2., 5.) and scale_ratio(2.5) == (5., 2.)
+    assert scale_ratio(1.) == (1., 1.) and scale_ratio(.02) == (1., 50.)
+
+
+def test_whole_number_ratio_reaches_setupsheet6_and_setscale(case):
+    options = replace(case.options, manual_scale=.4); case.native.options = options
+    plan = plan_sheet(plan_views(case.info, options), options)
+    case.native.create('fake.drwdot', plan)
+    setup = next(args for name, flags, args in case.drawing.calls if name == 'SetupSheet6')
+    assert setup[3:5] == (2., 5.)
+    case.native.set_scale(plan.name, .5)
+    assert case.native.sheet_state(plan.name)['scale'] == .5
+    assert case.state['props'][2:4] == [1., 2.]
+
+
+def test_a_refused_sheet_setup_tries_the_next_combination_and_reports_it(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    accept = case.drawing.methods['SetupSheet6']; seen = []
+    def refuse_empty_view_name(*args):
+        seen.append(args[9])
+        return accept(*args) if args[9] == 'Default' else False
+    case.drawing.methods['SetupSheet6'] = refuse_empty_view_name
+    case.native.create('fake.drwdot', plan)
+    assert seen == ['', 'Default']
+    assert case.result.measurements['sheet_setup'] == {plan.name: 'default_view'}
+    assert [f.code for f in case.result.findings if f.severity == 'WARNING'].count('sheet_setup') == 1
+
+
+def test_a_sheet_setup_refused_every_way_names_the_refused_values(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.drawing.methods['SetupSheet6'] = lambda *args: False
+    with pytest.raises(ApiError, match=r'reddedildi\. Pafta "Genel görünüşler", 420 × 297 mm, ölçek \d+:\d+, 1\. açı'):
+        case.native.create('fake.drwdot', plan)
