@@ -129,3 +129,16 @@ def test_existing_special_plan_keeps_its_live_circuit_and_cylinder_route(page, t
     page.quick.schematic.nodeClicked.emit('cylinder')
     assert page.input_stack.currentIndex() == 1 and page.tabs.currentIndex() == 0
     assert page.project == original
+
+
+def test_a_theme_change_recolours_the_issue_list_without_rebuilding_it(page):
+    page.quick.calculate()
+    page.show_result()
+    items = [page.issue_list.item(i) for i in range(page.issue_list.count())]
+    assert items                                   # the example project reports issues
+    before = [item.foreground().color().name() for item in items]
+    page.context.appearance = 'light' if page.context.appearance == 'dark' else 'dark'
+    page.theme_changed()
+    after = [page.issue_list.item(i) for i in range(page.issue_list.count())]
+    assert all(a is b for a, b in zip(items, after)) and len(after) == len(items)   # same items, not rebuilt
+    assert [item.foreground().color().name() for item in after] != before
