@@ -82,6 +82,47 @@ def placed_gears(spec,target='pair'):
         return shapes
 
 
+def boolean(kind, shape, tool, *, glue=False):
+    """One OCCT boolean (``fuse`` / ``cut``), computed ONCE.
+
+    ``BRepAlgoAPI_Fuse(a, b)`` already builds in its constructor; a following
+    ``Build()`` computed the whole boolean a second time. ``glue=True`` is for
+    solids that only share coincident faces (the two halves of a herringbone):
+    OCCT then skips the general intersection. The glued result must be one valid
+    solid with the summed volume, otherwise the full boolean is used.
+    """
+    from OCP.BRepAlgoAPI import BRepAlgoAPI_Cut, BRepAlgoAPI_Fuse
+    try:
+        from OCP.TopTools import TopTools_ListOfShape
+    except ImportError:  # OCCT 8 bindings
+        from OCP.collections import List_TopoDS_Shape as TopTools_ListOfShape
+    def run(glued):
+        op = {'fuse': BRepAlgoAPI_Fuse, 'cut': BRepAlgoAPI_Cut}[kind]()
+        arguments, tools = TopTools_ListOfShape(), TopTools_ListOfShape()
+        arguments.Append(shape); tools.Append(tool)
+        op.SetArguments(arguments); op.SetTools(tools)
+        if glued:
+            from OCP.BOPAlgo import BOPAlgo_GlueFull
+            op.SetGlue(BOPAlgo_GlueFull)
+        op.Build()
+        return op.Shape() if op.IsDone() else None
+    if glue and kind == 'fuse':
+        result = run(True)
+        if result is not None:
+            from OCP.BRepGProp import BRepGProp
+            from OCP.GProp import GProp_GProps
+            def volume(item):
+                props = GProp_GProps(); BRepGProp.VolumeProperties_s(item, props); return props.Mass()
+            expected = volume(shape)+volume(tool)
+            try:
+                stats = shape_stats(result)       # validity, solid count, volume
+            except ValueError:
+                stats = None
+            if stats and stats['solids'] == 1 and abs(stats['volume_mm3']-expected) <= 1e-7*max(1., expected):
+                return result
+    return run(False)
+
+
 def compound(shapes):
     from OCP.BRep import BRep_Builder
     from OCP.TopoDS import TopoDS_Compound

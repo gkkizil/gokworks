@@ -6,6 +6,19 @@ facets remain facets; thickening does not invent a forming or bend radius.
 import math
 
 
+def _all_planar(shape):
+    from OCP.BRepAdaptor import BRepAdaptor_Surface
+    from OCP.GeomAbs import GeomAbs_Plane
+    from OCP.TopAbs import TopAbs_FACE
+    from OCP.TopExp import TopExp_Explorer
+    from OCP.TopoDS import TopoDS
+    faces=TopExp_Explorer(shape,TopAbs_FACE)
+    while faces.More():
+        if BRepAdaptor_Surface(TopoDS.Face(faces.Current()),False).GetType()!=GeomAbs_Plane:return False
+        faces.Next()
+    return True
+
+
 def solid_stats(shape):
     from OCP.BRepCheck import BRepCheck_Analyzer
     from OCP.BRep import BRep_Tool
@@ -19,25 +32,35 @@ def solid_stats(shape):
         raise ValueError('Kalınlıklı B-Rep katı geometrisi geçersiz.')
     free=TopExp_Explorer(shape,TopAbs_FACE,TopAbs_SOLID)
     if free.More():raise ValueError('Katı çıktıda bağımsız açık yüzey kalmış.')
-    counts=[]
-    for kind in (TopAbs_FACE,TopAbs_SOLID):
-        explorer=TopExp_Explorer(shape,kind);count=0
-        while explorer.More():
-            if kind==TopAbs_SOLID:
-                properties=GProp_GProps();BRepGProp.VolumeProperties_s(explorer.Current(),properties,1e-10,True)
-                if not math.isfinite(properties.Mass()) or properties.Mass()<=0:
-                    raise ValueError('Her katı gövdenin yönlü hacmi pozitif olmalı.')
-            count+=1;explorer.Next()
-        counts.append(count)
+    planar=_all_planar(shape)
+    def integrate(item,kind):
+        """(value, relative error). Planar faces: Gauss integration of the linear
+        integrand is exact, so the adaptive (eps) pass only repeated it slowly."""
+        properties=GProp_GProps()
+        if planar:
+            (BRepGProp.VolumeProperties_s if kind=='volume' else BRepGProp.SurfaceProperties_s)(item,properties)
+            return properties.Mass(),0.
+        if kind=='volume':error=BRepGProp.VolumeProperties_s(item,properties,1e-10,True)
+        else:error=BRepGProp.SurfaceProperties_s(item,properties,1e-10)
+        return properties.Mass(),error
+    faces=TopExp_Explorer(shape,TopAbs_FACE);face_count=0
+    while faces.More():face_count+=1;faces.Next()
+    solids=TopExp_Explorer(shape,TopAbs_SOLID);volumes=[]
+    while solids.More():
+        volume,error=integrate(solids.Current(),'volume')
+        if not math.isfinite(volume) or volume<=0:
+            raise ValueError('Her katı gövdenin yönlü hacmi pozitif olmalı.')
+        volumes.append((volume,error));solids.Next()
+    counts=[face_count,len(volumes)]
     shells=TopExp_Explorer(shape,TopAbs_SHELL)
     while shells.More():
         if not BRep_Tool.IsClosed_s(shells.Current()):raise ValueError('Katı gövdenin kabuğu kapalı değil.')
         shells.Next()
     if counts[1]<1:raise ValueError('STEP çıktısında katı gövde bulunamadı; açık yüzey teslim edilmez.')
-    volume=GProp_GProps();area=GProp_GProps()
-    volume_error=BRepGProp.VolumeProperties_s(shape,volume,1e-10,True)
-    area_error=BRepGProp.SurfaceProperties_s(shape,area,1e-10)
-    if any(not math.isfinite(v) or v<=0 for v in (area.Mass(),volume.Mass())):
+    # No free faces (checked above): the shape's volume is the sum of its solids'.
+    total_volume=sum(v for v,_ in volumes);volume_error=max(abs(e) for _,e in volumes)
+    total_area,area_error=integrate(shape,'area')
+    if any(not math.isfinite(v) or v<=0 for v in (total_area,total_volume)):
         raise ValueError('Katının alanı ve hacmi sonlu, pozitif olmalı.')
     if any(not math.isfinite(e) or abs(e)>1e-7 for e in (volume_error,area_error)):
         raise ValueError('Katı alan/hacim integrasyonu istenen doğruluğa ulaşmadı.')
@@ -45,7 +68,7 @@ def solid_stats(shape):
     a,b=bounds.CornerMin(),bounds.CornerMax()
     coordinates=(a.X(),a.Y(),a.Z(),b.X(),b.Y(),b.Z())
     if not all(math.isfinite(v) for v in coordinates):raise ValueError('Katı sınır kutusu sonlu değil.')
-    return dict(faces=counts[0],solids=counts[1],area_mm2=area.Mass(),volume_mm3=volume.Mass(),
+    return dict(faces=counts[0],solids=counts[1],area_mm2=total_area,volume_mm3=total_volume,
                 closed=True,free_faces=0,bounds_mm=coordinates,
                 volume_integration_relative_error=volume_error,area_integration_relative_error=area_error)
 
