@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Build on Windows with SolidWorks installed:
+      dotnet build -c Release            (or msbuild GokworksAddin.csproj /p:Configuration=Release)
+    SolidWorksApi points at the folder holding SolidWorks.Interop.*.dll (the SolidWorks "api\redist").
+    Compile check without SolidWorks (CI / Linux): dotnet build -p:SwStubs=true
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>GokworksSolidWorksAddin</AssemblyName>
+    <RootNamespace>Gokworks.SolidWorksAddin</RootNamespace>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ComVisible>false</ComVisible>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>1.0.0</Version>
+    <SolidWorksApi Condition="'$(SolidWorksApi)' == ''">C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS\api\redist</SolidWorksApi>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="System.Windows.Forms" />
+    <Compile Remove="verify\**" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(SwStubs)' != 'true'">
+    <Reference Include="SolidWorks.Interop.sldworks"><HintPath>$(SolidWorksApi)\SolidWorks.Interop.sldworks.dll</HintPath><EmbedInteropTypes>false</EmbedInteropTypes></Reference>
+    <Reference Include="SolidWorks.Interop.swpublished"><HintPath>$(SolidWorksApi)\SolidWorks.Interop.swpublished.dll</HintPath><EmbedInteropTypes>false</EmbedInteropTypes></Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(SwStubs)' == 'true'">
+    <Compile Include="verify\SolidWorksStubs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\*.png" CopyToOutputDirectory="PreserveNewest" LinkBase="icons" />
+  </ItemGroup>
+</Project>

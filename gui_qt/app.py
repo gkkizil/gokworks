@@ -492,11 +492,19 @@ def main():
     log = enable('gui')
     start_watch(os.getpid(), log, 'gui')
     install()
+    from . import remote
+    command = remote.parse(sys.argv)
     app = create_application()
+    if command is not None and remote.send(command):
+        diagnostics.record(f"gui_command_forwarded module={command['module']}")
+        return 0        # the running GOKWORKS window opens the tool
     app.lastWindowClosed.connect(lambda: diagnostics.record('gui_last_window_closed'))
     app.aboutToQuit.connect(lambda: diagnostics.record('gui_about_to_quit'))
     window = MainWindow()
+    window.command_server = remote.CommandServer(window, (key for key, _, _ in MODULES))
     window.show()
+    if command is not None and command['module'] in window.pages:
+        remote.apply(window, command)
     diagnostics.record('gui_ready')
     result = app.exec()
     diagnostics.record(f'gui_event_loop_returned code={result}')
