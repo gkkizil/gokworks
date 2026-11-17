@@ -899,15 +899,27 @@ class HydraulicPage(BasePage):
         self._rows(self.summary_table, summary)
         self._rows(self.rows_table, [(label_, value, unit) for label_, value, unit, _ in rows],
                    tips=[formula for *_, formula in rows])
-        self.issue_list.clear()
+        entries = []
         for issue in sorted(r.issues, key=lambda i: ('critical', 'warning', 'info').index(i.severity)):
             title, token = SEVERITY.get(issue.severity, ('Uyarı', 'warning'))
             action = ACTIONS.get(issue.code,'')
-            item = QListWidgetItem(f'{title} · {issue.message}' + (f'\n→ {action}' if action else '')); item.setData(Qt.UserRole, issue.field)
-            item.setForeground(QColor(COLORS[self.context.appearance][token if token != 'muted' else 'muted']))
-            item.setToolTip(f'{issue.code}' + (f' · {issue.field}' if issue.field else ''))
-            self.issue_list.addItem(item)
-        self.issue_list.reflow()
+            entries.append((f'{title} · {issue.message}' + (f'\n→ {action}' if action else ''), issue.field,
+                            f'{issue.code}' + (f' · {issue.field}' if issue.field else ''),
+                            QColor(COLORS[self.context.appearance][token if token != 'muted' else 'muted'])))
+        current = [(self.issue_list.item(i).text(), self.issue_list.item(i).data(Qt.UserRole))
+                   for i in range(self.issue_list.count())]
+        if current == [(text, field) for text, field, _, _ in entries]:
+            # Same issues (e.g. a theme change): recolour in place. Rebuilding the list here
+            # crashed Qt natively on Windows (access violation in clear() during theme change).
+            for i, (_, _, tip, colour) in enumerate(entries):
+                self.issue_list.item(i).setForeground(colour); self.issue_list.item(i).setToolTip(tip)
+        else:
+            self.issue_list.clear()
+            for text, field, tip, colour in entries:
+                item = QListWidgetItem(text); item.setData(Qt.UserRole, field)
+                item.setForeground(colour); item.setToolTip(tip)
+                self.issue_list.addItem(item)
+            self.issue_list.reflow()
         phase_rows = []
         for f in cycle['phases']:
             phase_rows.append((f.name, f'{fmt(f.start_position * 1000, 1)} → {fmt(f.end_position * 1000, 1)}', f.duration,

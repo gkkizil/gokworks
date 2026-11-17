@@ -416,3 +416,70 @@ def test_a_sheet_setup_refused_every_way_names_the_refused_values(case):
     case.drawing.methods['SetupSheet6'] = lambda *args: False
     with pytest.raises(ApiError, match=r'reddedildi\. Pafta "Genel görünüşler", 420 × 297 mm, ölçek \d+:\d+, 1\. açı'):
         case.native.create('fake.drwdot', plan)
+
+
+def localized(case, names, accepted):
+    """SolidWorks in another UI language: only `accepted` standard view names exist."""
+    create = case.drawing.methods['CreateDrawViewFromModelView3']
+    case.drawing.methods['CreateDrawViewFromModelView3'] = (
+        lambda path, name, *args: create(path, name, *args) if name in accepted else None)
+    model = RawDispatch('IModelDoc2', methods={'GetModelViewNames': lambda: tuple(names)})
+    case.app.methods['GetOpenDocumentByName'] = lambda path: model
+
+
+def test_turkish_standard_view_names_are_used_when_the_english_name_is_refused(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    localized(case, ('*Ön', '*Arka', '*Sol', '*Sağ', '*Üst', '*Alt', '*İzometrik'), {'*Ön', '*İzometrik'})
+    case.native.create('fake.drwdot', plan); case.native.create_views(plan)
+    assert set(case.native.pages[plan.name]['views']) == {v.role for v in plan.views}
+    assert case.result.measurements['model_view_names'] == {'*Front': '*Ön', '*Isometric': '*İzometrik'}
+
+
+def test_any_language_falls_back_to_the_models_standard_view_order(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    german = ('*Vorderseite', '*Rückseite', '*Links', '*Rechts', '*Oben', '*Unten', '*Isometrisch', 'Benutzer 1')
+    localized(case, german, {'*Vorderseite', '*Isometrisch'})
+    case.native.create('fake.drwdot', plan); case.native.create_views(plan)
+    assert case.result.measurements['model_view_names'] == {'*Front': '*Vorderseite', '*Isometric': '*Isometrisch'}
+
+
+def test_an_unknown_view_name_reports_the_models_view_names(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    localized(case, ('*A', '*B'), set())
+    case.native.create('fake.drwdot', plan)
+    with pytest.raises(ApiError, match=r'main \(\*Front\)\. Modelin görünüş adları: \*A, \*B\.'):
+        case.native.create_views(plan)
+
+
+def test_sheet_format_is_kept_at_its_own_size_only_when_that_is_the_planned_paper(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.sheet.methods['GetTemplateName'] = lambda: 'C:/formats/a3 - iso.slddrt'
+    accept = case.drawing.methods['SetupSheet6']; widths = []
+    def custom_size_refused(*args):
+        widths.append(args[7])
+        if args[6] and args[7]:
+            return False                       # a format with a forced size is refused
+        accept(*args)
+        if not args[7]:                        # the format keeps its own (A3) size
+            case.state['props'][5:7] = [.420, .297]
+        return True
+    case.drawing.methods['SetupSheet6'] = custom_size_refused
+    case.native.create('fake.drwdot', plan)
+    assert case.result.measurements['sheet_setup'] == {plan.name: 'format_size'}
+    assert case.native.pages[plan.name]['format'] == 'C:/formats/a3 - iso.slddrt'
+
+
+def test_a_sheet_format_of_another_size_falls_back_to_no_format_and_names_it(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.sheet.methods['GetTemplateName'] = lambda: 'C:/formats/a4 - iso.slddrt'
+    accept = case.drawing.methods['SetupSheet6']
+    def a4_format(*args):
+        if args[6] and args[7]:
+            return False
+        accept(*args)
+        case.state['props'][5:7] = [.297, .210] if args[6] else [args[7], args[8]]
+        return True
+    case.drawing.methods['SetupSheet6'] = a4_format
+    case.native.create('fake.drwdot', plan)
+    assert case.result.measurements['sheet_setup'] == {plan.name: 'no_format'}
+    assert any('a4 - iso.slddrt' in f.text for f in case.result.findings if f.code == 'sheet_setup')

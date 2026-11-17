@@ -55,6 +55,12 @@ def annotation_box(annotation):
     return union(boxes), estimated
 
 
+# SolidWorks names the standard model views in its UI language and requires the exact name.
+STANDARD_ORDER = ('*Front', '*Back', '*Left', '*Right', '*Top', '*Bottom', '*Isometric')
+LOCAL_VIEW_NAMES = {'*Front': '*Ön', '*Back': '*Arka', '*Left': '*Sol', '*Right': '*Sağ',
+                    '*Top': '*Üst', '*Bottom': '*Alt', '*Isometric': '*İzometrik'}
+
+
 def scale_ratio(scale):
     """Sheet scale as SolidWorks stores it: whole-number ratio (0.5 → 1:2, 0.4 → 2:5, 2.5 → 5:2)."""
     from fractions import Fraction
@@ -91,19 +97,19 @@ class NativeDrawing:
             call(current, 'SetName', plan.name)
         zones = (to_m(self.options.margin_mm),)*4 + (4, 4)
         scale1, scale2 = scale_ratio(plan.scale)
-        def prefix(template, view_name):
+        def prefix(template, view_name, size=True):
             kind = c('swDwgTemplateCustom' if template else 'swDwgTemplateNone')
             return (plan.name, c('swDwgPapersUserDefined'), kind, scale1, scale2,
                     self.options.projection == 'first', template,
-                    to_m(plan.width_mm), to_m(plan.height_mm), view_name)
+                    to_m(plan.width_mm) if size else 0., to_m(plan.height_mm) if size else 0., view_name)
         # Untested combinations are tried in order of likelihood; the first one SolidWorks
         # accepts is recorded. 'no_format' drops the sheet format and says so.
         attempts = [('standard', template_name, ''), ('default_view', template_name, 'Default')]
         if template_name:
-            attempts.append(('no_format', '', ''))
+            attempts += [('format_size', template_name, 'Default'), ('no_format', '', '')]
         if new:
             for label, template, view_name in attempts:
-                if call(self.drawing, 'NewSheet4', *prefix(template, view_name), *zones):
+                if call(self.drawing, 'NewSheet4', *prefix(template, view_name, label != 'format_size'), *zones):
                     break
             else:
                 raise ApiError('Ek pafta oluşturulamadı: '+plan.name+' · '+self._sheet_arguments(prefix(template_name, ''), zones))
@@ -111,15 +117,21 @@ class NativeDrawing:
             raise ApiError('Pafta etkinleştirilemedi: '+plan.name)
         # SetupSheet6 has SEVENTEEN arguments; unlike SetupSheet5 it includes zones.
         for label, template, view_name in attempts:
-            if call(self.drawing, 'SetupSheet6', *prefix(template, view_name), False, *zones):
-                break
+            if not call(self.drawing, 'SetupSheet6', *prefix(template, view_name, label != 'format_size'), False, *zones):
+                continue
+            if label == 'format_size':      # only when the sheet format is the planned paper itself
+                self.rebuild(); actual = self.sheet_state(plan.name)
+                if abs(actual['width_mm']-plan.width_mm) > .05 or abs(actual['height_mm']-plan.height_mm) > .05:
+                    continue
+            break
         else:
             raise ApiError('Pafta / şablon ayarı SolidWorks tarafından reddedildi. '
                            + self._sheet_arguments(prefix(template_name, ''), zones))
         self.result.measurements.setdefault('sheet_setup', {})[plan.name] = label
         if label != 'standard':
             self.result.warn('sheet_setup', f'Pafta ayarı ilk denemede reddedildi; "{label}" ayarıyla kuruldu.'
-                             + (' Şablonun sayfa biçimi (antet) uygulanamadı.' if label == 'no_format' else ''),
+                             + (f' Şablonun sayfa biçimi (antet) uygulanamadı: {template_name}' if label == 'no_format' else '')
+                             + (' Sayfa biçiminin kendi boyutu kullanıldı.' if label == 'format_size' else ''),
                              plan.name)
         template_name = template
         self.rebuild()
@@ -170,8 +182,7 @@ class NativeDrawing:
                 self.select_view(page['views'][view_plan.parent])
                 view = call(self.drawing, 'CreateUnfoldedViewAt3', x, y, 0., False)
             else:
-                view = call(self.drawing, 'CreateDrawViewFromModelView3', self.info.source.path,
-                            view_plan.model_view, x, y, 0.)
+                view = self.model_view_at(view_plan, x, y)
             if view is None:
                 raise ApiError('Görünüş oluşturulamadı: '+view_plan.role)
             if view_plan.parent:
@@ -184,6 +195,38 @@ class NativeDrawing:
         self.set_scale(plan.name, plan.scale)
         for role, scale in list(plan.view_scales.items()):
             self.set_view_scale(plan, role, scale)
+
+    def model_view_names(self):
+        """The source model's named views as SolidWorks lists them (localized), or ()."""
+        if not hasattr(self, '_model_views'):
+            self._model_views = ()
+            try:
+                model = call(self.session.app, 'GetOpenDocumentByName', self.info.source.path)
+                if model is not None:
+                    self._model_views = tuple(str(v) for v in values(call(model, 'GetModelViewNames')) if v)
+            except Exception:       # diagnostics only; the English name was already refused
+                pass
+        return self._model_views
+
+    def model_view_at(self, view_plan, x, y):
+        """Create a model view; standard view names are localized ('*Ön' in Turkish SolidWorks)."""
+        def create(name):
+            return call(self.drawing, 'CreateDrawViewFromModelView3', self.info.source.path, name, x, y, 0.)
+        view = create(view_plan.model_view)
+        if view is not None:
+            return view
+        candidates = [LOCAL_VIEW_NAMES.get(view_plan.model_view)]
+        names = self.model_view_names()
+        standard = [n for n in names if n.startswith('*')]
+        if view_plan.model_view in STANDARD_ORDER and len(standard) >= len(STANDARD_ORDER):
+            candidates.append(standard[STANDARD_ORDER.index(view_plan.model_view)])
+        for name in dict.fromkeys(c for c in candidates if c and c != view_plan.model_view):
+            view = create(name)
+            if view is not None:
+                self.result.measurements.setdefault('model_view_names', {})[view_plan.model_view] = name
+                return view
+        raise ApiError(f'Görünüş oluşturulamadı: {view_plan.role} ({view_plan.model_view}). '
+                       f'Modelin görünüş adları: {", ".join(names) or "okunamadı"}.')
 
     def set_view_scale(self, plan, role, scale):
         """Own scale for one view (the isometric), so it does not shrink the orthographic views."""
