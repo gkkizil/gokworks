@@ -55,6 +55,15 @@ def annotation_box(annotation):
     return union(boxes), estimated
 
 
+def scale_ratio(scale):
+    """Sheet scale as SolidWorks stores it: whole-number ratio (0.5 → 1:2, 0.4 → 2:5, 2.5 → 5:2)."""
+    from fractions import Fraction
+    fraction = Fraction(scale).limit_denominator(1000)
+    if not math.isclose(float(fraction), scale, rel_tol=1e-9):
+        return float(scale), 1.
+    return float(fraction.numerator), float(fraction.denominator)
+
+
 class NativeDrawing:
     def __init__(self, session, info, options, result, stop=None):
         self.session, self.info, self.options, self.result, self.stop = session, info, options, result, stop
@@ -80,18 +89,39 @@ class NativeDrawing:
             current = call(self.drawing, 'GetCurrentSheet')
             template_name = self.options.sheet_format or str(call(current, 'GetTemplateName') or '')
             call(current, 'SetName', plan.name)
-        template_kind = c('swDwgTemplateCustom' if template_name else 'swDwgTemplateNone')
-        prefix = (plan.name, c('swDwgPapersUserDefined'), template_kind, plan.scale, 1.,
-                  self.options.projection == 'first', template_name,
-                  to_m(plan.width_mm), to_m(plan.height_mm), '')
         zones = (to_m(self.options.margin_mm),)*4 + (4, 4)
-        if new and not call(self.drawing, 'NewSheet4', *prefix, *zones):
-            raise ApiError('Ek pafta oluşturulamadı: '+plan.name)
+        scale1, scale2 = scale_ratio(plan.scale)
+        def prefix(template, view_name):
+            kind = c('swDwgTemplateCustom' if template else 'swDwgTemplateNone')
+            return (plan.name, c('swDwgPapersUserDefined'), kind, scale1, scale2,
+                    self.options.projection == 'first', template,
+                    to_m(plan.width_mm), to_m(plan.height_mm), view_name)
+        # Untested combinations are tried in order of likelihood; the first one SolidWorks
+        # accepts is recorded. 'no_format' drops the sheet format and says so.
+        attempts = [('standard', template_name, ''), ('default_view', template_name, 'Default')]
+        if template_name:
+            attempts.append(('no_format', '', ''))
+        if new:
+            for label, template, view_name in attempts:
+                if call(self.drawing, 'NewSheet4', *prefix(template, view_name), *zones):
+                    break
+            else:
+                raise ApiError('Ek pafta oluşturulamadı: '+plan.name+' · '+self._sheet_arguments(prefix(template_name, ''), zones))
         if not call(self.drawing, 'ActivateSheet', plan.name):
             raise ApiError('Pafta etkinleştirilemedi: '+plan.name)
         # SetupSheet6 has SEVENTEEN arguments; unlike SetupSheet5 it includes zones.
-        if not call(self.drawing, 'SetupSheet6', *prefix, False, *zones):
-            raise ApiError('Pafta / şablon ayarı SolidWorks tarafından reddedildi.')
+        for label, template, view_name in attempts:
+            if call(self.drawing, 'SetupSheet6', *prefix(template, view_name), False, *zones):
+                break
+        else:
+            raise ApiError('Pafta / şablon ayarı SolidWorks tarafından reddedildi. '
+                           + self._sheet_arguments(prefix(template_name, ''), zones))
+        self.result.measurements.setdefault('sheet_setup', {})[plan.name] = label
+        if label != 'standard':
+            self.result.warn('sheet_setup', f'Pafta ayarı ilk denemede reddedildi; "{label}" ayarıyla kuruldu.'
+                             + (' Şablonun sayfa biçimi (antet) uygulanamadı.' if label == 'no_format' else ''),
+                             plan.name)
+        template_name = template
         self.rebuild()
         self.pages[plan.name] = {'plan': plan, 'views': {}, 'format': template_name, 'tables': [], 'notes': []}
         actual = self.sheet_state(plan.name)
@@ -100,6 +130,13 @@ class NativeDrawing:
         if not template_name:
             self.result.warn('sheet_format', 'Şablonda antet / sayfa çerçevesi bulunamadı; firma .SLDDRT dosyası seçebilirsiniz.',
                              plan.name)
+
+    def _sheet_arguments(self, prefix, zones):
+        """The values SolidWorks refused, for the report (a refusal gives no reason)."""
+        name, paper, kind, scale1, scale2, first, template, width, height, view = prefix
+        return (f'Pafta "{name}", {to_mm(width):g} × {to_mm(height):g} mm, ölçek {scale1:g}:{scale2:g}, '
+                f'{"1." if first else "3."} açı, şablon "{template or "yok"}", kenar {to_mm(zones[0]):g} mm, '
+                f'alan {zones[4]}×{zones[5]}.')
 
     def sheet_state(self, name):
         call(self.drawing, 'ActivateSheet', name)
@@ -168,7 +205,7 @@ class NativeDrawing:
     def set_scale(self, name, scale):
         call(self.drawing, 'ActivateSheet', name)
         sheet = call(self.drawing, 'GetCurrentSheet')
-        if not call(sheet, 'SetScale', scale, 1., True, False):
+        if not call(sheet, 'SetScale', *scale_ratio(scale), True, False):
             raise ApiError('Pafta ölçeği uygulanamadı.')
         self.rebuild()
         actual = self.sheet_state(name)
