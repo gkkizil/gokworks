@@ -85,7 +85,7 @@ def flat_page(native, source_model):
         raise ApiError('Native açınım görünüşü oluşturulamadı.')
     if str(get(view, 'ReferencedConfiguration')) != matching[0] or not call(view, 'IsFlatPatternView'):
         raise ApiError('Açınım görünüşünün beklenen konfigürasyonu doğrulanamadı.')
-    put(view, 'UseSheetScale', True)
+    put(view, 'UseSheetScale', 1)
     native.pages[plan.name]['views']['flat'] = view
     native.set_scale(plan.name, plan.scale)
     native.fit(plan.name)
@@ -144,7 +144,7 @@ def body_flat_pages(native, source_model):
             put(view, 'Bodies', variant(0x2009, (matches[0],)))
             candidates = matches = (); part = None
             native.rebuild()
-        put(view, 'UseSheetScale', True)
+        put(view, 'UseSheetScale', 1)
         page['views']['flat'] = view
         native.set_scale(plan.name, plan.scale)
         native.fit(plan.name)

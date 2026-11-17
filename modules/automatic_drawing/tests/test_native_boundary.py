@@ -122,7 +122,7 @@ def test_raw_dual_interfaces_route_drawing_calls_without_python_method_attribute
     actual = case.native.actual_views(plan.name)
     assert all(v['configuration'] == 'Default' for v in actual)
     assert all(v['parent'] == 'View1' for v in actual if v['role'] in ('top', 'side'))
-    assert all(view.properties['UseSheetScale'] is True for view in case.views.values())
+    assert all(view.properties['UseSheetScale'] == 1 for view in case.views.values())
 
 
 def test_parameterized_custom_property_manager_uses_propertyget_not_method():
@@ -251,7 +251,7 @@ def test_center_marks_are_on_iview_with_ten_arguments_and_actual_count_readback(
     case.constants['swAutoInsertCenterMarkType_Hole'] = 1
     for view in case.views.values():
         view.methods['AutoInsertCenterMarks2'] = lambda *args: True
-        view.methods['GetCenterMarkCount2'] = lambda: 4
+        view.methods['GetCenterMarkCount2'] = lambda size: 4      # [out] Size is required (DISP_E_PARAMNOTOPTIONAL)
     case.native.center_marks(plan.name)
     calls = [(view.name, args) for view in case.views.values() for name, flags, args in view.calls
              if name == 'AutoInsertCenterMarks2']
@@ -365,9 +365,9 @@ def test_isometric_with_its_own_scale_leaves_the_sheet_scale_and_reads_back(case
     case.native.create('fake.drwdot', plan); case.native.create_views(plan)
     views = case.native.pages[plan.name]['views']
     iso = views['isometric']
-    assert iso.properties['UseSheetScale'] is False
+    assert iso.properties['UseSheetScale'] == 0
     ratio = iso.properties['ScaleRatio']; assert ratio[0]/ratio[1] == pytest.approx(plan.scale/2)
-    assert all(views[r].properties['UseSheetScale'] is True for r in ('main', 'top', 'side'))
+    assert all(views[r].properties['UseSheetScale'] == 1 for r in ('main', 'top', 'side'))
     assert case.native.sheet_state(plan.name)['scale'] == pytest.approx(plan.scale)
     assert not [f for f in case.result.findings if f.code == 'view_scale']
 
@@ -377,7 +377,7 @@ def test_rejected_view_scale_falls_back_to_the_sheet_scale_with_a_warning(case):
     plan.view_scales = {'isometric': plan.scale/2}          # the mock view has no ScaleRatio: SolidWorks refuses
     case.native.create('fake.drwdot', plan); case.native.create_views(plan)
     iso = case.native.pages[plan.name]['views']['isometric']
-    assert iso.properties['UseSheetScale'] is True and plan.view_scales == {}
+    assert iso.properties['UseSheetScale'] == 1 and plan.view_scales == {}
     assert [f.severity for f in case.result.findings if f.code == 'view_scale'] == ['WARNING']
 
 
@@ -483,3 +483,15 @@ def test_a_sheet_format_of_another_size_falls_back_to_no_format_and_names_it(cas
     case.native.create('fake.drwdot', plan)
     assert case.result.measurements['sheet_setup'] == {plan.name: 'no_format'}
     assert any('a4 - iso.slddrt' in f.text for f in case.result.findings if f.code == 'sheet_setup')
+
+
+def test_a_template_without_sheet_format_is_set_up_without_a_refused_first_attempt(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.sheet.methods['GetTemplateName'] = lambda: '*.drt'       # SolidWorks: no sheet format
+    accept = case.drawing.methods['SetupSheet6']; sent = []
+    def setup(*args):
+        sent.append(args[6]); return accept(*args) if not args[6] else False
+    case.drawing.methods['SetupSheet6'] = setup
+    case.native.create('fake.drwdot', plan)
+    assert sent == [''] and case.result.measurements['sheet_setup'] == {plan.name: 'standard'}
+    assert not [f for f in case.result.findings if f.code == 'sheet_setup']
