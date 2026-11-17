@@ -24,14 +24,12 @@ def build(s):
         if not face.IsDone():raise ValueError('Zincir dişlisi yüzeyi oluşturulamadı.')
         shape=BRepPrimAPI_MakePrism(face.Face(),gp_Vec(0,0,s.width_mm)).Shape()
         if s.hub_diameter_mm:
-            op=BRepAlgoAPI_Fuse(shape,BRepPrimAPI_MakeCylinder(s.hub_diameter_mm/2,s.hub_length_mm).Shape());op.Build()
-            if not op.IsDone():raise ValueError('Zincir dişlisi göbeği birleştirilemedi.')
-            shape=op.Shape()
+            shape=kernel.boolean('fuse',shape,BRepPrimAPI_MakeCylinder(s.hub_diameter_mm/2,s.hub_length_mm).Shape())
+            if shape is None:raise ValueError('Zincir dişlisi göbeği birleştirilemedi.')
         if s.bore_mm:
             tool=BRepPrimAPI_MakeCylinder(gp_Ax2(gp_Pnt(0,0,-1),gp_Dir(0,0,1)),s.bore_mm/2,max(s.width_mm,s.hub_length_mm)+2).Shape()
-            op=BRepAlgoAPI_Cut(shape,tool);op.Build()
-            if not op.IsDone():raise ValueError('Mil deliği kesilemedi.')
-            shape=op.Shape()
+            shape=kernel.boolean('cut',shape,tool)
+            if shape is None:raise ValueError('Mil deliği kesilemedi.')
         if kernel.shape_stats(shape)['solids']!=1:raise ValueError('Zincir dişlisi tek geçerli katı olmalı.')
         return shape
 

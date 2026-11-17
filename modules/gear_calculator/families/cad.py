@@ -29,7 +29,6 @@ def solid(s,section,index):
     if s.kind in ('helical','herringbone'):
         from OCP.BRepOffsetAPI import BRepOffsetAPI_ThruSections
         from OCP.TopoDS import TopoDS
-        from OCP.BRepAlgoAPI import BRepAlgoAPI_Cut
         r=cylindrical(s,s.teeth1 if index==0 else s.teeth2)['r']
         hand=1 if index==0 else -1
         angle=s.width_mm*tan(s.helix_deg*pi/180)/r
@@ -46,14 +45,12 @@ def solid(s,section,index):
             return loft.Shape()
         if s.kind=='helical':shape=half(0,s.width_mm)
         else:
-            from OCP.BRepAlgoAPI import BRepAlgoAPI_Fuse
-            joined=BRepAlgoAPI_Fuse(half(0,s.width_mm/2),half(s.width_mm/2,s.width_mm,True));joined.Build()
-            if not joined.IsDone():raise ValueError('Çift helisel orta birleşimi başarısız.')
-            shape=joined.Shape()
+            # The halves meet on one identical mid section: glue, do not intersect.
+            shape=kernel.boolean('fuse',half(0,s.width_mm/2),half(s.width_mm/2,s.width_mm,True),glue=True)
+            if shape is None:raise ValueError('Çift helisel orta birleşimi başarısız.')
         if section.bore:
-            cut=BRepAlgoAPI_Cut(shape,BRepPrimAPI_MakeCylinder(section.bore/2,s.width_mm).Shape());cut.Build()
-            if not cut.IsDone():raise ValueError('Helisel delik kesilemedi.')
-            shape=cut.Shape()
+            shape=kernel.boolean('cut',shape,BRepPrimAPI_MakeCylinder(section.bore/2,s.width_mm).Shape())
+            if shape is None:raise ValueError('Helisel delik kesilemedi.')
     else:
         f=BRepBuilderAPI_MakeFace(outer,True)
         if section.inner:

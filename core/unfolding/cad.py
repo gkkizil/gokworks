@@ -164,7 +164,11 @@ def surface_stats(shape):
         e=TopExp_Explorer(shape,kind);count=0
         while e.More():count+=1;e.Next()
         counts.append(count)
-    props=GProp_GProps();BRepGProp.SurfaceProperties_s(shape,props,1e-10);area=props.Mass()
+    from .solid_cad import _all_planar
+    props=GProp_GProps()
+    if _all_planar(shape):BRepGProp.SurfaceProperties_s(shape,props)   # planar: Gauss integration is exact
+    else:BRepGProp.SurfaceProperties_s(shape,props,1e-10)
+    area=props.Mass()
     if counts[0]<1 or counts[1]!=0 or not math.isfinite(area) or area<=0:raise ValueError('STEP geçerli pozitif alanlı orta yüzey olmalı; solid değildir.')
     bounds=Bnd_Box();BRepBndLib.AddOptimal_s(shape,bounds,False,False)
     low,high=bounds.CornerMin(),bounds.CornerMax()
