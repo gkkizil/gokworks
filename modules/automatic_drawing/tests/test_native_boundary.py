@@ -251,7 +251,7 @@ def test_center_marks_are_on_iview_with_ten_arguments_and_actual_count_readback(
     case.constants['swAutoInsertCenterMarkType_Hole'] = 1
     for view in case.views.values():
         view.methods['AutoInsertCenterMarks2'] = lambda *args: True
-        view.methods['GetCenterMarkCount2'] = lambda: 4
+        view.methods['GetCenterMarkCount2'] = lambda size: 4      # [out] Size is required (DISP_E_PARAMNOTOPTIONAL)
     case.native.center_marks(plan.name)
     calls = [(view.name, args) for view in case.views.values() for name, flags, args in view.calls
              if name == 'AutoInsertCenterMarks2']
@@ -483,3 +483,15 @@ def test_a_sheet_format_of_another_size_falls_back_to_no_format_and_names_it(cas
     case.native.create('fake.drwdot', plan)
     assert case.result.measurements['sheet_setup'] == {plan.name: 'no_format'}
     assert any('a4 - iso.slddrt' in f.text for f in case.result.findings if f.code == 'sheet_setup')
+
+
+def test_a_template_without_sheet_format_is_set_up_without_a_refused_first_attempt(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.sheet.methods['GetTemplateName'] = lambda: '*.drt'       # SolidWorks: no sheet format
+    accept = case.drawing.methods['SetupSheet6']; sent = []
+    def setup(*args):
+        sent.append(args[6]); return accept(*args) if not args[6] else False
+    case.drawing.methods['SetupSheet6'] = setup
+    case.native.create('fake.drwdot', plan)
+    assert sent == [''] and case.result.measurements['sheet_setup'] == {plan.name: 'standard'}
+    assert not [f for f in case.result.findings if f.code == 'sheet_setup']

@@ -94,6 +94,8 @@ class NativeDrawing:
         else:
             current = call(self.drawing, 'GetCurrentSheet')
             template_name = self.options.sheet_format or str(call(current, 'GetTemplateName') or '')
+            if template_name.startswith('*'):
+                template_name = ''      # '*.drt': the template has no sheet format; not a file to load
             call(current, 'SetName', plan.name)
         zones = (to_m(self.options.margin_mm),)*4 + (4, 4)
         scale1, scale2 = scale_ratio(plan.scale)
@@ -530,7 +532,7 @@ class NativeDrawing:
                 continue
             self.select_view(view)
             call(view, 'AutoInsertCenterMarks2', mask, 0, True, True, True, 0., 0., False, True, 0.)
-            count += int(call(view, 'GetCenterMarkCount2'))
+            count += int(call(view, 'GetCenterMarkCount2', out_int()))   # out Size: array size, not the count
         self.result.measurements.setdefault('center_marks', {})[name] = count
         call(self.model, 'ClearSelection2', True)
 
