@@ -112,7 +112,13 @@ def main():
     verify_libredwg(libredwg)
     from shared.app_info import source_revision
     info=ROOT/'build/application-info.json';info.parent.mkdir(parents=True,exist_ok=True)
-    info.write_text(json.dumps(dict(schema=1,revision=source_revision(ROOT))),encoding='utf-8')
+    # revision: the commit actually compiled. source_commit: the application code it was
+    # requested for (a build request may add packaging metadata on top). build: CI run.
+    build_request=ROOT/'packaging/windows-build-request.json'
+    requested=json.loads(build_request.read_text(encoding='utf-8')) if build_request.exists() else {}
+    info.write_text(json.dumps(dict(schema=1,revision=source_revision(ROOT),source_commit=requested.get('source_commit'),
+                                    build=os.environ.get('GITHUB_RUN_ID'),
+                                    validation_profile=requested.get('validation_profile','full'))),encoding='utf-8')
     args = [sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--'+mode, '--windowed', '--noupx',
             '--name', 'GOKWORKS', '--icon', str(ROOT/'assets/GOK_app_windows.ico'),
             '--distpath', str(ROOT/'dist'), '--workpath', str(ROOT/'build/pyinstaller'),
@@ -228,7 +234,8 @@ def main():
     (ROOT/'dist/release-notes.md').write_text(
         'Windows 10/11 x64 · Tek dosya GOKWORKS.exe. Yanında klasör veya Python kurulumu gerekmez.\n\n'
         'Uygulama ve geliştirici bilgileri Hakkında ekranındadır. CAD işlemleri kurulu ve açık SolidWorks gerektirir.\n\n'
-        + validation_note + f'SHA256: `{digest}`\n\nKaynak: `{os.environ.get("GITHUB_SHA", "yerel derleme")}`\n', encoding='utf-8')
+        + validation_note + f'SHA256: `{digest}`\n\nDerlenen commit: `{os.environ.get("GITHUB_SHA", "yerel derleme")}`'
+        + (f'\n\nUygulama kodu: `{request["source_commit"]}`' if request.get('source_commit') else '') + '\n', encoding='utf-8')
     print(json.dumps({'exe': str(exe), 'bytes': exe.stat().st_size, 'sha256': digest, 'smoke': reports}))
 
 

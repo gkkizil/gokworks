@@ -57,3 +57,18 @@ def test_real_multibody_sheet_has_individual_reopened_flat_scopes_and_visible_bo
     assert Path(result.outputs['slddrw']).stat().st_size > 1024
     assert Path(result.outputs['pdf']).read_bytes().startswith(b'%PDF-')
     assert source.read_bytes() == before
+
+
+from modules.automatic_drawing import live_acceptance as acceptance
+
+
+@pytest.mark.parametrize('scenario', acceptance.SCENARIOS, ids=lambda s: s.key)
+def test_real_acceptance_scenario(scenario, tmp_path):
+    """REAL SolidWorks only; see docs/automatic-drawing/LIVE_ACCEPTANCE.md for the fixtures."""
+    missing = acceptance.missing_requirements(scenario)
+    if missing:
+        pytest.skip('çalıştırılmadı: ' + '; '.join(missing))
+    row = acceptance.run_scenario(scenario, tmp_path)
+    if row['status'] == acceptance.NOT_RUN:
+        pytest.skip('çalıştırılmadı: ' + row['reason'])
+    assert row['status'] == acceptance.PASSED, row

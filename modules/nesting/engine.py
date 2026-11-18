@@ -12,7 +12,7 @@ import random
 import time
 
 from numpy import asarray, flatnonzero
-from shapely import affinity, union_all
+from shapely import affinity, set_precision, union_all
 from shapely.geometry import box, Point, Polygon
 
 from modules.nesting import ENGINE, ENGINE_VERSION
@@ -23,6 +23,8 @@ from modules.nesting.search_budget import for_project, meaningful_improvement, u
 from modules.nesting.layout_score import layout_score, plate_strip_area
 from modules.nesting.rotations import search_angles
 from modules.nesting.stock_refinement import refine_stock
+
+NFP_GRID = 1e-9      # mm; see nfp(): removes round-off micro-edges before the mitre offset
 
 
 def _vertices(g):
@@ -103,7 +105,13 @@ def nest(project, *, stop=None, progress=None, initial=None, budget=None):
             obstacle = minkowski(fixed, reflected, guard, parts_a=convex_cache[fixed_key], parts_b=convex_cache[reflected_key])
             distance = max(o.gap, o.kerf)+fixed_part.geometry_error+moving_part.geometry_error
             # Mitre expansion conservatively contains the round Euclidean offset.
-            cache[key] = obstacle.buffer(distance+2e-6, join_style=2) if distance else obstacle
+            # The convex-sum union keeps rotation round-off as edges of 1e-14..1e-30 mm;
+            # GEOS's mitre join divides by such a zero-length edge direction ("invalid
+            # value encountered in buffer"). Snapping to a 1e-9 mm grid removes them and
+            # moves no vertex more than 7.1e-10 mm, far inside the 2e-6 mm extra offset,
+            # so the obstacle still contains the exact one.
+            cache[key] = (set_precision(obstacle, NFP_GRID).buffer(distance+2e-6, join_style=2)
+                          if distance else obstacle)
         return cache[key]
 
     def candidate(part, sheet, previous, *, detailed, angle_limit=None, detail_slice=None):

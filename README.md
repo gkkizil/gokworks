@@ -4,11 +4,13 @@ GOKWORKS; SolidWorks dosyalarını toplu aktarmak, montajlardan ürün ağacı
 çıkarmak, sac ve profil kesimlerini planlamak ve mühendislik hesapları yapmak
 için geliştirilmiş Türkçe bir masaüstü uygulamasıdır.
 
-Sol menüde beş grupta 21 araç bulunur: **Aktarım** (PDF, DXF/DWG, 3D),
-**Montaj** (BOM, isimlendirme), **Üretim** (Nesting, Akıllı Parça Bölme,
-profil kesim, K faktörü, parametrik mil, DFM, sac açınımı), **Hesaplar**
-(geçme ve geometrik toleranslar, tolerans yığılması, cıvata, tork, ağırlık,
-hidrolik ünite) ve **Makine Elemanları** (dişli, kayış–kasnak).
+Kaynak kodda sol menüde dört grupta 23 araç bulunur: **Aktarım ve Montaj**
+(PDF, DXF/DWG, 3D dönüştürücü, BOM, isimlendirme), **Mühendislik Hesapları**
+(K faktörü, ISO geçme ve geometrik toleranslar, tolerans yığılması, cıvata, hızlı
+tork, ağırlık, Nesting, Akıllı Parça Bölme, hidrolik ünite, profil kesim),
+**Üretim** (parametrik mil, DFM, sac açınımı, abkant simülasyonu, otomatik teknik
+resim) ve **Makine Elemanları** (dişli, kayış–kasnak). İndirilebilir EXE'deki
+araç sayısı aşağıda, o paketin kaydında ayrıca yazılıdır.
 
 ![GOKWORKS · Nesting](docs/readme/nesting.png)
 
@@ -49,6 +51,12 @@ dağıtılmaz. SolidWorks gerektiren işlemler kullanıcının kendi lisanslı k
 **GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
 Uygulama kodu: `ec1c59b` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/43607242134) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+
+Derleme no: `43607242134` · Derlenen commit: `a97fd95` (uygulama koduna yalnız derleme isteği eklenmiş hali) · Paketteki araç sayısı: 22 · EXE doğrulaması: yalnız paket açılış kontrolü (regresyon test paketi bu EXE üzerinde çalıştırılmadı)
+
+SHA256: `5598e48cb82fb6777d97057f0bbda583a3738c61c82a92bf712a92116573057a`
+
+EXE, yukarıdaki uygulama kodundan derlenmiştir; kaynak koddaki daha yeni değişiklikleri içermez. Yeni EXE yalnız derlemesi ve açılış kontrolü başarılı olunca bu bağlantının yerini alır.
 <!-- windows-release:end -->
 
 1. Elinizde oluşturulmuş `GOKWORKS.exe` varsa çift tıklayarak açın. Kaynak

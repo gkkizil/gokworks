@@ -33,3 +33,12 @@ def test_packaged_version_comes_from_its_embedded_build_revision(tmp_path,monkey
     assert app_info.version_text()=='Derleme revizyonu cccccccc'
     (tmp_path/'build/application-info.json').unlink()
     assert app_info.version_text()=='Paket sürüm bilgisi bulunamadı'
+
+
+def test_packaged_version_names_build_commit_application_code_and_build_number(tmp_path,monkeypatch):
+    monkeypatch.setattr(app_info,'ROOT',tmp_path);monkeypatch.setattr(app_info.sys,'frozen',True,raising=False)
+    (tmp_path/'build').mkdir()
+    (tmp_path/'build/application-info.json').write_text(json.dumps(dict(schema=1,revision='a'*40,source_commit='e'*40,build='43607242134')))
+    assert app_info.version_text()=='Derleme revizyonu aaaaaaaa · uygulama kodu eeeeeeee · derleme 43607242134'
+    (tmp_path/'build/application-info.json').write_text(json.dumps(dict(schema=1,revision='a'*40,source_commit='a'*40,build=None)))
+    assert app_info.version_text()=='Derleme revizyonu aaaaaaaa'

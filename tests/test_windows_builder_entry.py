@@ -37,7 +37,7 @@ assert len(calls)==1 and calls[0][1:3]==['-m','PyInstaller']
 assert '--'+mode in calls[0]
 assert 'PyInstaller' not in sys.modules and 'PySide6' not in sys.modules
 info=json.loads((builder.parents[1]/'build/application-info.json').read_text(encoding='utf-8'))
-assert info==dict(schema=1,revision='a'*40),info
+assert info=={**dict(schema=1,revision='a'*40,build=None,validation_profile='full'),'source_commit':info.get('source_commit')},info
 print(json.dumps(dict(mode=mode,revision=info['revision'],build_started=False)))
 '''
 

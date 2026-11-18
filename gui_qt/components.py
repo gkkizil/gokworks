@@ -610,6 +610,33 @@ class BasePage(QWidget):
     def theme_changed(self):
         pass
 
+    # ---- unsaved-work protection (gui_qt/projects.py); inactive unless project_title is set
+    project_title = None          # e.g. 'Nesting projesi'
+    recovery_suffix = None        # file suffix of write_recovery()'s copy, e.g. '.goknest.json'
+
+    def project_snapshot(self):
+        """JSON-able picture of everything the project file would hold."""
+        return None
+
+    def mark_project_saved(self):
+        from . import projects
+        projects.mark_saved(self)
+
+    def has_unsaved_changes(self):
+        from . import projects
+        return projects.has_unsaved(self)
+
+    def guard_unsaved(self, action, proceed):
+        """Run ``proceed`` now, after a completed save, or not at all (user cancelled / save failed)."""
+        from . import projects
+        return projects.guard(self, action, proceed)
+
+    def write_recovery(self, path):
+        raise NotImplementedError
+
+    def restore_recovery(self, path):
+        raise NotImplementedError
+
 
 class ResultsPanel(QWidget):
     cleared = Signal()

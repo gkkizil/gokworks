@@ -38,6 +38,20 @@ class ProfileTableModel(TableModel):
 
 
 class ProfileCuttingPage(BasePage):
+    project_title = 'Profil kesim projesi'
+    recovery_suffix = '.gokprofile'
+
+    def project_snapshot(self):
+        return dict(project=asdict(self.project), scan=asdict(self.scan_result) if self.scan_result is not None else None)
+
+    def write_recovery(self, path):
+        save(self.project, self.scan_result, path)
+
+    def restore_recovery(self, path):
+        self.handle_events([('profile_project', load(path))])
+        from gui_qt.projects import mark_recovered; mark_recovered(self)
+        self.set_status('Önceki oturumdan kurtarılan kesim listesi açıldı; henüz kaydedilmedi.', tone='warning')
+
     def __init__(self, context):
         super().__init__(context, 'Profil kesim optimizasyonu',
                          'Kesilecek parçaları ekleyin, ham profil boyunu girin ve kesim planını görün.')
@@ -341,10 +355,9 @@ class ProfileCuttingPage(BasePage):
 
     def load_example(self):
         if not self.can_start(): return
-        if self.project.demands and QMessageBox.question(self, 'Örnek listeyi aç',
-                'Mevcut liste örnek parçalarla değişecek. Kaydetmediğiniz değişiklikler kaybolur. Devam edilsin mi?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
-            return
+        self.guard_unsaved('Örnek listeyi açmadan', self._load_example)
+
+    def _load_example(self):
         self.project = Project([Demand('example-1','40×40×2','S235JR','1200',4,thickness='2'),
                                 Demand('example-2','40×40×2','S235JR','800',6,thickness='2')])
         for key in ('stock_length','kerf','trim'): self.form.set_value(key,getattr(self.project,key))
@@ -353,6 +366,7 @@ class ProfileCuttingPage(BasePage):
         self.source_label.setText('Açık modeli okuyun veya bir SLDPRT / SLDASM dosyası seçin.')
         self.invalidate(); self.refresh_demands(); self.tabs.setCurrentIndex(0)
         self.set_status('Örnek liste: 1200 mm × 4 ve 800 mm × 6. Ham profil 6000 mm; hesaplayarak kesim planını görün.')
+        self.mark_project_saved()
 
     def edit_demand_cell(self, index, key, value):
         row = self.project.demands[index]; previous = getattr(row, key)
@@ -512,6 +526,7 @@ class ProfileCuttingPage(BasePage):
                 self.plan_stack.setCurrentIndex(0)
                 self.tabs.setCurrentIndex(2); self.plan_view.selectRow(0); self.draw_bar(0)
                 self.set_status('Kesim planı miktar, malzeme grubu ve stok sınırlarına karşı doğrulandı.')
+            elif kind == 'profile_saved': self.mark_project_saved()
             elif kind == 'profile_io': self.set_status(value)
             elif kind == 'profile_project':
                 project, result = value
@@ -522,6 +537,7 @@ class ProfileCuttingPage(BasePage):
                 self.scan_model.replace([]); self.refresh_scan_table()
                 self.source_label.setText('Kaydedilmiş tarama · Yeni aktarım için Verileri yenile düğmesini kullanın.')
                 self.invalidate(); self.refresh_demands(); self.set_status('Proje açıldı; sonuç için yeniden hesaplayın.')
+                self.mark_project_saved()
         self.update_actions()
 
     def draw_bar(self, index):
@@ -549,16 +565,17 @@ class ProfileCuttingPage(BasePage):
         def operation(events,stop):
             try:
                 save(project,result,path,stop=stop)
-                events.put(('profile_io','Profil kesim projesi kaydedildi.'))
+                events.put(('profile_saved',path)); events.put(('profile_io','Profil kesim projesi kaydedildi.'))
             except Cancelled: events.put(('phase','Proje kaydı durduruldu; önceki dosya korundu.'))
         self.jobs.start(self,operation)
 
     def open_project(self):
         if not self.can_start(): return
+        self.guard_unsaved('Başka proje açmadan', self._open_project)
+
+    def _open_project(self):
         path,_ = QFileDialog.getOpenFileName(self, 'Profil kesim projesini aç', '', 'Profil projesi (*.gokprofile)')
         if not path: return
-        from PySide6.QtWidgets import QMessageBox
-        if self.project.demands and QMessageBox.question(self, 'Mevcut liste', 'Proje açılınca mevcut kesim listesi değişecek. Devam edilsin mi?') != QMessageBox.Yes: return
         def operation(events,stop):
             try:
                 checkpoint(stop); result=load(path); checkpoint(stop)

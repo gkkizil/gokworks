@@ -98,6 +98,25 @@ COMMAND_PAGES = {'stages': 0, 'groove': 1, 'keyway': 2, 'chamfer': 3, 'fillet': 
 
 
 class ShaftPage(BasePage):
+    project_title = 'Mil projesi'
+    recovery_suffix = '.gokshaft.json'
+
+    def project_snapshot(self):
+        from dataclasses import asdict
+        return asdict(self.project)
+
+    def save_project(self):
+        return self.save_dialog()
+
+    def write_recovery(self, path):
+        storage.save(self.project, path, overwrite=True)
+
+    def restore_recovery(self, path):
+        self.load_path(path)
+        self.project_path = None; self.dirty = True     # not saved anywhere yet
+        from gui_qt.projects import mark_recovered; mark_recovered(self)
+        self.set_status('Önceki oturumdan kurtarılan mil projesi açıldı; henüz kaydedilmedi.', tone='warning')
+
     def __init__(self,context):
         super().__init__(context,'Parametrik mil','Üstten bölümü seçin, ölçüleri girin; mil aşağıda anında çizilir.')
         # Reserve native Windows font/frame overhead at 550×450 without
@@ -738,15 +757,20 @@ class ShaftPage(BasePage):
         return answer==QMessageBox.Discard
 
     def open_dialog(self):
-        if not self.confirm_discard():return
+        self.guard_unsaved('Başka proje açmadan', self._open_dialog)
+
+    def _open_dialog(self):
         path,_=QFileDialog.getOpenFileName(self,'Mil projesi aç','','Mil projesi (*.gokshaft.json *.json)')
-        if not path:return
+        if path:self.load_path(path)
+
+    def load_path(self,path):
         try:project=storage.load(path)
         except (OSError,ValueError) as error:self.set_status(str(error),True);return
         self.project=project;self.project_path=Path(path);self.dirty=False;self.last_result=None
         self.edge_undo=None;self.save_epoch+=1
         self.selected_stage=project.stages[0].id;self.selected_operation=''
         self.populate();self.refresh();self.set_status('Mil projesi açıldı.')
+        self.mark_project_saved()
 
     def save_dialog(self):
         path,_=QFileDialog.getSaveFileName(self,'Mil parametrelerini kaydet',str(self.project_path or (self.project.name+'.gokshaft.json')),
@@ -764,6 +788,7 @@ class ShaftPage(BasePage):
                 storage.save(self.project,path,overwrite=True,expected_digest=digest)
         except (OSError,ValueError) as error:self.set_status(str(error),True);return False
         self.project_path=Path(path);self.dirty=False;self.save_epoch+=1
+        self.mark_project_saved()
         self.set_status('Mil parametreleri JSON olarak kaydedildi.')
         return True
 

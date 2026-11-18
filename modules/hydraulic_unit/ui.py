@@ -186,6 +186,20 @@ def _table(headers, elastic=0, defaults=None):
 
 
 class HydraulicPage(BasePage):
+    project_title = 'Hidrolik proje'
+    recovery_suffix = '.gwhyd'
+
+    def project_snapshot(self):
+        return serialization.dumps(self.project)
+
+    def write_recovery(self, path):
+        serialization.save(self.project, path)
+
+    def restore_recovery(self, path):
+        self.load_path(path)
+        self.path = None
+        from gui_qt.projects import mark_recovered; mark_recovered(self)
+        self.set_status('Önceki oturumdan kurtarılan hidrolik proje açıldı; henüz kaydedilmedi.', tone='warning')
     quiet_cancel_on_close = True
 
     def __init__(self, context):
@@ -1095,11 +1109,17 @@ class HydraulicPage(BasePage):
 
     # ----------------------------------------------------------------- files
     def open_project(self):
+        self.guard_unsaved('Başka proje açmadan', self._open_project)
+
+    def _open_project(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Hidrolik proje aç', '', 'Hidrolik ünite (*.gwhyd)')
         if path:
             self.load_path(path)
 
     def load_example(self):
+        self.guard_unsaved('Örneği açmadan', self._load_example)
+
+    def _load_example(self):
         self.load_path(Path(__file__).resolve().parents[2] / 'examples' / 'ornek_pres_unitesi.gwhyd')
 
     def load_path(self, path):
@@ -1113,7 +1133,7 @@ class HydraulicPage(BasePage):
         if not simple_supported(project):
             self.view_mode.blockSignals(True);self.view_mode.setCurrentIndex(1);self.view_mode.blockSignals(False)
             self.input_stack.setCurrentIndex(1);self.apply_view_layout()
-        self.populate(); self.recalculate()
+        self.populate(); self.recalculate(); self.mark_project_saved()
         self.set_status(f'Proje açıldı: {Path(path).name}')
 
     def save_project(self):
@@ -1129,7 +1149,7 @@ class HydraulicPage(BasePage):
             serialization.save(self.project, path)
         except (OSError, ValueError) as error:
             self.set_status(f'Kaydedilemedi: {error}', True); return
-        self.path = Path(path); self.set_status(f'Proje kaydedildi: {Path(path).name}')
+        self.path = Path(path); self.mark_project_saved(); self.set_status(f'Proje kaydedildi: {Path(path).name}')
 
     def export(self, kind):
         if not self.current_result_ready() or not self.can_start():

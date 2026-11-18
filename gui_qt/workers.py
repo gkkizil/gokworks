@@ -196,4 +196,6 @@ class JobManager(QObject):
         self.finished.emit()
         if owner is not None:
             owner.job_finished()
+            from .projects import job_done
+            job_done(owner)          # a step that waited for this save runs only if it saved
         diagnostics.record('qt_job_finished_delivered')

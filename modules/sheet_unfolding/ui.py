@@ -100,6 +100,22 @@ class MetricStrip(QWidget):
 
 
 class UnfoldPage(BasePage):
+    project_title = 'Sac açınımı projesi'
+    recovery_suffix = '.gokunfold.json'
+
+    def project_snapshot(self):
+        return dict(name=self.project_name.text().strip(), parts=self.project_parts, metadata=self.project_metadata)
+
+    def write_recovery(self, path):
+        if self.project_parts:
+            self.service.save_project(self.project_object(), path)
+
+    def restore_recovery(self, path):
+        self.open_path(path)
+        from gui_qt.projects import mark_recovered; mark_recovered(self)
+        self.mark_dirty(True)
+        self.set_status('Önceki oturumdan kurtarılan sac açınımı projesi açıldı; henüz kaydedilmedi.', tone='warning')
+
     # Closing the window stops a running preview calculation without asking; file exports still ask.
     quiet_cancel_on_close = True
 
@@ -1248,17 +1264,17 @@ class UnfoldPage(BasePage):
             self.service.save_project(self.project_object(), path)
         except (OSError, ValueError) as error:
             self.set_status(f'Proje kaydedilemedi: {error}', True); return
-        self.mark_dirty(False); self.set_status(f'Proje kaydedildi: {Path(path).name}')
+        self.mark_dirty(False); self.mark_project_saved(); self.set_status(f'Proje kaydedildi: {Path(path).name}')
 
     def open_project(self):
-        if self.dirty and self.project_parts:
-            from PySide6.QtWidgets import QMessageBox
-            if QMessageBox.question(self, 'Kaydedilmemiş değişiklik', 'Proje değişiklikleri kaydedilmedi. Yine de başka proje açılsın mı?',
-                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
-                return
+        self.guard_unsaved('Başka proje açmadan', self._open_project)
+
+    def _open_project(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Proje aç', '', 'Sac açınımı projesi (*.json)')
-        if not path:
-            return
+        if path:
+            self.open_path(path)
+
+    def open_path(self, path):
         try:
             project = self.service.load_project(path)
         except (OSError, ValueError, KeyError, TypeError) as error:
@@ -1267,7 +1283,7 @@ class UnfoldPage(BasePage):
         self.project_parts = [dict(code=item.code, name=item.code, request=self.service.page_request(item.request), revision=1,
                                    quantity=item.quantity, material=item.request.material.name or '—', status='Yeniden hesaplanacak')
                               for item in project.items]
-        self.project_name.setText(project.name); self.refresh_project(); self.mark_dirty(False)
+        self.project_name.setText(project.name); self.refresh_project(); self.mark_dirty(False); self.mark_project_saved()
         note = ' Proje eski motor sürümüyle kaydedilmiş; sonuçlar yeniden hesaplanıyor.' if project.needs_recalculation else ''
         if self.project_parts:
             self.project_table.selectRow(0)            # loads the first part into the form and recalculates
