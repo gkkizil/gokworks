@@ -211,7 +211,7 @@ def test_broken_project_keeps_the_current_analysis_and_its_result(window,qtbot,t
     elif field=='physical_id':data['project']['dimensions'][0]['physical_id']=[]
     else:data['project']['dimensions']=None
     path.write_text(json.dumps(data),encoding='utf-8')
-    monkeypatch.setattr(page,'confirm_discard',lambda:True)
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *args:(str(path),''))
 
     page.open_project();qtbot.waitUntil(lambda:not window.jobs.busy,timeout=10000)
@@ -369,13 +369,13 @@ def test_compact_diagram_reflows_without_shrinking_text_and_keeps_add_actions_vi
         assert control.isVisible() and window.rect().contains(control.mapTo(window,control.rect().bottomRight()))
 
 
-def test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis(window,qtbot):
+def test_invalid_advanced_input_targets_its_field_and_does_not_leak_into_a_new_analysis(window,qtbot,monkeypatch):
     page=window.pages['tolerance_stack'];page.load_example();page.show_settings('statistics')
     page.form.set_value('seed','abc');page.tabs.setCurrentIndex(0)
     assert page.current_issue.target=='statistics' and not page.calculate_button.isEnabled()
     window.activateWindow();page.fix_button.click()
     qtbot.waitUntil(lambda:page.form.fields['seed'].hasFocus(),timeout=2000)
-    with patch.object(page,'confirm_discard',return_value=True):page.new_project()
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard');page.new_project()
     assert page.metadata_error=='' and page.metadata_field=='' and page.project.terms==[]
     assert not page.calculate_button.isEnabled()
 

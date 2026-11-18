@@ -87,13 +87,23 @@ class ToleranceStackPage(BasePage):
 
     def project_snapshot(self):
         from dataclasses import asdict
-        self.capture_settings()             # typed limits and method are part of the project file
-        return dict(project=asdict(self.project), result=self.result)
+        # Typed limits and method are part of the project file. The check reads them
+        # without changing the page: the current project object and form errors stay.
+        kept = self.project, self.metadata_error, self.metadata_field
+        try:
+            self.capture_settings()
+            return dict(project=asdict(self.project), result=self.result)
+        finally:
+            self.project, self.metadata_error, self.metadata_field = kept
 
     def write_recovery(self, path):
-        try: self.capture_settings()
-        except ValueError: pass
-        storage.save_project(project_snapshot(self.project), path, result=self.result, overwrite=True)
+        kept = self.project, self.metadata_error, self.metadata_field
+        try:
+            try: self.capture_settings()
+            except ValueError: pass
+            storage.save_project(project_snapshot(self.project), path, result=self.result, overwrite=True)
+        finally:
+            self.project, self.metadata_error, self.metadata_field = kept
 
     def restore_recovery(self, path):
         project, archive = storage.load_project(path)
@@ -927,7 +937,7 @@ class ToleranceStackPage(BasePage):
         self.target.setText('');self.source_info.setText('Manuel örnek · SolidWorks kaynağı yok.');self.watch_sources()
         self.load_form();self.invalidate();self.refresh();self.expand_library.setChecked(False);self.tabs.setCurrentIndex(0)
         self.set_status('Örnek: 50 − 20 − 29,8 = 0,2 mm. Kontrol kutusunu işaretleyip Hesapla düğmesine basın.')
-        self.dirty=False; self.mark_project_saved()
+        self.mark_project_saved()
 
     def save_project(self):
         try:self.capture_settings()

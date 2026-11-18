@@ -666,15 +666,28 @@ class NestingPage(BasePage):
         return True
 
     def project_snapshot(self):
-        self.read_parameters()              # typed options/costs are part of the project file
-        return dict(project=asdict(self.project), result=asdict(self.result) if self.result else None,
+        # Typed options/costs are part of the project file; read them without changing the project.
+        kept = self.project.options, self.project.operations
+        try:
+            self.read_parameters()
+            project = asdict(self.project)
+        finally:
+            self.project.options, self.project.operations = kept
+        # Sheet definitions live in the stock library: saved automatically and kept by
+        # New / Open, so editing them never loses work and never asks.
+        project.pop('sheets', None)
+        return dict(project=project, result=asdict(self.result) if self.result else None,
                     imports=deepcopy(self.imports))
 
     def write_recovery(self, path):
         from modules.nesting.storage import save_project
-        try: self.read_parameters()
-        except ValueError: pass             # keep the last valid options; parts and stock are the work
-        save_project(self.project, path, self.result, overwrite=True, imports=self.imports)
+        kept = self.project.options, self.project.operations
+        try:
+            try: self.read_parameters()
+            except ValueError: pass         # keep the last valid options; parts and stock are the work
+            save_project(self.project, path, self.result, overwrite=True, imports=self.imports)
+        finally:
+            self.project.options, self.project.operations = kept
 
     def restore_recovery(self, path):
         from modules.nesting.storage import load_project

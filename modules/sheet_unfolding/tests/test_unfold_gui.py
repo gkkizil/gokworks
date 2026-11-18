@@ -235,6 +235,7 @@ def test_project_save_open_and_zip(page, qtbot, tmp_path, monkeypatch):
     saved = page.service.load_project(str(target))
     assert [item.quantity for item in saved.items] == [1, 3] and saved.items[1].request.shape_id == 'cone'
     page.project_parts = []; page.refresh_project()
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *a, **k: (str(target), ''))
     page.open_project(); settle(qtbot, page)
     assert len(page.project_parts) == 2 and page.project_parts[1]['quantity'] == 3

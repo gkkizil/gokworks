@@ -3,7 +3,7 @@
 from decimal import Decimal
 
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QApplication, QMessageBox, QDialog
+from PySide6.QtWidgets import QApplication, QDialog
 
 from .test_ui import page, setup_scan  # noqa: F401
 from modules.profile_cutting.dialogs import RowDialog
@@ -98,10 +98,10 @@ def test_example_never_silently_replaces_existing_parts(page, monkeypatch):
     p, _ = page
     old = Demand('keep','IPE200','S355JR','1200',2)
     p.project.demands = [old]; p.refresh_demands()
-    monkeypatch.setattr(QMessageBox,'question',lambda *a: QMessageBox.No)
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'cancel')
     p.load_example()
     assert p.project.demands == [old]
-    monkeypatch.setattr(QMessageBox,'question',lambda *a: QMessageBox.Yes)
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     p.load_example()
     assert len(p.project.demands) == 2 and p.project.demands[0].id != old.id
 
