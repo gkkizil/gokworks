@@ -5,7 +5,7 @@ from pathlib import Path
 from PySide6.QtCore import QEvent, QSize, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout,
-    QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QSizePolicy, QSplitter,
+    QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QScrollArea, QSizePolicy, QSplitter,
     QStackedWidget,
     QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
@@ -18,6 +18,8 @@ from .pipeline import worker
 from .outputs import write_batch_report
 from .rules import CLASS_TITLES
 from .preview import SheetPreview
+from .coverage import COVERAGE, PASS_MEANING
+from gui_qt.coverage import CoverageList
 
 SOURCE_SUFFIXES = ('.sldprt', '.sldasm')
 STATUS_TEXT = {'PASS': 'Başarılı', 'WARNING': 'Uyarılı', 'FAIL': 'Hatalı', 'CANCELLED': 'İptal', 'SKIPPED': 'Atlandı'}
@@ -328,7 +330,10 @@ class AutoDrawingPage(BasePage):
             kicker = label(title.upper(), 'muted', wrap=False); kicker.setProperty('kicker', True)
             value = label('0', None, wrap=False); value.setProperty('tileValue', True)
             tl.addWidget(kicker); tl.addWidget(value); self.tiles[key] = value; tiles.addWidget(tile, 1)
+            if key == 'PASS':
+                tile.setToolTip(PASS_MEANING)
         rv.addLayout(tiles)
+        self.pass_meaning = label(PASS_MEANING, 'muted'); rv.addWidget(self.pass_meaning)
         self.result_table = QTableWidget(0, 5)
         self.result_table.setHorizontalHeaderLabels(['Dosya', 'Konfigürasyon', 'Durum', 'Pafta', 'Açıklama'])
         configure_view(self.result_table)
@@ -341,6 +346,12 @@ class AutoDrawingPage(BasePage):
                                      'Kaynakları işaretleyip “Resimleri oluştur” komutunu çalıştırın. '
                                      'Her dosya için SLDDRW, PDF ve doğrulama bulguları burada listelenir.')
         self.tabs.addTab(results, 'Sonuçlar')
+
+        coverage = QScrollArea(); coverage.setWidgetResizable(True); coverage.setFrameShape(QFrame.NoFrame)
+        self.coverage = CoverageList(COVERAGE, 'Bu araç neyi otomatik yapar? Kısmi ve desteklenmeyen konular '
+                                     'resimde sessizce atlanmış sayılmaz; elle tamamlanmalıdır.')
+        coverage.setWidget(self.coverage)
+        self.tabs.addTab(coverage, 'Kapsam')
 
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setChildrenCollapsible(False); self.splitter.setHandleWidth(10)

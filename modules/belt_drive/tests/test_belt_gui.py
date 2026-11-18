@@ -228,6 +228,7 @@ def test_project_save_open_recalculates_and_v1_projects_open(page, qtbot, tmp_pa
     assert data['schema'] == 'gokworks.belt_drive.automatic_result' and [c['identifier'] for c in data['unverified']] == selected
     # Reopen: inputs come back, results are recomputed, not read from the file.
     page.a_target.setValue(650.)
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *a, **k: (str(target), ''))
     page.open_project(); wait(qtbot, page)
     assert page.a_target.value() == pytest.approx(700.) and page.report is not None and page.compare_ids == selected
@@ -305,6 +306,7 @@ def test_nominal_project_v3_restores_general_method_without_a_catalog(page,qtbot
     data=json.loads(path.read_text(encoding='utf-8'))
     assert data['version']==3 and data['catalog'] is None and data['request']['center_target_mm'] is None
     page.use_catalog_mode()
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),''))
     page.open_project();wait(qtbot,page)
     assert page.nominal_mode() and page.report is not None and page.compare_ids==selected

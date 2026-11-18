@@ -152,6 +152,13 @@ class MainWindow(QMainWindow):
         # Only the restored initial module is constructed at startup. Existing
         # mapping access still loads any module explicitly requested by callers.
         self.pages = PageRegistry(PAGE_TYPES, self.create_page)
+        from .projects import Recovery
+        # Unsaved-work copies live next to the settings, never in a user's project folder.
+        self.recovery = Recovery(self.settings.path.parent / 'recovery')
+        self.recovery_timer = QTimer(self); self.recovery_timer.setInterval(60_000)
+        self.recovery_timer.timeout.connect(self.write_recovery)
+        self.recovery_timer.start()
+        QTimer.singleShot(0, self.offer_recovery)
         self.jobs.busyChanged.connect(self.job_state_changed)
         self.jobs.finished.connect(self.finished_job)
         self.set_theme(self.appearance)
@@ -173,6 +180,8 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(page)
         page.refresh_command_icons()
         page.theme_changed()
+        if page.project_title:
+            page.mark_project_saved()      # a freshly opened tool has nothing unsaved
         return page
 
     def navigate_relative(self, step):
@@ -414,8 +423,107 @@ class MainWindow(QMainWindow):
         try:dialog.exec()
         finally:dialog.deleteLater()
 
+    user_close = False          # set by request_user_close(): treat a programmatic close as the user's
+
+    def project_pages(self):
+        return [(key, page) for key, page in ((k, self.pages.peek(k)) for k in self.pages)
+                if page is not None and page.project_title]
+
+    def confirm_unsaved_projects(self):
+        """Save / continue without saving / cancel for each tool with unsaved work.
+
+        Returns True when the window may close now. A save running in the background
+        keeps the window open and closes it only once that save finished cleanly.
+        """
+        from . import projects
+        decided = getattr(self, '_discard_on_close', set())
+        for key, page in self.project_pages():
+            if key in decided or not page.has_unsaved_changes():
+                continue
+            self.navigate(key)
+            choice = projects.ask(page, 'Çıkmadan')
+            if choice == projects.CANCEL:
+                self._discard_on_close = set()
+                return False
+            if choice == projects.DISCARD:
+                decided.add(key); self._discard_on_close = decided
+                continue
+            outcome = projects.save_then(page, self.request_user_close)
+            if outcome is not True:     # still saving (closes when done) or not saved (stays open)
+                if outcome is False:
+                    self._discard_on_close = set()
+                return False
+        for key, _ in self.project_pages():
+            self.recovery.discard(key)  # saved or knowingly discarded: nothing left to recover
+        self._discard_on_close = set()
+        return True
+
+    def write_recovery(self):
+        """Copy unsaved work of idle tools to the recovery folder (each tool's own format)."""
+        for key, page in self.project_pages():
+            if self.jobs.busy and self.jobs.owner is page:
+                continue
+            try:
+                if page.has_unsaved_changes():
+                    stamp = getattr(page, '_recovered_digest', None)
+                    from .projects import current_digest
+                    now = current_digest(page)
+                    if stamp != now and self.recovery.write(key, page):
+                        page._recovered_digest = now
+                else:
+                    self.recovery.discard(key)
+            except Exception as error:      # recovery must never disturb the work itself
+                diagnostics.record(f'recovery_write_failed module={key} error={type(error).__name__}')
+
+    def offer_recovery(self):
+        """Offer copies left by an unclean exit; non-blocking, a broken copy is just skipped."""
+        try:
+            found = self.recovery.available(set(self.pages))
+        except Exception:
+            return
+        if not found:
+            return
+        from datetime import datetime
+        lines = '\n'.join(f"• {manifest.get('title') or key} · {datetime.fromtimestamp(manifest.get('saved_at', 0)):%d.%m.%Y %H:%M}"
+                          for key, manifest, _ in found)
+        box = QMessageBox(QMessageBox.Question, 'Kaydedilmemiş çalışma bulundu',
+                          'Önceki oturumdan kaydedilmemiş çalışma kurtarılabilir:\n' + lines
+                          + '\n\nKurtarılan çalışma kaydedilmemiş olarak açılır; proje dosyalarınıza dokunulmaz.', parent=self)
+        restore = box.addButton('Kurtar', QMessageBox.AcceptRole)
+        drop = box.addButton('Sil', QMessageBox.DestructiveRole)
+        box.addButton('Sonra', QMessageBox.RejectRole)
+        def answered(_):
+            if box.clickedButton() is restore:
+                self.restore_recovery(found)
+            elif box.clickedButton() is drop:
+                for key, _, _ in found:
+                    self.recovery.discard(key)
+        box.finished.connect(answered)
+        self.recovery_prompt = box
+        box.open()
+
+    def restore_recovery(self, found):
+        restored = []
+        for key, manifest, data in found:
+            page = self.pages[key]
+            if page.has_unsaved_changes():
+                continue                    # never replace work typed in this session
+            try:
+                page.restore_recovery(str(data))
+            except Exception as error:
+                page.set_status(f'Kurtarma kopyası açılamadı: {error}', True)
+                continue
+            restored.append(key)
+        if restored:
+            self.navigate(restored[0])
+
+    def request_user_close(self):
+        self.user_close = True
+        self.close()
+
     def closeEvent(self, event):
         diagnostics.record(f'gui_close_requested busy={self.jobs.busy} closing={self.closing}')
+        by_user, self.user_close = event.spontaneous() or self.user_close, False
         if self.jobs.busy and getattr(self.jobs.owner, 'quiet_cancel_on_close', False):
             # Short preview calculations (sheet unfolding) are stopped and awaited briefly;
             # only CAD/file work keeps the confirmation dialog below.
@@ -439,11 +547,18 @@ class MainWindow(QMainWindow):
                     owner.pending_apply = None
                 self.jobs.cancel()
             return
-        shaft = self.pages.peek('shaft_generator')
-        if shaft is not None and not shaft.confirm_close():
-            self.closing = False
-            event.ignore()
-            return
+        if by_user:
+            # The user closes the window: every tool with a project file is asked.
+            if not self.confirm_unsaved_projects():
+                self.closing = False
+                event.ignore()
+                return
+        else:
+            shaft = self.pages.peek('shaft_generator')
+            if shaft is not None and not shaft.confirm_close():
+                self.closing = False
+                event.ignore()
+                return
         self.settings.qt.setValue('window/geometry', self.saveGeometry())
         self.settings.qt.sync()
         if not self.settings.flush():

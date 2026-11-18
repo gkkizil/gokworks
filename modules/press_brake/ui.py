@@ -13,6 +13,8 @@ from .viewer import SceneView
 from .tool_picker import ToolPicker, profile_icon
 from .flat_plan import FlatPlan
 from .cards import CARD, PROGRESS, STATES, StepCardDelegate
+from .coverage import COVERAGE, PASS_MEANING
+from gui_qt.coverage import CoverageList
 
 SCOPE = ('Kapsam: sac / atanmış takım katıları / varsa tutucular. Tezgâh (sahnedeki üst kiriş ve alt ray yalnız görsel), '
          'arka dayama, adımlar arası tutuş ve çıkarma rotası kapsam dışı. CNC strok hesabı ve üretim uygunluğu onayı değildir.')
@@ -144,7 +146,8 @@ class PressBrakePage(BasePage):
         self.tool_section = Disclosure('Takım verisi', self.tool_info); side.addWidget(self.tool_section)
         details = QWidget(); details_body = QVBoxLayout(details); details_body.setContentsMargins(0, 0, 0, 0)
         self.details = QTextBrowser(); self.details.setMinimumHeight(110); self.details.setOpenExternalLinks(False); details_body.addWidget(self.details)
-        scope = label(SCOPE, 'muted'); details_body.addWidget(scope)
+        scope = label(PASS_MEANING, 'muted'); details_body.addWidget(scope)
+        self.coverage = CoverageList(COVERAGE); details_body.addWidget(self.coverage)
         self.details_section = Disclosure('Kontrol ayrıntıları ve kapsam', details); side.addWidget(self.details_section)
         side.addStretch(1)
         self.right_scroll = QScrollArea(); self.right_scroll.setWidgetResizable(True); self.right_scroll.setWidget(right); self.right_scroll.setMinimumWidth(220)
@@ -178,6 +181,7 @@ class PressBrakePage(BasePage):
         self.transport = AdaptiveRow(transport, views, stretch=0); self.layout.addWidget(self.transport)
         status = QHBoxLayout(); status.setSpacing(10)
         self.result_badge = label('○ Kontrol bekliyor', 'muted', wrap=False); status.addWidget(self.result_badge)
+        self.result_badge.setToolTip(SCOPE)
         self.frame_label = ElidedLabel('Hareket kontrolü henüz çalıştırılmadı.'); self.frame_label.setProperty('role', 'muted')
         self.frame_label.setToolTip(SCOPE); status.addWidget(self.frame_label, 1)
         self.layout.addLayout(status)
@@ -252,6 +256,7 @@ class PressBrakePage(BasePage):
         status = self.result.status if self.result else None
         symbol, text, tone = STATES[status]
         self.result_badge.setText(f'{symbol} {text}')
+        self.result_badge.setToolTip(PASS_MEANING if status == 'clear' else SCOPE)
         self.result_badge.setProperty('role', {'danger': 'error', 'muted': 'muted'}.get(tone, tone))
         self.result_badge.style().unpolish(self.result_badge); self.result_badge.style().polish(self.result_badge)
 

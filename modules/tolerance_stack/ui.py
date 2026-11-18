@@ -82,6 +82,36 @@ class LibraryFilter(FilterProxy):
 
 
 class ToleranceStackPage(BasePage):
+    project_title = 'Tolerans analizi'
+    recovery_suffix = '.gokstack.json'
+
+    def project_snapshot(self):
+        from dataclasses import asdict
+        # Typed limits and method are part of the project file. The check reads them
+        # without changing the page: the current project object and form errors stay.
+        kept = self.project, self.metadata_error, self.metadata_field
+        try:
+            self.capture_settings()
+            return dict(project=asdict(self.project), result=self.result)
+        finally:
+            self.project, self.metadata_error, self.metadata_field = kept
+
+    def write_recovery(self, path):
+        kept = self.project, self.metadata_error, self.metadata_field
+        try:
+            try: self.capture_settings()
+            except ValueError: pass
+            storage.save_project(project_snapshot(self.project), path, result=self.result, overwrite=True)
+        finally:
+            self.project, self.metadata_error, self.metadata_field = kept
+
+    def restore_recovery(self, path):
+        project, archive = storage.load_project(path)
+        self.handle_events([('stack_loaded', (project, '', '', bool(archive)))])
+        from gui_qt.projects import mark_recovered; mark_recovered(self)
+        self.dirty = True
+        self.set_status('Önceki oturumdan kurtarılan tolerans analizi açıldı; henüz kaydedilmedi.', tone='warning')
+
     def __init__(self,context):
         super().__init__(context,'Tolerans yığılması','Ölçüleri seçin, toplayın veya çıkarın; kalan mesafenin sınırlarını görün.')
         self.project=Project();self.result=None;self.selected_files=[];self.loading=False
@@ -887,14 +917,19 @@ class ToleranceStackPage(BasePage):
             QMessageBox.Yes|QMessageBox.No,QMessageBox.No)==QMessageBox.Yes
 
     def new_project(self):
-        if not self.confirm_discard():return
+        self.guard_unsaved('Yeni analize geçmeden', self._new_project)
+
+    def _new_project(self):
         self.project=Project();self.project_path='';self.selected_files=[];self.result=None
         self.target.setText('');self.source_info.setText('Yeni manuel analiz · SolidWorks kaynağı yok.');self.watch_sources()
         self.load_form();self.invalidate();self.refresh();self.dirty=False
         self.expand_library.setChecked(False);self.tabs.setCurrentIndex(0)
+        self.mark_project_saved()
 
     def load_example(self):
-        if not self.confirm_discard():return
+        self.guard_unsaved('Örneği açmadan', self._load_example)
+
+    def _load_example(self):
         self.project=Project(name='A − B − C · Fonksiyonel boşluk',acceptance_max=number('.40'),method='rss',truncate_normal=False)
         self.project.dimensions=[manual_dimension('A',50,'-.10','.10'),manual_dimension('B',20,'-.05','.05'),manual_dimension('C','29.80','-.03','.03')]
         self.project.terms=[Term(d.id,1 if i==0 else -1,f'P{i}',f'P{i+1}',datum='A') for i,d in enumerate(self.project.dimensions)]
@@ -902,6 +937,7 @@ class ToleranceStackPage(BasePage):
         self.target.setText('');self.source_info.setText('Manuel örnek · SolidWorks kaynağı yok.');self.watch_sources()
         self.load_form();self.invalidate();self.refresh();self.expand_library.setChecked(False);self.tabs.setCurrentIndex(0)
         self.set_status('Örnek: 50 − 20 − 29,8 = 0,2 mm. Kontrol kutusunu işaretleyip Hesapla düğmesine basın.')
+        self.mark_project_saved()
 
     def save_project(self):
         try:self.capture_settings()
@@ -912,7 +948,9 @@ class ToleranceStackPage(BasePage):
         self.start_job('save',lambda sink,stop:(storage.save_project(snapshot,path,result=value,overwrite=True,stop=stop),sink.put(('stack_saved',path))))
 
     def open_project(self):
-        if not self.confirm_discard():return
+        self.guard_unsaved('Başka analiz açmadan', self._open_project)
+
+    def _open_project(self):
         path,_=QFileDialog.getOpenFileName(self,'Analiz projesini aç','','GOKWORKS analiz (*.gokstack.json *.json)')
         if not path:return
         def operation(sink,stop):
@@ -931,7 +969,8 @@ class ToleranceStackPage(BasePage):
             elif kind=='stack_result':self.show_result(value)
             elif kind=='stack_progress':self.progressChanged.emit(*value)
             elif kind=='stack_phase':self.set_status(value)
-            elif kind=='stack_saved':self.project_path=value;self.dirty=False;self.set_status('Analiz projesi atomik olarak kaydedildi.')
+            elif kind=='stack_saved':
+                self.project_path=value;self.dirty=False;self.mark_project_saved();self.set_status('Analiz projesi atomik olarak kaydedildi.')
             elif kind=='stack_loaded':
                 self.project,self.project_path,issues,archived=value;self.load_form();self.invalidate();self.refresh();self.dirty=False
                 self.selected_files=[s.path for s in self.project.sources]
@@ -939,6 +978,7 @@ class ToleranceStackPage(BasePage):
                 if self.project.sources:self.target.setText(self.project.sources[0].path)
                 else:self.target.setText('')
                 self.set_status('Proje açıldı. Eski sonuç güncel sayılmaz; kaynakları ve zinciri doğrulayıp yeniden hesaplayın.'+('\n'+issues if issues else ''),bool(issues))
+                self.mark_project_saved()
             elif kind=='stack_output':
                 self.set_status(('Çıktı kaydedildi: ' if value['saved'] else 'Anotasyon eklendi; çizim kaydedilmedi: ')+value['path']+
                     ('\nYedek: '+value['backup'] if value.get('backup') else ''))

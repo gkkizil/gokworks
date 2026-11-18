@@ -31,6 +31,7 @@ def quiet_dialogs(monkeypatch):
     monkeypatch.setattr(QMessageBox, 'exec', lambda self: QMessageBox.No)
     monkeypatch.setattr(QDialog, 'exec', lambda self: 0)
     monkeypatch.setattr(QMenu, 'exec', lambda self, *a, **k: None)
+    monkeypatch.setattr('gui_qt.projects.ask', lambda page, action: 'cancel')   # unsaved-work question: keep work
 
 
 @pytest.fixture

@@ -42,9 +42,17 @@ def version_text():
     if getattr(sys,'frozen',False):
         try:
             info=json.loads((ROOT/'build/application-info.json').read_text(encoding='utf-8'))
-            revision=info.get('revision') if isinstance(info,dict) else None
+            info=info if isinstance(info,dict) else {}
+            revision=info.get('revision')
             if isinstance(revision,str) and re.fullmatch(r'[0-9a-fA-F]{40,64}',revision):
-                return 'Derleme revizyonu '+revision[:8]
+                text='Derleme revizyonu '+revision[:8]
+                source=info.get('source_commit')
+                if isinstance(source,str) and re.fullmatch(r'[0-9a-fA-F]{40,64}',source) and source!=revision:
+                    text+=' · uygulama kodu '+source[:8]
+                build=info.get('build')
+                if isinstance(build,(str,int)) and str(build).isdigit():
+                    text+=' · derleme '+str(build)
+                return text
         except (OSError,ValueError):pass
         return 'Paket sürüm bilgisi bulunamadı'
     revision=source_revision()

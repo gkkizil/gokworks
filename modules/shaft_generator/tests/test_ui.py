@@ -272,7 +272,7 @@ def test_existing_project_and_error_during_load_keep_current_data(page,tmp_path,
     monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a,**k:(str(path),''))
     page.name.setText('TEST_MIL');page.save_dialog();assert path.is_file() and not page.dirty
     page.table.item(0,2).setText('55')
-    monkeypatch.setattr(QMessageBox,'question',lambda *a,**k:QMessageBox.Yes)
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),''))
     page.open_dialog();assert page.project.total_length==190 and page.name.text()=='TEST_MIL'
     original=page.project;path.write_text('{broken')

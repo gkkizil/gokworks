@@ -171,6 +171,7 @@ def test_opened_legacy_duration_is_replaced_by_automatic_scheduling_on_start(win
     from modules.nesting.storage import save_project
     p=load_parts(window,qtbot,tmp_path);p.project.options.seconds=600
     path=tmp_path/'legacy.goknest.json';save_project(p.project,path)
+    monkeypatch.setattr('gui_qt.projects.ask',lambda page,action:'discard')
     p.new_project()
     monkeypatch.setattr(QFileDialog,'getOpenFileName',lambda *a,**k:(str(path),''))
     p.open_project();finish(window,qtbot)

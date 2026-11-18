@@ -144,6 +144,24 @@ def form():
 
 # ---- the page -----------------------------------------------------------------------------
 class BeltDrivePage(BasePage):
+    project_title = 'Kayış projesi'
+    recovery_suffix = '.gokbelt.json'
+
+    def project_snapshot(self):
+        # Every typed input (also an invalid one that has no manual result yet) plus what the file stores.
+        from gui_qt.projects import widget_values
+        request = self.request if self.report is not None or self.pairs is not None else None
+        return dict(inputs=widget_values(self), request=request, selected=list(self.compare_ids))
+
+    def write_recovery(self, path):
+        text = self._project_text(quiet=True)
+        if text is None:
+            raise ValueError('kaydedilecek geçerli tasarım yok')
+        write_text_atomic(path, text)
+
+    def restore_recovery(self, path):
+        self._recovered = True
+        self.open_path(path)
     def __init__(self, context):
         super().__init__(context, 'Kayış–Kasnak Tasarımı',
                          'V ve triger-senkron kayışta nominal hesap, katalogdan otomatik tasarım ve karşılaştırma. '
@@ -829,6 +847,12 @@ class BeltDrivePage(BasePage):
                 self.search_finished(kind, value)
             elif kind == 'belt_project_result':
                 self.project_recalculated(*value)
+                from gui_qt.projects import mark_recovered
+                if getattr(self, '_recovered', False):
+                    self._recovered = False; mark_recovered(self)
+                    self.set_status('Önceki oturumdan kurtarılan kayış projesi açıldı; henüz kaydedilmedi.', tone='warning')
+                else:
+                    self.mark_project_saved()
             elif kind == 'job_error':
                 self.running = None
                 message=str(value.get('error','Hesap tamamlanamadı.'))
@@ -1224,14 +1248,33 @@ class BeltDrivePage(BasePage):
         self.set_status(f'Karşılaştırma kaydedildi: {Path(path).name}')
 
     def save_project(self):
+        text = self._project_text()
+        if text is None:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, 'Kayış projesini kaydet', 'kayis_projesi.json', 'Kayış projesi (*.json)')
+        if not path:
+            return
+        try:
+            write_text_atomic(path, text)
+        except OSError as error:
+            self.set_status(f'Proje kaydedilemedi: {error}', True); return
+        self.mark_project_saved()
+        manual, request = self._saved_parts
+        self.set_status(f'Proje kaydedildi: {Path(path).name} (' + ('manuel tasarım ve otomatik arama' if manual and request else
+                        'manuel tasarım' if manual else 'otomatik arama') + '; sonuçlar açılışta yeniden hesaplanır).')
+
+    def _project_text(self, quiet=False):
+        """The project file text, or None (with a status message unless ``quiet``)."""
         if self.manual_timer.isActive():
             self.calculate_manual()          # the latest typed value is part of the saved design
         manual = self.manual_result.specification if self.manual_result is not None else None
         # The automatic request and its catalogue snapshot are saved only after a current search.
         request = self.request if self.report is not None or self.pairs is not None else None
         if manual is None and request is None:
-            self.set_status('Kaydedilecek geçerli tasarım yok: manuel girdileri düzeltin veya bir arama yapın.', True); return
-        if manual is None:
+            if not quiet:
+                self.set_status('Kaydedilecek geçerli tasarım yok: manuel girdileri düzeltin veya bir arama yapın.', True)
+            return None
+        if manual is None and not quiet:
             self.set_status('Manuel tasarım geçersiz olduğu için projeye yalnız otomatik arama kaydediliyor.', tone='warning')
         selected = tuple(self.compare_ids) if self.report is not None and request is not None else ()
         try:
@@ -1241,24 +1284,29 @@ class BeltDrivePage(BasePage):
                                     nominal_options=self.current_nominal_options() if nominal else None)
             text = project_dumps(project)
         except (ValueError, TypeError) as error:
-            self.set_status(f'Proje oluşturulamadı: {error}', True); return
+            if not quiet:
+                self.set_status(f'Proje oluşturulamadı: {error}', True)
+            return None
         if len(text.encode('utf-8')) > MAX_JSON_SIZE:
-            self.set_status('Proje 2 MiB sınırını aşıyor; daha küçük bir katalogla kaydedin.', True); return
-        path, _ = QFileDialog.getSaveFileName(self, 'Kayış projesini kaydet', 'kayis_projesi.json', 'Kayış projesi (*.json)')
-        if not path:
-            return
-        try:
-            write_text_atomic(path, text)
-        except OSError as error:
-            self.set_status(f'Proje kaydedilemedi: {error}', True); return
-        self.set_status(f'Proje kaydedildi: {Path(path).name} (' + ('manuel tasarım ve otomatik arama' if manual and request else
-                        'manuel tasarım' if manual else 'otomatik arama') + '; sonuçlar açılışta yeniden hesaplanır).')
+            if not quiet:
+                self.set_status('Proje 2 MiB sınırını aşıyor; daha küçük bir katalogla kaydedin.', True)
+            return None
+        self._saved_parts = (manual, request)
+        return text
 
     def open_project(self):
         if not self.can_start():
             return
+        self.guard_unsaved('Başka proje açmadan', self._open_project)
+
+    def _open_project(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Kayış projesi aç', '', 'Kayış projesi (*.json)')
-        if not path:
+        if path:
+            self._recovered = False
+            self.open_path(path)
+
+    def open_path(self, path):
+        if not self.can_start():
             return
         try:
             with open(path, 'rb') as stream:

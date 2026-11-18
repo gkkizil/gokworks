@@ -42,6 +42,9 @@ def fmt(v, digits=3):
 
 
 class NestingPage(BasePage):
+    project_title = 'Nesting projesi'
+    recovery_suffix = '.goknest.json'
+
     def __init__(self, context):
         super().__init__(context, 'Nesting · Sac maliyeti',
                          'Parçaları ekleyin, sacı tanımlayın ve plakaları sırayla doldurun.')
@@ -662,12 +665,48 @@ class NestingPage(BasePage):
         self.stock_save_notice.setText('Sac stoğu otomatik kaydedildi; yeni projelerde de kullanılacak.')
         return True
 
+    def project_snapshot(self):
+        # Typed options/costs are part of the project file; read them without changing the project.
+        kept = self.project.options, self.project.operations
+        try:
+            self.read_parameters()
+            project = asdict(self.project)
+        finally:
+            self.project.options, self.project.operations = kept
+        # Sheet definitions live in the stock library: saved automatically and kept by
+        # New / Open, so editing them never loses work and never asks.
+        project.pop('sheets', None)
+        return dict(project=project, result=asdict(self.result) if self.result else None,
+                    imports=deepcopy(self.imports))
+
+    def write_recovery(self, path):
+        from modules.nesting.storage import save_project
+        kept = self.project.options, self.project.operations
+        try:
+            try: self.read_parameters()
+            except ValueError: pass         # keep the last valid options; parts and stock are the work
+            save_project(self.project, path, self.result, overwrite=True, imports=self.imports)
+        finally:
+            self.project.options, self.project.operations = kept
+
+    def restore_recovery(self, path):
+        from modules.nesting.storage import load_project
+        project, result, imports = load_project(path, with_imports=True)
+        totals = calculate(project, result, complete=False) if result is not None else None
+        self.handle_events([('nest_project', (project, result, imports, totals))])
+        from gui_qt.projects import mark_recovered; mark_recovered(self)
+        self.set_status('Önceki oturumdan kurtarılan nesting projesi açıldı; henüz kaydedilmedi.', tone='warning')
+
     def new_project(self):
         if not self.can_start(): return
+        self.guard_unsaved('Yeni projeye geçmeden', self._new_project)
+
+    def _new_project(self):
         self.project = self.fresh_stock_project(); self.result = None; self.imports = []; self.sync_forms(); self.refresh(); self.invalidate()
         self.search.clear(); self.parts_toggle.setChecked(True)
         self.settings_dialog.reject()
         self.set_status(self.stock_load_error or 'Yeni proje hazır. Kayıtlı sac tanımları kullanılabilir.',bool(self.stock_load_error))
+        self.mark_project_saved()
 
     def build_stock(self):
         widget = QWidget(); self.stock_layout = QBoxLayout(QBoxLayout.LeftToRight,widget)
@@ -1277,11 +1316,15 @@ class NestingPage(BasePage):
         project,result,imports = deepcopy(self.project),deepcopy(self.result),deepcopy(self.imports)
         def operation(sink,stop):
             from modules.nesting.storage import save_project
-            save_project(project,path,result,overwrite=True,stop=stop,imports=imports); sink.put(('nest_message','Proje, geometrileri ve DXF yükleme listesiyle kaydedildi.'))
+            save_project(project,path,result,overwrite=True,stop=stop,imports=imports)
+            sink.put(('nest_saved',path)); sink.put(('nest_message','Proje, geometrileri ve DXF yükleme listesiyle kaydedildi.'))
         self.jobs.start(self,operation)
 
     def open_project(self):
         if not self.can_start(): return
+        self.guard_unsaved('Başka proje açmadan', self._open_project)
+
+    def _open_project(self):
         path,_ = QFileDialog.getOpenFileName(self,'Nesting projesi aç','','Nesting (*.goknest.json)')
         if not path: return
         def operation(sink,stop):
@@ -1326,6 +1369,8 @@ class NestingPage(BasePage):
                 self.search.clear(); self.sync_forms(); self.refresh(); self.show_result(result,totals)
                 self.parts_toggle.setChecked(True)
                 if result is None: self.set_status('Proje açıldı. Otomatik yerleşim yapabilirsiniz.')
+                self.mark_project_saved()
+            elif kind == 'nest_saved': self.mark_project_saved()
             elif kind == 'nest_message': self.set_status(value)
             elif kind == 'job_error':
                 self.progress_timer.stop(); self.pending_progress = None

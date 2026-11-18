@@ -29,7 +29,39 @@ def release_block(report):
             f'Uygulama kodu: `{report.get("source_commit", report["commit"])[:7]}` · '
             f'[Derleme kaydı]({report["run_url"]}) · '
             '[Paket bilgisi ve SHA256](packaging/latest-windows.json)\n'
+            + package_facts(report) +
             f'{RELEASE_END}')
+
+
+VALIDATION_TITLES = {
+    'package-only': 'yalnız paket açılış kontrolü (regresyon test paketi bu EXE üzerinde çalıştırılmadı)',
+    'full': 'paket açılış kontrolü ve regresyon test paketi',
+}
+
+
+def package_facts(report):
+    """What this EXE is and what was checked on it; source tests are reported separately."""
+    lines = []
+    build = report.get('run_url', '').rstrip('/').rsplit('/', 1)[-1]
+    pages = (report.get('smoke') or {}).get('pages')
+    if build.isdigit():
+        lines.append(f'Derleme no: `{build}`')
+    if report.get('source_commit') and report.get('commit') and report['source_commit'] != report['commit']:
+        lines.append(f'Derlenen commit: `{report["commit"][:7]}` (uygulama koduna yalnız derleme isteği eklenmiş hali)')
+    if pages:
+        lines.append(f'Paketteki araç sayısı: {len(pages)}')
+    if report.get('validation_profile'):
+        profile = report['validation_profile']
+        lines.append('EXE doğrulaması: ' + VALIDATION_TITLES.get(profile, profile))
+    if report.get('sha256'):
+        lines.append(f'SHA256: `{report["sha256"]}`')
+    if not lines:
+        return ''
+    sha = [line for line in lines if line.startswith('SHA256')]
+    facts = ' · '.join(line for line in lines if not line.startswith('SHA256'))
+    return ('\n' + facts + '\n' + ''.join('\n' + line + '\n' for line in sha)
+            + '\nEXE, yukarıdaki uygulama kodundan derlenmiştir; kaynak koddaki daha yeni değişiklikleri içermez. '
+              'Yeni EXE yalnız derlemesi ve açılış kontrolü başarılı olunca bu bağlantının yerini alır.\n')
 
 
 def publish(report):
@@ -48,6 +80,8 @@ def publish(report):
             if report['status'] == 'success':
                 if not report.get('download_url') or report.get('smoke', {}).get('status') != 'passed':
                     raise RuntimeError('Başarılı paket için indirme bağlantısı ve açılış kontrolü gerekli.')
+                if not report.get('sha256') or not report.get('source_commit') or not report.get('validation_profile'):
+                    raise RuntimeError('Başarılı paket kaydı SHA256, kaynak revizyonu ve doğrulama profili içermeli.')
                 readme = git('show', f'{parent}:README.md')
                 pattern = re.escape(RELEASE_START)+r'.*?'+re.escape(RELEASE_END)
                 readme, count = re.subn(pattern, lambda match: release_block(report), readme, flags=re.S)
