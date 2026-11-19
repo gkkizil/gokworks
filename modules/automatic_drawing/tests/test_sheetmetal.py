@@ -259,6 +259,11 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
     native = case.native
     native.info, native.session = info, c.session
     c.session.constants['swAttachAnnotationOption_Sheet'] = 0
+    c.session.constants.update(swAutodimEntitiesAll=1, swAutodimSchemeBaseline=1, swAutodimHorizontalPlacementAbove=1,
+                               swAutodimVerticalPlacementRight=2)
+    # Recorded on SolidWorks 2025 SP5: AutoDimension on a flat view returns 1 (BadOptionValue)
+    # although it creates the dimensions; the result is judged by the dimensions read back.
+    case.drawing.methods['AutoDimension'] = lambda *args: 1
     native.options, native.result = Options(), DrawingResult(info.source)
     native.model, native.drawing = case.model, case.drawing
     pages, views, sheet_properties, source_calls = {}, {}, {}, []
@@ -468,6 +473,18 @@ def test_multibody_flat_views_are_retargeted_to_saved_configurations_and_tempora
     assert not [f for f in findings if f.severity == 'FAIL']
     assert [s['views'][0]['body_references'] for s in snapshots] == [(row.body_ref,) for row in c.info.sheet_bodies]
     assert c.native.result.measurements['flat_pattern']['body_count'] == 3
+
+
+def test_a_flat_page_without_readable_edges_falls_back_to_auto_dimension_and_reports_missing_dimensions(case):
+    # This double has no ModelToViewTransform / visible edges: the datum-edge scheme cannot run,
+    # SolidWorks' AutoDimension is used once per page, and a page left without dimensions is reported.
+    c = native_flat_case(case, bodies=3)
+    flat_page(c.native, c.c.model)
+    calls = [args for name, flags, args in case.drawing.calls if name == 'AutoDimension']
+    assert len(calls) == 3 and all(len(args) == 5 for args in calls)
+    assert c.native.result.measurements['flat_dimensions'] == {name: 0 for name in c.native.pages}
+    texts = [f.text for f in c.native.result.findings if f.code == 'flat_dimensions']
+    assert sum('taban kenardan' in t for t in texts) == 3 and sum('eklenemedi' in t for t in texts) == 3
 
 
 def test_multibody_flat_view_whose_saved_configuration_also_unfolds_another_body_is_rejected(case):

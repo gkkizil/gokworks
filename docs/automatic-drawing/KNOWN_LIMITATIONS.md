@@ -29,6 +29,11 @@ fakes veya dosya başlığı testleri gerçek entegrasyon testi sayılmaz.
 - BOM `GetComponentsCount2` / `GetComponents2` BOM konfigürasyonunda bastırılmış bileşeni
   de sayar; adet bastırılmamış bileşenlerle doğrulanır. Kayıt sonrası BOM tablosu model
   görünüşünde değil pafta girdisinde listelenir.
+- Açınım paftaları ölçülendirilir: toplam boy / en ve her büküm çizgisinin taban kenardan
+  konumu (referans ölçü). `AutoDimension` açınımda 1 döndürür, tek büküm ölçer ve eni iki kez
+  yazar; bu yüzden kenarlar `GetVisibleEntities2` + `ModelToViewTransform` ile, büküm çizgileri
+  pafta konumundan `EXTSKETCHSEGMENT` olarak seçilir. Dikdörtgen olmayan dış hatta
+  `AutoDimension` yedek olarak kullanılır ve uyarı verilir.
 - Tek başına açılan bir SLDDRW, dış referans aramasıyla başka klasördeki aynı adlı modele
   bağlanabilir (fixture adları çakışınca görüldü). Aynı adlı farklı modelleri aynı arama
   yolunda tutmayın.
