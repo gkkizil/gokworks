@@ -46,8 +46,13 @@ def cut_pattern(bar):
     return ' → '.join(parts)
 
 
+def bar_length(plan, bar):
+    """A bar's own length: stock and offcut bars differ from the purchase length."""
+    return number(bar.stock_length) if getattr(bar, 'stock_length', '') else number(plan.stock_length)
+
+
 def plan_totals(plan):
-    stock = number(plan.stock_length) * len(plan.bars)
+    stock = sum((bar_length(plan, b) for b in plan.bars), Decimal(0))
     parts = sum((number(c.length) + number(c.allowance) for b in plan.bars for c in b.cuts), Decimal(0))
     count = sum(len(b.cuts) for b in plan.bars)
     return dict(bars=len(plan.bars), count=count, stock=stock, parts=parts,
@@ -98,7 +103,8 @@ class CutOrder(QWidget):
             c = palette(self.context.appearance)
             text, waste = c['text'], c['border']
             scene.configure(background=c['canvas'])
-            scale = 610 / float(plan.stock_length)
+            length = bar_length(plan, bar)
+            scale = 610 / float(length)
             trim = float(plan.trim) * scale
             left = 20 + trim
             scene.create_rectangle(20, 42, 630, 94, outline=c['muted'], tags='stock')
@@ -121,7 +127,8 @@ class CutOrder(QWidget):
             if number(bar.remaining):
                 remaining = scene.create_rectangle(left, 42, 630-trim, 94, fill=waste, outline='', tags='remaining')
                 remaining.setToolTip(f'Artan profil: {mm(bar.remaining)} mm')
-            scene.create_text(325, 18, text=f'Ham çubuk: {mm(plan.stock_length)} mm',
+            origin = getattr(bar, 'source', '') or 'Satın alınacak'
+            scene.create_text(325, 18, text=f'{origin} çubuk: {mm(length)} mm',
                 fill=text, width=630, font=('Segoe UI', -12))
             scene.create_text(325, 125, text=f'{len(bar.cuts)} parça · Artan: {mm(bar.remaining)} mm · '
                 f'Testere payı: {mm(plan.kerf)} mm/kesim', fill=text, width=630, font=('Segoe UI', -12))
