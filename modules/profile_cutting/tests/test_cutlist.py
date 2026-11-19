@@ -59,7 +59,9 @@ def test_pdf_lists_each_profile_with_length_quantity_and_angles(qtbot, tmp_path)
     path = tmp_path/'kesim.pdf'
     export_pdf(from_scan(scan_result()), path)
     assert path.read_bytes().startswith(b'%PDF-')
-    text = subprocess.run(['pdftotext', '-layout', str(path), '-'], capture_output=True, text=True).stdout
+    # Bytes + explicit UTF-8: on Windows the console code page cannot decode 'ç', '°'.
+    output = subprocess.run(['pdftotext', '-layout', '-enc', 'UTF-8', str(path), '-'], capture_output=True, check=True)
+    text = output.stdout.decode('utf-8')
     for expected in ('Profil kesim listesi', '60 x 40 x 5.0', '857,32', '152,9', '45°', '30°', 'Eksik bilgi', '12 parça'):
         assert expected in text, expected
 
