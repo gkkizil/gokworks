@@ -95,11 +95,12 @@ class Workspace(QStackedWidget):
         super().__init__()
         self.panels, self.titles, self.sizes, self.threshold = panels, titles, sizes, threshold
         self.compact_mode = False
-        self.splitter = QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
+        # Placed first, filled after: moving a filled tree restyles all of it (slow opening).
+        self.splitter = QSplitter(Qt.Horizontal, self); self.splitter.setChildrenCollapsible(False)
+        self.tabs = QTabWidget(self); self.addWidget(self.splitter); self.addWidget(self.tabs)
         for panel in panels:
             self.splitter.addWidget(panel)
         self.splitter.setStretchFactor(1, 1); self.splitter.setSizes(list(sizes))
-        self.tabs = QTabWidget(); self.addWidget(self.splitter); self.addWidget(self.tabs)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -176,12 +177,12 @@ class BeltDrivePage(BasePage):
         self.open_button = self.action('Proje aç…', self.open_project)
         self.save_button = self.action('Projeyi kaydet…', self.save_project)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
-        self.tabs = QTabWidget(); self.tabs.setDocumentMode(True)
+        self.tabs = QTabWidget(self); self.tabs.setDocumentMode(True)
+        self.layout.addWidget(self.tabs, 1)
         self.tabs.addTab(self.build_manual(), 'Manuel Tasarım')
         self.tabs.addTab(self.build_auto(), 'Otomatik Tasarım')
         self.tabs.addTab(self.build_catalog(), 'Katalog ve Kaynaklar')
         self.tabs.addTab(self.build_compare(), 'Tasarım Karşılaştırma')
-        self.layout.addWidget(self.tabs, 1)
         self.finish_layout()
         self.manual_timer = QTimer(self); self.manual_timer.setSingleShot(True); self.manual_timer.setInterval(120)
         self.manual_timer.timeout.connect(self.calculate_manual)

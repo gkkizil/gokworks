@@ -11,7 +11,12 @@ from modules.cad_converter.models import checkpoint
 from modules.profile_cutting.solidworks import optional, values
 from modules.dxf_dwg.autosave import Session as ReadSession
 from modules.dxf_dwg import exporter
-from .flat import read_flat
+
+
+def read_flat(*args, **kwargs):
+    # ezdxf (~0,25 s) loads with the first flat preview, not with the DXF/DWG page.
+    from .flat import read_flat as read
+    return read(*args, **kwargs)
 from .geometry import make_mesh, MAX_TRIANGLES
 from .models import Payload
 

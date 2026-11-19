@@ -148,11 +148,19 @@ class ShaftPage(BasePage):
         # Editor panel (scrolls when short): fields of the open command | list of added operations.
         # One scroll area (no nested ones) and an opaque background: switching sections must
         # repaint the whole field area, never leave the previous form's pixels behind (Windows).
+        # Containers are placed before they are filled: moving a filled tree makes Qt
+        # restyle all of it again (most of this page's opening time).
+        self.splitter=QSplitter(Qt.Vertical,self);self.splitter.setChildrenCollapsible(False)
+        self.layout.addWidget(self.splitter,1)
         self.editor=QWidget();self.editor.setMinimumWidth(0)
         self.editor.setObjectName('shaftEditor');self.editor.setAttribute(Qt.WA_StyledBackground,True)
         self.panel_box=QBoxLayout(QBoxLayout.LeftToRight,self.editor)
         self.panel_box.setContentsMargins(6,6,6,6);self.panel_box.setSpacing(16)
+        self.source_scroll=scroll(self.editor);self.source_scroll.setMinimumHeight(96)
+        self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.splitter.addWidget(self.source_scroll)
         fields_column=QWidget();edit=QVBoxLayout(fields_column);edit.setContentsMargins(0,0,0,0);edit.setSpacing(6)
+        self.panel_box.addWidget(fields_column,3)
         # Kept for keyboard users and older tests: the same sections as the ribbon, in one list.
         picker_row=QHBoxLayout(); picker_row.setSpacing(4)
         self.section_picker=QComboBox();self.section_picker.setAccessibleName('Mil parametre bölümü')
@@ -166,7 +174,7 @@ class ShaftPage(BasePage):
         header.addWidget(self.new_operation_button);header.addStretch(1)
         edit.addLayout(header)
         self.tabs=SectionTabs(); self.tabs.tabBar().hide();self.tabs.setDocumentMode(True)
-        self.tabs.setMinimumWidth(0)
+        self.tabs.setMinimumWidth(0);edit.addWidget(self.tabs,1)
 
         stage_page=QWidget(); stages=QVBoxLayout(stage_page); stages.setContentsMargins(0,4,0,0); stages.setSpacing(4)
         stages.addWidget(label('Çap ve boy hücresine çift tıklayıp yazın. Kademe çizimden de seçilir.','muted'))
@@ -277,10 +285,10 @@ class ShaftPage(BasePage):
         self.section_picker.addItem('Teknik resim · Tolerans ve yüzey',self.drawing_tab)
         self.section_picker.currentIndexChanged.connect(lambda:self.tabs.setCurrentIndex(self.section_picker.currentData()))
         self.tabs.currentChanged.connect(self.section_changed)
-        edit.addWidget(self.tabs,1)
         for action_bar in self.operation_actions.values():header.addWidget(action_bar)   # Ekle / Güncelle beside the title
         edit.addStretch(0)
         list_column=QWidget();side=QVBoxLayout(list_column);side.setContentsMargins(0,0,0,0);side.setSpacing(6)
+        self.panel_box.addWidget(list_column,2)
         self.operation_count=label('Eklenen işlemler · 0','section');side.addWidget(self.operation_count)
         self.operations=QListWidget();self.operations.setMinimumHeight(72);self.operations.setMaximumHeight(140)
         self.operations.setAlternatingRowColors(True)
@@ -302,18 +310,13 @@ class ShaftPage(BasePage):
         wall.addRow('En az et kalınlığı · mm',self.minimum_wall);side.addLayout(wall);side.addStretch(1)
         self.fields_column,self.list_column=fields_column,list_column
         fields_column.setMinimumWidth(280);list_column.setMinimumWidth(240)
-        self.panel_box.addWidget(fields_column,3);self.panel_box.addWidget(list_column,2)
-        self.source_scroll=scroll(self.editor);self.source_scroll.setMinimumHeight(96)
-        self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         views=AdaptiveViews();self.views=views
         self.top_view=ShaftPreview();self.section_view=ShaftPreview(section=True)
         for view in (self.top_view,self.section_view):
             view.stageSelected.connect(self.select_stage);view.operationSelected.connect(self.select_operation)
             views.add(view)
-        self.splitter=QSplitter(Qt.Vertical);self.splitter.setChildrenCollapsible(False)
-        self.splitter.addWidget(self.source_scroll);self.splitter.addWidget(views)
+        self.splitter.addWidget(views)
         self.splitter.setStretchFactor(0,0);self.splitter.setStretchFactor(1,1);self.splitter.setSizes([290,600])
-        self.layout.addWidget(self.splitter,1)
         self.validation_label=label('','muted');self.validation_label.setMaximumHeight(60);self.layout.addWidget(self.validation_label)
         footer=QHBoxLayout();self.create_button=button("SolidWorks’te çiz",self.create_model,primary=True)
         self.create_button.setToolTip('Açık SolidWorks oturumunda yeni parametrik mil parçası oluştur')

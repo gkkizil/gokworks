@@ -16,7 +16,8 @@ from .design import CONTROL_HEIGHT
 
 class NestingInspector(QWidget):
     def __init__(self,page):
-        super().__init__(); self.page=page; self.setObjectName('inspectorBody')
+        # Built inside the window's property panel: moving it there afterwards restyles it all again.
+        super().__init__(getattr(page.context, 'inspector_stack', None)); self.page=page; self.setObjectName('inspectorBody')
         self.setStyleSheet('QWidget#inspectorBody QLineEdit, QWidget#inspectorBody QComboBox { min-height:20px; }')
         self._syncing = False; self._active_sheet_id = None; self.sheet_dirty = False
         body=QVBoxLayout(self);body.setContentsMargins(0,0,0,0);body.setSpacing(0)

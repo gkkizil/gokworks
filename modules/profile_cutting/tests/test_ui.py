@@ -3,12 +3,11 @@ import threading
 
 import pytest
 from PySide6.QtCore import QCoreApplication,QEvent,Qt
-from PySide6.QtWidgets import QDialog
 
 from gui_qt.app import MainWindow,create_application
 from modules.profile_cutting.models import Demand,Project,ScanResult
 from modules.profile_cutting.scanner import scan as real_scan
-from modules.profile_cutting.dialogs import RowDialog,MappingDialog
+from modules.profile_cutting.dialogs import MappingDialog
 from .fakes import Model,Folder,factory
 
 
@@ -60,19 +59,14 @@ def test_source_file_picker_and_refresh_use_same_source(page,qtbot,tmp_path,monk
     assert [path for _,path in calls]==[source,source]
 
 
-def test_cell_edits_validate_numbers_and_require_review_before_import(page,qtbot,tmp_path,monkeypatch):
+def test_cell_edits_validate_numbers_and_import_the_edited_value(page,qtbot,tmp_path,monkeypatch):
     p,w=page;setup_scan(monkeypatch,tmp_path)
     p.start_scan(None);qtbot.waitUntil(lambda:not w.jobs.busy,timeout=6000)
     assert p.scan_model.setData(p.scan_model.index(0,3),'bad',Qt.EditRole)
     assert p.scan_result.rows[0].length=='1000' and 'Boy' in p.status_text
     assert p.scan_model.setData(p.scan_model.index(0,3),'950',Qt.EditRole)
-    assert not p.scan_result.rows[0].ready
-    p.import_scan();assert not p.project.demands
-    row=p.scan_result.rows[0]
-    dialog=RowDialog(p,row);qtbot.addWidget(dialog)
-    dialog.form.set_value('confirmed',True);dialog.form.set_value('note','Ham stok boyu ölçülerek doğrulandı.')
-    dialog.check();assert dialog.result()==QDialog.Accepted and dialog.value.ready
-    p.scan_result.rows[0]=dialog.value;p.import_scan()
+    assert p.scan_result.rows[0].ready            # an edited, valid value is taken as entered
+    p.import_scan()
     assert p.project.demands[0].length=='950'
 
 

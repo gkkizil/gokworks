@@ -214,7 +214,9 @@ class EngineService:
     # ---- catalogue / schema ----------------------------------------------------------
     def list_shapes(self):
         shapes = []
-        source_names={m['source_id']:m['name'] for m in self.engine.list_source_models()}
+        # Names only: the raw (cached) inventory, not the frozen models (~0,13 s to build).
+        from core.unfolding.source_models import inventory
+        source_names={m['source_id']:m['name'] for m in inventory()['models']}
         for summary in self.engine.list_shapes():
             category, keywords, preview, _ = PRESENTATION.get(summary.shape_id, ('Diğer', (), [], {}))
             if summary.category:

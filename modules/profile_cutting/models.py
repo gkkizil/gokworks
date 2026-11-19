@@ -53,6 +53,12 @@ class Property:
     status: str = ''
 
 
+# Data conflicts, not review notes: a body counted in two cut-list rows, or an
+# assembly feature that changes lengths the part's cut list does not show.
+DUPLICATE_BODY = 'Gövde kimliği eksik veya başka Cut List satırında tekrarlandı.'
+ASSEMBLY_FEATURE = 'Montaj unsuru '
+
+
 @dataclass
 class ScanRow:
     id: str
@@ -92,6 +98,10 @@ class ScanRow:
         except ValueError as error: errors.append(str(error))
         try: number(self.allowance, 'Ek ham boy')
         except ValueError as error: errors.append(str(error))
+        if any(issue == DUPLICATE_BODY for issue in self.issues):
+            errors.append('Aynı gövde başka bir kesim listesi satırında da sayılıyor.')
+        if any(ASSEMBLY_FEATURE in issue for issue in self.issues):
+            errors.append('Montajdaki kesim unsuru boyu değiştiriyor; parça kesim listesi bu boyu göstermiyor.')
         for angle in (self.angle1, self.angle2):
             if angle:
                 try:
@@ -101,13 +111,16 @@ class ScanRow:
 
     @property
     def ready(self):
-        return (not self.excluded and not self.errors() and
-                ((self.reviewed and bool(self.review_note.strip())) or
-                 (self.geometry_verified and not self.issues)))
+        """A weldment profile with a readable section, material, length and count.
+
+        The cut list is taken as the assembly states it: no review step. Notes about
+        freshness, geometry or mitre angles stay in ``issues`` as information.
+        """
+        return not self.excluded and not self.errors()
 
     @property
     def status(self):
-        return 'Hariç' if self.excluded else 'Hazır' if self.ready else 'İnceleme Gerekli'
+        return 'Hariç' if self.excluded else 'Hazır' if self.ready else 'Eksik bilgi'
 
     @property
     def revision(self):
@@ -255,7 +268,7 @@ def transfer(project, result):
         demand = Demand(key, row.profile, row.material, row.length, row.count, row.thickness,
                         row.standard, row.stock_code, row.allowance,
                         f'{row.source} [{row.configuration}] / {row.folder}', key, row.revision,
-                        row.review_note or 'Doğrusal geometri ve kare uçlar doğrulandı.', row.angle1, row.angle2,
+                        row.review_note or 'SolidWorks kesim listesinden.', row.angle1, row.angle2,
                         import_scope=scope, body_refs=list(row.body_refs),
                         import_root=digest([result.source.casefold(), result.configuration]))
         demand.validate()

@@ -151,11 +151,12 @@ class UnfoldPage(BasePage):
         self.layout.addWidget(self.banner); self.layout.addLayout(toolbar)
         self.banner.setVisible(self.service.is_fixture)     # only after it has a parent (else it becomes a window)
 
-        self.splitter = QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
+        # Placed before it is filled: moving a filled tree restyles all of it (slow opening).
+        self.splitter = QSplitter(Qt.Horizontal, self); self.splitter.setChildrenCollapsible(False)
+        self.layout.addWidget(self.splitter, 1)
         self.splitter.addWidget(self.build_shapes()); self.splitter.addWidget(self.build_parameters())
         self.splitter.addWidget(self.build_workspace())
         self.splitter.setStretchFactor(2, 1); self.splitter.setSizes([230, 330, 900])
-        self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
         self.controls += [self.shape_tree, self.variant]
         first = next((s for s in self.shapes if s['status'] == 'implemented'), None)
@@ -252,7 +253,15 @@ class UnfoldPage(BasePage):
         self.shape_id = shape_id
         self.load_schema(variant_id, keep=keep and same_shape)
         self.remember_recent(shape_id, variant_id)
-        self.fill_shapes()
+        self.select_shape_item()
+
+    def select_shape_item(self):
+        """Mark the current shape in the list without rebuilding it (icons are costly to redraw)."""
+        self.shape_tree.blockSignals(True)
+        for row in range(self.shape_tree.count()):
+            item = self.shape_tree.item(row)
+            item.setSelected(item.data(Qt.UserRole) == self.shape_id)
+        self.shape_tree.blockSignals(False)
 
     def variant_changed(self, *args):
         variant = self.variant.currentData()

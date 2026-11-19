@@ -12,6 +12,7 @@ from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
 from PySide6.QtWidgets import (QBoxLayout, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLineEdit,
                                QPushButton, QSizePolicy, QTabWidget, QVBoxLayout, QWidget)
 
+from gui_qt.components import set_style_sheet
 from gui_qt.components import Disclosure, button, label, scroll
 from gui_qt.theme import COLORS
 from .beginner import FORCE_FACTORS, phase_seconds, simple_supported
@@ -539,7 +540,7 @@ class BeginnerView(QWidget):
 
     def apply_theme(self):
         c = COLORS[self.owner.context.appearance]
-        self.setStyleSheet(f'''
+        set_style_sheet(self, f'''
             QPushButton[step="true"] {{ border: 1px solid {c['border']}; border-radius: 12px; padding: 4px 16px; font-weight: 600;
                                         color: {c['muted']}; background: transparent; }}
             QPushButton[step="true"]:hover {{ color: {c['text']}; border-color: {c['border_strong']}; }}

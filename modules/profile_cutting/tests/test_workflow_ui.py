@@ -127,7 +127,7 @@ def test_scan_ready_state_filters_and_append_only_transfer_remain_understandable
     p.from_sw_button.click(); assert p.tabs.currentIndex() == 1
     p.scan_button.click(); qtbot.waitUntil(lambda: not w.jobs.busy, timeout=6000)
     assert p.transfer_button.isEnabled() and '1 hazır satır' in p.transfer_button.text()
-    p.status_filter.setCurrentIndex(p.status_filter.findData('İnceleme Gerekli'))
+    p.status_filter.setCurrentIndex(p.status_filter.findData('Eksik bilgi'))
     assert p.scan_proxy.rowCount() == 0
     p.status_filter.setCurrentIndex(0)
     p.transfer_button.click()

@@ -2,7 +2,12 @@
 from shapely.geometry import Polygon
 import math
 
-from modules.nesting.dxf_import import read_dxf
+
+
+def read_dxf(*args, **kwargs):
+    # ezdxf (~0,25 s) loads with the first DXF read, not with the page.
+    from modules.nesting.dxf_import import read_dxf as read
+    return read(*args, **kwargs)
 
 
 def validate_source(part):

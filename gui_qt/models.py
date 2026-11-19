@@ -214,7 +214,10 @@ class FilterProxy(QSortFilterProxyModel):
         else:
             node = model.index(source_row, 0, source_parent).internalPointer()
             row, searchable = node.values, node.search
-        return ((self.status is None or row.get('status') == self.status)
+        status = row.get('status')
+        wanted = (self.status is None or (status != self.status[1:] if str(self.status).startswith('!')
+                                         else status == self.status))   # '!X': every row except X
+        return (wanted
                 and (not self.query or self.query in searchable))
 
     def lessThan(self, left, right):
