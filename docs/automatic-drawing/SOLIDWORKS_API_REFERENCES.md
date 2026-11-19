@@ -35,7 +35,7 @@ bilgisini rapora yazar; bulunmayan enum / metot sessizce tahmin edilmez.
 | API | Doğrulanan uygulama ayrıntısı |
 |---|---|
 | NewDocument | DRWDOT; user-defined sayfa boyutu metre cinsinden |
-| SetupSheet6 | 17 argüman; son altı zone bilgisi zorunlu; FirstAngle bool; genişlik / yükseklik metre |
+| SetupSheet6 | 17 argüman; son altı zone bilgisi zorunlu; FirstAngle bool; genişlik / yükseklik metre. 2025 SP5: `*.drt` (biçimsiz şablon) verilirse False; `swDwgTemplateCustom` + gerçek `.slddrt` yolu True |
 | NewSheet4 | 16 argüman; SetupSheet6’daki RemoveModifiedNotes argümanı burada yok |
 | GetProperties2 | Pafta genişlik / yükseklik indeksleri 5 / 6; ölçek 2 / 3; izdüşüm 4 |
 | SetScale | Sayfa oranı; annotation position ölçeklenebilir, metin yüksekliği küçültülmez |
@@ -44,7 +44,7 @@ bilgisini rapora yazar; bulunmayan enum / metot sessizce tahmin edilmez.
 | IView.GetOutline | Gerçek sheet-space sınırlar; metre → mm dönüşümü |
 | IView.Position | İki double içeren SAFEARRAY (X, Y); anotasyonların üç koordinatlı konumuyla karıştırılmaz |
 | IView.ReferencedDocument / ReferencedConfiguration | Yalnız kayıtlı dosya adı değil, çözülmüş model belgesi de doğrulanır |
-| CreateFlatPatternViewFromModelView3 | Yedi argüman; HideBendLines ters anlamı gözetilir; sonuç View nesnesi |
+| CreateFlatPatternViewFromModelView3 | Yedi argüman; HideBendLines ters anlamı gözetilir; sonuç View nesnesi. 2025 SP5: ANA konfigürasyon verilir, mevcut `<ana>SM-<yerel>` konfigürasyonuna çözülür; açınım konfigürasyonunun adı bükülü görünüş verir. Tek gövdede `GetBodiesCount` 0, `Bodies` boş |
 
 [SetupSheet6 — resmi 2018 imzası](https://help.solidworks.com/2018/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~SetupSheet6.html) ·
 [NewSheet4 — resmi 2016 imzası](https://help.solidworks.com/2016/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~NewSheet4.html) ·
@@ -65,7 +65,7 @@ bilgisini rapora yazar; bulunmayan enum / metot sessizce tahmin edilmez.
 | IAnnotation.IsDangling | Geometri bağlantısı kontrolü |
 | IModelDocExtension.AlignDimensions | Seçili native ölçüler; AutoArrange türü ve metre aralığı |
 | IAnnotation.SetPosition2 | Metin konumu taşınır; model ölçüsü değeri / toleransı yazılmaz |
-| IView.AutoInsertCenterMarks2 | On argüman; drawing view etkinleştirilir; DrawingDoc metodu değildir |
+| IView.AutoInsertCenterMarks2 | On argüman; drawing view etkinleştirilir; DrawingDoc metodu değildir. 2025 SP5: belge seçeneği işaretleri görünüşle ekler, tekrar çağrı ikiler; `GetCenterMarkCount2` 0 döner, anotasyonlar (`swCenterMarkSym`) sayılır |
 
 [SetUnits — resmi 2022 imzası](https://help.solidworks.com/2022/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDoc2~SetUnits.html) ·
 [InsertModelAnnotations3 — resmi imza / DuplicateDims açıklaması](https://help.solidworks.com/2016/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~InsertModelAnnotations3.html) ·
@@ -87,7 +87,7 @@ bilgisini rapora yazar; bulunmayan enum / metot sessizce tahmin edilmez.
 | IView.SetKeepLinkedToBOM | Balonlardan önce native BOM feature adıyla link kurulur |
 | CreateAutoBalloonOptions / AutoBalloon5 | Önce görünüş seçilir; sonuç native note dizisidir |
 | IModelDocExtension.SaveAs | Altı argüman; native boolean sonuç ve byref hata / uyarı doğrulanır |
-| IExportPdfData.SetSheets | Tüm paftalar açıkça seçilir; PDF görüntüleyicisi worker’dan açılmaz |
+| IExportPdfData.SetSheets | Tüm paftalar açıkça seçilir; PDF görüntüleyicisi worker’dan açılmaz. 2025 SP5: `ExportAllSheets` her argümanla False; `ExportSpecifiedSheets` + pafta adları (VT_ARRAY\|VT_BSTR) True |
 
 [InsertBomTable4 — resmi 2023 imzası](https://help.solidworks.com/2023/english/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IView~InsertBomTable4.html) ·
 [SetConfigurations](https://help.solidworks.com/2021/english/api/sldworksapi/SOLIDWORKS.Interop.sldworks~SOLIDWORKS.Interop.sldworks.IBomFeature~SetConfigurations.html) ·

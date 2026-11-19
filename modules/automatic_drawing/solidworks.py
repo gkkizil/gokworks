@@ -146,7 +146,7 @@ class Session(ReadSession):
             return obj
         import pythoncom
         if name not in self.interface_ids:
-            library, _ = raw(self.app).GetTypeInfo().GetContainingTypeLib()
+            library = self.type_library()
             for index in range(library.GetTypeInfoCount()):
                 if library.GetDocumentation(index)[0] == name:
                     self.interface_ids[name] = library.GetTypeInfo(index).GetTypeAttr().iid
@@ -154,6 +154,25 @@ class Session(ReadSession):
             else:
                 raise ApiError('Kurulu SolidWorks arayüzü bulunamadı: '+name)
         return dispatch.QueryInterface(self.interface_ids[name], pythoncom.IID_IDispatch)
+
+    def type_library(self):
+        """sldworks type library of the running release.
+
+        Recorded on SolidWorks 2025 SP5: ISldWorks' GetTypeInfo().GetContainingTypeLib() raises
+        TYPE_E_ELEMENTNOTFOUND (-2147319765), so the library beside the running executable is
+        loaded instead (as load_constants does for swconst.tlb).
+        """
+        from modules.cad_converter.api import raw
+        import pythoncom
+        try:
+            return raw(self.app).GetTypeInfo().GetContainingTypeLib()[0]
+        except Exception as error:
+            executable = Path(str(call(self.app, 'GetExecutablePath') or ''))
+            folder = executable if executable.is_dir() else executable.parent
+            path = folder/'sldworks.tlb'
+            if not path.is_file():
+                raise ApiError('Çalışan SolidWorks tür kitaplığı bulunamadı: '+str(path)) from error
+            return pythoncom.LoadTypeLib(str(path))
 
     def activate(self, model):
         self.assert_thread()
@@ -221,9 +240,30 @@ class Session(ReadSession):
             raise ApiError('Kaynakta kaydedilmemiş değişiklik var veya kayıt durumu okunamadı. '
                            'Modeli SolidWorks’te kaydedip yeniden deneyin; uygulama kaynağı kaydetmedi.')
         pending = self.rebuild_pending(model)
+        if pending is True and self.rebuild_after_load(model):
+            pending = self.rebuild_pending(model)
         if pending is not False:
             raise ApiError('Kaynak yeniden oluşturulmalı veya güncelliği doğrulanamadı. '
                            'SolidWorks’te yeniden oluşturup kaydedin.')
+
+    def rebuild_after_load(self, model):
+        """Perform the rebuild SolidWorks itself requested while THIS session opened the file.
+
+        Recorded on SolidWorks 2025 SP5 with 'rebuild assembly on load: always'
+        (swPerformanceAssemRebuildOnLoad = 1): every assembly, even one saved fully rebuilt,
+        opens with load warning swFileLoadWarning_NeedsRegen (32) and NeedsRebuild2 = 1.
+        Only a document this session opened read-only is rebuilt, in memory: it cannot be
+        saved, and documents the user already had open are never rebuilt here.
+        """
+        from modules.cad_converter.api import path_key
+        flag = self.constants.get('swFileLoadWarning_NeedsRegen')
+        key = path_key(str(call(model, 'GetPathName') or ''))
+        if flag is None or key not in getattr(self, 'owned', {}) or not getattr(self, 'load_warnings', {}).get(key, 0) & flag:
+            return False
+        if call(model, 'ForceRebuild3', False) is not True:
+            return False
+        self.load_rebuilt = getattr(self, 'load_rebuilt', set()) | {key}
+        return True
 
     def memory_stamp(self, model):
         value = optional(model, 'GetUpdateStamp')
@@ -432,6 +472,41 @@ class Session(ReadSession):
             self.analysis_cache[key] = copy.deepcopy(info)
         specific = model = None
         return info
+
+    def sheet_format_folders(self, template=''):
+        """Existing folders that hold .slddrt files: SolidWorks' setting, then the installation's own.
+
+        The setting can name a folder of a removed release. Seen on SolidWorks 2025 SP5
+        (Turkish): '...\\SOLIDWORKS 2024\\lang\\turkish\\sheetformat', which no longer existed,
+        while the formats were in '...\\SOLIDWORKS 2025\\lang\\turkish\\sheetformat'.
+        """
+        import os
+        found = []
+        if 'swFileLocationsSheetFormat' in self.constants:
+            setting = optional(self.app, 'GetUserPreferenceStringValue', self.c('swFileLocationsSheetFormat'), default='')
+            found += [p.strip() for p in str(setting or '').split(';') if p.strip()]
+        language = str(optional(self.app, 'GetCurrentLanguage', default='') or '').strip()
+        roots = list(Path(template).parents) if template else []
+        try:   # RevisionNumber 33.x is SOLIDWORKS 2025
+            year = int(str(getattr(self, 'revision', '')).split('.')[0]) + 1992
+            roots.append(Path(os.environ.get('ProgramData', r'C:\ProgramData'), 'SolidWorks', f'SOLIDWORKS {year}'))
+        except ValueError:
+            pass
+        for root in roots:
+            for name in dict.fromkeys(n for n in (language, 'english') if n):
+                found.append(str(Path(root, 'lang', name, 'sheetformat')))
+        return [folder for folder in dict.fromkeys(found) if Path(folder).is_dir()]
+
+    def standard_sheet_format(self, paper, template=''):
+        """The installed ISO sheet format of a standard paper ('a3 - iso.slddrt'), or ''."""
+        from .models import PAPERS
+        if paper not in PAPERS:
+            return ''
+        for folder in self.sheet_format_folders(template):
+            path = Path(folder, f'{paper.casefold()} - iso.slddrt')
+            if path.is_file():
+                return str(path)
+        return ''
 
     def new_drawing(self, template, width_mm, height_mm, paper=None):
         self.assert_thread()

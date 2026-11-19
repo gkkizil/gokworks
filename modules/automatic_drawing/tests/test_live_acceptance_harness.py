@@ -38,6 +38,17 @@ def test_unavailable_session_is_not_run_not_failed(tmp_path, monkeypatch):
     assert row['status'] == acceptance.NOT_RUN and 'SolidWorks' in row['reason']
 
 
+def test_no_running_solidworks_is_not_run_even_for_the_missing_reference_scenario(tmp_path, monkeypatch):
+    # Seen live: with SolidWorks closed, generate() returned FAIL results, so every scenario
+    # 'failed' and the missing-reference scenario (which expects FAIL) falsely passed.
+    monkeypatch.setattr(acceptance, 'missing_requirements', lambda scenario, environ=None: [])
+    monkeypatch.setattr(acceptance, 'solidworks_running', lambda: False)
+    scenario = next(s for s in acceptance.SCENARIOS if s.key == 'missing_reference')
+    source = tmp_path/'fixture'/'montaj.SLDASM'; source.parent.mkdir(); source.write_bytes(b'model')
+    row = acceptance.run_scenario(scenario, tmp_path/'out', {scenario.env: str(source)})
+    assert row['status'] == acceptance.NOT_RUN and 'SolidWorks' in row['reason']
+
+
 def test_a_changed_source_folder_fails_the_scenario_whatever_the_drawing_said(tmp_path, monkeypatch):
     monkeypatch.setattr(acceptance, 'missing_requirements', lambda scenario, environ=None: [])
     source = tmp_path/'fixture'/'mil.SLDPRT'; source.parent.mkdir(); source.write_bytes(b'model')
@@ -58,6 +69,19 @@ def test_missing_reference_scenario_requires_a_refusal_and_no_published_drawing(
     assert acceptance.check(scenario, refused, {}) == []
     accepted = SimpleNamespace(status='PASS', outputs={}, findings=[])
     assert acceptance.check(scenario, accepted, {})
+
+
+@pytest.mark.parametrize('rows,ok', [([{'quantity': 2}], True), ([], False)])
+def test_assembly_bom_is_judged_from_the_recorded_native_bom_rows(tmp_path, rows, ok):
+    # The BOM sheet's view role is 'main'; a 'bom' role never exists in result.sheets.
+    pdf = tmp_path/'a.pdf'; pdf.write_bytes(b'%PDF-1.7')
+    slddrw = tmp_path/'a.slddrw'; slddrw.write_bytes(b'x')
+    scenario = next(s for s in acceptance.SCENARIOS if s.key == 'assembly_suppressed_component')
+    root = SimpleNamespace(state='', children=[SimpleNamespace(state='suppressed', children=[])])
+    result = SimpleNamespace(status='WARNING', outputs={'pdf': str(pdf), 'slddrw': str(slddrw)}, findings=[],
+                             analysis=SimpleNamespace(kind='assembly', tree=root),
+                             sheets=[{'expected': ['main']}], measurements={'bom': {'rows': rows}})
+    assert ('BOM tablosu yok' not in acceptance.check(scenario, result, {})) is ok
 
 
 @pytest.mark.skipif(os.name == 'nt', reason='Linux/macOS harness check only')

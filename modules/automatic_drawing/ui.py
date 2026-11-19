@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from PySide6.QtCore import QEvent, QSize, Qt
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, QSize, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout,
     QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QScrollArea, QSizePolicy, QSplitter,
@@ -20,6 +20,31 @@ from .rules import CLASS_TITLES
 from .preview import SheetPreview
 from .coverage import COVERAGE, PASS_MEANING
 from gui_qt.coverage import CoverageList
+
+
+class _WheelGuard(QObject):
+    """A wheel over an unfocused combo / number box scrolls the page instead of changing the value.
+
+    Seen in the SolidWorks add-in dialog: scrolling the settings changed the projection from
+    ISO first angle to third angle without any click.
+    """
+    def eventFilter(self, watched, event):
+        if event.type() == QEvent.Wheel and not watched.hasFocus():
+            parent = watched.parentWidget()
+            if parent is not None:      # the page scrolls; the value stays
+                QCoreApplication.sendEvent(parent, event)
+            return True
+        return False
+
+
+WHEEL_GUARD = _WheelGuard()
+
+
+def guard_wheel(widget):
+    widget.setFocusPolicy(Qt.StrongFocus)
+    widget.installEventFilter(WHEEL_GUARD)
+    return widget
+
 
 SOURCE_SUFFIXES = ('.sldprt', '.sldasm')
 STATUS_TEXT = {'PASS': 'Başarılı', 'WARNING': 'Uyarılı', 'FAIL': 'Hatalı', 'CANCELLED': 'İptal', 'SKIPPED': 'Atlandı'}
@@ -400,7 +425,7 @@ class AutoDrawingPage(BasePage):
         return widget
 
     def _combo(self, form, key, title, items, default):
-        widget = QComboBox(); widget.setMinimumContentsLength(4)
+        widget = guard_wheel(QComboBox()); widget.setMinimumContentsLength(4)
         widget.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         for text, value in items: widget.addItem(text, value)
         index = widget.findData(self._saved(key, default)); widget.setCurrentIndex(max(0, index))
@@ -450,7 +475,7 @@ class AutoDrawingPage(BasePage):
                     *[(p+' yatay', p) for p in PAPERS if p != 'A3'], ('Özel', 'custom')], 'A3')
         for key, title, default in (('custom_width_mm', 'Özel en · mm', 420.),
                                     ('custom_height_mm', 'Özel boy · mm', 297.)):
-            spin = NumberSpinBox(2); spin.setRange(100, 5000)
+            spin = guard_wheel(NumberSpinBox(2)); spin.setRange(100, 5000)
             value = self.saved.get(key)
             if not isinstance(value, (int, float)) or isinstance(value, bool) or not 100 <= value <= 5000:
                 value = default

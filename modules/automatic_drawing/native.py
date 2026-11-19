@@ -6,7 +6,7 @@ leave this worker-owned adapter. See docs/automatic-drawing/SOLIDWORKS_API_REFER
 
 import math
 
-from modules.cad_converter.api import ApiError, MODEL_IID
+from modules.cad_converter.api import ApiError, MODEL_IID, PART_IID
 from modules.tolerance_stack.solidworks_reader import nominal_value, DIMENSION_TYPES
 from .solidworks import call, get, put, prop, optional, values, variant, out_int, null_dispatch, as_interface
 from .models import Box, Finding, checkpoint, to_mm, to_m, degrees, identity
@@ -74,11 +74,13 @@ class NativeDrawing:
     def __init__(self, session, info, options, result, stop=None):
         self.session, self.info, self.options, self.result, self.stop = session, info, options, result, stop
         self.model = self.drawing = None
+        self.template, self.auto_format = '', False
         self.pages = {}
         self.annotations = {}
         self.bom_rows = []
 
     def create(self, template, plan):
+        self.template = template
         self.model, self.drawing = self.session.new_drawing(template, plan.width_mm, plan.height_mm,
                                                             paper=self.paper_code(plan))
         call(self.model, 'SetUnits', self.session.c('swMM'), self.session.c('swDECIMAL'), 0, 3, False)
@@ -125,14 +127,20 @@ class NativeDrawing:
         checkpoint(self.stop)
         c = self.session.c
         if new:
-            template_name = self.options.sheet_format or self.pages[next(iter(self.pages))]['format']
+            template_name = self.options.sheet_format or (
+                self.standard_format(plan) if self.auto_format else self.pages[next(iter(self.pages))]['format'])
         else:
             current = call(self.drawing, 'GetCurrentSheet')
             template_name = self.options.sheet_format or str(call(current, 'GetTemplateName') or '')
-            if template_name.startswith('*'):
-                template_name = ''      # '*.drt': the template has no sheet format; not a file to load
+            if not template_name or template_name.startswith('*'):
+                # '*.drt': the template has no sheet format; it is not a file to load
+                # (SetupSheet6 returns False for it). Use the installed ISO format instead.
+                self.auto_format = True
+                template_name = self.standard_format(plan)
             call(current, 'SetName', plan.name)
-            if not self.options.sheet_format and self.keep_template_format(plan):
+            # Keep the template's own sheet only when it HAS a sheet format; a '*.drt'
+            # template would keep no title block, so the installed ISO format is set up below.
+            if not self.options.sheet_format and not self.auto_format and self.keep_template_format(plan):
                 self.result.measurements.setdefault('sheet_setup', {})[plan.name] = 'template'
                 self.pages[plan.name] = {'plan': plan, 'views': {}, 'format': template_name, 'tables': [], 'notes': []}
                 if not template_name:
@@ -186,6 +194,19 @@ class NativeDrawing:
         if not template_name:
             self.result.warn('sheet_format', 'Şablonda antet / sayfa çerçevesi bulunamadı; firma .SLDDRT dosyası seçebilirsiniz.',
                              plan.name)
+
+    def standard_format(self, plan):
+        """The installed '<paper> - iso.slddrt' for a template without a sheet format, or ''."""
+        find = getattr(self.session, 'standard_sheet_format', None)
+        path = find(plan.paper, getattr(self, 'template', '')) if find is not None else ''
+        if path:
+            files = self.result.measurements.setdefault('sheet_format_file', {})
+            repeated = path in files.values()
+            files[plan.name] = path
+            if not repeated:     # one warning per format file, every sheet is recorded
+                self.result.warn('sheet_format_standard', 'Şablonda antet / sayfa biçimi yoktu; SolidWorks’ün standart '
+                                 'sayfa biçimi uygulandı: '+path+'. Firma anteti için .SLDDRT seçebilirsiniz.', plan.name)
+        return path
 
     def _sheet_arguments(self, prefix, zones):
         """The values SolidWorks refused, for the report (a refusal gives no reason)."""
@@ -326,11 +347,19 @@ class NativeDrawing:
                 if referenced is None:
                     raise ApiError('Gövde açınımının kaynak belgesi çözümlenemedi.')
                 verify_unfolded(self.session, referenced, target, target.configurations[0])
-                bodies = values(get(view, 'Bodies'))
+                bodies, count = values(get(view, 'Bodies')), int(call(view, 'GetBodiesCount'))
+                if not bodies and count == 0:
+                    # Recorded on SolidWorks 2025 SP5: the flat pattern view of a single-body part
+                    # keeps no body filter (GetBodiesCount 0, Bodies empty, even after Bodies is
+                    # written); it shows the part's only body. Accept that only for one solid body.
+                    solids = values(call(as_interface(referenced, PART_IID), 'GetBodies2',
+                                         self.session.c('swSolidBody'), False))
+                    if len(solids) == 1:
+                        bodies, count = solids, 1
                 record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
                     body_references=tuple(self.session.persistent_ref(referenced, body) for body in bodies)
                                     if referenced is not None else (),
-                    body_count=int(call(view, 'GetBodiesCount')), body_label=target.label)
+                    body_count=count, body_label=target.label)
                 bodies = ()
             result.append(record)
         return result
@@ -349,11 +378,18 @@ class NativeDrawing:
         if note is None:
             raise ApiError('Açınım paftasına gövde kimliği yazılamadı.')
         annotation = call(note, 'GetAnnotation')
-        # ActivateView cannot activate a sheet. Attach the selected native note
-        # explicitly to the SHEET so it cannot follow/scale with a body view.
-        if not call(annotation, 'Select3', False, null_dispatch()) or not call(
-                self.drawing, 'AttachAnnotation', self.session.c('swAttachAnnotationOption_Sheet')):
-            raise ApiError('Gövde kimliği görünüş yerine paftaya bağlanamadı.')
+        note_name = str(call(note, 'GetName') or '')
+        if not note_name:
+            raise ApiError('Gövde kimliği anotasyonunun native adı okunamadı.')
+        # The note must belong to the SHEET so it cannot follow/scale with a body view.
+        # Recorded on SolidWorks 2025 SP5: with the sheet active InsertNote already puts the
+        # note on the sheet; Select3 then returns False and AttachAnnotation returns True even
+        # with nothing selected. So ownership is read back from the sheet's own note list.
+        if not self.sheet_has_note(note_name):
+            call(annotation, 'Select3', False, null_dispatch())
+            call(self.drawing, 'AttachAnnotation', self.session.c('swAttachAnnotationOption_Sheet'))
+            if not self.sheet_has_note(note_name):
+                raise ApiError('Gövde kimliği görünüş yerine paftaya bağlanamadı.')
         call(self.model, 'ClearSelection2', True)
         text_format = call(annotation, 'GetTextFormat', 0)
         if text_format is None:
@@ -363,10 +399,12 @@ class NativeDrawing:
             raise ApiError('Gövde kimliği yazı boyutu uygulanamadı.')
         if not call(annotation, 'SetPosition2', to_m(area.x+1.), to_m(area.top-4.), 0.):
             raise ApiError('Gövde kimliği ayrılan alana yerleştirilemedi.')
-        note_name = str(call(note, 'GetName') or '')
-        if not note_name:
-            raise ApiError('Gövde kimliği anotasyonunun native adı okunamadı.')
         self.pages[name]['notes'].append(dict(handle=note, name=note_name, text=text, area=area))
+
+    def sheet_has_note(self, note_name):
+        """The active sheet's own notes (GetFirstView is the sheet itself), by native name."""
+        sheet = call(self.drawing, 'GetFirstView')
+        return sheet is not None and note_name in {str(call(n, 'GetName')) for n in values(call(sheet, 'GetNotes'))}
 
     def notes(self, name):
         records, findings = [], []
@@ -572,12 +610,31 @@ class NativeDrawing:
         for role, view in self.pages[name]['views'].items():
             if role == 'isometric':
                 continue
-            self.select_view(view)
-            call(view, 'AutoInsertCenterMarks2', mask, 0, True, True, True, 0., 0., False, True, 0.)
-            marks = call(view, 'GetCenterMarkCount2', out_int())   # [out] Size is unused; the result is the count
-            count += int(marks[0] if isinstance(marks, tuple) else marks)
+            marks = self.center_mark_count(view)
+            if not marks:   # the document option may already have inserted them with the view
+                self.select_view(view)
+                call(view, 'AutoInsertCenterMarks2', mask, 0, True, True, True, 0., 0., False, True, 0.)
+                marks = self.center_mark_count(view)
+            count += marks
         self.result.measurements.setdefault('center_marks', {})[name] = count
         call(self.model, 'ClearSelection2', True)
+
+    def center_mark_count(self, view):
+        """Center marks are view annotations of type swCenterMarkSym.
+
+        Recorded on SolidWorks 2025 SP5: a front view of a plate with 5 holes already had
+        5 such annotations right after creation (swDetailingAutoInsertCenterMarksForHoles);
+        AutoInsertCenterMarks2 returned True and added 5 duplicates, and GetCenterMarkCount2
+        returned 0 both before and after. So the annotations are counted instead.
+        """
+        kind, count = self.session.c('swCenterMarkSym'), 0
+        annotation = call(view, 'GetFirstAnnotation3')
+        for _ in range(20000):
+            if annotation is None:
+                return count
+            count += call(annotation, 'GetType') == kind
+            annotation = call(annotation, 'GetNext3')
+        raise ApiError('Görünüş anotasyon listesi döngüsel veya güvenli sınırdan büyük.')
 
     def validate(self):
         findings, snapshots = [], []
@@ -637,8 +694,24 @@ class NativeDrawing:
                 if state.get('notes'):
                     for note in values(call(view, 'GetNotes')):
                         note_handles[str(call(note, 'GetName'))] = note
-                view = call(view, 'GetNextView') if view is not None else None
                 handles, tables = {}, []
+
+                def bom_tables(owner):
+                    for table in values(call(owner, 'GetTableAnnotations')):
+                        generic = self.session.named_interface(table, 'ITableAnnotation')
+                        if int(get(generic, 'Type')) == self.session.c('swTableAnnotation_BillOfMaterials'):
+                            tables.append(table_box(generic))
+                            columns = quantity_columns(generic, self.session)
+                            if len(columns) == 1:
+                                for row in self.bom_rows:
+                                    number, text = displayed_quantity(generic, row['row_index'], columns[0])
+                                    if number != row['quantity']:
+                                        raise ApiError('Kayıt sonrası BOM adetleri değişmiş.')
+                # Recorded on SolidWorks 2025 SP5: a BOM inserted on a model view is listed under
+                # the SHEET entry after the drawing is saved and reopened, not under that view.
+                if view is not None:
+                    bom_tables(view)
+                view = call(view, 'GetNextView') if view is not None else None
                 while view is not None:
                     checkpoint(self.stop)
                     if len(handles) > 100:
@@ -650,16 +723,7 @@ class NativeDrawing:
                     if role in handles:
                         raise ApiError('Kaydedilen görünüş tekrarlı.')
                     handles[role] = view
-                    for table in values(call(view, 'GetTableAnnotations')):
-                        generic = self.session.named_interface(table, 'ITableAnnotation')
-                        if int(get(generic, 'Type')) == self.session.c('swTableAnnotation_BillOfMaterials'):
-                            tables.append(table_box(generic))
-                            columns = quantity_columns(generic, self.session)
-                            if len(columns) == 1:
-                                for row in self.bom_rows:
-                                    number, text = displayed_quantity(generic, row['row_index'], columns[0])
-                                    if number != row['quantity']:
-                                        raise ApiError('Kayıt sonrası BOM adetleri değişmiş.')
+                    bom_tables(view)
                     view = call(view, 'GetNextView')
                 if set(handles) != set(state['expected']):
                     raise ApiError('SLDDRW yeniden açıldığında görünüşler eksik.')
@@ -701,7 +765,11 @@ class NativeDrawing:
             if export is None:
                 raise ApiError('PDF aktarım nesnesi oluşturulamadı.')
             put(export, 'ViewPdfAfterSaving', False)
-            if not call(export, 'SetSheets', c('swExportData_ExportAllSheets'), variant(0, None)):
+            # SolidWorks 2025 SP5 returns False for swExportData_ExportAllSheets with any
+            # Sheets argument (empty, null, names); naming every sheet is accepted.
+            names = tuple(str(v) for v in values(call(self.drawing, 'GetSheetNames')))
+            if not names or not call(export, 'SetSheets', c('swExportData_ExportSpecifiedSheets'),
+                                     variant(0x2008, names)):
                 raise ApiError('PDF için tüm paftalar seçilemedi.')
         flags = c('swSaveAsOptions_Silent')
         if kind != 'slddrw':

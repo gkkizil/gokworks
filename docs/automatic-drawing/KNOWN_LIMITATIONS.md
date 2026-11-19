@@ -2,12 +2,36 @@
 
 ## Gerçek CAD doğrulaması
 
-Bu geliştirme Linux ortamında yapıldı; Windows / pywin32 / lisanslı çalışan
-SolidWorks yoktu. Gerçek SLDPRT / SLDASM’den gerçek SLDDRW / PDF üretimi
-ve yeniden açılması bu ortamda çalıştırılmadı. Ham IDispatch fakes,
-orchestration fakes veya dosya başlığı testleri gerçek entegrasyon testi
-olarak değerlendirilmemelidir. SolidWorks 2026 öncelikli canlı kabul
-yapılmadan bu özellik üretim için doğrulanmış sayılmaz.
+18 Kasım 2026'da gerçek SolidWorks 2025 SP5 (33.5.0, Türkçe) üzerinde 8 kabul
+senaryosundan 6'sı geçti (bkz. `LIVE_ACCEPTANCE.md`). Firma şablonları ve
+SolidWorks 2026 henüz canlı kabul edilmedi. Ham IDispatch fakes, orchestration
+fakes veya dosya başlığı testleri gerçek entegrasyon testi sayılmaz.
+
+## Gerçek SolidWorks 2025 SP5'te kaydedilen davranışlar
+
+- Varsayılan `Teknik Resim.DRWDOT` sayfa biçimi içermez (`GetTemplateName` = `*.drt`);
+  bu yer tutucu `SetupSheet6`'ya verilirse çağrı False döner. Şablonda biçim yoksa
+  kurulumun `<kağıt> - iso.slddrt` dosyası uygulanır ve rapora yazılır. SolidWorks'ün
+  sayfa biçimi klasörü ayarı kaldırılmış bir sürümün klasörünü gösterebilir
+  (görülen: `SOLIDWORKS 2024\lang\turkish\sheetformat`); bu durumda şablonun kurulum
+  kökü ve çalışan revizyonun `SOLIDWORKS <yıl>` klasörü aranır.
+- `IExportPdfData.SetSheets(swExportData_ExportAllSheets, …)` her argümanla False döner;
+  bütün pafta adları `swExportData_ExportSpecifiedSheets` ile verilir.
+- 2015 sonrası SLDDRW OLE bileşik belge değildir; kayıt doğrulaması dosyayı
+  SolidWorks'te yeniden açarak yapılır.
+- Görünüş oluşurken belge seçeneği delik merkez işaretlerini zaten ekler;
+  `AutoInsertCenterMarks2` tekrar çağrılırsa işaretler ikilenir, `GetCenterMarkCount2`
+  0 döner. İşaretler görünüş anotasyonları (`swCenterMarkSym`) sayılarak okunur.
+- 'Yüklemede montajı yeniden oluştur: her zaman' ayarında tam yeniden oluşturulup
+  kaydedilmiş montaj da `swFileLoadWarning_NeedsRegen` ve `NeedsRebuild2 = 1` ile açılır.
+  Yalnız modülün salt okunur açtığı belge bellekte yeniden oluşturulur; kullanıcının açık
+  belgesi yeniden oluşturulmaz, kirli veya bekleyen kaynak yine reddedilir.
+- BOM `GetComponentsCount2` / `GetComponents2` BOM konfigürasyonunda bastırılmış bileşeni
+  de sayar; adet bastırılmamış bileşenlerle doğrulanır. Kayıt sonrası BOM tablosu model
+  görünüşünde değil pafta girdisinde listelenir.
+- Tek başına açılan bir SLDDRW, dış referans aramasıyla başka klasördeki aynı adlı modele
+  bağlanabilir (fixture adları çakışınca görüldü). Aynı adlı farklı modelleri aynı arama
+  yolunda tutmayın.
 
 ## Henüz tamamlanmamış özellikler
 
@@ -16,9 +40,15 @@ yapılmadan bu özellik üretim için doğrulanmış sayılmaz.
 - Tam delik / diş / havşa / PCD tanıma ve tüm geometriler için eksiksiz
   imalat ölçülendirmesi. Hole Wizard model ölçüleri native import edilir;
   yeni diş veya tolerans açıklaması tahmin edilmez.
-- Çok gövdeli sac için yeni açınım konfigürasyonlarını otomatik hazırlama.
-  Gövde bazlı paftalar yalnız mevcut ve doğrulanmış bir konfigürasyonla
-  üretilir; eksik veya birden fazla adayda o gövde atlanır ve WARNING verilir.
+- Çok gövdeli sacın gövde bazlı açınım paftaları. SolidWorks 2025 SP5'te diskten açılan
+  çok gövdeli parçada `CreateFlatPatternViewFromModelView3` (gövde önceden seçili) her
+  çağrıda kaynakta yeni bir `<ana>SM-FLAT-PATTERN<n>` konfigürasyonu açar, kayıtlı gövde
+  konfigürasyonunu yeniden kullanmaz; açınım konfigürasyonunun adı verilirse bükülü bir
+  görünüş döner. Kaynak değiştirilmediği için bu paftalar üretilmez,
+  `multibody_flat_unsupported` WARNING verilir; genel görünüşler üretilir.
+- Tek gövdeli sacda ana konfigürasyon istenir; SolidWorks bunu mevcut
+  `<ana>SM-<yerel ad>` (Türkçe: `SM-DÜZ-ÇOĞALTMA`) konfigürasyonuna çözer. Bu türetilmiş
+  konfigürasyon yoksa SolidWorks yenisini açar; modül bunu saptar ve paketi yayımlamaz.
 - Kaynakta hiç açınım konfigürasyonu yokken yeni konfigürasyon oluşturma.
   Mevcut konfigürasyonla sınırlı çalışma kaynak değişikliği riskini azaltır.
 - Genel görünüşleri keyfi sayıda sayfaya bölen optimizasyon; şu an bağlı
