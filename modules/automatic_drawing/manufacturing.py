@@ -100,15 +100,7 @@ def body_flat_pages(native, source_model):
     from modules.cad_converter.api import PART_IID
     from .sheetmetal import verify_unfolded
     info, options, session = native.info, native.options, native.session
-    if len(info.sheet_bodies) > 1:
-        # Recorded on SolidWorks 2025 SP5: with the body pre-selected, CreateFlatPatternViewFromModelView3
-        # creates a NEW '<parent>SM-FLAT-PATTERN<n>' configuration for every call on a reopened part;
-        # the saved per-body configurations are never reused, and naming one returns a folded view.
-        # The source must not gain configurations, so no body flat view is requested.
-        native.result.warn('multibody_flat_unsupported', 'Çok gövdeli sacın açınım paftaları otomatik oluşturulmadı: '
-                           'SolidWorks API kayıtlı gövde açınım konfigürasyonlarını yeniden kullanmıyor, kaynakta yeni '
-                           'konfigürasyon açıyor. Gövde açınımlarını SolidWorks’te elle ekleyin.')
-        return
+    multibody = len(info.sheet_bodies) > 1
     before = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
     delivered = []
     for row in info.sheet_bodies:
@@ -137,9 +129,25 @@ def body_flat_pages(native, source_model):
         # configuration (localized name, e.g. 'VarsayılanSM-DÜZ-ÇOĞALTMA'), checked below.
         # Recorded on SolidWorks 2025 SP5: naming the flat configuration itself returns a FOLDED
         # view that still reports IsFlatPatternView and references the parent configuration.
+        if multibody:
+            select_body(native, source_model, row)
         view = call(native.drawing, 'CreateFlatPatternViewFromModelView3', info.source.path,
                     info.source.configuration, x, y, 0., not options.bend_lines, False)
         after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
+        created = [name for name in after if name not in before]
+        if multibody and created:
+            # Recorded on SolidWorks 2025 SP5: on a reopened multibody part the selected body's
+            # flat view always gets a NEW in-memory '<parent>SM-FLAT-PATTERN<n>'; a drawing bound
+            # to it loses the unfolded geometry on reopen (the source is never saved). Retarget
+            # the view to the body's SAVED flat configuration, then remove the temporary one.
+            if view is not None:
+                put(view, 'ReferencedConfiguration', configuration)
+                native.rebuild()
+            for name in created:
+                if call(source_model, 'DeleteConfiguration2', name) is not True:
+                    raise RestoreError('Açınımın geçici kaynak konfigürasyonu kaldırılamadı: '+name+
+                                       '. Kaynak kaydedilmedi; SolidWorks’te bu konfigürasyonu kaydetmeden kapatın.')
+            after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
         if set(after) != set(before):
             raise RestoreError('Açınım oluşturulurken kaynak konfigürasyonları değişti; kaynak kaydedilmedi.')
         if view is None or str(get(view, 'ReferencedConfiguration')) != configuration or not call(view, 'IsFlatPatternView'):
@@ -171,6 +179,23 @@ def body_flat_pages(native, source_model):
                                                      'bend_lines_requested': options.bend_lines}
         native.result.warn('bend_notes', 'Gövde bazlı açınımlar mevcut konfigürasyonlardan oluşturuldu. '
                            'Büküm çizgileri, yönleri ve notlarının tamlığını SolidWorks’te kontrol edin.')
+
+
+def select_body(native, source_model, row):
+    """Pre-select the body in the source: SolidWorks asks which body to unfold on a multibody part."""
+    from modules.cad_converter.api import PART_IID
+    from .solidworks import null_dispatch
+    session = native.session
+    session.activate(source_model)
+    try:
+        call(source_model, 'ClearSelection2', True)
+        bodies = values(call(as_interface(source_model, PART_IID), 'GetBodies2', session.c('swSolidBody'), False))
+        matches = [body for body in bodies if session.persistent_ref(source_model, body) == row.body_ref]
+        if len(matches) != 1 or not call(matches[0], 'Select2', False, null_dispatch()):
+            raise ApiError(row.label+': açınım için sac gövdesi kaynakta seçilemedi.')
+    finally:
+        bodies = matches = ()
+        session.activate(native.model)
 
 
 def bom_page(native):

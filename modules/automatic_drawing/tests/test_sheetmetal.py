@@ -284,6 +284,18 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
     c.session.open_drawing = lambda path: (case.model, case.drawing)
     c.session.close_created = lambda model: source_calls.append('close-owned-drawing')
     c.session.activate = lambda model: source_calls.append('activate-owned-drawing')
+    selected = []
+    def delete_configuration(name):
+        if name not in c.state.configs:
+            return False
+        c.state.configs = tuple(n for n in c.state.configs if n != name); return True
+    c.model.methods.update(DeleteConfiguration2=delete_configuration, ClearSelection2=lambda all: selected.clear())
+    original_body = c.body
+    def selectable(index):
+        body = original_body(index)
+        body.methods['Select2'] = lambda append, data, body=body: selected.append(body.token) is None
+        return body
+    c.model.methods['GetBodies2'] = lambda *args: [selectable(i) for i in (1, 2, 3)]
 
     def create(path, config, x, y, z, hide, flip):
         # Recorded on SolidWorks 2025 SP5 (single sheet body, part reopened from disk): the
@@ -292,15 +304,21 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
         if new_config:
             c.state.configs += ('UNEXPECTED',)
         resolved = info.sheet_bodies[0].configurations[0] if config == 'Default' else 'Default'
+        multibody = len(info.sheet_bodies) > 1
+        if multibody:
+            # Recorded on SolidWorks 2025 SP5 (multibody, reopened part): a NEW temporary
+            # '<parent>SM-FLAT-PATTERN<n>' is created for the selected body; no body filter.
+            resolved = f'DefaultSM-FLAT-PATTERN-TEMP{len(views)+1}'
+            c.state.configs += (resolved,)
         props = dict(Position=(x, y), UseSheetScale=False, ReferencedDocument=c.model,
-                     Bodies=() if no_body_filter else c.get_bodies(),
+                     Bodies=() if (no_body_filter or multibody) else c.get_bodies(),
                      ReferencedConfiguration='Default' if wrong_config else resolved)
         def bounds():
             vx, vy = props['Position']; scale = case.state['props'][2]
             return vx-.04*scale, vy-.02*scale, vx+.04*scale, vy+.02*scale
         class View(RawDispatch):
             def Invoke(self, member, lcid, flags, result_wanted, *args):
-                if ignore_body_filter and member == 'Bodies' and flags == 4:
+                if (ignore_body_filter or multibody) and member == 'Bodies' and flags == 4:
                     self.calls.append((member, flags, args)); return None
                 return super().Invoke(member, lcid, flags, result_wanted, *args)
         name = 'Flat'+str(len(views)+1)
@@ -435,15 +453,28 @@ def test_an_unavailable_single_flat_body_is_reported_and_no_view_is_requested(ca
     assert any(f.code == 'body_flat_unavailable' and 'ORHAN-01' in f.text for f in c.native.result.findings)
 
 
-def test_multibody_flat_pages_are_not_requested_because_solidworks_would_add_configurations(case):
-    # Recorded on SolidWorks 2025 SP5: on a reopened multibody part every request created a new
-    # '<parent>SM-FLAT-PATTERN<n>' configuration instead of reusing the saved per-body one.
+def test_multibody_flat_views_are_retargeted_to_saved_configurations_and_temporaries_removed(case):
+    # Recorded on SolidWorks 2025 SP5: on a reopened multibody part each selected-body request
+    # created a NEW in-memory '<parent>SM-FLAT-PATTERN<n>'; a drawing bound to it lost the unfolded
+    # geometry on reopen. Retargeted to the SAVED per-body configuration it survived the reopen.
     c = native_flat_case(case, bodies=3)
+    saved = c.c.state.configs
     flat_page(c.native, c.c.model)
-    assert not c.native.pages
-    assert not [name for name, flags, args in case.drawing.calls if name == 'CreateFlatPatternViewFromModelView3']
-    assert c.c.state.configs == ('Default', 'Body1-SM-FLAT-PATTERN', 'Body2-SM-FLAT-PATTERN', 'Body3-SM-FLAT-PATTERN')
-    assert any(f.code == 'multibody_flat_unsupported' for f in c.native.result.findings)
+    assert c.c.state.configs == saved                     # every temporary configuration removed
+    assert len(c.native.pages) == 3
+    configs = [page['views']['flat'].properties['ReferencedConfiguration'] for page in c.native.pages.values()]
+    assert configs == ['Body1-SM-FLAT-PATTERN', 'Body2-SM-FLAT-PATTERN', 'Body3-SM-FLAT-PATTERN']
+    findings, snapshots = c.native.validate()
+    assert not [f for f in findings if f.severity == 'FAIL']
+    assert [s['views'][0]['body_references'] for s in snapshots] == [(row.body_ref,) for row in c.info.sheet_bodies]
+    assert c.native.result.measurements['flat_pattern']['body_count'] == 3
+
+
+def test_multibody_flat_view_whose_saved_configuration_also_unfolds_another_body_is_rejected(case):
+    c = native_flat_case(case, bodies=3)
+    c.c.state.suppressed[(2, 'Body1-SM-FLAT-PATTERN')] = False   # body 2 also unfolds there
+    with pytest.raises(ApiError, match='başka veya birden fazla gövde'):
+        flat_page(c.native, c.c.model)
 
 
 def test_body_heading_must_be_attached_to_sheet_and_cannot_silently_follow_a_model_view(case):

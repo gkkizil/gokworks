@@ -5,14 +5,15 @@ kabul edileceğini tanımlar. Kabul betiği:
 `modules/automatic_drawing/live_acceptance.py`.
 
 Durum (18 Kasım 2026, **gerçek SolidWorks 2025 SP5, revizyon 33.5.0, Türkçe arayüz**,
-Windows 11): 6 senaryo **geçti**, 1 senaryo **kaldı**, 1 senaryo **çalıştırılmadı**.
+Windows 11): 19 Kasım itibarıyla 7 senaryo **geçti**, 1 senaryo **çalıştırılmadı** (firma şablonu).
+(Çok gövdeli sac fixture'ında iki gövde de 3 mm çıktı; SolidWorks istenen 2 mm'yi uygulamadı.)
 
 | # | Senaryo | Sonuç |
 |---|---|---|
 | 1 | Kademeli mil | geçti |
 | 2 | Delikli plaka | geçti (5 delik → 5 merkez işareti, 5 model ölçüsü) |
 | 3 | Tek gövdeli sac | geçti (açınım + gövde başlığı) |
-| 4 | Çok gövdeli sac | **kaldı**: gövde açınım paftaları bilinçli olarak üretilmez, bkz. `KNOWN_LIMITATIONS.md` |
+| 4 | Çok gövdeli sac | 18 Kasım: kaldı. 19 Kasım: **geçti** (gövde başına açınım paftası; görünüş kayıtlı açınım konfigürasyonuna bağlanır, yeniden açılışta korunur) |
 | 5 | Konfigürasyonlu montaj | geçti (`Konfig-B`, BOM adetleri doğrulandı) |
 | 6 | Bastırılmış bileşenli montaj | geçti (bastırılmış bileşen BOM'da sayılmadı) |
 | 7 | Eksik referans | geçti (reddedildi, SLDDRW yayımlanmadı) |

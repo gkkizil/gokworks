@@ -40,12 +40,16 @@ fakes veya dosya başlığı testleri gerçek entegrasyon testi sayılmaz.
 - Tam delik / diş / havşa / PCD tanıma ve tüm geometriler için eksiksiz
   imalat ölçülendirmesi. Hole Wizard model ölçüleri native import edilir;
   yeni diş veya tolerans açıklaması tahmin edilmez.
-- Çok gövdeli sacın gövde bazlı açınım paftaları. SolidWorks 2025 SP5'te diskten açılan
-  çok gövdeli parçada `CreateFlatPatternViewFromModelView3` (gövde önceden seçili) her
-  çağrıda kaynakta yeni bir `<ana>SM-FLAT-PATTERN<n>` konfigürasyonu açar, kayıtlı gövde
-  konfigürasyonunu yeniden kullanmaz; açınım konfigürasyonunun adı verilirse bükülü bir
-  görünüş döner. Kaynak değiştirilmediği için bu paftalar üretilmez,
-  `multibody_flat_unsupported` WARNING verilir; genel görünüşler üretilir.
+- Çok gövdeli sacda gövde bazlı açınım için kaynakta her gövdenin KAYITLI açınım
+  konfigürasyonu bulunmalıdır (SolidWorks'te bir kez açınım görünüşü eklenip parça kaydedilerek
+  oluşur). SolidWorks 2025 SP5'te diskten açılan çok gövdeli parçada
+  `CreateFlatPatternViewFromModelView3` (gövde önceden seçili) her çağrıda bellekte yeni bir
+  `<ana>SM-FLAT-PATTERN<n>` açar; ona bağlı resim yeniden açılınca açınımı kaybeder. Modül
+  görünüşü gövdenin kayıtlı açınım konfigürasyonuna yeniden bağlar, geçici konfigürasyonu
+  bellekten siler ve konfigürasyon listesinin değişmediğini doğrular; resim tek başına yeniden
+  açıldığında açınımlar korunur. Kaynak diske yazılmaz, ama açık kaynak belgesi SolidWorks'te
+  değişmiş (kaydedilmemiş) olarak işaretlenir: kaydetmeden kapatın. Görünüşün gövdesi,
+  kayıtlı konfigürasyonda yalnız o gövdenin FlatPattern unsurunun açık olmasıyla kanıtlanır.
 - Tek gövdeli sacda ana konfigürasyon istenir; SolidWorks bunu mevcut
   `<ana>SM-<yerel ad>` (Türkçe: `SM-DÜZ-ÇOĞALTMA`) konfigürasyonuna çözer. Bu türetilmiş
   konfigürasyon yoksa SolidWorks yenisini açar; modül bunu saptar ve paketi yayımlamaz.

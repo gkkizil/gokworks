@@ -356,6 +356,13 @@ class NativeDrawing:
                                          self.session.c('swSolidBody'), False))
                     if len(solids) == 1:
                         bodies, count = solids, 1
+                    elif self.only_target_unfolded(referenced, target, str(get(view, 'ReferencedConfiguration') or '')):
+                        # Multibody (recorded): no body filter either; the view's saved flat
+                        # configuration unfolds exactly the target body's FlatPattern.
+                        record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
+                                      body_references=(target.body_ref,), body_count=1, body_label=target.label)
+                        result.append(record)
+                        continue
                 record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
                     body_references=tuple(self.session.persistent_ref(referenced, body) for body in bodies)
                                     if referenced is not None else (),
@@ -363,6 +370,19 @@ class NativeDrawing:
                 bodies = ()
             result.append(record)
         return result
+
+    def only_target_unfolded(self, model, target, configuration):
+        """True when ``configuration`` unfolds the target body's FlatPattern and no other sheet body's."""
+        from .sheetmetal import feature_by_ref, unfolded_configurations
+        rows = [row for row in getattr(self.info, 'sheet_bodies', ()) if row.flat_feature and row.flat_ref]
+        if not configuration or target not in rows or len(rows) < 2:
+            return False
+        for row in rows:
+            feature = feature_by_ref(self.session, model, row.flat_feature, row.flat_ref, 'FlatPattern')
+            unfolded = unfolded_configurations(self.session, feature, (configuration,)) == (configuration,)
+            if unfolded != (row is target):
+                return False
+        return True
 
     def body_heading(self, name, row, area):
         self.session.activate(self.model)
