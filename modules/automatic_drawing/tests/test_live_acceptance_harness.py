@@ -38,6 +38,17 @@ def test_unavailable_session_is_not_run_not_failed(tmp_path, monkeypatch):
     assert row['status'] == acceptance.NOT_RUN and 'SolidWorks' in row['reason']
 
 
+def test_no_running_solidworks_is_not_run_even_for_the_missing_reference_scenario(tmp_path, monkeypatch):
+    # Seen live: with SolidWorks closed, generate() returned FAIL results, so every scenario
+    # 'failed' and the missing-reference scenario (which expects FAIL) falsely passed.
+    monkeypatch.setattr(acceptance, 'missing_requirements', lambda scenario, environ=None: [])
+    monkeypatch.setattr(acceptance, 'solidworks_running', lambda: False)
+    scenario = next(s for s in acceptance.SCENARIOS if s.key == 'missing_reference')
+    source = tmp_path/'fixture'/'montaj.SLDASM'; source.parent.mkdir(); source.write_bytes(b'model')
+    row = acceptance.run_scenario(scenario, tmp_path/'out', {scenario.env: str(source)})
+    assert row['status'] == acceptance.NOT_RUN and 'SolidWorks' in row['reason']
+
+
 def test_a_changed_source_folder_fails_the_scenario_whatever_the_drawing_said(tmp_path, monkeypatch):
     monkeypatch.setattr(acceptance, 'missing_requirements', lambda scenario, environ=None: [])
     source = tmp_path/'fixture'/'mil.SLDPRT'; source.parent.mkdir(); source.write_bytes(b'model')

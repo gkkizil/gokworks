@@ -163,6 +163,20 @@ def check(scenario, result, environ=os.environ):
     return problems
 
 
+def solidworks_running():
+    """A running SolidWorks in the Running Object Table; never starts one."""
+    try:
+        import pythoncom
+        pythoncom.CoInitialize()
+        try:
+            pythoncom.GetActiveObject('SldWorks.Application')
+            return True
+        finally:
+            pythoncom.CoUninitialize()
+    except Exception:
+        return False
+
+
 def run_scenario(scenario, output_root, environ=os.environ, *, generate=None):
     """One scenario → report row. ``generate`` is the production pipeline unless given."""
     row = dict(key=scenario.key, title=scenario.title, fixture=environ.get(scenario.env, ''))
@@ -170,6 +184,10 @@ def run_scenario(scenario, output_root, environ=os.environ, *, generate=None):
     if reasons:
         return dict(row, status=NOT_RUN, reason='; '.join(reasons))
     if generate is None:
+        # generate() reports a missing session as a FAIL result, not an exception: without this
+        # check every scenario would 'fail' and the missing-reference one would falsely pass.
+        if not solidworks_running():
+            return dict(row, status=NOT_RUN, reason='Çalışan SolidWorks oturumu bulunamadı.')
         from .pipeline import generate
     from .models import Source
     source = environ[scenario.env]
