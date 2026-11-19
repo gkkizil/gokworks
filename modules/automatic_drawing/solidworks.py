@@ -508,9 +508,10 @@ class Session(ReadSession):
                 return str(path)
         return ''
 
-    def new_drawing(self, template, width_mm, height_mm):
+    def new_drawing(self, template, width_mm, height_mm, paper=None):
         self.assert_thread()
-        model = call(self.app, 'NewDocument', template, self.c('swDwgPapersUserDefined'),
+        # A standard paper code (A3…) lets the template keep its own sheet format.
+        model = call(self.app, 'NewDocument', template, self.c('swDwgPapersUserDefined') if paper is None else paper,
                      width_mm/1000, height_mm/1000)
         if model is None:
             raise ApiError('SolidWorks şablondan teknik resim oluşturamadı.')

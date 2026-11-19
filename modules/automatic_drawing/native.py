@@ -81,12 +81,47 @@ class NativeDrawing:
 
     def create(self, template, plan):
         self.template = template
-        self.model, self.drawing = self.session.new_drawing(template, plan.width_mm, plan.height_mm)
+        self.model, self.drawing = self.session.new_drawing(template, plan.width_mm, plan.height_mm,
+                                                            paper=self.paper_code(plan))
         call(self.model, 'SetUnits', self.session.c('swMM'), self.session.c('swDECIMAL'), 0, 3, False)
         units = values(call(self.model, 'GetUnits'))
         if not units or int(units[0]) != self.session.c('swMM'):
             raise ApiError('Teknik resmin mm birimi doğrulanamadı.')
         self.setup(plan)
+
+    def paper_code(self, plan):
+        """SolidWorks' own code for a standard ISO sheet (its templates and formats key on it)."""
+        name = {'A4': 'swDwgPaperA4size', 'A3': 'swDwgPaperA3size', 'A2': 'swDwgPaperA2size',
+                'A1': 'swDwgPaperA1size', 'A0': 'swDwgPaperA0size'}.get(getattr(plan, 'paper', ''))
+        try:
+            return self.session.c(name) if name else self.session.c('swDwgPapersUserDefined')
+        except (KeyError, AttributeError):
+            return self.session.c('swDwgPapersUserDefined')
+
+    def keep_template_format(self, plan):
+        """Scale/projection on the template's own sheet, keeping its title block.
+
+        The path the shaft drawing uses on real SolidWorks: no SetupSheet when no separate
+        sheet format was chosen, only ISheet.SetProperties2 on the sheet NewDocument made.
+        Returns False (nothing kept) when SolidWorks refuses or the size is not the planned one.
+        """
+        sheet = call(self.drawing, 'GetCurrentSheet')
+        props = values(call(sheet, 'GetProperties2'))
+        if len(props) < 8:
+            return False
+        scale1, scale2 = scale_ratio(plan.scale)
+        try:
+            accepted = call(sheet, 'SetProperties2', self.paper_code(plan), int(props[1]), scale1, scale2,
+                            self.options.projection == 'first', to_m(plan.width_mm), to_m(plan.height_mm), True)
+        except ApiError:
+            return False
+        if accepted is False:
+            return False
+        self.rebuild()
+        actual = self.sheet_state(plan.name)
+        return (abs(actual['width_mm']-plan.width_mm) <= .05 and abs(actual['height_mm']-plan.height_mm) <= .05
+                and abs(actual['scale'] - scale1/scale2) <= 1e-9 * max(1., scale1/scale2)
+                and actual['projection'] == self.options.projection)
 
     def setup(self, plan, *, new=False):
         checkpoint(self.stop)
@@ -103,6 +138,15 @@ class NativeDrawing:
                 self.auto_format = True
                 template_name = self.standard_format(plan)
             call(current, 'SetName', plan.name)
+            # Keep the template's own sheet only when it HAS a sheet format; a '*.drt'
+            # template would keep no title block, so the installed ISO format is set up below.
+            if not self.options.sheet_format and not self.auto_format and self.keep_template_format(plan):
+                self.result.measurements.setdefault('sheet_setup', {})[plan.name] = 'template'
+                self.pages[plan.name] = {'plan': plan, 'views': {}, 'format': template_name, 'tables': [], 'notes': []}
+                if not template_name:
+                    self.result.warn('sheet_format', 'Şablonda antet / sayfa çerçevesi bulunamadı; firma .SLDDRT '
+                                     'dosyası seçebilirsiniz.', plan.name)
+                return
         zones = (to_m(self.options.margin_mm),)*4 + (4, 4)
         scale1, scale2 = scale_ratio(plan.scale)
         def prefix(template, view_name, size=True):

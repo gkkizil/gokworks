@@ -55,7 +55,10 @@ def case(tmp_path):
     sheet = RawDispatch('ISheet', methods={
         'GetTemplateName': lambda: '', 'SetName': lambda name: state.update(name=name),
         'GetName': lambda: state['name'], 'GetProperties2': lambda: state['props'],
-        'SetScale': lambda n, d, positions, text: state['props'].__setitem__(slice(2, 4), [n, d]) is None},
+        'SetScale': lambda n, d, positions, text: state['props'].__setitem__(slice(2, 4), [n, d]) is None,
+        # Real SolidWorks: changes size/scale/projection and keeps the template's own sheet format.
+        'SetProperties2': lambda paper, template, n, d, first, w, h, same:
+            state.update(props=[paper, template, n, d, first, w, h, same]) is None},
         properties={'CustomPropertyView': ''})
     views, selected = {}, {'name': ''}
     extension = RawDispatch('IModelDocExtension', methods={
@@ -105,7 +108,7 @@ def case(tmp_path):
                       properties={'ViewPdfAfterSaving': True})
     app = RawDispatch('ISldWorks', methods={'GetExportFileData': lambda kind: pdf})
     session = SimpleNamespace(constants=constants, c=lambda key: constants[key],
-                              new_drawing=lambda *args: (model, drawing), app=app,
+                              new_drawing=lambda *args, **kwargs: (model, drawing), app=app,
                               activate=lambda model: None)
     info = ModelInfo(Source('C:/p.sldprt', 'Default'), 'part', 'p', (100, 50, 10), body_count=1)
     options = Options(main_view='front')
@@ -114,7 +117,33 @@ def case(tmp_path):
     return SimpleNamespace(**locals())
 
 
+def refuse_template_sheet(case):
+    """Fallback path: SolidWorks refuses ISheet.SetProperties2, SetupSheet6 rebuilds the sheet."""
+    case.sheet.methods['SetProperties2'] = lambda *args: False
+
+
+def test_template_sheet_keeps_its_own_format_and_only_changes_scale_and_projection(case):
+    case.sheet.methods['GetTemplateName'] = lambda: 'C:/formats/a3 - iso.slddrt'
+    case.constants['swDwgPaperA3size'] = 7
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.native.create('C:/company.drwdot', plan)
+    assert not any(name == 'SetupSheet6' for name, flags, args in case.drawing.calls)
+    sent = next(args for name, flags, args in case.sheet.calls if name == 'SetProperties2')
+    scale1, scale2 = sent[2:4]
+    assert sent[0] == 7 and sent[4] is True and sent[7] is True and plan.scale == pytest.approx(scale1/scale2)
+    assert case.result.measurements['sheet_setup'][plan.name] == 'template'
+    assert not case.result.findings                     # the template's title block stays: no warning
+
+
+def test_template_sheet_refused_falls_back_to_setupsheet6(case):
+    refuse_template_sheet(case)
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.native.create('C:/company.drwdot', plan)
+    assert any(name == 'SetupSheet6' for name, flags, args in case.drawing.calls)
+
+
 def test_raw_dual_interfaces_route_drawing_calls_without_python_method_attributes(case):
+    refuse_template_sheet(case)
     assert not hasattr(case.model, 'SetupSheet6') and not hasattr(case.drawing, 'GetUnits')
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.native.create('C:/company.drwdot', plan)
@@ -481,6 +510,7 @@ def test_sheet_scale_is_sent_as_the_whole_number_ratio_solidworks_stores():
 
 
 def test_whole_number_ratio_reaches_setupsheet6_and_setscale(case):
+    refuse_template_sheet(case)
     options = replace(case.options, manual_scale=.4); case.native.options = options
     plan = plan_sheet(plan_views(case.info, options), options)
     case.native.create('fake.drwdot', plan)
@@ -492,6 +522,7 @@ def test_whole_number_ratio_reaches_setupsheet6_and_setscale(case):
 
 
 def test_a_refused_sheet_setup_tries_the_next_combination_and_reports_it(case):
+    refuse_template_sheet(case)
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     accept = case.drawing.methods['SetupSheet6']; seen = []
     def refuse_empty_view_name(*args):
@@ -505,6 +536,7 @@ def test_a_refused_sheet_setup_tries_the_next_combination_and_reports_it(case):
 
 
 def test_a_sheet_setup_refused_every_way_names_the_refused_values(case):
+    refuse_template_sheet(case)
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.drawing.methods['SetupSheet6'] = lambda *args: False
     with pytest.raises(ApiError, match=r'reddedildi\. Pafta "Genel görünüşler", 420 × 297 mm, ölçek \d+:\d+, 1\. açı'):
@@ -545,6 +577,7 @@ def test_an_unknown_view_name_reports_the_models_view_names(case):
 
 
 def test_sheet_format_is_kept_at_its_own_size_only_when_that_is_the_planned_paper(case):
+    refuse_template_sheet(case)
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.sheet.methods['GetTemplateName'] = lambda: 'C:/formats/a3 - iso.slddrt'
     accept = case.drawing.methods['SetupSheet6']; widths = []
@@ -563,6 +596,7 @@ def test_sheet_format_is_kept_at_its_own_size_only_when_that_is_the_planned_pape
 
 
 def test_a_sheet_format_of_another_size_falls_back_to_no_format_and_names_it(case):
+    refuse_template_sheet(case)
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.sheet.methods['GetTemplateName'] = lambda: 'C:/formats/a4 - iso.slddrt'
     accept = case.drawing.methods['SetupSheet6']
@@ -579,6 +613,7 @@ def test_a_sheet_format_of_another_size_falls_back_to_no_format_and_names_it(cas
 
 
 def test_a_template_without_sheet_format_is_set_up_without_a_refused_first_attempt(case):
+    refuse_template_sheet(case)
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.sheet.methods['GetTemplateName'] = lambda: '*.drt'       # SolidWorks: no sheet format
     accept = case.drawing.methods['SetupSheet6']; sent = []
