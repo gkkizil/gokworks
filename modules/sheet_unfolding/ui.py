@@ -151,11 +151,12 @@ class UnfoldPage(BasePage):
         self.layout.addWidget(self.banner); self.layout.addLayout(toolbar)
         self.banner.setVisible(self.service.is_fixture)     # only after it has a parent (else it becomes a window)
 
-        self.splitter = QSplitter(Qt.Horizontal); self.splitter.setChildrenCollapsible(False)
+        # Placed before it is filled: moving a filled tree restyles all of it (slow opening).
+        self.splitter = QSplitter(Qt.Horizontal, self); self.splitter.setChildrenCollapsible(False)
+        self.layout.addWidget(self.splitter, 1)
         self.splitter.addWidget(self.build_shapes()); self.splitter.addWidget(self.build_parameters())
         self.splitter.addWidget(self.build_workspace())
         self.splitter.setStretchFactor(2, 1); self.splitter.setSizes([230, 330, 900])
-        self.layout.addWidget(self.splitter, 1)
         self.finish_layout()
         self.controls += [self.shape_tree, self.variant]
         first = next((s for s in self.shapes if s['status'] == 'implemented'), None)

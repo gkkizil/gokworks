@@ -7,6 +7,7 @@ from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLineEdit, QSizePolicy,
                                QVBoxLayout, QWidget)
 
+from gui_qt.components import set_style_sheet
 from gui_qt.components import Disclosure, button, label, scroll
 from gui_qt.theme import COLORS
 from .beginner import FORCE_FACTORS
@@ -468,7 +469,7 @@ class PracticalView(QWidget):
         appearance = self.owner.context.appearance; c = COLORS[appearance]
         self.diagram.update(); self.strip.appearance = appearance; self.strip.update()
         self.schematic.appearance = appearance; self.schematic.update()
-        self.setStyleSheet(f'''
+        set_style_sheet(self, f'''
             QLabel[chip="true"] {{ border: 1px solid {c['border']}; border-radius: 11px; padding: 3px 12px; font-weight: 600; }}
             QLabel[chip="true"][role="success"] {{ border-color: {c['success']}; }}
             QLabel[chip="true"][role="warning"] {{ border-color: {c['warning']}; }}

@@ -209,6 +209,12 @@ class StableScrollArea(QScrollArea):
             self._resizing = False
 
 
+def set_style_sheet(widget, css):
+    """setStyleSheet only when the text changes: Qt restyles the whole subtree on every call."""
+    if widget.styleSheet() != css:
+        widget.setStyleSheet(css)
+
+
 def scroll(widget):
     area = StableScrollArea()
     area.setWidgetResizable(True)
@@ -478,7 +484,9 @@ class BasePage(QWidget):
     progressChanged = Signal(int, int)
 
     def __init__(self, context, title, description):
-        super().__init__()
+        # Built directly inside the window's page stack: filling an unparented page and
+        # moving it in afterwards makes Qt restyle every widget of the page once more.
+        super().__init__(getattr(context, 'stack', None))   # a new child stays hidden until shown
         self.context, self.settings, self.jobs = context, context.settings, context.jobs
         self.busy = False
         self.controls = []

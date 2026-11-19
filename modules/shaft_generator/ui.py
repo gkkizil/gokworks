@@ -310,10 +310,10 @@ class ShaftPage(BasePage):
         for view in (self.top_view,self.section_view):
             view.stageSelected.connect(self.select_stage);view.operationSelected.connect(self.select_operation)
             views.add(view)
-        self.splitter=QSplitter(Qt.Vertical);self.splitter.setChildrenCollapsible(False)
+        self.splitter=QSplitter(Qt.Vertical,self);self.splitter.setChildrenCollapsible(False)
+        self.layout.addWidget(self.splitter,1)     # placed before filling: a moved filled tree is restyled again
         self.splitter.addWidget(self.source_scroll);self.splitter.addWidget(views)
         self.splitter.setStretchFactor(0,0);self.splitter.setStretchFactor(1,1);self.splitter.setSizes([290,600])
-        self.layout.addWidget(self.splitter,1)
         self.validation_label=label('','muted');self.validation_label.setMaximumHeight(60);self.layout.addWidget(self.validation_label)
         footer=QHBoxLayout();self.create_button=button("SolidWorks’te çiz",self.create_model,primary=True)
         self.create_button.setToolTip('Açık SolidWorks oturumunda yeni parametrik mil parçası oluştur')

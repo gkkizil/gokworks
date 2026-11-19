@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComb
     QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
 
+from gui_qt.components import set_style_sheet
 from gui_qt.components import (BasePage, AdaptiveRow, Disclosure, NumberSpinBox, button,
     configure_view, fit_columns, label, scroll)
 from gui_qt.theme import COLORS
@@ -378,12 +379,12 @@ class AutoDrawingPage(BasePage):
         coverage.setWidget(self.coverage)
         self.tabs.addTab(coverage, 'Kapsam')
 
-        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter = QSplitter(Qt.Horizontal, self)
         self.splitter.setChildrenCollapsible(False); self.splitter.setHandleWidth(10)
+        self.layout.addWidget(self.splitter, 1)    # placed before filling: a moved filled tree is restyled again
         self.splitter.addWidget(left); self.splitter.addWidget(self.tabs)
         self.splitter.setStretchFactor(0, 1); self.splitter.setStretchFactor(1, 3)
         self.splitter.setSizes([380, 900])
-        self.layout.addWidget(self.splitter, 1)
 
         # ------------------------------------------------------------- progress
         progress = QFrame(); progress.setProperty('card', True); progress.setObjectName('drawingProgress')
@@ -664,7 +665,7 @@ class AutoDrawingPage(BasePage):
         for item in self._all_items():
             self._tint(item)
         self.refresh_results()
-        self.setStyleSheet(f"""
+        set_style_sheet(self, f"""
             QFrame#drawingSources[dropping="true"] {{ border: 2px dashed {c['accent']}; }}
             QLabel[chip="true"] {{ border: 1px solid {c['border']}; border-radius: 11px; padding: 2px 10px;
                                    background: {c['input']}; }}

@@ -1,5 +1,6 @@
 """Integrated DXF nesting workspace; every heavy operation uses the existing job runner."""
 
+from gui_qt.components import set_style_sheet
 from gui_qt.components import fit_columns
 from copy import deepcopy
 from dataclasses import asdict, replace
@@ -1258,7 +1259,7 @@ class NestingPage(BasePage):
         self.part_table.viewport().update()
 
     def style_sheet_tabs(self):
-        self.sheet_tabs.setStyleSheet(plate_tabs_style(self.context.appearance))
+        set_style_sheet(self.sheet_tabs, plate_tabs_style(self.context.appearance))
 
     def verify(self):
         if not self.can_start() or self.result is None: return

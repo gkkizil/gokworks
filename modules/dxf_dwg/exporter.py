@@ -9,10 +9,21 @@ import re
 from uuid import uuid4
 from contextlib import nullcontext
 
-try:
-    import ezdxf
-except ImportError:
-    ezdxf = None
+import importlib
+import importlib.util
+
+
+class _LazyEzdxf:
+    """ezdxf on first use: importing it costs ~0,25 s, the DXF/DWG page opens without it."""
+    _module = None
+
+    def __getattr__(self, name):
+        if _LazyEzdxf._module is None:
+            _LazyEzdxf._module = importlib.import_module('ezdxf')
+        return getattr(_LazyEzdxf._module, name)
+
+
+ezdxf = _LazyEzdxf() if importlib.util.find_spec('ezdxf') is not None else None
 
 try:
     import pythoncom

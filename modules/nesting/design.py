@@ -5,6 +5,7 @@ adds the workstation layout: a flat command/menu bar, flush panes separated by
 splitter gaps and hairlines, a compact results strip and plate tabs.
 """
 
+from gui_qt.components import set_style_sheet
 from gui_qt.theme import COLORS, FONT_SIZES, CONTROL_RADIUS
 
 PANEL_WIDTH = 260
@@ -15,7 +16,7 @@ SPACING = 4
 
 def apply_design(page, appearance):
     c = dict(COLORS[appearance]); c.update(radius=CONTROL_RADIUS, caption=FONT_SIZES['caption'])
-    page.setStyleSheet('''
+    set_style_sheet(page, '''
         QWidget#nestingWorkspace QToolBar#nestingCommands { background: transparent; border: 0;
             border-bottom: 1px solid %(border)s; spacing: 0; padding: 0 0 4px 0; }
         QWidget#nestingWorkspace QToolButton[nestingMenu="true"] { background: transparent;
