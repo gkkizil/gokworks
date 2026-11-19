@@ -33,6 +33,25 @@ def test_one_registered_module_one_source_tree_and_no_com_on_open(window):
     assert page.options().pdf and not page.options().geometry_dimensions
 
 
+def test_scrolling_the_settings_over_an_unfocused_combo_does_not_change_the_projection(window, qtbot):
+    # Seen in the SolidWorks add-in dialog: a wheel over 'İzdüşüm' switched ISO first angle
+    # to third angle while the user only scrolled the settings.
+    from PySide6.QtCore import QPoint, QPointF
+    from PySide6.QtGui import QWheelEvent
+    from PySide6.QtWidgets import QApplication
+    page = window.pages['automatic_drawing']
+    combo = page.fields['projection']
+    window.setFocus(); qtbot.wait(10)
+    assert not combo.hasFocus()
+    centre = QPointF(combo.rect().center())
+    for delta in (-120, 120, -120):
+        event = QWheelEvent(centre, QPointF(combo.mapToGlobal(combo.rect().center())), QPoint(0, 0),
+                            QPoint(0, delta), Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False)
+        QApplication.sendEvent(combo, event)
+    assert page.options().projection == 'first'
+    assert combo.focusPolicy() == Qt.StrongFocus
+
+
 @pytest.mark.parametrize('size', ((820, 560), (1024, 700), (1440, 900)))
 @pytest.mark.parametrize('theme', ('dark', 'light'))
 def test_header_actions_visible_and_options_accessible_in_both_themes(window, qtbot, size, theme):
