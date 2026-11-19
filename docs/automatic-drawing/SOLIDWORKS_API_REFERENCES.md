@@ -44,7 +44,7 @@ bilgisini rapora yazar; bulunmayan enum / metot sessizce tahmin edilmez.
 | IView.GetOutline | Gerçek sheet-space sınırlar; metre → mm dönüşümü |
 | IView.Position | İki double içeren SAFEARRAY (X, Y); anotasyonların üç koordinatlı konumuyla karıştırılmaz |
 | IView.ReferencedDocument / ReferencedConfiguration | Yalnız kayıtlı dosya adı değil, çözülmüş model belgesi de doğrulanır |
-| CreateFlatPatternViewFromModelView3 | Yedi argüman; HideBendLines ters anlamı gözetilir; sonuç View nesnesi. 2025 SP5: ANA konfigürasyon verilir, mevcut `<ana>SM-<yerel>` konfigürasyonuna çözülür; açınım konfigürasyonunun adı bükülü görünüş verir. Tek gövdede `GetBodiesCount` 0, `Bodies` boş |
+| CreateFlatPatternViewFromModelView3 | Yedi argüman; HideBendLines ters anlamı gözetilir; sonuç View nesnesi. 2025 SP5: ANA konfigürasyon verilir, mevcut `<ana>SM-<yerel>` konfigürasyonuna çözülür; açınım konfigürasyonunun adı bükülü görünüş verir. Tek gövdede `GetBodiesCount` 0, `Bodies` boş. Çok gövdede (gövde seçili) her çağrı bellekte geçici konfigürasyon açar; görünüş `ReferencedConfiguration` ile kayıtlı gövde konfigürasyonuna taşınır, geçici olan `DeleteConfiguration2` ile silinir |
 
 [SetupSheet6 — resmi 2018 imzası](https://help.solidworks.com/2018/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~SetupSheet6.html) ·
 [NewSheet4 — resmi 2016 imzası](https://help.solidworks.com/2016/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~NewSheet4.html) ·
