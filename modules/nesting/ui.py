@@ -55,6 +55,8 @@ class NestingPage(BasePage):
         self.folder_import_pending=None;self.folder_import_cancelled=False
         self.jobs.finished.connect(self.resume_folder_import)
         self.setObjectName('nestingWorkspace')
+        # The page's own rules before its widgets exist: set afterwards, Qt restyles them all again.
+        apply_design(self,self.context.appearance)
         self.preview_target = None; self._refreshing = False; self._syncing_sheet = False
         self.imports = []; self.sheet_totals = []; self.totals = None; self.preferred_sheet = None
         self.price_candidate = None
@@ -281,7 +283,6 @@ class NestingPage(BasePage):
         self.controls.append(self.inspector)
         context.register_inspector('nesting',self.inspector)
         self.style_sheet_tabs()
-        apply_design(self,self.context.appearance)
         self.set_status('DXF ekleyin · Sac ve ayarlardan stok tanımlayın · Yerleştir')
         if self.stock_load_error:
             self.stock_save_notice.setText(self.stock_load_error)

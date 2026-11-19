@@ -1,5 +1,6 @@
 """Stable, bounded-cache synchronous service for the application's job manager."""
 from collections import OrderedDict
+from functools import lru_cache
 from dataclasses import replace
 import hashlib
 import importlib.util
@@ -17,17 +18,22 @@ def input_hash(normalized):
     return hashlib.sha256(json.dumps(data,sort_keys=True,ensure_ascii=False,allow_nan=False,separators=(',',':')).encode()).hexdigest()
 
 
+@lru_cache(maxsize=1)
+def _source_models():
+    """Frozen once per process: the inventory is fixed and freezing it took ~0,2 s per call."""
+    from .source_models import inventory
+    from .shapes.source_dispatch import supported,method_for
+    return tuple(FrozenMap(dict(m,calculation_available=supported(m),calculation_method=method_for(m) if supported(m) else None))
+                 for m in inventory()['models'])
+
+
 class UnfoldService:
     def __init__(self,cache_size=16):
         if type(cache_size) is not int or not 0<=cache_size<=64:raise ValueError('Cache boyutu 0–64 olmalı.')
         self._cache_size=cache_size;self._cache=OrderedDict();self._lock=RLock()
 
     def list_shapes(self):return tuple(d.summary for d in DEFINITIONS.values())
-    def list_source_models(self):
-        from .source_models import inventory
-        from .shapes.source_dispatch import supported,method_for
-        return tuple(FrozenMap(dict(m,calculation_available=supported(m),calculation_method=method_for(m) if supported(m) else None))
-                     for m in inventory()['models'])
+    def list_source_models(self):return _source_models()
     def get_schema(self,shape_id,variant_id):return definition(shape_id).schema(variant_id)
     def validate(self,request):return validate(request)
 

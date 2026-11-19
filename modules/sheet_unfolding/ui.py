@@ -253,7 +253,15 @@ class UnfoldPage(BasePage):
         self.shape_id = shape_id
         self.load_schema(variant_id, keep=keep and same_shape)
         self.remember_recent(shape_id, variant_id)
-        self.fill_shapes()
+        self.select_shape_item()
+
+    def select_shape_item(self):
+        """Mark the current shape in the list without rebuilding it (icons are costly to redraw)."""
+        self.shape_tree.blockSignals(True)
+        for row in range(self.shape_tree.count()):
+            item = self.shape_tree.item(row)
+            item.setSelected(item.data(Qt.UserRole) == self.shape_id)
+        self.shape_tree.blockSignals(False)
 
     def variant_changed(self, *args):
         variant = self.variant.currentData()

@@ -4,7 +4,6 @@ from datetime import datetime
 import hashlib
 from pathlib import Path
 
-from .importers import dxf as dxf_reader
 from .geometry import topology
 from .models import AnalysisResult
 from .profiles import bundled
@@ -25,6 +24,7 @@ def analyze(path, profile, *, thickness=None, material='', unit=None, tolerance=
         raise ValueError('Sac kalınlığı pozitif olmalı.')
     report = progress or (lambda *args: None)
     report(0, 3, 'DXF okunuyor')
+    from .importers import dxf as dxf_reader      # ezdxf (~0,3 s) loads with the first analysis
     drawing, data = dxf_reader.read(path, unit=unit, tolerance=tolerance, excluded_layers=excluded_layers, stop=stop)
     report(1, 3, 'Konturlar ve parçalar çıkarılıyor')
     topo = topology.build(drawing.contours, closure=profile.closure_tolerance, short_segment=profile.short_segment,
