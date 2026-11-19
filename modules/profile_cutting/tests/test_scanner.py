@@ -86,12 +86,21 @@ def test_referenced_configurations_stay_separate_and_original_is_restored(tmp_pa
     assert part.ConfigurationManager.ActiveConfiguration.Name=='A'
 
 
-@pytest.mark.parametrize('properties', [{'LENGTH':''},{'LENGTH':'bad'},{'QUANTITY':'5'},{'Angle1':'45'},{'MATERIAL':''},{'DESCRIPTION':'Profile'}])
-def test_missing_and_conflicting_properties_and_miter_are_blocked(tmp_path,properties):
+@pytest.mark.parametrize('properties', [{'LENGTH':''},{'LENGTH':'bad'},{'MATERIAL':''}])
+def test_missing_or_unreadable_values_are_blocked(tmp_path,properties):
     result,_=read(Model(tmp_path/'p.SLDPRT',[Folder(properties=properties)]))
-    assert not result.rows[0].ready
+    assert not result.rows[0].ready and result.rows[0].status=='Eksik bilgi'
     project=Project();stats=transfer(project,result)
     assert stats['blocked']==1 and project.demands==[]
+
+
+@pytest.mark.parametrize('properties', [{'QUANTITY':'5'},{'Angle1':'45'},{'DESCRIPTION':'Profile'}])
+def test_cut_list_is_taken_as_the_model_states_it_and_notes_stay_informative(tmp_path,properties):
+    # No review step: the body count, angle and section come from the model; the note explains.
+    result,_=read(Model(tmp_path/'p.SLDPRT',[Folder(properties=properties)]))
+    row=result.rows[0]
+    assert row.ready and row.issues and row.count==1
+    project=Project();assert transfer(project,result)['added']==1
 
 
 def test_geometry_fallback_is_explicit_and_never_uses_aabb(tmp_path):
@@ -106,20 +115,22 @@ def test_geometry_fallback_is_explicit_and_never_uses_aabb(tmp_path):
 def test_curves_and_sheet_or_non_weldment_bodies_are_not_accepted(tmp_path):
     folders=[Folder('curve',[Body('curved',curved=True)]),Folder('sheet',[Body('sheet',sheet=True)]),Folder('solid',kind=1)]
     result,_=read(Model(tmp_path/'p.SLDPRT',folders))
-    assert not any(r.ready for r in result.rows)
+    assert [r.ready for r in result.rows]==[True,False,False]       # curved profile listed with its note
     assert [r.excluded for r in result.rows]==[False,True,True]
+    assert result.rows[0].issues
 
 
-def test_stale_cutlist_requires_choice_and_never_changes_update_settings(tmp_path):
+def test_stale_cutlist_is_noted_and_never_changes_update_settings(tmp_path):
     folder=Folder();folder.automatic=False
     model=Model(tmp_path/'p.SLDPRT',[folder])
     result,_=read(model)
-    assert not result.rows[0].ready and folder.updated==0
+    assert result.rows[0].ready and folder.updated==0
+    assert any('güncelliği doğrulanamadı' in issue for issue in result.rows[0].issues)
     result,_=read(model,options=Options(update_cut_list=True))
     assert result.rows[0].ready and folder.updated==1 and folder.automatic is False
     model.Extension.NeedsRebuild2=True
     result,_=read(model,options=Options(update_cut_list=True))
-    assert not result.rows[0].ready
+    assert any('rebuild' in issue for issue in result.rows[0].issues)
 
 
 def test_duplicate_body_in_two_folders_is_not_imported_twice(tmp_path):
@@ -142,18 +153,16 @@ def test_repeat_scan_preserves_manual_entries_and_changed_sources_are_not_overwr
     assert project.demands[1].material=='S235JR'
 
 
-def test_miter_manual_review_requires_note_and_keeps_angles_and_allowance(tmp_path):
+def test_miter_rows_keep_angles_and_allowance_without_review(tmp_path):
     result,_=read(Model(tmp_path/'p.SLDPRT',[Folder(properties={'Angle1':'45'})]))
-    row=result.rows[0];row.reviewed=True
-    assert not row.ready
-    row.review_note='Uzun uç 1000 mm; testere açısı üretim resminden kontrol edildi.'
+    row=result.rows[0]
+    assert row.ready and row.angle1=='45'
     row.allowance='25'
-    assert row.ready
     project=Project();transfer(project,result)
     demand=project.demands[0]
     assert demand.angle1=='45' and demand.allowance=='25'
     cut=optimize(project).bars[0].cuts[0]
-    assert cut.consumption=='1028' and cut.angle1=='45' and cut.note==row.review_note
+    assert cut.consumption=='1028' and cut.angle1=='45' and cut.note=='SolidWorks kesim listesinden.'
 
 
 def test_missing_configuration_and_no_cutlist_are_reported(tmp_path):

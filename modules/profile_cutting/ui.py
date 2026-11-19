@@ -7,7 +7,7 @@ from dataclasses import asdict
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QTabWidget, QTableView, QFileDialog, QAbstractItemView, QDialog, QLineEdit, QComboBox,
-    QSplitter, QStackedWidget, QMenu, QCheckBox, QHeaderView, QMessageBox)
+    QSplitter, QStackedWidget, QMenu, QHeaderView, QMessageBox)
 
 from gui_qt.components import BasePage, ValueForm, Disclosure, label, button, configure_view, show_details, scroll
 from gui_qt.models import TableModel, FilterProxy, Column
@@ -66,7 +66,9 @@ class ProfileCuttingPage(BasePage):
         project_menu = QMenu(self.project_button)
         project_menu.addAction('Proje aç…', self.open_project)
         project_menu.addAction('Projeyi kaydet…', self.save_project)
-        self.csv_action = project_menu.addAction('CSV raporu kaydet…', self.report)
+        self.pdf_action = project_menu.addAction('Kesim listesi PDF…', lambda: self.export_cut_list('pdf'))
+        self.excel_action = project_menu.addAction('Kesim listesi Excel…', lambda: self.export_cut_list('xlsx'))
+        self.csv_action = project_menu.addAction('Ayrıntılı CSV raporu…', self.report)
         project_menu.addSeparator()
         project_menu.addAction('Örnekle dene', self.load_example)
         self.project_button.setMenu(project_menu)
@@ -183,25 +185,23 @@ class ProfileCuttingPage(BasePage):
         self.scan_options.check('update_cut_list', 'Okumadan önce kesim listesini güncelle', False).setToolTip('SolidWorks Cut List güncellenir; kaynak dosya kaydedilmez.')
         self.scan_options.check('geometry_length', 'Boy bilgisi eksikse doğrulanmış geometriden al', False).setToolTip('Yalnız doğrusal olduğu doğrulanan profiller için; bounding box boyu kullanılmaz.')
         advanced_body.addWidget(self.scan_options)
-        self.scan_details_check = QCheckBox('Açı sütunlarını göster')
-        self.scan_details_check.setChecked(self.settings.get('profile_cutting_scan_details', False) is True)
-        self.scan_details_check.toggled.connect(self.update_scan_columns); advanced_body.addWidget(self.scan_details_check)
-        advanced_body.addWidget(label('Kaynak açıları testere ayarı değildir. Açılı kesimler listeye eklenmeden önce kontrol edilir.', 'muted'))
+        advanced_body.addWidget(label('Açılar SolidWorks kesim listesindeki ANGLE1 / ANGLE2 değerleridir.', 'muted'))
         self.scan_disclosure = Disclosure('SolidWorks seçenekleri', advanced)
         sw_layout.addWidget(self.scan_disclosure)
         self.source_label = label('Açık modeli okuyun veya bir SLDPRT / SLDASM dosyası seçin.', 'muted')
         sw_layout.addWidget(self.source_label)
         self.search = QLineEdit(); self.search.setPlaceholderText('Parça, profil veya malzeme ara…')
         self.status_filter = QComboBox()
-        for text, value in (('Tüm sonuçlar',None),('Hazır','Hazır'),('Kontrol gerekiyor','İnceleme Gerekli'),('Hariç','Hariç')):
+        for text, value in (('Profiller','!Hariç'),('Tüm satırlar',None),('Hazır','Hazır'),('Eksik bilgi','Eksik bilgi'),('Hariç','Hariç')):
             self.status_filter.addItem(text, value)
         search_row = QHBoxLayout(); search_row.addWidget(self.search,1); search_row.addWidget(self.status_filter)
         sw_layout.addLayout(search_row)
         self.scan_model = ProfileTableModel((Column('Parça / kesim grubu','source'), Column('Profil kesiti','profile'),
             Column('Malzeme','material'), Column('Boy · mm','length',display), Column('Adet','count'),
-            Column('Açı 1 · °','angle1'), Column('Açı 2 · °','angle2'), Column('Kontrol','status',lambda v:'Kontrol gerekiyor' if v=='İnceleme Gerekli' else v)),
+            Column('Açı 1 · °','angle1',display), Column('Açı 2 · °','angle2',display), Column('Durum','status')),
             editable=('profile','material','length','count','angle1','angle2'))
         self.scan_proxy = FilterProxy(self); self.scan_proxy.setSourceModel(self.scan_model)
+        self.scan_proxy.set_status('!Hariç')                       # profiles first; plates/sheets on request
         self.status_filter.currentIndexChanged.connect(lambda _:self.scan_proxy.set_status(self.status_filter.currentData()))
         self.scan_view = configure_view(QTableView()); self.scan_view.setModel(self.scan_proxy)
         self.scan_view.setMinimumHeight(180)
@@ -220,11 +220,18 @@ class ProfileCuttingPage(BasePage):
         menu.addAction('Okuma ayrıntıları…', self.scan_details); menu.addAction('CSV raporu kaydet…', self.report)
         more.setMenu(menu); row.addWidget(more); self.controls.append(more)
         row.addStretch(); row.addWidget(self.transfer_button); sw_layout.addLayout(row)
-        sw_layout.addWidget(label('Yalnız hazır satırlar eklenir. Elle girdiğiniz parçalar korunur; aynı tarama iki kez eklenmez.', 'muted'))
+        export = QHBoxLayout()
+        export.addWidget(label('Kesim listesi:', 'muted', wrap=False))
+        self.scan_pdf_button = button('PDF kaydet', lambda: self.export_cut_list('pdf', scan=True))
+        self.scan_excel_button = button('Excel kaydet', lambda: self.export_cut_list('xlsx', scan=True))
+        for control in (self.scan_pdf_button, self.scan_excel_button):
+            control.setToolTip('Her profil için boy, adet ve açılar; aynı parçalar birleştirilir.')
+            export.addWidget(control); self.controls.append(control)
+        export.addStretch(); sw_layout.addLayout(export)
+        sw_layout.addWidget(label('Hazır satırlar kesim planı için listeye eklenir. Elle girdiğiniz parçalar korunur; aynı tarama iki kez eklenmez.', 'muted'))
         sw_scroll = scroll(sw_page)
         sw_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.tabs.addTab(sw_scroll, 'SolidWorks’ten al')
-        self.update_scan_columns(self.scan_details_check.isChecked())
 
     def _build_plan_page(self):
         plan_page = QWidget(); plan_layout = QVBoxLayout(plan_page); plan_layout.setContentsMargins(0,8,0,0)
@@ -298,17 +305,15 @@ class ProfileCuttingPage(BasePage):
         self.refresh_button.setEnabled(idle and (self.scan_result is not None or self.last_path is not None))
         self.report_button.setEnabled(idle and self.plan is not None)
         self.csv_action.setEnabled(idle and (has_parts or self.scan_result is not None))
+        for action in (self.pdf_action, self.excel_action):
+            action.setEnabled(idle and (has_parts or self.scan_result is not None))
+        for control in (self.scan_pdf_button, self.scan_excel_button):
+            control.setEnabled(idle and self.scan_result is not None)
 
     def update_demand_columns(self, *args):
         detail = self.detail_columns.isChecked()
         self.demands.setColumnHidden(5, not detail)
         self.demands.setColumnHidden(4, not (detail or any(number(r.allowance) for r in self.project.demands)))
-
-    def update_scan_columns(self, checked):
-        if hasattr(self, 'scan_view'):
-            self.scan_view.setColumnHidden(5, not checked)
-            self.scan_view.setColumnHidden(6, not checked)
-        self.settings.set('profile_cutting_scan_details', bool(checked))
 
     def update_input_summary(self):
         rows = self.project.demands
@@ -415,8 +420,10 @@ class ProfileCuttingPage(BasePage):
             angle1=row.angle1, angle2=row.angle2, status=row.status) for row in self.scan_result.rows])
         s = self.scan_result.summary
         self._ready_rows = sum(r.ready for r in self.scan_result.rows)
-        self.scan_summary.setText(f'{s["profiles"]} profil parçası bulundu · {self._ready_rows} satır hazır · '
-            f'{s["review"]} kontrol gerekiyor · {s["excluded"]} hariç'
+        self.scan_summary.setText(f'{s["profiles"]} profil parçası · toplam {display(round(number(s["length"])/1000, 2))} m · '
+            f'{self._ready_rows} satır hazır'
+            + (f' · {s["review"]} eksik bilgi' if s['review'] else '')
+            + (f' · {s["excluded"]} hariç (levha, sac, boş grup)' if s['excluded'] else '')
             + (f' · {s["unscanned"]} model okunamadı' if s['unscanned'] else ''))
         self.scan_summary.setToolTip(f'{s["parts"]} parça örneği · {s["weldments"]} Weldment · '
             f'Bilinen toplam boy {display(s["length"])} mm · {s["property_errors"]} özellik alanı sorunlu')
@@ -507,7 +514,7 @@ class ProfileCuttingPage(BasePage):
                     self.set_status('Bu konfigürasyonda Cut List bulunamadı. SolidWorks’te kesim listesini '
                                     'oluşturup/güncelleyip tekrar tarayın.', True)
                 else:
-                    self.set_status('Tarama tamamlandı. Hazır satırları aktarın; diğerlerini inceleyin.')
+                    self.set_status('Tarama tamamlandı. Kesim listesini PDF / Excel kaydedebilir veya hazır satırları kesim planına ekleyebilirsiniz.')
             elif kind == 'profile_plan':
                 self.plan = value
                 self.plan_model.replace([dict(bar=i+1, group=group_name(bar.group),
@@ -582,6 +589,37 @@ class ProfileCuttingPage(BasePage):
                 events.put(('profile_project',result))
             except Cancelled: events.put(('phase','Proje açma durduruldu; önceki liste korundu.'))
         self.jobs.start(self,operation)
+
+    def export_cut_list(self, kind, *, scan=False):
+        """Workshop cut list (length, quantity, angles per profile) as PDF or Excel.
+
+        From the SolidWorks tab (or with no parts entered) the scanned model is exported as
+        the model states it; otherwise the parts list on the first tab.
+        """
+        if not self.can_start(): return
+        from .cutlist import from_scan, from_project, export_pdf, export_excel
+        use_scan = self.scan_result is not None and (scan or self.tabs.currentIndex() == 1 or not self.project.demands)
+        try:
+            cut_list = from_scan(self.scan_result) if use_scan else from_project(self.project)
+        except ValueError as error:
+            self.set_status(str(error), True); return
+        if not cut_list.groups:
+            self.set_status('Kesim listesine girecek profil yok.', True); return
+        name = (source_name(self.scan_result.source).rsplit('.', 1)[0] if use_scan else 'profil') + '-kesim-listesi'
+        title, pattern = (('PDF kaydet', 'PDF (*.pdf)') if kind == 'pdf' else ('Excel kaydet', 'Excel (*.xlsx)'))
+        path, _ = QFileDialog.getSaveFileName(self, 'Kesim listesini ' + title.split()[0] + ' olarak kaydet',
+                                              name + '.' + kind, pattern)
+        if not path: return
+        if not path.lower().endswith('.' + kind): path += '.' + kind
+        plan = deepcopy(self.plan) if not use_scan else None
+        def operation(events, stop):
+            try:
+                if kind == 'pdf': export_pdf(cut_list, path, stop=stop)
+                else: export_excel(cut_list, path, plan=plan, stop=stop)
+                events.put(('profile_io', f'Kesim listesi kaydedildi: {cut_list.count} parça, '
+                                          f'{len(cut_list.groups)} profil · {path}'))
+            except Cancelled: events.put(('phase', 'Kayıt durduruldu; yarım dosya yayımlanmadı.'))
+        self.jobs.start(self, operation)
 
     def report(self):
         if not self.can_start(): return

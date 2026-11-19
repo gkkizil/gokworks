@@ -8,7 +8,7 @@ import traceback
 
 from modules.cad_converter.api import call, get, RestoreError
 from .solidworks import Session, optional, values
-from .models import ScanResult, ScanRow, digest, quantity, number, checkpoint, Cancelled
+from .models import ScanResult, ScanRow, digest, quantity, number, checkpoint, Cancelled, DUPLICATE_BODY
 from .properties import (DEFAULT_MAPPING, evaluated, validate_mapping, length_mm, angle_degrees,
                          section_thickness, identifiable_section, key)
 from .geometry import verify
@@ -94,6 +94,9 @@ def read_part(session, model, path, configuration, options, mapping, stop):
                     row.issues.append('Kesit tanımının birimi doğrulanamadı; mm kesit/et veya standart/stok kodunu manuel doğrulayın.')
                 bodies = values(call(folder, 'GetBodies'))
                 row.count = len(bodies)
+                if not bodies:
+                    row.excluded = True
+                    row.issues.append('Boş kesim listesi klasörü: içinde gövde yok.')
                 if call(folder, 'GetBodyCount') != len(bodies):
                     row.issues.append('BodyFolder gövde sayısı, okunan gövdelerle eşleşmiyor.')
                 try:
@@ -117,7 +120,7 @@ def read_part(session, model, path, configuration, options, mapping, stop):
                         reference = 'name:' + body_name if body_name else ''
                     if not reference or reference in seen_bodies:
                         unique_bodies = False
-                        row.issues.append('Gövde kimliği eksik veya başka Cut List satırında tekrarlandı.')
+                        row.issues.append(DUPLICATE_BODY)
                     if reference: seen_bodies.add(reference)
                     row.body_refs.append(reference)
                     if call(body, 'IsSheetMetal'):
