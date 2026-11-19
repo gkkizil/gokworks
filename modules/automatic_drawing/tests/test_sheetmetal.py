@@ -250,11 +250,12 @@ def test_last_minute_flat_suppression_is_rechecked_before_native_view_creation()
         verify_unfolded(c.session, c.model, row, row.configurations[0])
 
 
-def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_config=False):
+def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_config=False, bodies=1,
+                     no_body_filter=False, note_on_view=False):
     """Recorded DrawingDoc/ModelDoc2 protocol, deliberately no real CAD geometry."""
     c = inventory_case()
     info = c.info
-    info.sheet_bodies = inspect_bodies(c.session, c.model, info, c.descriptors)
+    info.sheet_bodies = inspect_bodies(c.session, c.model, info, c.descriptors)[:bodies]
     native = case.native
     native.info, native.session = info, c.session
     c.session.constants['swAttachAnnotationOption_Sheet'] = 0
@@ -274,16 +275,26 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
         activate(plan.name)
     native.setup = setup
     case.drawing.methods['ActivateSheet'] = activate
-    case.drawing.methods['AttachAnnotation'] = lambda option: option == 0
+    pending = []                 # notes that SolidWorks put on a view, not on the sheet
+    def attach(option):
+        if option == 0 and pending:
+            pages[case.state['name']].append(pending.pop())
+        return True              # recorded: True even when nothing is selected/attached
+    case.drawing.methods['AttachAnnotation'] = attach
     c.session.open_drawing = lambda path: (case.model, case.drawing)
     c.session.close_created = lambda model: source_calls.append('close-owned-drawing')
     c.session.activate = lambda model: source_calls.append('activate-owned-drawing')
 
     def create(path, config, x, y, z, hide, flip):
+        # Recorded on SolidWorks 2025 SP5 (single sheet body, part reopened from disk): the
+        # PARENT configuration resolves to its existing derived flat configuration; naming the
+        # flat configuration itself yields a folded view that references the parent.
         if new_config:
             c.state.configs += ('UNEXPECTED',)
-        props = dict(Position=(x, y), UseSheetScale=False, Bodies=c.get_bodies(), ReferencedDocument=c.model,
-                     ReferencedConfiguration='Default' if wrong_config else config)
+        resolved = info.sheet_bodies[0].configurations[0] if config == 'Default' else 'Default'
+        props = dict(Position=(x, y), UseSheetScale=False, ReferencedDocument=c.model,
+                     Bodies=() if no_body_filter else c.get_bodies(),
+                     ReferencedConfiguration='Default' if wrong_config else resolved)
         def bounds():
             vx, vy = props['Position']; scale = case.state['props'][2]
             return vx-.04*scale, vy-.02*scale, vx+.04*scale, vy+.02*scale
@@ -313,49 +324,50 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
         font = RawDispatch('ITextFormat', properties={'CharHeight': .006})
         annotation = RawDispatch('IAnnotation', methods={'GetTextFormat': lambda i: font,
             'SetTextFormat': lambda *args: True, 'GetDisplayData': lambda: display,
-            'Select3': lambda append, data: True,
+            'Select3': lambda append, data: note_on_view,     # recorded False for a sheet note
             'SetPosition2': lambda *args: position.update(xyz=args) is None})
         name = 'BodyHeading'+str(sum(len(notes) for notes in pages.values())+1)
         note = RawDispatch('INote', methods={'GetName': lambda: name,
             'GetText': lambda: note_state['text'], 'GetAnnotation': lambda: annotation})
         note.state = note_state
-        current_notes.append(note)
+        # Recorded on SolidWorks 2025 SP5: with the sheet active the note is the sheet's own.
+        (pending if note_on_view else current_notes).append(note)
         return note
     case.model.methods['InsertNote'] = insert
 
     def first_view():
         name = case.state['name']
         return RawDispatch('IView(sheet)', methods={'GetNextView': lambda: views[name],
-                                                  'GetNotes': lambda: tuple(pages[name])})
+                                                  'GetNotes': lambda: tuple(pages[name]),
+                                                  'GetTableAnnotations': lambda: None})
     case.drawing.methods['GetFirstView'] = first_view
     case.drawing.methods['GetSheetNames'] = lambda: tuple(pages)
     return SimpleNamespace(**locals())
 
 
-def test_native_pages_isolate_each_body_restore_source_and_reopen_with_identifiers_and_thickness(case):
+def test_native_page_requests_the_parent_configuration_restores_source_and_reopens_with_identifiers(case):
     c = native_flat_case(case)
     flat_page(c.native, c.c.model)
-    assert len(c.native.pages) == 3
+    assert len(c.native.pages) == 1
     assert c.c.state.configuration == 'Default'
     findings, snapshots = c.native.validate()
     assert not [f for f in findings if f.severity == 'FAIL']
-    assert [s['views'][0]['body_label'] for s in snapshots] == ['ORHAN-01', 'ORHAN-02', 'ORHAN-03']
-    assert [s['notes'][0]['text'] for s in snapshots] == ['ORHAN-01\nt = 1.2 mm\nSTEEL-1',
-                                                       'ORHAN-02\nt = 2 mm\nSTEEL-2',
-                                                       'ORHAN-03\nt = 3 mm\nSTEEL-3']
+    assert [s['views'][0]['body_label'] for s in snapshots] == ['ORHAN-01']
+    assert [s['notes'][0]['text'] for s in snapshots] == ['ORHAN-01\nt = 1.2 mm\nSTEEL-1']
     writes = [args[0] for view in c.views.values() for name, flags, args in view.calls
               if name == 'Bodies' and flags == 4]
-    assert len(writes) == 3
+    assert len(writes) == 1
     assert all(w.varianttype == 0x2009 and len(w.value) == 1 for w in writes)
     calls = [args for name, flags, args in case.drawing.calls if name == 'CreateFlatPatternViewFromModelView3']
-    assert [args[1] for args in calls] == list(c.c.state.configs[1:])
+    assert [args[1] for args in calls] == ['Default']          # parent, never the flat configuration
     assert all(len(args) == 7 and args[5] is False for args in calls)
-    assert sum(name == 'AttachAnnotation' for name, flags, args in case.drawing.calls) == 3
+    assert c.views[next(iter(c.views))].properties['ReferencedConfiguration'] == 'Body1-SM-FLAT-PATTERN'
+    assert not any(name == 'AttachAnnotation' for name, flags, args in case.drawing.calls)   # already on sheet
     assert not any(name == 'ActivateView' and args == ('',) for name, flags, args in case.drawing.calls)
     c.native.close()
     findings, reread = c.native.verify_saved('FAKE-not-a-native-file.SLDDRW', snapshots)
     assert not [f for f in findings if f.severity == 'FAIL']
-    assert len(reread) == 3 and c.c.state.configuration == 'Default'
+    assert len(reread) == 1 and c.c.state.configuration == 'Default'
     assert not any('Save' in name or 'SetSuppression' in name for name, flags, args in c.c.model.calls)
 
 
@@ -400,21 +412,56 @@ def test_unsafe_native_creation_never_reports_a_flat_package_as_completed(case, 
     assert c.c.state.configuration == 'Default'
 
 
-def test_one_unavailable_flat_body_is_reported_while_two_verified_bodies_get_separate_pages(case):
+@pytest.mark.parametrize('solids', (1, 3))
+def test_a_flat_view_without_body_filter_is_the_only_body_of_a_single_body_part(case, solids):
+    # Recorded on SolidWorks 2025 SP5: single-body flat pattern view → GetBodiesCount 0 and
+    # Bodies empty, also after Bodies is written. It is accepted only when one solid body exists.
+    c = native_flat_case(case, ignore_body_filter=True, no_body_filter=True)
+    c.c.model.methods['GetBodies2'] = lambda *args: [c.c.body(i) for i in range(1, solids+1)]
+    if solids == 1:
+        flat_page(c.native, c.c.model)
+        actual = c.native.actual_views(next(iter(c.native.pages)))[0]
+        assert actual['body_count'] == 1 and actual['body_references'] == (c.info.sheet_bodies[0].body_ref,)
+    else:
+        with pytest.raises(ApiError, match='başka veya birden fazla gövde'):
+            flat_page(c.native, c.c.model)
+
+
+def test_an_unavailable_single_flat_body_is_reported_and_no_view_is_requested(case):
     c = native_flat_case(case)
-    c.info.sheet_bodies[1].configurations = ()
+    c.info.sheet_bodies[0].configurations = ()
     flat_page(c.native, c.c.model)
-    assert len(c.native.pages) == 2
-    assert c.native.result.measurements['flat_pattern']['body_count'] == 2
-    assert any(f.code == 'body_flat_unavailable' and 'ORHAN-02' in f.text for f in c.native.result.findings)
+    assert not c.native.pages
+    assert any(f.code == 'body_flat_unavailable' and 'ORHAN-01' in f.text for f in c.native.result.findings)
+
+
+def test_multibody_flat_pages_are_not_requested_because_solidworks_would_add_configurations(case):
+    # Recorded on SolidWorks 2025 SP5: on a reopened multibody part every request created a new
+    # '<parent>SM-FLAT-PATTERN<n>' configuration instead of reusing the saved per-body one.
+    c = native_flat_case(case, bodies=3)
+    flat_page(c.native, c.c.model)
+    assert not c.native.pages
+    assert not [name for name, flags, args in case.drawing.calls if name == 'CreateFlatPatternViewFromModelView3']
+    assert c.c.state.configs == ('Default', 'Body1-SM-FLAT-PATTERN', 'Body2-SM-FLAT-PATTERN', 'Body3-SM-FLAT-PATTERN')
+    assert any(f.code == 'multibody_flat_unsupported' for f in c.native.result.findings)
 
 
 def test_body_heading_must_be_attached_to_sheet_and_cannot_silently_follow_a_model_view(case):
-    c = native_flat_case(case)
-    case.drawing.methods['AttachAnnotation'] = lambda option: False
+    # Ownership is read back from the sheet's notes; AttachAnnotation's True is not trusted.
+
+    c = native_flat_case(case, note_on_view=True)       # the note landed on a view
+    case.drawing.methods['AttachAnnotation'] = lambda option: True   # recorded: True proves nothing
     with pytest.raises(ApiError, match='paftaya bağlanamadı'):
         flat_page(c.native, c.c.model)
     assert not c.native.result.measurements.get('flat_pattern')
+
+
+def test_body_heading_on_a_view_is_moved_to_the_sheet_and_read_back(case):
+    c = native_flat_case(case, note_on_view=True)
+    flat_page(c.native, c.c.model)
+    assert sum(name == 'AttachAnnotation' for name, flags, args in case.drawing.calls) == 1
+    findings, snapshots = c.native.validate()
+    assert snapshots[0]['notes'][0]['text'] == 'ORHAN-01\nt = 1.2 mm\nSTEEL-1'
 
 
 def test_foreign_resolved_document_is_rejected_before_configuration_or_selection_access(case):

@@ -49,7 +49,7 @@ def case(tmp_path):
         'swImportModelItemsFromAssemblyOnly', 'swImportModelItemsFromEntireModel',
         'swAutodimEntitiesAll', 'swAutodimSchemeBaseline', 'swAutodimHorizontalPlacementAbove',
         'swAutodimVerticalPlacementRight', 'swAutodimStatusSuccess', 'swAlignDimensionType_AutoArrange',
-        'swExportPdfData', 'swExportData_ExportAllSheets', 'swSaveAsOptions_Silent',
+        'swExportPdfData', 'swExportData_ExportAllSheets', 'swExportData_ExportSpecifiedSheets', 'swSaveAsOptions_Silent',
         'swSaveAsOptions_Copy', 'swSaveAsCurrentVersion'))}
     state = {'name': 'Sheet1', 'props': [0, 0, 1., 1., True, .420, .297, False]}
     sheet = RawDispatch('ISheet', methods={
@@ -90,12 +90,18 @@ def case(tmp_path):
         return True
 
     drawing = RawDispatch('IDrawingDoc', methods={'GetCurrentSheet': lambda: sheet,
+        'GetSheetNames': lambda: (state['name'],),
         'ActivateSheet': lambda name: True, 'SetupSheet6': setup_sheet,
         'CreateDrawViewFromModelView3': add_view,
         'CreateUnfoldedViewAt3': lambda x, y, z, flip: add_view('C:/p.sldprt', '', x, y, z, views[selected['name']]),
         'ActivateView': lambda name: True, 'InsertModelAnnotations3': lambda *args: (),
         'AutoDimension': lambda *args: constants['swAutodimStatusSuccess']})
-    pdf = RawDispatch('IExportPdfData', methods={'SetSheets': lambda *args: True},
+    def set_sheets(which, sheets):
+        # Recorded on SolidWorks 2025 SP5: ExportAllSheets is refused with any Sheets
+        # argument; ExportSpecifiedSheets with the sheet names is accepted.
+        names = getattr(sheets, 'value', sheets)
+        return which == constants['swExportData_ExportSpecifiedSheets'] and bool(names)
+    pdf = RawDispatch('IExportPdfData', methods={'SetSheets': set_sheets},
                       properties={'ViewPdfAfterSaving': True})
     app = RawDispatch('ISldWorks', methods={'GetExportFileData': lambda kind: pdf})
     session = SimpleNamespace(constants=constants, c=lambda key: constants[key],
@@ -173,8 +179,9 @@ def test_pdf_export_uses_all_native_sheets_and_copy_does_not_rename_drawing(case
     args = next(args for name, flags, args in case.extension.calls if name == 'SaveAs')
     assert len(args) == 6
     assert args[2] == case.constants['swSaveAsOptions_Silent'] | case.constants['swSaveAsOptions_Copy']
-    assert any(name == 'SetSheets' and args[0] == case.constants['swExportData_ExportAllSheets']
-               for name, flags, args in case.pdf.calls)
+    set_sheets = [args for name, flags, args in case.pdf.calls if name == 'SetSheets']
+    assert len(set_sheets) == 1 and set_sheets[0][0] == case.constants['swExportData_ExportSpecifiedSheets']
+    assert tuple(getattr(set_sheets[0][1], 'value', set_sheets[0][1])) == (plan.name,)
     assert case.pdf.properties['ViewPdfAfterSaving'] is False
 
 
@@ -245,18 +252,72 @@ def test_dirty_or_unknown_source_status_never_autosaves_or_proceeds():
         assert [name for name, flags, args in model.calls] == ['GetSaveFlag']
 
 
-def test_center_marks_are_on_iview_with_ten_arguments_and_actual_count_readback(case):
+@pytest.mark.parametrize('owned,warning,expected', [
+    (True, 32, 'rebuilt'),          # opened here, SolidWorks asked for a regeneration on load
+    (False, 32, 'refused'),         # the user's own open document is never rebuilt here
+    (True, 0, 'refused')])          # opened here, but no load request: a stale saved model
+def test_a_rebuild_requested_on_load_is_done_only_for_a_read_only_document_opened_here(owned, warning, expected):
+    # Recorded on SolidWorks 2025 SP5 ('rebuild assembly on load: always'): a fully rebuilt and
+    # saved assembly reopens with load warning 32 and NeedsRebuild2 = 1.
+    state = {'pending': 1, 'dirty': False}
+    def rebuild(top_only):
+        state.update(pending=0, dirty=True); return True
+    extension = RawDispatch('IModelDocExtension', properties={'NeedsRebuild2': lambda: state['pending']})
+    model = RawDispatch('IModelDoc2', methods={'GetSaveFlag': lambda: state['dirty'],
+        'GetPathName': lambda: 'C:/A.SLDASM', 'ForceRebuild3': rebuild}, properties={'Extension': extension})
+    session = Session()
+    session.constants = {'swFileLoadWarning_NeedsRegen': 32, 'swModelRebuildStatus_FullyRebuilt': 0,
+                         'swModelRebuildStatus_NonFrozenFeatureNeedsRebuild': 1}
+    from modules.cad_converter.api import path_key
+    session.owned = {path_key('C:/A.SLDASM'): 'A.SLDASM'} if owned else {}
+    session.load_warnings = {path_key('C:/A.SLDASM'): warning}
+    if expected == 'rebuilt':
+        session.source_ready(model)
+        assert state == {'pending': 0, 'dirty': True}
+    else:
+        with pytest.raises(ApiError, match='yeniden oluşturulmalı'):
+            session.source_ready(model)
+        assert not any(name == 'ForceRebuild3' for name, flags, args in model.calls)
+
+
+def annotated_views(case, existing):
+    """Views whose annotation chain holds ``existing`` center marks (swCenterMarkSym) and a note."""
+    case.constants.update(swAutoInsertCenterMarkType_Hole=1, swCenterMarkSym=13)
+    def chain_of(chain):
+        def annotation(index):
+            if index >= len(chain):
+                return None
+            return RawDispatch('IAnnotation', methods={'GetType': lambda: chain[index],
+                                                       'GetNext3': lambda: annotation(index+1)})
+        def insert(*args):
+            chain.extend([13]*4); return True        # SolidWorks returns True and appends 4 marks
+        return dict(GetFirstAnnotation3=lambda: annotation(0), AutoInsertCenterMarks2=insert,
+                    GetCenterMarkCount2=lambda size: 0)    # recorded: 0 even with marks present
+    for view in case.views.values():
+        view.methods.update(chain_of([6] + [13]*existing))   # 6: a note, never counted
+
+
+def test_center_marks_are_inserted_on_iview_with_ten_arguments_and_counted_as_annotations(case):
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.native.create('fake.drwdot', plan); case.native.create_views(plan)
-    case.constants['swAutoInsertCenterMarkType_Hole'] = 1
-    for view in case.views.values():
-        view.methods['AutoInsertCenterMarks2'] = lambda *args: True
-        view.methods['GetCenterMarkCount2'] = lambda size: 4      # [out] Size is required (DISP_E_PARAMNOTOPTIONAL)
+    annotated_views(case, existing=0)
     case.native.center_marks(plan.name)
     calls = [(view.name, args) for view in case.views.values() for name, flags, args in view.calls
              if name == 'AutoInsertCenterMarks2']
     assert len(calls) == 3 and all(owner == 'IView' and len(args) == 10 for owner, args in calls)
     assert case.result.measurements['center_marks'][plan.name] == 12
+
+
+def test_center_marks_already_inserted_with_the_view_are_not_duplicated(case):
+    # Recorded on SolidWorks 2025 SP5: the document option inserts hole center marks when the
+    # view is created; a further AutoInsertCenterMarks2 stacked a duplicate on every hole.
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.native.create('fake.drwdot', plan); case.native.create_views(plan)
+    annotated_views(case, existing=5)
+    case.native.center_marks(plan.name)
+    assert not [name for view in case.views.values() for name, flags, args in view.calls
+                if name == 'AutoInsertCenterMarks2']
+    assert case.result.measurements['center_marks'][plan.name] == 15
 
 
 def test_saved_path_string_is_not_enough_when_referenced_model_cannot_be_resolved(case):
@@ -320,7 +381,8 @@ def test_native_reopen_enumerates_all_saved_views_and_rejects_extra_template_vie
     ordered = list(case.views.values())
     for index, view in enumerate(ordered):
         view.methods['GetNextView'] = lambda index=index: ordered[index+1] if index+1 < len(ordered) else None
-    sheet_view = RawDispatch('IView-sheet', methods={'GetNextView': lambda: ordered[0]})
+    sheet_view = RawDispatch('IView-sheet', methods={'GetNextView': lambda: ordered[0],
+                                                     'GetTableAnnotations': lambda: None})
     case.drawing.methods['GetFirstView'] = lambda: sheet_view
     case.drawing.methods['GetSheetNames'] = lambda: (case.state['name'],)
     if extra:
@@ -330,6 +392,37 @@ def test_native_reopen_enumerates_all_saved_views_and_rejects_extra_template_vie
         new_findings, reread = case.native.verify_saved('fake.SLDDRW', snapshots)
         assert not new_findings and len(reread[0]['views']) == 4
     assert len(closed) == 2  # initial close, then the separately reopened checker
+
+
+def test_saved_bom_listed_under_the_sheet_entry_is_found_on_reopen(case):
+    # Recorded on SolidWorks 2025 SP5: after save/reopen the BOM inserted on a model view is
+    # returned by the SHEET entry's GetTableAnnotations, and by no model view.
+    from modules.automatic_drawing.manufacturing import table_box
+    from modules.automatic_drawing.models import to_m
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.native.create('fake.drwdot', plan); case.native.create_views(plan)
+    findings, snapshots = case.native.validate()
+    usable = snapshots[0]['usable']
+    case.constants.update(swTableAnnotation_BillOfMaterials=7, swColumnTypeStatus_Success=0,
+                          swBomTableColumnType_Quantity=203)
+    annotation = RawDispatch('IAnnotation', methods={'GetPosition': lambda: (to_m(usable.x+1), to_m(usable.top-1), 0.)})
+    table = RawDispatch('ITableAnnotation', methods={'GetAnnotation': lambda: annotation,
+        'GetColumnWidth': lambda i: .01, 'GetRowHeight': lambda i: .003, 'GetColumnType3': lambda *args: 0},
+        properties={'Type': 7, 'RowCount': 2, 'ColumnCount': 1})
+    case.native.pages[plan.name]['tables'].append(table_box(table))
+    case.session.named_interface = lambda obj, name: obj
+    case.session.close_created = lambda model: None
+    case.session.open_drawing = lambda path: (case.model, case.drawing)
+    case.native.close()
+    ordered = list(case.views.values())
+    for index, view in enumerate(ordered):
+        view.methods['GetNextView'] = lambda index=index: ordered[index+1] if index+1 < len(ordered) else None
+    sheet_view = RawDispatch('IView-sheet', methods={'GetNextView': lambda: ordered[0],
+                                                     'GetTableAnnotations': lambda: (table,)})
+    case.drawing.methods['GetFirstView'] = lambda: sheet_view
+    case.drawing.methods['GetSheetNames'] = lambda: (case.state['name'],)
+    new_findings, reread = case.native.verify_saved('fake.SLDDRW', snapshots)
+    assert not [f for f in new_findings if f.severity == 'FAIL']
 
 
 @pytest.mark.parametrize('refuses', (False, True))
@@ -495,3 +588,35 @@ def test_a_template_without_sheet_format_is_set_up_without_a_refused_first_attem
     case.native.create('fake.drwdot', plan)
     assert sent == [''] and case.result.measurements['sheet_setup'] == {plan.name: 'standard'}
     assert not [f for f in case.result.findings if f.code == 'sheet_setup']
+
+
+def test_standard_sheet_format_is_found_in_the_installation_when_the_setting_names_a_removed_release(tmp_path, monkeypatch):
+    # Recorded on SolidWorks 2025 SP5 (Turkish): swFileLocationsSheetFormat named
+    # '...\SOLIDWORKS 2024\lang\turkish\sheetformat' (absent); the formats were under 2025.
+    monkeypatch.setenv('ProgramData', str(tmp_path/'ProgramData'))     # no real installation is consulted
+    release = tmp_path/'SOLIDWORKS 2025'
+    template = release/'templates'/'Teknik Resim.drwdot'
+    formats = release/'lang'/'turkish'/'sheetformat'
+    formats.mkdir(parents=True); template.parent.mkdir(parents=True); template.write_bytes(b'x')
+    (formats/'a3 - iso.slddrt').write_bytes(b'x')
+    app = RawDispatch('ISldWorks', methods={
+        'GetUserPreferenceStringValue': lambda key: str(tmp_path/'SOLIDWORKS 2024'/'lang'/'turkish'/'sheetformat'),
+        'GetCurrentLanguage': lambda: 'turkish'})
+    session = object.__new__(Session)
+    session.app, session.constants, session.revision = app, {'swFileLocationsSheetFormat': 1}, '33.5.0'
+    assert session.standard_sheet_format('A3', str(template)) == str(formats/'a3 - iso.slddrt')
+    assert session.standard_sheet_format('A2', str(template)) == ''
+    assert session.standard_sheet_format('custom', str(template)) == ''
+
+
+def test_a_template_without_sheet_format_gets_the_installed_iso_format_of_its_paper(case):
+    plan = plan_sheet(plan_views(case.info, case.options), case.options)
+    case.sheet.methods['GetTemplateName'] = lambda: '*.drt'       # recorded for 'Teknik Resim.drwdot'
+    standard = r'C:\ProgramData\SolidWorks\SOLIDWORKS 2025\lang\turkish\sheetformat\a3 - iso.slddrt'
+    case.session.standard_sheet_format = lambda paper, template: standard if paper == 'A3' else ''
+    case.native.create('C:/templates/Teknik Resim.drwdot', plan)
+    setup = next(args for name, flags, args in case.drawing.calls if name == 'SetupSheet6')
+    assert setup[2] == case.constants['swDwgTemplateCustom'] and setup[6] == standard
+    assert case.result.measurements['sheet_format_file'] == {plan.name: standard}
+    assert case.result.measurements['sheet_setup'] == {plan.name: 'standard'}
+    assert case.native.pages[plan.name]['format'] == standard

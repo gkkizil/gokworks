@@ -4,11 +4,26 @@ Bu belge, otomatik teknik resim modülünün **gerçek SolidWorks** üzerinde na
 kabul edileceğini tanımlar. Kabul betiği:
 `modules/automatic_drawing/live_acceptance.py`.
 
-Durum (18 Kasım 2026): **8 senaryonun hiçbiri çalıştırılmadı.** Bu geliştirme
-ortamı Linux'tur; Windows, pywin32 ve lisanslı SolidWorks yoktur. Modüldeki
-diğer testler ham COM taklitleri (fake/mock) kullanır. Bu testler çağrı
-sözleşmesini sınar, CAD doğrulaması değildir. Gerçek kabul sonucu yalnız
-aşağıdaki betik Windows'ta çalışınca oluşur.
+Durum (18 Kasım 2026, **gerçek SolidWorks 2025 SP5, revizyon 33.5.0, Türkçe arayüz**,
+Windows 11): 6 senaryo **geçti**, 1 senaryo **kaldı**, 1 senaryo **çalıştırılmadı**.
+
+| # | Senaryo | Sonuç |
+|---|---|---|
+| 1 | Kademeli mil | geçti |
+| 2 | Delikli plaka | geçti (5 delik → 5 merkez işareti, 5 model ölçüsü) |
+| 3 | Tek gövdeli sac | geçti (açınım + gövde başlığı) |
+| 4 | Çok gövdeli sac | **kaldı**: gövde açınım paftaları bilinçli olarak üretilmez, bkz. `KNOWN_LIMITATIONS.md` |
+| 5 | Konfigürasyonlu montaj | geçti (`Konfig-B`, BOM adetleri doğrulandı) |
+| 6 | Bastırılmış bileşenli montaj | geçti (bastırılmış bileşen BOM'da sayılmadı) |
+| 7 | Eksik referans | geçti (reddedildi, SLDDRW yayımlanmadı) |
+| 8 | Firma şablonları | çalıştırılmadı: firma DRWDOT / SLDDRT / BOM şablonu yok |
+
+1–7 fixture'ları kullanıcı dosyası değildir; `tools/automatic_drawing/build_live_fixtures.py`
+ile API'den sıfırdan üretildi. Varsayılan şablon `Teknik Resim.DRWDOT` (sayfa biçimsiz)
+kullanıldı; antet olarak kurulumun `a3 - iso.slddrt` dosyası uygulandı. Modüldeki diğer
+testler ham COM taklitleri (fake/mock) kullanır; çağrı sözleşmesini sınar, CAD
+doğrulaması değildir. Modülsüz adım adım API denemesi:
+`tools/automatic_drawing/sw_drawing_probe.py`.
 
 ## Çalıştırma (Windows, lisanslı ve açık SolidWorks)
 

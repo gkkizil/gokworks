@@ -60,6 +60,19 @@ def test_missing_reference_scenario_requires_a_refusal_and_no_published_drawing(
     assert acceptance.check(scenario, accepted, {})
 
 
+@pytest.mark.parametrize('rows,ok', [([{'quantity': 2}], True), ([], False)])
+def test_assembly_bom_is_judged_from_the_recorded_native_bom_rows(tmp_path, rows, ok):
+    # The BOM sheet's view role is 'main'; a 'bom' role never exists in result.sheets.
+    pdf = tmp_path/'a.pdf'; pdf.write_bytes(b'%PDF-1.7')
+    slddrw = tmp_path/'a.slddrw'; slddrw.write_bytes(b'x')
+    scenario = next(s for s in acceptance.SCENARIOS if s.key == 'assembly_suppressed_component')
+    root = SimpleNamespace(state='', children=[SimpleNamespace(state='suppressed', children=[])])
+    result = SimpleNamespace(status='WARNING', outputs={'pdf': str(pdf), 'slddrw': str(slddrw)}, findings=[],
+                             analysis=SimpleNamespace(kind='assembly', tree=root),
+                             sheets=[{'expected': ['main']}], measurements={'bom': {'rows': rows}})
+    assert ('BOM tablosu yok' not in acceptance.check(scenario, result, {})) is ok
+
+
 @pytest.mark.skipif(os.name == 'nt', reason='Linux/macOS harness check only')
 def test_non_windows_is_always_a_missing_requirement():
     assert 'Windows değil' in acceptance.missing_requirements(acceptance.SCENARIOS[0], {})

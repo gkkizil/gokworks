@@ -166,6 +166,15 @@ class OutputTransaction:
             finally: self.lock = None
 
 
+OLE_HEADER = bytes.fromhex('d0cf11e0a1b11ae1')
+
+
+def foreign_header(header):
+    """PDF, ZIP or plain text: certainly not a native SolidWorks document."""
+    return (header.startswith((b'%PDF-', b'PK\x03\x04'))
+            or all(32 <= byte < 127 or byte in (9, 10, 13) for byte in header))
+
+
 def check_file(path, kind):
     path = Path(path)
     if not path.is_file() or path.stat().st_size < 16:
@@ -178,8 +187,11 @@ def check_file(path, kind):
             stream.seek(max(0, path.stat().st_size-2048))
             if b'%%EOF' not in stream.read():
                 raise RuntimeError('PDF tamamlanmamış görünüyor.')
-        elif kind == 'slddrw' and not header.startswith(bytes.fromhex('d0cf11e0a1b11ae1')):
-            raise RuntimeError('SLDDRW bileşik belge başlığı doğrulanamadı.')
+        elif kind == 'slddrw' and not header.startswith(OLE_HEADER) and foreign_header(header):
+            # SolidWorks 2015+ no longer writes an OLE compound file (2025 SP5 SLDDRW starts
+            # 'D0 61 70 30 00 00 00 04'); the format is undocumented. Only a recognisably
+            # foreign file is refused here; verify_saved() reopens the drawing in SolidWorks.
+            raise RuntimeError('SLDDRW dosya başlığı SolidWorks belgesi değil.')
     if kind == 'dxf':
         import ezdxf
         doc = ezdxf.readfile(path)

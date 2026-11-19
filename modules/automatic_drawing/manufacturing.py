@@ -5,7 +5,7 @@ from dataclasses import replace
 import re
 
 from modules.cad_converter.api import ApiError, RestoreError
-from .solidworks import call, get, put, prop, values, variant, out_int, as_interface
+from .solidworks import call, get, put, prop, optional, values, variant, out_int, as_interface
 from .models import Box, ViewPlan, checkpoint, identity, to_mm, to_m
 from .layout import plan_sheet
 from .rules import quantities
@@ -100,6 +100,15 @@ def body_flat_pages(native, source_model):
     from modules.cad_converter.api import PART_IID
     from .sheetmetal import verify_unfolded
     info, options, session = native.info, native.options, native.session
+    if len(info.sheet_bodies) > 1:
+        # Recorded on SolidWorks 2025 SP5: with the body pre-selected, CreateFlatPatternViewFromModelView3
+        # creates a NEW '<parent>SM-FLAT-PATTERN<n>' configuration for every call on a reopened part;
+        # the saved per-body configurations are never reused, and naming one returns a folded view.
+        # The source must not gain configurations, so no body flat view is requested.
+        native.result.warn('multibody_flat_unsupported', 'Çok gövdeli sacın açınım paftaları otomatik oluşturulmadı: '
+                           'SolidWorks API kayıtlı gövde açınım konfigürasyonlarını yeniden kullanmıyor, kaynakta yeni '
+                           'konfigürasyon açıyor. Gövde açınımlarını SolidWorks’te elle ekleyin.')
+        return
     before = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
     delivered = []
     for row in info.sheet_bodies:
@@ -124,10 +133,12 @@ def body_flat_pages(native, source_model):
         page = native.pages[plan.name]
         page['flat_body'] = row
         x, y = (to_m(v) for v in plan.views[0].center)
-        # Explicitly request the already existing unfolded configuration.
-        # The source is never switched to a newly created/suppressed state.
+        # Request the PARENT configuration: SolidWorks resolves it to its existing derived flat
+        # configuration (localized name, e.g. 'VarsayılanSM-DÜZ-ÇOĞALTMA'), checked below.
+        # Recorded on SolidWorks 2025 SP5: naming the flat configuration itself returns a FOLDED
+        # view that still reports IsFlatPatternView and references the parent configuration.
         view = call(native.drawing, 'CreateFlatPatternViewFromModelView3', info.source.path,
-                    configuration, x, y, 0., not options.bend_lines, False)
+                    info.source.configuration, x, y, 0., not options.bend_lines, False)
         after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
         if set(after) != set(before):
             raise RestoreError('Açınım oluşturulurken kaynak konfigürasyonları değişti; kaynak kaydedilmedi.')
@@ -220,7 +231,14 @@ def bom_page(native):
         number = int(number)
         if number <= 0:
             continue
-        components = values(call(table, 'GetComponents2', row, configuration))
+        listed = values(call(table, 'GetComponents2', row, configuration))
+        # Recorded on SolidWorks 2025 SP5: GetComponentsCount2 and GetComponents2 include a
+        # component suppressed in the BOM configuration; the displayed quantity does not.
+        components = [component for component in listed
+                      if optional(component, 'GetSuppression2') != c('swComponentSuppressed')]
+        number -= len(listed)-len(components)
+        if number <= 0:
+            continue
         keys = [identity(str(call(component, 'GetPathName') or ''),
                          str(get(component, 'ReferencedConfiguration') or '')) for component in components]
         if len(keys) == number:

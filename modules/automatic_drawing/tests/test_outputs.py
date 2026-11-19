@@ -92,6 +92,15 @@ def test_invalid_or_incomplete_output_headers_are_rejected(tmp_path, kind, conte
     with pytest.raises(RuntimeError): check_file(path, kind)
 
 
+@pytest.mark.parametrize('header', (
+    'd06170300000000466875b2815bd28b0',       # recorded: SLDDRW saved by SolidWorks 2025 SP5
+    'd0cf11e0a1b11ae10000000000000000'))      # pre-2015 OLE compound document
+def test_native_slddrw_headers_of_old_and_current_releases_are_accepted(tmp_path, header):
+    path = tmp_path/'output.slddrw'
+    path.write_bytes(bytes.fromhex(header.replace(' ', ''))+bytes(range(256))*4)
+    check_file(path, 'slddrw')
+
+
 def test_batch_report_keeps_failure_stage_and_distinguishes_structural_pass(tmp_path):
     result = DrawingResult(Source('C:/part.sldprt', 'A'), stage='Model açılıyor')
     result.fail('load', 'Missing reference')

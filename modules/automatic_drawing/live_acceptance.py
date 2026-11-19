@@ -142,7 +142,9 @@ def check(scenario, result, environ=os.environ):
     if scenario.key.startswith('assembly') or scenario.key == 'company_templates':
         if scenario.key != 'company_templates' and getattr(info, 'kind', '') != 'assembly':
             problems.append('montaj olarak okunmadı')
-        if 'bom' not in expected:
+        # The BOM is a table on its own sheet (whose only view role is 'main'); bom_page records
+        # its native rows, read back again from the saved drawing by verify_saved.
+        if not ((getattr(result, 'measurements', None) or {}).get('bom') or {}).get('rows'):
             problems.append('BOM tablosu yok')
     if scenario.key == 'assembly_configurations':
         wanted = environ.get('GOKWORKS_LIVE_ASSEMBLY_CONFIGURATION', '')

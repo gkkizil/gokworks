@@ -49,17 +49,18 @@ def test_native_flat_requires_correct_parent_and_detects_unexpected_configuratio
     assert not any('Save' in name or 'Suppress' in name for name, flags, args in model.calls)
 
 
-def bom_case(mode='parts', quantity=12, returned_components=12, display=None):
+def bom_case(mode='parts', quantity=12, returned_components=12, display=None, suppressed=0):
     source, part = Source('C:/assembly.sldasm', 'Default'), Source('C:/screw.sldprt', 'M8')
     root = Node('Assembly', source, 'assembly',
-                children=[Node(f'Bolt-{i}', part) for i in range(12)])
+                children=[Node(f'Bolt-{i}', part, state='suppressed' if i < suppressed else 'ready')
+                          for i in range(12)])
     info = ModelInfo(source, 'assembly', 'Assembly', (100, 50, 20), tree=root)
     options = Options(bom_type=mode, model_dimensions=False, center_marks=False, flat_pattern=False)
     result = DrawingResult(source)
     constants = {name: i+1 for i, name in enumerate(('swBomType_PartsOnly', 'swBomType_TopLevelOnly',
         'swBomType_Indented', 'swBOMConfigurationAnchor_TopLeft', 'swNumberingType_Detailed',
         'swNumberingType_None'))}
-    constants.update(swColumnTypeStatus_Success=0, swBomTableColumnType_Quantity=203)
+    constants.update(swColumnTypeStatus_Success=0, swBomTableColumnType_Quantity=203, swComponentSuppressed=0)
     feature = RawDispatch('IBomFeature', methods={'SetConfigurations': lambda *args: True},
                           properties={'Configuration': 'Default'})
     annotation = RawDispatch('IAnnotation', methods={'GetPosition': lambda: (.010, .287, 0)})
@@ -68,15 +69,17 @@ def bom_case(mode='parts', quantity=12, returned_components=12, display=None):
         'GetColumnType3': lambda index, hidden, data, status: 203 if index == 3 else 0},
         properties={'RowCount': 2, 'ColumnCount': 4,
                     'DisplayedText2': lambda row, col, hidden: str(quantity) if display is None else display})
-    component = RawDispatch('IComponent2', methods={'GetPathName': lambda: part.path},
-                            properties={'ReferencedConfiguration': part.configuration})
+    def component(state):
+        return RawDispatch('IComponent2', methods={'GetPathName': lambda: part.path, 'GetSuppression2': lambda: state},
+                           properties={'ReferencedConfiguration': part.configuration})
+    listed = [component(0) for i in range(suppressed)] + [component(2)]*(returned_components-suppressed)
     def counts(row, configuration, item, part_number):
         if row == 0:
             return 0
         item.value, part_number.value = '1', 'SCREW-M8'
         return quantity
     bom = RawDispatch('IBomTableAnnotation', methods={'GetComponentsCount2': counts,
-        'GetComponents2': lambda *args: [component]*returned_components}, properties={'BomFeature': feature})
+        'GetComponents2': lambda *args: listed}, properties={'BomFeature': feature})
     view = RawDispatch('IView', methods={'InsertBomTable4': lambda *args: bom})
     pages = {}
     session = SimpleNamespace(c=lambda key: constants[key], named_interface=lambda obj, name: generic)
@@ -100,6 +103,16 @@ def test_native_bom_has_ten_arguments_and_proves_twelve_repeated_components(mode
     assert native.result.measurements['bom']['rows'][0]['quantity'] == 12
     if mode == 'top':
         assert any(name == 'SetConfigurations' for name, flags, args in feature.calls)
+
+
+def test_a_component_suppressed_in_the_bom_configuration_is_not_counted():
+    # Recorded on SolidWorks 2025 SP5: GetComponentsCount2 / GetComponents2 still list a component
+    # suppressed in the BOM configuration; the displayed BOM quantity does not include it.
+    native, view, feature = bom_case(quantity=12, returned_components=12, display='11', suppressed=1)
+    bom_page(native)
+    row = native.result.measurements['bom']['rows'][0]
+    assert row['quantity'] == 11 and row['component_count'] == 11
+    assert native.result.measurements['bom']['quantities_verified'] is True
 
 
 def test_mismatched_bom_quantity_is_a_critical_failure_not_a_warning_or_pass():
