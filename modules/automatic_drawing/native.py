@@ -471,6 +471,11 @@ class NativeDrawing:
                 try:
                     raw_value = float(nominal_value(dimension, configuration, reference))
                     value = degrees(raw_value) if kind == 'angle' else to_mm(raw_value)
+                    if value == 0:
+                        # A dimension owned by the drawing (AutoDimension on a flat view): recorded
+                        # on SolidWorks 2025 SP5, the model-configuration read returns 0 for it while
+                        # Value holds it in the drawing's own units (mm, set in create()).
+                        value = float(get(dimension, 'Value'))
                 except Exception:
                     pass  # validator explicitly reports unreadable numbers
                 try:
@@ -527,6 +532,128 @@ class NativeDrawing:
         call(self.model, 'ClearSelection2', True)
         self.result.warn('reference_dimensions', 'Geometriden eklenen referans ölçüler tasarım ölçüsü veya tolerans sayılmaz; '
                          'imalat referanslarını kontrol edin.', name)
+        self.rebuild()
+
+    def flat_dimensions(self, name):
+        """Overall size and bend-line positions on a flat pattern page (geometry reference dimensions).
+
+        Recorded on SolidWorks 2025 SP5: AutoDimension on a flat pattern view returns 1
+        (swAutodimStatusBadOptionValue) while it DOES create the overall length/width and
+        the bend-line positions; success is therefore judged by the dimensions read back.
+        """
+        view = self.pages[name]['views']['flat']
+        try:
+            self.flat_baseline_dimensions(view)
+        except Exception as error:      # an unusual outline: fall back to SolidWorks' own scheme
+            self.result.warn('flat_dimensions', f'Açınım ölçüleri taban kenardan çıkarılamadı ({error}); '
+                             'SolidWorks otomatik ölçülendirmesi kullanıldı.', name)
+            c = self.session.c
+            self.select_view(view)
+            call(self.drawing, 'AutoDimension', c('swAutodimEntitiesAll'), c('swAutodimSchemeBaseline'),
+                 c('swAutodimHorizontalPlacementAbove'), c('swAutodimSchemeBaseline'), c('swAutodimVerticalPlacementRight'))
+        call(self.model, 'ClearSelection2', True)
+        self.rebuild()
+        count = len(self.dimensions(name, roles=('flat',)))
+        self.result.measurements.setdefault('flat_dimensions', {})[name] = count
+        if not count:
+            self.result.warn('flat_dimensions', 'Açınım görünüşüne ölçü eklenemedi; toplam ölçüleri ve büküm '
+                             'konumlarını SolidWorks’te elle ekleyin.', name)
+            return
+        self.remove_duplicate_flat_dimensions(name)
+        # Refit with the dimension texts' real boxes. (Recorded: the general pages' align/place
+        # step pushed a bend-position text off its extension lines on a flat view.)
+        self.fit(name, include_dimensions=True)
+
+    def flat_baseline_dimensions(self, view):
+        """Overall length / width and every bend line from one datum edge (recorded on SolidWorks 2025 SP5).
+
+        Edges come from IView.GetVisibleEntities2 and are mapped to the sheet with
+        ModelToViewTransform. A bend line is selected by its sheet position as EXTSKETCHSEGMENT
+        (IView.SelectEntity returns False for it, and ISketchSegment.Select4 selects nothing usable).
+        """
+        c = self.session.c
+        transform = tuple(float(v) for v in values(get(get(view, 'ModelToViewTransform'), 'ArrayData')))
+        r, t, s = transform[0:9], transform[9:12], transform[12]
+
+        def sheet(p):
+            return ((p[0]*r[0]+p[1]*r[3]+p[2]*r[6])*s+t[0], (p[0]*r[1]+p[1]*r[4]+p[2]*r[7])*s+t[1])
+        components = values(call(view, 'GetVisibleComponents'))
+        if not components:
+            raise ApiError('görünür gövde bileşeni yok')
+        edges = []
+        for edge in values(call(view, 'GetVisibleEntities2', components[0], c('swViewEntityType_Edge'))):
+            params = values(call(edge, 'GetCurveParams2'))
+            if len(params) >= 6:
+                edges.append((edge, sheet(params[0:3]), sheet(params[3:6])))
+        horizontal = [e for e in edges if abs(e[1][1]-e[2][1]) < 1e-6 and abs(e[1][0]-e[2][0]) > 1e-6]
+        vertical = [e for e in edges if abs(e[1][0]-e[2][0]) < 1e-6 and abs(e[1][1]-e[2][1]) > 1e-6]
+        if len(horizontal) < 2 or len(vertical) < 2:
+            raise ApiError('dikdörtgen olmayan açınım dış hattı')
+        bottom, top = min(horizontal, key=lambda e: e[1][1]), max(horizontal, key=lambda e: e[1][1])
+        left, right = min(vertical, key=lambda e: e[1][0]), max(vertical, key=lambda e: e[1][0])
+        x0, y0, x1, y1 = (float(v) for v in values(call(view, 'GetOutline')))
+        gap = to_m(9.)
+        call(self.drawing, 'ActivateView', str(call(view, 'GetName2')))
+        extension = get(self.model, 'Extension')
+
+        def between(a, b, x, y):
+            call(self.model, 'ClearSelection2', True)
+            if not (call(view, 'SelectEntity', a, False) and call(view, 'SelectEntity', b, True)):
+                raise ApiError('açınım kenarı seçilemedi')
+            return call(self.model, 'AddDimension2', x, y, 0.)
+        right_slot, top_slot = [x1+gap], [y1+gap]
+        # Bend positions on the inner rows, overall dimensions outermost (drafting convention).
+        for bend in values(call(view, 'GetBendLines')):
+            start, end = call(bend, 'GetStartPoint2'), call(bend, 'GetEndPoint2')
+            ends = [sheet((float(get(p, 'X')), float(get(p, 'Y')), float(get(p, 'Z')))) for p in (start, end)]
+            mx, my = (ends[0][0]+ends[1][0])/2, (ends[0][1]+ends[1][1])/2
+            placed = None
+            for datum, x, y, slot in ((bottom[0], right_slot[0], my, right_slot), (left[0], mx, top_slot[0], top_slot)):
+                call(self.model, 'ClearSelection2', True)
+                if not call(extension, 'SelectByID2', '', 'EXTSKETCHSEGMENT', mx, my, 0., False, 0, null_dispatch(), 0):
+                    raise ApiError('büküm çizgisi seçilemedi')
+                if not call(view, 'SelectEntity', datum, True):
+                    continue
+                display = call(self.model, 'AddDimension2', x, y, 0.)
+                dimension = call(display, 'GetDimension2', 0) if display is not None else None
+                value = float(get(dimension, 'Value')) if dimension is not None else 0.
+                if value > .01 and get(display, 'Type2') != self.session.constants.get('swAngularDimension', -1):
+                    placed = display; slot[0] += gap
+                    break
+                if display is not None:       # perpendicular datum: not a bend position, remove it
+                    call(self.model, 'ClearSelection2', True)
+                    call(call(display, 'GetAnnotation'), 'Select3', False, null_dispatch())
+                    call(self.model, 'EditDelete')
+            if placed is None:
+                raise ApiError('büküm konumu ölçülemedi')
+        between(bottom[0], top[0], right_slot[0], (y0+y1)/2)       # overall length
+        between(left[0], right[0], (x0+x1)/2, top_slot[0])          # overall width
+        call(self.model, 'ClearSelection2', True)
+
+    def remove_duplicate_flat_dimensions(self, name):
+        """AutoDimension adds e.g. the flat width both as a sketch and as a reference dimension (recorded);
+        keep one per value, orientation and SPAN, preferring the reference dimension. Two equal flanges
+        (a U profile: 30 / 60 / 30) are different spans along the same axis and are both kept."""
+        records = self.dimensions(name, roles=('flat',))
+        kept, extra = {}, []
+        for record in sorted(records, key=lambda r: not r['reference']):
+            if record['value'] is None or record['box'] is None:
+                continue
+            box = record['box']
+            horizontal = box.width >= box.height
+            along = box.x + box.width/2 if horizontal else box.y + box.height/2   # centre along the measured axis
+            key = round(record['value'], 2), horizontal, round(along/3)
+            (extra if key in kept else kept.setdefault(key, [])).append(record)
+        if not extra:
+            return
+        extension = get(self.model, 'Extension')
+        call(self.model, 'ClearSelection2', True)
+        for index, record in enumerate(extra):
+            if not call(extension, 'SelectByID2', record['name'], 'DIMENSION', 0., 0., 0., bool(index), 0, null_dispatch(), 0):
+                call(self.model, 'ClearSelection2', True)
+                return
+        call(self.model, 'EditDelete')
+        call(self.model, 'ClearSelection2', True)
         self.rebuild()
 
     def arrange_dimensions(self, name):

@@ -89,6 +89,7 @@ def flat_page(native, source_model):
     native.pages[plan.name]['views']['flat'] = view
     native.set_scale(plan.name, plan.scale)
     native.fit(plan.name)
+    native.flat_dimensions(plan.name)
     result.measurements['flat_pattern'] = {'configuration': matching[0], 'body_count': 1,
         'bend_lines_requested': options.bend_lines, 'thickness_mm': info.thickness_mm}
     result.warn('bend_notes', 'Açınım native görünüş olarak eklendi. Büküm çizgileri / yönleri ve büküm notlarının '
@@ -167,6 +168,7 @@ def body_flat_pages(native, source_model):
         page['views']['flat'] = view
         native.set_scale(plan.name, plan.scale)
         native.fit(plan.name)
+        native.flat_dimensions(plan.name)
         actual = native.actual_views(plan.name)[0]
         if actual.get('body_references') != (row.body_ref,) or actual.get('body_count') != 1:
             raise ApiError(row.label+': native açınım başka veya birden fazla gövde gösteriyor.')
