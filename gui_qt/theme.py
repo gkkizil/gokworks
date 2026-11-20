@@ -269,7 +269,16 @@ def _cross_icon():
     return icon
 
 
-def apply_theme(app, appearance):
+def apply_theme(app, appearance, window=None):
+    """Palette on the application; the style sheet on ``window`` when given.
+
+    A style sheet on the QApplication makes every theme change restyle each widget
+    once per ancestor (Qt repolishes all cached widgets and then their children
+    again): 6 s with every tool open. On the main window the same rules cascade to
+    all its widgets and dialogs and a change visits each widget once. Windows
+    outside it (tool tips, parentless dialogs) still get the theme colours from
+    the palette.
+    """
     c = palette_colors(appearance)
     palette = QPalette()
     for role, key in ((QPalette.Window, 'bg'), (QPalette.WindowText, 'text'),
@@ -284,4 +293,15 @@ def apply_theme(app, appearance):
     for role in (QPalette.Text, QPalette.WindowText, QPalette.ButtonText):
         palette.setColor(QPalette.Disabled, role, QColor(c['muted']))
     app.setPalette(palette)
-    app.setStyleSheet(STYLESHEET % c)
+    css = STYLESHEET % c
+    if window is None:
+        app.setStyleSheet(css)
+        return
+    if app.styleSheet():
+        app.setStyleSheet('')
+    if window.styleSheet() != css:
+        window.setStyleSheet(css)
+
+
+def theme_style_sheet(appearance):
+    return STYLESHEET % palette_colors(appearance)
