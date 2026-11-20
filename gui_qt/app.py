@@ -104,6 +104,12 @@ class MainWindow(QMainWindow):
         self.appearance = str(self.settings.get('appearance', 'dark'))
         if self.appearance not in COLORS:
             self.appearance = 'dark'
+        # The theme rules live on this window, set before any child exists (see apply_theme).
+        from .theme import theme_style_sheet
+        app = QApplication.instance()
+        if app is not None and app.styleSheet():
+            app.setStyleSheet('')
+        self.setStyleSheet(theme_style_sheet(self.appearance))
         self.jobs = JobManager(self)
         self.closing = False
         self.busy = False
@@ -307,7 +313,7 @@ class MainWindow(QMainWindow):
             blocked = self.theme_picker.blockSignals(True)
             self.theme_picker.setCurrentIndex(0 if appearance == 'dark' else 1)
             self.theme_picker.blockSignals(blocked)
-        apply_theme(QApplication.instance(), appearance)
+        apply_theme(QApplication.instance(), appearance, self)
         self.logo.set_appearance(appearance)
         for mode, nav in self.navigation.items():
             nav.setIcon(icon(mode, COLORS[appearance]['accent' if nav.isChecked() else 'muted']))
