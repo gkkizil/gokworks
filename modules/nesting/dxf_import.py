@@ -5,6 +5,7 @@ import math
 import hashlib
 from io import StringIO
 from pathlib import Path
+import re
 
 import ezdxf
 from ezdxf import units
@@ -15,7 +16,48 @@ from shapely.ops import polygonize_full
 from shapely.strtree import STRtree
 from shapely.validation import explain_validity
 
+from ezdxf.lldxf.tagwriter import TagWriter
+
 from modules.nesting.models import Part, number
+
+
+class PartDxfWriter:
+    """Each part's source geometry as its own DXF text, without a full document per part.
+
+    Writing a fresh R2018 document per part (header, tables, objects) took ~3,5 ms
+    each, most of a large import. The empty document is written once; a part only
+    writes its entities into the ENTITIES section, with the handle seed raised above
+    them. Entities that refer to other DXF objects (blocks, styles, dictionaries)
+    return None and keep the full-document path.
+    """
+    SIMPLE = frozenset(('LINE', 'ARC', 'CIRCLE', 'LWPOLYLINE', 'SPLINE', 'ELLIPSE'))
+    MARKER = '  0\nSECTION\n  2\nENTITIES\n'
+
+    def __init__(self):
+        self.doc = ezdxf.new('R2018'); self.doc.units = units.MM
+        self.modelspace = self.doc.modelspace()
+        stream = StringIO(); self.doc.write(stream); text = stream.getvalue()
+        cut = text.index(self.MARKER) + len(self.MARKER)
+        self.head, self.tail = text[:cut], text[cut:]
+
+    def text(self, entities):
+        if not entities or any(e.dxftype() not in self.SIMPLE or e.has_extension_dict or e.has_reactors()
+                               for e in entities):
+            return None
+        added = []
+        try:
+            for entity in entities:
+                self.modelspace.add_entity(entity); added.append(entity)
+            stream = StringIO(); writer = TagWriter(stream, dxfversion=self.doc.dxfversion)
+            for entity in added:
+                entity.export_dxf(writer)
+            seed = format(max(int(e.dxf.handle, 16) for e in added) + 1, 'X')
+            head = re.sub(r'(\n  9\n\$HANDSEED\n  5\n)[0-9A-Fa-f]+\n', lambda m: m.group(1) + seed + '\n',
+                          self.head, count=1)
+            return head + stream.getvalue() + self.tail
+        finally:
+            for entity in added:
+                self.modelspace.delete_entity(entity)
 
 SUPPORTED = {'LINE', 'ARC', 'CIRCLE', 'LWPOLYLINE', 'POLYLINE', 'SPLINE', 'ELLIPSE'}
 ANNOTATIONS = {'TEXT', 'MTEXT', 'DIMENSION', 'LEADER', 'MLEADER', 'POINT', 'HATCH', 'SOLID', 'ATTDEF', 'ATTRIB'}
@@ -350,13 +392,14 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
     if grouped:
         components = [union_all(components)]
     result = []
+    part_writer = None
     source_sha256 = hashlib.sha256(before).hexdigest()
     short_records = {i for i,line in enumerate(lines) if line.length <= join_tolerance*2}
     for index, g in enumerate(components):
         check_cancel(stop)
         minx, miny, _, _ = g.bounds
         normalized = affinity.translate(g, -minx, -miny)
-        original = ezdxf.new('R2018'); original.units = units.MM
+        copies = []
         boundary_band = g.boundary.buffer(join_tolerance*2)
         # Broad phase only. The unchanged exact difference test decides inclusion.
         # Short lines can satisfy the historical residual-length test even when
@@ -367,14 +410,20 @@ def _read_dxf(filename, *, material='S235JR', thickness=2, quantity=1, unit=None
             entity, line = records[candidate]
             if line.difference(boundary_band).length <= join_tolerance*2:
                 copy = entity.copy(); copy.transform(Matrix44.translate(-minx, -miny, 0))
-                copy.dxf.layer = '0'; original.modelspace().add_entity(copy)
-        stream = StringIO(); original.write(stream)
+                copy.dxf.layer = '0'; copies.append(copy)
+        part_writer = part_writer or PartDxfWriter()
+        original_text = part_writer.text(copies)
+        if original_text is None:
+            original = ezdxf.new('R2018'); original.units = units.MM
+            for copy in copies:
+                original.modelspace().add_entity(copy)
+            stream = StringIO(); original.write(stream); original_text = stream.getvalue()
         result.append(Part.create(filename.stem + (f'-{index+1:02d}' if len(components) > 1 else ''), normalized,
                                  material, thickness, quantity=quantity, source=str(filename.resolve()),
                                  source_sha256=source_sha256, source_unit=source_unit,
                                  curve_tolerance=tolerance if curved else 0, join_tolerance=join_tolerance,
                                  endpoint_error=endpoint_error,
-                                 original_dxf=stream.getvalue(), notes=[
+                                 original_dxf=original_text, notes=[
                                      f'Uç birleştirme toleransı: {join_tolerance:g} mm.',
                                      f'Birleştirilen uçlarda en büyük hareket: {endpoint_error:g} mm; çarpışma payına eklendi.',
                                      f'Eğriler en fazla {tolerance:g} mm kiriş sapmasıyla düzleştirildi.' if curved else 'Doğrusal kontur.',
