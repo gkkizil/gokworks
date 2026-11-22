@@ -1,10 +1,8 @@
 name: Windows shaft bridge
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ['modules/shaft_generator/**', 'modules/dxf_dwg/**', 'modules/profile_cutting/**', 'tests/support/solidworks.py', 'packaging/prepare_shaft_test_refs.py', '.github/workflows/windows-shaft-bridge.yml']
 
 permissions:
   contents: read

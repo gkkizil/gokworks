@@ -1,12 +1,8 @@
 name: Windows gear engineering and CAD
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'modules/gear_calculator/**'
-      - '.github/workflows/windows-gears.yml'
 
 permissions:
   contents: read

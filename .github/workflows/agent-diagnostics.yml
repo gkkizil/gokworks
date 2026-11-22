@@ -1,8 +1,7 @@
 name: Agent failure diagnostics
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
-  push:
-    branches: [agent/codex]
   workflow_dispatch:
     inputs:
       run_id:

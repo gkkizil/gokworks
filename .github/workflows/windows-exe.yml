@@ -185,7 +185,7 @@ jobs:
           name: GOKWORKS-Tek-EXE-Windows-x64-${{ github.sha }}
           path: dist/GOKWORKS.exe
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Publish direct EXE download
         id: release
         env:
@@ -216,6 +216,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows-build-log-${{ github.sha }}
+          retention-days: 7
           path: |
             windows-build.log
             windows-release.log

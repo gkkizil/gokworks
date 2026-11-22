@@ -28,7 +28,7 @@ const isDocument = name => DOCUMENT.test(name);
 // deterministic part of the collected tests; their results are combined in finish().
 const SHARDS = 3;
 // Agents usually push several commits within minutes; start once a branch has been
-// quiet this long. The 5-minute schedule picks the branch up afterwards.
+// quiet this long. Push runs wait here; the 3-hourly schedule is only a safety net.
 const SETTLE_MINUTES = 5;
 
 function onlyFiles(comparison, allowed) {

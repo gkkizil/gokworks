@@ -1,17 +1,8 @@
 name: SolidWorks connection and Pack and Go bindings
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - solidworks/connection.py
-      - modules/naming/native.py
-      - modules/naming/interop/**
-      - modules/naming/tests/test_naming_native.py
-      - tests/test_settings_and_connection.py
-      - .github/workflows/solidworks-bindings.yml
-      - packaging/publish_binding_status.py
 
 permissions:
   contents: write

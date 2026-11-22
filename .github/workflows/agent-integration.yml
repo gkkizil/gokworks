@@ -4,8 +4,10 @@ on:
   push:
     branches: [main, agent/codex, agent/claude]
   schedule:
+    # Safety net only: push runs wait out the settle time themselves and a merge
+    # dispatches the follow-up run. Kept rare to save Actions minutes.
     # Also discovers agent branches which do not yet contain this workflow.
-    - cron: '*/5 * * * *'
+    - cron: '23 */3 * * *'
   workflow_dispatch:
     inputs:
       retry_failed:
@@ -160,7 +162,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: agent-validation-${{ matrix.pull }}-${{ matrix.head }}-${{ matrix.shard }}of${{ matrix.shards }}
-          retention-days: 7
+          retention-days: 2
           if-no-files-found: ignore
           path: |
             candidate/windows-tests.xml

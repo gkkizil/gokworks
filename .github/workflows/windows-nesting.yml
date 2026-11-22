@@ -1,14 +1,8 @@
 name: Windows Nesting workspace
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'modules/nesting/**'
-      - 'gui_qt/**'
-      - 'requirements*.txt'
-      - '.github/workflows/windows-nesting.yml'
 
 permissions:
   contents: read
