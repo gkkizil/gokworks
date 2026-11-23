@@ -159,6 +159,8 @@ jobs:
           $source | python - .
       - name: Upload test evidence
         if: always() && matrix.cached != true
+        # Evidence only: a full Actions storage quota must not turn passed tests into a failure.
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: agent-validation-${{ matrix.pull }}-${{ matrix.head }}-${{ matrix.shard }}of${{ matrix.shards }}
