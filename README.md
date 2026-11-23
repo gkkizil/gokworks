@@ -1,8 +1,9 @@
 # GOKWORKS — Kullanım rehberi
 
-GOKWORKS; SolidWorks dosyalarını toplu aktarmak, montajlardan ürün ağacı
-çıkarmak, sac ve profil kesimlerini planlamak ve mühendislik hesapları yapmak
-için geliştirilmiş Türkçe bir masaüstü uygulamasıdır.
+GOKWORKS, Windows için Türkçe bir mühendislik uygulamasıdır. SolidWorks
+modellerinden teknik resim ve üretim çıktıları hazırlayabilir, montajlardan ürün
+ağacı çıkarabilir, sac ve profil kesimlerini planlayabilir ve mühendislik
+hesapları yapabilirsiniz.
 
 Kaynak kodda sol menüde dört grupta 23 araç bulunur: **Aktarım ve Montaj**
 (PDF, DXF/DWG, 3D dönüştürücü, BOM, isimlendirme), **Mühendislik Hesapları**
@@ -16,6 +17,7 @@ araç sayısı aşağıda, o paketin kaydında ayrıca yazılıdır.
 
 [Telif, lisans ve bağımlılıklar](#telif-lisans-ve-bağımlılıklar) · [Başlangıç](#başlangıç) ·
 [Araç seçimi](#hangi-aracı-kullanmalıyım) · [Adım adım kullanım](#adım-adım-kullanım) ·
+[Otomatik teknik resim](#otomatik-teknik-resim) · [Abkant](#abkant-simülasyonu) ·
 [Sorun giderme](#sorun-giderme) · [Kurulum ve güncelleme](#kurulum-ve-güncelleme) ·
 [İletişim](#geliştirici-ve-iletişim)
 
@@ -37,11 +39,13 @@ bileşenler kendi lisanslarına tabidir. Lisans metinleri uygulama içinde
 | Pillow | 13.0.0 | MIT-CMU | Görseller |
 | pywin32 | 312 | PSF tarzı | SolidWorks COM bağlantısı (Windows) |
 | cadquery-ocp-novtk (OCCT 8.0.1) | 8.0.1.1.0 | Apache-2.0 (OCCT: LGPL-2.1 + istisna) | STEP ve katı model işlemleri |
+| spyrrow / Sparrow | 0.10.0 / 0.3.0 | MIT | Sac yerleşimi için başlangıç planı |
 | GNU LibreDWG (`dwg2dxf`) | 0.13.3 | GPL-3.0-or-later | DWG okuma; ayrı program olarak çalışır, GOKWORKS koduna bağlanmaz ([bildirim](packaging/licenses/LibreDWG-NOTICE.txt)) |
 | PyInstaller | 6.16.0 | GPL-2.0+ ve bootloader istisnası | Yalnız EXE oluşturma; uygulamayı GPL yapmaz |
 
-SolidWorks, Microsoft Excel, ODA File Converter ve AutoCAD uygulamayla
-dağıtılmaz. SolidWorks gerektiren işlemler kullanıcının kendi lisanslı kurulumunu kullanır.
+SolidWorks gerektiren işlemler, bilgisayarınızdaki lisanslı SolidWorks
+oturumuyla çalışır. Ürünlerin dağıtım ve lisans ayrıntıları için
+[üçüncü taraf bildirimlerine](docs/THIRD_PARTY_NOTICES.md) bakın.
 
 ## Başlangıç
 
@@ -58,6 +62,11 @@ SHA256: `5598e48cb82fb6777d97057f0bbda583a3738c61c82a92bf712a92116573057a`
 
 EXE, yukarıdaki uygulama kodundan derlenmiştir; kaynak koddaki daha yeni değişiklikleri içermez. Yeni EXE yalnız derlemesi ve açılış kontrolü başarılı olunca bu bağlantının yerini alır.
 <!-- windows-release:end -->
+
+Bu rehber güncel kaynak kodu anlatır. İndirdiğiniz paketin kaynak revizyonu
+ve araç sayısı yukarıdaki derleme kaydında yer alır. Daha yeni özellikleri
+denemek için [kaynak koddan çalıştırma](#kaynak-koddan-çalıştırma) adımlarını
+uygulayın.
 
 1. Elinizde oluşturulmuş `GOKWORKS.exe` varsa çift tıklayarak açın. Kaynak
    kod kullanıyorsanız aşağıdaki kurulum adımlarını uygulayın.
@@ -86,6 +95,7 @@ kurulumu gerekmez.
 | Yapmak istediğiniz iş | Sol menüdeki araç | SolidWorks gerekir mi? |
 | --- | --- | --- |
 | Teknik resimleri PDF'e çevirmek | [PDF aktarımı](#pdf-aktarımı) | Evet |
+| Parça veya montajdan düzenlenebilir SLDDRW oluşturmak | [Otomatik Teknik Resim](#otomatik-teknik-resim) | Evet |
 | Sac parçalarının açınımlarını almak | [DXF / DWG](#dxf-ve-dwg-açınımı) | Evet |
 | Parça veya montajları STEP, Parasolid, IGES, STL olarak kaydetmek | [3D Dönüştürücü](#3d-dosya-aktarımı) | Evet |
 | Parça adedi, ürün ağacı ve Excel raporu almak | [BOM · Ürün ağacı](#bom-ve-excel) | Evet |
@@ -93,8 +103,9 @@ kurulumu gerekmez.
 | Sac parçalarını levhalara yerleştirip maliyet hesaplamak | [Nesting · Sac maliyeti](#nesting-ve-sac-maliyeti) | Hayır |
 | Levhaya sığmayan büyük parçaları segmentlere bölmek | [Akıllı Parça Bölme](#akıllı-parça-bölme) | Hayır |
 | Silindir, koni, redüksiyon, dirsek gibi sac şekillerin açınımını hesaplamak | [Sac Açınımı](#sac-açınımı) | Hayır |
+| Büküm sırasını, takımları ve hareket çarpışmalarını incelemek | [Abkant Simülasyonu](#abkant-simülasyonu) | Aktif sac parçayı okumak için gerekir. Demo ve DXF takımları bağımsız çalışır. |
 | DXF kesim geometrisini lazer kesim kurallarına göre kontrol etmek | [DFM · İmalat uygunluğu](#dfm-ve-imalat-uygunluğu) | Hayır |
-| Profil parçalarını ham çubuklara paylaştırmak | [Profil kesim](#profil-kesim) | Modelden liste almak için gerekir |
+| Profil kesimlerini eldeki çubuklara ve artıklara dağıtmak, kesim listesi hazırlamak | [Profil kesim](#profil-kesim) | Modelden liste almak için gerekir |
 | Kademeli mil tasarlayıp katı model oluşturmak | [Parametrik mil](#parametrik-mil) | Katı model oluşturmak için gerekir |
 | Büküm hesabı yapmak veya saclara K/R atamak | [K faktörü / yarıçap](#k-faktörü-ve-yarıçap) | Montaja atama için gerekir |
 | Ölçü zincirinin toplam toleransını hesaplamak | [Tolerans yığılması](#tolerans-yığılması) | Teknik resim okuma/yazma için gerekir |
@@ -109,8 +120,8 @@ kurulumu gerekmez.
 
 ## Ekranı tanıma
 
-- **Sol menü:** araç seçimi ve araç araması. Aktarım, Montaj, Üretim,
-  Hesaplar ve Makine Elemanları gruplarından istediğiniz aracı açabilirsiniz.
+- **Sol menü** üzerinden araçları arayın veya Aktarım ve Montaj,
+  Mühendislik Hesapları, Üretim ve Makine Elemanları gruplarından seçin.
 - **Kaynak ve ayarlar:** dosyaları, ölçüleri ve işlem seçeneklerini girersiniz.
 - **Önizleme ve sonuçlar:** seçilen parçayı, yerleşimi, hesapları veya işlem
   listesini görürsünüz. Panellerin arasındaki ayırıcıları sürükleyebilirsiniz.
@@ -124,6 +135,7 @@ kurulumu gerekmez.
 | --- | --- |
 | `Ctrl+K` | Araç aramasına geçer. |
 | `Ctrl+B` | Sol menüyü daraltır veya genişletir. |
+| `Ctrl+PgUp` / `Ctrl+PgDown` | Önceki veya sonraki araca geçer. |
 | Ayarlar / sol menüdeki tema listesi | Açık-koyu tema ve görünüm tercihlerini değiştirir. |
 | Durdur | Yürüyen işlemin durdurulmasını ister. Süren SolidWorks çağrısının bitmesi beklenebilir. |
 
@@ -144,7 +156,37 @@ sıfırlar; oluşturulmuş çıktı dosyaları klasörlerinde kalır.
 5. **Aktarımı başlat** düğmesine basın; sonuçları ve günlüğü inceleyin.
 
 Her teknik resim için ayrı PDF oluşur. Aynı teknik resmin bütün sayfaları
-aynı PDF dosyasında yer alır.
+aynı PDF dosyasında yer alır. Üst özetten aktarılan, atlanan ve hatalı dosya
+sayılarını, **Günlük** bölümünden de dosya bazlı açıklamaları izleyebilirsiniz.
+
+### Otomatik teknik resim
+
+1. **Üretim → Otomatik Teknik Resim** ekranında kayıtlı `.SLDPRT` veya
+   `.SLDASM` dosyalarını ekleyin ya da **Aktif dosyayı al** komutunu kullanın.
+   Kaynak modeli SolidWorks'te güncelleyip kaydedin.
+2. **Analiz et** ile modeli ve seçili konfigürasyonu okuyun. **Taslak pafta**
+   önizlemesinde görünüş yerlerini, ölçeği ve antet alanını inceleyin.
+3. Pafta boyutunu, birinci veya üçüncü açı izdüşümünü, ölçeği ve çıktı
+   klasörünü seçin. Firma kullanıyorsa `.DRWDOT` şablonu ve `.SLDDRT` sayfa
+   biçimini belirtin. İzometrik görünüş gerektiğinde ayrı bir ölçek kullanır
+   veya kendi paftasına alınır.
+4. **Resimleri oluştur** ile düzenlenebilir `.SLDDRW` ve JSON raporu alın.
+   PDF ve tek paftalı DXF isteğe bağlıdır. **SolidWorks PDF** önizlemesinde
+   oluşturulan resmi, sonuç listesinde de dosya bazlı denetimleri inceleyin.
+
+Resim, modelde çizim için işaretlenen ölçüleri ve isteğe bağlı geometrik
+referans ölçülerini kullanır. Montajlar için BOM ve balonlar eklenebilir.
+Kayıtlı açınım konfigürasyonları olan çok gövdeli saclarda her doğrulanmış
+gövde aynı resimde ayrı bir paftaya yerleştirilir. Açınım paftalarında dış
+ölçüler ve uygun büküm çizgilerinin konum ölçüleri gösterilir.
+
+Modül kaynak parçayı veya montajı otomatik kaydetmez. İmalat ölçüleri,
+toleranslar ve firma anteti için sonuçları SolidWorks'te inceleyin. Gerçek
+SolidWorks 2025 SP5 üzerinde yapılan senaryolar ve firma şablonu kapsamı kabul
+kaydında listelenir.
+[Kullanım ayrıntıları](modules/automatic_drawing/README.md) ·
+[Canlı kabul kaydı](docs/automatic-drawing/LIVE_ACCEPTANCE.md) ·
+[Bilinen sınırlar](docs/automatic-drawing/KNOWN_LIMITATIONS.md)
 
 ### DXF ve DWG açınımı
 
@@ -170,6 +212,13 @@ adetleri alınır. Ana montaj yoksa bağımsız parça dosyaları birer örnek s
 
 Çıktı adında kalınlık ve adet bulunabilir; örneğin
 `BRAKET - 1.5 mm - 12 adet.dxf`. Bu dosyaları daha sonra Nesting'e ekleyebilirsiniz.
+Çok gövdeli bir parçada her sac gövdesi ayrı dosyaya gider. Örneğin
+`ORHAN-02 - 2 mm - 1 adet.dxf`, yalnız ikinci gövdeyi seçseniz de
+`ORHAN-02` olarak kalır. Aynı adlandırma DWG'de geçerlidir.
+
+Envanter taraması kaynakları kaydetmez. Önizleme ve üretim aktarımı,
+değiştirilmiş açık SolidWorks belgelerini ve ilgili montaj parçalarını
+otomatik kaydedebilir. Kaydedilemeyen bir belge olursa günlükte sebebini görün.
 
 [Ayrıntılı açınım rehberi](modules/dxf_dwg/README.md)
 
@@ -250,7 +299,10 @@ Sac tanımları otomatik kaydedilir ve yeni projelerde tekrar kullanılabilir.
 Hesaplama, kayıtlı stok adedinden otomatik düşüm yapmaz.
 Adet, geometri veya yerleşim payı değiştirildiğinde **Yerleştir** ile yeni plan oluşturun.
 
-Uygun küçük parçalar için delik içi yerleşim otomatik değerlendirilir.
+Parça listesinde her parçanın küçük 2B kontur önizlemesini görebilirsiniz.
+Sparrow başlangıç yerleşimini oluşturur ve GOKWORKS konturlarla bu planı
+iyileştirmeyi dener. Uygun küçük parçalar için delik içi yerleşim de
+otomatik değerlendirilir.
 DXF ile oluşturulan kesim sırası dosyasını CAM hazırlığında inceleyin;
 Nesting çıktısı doğrudan makine programı değildir.
 
@@ -293,19 +345,28 @@ Sonuç geometrik bir ön kontroldür; kaynak/bağlantı dayanımı hesaplanmaz.
 2. **Ham profil ve kesim payı** bölümünde satın alınan çubuğun boyunu,
    testere payını ve gerekiyorsa uç düzeltme miktarını tanımlayın.
    **6 metre çubuk için 6000 mm** girilir.
-3. **Kesim planını hesapla** düğmesine basın. Çubuk sayısını, kesim sırasını
-   ve artan boyları inceleyin; listeden çubuk seçerek çizimini görün.
-4. **Kesim planını CSV kaydet** ile raporu alın. **Proje** menüsünden
-   listeyi kaydedip yeniden açabilirsiniz.
+3. Elinizde malzeme varsa **Stok** sekmesine tam boy çubukları ve artıkları
+   profil, malzeme, boy ve adetleriyle ekleyin. Plan önce uygun artıkları,
+   ardından stoktaki tam boyları kullanır. Eksik çubukları **Satın alınacak**
+   olarak listeler.
+4. **Kesim planını hesapla** ile çubuk sayısını, kesim sırasını ve artan
+   boyları inceleyin. İş atölyede kesildikten sonra **Kesildi: stoğu güncelle**
+   komutuyla kullanılan çubukları düşüp belirlediğiniz asgari boyu karşılayan
+   artanları stoğa ekleyin.
+5. **Proje → Kesim listesi PDF…** veya **Kesim listesi Excel…** ile profil
+   bazında boy, adet ve varsa açı bilgilerini içeren iş listesi alın.
+   Hesaplanan yerleşimin CSV raporu **Kesim planını CSV kaydet** ile alınır.
 
 İlk deneme için **Örnekle dene** düğmesini kullanabilirsiniz:
-1200 mm'den 4 adet ve 800 mm'den 6 adet; 6000 mm çubuk ve 3 mm testere payıyla
-2 çubuk gerekir, toplam 2370 mm artan ve 30 mm testere kaybı oluşur.
+1200 mm'den 4 adet ve 800 mm'den 6 adet için, boş stok ve uç düzeltme olmadan,
+6000 mm çubuk ve 3 mm testere payıyla 2 çubuk gerekir. Toplam 2370 mm artan
+ve 30 mm testere kaybı oluşur.
 
 SolidWorks'ten liste almak için **SolidWorks’ten al → Açık modeli oku**
-veya **Dosya seç…** komutunu kullanın. Eksik bilgileri kontrol ettikten sonra
-**Hazır satırları listeye ekle** ile kesim listesine aktarın.
-Farklı profil kesitleri ve malzemeler ayrı gruplarda hesaplanır.
+veya **Dosya seç…** komutunu kullanın. Tarama sekmesindeki kesim listesini
+doğrudan PDF veya Excel kaydedebilir, uygun satırları da optimizasyon
+girdisine ekleyebilirsiniz. Farklı kesit ve malzemeler ayrı hesaplanır.
+[Ayrıntılı profil kesim rehberi](modules/profile_cutting/README.md)
 
 ### Parametrik mil
 
@@ -364,8 +425,9 @@ ayrı bir işlemdir; bu işlem öncesindeki kayıt ve kaynak seçimini kontrol e
 
 ![Sac Açınımı](docs/readme/sheet_unfolding.png)
 
-1. **Sac Açınımı** ekranında şekli seçin (silindir, koni, redüksiyon, kare–yuvarlak
-   geçiş, dirsek, kanal ve diğer 51 aile); arama kutusunu kullanabilirsiniz.
+1. **Sac Açınımı** ekranında silindir, koni, redüksiyon, kare–yuvarlak
+   geçiş, dirsek, kanal gibi şekil ailelerinden birini seçin. Listeyi
+   arama kutusuyla daraltabilirsiniz.
 2. Ölçüleri şema üzerinde veya formda girin; ölçü yüzeyini (iç/orta/dış),
    malzemeyi, sac kalınlığını ve birleşim tipini seçin.
 3. Açınım ölçüsünü, net alanı, kesim boyunu ve kütleyi inceleyin; 3D ve açınım
@@ -374,6 +436,21 @@ ayrı bir işlemdir; bu işlem öncesindeki kayıt ve kaynak seçimini kontrol e
    ile doğrudan yerleşime aktarın. Projeyi kaydedip sonra açabilirsiniz.
 
 [Ayrıntılı rehber](modules/sheet_unfolding/README.md)
+
+### Abkant simülasyonu
+
+1. **Üretim → Abkant Simülasyonu** ekranında **Demoyu aç** ile hazır bir örnek
+   seçin veya açık sac modelini **Aktif SolidWorks Parçasını Al** ile okuyun.
+2. Bükümleri sıraya koyun. Her adıma kesit kartlarından üst bıçak ve alt kalıp
+   atayın. V kanalı, takım segmentleri, tutuş, parça yönü ve hedef açıyı
+   gerektiğinde ayarlayın. Kendi kesitinizi **DXF takım ekle…** ile yükleyin.
+3. **Hareketi kontrol et** ile yaklaşma, büküm ve geri çekilme pozlarını
+   inceleyin. Açınım ve bitmiş form arasında geçebilir, 3B sahneyi farklı
+   hızlarda oynatabilir ve kontrol edilen hareketlerdeki çarpışmaları görebilirsiniz.
+4. **Büküm Föyü PDF** veya **Video MP4** ile sonucu kaydedin. Denetlenen
+   geometri ve hareketleri sonuçtaki kapsam bilgisiyle birlikte inceleyin.
+
+[Desteklenen SolidWorks geometrileri, takım kütüphanesi ve kontrol kapsamı](modules/press_brake/README.md)
 
 ### DFM ve imalat uygunluğu
 
@@ -389,24 +466,18 @@ lazer profili örnek başlangıç profilidir. [Ayrıntılı rehber](modules/dfm_
 
 ### Hidrolik ünite hesaplayıcı
 
-![Hidrolik Ünite Hesaplayıcı](docs/readme/hydraulic_unit.png)
+1. **Pratik hesap** ekranında pistonun iç çapını, mil çapını ve stroku girin.
+2. İtme kuvvetini, ileri ve geri hareket sürelerini, varsa uçta bekleme
+   süresini yazın. Kuvvet için kN veya ton-kuvvet seçebilirsiniz.
+3. **Ünite ihtiyacını hesapla** ile motor gücünü, pompa debisini, basıncı ve
+   tank hacmini görün. Etkileşimli ünite şemasında bir elemana tıklayarak
+   ilgili ayara geçin. Hat, soğutma ve uyarıları inceleyip PDF veya Excel alın.
 
-**Kolay kullanım** görünümünde üç adım vardır:
-
-1. **Ölçüler:** piston çapını (silindirin iç çapı), mil çapını ve stroku girin.
-   Çizim hangi ölçünün nerede olduğunu gösterir; gövde dış çapı girilmez.
-2. **Hareketler:** her hareket için “Ne kadar yol alsın?”, “Kaç saniye sürsün?”
-   ve gerekli itme/çekme kuvvetini girin. **İleri – bekle – geri örneğini kur**
-   hazır bir sıra yazar. Kuvvet kN veya ton-kuvvet olarak girilebilir.
-3. **Sonuç ve rapor:** motor gücü, pompa debisi, basınç, hat iç çapı, tank ve
-   soğutucu ihtiyacı kartlarda İHTİYAÇ / MEVCUT / ÖNERİ ayrımıyla gösterilir.
-   Uyarıların yanında ne yapılacağı ve ilgili alana giden **Göster →** düğmesi
-   vardır. **PDF raporu** veya **Excel tablosu** alın.
-
-Pompa, hat, yağ, tank, akümülatör ve çok silindirli projeler için görünümü
-**Ayrıntılı ayarlar** yapın. Projeler `.gwhyd` dosyası olarak kaydedilir;
-**Örnek pres ünitesi** ile hazır bir proje açılır. Sonuçlar ön boyutlandırmadır;
-üretici veya imalat onayı değildir. [Ayrıntılı rehber](modules/hydraulic_unit/README.md)
+Özel hareket sıraları için **Hareket planı (3 adım)** görünümünü açın. Çok
+silindirli projeler ile pompa, hat, yağ, tank ve akümülatör seçenekleri
+**Ayrıntılı ayarlar** görünümündedir. Projeler `.gwhyd` dosyası olarak
+kaydedilir. Sonuçlar ön boyutlandırma içindir.
+[Pratik hesap rehberi](modules/hydraulic_unit/PRACTICAL_VIEW.md)
 
 ### Dişli hesaplama
 
@@ -430,8 +501,11 @@ Pompa, hat, yağ, tank, akümülatör ve çok silindirli projeler için görün�
 3. **Otomatik tasarım** sekmesinde güç ve devirlerden kasnak çapları ile kayış
    boyunu önerir; eksen mesafesini boş bırakabilirsiniz.
 
-Ürün kataloğu ve güç tablosu değerlendirmesi ayrı seçeneklerdir; stok
-bulunabilirliği iddia edilmez. [Ayrıntılı rehber](modules/belt_drive/README.md)
+V kayışında SPZ, SPA, SPB ve SPC gibi profilleri seçebilirsiniz. Tosyalı
+kasnak kataloğu ve ilgili kayış güç referansı kullanıldığında kanal adedi
+ve kapasite hesabı ayrıca değerlendirilir. Ekranda adayın katalog ve
+doğrulama durumunu kontrol edin.
+[Ayrıntılı kayış–kasnak rehberi](modules/belt_drive/README.md)
 
 ### Diğer hesap araçları
 
@@ -457,11 +531,14 @@ hesaplarında üretici şartnamelerini; kesim çıktılarında üretim/CAM hazı
 
 ## Projeler ve kaydedilen tercihler
 
-Klasör seçimleri, görünüm tercihleri ve Nesting sac tanımları otomatik
-hatırlanır. **Nesting, Profil kesim, Parametrik mil, Tolerans yığılması, Sac Açınımı ve Hidrolik Ünite**
-çalışmalarınızı kendi proje kaydetme komutlarıyla saklayın.
-Proje dosyası düzenlemeye devam etmek, PDF/Excel/DXF/STEP gibi çıktılar
-ise sonucu paylaşmak veya sonraki işleme taşımak içindir.
+Klasör seçimleri, görünüm tercihleri, Nesting sac tanımları ve profil stok
+listesi hatırlanır. **Nesting, Profil kesim, Parametrik mil, Tolerans
+yığılması, Sac Açınımı, Hidrolik Ünite ve Kayış–Kasnak** çalışmalarınızı
+ilgili aracın proje kaydetme komutuyla saklayın.
+
+Bu araçlarda kaydedilmemiş değişiklik varsa yeni proje açarken veya
+uygulamadan çıkarken kaydetme seçeneği sunulur. Önceki oturumdan bir kurtarma
+kopyası varsa uygulama bir sonraki açılışta onu açmayı önerir.
 
 Sürüm ve kaynak revizyonunu **Hakkında** ekranında bulabilirsiniz.
 Windows hata günlükleri `%LOCALAPPDATA%\GOKWORKS\logs` klasöründedir.
@@ -473,6 +550,8 @@ Windows hata günlükleri `%LOCALAPPDATA%\GOKWORKS\logs` klasöründedir.
 | SolidWorks bağlantısı kurulamıyor | SolidWorks'ün açık olduğunu, iki uygulamanın aynı Windows kullanıcı oturumunda ve yetki seviyesinde çalıştığını kontrol edin. Alt çubuktaki **Bağlantıyı kontrol et** komutunu kullanın. |
 | Yanlış parça, adet veya konfigürasyon okunuyor | SolidWorks'te doğru ana montajı ve konfigürasyonu etkinleştirip yeniden tarayın. |
 | DXF/DWG'de parça görünmüyor veya sac olarak tanınmıyor | Parçanın ilgili konfigürasyonunda gerçek sac metal gövdesi ve açınım tanımı bulunduğunu kontrol edin. Açınımı SolidWorks'te inceleyip modeli **Ctrl+B/Ctrl+Q** ile güncelleyin, ardından tekrar tarayın. |
+| Teknik resimde çok gövdeli sac açınımı eksik | Kaynak parçada her gövde için kayıtlı açınım konfigürasyonu bulunduğunu ve Cut List'in güncel olduğunu kontrol edin. **Sonuçlar** sekmesinde ilgili gövdenin uyarısını okuyun. |
+| Menüde Otomatik Teknik Resim görünmüyor | **Hakkında** ekranındaki kaynak revizyonunu derleme kaydıyla karşılaştırın. Aracı güncel kaynak kodda **Üretim** grubunda bulabilirsiniz. |
 | Aynı dosya yeniden aktarılmıyor | Çıktı klasöründe mevcut dosya olup olmadığını ve **Üzerine yaz** seçimini kontrol edin. |
 | Nesting'de bazı parçalar yerleşmiyor | Parça/sac malzeme ve kalınlık eşleşmesini, levha ölçülerini, stok adedini, aralık ve kenar paylarını kontrol edip yeniden yerleştirin. |
 | Nesting dışa aktarma düğmesi kapalı | Bütün parçaların yerleştiğini ve son değişiklikten sonra hesabın yenilendiğini kontrol edin. |
@@ -502,6 +581,9 @@ py -3.13 -m venv .venv
 
 Sonraki açılışlarda yalnız son komut yeterlidir.
 
+Sabit `spyrrow` bağımlılığı kaynak koddan derlenir. Bu adım için Git,
+Rust 1.90 veya üzeri ve Windows C++ derleme araçları gerekir.
+
 ### PyCharm üzerinden çalıştırma
 
 1. **File → Open** ile `main.py` dosyasının bulunduğu proje klasörünü açın.
@@ -523,6 +605,19 @@ Kaynak kurulumunuz hazırsa proje klasöründeki terminalde:
 Derleme tamamlandığında çıktı **`dist\GOKWORKS.exe`** olur. Dosyayı başka
 bir klasöre taşıyarak çalıştırabilirsiniz. Bu işlem GitHub'a yayın yapmaz.
 [Ayrıntılı Windows derleme rehberi](packaging/README.md)
+
+### Geliştirici testleri
+
+Depo kökünde geliştirme bağımlılıklarını kurup ilgili modülü test edebilirsiniz.
+Örneğin Otomatik Teknik Resim için:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pytest modules/automatic_drawing/tests -ra
+```
+
+Gerçek SolidWorks senaryolarının örnek dosyaları ve çalıştırma adımları
+[canlı kabul rehberinde](docs/automatic-drawing/LIVE_ACCEPTANCE.md) yer alır.
 
 ### Güncel kodu alma
 
