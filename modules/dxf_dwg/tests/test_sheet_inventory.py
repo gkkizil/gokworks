@@ -454,3 +454,20 @@ def test_multibody_sheets_are_named_part_01_02_03_without_body_names_or_digests(
         assert sorted(t.name for targets in plans.values() for t in targets)==[
             'ARMJR075005 - 1 mm - 4 adet.dxf','ARMOJR01-01 - 1 mm - 2 adet.dxf',
             'ARMOJR01-02 - 2 mm - 2 adet.dxf','ARMOJR01-03 - 3 mm - 2 adet.dxf']
+
+
+def test_export_freezes_tree_and_graphics_and_turns_them_back_on(env,tmp_path):
+    from types import SimpleNamespace as NS
+    app,Session,_=env;p=part(app,tmp_path/'Panel.SLDPRT');app.ActiveDoc=p
+    p.FeatureManager=NS(EnableFeatureTree=True,EnableFeatureTreeWindow=True);p.ActiveView=NS(EnableGraphicsUpdate=True)
+    seen=[];export=p.ExportToDWG2
+    def watched(*args):
+        seen.append((p.FeatureManager.EnableFeatureTree,p.FeatureManager.EnableFeatureTreeWindow,p.ActiveView.EnableGraphicsUpdate))
+        return export(*args)
+    p.ExportToDWG2=watched
+    rows,_=scan(env);events=Queue()
+    export_selection(rows,tmp_path,tmp_path/'out',('dxf','dwg'),events,session_factory=Session)
+    assert events.queue[-1][1]['succeeded']==1
+    assert seen==[(False,False,False)]*2                     # no redraw while SolidWorks exports
+    assert (p.FeatureManager.EnableFeatureTree,p.FeatureManager.EnableFeatureTreeWindow,
+            p.ActiveView.EnableGraphicsUpdate)==(True,True,True)

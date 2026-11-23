@@ -480,6 +480,38 @@ def _verify_sheet_source(session, model, sheet, stop, checked_update=None):
     return optional(model, 'GetUpdateStamp')
 
 
+def _freeze_view(model):
+    """Stop feature-tree and graphics redraw while exporting (display only, like fast macros).
+
+    Returns what was changed so _thaw_view can put exactly that back. A setting
+    the model does not offer is skipped: freezing is a speed-up, never required.
+    """
+    changed = []
+    for owner_name, setting in (('FeatureManager', 'EnableFeatureTree'), ('FeatureManager', 'EnableFeatureTreeWindow'),
+                                ('ActiveView', 'EnableGraphicsUpdate')):
+        try:
+            owner = getattr(model, owner_name)
+            if owner is None or getattr(owner, setting) is False:
+                continue
+            setattr(owner, setting, False)
+            changed.append((owner, setting))
+        except Exception:
+            continue
+    return changed
+
+
+def _thaw_view(changed):
+    """Turn redraw back on, newest first; returns a message when SolidWorks refused."""
+    failed = []
+    while changed:
+        owner, setting = changed.pop()
+        try:
+            setattr(owner, setting, True)
+        except Exception as error:
+            failed.append(f'{setting}: {error}')
+    return ('SolidWorks ekran/ağaç güncellemesi yeniden açılamadı: ' + '; '.join(failed)) if failed else ''
+
+
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     target_builder=None, output_paths=None, output_results=None, output_identity=None,
                     save_modified=False, stop_event=None, sheet=None, selection_session=None,
@@ -518,6 +550,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     source_validated = False
     managed_save = save_modified and session_managed_save and selection_session is not None
     notes, outcomes = [], []
+    frozen = []
     def checkpoint():
         if stop_event is not None and stop_event.is_set():
             raise CountCancelled()
@@ -609,6 +642,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             active = _value(app, "ActiveDoc")
             if active is None or _part_key(_value(active, "GetPathName"), "") != _part_key(model_path, ""):
                 raise RuntimeError("Aktif SolidWorks belgesi kaynak parça değil; aktarım yapılmadı.")
+        if pending:
+            frozen = _freeze_view(model)
         options = FLAT_GEOMETRY | (BEND_LINES if bend_lines else 0)
         # Default orientation; no selection, suppression or preference changes.
         alignment = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
@@ -721,6 +756,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             if output_identity is not None:
                 output_identity['native_save_error'] = '; '.join(notes)
             notes.append('Kayıt başarısız olduğu için açık belgeler kapatılmadı; aktarım durduruldu.')
+        thaw_error = _thaw_view(frozen)
+        if thaw_error:
+            notes.append(thaw_error)
         if visibility_changed and not opened_here and model is not None and not save_failed:
             try:
                 model.Visible = False
