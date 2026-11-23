@@ -107,9 +107,11 @@ class DxfDwgPage(ExportPage):
         self.group_instances = QCheckBox('Grupla')
         self.group_instances.setToolTip('Özdeş parçaları grupla; kapatınca montaj örneklerini ayrı göster')
         self.group_instances.setAccessibleName('Özdeş parçaları grupla / ayrı göster')
-        self.group_instances.setChecked(self.settings.get('dxf_dwg_group_instances',True) is True)
+        # Always opens grouped (one row per part, Adet = assembly count). Showing single
+        # occurrences is a per-look choice, not remembered: a forgotten off state listed
+        # every occurrence as its own "1 adet" row.
+        self.group_instances.setChecked(True)
         self.group_instances.toggled.connect(self.render_inventory)
-        self.group_instances.toggled.connect(lambda value:self.settings.set('dxf_dwg_group_instances',value))
         for widget in (self.select_all_button,self.select_none_button,self.group_instances):
             controls.addWidget(widget);self.controls.append(widget)
         controls.addStretch()
@@ -770,6 +772,8 @@ class DxfDwgPage(ExportPage):
                     continue
                 self.inventory = value
                 self.checked_instances = {r['sheet_id']:set(r['instances']) if r.get('exportable') else set() for r in value}
+                self.group_instances.blockSignals(True); self.group_instances.setChecked(True)
+                self.group_instances.blockSignals(False)
                 self.render_inventory()
                 continue
             if kind=='done' and value.get('state')=='preview' and self._preview_cancelled:

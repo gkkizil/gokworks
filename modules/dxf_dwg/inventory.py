@@ -14,7 +14,7 @@ def display_rows(inventory, selected, grouped=True):
         for group in groups:
             count = len(set(group) & chosen)
             row = dict(item, row_id=item['sheet_id'] if grouped else item['sheet_id']+'|'+group[0],
-                       quantity=len(group), instances=group,
+                       quantity=len(group), instances=group, total_quantity=len(instances), grouped=grouped,
                        selected=True if count == len(group) else None if count else False)
             indexed = item.get('body_count',1)>1 and type(item.get('body_index')) is int and item['body_index']>0
             row['source_label'] = (f"{Path(item['source']).stem}-{item['body_index']:02d}" if indexed

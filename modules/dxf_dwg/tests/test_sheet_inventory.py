@@ -424,3 +424,17 @@ def test_rebuild_failure_before_export_blocks_only_the_failed_part(env, tmp_path
     assert all('Healthy' in path.name for path in (tmp_path / 'out').iterdir())
     assert app.ActiveDoc is root and not app.saves
     assert before == {model.path: Path(model.path).read_bytes() for model in (broken, healthy)}
+
+
+def test_part_used_ten_times_writes_ten_adet_in_the_file_name_whatever_the_view(env,tmp_path):
+    app,_,_=env;p=part(app,tmp_path/'PARÇA 1.SLDPRT')
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,name=f'PARÇA 1-{i}') for i in range(1,11)]);app.ActiveDoc=root
+    rows,_=scan(env)
+    assert len(rows)==1 and rows[0]['quantity']==10
+    selected={rows[0]['sheet_id']:set(rows[0]['instances'])}
+    for grouped in (True,False):               # one row of 10, or ten rows of "1 / 10"
+        shown=display_rows(rows,selected,grouped)
+        assert len(shown)==(1 if grouped else 10) and all(r['total_quantity']==10 for r in shown)
+    items=selected_items(rows,selected)
+    targets=plan_destinations(items,tmp_path,tmp_path/'out',('dxf','dwg'))
+    assert [t.name for t in targets[rows[0]['sheet_id']]]==['PARÇA 1 - 1 mm - 10 adet.dxf','PARÇA 1 - 1 mm - 10 adet.dwg']
