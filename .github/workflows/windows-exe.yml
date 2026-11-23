@@ -180,12 +180,14 @@ jobs:
         run: python packaging/build_windows.py *> windows-build.log
       - name: Upload single executable
         id: artifact
+        # The release below is the real download; a full Actions storage quota must not stop it.
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: GOKWORKS-Tek-EXE-Windows-x64-${{ github.sha }}
           path: dist/GOKWORKS.exe
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
       - name: Publish direct EXE download
         id: release
         env:
@@ -213,9 +215,11 @@ jobs:
           }
       - name: Upload build log
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Windows-build-log-${{ github.sha }}
+          retention-days: 7
           path: |
             windows-build.log
             windows-release.log

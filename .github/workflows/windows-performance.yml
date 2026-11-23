@@ -1,19 +1,8 @@
 name: Windows performance and workbench regression
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'gui_qt/**'
-      - 'modules/tolerance_stack/**'
-      - 'modules/nesting/accounting.py'
-      - 'modules/nesting/dxf_import.py'
-      - 'modules/nesting/validation.py'
-      - 'packaging/benchmark_performance.py'
-      - 'packaging/hooks/hook-gui_qt.app.py'
-      - 'tests/test_lazy_pages_gui.py'
-      - '.github/workflows/windows-performance.yml'
 
 permissions:
   contents: read

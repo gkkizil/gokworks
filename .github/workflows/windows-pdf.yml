@@ -1,15 +1,8 @@
 name: Windows PDF export
 
+# Manual only (Actions minutes): the Agent integration workflow already runs the full suite on Windows.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'modules/pdf/**'
-      - 'tests/support/solidworks.py'
-      - 'tests/support/pdf_worker.py'
-      - 'tests/test_process_watch.py'
-      - '.github/workflows/windows-pdf.yml'
 
 permissions:
   contents: read

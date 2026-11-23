@@ -16,6 +16,8 @@ from modules.cad_converter.models import checkpoint, Cancelled
 from modules.profile_cutting.solidworks import Session as ReadSession, optional, values
 from modules.tolerance_stack.com import variant
 
+from .inventory import numbered
+
 
 def key(path, configuration=''):
     from .exporter import _part_key
@@ -707,7 +709,7 @@ def scan_inventory(session, source=None, recursive=True, stop=None, *, mode='act
         names={}
         for row in rows.values():
             stem=Path(row['source']).stem
-            if row.get('body_count',1)>1 and type(row.get('body_index')) is int:
+            if numbered(row):
                 stem+=f"-{row['body_index']:02d}"
             token=(key(str(Path(row['source']).parent))[0],stem.casefold())
             names.setdefault(token,[]).append(row)

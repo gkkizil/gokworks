@@ -35,6 +35,9 @@ def test_checkboxes_grouping_preserve_exact_instance_selection(page):
     p.select_none_button.click();assert not selected_items(p.inventory,p.checked_instances)
     p.select_all_button.click();assert len(selected_items(p.inventory,p.checked_instances))==2
     p.group_instances.setChecked(False);assert p.results.model.rowCount()==7
+    # Single occurrences are named and say how many the assembly holds, never a bare "1".
+    model=p.results.model
+    assert model.data(model.index(0,5))=='1 / 3' and ' · ' in model.data(model.index(0,1))
     assert p.results.model.setData(p.results.model.index(0,0),Qt.Unchecked,Qt.CheckStateRole)
     selected=selected_items(p.inventory,p.checked_instances)
     assert selected[0]['quantity']==2 and selected[1]['quantity']==3
@@ -159,3 +162,12 @@ def test_search_hiding_all_checked_bodies_reveals_a_selected_body_for_review(pag
     qtbot.waitUntil(lambda:not w.jobs.busy and p.preview_payload is not None)
     assert not calls and p.preview_request.body_name in ('A','B')
     assert p.results.search.text()=='' and p.checked_instances==selected
+
+
+def test_every_scan_lists_one_row_per_part_with_the_assembly_count(page):
+    p,w,files=page;install(p,files)
+    p.group_instances.setChecked(False);assert p.results.model.rowCount()==7
+    p.handle_events([('sheet_inventory',catalog(files)),('done',dict(state='preview',total=3))])
+    assert p.group_instances.isChecked() and p.results.model.rowCount()==3
+    assert [p.results.model.data(p.results.model.index(i,5)) for i in range(2)]==[3,3]
+    assert 'dxf_dwg_group_instances' not in w.settings.values

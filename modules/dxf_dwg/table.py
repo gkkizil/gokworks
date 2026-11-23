@@ -56,7 +56,13 @@ class SheetTableModel(TableModel):
                 if role == Qt.DisplayRole:
                     return ''
             if role == Qt.DisplayRole and index.column()==1:
-                return row.get('code') or row.get('source_label') or row['source']
+                text = row.get('code') or row.get('source_label') or row['source']
+                if row.get('grouped') is False and row.get('instances'):
+                    # One assembly occurrence per row: name it, or identical rows look like duplicates.
+                    text += ' · ' + str(row['instances'][0]).rsplit('/', 1)[-1]
+                return text
+            if role == Qt.DisplayRole and index.column()==5 and row.get('grouped') is False:
+                return f"1 / {row.get('total_quantity', 1)}"
             if role == Qt.DisplayRole and index.column()==6 and row.get('sheet_id') and row.get('status')=='pending':
                 return 'Hazır'
             if role == Qt.TextAlignmentRole and index.column() in self.NUMERIC:

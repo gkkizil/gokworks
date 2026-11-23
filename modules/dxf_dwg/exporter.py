@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 import re
 from uuid import uuid4
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 
 import importlib
 import importlib.util
@@ -480,6 +480,38 @@ def _verify_sheet_source(session, model, sheet, stop, checked_update=None):
     return optional(model, 'GetUpdateStamp')
 
 
+def _freeze_view(model):
+    """Stop feature-tree and graphics redraw while exporting (display only, like fast macros).
+
+    Returns what was changed so _thaw_view can put exactly that back. A setting
+    the model does not offer is skipped: freezing is a speed-up, never required.
+    """
+    changed = []
+    for owner_name, setting in (('FeatureManager', 'EnableFeatureTree'), ('FeatureManager', 'EnableFeatureTreeWindow'),
+                                ('ActiveView', 'EnableGraphicsUpdate')):
+        try:
+            owner = getattr(model, owner_name)
+            if owner is None or getattr(owner, setting) is False:
+                continue
+            setattr(owner, setting, False)
+            changed.append((owner, setting))
+        except Exception:
+            continue
+    return changed
+
+
+def _thaw_view(changed):
+    """Turn redraw back on, newest first; returns a message when SolidWorks refused."""
+    failed = []
+    while changed:
+        owner, setting = changed.pop()
+        try:
+            setattr(owner, setting, True)
+        except Exception as error:
+            failed.append(f'{setting}: {error}')
+    return ('SolidWorks ekran/ağaç güncellemesi yeniden açılamadı: ' + '; '.join(failed)) if failed else ''
+
+
 def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
                     target_builder=None, output_paths=None, output_results=None, output_identity=None,
                     save_modified=False, stop_event=None, sheet=None, selection_session=None,
@@ -518,6 +550,7 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
     source_validated = False
     managed_save = save_modified and session_managed_save and selection_session is not None
     notes, outcomes = [], []
+    frozen = []
     def checkpoint():
         if stop_event is not None and stop_event.is_set():
             raise CountCancelled()
@@ -609,6 +642,8 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             active = _value(app, "ActiveDoc")
             if active is None or _part_key(_value(active, "GetPathName"), "") != _part_key(model_path, ""):
                 raise RuntimeError("Aktif SolidWorks belgesi kaynak parça değil; aktarım yapılmadı.")
+        if pending:
+            frozen = _freeze_view(model)
         options = FLAT_GEOMETRY | (BEND_LINES if bend_lines else 0)
         # Default orientation; no selection, suppression or preference changes.
         alignment = win32com.client.VARIANT(pythoncom.VT_EMPTY, None)
@@ -721,6 +756,9 @@ def export_one_part(app, part, targets, overwrite=False, bend_lines=False,
             if output_identity is not None:
                 output_identity['native_save_error'] = '; '.join(notes)
             notes.append('Kayıt başarısız olduğu için açık belgeler kapatılmadı; aktarım durduruldu.')
+        thaw_error = _thaw_view(frozen)
+        if thaw_error:
+            notes.append(thaw_error)
         if visibility_changed and not opened_here and model is not None and not save_failed:
             try:
                 model.Visible = False
@@ -902,6 +940,58 @@ def export_parts(source_folder, output_folder, include_subfolders, overwrite_exi
             events.put(("done", summary))
 
 
+@contextmanager
+def _part_in_front(session, model):
+    """Bring the part forward and freeze its display for a whole group of bodies.
+
+    export_one_part then finds it already visible, active and frozen, so it does
+    not switch windows back and forth for every body. Afterwards the part's
+    visibility and the previously active document are put back.
+    """
+    from modules.cad_converter.api import RestoreError
+    app = _late_bound(session.app)
+    model = _wrap_raw(model)
+    previous = _value(app, 'ActiveDoc')
+    previous_name = _document_name(previous) if previous is not None else ''
+    model_path = _value(model, 'GetPathName')
+    moved = bool(previous_name) and _part_key(previous_name, '') != _part_key(model_path, '')
+    shown = activated = False
+    frozen = []
+    try:
+        if moved:
+            if not _value(model, 'Visible'):
+                model.Visible = True; shown = True
+            errors = _out_integer()
+            active = app.ActivateDoc3(model_path, False, DONT_REBUILD, errors)
+            activated = True
+            if active is None or errors.value or _part_key(_value(active, 'GetPathName'), '') != _part_key(model_path, ''):
+                raise RuntimeError(f'Parça etkinleştirilemedi. SolidWorks hata kodu: {errors.value}')
+        frozen = _freeze_view(model)
+        yield
+    finally:
+        failures = [message for message in (_thaw_view(frozen),) if message]
+        try:
+            if shown:
+                model.Visible = False
+                if _value(model, 'Visible'):
+                    failures.append('Belge görünürlüğü geri yüklenemedi.')
+        except Exception as error:
+            failures.append(f'Belge görünürlüğü geri yüklenemedi: {error}')
+        try:
+            if activated:
+                errors = _out_integer()
+                restored = app.ActivateDoc3(previous_name, False, DONT_REBUILD, errors)
+                active = _value(app, 'ActiveDoc')
+                if (restored is None or activation_failed(errors.value) or active is None
+                        or _part_key(_document_name(active), '') != _part_key(previous_name, '')):
+                    raise RuntimeError(f'SolidWorks hata kodu: {errors.value}')
+        except Exception as error:
+            failures.append(f'Önceki belge etkinleştirilemedi: {error}')
+        previous = active = restored = model = app = None
+        if failures:
+            raise RestoreError('; '.join(failures))
+
+
 def export_selection(items, source, output, formats, events, stop=None, *, overwrite=False,
                      bend_lines=False, group_by_thickness=False, naming=(), session_factory=None, save_modified=False):
     """Body-specific exports; production callers explicitly enable native saves.
@@ -930,59 +1020,105 @@ def export_selection(items, source, output, formats, events, stop=None, *, overw
         if not items:
             summary['state'] = 'empty'
             return
+        # One pass per part + configuration: open, switch configuration, bring the part
+        # forward and freeze its display ONCE, export every selected body of it, then put
+        # everything back and save ONCE. Order of first appearance is kept.
+        groups = {}
+        for item in items:
+            groups.setdefault(_part_key(item['source'], item['configuration']), []).append(item)
         with (session_factory or Session)() as session:
             session.save_modified = save_modified
             if save_modified: save_pending(session)
-            for item in items:
+            for group in groups.values():
                 checkpoint(stop)
-                active_item=item
+                first = group[0]
                 model = None
-                source_validated = False
-                outputs, metadata = [], {}
-                events.put(('sheet_current', item['sheet_id']))
+                validated = False
+                finished = []          # (item, status, detail, outputs, metadata) awaiting the part's save
+                published = set()
+                def downgrade(error):
+                    # Outputs already written stay; the bodies are reported partial with the reason.
+                    for entry in finished:
+                        wrote = any(r['status'] == 'success' for r in entry[3])
+                        entry[1] = 'partial' if wrote else 'error'
+                        entry[2] = '; '.join(filter(None, (entry[2], str(error))))
+                def publish(entry):
+                    item, status, detail, done, data = entry
+                    published.add(item['sheet_id'])
+                    summary['processed'] += 1
+                    summary[dict(success='succeeded',partial='partial',skipped='skipped',error='failed')[status]] += 1
+                    available = [r['path'] for r in done if r['status'] in ('success','skipped')]
+                    events.put(('sheet_result', dict(item, **data, status=status, detail=detail,
+                               outputs=done, output=' | '.join(available))))
+                    events.put(('progress',(summary['processed'],len(items))))
                 try:
                     # The saving session opens its own sources writable; scanners
                     # and read-only API callers retain the old policy.
-                    model = session.document(item['source'])
+                    model = session.document(first['source'])
                     try:
-                        with session.configuration(model, item['configuration']):
-                            # Material/property edits need not advance the geometry
-                            # stamp. Refresh only this body, immediately before use.
-                            checked_update = _verify_sheet_source(session, model, item, stop)
-                            source_validated = True
-                            status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
-                                overwrite, bend_lines, output_results=outputs, output_identity=metadata,
-                                stop_event=stop, sheet=item, selection_session=session, save_modified=save_modified,
-                                session_managed_save=save_modified, checked_update=checked_update)
-                    except (RestoreError, SourceRestoreError) as error:
-                        if save_modified: session._save_failure = str(error)
+                        with session.configuration(model, first['configuration']), _part_in_front(session, model):
+                            for item in group:
+                                checkpoint(stop)
+                                active_item = item
+                                outputs, metadata = [], {}
+                                events.put(('sheet_current', item['sheet_id']))
+                                try:
+                                    # Material/property edits need not advance the geometry
+                                    # stamp. Refresh only this body, immediately before use.
+                                    checked_update = _verify_sheet_source(session, model, item, stop)
+                                    validated = True
+                                    status, detail = export_one_part(session.app, item['source'], plans[item['sheet_id']],
+                                        overwrite, bend_lines, output_results=outputs, output_identity=metadata,
+                                        stop_event=stop, sheet=item, selection_session=session, save_modified=save_modified,
+                                        session_managed_save=save_modified, checked_update=checked_update)
+                                except (Cancelled, RestoreError, SourceRestoreError, SaveDocumentsError):
+                                    raise
+                                except Exception as error:
+                                    if save_modified and getattr(session, '_save_failure', ''):
+                                        raise SaveDocumentsError(str(error)) from error
+                                    status, detail = 'error', str(error)
+                                if save_modified and metadata.get('native_save_error'):
+                                    session._save_failure = metadata['native_save_error']
+                                    raise SaveDocumentsError(metadata['native_save_error'])
+                                # Reported once the part is put back (and saved): a failure there
+                                # still belongs to these bodies.
+                                finished.append([item, status, detail, outputs, metadata])
+                                active_item = None
+                                checkpoint(stop)
+                    except (RestoreError, SourceRestoreError, SaveDocumentsError) as error:
+                        if save_modified and not isinstance(error, SaveDocumentsError): session._save_failure = str(error)
+                        downgrade(error)
                         raise
                     finally:
                         # configuration() has restored the original context now.
                         # Never persist a failed rollback or retry a failed Save3.
-                        if save_modified and source_validated and not getattr(session, '_save_failure', '') and not metadata.get('native_save_error'):
-                            save_pending(session, model)
-                    if save_modified and metadata.get('native_save_error'):
-                        session._save_failure = metadata['native_save_error']
-                        raise SaveDocumentsError(metadata['native_save_error'])
-                    if save_modified:
-                        metadata.update(preview_identity(model, None))
+                        try:
+                            if save_modified and validated and not getattr(session, '_save_failure', '') and finished:
+                                try:
+                                    save_pending(session, model)
+                                except Exception as error:
+                                    downgrade(error)
+                                    raise
+                                identity = preview_identity(model, None) if model is not None else {}
+                                for entry in finished:
+                                    entry[4].update(identity)
+                        finally:
+                            for entry in finished:
+                                publish(tuple(entry))
+                            finished.clear()
                 except (Cancelled, RestoreError, SourceRestoreError, SaveDocumentsError):
                     raise
                 except Exception as error:
                     if save_modified and getattr(session, '_save_failure', ''):
                         raise SaveDocumentsError(str(error)) from error
-                    status, detail = 'error', str(error)
+                    # The part itself could not be opened, switched or brought forward:
+                    # every body of it not reported yet failed with that reason.
+                    for item in group:
+                        if item['sheet_id'] not in published:
+                            publish((item, 'error', str(error), [], {}))
+                    active_item = None
                 finally:
                     model = None
-                summary['processed'] += 1
-                summary[dict(success='succeeded',partial='partial',skipped='skipped',error='failed')[status]] += 1
-                available = [r['path'] for r in outputs if r['status'] in ('success','skipped')]
-                events.put(('sheet_result', dict(item, **metadata, status=status, detail=detail,
-                           outputs=outputs, output=' | '.join(available))))
-                active_item=None
-                events.put(('progress',(summary['processed'],len(items))))
-                checkpoint(stop)
     except Cancelled:
         summary['state'] = 'cancelled'
         if active_item is not None:

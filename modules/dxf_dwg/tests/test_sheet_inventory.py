@@ -424,3 +424,67 @@ def test_rebuild_failure_before_export_blocks_only_the_failed_part(env, tmp_path
     assert all('Healthy' in path.name for path in (tmp_path / 'out').iterdir())
     assert app.ActiveDoc is root and not app.saves
     assert before == {model.path: Path(model.path).read_bytes() for model in (broken, healthy)}
+
+
+def test_part_used_ten_times_writes_ten_adet_in_the_file_name_whatever_the_view(env,tmp_path):
+    app,_,_=env;p=part(app,tmp_path/'PARÇA 1.SLDPRT')
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,name=f'PARÇA 1-{i}') for i in range(1,11)]);app.ActiveDoc=root
+    rows,_=scan(env)
+    assert len(rows)==1 and rows[0]['quantity']==10
+    selected={rows[0]['sheet_id']:set(rows[0]['instances'])}
+    for grouped in (True,False):               # one row of 10, or ten rows of "1 / 10"
+        shown=display_rows(rows,selected,grouped)
+        assert len(shown)==(1 if grouped else 10) and all(r['total_quantity']==10 for r in shown)
+    items=selected_items(rows,selected)
+    targets=plan_destinations(items,tmp_path,tmp_path/'out',('dxf','dwg'))
+    assert [t.name for t in targets[rows[0]['sheet_id']]]==['PARÇA 1 - 1 mm - 10 adet.dxf','PARÇA 1 - 1 mm - 10 adet.dwg']
+
+
+def test_multibody_sheets_are_named_part_01_02_03_without_body_names_or_digests(env,tmp_path):
+    app,_,_=env;folder=tmp_path/'parts';folder.mkdir()
+    p=part(app,folder/'ARMOJR01.SLDPRT',count=3);single=part(app,folder/'ARMJR075005.SLDPRT')
+    for model in (p,single):
+        model.features_by_config['Default'][1].CustomPropertyManager.values['PART NUMBER']=Path(model.path).stem
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,name=f'ARMOJR01-{i}') for i in (1,2)]
+                  +[component(single,name=f'ARMJR075005-{i}') for i in range(1,5)]);app.ActiveDoc=root
+    rows,_=scan(env)
+    elsewhere=tmp_path/'unrelated'             # the scanned parts lie outside this folder
+    for naming in ((),('code',)):
+        plans=plan_destinations(rows,elsewhere,tmp_path/'out',('dxf',),naming=naming)
+        assert sorted(t.name for targets in plans.values() for t in targets)==[
+            'ARMJR075005 - 1 mm - 4 adet.dxf','ARMOJR01-01 - 1 mm - 2 adet.dxf',
+            'ARMOJR01-02 - 2 mm - 2 adet.dxf','ARMOJR01-03 - 3 mm - 2 adet.dxf']
+
+
+def test_export_freezes_tree_and_graphics_and_turns_them_back_on(env,tmp_path):
+    from types import SimpleNamespace as NS
+    app,Session,_=env;p=part(app,tmp_path/'Panel.SLDPRT');app.ActiveDoc=p
+    p.FeatureManager=NS(EnableFeatureTree=True,EnableFeatureTreeWindow=True);p.ActiveView=NS(EnableGraphicsUpdate=True)
+    seen=[];export=p.ExportToDWG2
+    def watched(*args):
+        seen.append((p.FeatureManager.EnableFeatureTree,p.FeatureManager.EnableFeatureTreeWindow,p.ActiveView.EnableGraphicsUpdate))
+        return export(*args)
+    p.ExportToDWG2=watched
+    rows,_=scan(env);events=Queue()
+    export_selection(rows,tmp_path,tmp_path/'out',('dxf','dwg'),events,session_factory=Session)
+    assert events.queue[-1][1]['succeeded']==1
+    assert seen==[(False,False,False)]*2                     # no redraw while SolidWorks exports
+    assert (p.FeatureManager.EnableFeatureTree,p.FeatureManager.EnableFeatureTreeWindow,
+            p.ActiveView.EnableGraphicsUpdate)==(True,True,True)
+
+
+def test_multibody_part_is_opened_switched_and_brought_forward_once_for_all_bodies(env,tmp_path):
+    app,Session,_=env
+    p=part(app,tmp_path/'ARMOJR01.SLDPRT',{'A':[('Body',1,10)],'B':[(f'Body-{i}',i+1,10*(i+1)) for i in range(3)]})
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,configuration='B')]);app.ActiveDoc=root
+    rows,_=scan(env);assert len(rows)==3
+    activations=[];shows=[];activate=app.ActivateDoc3;show=p.ShowConfiguration2
+    app.ActivateDoc3=lambda name,*args:(activations.append(Path(name).name),activate(name,*args))[1]
+    p.ShowConfiguration2=lambda name:(shows.append(name),show(name))[1]
+    events=Queue()
+    export_selection(rows,tmp_path,tmp_path/'out',('dxf','dwg'),events,session_factory=Session)
+    assert events.queue[-1][1]['succeeded']==3 and len(p.export_calls)==6
+    assert activations.count('ARMOJR01.SLDPRT')==1               # brought forward once for 3 bodies
+    assert shows==['B','A']                                     # configuration once, back once
+    assert p.active=='A' and app.ActiveDoc is root
+    assert [r['status'] for k,r in events.queue if k=='sheet_result']==['success']*3

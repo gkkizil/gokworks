@@ -1,0 +1,55 @@
+name: Clean up Actions history
+
+# Deletes every workflow run (with its logs and artifacts) except the newest few,
+# to free Actions storage. Releases (the EXE downloads) are not touched.
+on:
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: Newest runs to keep
+        type: number
+        default: 5
+  push:
+    branches: [agent/claude]
+    paths: ['.github/workflows/cleanup-actions.yml']
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cleanup-actions
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          KEEP: ${{ inputs.keep || 5 }}
+        with:
+          script: |
+            const repo = context.repo;
+            const keep = Math.max(0, Number(process.env.KEEP) || 5);
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {...repo, per_page: 100});
+            runs.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+            // This run is never counted or deleted; nor are runs still going.
+            const others = runs.filter(run => run.id !== context.runId);
+            const old = others.slice(keep).filter(run => run.status === 'completed');
+            core.notice(`${runs.length} runs; keeping the newest ${keep}, deleting ${old.length}.`);
+            let deleted = 0, failed = 0;
+            for (const run of old) {
+              try {
+                await github.rest.actions.deleteWorkflowRun({...repo, run_id: run.id});
+                deleted++;
+              } catch (error) {
+                failed++;
+                core.warning(`Run ${run.id} (${run.name}): ${error.message}`);
+              }
+            }
+            const left = await github.paginate(github.rest.actions.listArtifactsForRepo, {...repo, per_page: 100});
+            const bytes = left.filter(a => !a.expired).reduce((sum, a) => sum + a.size_in_bytes, 0);
+            core.notice(`Deleted ${deleted} runs (${failed} failed). Artifacts left: ${left.length}, ${(bytes / 1e6).toFixed(1)} MB.`);
+            if (failed) core.setFailed(`${failed} runs could not be deleted.`);
