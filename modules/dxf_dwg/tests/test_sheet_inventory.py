@@ -471,3 +471,20 @@ def test_export_freezes_tree_and_graphics_and_turns_them_back_on(env,tmp_path):
     assert seen==[(False,False,False)]*2                     # no redraw while SolidWorks exports
     assert (p.FeatureManager.EnableFeatureTree,p.FeatureManager.EnableFeatureTreeWindow,
             p.ActiveView.EnableGraphicsUpdate)==(True,True,True)
+
+
+def test_multibody_part_is_opened_switched_and_brought_forward_once_for_all_bodies(env,tmp_path):
+    app,Session,_=env
+    p=part(app,tmp_path/'ARMOJR01.SLDPRT',{'A':[('Body',1,10)],'B':[(f'Body-{i}',i+1,10*(i+1)) for i in range(3)]})
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,configuration='B')]);app.ActiveDoc=root
+    rows,_=scan(env);assert len(rows)==3
+    activations=[];shows=[];activate=app.ActivateDoc3;show=p.ShowConfiguration2
+    app.ActivateDoc3=lambda name,*args:(activations.append(Path(name).name),activate(name,*args))[1]
+    p.ShowConfiguration2=lambda name:(shows.append(name),show(name))[1]
+    events=Queue()
+    export_selection(rows,tmp_path,tmp_path/'out',('dxf','dwg'),events,session_factory=Session)
+    assert events.queue[-1][1]['succeeded']==3 and len(p.export_calls)==6
+    assert activations.count('ARMOJR01.SLDPRT')==1               # brought forward once for 3 bodies
+    assert shows==['B','A']                                     # configuration once, back once
+    assert p.active=='A' and app.ActiveDoc is root
+    assert [r['status'] for k,r in events.queue if k=='sheet_result']==['success']*3

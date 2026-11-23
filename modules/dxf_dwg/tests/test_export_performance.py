@@ -29,7 +29,8 @@ def test_stable_multibody_export_does_not_repeat_whole_tree_validation_per_forma
     monkeypatch.setattr(ex,'save_modified_documents',sweep)
     assert run(c,formats=formats)['succeeded']==12
     assert calls['tree']==12  # One complete initial validation per selected body.
-    assert calls['save_sweeps']==1+12*(len(formats)+1)
+    # Before each format (ExportToDWG2 must not meet a dirty document) and once for the part.
+    assert calls['save_sweeps']==1+12*len(formats)+1
     assert len(c.model.export_calls)==12*len(formats)
     assert not c.model.dirty and not c.root.dirty and c.app.ActiveDoc is c.root
 
