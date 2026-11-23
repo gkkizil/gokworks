@@ -10,8 +10,8 @@ import time
 from modules.cad_converter.api import ApiError, RestoreError
 from .models import (Cancelled, DrawingResult, Options, Source, STAGES, checkpoint, identity)
 from .outputs import ExistingOutput, OutputTransaction, check_file, fingerprint
-from .rules import CLASS_TITLES, plan_views, recommendations, unique_sources
-from .layout import plan_sheets
+from .rules import CLASS_TITLES, recommendations, unique_sources
+from .layout import plan_drawing
 from .solidworks import Session, call, error_text
 from .native import NativeDrawing
 from .manufacturing import flat_page, bom_page
@@ -118,7 +118,9 @@ def generate_one(session, source, options, events, stop, *, native_factory=Nativ
             for problem in problems:
                 result.warn('assembly_reference', problem)
         with progress.phase(4):
-            plans = plan_sheets(plan_views(info, options), options)
+            plans, deferred = plan_drawing(info, options)
+            for name in deferred:
+                result.warn('derived_layout', name+' için izin verilen pafta ve ölçeklerde yer bulunamadı.')
             plan = plans[0]
         with progress.phase(5):
             template = resolve_template(session, options)
@@ -149,6 +151,9 @@ def generate_one(session, source, options, events, stop, *, native_factory=Nativ
                     native.geometry_dimensions(plan.name)
                     count_after = len(native.dimensions(plan.name))
                     result.measurements['geometry_dimensions_created'] = max(0, count_after-count_before)
+                    if info.holes:
+                        from .hole_annotations import annotate_holes
+                        annotate_holes(native, plan.name)
                 with progress.phase(10):
                     for page in plans:
                         native.arrange_dimensions(page.name)
@@ -185,12 +190,12 @@ def generate_one(session, source, options, events, stop, *, native_factory=Nativ
                 with progress.phase(16):
                     native.close()
                     check_file(transaction.staged['slddrw'], 'slddrw')
-                    findings, reread = native.verify_saved(transaction.staged['slddrw'], snapshots)
+                    reopened_findings, reread = native.verify_saved(transaction.staged['slddrw'], snapshots)
                     # The saved/reopened geometry is the delivered evidence.
                     result.findings = [f for f in result.findings if f not in findings]
-                    result.findings.extend(findings)
+                    result.findings.extend(reopened_findings)
                     result.sheets = reread
-                    if any(f.severity == 'FAIL' for f in findings):
+                    if any(f.severity == 'FAIL' for f in reopened_findings):
                         raise ApiError('Kaydedilen SLDDRW yeniden açılıp doğrulanamadı.')
                 # Flat-pattern creation may switch the native model configuration;
                 # its read-only file/configuration checks remain mandatory.
@@ -200,6 +205,7 @@ def generate_one(session, source, options, events, stop, *, native_factory=Nativ
             if fingerprint(source.path) != stamp:
                 raise ApiError('Kaynak dosya işlem sırasında değişti; çıktı paketi yayımlanmadı.')
             with progress.phase(17):
+                session.restore_before_publish(source)
                 result.classify()
                 result.elapsed_s = time.monotonic()-started
                 result.outputs = {k: str(v) for k, v in transaction.targets.items()}
@@ -290,7 +296,8 @@ def generate(sources, options, events, stop, *, session_factory=Session, native_
                     mode = 'all' if options.assembly_scope == 'all' else 'parts'
                     queue.extend(s for s in unique_sources(result.analysis.tree.children, mode) if s.key not in seen)
                 # Keep user-open documents; close only files opened by this session.
-                session.release(result.source.path)
+                if not result.outputs:
+                    session.release(result.source.path)
     except Cancelled:
         events.put(('drawing_notice', 'İşlem kullanıcı tarafından durduruldu.'))
     except Exception as error:

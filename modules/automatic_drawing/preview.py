@@ -12,10 +12,11 @@ from PySide6.QtGui import QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 from gui_qt.theme import COLORS
-from .layout import LayoutError, plan_sheets
-from .rules import CLASS_TITLES, MODEL_VIEWS, plan_views
+from .layout import LayoutError, plan_drawing
+from .rules import CLASS_TITLES, MODEL_VIEWS
 
-ROLE_TITLES = {'main': 'Ana görünüş', 'top': 'Üst izdüşüm', 'side': 'Yan izdüşüm', 'isometric': 'İzometrik'}
+ROLE_TITLES = {'main': 'Ana görünüş', 'top': 'Üst izdüşüm', 'side': 'Yan izdüşüm', 'isometric': 'İzometrik',
+               'section': 'Kesit A-A', 'detail': 'Detay B'}
 VIEW_NAMES = {v: k for k, v in MODEL_VIEWS.items()}
 DIRECTION_TITLES = {'front': 'ön', 'back': 'arka', 'top': 'üst', 'bottom': 'alt', 'right': 'sağ',
                     'left': 'sol', 'isometric': 'izometrik'}
@@ -31,7 +32,7 @@ def plan_preview(info, options):
     """Sheets for ``info`` under ``options`` (same rules as generation); raises LayoutError/ValueError."""
     if options.classification != 'auto' and info.kind == 'part' and options.classification in CLASS_TITLES:
         info = replace(info, classification=options.classification)
-    return plan_sheets(plan_views(info, options), options)
+    return plan_drawing(info, options)[0]
 
 
 class SheetPreview(QWidget):

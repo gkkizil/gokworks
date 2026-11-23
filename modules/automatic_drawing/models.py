@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 import math
 from pathlib import Path
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 SCALES = (5., 2., 1., .5, .4, .2, .1, .05, .02, .01)
 PAPERS = {'A4': (297., 210.), 'A3': (420., 297.), 'A2': (594., 420.),
           'A1': (841., 594.), 'A0': (1189., 841.)}
@@ -83,6 +83,36 @@ class FaceEvidence:
     point_mm: tuple = ()
 
 
+@dataclass(frozen=True)
+class Hole:
+    """Measured rim centres in model space, with optional explicit Wizard data."""
+    axis: tuple
+    rims_mm: tuple
+    diameter_mm: float
+    feature: str = ''
+    wizard_type: str = ''
+    end_condition: str = ''
+    parameters: tuple = ()
+
+
+@dataclass(frozen=True)
+class Detail:
+    kind: str
+    point_mm: tuple
+    size_mm: float
+    normal_axis: int
+
+
+@dataclass(frozen=True)
+class DerivedView:
+    label: str
+    point_mm: tuple
+    direction: tuple = ()
+    radius_mm: float = 0.
+    scale: float = 0.
+    offset_axis: int = 0
+
+
 @dataclass
 class SheetBody:
     """Plain manufacturing evidence; names are labels, persistent IDs are identity."""
@@ -131,6 +161,8 @@ class ModelInfo:
     fingerprint: tuple = ()
     memory_stamp: int | None = None
     sheet_bodies: list = field(default_factory=list)
+    holes: list = field(default_factory=list)
+    details: list = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -172,6 +204,7 @@ class Options:
     title_height_mm: float = 40.
     annotation_padding_mm: float = 15.
     gap_mm: float = 16.
+    hole_table_template: str = ''
 
     def validate(self):
         if self.paper not in (*PAPERS, 'auto', 'custom'):
@@ -211,7 +244,7 @@ class Options:
                 raise ValueError('Aynı antet hedef alanına iki model özelliği atanamaz: '+pair[1])
             targets.add(pair[1].casefold())
         for path, suffix in ((self.template, '.drwdot'), (self.sheet_format, '.slddrt'),
-                             (self.bom_template, '.sldbomtbt')):
+                             (self.bom_template, '.sldbomtbt'), (self.hole_table_template, '.sldholtbt')):
             if path and (Path(path).suffix.casefold() != suffix or not Path(path).is_file()):
                 raise ValueError('Şablon bulunamadı veya türü yanlış: ' + str(path))
         return self
@@ -259,6 +292,7 @@ class ViewPlan:
     footprint: tuple
     center: tuple = (0., 0.)
     parent: str = ''
+    derived: DerivedView | None = None
 
 
 @dataclass

@@ -58,6 +58,12 @@ SCENARIOS = (
     Scenario('company_templates', 'Firma DRWDOT / SLDDRT / BOM şablonları', 'GOKWORKS_LIVE_COMPANY_SOURCE',
              dict(bom=True), extra_env=('GOKWORKS_LIVE_COMPANY_DRWDOT', 'GOKWORKS_LIVE_COMPANY_SLDDRT',
                                          'GOKWORKS_LIVE_COMPANY_BOM')),
+    Scenario('holed_plate_wizard', 'Hole Wizard delikli plaka', 'GOKWORKS_LIVE_HOLED_PLATE_WIZARD',
+             dict(flat_pattern=False, bom=False)),
+    Scenario('bored_shaft_section', 'İç kademeli mil kesiti', 'GOKWORKS_LIVE_BORED_SHAFT_SECTION',
+             dict(flat_pattern=False, bom=False)),
+    Scenario('small_radius_detail', 'Küçük radyüs detay görünüşü', 'GOKWORKS_LIVE_SMALL_RADIUS_DETAIL',
+             dict(flat_pattern=False, bom=False, manual_scale=1.)),
 )
 
 
@@ -129,6 +135,20 @@ def check(scenario, result, environ=os.environ):
         problems.append(f'mil olarak sınıflanmadı ({getattr(info, "classification", "?")})')
     if scenario.key == 'holed_plate' and getattr(info, 'classification', '') not in ('plate', 'block'):
         problems.append(f'plaka olarak sınıflanmadı ({getattr(info, "classification", "?")})')
+    if scenario.key == 'holed_plate_wizard':
+        groups = [row for row in result.measurements.get('holes', ()) if row.get('source') == 'Hole Wizard']
+        saved = [annotation for sheet in result.sheets for annotation in sheet.get('annotations', ())]
+        saved += [dimension for sheet in result.sheets for dimension in sheet.get('dimensions', ())]
+        if (not groups or not all(row.get('view') and row.get('annotated_count') == row.get('count') for row in groups)
+                or not any(row.get('annotation_kind') in ('hole_callout', 'wizard_note', 'hole_table') for row in saved)):
+            problems.append('Tüm Hole Wizard delikleri kayıtlı görünüşte delik bilgisi veya tablosuyla doğrulanamadı')
+    if scenario.key in ('bored_shaft_section', 'small_radius_detail'):
+        role, label = ('section', 'A') if scenario.key == 'bored_shaft_section' else ('detail', 'B')
+        view = next((v for sheet in result.sheets for v in sheet.get('views', ()) if v['role'] == role), None)
+        if view is None or not view.get('parent') or view.get('label') not in (label, f'{label}-{label}'):
+            problems.append('Kayıtlı kesit A-A veya detay B görünüşü ve ana görünüş bağı doğrulanamadı')
+        elif role == 'detail' and view.get('view_scale') not in (2., 5., 10.):
+            problems.append('Detay büyütme ölçeği beklenen 2:1, 5:1 veya 10:1 değerlerinden biri değil')
     if scenario.key == 'single_body_sheet':
         if getattr(info, 'sheet_body_count', 0) != 1:
             problems.append('tek sac gövdesi okunmadı')

@@ -93,6 +93,7 @@ def case(tmp_path):
         return True
 
     drawing = RawDispatch('IDrawingDoc', methods={'GetCurrentSheet': lambda: sheet,
+        'GetFirstView': lambda: RawDispatch('IView-sheet'),
         'GetSheetNames': lambda: (state['name'],),
         'ActivateSheet': lambda name: True, 'SetupSheet6': setup_sheet,
         'CreateDrawViewFromModelView3': add_view,
@@ -434,7 +435,8 @@ def test_saved_bom_listed_under_the_sheet_entry_is_found_on_reopen(case):
     usable = snapshots[0]['usable']
     case.constants.update(swTableAnnotation_BillOfMaterials=7, swColumnTypeStatus_Success=0,
                           swBomTableColumnType_Quantity=203)
-    annotation = RawDispatch('IAnnotation', methods={'GetPosition': lambda: (to_m(usable.x+1), to_m(usable.top-1), 0.)})
+    annotation = RawDispatch('IAnnotation', methods={'GetPosition': lambda: (to_m(usable.x+1), to_m(usable.top-1), 0.),
+                                                     'GetName': lambda: 'BOM'})
     table = RawDispatch('ITableAnnotation', methods={'GetAnnotation': lambda: annotation,
         'GetColumnWidth': lambda i: .01, 'GetRowHeight': lambda i: .003, 'GetColumnType3': lambda *args: 0},
         properties={'Type': 7, 'RowCount': 2, 'ColumnCount': 1})

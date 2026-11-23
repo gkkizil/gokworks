@@ -93,7 +93,8 @@ def inventory_case(*, fallback=False, reverse=False, wrong_parent=False):
             def fixed():
                 if fallback and not scope['accessed']:
                     return None
-                return RawDispatch('IFace2', methods={'GetBody': lambda: body(i)})
+                return RawDispatch('IFace2', methods={'GetBody': lambda: body(i)},
+                                   properties={'Normal': (0., 0., 1.)})
             return RawDispatch('IFlatPatternFeatureData', methods={'AccessSelections': access,
                 'ReleaseSelectionAccess': release}, properties={'FixedFace2': fixed})
         def suppression(option, configs, i=index):
@@ -289,51 +290,30 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
     c.session.open_drawing = lambda path: (case.model, case.drawing)
     c.session.close_created = lambda model: source_calls.append('close-owned-drawing')
     c.session.activate = lambda model: source_calls.append('activate-owned-drawing')
-    selected = []
-    def delete_configuration(name):
-        if name not in c.state.configs:
-            return False
-        c.state.configs = tuple(n for n in c.state.configs if n != name); return True
-    c.model.methods.update(DeleteConfiguration2=delete_configuration, ClearSelection2=lambda all: selected.clear())
-    original_body = c.body
-    def selectable(index):
-        body = original_body(index)
-        body.methods['Select2'] = lambda append, data, body=body: selected.append(body.token) is None
-        return body
-    c.model.methods['GetBodies2'] = lambda *args: [selectable(i) for i in (1, 2, 3)]
-
-    def create(path, config, x, y, z, hide, flip):
-        # Recorded on SolidWorks 2025 SP5 (single sheet body, part reopened from disk): the
-        # PARENT configuration resolves to its existing derived flat configuration; naming the
-        # flat configuration itself yields a folded view that references the parent.
+    def create(path, direction, x, y, z):
+        assert direction == '*Front'
         if new_config:
             c.state.configs += ('UNEXPECTED',)
-        resolved = info.sheet_bodies[0].configurations[0] if config == 'Default' else 'Default'
-        multibody = len(info.sheet_bodies) > 1
-        if multibody:
-            # Recorded on SolidWorks 2025 SP5 (multibody, reopened part): a NEW temporary
-            # '<parent>SM-FLAT-PATTERN<n>' is created for the selected body; no body filter.
-            resolved = f'DefaultSM-FLAT-PATTERN-TEMP{len(views)+1}'
-            c.state.configs += (resolved,)
         props = dict(Position=(x, y), UseSheetScale=False, ReferencedDocument=c.model,
-                     Bodies=() if (no_body_filter or multibody) else c.get_bodies(),
-                     ReferencedConfiguration='Default' if wrong_config else resolved)
+                     Bodies=() if no_body_filter else c.get_bodies(), ReferencedConfiguration='Default')
         def bounds():
             vx, vy = props['Position']; scale = case.state['props'][2]
             return vx-.04*scale, vy-.02*scale, vx+.04*scale, vy+.02*scale
         class View(RawDispatch):
             def Invoke(self, member, lcid, flags, result_wanted, *args):
-                if (ignore_body_filter or multibody) and member == 'Bodies' and flags == 4:
-                    self.calls.append((member, flags, args)); return None
+                if flags == 4 and ((ignore_body_filter and member == 'Bodies') or
+                                   (wrong_config and member == 'ReferencedConfiguration')):
+                    self.calls.append((member, flags, args))
+                    return None
                 return super().Invoke(member, lcid, flags, result_wanted, *args)
         name = 'Flat'+str(len(views)+1)
         view = View('IView', methods={'GetName2': lambda: name, 'GetOutline': bounds,
-            'IsFlatPatternView': lambda: True, 'GetReferencedModelName': lambda: info.source.path,
+            'IsFlatPatternView': lambda: False, 'GetReferencedModelName': lambda: info.source.path,
             'GetBodiesCount': lambda: len(props['Bodies']), 'GetFirstDisplayDimension5': lambda: None,
             'GetTableAnnotations': lambda: None, 'GetNextView': lambda: None}, properties=props)
         views[case.state['name']] = view
         return view
-    case.drawing.methods['CreateFlatPatternViewFromModelView3'] = create
+    case.drawing.methods['CreateDrawViewFromModelView3'] = create
 
     def insert(text):
         position = {'xyz': (0., 0., 0.)}
@@ -368,7 +348,7 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
     return SimpleNamespace(**locals())
 
 
-def test_native_page_requests_the_parent_configuration_restores_source_and_reopens_with_identifiers(case):
+def test_native_page_uses_saved_configuration_restores_source_and_reopens_with_identifiers(case):
     c = native_flat_case(case)
     flat_page(c.native, c.c.model)
     assert len(c.native.pages) == 1
@@ -381,9 +361,10 @@ def test_native_page_requests_the_parent_configuration_restores_source_and_reope
               if name == 'Bodies' and flags == 4]
     assert len(writes) == 1
     assert all(w.varianttype == 0x2009 and len(w.value) == 1 for w in writes)
-    calls = [args for name, flags, args in case.drawing.calls if name == 'CreateFlatPatternViewFromModelView3']
-    assert [args[1] for args in calls] == ['Default']          # parent, never the flat configuration
-    assert all(len(args) == 7 and args[5] is False for args in calls)
+    calls = [args for name, flags, args in case.drawing.calls if name == 'CreateDrawViewFromModelView3']
+    assert [args[1] for args in calls] == ['*Front']
+    assert all(len(args) == 5 for args in calls)
+    assert not any(name == 'CreateFlatPatternViewFromModelView3' for name, _, _ in case.drawing.calls)
     assert c.views[next(iter(c.views))].properties['ReferencedConfiguration'] == 'Body1-SM-FLAT-PATTERN'
     assert not any(name == 'AttachAnnotation' for name, flags, args in case.drawing.calls)   # already on sheet
     assert not any(name == 'ActivateView' and args == ('',) for name, flags, args in case.drawing.calls)
@@ -458,14 +439,12 @@ def test_an_unavailable_single_flat_body_is_reported_and_no_view_is_requested(ca
     assert any(f.code == 'body_flat_unavailable' and 'ORHAN-01' in f.text for f in c.native.result.findings)
 
 
-def test_multibody_flat_views_are_retargeted_to_saved_configurations_and_temporaries_removed(case):
-    # Recorded on SolidWorks 2025 SP5: on a reopened multibody part each selected-body request
-    # created a NEW in-memory '<parent>SM-FLAT-PATTERN<n>'; a drawing bound to it lost the unfolded
-    # geometry on reopen. Retargeted to the SAVED per-body configuration it survived the reopen.
+def test_multibody_flat_views_use_saved_configurations_without_creating_source_configurations(case):
     c = native_flat_case(case, bodies=3)
     saved = c.c.state.configs
     flat_page(c.native, c.c.model)
-    assert c.c.state.configs == saved                     # every temporary configuration removed
+    assert c.c.state.configs == saved
+    assert not any('DeleteConfiguration' in name for name, _, _ in c.c.model.calls)
     assert len(c.native.pages) == 3
     configs = [page['views']['flat'].properties['ReferencedConfiguration'] for page in c.native.pages.values()]
     assert configs == ['Body1-SM-FLAT-PATTERN', 'Body2-SM-FLAT-PATTERN', 'Body3-SM-FLAT-PATTERN']

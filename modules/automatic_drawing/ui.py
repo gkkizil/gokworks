@@ -501,8 +501,6 @@ class AutoDrawingPage(BasePage):
         for key, title, default in (('top', 'Üst izdüşüm', True), ('side', 'Yan izdüşüm', True),
                                     ('isometric', 'İzometrik görünüş', True)):
             self._check(views, key, title, default)
-        views.addRow(label('Kesit / detay gereksinimleri analiz raporunda önerilir; bu sürümde otomatik oluşturulmaz.',
-                           'muted'))
 
         dims = self._form('Ölçüler ve ayrıntılar', 'Modelden aktarılan ölçüler, düzenleme ve sac ayrıntıları.')
         for key, title, default, hint in (
@@ -514,6 +512,8 @@ class AutoDrawingPage(BasePage):
             ('flat_pattern', 'Mevcut sac açınımını ekle', True, 'Modelde açınım varsa ayrı görünüş olarak.'),
             ('bend_lines', 'Açınım büküm çizgileri', True, '')):
             self._check(dims, key, title, default, hint)
+        self._path(dims, 'hole_table_template', 'Delik tablosu şablonu (isteğe bağlı)',
+                   'SolidWorks delik tablosu (*.sldholtbt *.SLDHOLTBT)', 'SolidWorks standart şablonu')
 
         assembly = self._form('Montaj ve BOM', 'Montaj resmi kapsamı, malzeme listesi ve balonlar.')
         self._combo(assembly, 'assembly_scope', 'Oluşturulacak resimler',

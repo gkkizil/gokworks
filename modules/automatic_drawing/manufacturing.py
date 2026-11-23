@@ -12,7 +12,7 @@ from .rules import quantities
 
 
 def table_box(table):
-    """ITableAnnotation bounds from native row/column dimensions and top-left anchor."""
+    """ITableAnnotation bounds from native row/column dimensions and anchor."""
     rows, columns = int(get(table, 'RowCount')), int(get(table, 'ColumnCount'))
     if not 0 < rows < 10000 or not 0 < columns < 1000:
         raise ApiError('BOM tablo boyutları okunamadı.')
@@ -22,7 +22,10 @@ def table_box(table):
         raise ApiError('BOM tablosu konumu okunamadı.')
     width = sum(to_mm(call(table, 'GetColumnWidth', i)) for i in range(columns))
     height = sum(to_mm(call(table, 'GetRowHeight', i)) for i in range(rows))
-    return Box(to_mm(position[0]), to_mm(position[1])-height, width, height)
+    anchor = optional(table, 'AnchorType', property=True, default=1)
+    x = to_mm(position[0])-(width if anchor in (2, 4) else 0.)
+    y = to_mm(position[1])-(height if anchor in (1, 2) else 0.)
+    return Box(x, y, width, height)
 
 
 def quantity_columns(table, session):
@@ -53,55 +56,18 @@ def flat_page(native, source_model):
     info, options, result = native.info, native.options, native.result
     if not options.flat_pattern or not info.sheet_body_count:
         return
-    if info.sheet_bodies:
-        return body_flat_pages(native, source_model)
-    if info.body_count != 1 or info.sheet_body_count != 1:
-        result.warn('multibody_flat', 'Sac gövdelerinin kalıcı kimlikleri / açınım eşleştirmeleri eksik; '
-                    'yeniden analiz edin. Gövde adı veya sırası ile açınım tahmin edilmedi.')
+    if not info.sheet_bodies:
+        result.warn('flat_configuration', 'Sac gövdesinin kayıtlı açınım konfigürasyonu ve kalıcı kimliği '
+                    'doğrulanamadı. Açınım paftası atlandı.')
         return
-    matching = []
-    for name in info.flat_configurations:
-        config = call(source_model, 'GetConfigurationByName', name)
-        parent = call(config, 'GetParent')
-        if parent is not None and str(get(parent, 'Name')) == info.source.configuration:
-            matching.append(name)
-    if len(matching) != 1:
-        result.warn('flat_configuration', 'Kaynağa bağlı tek bir mevcut SM-FLAT-PATTERN konfigürasyonu '
-                    'doğrulanamadı; kaynakta yeni açınım konfigürasyonu oluşturulmadı.')
-        return
-    before = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
-    single = replace(options, top=False, side=False, isometric=False)
-    diagonal = sum(x*x for x in info.size_mm)**.5
-    plan = plan_sheet([ViewPlan('flat', '', (diagonal, diagonal))], single, 'Sac açınımı')
-    native.setup(plan, new=True)
-    x, y = (to_m(v) for v in plan.views[0].center)
-    view = call(native.drawing, 'CreateFlatPatternViewFromModelView3', info.source.path,
-                info.source.configuration, x, y, 0., not options.bend_lines, False)
-    after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
-    if set(after) != set(before):
-        raise RestoreError('SolidWorks mevcut açınım yerine kaynakta yeni bir konfigürasyon oluşturdu. '
-                           'Kaynak dosya kaydedilmedi; SolidWorks’te geçici konfigürasyonu kontrol edin.')
-    if view is None:
-        raise ApiError('Native açınım görünüşü oluşturulamadı.')
-    if str(get(view, 'ReferencedConfiguration')) != matching[0] or not call(view, 'IsFlatPatternView'):
-        raise ApiError('Açınım görünüşünün beklenen konfigürasyonu doğrulanamadı.')
-    put(view, 'UseSheetScale', 1)
-    native.pages[plan.name]['views']['flat'] = view
-    native.set_scale(plan.name, plan.scale)
-    native.fit(plan.name)
-    native.flat_dimensions(plan.name)
-    result.measurements['flat_pattern'] = {'configuration': matching[0], 'body_count': 1,
-        'bend_lines_requested': options.bend_lines, 'thickness_mm': info.thickness_mm}
-    result.warn('bend_notes', 'Açınım native görünüş olarak eklendi. Büküm çizgileri / yönleri ve büküm notlarının '
-                'tamlığı SolidWorks’te kontrol edilmeli; eksik K faktörü veya büküm açısı tahmin edilmedi.', plan.name)
+    return body_flat_pages(native, source_model)
 
 
 def body_flat_pages(native, source_model):
     """One existing flat configuration and one verified body per native page."""
     from modules.cad_converter.api import PART_IID
-    from .sheetmetal import verify_unfolded
+    from .sheetmetal import flat_view_direction, verify_unfolded
     info, options, session = native.info, native.options, native.session
-    multibody = len(info.sheet_bodies) > 1
     before = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
     delivered = []
     for row in info.sheet_bodies:
@@ -112,11 +78,16 @@ def body_flat_pages(native, source_model):
             continue
         configuration = row.configurations[0]
         verify_unfolded(session, source_model, row, configuration)
+        direction = flat_view_direction(session, source_model, row, configuration)
+        if direction is None:
+            native.result.warn('flat_direction', row.label+': sabit açınım yüzü standart bir görünüme dik '
+                               'değil veya okunamadı. Açınım paftası atlandı.')
+            continue
         single = replace(options, top=False, side=False, isometric=False)
         # The folded box is only an initial estimate; native.fit uses the actual
         # unfolded geometry. Reserve a separate header outside the view region.
         diagonal = sum(x*x for x in (row.size_mm or info.size_mm))**.5
-        plan = plan_sheet([ViewPlan('flat', '', (diagonal, diagonal))], single,
+        plan = plan_sheet([ViewPlan('flat', direction, (diagonal, diagonal))], single,
                           f'Sac açınımı {row.index:02d}')
         whole = plan.usable
         header = Box(whole.x, whole.top-18., whole.width, 18.)
@@ -126,33 +97,18 @@ def body_flat_pages(native, source_model):
         page = native.pages[plan.name]
         page['flat_body'] = row
         x, y = (to_m(v) for v in plan.views[0].center)
-        # Request the PARENT configuration: SolidWorks resolves it to its existing derived flat
-        # configuration (localized name, e.g. 'VarsayılanSM-DÜZ-ÇOĞALTMA'), checked below.
-        # Recorded on SolidWorks 2025 SP5: naming the flat configuration itself returns a FOLDED
-        # view that still reports IsFlatPatternView and references the parent configuration.
-        if multibody:
-            select_body(native, source_model, row)
-        view = call(native.drawing, 'CreateFlatPatternViewFromModelView3', info.source.path,
-                    info.source.configuration, x, y, 0., not options.bend_lines, False)
+        # The native flat-view constructor can create a new source configuration.
+        # Use an ordinary model view of the existing, verified unfolded configuration.
+        view = native.model_view_at(plan.views[0], x, y)
+        if view is None:
+            raise ApiError(row.label+': mevcut açınım konfigürasyonu için görünüş oluşturulamadı.')
+        put(view, 'ReferencedConfiguration', configuration)
+        native.rebuild()
         after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
-        created = [name for name in after if name not in before]
-        if multibody and created:
-            # Recorded on SolidWorks 2025 SP5: on a reopened multibody part the selected body's
-            # flat view always gets a NEW in-memory '<parent>SM-FLAT-PATTERN<n>'; a drawing bound
-            # to it loses the unfolded geometry on reopen (the source is never saved). Retarget
-            # the view to the body's SAVED flat configuration, then remove the temporary one.
-            if view is not None:
-                put(view, 'ReferencedConfiguration', configuration)
-                native.rebuild()
-            for name in created:
-                if call(source_model, 'DeleteConfiguration2', name) is not True:
-                    raise RestoreError('Açınımın geçici kaynak konfigürasyonu kaldırılamadı: '+name+
-                                       '. Kaynak kaydedilmedi; SolidWorks’te bu konfigürasyonu kaydetmeden kapatın.')
-            after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
         if set(after) != set(before):
-            raise RestoreError('Açınım oluşturulurken kaynak konfigürasyonları değişti; kaynak kaydedilmedi.')
-        if view is None or str(get(view, 'ReferencedConfiguration')) != configuration or not call(view, 'IsFlatPatternView'):
-            raise ApiError(row.label+': istenen native açınım görünüşü doğrulanamadı.')
+            raise RestoreError('Açınım sırasında kaynak konfigürasyonları değişti; kaynak kaydedilmedi.')
+        if str(get(view, 'ReferencedConfiguration')) != configuration:
+            raise ApiError(row.label+': kayıtlı açınım konfigürasyonu görünüşe bağlanamadı.')
         # Select through IView.Bodies rather than names or the first body's index.
         # Source handles are reacquired AFTER any definition/rollback access.
         with session.configuration(source_model, configuration):
@@ -179,25 +135,9 @@ def body_flat_pages(native, source_model):
     if delivered:
         native.result.measurements['flat_pattern'] = {'bodies': delivered, 'body_count': len(delivered),
                                                      'bend_lines_requested': options.bend_lines}
-        native.result.warn('bend_notes', 'Gövde bazlı açınımlar mevcut konfigürasyonlardan oluşturuldu. '
-                           'Büküm çizgileri, yönleri ve notlarının tamlığını SolidWorks’te kontrol edin.')
-
-
-def select_body(native, source_model, row):
-    """Pre-select the body in the source: SolidWorks asks which body to unfold on a multibody part."""
-    from modules.cad_converter.api import PART_IID
-    from .solidworks import null_dispatch
-    session = native.session
-    session.activate(source_model)
-    try:
-        call(source_model, 'ClearSelection2', True)
-        bodies = values(call(as_interface(source_model, PART_IID), 'GetBodies2', session.c('swSolidBody'), False))
-        matches = [body for body in bodies if session.persistent_ref(source_model, body) == row.body_ref]
-        if len(matches) != 1 or not call(matches[0], 'Select2', False, null_dispatch()):
-            raise ApiError(row.label+': açınım için sac gövdesi kaynakta seçilemedi.')
-    finally:
-        bodies = matches = ()
-        session.activate(native.model)
+        if options.bend_lines:
+            native.result.warn('bend_notes', 'Açınım, kaydedilmiş konfigürasyon geometrisini gösterir. Büküm çizgileri '
+                               've büküm notları çizimde ayrıca doğrulanmalı.')
 
 
 def bom_page(native):

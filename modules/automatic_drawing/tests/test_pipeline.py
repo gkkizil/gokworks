@@ -48,6 +48,7 @@ class FakeSession:
     def active_configuration(self, model): return model.configuration
     def memory_stamp(self, model): return getattr(model, 'update_stamp', 1)
     def release(self, path): self.released.append(path)
+    def restore_before_publish(self, source): self.release(source.path)
 
     @contextmanager
     def configuration(self, model, name):
@@ -162,6 +163,20 @@ def test_failed_native_reopen_prevents_publication_even_with_existing_staged_fil
         session_factory=lambda: FakeSession(template), native_factory=FakeNative)[0]
     assert result.status == 'FAIL' and not result.outputs and result.stage == STAGES[16]
     assert list((tmp_path/'out').iterdir()) == []
+
+
+def test_active_document_restore_failure_prevents_publication(tmp_path, setup, monkeypatch):
+    options, template = setup
+    session = FakeSession(template)
+
+    def failed_restore(_):
+        raise RestoreError('Önceki aktif belge geri getirilemedi.')
+
+    monkeypatch.setattr(session, 'restore_before_publish', failed_restore)
+    results = pipeline.generate([source(tmp_path, 'a'), source(tmp_path, 'b')], options, Sink(), Event(),
+                                session_factory=lambda: session, native_factory=FakeNative)
+    assert len(results) == 1 and results[0].status == 'FAIL' and results[0].stage == STAGES[17]
+    assert not results[0].outputs and list((tmp_path/'out').iterdir()) == []
 
 
 def test_external_model_change_invalidates_previously_generated_drawing(tmp_path, setup, monkeypatch):

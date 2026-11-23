@@ -39,7 +39,8 @@ def arrange(views, scale, area, options, *, measured=None, positions=None):
             origin = positions[role] if positions is not None else box.center
             box = box.shifted(-origin[0], -origin[1])
         else:
-            width, height = (v*scale for v in view.footprint)
+            own = view.derived.scale if view.derived and view.derived.scale else scale
+            width, height = (v*own for v in view.footprint)
             box = Box(-width/2, -height/2, width, height)
         local[role] = box.grow(pad)
     centers = {views[0].role if len(views) == 1 else 'main': (0., 0.)}
@@ -68,6 +69,19 @@ def arrange(views, scale, area, options, *, measured=None, positions=None):
                       [sign*separation(local[r].shifted(*centers[r]), iso, 1)
                        for r in ('main', 'side') if r in centers])
         centers['isometric'] = (dx, dy)
+    for role in ('section', 'detail'):
+        if role not in roles:
+            continue
+        axis = roles[role].derived.offset_axis
+        occupied = [local[r].shifted(*center) for r, center in centers.items()]
+        own = local[role]
+        if role == 'section':
+            distance = sign*max(sign*separation(other, own, axis) for other in occupied)
+        else:
+            # A free-positioned detail goes opposite the orthographic group.
+            distance = (min(b.x for b in occupied)-own.right-gap if sign > 0 else
+                        max(b.right for b in occupied)-own.x+gap)
+        centers[role] = (distance, 0.) if axis == 0 else (0., distance)
     boxes = {r: local[r].shifted(*c) for r, c in centers.items()}
     left, right = min(b.x for b in boxes.values()), max(b.right for b in boxes.values())
     bottom, top = min(b.y for b in boxes.values()), max(b.top for b in boxes.values())
@@ -108,12 +122,14 @@ def _best_on(views, options, paper, name):
     for scale in scales:
         own = [scale]+([s for s in preferred if scale/ISO_STEP-1e-12 <= s < scale] if isometric else [])
         for iso in own:
-            measured = {v.role: Box(0, 0, v.footprint[0]*(iso if v.role == 'isometric' else scale),
-                                    v.footprint[1]*(iso if v.role == 'isometric' else scale)) for v in views}
+            own_scales = {v.role: v.derived.scale for v in views if v.derived and v.derived.scale}
+            if iso != scale:
+                own_scales['isometric'] = iso
+            measured = {v.role: Box(0, 0, v.footprint[0]*own_scales.get(v.role, scale),
+                                    v.footprint[1]*own_scales.get(v.role, scale)) for v in views}
             arranged = arrange(views, scale, area, options, measured=measured)
             if arranged is not None:
-                return SheetPlan(name, paper, width, height, scale, arranged, area,
-                                 {'isometric': iso} if iso != scale else {})
+                return SheetPlan(name, paper, width, height, scale, arranged, area, own_scales)
     return None
 
 
@@ -148,6 +164,27 @@ def plan_sheets(views, options):
                 plan_sheet(separate, options, 'İzometrik görünüş')]
 
 
+def plan_drawing(info, options):
+    """Shared draft/generator plan. Keep every cut with its parent view."""
+    from .rules import derived_views, plan_views
+    plans = plan_sheets(plan_views(info, options), options)
+    general = plans[0]
+    base = next(v for v in general.views if v.role == 'main')
+    deferred = []
+    for derived in derived_views(info, base, general.scale):
+        fixed = replace(options, manual_scale=general.scale)
+        together = _best_on([*general.views, derived], fixed, general.paper, general.name)
+        if together is not None:
+            general = plans[0] = together
+            continue
+        name = 'Kesit A-A' if derived.role == 'section' else 'Detay B'
+        try:
+            plans.append(plan_sheet([base, derived], options, name))
+        except LayoutError:
+            deferred.append(name)
+    return plans, deferred
+
+
 def union(boxes):
     boxes = list(boxes)
     if not boxes:
@@ -170,7 +207,23 @@ def text_box(x, y, width, height, angle):
     return Box(left, bottom, max(p[0] for p in points)-left, max(p[1] for p in points)-bottom)
 
 
-def place_texts(records, outlines, area, *, obstacle_boxes=(), lanes=20, offset=7.):
+def crosses_box(start, end, box):
+    """Clip a leader segment against the interior of an annotation rectangle."""
+    lower, upper = 0., 1.
+    for a, b, lo, hi in zip(start, end, (box.x, box.y), (box.right, box.top)):
+        delta = b-a
+        if abs(delta) < 1e-9:
+            if not lo < a < hi:
+                return False
+            continue
+        t0, t1 = sorted(((lo-a)/delta, (hi-a)/delta))
+        lower, upper = max(lower, t0), min(upper, t1)
+        if lower >= upper:
+            return False
+    return True
+
+
+def place_texts(records, outlines, area, *, obstacle_boxes=(), obstacle_leaders=(), lanes=20, offset=7.):
     """Move only annotation text, retain its native references and dimension value.
 
     Bounded greedy search keeps close-to-view positions. Unknown text bounds are
@@ -178,7 +231,8 @@ def place_texts(records, outlines, area, *, obstacle_boxes=(), lanes=20, offset=
     """
     occupied = list(obstacle_boxes)
     moves, unresolved = {}, []
-    for key, owner, box in records:
+    for key, owner, box in sorted(records, key=lambda record: (
+            record[1], record[2].x if record[2] else 0., record[2].y if record[2] else 0.)):
         if box is None or owner not in outlines:
             unresolved.append(key)
             continue
@@ -190,9 +244,18 @@ def place_texts(records, outlines, area, *, obstacle_boxes=(), lanes=20, offset=
                                Box(box.x, view.y-distance-box.height, box.width, box.height),
                                Box(view.x-distance-box.width, box.y, box.width, box.height),
                                Box(view.right+distance, box.y, box.width, box.height)))
+        # If the starting axis itself is blocked by another view, shift along
+        # the first lane in equal steps before leaving the view's vicinity.
+        for step in range(1, lanes+1):
+            for shift in (-offset*step, offset*step):
+                candidates.extend((Box(box.x+shift, view.top+offset, box.width, box.height),
+                                   Box(box.x+shift, view.y-offset-box.height, box.width, box.height),
+                                   Box(view.x-offset-box.width, box.y+shift, box.width, box.height),
+                                   Box(view.right+offset, box.y+shift, box.width, box.height)))
         selected = next((b for b in candidates if area.contains(b) and
                          not any(b.overlaps(v, .8) for v in outlines.values()) and
-                         not any(b.overlaps(v, .8) for v in occupied)), None)
+                         not any(b.overlaps(v, .8) for v in occupied) and
+                         not any(crosses_box(*line, b) for line in obstacle_leaders)), None)
         if selected is None:
             unresolved.append(key)
             occupied.append(box)
