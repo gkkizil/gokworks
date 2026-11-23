@@ -438,3 +438,19 @@ def test_part_used_ten_times_writes_ten_adet_in_the_file_name_whatever_the_view(
     items=selected_items(rows,selected)
     targets=plan_destinations(items,tmp_path,tmp_path/'out',('dxf','dwg'))
     assert [t.name for t in targets[rows[0]['sheet_id']]]==['PARÇA 1 - 1 mm - 10 adet.dxf','PARÇA 1 - 1 mm - 10 adet.dwg']
+
+
+def test_multibody_sheets_are_named_part_01_02_03_without_body_names_or_digests(env,tmp_path):
+    app,_,_=env;folder=tmp_path/'parts';folder.mkdir()
+    p=part(app,folder/'ARMOJR01.SLDPRT',count=3);single=part(app,folder/'ARMJR075005.SLDPRT')
+    for model in (p,single):
+        model.features_by_config['Default'][1].CustomPropertyManager.values['PART NUMBER']=Path(model.path).stem
+    root=assembly(app,tmp_path/'Main.SLDASM',[component(p,name=f'ARMOJR01-{i}') for i in (1,2)]
+                  +[component(single,name=f'ARMJR075005-{i}') for i in range(1,5)]);app.ActiveDoc=root
+    rows,_=scan(env)
+    elsewhere=tmp_path/'unrelated'             # the scanned parts lie outside this folder
+    for naming in ((),('code',)):
+        plans=plan_destinations(rows,elsewhere,tmp_path/'out',('dxf',),naming=naming)
+        assert sorted(t.name for targets in plans.values() for t in targets)==[
+            'ARMJR075005 - 1 mm - 4 adet.dxf','ARMOJR01-01 - 1 mm - 2 adet.dxf',
+            'ARMOJR01-02 - 2 mm - 2 adet.dxf','ARMOJR01-03 - 3 mm - 2 adet.dxf']
