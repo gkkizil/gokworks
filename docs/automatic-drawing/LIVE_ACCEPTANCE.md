@@ -83,13 +83,20 @@ onaylamaz.
 | 6 | Bastırılmış bileşenli montaj | `GOKWORKS_LIVE_SUPPRESSED_ASSEMBLY` | Etkin konfigürasyonda en az 1 bastırılmış bileşen | Bastırılmış bileşen ağaçta; BOM tablosu (adet elle kontrol edilir) |
 | 7 | Eksik referans | `GOKWORKS_LIVE_MISSING_REFERENCE` | Bir bileşen dosyası silinmiş / yeniden adlandırılmış montaj kopyası | Durum `FAIL`, gerekçe bildirilir, **SLDDRW yayımlanmaz** |
 | 8 | Firma şablonları | `GOKWORKS_LIVE_COMPANY_SOURCE`, `GOKWORKS_LIVE_COMPANY_DRWDOT`, `GOKWORKS_LIVE_COMPANY_SLDDRT`, `GOKWORKS_LIVE_COMPANY_BOM` | Firmanın gerçek DRWDOT, SLDDRT ve BOM şablonu + bir montaj | Şablonlarla SLDDRW + PDF; BOM tablosu (antet alanları elle kontrol edilir) |
+| 9 | Hole Wizard delikli plaka | `GOKWORKS_LIVE_HOLED_PLATE_WIZARD` | Aynı eksende en az birkaç geometrik olarak ayrı Wizard deliği. Mümkünse eş delikler, diş ve karşı havşa | Tekrar açıldığında doğrulanabilir native delik bilgisi, gruplanmış ölçü notu veya delik tablosu |
+| 10 | İç kademeli mil | `GOKWORKS_LIVE_BORED_SHAFT_SECTION` | Ana eksene hizalı, ortak uçlu farklı çaplarda iç silindirlerden oluşan mil | Kayıtlı kesit A-A ve ana görünüş bağı |
+| 11 | Küçük radyüs detayı | `GOKWORKS_LIVE_SMALL_RADIUS_DETAIL` | Ana görünüşte okunabilen 0,3–2,9 mm arası modellenmiş radyüs | 1:1 ana paftadan 2:1, 5:1 veya 10:1 ölçekli kayıtlı detay B |
 
-Ortak şablon: 1–7 numaralı senaryolar `GOKWORKS_DRAWING_LIVE_TEMPLATE` ile verilen DRWDOT'u kullanır.
+1–7 ve 9–11 numaralı senaryolar `GOKWORKS_DRAWING_LIVE_TEMPLATE` ile verilen DRWDOT'u kullanır.
+9–11 henüz gerçek SolidWorks'te çalıştırılmadı. 3 ve 4 numaralı senaryolar kayıtlı açınım
+konfigürasyonlarını kullanan yeni akışla tekrar çalıştırılmalıdır.
 
 ## Elle incelenecekler (rapora eklenmeli)
 
 - Ölçülerin okunabilirliği, çakışma, eksik imalat ölçüsü.
-- Delik / diş / havşa açıklamaları. Bunlar model ölçüsü olarak gelir; otomatik tanıma kapsamı sınırlıdır, bkz. `KNOWN_LIMITATIONS.md`.
+- Delik / diş / havşa açıklamaları ve delik tablosu. Tip, sayılar ve seçilen
+  görünüş modelle karşılaştırılır.
+- Kesit çizgisinin iç kademeyi kesmesi, A-A etiketi, detay B'nin dairesi ve ölçeği.
 - Büküm çizgileri ve büküm notları.
 - BOM adetleri: Bastırılmış bileşen sayılmamalıdır.
 - Firma antetindeki özellik bağlantıları.

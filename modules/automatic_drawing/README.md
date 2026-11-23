@@ -7,10 +7,10 @@ modele bağlı SLDDRW oluşturmak için geliştirilmiştir. Python, mevcut PySid
 pywin32 bağlantısı ve sıralı JobManager kullanılır. Yeni CAD motoru veya
 ayrı bir MCP / yapay zekâ servisi gerekmez.
 
-**Doğrulama durumu:** Linux üzerindeki algoritma, dosya güvenliği, ham COM
-çağrı sözleşmeleri ve Qt testleri gerçek SolidWorks kabul testi değildir.
-Bu geliştirme ortamında lisanslı SolidWorks bulunmadığından gerçek CAD
-üretimi henüz doğrulanmamıştır. Opt-in Windows testi aşağıdadır.
+Önceki sürüm SolidWorks 2025 SP5 üzerinde yedi canlı senaryoyu geçti.
+Yeni delik bilgileri, kesit, detay ve kayıtlı konfigürasyondan açınım akışı
+için [canlı kabul kaydındaki](../../docs/automatic-drawing/LIVE_ACCEPTANCE.md)
+senaryolar çalıştırılmalıdır.
 
 ## Kullanım
 
@@ -32,7 +32,8 @@ Bu geliştirme ortamında lisanslı SolidWorks bulunmadığından gerçek CAD
    inceleyin. Önizleme, SolidWorks’ten dışa aktarılan gerçek PDF’i gösterir.
    Önizleme › **Taslak pafta**, analizden hemen sonra ve oluşturmadan önce oluşturucunun aynı
    planını çizer: pafta, ölçek, izdüşüm yönüne göre görünüş yerleri, antet alanı ve gerekirse
-   ikinci pafta. Görünüşler model dış ölçüsü × ölçek kutularıdır; çizgiler, ölçüler, açınım ve
+   ek pafta. Kesit A-A ve Detay B planlandığında kendi adları ve ölçekleriyle görünür.
+   Görünüşler model dış ölçüsü × ölçek kutularıdır. Çizgiler, ölçüler, açınım ve
    BOM paftaları oluşturulunca gelir. SolidWorks çağrısı yoktur, ayar değişikliği anında
    yansır (plan ≈ 0,1 ms).
 
@@ -54,7 +55,17 @@ bırakma onayı değildir. Belirsiz veya eksik imalat bilgileri raporlanır.
 - A4–A0, özel boyut, otomatik / manuel ölçek, gerçek görünüş sınırlarından
   yeniden sığdırma; gerekirse izometriyi ayrı paftaya alma.
 - Native model ölçüleri, isteğe bağlı AutoDimension, merkez işaretleri,
-  ölçü metni yerleşimi ve kayıt sonrası yeniden denetim.
+  ölçü metni, not, balon, lider, etiket ve tablo çakışma denetimi. Sonuç
+  kaydedildikten sonra tekrar açılır ve kalan çakışmalar raporlanır.
+- Hole Wizard bilgileri uygun görünüşe aktarılır. Çok delikte
+  **Ölçüler ve ayrıntılar** altında seçilebilen firma `.SLDHOLTBT`
+  şablonu veya kurulumdaki standart şablonla tablo denenir. Aynı
+  belirlenmiş özelliklere sahip delikler ortak bir notta gruplanabilir.
+  Geometriden doğrulanan deliklerde çap ölçüsü ve inceleme uyarısı verilir.
+- Modelin ölçülen kör veya kademeli deliği için eksenden geçen kesit A-A.
+  Paftada 3 mm'nin altında kalan ölçülmüş radyüs, pah veya Hole Wizard
+  kanalı için 2:1, 5:1 veya 10:1 ölçekli detay B. Ayrıntı sığmazsa ana
+  görünüşüyle ayrı pafta denenir.
 - Üç BOM tipi; gerçek bileşen kimlikleri, örnek adetleri ve görünen adet
   sütunu karşılaştırması. BOM’a bağlı balonlar seçilebilir.
 - Tek / çok gövdeli sac için gövde–Cut List–FlatPattern kimliklerini okuma;
@@ -67,9 +78,10 @@ bırakma onayı değildir. Belirsiz veya eksik imalat bilgileri raporlanır.
 - Kaynak ve açık belgeleri koruma; iptal, başarısız dosyayı ayırma,
   benzersiz dosya / konfigürasyon kuyruğu ve aşama raporu.
 
-Kesit / detay oluşturma, tam delik / diş / PCD tanıma ve tüm geometriye
-üretim ölçüsü oluşturma tamamlanmış değildir. Çok gövdeli açınımın canlı
-SolidWorks kabulü ayrıca gereklidir.
+Delik tipi ve imalat bilgisi modelden doğrulanabildiği ölçüde aktarılır.
+PCD, serbest biçimli iç boşluklar ve firma şablonlarına özgü ölçülendirme
+ayrıca incelenir. Gövde açınımı kayıtlı konfigürasyon geometrisine bağlıdır.
+Büküm çizgileri ve notlarını SolidWorks'te kontrol edin.
 Bkz. [bilinen sınırlar](../../docs/automatic-drawing/KNOWN_LIMITATIONS.md).
 
 ## Testler

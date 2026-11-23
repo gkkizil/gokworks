@@ -175,10 +175,13 @@ sayılarını, **Günlük** bölümünden de dosya bazlı açıklamaları izleye
    oluşturulan resmi, sonuç listesinde de dosya bazlı denetimleri inceleyin.
 
 Resim, modelde çizim için işaretlenen ölçüleri ve isteğe bağlı geometrik
-referans ölçülerini kullanır. Montajlar için BOM ve balonlar eklenebilir.
+referans ölçülerini kullanır. Modelde doğrulanan kör ve kademeli delikler
+için kesit, paftada küçük kalan ölçülmüş ayrıntılar için detay görünüşü
+planlanır. Hole Wizard bilgileri, delik eksenine dik görünüşte delik
+bilgisi veya tablo olarak gösterilebilir. Montajlar için BOM ve balonlar eklenebilir.
 Kayıtlı açınım konfigürasyonları olan çok gövdeli saclarda her doğrulanmış
-gövde aynı resimde ayrı bir paftaya yerleştirilir. Açınım paftalarında dış
-ölçüler ve uygun büküm çizgilerinin konum ölçüleri gösterilir.
+gövde aynı resimde ayrı bir paftaya yerleştirilir. Açınım paftaları dış
+ölçüleri ve çizimde okunabilen büküm çizgilerinin konum ölçülerini gösterir.
 
 Modül kaynak parçayı veya montajı otomatik kaydetmez. İmalat ölçüleri,
 toleranslar ve firma anteti için sonuçları SolidWorks'te inceleyin. Gerçek

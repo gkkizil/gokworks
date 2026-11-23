@@ -132,3 +132,61 @@ ActivateView bir paftayı etkinleştirmek için kullanılmaz; bu durumda false
 döndürebildiği resmi açıklamada belirtilir. Başlık için ActivateSheet ve
 açık annotation attachment kullanılmıştır. Bu ek API araştırması canlı
 SolidWorks testi değildir.
+
+## Delik bilgisi, kesit ve detay
+
+| İşlem | Sözleşme |
+|---|---|
+| IWizardHoleFeatureData2 | Unsurun `GetDefinition` sonucu çalışan SolidWorks tür kitaplığıyla ilgili arayüze çevrilir. `Type`, yalnız o tipe ait çap, derinlik, karşı havşa, havşa ve diş alanlarını belirler. API uzunlukları metre, açıları radyandır. |
+| ICurve.CircleParams / IFace2.FaceInSurfaceSense | Yedi double çember merkezi, eksen, yarıçap. Yüzeyin yönü, iki dairesel sınır ve ölçülmüş silindir alanı birlikte kullanılır. |
+| InsertModelAnnotations3 | `swInsertholeCallout` bit maskesi seçili görünüşe uygulanır. Dönen IAnnotation dizisindeki `IsHoleCallout` ve `GetAttachedEntities3` gerçek çemberle karşılaştırılır. |
+| IView.InsertHoleTable3 / InsertHoleTable2 | Sırasıyla dokuz ve altı argüman. Görünüş köşesi seçim işareti 1, delik kenarları işaret 2. Tablo başında gerçek XYZ köşesi kullanılır. Kurulumun standart harfli şablonu veya firmanın SLDHOLTBT dosyası seçilir. Her seçili delik için benzersiz etiket yeniden okunur. |
+| IModelDoc2.InsertNote / AddDiameterDimension2 | Üretilen çizimde seçilen dairesel kenara bağlanır. Grup notunun lideri ve çap ölçüsü kayıt sonrasında yeniden okunur. |
+| IDrawingDoc.CreateSectionViewAt5 | Seçilen kesit çizgisiyle sessiz çalışır. Doküman arayüzünde yedi argüman. Ham COM için out bileşen sayısı alan `ICreateSectionViewAt5` kullanılmaz. `SetLabel2` sıfır döndürmeli. |
+| IDrawingDoc.CreateDetailViewAt4 | Seçilen görünüş çemberiyle 12 argüman. Pay ve payda ayrı double. `GetDetail`, `GetLabel` ve `ScaleRatio` ile yeniden okunur. |
+| IView.ModelToViewTransform / ISketch.ModelToSketchTransform | Model noktası paftaya, pafta noktası görünüş eskizine dönüştürülür. Eskiz metotları yalnız yeni teknik resim belgesinde çağrılır. |
+| IDrSection.GetTextInfo / IDetailCircle.GetLabelPosition | Kesit iki XYZ kaydı döndürür. Detayda iki BYREF double çıkışı doğrulanır. `CharHeight` okunursa metin genişliği tahmini açıkça raporlanır. |
+| IAnnotation.GetLeaderPointsAtIndex | Sıfır tabanlı indeks. İki veya üç XYZ noktasından lider parçaları kurulur. |
+
+[Hole Wizard tipleri ve geçerli alanlar](https://help.solidworks.com/2025/English/api/sldworksapi/Table_of_Wizard_Hole_Types_and_Valid_Properties.htm) ·
+[Wizard tanımı](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IWizardHoleFeatureData2_members.html) ·
+[Çember parametreleri](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ICurve~CircleParams.html) ·
+[Yüz yönü](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFace2~FaceInSurfaceSense.html) ·
+[Görünür varlıklar](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IView~GetVisibleEntities2.html) ·
+[Çıkartılan pahlarda ölçülen mesafe](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IChamferFeatureData2~GetEdgeChamferDistance.html).
+
+[Delik bilgisi içe aktarma türleri](https://help.solidworks.com/2025/English/api/swconst/SolidWorks.Interop.swconst~SolidWorks.Interop.swconst.swInsertAnnotation_e.html) ·
+[IsHoleCallout](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDisplayDimension~IsHoleCallout.html) ·
+[Bağlı varlıklar](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAnnotation~GetAttachedEntities3.html) ·
+[Delik tablosu ve seçim işaretleri](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IView~InsertHoleTable3.html) ·
+[Önceki delik tablosu imzası](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IView~InsertHoleTable2.html) ·
+[Delik etiketi](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IHoleTable~HoleTag.html) ·
+[Tablo ankrajı](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ITableAnnotation~AnchorType.html) ·
+[Köşe/kenar seçimi](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IEntity~Select4.html) ·
+[Bağlı not](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDoc2~InsertNote.html) ·
+[Çap ölçüsü](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IModelDoc2~AddDiameterDimension2.html).
+
+`AddHoleCallout2` kullanıcıdan sisteme ait delik bilgisi penceresinde **Tamam** ister.
+Otomatik akışta bunun yerine model anotasyonu içe aktarma, doğrulanmış delik tablosu ve
+model parametrelerinden not kullanılır. [AddHoleCallout2 uyarısı](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~AddHoleCallout2.html).
+
+[Kesit örneği](https://help.solidworks.com/2025/English/api/sldworksapi/Create_Section_View_and_Get_Some_Data_Example_CSharp.htm) ·
+[CreateSectionViewAt5](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~CreateSectionViewAt5.html) ·
+[ICreateSectionViewAt5](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~ICreateSectionViewAt5.html) ·
+[Kesit etiketi](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrSection~SetLabel2.html) ·
+[Detay örneği](https://help.solidworks.com/2025/English/api/sldworksapi/Create_Detail_Circle_and_Detail_View_Example_VB.htm) ·
+[CreateDetailViewAt4](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~CreateDetailViewAt4.html).
+
+[Çizim görünüşü dönüşümü](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IView~ModelToViewTransform.html) ·
+[Eskiz dönüşümü](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.ISketch~ModelToSketchTransform.html) ·
+[Kesit etiketi konumu](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrSection~GetTextInfo.html) ·
+[Detay etiketi konumu](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDetailCircle~GetLabelPosition.html) ·
+[Lider noktaları](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IAnnotation~GetLeaderPointsAtIndex.html).
+
+Kayıtlı açınım akışı `IFlatPatternFeatureData.FixedFace2` ve `IFace2.Normal` ile
+görünüş yönünü seçip `CreateDrawViewFromModelView3` çıktısını mevcut açınım
+konfigürasyonuna bağlar. Daha önce canlı testte gözlenen
+`CreateFlatPatternViewFromModelView3` çağrısı bellekte yeni kaynak konfigürasyonu
+açabildiği için bu akışta kaldırıldı.
+[Sabit açınım yüzü](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IFlatPatternFeatureData~FixedFace2.html) ·
+[Standart model görünüşü](https://help.solidworks.com/2025/English/api/sldworksapi/SolidWorks.Interop.sldworks~SolidWorks.Interop.sldworks.IDrawingDoc~CreateDrawViewFromModelView3.html).
