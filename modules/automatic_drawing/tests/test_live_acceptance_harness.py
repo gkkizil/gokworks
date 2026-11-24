@@ -12,11 +12,12 @@ import pytest
 from modules.automatic_drawing import live_acceptance as acceptance
 
 
-def test_eight_named_scenarios_cover_the_requested_cases():
+def test_live_scenarios_cover_the_requested_cases():
     assert [s.key for s in acceptance.SCENARIOS] == [
         'stepped_shaft', 'holed_plate', 'single_body_sheet', 'multibody_sheet', 'assembly_configurations',
-        'assembly_suppressed_component', 'missing_reference', 'company_templates']
-    assert len({s.env for s in acceptance.SCENARIOS}) == 8
+        'assembly_suppressed_component', 'missing_reference', 'company_templates',
+        'holed_plate_wizard', 'bored_shaft_section', 'small_radius_detail']
+    assert len({s.env for s in acceptance.SCENARIOS}) == 11
 
 
 def test_without_solidworks_or_fixtures_every_scenario_is_reported_not_run(tmp_path):
@@ -24,7 +25,8 @@ def test_without_solidworks_or_fixtures_every_scenario_is_reported_not_run(tmp_p
     report = acceptance.run(tmp_path, environ={}, generate=lambda *a: called.append(a))
     assert not called
     assert {row['status'] for row in report['scenarios']} == {acceptance.NOT_RUN}
-    assert report['summary'] == {acceptance.PASSED: 0, acceptance.FAILED: 0, acceptance.NOT_RUN: 8}
+    assert report['summary'] == {acceptance.PASSED: 0, acceptance.FAILED: 0,
+                                 acceptance.NOT_RUN: len(acceptance.SCENARIOS)}
     assert all(row['reason'] for row in report['scenarios'])
 
 

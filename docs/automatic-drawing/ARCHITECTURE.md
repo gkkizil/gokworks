@@ -20,7 +20,9 @@ mevcut CAD oturumu kullanılır ve COM initialization / cleanup dengelenir.
 |---|---|
 | models.py | Birimler, veri sözleşmeleri, seçenek denetimi, gerçek aşama listesi |
 | solidworks.py | Mevcut raw COM bağlantısı, STA sahipliği, kaynak analizi ve hiyerarşi |
-| rules.py | Kanıta dayalı sınıf / yön puanı, benzersiz işler ve BOM örnek adetleri |
+| rules.py | Kanıta dayalı sınıf / yön puanı, kesit ve detay kararı, benzersiz işler ve BOM örnek adetleri |
+| part_features.py | Hole Wizard tanımı ve ölçülmüş delik / detay geometri kanıtları |
+| hole_annotations.py | Native delik bilgisi içe aktarma, tablo, çap ölçüsü ve gruplanmış not |
 | layout.py | Pafta / ölçek seçimi, bağlı izdüşüm yerleşimi, ölçü metni alanları |
 | native.py | Gerçek Drawing / View / Dimension nesneleri, kayıt ve tekrar açma |
 | manufacturing.py | Native BOM / balonlar ve koşullu açınım paftası |
@@ -47,7 +49,7 @@ gövde / unsur pointer’ları cache veya UI’ya girmez. GetPersistReference3
 bağlantı hataları kayıp kimlik gibi yutulmaz. Gövde kimliği başlığı
 AttachAnnotation ile paftaya bağlanır; görünüş ölçeklenince başlık değişmez.
 Başlık, tek gövde kapsamı ve üretim özellikleri SLDDRW yeniden açılınca
-tekrar denetlenir. Analiz / rapor şeması yeni gövde kanıtları için v2’dir.
+  tekrar denetlenir. Analiz / rapor v3 delik, ayrıntı ve anotasyon kanıtlarını da taşır.
 
 IModelDoc2 ve IDrawingDoc dual arayüzleri ayrı işlenir. BOM tablosunun
 ITableAnnotation arayüz kimliği çalışan SolidWorks tür kitaplığından alınır.
@@ -79,10 +81,11 @@ yeniden okunur. Her ölçüden sonra kayıt yapılmaz.
 
 1. Hedef klasör / ad / çakışma politikası doğrulanır.
 2. Nihai klasörde özel, geçici adlarla SLDDRW / PDF / rapor hazırlanır.
-3. Native geometri ve bağlantılar incelenir; native dosya kapatılıp tekrar
-   salt okunur açılır. Bütün kayıtlı sayfa / görünüşler sayılır.
-4. Kaynak konfigürasyonu geri alındıktan ve kaynak dosya yeniden
-   denetlendikten sonra paket yayımlanır.
+3. Native geometri, delik bilgileri, anotasyon yerleşimi ve bağlantılar
+   incelenir. Native dosya kapatılıp salt okunur açılır ve bütün paftalar
+   tekrar denetlenir.
+4. Kaynak dosya yeniden denetlenir. Konfigürasyon, seçim ve önceki etkin
+   belge geri getirildikten sonra paket yayımlanır.
 5. Mevcut dosya üzerine yazmayan link / Windows rename uygulanır.
    JSON raporu en son yayımlanır. Kısmi yayın hatasında yalnız işlem
    tarafından oluşturulmuş, hâlâ aynı kimlikteki dosyalar geri alınır.

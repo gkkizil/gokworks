@@ -4,6 +4,7 @@ from itertools import combinations
 import math
 
 from .models import Box, Finding, identity
+from .layout import crosses_box
 
 
 def validate_views(sheet, actual, source, *, flat_configurations=(), projection=None):
@@ -47,11 +48,18 @@ def validate_views(sheet, actual, source, *, flat_configurations=(), projection=
         elif config != source.configuration:
             findings.append(Finding('FAIL', 'configuration', 'Görünüş yanlış konfigürasyona bağlı.',
                                     sheet['name'], label))
-        if view['role'] in ('top', 'side') and view.get('parent') != view.get('main_name'):
+        if view['role'] in ('top', 'side', 'section', 'detail') and view.get('parent') != view.get('main_name'):
             findings.append(Finding('FAIL', 'projection_link', 'İzdüşümün ana görünüş ilişkisi korunmamış.',
                                     sheet['name'], label))
-        if view['role'] in ('top', 'side') and main_position and view.get('position'):
-            axis = 0 if view['role'] == 'top' else 1
+        if view['role'] in ('section', 'detail') and (not view.get('label') or
+                view['label'] not in (view['expected_label'], view['expected_label']+'-'+view['expected_label'])):
+            findings.append(Finding('FAIL', 'derived_label', 'Kesit/detay etiketi doğrulanamadı.',
+                                    sheet['name'], label))
+        if view['role'] == 'detail' and not math.isclose(view['view_scale'], view['expected_scale'], rel_tol=1e-6):
+            findings.append(Finding('FAIL', 'detail_scale', 'Kayıtlı detay ölçeği seçilen değerle uyuşmuyor.',
+                                    sheet['name'], label))
+        if view['role'] in ('top', 'side', 'section') and main_position and view.get('position'):
+            axis = 1-view['offset_axis'] if view['role'] == 'section' else int(view['role'] == 'side')
             if abs(view['position'][axis]-main_position[axis]) > .05:
                 findings.append(Finding('FAIL', 'projection_alignment', 'İzdüşüm ana görünüşle aynı eksende değil.',
                                         sheet['name'], label))
@@ -69,7 +77,7 @@ def validate_views(sheet, actual, source, *, flat_configurations=(), projection=
     return findings
 
 
-def validate_annotations(records, outlines, area, sheet=''):
+def validate_annotations(records, outlines, area, sheet='', *, bounds=None):
     findings = []
     seen = set()
     for record in records:
@@ -89,7 +97,11 @@ def validate_annotations(records, outlines, area, sheet=''):
         if box is None:
             findings.append(Finding('WARNING', 'dimension_bounds', 'Ölçünün metin sınırları okunamadı: '+name, sheet))
         elif not area.contains(box):
-            findings.append(Finding('FAIL', 'dimension_outside', 'Ölçü pafta / antet alanı dışında: '+name, sheet))
+            if bounds is None or not bounds.contains(box):
+                findings.append(Finding('FAIL', 'dimension_outside', 'Ölçü pafta dışında: '+name, sheet))
+            else:
+                findings.append(Finding('WARNING', 'dimension_title_area', 'Ölçü antet veya kenar boşluğuna taşıyor: '+name,
+                                        sheet))
         elif any(box.overlaps(outline) for outline in outlines.values()):
             findings.append(Finding('WARNING', 'dimension_on_view', 'Ölçü metni görünüş üzerine geliyor: '+name, sheet))
     readable = [r for r in records if r.get('box') is not None]
@@ -97,4 +109,35 @@ def validate_annotations(records, outlines, area, sheet=''):
         if first['box'].overlaps(second['box'], .25):
             findings.append(Finding('WARNING', 'dimension_collision',
                                     f"Ölçü metinleri çakışıyor: {first['name']} / {second['name']}.", sheet))
+    return findings
+
+
+def validate_annotation_obstacles(dimensions, extras, outlines, area, sheet):
+    findings = []
+    for record in extras:
+        box = record['box']
+        if record['kind'] == 'wizard_note' and record.get('dangling') is True:
+            findings.append(Finding('FAIL', 'hole_note_link', 'Delik notunun geometri bağı kopmuş: '+record['name'], sheet))
+        if box is None:
+            findings.append(Finding('WARNING', 'annotation_bounds',
+                                    'Anotasyon sınırları okunamadı: '+record['name'], sheet))
+        elif record['kind'] != 'title':
+            if not area.contains(box):
+                findings.append(Finding('WARNING', 'annotation_outside',
+                    'Anotasyon pafta veya antet alanına taşıyor: '+record['name'], sheet))
+            if any(box.overlaps(view) for view in outlines.values()):
+                findings.append(Finding('WARNING', 'annotation_on_view',
+                    'Anotasyon metni görünüş üzerine geliyor: '+record['name'], sheet))
+    for first, second in combinations([*dimensions, *extras], 2):
+        a, b = first.get('box'), second.get('box')
+        if first.get('kind') == second.get('kind') == 'title':
+            continue
+        if (a is not None and b is not None and (first.get('annotation_kind') or second.get('annotation_kind'))
+                and a.overlaps(b, .25)):
+            findings.append(Finding('WARNING', 'annotation_collision',
+                f"Anotasyonlar çakışıyor: {first['name']} / {second['name']}.", sheet))
+        if ((a is not None and any(crosses_box(*line, a) for line in second.get('leaders', ()))) or
+                (b is not None and any(crosses_box(*line, b) for line in first.get('leaders', ())))):
+            findings.append(Finding('WARNING', 'annotation_leader_collision',
+                f"Lider çizgisi metin veya tabloyu kesiyor: {first['name']} / {second['name']}.", sheet))
     return findings

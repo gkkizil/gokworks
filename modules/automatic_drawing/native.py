@@ -11,7 +11,7 @@ from modules.tolerance_stack.solidworks_reader import nominal_value, DIMENSION_T
 from .solidworks import call, get, put, prop, optional, values, variant, out_int, null_dispatch, as_interface
 from .models import Box, Finding, checkpoint, to_mm, to_m, degrees, identity
 from .layout import arrange, place_texts, text_box, union
-from .validation import validate_views, validate_annotations
+from .validation import validate_views, validate_annotations, validate_annotation_obstacles
 
 
 def outline(view):
@@ -53,6 +53,43 @@ def annotation_box(annotation):
             estimated = True
         boxes.append(text_box(to_mm(position[0]), to_mm(position[1]), to_mm(width), to_mm(height), angle))
     return union(boxes), estimated
+
+
+def annotation_leaders(annotation):
+    count = optional(annotation, 'GetLeaderCount')
+    segments = []
+    for index in range(count if type(count) is int and 0 < count <= 100 else 0):
+        raw = values(optional(annotation, 'GetLeaderPointsAtIndex', index, default=()))
+        if len(raw) in (6, 9) and all(isinstance(x, (int, float)) and math.isfinite(x) for x in raw):
+            points = [(to_mm(raw[i]), to_mm(raw[i+1])) for i in range(0, len(raw), 3)]
+            segments.extend(zip(points, points[1:]))
+    return segments, type(count) is int and (count < 0 or count > 100 or count > len(segments))
+
+
+def derived_labels(view, planned):
+    kind = planned.role
+    symbol = call(view, 'GetSection' if kind == 'section' else 'GetDetail')
+    label = planned.derived.label
+    if symbol is None:
+        return []
+    if kind == 'section':
+        raw = values(optional(symbol, 'GetTextInfo', default=()))
+        points = (raw[:2], raw[3:5]) if len(raw) == 6 else ()
+    else:
+        x, y = variant(0x4005, float('nan')), variant(0x4005, float('nan'))
+        result = optional(symbol, 'GetLabelPosition', x, y)
+        if isinstance(result, (tuple, list)):
+            if len(result) != 2:
+                raise ApiError('Detay etiketi konumunun BYREF sözleşmesi geçersiz.')
+            x.value, y.value = result
+        points = ((x.value, y.value),)
+    style = optional(symbol, 'GetTextFormat')
+    height = optional(style, 'CharHeight', property=True)
+    boxes = [Box(to_mm(x), to_mm(y-height), to_mm(height)*len(label)*.8, to_mm(height))
+             for x, y in points if type(height) in (int, float) and height > 0. and
+             all(type(v) in (int, float) and math.isfinite(v) for v in (x, y, height))]
+    return [dict(name=f'{label}/{index}', owner='main', kind='view_label', annotation_kind='view_label',
+                 box=box, estimated=box is not None) for index, box in enumerate(boxes or [None], 1)]
 
 
 # SolidWorks names the standard model views in its UI language and requires the exact name.
@@ -243,7 +280,9 @@ class NativeDrawing:
         for view_plan in plan.views:
             checkpoint(self.stop)
             x, y = (to_m(v) for v in view_plan.center)
-            if view_plan.parent:
+            if view_plan.derived:
+                view = self.create_derived_view(page['views'][view_plan.parent], view_plan, x, y)
+            elif view_plan.parent:
                 self.select_view(page['views'][view_plan.parent])
                 view = call(self.drawing, 'CreateUnfoldedViewAt3', x, y, 0., False)
             else:
@@ -255,11 +294,79 @@ class NativeDrawing:
                     raise ApiError('İzdüşüm ana görünüşün konfigürasyonunu devralmadı.')
             else:
                 put(view, 'ReferencedConfiguration', self.info.source.configuration)
-            put(view, 'UseSheetScale', 1)
+            if not view_plan.derived or view_plan.role == 'section':
+                put(view, 'UseSheetScale', 1)
             page['views'][view_plan.role] = view
         self.set_scale(plan.name, plan.scale)
         for role, scale in list(plan.view_scales.items()):
-            self.set_view_scale(plan, role, scale)
+            if role != 'detail':
+                self.set_view_scale(plan, role, scale)
+
+    def transform_point(self, point, *transforms):
+        utility = call(self.session.app, 'GetMathUtility')
+        result = call(utility, 'CreatePoint', variant(0x2005, point))
+        for transform in transforms:
+            result = call(result, 'MultiplyTransform', transform)
+        coordinates = tuple(float(value) for value in values(get(result, 'ArrayData')))
+        if len(coordinates) != 3 or not all(math.isfinite(value) for value in coordinates):
+            raise ApiError('Çizim koordinat dönüşümü okunamadı.')
+        return coordinates
+
+    def create_derived_view(self, parent, plan, x, y):
+        evidence = plan.derived
+        name = str(call(parent, 'GetName2'))
+        if not call(self.drawing, 'ActivateView', name):
+            raise ApiError('Kesit/detay için ana görünüş etkinleştirilemedi.')
+        call(self.model, 'ClearSelection2', True)
+        view_transform = get(parent, 'ModelToViewTransform')
+        sketch_transform = get(call(parent, 'GetSketch'), 'ModelToSketchTransform')
+        point = tuple(to_m(v) for v in evidence.point_mm)
+        px, py, _ = self.transform_point(point, view_transform)
+        parent_box = outline(parent)
+        if not parent_box.grow(2.).contains(Box(to_mm(px), to_mm(py), 0., 0.)):
+            raise ApiError('Kesit/detay referans noktası ana görünüşe izdüşürülemedi.')
+        sketch = get(self.model, 'SketchManager')
+        original = get(sketch, 'AddToDB')
+        try:
+            put(sketch, 'AddToDB', True)
+            if plan.role == 'section':
+                # Obtain the signed direction from the actual view transform.
+                end = tuple(v+d for v, d in zip(point, evidence.direction))
+                ex, ey, _ = self.transform_point(end, view_transform)
+                length = math.hypot(ex-px, ey-py)
+                if length <= 1e-9:
+                    raise ApiError('Kesit ekseni ana görünüşte izlenemedi.')
+                reach = to_m(math.hypot(parent_box.width, parent_box.height)+5.)
+                dx, dy = (ex-px)*reach/length, (ey-py)*reach/length
+            else:
+                ratio = values(get(parent, 'ScaleRatio'))
+                if len(ratio) != 2 or ratio[0] <= 0 or ratio[1] <= 0:
+                    raise ApiError('Detay çemberi için ana görünüş ölçeği okunamadı.')
+                dx, dy = to_m(evidence.radius_mm)*ratio[0]/ratio[1], 0.
+            start = (px-dx, py-dy, 0.) if plan.role == 'section' else (px, py, 0.)
+            first = self.transform_point(start, sketch_transform)
+            last = self.transform_point((px+dx, py+dy, 0.), sketch_transform)
+            segment = call(sketch, 'CreateLine' if plan.role == 'section' else 'CreateCircle', *first, *last)
+        finally:
+            put(sketch, 'AddToDB', original)
+        if segment is None or not call(segment, 'Select4', False, null_dispatch()):
+            raise ApiError('Kesit çizgisi veya detay çemberi görünüş eskizinde seçilemedi.')
+        try:
+            c = self.session.c
+            if plan.role == 'section':
+                view = call(self.drawing, 'CreateSectionViewAt5', x, y, 0., evidence.label,
+                            c('swCreateSectionView_ScaleWithModel'), variant(0, None), 0.)
+                section = call(view, 'GetSection') if view is not None else None
+                if section is None or call(section, 'SetLabel2', evidence.label) != 0:
+                    raise ApiError('Native kesit veya benzersiz kesit etiketi oluşturulamadı.')
+            else:
+                view = call(self.drawing, 'CreateDetailViewAt4', x, y, 0., c('swDetViewSTANDARD'),
+                            evidence.scale, 1., evidence.label, c('swDetCircleCIRCLE'), True, False, False, 5)
+                if view is None or call(view, 'GetDetail') is None:
+                    raise ApiError('Native detay görünüşü oluşturulamadı.')
+            return view
+        finally:
+            call(self.model, 'ClearSelection2', True)
 
     def model_view_names(self):
         """The source model's named views as SolidWorks lists them (localized), or ()."""
@@ -330,7 +437,7 @@ class NativeDrawing:
             if roles is not None and role not in roles:
                 continue
             checkpoint(self.stop)
-            parent = call(view, 'GetBaseView') if role in ('top', 'side') else None
+            parent = call(view, 'GetBaseView') if role in ('top', 'side', 'section', 'detail') else None
             referenced = get(view, 'ReferencedDocument')
             referenced = as_interface(referenced, MODEL_IID) if referenced is not None else None
             record = dict(role=role, name=str(call(view, 'GetName2')), outline=outline(view),
@@ -339,8 +446,17 @@ class NativeDrawing:
                 resolved_path=str(call(referenced, 'GetPathName') or '') if referenced is not None else '',
                 configuration=str(get(view, 'ReferencedConfiguration') or ''),
                 parent=str(call(parent, 'GetName2')) if parent is not None else '',
-                main_name=main, flat=bool(call(view, 'IsFlatPatternView')) if role == 'flat' else False,
+                main_name=main, flat=False,
                 position=tuple(to_mm(v) for v in view_position(view)))
+            if role in ('section', 'detail'):
+                derived = next(v.derived for v in page['plan'].views if v.role == role)
+                native = call(view, 'GetSection' if role == 'section' else 'GetDetail')
+                label = str(call(native, 'GetLabel') or '') if native is not None else ''
+                record.update(label=label, expected_label=derived.label, offset_axis=derived.offset_axis)
+                if role == 'detail':
+                    ratio = values(get(view, 'ScaleRatio'))
+                    record.update(view_scale=float(ratio[0])/float(ratio[1]) if len(ratio) == 2 and ratio[1] else 0.,
+                                  expected_scale=derived.scale)
             target = page.get('flat_body') if role == 'flat' else None
             if target is not None:
                 from .sheetmetal import verify_unfolded
@@ -349,24 +465,17 @@ class NativeDrawing:
                 verify_unfolded(self.session, referenced, target, target.configurations[0])
                 bodies, count = values(get(view, 'Bodies')), int(call(view, 'GetBodiesCount'))
                 if not bodies and count == 0:
-                    # Recorded on SolidWorks 2025 SP5: the flat pattern view of a single-body part
-                    # keeps no body filter (GetBodiesCount 0, Bodies empty, even after Bodies is
-                    # written); it shows the part's only body. Accept that only for one solid body.
                     solids = values(call(as_interface(referenced, PART_IID), 'GetBodies2',
                                          self.session.c('swSolidBody'), False))
                     if len(solids) == 1:
                         bodies, count = solids, 1
-                    elif self.only_target_unfolded(referenced, target, str(get(view, 'ReferencedConfiguration') or '')):
-                        # Multibody (recorded): no body filter either; the view's saved flat
-                        # configuration unfolds exactly the target body's FlatPattern.
-                        record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
-                                      body_references=(target.body_ref,), body_count=1, body_label=target.label)
-                        result.append(record)
-                        continue
+                if count == 1 and len(self.info.sheet_bodies) > 1 and not self.only_target_unfolded(
+                        referenced, target, record['configuration']):
+                    raise ApiError('Açınım konfigürasyonu başka veya birden fazla gövdeyi açıyor.')
                 record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
                     body_references=tuple(self.session.persistent_ref(referenced, body) for body in bodies)
                                     if referenced is not None else (),
-                    body_count=count, body_label=target.label)
+                    body_count=count, body_label=target.label, flat=True)
                 bodies = ()
             result.append(record)
         return result
@@ -488,11 +597,92 @@ class NativeDrawing:
                 self.annotations[key] = annotation
                 result.append(dict(key=key, name=selection, owner=role, box=box, estimated=estimated,
                     value=value, kind=kind, reference=reference, dangling=dangling,
+                    annotation_kind='hole_callout' if optional(display, 'IsHoleCallout') is True else '',
                     model_identity=(identity(self.info.source.path, configuration), model_name, kind, reference)
                                    if model_name else None,
                     position=tuple(float(v) for v in position)))
+                result[-1]['leaders'], result[-1]['leader_bounds_unknown'] = annotation_leaders(annotation)
                 display = call(display, 'GetNext5')
         return result
+
+    def annotation_obstacles(self, name):
+        from collections import Counter
+        from .hole_annotations import hole_table_tags
+        from .manufacturing import table_box
+        page = self.pages[name]
+        call(self.drawing, 'ActivateSheet', name)
+        first = call(self.drawing, 'GetFirstView')
+        supported = {self.session.constants[key]: kind for key, kind in (
+            ('swNote', 'note'), ('swLeader', 'leader')) if key in self.session.constants}
+        hidden = {self.session.constants[key] for key in ('swAnnotationHidden', 'swAnnotationHalfHidden')
+                  if key in self.session.constants}
+        records, seen = [], set()
+        wizard_notes = Counter(page.get('wizard_notes', ()))
+        for role, view in [('sheet', first), *page['views'].items()]:
+            if view is None:
+                continue
+            for annotation in values(optional(view, 'GetAnnotations', default=())):
+                checkpoint(self.stop)
+                kind = supported.get(optional(annotation, 'GetType'))
+                if kind is None or optional(annotation, 'Visible', property=True) in hidden:
+                    continue
+                label = str(optional(annotation, 'GetName') or kind)
+                key = role, label
+                if key in seen:
+                    continue
+                seen.add(key)
+                try:
+                    box, estimated = annotation_box(annotation)
+                except (ValueError, ApiError):
+                    box, estimated = None, False
+                specific = optional(annotation, 'GetSpecificAnnotation')
+                content = str(optional(specific, 'GetText') or '').replace('\r\n', '\n').replace('\r', '\n') if kind == 'note' else ''
+                if wizard_notes[content]:
+                    wizard_notes[content] -= 1
+                    kind = 'wizard_note'
+                if optional(specific, 'IsBomBalloon') is True:
+                    kind = 'balloon'
+                if content and role in ('main', 'section', 'detail'):
+                    labels = [v.derived.label for v in page['plan'].views if v.derived]
+                    if any(content.strip() in (label, label+'-'+label, 'KESİT '+label+'-'+label,
+                                                'SECTION '+label+'-'+label) for label in labels):
+                        kind = 'view_label'
+                if role == 'sheet' and (box is None or box.top <= page['plan'].usable.y):
+                    kind = 'title'
+                leaders, unreadable = annotation_leaders(annotation)
+                record = dict(name=label, owner=role, kind=kind, annotation_kind=kind, box=box,
+                                    estimated=estimated, leaders=leaders, leader_bounds_unknown=unreadable,
+                                    text=content, dangling=optional(annotation, 'IsDangling'))
+                if kind == 'wizard_note' and role in page['views']:
+                    record['key'] = name, role, 'wizard_note', label
+                    record['position'] = values(call(annotation, 'GetPosition'))
+                    self.annotations[record['key']] = annotation
+                records.append(record)
+            for table in values(optional(view, 'GetTableAnnotations', default=())):
+                generic = self.session.named_interface(table, 'ITableAnnotation')
+                annotation = call(generic, 'GetAnnotation')
+                label = str(optional(annotation, 'GetName') or '')
+                bounds = table_box(generic)
+                key = 'table', label or bounds
+                if key in seen:
+                    continue
+                seen.add(key)
+                code = int(get(generic, 'Type'))
+                title_type = self.session.constants.get('swTableAnnotation_TitleBlock')
+                hole_type = self.session.constants.get('swTableAnnotation_HoleChart')
+                kind = 'title' if code == title_type else 'hole_table' if code == hole_type else 'table'
+                records.append(dict(name=label or kind, owner=role, kind=kind, box=bounds,
+                                    annotation_kind=kind, rows=int(get(generic, 'RowCount'))))
+                if kind == 'hole_table':
+                    records[-1]['tags'] = hole_table_tags(self.session, generic)
+        for planned in page['plan'].views:
+            if planned.derived:
+                records.extend(derived_labels(page['views'][planned.role], planned))
+        if any(wizard_notes.values()):
+            raise ApiError('Oluşturulan delik notu çizimde bulunamadı.')
+        if len([r for r in records if r['kind'] == 'hole_table']) < len(page.get('hole_tables', ())):
+            raise ApiError('Oluşturulan delik tablosu çizimde bulunamadı veya tekrarlı.')
+        return records
 
     def import_dimensions(self, name):
         if not self.options.model_dimensions:
@@ -676,18 +866,23 @@ class NativeDrawing:
         self.rebuild()
         records = self.dimensions(name)
         outlines = {v['role']: v['outline'] for v in self.actual_views(name)}
-        moves, unresolved = place_texts([(r['key'], r['owner'], r['box']) for r in records],
-            outlines, self.pages[name]['plan'].usable)
-        for record in records:
+        extras = self.annotation_obstacles(name)
+        moving = [*records, *(record for record in extras if 'key' in record)]
+        fixed = [record for record in extras if 'key' not in record]
+        moves, unresolved = place_texts([(r['key'], r['owner'], r['box']) for r in moving],
+            outlines, self.pages[name]['plan'].usable,
+            obstacle_boxes=[record['box'] for record in fixed if record['box'] is not None],
+            obstacle_leaders=[line for record in fixed for line in record.get('leaders', ())])
+        for record in moving:
             if record['key'] not in moves:
                 continue
             dx, dy = moves[record['key']]
             pos = record['position']
             if len(pos) < 3 or not call(self.annotations[record['key']], 'SetPosition2',
                                        pos[0]+to_m(dx), pos[1]+to_m(dy), pos[2]):
-                self.result.warn('dimension_move', 'Ölçü konumu düzenlenemedi: '+record['name'], name)
+                self.result.warn('dimension_move', 'Anotasyon konumu düzenlenemedi: '+record['name'], name)
         if unresolved:
-            self.result.warn('dimension_layout', f'{len(unresolved)} ölçü metni için boş konum bulunamadı veya sınırlar okunamadı.',
+            self.result.warn('dimension_layout', f'{len(unresolved)} anotasyon metni için boş konum bulunamadı veya sınırlar okunamadı.',
                              name)
         self.rebuild()
 
@@ -723,6 +918,14 @@ class NativeDrawing:
                         a.overlaps(b) for i, a in enumerate(bounds) for b in bounds[i+1:]):
                     page['plan'].views = planned
                     return
+        if include_dimensions:
+            self.fit(name)
+            width, height = page['plan'].width_mm, page['plan'].height_mm
+            bounds = Box(0., 0., width, height)
+            if all(record['box'] is None or bounds.contains(record['box']) for record in self.dimensions(name)):
+                self.result.warn('dimension_layout', 'Görünüşler yerleşti. Ölçü boşlukları için kayıt sonrası bulguları kontrol edin.',
+                                 name)
+                return
         raise ApiError('Gerçek görünüş / ölçü sınırları paftaya sığdırılamadı; dosya başarılı sayılmadı.')
 
     def title_properties(self):
@@ -800,10 +1003,22 @@ class NativeDrawing:
                          usable=page.get('validation_area', page['plan'].usable))
             actual = self.actual_views(name)
             records = self.dimensions(name)
+            extras = self.annotation_obstacles(name)
             findings.extend(validate_views(state, actual, self.info.source,
                              flat_configurations=self.info.flat_configurations, projection=self.options.projection))
+            bounds = Box(0., 0., state['width_mm'], state['height_mm'])
             findings.extend(validate_annotations(records, {v['role']: v['outline'] for v in actual},
-                                                  page['plan'].usable, name))
+                                                  page['plan'].usable, name, bounds=bounds))
+            findings.extend(validate_annotation_obstacles(records, extras, {v['role']: v['outline'] for v in actual},
+                                                          page['plan'].usable, name))
+            for record in [*records, *extras]:
+                if record.get('leader_bounds_unknown'):
+                    findings.append(self._warning('annotation_leader_bounds', 'Lider çizgisi okunamadı.',
+                                                  name, record['name']))
+            for record in extras:
+                if record.get('estimated'):
+                    findings.append(self._warning('annotation_text_estimate', 'Anotasyon metin genişliği tahmin içeriyor.',
+                                                  name, record['name']))
             for record in records:
                 if record['estimated']:
                     findings.append(self._warning('text_estimate', 'Ölçü metni genişliği tahmin içeriyor; yerleşimi kontrol edin.',
@@ -818,7 +1033,7 @@ class NativeDrawing:
                     raise ApiError('BOM tablosu görünüşle çakışıyor.')
             notes, note_findings = self.notes(name)
             findings.extend(note_findings)
-            snapshots.append(dict(**state, views=actual, dimensions=records, notes=notes))
+            snapshots.append(dict(**state, views=actual, dimensions=records, notes=notes, annotations=extras))
         return findings, snapshots
 
     def verify_saved(self, path, snapshots):
@@ -879,7 +1094,7 @@ class NativeDrawing:
                     raise ApiError('BOM tablosu kaydedilen teknik resimde bulunamadı veya tekrarlı.')
                 check.pages[name] = dict(plan=original['plan'], views=handles, tables=tables,
                     format=original['format'], validation_area=state['usable'], flat_body=original.get('flat_body'),
-                    notes=[])
+                    notes=[], wizard_notes=original.get('wizard_notes', ()), hole_tables=original.get('hole_tables', ()))
                 for target in state.get('notes', ()):
                     if target['name'] not in note_handles:
                         raise ApiError('Gövde kimliği / kalınlık notu kaydedilen teknik resimde bulunamadı.')
@@ -892,6 +1107,15 @@ class NativeDrawing:
             for before, after in zip(snapshots, reread):
                 if len(before['dimensions']) != len(after['dimensions']):
                     raise ApiError('Kayıt sonrası model ölçüleri korunmamış.')
+                def holes(state):
+                    selected = [(r['kind'], r.get('text', ''), r.get('rows', 0), tuple(r.get('tags', ())))
+                                for r in state['annotations']
+                                if r['kind'] in ('hole_table', 'wizard_note')]
+                    selected.extend(('callout', str(r['value']), 0, ()) for r in state['dimensions']
+                                    if r['annotation_kind'] == 'hole_callout')
+                    return sorted(selected)
+                if holes(before) != holes(after):
+                    raise ApiError('Kayıt sonrası delik bilgisi / tablosu korunmamış.')
             return findings, reread
         finally:
             check.close()

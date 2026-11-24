@@ -2,10 +2,10 @@
 
 ## Gerçek CAD doğrulaması
 
-18 Kasım 2026'da gerçek SolidWorks 2025 SP5 (33.5.0, Türkçe) üzerinde 8 kabul
-senaryosundan 6'sı geçti (bkz. `LIVE_ACCEPTANCE.md`). Firma şablonları ve
-SolidWorks 2026 henüz canlı kabul edilmedi. Ham IDispatch fakes, orchestration
-fakes veya dosya başlığı testleri gerçek entegrasyon testi sayılmaz.
+19 Kasım 2026'da gerçek SolidWorks 2025 SP5 (33.5.0, Türkçe) üzerinde önceki
+akışın sekiz kabul senaryosundan yedisi geçti. Firma şablonları ve SolidWorks
+2026 canlı kabul bekliyor. Yeni delik bilgisi, kesit, detay ve açınım akışları
+da canlı kabul bekliyor. Koşullar [canlı kabul kaydında](LIVE_ACCEPTANCE.md).
 
 ## Gerçek SolidWorks 2025 SP5'te kaydedilen davranışlar
 
@@ -40,31 +40,21 @@ fakes veya dosya başlığı testleri gerçek entegrasyon testi sayılmaz.
 
 ## Henüz tamamlanmamış özellikler
 
-- Otomatik kesit, detay, yardımcı görünüş ve patlatılmış montaj seçimi.
-  Mevcut veriye göre kesit / detay gereksinimi önerilir.
-- Tam delik / diş / havşa / PCD tanıma ve tüm geometriler için eksiksiz
-  imalat ölçülendirmesi. Hole Wizard model ölçüleri native import edilir;
-  yeni diş veya tolerans açıklaması tahmin edilmez.
-- Çok gövdeli sacda gövde bazlı açınım için kaynakta her gövdenin KAYITLI açınım
-  konfigürasyonu bulunmalıdır (SolidWorks'te bir kez açınım görünüşü eklenip parça kaydedilerek
-  oluşur). SolidWorks 2025 SP5'te diskten açılan çok gövdeli parçada
-  `CreateFlatPatternViewFromModelView3` (gövde önceden seçili) her çağrıda bellekte yeni bir
-  `<ana>SM-FLAT-PATTERN<n>` açar; ona bağlı resim yeniden açılınca açınımı kaybeder. Modül
-  görünüşü gövdenin kayıtlı açınım konfigürasyonuna yeniden bağlar, geçici konfigürasyonu
-  bellekten siler ve konfigürasyon listesinin değişmediğini doğrular; resim tek başına yeniden
-  açıldığında açınımlar korunur. Kaynak diske yazılmaz, ama açık kaynak belgesi SolidWorks'te
-  değişmiş (kaydedilmemiş) olarak işaretlenir: kaydetmeden kapatın. Görünüşün gövdesi,
-  kayıtlı konfigürasyonda yalnız o gövdenin FlatPattern unsurunun açık olmasıyla kanıtlanır.
-- Tek gövdeli sacda ana konfigürasyon istenir; SolidWorks bunu mevcut
-  `<ana>SM-<yerel ad>` (Türkçe: `SM-DÜZ-ÇOĞALTMA`) konfigürasyonuna çözer. Bu türetilmiş
-  konfigürasyon yoksa SolidWorks yenisini açar; modül bunu saptar ve paketi yayımlamaz.
-- Kaynakta hiç açınım konfigürasyonu yokken yeni konfigürasyon oluşturma.
-  Mevcut konfigürasyonla sınırlı çalışma kaynak değişikliği riskini azaltır.
+- Serbest biçimli, açılı veya ofset kesitler, yardımcı görünüş ve patlatılmış
+  montaj seçimi. Kesit ve detay kuralları standart yönler ve doğrulanabilen
+  parça geometrisiyle sınırlıdır.
+- PCD ve genel delik düzeni tanıma, birçok yüzeye bölünmüş veya açılı deliklerin
+  otomatik ölçülendirilmesi ve tüm geometriye imalat ölçüsü oluşturma.
+  Hole Wizard model verisi bulunamayan deliklerin çapı ölçülebilir.
+- Sac açınımı için her gövdenin kayıtlı açınım konfigürasyonu ve standart bir
+  görünüme dik sabit yüzü gerekir. Açınım görünüşü kayıtlı konfigürasyondaki
+  geometriyi gösterir. Native büküm çizgileri ve büküm notları
+  gerçek SolidWorks'te ayrıca kontrol edilmelidir.
 - Genel görünüşleri keyfi sayıda sayfaya bölen optimizasyon; şu an bağlı
   izdüşüm grubu birlikte kalır, izometri / açınım / BOM ayrılabilir.
 - Büyük BOM tablolarını otomatik bölme ve sonraki sayfaya taşıma.
-- Tam lider çizgisi, GD&T frame, genel not ve kaynak sembolü çakışma
-  denetimi. Ölçü metin sınırları ve görünüş / tablo alanları denetlenir.
+- Lider–lider kesişimleri, GD&T çerçeveleri, kaynak sembolleri ve şablonun
+  çizgi ağının tamamı. Okunabilen liderlerin metin ve tabloları kesmesi denetlenir.
 - Named profil kütüphanesi, kesintiden sonra kalıcı kuyruk devamı,
   BOM CSV/XLSX ve tek paket ZIP dışa aktarımı.
 - Üzerine yazma modu. Mevcut dosyayı atlama / yeni ad üretme vardır.
@@ -92,9 +82,10 @@ Firmanın DRWDOT / SLDDRT / BOM şablonu, PDM kuralları ve ağ klasörü
 davranışı canlı kabul edilmelidir. Başarılı şablon seçimi ISO 128, 129,
 5456, 7200, 1101 veya 2768 uygunluğunu tek başına garanti etmez.
 
-Bir native açınım çağrısı beklenmedik kaynak konfigürasyonu oluşturursa
-dosya kaydedilmez, kuyruk durur ve kontrol mesajı verilir. Kullanıcıya ait
-olabilecek konfigürasyonlar otomatik silinmez.
+Açınım mevcut konfigürasyona bağlı model görünüşüyle oluşturulur. Kaynakta
+geçici konfigürasyon açabilen `CreateFlatPatternViewFromModelView3` bu
+akımdan çıkarıldı. Konfigürasyon listesi beklenmedik biçimde değişirse
+kuyruk durur ve paket yayımlanmaz.
 
 Gövde kimliği, Cut List üyeliği, bastırılmamış FlatPattern ve görünüşün
 tek gövde kapsamı birlikte kontrol edilir. Sadece görünüş adının veya

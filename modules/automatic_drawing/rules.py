@@ -2,9 +2,10 @@
 
 from collections import Counter
 from dataclasses import dataclass
+from itertools import combinations
 import math
 
-from .models import ViewPlan, identity
+from .models import DerivedView, ViewPlan, identity
 
 MODEL_VIEWS = {'front': '*Front', 'back': '*Back', 'top': '*Top', 'bottom': '*Bottom',
                'right': '*Right', 'left': '*Left', 'isometric': '*Isometric'}
@@ -101,6 +102,56 @@ def plan_views(info, options):
         views.append(ViewPlan('isometric', MODEL_VIEWS['isometric'],
                               ((x+z)/math.sqrt(2), (x+2*y+z)/math.sqrt(6))))
     return views
+
+
+def derived_views(info, base, scale):
+    """At most one section and one magnification, using only measured evidence."""
+    if info.kind != 'part':
+        return []
+    from .part_features import dot, line_distance
+    name = next(name for name, value in MODEL_VIEWS.items() if value == base.model_view)
+    horizontal, vertical, normal = VIEW_AXES[name]
+    candidates = [hole for hole in info.holes if max(abs(v) for v in hole.axis) >= .9999]
+    sections = [hole for hole in candidates if hole.end_condition == 'blind' or
+                dict(hole.parameters).get('CounterBoreDiameter', 0.) > 0.]
+    step = None
+    # Group by model axis and radial position before testing adjacent rim planes.
+    groups = {}
+    for hole in candidates:
+        axis = max(range(3), key=lambda index: abs(hole.axis[index]))
+        key = axis, tuple(round(v, 1) for i, v in enumerate(hole.rims_mm[0]) if i != axis)
+        groups.setdefault(key, []).append(hole)
+    for first, second in (pair for holes in groups.values() for pair in combinations(holes, 2)):
+        if (abs(first.diameter_mm-second.diameter_mm) >= .1 and
+                abs(dot(first.axis, second.axis)) >= .9999 and
+                line_distance(first.rims_mm[0], second.rims_mm[0], first.axis) <= .02 and
+                min(math.dist(a, b) for a in first.rims_mm for b in second.rims_mm) <= .02):
+            step = first
+            break
+    result = []
+    hole = step or (sections[0] if sections else None)
+    if hole is not None:
+        direction = hole.axis
+        if abs(hole.axis[normal]) >= .9999:
+            # An axis seen end-on still lies ON a cut plane through its centre.
+            long_axis = horizontal if base.footprint[0] >= base.footprint[1] else vertical
+            direction = tuple(float(i == long_axis) for i in range(3))
+        offset_axis = 0 if abs(direction[vertical]) >= .9999 else 1
+        point = hole.rims_mm[0]
+        footprint = list(base.footprint)
+        footprint[offset_axis] = info.size_mm[normal]
+        result.append(ViewPlan('section', '', tuple(footprint), parent='main',
+                               derived=DerivedView('A', point, direction, offset_axis=offset_axis)))
+    details = sorted((d for d in info.details if d.normal_axis == normal and d.size_mm*scale < 3.),
+                     key=lambda d: (d.size_mm, d.point_mm))
+    for detail in details:
+        own = next((s for s in (2., 5., 10.) if s > scale and s*detail.size_mm >= 3.), None)
+        if own is not None:
+            radius = max(1., detail.size_mm*2.)
+            result.append(ViewPlan('detail', '', (2*radius, 2*radius), parent='main',
+                                   derived=DerivedView('B', detail.point_mm, radius_mm=radius, scale=own)))
+            break
+    return result
 
 
 def unique_sources(nodes, scope='all'):

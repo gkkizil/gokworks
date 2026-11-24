@@ -24,29 +24,15 @@ def test_multibody_or_missing_existing_flat_is_reported_without_modifying_source
     assert result.findings[0].code in ('multibody_flat', 'flat_configuration')
 
 
-def test_native_flat_requires_correct_parent_and_detects_unexpected_configuration_creation():
+def test_named_flat_configuration_alone_does_not_trigger_native_creation():
     source = Source('C:/sheet.sldprt', 'Default')
-    flat = 'DefaultSM-FLAT-PATTERN'
-    info = ModelInfo(source, 'part', 'Sheet', (100, 50, 20), body_count=1,
-                     sheet_body_count=1, flat_configurations=(flat,))
-    calls = []
-    parent = RawDispatch('IConfiguration', properties={'Name': 'Default'})
-    config = RawDispatch('IConfiguration', methods={'GetParent': lambda: parent})
-    def configurations():
-        calls.append('read')
-        return ('Default', flat) if len(calls) == 1 else ('Default', flat, 'unexpected-new-config')
-    model = RawDispatch('IModelDoc2', methods={'GetConfigurationByName': lambda name: config,
-                                             'GetConfigurationNames': configurations})
-    view = RawDispatch('IView', methods={'IsFlatPatternView': lambda: True},
-                       properties={'ReferencedConfiguration': flat, 'UseSheetScale': False})
-    drawing = RawDispatch('IDrawingDoc', methods={'CreateFlatPatternViewFromModelView3': lambda *args: view})
-    pages = {}
-    native = SimpleNamespace(info=info, options=Options(), result=DrawingResult(source), drawing=drawing,
-        pages=pages, setup=lambda plan, new=False: pages.update({plan.name: {'views': {}}}),
-        set_scale=lambda *args: None, fit=lambda *args: None)
-    with pytest.raises(RestoreError, match='yeni bir konfigürasyon'):
-        flat_page(native, model)
-    assert not any('Save' in name or 'Suppress' in name for name, flags, args in model.calls)
+    info = ModelInfo(source, 'part', 'Sheet', (100, 50, 20), body_count=1, sheet_body_count=1,
+                     flat_configurations=('DefaultSM-FLAT-PATTERN',))
+    native = SimpleNamespace(info=info, options=Options(), result=DrawingResult(source))
+    model = RawDispatch('IModelDoc2')
+    flat_page(native, model)
+    assert not model.calls
+    assert native.result.findings[0].code == 'flat_configuration'
 
 
 def bom_case(mode='parts', quantity=12, returned_components=12, display=None, suppressed=0):

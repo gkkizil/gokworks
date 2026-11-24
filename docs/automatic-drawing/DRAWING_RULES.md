@@ -60,19 +60,53 @@ referans ölçüleridir; datum / tolerans / işlevsel tasarım ölçüsü olarak
 sunulmaz. Her döndürülmüş metin için gerçek display-data geometrisi okunur.
 Genişlik API’den alınamıyorsa tahmin açıkça WARNING üretir.
 
-Native AlignDimensions sonrası sınırlı, deterministik dış şerit araması
-metni boş alana taşımayı dener. Son konum tekrar native API’den okunur.
-Kopuk ölçü ve pafta dışına taşma FAIL, çözülemeyen metin çakışması WARNING
-üretir. Lider / ölçü çizgilerinin bütün kesişimleri henüz denetlenmez.
+Native AlignDimensions sonrası saf Python yerleşimi, metni görünüşün
+dışındaki eşit aralıklı şeritlerde konumlandırır. Görünüş sınırları,
+antet alanı, kayıtlı notlar, balonlar, delik bilgileri, kesit/detay
+etiketleri, tablolar ve okunabilen lider parçaları engel olarak kullanılır.
+SolidWorks'e yalnız konum değişimi uygulanır. Kayıttan sonra konumlar
+yeniden okunur. Kopmuş bağlantı ve fiziksel pafta dışındaki ölçü FAIL,
+kalan çakışma ve okunamayan anotasyon geometrisi WARNING üretir.
 
 ## İmalat ayrıntıları
 
 Merkez işaretleri native IView API’siyle oluşturulur. Geometriden diş
 adı, H7, K faktörü, genel tolerans veya GD&T uydurulmaz.
 
-Delik / iç boşluk / küçük pah ve radyüs bilgileri kesit / detay kontrol
-önerisi doğurabilir. Kesit çizgisi ve kesit / detay görünüşünün otomatik
-oluşturulması bu sürümün tamamlanmış özelliği değildir.
+### Delikler
+
+Hole Wizard tipi ve geçerli parametreleri unsur tanımından okunur.
+Silindir yüzü içe bakmalı, iki dairesel sınırı aynı eksende olmalı ve
+alanı `2πrL` değerinden en çok %2 sapmalıdır. Hole Wizard bilgisi o yüzün
+unsuruyla eşleştirilir. Aynı Wizard unsurunun eş eksenli çap kademeleri
+tek delik konumu olarak sayılır.
+
+Delik ekseni görünüş normaline paralel olmalı (`|dot| ≥ 0,9999`) ve o
+görünüşte gerçek bir çembersel sınır eşleşmelidir. Önce native delik
+bilgisi içe aktarılır. Aynı görünüşte içe aktarılamayan en az sekiz Wizard
+deliğinde, doğrulanmış orijin köşesi ve yeterli boşluk varsa tablo denenir.
+Kalan Wizard delikleri aynı model parametrelerine göre bir notta
+gruplanır. Salt geometriden eşleştirilen deliğe yalnız çap ölçüsü eklenir.
+JSON her grubun kaynağını, görünüşünü ve kullanılan yöntemi kaydeder.
+
+### Kesit ve detay
+
+Kesit A-A şu kanıtlardan biriyle seçilir. Modelde kör olarak tanımlanmış
+bir delik, dairesel dip yüzü doğrulanmış bir kör silindir, karşı havşa veya
+ortak eksende bitişen farklı çaplı iki iç silindir. Kademeler arasında
+en az 0,1 mm çap farkı ve en çok 0,02 mm ortak eksen/uç sapması aranır.
+Eksen standart doğrultudaysa çizgi delik merkezinden geçer. Eksen ana
+görünüşe dikse kesit çizgisi görünüşün uzun doğrultusunda delik
+merkezinden geçer. Kesit birinci/üçüncü açıya göre hizalanır.
+
+Ölçülen radyüs, pah veya Hole Wizard kanal genişliği ana görünüşte
+3 mm'nin altına düştüğünde, ayrıntıyı kâğıt üzerinde en az 3 mm yapan ve
+ana görünüş ölçeğini aşan ilk 2:1, 5:1 veya 10:1 oranı seçilir. Her resim
+için bir kesit ve bir detay planlanabilir. Ana paftanın ölçeği korunur.
+Ayrıntı sığmadığında kaynak görünüşün bir kopyasıyla aynı ek paftaya
+alınır. Pafta planı taslak önizleme ve üretimde ortaktır.
+
+### Sac ve montaj
 
 Sac gövdeleri kalıcı API kimlikleriyle sıralanır; görüntülenen ad veya
 GetBodies2 sırası üretim kimliği sayılmaz. Cut List üyeliği ve FlatPattern
@@ -86,6 +120,7 @@ değildir. Belirsiz / eksik aday atlanır. Aynı SLDDRW içinde her doğrulanmı
 gövdeye ayrı pafta açılır; ORHAN-01 gibi kimlik ve doğrulanmışsa gövde
 kalınlığı / malzemesi görünüşten ayrı başlık alanına yazılır.
 
+Kayıtlı açınımın sabit yüzüne dik standart model görünüşü kullanılır.
 IView.Bodies ile yalnız hedef gövde gösterilir. Kayıt sonrası gerçek
 gövde kimliği, gövde sayısı, konfigürasyon ve pafta başlığı tekrar okunur;
 Cut List üyeliği, kalınlık veya malzeme değişmişse çıktı başarılı sayılmaz.

@@ -226,6 +226,20 @@ def verify_unfolded(session, model, row, configuration):
         raise ApiError('Gövdenin FlatPattern unsuru açınım konfigürasyonunda bastırılmış.')
 
 
+def flat_view_direction(session, model, row, configuration):
+    with session.configuration(model, configuration):
+        feature = feature_by_ref(session, model, row.flat_feature, row.flat_ref, 'FlatPattern')
+        definition = call(feature, 'GetDefinition')
+        face = optional(definition, 'FixedFace2', property=True)
+        normal = values(optional(face, 'Normal', property=True, default=()))
+        if len(normal) != 3 or not all(math.isfinite(v) for v in normal):
+            return None
+        axis = max(range(3), key=lambda i: abs(normal[i]))
+        if abs(normal[axis]) < .999999:
+            return None
+        return (('*Right', '*Left'), ('*Top', '*Bottom'), ('*Front', '*Back'))[axis][int(normal[axis] < 0.)]
+
+
 def verify_metadata(session, model, row, info):
     """A drawing header must not silently retain stale thickness/material data."""
     part = body = feature = folder = None

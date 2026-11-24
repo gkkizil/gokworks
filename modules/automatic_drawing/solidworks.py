@@ -360,6 +360,7 @@ class Session(ReadSession):
 
     def inspect(self, model, source, stop=None):
         """COM stays here; ModelInfo/Node contain only Python values."""
+        from .part_features import apply_wizard_data, cylinder_hole, detail_evidence, wizard_definition
         self.assert_thread()
         checkpoint(stop)
         path = str(call(model, 'GetPathName'))
@@ -392,12 +393,16 @@ class Session(ReadSession):
         info.source_unit = self.display_unit(model)
         kinds, names, thicknesses = Counter(), set(), set()
         feature = definition = None
-        sheet_features = []
+        sheet_features, wizard = [], {}
         try:
             for feature, name, kind in feature_tree(model, stop):
                 if (name, kind) in names:
                     continue
                 names.add((name, kind)); kinds[kind] += 1
+                if not assembly and kind == 'HoleWzd':
+                    wizard[name] = wizard_definition(self, feature)
+                    if wizard[name] is None:
+                        info.warnings.append(name+': Hole Wizard tipi okunamadı.')
                 if kind in ('FlatPattern', 'CutListFolder'):
                     sheet_features.append((name, kind, self.persistent_ref(model, feature)))
                 if 'sheetmetal' in kind.casefold():
@@ -417,6 +422,8 @@ class Session(ReadSession):
         else:
             bodies = values(call(specific, 'GetBodies2', self.c('swSolidBody'), False))
             info.body_count = len(bodies)
+            detail_features = wizard or any('fillet' in k.casefold() or 'chamfer' in k.casefold() for k in kinds)
+            holes = []
             face = body = surface = None
             try:
                 for body in bodies:
@@ -429,6 +436,7 @@ class Session(ReadSession):
                             raise ApiError('Yüzey sayısı güvenli analiz sınırını aştı.')
                         area = finite(call(face, 'GetArea'), 'Yüzey alanı', minimum=0)*1e6
                         surface = call(face, 'GetSurface')
+                        axis, radius = (), None
                         if call(surface, 'IsPlane'):
                             direction = tuple(float(v) for v in values(get(face, 'Normal')))
                             info.faces.append(FaceEvidence('plane', area, direction))
@@ -436,13 +444,26 @@ class Session(ReadSession):
                             params = values(get(surface, 'CylinderParams'))
                             if len(params) != 7:
                                 raise ApiError('Silindirik yüzey parametreleri geçersiz.')
-                            info.faces.append(FaceEvidence('cylinder', area, tuple(float(v) for v in params[3:6]),
-                                                           to_mm(params[6]), tuple(to_mm(v) for v in params[:3])))
+                            axis, radius = tuple(float(v) for v in params[3:6]), to_mm(params[6])
+                            info.faces.append(FaceEvidence('cylinder', area, axis, radius,
+                                                           tuple(to_mm(v) for v in params[:3])))
+                            if abs(math.hypot(*axis)-1.) <= 1e-6:
+                                hole = cylinder_hole(face, area, axis, radius)
+                                if hole is not None:
+                                    holes.append(hole)
                         else:
                             info.faces.append(FaceEvidence('other', area))
+                        if detail_features:
+                            detail = detail_evidence(self, face, surface, wizard, axis, radius)
+                            if detail is not None:
+                                info.details.append(detail)
                         surface = None
                 if not bodies:
                     raise ApiError('Kaynakta teknik resim oluşturulabilecek katı gövde yok.')
+                info.holes = apply_wizard_data(holes, wizard)
+                matched = {hole.feature for hole in info.holes if hole.wizard_type}
+                for name in wizard.keys()-matched:
+                    info.warnings.append(name+': Hole Wizard verisi çizilebilir delik sınırıyla eşleştirilemedi.')
             finally:
                 bodies = (); body = face = surface = None
             database = variant(0x4008, '')
@@ -535,6 +556,24 @@ class Session(ReadSession):
         if remaining is not None:
             raise RestoreError('SolidWorks oluşturulan teknik resmi kapatmadı; kaynak belgeleri kapatılmadı.')
         self.created = [item for item in self.created if item is not model]
+
+    def restore_before_publish(self, source):
+        """Restore the prior document before publishing, including owned source windows."""
+        try:
+            self.release(source.path)
+            active = as_interface(get(self.app, 'ActiveDoc'), MODEL_IID)
+            active_name = (call(active, 'GetPathName') or call(active, 'GetTitle')) if active is not None else ''
+            if identity(active_name) == identity(self.previous):
+                return
+            previous = call(self.app, 'GetOpenDocumentByName', self.previous) if self.previous else None
+            if previous is None:
+                raise RestoreError('Önceki aktif belge bulunamadı.')
+            self.activate(as_interface(previous, MODEL_IID))
+            active = as_interface(get(self.app, 'ActiveDoc'), MODEL_IID)
+            if active is None or identity(call(active, 'GetPathName') or call(active, 'GetTitle')) != identity(self.previous):
+                raise RestoreError('Önceki aktif belgenin kimliği doğrulanamadı.')
+        except Exception as error:
+            raise RestoreError('Yayın öncesi SolidWorks belge durumu geri yüklenemedi.') from error
 
     def open_drawing(self, path):
         self.assert_thread()
