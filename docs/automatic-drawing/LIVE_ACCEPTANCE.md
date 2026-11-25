@@ -88,8 +88,19 @@ onaylamaz.
 | 11 | Küçük radyüs detayı | `GOKWORKS_LIVE_SMALL_RADIUS_DETAIL` | Ana görünüşte okunabilen 0,3–2,9 mm arası modellenmiş radyüs | 1:1 ana paftadan 2:1, 5:1 veya 10:1 ölçekli kayıtlı detay B |
 
 1–7 ve 9–11 numaralı senaryolar `GOKWORKS_DRAWING_LIVE_TEMPLATE` ile verilen DRWDOT'u kullanır.
-9–11 henüz gerçek SolidWorks'te çalıştırılmadı. 3 ve 4 numaralı senaryolar kayıtlı açınım
-konfigürasyonlarını kullanan yeni akışla tekrar çalıştırılmalıdır.
+8–11 numaralı senaryoların test modellerini üretmek için önce `shaft` ve `plate` fixture'larını
+hazırlayın. Ardından aşağıdaki komutu yeni bir hedef klasörle çalıştırın.
+
+```bat
+python tools/automatic_drawing/build_live_fixtures.py C:\Kabul\yeni company_templates wizard_plate bored_shaft small_radius_detail
+```
+
+`company_templates` hedef klasörün veya üst klasörünün `01-mil` ve `02-delikli-plaka`
+altındaki parçaları kopyalar. Test için A3 DRWDOT ve SLDDRT üretir, SolidWorks'ün
+standart BOM şablonunu kopyalar. Firma kabulünde tabloda belirtilen dört değişkeni
+firmanın kendi montajına ve şablonlarına yönlendirin. SolidWorks önceki bir fixture
+ile aynı dosya adına sahip açık bir modeli yeniden kullanabildiği için eski fixture
+belgelerini yeni kabul koşusuna başlamadan önce kapatın.
 
 ## Elle incelenecekler (rapora eklenmeli)
 
