@@ -8,6 +8,7 @@ from collections import deque
 from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot, Qt
 import shiboken6
 from solidworks import diagnostics
+from solidworks.speed import cad_job
 
 
 class EventSink:
@@ -77,7 +78,8 @@ class JobWorker(QObject):
         diagnostics.record('qt_worker_run_started')
         sink = EventSink(self.batch.emit)
         try:
-            self.operation(sink, self.stop)
+            with cad_job():
+                self.operation(sink, self.stop)
         except Exception as error:
             diagnostics.record('qt_worker_exception='+type(error).__name__)
             sink.put(('job_error', {'error': str(error), 'traceback': traceback.format_exc()}))
