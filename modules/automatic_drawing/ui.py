@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QSize, Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QCheckBox, QComboBox, QFileDialog, QFormLayout,
+from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QPushButton, QCheckBox, QComboBox, QFileDialog, QFormLayout,
     QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QProgressBar, QScrollArea, QSizePolicy, QSplitter,
     QStackedWidget,
     QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
@@ -225,7 +225,8 @@ class AutoDrawingPage(BasePage):
         self.saved = self.settings.get('automatic_drawing', {})
         if not isinstance(self.saved, dict):
             self.saved = {}
-        self.analyze_button = self.action('Analiz et', self.analyze)
+        self.analyze_button = self.action('Kontrol et', self.analyze)
+        self.analyze_button.setToolTip('Seçili modeli SolidWorks’ten okur; resim oluşturmaz, modeli değiştirmez.')
         self.start_button = self.action('Resimleri oluştur', self.start, primary=True)
         self.stop_button = self.action('Durdur', self.jobs.cancel, locked=False)
         self.report_button = self.action('Rapor kaydet', self.save_report)
@@ -237,7 +238,7 @@ class AutoDrawingPage(BasePage):
         left = QFrame(); left.setObjectName('drawingSources'); left.setProperty('card', True); left.setMinimumWidth(0)
         ll = QVBoxLayout(left); ll.setContentsMargins(12, 10, 12, 10); ll.setSpacing(8)
         head = QHBoxLayout(); head.setSpacing(8)
-        head.addWidget(label('Kaynaklar', 'section', wrap=False)); head.addStretch()
+        head.addWidget(label('1 · Modeller', 'section', wrap=False)); head.addStretch()
         self.source_count = label('', 'muted', wrap=False); self.source_count.setProperty('chip', True)
         head.addWidget(self.source_count); ll.addLayout(head)
         self.add_file_button = button('Dosya ekle…', self.choose_files)
@@ -264,95 +265,98 @@ class AutoDrawingPage(BasePage):
                                   self.empty_add, self.empty_active, glyph='automatic_drawing')
         ll.addWidget(self.tree, 1)
         foot = QHBoxLayout(); foot.setSpacing(8)
-        self.tree_hint = label('İşaretliler oluşturulur · konfigürasyon: çift tık', 'muted')
+        self.tree_hint = label('İşaretli modellerin resmi çıkar · konfigürasyonu değiştirmek için çift tıklayın', 'muted')
         foot.addWidget(self.tree_hint, 1); foot.addWidget(self.remove_button, 0, Qt.AlignTop)
         ll.addLayout(foot)
         self.controls += [self.add_file_button, self.add_folder_button, self.active_button,
                           self.remove_button, self.tree, self.empty_add, self.empty_active]
         self.source_card = left
 
-        # ------------------------------------------------------------- settings
+        # ------------------------------------------------------------- steps
+        # Left: 1 · Modeller. Right: 2 · Kontrol → 3 · Ayarlar → 4 · Sonuçlar, one at a time,
+        # with a "next step" box that always says what to do now and offers that button.
+        right = QWidget(); rl = QVBoxLayout(right); rl.setContentsMargins(0, 0, 0, 0); rl.setSpacing(8)
+        steps_row = QHBoxLayout(); steps_row.setSpacing(6)
+        self.step_group = QButtonGroup(self); self.step_buttons = []
+        for index, (title, tip) in enumerate((
+                ('2 · Kontrol', 'Model SolidWorks’ten okunur; parça bilgisi ve pafta taslağı görünür.'),
+                ('3 · Ayarlar', 'Pafta, görünüşler ve çıktılar. Ayrıntılı ayarlar “Gelişmiş” altında.'),
+                ('4 · Sonuçlar', 'Oluşturulan resimler, bulgular ve SolidWorks PDF’i.'))):
+            step = QPushButton(title); step.setCheckable(True); step.setProperty('step', True)
+            step.setToolTip(tip); step.setAccessibleName('Adım '+title)
+            self.step_group.addButton(step, index); steps_row.addWidget(step); self.step_buttons.append(step)
+        steps_row.addStretch()
+        self.help_button = button('Bu araç neyi yapar?', self.show_coverage, flat=True)
+        steps_row.addWidget(self.help_button)
+        rl.addLayout(steps_row)
+        guide = QFrame(); guide.setProperty('card', True); guide.setObjectName('drawingGuide')
+        gl = QHBoxLayout(guide); gl.setContentsMargins(12, 8, 12, 8); gl.setSpacing(10)
+        self.guide_text = label('', None); self.guide_text.setProperty('guide', True)
+        self.guide_button = button('', self._guide_action, primary=True)
+        gl.addWidget(self.guide_text, 1); gl.addWidget(self.guide_button, 0, Qt.AlignVCenter)
+        rl.addWidget(guide)
         self.tabs = QTabWidget(); self.tabs.setMinimumWidth(0); self.tabs.setDocumentMode(True)
+        self.tabs.tabBar().hide()                      # the numbered steps above replace the tab bar
+        self.step_group.idClicked.connect(self.tabs.setCurrentIndex)
+        self.tabs.currentChanged.connect(lambda index: self.step_buttons[index].setChecked(True))
+        self.tabs.currentChanged.connect(lambda *_: self.refresh_guide())
+        rl.addWidget(self.tabs, 1)
+
+        # 2 · Kontrol: what was read and how the sheet will look, before anything is created.
+        check = QWidget(); cv = QVBoxLayout(check); cv.setContentsMargins(0, 4, 0, 0); cv.setSpacing(8)
+        self.facts = {}
+        facts = QHBoxLayout(); facts.setSpacing(8)
+        for key, title in (('class', 'Parça türü'), ('size', 'Dış ölçüler · mm'),
+                           ('bodies', 'Gövdeler'), ('config', 'Konfigürasyon')):
+            tile = QFrame(); tile.setProperty('card', True); tile.setProperty('fact', True)
+            tl = QVBoxLayout(tile); tl.setContentsMargins(12, 6, 12, 6); tl.setSpacing(1)
+            kicker = label(title.upper(), 'muted', wrap=False); kicker.setProperty('kicker', True)
+            value = label('—', None); value.setProperty('factValue', True)
+            value.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            tl.addWidget(kicker); tl.addWidget(value); self.facts[key] = value
+            facts.addWidget(tile, 1)
+        cv.addLayout(facts)
+        self.preview_caption = label('Taslak için önce modeli kontrol edin.', 'muted')
+        cv.addWidget(self.preview_caption)
+        self.sheet_preview = SheetPreview()
+        self.sheet_preview.show_message('Soldan bir model seçip “Kontrol et”e basın. Pafta, ölçek ve görünüşlerin '
+                                        'yeri burada, resim oluşturulmadan önce görünür.')
+        cv.addWidget(self.sheet_preview, 1)
+        self.draft_note = label('Taslak: kutular görünüşlerin yeri ve boyudur. Çizgiler, ölçüler, açınım ve BOM, '
+                                'resim oluşturulunca gelir. Ayar değişikliği taslağa anında yansır.', 'muted')
+        cv.addWidget(self.draft_note)
+        self.analysis_text = QPlainTextEdit(); self.analysis_text.setReadOnly(True)
+        self.analysis_text.setPlainText('Soldan bir model seçip “Kontrol et”e basın.')
+        self.analysis_text.setMinimumHeight(110)
+        cv.addWidget(Disclosure('Okunan model bilgilerinin tamamı', self.analysis_text))
+        self.tabs.addTab(check, 'Kontrol')
+
+        # 3 · Ayarlar: the few that matter first, the rest under "Gelişmiş".
         settings_widget = QWidget()
-        settings_layout = QVBoxLayout(settings_widget); settings_layout.setContentsMargins(4, 10, 8, 10)
-        settings_layout.setSpacing(12)
+        settings_layout = QVBoxLayout(settings_widget); settings_layout.setContentsMargins(0, 4, 8, 10)
+        settings_layout.setSpacing(10)
         self.summary = FlowRow(); self.summary_chips = []
         settings_layout.addWidget(self.summary)
         self.fields = {}
-        self.cards = Reflow(430)
+        self.cards = Reflow(360, max_columns=3)
+        self.advanced_cards = Reflow(430)
         self._build_options()
         settings_layout.addWidget(self.cards)
+        self.advanced = Disclosure('Gelişmiş ayarlar · şablonlar, ölçüler, montaj / BOM, dosya adı, antet',
+                                   self.advanced_cards)
+        settings_layout.addWidget(self.advanced)
         settings_layout.addStretch()
         settings_scroll = scroll(settings_widget)
         settings_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         settings_scroll.setFrameShape(QFrame.NoFrame)
         self.tabs.addTab(settings_scroll, 'Ayarlar')
 
-        # This is the PDF exported by SolidWorks from the actual native drawing.
-        preview = QWidget(); pv = QVBoxLayout(preview); pv.setContentsMargins(4, 10, 4, 4); pv.setSpacing(8)
-        mode = QHBoxLayout(); mode.setSpacing(4)
-        self.draft_button = button('Taslak pafta'); self.pdf_button = button('SolidWorks PDF')
-        self.preview_modes = QButtonGroup(self)
-        for index, widget in enumerate((self.draft_button, self.pdf_button)):
-            widget.setCheckable(True); widget.setProperty('segment', True)
-            self.preview_modes.addButton(widget, index); mode.addWidget(widget)
-        self.draft_button.setToolTip('Analiz sonucundan ve ayarlardan, oluşturmadan önce: pafta, ölçek ve görünüş yerleri.')
-        self.pdf_button.setToolTip('Oluşturulan resmin SolidWorks’ten dışa aktarılan gerçek PDF’i.')
-        self.preview_modes.idClicked.connect(self.set_preview_mode)
-        mode.addSpacing(8)
-        self.preview_caption = label('Oluşturulan gerçek PDF burada gösterilecek.', 'muted')
-        mode.addWidget(self.preview_caption, 1)
-        pv.addLayout(mode)
-        self.preview_stack = QStackedWidget()
-        draft = QWidget(); dv = QVBoxLayout(draft); dv.setContentsMargins(0, 0, 0, 0); dv.setSpacing(6)
-        self.sheet_preview = SheetPreview()
-        self.sheet_preview.show_message('Bir kaynak seçip “Analiz et” komutunu kullanın; '
-                                        'pafta, ölçek ve görünüş yerleri burada, oluşturmadan önce görünür.')
-        dv.addWidget(self.sheet_preview, 1)
-        self.draft_note = label('Taslak: görünüşler modelin dış ölçüsü × ölçek kutularıdır; çizgiler, ölçüler, '
-                                'sac açınımı ve BOM paftaları resim oluşturulunca gelir. Ayar değişikliği anında yansır.',
-                                'muted')
-        dv.addWidget(self.draft_note)
-        self.preview_stack.addWidget(draft)
-        pdf = QWidget(); pdv = QVBoxLayout(pdf); pdv.setContentsMargins(0, 0, 0, 0)
-        from PySide6.QtPdf import QPdfDocument
-        from PySide6.QtPdfWidgets import QPdfView
-        self.pdf_document = QPdfDocument(self)
-        self.pdf_view = QPdfView()
-        self.pdf_view.setDocument(self.pdf_document)
-        self.pdf_view.setZoomMode(QPdfView.ZoomMode.FitInView)
-        self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
-        pdv.addWidget(self.pdf_view, 1)
-        self.preview_stack.addWidget(pdf)
-        pv.addWidget(self.preview_stack, 1)
-        self.preview_empty = Overlay(self.pdf_view, 'Önizleme yok',
-                                     'Resimler oluşturulduktan sonra Sonuçlar listesinden bir satır seçin; '
-                                     'SolidWorks’ün dışa aktardığı gerçek PDF burada açılır.', glyph='pdf')
-        self.tabs.addTab(preview, 'Önizleme')
-
-        analysis = QWidget(); av = QVBoxLayout(analysis); av.setContentsMargins(4, 10, 4, 4); av.setSpacing(10)
-        self.facts = {}
-        facts = QGridLayout(); facts.setSpacing(8)
-        for i, (key, title) in enumerate((('class', 'Parça sınıfı'), ('size', 'Dış ölçüler · mm'),
-                                          ('bodies', 'Gövdeler'), ('config', 'Konfigürasyon'))):
-            tile = QFrame(); tile.setProperty('card', True); tile.setProperty('fact', True)
-            tl = QVBoxLayout(tile); tl.setContentsMargins(12, 8, 12, 8); tl.setSpacing(2)
-            kicker = label(title.upper(), 'muted', wrap=False); kicker.setProperty('kicker', True)
-            value = label('—', None); value.setProperty('factValue', True)
-            value.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            tl.addWidget(kicker); tl.addWidget(value); self.facts[key] = value
-            facts.addWidget(tile, i//2, i % 2)
-        av.addLayout(facts)
-        self.analysis_text = QPlainTextEdit(); self.analysis_text.setReadOnly(True)
-        self.analysis_text.setPlainText('Bir kaynak seçip “Analiz et” komutunu kullanın.')
-        av.addWidget(self.analysis_text, 1)
-        self.tabs.addTab(analysis, 'Analiz')
-
-        results = QWidget(); rv = QVBoxLayout(results); rv.setContentsMargins(4, 10, 4, 4); rv.setSpacing(10)
+        # 4 · Sonuçlar: counts, the list, and the real PDF exported by SolidWorks below it.
+        results = QWidget(); rv = QVBoxLayout(results); rv.setContentsMargins(0, 4, 0, 0); rv.setSpacing(8)
         tiles = QHBoxLayout(); tiles.setSpacing(8); self.tiles = {}
         for key, title in (('PASS', 'Başarılı'), ('WARNING', 'Uyarılı'), ('FAIL', 'Hatalı'), ('sheets', 'Pafta')):
             tile = QFrame(); tile.setProperty('card', True); tile.setProperty('tile', key)
-            tl = QVBoxLayout(tile); tl.setContentsMargins(12, 8, 12, 8); tl.setSpacing(0)
+            tl = QVBoxLayout(tile); tl.setContentsMargins(12, 6, 12, 6); tl.setSpacing(0)
             kicker = label(title.upper(), 'muted', wrap=False); kicker.setProperty('kicker', True)
             value = label('0', None, wrap=False); value.setProperty('tileValue', True)
             tl.addWidget(kicker); tl.addWidget(value); self.tiles[key] = value; tiles.addWidget(tile, 1)
@@ -367,22 +371,35 @@ class AutoDrawingPage(BasePage):
         self.result_table.itemSelectionChanged.connect(self.select_result)
         fit_columns(self.result_table, elastic=4, minimum=160, autofit=(0, 1, 2, 3),
                     settings=self.settings, key='automatic_drawing_results')
-        rv.addWidget(self.result_table, 1)
         self.results_empty = Overlay(self.result_table, 'Henüz sonuç yok',
-                                     'Kaynakları işaretleyip “Resimleri oluştur” komutunu çalıştırın. '
+                                     'Modelleri işaretleyip “Resimleri oluştur”a basın. '
                                      'Her dosya için SLDDRW, PDF ve doğrulama bulguları burada listelenir.')
+        from PySide6.QtPdf import QPdfDocument
+        from PySide6.QtPdfWidgets import QPdfView
+        self.pdf_document = QPdfDocument(self)
+        self.pdf_view = QPdfView()
+        self.pdf_view.setDocument(self.pdf_document)
+        self.pdf_view.setZoomMode(QPdfView.ZoomMode.FitInView)
+        self.pdf_view.setPageMode(QPdfView.PageMode.MultiPage)
+        pdf = QWidget(); pdv = QVBoxLayout(pdf); pdv.setContentsMargins(0, 0, 0, 0); pdv.setSpacing(4)
+        self.pdf_caption = label('Listeden bir sonuç seçin; SolidWorks’ün dışa aktardığı gerçek PDF burada açılır.',
+                                 'muted')
+        pdv.addWidget(self.pdf_caption); pdv.addWidget(self.pdf_view, 1)
+        self.preview_empty = Overlay(self.pdf_view, 'PDF önizleme',
+                                     'Yukarıdaki listeden bir resim seçin.', glyph='pdf')
+        result_split = QSplitter(Qt.Vertical); result_split.setChildrenCollapsible(False)
+        result_split.addWidget(self.result_table); result_split.addWidget(pdf)
+        result_split.setSizes([200, 400])
+        rv.addWidget(result_split, 1)
         self.tabs.addTab(results, 'Sonuçlar')
 
-        coverage = QScrollArea(); coverage.setWidgetResizable(True); coverage.setFrameShape(QFrame.NoFrame)
         self.coverage = CoverageList(COVERAGE, 'Bu araç neyi otomatik yapar? Kısmi ve desteklenmeyen konular '
                                      'resimde sessizce atlanmış sayılmaz; elle tamamlanmalıdır.')
-        coverage.setWidget(self.coverage)
-        self.tabs.addTab(coverage, 'Kapsam')
 
         self.splitter = QSplitter(Qt.Horizontal, self)
         self.splitter.setChildrenCollapsible(False); self.splitter.setHandleWidth(10)
         self.layout.addWidget(self.splitter, 1)    # placed before filling: a moved filled tree is restyled again
-        self.splitter.addWidget(left); self.splitter.addWidget(self.tabs)
+        self.splitter.addWidget(left); self.splitter.addWidget(right)
         self.splitter.setStretchFactor(0, 1); self.splitter.setStretchFactor(1, 3)
         self.splitter.setSizes([380, 900])
 
@@ -390,7 +407,7 @@ class AutoDrawingPage(BasePage):
         progress = QFrame(); progress.setProperty('card', True); progress.setObjectName('drawingProgress')
         pl = QVBoxLayout(progress); pl.setContentsMargins(12, 8, 12, 8); pl.setSpacing(6)
         top = QHBoxLayout()
-        self.progress_label = label('SolidWorks bağlantısı analiz / oluşturma sırasında kontrol edilir.', 'muted')
+        self.progress_label = label('SolidWorks bağlantısı kontrol / oluşturma sırasında denetlenir.', 'muted')
         top.addWidget(self.progress_label, 1)
         self.stage_count = label('', 'muted', wrap=False); top.addWidget(self.stage_count)
         pl.addLayout(top)
@@ -410,7 +427,9 @@ class AutoDrawingPage(BasePage):
                       else field.textChanged)
             signal.connect(self.refresh_options)
         self.refresh_options(); self.refresh_sources(); self.refresh_results(); self.theme_changed()
-        self.set_preview_mode(0)
+        self.tabs.setCurrentIndex(0); self.step_buttons[0].setChecked(True)
+        self.tree.itemChanged.connect(lambda *_: self.refresh_guide())
+        self.refresh_guide()
 
     # ------------------------------------------------------------------ options
     def _saved(self, key, default):
@@ -454,7 +473,7 @@ class AutoDrawingPage(BasePage):
         layout.addWidget(widget, 1); layout.addWidget(browse)
         form.addRow(title, row); self.controls.append(browse); self.browse[key] = browse
 
-    def _form(self, title, detail, wide=False):
+    def _form(self, title, detail, wide=False, advanced=False):
         section = QFrame(); section.setProperty('card', True); section.setProperty('settingsCard', True)
         body = QVBoxLayout(section); body.setContentsMargins(14, 12, 14, 12); body.setSpacing(8)
         body.addWidget(label(title, 'section'))
@@ -463,17 +482,14 @@ class AutoDrawingPage(BasePage):
         form = QFormLayout(); form.setRowWrapPolicy(QFormLayout.WrapAllRows)
         form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         form.setVerticalSpacing(8); form.setContentsMargins(0, 4, 0, 0)
-        body.addLayout(form); self.cards.add(section, wide)
+        body.addLayout(form); (self.advanced_cards if advanced else self.cards).add(section, wide)
         return form
 
     def _build_options(self):
-        general = self._form('Pafta ve şablon', 'Resim şablonu, pafta boyutu, izdüşüm ve ölçek seçimi.')
-        self._path(general, 'template', 'Drawing şablonu · DRWDOT', 'SolidWorks Drawing şablonu (*.drwdot *.DRWDOT)',
-                   'SolidWorks varsayılan şablonu')
-        self._path(general, 'sheet_format', 'Firma anteti · SLDDRT (isteğe bağlı)',
-                   'SolidWorks sayfa biçimi (*.slddrt *.SLDDRT)', 'Şablondaki antet')
-        self._combo(general, 'paper', 'Pafta boyutu', [('A3 yatay', 'A3'), ('Otomatik', 'auto'),
-                    *[(p+' yatay', p) for p in PAPERS if p != 'A3'], ('Özel', 'custom')], 'A3')
+        # ---- basic: what most drawings need
+        general = self._form('Pafta', 'Kâğıt boyu, izdüşüm yöntemi ve ölçek.')
+        self._combo(general, 'paper', 'Pafta boyutu', [('A3 yatay', 'A3'), ('Otomatik (parçaya göre)', 'auto'),
+                    *[(p+' yatay', p) for p in PAPERS if p != 'A3'], ('Özel ölçü', 'custom')], 'A3')
         for key, title, default in (('custom_width_mm', 'Özel en · mm', 420.),
                                     ('custom_height_mm', 'Özel boy · mm', 297.)):
             spin = guard_wheel(NumberSpinBox(2)); spin.setRange(100, 5000)
@@ -487,54 +503,67 @@ class AutoDrawingPage(BasePage):
                 general.setRowVisible(self.fields[key], custom)
         self.fields['paper'].currentIndexChanged.connect(custom_paper)
         custom_paper()
-        self._combo(general, 'projection', 'İzdüşüm', [('ISO · birinci açı', 'first'),
-                                                     ('Üçüncü açı', 'third')], 'first')
-        self._line(general, 'scales_text', 'Tercih edilen ölçekler',
-                   '5:1;2:1;1:1;1:2;1:2,5;1:5;1:10;1:20;1:50;1:100')
-        self._line(general, 'manual_scale_text', 'Manuel ölçek', placeholder='Boş: listeden otomatik · ör. 1:2')
+        self._combo(general, 'projection', 'İzdüşüm yöntemi', [('Avrupa · ISO 1. açı', 'first'),
+                                                             ('Amerikan · 3. açı', 'third')], 'first')
+        self._line(general, 'manual_scale_text', 'Ölçek', placeholder='Boş: otomatik · sabit için ör. 1:2')
 
-        views = self._form('Görünüşler', 'Ana görünüş ve izdüşümler; parça sınıfı yerleşimi belirler.')
-        self._combo(views, 'main_view', 'Ana görünüş', [('Akıllı seçim', 'auto'), ('Ön', 'front'),
-                    ('Arka', 'back'), ('Üst', 'top'), ('Alt', 'bottom'), ('Sağ', 'right'), ('Sol', 'left')], 'auto')
-        self._combo(views, 'classification', 'Parça sınıfı', [('Otomatik', 'auto')]+[
-            (title, key) for key, title in CLASS_TITLES.items() if key != 'assembly'], 'auto')
-        for key, title, default in (('top', 'Üst izdüşüm', True), ('side', 'Yan izdüşüm', True),
-                                    ('isometric', 'İzometrik görünüş', True)):
+        views = self._form('Görünüşler', 'Ön görünüş her zaman çizilir. Yanına eklenecekleri seçin.')
+        for key, title, default in (('top', 'Üstten görünüş', True), ('side', 'Yandan görünüş', True),
+                                    ('isometric', 'İzometrik (3B) görünüş', True)):
             self._check(views, key, title, default)
+        self._check(views, 'flat_pattern', 'Sac parçada açınım', True, 'Modelde açınım varsa ayrı görünüş olarak.')
+        self._check(views, 'bom', 'Montajda malzeme listesi (BOM)', True)
 
-        dims = self._form('Ölçüler ve ayrıntılar', 'Modelden aktarılan ölçüler, düzenleme ve sac ayrıntıları.')
+        output = self._form('Çıktı', 'SolidWorks resmi (SLDDRW) her zaman kaydedilir.')
+        self._path(output, 'output_dir', 'Kayıt klasörü', placeholder='Boş: modelin kendi klasörü')
+        self._check(output, 'pdf', 'PDF de kaydet (önizleme için gerekli)', True)
+        self._check(output, 'dxf', 'DXF de kaydet (tek paftalı resimlerde)', False)
+        self._combo(output, 'existing', 'Aynı adla dosya varsa', [('Yeni ad ver', 'unique'), ('Atla', 'skip')],
+                    'unique')
+
+        # ---- advanced
+        templates = self._form('Şablonlar', 'Boş bırakılırsa SolidWorks’ün kendi şablonları kullanılır.', advanced=True)
+        self._path(templates, 'template', 'Resim şablonu (.drwdot)', 'SolidWorks resim şablonu (*.drwdot *.DRWDOT)',
+                   'SolidWorks varsayılanı')
+        self._path(templates, 'sheet_format', 'Firma anteti / pafta çerçevesi (.slddrt)',
+                   'SolidWorks sayfa biçimi (*.slddrt *.SLDDRT)', 'Şablondaki antet')
+        self._path(templates, 'hole_table_template', 'Delik tablosu şablonu (.sldholtbt)',
+                   'SolidWorks delik tablosu (*.sldholtbt *.SLDHOLTBT)', 'SolidWorks standart şablonu')
+        self._path(templates, 'bom_template', 'BOM şablonu (.sldbomtbt)',
+                   'SolidWorks BOM şablonu (*.sldbomtbt *.SLDBOMTBT)', 'SolidWorks varsayılanı')
+
+        layout = self._form('Görünüş yerleşimi', 'Hangi yüzün ön görünüş olacağı ve ölçek seçenekleri.', advanced=True)
+        self._combo(layout, 'main_view', 'Ön görünüş olarak', [('Otomatik seç', 'auto'), ('Ön', 'front'),
+                    ('Arka', 'back'), ('Üst', 'top'), ('Alt', 'bottom'), ('Sağ', 'right'), ('Sol', 'left')], 'auto')
+        self._combo(layout, 'classification', 'Parça türü', [('Otomatik', 'auto')]+[
+            (title, key) for key, title in CLASS_TITLES.items() if key != 'assembly'], 'auto')
+        self._line(layout, 'scales_text', 'Otomatik ölçekte denenecekler',
+                   '5:1;2:1;1:1;1:2;1:2,5;1:5;1:10;1:20;1:50;1:100')
+
+        dims = self._form('Ölçüler', 'Modelden aktarılan ölçüler ve işaretler.', advanced=True)
         for key, title, default, hint in (
-            ('model_dimensions', 'Resme işaretli model ölçüleri', True, 'Modelde “resme aktar” işaretli ölçüler.'),
-            ('include_unmarked', 'İşaretsiz ölçüleri de aktar', False, 'Kalabalık resim üretebilir.'),
-            ('geometry_dimensions', 'Geometriden referans ölçüleri', False, 'Dış ölçüler ve delik konumları; referans olarak.'),
+            ('model_dimensions', 'Modelde “resme aktar” işaretli ölçüler', True, ''),
+            ('include_unmarked', 'İşaretsiz model ölçüleri de', False, 'Kalabalık resim üretebilir.'),
+            ('geometry_dimensions', 'Geometriden referans ölçüler', False, 'Dış ölçüler ve delik konumları; referans olarak.'),
             ('arrange_dimensions', 'Ölçüleri düzenle ve denetle', True, 'Çakışan ve görünüş dışına taşan ölçüler raporlanır.'),
             ('center_marks', 'Delik merkez işaretleri', True, ''),
-            ('flat_pattern', 'Mevcut sac açınımını ekle', True, 'Modelde açınım varsa ayrı görünüş olarak.'),
-            ('bend_lines', 'Açınım büküm çizgileri', True, '')):
+            ('bend_lines', 'Açınımda büküm çizgileri', True, '')):
             self._check(dims, key, title, default, hint)
-        self._path(dims, 'hole_table_template', 'Delik tablosu şablonu (isteğe bağlı)',
-                   'SolidWorks delik tablosu (*.sldholtbt *.SLDHOLTBT)', 'SolidWorks standart şablonu')
 
-        assembly = self._form('Montaj ve BOM', 'Montaj resmi kapsamı, malzeme listesi ve balonlar.')
+        assembly = self._form('Montaj ve BOM', 'Montajda hangi resimler çıkar, BOM nasıl olur.', advanced=True)
         self._combo(assembly, 'assembly_scope', 'Oluşturulacak resimler',
                     [('Yalnız seçili dosyalar / montaj', 'assembly'),
-                     ('Montaj ve benzersiz parçalar', 'parts'),
-                     ('Montaj, alt montajlar ve benzersiz parçalar', 'all')], 'assembly')
-        self._check(assembly, 'bom', 'Native SolidWorks BOM tablosu', True)
-        self._combo(assembly, 'bom_type', 'BOM kapsamı', [('Yalnız parçalar', 'parts'),
+                     ('Montaj ve içindeki parçalar', 'parts'),
+                     ('Montaj, alt montajlar ve parçalar', 'all')], 'assembly')
+        self._combo(assembly, 'bom_type', 'BOM içeriği', [('Yalnız parçalar', 'parts'),
                     ('Üst seviye', 'top'), ('Girintili', 'indented')], 'parts')
-        self._path(assembly, 'bom_template', 'BOM şablonu (isteğe bağlı)',
-                   'SolidWorks BOM şablonu (*.sldbomtbt *.SLDBOMTBT)', 'SolidWorks varsayılanı')
-        self._check(assembly, 'balloons', 'BOM’a bağlı otomatik balonlar', False)
+        self._check(assembly, 'balloons', 'BOM’a bağlı balonlar', False)
 
-        output = self._form('Çıktı', 'Düzenlenebilir SLDDRW her zaman üretilir; PDF ve DXF isteğe bağlıdır.')
-        self._path(output, 'output_dir', 'Çıktı klasörü', placeholder='Boş: kaynak dosyanın klasörü')
-        self._line(output, 'naming', 'Dosya adı şablonu', '{name}-{configuration}')
-        self._combo(output, 'existing', 'Mevcut dosya', [('Yeni ad üret', 'unique'), ('Atla', 'skip')], 'unique')
-        self._check(output, 'pdf', 'Tüm paftalar PDF / önizleme', True)
-        self._check(output, 'dxf', 'Tek pafta için DXF', False)
+        naming = self._form('Dosya adı', '{name} model adı, {configuration} konfigürasyon.', advanced=True)
+        self._line(naming, 'naming', 'Dosya adı şablonu', '{name}-{configuration}')
 
-        mapping = self._form('Antet eşlemesi', 'Model özelliği → resim özelliği. Antetteki alanlar bu eşlemeyle dolar.')
+        mapping = self._form('Antet eşlemesi', 'Model özelliği → resim özelliği. Antetteki alanlar bu eşlemeyle dolar.',
+                             advanced=True)
         raw_map = self.saved.get('property_map')
         saved_map = raw_map if isinstance(raw_map, list) and 0 < len(raw_map) <= 50 and all(
             isinstance(p, (list, tuple)) and len(p) == 2 and all(isinstance(s, str) for s in p)
@@ -581,13 +610,6 @@ class AutoDrawingPage(BasePage):
         self.refresh_draft()
 
     # ------------------------------------------------------------------ draft preview
-    def set_preview_mode(self, index):
-        self.preview_stack.setCurrentIndex(index)
-        (self.draft_button if index == 0 else self.pdf_button).setChecked(True)
-        self.preview_empty.setVisible(index == 1 and self.pdf_document.pageCount() == 0)
-        if index == 0:
-            self.refresh_draft()
-
     def current_info(self):
         item = self.tree.currentItem()
         while item is not None and item.data(0, Qt.UserRole+1) is None:
@@ -601,9 +623,9 @@ class AutoDrawingPage(BasePage):
             return
         info = self.current_info()
         if info is None:
-            self.sheet_preview.show_message('Bir kaynak seçip “Analiz et” komutunu kullanın; pafta, ölçek ve '
-                                            'görünüş yerleri burada, oluşturmadan önce görünür.')
-            caption = 'Taslak için önce analiz gerekir (SolidWorks yalnız okunur, resim oluşturulmaz).'
+            self.sheet_preview.show_message('Soldan bir model seçip “Kontrol et”e basın. Pafta, ölçek ve görünüşlerin '
+                                            'yeri burada, resim oluşturulmadan önce görünür.')
+            caption = 'Taslak için önce modeli kontrol edin (SolidWorks yalnız okunur, resim oluşturulmaz).'
         else:
             try:
                 options = self.collect_options(save=False)
@@ -613,12 +635,63 @@ class AutoDrawingPage(BasePage):
                 self.sheet_preview.show_plan(info, options)
                 caption = (Path(info.source.path).name+' · '+info.source.configuration+' · '
                            + (self.sheet_preview.summary() if self.sheet_preview.plans else 'sığmıyor'))
-        if self.preview_stack.currentIndex() == 0:
-            self.preview_caption.setText(caption)
+        self.preview_caption.setText(caption)
 
     def set_busy(self, busy):
         super().set_busy(busy)
         self.refresh_options()
+        if hasattr(self, 'guide_button'):
+            self.refresh_guide()
+
+    # ------------------------------------------------------------------ guide
+    def refresh_guide(self):
+        """One sentence on what to do now, and the button that does it."""
+        if not hasattr(self, 'guide_button'):
+            return
+        files = self.tree.topLevelItemCount()
+        checked = len(self.selected_sources()) if files else 0
+        analysed = self.current_info() is not None
+        if self.busy:
+            text, action = 'Çalışıyor… İlerleme aşağıda. İsterseniz “Durdur” ile kesebilirsiniz.', None
+        elif not files:
+            text, action = ('1. Resmi çıkarılacak parça veya montajı ekleyin: dosya seçin, sürükleyip bırakın '
+                            'ya da SolidWorks’te açık modeli alın.'), ('Dosya ekle…', 'add')
+        elif not checked:
+            text, action = '1. Soldaki listede resmi çıkarılacak modelleri işaretleyin.', None
+        elif self.results:
+            text, action = (f'Bitti: {len(self.results)} sonuç. Listeden bir satır seçin, PDF aşağıda açılır. '
+                            'Klasörde SLDDRW ve PDF dosyaları hazır.'), ('Sonuçlara git', 'results')
+        elif not analysed:
+            text, action = ('2. Modeli kontrol edin: SolidWorks’ten okunur, pafta taslağı gösterilir. Model değişmez.'),\
+                ('Kontrol et', 'analyze')
+        else:
+            text, action = ('3. Taslak uygunsa ayarlara bir göz atın ve resimleri oluşturun. '
+                            f'{checked} model işaretli.'), ('Resimleri oluştur', 'start')
+        self.guide_text.setText(text)
+        if action and action[1] == 'results' and self.tabs.currentIndex() == 2:
+            action = None                              # already there
+        self.guide_button.setVisible(action is not None)
+        if action:
+            self.guide_button.setText(action[0]); self.guide_button.setProperty('guideAction', action[1])
+            self.guide_button.setEnabled(not self.busy)
+
+    def _guide_action(self):
+        action = self.guide_button.property('guideAction')
+        if action == 'add': self.choose_files()
+        elif action == 'analyze': self.analyze()
+        elif action == 'start': self.start()
+        elif action == 'results': self.tabs.setCurrentIndex(2)
+
+    def show_coverage(self):
+        from PySide6.QtWidgets import QDialog, QDialogButtonBox
+        dialog = QDialog(self); dialog.setWindowTitle('Otomatik teknik resim neyi yapar?')
+        layout = QVBoxLayout(dialog)
+        area = QScrollArea(); area.setWidgetResizable(True); area.setFrameShape(QFrame.NoFrame)
+        self.coverage.setParent(None); area.setWidget(self.coverage); layout.addWidget(area, 1)
+        buttons = QDialogButtonBox(QDialogButtonBox.Close); buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons); dialog.resize(720, 560)
+        dialog.finished.connect(lambda *_: (area.takeWidget(), self.coverage.setParent(self)))
+        dialog.exec()
 
     # ------------------------------------------------------------------ sources
     def refresh_sources(self):
@@ -627,6 +700,7 @@ class AutoDrawingPage(BasePage):
         self.source_count.setText(f'{files} dosya · {checked} seçili' if files else 'Boş')
         self.tree_empty.setVisible(files == 0)
         self.tree.header().setVisible(files > 0)
+        self.refresh_guide()
 
     def _tint(self, item):
         status = item.text(2)
@@ -678,6 +752,11 @@ class AutoDrawingPage(BasePage):
             QFrame[tile="FAIL"] {{ border-left-color: {c['danger']}; }}
             QFrame[tile="sheets"] {{ border-left-color: {c['accent']}; }}
             QPushButton[segment="true"] {{ padding: 4px 12px; }}
+            QPushButton[step="true"] {{ padding: 6px 16px; font-weight: 600; border-radius: 15px; }}
+            QPushButton[step="true"]:checked {{ background: {c['accent']}; border-color: {c['accent']};
+                                                color: {c['on_accent']}; }}
+            QFrame#drawingGuide {{ border-left: 4px solid {c['accent']}; }}
+            QLabel[guide="true"] {{ font-size: 13px; }}
             QPushButton[segment="true"]:checked {{ background: {c['selected']}; border-color: {c['accent']}; color: {c['text']}; }}
             QLabel[optionHint="true"] {{ font-size: 11px; padding-left: 24px; }}
             QFrame[settingsCard="true"] QLineEdit, QFrame[settingsCard="true"] QComboBox {{ min-height: 24px; }}
@@ -698,8 +777,10 @@ class AutoDrawingPage(BasePage):
         self.tiles['sheets'].setText(str(sum(len(r.sheets) for r in self.results)))
         self.results_empty.setVisible(not self.results)
         self.result_table.horizontalHeader().setVisible(bool(self.results))
-        self.tabs.setTabText(3, f'Sonuçlar · {len(self.results)}' if self.results else 'Sonuçlar')
-        self.preview_empty.setVisible(self.preview_stack.currentIndex() == 1 and self.pdf_document.pageCount() == 0)
+        self.tabs.setTabText(2, f'Sonuçlar · {len(self.results)}' if self.results else 'Sonuçlar')
+        self.step_buttons[2].setText(f'4 · Sonuçlar · {len(self.results)}' if self.results else '4 · Sonuçlar')
+        self.preview_empty.setVisible(self.pdf_document.pageCount() == 0)
+        self.refresh_guide()
 
     def choose_path(self, field, title, file_filter):
         if file_filter:
@@ -908,12 +989,11 @@ class AutoDrawingPage(BasePage):
         result = self.results[row]
         self.pdf_document.close()
         path = result.outputs.get('pdf')
-        self.set_preview_mode(1)
         if path and Path(path).is_file():
             self.pdf_document.load(path)
-            self.preview_caption.setText(Path(path).name+' · SolidWorks’ten alınan PDF')
+            self.pdf_caption.setText(Path(path).name+' · SolidWorks’ten alınan PDF')
         else:
-            self.preview_caption.setText('Bu sonuç için PDF oluşturulmadı. SLDDRW / rapor ayrıntılarını kontrol edin.')
+            self.pdf_caption.setText('Bu sonuç için PDF oluşturulmadı. SLDDRW / rapor ayrıntılarını kontrol edin.')
         self.refresh_results()
 
     def save_report(self):
@@ -935,7 +1015,7 @@ class AutoDrawingPage(BasePage):
                 try: self.add_sources(value)
                 finally: self.busy = busy
             elif kind == 'drawing_analysis':
-                self._analysis_item(value); self.tabs.setCurrentIndex(2)
+                self._analysis_item(value); self.tabs.setCurrentIndex(0); self.refresh_guide()
                 self.set_status('Model analizi tamamlandı.')
             elif kind == 'drawing_analysis_error':
                 self.set_status(value['error'], True); self.log.appendPlainText(value['error'])
@@ -958,7 +1038,7 @@ class AutoDrawingPage(BasePage):
                 self.phases.set_state(self.stage_progress.value(), False)
                 self.set_status(summary+('\n'+self.batch_notice if self.batch_notice else ''),
                                 error=bool(counts['FAIL'] or self.batch_notice))
-                self.tabs.setCurrentIndex(3)
+                self.tabs.setCurrentIndex(2)
 
     def job_finished(self):
         self.report_button.setEnabled(bool(self.results))
