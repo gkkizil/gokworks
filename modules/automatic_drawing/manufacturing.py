@@ -68,6 +68,7 @@ def body_flat_pages(native, source_model):
     from modules.cad_converter.api import PART_IID
     from .sheetmetal import flat_view_direction, verify_unfolded
     info, options, session = native.info, native.options, native.session
+    multibody = len(info.sheet_bodies) > 1
     before = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
     delivered = []
     for row in info.sheet_bodies:
@@ -97,13 +98,16 @@ def body_flat_pages(native, source_model):
         page = native.pages[plan.name]
         page['flat_body'] = row
         x, y = (to_m(v) for v in plan.views[0].center)
-        # The native flat-view constructor can create a new source configuration.
-        # Use an ordinary model view of the existing, verified unfolded configuration.
-        view = native.model_view_at(plan.views[0], x, y)
-        if view is None:
-            raise ApiError(row.label+': mevcut açınım konfigürasyonu için görünüş oluşturulamadı.')
-        put(view, 'ReferencedConfiguration', configuration)
-        native.rebuild()
+        if multibody:
+            view = multibody_flat_view(native, source_model, row, configuration, before, x, y)
+        else:
+            # The native flat-view constructor can create a new source configuration.
+            # Use an ordinary model view of the existing, verified unfolded configuration.
+            view = native.model_view_at(plan.views[0], x, y)
+            if view is None:
+                raise ApiError(row.label+': mevcut açınım konfigürasyonu için görünüş oluşturulamadı.')
+            put(view, 'ReferencedConfiguration', configuration)
+            native.rebuild()
         after = tuple(str(v) for v in values(call(source_model, 'GetConfigurationNames')))
         if set(after) != set(before):
             raise RestoreError('Açınım sırasında kaynak konfigürasyonları değişti; kaynak kaydedilmedi.')
@@ -138,6 +142,52 @@ def body_flat_pages(native, source_model):
         if options.bend_lines:
             native.result.warn('bend_notes', 'Açınım, kaydedilmiş konfigürasyon geometrisini gösterir. Büküm çizgileri '
                                've büküm notları çizimde ayrıca doğrulanmalı.')
+
+
+def multibody_flat_view(native, source_model, row, configuration, before, x, y):
+    """Flat view that shows ONLY ``row``'s body of a multibody part.
+
+    Recorded on SolidWorks 2025 SP5 (2026-11-25): a model view of the saved flat configuration
+    shows every body; setting IView.Bodies is ignored, and changing ReferencedConfiguration after
+    creation clears a body filter. The flat-pattern constructor with the body pre-selected shows
+    exactly that body. On a reopened multibody part it binds to a NEW in-memory
+    '<parent>SM-FLAT-PATTERN<n>' whose drawing loses the unfolded geometry on reopen (the source
+    is never saved): retarget the view to the body's SAVED flat configuration, then remove the
+    temporary one.
+    """
+    info, options = native.info, native.options
+    select_body(native, source_model, row)
+    view = call(native.drawing, 'CreateFlatPatternViewFromModelView3', info.source.path,
+                info.source.configuration, x, y, 0., not options.bend_lines, False)
+    created = [name for name in (str(v) for v in values(call(source_model, 'GetConfigurationNames')))
+               if name not in before]
+    if view is not None and created:
+        put(view, 'ReferencedConfiguration', configuration)
+        native.rebuild()
+    for name in created:
+        if call(source_model, 'DeleteConfiguration2', name) is not True:
+            raise RestoreError('Açınımın geçici kaynak konfigürasyonu kaldırılamadı: '+name+
+                               '. Kaynak kaydedilmedi; SolidWorks’te bu konfigürasyonu kaydetmeden kapatın.')
+    if view is None or not call(view, 'IsFlatPatternView'):
+        raise ApiError(row.label+': istenen native açınım görünüşü oluşturulamadı.')
+    return view
+
+
+def select_body(native, source_model, row):
+    """Pre-select the body in the source: SolidWorks asks which body to unfold on a multibody part."""
+    from modules.cad_converter.api import PART_IID
+    from .solidworks import null_dispatch
+    session = native.session
+    session.activate(source_model)
+    try:
+        call(source_model, 'ClearSelection2', True)
+        bodies = values(call(as_interface(source_model, PART_IID), 'GetBodies2', session.c('swSolidBody'), False))
+        matches = [body for body in bodies if session.persistent_ref(source_model, body) == row.body_ref]
+        if len(matches) != 1 or not call(matches[0], 'Select2', False, null_dispatch()):
+            raise ApiError(row.label+': açınım için sac gövdesi kaynakta seçilemedi.')
+    finally:
+        bodies = matches = ()
+        session.activate(native.model)
 
 
 def bom_page(native):

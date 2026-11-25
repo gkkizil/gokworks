@@ -290,30 +290,64 @@ def native_flat_case(case, *, ignore_body_filter=False, new_config=False, wrong_
     c.session.open_drawing = lambda path: (case.model, case.drawing)
     c.session.close_created = lambda model: source_calls.append('close-owned-drawing')
     c.session.activate = lambda model: source_calls.append('activate-owned-drawing')
-    def create(path, direction, x, y, z):
-        assert direction == '*Front'
-        if new_config:
-            c.state.configs += ('UNEXPECTED',)
-        props = dict(Position=(x, y), UseSheetScale=False, ReferencedDocument=c.model,
-                     Bodies=() if no_body_filter else c.get_bodies(), ReferencedConfiguration='Default')
+    multibody = len(info.sheet_bodies) > 1
+    selected = []
+    def delete_configuration(name):
+        if name not in c.state.configs:
+            return False
+        c.state.configs = tuple(n for n in c.state.configs if n != name); return True
+    c.model.methods.update(DeleteConfiguration2=delete_configuration, ClearSelection2=lambda all: selected.clear())
+    original_body = c.body
+    def selectable(index):
+        body = original_body(index)
+        body.methods['Select2'] = lambda append, data, index=index: selected.append(index) is None
+        return body
+    c.model.methods['GetBodies2'] = lambda *args: [selectable(i) for i in (1, 2, 3)]
+
+    def make_view(props, flat, ignore_bodies):
         def bounds():
             vx, vy = props['Position']; scale = case.state['props'][2]
             return vx-.04*scale, vy-.02*scale, vx+.04*scale, vy+.02*scale
         class View(RawDispatch):
             def Invoke(self, member, lcid, flags, result_wanted, *args):
-                if flags == 4 and ((ignore_body_filter and member == 'Bodies') or
+                if flags == 4 and ((ignore_bodies and member == 'Bodies') or
                                    (wrong_config and member == 'ReferencedConfiguration')):
                     self.calls.append((member, flags, args))
                     return None
                 return super().Invoke(member, lcid, flags, result_wanted, *args)
         name = 'Flat'+str(len(views)+1)
         view = View('IView', methods={'GetName2': lambda: name, 'GetOutline': bounds,
-            'IsFlatPatternView': lambda: False, 'GetReferencedModelName': lambda: info.source.path,
+            'IsFlatPatternView': lambda: flat, 'GetReferencedModelName': lambda: info.source.path,
             'GetBodiesCount': lambda: len(props['Bodies']), 'GetFirstDisplayDimension5': lambda: None,
             'GetTableAnnotations': lambda: None, 'GetNextView': lambda: None}, properties=props)
         views[case.state['name']] = view
         return view
+
+    def create(path, direction, x, y, z):
+        # Single sheet body: a model view of the saved flat configuration (recorded passing).
+        # Multibody (recorded on SolidWorks 2025 SP5, 2026-11-25): the model view shows EVERY body
+        # and IView.Bodies writes are ignored, so it can never show only one body.
+        assert direction == '*Front'
+        if new_config:
+            c.state.configs += ('UNEXPECTED',)
+        props = dict(Position=(x, y), UseSheetScale=False, ReferencedDocument=c.model,
+                     Bodies=() if no_body_filter else c.get_bodies(),
+                     ReferencedConfiguration='Default')
+        return make_view(props, False, ignore_body_filter or multibody)
     case.drawing.methods['CreateDrawViewFromModelView3'] = create
+
+    def create_flat(path, config, x, y, z, hide, flip):
+        # Recorded on SolidWorks 2025 SP5 (multibody, reopened part): with the body pre-selected a
+        # NEW temporary '<parent>SM-FLAT-PATTERN<n>' is created; the flat view keeps NO body filter
+        # (GetBodiesCount 0, Bodies empty, writes ignored). It is accepted only because its saved
+        # flat configuration unfolds exactly the target body.
+        assert config == 'Default' and len(selected) == 1
+        temporary = f'DefaultSM-FLAT-PATTERN-TEMP{len(views)+1}'
+        c.state.configs += (temporary,)
+        props = dict(Position=(x, y), UseSheetScale=False, ReferencedDocument=c.model,
+                     Bodies=(), ReferencedConfiguration=temporary)
+        return make_view(props, True, True)
+    case.drawing.methods['CreateFlatPatternViewFromModelView3'] = create_flat
 
     def insert(text):
         position = {'xyz': (0., 0., 0.)}
@@ -439,12 +473,17 @@ def test_an_unavailable_single_flat_body_is_reported_and_no_view_is_requested(ca
     assert any(f.code == 'body_flat_unavailable' and 'ORHAN-01' in f.text for f in c.native.result.findings)
 
 
-def test_multibody_flat_views_use_saved_configurations_without_creating_source_configurations(case):
+def test_multibody_flat_views_are_retargeted_to_saved_configurations_and_temporaries_removed(case):
+    # Recorded on SolidWorks 2025 SP5 (2026-11-25): a model view of a multibody part's saved flat
+    # configuration shows every body (IView.Bodies writes are ignored). The flat-pattern constructor
+    # with the body pre-selected shows that body only and creates a temporary configuration, which
+    # is retargeted to the SAVED per-body configuration and removed.
     c = native_flat_case(case, bodies=3)
     saved = c.c.state.configs
     flat_page(c.native, c.c.model)
-    assert c.c.state.configs == saved
-    assert not any('DeleteConfiguration' in name for name, _, _ in c.c.model.calls)
+    assert c.c.state.configs == saved                     # every temporary configuration removed
+    assert sum(name == 'DeleteConfiguration2' for name, _, _ in c.c.model.calls) == 3
+    assert not any(name == 'CreateDrawViewFromModelView3' for name, _, _ in case.drawing.calls)
     assert len(c.native.pages) == 3
     configs = [page['views']['flat'].properties['ReferencedConfiguration'] for page in c.native.pages.values()]
     assert configs == ['Body1-SM-FLAT-PATTERN', 'Body2-SM-FLAT-PATTERN', 'Body3-SM-FLAT-PATTERN']
@@ -471,6 +510,22 @@ def test_multibody_flat_view_whose_saved_configuration_also_unfolds_another_body
     c.c.state.suppressed[(2, 'Body1-SM-FLAT-PATTERN')] = False   # body 2 also unfolds there
     with pytest.raises(ApiError, match='başka veya birden fazla gövde'):
         flat_page(c.native, c.c.model)
+
+
+def test_an_unfiltered_multibody_model_view_is_never_accepted_as_one_body_flat(case):
+    # Regression (GOKWORKS 0d5874e on SolidWorks 2025 SP5): a model view of the saved flat
+    # configuration shows every body of a multibody part; it must never pass as one body's flat.
+    c = native_flat_case(case, bodies=3)
+    flat = case.drawing.methods['CreateFlatPatternViewFromModelView3']
+    def not_a_flat_view(*args):
+        view = flat(*args)                       # unfiltered, but NOT a flat pattern view
+        view.methods['IsFlatPatternView'] = lambda: False
+        return view
+    case.drawing.methods['CreateFlatPatternViewFromModelView3'] = not_a_flat_view
+    with pytest.raises(ApiError, match='açınım görünüşü oluşturulamadı'):
+        flat_page(c.native, c.c.model)
+    assert not any(name == 'CreateDrawViewFromModelView3' for name, _, _ in case.drawing.calls)   # no model-view fallback
+    assert not c.native.result.measurements.get('flat_pattern')
 
 
 def test_body_heading_must_be_attached_to_sheet_and_cannot_silently_follow_a_model_view(case):
