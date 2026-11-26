@@ -465,10 +465,20 @@ class NativeDrawing:
                 verify_unfolded(self.session, referenced, target, target.configurations[0])
                 bodies, count = values(get(view, 'Bodies')), int(call(view, 'GetBodiesCount'))
                 if not bodies and count == 0:
+                    # Recorded on SolidWorks 2025 SP5: a view keeps no body filter (GetBodiesCount 0,
+                    # Bodies empty, even after Bodies is written). A single-body part: its only body.
                     solids = values(call(as_interface(referenced, PART_IID), 'GetBodies2',
                                          self.session.c('swSolidBody'), False))
                     if len(solids) == 1:
                         bodies, count = solids, 1
+                    elif call(view, 'IsFlatPatternView') and self.only_target_unfolded(referenced, target, record['configuration']):
+                        # Multibody FLAT PATTERN view (recorded, 2026-11-25 again): no body filter either;
+                        # its saved flat configuration unfolds exactly the target body's FlatPattern.
+                        # An unfiltered MODEL view of a multibody part shows every body: never accepted.
+                        record.update(expected_body=target.body_ref, expected_flat_configuration=target.configurations[0],
+                                      body_references=(target.body_ref,), body_count=1, body_label=target.label, flat=True)
+                        result.append(record)
+                        continue
                 if count == 1 and len(self.info.sheet_bodies) > 1 and not self.only_target_unfolded(
                         referenced, target, record['configuration']):
                     raise ApiError('Açınım konfigürasyonu başka veya birden fazla gövdeyi açıyor.')
