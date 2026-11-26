@@ -140,6 +140,35 @@ def test_rotated_text_and_greedy_placement_are_within_paper_and_keep_dimensions(
     assert not boxes[0].overlaps(boxes[1])
 
 
+@pytest.mark.parametrize('axis', ['vertical', 'horizontal'])
+def test_linear_dimensions_use_distinct_parallel_lanes_outside_the_view(axis):
+    view = Box(100, 100, 80, 60)
+    if axis == 'vertical':
+        boxes = [Box(102, 111, 3.5, 16), Box(102, 159, 3.5, 16)]
+        fixed_coordinate, lane_coordinate = 1, 0
+    else:
+        boxes = [Box(103, 102, 16, 3.5), Box(150, 102, 16, 3.5)]
+        fixed_coordinate, lane_coordinate = 0, 1
+    records = [(index, 'main', box) for index, box in enumerate(boxes)]
+    moves, unresolved = place_texts(records, {'main': view}, Box(10, 50, 400, 237),
+                                    linear={0: (axis, 104, 50), 1: (axis, 104, 10)})
+    assert not unresolved and len(moves) == 2
+    placed = [box.shifted(*moves[index]) for index, box in enumerate(boxes)]
+    assert all(move[fixed_coordinate] == 0 for move in moves.values())
+    assert abs(placed[0].center[lane_coordinate]-placed[1].center[lane_coordinate]) >= 7
+    assert all(not box.overlaps(view, 3.5) for box in placed)
+    assert placed[0].center[lane_coordinate] < placed[1].center[lane_coordinate]
+
+
+def test_dimension_displayed_on_far_side_returns_to_its_witness_points():
+    view = Box(100, 100, 80, 60)
+    original = Box(200, 120, 3.5, 16)
+    moves, unresolved = place_texts([('d', 'main', original)], {'main': view}, Box(10, 50, 400, 237),
+                                    linear={'d': ('vertical', 110, 50)})
+    assert not unresolved
+    assert original.shifted(*moves['d']).right < view.x
+
+
 def test_validator_catches_wrong_model_configuration_and_broken_projection():
     source = Source('C:/p.sldprt', 'Default')
     sheet = dict(name='S1', width_mm=420., height_mm=297., expected=['main', 'side'],

@@ -514,8 +514,7 @@ class AutoDrawingPage(BasePage):
         self._check(views, 'flat_pattern', 'Sac parçada açınım', True, 'Modelde açınım varsa ayrı görünüş olarak.')
         self._check(views, 'bom', 'Montajda malzeme listesi (BOM)', True)
 
-        output = self._form('Çıktı', 'SolidWorks resmi (SLDDRW) her zaman kaydedilir.')
-        self._path(output, 'output_dir', 'Kayıt klasörü', placeholder='Boş: modelin kendi klasörü')
+        output = self._form('Çıktı', 'Her teknik resim ve dışa aktarımı, kendi kaynak modelinin klasörüne kaydedilir.')
         self._check(output, 'pdf', 'PDF de kaydet (önizleme için gerekli)', True)
         self._check(output, 'dxf', 'DXF de kaydet (tek paftalı resimlerde)', False)
         self._combo(output, 'existing', 'Aynı adla dosya varsa', [('Yeni ad ver', 'unique'), ('Atla', 'skip')],
@@ -545,7 +544,6 @@ class AutoDrawingPage(BasePage):
             ('model_dimensions', 'Modelde “resme aktar” işaretli ölçüler', True, ''),
             ('include_unmarked', 'İşaretsiz model ölçüleri de', False, 'Kalabalık resim üretebilir.'),
             ('geometry_dimensions', 'Geometriden referans ölçüler', False, 'Dış ölçüler ve delik konumları; referans olarak.'),
-            ('arrange_dimensions', 'Ölçüleri düzenle ve denetle', True, 'Çakışan ve görünüş dışına taşan ölçüler raporlanır.'),
             ('center_marks', 'Delik merkez işaretleri', True, ''),
             ('bend_lines', 'Açınımda büküm çizgileri', True, '')):
             self._check(dims, key, title, default, hint)
