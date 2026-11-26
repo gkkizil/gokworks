@@ -305,3 +305,28 @@ def test_deferred_export_never_starts_a_worker_after_window_closing(page, monkey
         assert not started
     finally:
         w.closing = False
+
+
+def test_visible_button_turns_the_3d_preview_off_and_on_and_is_remembered(page, qtbot):  # noqa: F811
+    p, w, _ = page
+    toggle, section = p.preview.mesh_toggle, p.preview.mesh_section
+    assert toggle.isVisible() and toggle.isChecked() and section.isVisible() and toggle.text() == '3D önizleme: Açık'
+    toggle.click()
+    assert not section.isVisible() and toggle.text() == '3D önizleme: Kapalı'
+    assert p.preview.flat_section.isVisible() and p.preview.info.isVisible()   # flat and part data stay
+    assert w.settings.get('dxf_dwg_show_3d') is False
+    p.preview.show_payload(payload(p.results.model.rows[0]['source']))       # new part: stays hidden
+    assert not section.isVisible()
+    toggle.click()
+    assert section.isVisible() and toggle.text() == '3D önizleme: Açık' and w.settings.get('dxf_dwg_show_3d') is True
+
+
+def test_hidden_3d_preview_stays_hidden_in_a_new_window(qtbot, tmp_path):
+    from gui_qt.settings import SettingsStore
+    store = SettingsStore(tmp_path/'settings.json'); store.set('dxf_dwg_show_3d', False); store.flush()
+    create_application([])
+    window = MainWindow(tmp_path/'settings.json'); qtbot.addWidget(window)
+    window.resize(1400, 900); window.show(); window.navigate('dxf_dwg')
+    preview = window.pages['dxf_dwg'].preview
+    assert not preview.mesh_toggle.isChecked() and not preview.mesh_section.isVisible()
+    assert preview.mesh_toggle.isVisible()

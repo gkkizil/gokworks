@@ -139,6 +139,8 @@ class DxfDwgPage(ExportPage):
         self._events = _PageEvents(self)
         self.handle_events = self._events.accept
         self.preview = PreviewPanel()
+        self.preview.set_mesh_visible(self.settings.get('dxf_dwg_show_3d', True) is not False)
+        self.preview.meshVisibilityChanged.connect(lambda value: self.settings.set('dxf_dwg_show_3d', value))
         self.preview.refresh_button.setToolTip('Önizlemeyi yeniler; değiştirilmiş SolidWorks belgeleri sessizce otomatik kaydedilir.')
         self.preview_cache = MeshCache()
         self.preview_snapshots = PreviewCache()

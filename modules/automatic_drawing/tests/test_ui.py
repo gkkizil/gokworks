@@ -168,7 +168,8 @@ def test_sorted_result_rows_keep_their_own_status_and_open_their_own_pdf(window,
         table.setCurrentCell(r, 0); page.select_result()
         assert opened[-1] == str(target)
     assert [page.tiles[k].text() for k in ('PASS', 'WARNING', 'FAIL', 'sheets')] == ['1', '1', '1', '1']
-    assert page.tabs.tabText(3) == 'Sonuçlar · 3' and not page.results_empty.isVisible()
+    assert page.tabs.tabText(2) == 'Sonuçlar · 3' and not page.results_empty.isVisible()
+    assert page.step_buttons[2].text() == '4 · Sonuçlar · 3'
 
 
 def test_dependent_options_follow_their_parent_and_the_summary_follows_the_options(window):
@@ -203,7 +204,7 @@ def test_draft_sheet_preview_uses_the_generation_plan_and_follows_the_settings(w
     from modules.automatic_drawing.layout import plan_sheets
     from modules.automatic_drawing.rules import plan_views
     page = window.pages['automatic_drawing']
-    assert page.preview_stack.currentIndex() == 0 and not page.sheet_preview.plans
+    assert page.tabs.currentIndex() == 0 and not page.sheet_preview.plans
     info = ModelInfo(Source(str(tmp_path/'Mil.SLDPRT'), 'Default'), 'part', 'Mil', (420, 30, 30),
                      classification='shaft')
     page._analysis_item(info)
@@ -233,7 +234,32 @@ def test_draft_preview_does_not_save_settings_and_a_result_switches_to_the_pdf(w
     assert page.sheet_preview.plans[0].paper == 'A2'
     assert window.settings.get('automatic_drawing', None) == before   # only Generate saves options
     page.show_result(DrawingResult(Source(str(tmp_path/'P.SLDPRT'), 'Default'), 'PASS'))
+    page.tabs.setCurrentIndex(2)
     page.result_table.setCurrentCell(0, 0); page.select_result()
-    assert page.preview_stack.currentIndex() == 1 and page.pdf_button.isChecked()
-    page.draft_button.click()
-    assert page.preview_stack.currentIndex() == 0 and not page.preview_empty.isVisible()
+    assert 'PDF oluşturulmadı' in page.pdf_caption.text() and page.preview_empty.isVisible()
+    page.step_buttons[0].click()
+    assert page.tabs.currentIndex() == 0 and page.sheet_preview.plans
+
+
+def test_steps_and_the_next_step_box_lead_the_user_from_empty_to_results(window, tmp_path):
+    from modules.automatic_drawing.models import DrawingResult
+    page = window.pages['automatic_drawing']
+    assert not page.tabs.tabBar().isVisible()                       # numbered steps replace the tabs
+    assert [b.text() for b in page.step_buttons] == ['2 · Kontrol', '3 · Ayarlar', '4 · Sonuçlar']
+    assert page.guide_button.text() == 'Dosya ekle…' and 'ekleyin' in page.guide_text.text()
+    source = Source(str(tmp_path/'Flans.SLDPRT'), 'Varsayılan')
+    page.add_sources([source])
+    assert page.guide_button.text() == 'Kontrol et' and 'kontrol' in page.guide_text.text()
+    page._analysis_item(ModelInfo(source, 'part', 'Flans', (240, 160, 12), classification='plate'))
+    page.refresh_guide()
+    assert page.guide_button.text() == 'Resimleri oluştur'
+    page.step_buttons[1].click()
+    assert page.tabs.currentIndex() == 1 and page.step_buttons[1].isChecked()
+    assert not page.advanced.is_expanded() and page.fields['paper'].isVisible()
+    assert not page.fields['template'].isVisible()                  # templates live under "Gelişmiş"
+    page.advanced.set_expanded(True)
+    assert page.fields['template'].isVisible()
+    page.show_result(DrawingResult(source, 'PASS'))
+    assert page.guide_button.text() == 'Sonuçlara git'
+    page.guide_button.click()
+    assert page.tabs.currentIndex() == 2 and not page.guide_button.isVisible()

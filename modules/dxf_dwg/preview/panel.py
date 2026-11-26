@@ -86,6 +86,7 @@ class FlatView(QGraphicsView):
 
 class PreviewPanel(QWidget):
     refreshRequested = Signal()
+    meshVisibilityChanged = Signal(bool)
 
     def __init__(self):
         super().__init__()
@@ -99,7 +100,16 @@ class PreviewPanel(QWidget):
         body = QVBoxLayout(content); body.setContentsMargins(0, 0, 0, 0); body.setSpacing(4)
         self.source_label = QLabel('Önizleme · listeden bir sac parçası seçin')
         self.source_label.setProperty('role', 'section')
-        self.source_label.setWordWrap(True); body.addWidget(self.source_label)
+        self.source_label.setWordWrap(True)
+        # Always visible: hides the 3D model (its controls and drawing) and gives the room
+        # to the flat pattern. The choice is the page's to remember.
+        self.mesh_toggle = QPushButton('3D önizleme: Açık'); self.mesh_toggle.setCheckable(True)
+        self.mesh_toggle.setChecked(True)
+        self.mesh_toggle.setToolTip('3D model önizlemesini göster / gizle (açınım ve parça bilgileri kalır)')
+        self.mesh_toggle.setAccessibleName('3D önizlemeyi aç veya kapat')
+        header = QHBoxLayout(); header.setSpacing(6)
+        header.addWidget(self.source_label, 1); header.addWidget(self.mesh_toggle, 0, Qt.AlignTop)
+        body.addLayout(header)
         self.splitter = QSplitter(Qt.Vertical)
         self.splitter.setChildrenCollapsible(False)
         upper = QWidget(); layout = QVBoxLayout(upper); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(3)
@@ -121,7 +131,7 @@ class PreviewPanel(QWidget):
         self.message = QLabel('Gerçek SolidWorks geometrisi · görsel inceleme içindir')
         self.message.setProperty('role', 'subtitle')
         self.message.setWordWrap(True); layout.addWidget(self.message)
-        self.splitter.addWidget(upper)
+        self.splitter.addWidget(upper); self.mesh_section = upper
         middle = self.flat_section = QWidget(); layout = QVBoxLayout(middle); layout.setContentsMargins(0, 0, 0, 0); layout.setSpacing(3)
         middle.setMinimumHeight(125)
         row = QHBoxLayout(); self.flat_label = QLabel('Açınım · henüz okunmadı'); self.flat_label.setWordWrap(True)
@@ -147,8 +157,24 @@ class PreviewPanel(QWidget):
         self.fit_button.clicked.connect(self.mesh_view.fit)
         self.flat_fit.clicked.connect(self.flat_view.fit)
         self.refresh_button.clicked.connect(self.refreshRequested)
+        self.mesh_toggle.toggled.connect(self.set_mesh_visible)
         self.perspective.toggled.connect(self.camera_changed)
         self.edges.toggled.connect(self.camera_changed)
+
+    def set_mesh_visible(self, visible):
+        """Show or hide the 3D section; the flat pattern and part data stay."""
+        visible = bool(visible)
+        if self.mesh_toggle.isChecked() != visible:
+            self.mesh_toggle.setChecked(visible)       # re-enters through toggled
+            return
+        self.mesh_toggle.setText('3D önizleme: ' + ('Açık' if visible else 'Kapalı'))
+        self.mesh_section.setVisible(visible)
+        if visible:
+            self.mesh_view.fit()
+        self.meshVisibilityChanged.emit(visible)
+
+    def mesh_visible(self):
+        return self.mesh_toggle.isChecked()
 
     def set_appearance(self, appearance):
         """Theme hook: both drawing surfaces use the ``canvas`` token."""

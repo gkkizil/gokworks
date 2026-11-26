@@ -46,8 +46,9 @@ def test_every_row_has_a_known_level_and_a_reason(items):
 
 def test_pages_show_coverage_and_pass_meaning(window):
     page = window.pages['automatic_drawing']
-    titles = [page.tabs.tabText(i) for i in range(page.tabs.count())]
-    assert 'Kapsam' in titles
+    window.navigate('automatic_drawing')
+    # Coverage is one click away on every step: "Bu araç neyi yapar?" opens it.
+    assert page.help_button.isVisible() and page.help_button.text() == 'Bu araç neyi yapar?'
     assert isinstance(page.coverage, CoverageList) and page.coverage.items == drawing.COVERAGE
     assert page.pass_meaning.text() == drawing.PASS_MEANING
     press = window.pages['press_brake']
