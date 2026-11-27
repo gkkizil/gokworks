@@ -316,7 +316,9 @@ class SmartSplittingPage(BasePage):
             try: return (float(self.form.value('center_x').replace(',','.')),float(self.form.value('center_y').replace(',','.')))
             except ValueError: return None
         if mode=='Alan ağırlık merkezi':
-            point=self.source.polygon.centroid; return (point.x,point.y)
+            from .analysis import centroid
+            try: return centroid(self.source.polygon)
+            except ValueError: return None
         x0,y0,x1,y1=self.source.polygon.bounds; return ((x0+x1)/2,(y0+y1)/2)
 
     def invalidate(self,*args):
