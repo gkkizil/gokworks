@@ -59,6 +59,19 @@ def test_circle_classification_has_no_overflow_for_finite_large_area_and_perimet
     assert analyze(normal)['kind']==analyze(large)['kind']=='Daire'
 
 
+def test_area_centroid_stays_finite_and_exact_for_a_huge_valid_source():
+    import math, warnings
+    from shapely.geometry import Point
+    from modules.smart_splitting.analysis import analyze, centroid
+    offset=Point(7,-3).buffer(5,quad_segs=32)
+    assert all(math.isclose(a,b,abs_tol=1e-9) for a,b in zip(centroid(offset),(offset.centroid.x,offset.centroid.y)))
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')                  # no overflow / invalid value inside GEOS either
+        large=analyze(Part.create('Large circle',Point(3e153,-2e153).buffer(5e153,quad_segs=32)))
+    x,y=large['centroid']
+    assert math.isclose(x,3e153,rel_tol=1e-9) and math.isclose(y,-2e153,rel_tol=1e-9)
+
+
 def test_source_with_finite_area_but_overflowed_perimeter_is_rejected():
     import numpy as np
     from modules.smart_splitting.analysis import analyze

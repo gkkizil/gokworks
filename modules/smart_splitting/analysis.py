@@ -19,6 +19,25 @@ def validate_source(part):
     return g
 
 
+def centroid(g):
+    """Area centroid that stays finite for any valid (finite) source.
+
+    GEOS squares coordinates while integrating: a valid source around 1e150 mm
+    returns NaN. The shape is scaled to its own size first and back afterwards;
+    for ordinary parts the result equals g.centroid to rounding.
+    """
+    from shapely import affinity
+    x0,y0,x1,y1=g.bounds
+    cx,cy=(x0+x1)/2,(y0+y1)/2
+    size=max(x1-x0,y1-y0) or 1.0
+    unit=affinity.scale(affinity.translate(g,-cx,-cy),1/size,1/size,origin=(0,0))
+    c=unit.centroid
+    point=(cx+c.x*size,cy+c.y*size)
+    if not all(math.isfinite(v) for v in point):
+        raise ValueError('Kaynak parçanın ağırlık merkezi hesaplanamadı; geometriyi kontrol edin.')
+    return point
+
+
 def load_parts(path, *, unit=None, tolerance=.05, stop=None):
     """DXF directly; DWG through Nesting's converter (installed ODA, else the bundled LibreDWG)."""
     from pathlib import Path
@@ -39,5 +58,5 @@ def analyze(part):
     circle_score=(exterior.area/exterior.length)/exterior.length*(4*math.pi)
     kind='Halka / delikli daire' if circle_score>.995 and g.interiors else 'Daire' if circle_score>.995 else 'Genel kontur'
     return dict(kind=kind,area=g.area,bounds=g.bounds,holes=len(g.interiors),
-                bounds_center=((x0+x1)/2,(y0+y1)/2),centroid=(g.centroid.x,g.centroid.y),
+                bounds_center=((x0+x1)/2,(y0+y1)/2),centroid=centroid(g),
                 hole_bounds=[Polygon(ring).bounds for ring in g.interiors])
