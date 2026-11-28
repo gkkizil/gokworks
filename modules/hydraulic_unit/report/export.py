@@ -107,7 +107,7 @@ def report_html(project, result):
         for row in rows:
             content += '<tr>' + ''.join('<td>' + escape('Değerlendirilmedi' if v is None else f'{v:.6g}' if isinstance(v,float) else str(v)) + '</td>' for v in row) + '</tr>'
         return '<table width="100%" border="1" cellspacing="0" cellpadding="4">' + content + '</table>'
-    html = '<h1>GOKWORKS · Hidrolik Ünite</h1><h2>' + escape(project.name) + '</h2>'
+    html = '<h1>GOKWORKS · Hidrolik ünite</h1><h2>' + escape(project.name) + '</h2>'
     html += '<p>' + datetime.now(timezone.utc).isoformat() + ' · Girdi kayıtları SI birimindedir.</p>'
     html += '<p><b>' + ('Kritik kontrol yok; üretici/imalat onayı değildir.' if result.feasible else 'Kritik kontroller var. Sağlanamayan fazların ısı/güç sonuçları erişilmiş performans değildir.') + '</b></p>'
     html += table(('Sonuç','Değer','Birim','Yöntem'), result_rows(project, result))

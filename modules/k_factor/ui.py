@@ -71,8 +71,15 @@ class KrPage(BasePage):
         self.stop_button = self.action('Durdur', self.stop, locked=False)
         self.stop_button.setEnabled(False)
         self.tabs = QTabWidget()
-        manual, body = pane('Sac kalınlığı → K / R ataması')
-        body.setContentsMargins(0, 4, 0, 0)
+        # Assignment on the left, a short how-to card on the right, so the
+        # tab reads as a finished page instead of a narrow form over empty space.
+        manual = QWidget()
+        manual_layout = QHBoxLayout(manual)
+        manual_layout.setContentsMargins(0, 4, 0, 0)
+        manual_layout.setSpacing(16)
+        assignment, body = pane('Sac kalınlığı → K / R ataması')
+        assignment.setMaximumWidth(660)
+        manual_layout.addWidget(assignment, 3)
         first = {key: str(self.settings.get('kr_manual_' + field, default))
                  for key, field, default in (('thickness', 'thickness', '2'), ('k', 'k', ''), ('r', 'r', ''))}
         try:
@@ -93,7 +100,7 @@ class KrPage(BasePage):
         self.rows_model.rowsInserted.connect(self.fit_assignment_rows)
         self.rows_model.modelReset.connect(self.fit_assignment_rows)
         self.fit_assignment_rows()
-        body.addWidget(label('Kalınlığa göre K ve R girin → Montajı tara → Montaja K/R uygula', 'muted'))
+        body.addWidget(label('Her sac kalınlığı için K faktörünü ve iç yarıçapı girin.', 'muted'))
         body.addWidget(self.rows)
         actions = QHBoxLayout()
         self.add_row = button('Satır ekle', self.add_assignment)
@@ -107,6 +114,7 @@ class KrPage(BasePage):
         body.addWidget(self.save_form)
         body.addWidget(label('Yalnız ana Sac-Levha K faktörü ve iç yarıçapı değiştirilir. Kalınlık ve özel alt büküm ayarları korunur. Büküm tablosundan değer alınmaz.', 'muted'))
         body.addStretch(1)
+        manual_layout.addWidget(self.how_to_card(), 2, Qt.AlignTop)
         self.tabs.addTab(manual, 'Manuel K / R')
         helper, helper_body = pane('Hesap yardımı · atamadan bağımsız')
         helper_body.setContentsMargins(0, 4, 8, 0)
@@ -158,6 +166,35 @@ class KrPage(BasePage):
         self.helper.changed.connect(lambda key: self.helper_timer.start())
         self.finish_layout()
         self.calculate_helper()
+
+    def how_to_card(self):
+        """Three numbered steps from values to the assembly, plus the helper shortcut."""
+        how, layout = card('Nasıl çalışır')
+        how.setMaximumWidth(460)
+        layout.setContentsMargins(14, 12, 14, 14)
+        layout.setSpacing(12)
+        steps = (('1', 'Değerleri girin', 'Tabloya kullandığınız her sac kalınlığı için K ve iç R yazın.'),
+                 ('2', 'Montajı tarayın', 'SolidWorks’te açık montajdaki sac parçalar ve kalınlıkları bulunur.'),
+                 ('3', 'Uygulayın', 'Kalınlığı eşleşen parçalara K ve R yazılır; sonuç “Montaj sonuçları” '
+                                    'sekmesinde listelenir.'))
+        for number_text, title, text in steps:
+            row = QHBoxLayout()
+            row.setSpacing(10)
+            badge = label(number_text, 'section', wrap=False)
+            badge.setFixedWidth(18)
+            badge.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+            texts = QVBoxLayout()
+            texts.setSpacing(0)
+            texts.addWidget(label(title, 'section'))
+            texts.addWidget(label(text, 'muted'))
+            row.addWidget(badge, 0, Qt.AlignTop)
+            row.addLayout(texts, 1)
+            layout.addLayout(row)
+        layout.addWidget(label('K değerini bilmiyor musunuz? Numune ölçüsünden ya da takım tablosundan '
+                               'hesaplayabilirsiniz.', 'muted'))
+        self.helper_link = button('Hesap yardımını aç', lambda: self.tabs.setCurrentIndex(1))
+        layout.addWidget(self.helper_link, 0, Qt.AlignLeft)
+        return how
 
     def fit_assignment_rows(self, *args):
         # Header + one ROW_HEIGHT per assignment; grows up to ~9 rows, then scrolls.

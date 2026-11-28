@@ -121,7 +121,7 @@ class Session(ReadSession):
         try:
             super().__enter__()  # CoInitialize is STA; raw GetActiveObject, installed swconst.
         except Exception as error:
-            raise ApiError('Otomatik Teknik Resim için Windows, pywin32 ve açık bir SolidWorks oturumu gerekli. '
+            raise ApiError('Otomatik teknik resim için Windows, pywin32 ve açık bir SolidWorks oturumu gerekli. '
                            + error_text(error)) from error
         self.owner_thread = threading.get_ident()
         self.analysis_cache = {}

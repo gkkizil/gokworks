@@ -15,7 +15,7 @@ def export_pdf(plan, result, path, *, overwrite=False, stop=None):
     def write(temporary):
         pdf = QPdfWriter(str(temporary)); pdf.setResolution(120)
         pdf.setPageSize(QPageSize(QPageSize.A4)); pdf.setTitle('GOKWORKS · Büküm Föyü')
-        pdf.setCreator('GOKWORKS · Abkant Simülasyonu')
+        pdf.setCreator('GOKWORKS · Abkant simülasyonu')
         painter = QPainter(pdf)
         if not painter.isActive():
             raise OSError('PDF yazıcısı açılamadı.')
