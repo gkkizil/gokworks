@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, QStandardPaths, QSize, QLocale, QElapsedTimer, Signal
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QFormLayout, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                               QAbstractItemView, QDoubleSpinBox, QListView, QListWidget, QListWidgetItem, QScrollArea, QSlider, QSplitter, QTextBrowser, QVBoxLayout, QWidget)
-from gui_qt.components import AdaptiveRow, BasePage, Disclosure, ElidedLabel, button, card, label, separator
+from gui_qt.components import empty_state, AdaptiveRow, BasePage, Disclosure, ElidedLabel, button, card, label, separator
 from gui_qt.theme import COLORS
 from .dialogs import ToolDialog, format_segments, segments
 from .models import Plan, Step
@@ -54,6 +54,7 @@ class PressBrakePage(BasePage):
         left = QWidget(); left.setMinimumWidth(150); left_body = QVBoxLayout(left); left_body.setContentsMargins(0, 0, 0, 0); left_body.setSpacing(6)
         self.sequence_title = label('BÜKÜM SIRASI', 'section', wrap=False); left_body.addWidget(self.sequence_title)
         self.bends = QListWidget(); self.bends.setAccessibleName('Büküm sırası')
+        empty_state(self.bends, 'Büküm yok', 'SolidWorks’ten sac parçasını alın veya bir demo açın.')
         self.bends.setWordWrap(True); self.bends.setTextElideMode(Qt.ElideNone); self.bends.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.bends.setResizeMode(QListView.Adjust); self.bends.setSpacing(0); self.bends.setUniformItemSizes(False)
         self.step_cards = StepCardDelegate(self.bends, context.appearance); self.bends.setItemDelegate(self.step_cards)

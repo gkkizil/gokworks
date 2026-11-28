@@ -72,6 +72,88 @@ class ViewEmptyState(QWidget):
         self.setVisible(empty)
 
 
+class AutoEmptyState(QWidget):
+    """Message over an empty table/list instead of a blank white box.
+
+    Follows the model itself (rows added, removed, reset, filtered), so pages
+    only describe what will appear and what to do; nothing is drawn while the
+    view has rows. A filtered-out view says so instead of looking empty.
+    """
+    def __init__(self, view, title='Henüz satır yok', hint='', icon_name=None):
+        super().__init__(view.viewport())
+        self.view, self.model = view, None
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setObjectName('autoEmptyState')
+        layout = QVBoxLayout(self); layout.setContentsMargins(24, 16, 24, 16); layout.setSpacing(6)
+        layout.addStretch(2)
+        self.glyph = QLabel(); self.glyph.setAlignment(Qt.AlignCenter)
+        self.title = label('', 'section'); self.detail = label('', 'muted')
+        for widget in (self.glyph, self.title, self.detail):
+            widget.setAlignment(Qt.AlignCenter); layout.addWidget(widget, 0, Qt.AlignHCenter)
+        self.title.setTextFormat(Qt.PlainText); self.detail.setTextFormat(Qt.PlainText)
+        layout.addStretch(3)
+        self.hide()
+        view.viewport().installEventFilter(self)
+        self.setGeometry(view.viewport().rect())
+        self.configure(title, hint, icon_name)
+
+    def configure(self, title, hint='', icon_name=None):
+        self.texts = (title, hint)
+        if icon_name:
+            from .icons import icon
+            self.glyph.setPixmap(icon(icon_name, '#9DA2AB').pixmap(36, 36))
+        self.glyph.setVisible(bool(icon_name))
+        self.sync()
+
+    def _fit(self):
+        # Wrapped text in a manually placed overlay needs its height set
+        # explicitly, otherwise the second line is clipped.
+        width = max(120, min(460, self.view.viewport().width() - 48))
+        for caption in (self.title, self.detail):
+            caption.setFixedWidth(width)
+            caption.setFixedHeight(caption.heightForWidth(width) if caption.text() else 0)
+
+    def _hook(self):
+        model = self.view.model()
+        if model is self.model: return
+        self.model = model
+        if model is not None:
+            for signal in (model.rowsInserted, model.rowsRemoved, model.modelReset, model.layoutChanged):
+                signal.connect(self.sync)
+
+    def sync(self, *args):
+        self._hook()
+        model = self.view.model()
+        title, hint = self.texts
+        rows = model.rowCount() if model is not None else 0
+        source = model.sourceModel() if model is not None and hasattr(model, 'sourceModel') else None
+        filtered = rows == 0 and source is not None and source.rowCount() > 0
+        self.title.setText('Aramayla eşleşen satır yok' if filtered else title)
+        self.detail.setText('Arama metnini veya filtreyi temizleyin.' if filtered else hint)
+        self.detail.setVisible(bool(self.detail.text()))
+        self._fit()
+        visible = bool(title) and model is not None and rows == 0
+        if visible != self.isVisible(): self.setVisible(visible)
+
+    def eventFilter(self, watched, event):
+        kind = event.type()
+        if kind == QEvent.Resize and watched is self.view.viewport():
+            self.setGeometry(self.view.viewport().rect()); self._fit()
+        elif kind in (QEvent.Show, QEvent.Paint) and self.view.model() is not self.model:
+            self.sync()
+        return super().eventFilter(watched, event)
+
+
+def empty_state(view, title, hint='', icon_name=None):
+    """Describe what an empty table will show and how to fill it."""
+    state = getattr(view, 'auto_empty', None)
+    if state is None:
+        state = view.auto_empty = AutoEmptyState(view, title, hint, icon_name)
+    else:
+        state.configure(title, hint, icon_name)
+    return state
+
+
 def button(text, callback=None, *, primary=False, destructive=False, flat=False):
     """Design-system button: secondary by default; primary, destructive or flat."""
     widget = QPushButton(text)
@@ -241,6 +323,7 @@ def configure_view(view):
         view.setWordWrap(False)
     view.setMinimumWidth(0)
     fit_columns(view, minimum=80)
+    empty_state(view, 'Henüz satır yok')
     return view
 
 
@@ -685,6 +768,7 @@ class ResultsPanel(QWidget):
         self.proxy.setSourceModel(self.model)
         self.table.setModel(self.proxy)
         self.empty_state = ViewEmptyState(self.table, self.clear_filters, empty_hint)
+        if getattr(self.table, 'auto_empty', None) is not None: self.table.auto_empty.configure('')
         self.empty_state.show_state(empty=True, filtered=False, busy=False)
         # Description takes the free width; the file name follows its contents
         # until dragged; every edge stays draggable.

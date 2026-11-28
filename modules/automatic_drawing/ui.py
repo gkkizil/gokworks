@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QPushButton, QCh
     QStyledItemDelegate, QTabWidget, QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
 
-from gui_qt.components import set_style_sheet
+from gui_qt.components import empty_state, set_style_sheet
 from gui_qt.components import (BasePage, AdaptiveRow, Disclosure, NumberSpinBox, button,
     configure_view, fit_columns, label, scroll)
 from gui_qt.theme import COLORS
@@ -367,6 +367,7 @@ class AutoDrawingPage(BasePage):
         self.result_table = QTableWidget(0, 5)
         self.result_table.setHorizontalHeaderLabels(['Dosya', 'Konfigürasyon', 'Durum', 'Pafta', 'Açıklama'])
         configure_view(self.result_table)
+        empty_state(self.result_table, 'Henüz resim oluşturulmadı', 'Modeli kontrol edip Resimleri oluştur’a basın; sonuçlar burada listelenir.')
         self.result_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.result_table.itemSelectionChanged.connect(self.select_result)
         fit_columns(self.result_table, elastic=4, minimum=160, autofit=(0, 1, 2, 3),

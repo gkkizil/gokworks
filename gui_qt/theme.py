@@ -31,7 +31,7 @@ COLORS = {
 # Type scale (logical px; Windows applies 100/125/150 % scaling). Segoe UI on
 # Windows; Inter/DejaVu keep metrics close on the Linux test runner.
 FONT_FAMILY = '"Segoe UI", "DejaVu Sans"'
-FONT_SIZES = dict(caption=11, body=12, section=12, title=15, result=20)
+FONT_SIZES = dict(caption=11, body=12, section=13, title=18, result=22)
 
 # Spacing scale and shared metrics. Layout code should use these values
 # instead of new literals: 2, 4, 6, 8, 12, 16.

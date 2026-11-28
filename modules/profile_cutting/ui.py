@@ -1,6 +1,6 @@
 """Integrated, asynchronous profile cut-list and Weldments workflow."""
 
-from gui_qt.components import fit_columns
+from gui_qt.components import empty_state, fit_columns
 from copy import deepcopy
 from dataclasses import asdict
 
@@ -208,6 +208,7 @@ class ProfileCuttingPage(BasePage):
         self.scan_proxy.set_status('!Hariç')                       # profiles first; plates/sheets on request
         self.status_filter.currentIndexChanged.connect(lambda _:self.scan_proxy.set_status(self.status_filter.currentData()))
         self.scan_view = configure_view(QTableView()); self.scan_view.setModel(self.scan_proxy)
+        empty_state(self.scan_view, 'Model henüz okunmadı', 'SolidWorks’te kaynak modeli açıp Açık modeli oku’ya basın; kesim listesi burada görünür.', 'profile_cutting')
         self.scan_view.setMinimumHeight(180)
         for i,width in enumerate((270,160,95,90,60,70,70,140)): self.scan_view.setColumnWidth(i,width)
         self.scan_view.doubleClicked.connect(lambda _: self.review_selected())
@@ -314,6 +315,7 @@ class ProfileCuttingPage(BasePage):
             Column('Boy · mm','length',display), Column('Adet','count'), Column('Tür','kind'),
             Column('Kesim listesinde','use')), editable=('profile','material','length','count'))
         self.stock_view = configure_view(QTableView()); self.stock_view.setModel(self.stock_model)
+        empty_state(self.stock_view, 'Stok boş', 'Yukarıdaki satıra profil, malzeme, boy ve adet yazıp Ekle’ye basın.')
         self.stock_view.setSortingEnabled(False)
         self.stock_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.stock_view.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed)
@@ -341,6 +343,7 @@ class ProfileCuttingPage(BasePage):
             Column('Düşülen','used'), Column('Satın alınan','bought'), Column('Stoğa dönen artık','added'),
             Column('Ayrıntı','detail')))
         self.stock_log_view = configure_view(QTableView()); self.stock_log_view.setModel(self.stock_log_model)
+        empty_state(self.stock_log_view, 'Henüz stok hareketi yok', 'Kesim planında “Stoktan düş” dediğinizde kayıt burada görünür.')
         self.stock_log_view.setSortingEnabled(False); self.stock_log_view.setMaximumHeight(150)
         self.stock_log_view.setAccessibleName('Stok hareketleri: tarih, proje, düşülen çubuk ve dönen artık')
         fit_columns(self.stock_log_view, elastic=5, minimum=80, defaults={0: 140, 1: 140}, autofit=(2, 3, 4))

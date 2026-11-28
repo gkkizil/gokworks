@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QComboBox, QFileDialog, QFrame, QGridLayout, QHBo
     QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget, QCheckBox)
 from shapely.geometry import box, mapping
 
-from gui_qt.components import BasePage, Disclosure, ValueForm, button, configure_view, fit_columns, label, scroll
+from gui_qt.components import empty_state, BasePage, Disclosure, ValueForm, button, configure_view, fit_columns, label, scroll
 from gui_qt.theme import COLORS
 from modules.nesting.materials import new_project
 from modules.nesting.models import integer, number
@@ -142,6 +142,7 @@ class SmartSplittingPage(BasePage):
         for col,tip in ((1,'Adet: dosya adından okunur; çift tıklayıp düzeltin.'),(2,'Sac kalınlığı · mm: dosya adından okunur; çift tıklayıp düzeltin.')):
             self.source_table.horizontalHeaderItem(col).setToolTip(tip)
         configure_view(self.source_table); self.source_table.setSortingEnabled(False)
+        empty_state(self.source_table, 'Parça yok', 'DXF/DWG ekleyin veya Nesting’den parça alın.')
         self.source_table.setAccessibleName('Bölünecek parçalar; adet ve kalınlık düzenlenebilir')
         self.source_table.setToolTip('Satırı seçin: çizim ve sonuçlar o parçayı gösterir. Adet ve kalınlığa çift tıklayıp düzeltebilirsiniz.')
         fit_columns(self.source_table,elastic=0,minimum=36,defaults={0:110,1:44,2:40,3:62})
