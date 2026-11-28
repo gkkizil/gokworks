@@ -200,3 +200,42 @@ def test_regrouped_cutlist_bodies_are_not_counted_again_until_old_import_is_remo
     assert stats['changed']==2 and stats['added']==0 and sum(d.count for d in project.demands)==2
     project.demands.clear()
     assert transfer(project,again)['added']==2 and sum(d.count for d in project.demands)==2
+
+
+class CountingBody(Body):
+    walks = 0
+    def GetFaces(self):
+        CountingBody.walks += 1
+        return super().GetFaces()
+
+
+def test_up_to_date_cut_list_folder_walks_faces_of_one_body_only(tmp_path):
+    # SolidWorks groups only identical bodies in a fresh folder; reading every
+    # face of 40 identical members over COM was what made scans slow.
+    CountingBody.walks = 0
+    bodies=[CountingBody(f'b{i}') for i in range(40)]
+    result,_=read(Model(tmp_path/'frame.SLDPRT',[Folder('Cut-List-1',bodies)]))
+    row=result.rows[0]
+    assert CountingBody.walks==1 and row.count==40 and row.ready and row.geometry_verified
+    assert len(set(row.body_refs))==40
+
+
+def test_unproven_cut_list_freshness_still_checks_every_body(tmp_path):
+    CountingBody.walks = 0
+    folder=Folder('Cut-List-1',[CountingBody(f'b{i}') for i in range(5)]); folder.automatic=False
+    read(Model(tmp_path/'frame.SLDPRT',[folder]))
+    assert CountingBody.walks==5
+
+
+def test_only_cut_list_folders_ask_for_persistent_references(tmp_path):
+    model=Model(tmp_path/'frame.SLDPRT',[Folder()])
+    asked=[]
+    model.Extension.GetPersistReference3=lambda obj:(asked.append(obj), obj.Name.encode())[1]
+    plain=type('Plain',(),dict(Name='Boss-Extrude1',GetTypeName2=lambda self:'Extrusion',
+                               GetFirstSubFeature=lambda self:None,GetNextSubFeature=lambda self:None))()
+    first=model.FirstFeature
+    def tree():
+        folder=first(); plain.GetNextFeature=lambda:folder; return plain
+    model.FirstFeature=tree
+    result,_=read(model)
+    assert result.rows and plain not in asked
