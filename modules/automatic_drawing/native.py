@@ -695,6 +695,9 @@ class NativeDrawing:
         return records
 
     def import_dimensions(self, name):
+        # A section or detail may have left its own sheet active.
+        if not call(self.drawing, 'ActivateSheet', name):
+            raise ApiError('Ölçü aktarımı için pafta etkinleştirilemedi: '+name)
         if not self.options.model_dimensions:
             return
         c = self.session.c
@@ -960,6 +963,8 @@ class NativeDrawing:
     def center_marks(self, name):
         if not self.options.center_marks:
             return
+        if not call(self.drawing, 'ActivateSheet', name):
+            raise ApiError('Merkez işaretleri için pafta etkinleştirilemedi: '+name)
         mask = 0
         for key, value in self.session.constants.items():
             if key.startswith('swAutoInsertCenterMark') and 'hole' in key.casefold():

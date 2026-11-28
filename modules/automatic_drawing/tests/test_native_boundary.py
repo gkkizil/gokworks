@@ -198,6 +198,7 @@ def test_model_dimensions_use_native_duplicate_elimination_and_skip_isometric(ca
     assert all(args[0] == case.constants['swImportModelItemsFromEntireModel'] for args in calls)
     case.native.info.kind = 'assembly'
     case.drawing.calls.clear(); case.native.import_dimensions(plan.name)
+    assert case.drawing.calls[0] == ('ActivateSheet', 1, (plan.name,))
     assert all(args[0] == case.constants['swImportModelItemsFromAssemblyOnly']
                for name, flags, args in case.drawing.calls if name == 'InsertModelAnnotations3')
 
@@ -331,7 +332,9 @@ def test_center_marks_are_inserted_on_iview_with_ten_arguments_and_counted_as_an
     plan = plan_sheet(plan_views(case.info, case.options), case.options)
     case.native.create('fake.drwdot', plan); case.native.create_views(plan)
     annotated_views(case, existing=0)
+    case.drawing.calls.clear()
     case.native.center_marks(plan.name)
+    assert case.drawing.calls[0] == ('ActivateSheet', 1, (plan.name,))
     calls = [(view.name, args) for view in case.views.values() for name, flags, args in view.calls
              if name == 'AutoInsertCenterMarks2']
     assert len(calls) == 3 and all(owner == 'IView' and len(args) == 10 for owner, args in calls)

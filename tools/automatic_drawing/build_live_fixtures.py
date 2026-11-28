@@ -1,7 +1,8 @@
 """Gerçek SolidWorks kabul fixture'larını API ile sıfırdan üretir (kullanıcı dosyası kullanmaz).
 
     python tools/automatic_drawing/build_live_fixtures.py HEDEF_KLASOR \
-        [shaft plate sheet multibody_sheet assembly suppressed_assembly missing_reference]
+        [shaft plate sheet multibody_sheet assembly suppressed_assembly missing_reference
+         company_templates wizard_plate bored_shaft small_radius_detail]
 
 Her fixture kendi alt klasörüne kaydedilir (LIVE_ACCEPTANCE.md: klasör SHA256 ile izlenir).
 Var olan bir fixture dosyasının üzerine yazılmaz. Montajlar HEDEF_KLASOR (veya üst klasörü)
@@ -12,8 +13,11 @@ Aynı ada sahip fixture'ları farklı klasörlerde tutmayın: tek açılan bir S
 dış referans aramasıyla başka klasördeki aynı adlı modele bağlanabilir.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 import math
 import os
+from pathlib import Path
+import shutil
 import sys
 
 import pythoncom
@@ -35,6 +39,7 @@ class Builder:
     def __init__(self, root):
         self.root = root
         self.app = wc.dynamic.Dispatch(wc.GetActiveObject('SldWorks.Application')._oleobj_)
+        self.app._FlagAsMethod('GetOpenDocumentByName')
         self.c = load_constants(self.app)
         self.created = []
 
@@ -163,6 +168,119 @@ class Builder:
         self.app.CloseDoc(model.GetTitle)
         return path
 
+    def extrude_plate(self, model, width, height, thickness):
+        self.sketch_on(model, self.planes(model)[0])
+        model.SketchManager.CreateCornerRectangle(0., 0., 0., width, height, 0.)
+        self.close_sketch(model)
+        feature = model.FeatureManager.FeatureExtrusion3(
+            True, False, False, 0, 0, thickness, 0., False, False, False, False,
+            0., 0., False, False, False, False, True, True, True, 0, 0., False)
+        if feature is None:
+            raise RuntimeError('Fixture plakası oluşturulamadı')
+        return feature
+
+    def wizard_plate(self):
+        model = self.new('part')
+        self.extrude_plate(model, .1, .05, .01)
+        c = self.c
+        for x, y in ((.02, .015), (.08, .015), (.02, .035), (.08, .035)):
+            model.ClearSelection2(True)
+            if not model.Extension.SelectByRay(x, y, .02, 0., 0., -1., .0001, c['swSelFACES'],
+                                                False, 0, 0):
+                raise RuntimeError('Hole Wizard yüzü seçilemedi')
+            feature = model.FeatureManager.HoleWizard5(
+                c['swWzdCounterSink'], c['swStandardAnsiMetric'], c['swStandardAnsiMetricFlatHead82'],
+                'M5', c['swEndCondThroughAll'], .0055, .01, 0.,
+                .01, math.pi/2, 0., 0., -1., -1., -1., -1., 1., -1., -1., -1.,
+                '', False, True, True, True, True, False)
+            if feature is None or feature.GetTypeName2 != 'HoleWzd':
+                raise RuntimeError('Native Hole Wizard deliği oluşturulamadı')
+        model.ClearSelection2(True)
+        path = self.save(model, os.path.join(self.root, '09-wizard'), 'kabul_wizard_plaka.SLDPRT')
+        self.app.CloseDoc(model.GetTitle)
+        return path
+
+    def bored_shaft(self):
+        model = self.new('part')
+        self.sketch_on(model, self.planes(model)[0])
+        sm = model.SketchManager
+        # Both coaxial bores open at the left end; the smaller one passes through.
+        points = ((0, 8), (30, 8), (30, 4), (150, 4), (150, 13),
+                  (110, 13), (110, 20), (45, 20), (45, 15), (0, 15))
+        for a, b in zip(points, points[1:] + points[:1]):
+            sm.CreateLine(a[0]*MM, a[1]*MM, 0., b[0]*MM, b[1]*MM, 0.)
+        sm.CreateCenterLine(0., 0., 0., .15, 0., 0.)
+        self.close_sketch(model)
+        feature = model.FeatureManager.FeatureRevolve2(
+            True, True, False, False, False, False, 0, 0, 2*math.pi, 0.,
+            False, False, 0., 0., 0, 0., 0., True, True, True)
+        if feature is None:
+            raise RuntimeError('İç kademeli mil oluşturulamadı')
+        path = self.save(model, os.path.join(self.root, '10-kesit'), 'kabul_ic_kademeli_mil.SLDPRT')
+        self.app.CloseDoc(model.GetTitle)
+        return path
+
+    def small_radius_detail(self):
+        model = self.new('part')
+        self.extrude_plate(model, .08, .03, .008)
+        c = self.c
+        model.ClearSelection2(True)
+        if not model.Extension.SelectByRay(.081, .031, .004, -1., -1., 0., .00005,
+                                            c['swSelEDGES'], False, 1, 0):
+            raise RuntimeError('R2 için köşe kenarı seçilemedi')
+        feature = model.FeatureManager.FeatureFillet3(
+            c['swFeatureFilletUniformRadius'], .002, 0., 0., c['swFeatureFilletType_Simple'],
+            c['swFilletOverFlowType_Default'], c['swFeatureFilletCircular'], *([None]*7))
+        if feature is None or 'fillet' not in feature.GetTypeName2.casefold():
+            raise RuntimeError('Native 2 mm radyüs oluşturulamadı')
+        model.ClearSelection2(True)
+        path = self.save(model, os.path.join(self.root, '11-detay'), 'kabul_r2_detay.SLDPRT')
+        self.app.CloseDoc(model.GetTitle)
+        return path
+
+    def company_templates(self):
+        """Dedicated fixture templates. Customer-provided templates are separate inputs."""
+        folder = Path(self.root)/'08-sablon'
+        source = _assembly(self, str(folder), 'kabul_sablon_montaj.SLDASM',
+                           [(_part(self, 'plate'), 2), (_part(self, 'shaft'), 1)])
+        # Force an A3 sheet before saving its format: the user's default DRWDOT
+        # may describe another size or have no antet at all.
+        from modules.automatic_drawing.solidworks import Session, call, get, null_dispatch
+        from modules.automatic_drawing.solidworks import out_int as raw_out_int
+        with Session() as session:
+            c = session.c
+            install = Path(call(session.app, 'GetExecutablePath'))
+            iso = session.standard_sheet_format('A3')
+            template = call(session.app, 'GetUserPreferenceStringValue', c('swDefaultTemplateDrawing'))
+            model, drawing = session.new_drawing(template, 420, 297, c('swDwgPaperA3size'))
+            try:
+                sheet = call(drawing, 'GetCurrentSheet')
+                name = call(sheet, 'GetName')
+                if not iso or not call(drawing, 'SetupSheet6',
+                        name, c('swDwgPaperA3size'), c('swDwgTemplateCustom'), 1., 1., True, iso,
+                        .42, .297, '', False, .01, .01, .01, .01, 4, 4):
+                    raise RuntimeError('A3 kabul paftası ayarlanamadı')
+                sheet = call(drawing, 'GetCurrentSheet')
+                width, height = call(sheet, 'GetProperties2')[5:7]
+                if not math.isclose(width, .42, abs_tol=.00005) or not math.isclose(height, .297, abs_tol=.00005):
+                    raise RuntimeError(f'Beklenen A3 yerine {width:g} × {height:g} m pafta oluşturuldu')
+                sheet_format, drwdot = folder/'kabul_antet.slddrt', folder/'kabul_resim.drwdot'
+                for target in (sheet_format, drwdot):
+                    if target.exists():
+                        raise FileExistsError(target)
+                if not call(sheet, 'SaveFormat', str(sheet_format)):
+                    raise RuntimeError('Fixture antet şablonu kaydedilemedi')
+                errors, warnings = raw_out_int(), raw_out_int()
+                if not call(get(model, 'Extension'), 'SaveAs', str(drwdot), c('swSaveAsCurrentVersion'),
+                            c('swSaveAsOptions_Silent'), null_dispatch(), errors, warnings) or errors.value:
+                    raise RuntimeError(f'Fixture resim şablonu kaydedilemedi ({errors.value})')
+            finally:
+                session.close_created(model)
+        bom = folder/'kabul_bom.sldbomtbt'
+        with (install/'lang'/'english'/'bom-standard.sldbomtbt').open('rb') as src, bom.open('xb') as dst:
+            shutil.copyfileobj(src, dst)
+        return source
+
 
 def _sheet_body(builder, model, plane, x0, thickness, depth, merge=False):
     """U profile (2 bends) as a sheet metal base flange; returns the new feature."""
@@ -245,11 +363,16 @@ def _assembly(builder, folder, name, parts, suppress=(), configuration=None):
         target = os.path.join(folder, os.path.basename(source))
         if not os.path.exists(target):
             shutil.copy2(source, target)
-        errors, warnings = out_int(), out_int()
-        doc = app.OpenDoc6(target, c['swDocPART'], c['swOpenDocOptions_Silent'], '', errors, warnings)
-        if doc is None:
+        doc = app.GetOpenDocumentByName(target)
+        already_open = doc is not None
+        if not already_open:
+            errors, warnings = out_int(), out_int()
+            doc = app.OpenDoc6(target, c['swDocPART'], c['swOpenDocOptions_Silent'], '', errors, warnings)
+        if doc is None or os.path.normcase(doc.GetPathName) != os.path.normcase(target):
             raise RuntimeError('Bileşen açılamadı: ' + target)
-        opened.append(doc.GetTitle)
+        if not already_open:
+            opened.append(target)
+            builder.created.append(target)
         paths += [target]*count
     model = builder.new('assembly')
     components = []
@@ -280,8 +403,8 @@ def _assembly(builder, folder, name, parts, suppress=(), configuration=None):
         model.ShowConfiguration2(parent)
     path = builder.save(model, folder, name)
     app.CloseDoc(model.GetTitle)
-    for title in opened:
-        app.CloseDoc(title)
+    for target in opened:
+        app.CloseDoc(target)
     return path
 
 
@@ -320,21 +443,35 @@ Builder.suppressed_assembly = suppressed_assembly
 Builder.missing_reference = missing_reference
 
 
-def main():
-    root = sys.argv[1]
-    wanted = sys.argv[2:] or ['shaft', 'plate']
+def build_fixtures(root, wanted):
     pythoncom.CoInitialize()
-    builder = Builder(root)
-    for name in wanted:
-        try:
-            getattr(builder, name)()
-        except Exception as error:      # noqa: BLE001
-            print(f'{name}: HATA {type(error).__name__}: {error}')
-        for title in builder.created:   # only documents this builder opened and left unsaved/open
-            if builder.app.GetOpenDocumentByName(title) is not None:
-                builder.app.CloseDoc(title)
-        builder.created.clear()
+    try:
+        builder = Builder(root)
+        failed = False
+        for name in wanted:
+            try:
+                getattr(builder, name)()
+            except Exception as error:      # noqa: BLE001
+                failed = True
+                print(f'{name}: HATA {type(error).__name__}: {error}')
+            finally:
+                for title in builder.created:   # only documents this builder created or opened
+                    if builder.app.GetOpenDocumentByName(title) is not None:
+                        builder.app.CloseDoc(title)
+                builder.created.clear()
+        return int(failed)
+    finally:
+        pythoncom.CoUninitialize()
+
+
+def main():
+    root = os.path.abspath(sys.argv[1])
+    wanted = sys.argv[2:] or ['shaft', 'plate']
+    # A worker apartment lets both the builder and nested drawing Session
+    # acquire and release their own COM references.
+    with ThreadPoolExecutor(max_workers=1) as worker:
+        return worker.submit(build_fixtures, root, wanted).result()
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

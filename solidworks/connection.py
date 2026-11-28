@@ -21,9 +21,13 @@ def connect_to_solidworks(*, raw=False):
             # GetActiveObject resolves a ProgID itself (PyWinObject_AsIID).
             # CLSIDFromProgID is a Windows API, not a pythoncom export.
             active = pythoncom.GetActiveObject("SldWorks.Application")
-            return active.QueryInterface(pythoncom.IID_IDispatch)
-        return win32com.client.GetActiveObject("SldWorks.Application")
+            dispatch = active.QueryInterface(pythoncom.IID_IDispatch)
+        else:
+            dispatch = win32com.client.GetActiveObject("SldWorks.Application")
     except Exception as error:
         raise RuntimeError(
             "SolidWorks açık değil veya oturuma bağlanılamadı. SolidWorks'ü açıp tekrar deneyin.\n" + str(error)
         ) from error
+    from .speed import enable_for
+    enable_for(dispatch if raw else getattr(dispatch, '_oleobj_', dispatch))
+    return dispatch
