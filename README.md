@@ -50,15 +50,15 @@ oturumuyla çalışır. Ürünlerin dağıtım ve lisans ayrıntıları için
 ## Başlangıç
 
 <!-- windows-release:start -->
-**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-45815974296-1/GOKWORKS.exe)
+**Son başarılı Windows EXE:** [GOKWORKS.exe indir](https://github.com/gkkizil/gokworks/releases/download/windows-onefile-46135685573-1/GOKWORKS.exe)
 
 **GOKWORKS.exe** tek başına çalışır; yanında klasör gerekmez. Windows 10/11 x64; Python kurulumu gerekmez.
 
-Uygulama kodu: `ec1c59b` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/45815974296) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
+Uygulama kodu: `ec1c59b` · [Derleme kaydı](https://github.com/gkkizil/gokworks/actions/runs/46135685573) · [Paket bilgisi ve SHA256](packaging/latest-windows.json)
 
-Derleme no: `45815974296` · Derlenen commit: `f56bf65` (uygulama koduna yalnız derleme isteği eklenmiş hali) · Paketteki araç sayısı: 23 · EXE doğrulaması: yalnız paket açılış kontrolü (regresyon test paketi bu EXE üzerinde çalıştırılmadı)
+Derleme no: `46135685573` · Derlenen commit: `5d303ae` (uygulama koduna yalnız derleme isteği eklenmiş hali) · Paketteki araç sayısı: 23 · EXE doğrulaması: yalnız paket açılış kontrolü (regresyon test paketi bu EXE üzerinde çalıştırılmadı)
 
-SHA256: `82bdfa19b8a0fb8522a01c37bb5a14e8a514cd5f0981dc74f91dec9ba850ce2d`
+SHA256: `7081c647dbfd174c3d9b0291b43b30eb0074979b36802835260359aee8f68e4c`
 
 EXE, yukarıdaki uygulama kodundan derlenmiştir; kaynak koddaki daha yeni değişiklikleri içermez. Yeni EXE yalnız derlemesi ve açılış kontrolü başarılı olunca bu bağlantının yerini alır.
 <!-- windows-release:end -->
