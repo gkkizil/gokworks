@@ -1,6 +1,6 @@
 """GOKWORKS transfer workspace; all scanning, COM and reports run as jobs."""
 
-from gui_qt.components import fit_columns
+from gui_qt.components import empty_state, fit_columns
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Slot
@@ -166,6 +166,7 @@ class CadConverterPage(BasePage):
         self.files_proxy = FilterProxy(self)
         self.files_proxy.setSourceModel(self.files_model)
         self.files_view = configure_view(QTableView()); self.files_view.setModel(self.files_proxy)
+        empty_state(self.files_view, 'Aktarılacak dosya yok', 'Dosyaları seç… veya Kaynak klasörü seç… ile SLDPRT / SLDASM ekleyin.', 'cad_converter')
         self.files_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
         fit_columns(self.files_view, elastic=0, minimum=120, defaults={1: 70, 2: 150, 3: 200, 4: 110},
                     settings=self.settings, key='cad_converter.files')

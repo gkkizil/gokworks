@@ -239,3 +239,22 @@ def test_only_cut_list_folders_ask_for_persistent_references(tmp_path):
     model.FirstFeature=tree
     result,_=read(model)
     assert result.rows and plain not in asked
+
+
+def test_scan_runs_in_solidworks_batch_mode_and_restores_display(tmp_path):
+    from types import SimpleNamespace as NS
+    model=Model(tmp_path/'frame.SLDPRT',[Folder()])
+    seen=[]
+    class Recorder(NS):
+        def __setattr__(self, key, value):
+            seen.append((key, value)); super().__setattr__(key, value)
+    model.FeatureManager=Recorder(EnableFeatureTree=True, EnableFeatureTreeWindow=True)
+    model.ActiveView=Recorder(EnableGraphicsUpdate=True)
+    session,make=factory([model],model); session.app=Recorder(CommandInProgress=False)
+    seen.clear()
+    result=scan(session_factory=make)
+    assert result.rows and session.closed
+    assert seen[0]==('CommandInProgress',True) and seen[-1]==('CommandInProgress',False)
+    for flag in ('EnableFeatureTree','EnableFeatureTreeWindow','EnableGraphicsUpdate'):
+        assert (flag,False) in seen and (flag,True) in seen
+    assert model.FeatureManager.EnableFeatureTree and model.ActiveView.EnableGraphicsUpdate

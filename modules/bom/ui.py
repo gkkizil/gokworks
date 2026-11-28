@@ -1,6 +1,6 @@
 """Virtualized hierarchical BOM, instance weights and complete Excel export."""
 
-from gui_qt.components import fit_columns
+from gui_qt.components import empty_state, fit_columns
 from dataclasses import asdict
 from pathlib import PureWindowsPath
 
@@ -113,6 +113,7 @@ class BomPage(BasePage):
         result_layout.addWidget(self.toolbar)
         self.tabs = QTabWidget()
         self.parts = configure_view(QTableView())
+        empty_state(self.parts, 'Parça listesi boş', 'SolidWorks’te montajı açın ve Montajı oku’ya basın. Parçalar, adetler ve ağırlıklar burada listelenir.', 'bom')
         self.parts_model = PartsModel((Column('Parça adı', 'name'), Column('Adet', 'quantity'),
             Column('Birim ağırlık · kg', 'mass_kg', mass), Column('Toplam · kg', 'total_mass_kg', mass),
             Column('Konfigürasyon', 'configuration'), Column('Dosya yolu', 'path'), Column('Ağırlık durumu', 'mass_note')))
@@ -120,6 +121,7 @@ class BomPage(BasePage):
         self.parts_proxy.setSourceModel(self.parts_model)
         self.parts.setModel(self.parts_proxy)
         self.tree = configure_view(QTreeView())
+        empty_state(self.tree, 'Ürün ağacı boş', 'Montaj okunduğunda alt montajlar ve parçalar burada ağaç olarak görünür.', 'bom')
         self.tree_model = BomTreeModel((Column('Montaj / parça', 'name'), Column('Pozisyon', 'number'),
             Column('Tür', 'kind'), Column('Ağırlık · kg', 'mass_kg', mass),
             Column('Konfigürasyon', 'configuration'), Column('Dosya yolu', 'path')))
@@ -138,6 +140,7 @@ class BomPage(BasePage):
         self.tree.doubleClicked.connect(self.details)
         result_layout.addWidget(self.tabs, 1)
         self.source_tree = configure_view(QTreeView())
+        empty_state(self.source_tree, 'Montaj okunmadı', 'Okunan montajın yapısı burada görünür.')
         self.source_tree.setModel(self.tree_proxy); self.source_tree.setHeaderHidden(True)
         self.source_tree.setAccessibleName('Kaynak montaj ve parça seçimi')
         self.source_tree.setMinimumHeight(96)

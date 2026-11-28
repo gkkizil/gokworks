@@ -13,7 +13,7 @@ from modules.tolerance_stack.calculator import calculate,Cancelled,check_cancel
 from modules.tolerance_stack.chain import validate,ChainIssue
 from modules.tolerance_stack import storage,solidworks_reader,drawing_writer,report
 from modules.tolerance_stack.diagram import draw_chain,draw_contributions,draw_histogram
-from gui_qt.components import BasePage,ValueForm,PathPicker,card,label,button,scroll,separator,configure_view,show_details
+from gui_qt.components import empty_state, BasePage,ValueForm,PathPicker,card,label,button,scroll,separator,configure_view,show_details
 from gui_qt.models import Column,TableModel,FilterProxy
 from modules.tolerance_stack.ui_dialogs import MemorySettings,DimensionDialog,TermDialog,IsoPairDialog,KINDS,KIND_TITLES,DIST
 from modules.tolerance_stack.ui_widgets import Disclosure,StackDiagram,compact,short_name
@@ -167,6 +167,7 @@ class ToleranceStackPage(BasePage):
         self.filter.setMaximumWidth(145)
         search.addWidget(self.search,1);search.addWidget(self.filter);left.addLayout(search)
         self.library=configure_view(QTableView());self.library.setMinimumWidth(250)
+        empty_state(self.library, 'Ölçü yok', 'Manuel ölçü veya ISO geçme ile ölçü ekleyin; aktif teknik resimden de okuyabilirsiniz.', 'tolerance_stack')
         self.library.setMinimumHeight(150)
         self.library_model=StackTable((Column('Ölçü','name'),Column('mm','nominal',compact),
             Column('Tolerans','tolerance'),Column('Durum','readiness'),
@@ -218,6 +219,7 @@ class ToleranceStackPage(BasePage):
         self.chain_diagram=StackDiagram(width=700,height=150);self.chain_diagram.setMinimumHeight(130);self.chain_diagram.setMaximumHeight(150)
         chain.addWidget(self.chain_diagram)
         self.chain_table=configure_view(QTableView());self.chain_table.setSortingEnabled(False)
+        empty_state(self.chain_table, 'Zincir boş', 'Soldan bir ölçü seçip + Topla veya − Çıkar ile zincire ekleyin.')
         self.chain_table.setMinimumHeight(170)
         self.chain_model=StackTable((Column('Sıra','label'),Column('Ölçü','name'),Column('İşlem','direction'),
             Column('mm','nominal',compact),Column('Kontrol','check'),Column('Katsayı','factor',fmt),
@@ -328,6 +330,7 @@ class ToleranceStackPage(BasePage):
         plots.addTab(self.contribution_diagram,'Tolerans katkıları');plots.addTab(self.histogram,'Monte Carlo dağılımı');results_body.addWidget(plots)
         self.critical_label=label();results_body.addWidget(self.critical_label)
         self.metrics=configure_view(QTableView());self.metrics.setMinimumHeight(230)
+        empty_state(self.metrics, 'Henüz sonuç yok', 'Zinciri kurup Hesapla ve sonuçları göster’e basın.')
         self.metric_model=StackTable((Column('Sonuç / açıklama','name'),Column('Değer','value')));self.metrics.setModel(self.metric_model)
         self.metrics.setSortingEnabled(False)
         details=QWidget();details_body=QVBoxLayout(details);details_body.setContentsMargins(0,0,0,0)

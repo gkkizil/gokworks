@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
                                QListWidgetItem, QSplitter, QTableView, QTabWidget, QTextBrowser, QVBoxLayout,
                                QWidget, QCheckBox, QMenu)
 
-from gui_qt.components import BasePage, button, configure_view, fit_columns, label, pane, scroll, NumberSpinBox, section_header
+from gui_qt.components import empty_state, BasePage, button, configure_view, fit_columns, label, pane, scroll, NumberSpinBox, section_header
 from gui_qt.theme import COLORS
 from . import controller, reporting
 from .models import SEVERITY_TITLES, STATUS_TITLES, ERROR, WARNING, INFO, NOT_EVALUATED, FAILED
@@ -148,6 +148,7 @@ class DfmPage(BasePage):
         self.proxy.setFilterCaseSensitivity(Qt.CaseInsensitive); self.proxy.setFilterKeyColumn(-1)
         self.proxy.setSortRole(Qt.UserRole + 1)
         self.table = QTableView(); self.table.setModel(self.proxy); configure_view(self.table)
+        empty_state(self.table, 'Henüz analiz yapılmadı', 'DXF dosyası seçip Analiz et’e basın; bulgular önem sırasıyla burada listelenir.', 'dfm_analyzer')
         self.table.setTextElideMode(Qt.ElideRight)
         fit_columns(self.table, elastic=2, minimum=160, autofit=(0, 1, 3, 4, 5), settings=self.settings, key='dfm_findings')
         self.table.selectionModel().selectionChanged.connect(self.finding_selected)
@@ -160,6 +161,7 @@ class DfmPage(BasePage):
         self.outcomes = QStandardItemModel(0, 4)
         self.outcomes.setHorizontalHeaderLabels(['Durum', 'Kural', 'Sınır', 'Açıklama'])
         self.outcome_table = QTableView(); self.outcome_table.setModel(self.outcomes); configure_view(self.outcome_table)
+        empty_state(self.outcome_table, 'Kural sonucu yok', 'Analizden sonra her kuralın sonucu burada görünür.')
         fit_columns(self.outcome_table, elastic=3, minimum=180, autofit=(0, 1, 2), settings=self.settings, key='dfm_outcomes')
         self.tabs.addTab(self.outcome_table, 'Kural sonuçları')
         self.notes = QTextBrowser()

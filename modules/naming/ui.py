@@ -1,6 +1,6 @@
 """Folder-first Pack and Go workflow with a hierarchical, collision-aware preview."""
 
-from gui_qt.components import fit_columns
+from gui_qt.components import empty_state, fit_columns
 from pathlib import Path, PureWindowsPath
 from collections import Counter
 from PySide6.QtCore import Qt, QTimer
@@ -131,6 +131,7 @@ class NamingPage(BasePage):
         self.more_button.setMenu(menu)
         layout.addWidget(section_header('İsimlendirme önizlemesi', self.edit_button, self.more_button))
         self.tree = configure_view(QTreeView())
+        empty_state(self.tree, 'Dosya listesi boş', 'Kaynak montajı seçip Dosyaları oku’ya basın; mevcut ve yeni dosya adları burada yan yana görünür.', 'naming')
         self.model = TreeModel((Column('Montaj / mevcut dosya adı', 'name'), Column('Yeni dosya adı', 'new_name'),
                                 Column('Tür', 'kind'), Column('Kaynak dosya', 'source')))
         self.proxy = FilterProxy(self, tree=True)

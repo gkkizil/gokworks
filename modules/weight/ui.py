@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QFileDialog, QHBoxLayout, QLin
                                QTableView, QWidget)
 
 from gui_qt.calculations import CalculationPage
-from gui_qt.components import button, configure_view, fit_columns, label, section_header, show_details
+from gui_qt.components import empty_state, button, configure_view, fit_columns, label, section_header, show_details
 from gui_qt.models import Column, TableModel
 from modules.weight import catalog, export, rules as r, sections, worklist
 from modules.weight.diagram import draw
@@ -141,6 +141,7 @@ class WeightPage(CalculationPage):
         self.list_model = TableModel(columns, editable=('name', 'length', 'count', 'price'))
         self.list_model.edited.connect(self.item_edited)
         self.list_view = configure_view(QTableView())
+        empty_state(self.list_view, 'Hesaplama listesi boş', 'Bir kesit hesaplayıp Hesaplamaya ekle’ye basın; toplam ağırlık ve maliyet burada toplanır.')
         self.list_view.setModel(self.list_model)
         self.list_view.setSortingEnabled(False)
         self.list_view.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed)

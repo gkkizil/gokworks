@@ -60,6 +60,17 @@ class BendAnnotations(QWidget):
     def paintEvent(self, event):
         v = self.viewer
         if v.mesh is None:
+            # An empty scene says what it is for instead of showing a blank area.
+            painter = QPainter(self); painter.setRenderHint(QPainter.Antialiasing)
+            ink, _ = self.colours(); muted = QColor(ink); muted.setAlpha(150)
+            font = QFont(self.font()); font.setPixelSize(13); font.setBold(True); painter.setFont(font)
+            middle = self.height()/2
+            painter.setPen(ink)
+            painter.drawText(QRectF(0, middle-26, self.width(), 22), Qt.AlignCenter, '3B büküm sahnesi')
+            font.setPixelSize(12); font.setBold(False); painter.setFont(font); painter.setPen(muted)
+            painter.drawText(QRectF(24, middle, self.width()-48, 40), Qt.AlignHCenter | Qt.AlignTop | Qt.TextWordWrap,
+                             'Parça yüklendiğinde sac, takımlar ve büküm adımları burada canlandırılır.')
+            painter.end()
             return
         project = projector(v.mesh, v.camera.state(), self.width(), self.height())
         painter = QPainter(self); painter.setRenderHint(QPainter.Antialiasing)

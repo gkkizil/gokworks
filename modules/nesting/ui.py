@@ -1,6 +1,6 @@
 """Integrated DXF nesting workspace; every heavy operation uses the existing job runner."""
 
-from gui_qt.components import set_style_sheet
+from gui_qt.components import empty_state, set_style_sheet
 from gui_qt.components import fit_columns
 from copy import deepcopy
 from dataclasses import asdict, replace
@@ -140,6 +140,7 @@ class NestingPage(BasePage):
         self.part_tree_model = PartTreeModel(self.part_proxy,self,quantity_editor=self.set_part_quantity,
             thumbnail_provider=lambda key:self.part_thumbnails.icon(key,self.context.appearance,self.devicePixelRatioF()))
         self.part_table = configure_view(PartTree()); self.part_table.setModel(self.part_tree_model)
+        empty_state(self.part_table, 'Parça yok', 'DXF ekle ile kesilecek parçaları yükleyin.')
         self.part_table.setIconSize(QSize(36,28))
         self.part_table.setItemDelegateForColumn(1,PartQuantityDelegate(self.part_table))
         self.quantity_edit_triggers = (QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed

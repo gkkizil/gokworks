@@ -19,6 +19,19 @@ def values(value):
     return tuple(value) if isinstance(value, (tuple, list)) else (value,)
 
 
+def put(obj, name, value):
+    """Set a COM property through the raw dispatch the session already uses."""
+    from modules.cad_converter.api import raw
+    dispatch = raw(obj)
+    try:
+        if hasattr(dispatch, 'Invoke') and hasattr(dispatch, 'GetIDsOfNames'):
+            dispatch.Invoke(dispatch.GetIDsOfNames(0, name), 0, 4, False, value)  # DISPATCH_PROPERTYPUT
+        else:
+            setattr(obj, name, value)
+    finally:
+        obj = dispatch = None
+
+
 def optional(obj, name, *, prop=False, default=None):
     try: return get(obj, name) if prop else call(obj, name)
     except Exception: return default
@@ -56,6 +69,53 @@ class Session(CadSession):
         if call(model, 'GetType') not in (self.c('swDocPART'), self.c('swDocASSEMBLY')):
             raise ApiError('Açık belge parça veya montaj değil; SLDPRT / SLDASM açın.')
         return model
+
+    @contextmanager
+    def fast_api(self):
+        """Tell SolidWorks a batch of API calls is coming (ISldWorks.CommandInProgress).
+
+        Out-of-process programs are much faster while this is set: SolidWorks
+        stops treating every call as a separate user command. Always reset,
+        and never required: a SolidWorks that refuses simply runs slower.
+        """
+        app = getattr(self, 'app', None)
+        enabled = False
+        try:
+            if app is not None:
+                try:
+                    if not get(app, 'CommandInProgress'):
+                        put(app, 'CommandInProgress', True); enabled = True
+                except Exception:
+                    enabled = False
+            yield
+        finally:
+            if enabled:
+                try: put(app, 'CommandInProgress', False)
+                except Exception: pass
+            app = None
+
+    @contextmanager
+    def frozen(self, model):
+        """No feature-tree or graphics redraw while a model is read (display only)."""
+        changed = []
+        owner = None
+        try:
+            for owner_name, setting in (('FeatureManager', 'EnableFeatureTree'),
+                                        ('FeatureManager', 'EnableFeatureTreeWindow'),
+                                        ('ActiveView', 'EnableGraphicsUpdate')):
+                try:
+                    owner = get(model, owner_name)
+                    if owner is None or get(owner, setting) is False: continue
+                    put(owner, setting, False); changed.append((owner, setting))
+                except Exception:
+                    continue
+            yield
+        finally:
+            while changed:
+                owner, setting = changed.pop()
+                try: put(owner, setting, True)
+                except Exception: pass
+            owner = model = None
 
     def active_configuration(self, model):
         return str(get(get(get(model, 'ConfigurationManager'), 'ActiveConfiguration'), 'Name'))
