@@ -153,10 +153,9 @@ class Session(CadSession):
             return None
         finally: model = extension = None
 
-    def persistent_ref(self, model, obj):
-        extension = None
+    def persistent_ref(self, model, obj, extension=None):
         try:
-            extension = get(model, 'Extension')
+            if extension is None: extension = get(model, 'Extension')
             data = call(extension, 'GetPersistReference3', obj)
             if data: return 'persist:' + base64.b64encode(bytes((int(x) & 255 for x in data))).decode('ascii')
         except Exception: pass
@@ -193,8 +192,9 @@ class Session(CadSession):
         """
         visited, yielded = set(), set()
         pending = []
-        feature = child = next_feature = None
+        feature = child = next_feature = extension = None
         try:
+            extension = optional(model, 'Extension', prop=True)
             pending.append((call(model, 'FirstFeature'), False, False))
             while pending:
                 checkpoint(stop)
@@ -207,7 +207,11 @@ class Session(CadSession):
                 name, kind = str(get(feature, 'Name')), call(feature, 'GetTypeName2')
                 # A persistent token alone is not a feature-tree identity:
                 # generic folders can share it or have no supported reference.
-                token = (name, kind, self.persistent_ref(model, feature))
+                # Only cut-list folders need the (slow) persistent reference:
+                # feature names are unique within a part, and folders are the
+                # only kind whose name-and-kind can repeat for distinct items.
+                folder = kind in ('CutListFolder', 'SolidBodyFolder')
+                token = (name, kind, self.persistent_ref(model, feature, extension) if folder else '')
                 state = (token, sub)
                 if state in visited: continue
                 visited.add(state)
@@ -225,7 +229,7 @@ class Session(CadSession):
                 pending.append((child, True, False))
         finally:
             pending.clear()
-            model = feature = child = next_feature = None
+            model = feature = child = next_feature = extension = None
 
     def assembly_cautions(self, model, stop=None):
         """A part-document cut list cannot prove instance-specific assembly cuts."""

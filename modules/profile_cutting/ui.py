@@ -266,8 +266,10 @@ class ProfileCuttingPage(BasePage):
         self.plan_stack.setCurrentIndex(1)
         footer = QHBoxLayout()
         footer.addWidget(label('Artan profil ile testere / uç düzeltme kaybı ayrı gösterilir.', 'muted'),1)
-        self.apply_stock_button = button('Kesildi: stoğu güncelle', self.apply_plan_to_stock)
-        self.apply_stock_button.setToolTip('Kullanılan stok çubuklarını stoktan düşer; işe yarar artanları artık olarak stoğa ekler.')
+        self.apply_stock_button = button('Stoktan düş', self.apply_plan_to_stock, primary=True)
+        self.apply_stock_button.setAccessibleName('Kesilen planı stoktan düş')
+        self.apply_stock_button.setToolTip('Kesimden sonra: kullanılan stok çubuklarını stoktan düşer, işe yarar artanları '
+                                           'artık olarak stoğa ekler. Stok sekmesinden geri alınabilir.')
         footer.addWidget(self.apply_stock_button)
         self.report_button = button('Kesim planını CSV kaydet', self.report); footer.addWidget(self.report_button)
         plan_layout.addLayout(footer)
@@ -323,12 +325,27 @@ class ProfileCuttingPage(BasePage):
         layout.addWidget(self.stock_view, 1)
         self.stock_summary = label('', 'muted'); layout.addWidget(self.stock_summary)
         keep = QHBoxLayout()
-        keep.addWidget(label('“Kesildi: stoğu güncelle” bundan uzun artanları stoğa ekler:', 'muted'))
+        keep.addWidget(label('“Stoktan düş” bundan uzun artanları stoğa ekler:', 'muted', wrap=False))
         self.keep_offcut = QLineEdit(str(self.settings.get('profile_cutting_keep_offcut', '500')))
         self.keep_offcut.setMaximumWidth(80); self.keep_offcut.setAccessibleName('Stoğa eklenecek en kısa artık · mm')
         self.keep_offcut.editingFinished.connect(lambda: self.settings.set('profile_cutting_keep_offcut', self.keep_offcut.text().strip()))
         keep.addWidget(self.keep_offcut); keep.addWidget(label('mm', 'muted')); keep.addStretch()
         layout.addLayout(keep)
+        history = QHBoxLayout()
+        history.addWidget(label('Stok hareketleri', 'section')); history.addStretch()
+        self.stock_undo_button = button('Son düşümü geri al', self.undo_stock)
+        self.stock_undo_button.setToolTip('Stoğu son “Stoktan düş” öncesindeki haline getirir.')
+        history.addWidget(self.stock_undo_button)
+        layout.addLayout(history)
+        self.stock_log_model = ProfileTableModel((Column('Tarih','time'), Column('Proje','project'),
+            Column('Düşülen','used'), Column('Satın alınan','bought'), Column('Stoğa dönen artık','added'),
+            Column('Ayrıntı','detail')))
+        self.stock_log_view = configure_view(QTableView()); self.stock_log_view.setModel(self.stock_log_model)
+        self.stock_log_view.setSortingEnabled(False); self.stock_log_view.setMaximumHeight(150)
+        self.stock_log_view.setAccessibleName('Stok hareketleri: tarih, proje, düşülen çubuk ve dönen artık')
+        fit_columns(self.stock_log_view, elastic=5, minimum=80, defaults={0: 140, 1: 140}, autofit=(2, 3, 4))
+        layout.addWidget(self.stock_log_view)
+        self.controls.extend((self.stock_undo_button,))
         self.controls.extend((self.stock_add_button, self.stock_from_parts_button, self.stock_remove_button,
                               self.stock_clear_button, self.stock_view))
         self.tabs.addTab(page, 'Stok')
@@ -358,6 +375,11 @@ class ProfileCuttingPage(BasePage):
                                    'Stok boş. Plan, bütün çubukları “satın alınacak” olarak hesaplar.')
         missing = [d for d in self.project.demands if stock_store.match_key(d.profile, d.material) not in
                    {i.key for i in self.stocks}]
+        if hasattr(self, 'stock_log_model'):
+            log = stock_store.load_log(self.settings)
+            self.stock_log_model.replace([dict(time=e.get('time','').replace('T',' ')[:16], project=e.get('project') or '—',
+                used=f"{e.get('used',0)} çubuk", bought=f"{e.get('bought',0)} çubuk", added=f"{e.get('added',0)} artık",
+                detail=e.get('detail','')) for e in log])
         if hasattr(self, 'stock_note'):
             self.stock_note.setText(f'Stokta: {bars} çubuk · {offcuts} artık.' if self.stocks else 'Stok girilmedi.')
         self.stock_suggestions()
@@ -425,14 +447,42 @@ class ProfileCuttingPage(BasePage):
         if self.plan is None: return
         try: keep = number(self.keep_offcut.text() or '0', 'Artık sınırı')
         except ValueError as error: self.set_status(str(error), True); return
-        used = sum(1 for b in self.plan.bars if b.stock_id)
-        if QMessageBox.question(self, 'Stoğu güncelle',
-                f'Bu plan kesildi mi?\n\n{used} stok çubuğu stoktan düşülecek; {mm(keep)} mm ve daha uzun artanlar '
-                'artık olarak stoğa eklenecek.', QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+        rows = stock_store.preview(self.plan, keep)
+        lines = '\n'.join(f'• {name}: {used} stok çubuğu düşülecek' + (f', {buy} çubuk satın alınmış sayılacak' if buy else '')
+                          + (f', {back} artık stoğa dönecek' if back else '') for name, (used, buy, back) in rows.items())
+        text = (f'Bu kesim planı stoktan düşülsün mü?\n\n{lines}\n\n{mm(keep)} mm ve daha uzun artanlar artık olarak '
+                'stoğa eklenir. İşlem Stok sekmesindeki “Son düşümü geri al” ile geri alınabilir.')
+        previous = stock_store.already_deducted(self.settings, self.plan)
+        if previous is not None:
+            text = (f'Bu plan {previous.get("time", "").replace("T", " ")[:16]} tarihinde zaten stoktan düşüldü.\n'
+                    'Aynı kesimi ikinci kez yaptıysanız devam edin.\n\n') + text
+        if QMessageBox.question(self, 'Stoktan düş', text, QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
             return
-        used, added = stock_store.apply_plan(self.stocks, self.plan, keep_from=keep)
-        self.save_stock()
-        self.set_status(f'Stok güncellendi: {used} çubuk düşüldü, {added} artık eklendi.')
+        entry = stock_store.deduct(self.settings, self.stocks, self.plan, keep_from=keep, project=self.stock_project_name())
+        self.invalidate(); self.refresh_stock()
+        self.set_status(f'Stoktan düşüldü: {entry["used"]} çubuk; {entry["added"]} artık stoğa eklendi. '
+                        'Geri almak için Stok sekmesi → Son düşümü geri al.')
+
+    def stock_project_name(self):
+        """The model the list came from, so the movement log says what was cut."""
+        source = self.scan_result.source if self.scan_result is not None else ''
+        return source.replace('\\', '/').rsplit('/', 1)[-1] if source else f'{len(self.project.demands)} satırlık liste'
+
+    def undo_stock(self):
+        log = stock_store.load_log(self.settings)
+        if not log: self.set_status('Geri alınacak stok düşümü yok.'); return
+        entry = log[0]
+        note = ('\n\nDikkat: bu düşümden sonra stokta elle yapılan değişiklikler de geri alınır.'
+                if stock_store.changed_since(entry, self.stocks) else '')
+        if QMessageBox.question(self, 'Son düşümü geri al',
+                f'{entry.get("time", "").replace("T", " ")[:16]} tarihli düşüm ({entry.get("used", 0)} çubuk, '
+                f'{entry.get("added", 0)} artık) geri alınsın mı?{note}',
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+            return
+        items, entry = stock_store.undo_last(self.settings)
+        self.stocks[:] = items
+        self.invalidate(); self.refresh_stock()
+        self.set_status(f'Stok düşümü geri alındı: {entry.get("used", 0)} çubuk stoğa döndü.')
 
     def reflow_source(self):
         columns = 3 if self.width()-32 >= 800 else 2
@@ -476,6 +526,7 @@ class ProfileCuttingPage(BasePage):
         if hasattr(self, 'stock_view'):
             self.stock_remove_button.setEnabled(idle and bool(self.stock_view.selectionModel().selectedRows()))
             self.stock_clear_button.setEnabled(idle and bool(self.stocks))
+            self.stock_undo_button.setEnabled(idle and bool(stock_store.load_log(self.settings)))
             self.stock_from_parts_button.setEnabled(idle and bool(self.project.demands))
         self.csv_action.setEnabled(idle and (has_parts or self.scan_result is not None))
         for action in (self.pdf_action, self.excel_action):

@@ -69,3 +69,57 @@ def test_invalid_stock_entry_says_what_to_fix(page):  # noqa: F811
     p.stock_profile.setEditText('40x40x2'); p.stock_material.setEditText('S235JR'); p.stock_length.setText('abc')
     p.stock_add_button.click()
     assert 'Çubuk boyu' in p.status_text and not p.stocks
+
+
+class Settings(dict):
+    def set(self, key, value): self[key] = value
+
+
+def test_deduct_records_a_movement_that_undo_restores():
+    from modules.profile_cutting.stock import deduct, load_log, undo_last, already_deducted, changed_since
+    settings = Settings()
+    items = [Stock('bar', '40x40x2', 'S235JR', '3000', 2, FULL)]
+    plan = optimize(project(('40x40x2', 'S235JR', '1000', 2)), stock_items=items)
+    assert already_deducted(settings, plan) is None
+    entry = deduct(settings, items, plan, keep_from='500', project='Şase.SLDASM')
+    assert entry['used'] == 1 and entry['added'] == 1 and entry['bought'] == 0 and entry['project'] == 'Şase.SLDASM'
+    assert '40x40x2 S235JR: 1 çubuk, 1 artık' in entry['detail']
+    assert [(i.kind, i.count) for i in load(settings)] == [(FULL, 1), (OFFCUT, 1)]
+    assert already_deducted(settings, plan)['id'] == entry['id'] and not changed_since(entry, items)
+    items[0].count = 9
+    assert changed_since(entry, items)
+    restored, undone = undo_last(settings)
+    assert undone['id'] == entry['id'] and not load_log(settings)
+    assert [(i.kind, i.length, i.count) for i in restored] == [(FULL, '3000', 2)] == [(i.kind, i.length, i.count) for i in load(settings)]
+    assert undo_last(settings) is None
+
+
+def test_bars_to_buy_are_counted_and_their_leftovers_return_to_stock():
+    from modules.profile_cutting.stock import deduct
+    settings, items = Settings(), []
+    plan = optimize(project(('40x40x2', 'S235JR', '2000', 2)), stock_items=items)
+    entry = deduct(settings, items, plan, keep_from='500')
+    assert entry['used'] == 0 and entry['bought'] == 1 and entry['added'] == 1
+    assert [(i.kind, i.length) for i in items] == [(OFFCUT, '1994')]
+
+
+def test_stoktan_dus_button_warns_on_a_second_deduction_and_undo_button_restores(page, qtbot, monkeypatch):  # noqa: F811
+    p, w = page
+    p.project.demands = [Demand('a', '40x40x2', 'S235JR', '1000', 2)]; p.refresh_demands()
+    p.stocks[:] = [Stock('bar', '40x40x2', 'S235JR', '3000', 2, FULL)]; p.save_stock()
+    asked = []
+    monkeypatch.setattr(QMessageBox, 'question', lambda parent, title, text, *a, **k: asked.append(text) or QMessageBox.Yes)
+    assert not p.apply_stock_button.isEnabled() and not p.stock_undo_button.isEnabled()
+    p.calculate(); qtbot.waitUntil(lambda: not w.jobs.busy and p.plan is not None, timeout=8000)
+    assert p.apply_stock_button.isEnabled() and p.apply_stock_button.text() == 'Stoktan düş'
+    first_plan = p.plan
+    p.apply_stock_button.click()
+    assert '1 stok çubuğu düşülecek' in asked[-1] and 'zaten' not in asked[-1]
+    assert sum(s.count for s in p.stocks if s.kind == FULL) == 1 and p.plan is None
+    assert p.stock_log_model.rowCount() == 1 and p.stock_undo_button.isEnabled()
+    assert 'Stoktan düşüldü' in p.status_text
+    p.plan = first_plan; p.apply_plan_to_stock()                           # same cut list again
+    assert 'zaten stoktan düşüldü' in asked[-1] and p.stock_log_model.rowCount() == 2
+    p.stock_undo_button.click(); p.stock_undo_button.click()
+    assert [(s.kind, s.count) for s in p.stocks] == [(FULL, 2)] and p.stock_log_model.rowCount() == 0
+    assert not p.stock_undo_button.isEnabled() and 'geri alındı' in p.status_text

@@ -25,6 +25,7 @@ def read_part(session, model, path, configuration, options, mapping, stop):
     unit = session.display_unit(model)
     folder = body = feature = bodies = None
     seen_bodies = set()
+    extension = optional(model, 'Extension', prop=True)
     try:
         needs_rebuild = session.rebuild_pending(model)
         for feature, kind in session.cut_folders(model,stop):
@@ -39,6 +40,7 @@ def read_part(session, model, path, configuration, options, mapping, stop):
             row = ScanRow(digest([path.casefold(), configuration, name]), path, configuration, name)
             row.display_unit = unit
             try:
+                automatic = None
                 if options.update_cut_list:
                     updated = bool(call(folder, 'UpdateCutList'))
                     if not updated: row.issues.append('Cut List güncellemesi başarısız.')
@@ -112,9 +114,15 @@ def read_part(session, model, path, configuration, options, mapping, stop):
                     row.issues.append('Weldment profil grubu değil; sac/levha/diğer katı inceleme listesinde.')
                 verified = []
                 unique_bodies = True
+                # SolidWorks groups only identical bodies in one up-to-date cut
+                # list folder, so one face walk proves the whole group. Reading
+                # every face of every body over COM was the slow part of a scan;
+                # when freshness is unproven, each body is still checked.
+                fresh = not options.update_cut_list and needs_rebuild is False and bool(automatic) \
+                    or options.update_cut_list and row.freshness == 'UpdateCutList başarılı' and needs_rebuild is False
                 for body in bodies:
                     checkpoint(stop)
-                    reference = session.persistent_ref(model, body)
+                    reference = session.persistent_ref(model, body, extension)
                     if not reference:
                         body_name = str(optional(body, 'Name', prop=True, default='') or '')
                         reference = 'name:' + body_name if body_name else ''
@@ -125,8 +133,10 @@ def read_part(session, model, path, configuration, options, mapping, stop):
                     row.body_refs.append(reference)
                     if call(body, 'IsSheetMetal'):
                         row.excluded = True; row.issues.append('Sac metal gövde; profil kesiminden hariç.')
-                    check = verify(session.faces(body,stop), number(row.length) if row.length else None)
-                    verified.append(check)
+                    if fresh and verified:
+                        verified.append(verified[0])
+                    else:
+                        verified.append(verify(session.faces(body,stop), number(row.length) if row.length else None))
                 row.geometry_verified = bool(verified) and all(v.verified for v in verified)
                 if not row.geometry_verified:
                     row.issues.append(next((v.reason for v in verified if not v.verified), 'Gövde veya doğrusal geometri bulunamadı.'))
@@ -152,7 +162,7 @@ def read_part(session, model, path, configuration, options, mapping, stop):
             rows.append(row)
             bodies = body = folder = feature = None
         return rows
-    finally: model = folder = feature = bodies = body = None
+    finally: model = folder = feature = bodies = body = extension = None
 
 
 def scan(path=None, options=Options(), mapping=None, events=None, stop=None, *, session_factory=Session):

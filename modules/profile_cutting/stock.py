@@ -6,13 +6,16 @@ the project's purchase length. After cutting, ``apply_plan`` removes the bars us
 and returns the useful leftovers to stock as offcuts.
 """
 from dataclasses import asdict, dataclass
+from datetime import datetime
 import re
 import uuid
 
-from .models import canonical, number, quantity
+from .models import canonical, digest, number, quantity
 
 FULL, OFFCUT = 'Tam boy', 'Artık'
 SETTINGS_KEY = 'profile_cutting_stock'
+LOG_KEY = 'profile_cutting_stock_log'
+LOG_LIMIT = 50
 
 
 @dataclass
@@ -104,3 +107,69 @@ def apply_plan(items, plan, *, keep_from=None):
                     items.append(Stock.new(profile, material, format(leftover.normalize(), 'f'), 1, OFFCUT))
                 added += 1
     return used, added
+
+
+def plan_signature(plan):
+    """Same bars cut from the same stock: a plan deducted twice gives the same value."""
+    return digest([[getattr(bar, 'stock_id', ''), bar.label_profile, bar.label_material,
+                    getattr(bar, 'stock_length', ''), [str(c) for c in bar.cuts]] for bar in plan.bars])
+
+
+def preview(plan, keep_from=None):
+    """Per section + material: (stock bars taken, bars to buy, offcuts returned) for the confirmation."""
+    threshold = number(keep_from, 'Artık sınırı') if keep_from is not None else None
+    rows = {}
+    for bar in plan.bars:
+        name = f'{bar.label_profile} {bar.label_material}'.strip()
+        row = rows.setdefault(name, [0, 0, 0])
+        row[0 if getattr(bar, 'stock_id', '') else 1] += 1
+        leftover = number(bar.remaining)
+        if threshold is not None and leftover >= threshold and leftover > 0: row[2] += 1
+    return rows
+
+
+def load_log(settings):
+    log = settings.get(LOG_KEY, []) or []
+    return [entry for entry in log if isinstance(entry, dict) and isinstance(entry.get('before'), list)]
+
+
+def deduct(settings, items, plan, *, keep_from=None, project=''):
+    """Apply a cut plan to the stock, save it and record the movement so it can be undone."""
+    before = [asdict(item) for item in items]
+    used, added = apply_plan(items, plan, keep_from=keep_from)
+    save(settings, items)
+    summary = preview(plan, keep_from)
+    entry = dict(id=uuid.uuid4().hex, time=datetime.now().isoformat(timespec='seconds'),
+                 project=str(project or ''), used=used, added=added,
+                 bought=sum(row[1] for row in summary.values()),
+                 detail='; '.join(f'{name}: {row[0]} çubuk' + (f', {row[2]} artık' if row[2] else '')
+                                  for name, row in summary.items()),
+                 signature=plan_signature(plan), before=before, after=[asdict(item) for item in items])
+    settings.set(LOG_KEY, ([entry] + load_log(settings))[:LOG_LIMIT])
+    return entry
+
+
+def already_deducted(settings, plan):
+    signature = plan_signature(plan)
+    return next((entry for entry in load_log(settings) if entry.get('signature') == signature), None)
+
+
+def changed_since(entry, items):
+    """True when the stock was edited after this deduction (undo would discard that edit)."""
+    return entry.get('after') is not None and entry['after'] != [asdict(item) for item in items]
+
+
+def undo_last(settings):
+    """Restore the stock as it was before the newest deduction; returns (items, entry) or None."""
+    log = load_log(settings)
+    if not log: return None
+    entry = log[0]
+    items = []
+    for raw in entry['before']:
+        try:
+            item = Stock(**raw); item.validate(); items.append(item)
+        except (TypeError, ValueError):
+            continue
+    save(settings, items)
+    settings.set(LOG_KEY, log[1:])
+    return items, entry
