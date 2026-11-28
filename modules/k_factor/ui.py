@@ -62,7 +62,7 @@ class HelperWorkspace(QStackedWidget):
 
 class KrPage(BasePage):
     def __init__(self, context):
-        super().__init__(context, 'K faktörü / yarıçap', 'Girdiğiniz K ve R’yi kalınlık eşleştirerek Sac-Levha parametrelerine yazın.')
+        super().__init__(context, 'K faktörü / yarıçap', 'Kalınlığa göre K faktörü ve iç yarıçap girin; montajdaki sac parçalara yazın.')
         self.preview = False
         self.pending_apply = None
         self.summary = None

@@ -74,7 +74,7 @@ class NestingPage(BasePage):
         self.project_menu = project_menu; self.command_bar.hide()
         # A compact project header; the working surface has no wizard tabs.
         heading = self.layout.itemAt(0).layout(); captions = heading.itemAt(0).layout()
-        captions.itemAt(0).widget().setText('GOKWORKS / Nesting')
+        captions.itemAt(0).widget().setText('Nesting · Sac maliyeti')
         captions.itemAt(0).widget().setWordWrap(False)
         captions.itemAt(1).widget().hide(); heading.setStretch(0,0)
         self.name = QLineEdit(self.project.name); self.name.textEdited.connect(self.name_changed)

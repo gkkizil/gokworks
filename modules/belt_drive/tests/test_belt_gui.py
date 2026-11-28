@@ -44,7 +44,7 @@ def use_synthetic(page):
 
 
 def test_menu_entry_and_reference_v_design(page):
-    assert ('belt_drive', 'Kayış–Kasnak Tasarımı', 'MAKİNE ELEMANLARI') in MODULES
+    assert ('belt_drive', 'Kayış–kasnak tasarımı', 'MAKİNE ELEMANLARI') in MODULES
     r = page.manual_result
     assert r is not None and r.ratio == pytest.approx(2.) and r.length_exact_mm == pytest.approx(1277.4970744746527)
     values = {page.result_table.item(i, 0).text(): page.result_table.item(i, 1).text() for i in range(page.result_table.rowCount())}

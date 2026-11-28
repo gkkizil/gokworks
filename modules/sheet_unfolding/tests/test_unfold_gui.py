@@ -59,7 +59,7 @@ def gated(window, qtbot):
 
 
 def test_menu_real_engine_and_reference_cylinder(page):
-    assert ('sheet_unfolding', 'Sac Açınımı', 'ÜRETİM') in MODULES
+    assert ('sheet_unfolding', 'Sac açınımı', 'ÜRETİM') in MODULES
     assert not page.service.is_fixture and not page.banner.isVisible()
     assert page.shape_id == 'cylinder' and set(page.fields) >= {'diameter', 'height', 'thickness'}
     assert page.state in ('ok', 'warning')

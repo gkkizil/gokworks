@@ -31,7 +31,7 @@ class WeightPage(CalculationPage):
         if isinstance(kind, str) and kind in r.KINDS:
             settings.set('weight_category', r.category_of(kind))
         super().__init__(context, 'Ağırlık hesabı',
-                         'Kesit, standart profil veya CAD modelinden ağırlık; listeye ekleyip maliyet çıkarın.', 'weight_')
+                         'Kesitten, standart profilden veya CAD modelinden ağırlık hesaplayın; listeye ekleyip maliyet çıkarın.', 'weight_')
         self.info_action('Yöntem ve kaynaklar', self.show_sources)
         f = self.form
         f.combo('category', 'Kesit kategorisi', sections.CATEGORIES, 'Dolu malzeme')

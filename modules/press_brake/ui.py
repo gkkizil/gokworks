@@ -24,7 +24,7 @@ class PressBrakePage(BasePage):
     timelineReady = Signal(object)   # (result, Timeline) from the animation builder thread
 
     def __init__(self, context):
-        super().__init__(context, 'Abkant Simülasyonu', 'Hava bükümü · manuel sıra ve takım planı · geometrik hareket kontrolü')
+        super().__init__(context, 'Abkant simülasyonu', 'Büküm sırasını ve takımları planlayın; hava bükümünü adım adım, çarpışma kontrolüyle izleyin.')
         self.plan = self.result = None
         self.flat_mesh = self.formed_mesh = None
         self.loading = False; self.generation = 0; self.frame_index = 0

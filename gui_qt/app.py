@@ -58,7 +58,7 @@ def __getattr__(name):
 MODULES = (
     ('pdf', 'PDF aktarımı', 'AKTARIM VE MONTAJ'),
     ('dxf_dwg', 'DXF / DWG', 'AKTARIM VE MONTAJ'),
-    ('cad_converter', '3D Dönüştürücü', 'AKTARIM VE MONTAJ'),
+    ('cad_converter', '3D dönüştürücü', 'AKTARIM VE MONTAJ'),
     ('bom', 'BOM · Ürün ağacı', 'AKTARIM VE MONTAJ'),
     ('naming', 'İsimlendirme aracı', 'AKTARIM VE MONTAJ'),
     ('k_factor', 'K faktörü / yarıçap', 'MÜHENDİSLİK HESAPLARI'),
@@ -69,16 +69,16 @@ MODULES = (
     ('bolt_torque', 'Hızlı tork hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('weight', 'Ağırlık hesabı', 'MÜHENDİSLİK HESAPLARI'),
     ('nesting', 'Nesting · Sac maliyeti', 'MÜHENDİSLİK HESAPLARI'),
-    ('smart_splitting', 'Akıllı Parça Bölme', 'MÜHENDİSLİK HESAPLARI'),
-    ('hydraulic_unit', 'Hidrolik Ünite Hesaplayıcı', 'MÜHENDİSLİK HESAPLARI'),
+    ('smart_splitting', 'Akıllı parça bölme', 'MÜHENDİSLİK HESAPLARI'),
+    ('hydraulic_unit', 'Hidrolik ünite', 'MÜHENDİSLİK HESAPLARI'),
     ('profile_cutting', 'Profil kesim', 'MÜHENDİSLİK HESAPLARI'),
     ('shaft_generator', 'Parametrik mil', 'ÜRETİM'),
     ('dfm_analyzer', 'DFM · İmalat uygunluğu', 'ÜRETİM'),
-    ('sheet_unfolding', 'Sac Açınımı', 'ÜRETİM'),
-    ('press_brake', 'Abkant Simülasyonu', 'ÜRETİM'),
-    ('automatic_drawing', 'Otomatik Teknik Resim', 'ÜRETİM'),
-    ('gear_calculator', 'Dişli Hesaplama', 'MAKİNE ELEMANLARI'),
-    ('belt_drive', 'Kayış–Kasnak Tasarımı', 'MAKİNE ELEMANLARI'),
+    ('sheet_unfolding', 'Sac açınımı', 'ÜRETİM'),
+    ('press_brake', 'Abkant simülasyonu', 'ÜRETİM'),
+    ('automatic_drawing', 'Otomatik teknik resim', 'ÜRETİM'),
+    ('gear_calculator', 'Dişli hesabı', 'MAKİNE ELEMANLARI'),
+    ('belt_drive', 'Kayış–kasnak tasarımı', 'MAKİNE ELEMANLARI'),
 )
 
 

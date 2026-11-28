@@ -44,7 +44,7 @@ class BomTreeModel(_NumericColumns, TreeModel):
 
 class BomPage(BasePage):
     def __init__(self, context):
-        super().__init__(context, 'BOM · Ürün ağacı', 'Montaj hiyerarşisi, parça adetleri ve isteğe bağlı ağırlık hesabı.')
+        super().__init__(context, 'BOM · Ürün ağacı', 'Montajın parça listesini, adetlerini ve isteğe bağlı ağırlıklarını çıkarın.')
         self.result = None
         self.scan_button = self.action('Montajı oku', self.scan, primary=True)
         self.export_button = self.action('Excel kaydet', self.export)

@@ -21,7 +21,7 @@ def fmt(value, digits=2):
 
 class TorquePage(BasePage):
     def __init__(self, context):
-        super().__init__(context, 'Hızlı Cıvata Tork Hesabı',
+        super().__init__(context, 'Hızlı cıvata tork hesabı',
                          'Çapı, kaliteyi ve bağlantı koşulunu seçin; tahmini sıkma torkunu görün.')
         self.result = None
         self.loading = False

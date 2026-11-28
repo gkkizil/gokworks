@@ -164,9 +164,9 @@ class BeltDrivePage(BasePage):
         self._recovered = True
         self.open_path(path)
     def __init__(self, context):
-        super().__init__(context, 'Kayış–Kasnak Tasarımı',
-                         'V ve triger-senkron kayışta nominal hesap, katalogdan otomatik tasarım ve karşılaştırma. '
-                         'Üretim onayı vermez.')
+        super().__init__(context, 'Kayış–kasnak tasarımı',
+                         'V ve triger kayışlarını hesaplayın, katalogdan otomatik tasarım bulun '
+                         've seçenekleri karşılaştırın.')
         self.manual_result = None
         self._ready=False
         self.nominal_options=NominalSizingOptions()

@@ -203,7 +203,7 @@ class HydraulicPage(BasePage):
     quiet_cancel_on_close = True
 
     def __init__(self, context):
-        super().__init__(context, 'Hidrolik Ünite Hesaplayıcı',
+        super().__init__(context, 'Hidrolik ünite hesaplayıcı',
                          'Silindir ölçülerini ve yapılacak hareketleri girin; motor, pompa ve soğutma ihtiyacını öğrenin.')
         self.project = self.restore_project()
         self.result = None; self.pdf_job = None; self.loading = False; self.path = None

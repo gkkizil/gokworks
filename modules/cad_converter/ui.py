@@ -78,7 +78,7 @@ class CadResults(ResultsPanel):
 
 class CadConverterPage(BasePage):
     def __init__(self, context):
-        super().__init__(context, '3D Dönüştürücü', 'Parça ve montajları birden fazla CAD formatına toplu aktarın.')
+        super().__init__(context, '3D dönüştürücü', 'Parça ve montajları birden fazla CAD formatına toplu aktarın.')
         self.sources = []
         # Source selection stays above the settings scroll area. It is the
         # first action in the workflow and must not live beside the run button.

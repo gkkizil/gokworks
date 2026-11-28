@@ -25,7 +25,7 @@ def test_one_registered_module_one_source_tree_and_no_com_on_open(window):
     page = window.pages['automatic_drawing']
     assert sum(key == 'automatic_drawing' for key, title, category in MODULES) == 1
     assert PAGE_TYPES['automatic_drawing'][0] == 'modules.automatic_drawing.ui'
-    assert window.browser.buttons['automatic_drawing'].text() == 'Otomatik Teknik Resim'
+    assert window.browser.buttons['automatic_drawing'].text() == 'Otomatik teknik resim'
     assert len(page.findChildren(QTreeWidget)) == 1
     assert not window.jobs.busy
     assert page.options().projection == 'first'

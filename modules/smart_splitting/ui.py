@@ -117,7 +117,7 @@ def step_title(number_, text):
 
 class SmartSplittingPage(BasePage):
     def __init__(self,context):
-        super().__init__(context,'Akıllı Parça Bölme','Büyük bir parçayı levhaya sığacak segmentlere bölün; konturu ve delikleri koruyun, fireyi Nesting ile karşılaştırın.')
+        super().__init__(context,'Akıllı parça bölme','Büyük parçayı levhaya sığacak parçalara bölün; konturu ve delikleri koruyun.')
         self.sources=[]; self.meta=[]; self.source=None; self.solution=None; self.optimization=None
         self.solutions={}; self.part_errors={}; self.current=-1
         self.import_paths=[]; self.import_options=None; self.import_stale=False
