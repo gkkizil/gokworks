@@ -215,7 +215,7 @@ class PhaseStrip(QWidget):
 
 class AutoDrawingPage(BasePage):
     def __init__(self, context):
-        super().__init__(context, 'Otomatik Teknik Resim',
+        super().__init__(context, 'Otomatik teknik resim',
                          'SolidWorks parça ve montajlarından modele bağlı, düzenlenebilir teknik resimler oluşturun.')
         self.results = []
         self.batch_notice = ''

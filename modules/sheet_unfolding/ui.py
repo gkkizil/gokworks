@@ -120,7 +120,7 @@ class UnfoldPage(BasePage):
     quiet_cancel_on_close = True
 
     def __init__(self, context, service=None):
-        super().__init__(context, 'Sac Açınımı', 'Şekil → ölçü → önizleme → açınım → çıktı. Hesap ve dosyalar açınım servisinden gelir.')
+        super().__init__(context, 'Sac açınımı', 'Şekli seçin, ölçüleri girin; açınımı görün ve DXF / PDF olarak kaydedin.')
         self.service = service or resolve_service()
         self.shapes = self.service.list_shapes()
         from modules.weight.materials import MATERIALS
@@ -1110,7 +1110,7 @@ class UnfoldPage(BasePage):
     # ==================================================================================
     def mark_dirty(self, dirty=True):
         self.dirty = dirty
-        self.title_label.setText('Sac Açınımı' + (' · kaydedilmemiş değişiklik' if dirty else ''))
+        self.title_label.setText('Sac açınımı' + (' · kaydedilmemiş değişiklik' if dirty else ''))
 
     def add_to_project(self):
         if not self.is_current():

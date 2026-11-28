@@ -15,7 +15,7 @@ from modules.geometric_tolerances.catalog_view import CatalogModel, CatalogView,
 
 class GdtPage(CalculationPage):
     def __init__(self, context):
-        super().__init__(context, 'Geometrik toleranslar', 'ASME Y14.5-2018 · Tolerans çerçevesi, bölge ve ölçüm karşılaştırması.', 'gdt_')
+        super().__init__(context, 'Geometrik toleranslar', 'Tolerans çerçevesini kurun, tolerans bölgesini görün ve ölçümünüzü karşılaştırın (ASME Y14.5-2018).', 'gdt_')
         self.info_action('Okuma rehberi', lambda: show_details(self, 'GD&T rehberi', GUIDE))
         self.kind = self.settings.get('gdt_kind', 'cylindricity')
         if not isinstance(self.kind, str) or self.kind not in CHARACTERISTICS:   # damaged settings value

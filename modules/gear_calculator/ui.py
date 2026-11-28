@@ -45,7 +45,7 @@ def style_result_table(table):
 
 class GearPage(BasePage):
     def __init__(self,context):
-        super().__init__(context,'Dişli Hesaplama','Dişli türleri · Hesap, hareket ve CAD · türe göre doğrulama kapsamı')
+        super().__init__(context,'Dişli hesabı','Dişli türünü seçin; ölçüleri hesaplayın, hareketi izleyin ve CAD olarak dışa aktarın.')
         self.family_panel=None;self.family_panels={}
         self.specification=None;self.result=None;self.selected=0;self.mesh_view=None;self.last_export=None
         self._geometry_key=None;self._mesh_key=None;self._pending=None

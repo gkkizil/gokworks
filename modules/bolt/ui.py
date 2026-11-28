@@ -22,7 +22,7 @@ class BoltPage(CalculationPage):
     def __init__(self, context):
         if context.settings.get('bolt_unit') == 'kgf':
             context.settings.set('bolt_unit', 'kg')
-        super().__init__(context, 'Cıvata hesabı', 'Metrik ölçü, kalite ve yük ile statik dayanım kontrolü.', 'bolt_')
+        super().__init__(context, 'Cıvata hesabı', 'Metrik ölçü, kalite ve yükle cıvatanın statik dayanımını kontrol edin.', 'bolt_')
         self.info_action('Hesap yöntemi', lambda: show_details(self, 'Cıvata hesabı', METHOD))
         f = self.form
         f.combo('metric', 'Metrik ölçü', r.THREADS, 'M10')

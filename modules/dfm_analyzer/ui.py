@@ -45,8 +45,8 @@ def _number(value):
 class DfmPage(BasePage):
     def __init__(self, context):
         super().__init__(context, 'DFM · İmalat uygunluk analizi',
-                         'DXF kesim geometrisini seçilen makine/kural profiline göre kontrol eder; '
-                         'bulguları geometri üzerinde gösterir. Kaynak dosya yalnız okunur.')
+                         'DXF kesim geometrisini makine kurallarına göre kontrol edin; '
+                         'bulgular çizimin üzerinde gösterilir.')
         self.result = None
         self.profiles = controller.profiles()
         self.custom_profile = None
