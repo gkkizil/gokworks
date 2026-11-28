@@ -173,7 +173,7 @@ def scan(path=None, options=Options(), mapping=None, events=None, stop=None, *, 
     merged = {}
     welded = set()
     try:
-        with session_factory() as session:
+        with session_factory() as session, session.fast_api():
             try:
                 model = session.document(path)
                 root_path = str(call(model, 'GetPathName') or '')
@@ -193,7 +193,7 @@ def scan(path=None, options=Options(), mapping=None, events=None, stop=None, *, 
                     try:
                         if identity not in cache:
                             model = session.document(source)
-                            with session.configuration(model, config):
+                            with session.frozen(model), session.configuration(model, config):
                                 if session.is_assembly(model):
                                     cache[identity] = ('assembly', (session.children(model,stop), session.assembly_cautions(model,stop)))
                                 else:
