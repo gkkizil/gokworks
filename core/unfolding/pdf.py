@@ -18,7 +18,7 @@ def write_pdf(parts,path,result,options,cancel_token=None):
     writer=QPdfWriter(str(path));writer.setResolution(96)
     writer.setPageSize(QPageSize(QPageSize.A3 if options.page_size=='A3' else QPageSize.A4))
     writer.setPageMargins(QMarginsF(12,12,12,12),QPageLayout.Millimeter)
-    writer.setTitle(options.project_name or 'Sac Açınımı');writer.setCreator('GOKWORKS Unfolding '+result.engine_version)
+    writer.setTitle(options.project_name or 'Sac açınımı');writer.setCreator('GOKWORKS Unfolding '+result.engine_version)
     painter=QPainter(writer)
     if not painter.isActive():raise OSError('PDF çizicisi başlatılamadı.')
     painter.setRenderHint(QPainter.Antialiasing,True);painter.setFont(QFont('Arial',9))
@@ -56,7 +56,7 @@ def write_pdf(parts,path,result,options,cancel_token=None):
             document=QTextDocument();document.setDefaultFont(QFont('Arial',9))
             document.setDefaultStyleSheet('body {color:#000000;font-family:Arial,sans-serif;font-size:8pt;} h1{font-size:15pt;} td{padding:2px;}')
             # Black text set inline: the app's dark-theme palette must never reach the printed page.
-            document.setHtml('<div style="color:#000000"><h1 style="color:#000000">GOKWORKS · Sac Açınımı</h1>'
+            document.setHtml('<div style="color:#000000"><h1 style="color:#000000">GOKWORKS · Sac açınımı</h1>'
                 '<table style="color:#000000">'+''.join(
                 f'<tr><td style="color:#000000"><b>{escape(a)}</b></td><td style="color:#000000">{escape(b)}</td></tr>'
                 for a,b in rows)+'</table></div>')

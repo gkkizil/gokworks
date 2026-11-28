@@ -7,7 +7,7 @@ from .presentation import result_rows
 
 
 def main():
-    parser = argparse.ArgumentParser(description='GOKWORKS Hidrolik Ünite — bağımsız hesap')
+    parser = argparse.ArgumentParser(description='GOKWORKS Hidrolik ünite — bağımsız hesap')
     parser.add_argument('project', nargs='?', help='.gwhyd proje dosyası; verilmezse dört fazlı örnek')
     parser.add_argument('--save', type=Path, help='Proje kaydet')
     parser.add_argument('--json', type=Path, help='SI sonuç raporu')
