@@ -158,6 +158,7 @@ def generate_one(session, source, options, events, stop, *, native_factory=Nativ
                     for page in plans:
                         native.arrange_dimensions(page.name)
                         native.fit(page.name, include_dimensions=True)
+                        native.place_annotations(page.name)
                 with progress.phase(11):
                     native.center_marks(plan.name)
                     flat_page(native, model)

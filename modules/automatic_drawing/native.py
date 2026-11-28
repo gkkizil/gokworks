@@ -66,6 +66,41 @@ def annotation_leaders(annotation):
     return segments, type(count) is int and (count < 0 or count > 100 or count > len(segments))
 
 
+def linear_placement(annotation, kind, box, value):
+    """Direction and near edge from the native arrow and extension lines."""
+    data = optional(annotation, 'GetDisplayData')
+    arrow = values(optional(data, 'GetArrowHeadAtIndex2', 0, default=()))
+    if kind == 'linear':
+        if len(arrow) == 12:
+            dx, dy = map(abs, arrow[3:5])
+            if dx > .999:
+                kind = 'horizontal'
+            elif dy > .999:
+                kind = 'vertical'
+            else:
+                return None
+        elif box.height > 2*box.width:
+            kind = 'vertical'
+        elif box.width > 2*box.height:
+            kind = 'horizontal'
+        else:
+            return None
+    index = 0 if kind == 'vertical' else 1
+    anchors = []
+    count = optional(data, 'GetLineCount', default=0)
+    if len(arrow) == 12 and type(count) is int and 0 < count <= 24:
+        for i in range(count):
+            line = values(optional(data, 'GetLineAtIndex3', i, default=()))
+            if len(line) != 10 or abs(line[5-index]-line[8-index]) > 1e-6:
+                continue
+            ends = line[4+index], line[7+index]
+            distances = tuple(abs(end-arrow[index]) for end in ends)
+            if min(distances) <= .002 and max(distances) > .002:
+                anchors.append(to_mm(ends[distances.index(max(distances))]))
+    anchor = sum(anchors)/len(anchors) if anchors else box.center[index]
+    return kind, anchor, abs(value) if value is not None and math.isfinite(value) else float('inf')
+
+
 def derived_labels(view, planned):
     kind = planned.role
     symbol = call(view, 'GetSection' if kind == 'section' else 'GetDetail')
@@ -695,6 +730,8 @@ class NativeDrawing:
         return records
 
     def import_dimensions(self, name):
+        if not call(self.drawing, 'ActivateSheet', name):
+            raise ApiError('Ölçü aktarımı için pafta etkinleştirilemedi: '+name)
         if not self.options.model_dimensions:
             return
         c = self.session.c
@@ -874,27 +911,45 @@ class NativeDrawing:
                 self.result.warn('dimension_arrange', 'SolidWorks otomatik ölçü hizalamasını uygulayamadı.', name)
         call(self.model, 'ClearSelection2', True)
         self.rebuild()
+        self.place_annotations(name, report=False)
+
+    def place_annotations(self, name, *, report=True):
+        if not self.options.arrange_dimensions:
+            return
         records = self.dimensions(name)
         outlines = {v['role']: v['outline'] for v in self.actual_views(name)}
         extras = self.annotation_obstacles(name)
         moving = [*records, *(record for record in extras if 'key' in record)]
         fixed = [record for record in extras if 'key' not in record]
+        linear = {}
+        for record in records:
+            box, kind = record['box'], record['kind']
+            if record['annotation_kind'] or box is None or kind not in ('horizontal', 'vertical', 'linear'):
+                continue
+            key = record['key']
+            placement = linear_placement(self.annotations[key], kind, box, record['value'])
+            if placement is not None:
+                linear[key] = placement
         moves, unresolved = place_texts([(r['key'], r['owner'], r['box']) for r in moving],
-            outlines, self.pages[name]['plan'].usable,
+            outlines, self.pages[name]['plan'].usable, linear=linear,
             obstacle_boxes=[record['box'] for record in fixed if record['box'] is not None],
             obstacle_leaders=[line for record in fixed for line in record.get('leaders', ())])
+        if not moves and not unresolved:
+            return
         for record in moving:
             if record['key'] not in moves:
                 continue
             dx, dy = moves[record['key']]
             pos = record['position']
-            if len(pos) < 3 or not call(self.annotations[record['key']], 'SetPosition2',
-                                       pos[0]+to_m(dx), pos[1]+to_m(dy), pos[2]):
+            moved = len(pos) >= 3 and call(self.annotations[record['key']], 'SetPosition2',
+                                            pos[0]+to_m(dx), pos[1]+to_m(dy), pos[2])
+            if not moved and report:
                 self.result.warn('dimension_move', 'Anotasyon konumu düzenlenemedi: '+record['name'], name)
-        if unresolved:
+        if unresolved and report:
             self.result.warn('dimension_layout', f'{len(unresolved)} anotasyon metni için boş konum bulunamadı veya sınırlar okunamadı.',
                              name)
-        self.rebuild()
+        if moves:
+            self.rebuild()
 
     def fit(self, name, *, include_dimensions=False):
         """Refit measured native outlines, preserving projected view links."""
@@ -960,6 +1015,8 @@ class NativeDrawing:
     def center_marks(self, name):
         if not self.options.center_marks:
             return
+        if not call(self.drawing, 'ActivateSheet', name):
+            raise ApiError('Merkez işaretleri için pafta etkinleştirilemedi: '+name)
         mask = 0
         for key, value in self.session.constants.items():
             if key.startswith('swAutoInsertCenterMark') and 'hole' in key.casefold():

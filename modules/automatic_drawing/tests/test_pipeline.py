@@ -89,6 +89,7 @@ class FakeNative:
     def dimensions(self, *args): return []
     def geometry_dimensions(self, *args): pass
     def arrange_dimensions(self, *args): pass
+    def place_annotations(self, *args): pass
     def center_marks(self, *args): pass
     def title_properties(self): pass
     def rebuild(self): pass

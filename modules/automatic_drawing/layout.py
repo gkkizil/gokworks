@@ -223,35 +223,50 @@ def crosses_box(start, end, box):
     return True
 
 
-def place_texts(records, outlines, area, *, obstacle_boxes=(), obstacle_leaders=(), lanes=20, offset=7.):
+def _linear_candidates(box, view, axis, anchor, lanes, offset):
+    """Use the edge nearest the solid's witness points before trying the far side."""
+    vertical = axis == 'vertical'
+    index = 0 if vertical else 1
+    near_low = anchor <= view.center[index]
+    clearance = (view.x-box.right, box.x-view.right) if vertical else (view.y-box.top, box.y-view.top)
+    for low in (near_low, not near_low):
+        if clearance[0 if low else 1] >= offset/2:
+            yield box
+        for lane in range(1, lanes+1):
+            gap = lane*offset
+            if vertical:
+                yield Box(view.x-gap-box.width if low else view.right+gap, box.y, box.width, box.height)
+            else:
+                yield Box(box.x, view.y-gap-box.height if low else view.top+gap, box.width, box.height)
+
+
+def place_texts(records, outlines, area, *, obstacle_boxes=(), obstacle_leaders=(),
+                linear=None, lanes=20, offset=7.):
     """Move only annotation text, retain its native references and dimension value.
 
     Bounded greedy search keeps close-to-view positions. Unknown text bounds are
     never claimed to fit. Final native rereading is required after applying moves.
     """
     occupied = list(obstacle_boxes)
+    linear = linear or {}
+    used_lanes = {}
     moves, unresolved = {}, []
     for key, owner, box in sorted(records, key=lambda record: (
-            record[1], record[2].x if record[2] else 0., record[2].y if record[2] else 0.)):
+            record[1], linear.get(record[0], ('', 0., float('inf')))[2],
+            record[2].x if record[2] else 0., record[2].y if record[2] else 0.)):
         if box is None or owner not in outlines:
             unresolved.append(key)
             continue
         view = outlines[owner]
-        candidates = [box]
-        for lane in range(1, lanes+1):
-            distance = offset*lane
-            candidates.extend((Box(box.x, view.top+distance, box.width, box.height),
-                               Box(box.x, view.y-distance-box.height, box.width, box.height),
-                               Box(view.x-distance-box.width, box.y, box.width, box.height),
-                               Box(view.right+distance, box.y, box.width, box.height)))
-        # If the starting axis itself is blocked by another view, shift along
-        # the first lane in equal steps before leaving the view's vicinity.
-        for step in range(1, lanes+1):
-            for shift in (-offset*step, offset*step):
-                candidates.extend((Box(box.x+shift, view.top+offset, box.width, box.height),
-                                   Box(box.x+shift, view.y-offset-box.height, box.width, box.height),
-                                   Box(view.x-offset-box.width, box.y+shift, box.width, box.height),
-                                   Box(view.right+offset, box.y+shift, box.width, box.height)))
+        placement = linear.get(key)
+        if placement:
+            axis, anchor, _ = placement
+            columns = used_lanes.setdefault((owner, axis), [])
+            index = 0 if axis == 'vertical' else 1
+            candidates = _linear_candidates(box, view, axis, anchor, lanes, offset)
+            candidates = (b for b in candidates if all(abs(b.center[index]-v) >= offset-.25 for v in columns))
+        else:
+            candidates = _text_candidates(box, view, lanes, offset)
         selected = next((b for b in candidates if area.contains(b) and
                          not any(b.overlaps(v, .8) for v in outlines.values()) and
                          not any(b.overlaps(v, .8) for v in occupied) and
@@ -261,6 +276,25 @@ def place_texts(records, outlines, area, *, obstacle_boxes=(), obstacle_leaders=
             occupied.append(box)
         else:
             occupied.append(selected)
+            if placement:
+                columns.append(selected.center[index])
             if selected != box:
                 moves[key] = selected.x-box.x, selected.y-box.y
     return moves, unresolved
+
+
+def _text_candidates(box, view, lanes, offset):
+    """Try free positions for notes, leaders and non-orthogonal dimensions."""
+    yield box
+    for lane in range(1, lanes+1):
+        distance = offset*lane
+        yield Box(box.x, view.top+distance, box.width, box.height)
+        yield Box(box.x, view.y-distance-box.height, box.width, box.height)
+        yield Box(view.x-distance-box.width, box.y, box.width, box.height)
+        yield Box(view.right+distance, box.y, box.width, box.height)
+    for step in range(1, lanes+1):
+        for shift in (-offset*step, offset*step):
+            yield Box(box.x+shift, view.top+offset, box.width, box.height)
+            yield Box(box.x+shift, view.y-offset-box.height, box.width, box.height)
+            yield Box(view.x-offset-box.width, box.y+shift, box.width, box.height)
+            yield Box(view.right+offset, box.y+shift, box.width, box.height)

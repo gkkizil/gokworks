@@ -33,6 +33,16 @@ def test_one_registered_module_one_source_tree_and_no_com_on_open(window):
     assert page.options().pdf and not page.options().geometry_dimensions
 
 
+def test_old_output_folder_and_layout_preferences_do_not_override_drawing_defaults(window, qtbot):
+    window.settings.set('automatic_drawing', {'output_dir': 'C:/old-folder', 'arrange_dimensions': False})
+    page = ui.AutoDrawingPage(window)
+    qtbot.addWidget(page)
+    options = page.options()
+    assert options.output_dir == ''
+    assert options.arrange_dimensions
+    assert 'output_dir' not in window.settings.get('automatic_drawing')
+
+
 def test_scrolling_the_settings_over_an_unfocused_combo_does_not_change_the_projection(window, qtbot):
     # Seen in the SolidWorks add-in dialog: a wheel over 'İzdüşüm' switched ISO first angle
     # to third angle while the user only scrolled the settings.
